@@ -3,7 +3,8 @@
   "compilerOptions": {
     "strict": true,
     "forceConsistentCasingInFileNames": true,
-    "outDir": "dist/",
+    "allowSyntheticDefaultImports": true,
+    "outDir": "./dist/",
     "rootDir": "./",
     "noImplicitAny": true,
     "module": "es6",
