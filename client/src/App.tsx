@@ -31,12 +31,14 @@ import Navigation from "./components/Navigation";
 import Sidebar from "./components/Sidebar";
 
 // Custom pages
-import Create from "./pages/Create";
+import Start from "./pages/Create/Start";
+import Projects from "./pages/Projects";
+import Associations from "./pages/Create/Associations";
+import Parameters from "./pages/Create/Parameters";
 import Home from "./pages/Home";
 
 // Theme
 import { theme } from "./theme";
-import Projects from "./pages/Projects";
 
 class App extends Component {
   state = {
@@ -54,7 +56,7 @@ class App extends Component {
               <Box fill>
                 <Navigation>
                   <Heading level="3" margin="none">
-                    <Link to="/">SampleFlow</Link>
+                    <Link to="/">🧪 SampleFlow</Link>
                   </Heading>
                   <Box
                     flex
@@ -62,12 +64,6 @@ class App extends Component {
                     gap="xlarge"
                     pad={{ left: "medium", right: "small", vertical: "small" }}
                   >
-                    <Box direction="row" gap="small">
-                      <AddCircle />
-                      <Heading level="4" margin="none">
-                        <Link to="/create">Create</Link>
-                      </Heading>
-                    </Box>
                     <Box direction="row" gap="small">
                       <List />
                       <Heading level="4" margin="none">
@@ -78,6 +74,12 @@ class App extends Component {
                       <Catalog />
                       <Heading level="4" margin="none">
                         Samples
+                      </Heading>
+                    </Box>
+                    <Box direction="row" gap="small">
+                      <AddCircle />
+                      <Heading level="4" margin="none">
+                        <Link to="/create/start">Create</Link>
                       </Heading>
                     </Box>
                   </Box>
@@ -101,7 +103,9 @@ class App extends Component {
                   <Box flex align="left">
                     <Routes>
                       <Route path="/" element={<Home />} />
-                      <Route path="/create" element={<Create />} />
+                      <Route path="/create/start" element={<Start />} />
+                      <Route path="/create/associations" element={<Associations />} />
+                      <Route path="/create/parameters" element={<Parameters />} />
                       <Route path="/projects" element={<Projects />} />
                     </Routes>
                   </Box>

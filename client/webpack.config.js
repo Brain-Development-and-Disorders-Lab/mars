@@ -16,6 +16,7 @@ module.exports = {
       directory: path.join(__dirname, "dist"),
     },
     hot: true,
+    historyApiFallback: true,
   },
   module: {
     rules: [
@@ -36,5 +37,6 @@ module.exports = {
   output: {
     filename: "client.bundle.js",
     path: path.resolve(__dirname, "dist"),
+    publicPath: "/",
   },
 };
