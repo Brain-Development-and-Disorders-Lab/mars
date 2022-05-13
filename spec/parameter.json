@@ -1,0 +1,9 @@
+{
+  "id": "param_A",
+  "name": "Parameter Name",
+  "type": "select",
+  "description": "",
+  "options": [],
+  "parent": "",
+  "children": []
+}

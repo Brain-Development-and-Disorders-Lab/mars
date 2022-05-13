@@ -1,0 +1,15 @@
+{
+  "id": "027e4180beedb29744413a7ea6b84a42",
+  "created": "05132022-143644",
+  "owner": "henry.burgess@wustl.edu",
+  "storage": {
+    "type": "physical"
+  },
+  "associations": {
+    "projects": [],
+    "parents": [],
+    "children": [],
+    "data": []
+  },
+  "parameters": []
+}
