@@ -41,7 +41,7 @@ export const Associations = ({}) => {
       <Box margin="small">
         <Form
           onChange={() => {}}
-          onSubmit={() => {}}
+          onSubmit={() => {navigate("/create/parameters")}}
         >
           <Box direction="row">
             <Box direction="column">
@@ -85,10 +85,10 @@ export const Associations = ({}) => {
             </Box>
           </Box>
 
-          <Box direction="row" justify="between" margin={{ top: "medium" }}>
+          <Box direction="row" flex={false} justify="between">
             <Button label="Cancel" />
             <Button label="Back" icon={<LinkPrevious />} onClick={() => navigate("/create/start")}/>
-            <Button type="submit" label="Continue" icon={<LinkNext />} reverse primary onClick={() => navigate("/create/parameters")} />
+            <Button type="submit" label="Continue" icon={<LinkNext />} reverse primary />
           </Box>
         </Form>
       </Box>

@@ -26,14 +26,13 @@ export const Start = ({}) => {
   return (
     <>
       <Heading level="2">Create a Sample</Heading>
-      <Box width="large">
+      <Box width="large" fill>
         <Form
-          onChange={(value) => console.log("Change", value)}
+          onChange={() => {}}
           onReset={() => {
             setId("");
           }}
-          onSubmit={(event) => {
-            console.log("Submit", event.value, event.touched);
+          onSubmit={() => {
             navigate("/create/associations", { state: { id: id, description: description }});
           }}
         >
@@ -68,8 +67,7 @@ export const Start = ({}) => {
               onChange={(event) => setDescription(event.target.value)}
             />
           </FormField>
-          
-          <Box direction="row" justify="between" margin={{ top: "medium" }}>
+          <Box direction="row" flex={false} justify="between">
             <Button label="Cancel" />
             <Button type="submit" label="Continue" icon={<LinkNext />} reverse primary />
           </Box>
