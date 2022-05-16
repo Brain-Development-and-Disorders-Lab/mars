@@ -9,6 +9,8 @@ import {
   TextArea,
   TextInput,
 } from "grommet";
+import { LinkNext } from "grommet-icons";
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -69,8 +71,7 @@ export const Start = ({}) => {
           
           <Box direction="row" justify="between" margin={{ top: "medium" }}>
             <Button label="Cancel" />
-            <Button type="reset" label="Reset" />
-            <Button type="submit" label="Continue" primary />
+            <Button type="submit" label="Continue" icon={<LinkNext />} reverse primary />
           </Box>
         </Form>
       </Box>
