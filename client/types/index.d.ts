@@ -12,3 +12,10 @@ declare namespace Create {
     projects: string[];
   };
 }
+
+declare type ParameterStruct = {
+  key: number;
+  name: string;
+  type: "Sample" | "Number" | "Data"
+  value: string;
+};
