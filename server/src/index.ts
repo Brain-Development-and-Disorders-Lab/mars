@@ -8,7 +8,7 @@ import cors from "cors";
 import connection from "./lib/connection";
 
 // Routes
-import sampleRoutes from "./routes/sample";
+import samplesRoute from "./routes/samples";
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -16,7 +16,7 @@ const port = process.env.PORT || 8000;
 // Configure middleware
 app.use(cors());
 app.use(express.json());
-app.use(sampleRoutes);
+app.use(samplesRoute);
 
 // Start the server
 app.listen(port, () => {

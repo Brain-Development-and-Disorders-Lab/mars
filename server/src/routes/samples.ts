@@ -1,9 +1,9 @@
 import express from "express";
  
-// sampleRoutes is an instance of the express router.
+// 'samplesRoute' is an instance of the express router.
 // We use it to define our routes.
 // The router will be added as a middleware and will take control of requests starting with path /record.
-const sampleRoutes = express.Router();
+const samplesRoute = express.Router();
  
 // This will help us connect to the database
 import connection from "../lib/connection";
@@ -13,7 +13,7 @@ const ObjectId = require("mongodb").ObjectId;
  
  
 // This section will help you get a list of all the records.
-sampleRoutes.route("/sample").get(function (req: any, res: any) {
+samplesRoute.route("/samples").get(function (req: any, res: any) {
   let _connect = connection.getDatabase();
   _connect
     .collection("samples")
@@ -25,7 +25,7 @@ sampleRoutes.route("/sample").get(function (req: any, res: any) {
 });
  
 // This section will help you get a single record by id
-sampleRoutes.route("/sample/:id").get(function (req: { params: { id: any; }; }, res: { json: (arg0: any) => void; }) {
+samplesRoute.route("/samples/:id").get(function (req: { params: { id: any; }; }, res: { json: (arg0: any) => void; }) {
   let _connect = connection.getDatabase();
   let query = { _id: ObjectId( req.params.id )};
   _connect.collection("samples")
@@ -66,7 +66,7 @@ sampleRoutes.route("/sample/:id").get(function (req: { params: { id: any; }; }, 
 // });
  
 // This section will help you delete a record
-sampleRoutes.route("/:id").delete((req: { params: { id: any; }; }, response: { json: (arg0: any) => void; }) => {
+samplesRoute.route("/:id").delete((req: { params: { id: any; }; }, response: { json: (arg0: any) => void; }) => {
   let _connect = connection.getDatabase();
   let query = { _id: ObjectId( req.params.id )};
   _connect.collection("samples").deleteOne(query, function (err: any, obj: any) {
@@ -79,4 +79,4 @@ sampleRoutes.route("/:id").delete((req: { params: { id: any; }; }, response: { j
   });
 });
  
-export default sampleRoutes;
+export default samplesRoute;
