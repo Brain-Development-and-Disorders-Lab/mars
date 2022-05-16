@@ -39,6 +39,7 @@ import Home from "./pages/Home";
 
 // Theme
 import { theme } from "./theme";
+import Sample from "./pages/Sample";
 
 class App extends Component {
   state = {
@@ -107,6 +108,9 @@ class App extends Component {
                       <Route path="/create/associations" element={<Associations />} />
                       <Route path="/create/parameters" element={<Parameters />} />
                       <Route path="/projects" element={<Projects />} />
+                      <Route path="sample">
+                        <Route path=":id" element={<Sample />} />
+                      </Route>
                     </Routes>
                   </Box>
                   {!showSidebar || size !== "small" ? (
