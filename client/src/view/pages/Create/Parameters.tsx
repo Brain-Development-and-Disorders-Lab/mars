@@ -42,12 +42,13 @@ export const Parameters = ({}) => {
   const sampleData = {
     name: name,
     created: created,
-    owner: owner, // To Do: implement owner specification
+    owner: owner,
+    project: project,
+    description: description,
     projects: projects,
-    origin: origin,
-    storage: {},  // To Do: implement storage
+    storage: {},
     associations: {
-      origins: [],  // To Do: implement multiple origins
+      origin: origin,
       products: products,
     },
     parameters: []  // To Do: implement parameters
@@ -161,10 +162,10 @@ export const Parameters = ({}) => {
     }
     {showConfirmation &&
       <Layer>
-        <Box width="large" direction="column" gap="small" margin="small" align="center">
+        <Box width="large" direction="column" gap="small" margin="small" pad="medium" align="center">
           <Heading level="3" margin={{top: "small"}}>Sample Summary</Heading>
           <Box direction="row" gap="small">
-            <Box direction="column" gap="small">
+            <Box direction="column" gap="small" pad="medium" >
               <Text><b>Identifier:</b> {name}</Text>
               <Text><b>Created:</b> {new Date(created).toDateString()}</Text>
               <Text><b>Description:</b> {description}</Text>
@@ -173,16 +174,16 @@ export const Parameters = ({}) => {
               <Text><b>Primary project:</b> <Linky key={project.id} type="projects" id={project.id} /></Text>
               <Text><b>Associated projects:</b> {projects.map((project) => {
                 return (
-                  <Linky key={project.id} type="projects" id={project.id} />
+                  <Linky key={`_${project.id}`} type="projects" id={project.id} />
                 );
               })}</Text>
-              {origin &&
+              {origin.name !== "" &&
                 <Text><b>Origin sample:</b> <Linky type="samples" id={origin.id} /></Text>
               }
               {products.length > 0 &&
-                <Text><b>Product samples:</b> {products.map((child) => {
+                <Text><b>Product samples:</b> {products.map((product) => {
                   return (
-                    <Linky key={child.id} type="samples" id={child.id} />
+                    <Linky key={product.id} type="samples" id={product.id} />
                   );
                 })}</Text>
               }

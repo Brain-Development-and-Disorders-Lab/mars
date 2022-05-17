@@ -61,15 +61,16 @@ export type SampleStruct = {
   name: string;
   created: string;
   owner: string;
-  projects: string[];
-  origin: string;
+  project: {name: string, id: string};
+  description: string;
+  projects: {name: string, id: string}[];
   storage: {
     types: string[];
     data: { type: string, location: string }[];
   };
   associations: {
-    origins: string[];
-    products: string[];
+    origin: {name: string, id: string};
+    products: {name: string, id: string}[];
   };
   parameters: string[];
 }

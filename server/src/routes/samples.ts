@@ -48,10 +48,14 @@ samplesRoute.route("/samples/add").post(function (req: { body: SampleStruct; }, 
     name: req.body.name,
     created: req.body.created,
     owner: req.body.owner,
+    project: req.body.project,
+    description: req.body.description,
     projects: req.body.projects,
-    origin: req.body.origin,
     storage: req.body.storage,
-    assocations: req.body.associations,
+    associations: {
+      origin: req.body.associations.origin,
+      products: req.body.associations.products,
+    },
     parameters: req.body.parameters,
   };
 
