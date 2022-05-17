@@ -25,7 +25,7 @@ export const Associations = ({}) => {
   
   // Setup state data
   const [origin, setOrigin] = useState({name: "", id: ""});
-  const [children, setChildren] = useState([] as {name: string, id: string}[]);
+  const [products, setProducts] = useState([] as {name: string, id: string}[]);
   const [additionalProjects, setAdditionalProjects] = useState([] as {name: string, id: string}[]);
   
   const [isLoaded, setIsLoaded] = useState(false);
@@ -46,7 +46,7 @@ export const Associations = ({}) => {
     description: description,
     projects: additionalProjects,
     origin: origin.id,
-    children: children,
+    products: products,
   }
 
   useEffect(() => {
@@ -135,15 +135,15 @@ export const Associations = ({}) => {
               </FormField>
             </Box>
             <Box direction="column">
-              <FormField label="Linked Children" name="children" info="If this sample has any derivatives or samples that have been created from it, specify those associations here by searching for the corresponding sample.">
+              <FormField label="Linked Products" name="products" info="If this sample has any derivatives or samples that have been created from it, specify those associations here by searching for the corresponding sample.">
                 <Select
                   options={childOptions}
                   labelKey="name"
-                  value={children}
+                  value={products}
                   valueKey="name"
                   onChange={({ value }) => {
-                    if (!children.includes(value)) {
-                      setChildren([...children, value])
+                    if (!products.includes(value)) {
+                      setProducts([...products, value])
                     }
                   }}
                   searchPlaceholder="Search..."
@@ -155,10 +155,10 @@ export const Associations = ({}) => {
                 />
               </FormField>
               <Box direction="column" gap="xsmall">
-                {children.map((child) => {
-                  return <Tag name="Child ID" value={child.name} key={child.name} onRemove={() => {
-                    setChildren(children.filter((item) => {
-                      return item !== child;
+                {products.map((product) => {
+                  return <Tag name="Product" value={product.name} key={product.name} onRemove={() => {
+                    setProducts(products.filter((item) => {
+                      return item !== product;
                     }))
                   }}/>;
                 })}

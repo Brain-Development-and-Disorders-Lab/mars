@@ -11,7 +11,7 @@ declare namespace Create {
   type Associations = Start & {
     projects: {name: string, id: string}[];
     origin: string;
-    children: {name: string, id: string}[];
+    products: {name: string, id: string}[];
   };
 }
 
@@ -23,7 +23,7 @@ declare type ParameterStruct = {
   attributes: string[];
   associations: {
     origin: string;
-    children: string[];
+    products: string[];
   }
 };
 
@@ -35,7 +35,7 @@ declare type ParameterProps = {
   attributes?: string[];
   associations?: {
     origin?: string;
-    children?: string[];
+    products?: string[];
   };
 }
 
@@ -55,13 +55,14 @@ declare type SampleStruct = {
   created: string;
   owner: string;
   projects: string[];
+  origin: string;
   storage: {
     types: string[];
     data: { type: string, location: string }[];
   };
   associations: {
     origins: string[];
-    children: string[];
+    products: string[];
   };
   parameters: string[];
 }
