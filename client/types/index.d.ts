@@ -19,7 +19,7 @@ declare type ParameterStruct = {
   _id: string;
   name: string;
   description: string;
-  type: "sample" | "number" | "data" | "select";
+  type: "sample" | "number" | "data";
   attributes: string[];
   associations: {
     parent: string;
@@ -30,7 +30,13 @@ declare type ParameterStruct = {
 declare type ParameterProps = {
   key: string;
   name: string;
-  type: "sample" | "number" | "data" | "select";
+  description: string;
+  type?: "sample" | "number" | "data";
+  attributes?: string[];
+  associations?: {
+    parent?: string;
+    children?: string[];
+  };
 }
 
 declare type ProjectStruct = {
@@ -58,4 +64,9 @@ declare type SampleStruct = {
     children: string[];
   };
   parameters: string[];
+}
+
+declare type LinkyProps = {
+  type: string;
+  id: string;
 }
