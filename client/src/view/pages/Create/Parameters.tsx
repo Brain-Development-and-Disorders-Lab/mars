@@ -3,17 +3,22 @@ import {
   Button,
   Form,
   Heading,
+  Text,
 } from "grommet";
 import { Add, Checkmark, LinkPrevious } from "grommet-icons";
 
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 // Custom components
 import Parameter from "src/view/components/Parameter";
 
 export const Parameters = ({}) => {
   const navigate = useNavigate();
+
+  // Extract state from prior page
+  const { state } = useLocation();
+  const { id, created, project, projects, description, parent, children } = state as Create.Associations;
 
   const defaultParameters: ParameterProps[] = [];
   const [parameters, setParameters] = useState(defaultParameters);
@@ -45,6 +50,13 @@ export const Parameters = ({}) => {
           </Box>
           <Box width="large" direction="column" gap="small" margin="small">
             <Heading level="3" margin={{top: "small"}}>Sample Summary</Heading>
+            <Text>ID: {id}</Text>
+            <Text>Created: {new Date(created).toDateString()}</Text>
+            <Text>Primary project ID: {project}</Text>
+            <Text>Associated projects: {projects.join()}</Text>
+            <Text>Description: {description}</Text>
+            <Text>Parent ID: {parent}</Text>
+            <Text>Associated children IDs: {children.join()}</Text>
           </Box>
         </Box>
         <Box direction="row" flex={false} justify="between">

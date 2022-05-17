@@ -17,6 +17,7 @@ import { LinkNext } from "grommet-icons";
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getData } from "src/lib/database/getData";
+import { pseudoId } from "src/lib/functions";
 
 export const Start = ({}) => {
   const navigate = useNavigate();
@@ -24,8 +25,8 @@ export const Start = ({}) => {
   // Extract prior state and apply
   const { state } = useLocation();
 
-  const initialId = state === null ? "" : (state as Create.Associations).id;
-  const initialCreated = state === null ? "" : (state as Create.Associations).created;
+  const initialId = state === null ? pseudoId() : (state as Create.Associations).id;
+  const initialCreated = state === null ? new Date().toISOString() : (state as Create.Associations).created;
   const initialProject = state === null ? "" : (state as Create.Associations).project;
   const initialDescription = state === null ? "" : (state as Create.Associations).description;
 

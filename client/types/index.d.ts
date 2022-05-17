@@ -10,6 +10,8 @@ declare namespace Create {
 
   type Associations = Start & {
     projects: string[];
+    parent: string;
+    children: string[];
   };
 }
 

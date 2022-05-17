@@ -35,12 +35,18 @@ export const Associations = ({}) => {
   const [projectData, setProjectData] = useState([] as ProjectStruct[]);
   const [sampleData, setSampleData] = useState([] as SampleStruct[]);
 
+  // Options for Select element drop-down menu
+  const [parentOptions, setParentOptions] = useState([] as {name: string, id: string}[]);
+  const [childOptions, setChildOptions] = useState([] as {name: string, id: string}[]);
+
   const associationState: Create.Associations = {
     id: id,
     created: created,
     project: project,
     description: description,
     projects: additionalProjects,
+    parent: parent.id,
+    children: children.map((child) => { return child.id }),
   }
 
   let errorBody = (
@@ -57,6 +63,8 @@ export const Associations = ({}) => {
     // Handle the response from the database
     samples.then((value) => {
       setSampleData(value);
+      setChildOptions(value.map((e: SampleStruct) => { return { name: e.name, id: e._id } }))
+      setParentOptions(value.map((e: SampleStruct) => { return { name: e.name, id: e._id } }))
 
       // Check the contents of the response
       if (value["error"] !== undefined) {
@@ -111,7 +119,7 @@ export const Associations = ({}) => {
 
               <FormField label="Linked Parent" name="parent" info="If the source of this sample currently exists or did exist in this system, specify that association here by searching for the parent sample.">
                 <Select
-                  options={sampleData.map((sample) => { return { name: sample.name, id: sample._id } })}
+                  options={parentOptions}
                   labelKey="name"
                   value={parent}
                   valueKey="name"
@@ -119,14 +127,18 @@ export const Associations = ({}) => {
                     setParent(option);
                   }}
                   searchPlaceholder="Search..."
-                  onSearch={() => {}}
+                  onSearch={(query) => {
+                    const escapedText = query.replace(/[-\\^$*+?.()|[\]{}]/g, '\\$&');
+                    const exp = new RegExp(escapedText, 'i');
+                    setParentOptions(sampleData.filter((sample) => exp.test(sample.name)).map((sample) => { return { name: sample.name, id: sample._id }}));
+                  }}
                 />
               </FormField>
             </Box>
             <Box direction="column">
               <FormField label="Linked Children" name="children" info="If this sample has any derivatives or samples that have been created from it, specify those associations here by searching for the corresponding sample.">
                 <Select
-                  options={sampleData.map((sample) => { return { name: sample.name, id: sample._id } })}
+                  options={childOptions}
                   labelKey="name"
                   value={children}
                   valueKey="name"
@@ -136,7 +148,11 @@ export const Associations = ({}) => {
                     }
                   }}
                   searchPlaceholder="Search..."
-                  onSearch={() => {}}
+                  onSearch={(query) => {
+                    const escapedText = query.replace(/[-\\^$*+?.()|[\]{}]/g, '\\$&');
+                    const exp = new RegExp(escapedText, 'i');
+                    setChildOptions(sampleData.filter((sample) => exp.test(sample.name)).map((sample) => { return { name: sample.name, id: sample._id }}));
+                  }}
                 />
               </FormField>
               <Box direction="column" gap="xsmall">
