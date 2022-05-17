@@ -18,19 +18,27 @@ export const Associations = ({}) => {
 
   // Extract state from prior page
   const { state } = useLocation();
-  const { id } = state as Create.Start;
+  const { id, created, project, description } = state as Create.Start;
   
+  // Setup state data
+  const [projects, setProjects] = useState([] as string[]);
+  const [parent, setParent] = useState("");
+  const [children, setChildren] = useState([] as string[]);
+
+  const associationState: Create.Associations = {
+    id: id,
+    created: created,
+    project: project,
+    description: description,
+    projects: projects,
+  }
+
   // Parent field
   const allParentData = [
     {id: "312635e76a76", customId: "d_2l3nP"},
     {id: "362ba72e76a7", customId: "c_3n2_pd"},
     {id: "a62ba72635e3", customId: "20190_203"},
   ];
-  const [parent, setParent] = useState("");
-
-  // Type the state array that will contain the children
-  const initialChildren: string[] = [];
-  const [children, setChildren] = useState(initialChildren);
 
   return (
     <>
@@ -41,12 +49,17 @@ export const Associations = ({}) => {
       <Box margin="small">
         <Form
           onChange={() => {}}
-          onSubmit={() => {navigate("/create/parameters")}}
+          onSubmit={() => {navigate("/create/parameters", { state: associationState })}}
         >
           <Box direction="row">
             <Box direction="column">
               <FormField label="Linked Projects" name="projects" info="Specify the projects that this new sample should be associated with. The sample will then show up underneath the specified projects.">
-                <CheckBoxGroup options={["(dunnart1234) Dunnart Prey Capture", "(ccddm2020) Metacognition in CCD"]} />
+                <CheckBoxGroup
+                  options={["(dunnart1234) Dunnart Prey Capture", "(ccddm2020) Metacognition in CCD"]}
+                  onChange={(e) => {
+                    setProjects(e?.value as unknown as string[]);
+                  }}
+                />
               </FormField>
 
               <FormField label="Linked Parent" name="parent" info="If the source of this sample currently exists or did exist in this system, specify that association here by searching for the parent sample.">
@@ -87,7 +100,7 @@ export const Associations = ({}) => {
 
           <Box direction="row" flex={false} justify="between">
             <Button label="Cancel" />
-            <Button label="Back" icon={<LinkPrevious />} onClick={() => navigate("/create/start")}/>
+            <Button label="Back" icon={<LinkPrevious />} onClick={() => navigate("/create/start", { state: associationState })}/>
             <Button type="submit" label="Continue" icon={<LinkNext />} reverse primary />
           </Box>
         </Form>

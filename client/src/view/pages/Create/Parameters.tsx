@@ -15,7 +15,7 @@ import Parameter from "src/view/components/Parameter";
 export const Parameters = ({}) => {
   const navigate = useNavigate();
 
-  const defaultParameters: ParameterStruct[] = [];
+  const defaultParameters: ParameterProps[] = [];
   const [parameters, setParameters] = useState(defaultParameters);
 
   return (
@@ -31,7 +31,7 @@ export const Parameters = ({}) => {
               {
                 parameters.map((e) => {
                   return (
-                    <Parameter key={e.key} name={e.name} type={e.type} value={e.value} />
+                    <Parameter key={e.key} type={e.type} name={e.name} />
                   );
                 })
               }
@@ -39,7 +39,7 @@ export const Parameters = ({}) => {
 
             <Box justify="center" direction="row" >
               <Button icon={<Add />} primary onClick={() => {
-                setParameters([...parameters, { key: parameters.length, name: "", type: "Sample", value: ""}]);
+                setParameters([...parameters, { key: `${parameters.length}`, name: "", type: "sample"}]);
               }} />
             </Box>
           </Box>

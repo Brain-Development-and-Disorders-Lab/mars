@@ -12,16 +12,30 @@ import {
 import { LinkNext } from "grommet-icons";
 
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export const Start = ({}) => {
   const navigate = useNavigate();
 
-  // Store state
-  const [id, setId] = useState("");
-  const [created, setCreated] = useState("");
-  const [project, setProject] = useState("");
-  const [description, setDescription] = useState("");
+  // Extract prior state and apply
+  const { state } = useLocation();
+
+  const initialId = state === null ? "" : (state as Create.Associations).id;
+  const initialCreated = state === null ? "" : (state as Create.Associations).created;
+  const initialProject = state === null ? "" : (state as Create.Associations).project;
+  const initialDescription = state === null ? "" : (state as Create.Associations).description;
+
+  const [id, setId] = useState(initialId);
+  const [created, setCreated] = useState(initialCreated);
+  const [project, setProject] = useState(initialProject);
+  const [description, setDescription] = useState(initialDescription);
+
+  const startState: Create.Start = {
+    id: id,
+    created: created,
+    project: project,
+    description: description,
+  };
 
   return (
     <>
@@ -29,11 +43,9 @@ export const Start = ({}) => {
       <Box width="large" fill>
         <Form
           onChange={() => {}}
-          onReset={() => {
-            setId("");
-          }}
+          onReset={() => {}}
           onSubmit={() => {
-            navigate("/create/associations", { state: { id: id, description: description }});
+            navigate("/create/associations", { state: startState});
           }}
         >
           <Box direction="row" justify="between">
@@ -68,7 +80,7 @@ export const Start = ({}) => {
             />
           </FormField>
           <Box direction="row" flex={false} justify="between">
-            <Button label="Cancel" />
+            <Button label="Cancel" onClick={() => navigate("/")}/>
             <Button type="submit" label="Continue" icon={<LinkNext />} reverse primary />
           </Box>
         </Form>
