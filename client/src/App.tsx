@@ -15,6 +15,7 @@ import {
   FormClose,
   List,
   Notification,
+  Search,
   SettingsOption,
   User,
 } from "grommet-icons";
@@ -27,19 +28,19 @@ import "@fontsource/roboto";
 import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
 
 // Custom components
-import Navigation from "./components/Navigation";
-import Sidebar from "./components/Sidebar";
+import Navigation from "./view/components/Navigation";
+import Sidebar from "./view/components/Sidebar";
 
 // Custom pages
-import Start from "./pages/Create/Start";
-import Projects from "./pages/Projects";
-import Associations from "./pages/Create/Associations";
-import Parameters from "./pages/Create/Parameters";
-import Home from "./pages/Home";
+import Start from "./view/pages/Create/Start";
+import Projects from "./view/pages/Projects";
+import Associations from "./view/pages/Create/Associations";
+import Parameters from "./view/pages/Create/Parameters";
+import Home from "./view/pages/Home";
 
 // Theme
 import { theme } from "./theme";
-import Sample from "./pages/Sample";
+import Sample from "./view/pages/Sample";
 
 class App extends Component {
   state = {
@@ -66,21 +67,27 @@ class App extends Component {
                     pad={{ left: "medium", right: "small", vertical: "small" }}
                   >
                     <Box direction="row" gap="small">
+                      <Search />
+                      <Heading level="4" margin="none">
+                        <Link to="#">Search</Link>
+                      </Heading>
+                    </Box>
+                    <Box direction="row" gap="small">
                       <List />
                       <Heading level="4" margin="none">
                         <Link to="/projects">Projects</Link>
                       </Heading>
                     </Box>
                     <Box direction="row" gap="small">
-                      <Catalog />
-                      <Heading level="4" margin="none">
-                        Samples
-                      </Heading>
-                    </Box>
-                    <Box direction="row" gap="small">
                       <AddCircle />
                       <Heading level="4" margin="none">
                         <Link to="/create/start">Create</Link>
+                      </Heading>
+                    </Box>
+                    <Box direction="row" gap="small">
+                      <Catalog />
+                      <Heading level="4" margin="none">
+                        <Link to="#">Samples</Link>
                       </Heading>
                     </Box>
                   </Box>

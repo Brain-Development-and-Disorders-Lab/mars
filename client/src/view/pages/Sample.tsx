@@ -3,6 +3,7 @@ import { LinkNext } from "grommet-icons";
 
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { getData } from "src/lib/database/getData";
 
 export const Sample = () => {
   const { id } = useParams();
@@ -10,6 +11,8 @@ export const Sample = () => {
 
   const [isLoaded, setIsLoaded] = useState(false);
   const [isError, setIsError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("An error has occurred.");
+
   const [sampleData, setSampleData] = useState({} as {
     _id: string;
     name: string;
@@ -23,33 +26,26 @@ export const Sample = () => {
   let errorBody = (
     <Box margin="small" pad="small" justify="center" align="center" direction="column" gap="small">
       <Heading margin="small" color="red">Error!</Heading>
-      <Text>An error has occurred.</Text>
+      <Text><b>Message:</b> {errorMessage}</Text>
       <Button label="Return" icon={<LinkNext />} onClick={() => navigate("/")} primary reverse />
     </Box>
   );
 
   useEffect(() => {
-    async function fetchData() {
-      const response = await fetch(`http://localhost:8000/samples/${id}`);
-  
-      if (!response.ok) {
+    const response = getData(`/samples/${id}`);
+
+    // Handle the response from the database
+    response.then((value) => {
+      setSampleData(value);
+
+      // Check the contents of the response
+      if (value["error"] !== undefined) {
+        setErrorMessage(value["error"]);
         setIsError(true);
-        setIsLoaded(true);
-        return;
-      }
-  
-      const record = await response.json();
-      if (!record) {
-        setIsError(true);
-        setIsLoaded(true);
-        return;
       }
 
-      setSampleData(record);
       setIsLoaded(true);
-    }
-
-    fetchData();
+    });
     return;
   }, [id]);
 

@@ -10,7 +10,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 // Custom components
-import Parameter from "src/components/Parameter";
+import Parameter from "src/view/components/Parameter";
 
 export const Parameters = ({}) => {
   const navigate = useNavigate();
