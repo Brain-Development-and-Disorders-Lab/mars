@@ -22,7 +22,7 @@ export const Associations = ({}) => {
 
   // Extract state from prior page
   const { state } = useLocation();
-  const { id, created, project, description } = state as Create.Start;
+  const { name, created, project, description, owner } = state as Create.Start;
   
   // Setup state data
   const [origin, setOrigin] = useState({name: "", id: ""});
@@ -38,16 +38,19 @@ export const Associations = ({}) => {
 
   // Options for Select element drop-down menu
   const [originOptions, setOriginOptions] = useState([] as {name: string, id: string}[]);
-  const [childOptions, setChildOptions] = useState([] as {name: string, id: string}[]);
+  const [productOptions, setProductOptions] = useState([] as {name: string, id: string}[]);
 
   const associationState: Create.Associations = {
-    id: id,
+    name: name,
     created: created,
+    owner: owner,
     project: project,
-    description: description,
     projects: additionalProjects,
-    origin: origin.id,
-    products: products,
+    description: description,
+    associations: {
+      origin: origin,
+      products: products,
+    }
   }
 
   useEffect(() => {
@@ -56,7 +59,7 @@ export const Associations = ({}) => {
     // Handle the response from the database
     samples.then((value) => {
       setSampleData(value);
-      setChildOptions(value.map((e: SampleStruct) => { return { name: e.name, id: e._id } }))
+      setProductOptions(value.map((e: SampleStruct) => { return { name: e.name, id: e._id } }))
       setOriginOptions(value.map((e: SampleStruct) => { return { name: e.name, id: e._id } }))
 
       // Check the contents of the response
@@ -88,7 +91,7 @@ export const Associations = ({}) => {
     {isLoaded && isError === false ?
     <>
       <Box direction="row" justify="between" align="center">
-        <Heading level="2">Configure Associations for "{id}"</Heading>
+        <Heading level="2">Configure Associations for "{name}"</Heading>
       </Box>
 
       <Box margin="small">
@@ -138,7 +141,7 @@ export const Associations = ({}) => {
             <Box direction="column">
               <FormField label="Linked Products" name="products" info="If this sample has any derivatives or samples that have been created from it, specify those associations here by searching for the corresponding sample.">
                 <Select
-                  options={childOptions}
+                  options={productOptions}
                   labelKey="name"
                   value={products}
                   valueKey="name"
@@ -151,7 +154,7 @@ export const Associations = ({}) => {
                   onSearch={(query) => {
                     const escapedText = query.replace(/[-\\^$*+?.()|[\]{}]/g, '\\$&');
                     const exp = new RegExp(escapedText, 'i');
-                    setChildOptions(sampleData.filter((sample) => exp.test(sample.name)).map((sample) => { return { name: sample.name, id: sample._id }}));
+                    setProductOptions(sampleData.filter((sample) => exp.test(sample.name)).map((sample) => { return { name: sample.name, id: sample._id }}));
                   }}
                 />
               </FormField>

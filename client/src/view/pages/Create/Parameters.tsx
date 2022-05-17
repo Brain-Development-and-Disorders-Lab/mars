@@ -27,7 +27,7 @@ export const Parameters = ({}) => {
 
   // Extract state from prior page
   const { state } = useLocation();
-  const { id, created, project, projects, description, origin, products } = state as Create.Associations;
+  const { name, created, project, projects, description, owner, associations: { origin, products} } = state as Create.Associations;
 
   const [parameters, setParameters] = useState([] as ParameterProps[]);
   const [parameterData, setParameterData] = useState([] as ParameterStruct[]);
@@ -40,9 +40,9 @@ export const Parameters = ({}) => {
   const [showConfirmation, setShowConfirmation] = useState(false);
 
   const sampleData = {
-    name: id,
+    name: name,
     created: created,
-    owner: "owner", // To Do: implement owner specification
+    owner: owner, // To Do: implement owner specification
     projects: projects,
     origin: origin,
     storage: {},  // To Do: implement storage
@@ -91,7 +91,6 @@ export const Parameters = ({}) => {
                 labelKey="name"
                 onChange={({ option }) => {
                   // We need to get the existing parameter and insert it here
-                  console.debug(option);
                   getData(`/parameters/${option.id}`).then((value: ParameterStruct) => {
                     setParameters([
                       ...parameters,
@@ -166,7 +165,7 @@ export const Parameters = ({}) => {
           <Heading level="3" margin={{top: "small"}}>Sample Summary</Heading>
           <Box direction="row" gap="small">
             <Box direction="column" gap="small">
-              <Text><b>Identifier:</b> {id}</Text>
+              <Text><b>Identifier:</b> {name}</Text>
               <Text><b>Created:</b> {new Date(created).toDateString()}</Text>
               <Text><b>Description:</b> {description}</Text>
             </Box>
@@ -178,7 +177,7 @@ export const Parameters = ({}) => {
                 );
               })}</Text>
               {origin &&
-                <Text><b>Origin sample:</b> <Linky type="samples" id={origin} /></Text>
+                <Text><b>Origin sample:</b> <Linky type="samples" id={origin.id} /></Text>
               }
               {products.length > 0 &&
                 <Text><b>Product samples:</b> {products.map((child) => {

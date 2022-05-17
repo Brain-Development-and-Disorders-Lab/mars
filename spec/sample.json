@@ -3,8 +3,9 @@
   "name": "Sample Name",
   "created": "05132022-143644",
   "owner": "henry.burgess@wustl.edu",
+  "project": "",
+  "description": "",
   "projects": [],
-  "origin": "",
   "storage": {
     "types": ["physical", "digital"],
     "data": [
@@ -13,7 +14,7 @@
     ]
   },
   "associations": {
-    "origins": [],
+    "origin": "",
     "products": []
   },
   "parameters": []

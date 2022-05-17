@@ -25,13 +25,15 @@ export const Start = ({}) => {
   // Extract prior state and apply
   const { state } = useLocation();
 
-  const initialId = state === null ? pseudoId() : (state as Create.Associations).id;
+  const initialName = state === null ? pseudoId() : (state as Create.Associations).name;
   const initialCreated = state === null ? new Date().toISOString() : (state as Create.Associations).created;
+  const initialOwner = state === null ? "" : (state as Create.Associations).owner;
   const initialProject = state === null ? {name: "", id: ""} : (state as Create.Associations).project;
   const initialDescription = state === null ? "" : (state as Create.Associations).description;
 
-  const [id, setId] = useState(initialId);
+  const [name, setName] = useState(initialName);
   const [created, setCreated] = useState(initialCreated);
+  const [owner, setOwner] = useState(initialOwner);
   const [project, setProject] = useState(initialProject);
   const [description, setDescription] = useState(initialDescription);
 
@@ -42,8 +44,9 @@ export const Start = ({}) => {
   const [projectData, setProjectData] = useState([] as ProjectStruct[]);
 
   const startState: Create.Start = {
-    id: id,
+    name: name,
     created: created,
+    owner: owner,
     project: project,
     description: description,
   };
@@ -81,11 +84,18 @@ export const Start = ({}) => {
             }}
           >
             <Box direction="row" justify="between">
-              <FormField label="ID" name="id" info="A standardised ID for the sample.">
+              <FormField label="Name" name="name" info="A standardised name or ID for the sample.">
                 <TextInput
-                  name="ID"
-                  value={id}
-                  onChange={(event) => setId(event.target.value)}
+                  name="name"
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                />
+              </FormField>
+              <FormField label="Owner" name="owner" info="Owner of the sample.">
+                <TextInput
+                  name="owner"
+                  value={owner}
+                  onChange={(event) => setOwner(event.target.value)}
                 />
               </FormField>
               <FormField label="Created" name="created" info="Date the sample was created.">
