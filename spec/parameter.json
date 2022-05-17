@@ -5,7 +5,7 @@
   "type": "data",
   "attributes": [{"url": "https://wustl.box.edu"}],
   "associations": {
-    "parent": "",
+    "origin": "",
     "children": []
   }
 }

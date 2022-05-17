@@ -10,7 +10,7 @@ declare namespace Create {
 
   type Associations = Start & {
     projects: {name: string, id: string}[];
-    parent: string;
+    origin: string;
     children: {name: string, id: string}[];
   };
 }
@@ -22,7 +22,7 @@ declare type ParameterStruct = {
   type: "sample" | "number" | "data";
   attributes: string[];
   associations: {
-    parent: string;
+    origin: string;
     children: string[];
   }
 };
@@ -34,7 +34,7 @@ declare type ParameterProps = {
   type?: "sample" | "number" | "data";
   attributes?: string[];
   associations?: {
-    parent?: string;
+    origin?: string;
     children?: string[];
   };
 }
@@ -60,7 +60,7 @@ declare type SampleStruct = {
     data: { type: string, location: string }[];
   };
   associations: {
-    parents: string[];
+    origins: string[];
     children: string[];
   };
   parameters: string[];

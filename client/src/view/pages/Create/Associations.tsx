@@ -24,7 +24,7 @@ export const Associations = ({}) => {
   const { id, created, project, description } = state as Create.Start;
   
   // Setup state data
-  const [parent, setParent] = useState({name: "", id: ""});
+  const [origin, setOrigin] = useState({name: "", id: ""});
   const [children, setChildren] = useState([] as {name: string, id: string}[]);
   const [additionalProjects, setAdditionalProjects] = useState([] as {name: string, id: string}[]);
   
@@ -36,7 +36,7 @@ export const Associations = ({}) => {
   const [sampleData, setSampleData] = useState([] as SampleStruct[]);
 
   // Options for Select element drop-down menu
-  const [parentOptions, setParentOptions] = useState([] as {name: string, id: string}[]);
+  const [originOptions, setOriginOptions] = useState([] as {name: string, id: string}[]);
   const [childOptions, setChildOptions] = useState([] as {name: string, id: string}[]);
 
   const associationState: Create.Associations = {
@@ -45,7 +45,7 @@ export const Associations = ({}) => {
     project: project,
     description: description,
     projects: additionalProjects,
-    parent: parent.id,
+    origin: origin.id,
     children: children,
   }
 
@@ -56,7 +56,7 @@ export const Associations = ({}) => {
     samples.then((value) => {
       setSampleData(value);
       setChildOptions(value.map((e: SampleStruct) => { return { name: e.name, id: e._id } }))
-      setParentOptions(value.map((e: SampleStruct) => { return { name: e.name, id: e._id } }))
+      setOriginOptions(value.map((e: SampleStruct) => { return { name: e.name, id: e._id } }))
 
       // Check the contents of the response
       if (value["error"] !== undefined) {
@@ -116,20 +116,20 @@ export const Associations = ({}) => {
                 />
               </FormField>
 
-              <FormField label="Linked Parent" name="parent" info="If the source of this sample currently exists or did exist in this system, specify that association here by searching for the parent sample.">
+              <FormField label="Linked Origin" name="origin" info="If the source of this sample currently exists or did exist in this system, specify that association here by searching for the origin sample.">
                 <Select
-                  options={parentOptions}
+                  options={originOptions}
                   labelKey="name"
-                  value={parent}
+                  value={origin}
                   valueKey="name"
                   onChange={({ option }) => {
-                    setParent(option);
+                    setOrigin(option);
                   }}
                   searchPlaceholder="Search..."
                   onSearch={(query) => {
                     const escapedText = query.replace(/[-\\^$*+?.()|[\]{}]/g, '\\$&');
                     const exp = new RegExp(escapedText, 'i');
-                    setParentOptions(sampleData.filter((sample) => exp.test(sample.name)).map((sample) => { return { name: sample.name, id: sample._id }}));
+                    setOriginOptions(sampleData.filter((sample) => exp.test(sample.name)).map((sample) => { return { name: sample.name, id: sample._id }}));
                   }}
                 />
               </FormField>

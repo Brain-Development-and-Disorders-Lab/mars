@@ -25,7 +25,7 @@ export const Parameters = ({}) => {
 
   // Extract state from prior page
   const { state } = useLocation();
-  const { id, created, project, projects, description, parent, children } = state as Create.Associations;
+  const { id, created, project, projects, description, origin, children } = state as Create.Associations;
 
   const [parameters, setParameters] = useState([] as ParameterProps[]);
   const [parameterData, setParameterData] = useState([] as ParameterStruct[]);
@@ -161,8 +161,8 @@ export const Parameters = ({}) => {
                   <Linky key={project.id} type="projects" id={project.id} />
                 );
               })}</Text>
-              {parent &&
-                <Text><b>Origin sample:</b> <Linky type="samples" id={parent} /></Text>
+              {origin &&
+                <Text><b>Origin sample:</b> <Linky type="samples" id={origin} /></Text>
               }
               {children.length > 0 &&
                 <Text><b>Associated samples:</b> {children.map((child) => {
