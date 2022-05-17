@@ -36,7 +36,7 @@ declare type ProjectStruct = {
   name: string;
   description: string;
   attributes: string[];
-  attributes: {
+  associations: {
     samples: string[];
   };
 }

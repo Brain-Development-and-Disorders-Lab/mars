@@ -24,13 +24,15 @@ export const Associations = ({}) => {
   const { id, created, project, description } = state as Create.Start;
   
   // Setup state data
-  const [projects, setProjects] = useState([] as string[]);
   const [parent, setParent] = useState({name: "", id: ""});
   const [children, setChildren] = useState([] as {name: string, id: string}[]);
-
+  const [additionalProjects, setAdditionalProjects] = useState([] as string[]);
+  
   const [isLoaded, setIsLoaded] = useState(false);
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("An error has occurred.");
+
+  const [projectData, setProjectData] = useState([] as ProjectStruct[]);
   const [sampleData, setSampleData] = useState([] as SampleStruct[]);
 
   const associationState: Create.Associations = {
@@ -38,7 +40,7 @@ export const Associations = ({}) => {
     created: created,
     project: project,
     description: description,
-    projects: projects,
+    projects: additionalProjects,
   }
 
   let errorBody = (
@@ -50,12 +52,25 @@ export const Associations = ({}) => {
   );
 
   useEffect(() => {
-    const response = getData(`/samples`);
+    const samples = getData(`/samples`);
 
     // Handle the response from the database
-    response.then((value) => {
+    samples.then((value) => {
       setSampleData(value);
 
+      // Check the contents of the response
+      if (value["error"] !== undefined) {
+        setErrorMessage(value["error"]);
+        setIsError(true);
+      }
+    });
+
+    const projects = getData(`/projects`);
+
+    // Handle the response from the database
+    projects.then((value) => {
+      setProjectData(value);
+      
       // Check the contents of the response
       if (value["error"] !== undefined) {
         setErrorMessage(value["error"]);
@@ -84,9 +99,12 @@ export const Associations = ({}) => {
             <Box direction="column">
               <FormField label="Linked Projects" name="projects" info="Specify the projects that this new sample should be associated with. The sample will then show up underneath the specified projects.">
                 <CheckBoxGroup
-                  options={["(dunnart1234) Dunnart Prey Capture", "(ccddm2020) Metacognition in CCD"]}
-                  onChange={(e) => {
-                    setProjects(e?.value as unknown as string[]);
+                  options={projectData.map((project) => { return project.name })}
+                  onChange={(event) => {
+                    if (event?.value && Array.isArray(event?.value)) {
+                      setAdditionalProjects(event.value);
+                      console.debug(additionalProjects);
+                    }
                   }}
                 />
               </FormField>
