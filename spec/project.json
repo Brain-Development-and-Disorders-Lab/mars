@@ -1,0 +1,9 @@
+{
+  "id": "project_a",
+  "name": "Project Name",
+  "description": "",
+  "attributes": [],
+  "associations": {
+    "samples": []
+  }
+}

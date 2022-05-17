@@ -14,8 +14,46 @@ declare namespace Create {
 }
 
 declare type ParameterStruct = {
-  key: number;
+  _id: string;
   name: string;
-  type: "Sample" | "Number" | "Data"
-  value: string;
+  description: string;
+  type: "sample" | "number" | "data" | "select";
+  attributes: string[];
+  associations: {
+    parent: string;
+    children: string[];
+  }
 };
+
+declare type ParameterProps = {
+  key: string;
+  name: string;
+  type: "sample" | "number" | "data" | "select";
+}
+
+declare type ProjectStruct = {
+  _id: string;
+  name: string;
+  description: string;
+  attributes: string[];
+  attributes: {
+    samples: string[];
+  };
+}
+
+declare type SampleStruct = {
+  _id: string;
+  name: string;
+  created: string;
+  owner: string;
+  projects: string[];
+  storage: {
+    types: string[];
+    data: { type: string, location: string }[];
+  };
+  associations: {
+    parents: string[];
+    children: string[];
+  };
+  parameters: string[];
+}
