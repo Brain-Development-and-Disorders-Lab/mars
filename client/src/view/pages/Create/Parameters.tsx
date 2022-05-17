@@ -7,6 +7,7 @@ import {
   Layer,
   Select,
   Spinner,
+  Tag,
   Text,
 } from "grommet";
 import { Add, Checkmark, LinkPrevious } from "grommet-icons";
@@ -51,7 +52,7 @@ export const Parameters = ({}) => {
       origin: origin,
       products: products,
     },
-    parameters: []  // To Do: implement parameters
+    parameters: parameters
   };
 
   useEffect(() => {
@@ -78,80 +79,78 @@ export const Parameters = ({}) => {
     {isLoaded && isError === false ?
     <>
       <Heading level="2">Apply Parameters</Heading>
-      <Form
-        onChange={() => {}}
-        onSubmit={() => {
-          setShowConfirmation(true);
-        }}
-      >
-        <Box direction="row" margin="small" fill>
-          <Box width="large" direction="column" overflow="auto">
-            <FormField label="Existing Parameter" name="existing" info="If you have already created a parameter, you can search and add it here.">
-              <Select
-                options={parameterOptions.map((parameter) => { return { name: parameter.name, id: parameter._id }})}
-                labelKey="name"
-                onChange={({ option }) => {
-                  // We need to get the existing parameter and insert it here
-                  getData(`/parameters/${option.id}`).then((value: ParameterStruct) => {
-                    setParameters([
-                      ...parameters,
-                      {
-                        key: `${value._id}_${parameters.length}`,
-                        name: value.name,
-                        description: value.description,
-                        type: value.type,
-                        attributes: value.attributes,
-                        associations: value.associations,
-                      }
-                    ])
+      <Box margin="small">
+        <Form
+          onChange={() => {}}
+          onSubmit={() => {setShowConfirmation(true)}}
+        >
+          <Box direction="row" margin="small" fill>
+            <Box direction="column" overflow="auto">
+              <FormField label="Existing Parameter" name="existing" info="If you have already created a parameter, you can search and add it here.">
+                <Select
+                  options={parameterOptions.map((parameter) => { return { name: parameter.name, id: parameter._id }})}
+                  labelKey="name"
+                  onChange={({ option }) => {
+                    // We need to get the existing parameter and insert it here
+                    getData(`/parameters/${option.id}`).then((value: ParameterStruct) => {
+                      setParameters([
+                        ...parameters,
+                        {
+                          key: `${value._id}_${parameters.length}`,
+                          name: value.name,
+                          description: value.description,
+                          type: value.type,
+                          attributes: value.attributes,
+                        }
+                      ])
+                    })
+                  }}
+                  searchPlaceholder="Search..."
+                  onSearch={(query) => {
+                    const escapedText = query.replace(/[-\\^$*+?.()|[\]{}]/g, '\\$&');
+                    const exp = new RegExp(escapedText, 'i');
+                    setParameterOptions(parameterData.filter((parameter) => exp.test(parameter.name)));
+                  }}
+                />
+              </FormField>
+
+              <Box direction="column" gap="small" margin="small">
+                {
+                  parameters.map((parameter) => {
+                    return (
+                      <Parameter
+                        key={parameter.key}
+                        name={parameter.name}
+                        description={parameter.description}
+                        type={parameter.type}
+                        attributes={parameter.attributes}
+                      />
+                    );
                   })
-                }}
-                searchPlaceholder="Search..."
-                onSearch={(query) => {
-                  const escapedText = query.replace(/[-\\^$*+?.()|[\]{}]/g, '\\$&');
-                  const exp = new RegExp(escapedText, 'i');
-                  setParameterOptions(parameterData.filter((parameter) => exp.test(parameter.name)));
-                }}
-              />
-            </FormField>
+                }
+              </Box>
 
-            <Box direction="column" gap="small" margin="small">
-              {
-                parameters.map((parameter) => {
-                  return (
-                    <Parameter
-                      key={parameter.key}
-                      name={parameter.name}
-                      description={parameter.description}
-                      type={parameter.type}
-                      attributes={parameter.attributes}
-                      associations={parameter.associations}
-                    />
-                  );
-                })
-              }
-            </Box>
-
-            <Box justify="center" direction="row" >
-              <Button icon={<Add />} label="Create new parameter" primary onClick={() => {
-                setParameters([
-                  ...parameters,
-                  {
-                    key: `${parameters.length}`,
-                    name: "",
-                    description: "",
-                    type: "sample"
-                  }]);
-              }} />
+              <Box justify="center" direction="row" >
+                <Button icon={<Add />} label="Create new parameter" primary onClick={() => {
+                  setParameters([
+                    ...parameters,
+                    {
+                      key: `${parameters.length}`,
+                      name: "",
+                      description: "",
+                      type: "data"
+                    }]);
+                }} />
+              </Box>
             </Box>
           </Box>
-        </Box>
-        <Box direction="row" flex={false} justify="between">
-          <Button label="Cancel" />
-          <Button label="Back" icon={<LinkPrevious />} onClick={() => navigate("/create/associations")}/>
-          <Button type="submit" label="Finish" icon={<Checkmark />} reverse primary />
-        </Box>
-      </Form>
+          <Box direction="row" flex={false} justify="between">
+            <Button label="Cancel" />
+            <Button label="Back" icon={<LinkPrevious />} onClick={() => navigate("/create/associations")}/>
+            <Button type="submit" label="Finish" icon={<Checkmark />} reverse primary />
+          </Box>
+        </Form>
+      </Box>
     </>
     :
       <Box fill align="center" justify="center">
@@ -187,6 +186,15 @@ export const Parameters = ({}) => {
                   );
                 })}</Text>
               }
+              {parameters.length > 0 &&
+                <Text><b>Parameters:</b> {parameters.map((parameter) => {
+                  return (
+                    <>
+                      <Tag name={parameter.name} value={parameter.name} />
+                    </>
+                  );
+                })}</Text>
+              }
             </Box>
           </Box>
           <Box direction="row" justify="between" fill>
@@ -194,6 +202,7 @@ export const Parameters = ({}) => {
             <Button type="submit" label="Confirm" icon={<Checkmark />} reverse primary onClick={() => {
               // Create new parameters
               // Push the data and parameters
+              console.debug(`Sample data:`, sampleData);
               pushData(`/samples/add`, sampleData).then(() => navigate("/samples"));
             }} />
           </Box>

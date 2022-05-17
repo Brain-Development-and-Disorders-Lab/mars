@@ -11,15 +11,28 @@ const Parameter = (props: ParameterProps) => {
   return (
     <Box direction="row" align="center" gap="small">
       <Text>Parameter:</Text>
-      <TextInput placeholder={"Parameter Name"} value={name} onChange={(event) => setName(event.target.value)}/>
+      <TextInput placeholder={"Parameter Name"} value={name} onChange={(event) => setName(event.target.value)} disabled/>
       <Select
         placeholder="Type"
         options={validTypes}
+        value={props.type}
+        width="auto"
+        disabled
       />
-      {/* <Select
-        placeholder="Value"
-        options={[""]}
-      /> */}
+      <>
+        {props.attributes &&
+          props.attributes.map((attribute) => {
+            return (
+              <>
+                <Text>{attribute.name}:</Text>
+                <TextInput
+                  placeholder="Define value"
+                />
+              </>
+            );
+          })
+        }
+      </>
     </Box>
   );
 };

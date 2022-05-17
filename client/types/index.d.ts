@@ -27,11 +27,7 @@ export type ParameterStruct = {
   name: string;
   description: string;
   type: "sample" | "number" | "data";
-  attributes: string[];
-  associations: {
-    origin: string;
-    products: string[];
-  }
+  attributes: { name: string; data: number | string }[];
 };
 
 declare type ParameterProps = {
@@ -39,11 +35,7 @@ declare type ParameterProps = {
   name: string;
   description: string;
   type?: "sample" | "number" | "data";
-  attributes?: string[];
-  associations?: {
-    origin?: string;
-    products?: string[];
-  };
+  attributes?: { name: string; data: number | string }[];
 }
 
 export type ProjectStruct = {

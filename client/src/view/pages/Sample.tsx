@@ -34,8 +34,6 @@ export const Sample = () => {
     return;
   }, [id]);
 
-  console.debug(sampleData);
-
   return (
     <>
       {isLoaded && isError === false ?

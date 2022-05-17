@@ -3,9 +3,5 @@
   "name": "Box File",
   "description": "A link to a file stored on Box.",
   "type": "data",
-  "attributes": [{"url": "https://wustl.box.edu"}],
-  "associations": {
-    "origin": "",
-    "products": []
-  }
+  "attributes": []
 }
