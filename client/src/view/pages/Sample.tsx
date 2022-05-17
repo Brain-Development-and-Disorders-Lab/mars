@@ -13,15 +13,7 @@ export const Sample = () => {
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("An error has occurred.");
 
-  const [sampleData, setSampleData] = useState({} as {
-    _id: string;
-    name: string;
-    created: string;
-    owner: string;
-    storage: {type: string};
-    associations: {projects: string[], parents: string[], children: string[], data: string[]};
-    parameters: string[];
-  });
+  const [sampleData, setSampleData] = useState({} as SampleStruct);
 
   let errorBody = (
     <Box margin="small" pad="small" justify="center" align="center" direction="column" gap="small">
@@ -82,9 +74,9 @@ export const Sample = () => {
                 </TableRow>
                 <TableRow>
                   <TableCell scope="row">
-                    <strong>Storage medium:</strong>
+                    <strong>Storage mediums:</strong>
                   </TableCell>
-                  <TableCell>{sampleData.storage.type}</TableCell>
+                  <TableCell>{sampleData.storage.types}</TableCell>
                 </TableRow>
               </TableBody>
             </Table>
