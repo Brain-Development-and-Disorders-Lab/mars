@@ -26,7 +26,7 @@ export const Start = ({}) => {
 
   const initialId = state === null ? pseudoId() : (state as Create.Associations).id;
   const initialCreated = state === null ? new Date().toISOString() : (state as Create.Associations).created;
-  const initialProject = state === null ? "" : (state as Create.Associations).project;
+  const initialProject = state === null ? {name: "", id: ""} : (state as Create.Associations).project;
   const initialDescription = state === null ? "" : (state as Create.Associations).description;
 
   const [id, setId] = useState(initialId);
@@ -98,9 +98,15 @@ export const Start = ({}) => {
 
             <FormField label="Project" name="project" info="Select the primary project that this sample should be associated with. Additional projects can be specified as an Association.">
               <Select
-                options={projectData.map((project) => { return project.name })}
+                options={projectData.map((project) => {
+                  return { name: project.name, id: project._id };
+                })}
                 value={project}
-                onChange={({ option }) => setProject(option)}
+                valueKey="name"
+                labelKey="name"
+                onChange={({ option }) => {
+                  setProject(option);
+                }}
               />
             </FormField>
 

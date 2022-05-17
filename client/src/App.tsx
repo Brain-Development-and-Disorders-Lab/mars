@@ -110,7 +110,7 @@ export const App = () => {
                     <Route path="/create/parameters" element={<Parameters />} />
                     <Route path="/projects" element={<Projects />} />
                     <Route path="/samples" element={<Samples />} />
-                    <Route path="sample">
+                    <Route path="samples">
                       <Route path=":id" element={<Sample />} />
                     </Route>
                   </Routes>

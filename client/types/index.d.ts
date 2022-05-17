@@ -4,14 +4,14 @@ declare namespace Create {
   type Start = {
     id: string;
     created: string;
-    project: string;
+    project: {name: string, id: string};
     description: string;
   };
 
   type Associations = Start & {
-    projects: string[];
+    projects: {name: string, id: string}[];
     parent: string;
-    children: string[];
+    children: {name: string, id: string}[];
   };
 }
 
@@ -67,6 +67,6 @@ declare type SampleStruct = {
 }
 
 declare type LinkyProps = {
-  type: string;
+  type: "samples" | "projects" | "parameters";
   id: string;
 }

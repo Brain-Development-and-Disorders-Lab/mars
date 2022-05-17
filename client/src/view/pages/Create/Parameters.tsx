@@ -15,6 +15,7 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getData } from "src/lib/database/getData";
 import ErrorLayer from "src/view/components/ErrorLayer";
+import Linky from "src/view/components/Linky";
 
 // Custom components
 import Parameter from "src/view/components/Parameter";
@@ -145,17 +146,37 @@ export const Parameters = ({}) => {
     }
     {showConfirmation &&
       <Layer>
-        <Box width="large" direction="column" gap="small" margin="small">
+        <Box width="large" direction="column" gap="small" margin="small" align="center">
           <Heading level="3" margin={{top: "small"}}>Sample Summary</Heading>
-          <Text>ID: {id}</Text>
-          <Text>Created: {new Date(created).toDateString()}</Text>
-          <Text>Primary project ID: {project}</Text>
-          <Text>Associated projects: {projects.join()}</Text>
-          <Text>Description: {description}</Text>
-          <Text>Parent ID: {parent}</Text>
-          <Text>Associated children IDs: {children.join()}</Text>
-          <Button type="submit" label="Go Back" />
-          <Button type="submit" label="Confirm" icon={<Checkmark />} reverse primary />
+          <Box direction="row" gap="small">
+            <Box direction="column" gap="small">
+              <Text><b>Identifier:</b> {id}</Text>
+              <Text><b>Created:</b> {new Date(created).toDateString()}</Text>
+              <Text><b>Description:</b> {description}</Text>
+            </Box>
+            <Box direction="column" gap="medium">
+              <Text><b>Primary project:</b> <Linky key={project.id} type="projects" id={project.id} /></Text>
+              <Text><b>Associated projects:</b> {projects.map((project) => {
+                return (
+                  <Linky key={project.id} type="projects" id={project.id} />
+                );
+              })}</Text>
+              {parent &&
+                <Text><b>Origin sample:</b> <Linky type="samples" id={parent} /></Text>
+              }
+              {children.length > 0 &&
+                <Text><b>Associated samples:</b> {children.map((child) => {
+                  return (
+                    <Linky key={child.id} type="samples" id={child.id} />
+                  );
+                })}</Text>
+              }
+            </Box>
+          </Box>
+          <Box direction="row" justify="between" fill>
+            <Button type="submit" label="Go Back" onClick={() => setShowConfirmation(false)}/>
+            <Button type="submit" label="Confirm" icon={<Checkmark />} reverse primary />
+          </Box>
         </Box>
       </Layer>
     }

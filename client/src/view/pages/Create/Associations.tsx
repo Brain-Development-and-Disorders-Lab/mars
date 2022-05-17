@@ -26,7 +26,7 @@ export const Associations = ({}) => {
   // Setup state data
   const [parent, setParent] = useState({name: "", id: ""});
   const [children, setChildren] = useState([] as {name: string, id: string}[]);
-  const [additionalProjects, setAdditionalProjects] = useState([] as string[]);
+  const [additionalProjects, setAdditionalProjects] = useState([] as {name: string, id: string}[]);
   
   const [isLoaded, setIsLoaded] = useState(false);
   const [isError, setIsError] = useState(false);
@@ -46,7 +46,7 @@ export const Associations = ({}) => {
     description: description,
     projects: additionalProjects,
     parent: parent.id,
-    children: children.map((child) => { return child.id }),
+    children: children,
   }
 
   useEffect(() => {
@@ -99,11 +99,18 @@ export const Associations = ({}) => {
             <Box direction="column">
               <FormField label="Associated Projects" name="projects" info="Specify the projects that this new sample should be associated with. The sample will then show up underneath the specified projects.">
                 <CheckBoxGroup
-                  options={projectData.map((project) => { return project.name })}
+                  options={projectData.map((project) => { return {name: project.name, id: project._id} })}
+                  labelKey="name"
+                  valueKey="id"
                   onChange={(event) => {
-                    if (event?.value && Array.isArray(event?.value)) {
-                      setAdditionalProjects(event.value);
-                      console.debug(additionalProjects);
+                    if (event) {
+                      setAdditionalProjects([
+                        ...additionalProjects,
+                        {
+                          name: (event.option as {name: string, id: string}).name,
+                          id: (event.option as {name: string, id: string}).id,
+                        }
+                      ])
                     }
                   }}
                 />

@@ -1,14 +1,16 @@
 import { Box, Select, Text, TextInput } from "grommet";
 
-import React from "react";
+import React, { useState } from "react";
 
 const validTypes = ["sample", "number", "data"];
 
 const Parameter = (props: ParameterProps) => {
+  const [name, setName] = useState(props.name);
+
   return (
     <Box direction="row" align="center" gap="small">
       <Text>Parameter:</Text>
-      <TextInput placeholder={"Parameter Name"} value={props.name} />
+      <TextInput placeholder={"Parameter Name"} value={name} onChange={(event) => setName(event.target.value)}/>
       <Select
         placeholder="Type"
         options={validTypes}

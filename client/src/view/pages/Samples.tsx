@@ -70,7 +70,7 @@ const Samples = () => {
                     <strong>Today</strong> at 14:17.43 by Henry
                   </TableCell>
                   <TableCell>
-                    <Button primary label="View" onClick={() => navigate(`/sample/${value._id}`)}/>
+                    <Button primary label="View" onClick={() => navigate(`/samples/${value._id}`)}/>
                   </TableCell>
                 </TableRow>
               );
