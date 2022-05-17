@@ -97,7 +97,7 @@ export const Associations = ({}) => {
         >
           <Box direction="row">
             <Box direction="column">
-              <FormField label="Linked Projects" name="projects" info="Specify the projects that this new sample should be associated with. The sample will then show up underneath the specified projects.">
+              <FormField label="Associated Projects" name="projects" info="Specify the projects that this new sample should be associated with. The sample will then show up underneath the specified projects.">
                 <CheckBoxGroup
                   options={projectData.map((project) => { return project.name })}
                   onChange={(event) => {
