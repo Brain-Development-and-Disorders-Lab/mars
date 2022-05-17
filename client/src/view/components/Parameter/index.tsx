@@ -1,6 +1,7 @@
 import { Box, Select, Text, TextInput } from "grommet";
 
 import React, { useState } from "react";
+import { ParameterProps } from "types";
 
 const validTypes = ["sample", "number", "data"];
 

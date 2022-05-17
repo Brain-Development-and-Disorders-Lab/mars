@@ -14,11 +14,13 @@ import { Add, Checkmark, LinkPrevious } from "grommet-icons";
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getData } from "src/lib/database/getData";
+import { pushData } from "src/lib/database/pushData";
 import ErrorLayer from "src/view/components/ErrorLayer";
 import Linky from "src/view/components/Linky";
 
 // Custom components
 import Parameter from "src/view/components/Parameter";
+import { Create, ParameterProps, ParameterStruct } from "types";
 
 export const Parameters = ({}) => {
   const navigate = useNavigate();
@@ -36,6 +38,20 @@ export const Parameters = ({}) => {
   const [errorMessage, setErrorMessage] = useState("An error has occurred.");
 
   const [showConfirmation, setShowConfirmation] = useState(false);
+
+  const sampleData = {
+    name: id,
+    created: created,
+    owner: "owner", // To Do: implement owner specification
+    projects: projects,
+    origin: origin,
+    storage: {},  // To Do: implement storage
+    associations: {
+      origins: [],  // To Do: implement multiple origins
+      products: products,
+    },
+    parameters: []  // To Do: implement parameters
+  };
 
   useEffect(() => {
     const parameters = getData(`/parameters`);
@@ -175,7 +191,11 @@ export const Parameters = ({}) => {
           </Box>
           <Box direction="row" justify="between" fill>
             <Button type="submit" label="Go Back" onClick={() => setShowConfirmation(false)}/>
-            <Button type="submit" label="Confirm" icon={<Checkmark />} reverse primary />
+            <Button type="submit" label="Confirm" icon={<Checkmark />} reverse primary onClick={() => {
+              // Create new parameters
+              // Push the data and parameters
+              pushData(`/samples/add`, sampleData).then(() => navigate("/samples"));
+            }} />
           </Box>
         </Box>
       </Layer>

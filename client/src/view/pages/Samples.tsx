@@ -2,6 +2,7 @@ import { Box, Button, Heading, Spinner, Table, TableBody, TableCell, TableHeader
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getData } from "src/lib/database/getData";
+import { SampleStruct } from "types";
 import ErrorLayer from "../components/ErrorLayer";
 
 const Samples = () => {

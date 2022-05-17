@@ -15,6 +15,7 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getData } from "src/lib/database/getData";
 import ErrorLayer from "src/view/components/ErrorLayer";
+import { Create, ProjectStruct, SampleStruct } from "types";
 
 export const Associations = ({}) => {
   const navigate = useNavigate();

@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 
 import { useNavigate } from "react-router-dom";
 import { getData } from "src/lib/database/getData";
+import { LinkyProps, ParameterStruct, ProjectStruct, SampleStruct } from "types";
 import ErrorLayer from "../ErrorLayer";
 
 const Linky = (props: LinkyProps) => {

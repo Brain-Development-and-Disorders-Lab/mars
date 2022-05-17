@@ -15,7 +15,7 @@ declare namespace Create {
   };
 }
 
-declare type ParameterStruct = {
+export type ParameterStruct = {
   _id: string;
   name: string;
   description: string;
@@ -39,7 +39,7 @@ declare type ParameterProps = {
   };
 }
 
-declare type ProjectStruct = {
+export type ProjectStruct = {
   _id: string;
   name: string;
   description: string;
@@ -49,7 +49,7 @@ declare type ProjectStruct = {
   };
 }
 
-declare type SampleStruct = {
+export type SampleStruct = {
   _id: string;
   name: string;
   created: string;

@@ -1,4 +1,7 @@
 import express from "express";
+
+// Import types from the client
+import { SampleStruct } from "../../../client/types";
  
 // 'samplesRoute' is an instance of the express router.
 // We use it to define our routes.
@@ -39,18 +42,24 @@ samplesRoute.route("/samples/:id").get(function (req: { params: { id: any; }; },
 });
  
 // This section will help you create a new record.
-// sampleRoutes.route("/sample/add").post(function (req: { body: { name: any; position: any; level: any; }; }, response: { json: (arg0: any) => void; }) {
-//  let db_connect = dbo.getDb();
-//  let myobj = {
-//    name: req.body.name,
-//    position: req.body.position,
-//    level: req.body.level,
-//  };
-//  db_connect.collection("records").insertOne(myobj, function (err, res) {
-//    if (err) throw err;
-//    response.json(res);
-//  });
-// });
+samplesRoute.route("/samples/add").post(function (req: { body: SampleStruct; }, response: { json: (arg0: any) => void; }) {
+  let _connect = connection.getDatabase();
+  let data = {
+    name: req.body.name,
+    created: req.body.created,
+    owner: req.body.owner,
+    projects: req.body.projects,
+    origin: req.body.origin,
+    storage: req.body.storage,
+    assocations: req.body.associations,
+    parameters: req.body.parameters,
+  };
+
+  _connect.collection("samples").insertOne(data, function (err: any, res: any) {
+    if (err) throw err;
+    response.json(res);
+  });
+});
  
 // This section will help you update a record by id.
 // recordRoutes.route("/update/:id").post(function (req, response) {

@@ -17,6 +17,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { getData } from "src/lib/database/getData";
 import { pseudoId } from "src/lib/functions";
 import ErrorLayer from "src/view/components/ErrorLayer";
+import { Create, ProjectStruct } from "types";
 
 export const Start = ({}) => {
   const navigate = useNavigate();

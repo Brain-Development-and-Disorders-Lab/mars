@@ -3,6 +3,7 @@ import { Anchor, Box, Heading, Spinner, Table, TableBody, TableCell, TableHeader
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getData } from "src/lib/database/getData";
+import { SampleStruct } from "types";
 import ErrorLayer from "../components/ErrorLayer";
 
 export const Sample = () => {
