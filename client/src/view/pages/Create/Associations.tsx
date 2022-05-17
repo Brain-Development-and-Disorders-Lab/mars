@@ -6,12 +6,15 @@ import {
   FormField,
   Heading,
   Select,
+  Spinner,
   Tag,
+  Text,
 } from "grommet";
-import { LinkNext, LinkPrevious } from "grommet-icons";
+import { Layer, LinkNext, LinkPrevious } from "grommet-icons";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { getData } from "src/lib/database/getData";
 
 export const Associations = ({}) => {
   const navigate = useNavigate();
@@ -22,8 +25,13 @@ export const Associations = ({}) => {
   
   // Setup state data
   const [projects, setProjects] = useState([] as string[]);
-  const [parent, setParent] = useState("");
-  const [children, setChildren] = useState([] as string[]);
+  const [parent, setParent] = useState({name: "", id: ""});
+  const [children, setChildren] = useState([] as {name: string, id: string}[]);
+
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [isError, setIsError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("An error has occurred.");
+  const [sampleData, setSampleData] = useState([] as SampleStruct[]);
 
   const associationState: Create.Associations = {
     id: id,
@@ -33,14 +41,35 @@ export const Associations = ({}) => {
     projects: projects,
   }
 
-  // Parent field
-  const allParentData = [
-    {id: "312635e76a76", customId: "d_2l3nP"},
-    {id: "362ba72e76a7", customId: "c_3n2_pd"},
-    {id: "a62ba72635e3", customId: "20190_203"},
-  ];
+  let errorBody = (
+    <Box margin="small" pad="small" justify="center" align="center" direction="column" gap="small">
+      <Heading margin="small" color="red">Error!</Heading>
+      <Text><b>Message:</b> {errorMessage}</Text>
+      <Button label="Return" icon={<LinkNext />} onClick={() => navigate("/")} primary reverse />
+    </Box>
+  );
+
+  useEffect(() => {
+    const response = getData(`/samples`);
+
+    // Handle the response from the database
+    response.then((value) => {
+      setSampleData(value);
+
+      // Check the contents of the response
+      if (value["error"] !== undefined) {
+        setErrorMessage(value["error"]);
+        setIsError(true);
+      }
+
+      setIsLoaded(true);
+    });
+    return;
+  }, []);
 
   return (
+    <>
+    {isLoaded && isError === false ?
     <>
       <Box direction="row" justify="between" align="center">
         <Heading level="2">Configure Associations for "{id}"</Heading>
@@ -64,9 +93,13 @@ export const Associations = ({}) => {
 
               <FormField label="Linked Parent" name="parent" info="If the source of this sample currently exists or did exist in this system, specify that association here by searching for the parent sample.">
                 <Select
-                  options={allParentData.map((parent) => { return parent.customId })}
+                  options={sampleData.map((sample) => { return { name: sample.name, id: sample._id } })}
+                  labelKey="name"
                   value={parent}
-                  onChange={({ parent }) => setParent(parent)}
+                  valueKey="name"
+                  onChange={({ option }) => {
+                    setParent(option);
+                  }}
                   searchPlaceholder="Search..."
                   onSearch={() => {}}
                 />
@@ -75,8 +108,10 @@ export const Associations = ({}) => {
             <Box direction="column">
               <FormField label="Linked Children" name="children" info="If this sample has any derivatives or samples that have been created from it, specify those associations here by searching for the corresponding sample.">
                 <Select
-                  options={allParentData.map((parent) => { return parent.customId })}
+                  options={sampleData.map((sample) => { return { name: sample.name, id: sample._id } })}
+                  labelKey="name"
                   value={children}
+                  valueKey="name"
                   onChange={({ value }) => {
                     if (!children.includes(value)) {
                       setChildren([...children, value])
@@ -88,7 +123,7 @@ export const Associations = ({}) => {
               </FormField>
               <Box direction="column" gap="xsmall">
                 {children.map((child) => {
-                  return <Tag name="Child ID" value={child} key={child} onRemove={() => {
+                  return <Tag name="Child ID" value={child.name} key={child.name} onRemove={() => {
                     setChildren(children.filter((item) => {
                       return item !== child;
                     }))
@@ -105,6 +140,16 @@ export const Associations = ({}) => {
           </Box>
         </Form>
       </Box>
+    </>
+    :
+      <Box fill align="center" justify="center">
+        <Spinner size="large"/>
+      </Box>}
+    {isError &&
+      <Layer>
+        {errorBody}
+      </Layer>
+    }
     </>
   );
 };
