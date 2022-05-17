@@ -1,27 +1,18 @@
-import { Anchor, Box, Button, Heading, Layer, Spinner, Table, TableBody, TableCell, TableHeader, TableRow, Text } from "grommet";
-import { LinkNext } from "grommet-icons";
+import { Anchor, Box, Heading, Spinner, Table, TableBody, TableCell, TableHeader, TableRow } from "grommet";
 
 import React, { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { getData } from "src/lib/database/getData";
+import ErrorLayer from "../components/ErrorLayer";
 
 export const Sample = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
 
   const [isLoaded, setIsLoaded] = useState(false);
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("An error has occurred.");
 
   const [sampleData, setSampleData] = useState({} as SampleStruct);
-
-  let errorBody = (
-    <Box margin="small" pad="small" justify="center" align="center" direction="column" gap="small">
-      <Heading margin="small" color="red">Error!</Heading>
-      <Text><b>Message:</b> {errorMessage}</Text>
-      <Button label="Return" icon={<LinkNext />} onClick={() => navigate("/")} primary reverse />
-    </Box>
-  );
 
   useEffect(() => {
     const response = getData(`/samples/${id}`);
@@ -87,9 +78,7 @@ export const Sample = () => {
           <Spinner size="large"/>
         </Box>}
       {isError &&
-        <Layer>
-          {errorBody}
-        </Layer>
+        <ErrorLayer message={errorMessage} />
       }
     </>
   );

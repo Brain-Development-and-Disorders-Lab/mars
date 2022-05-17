@@ -5,10 +5,8 @@ import {
   Form,
   FormField,
   Heading,
-  Layer,
   Select,
   Spinner,
-  Text,
   TextArea,
   TextInput,
 } from "grommet";
@@ -18,6 +16,7 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getData } from "src/lib/database/getData";
 import { pseudoId } from "src/lib/functions";
+import ErrorLayer from "src/view/components/ErrorLayer";
 
 export const Start = ({}) => {
   const navigate = useNavigate();
@@ -47,14 +46,6 @@ export const Start = ({}) => {
     project: project,
     description: description,
   };
-
-  let errorBody = (
-    <Box margin="small" pad="small" justify="center" align="center" direction="column" gap="small">
-      <Heading margin="small" color="red">Error!</Heading>
-      <Text><b>Message:</b> {errorMessage}</Text>
-      <Button label="Return" icon={<LinkNext />} onClick={() => navigate("/")} primary reverse />
-    </Box>
-  );
 
   useEffect(() => {
     const projects = getData(`/projects`);
@@ -131,9 +122,7 @@ export const Start = ({}) => {
         <Spinner size="large"/>
       </Box>}
     {isError &&
-      <Layer>
-        {errorBody}
-      </Layer>
+      <ErrorLayer message={errorMessage} />
     }
     </>
   );

@@ -1,8 +1,8 @@
 import { Box, Button, Heading, Spinner, Table, TableBody, TableCell, TableHeader, TableRow, Text } from "grommet";
-import { Layer, LinkNext } from "grommet-icons";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getData } from "src/lib/database/getData";
+import ErrorLayer from "../components/ErrorLayer";
 
 const Samples = () => {
   const navigate = useNavigate();
@@ -11,14 +11,6 @@ const Samples = () => {
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("An error has occurred.");
   const [sampleData, setSampleData] = useState([] as SampleStruct[]);
-
-  let errorBody = (
-    <Box margin="small" pad="small" justify="center" align="center" direction="column" gap="small">
-      <Heading margin="small" color="red">Error!</Heading>
-      <Text><b>Message:</b> {errorMessage}</Text>
-      <Button label="Return" icon={<LinkNext />} onClick={() => navigate("/")} primary reverse />
-    </Box>
-  );
 
   useEffect(() => {
     const response = getData(`/samples`);
@@ -90,11 +82,9 @@ const Samples = () => {
       <Box fill align="center" justify="center">
         <Spinner size="large"/>
       </Box>}
-    {isError &&
-      <Layer>
-        {errorBody}
-      </Layer>
-    }
+      {isError &&
+        <ErrorLayer message={errorMessage} />
+      }
     </>
   );
 }

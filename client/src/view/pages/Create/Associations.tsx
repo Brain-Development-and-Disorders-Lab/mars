@@ -8,13 +8,13 @@ import {
   Select,
   Spinner,
   Tag,
-  Text,
 } from "grommet";
-import { Layer, LinkNext, LinkPrevious } from "grommet-icons";
+import { LinkNext, LinkPrevious } from "grommet-icons";
 
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getData } from "src/lib/database/getData";
+import ErrorLayer from "src/view/components/ErrorLayer";
 
 export const Associations = ({}) => {
   const navigate = useNavigate();
@@ -48,14 +48,6 @@ export const Associations = ({}) => {
     parent: parent.id,
     children: children.map((child) => { return child.id }),
   }
-
-  let errorBody = (
-    <Box margin="small" pad="small" justify="center" align="center" direction="column" gap="small">
-      <Heading margin="small" color="red">Error!</Heading>
-      <Text><b>Message:</b> {errorMessage}</Text>
-      <Button label="Return" icon={<LinkNext />} onClick={() => navigate("/")} primary reverse />
-    </Box>
-  );
 
   useEffect(() => {
     const samples = getData(`/samples`);
@@ -180,9 +172,7 @@ export const Associations = ({}) => {
         <Spinner size="large"/>
       </Box>}
     {isError &&
-      <Layer>
-        {errorBody}
-      </Layer>
+      <ErrorLayer message={errorMessage} />
     }
     </>
   );
