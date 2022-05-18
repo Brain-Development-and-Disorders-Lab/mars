@@ -62,11 +62,11 @@ const Parameter = (props: ParameterProps) => {
         />
       </Box>
       <Box direction="column" margin="small" gap="small" align="center" fill>
-        <Heading level="4" margin="xsmall">Attributes</Heading>
-        <Box width="small">
+        <Box  direction="row" align="center" >
+          <Heading level="4" margin="xsmall">Attributes</Heading>
           <Button
             icon={<Add />}
-            label="Create new parameter"
+            label="Create new attribute"
             primary
             onClick={() => {
               // Create a unique identifier
@@ -79,15 +79,15 @@ const Parameter = (props: ParameterProps) => {
                 ...attributes,
                 {
                   identifier: identifier,
-                  name: "Name",
+                  name: "",
                   type: "string",
-                  data: "...",
+                  data: "",
                 },
               ]);
             }}
           />
         </Box>
-        <Box direction="column" gap="small" margin="small">
+        <Box direction="column" gap="small" margin="small" fill>
           <AttributeGroup attributes={attributes}/>
         </Box>
       </Box>

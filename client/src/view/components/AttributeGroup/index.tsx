@@ -7,7 +7,7 @@ import Attribute from "../Attribute";
 
 const AttributeGroup = (props: AttributeGroupProps) => {
   return (
-    <Box gap="small">
+    <Box gap="small" align="center">
       {props.attributes.length > 0 ? (
         // Extract and return only components
         props.attributes.map((attribute) => {
