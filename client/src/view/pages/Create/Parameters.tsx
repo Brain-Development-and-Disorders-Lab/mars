@@ -77,88 +77,95 @@ export const Parameters = ({}) => {
   return (
     <>
     {isLoaded && isError === false ?
-    <>
-      <Heading level="2">Apply Parameters</Heading>
-      <Box margin="small">
+      <>
+        <Heading level="2">Apply Parameters</Heading>
+        <Box fill>
         <Form
           onChange={() => {}}
           onSubmit={() => {setShowConfirmation(true)}}
         >
-          <Box direction="row" margin="small" fill>
-            <Box direction="column" overflow="auto">
-              <FormField label="Existing Parameter" name="existing" info="If you have already created a parameter, you can search and add it here.">
-                <Select
-                  options={parameterOptions.map((parameter) => { return { name: parameter.name, id: parameter._id }})}
-                  labelKey="name"
-                  onChange={({ option }) => {
-                    // We need to get the existing parameter and insert it here
-                    getData(`/parameters/${option.id}`).then((value: ParameterStruct) => {
-                      setParameters([
-                        ...parameters,
-                        {
-                          key: `${value._id}_${parameters.length}`,
-                          name: value.name,
-                          description: value.description,
-                          type: value.type,
-                          attributes: value.attributes,
-                        }
-                      ])
-                    })
-                  }}
-                  searchPlaceholder="Search..."
-                  onSearch={(query) => {
-                    const escapedText = query.replace(/[-\\^$*+?.()|[\]{}]/g, '\\$&');
-                    const exp = new RegExp(escapedText, 'i');
-                    setParameterOptions(parameterData.filter((parameter) => exp.test(parameter.name)));
-                  }}
-                />
-              </FormField>
-
-              <Box direction="column" gap="small" margin="small">
-                {
-                  parameters.map((parameter) => {
-                    return (
-                      <Parameter
-                        key={parameter.key}
-                        name={parameter.name}
-                        description={parameter.description}
-                        type={parameter.type}
-                        attributes={parameter.attributes}
-                      />
-                    );
-                  })
-                }
-              </Box>
-
-              <Box justify="center" direction="row" >
-                <Button icon={<Add />} label="Create new parameter" primary onClick={() => {
-                  setParameters([
-                    ...parameters,
-                    {
-                      key: `${parameters.length}`,
-                      name: "",
-                      description: "",
-                      type: "data"
-                    }]);
-                }} />
-              </Box>
-            </Box>
+          <Heading level="3">Parameters</Heading>
+          <Box direction="column" gap="small" margin="small">
+            {parameters.length > 0 ?
+              parameters.map((parameter) => {
+                return (
+                  <Parameter
+                    key={parameter.key}
+                    name={parameter.name}
+                    description={parameter.description}
+                    type={parameter.type}
+                    attributes={parameter.attributes}
+                  />
+                );
+              })
+            :
+              <Text>No parameters have been added.</Text>
+            }
           </Box>
+
+          <Box justify="center" align="center" direction="row" gap="small">
+            <Box>
+              <Button icon={<Add />} label="Create new parameter" primary onClick={() => {
+                setParameters([
+                  ...parameters,
+                  {
+                    key: `${parameters.length}`,
+                    name: "",
+                    description: "",
+                    type: "data"
+                  }]);
+              }} />
+            </Box>
+
+            <Text>Or</Text>
+
+            <FormField label="Add existing parameter" name="existing" info="Search for and add an existing parameter.">
+              <Select
+                options={parameterOptions.map((parameter) => { return { name: parameter.name, id: parameter._id }})}
+                labelKey="name"
+                onChange={({ option }) => {
+                  // We need to get the existing parameter and insert it here
+                  getData(`/parameters/${option.id}`).then((value: ParameterStruct) => {
+                    setParameters([
+                      ...parameters,
+                      {
+                        key: `${value._id}_${parameters.length}`,
+                        name: value.name,
+                        description: value.description,
+                        type: value.type,
+                        attributes: value.attributes,
+                      }
+                    ])
+                  })
+                }}
+                searchPlaceholder="Search..."
+                onSearch={(query) => {
+                  const escapedText = query.replace(/[-\\^$*+?.()|[\]{}]/g, '\\$&');
+                  const exp = new RegExp(escapedText, 'i');
+                  setParameterOptions(parameterData.filter((parameter) => exp.test(parameter.name)));
+                }}
+              />
+            </FormField>
+          </Box>
+
           <Box direction="row" flex={false} justify="between">
             <Button label="Cancel" />
             <Button label="Back" icon={<LinkPrevious />} onClick={() => navigate("/create/associations")}/>
             <Button type="submit" label="Finish" icon={<Checkmark />} reverse primary />
           </Box>
         </Form>
-      </Box>
-    </>
+        </Box>
+      </>
     :
       <Box fill align="center" justify="center">
         <Spinner size="large"/>
-      </Box>}
+      </Box>
+    }
+
     {isError &&
       <ErrorLayer message={errorMessage} />
     }
+
     {showConfirmation &&
       <Layer>
         <Box width="large" direction="column" gap="small" margin="small" pad="medium" align="center">
@@ -197,6 +204,7 @@ export const Parameters = ({}) => {
               }
             </Box>
           </Box>
+
           <Box direction="row" justify="between" fill>
             <Button type="submit" label="Go Back" onClick={() => setShowConfirmation(false)}/>
             <Button type="submit" label="Confirm" icon={<Checkmark />} reverse primary onClick={() => {
