@@ -144,7 +144,7 @@ export const Parameters = ({}) => {
                           _id: identifier,
                           name: "",
                           description: "",
-                          type: "data",
+                          type: "physical",
                           attributes: [],
                         },
                       ]);

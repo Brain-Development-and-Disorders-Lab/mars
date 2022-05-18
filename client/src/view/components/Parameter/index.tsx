@@ -2,7 +2,6 @@ import {
   Box,
   Button,
   Heading,
-  Paragraph,
   Select,
   TextArea,
   TextInput,
@@ -10,16 +9,19 @@ import {
 import { Add, Save, SettingsOption, StatusDisabled } from "grommet-icons";
 
 import React, { useState } from "react";
-import { ParameterProps } from "types";
+import { AttributeProps, ParameterProps } from "types";
+import AttributeGroup from "../AttributeGroup";
 
-const validTypes = ["sample", "number", "data"];
+const validTypes = ["physical", "digital"];
+
 
 const Parameter = (props: ParameterProps) => {
   const [name, setName] = useState(props.name);
   const [type, setType] = useState(props.type);
   const [description, setDescription] = useState(props.description);
   const [finished, setFinished] = useState(false);
-
+  
+  const [attributes, setAttributes] = useState([] as AttributeProps[]);
   const parameterData: ParameterProps = {
     identifier: props.identifier,
     name: name,
@@ -60,17 +62,33 @@ const Parameter = (props: ParameterProps) => {
         />
       </Box>
       <Box direction="column" margin="small" gap="small" align="center" fill>
-        <Heading level="4" margin="xsmall">
-          Blocks
-        </Heading>
-        <Paragraph>Placeholder for the `block` system of attributes.</Paragraph>
+        <Heading level="4" margin="xsmall">Attributes</Heading>
         <Box width="small">
           <Button
             icon={<Add />}
-            label="Add block"
+            label="Create new parameter"
             primary
-            disabled={finished}
+            onClick={() => {
+              // Create a unique identifier
+              const identifier = `parameter_${Math.round(
+                performance.now()
+              )}`;
+
+              // Create an 'empty' parameter and add the data structure to the 'parameterData' collection
+              setAttributes([
+                ...attributes,
+                {
+                  identifier: identifier,
+                  name: "Name",
+                  type: "string",
+                  data: "...",
+                },
+              ]);
+            }}
           />
+        </Box>
+        <Box direction="column" gap="small" margin="small">
+          <AttributeGroup attributes={attributes}/>
         </Box>
       </Box>
       <Box direction="column" width="small" gap="small">

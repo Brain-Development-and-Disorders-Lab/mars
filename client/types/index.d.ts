@@ -25,12 +25,8 @@ declare namespace Create {
 export type ParameterStruct = {
   name: string;
   description: string;
-  type: "sample" | "number" | "data";
-  attributes?: {
-    name: string;
-    type: "number" | "file" | "url" | "string";
-    data: number | string;
-  }[];
+  type: "physical" | "digital";
+  attributes?: AttributeStruct[];
 };
 
 export type ParameterModel = ParameterStruct & {
@@ -82,6 +78,24 @@ export type SampleStruct = {
 
 export type SampleModel = SampleStruct & {
   _id: string;
+};
+
+export type AttributeStruct = {
+  name: string;
+  type: "number" | "file" | "url" | "date" | "string";
+  data: number | string;
+};
+
+export type AttributeProps = AttributeStruct & {
+  identifier: string;
+  dataCallback?: (data: AttributeProps) => void;
+  removeCallback?: (identifier: string) => void;
+};
+
+export type AttributeGroupProps = {
+  attributes: AttributeProps[];
+  onRemove?: (identifier: string) => void;
+  onDataUpdate?: (data: AttributeStruct) => void;
 };
 
 declare type LinkyProps = {
