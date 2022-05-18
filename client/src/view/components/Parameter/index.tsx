@@ -66,7 +66,6 @@ const Parameter = (props: ParameterProps) => {
           onClick={() => {
             setFinished(true);
             if (props.dataCallback) {
-              console.debug("Parameter data:", parameterData);
               props.dataCallback(parameterData);
             }
           }}

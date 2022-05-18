@@ -44,7 +44,7 @@ declare type ParameterProps = {
 }
 
 declare type ParameterGroupProps = {
-  parameters: {identifier: string, data: ParameterStruct}[];
+  parameters: ParameterModel[];
   onRemove?: (identifier: string) => void;
 }
 

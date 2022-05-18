@@ -10,14 +10,14 @@ const ParameterGroup = (props: ParameterGroupProps) => {
     <Box gap="small">
       {props.parameters.length > 0 ?
         // Extract and return only components
-        props.parameters.map((value) => {
+        props.parameters.map((parameter) => {
           return (
             <Parameter
-              key={value.identifier}
-              identifier={value.identifier}
-              name=""
-              description=""
-              type="data"
+              key={parameter._id}
+              identifier={parameter._id}
+              name={parameter.name}
+              description={parameter.description}
+              type={parameter.type}
               dataCallback={() => {}}
               removeCallback={props.onRemove}
             />

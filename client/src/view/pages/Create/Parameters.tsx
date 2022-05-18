@@ -32,7 +32,7 @@ export const Parameters = ({}) => {
   const { name, created, project, projects, description, owner, associations: { origin, products} } = state as Create.Associations;
 
   // Used to manage React components
-  const [parameters, setParameters] = useState([] as {identifier: string, data: ParameterModel}[]);
+  const [parameters, setParameters] = useState([] as ParameterModel[]);
 
   // Used for filtering selectable options
   const [parameterOptions, setParameterOptions] = useState([] as ParameterModel[]);
@@ -63,7 +63,6 @@ export const Parameters = ({}) => {
 
     // Handle the response from the database
     parameters.then((value) => {
-      console.debug(value);
       // setParameters(value);
       setParameterOptions(value);
       
@@ -85,12 +84,8 @@ export const Parameters = ({}) => {
 
   // Removal callback
   const removeCallback = (identifier: string) => {
-    console.debug("Identifier to remove:", identifier);
-    
     // We need to filter the removed parameter from the total collection
-    const newList = parameters.filter((parameter) => parameter.identifier !== identifier);
-    console.debug("Parameters (adjusted):", newList);
-    setParameters(newList);
+    setParameters(parameters.filter((parameter) => parameter._id !== identifier));
   };
 
   return (
@@ -117,14 +112,11 @@ export const Parameters = ({}) => {
                   setParameters([
                     ...parameters,
                     {
-                      identifier: identifier,
-                      data: {
-                        _id: "",
-                        name: "",
-                        description: "",
-                        type: "data",
-                        attributes: []
-                      }
+                      _id: identifier,
+                      name: "",
+                      description: "",
+                      type: "data",
+                      attributes: []
                     }
                   ]);
                 }} />
@@ -143,23 +135,20 @@ export const Parameters = ({}) => {
                       setParameters([
                         ...parameters,
                         {
-                          identifier: option.id,
-                          data: {
-                            _id: option.id,
-                            name: value.name,
-                            description: value.description,
-                            type: value.type,
-                            attributes: value.attributes,
-                          }
+                          _id: option.id,
+                          name: value.name,
+                          description: value.description,
+                          type: value.type,
+                          attributes: value.attributes,
                         }
-                      ])
+                      ]);
                     })
                   }}
                   searchPlaceholder="Search..."
                   onSearch={(query) => {
                     const escapedText = query.replace(/[-\\^$*+?.()|[\]{}]/g, '\\$&');
                     const exp = new RegExp(escapedText, 'i');
-                    setParameterOptions(parameters.filter((parameter) => exp.test(parameter.data.name)).map((parameter) => { return parameter.data}));
+                    setParameterOptions(parameters.filter((parameter) => exp.test(parameter.name)));
                   }}
                 />
               </FormField>
@@ -221,7 +210,7 @@ export const Parameters = ({}) => {
                 <Text><b>Parameters:</b> {parameters.map((parameter) => {
                   return (
                     <>
-                      <Tag name={parameter.data.name} value={parameter.data.name} />
+                      <Tag name={parameter.name} value={parameter.name} />
                     </>
                   );
                 })}</Text>
@@ -234,7 +223,6 @@ export const Parameters = ({}) => {
             <Button type="submit" label="Confirm" icon={<Checkmark />} reverse primary onClick={() => {
               // Create new parameters
               // Push the data and parameters
-              console.debug(`Sample data:`, sampleData);
               pushData(`/samples/add`, sampleData).then(() => navigate("/samples"));
             }} />
           </Box>

@@ -3,5 +3,10 @@
   "name": "Box File",
   "description": "A link to a file stored on Box.",
   "type": "data",
-  "attributes": []
+  "attributes": [
+    {
+      "name": "URL",
+      "value": "box.wustl.edu"
+    }
+  ]
 }
