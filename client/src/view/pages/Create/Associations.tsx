@@ -37,8 +37,8 @@ export const Associations = ({}) => {
   const [sampleData, setSampleData] = useState([] as SampleStruct[]);
 
   // Options for Select element drop-down menu
-  const [originOptions, setOriginOptions] = useState([] as {name: string, id: string}[]);
-  const [productOptions, setProductOptions] = useState([] as {name: string, id: string}[]);
+  const [originOptions, setOriginOptions] = useState([] as {name: string, id?: string}[]);
+  const [productOptions, setProductOptions] = useState([] as {name: string, id?: string}[]);
 
   const associationState: Create.Associations = {
     name: name,

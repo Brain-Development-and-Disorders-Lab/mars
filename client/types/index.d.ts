@@ -23,7 +23,7 @@ declare namespace Create {
 }
 
 export type ParameterStruct = {
-  _id: string;
+  _id?: string;
   name: string;
   description: string;
   type: "sample" | "number" | "data";
@@ -31,15 +31,14 @@ export type ParameterStruct = {
 };
 
 declare type ParameterProps = {
-  key: string;
   name: string;
   description: string;
-  type?: "sample" | "number" | "data";
+  type: "sample" | "number" | "data";
   attributes?: { name: string; data: number | string }[];
 }
 
 export type ProjectStruct = {
-  _id: string;
+  _id?: string;
   name: string;
   description: string;
   attributes: string[];
@@ -49,7 +48,7 @@ export type ProjectStruct = {
 }
 
 export type SampleStruct = {
-  _id: string;
+  _id?: string;
   name: string;
   created: string;
   owner: string;
