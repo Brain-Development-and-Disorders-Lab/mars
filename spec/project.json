@@ -1,7 +1,7 @@
 {
-  "id": "project_a",
-  "name": "Project Name",
-  "description": "",
+  "id": "project_1",
+  "name": "Example Project",
+  "description": "This is an example project that is used as a template for testing.",
   "attributes": [],
   "associations": {
     "samples": []
