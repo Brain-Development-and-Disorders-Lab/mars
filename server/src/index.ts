@@ -5,7 +5,7 @@ import express from "express";
 import cors from "cors";
 
 // Get the connection functions
-import connection from "./lib/connection";
+import { run } from "./lib/connection";
 
 // Routes
 import samplesRoute from "./routes/samples";
@@ -23,7 +23,7 @@ app.use(samplesRoute, projectsRoute, parametersRoute);
 // Start the server
 app.listen(port, () => {
   // Connect to the database when the server starts
-  connection.connectToServer(function (err: any) {
+  run(function (err: any) {
     if (err) console.error(err);
   });
   console.log(`Server is running on port: ${port}`);

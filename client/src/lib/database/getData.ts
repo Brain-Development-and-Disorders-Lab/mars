@@ -29,4 +29,4 @@ export const getData = async (path: string): Promise<any> => {
 
   consola.success("Successful database query");
   return record;
-}
+};

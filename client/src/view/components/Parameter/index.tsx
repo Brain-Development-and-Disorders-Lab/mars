@@ -1,4 +1,12 @@
-import { Box, Button, Heading, Paragraph, Select, TextArea, TextInput } from "grommet";
+import {
+  Box,
+  Button,
+  Heading,
+  Paragraph,
+  Select,
+  TextArea,
+  TextInput,
+} from "grommet";
 import { Add, Save, SettingsOption, StatusDisabled } from "grommet-icons";
 
 import React, { useState } from "react";
@@ -20,7 +28,14 @@ const Parameter = (props: ParameterProps) => {
   };
 
   return (
-    <Box direction="row" align="center" gap="small" pad="small" background="light-1" round>
+    <Box
+      direction="row"
+      align="center"
+      gap="small"
+      pad="small"
+      background="light-1"
+      round
+    >
       <SettingsOption />
       <Box direction="column" margin="small" gap="small" width="medium">
         <TextInput
@@ -45,10 +60,10 @@ const Parameter = (props: ParameterProps) => {
         />
       </Box>
       <Box direction="column" margin="small" gap="small" align="center" fill>
-        <Heading level="4" margin="xsmall">Blocks</Heading>
-        <Paragraph>
-          Placeholder for the `block` system of attributes.
-        </Paragraph>
+        <Heading level="4" margin="xsmall">
+          Blocks
+        </Heading>
+        <Paragraph>Placeholder for the `block` system of attributes.</Paragraph>
         <Box width="small">
           <Button
             icon={<Add />}

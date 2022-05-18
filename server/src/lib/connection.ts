@@ -1,24 +1,21 @@
-import { Callback, MongoClient } from "mongodb";
+import { Callback, Db, MongoClient } from "mongodb";
 
 // Get the connection string from the environment variables
 const CONNECTION_STRING = process.env.CONNECTION_STRING as string;
 
 const client: MongoClient = new MongoClient(CONNECTION_STRING, {});
-let _db: any;
+let database: Db;
 
-export default {
-  connectToServer: (callback: any) => {
-    client.connect((err: any, database: any): Callback<MongoClient> => {
-      // Verify we got a good database
-      if (database) {
-        _db = database.db("flow");
-        console.log("Successfully connected to MongoDB."); 
-      }
-      return callback(err);
-    });
-  },
+export const run = (callback: any) => {
+  client.connect((error: any, result: any): Callback<MongoClient> => {
+    if (result) {
+      database = result.db("flow");
+      console.log("Successfully connected to MongoDB.");
+    }
+    return callback(error);
+  });
+};
 
-  getDatabase: () => {
-    return _db;
-  },
+export const getDatabase = (): Db => {
+  return database;
 };

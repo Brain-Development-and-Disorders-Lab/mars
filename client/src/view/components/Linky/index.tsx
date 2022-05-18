@@ -3,7 +3,12 @@ import React, { useEffect, useState } from "react";
 
 import { useNavigate } from "react-router-dom";
 import { getData } from "src/lib/database/getData";
-import { LinkyProps, ParameterStruct, ProjectStruct, SampleStruct } from "types";
+import {
+  LinkyProps,
+  ParameterStruct,
+  ProjectStruct,
+  SampleStruct,
+} from "types";
 import ErrorLayer from "../ErrorLayer";
 
 const Linky = (props: LinkyProps) => {
@@ -11,7 +16,9 @@ const Linky = (props: LinkyProps) => {
 
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("An error has occurred.");
-  const [linkData, setLinkData] = useState({} as ParameterStruct | ProjectStruct | SampleStruct);
+  const [linkData, setLinkData] = useState(
+    {} as ParameterStruct | ProjectStruct | SampleStruct
+  );
 
   useEffect(() => {
     const data = getData(`/${props.type}/${props.id}`);
@@ -37,11 +44,9 @@ const Linky = (props: LinkyProps) => {
         onClick={() => navigate(`/${props.type}/${props.id}`)}
         margin={{ left: "small", right: "small" }}
       />
-      {isError &&
-        <ErrorLayer message={errorMessage} />
-      }
+      {isError && <ErrorLayer message={errorMessage} />}
     </>
   );
-}
+};
 
 export default Linky;

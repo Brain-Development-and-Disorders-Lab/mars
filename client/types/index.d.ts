@@ -5,21 +5,21 @@ declare namespace Create {
     name: string;
     created: string;
     owner: string;
-    project: {name: string, id: string};
+    project: { name: string; id: string };
     description: string;
   };
 
   type Associations = Start & {
-    projects: {name: string, id: string}[];
+    projects: { name: string; id: string }[];
     associations: {
-      origin: {name: string, id: string};
-      products: {name: string, id: string}[];
+      origin: { name: string; id: string };
+      products: { name: string; id: string }[];
     };
   };
 
   type Parameters = Associations & {
     parameters: ParameterProps[];
-  }
+  };
 }
 
 export type ParameterStruct = {
@@ -41,13 +41,13 @@ declare type ParameterProps = {
   attributes?: { name: string; data: number | string }[];
   dataCallback?: (data: ParameterProps) => void;
   removeCallback?: (identifier: string) => void;
-}
+};
 
 declare type ParameterGroupProps = {
   parameters: ParameterModel[];
   onRemove?: (identifier: string) => void;
   onDataUpdate?: (data: ParameterProps) => void;
-}
+};
 
 export type ProjectStruct = {
   name: string;
@@ -56,35 +56,31 @@ export type ProjectStruct = {
   associations: {
     samples: string[];
   };
-}
+};
 
 export type ProjectModel = ProjectStruct & {
   _id: string;
-}
+};
 
 export type SampleStruct = {
   name: string;
   created: string;
   owner: string;
-  project: {name: string, id: string};
+  project: { name: string; id: string };
   description: string;
-  projects: {name: string, id: string}[];
-  storage: {
-    types: string[];
-    data: { type: string, location: string }[];
-  };
+  projects: { name: string; id: string }[];
   associations: {
-    origin: {name: string, id: string};
-    products: {name: string, id: string}[];
+    origin: { name: string; id: string };
+    products: { name: string; id: string }[];
   };
   parameters: string[];
-}
+};
 
 export type SampleModel = SampleStruct & {
   _id: string;
-}
+};
 
 declare type LinkyProps = {
   type: "samples" | "projects" | "parameters";
   id: string;
-}
+};

@@ -25,11 +25,20 @@ export const Start = ({}) => {
   // Extract prior state and apply
   const { state } = useLocation();
 
-  const initialName = state === null ? pseudoId() : (state as Create.Associations).name;
-  const initialCreated = state === null ? new Date().toISOString() : (state as Create.Associations).created;
-  const initialOwner = state === null ? "" : (state as Create.Associations).owner;
-  const initialProject = state === null ? {name: "", id: ""} : (state as Create.Associations).project;
-  const initialDescription = state === null ? "" : (state as Create.Associations).description;
+  const initialName =
+    state === null ? pseudoId() : (state as Create.Associations).name;
+  const initialCreated =
+    state === null
+      ? new Date().toISOString()
+      : (state as Create.Associations).created;
+  const initialOwner =
+    state === null ? "" : (state as Create.Associations).owner;
+  const initialProject =
+    state === null
+      ? { name: "", id: "" }
+      : (state as Create.Associations).project;
+  const initialDescription =
+    state === null ? "" : (state as Create.Associations).description;
 
   const [name, setName] = useState(initialName);
   const [created, setCreated] = useState(initialCreated);
@@ -57,7 +66,7 @@ export const Start = ({}) => {
     // Handle the response from the database
     projects.then((value) => {
       setProjectData(value);
-      
+
       // Check the contents of the response
       if (value["error"] !== undefined) {
         setErrorMessage(value["error"]);
@@ -69,78 +78,102 @@ export const Start = ({}) => {
     return;
   }, []);
 
-
   return (
     <>
-    {isLoaded && isError === false ?
-      <>
-        <Heading level="2">Create a Sample</Heading>
-        <Box width="large" fill>
-          <Form
-            onChange={() => {}}
-            onReset={() => {}}
-            onSubmit={() => {
-              navigate("/create/associations", { state: startState});
-            }}
-          >
-            <Box direction="row" justify="between">
-              <FormField label="Name" name="name" info="A standardised name or ID for the sample.">
-                <TextInput
+      {isLoaded && isError === false ? (
+        <>
+          <Heading level="2">Create a Sample</Heading>
+          <Box width="large" fill>
+            <Form
+              onChange={() => {}}
+              onReset={() => {}}
+              onSubmit={() => {
+                navigate("/create/associations", { state: startState });
+              }}
+            >
+              <Box direction="row" justify="between">
+                <FormField
+                  label="Name"
                   name="name"
-                  value={name}
-                  onChange={(event) => setName(event.target.value)}
-                />
-              </FormField>
-              <FormField label="Owner" name="owner" info="Owner of the sample.">
-                <TextInput
+                  info="A standardised name or ID for the sample."
+                >
+                  <TextInput
+                    name="name"
+                    value={name}
+                    onChange={(event) => setName(event.target.value)}
+                  />
+                </FormField>
+                <FormField
+                  label="Owner"
                   name="owner"
-                  value={owner}
-                  onChange={(event) => setOwner(event.target.value)}
+                  info="Owner of the sample."
+                >
+                  <TextInput
+                    name="owner"
+                    value={owner}
+                    onChange={(event) => setOwner(event.target.value)}
+                  />
+                </FormField>
+                <FormField
+                  label="Created"
+                  name="created"
+                  info="Date the sample was created."
+                >
+                  <DateInput
+                    format="mm/dd/yyyy"
+                    value={created}
+                    onChange={({ value }) => setCreated(value.toString())}
+                  />
+                </FormField>
+              </Box>
+
+              <FormField
+                label="Project"
+                name="project"
+                info="Select the primary project that this sample should be associated with. Additional projects can be specified as an Association."
+              >
+                <Select
+                  options={projectData.map((project) => {
+                    return { name: project.name, id: project._id };
+                  })}
+                  value={project}
+                  valueKey="name"
+                  labelKey="name"
+                  onChange={({ option }) => {
+                    setProject(option);
+                  }}
                 />
               </FormField>
-              <FormField label="Created" name="created" info="Date the sample was created.">
-                <DateInput
-                  format="mm/dd/yyyy"
-                  value={created}
-                  onChange={({ value }) => setCreated(value.toString())}
+
+              <FormField
+                label="Description"
+                name="description"
+                info="A brief description of the new sample. Most details should be inputted as Parameters."
+              >
+                <TextArea
+                  value={description}
+                  onChange={(event) => setDescription(event.target.value)}
                 />
               </FormField>
-            </Box>
-
-            <FormField label="Project" name="project" info="Select the primary project that this sample should be associated with. Additional projects can be specified as an Association.">
-              <Select
-                options={projectData.map((project) => {
-                  return { name: project.name, id: project._id };
-                })}
-                value={project}
-                valueKey="name"
-                labelKey="name"
-                onChange={({ option }) => {
-                  setProject(option);
-                }}
-              />
-            </FormField>
-
-            <FormField label="Description" name="description" info="A brief description of the new sample. Most details should be inputted as Parameters.">
-              <TextArea
-                value={description}
-                onChange={(event) => setDescription(event.target.value)}
-              />
-            </FormField>
-            <Box direction="row" flex={false} justify="between">
-              <Button label="Cancel" onClick={() => navigate("/")}/>
-              <Button type="submit" label="Continue" icon={<LinkNext />} reverse primary />
-            </Box>
-          </Form>
+              <Box direction="row" flex={false} justify="between">
+                <Button label="Cancel" onClick={() => navigate("/")} />
+                <Button
+                  type="submit"
+                  label="Continue"
+                  icon={<LinkNext />}
+                  reverse
+                  primary
+                />
+              </Box>
+            </Form>
+          </Box>
+        </>
+      ) : (
+        <Box fill align="center" justify="center">
+          <Spinner size="large" />
         </Box>
-      </>
-    :
-      <Box fill align="center" justify="center">
-        <Spinner size="large"/>
-      </Box>}
-    {isError &&
-      <ErrorLayer message={errorMessage} />
-    }
+      )}
+      {isError && <ErrorLayer message={errorMessage} />}
     </>
   );
 };

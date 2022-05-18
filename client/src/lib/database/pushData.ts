@@ -14,12 +14,11 @@ export const pushData = async (path: string, data: any): Promise<any> => {
       "Content-Type": "application/json",
     },
     body: JSON.stringify(data),
-  })
-  .catch(error => {
+  }).catch((error) => {
     consola.error("Error when pushing data");
     return {
       error: error,
     };
   });
   return;
-}
+};

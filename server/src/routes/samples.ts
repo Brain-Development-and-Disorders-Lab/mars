@@ -1,95 +1,132 @@
 import express from "express";
+import { ObjectId } from "mongodb";
 
-// Import types from the client
-import { SampleStruct } from "../../../client/types";
- 
-// 'samplesRoute' is an instance of the express router.
-// We use it to define our routes.
-// The router will be added as a middleware and will take control of requests starting with path /record.
+// Import types from the client to enforce structure
+import { SampleModel, SampleStruct } from "../../../client/types";
+
+// Utility functions
+import { getDatabase } from "../lib/connection";
+
 const samplesRoute = express.Router();
- 
-// This will help us connect to the database
-import connection from "../lib/connection";
- 
-// This help convert the id from string to ObjectId for the _id.
-const ObjectId = require("mongodb").ObjectId;
- 
- 
-// This section will help you get a list of all the records.
-samplesRoute.route("/samples").get(function (req: any, res: any) {
-  let _connect = connection.getDatabase();
-  _connect
-    .collection("samples")
+
+// Constants
+const SAMPLES_COLLECTION = "samples";
+
+samplesRoute.route("/samples").get((req: any, res: any) => {
+  const database = getDatabase();
+  database
+    .collection(SAMPLES_COLLECTION)
     .find({})
-    .toArray(function (err: any, result: any) {
-      if (err) throw err;
-      res.json(result);
-    });
-});
- 
-// This section will help you get a single record by id
-samplesRoute.route("/samples/:id").get(function (req: { params: { id: any; }; }, res: { json: (arg0: any) => void; }) {
-  let _connect = connection.getDatabase();
-  let query = { _id: ObjectId( req.params.id )};
-  _connect.collection("samples")
-    .findOne(query, function (err: any, result: any) {
-      if (err) {
-        throw err;
+    .toArray((error: any, result: any) => {
+      if (error) {
+        throw error;
       }
-
       res.json(result);
     });
 });
- 
+
+samplesRoute.route("/samples/:id").get((req: any, res: any) => {
+  const database = getDatabase();
+  const query = { _id: new ObjectId(req.params.id) };
+
+  database
+    .collection(SAMPLES_COLLECTION)
+    .findOne(query, (error: any, result: any) => {
+      if (error) {
+        throw error;
+      }
+      res.json(result);
+    });
+});
+
 // This section will help you create a new record.
-samplesRoute.route("/samples/add").post(function (req: { body: SampleStruct; }, response: { json: (arg0: any) => void; }) {
-  let _connect = connection.getDatabase();
-  let data = {
-    name: req.body.name,
-    created: req.body.created,
-    owner: req.body.owner,
-    project: req.body.project,
-    description: req.body.description,
-    projects: req.body.projects,
-    storage: req.body.storage,
-    associations: {
-      origin: req.body.associations.origin,
-      products: req.body.associations.products,
-    },
-    parameters: req.body.parameters,
-  };
+samplesRoute
+  .route("/samples/add")
+  .post((req: { body: SampleStruct }, response: any) => {
+    const database = getDatabase();
+    let data = {
+      name: req.body.name,
+      created: req.body.created,
+      owner: req.body.owner,
+      project: req.body.project,
+      description: req.body.description,
+      projects: req.body.projects,
+      associations: {
+        origin: req.body.associations.origin,
+        products: req.body.associations.products,
+      },
+      parameters: req.body.parameters,
+    };
 
-  _connect.collection("samples").insertOne(data, function (err: any, res: any) {
-    if (err) throw err;
-    response.json(res);
-  });
-});
- 
-// This section will help you update a record by id.
-// recordRoutes.route("/update/:id").post(function (req, response) {
-//  let db_connect = dbo.getDb(); 
-//  let myquery = { _id: ObjectId( req.params.id )}; 
-//  let newvalues = {   
-//    $set: {     
-//      name: req.body.name,    
-//      position: req.body.position,     
-//      level: req.body.level,   
-//    }, 
-//   }
-// });
- 
-// This section will help you delete a record
-samplesRoute.route("/:id").delete((req: { params: { id: any; }; }, response: { json: (arg0: any) => void; }) => {
-  let _connect = connection.getDatabase();
-  let query = { _id: ObjectId( req.params.id )};
-  _connect.collection("samples").deleteOne(query, function (err: any, obj: any) {
-    if (err) {
-      throw err;
+    // Insert the new sample
+    database
+      .collection(SAMPLES_COLLECTION)
+      .insertOne(data, (error: any, res: any) => {
+        if (error) {
+          throw error;
+        }
+        response.json(res);
+      });
+
+    // Retrieve the ID of the inserted sample
+    const insertedId = (data as SampleStruct & { _id: string })._id;
+
+    // We need to apply the associations that have been specified
+    if (data.associations.origin.name !== "") {
+      // Get the origin record's products list
+      const originQuery = { _id: new ObjectId(data.associations.origin.id) };
+
+      let origin: SampleModel;
+      database
+        .collection(SAMPLES_COLLECTION)
+        .findOne(originQuery, (error: any, result: any) => {
+          if (error) {
+            throw error;
+          }
+
+          origin = result;
+
+          // Update product record of the origin to include this sample as a product
+          const updatedValues = {
+            $set: {
+              associations: {
+                origin: {
+                  name: origin.associations.origin.name,
+                  id: origin.associations.origin.id,
+                },
+                products: [...origin.associations.products, insertedId],
+              },
+            },
+          };
+
+          database
+            .collection(SAMPLES_COLLECTION)
+            .updateOne(originQuery, updatedValues, (error: any, res: any) => {
+              if (error) {
+                throw error;
+              }
+            });
+        });
     }
-    console.log("1 sample deleted");
-
-    response.json(obj);
   });
-});
- 
+
+// This section will help you delete a record
+samplesRoute
+  .route("/:id")
+  .delete((req: { params: { id: any } }, response: any) => {
+    const database = getDatabase();
+
+    let query = { _id: new ObjectId(req.params.id) };
+    database
+      .collection(SAMPLES_COLLECTION)
+      .deleteOne(query, function (error: any, obj: any) {
+        if (error) {
+          throw error;
+        }
+        console.log("1 sample deleted");
+
+        response.json(obj);
+      });
+  });
+
 export default samplesRoute;

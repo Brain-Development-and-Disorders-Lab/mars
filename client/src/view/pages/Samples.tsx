@@ -1,9 +1,20 @@
-import { Box, Button, Heading, Spinner, Table, TableBody, TableCell, TableHeader, TableRow, Text } from "grommet";
+import {
+  Box,
+  Button,
+  Heading,
+  Spinner,
+  Table,
+  TableBody,
+  TableCell,
+  TableHeader,
+  TableRow,
+} from "grommet";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getData } from "src/lib/database/getData";
 import { SampleModel } from "types";
 import ErrorLayer from "../components/ErrorLayer";
+import Linky from "../components/Linky";
 
 const Samples = () => {
   const navigate = useNavigate();
@@ -33,61 +44,67 @@ const Samples = () => {
 
   return (
     <>
-    {isLoaded && isError === false ?
-      <>
-        <Heading>Samples</Heading>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableCell scope="col" border="bottom">
-                Name
-              </TableCell>
-              <TableCell scope="col" border="bottom">
-                Owner
-              </TableCell>
-              <TableCell scope="col" border="bottom">
-                Stored
-              </TableCell>
-              <TableCell scope="col" border="bottom">
-                Last Update
-              </TableCell>
-              <TableCell scope="col" border="bottom"></TableCell>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoaded && sampleData.map((value) => {
-              return (
-                <TableRow key={value._id}>
-                  <TableCell scope="row" border="right">
-                    <strong>{value.name}</strong>
-                  </TableCell>
-                  <TableCell>
-                    <strong>{value.owner}</strong>
-                  </TableCell>
-                  <TableCell>
-                    <Text>asdf</Text>
-                  </TableCell>
-                  <TableCell>
-                    <strong>Today</strong> at 14:17.43 by Henry
-                  </TableCell>
-                  <TableCell>
-                    <Button primary label="View" onClick={() => navigate(`/samples/${value._id}`)}/>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-      </>
-      :
-      <Box fill align="center" justify="center">
-        <Spinner size="large"/>
-      </Box>}
-      {isError &&
-        <ErrorLayer message={errorMessage} />
-      }
+      {isLoaded && isError === false ? (
+        <>
+          <Heading>Samples</Heading>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableCell scope="col" border="bottom" align="center">
+                  Identifier
+                </TableCell>
+                <TableCell scope="col" border="bottom" align="center">
+                  Created
+                </TableCell>
+                <TableCell scope="col" border="bottom" align="center">
+                  Owner
+                </TableCell>
+                <TableCell scope="col" border="bottom" align="center">
+                  Primary project
+                </TableCell>
+                <TableCell scope="col" border="bottom"></TableCell>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {isLoaded &&
+                sampleData.map((value) => {
+                  return (
+                    <TableRow key={value._id}>
+                      <TableCell scope="row" border="right" align="center">
+                        <strong>{value.name}</strong>
+                      </TableCell>
+                      <TableCell align="center">
+                        <strong>
+                          {new Date(value.created).toDateString()}
+                        </strong>
+                      </TableCell>
+                      <TableCell align="center">
+                        <strong>{value.owner}</strong>
+                      </TableCell>
+                      <TableCell border="right" align="center">
+                        <Linky type="projects" id={value.project.id} />
+                      </TableCell>
+                      <TableCell align="center">
+                        <Button
+                          primary
+                          label="Details"
+                          onClick={() => navigate(`/samples/${value._id}`)}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+            </TableBody>
+          </Table>
+        </>
+      ) : (
+        <Box fill align="center" justify="center">
+          <Spinner size="large" />
+        </Box>
+      )}
+      {isError && <ErrorLayer message={errorMessage} />}
     </>
   );
-}
+};
 
 export default Samples;

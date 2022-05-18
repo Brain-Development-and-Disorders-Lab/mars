@@ -8,7 +8,7 @@ import Parameter from "../Parameter";
 const ParameterGroup = (props: ParameterGroupProps) => {
   return (
     <Box gap="small">
-      {props.parameters.length > 0 ?
+      {props.parameters.length > 0 ? (
         // Extract and return only components
         props.parameters.map((parameter) => {
           return (
@@ -23,9 +23,9 @@ const ParameterGroup = (props: ParameterGroupProps) => {
             />
           );
         })
-      :
+      ) : (
         <Text>No parameters have been added yet.</Text>
-      }
+      )}
     </Box>
   );
 };

@@ -1,4 +1,16 @@
-import { Anchor, Box, Heading, Spinner, Table, TableBody, TableCell, TableHeader, TableRow } from "grommet";
+import {
+  Anchor,
+  Box,
+  Heading,
+  Paragraph,
+  Spinner,
+  Table,
+  TableBody,
+  TableCell,
+  TableHeader,
+  TableRow,
+  Text,
+} from "grommet";
 
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
@@ -36,104 +48,142 @@ export const Sample = () => {
 
   return (
     <>
-      {isLoaded && isError === false ?
+      {isLoaded && isError === false ? (
         <>
-          <Heading level="2" margin="small">Sample "{sampleData.name}"</Heading>
+          <Heading level="2" margin="small">
+            Sample "{sampleData.name}"
+          </Heading>
           <Box width="large" margin="small">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableCell scope="col" border="bottom">
-                    Field
+                  <TableCell scope="col" border align="center">
+                    <Heading level="3" margin="small">
+                      Field
+                    </Heading>
                   </TableCell>
-                  <TableCell scope="col" border="bottom">
-                    Value
+                  <TableCell scope="col" border align="center">
+                    <Heading level="3" margin="small">
+                      Value
+                    </Heading>
                   </TableCell>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 <TableRow>
-                  <TableCell scope="row">
-                    <strong>Created:</strong>
+                  <TableCell scope="row" align="right" border>
+                    <Heading level="4" margin="small">
+                      Created
+                    </Heading>
                   </TableCell>
-                  <TableCell>{new Date(sampleData.created).toDateString()}</TableCell>
+                  <TableCell border>
+                    <Text>{new Date(sampleData.created).toDateString()}</Text>
+                  </TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell scope="row">
-                    <strong>Owner:</strong>
+                  <TableCell scope="row" align="right" border>
+                    <Heading level="4" margin="small">
+                      Owner
+                    </Heading>
                   </TableCell>
-                  <TableCell><Anchor label={sampleData.owner} color="dark-2" /></TableCell>
+                  <TableCell border>
+                    <Text>
+                      <Anchor label={sampleData.owner} color="dark-2" />
+                    </Text>
+                  </TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell scope="row">
-                    <strong>Description:</strong>
+                  <TableCell scope="row" align="right" border>
+                    <Heading level="4" margin="small">
+                      Description:
+                    </Heading>
                   </TableCell>
-                  <TableCell><Anchor label={sampleData.description} color="dark-2" /></TableCell>
+                  <TableCell border>
+                    <Paragraph>{sampleData.description}</Paragraph>
+                  </TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell scope="row">
-                    <strong>Primary project:</strong>
+                  <TableCell scope="row" align="right" border>
+                    <Heading level="4" margin="small">
+                      Primary project
+                    </Heading>
                   </TableCell>
-                  <TableCell><Linky key={sampleData.project.id} type="projects" id={sampleData.project.id} /></TableCell>
+                  <TableCell border>
+                    <Linky
+                      key={sampleData.project.id}
+                      type="projects"
+                      id={sampleData.project.id}
+                    />
+                  </TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell scope="row">
-                    <strong>Associated projects:</strong>
+                  <TableCell scope="row" border align="right">
+                    <Heading level="4" margin="small">
+                      Associated projects
+                    </Heading>
                   </TableCell>
-                  <TableCell>
+                  <TableCell border>
                     {sampleData.projects.map((project) => {
                       return (
-                        <Linky key={project.id} type="projects" id={project.id} />
+                        <Linky
+                          key={project.id}
+                          type="projects"
+                          id={project.id}
+                        />
                       );
                     })}
                   </TableCell>
                 </TableRow>
 
-                {sampleData.associations.origin.name !== "" &&
+                {sampleData.associations.origin.name !== "" && (
                   <TableRow>
-                    <TableCell scope="row">
-                      <strong>Origin:</strong>
+                    <TableCell scope="row" border align="right">
+                      <Heading level="4" margin="small">
+                        Origin
+                      </Heading>
                     </TableCell>
-                    <TableCell><Linky key={sampleData.associations.origin.id} type="samples" id={sampleData.associations.origin.id} /></TableCell>
+                    <TableCell border>
+                      <Linky
+                        key={sampleData.associations.origin.id}
+                        type="samples"
+                        id={sampleData.associations.origin.id}
+                      />
+                    </TableCell>
                   </TableRow>
-                }
+                )}
 
-                {sampleData.storage.types &&
+                {sampleData.associations.products.length > 0 && (
                   <TableRow>
-                    <TableCell scope="row">
-                      <strong>Storage:</strong>
+                    <TableCell scope="row" border align="right">
+                      <Heading level="4" margin="small">
+                        Products
+                      </Heading>
                     </TableCell>
-                    <TableCell>{sampleData.storage.types}</TableCell>
-                  </TableRow>
-                }
-
-                {sampleData.associations.products.length > 0 &&
-                  <TableRow>
-                    <TableCell scope="row">
-                      <strong>Products:</strong>
-                    </TableCell>
-                    <TableCell>
+                    <TableCell border>
                       {sampleData.associations.products.map((product) => {
                         return (
-                          <Linky key={product.id} type="samples" id={product.id} />
+                          <Linky
+                            key={product.id}
+                            type="samples"
+                            id={product.id}
+                          />
                         );
                       })}
                     </TableCell>
                   </TableRow>
-                }
+                )}
               </TableBody>
             </Table>
           </Box>
         </>
-      :
+      ) : (
         <Box fill align="center" justify="center">
-          <Spinner size="large"/>
-        </Box>}
-      {isError &&
-        <ErrorLayer message={errorMessage} />
-      }
+          <Spinner size="large" />
+        </Box>
+      )}
+      {isError && <ErrorLayer message={errorMessage} />}
     </>
   );
-}
+};
 
 export default Sample;

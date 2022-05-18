@@ -1,4 +1,13 @@
-import { Button, Heading, Table, TableBody, TableCell, TableHeader, TableRow, Text } from "grommet";
+import {
+  Button,
+  Heading,
+  Table,
+  TableBody,
+  TableCell,
+  TableHeader,
+  TableRow,
+  Text,
+} from "grommet";
 import React, { Component } from "react";
 
 class Projects extends Component {
