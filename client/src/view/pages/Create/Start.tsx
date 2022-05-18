@@ -17,7 +17,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { getData } from "src/lib/database/getData";
 import { pseudoId } from "src/lib/functions";
 import ErrorLayer from "src/view/components/ErrorLayer";
-import { Create, ProjectStruct } from "types";
+import { Create, ProjectModel } from "types";
 
 export const Start = ({}) => {
   const navigate = useNavigate();
@@ -41,7 +41,7 @@ export const Start = ({}) => {
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("An error has occurred.");
 
-  const [projectData, setProjectData] = useState([] as ProjectStruct[]);
+  const [projectData, setProjectData] = useState([] as ProjectModel[]);
 
   const startState: Create.Start = {
     name: name,

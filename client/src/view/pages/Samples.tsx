@@ -2,7 +2,7 @@ import { Box, Button, Heading, Spinner, Table, TableBody, TableCell, TableHeader
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getData } from "src/lib/database/getData";
-import { SampleStruct } from "types";
+import { SampleModel } from "types";
 import ErrorLayer from "../components/ErrorLayer";
 
 const Samples = () => {
@@ -11,7 +11,7 @@ const Samples = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("An error has occurred.");
-  const [sampleData, setSampleData] = useState([] as SampleStruct[]);
+  const [sampleData, setSampleData] = useState([] as SampleModel[]);
 
   useEffect(() => {
     const response = getData(`/samples`);

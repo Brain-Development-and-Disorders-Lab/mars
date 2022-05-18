@@ -1,4 +1,5 @@
-import { Box, Form, FormField, Select, Text, TextArea, TextInput } from "grommet";
+import { Box, Button, Heading, Paragraph, Select, TextArea, TextInput } from "grommet";
+import { Add, Checkmark, SettingsOption, StatusDisabled } from "grommet-icons";
 
 import React, { useState } from "react";
 import { ParameterProps } from "types";
@@ -9,46 +10,82 @@ const Parameter = (props: ParameterProps) => {
   const [name, setName] = useState(props.name);
   const [type, setType] = useState(props.type);
   const [description, setDescription] = useState(props.description);
+  const [finished, setFinished] = useState(false);
 
   const parameterData: ParameterProps = {
+    identifier: props.identifier,
     name: name,
     type: type,
     description: description,
   };
-  console.debug("Parameter data:", parameterData);
 
   return (
-    <Form
-      onSubmit={() => {
-      }}
-    >
-      <FormField>
+    <Box direction="row" align="center" gap="small" pad="small" background="light-1" round>
+      <SettingsOption />
+      <Box direction="column" margin="small" gap="small" width="medium">
         <TextInput
           placeholder={"Parameter Name"}
           value={name}
           onChange={(event) => setName(event.target.value)}
+          disabled={finished}
         />
-      </FormField>
-      <FormField>
         <Select
           placeholder="Type"
           options={validTypes}
-          value={props.type}
+          value={type}
           width="auto"
           onChange={({ option }) => setType(option)}
+          disabled={finished}
         />
-      </FormField>
-      <FormField>
         <TextArea
           value={description}
+          placeholder={"Parameter description"}
           onChange={(event) => setDescription(event.target.value)}
+          disabled={finished}
         />
-      </FormField>
-      <Box direction="row" align="center" gap="small">
-        <Text>Parameter:</Text>
       </Box>
-    </Form>
-    
+      <Box direction="column" margin="small" gap="small" align="center" fill>
+        <Heading level="4" margin="xsmall">Blocks</Heading>
+        <Paragraph>
+          Placeholder for the `block` system of attributes.
+        </Paragraph>
+        <Box width="small">
+          <Button
+            icon={<Add />}
+            label="Add block"
+            primary
+            disabled={finished}
+          />
+        </Box>
+      </Box>
+      <Box direction="column" width="small" gap="small">
+        <Button
+          label="Apply"
+          color="green"
+          icon={<Checkmark />}
+          onClick={() => {
+            setFinished(true);
+            if (props.dataCallback) {
+              console.debug("Parameter data:", parameterData);
+              props.dataCallback(parameterData);
+            }
+          }}
+          reverse
+          disabled={finished}
+        />
+        <Button
+          color="red"
+          label="Remove"
+          onClick={() => {
+            if (props.removeCallback) {
+              props.removeCallback(props.identifier);
+            }
+          }}
+          icon={<StatusDisabled />}
+          reverse
+        />
+      </Box>
+    </Box>
   );
 };
 

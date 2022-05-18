@@ -15,7 +15,7 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getData } from "src/lib/database/getData";
 import ErrorLayer from "src/view/components/ErrorLayer";
-import { Create, ProjectStruct, SampleStruct } from "types";
+import { Create, ProjectModel, SampleModel } from "types";
 
 export const Associations = ({}) => {
   const navigate = useNavigate();
@@ -33,8 +33,8 @@ export const Associations = ({}) => {
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("An error has occurred.");
 
-  const [projectData, setProjectData] = useState([] as ProjectStruct[]);
-  const [sampleData, setSampleData] = useState([] as SampleStruct[]);
+  const [projectData, setProjectData] = useState([] as ProjectModel[]);
+  const [sampleData, setSampleData] = useState([] as SampleModel[]);
 
   // Options for Select element drop-down menu
   const [originOptions, setOriginOptions] = useState([] as {name: string, id?: string}[]);
@@ -59,8 +59,8 @@ export const Associations = ({}) => {
     // Handle the response from the database
     samples.then((value) => {
       setSampleData(value);
-      setProductOptions(value.map((e: SampleStruct) => { return { name: e.name, id: e._id } }))
-      setOriginOptions(value.map((e: SampleStruct) => { return { name: e.name, id: e._id } }))
+      setProductOptions(value.map((e: SampleModel) => { return { name: e.name, id: e._id } }))
+      setOriginOptions(value.map((e: SampleModel) => { return { name: e.name, id: e._id } }))
 
       // Check the contents of the response
       if (value["error"] !== undefined) {

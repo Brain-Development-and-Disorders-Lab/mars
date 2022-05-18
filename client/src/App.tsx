@@ -14,7 +14,6 @@ import {
   Catalog,
   FormClose,
   List,
-  Notification,
   Search,
   SettingsOption,
   User,
@@ -88,10 +87,9 @@ export const App = () => {
                   </Box>
                 </Box>
                 <Button
-                  icon={<Notification />}
+                  icon={<SettingsOption />}
                   onClick={() => setShowSidebar(!showSidebar)}
                 />
-                <Button icon={<SettingsOption />} />
                 <Avatar background="white">
                   <User color="black" />
                 </Avatar>

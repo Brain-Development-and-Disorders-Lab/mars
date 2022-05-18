@@ -23,22 +23,32 @@ declare namespace Create {
 }
 
 export type ParameterStruct = {
-  _id?: string;
   name: string;
   description: string;
   type: "sample" | "number" | "data";
   attributes: { name: string; data: number | string }[];
 };
 
+export type ParameterModel = ParameterStruct & {
+  _id: string;
+};
+
 declare type ParameterProps = {
+  identifier: string;
   name: string;
   description: string;
   type: "sample" | "number" | "data";
   attributes?: { name: string; data: number | string }[];
+  dataCallback?: (data: ParameterProps) => void;
+  removeCallback?: (identifier: string) => void;
+}
+
+declare type ParameterGroupProps = {
+  parameters: {identifier: string, data: ParameterStruct}[];
+  onRemove?: (identifier: string) => void;
 }
 
 export type ProjectStruct = {
-  _id?: string;
   name: string;
   description: string;
   attributes: string[];
@@ -47,8 +57,11 @@ export type ProjectStruct = {
   };
 }
 
+export type ProjectModel = ProjectStruct & {
+  _id: string;
+}
+
 export type SampleStruct = {
-  _id?: string;
   name: string;
   created: string;
   owner: string;
@@ -64,6 +77,10 @@ export type SampleStruct = {
     products: {name: string, id: string}[];
   };
   parameters: string[];
+}
+
+export type SampleModel = SampleStruct & {
+  _id: string;
 }
 
 declare type LinkyProps = {

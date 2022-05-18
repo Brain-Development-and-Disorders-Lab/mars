@@ -20,8 +20,9 @@ import ErrorLayer from "src/view/components/ErrorLayer";
 import Linky from "src/view/components/Linky";
 
 // Custom components
-import Parameter from "src/view/components/Parameter";
-import { Create, ParameterStruct } from "types";
+// import Parameter from "src/view/components/Parameter";
+import ParameterGroup from "src/view/components/ParameterGroup";
+import { Create, ParameterModel } from "types";
 
 export const Parameters = ({}) => {
   const navigate = useNavigate();
@@ -30,8 +31,11 @@ export const Parameters = ({}) => {
   const { state } = useLocation();
   const { name, created, project, projects, description, owner, associations: { origin, products} } = state as Create.Associations;
 
-  const [parameterData, setParameterData] = useState([] as ParameterStruct[]);
-  const [parameterOptions, setParameterOptions] = useState([] as ParameterStruct[]);
+  // Used to manage React components
+  const [parameters, setParameters] = useState([] as {identifier: string, data: ParameterModel}[]);
+
+  // Used for filtering selectable options
+  const [parameterOptions, setParameterOptions] = useState([] as ParameterModel[]);
 
   const [isLoaded, setIsLoaded] = useState(false);
   const [isError, setIsError] = useState(false);
@@ -51,7 +55,7 @@ export const Parameters = ({}) => {
       origin: origin,
       products: products,
     },
-    parameters: parameterData
+    // parameters: parameterData
   };
 
   useEffect(() => {
@@ -59,7 +63,8 @@ export const Parameters = ({}) => {
 
     // Handle the response from the database
     parameters.then((value) => {
-      setParameterData(value);
+      console.debug(value);
+      // setParameters(value);
       setParameterOptions(value);
       
       // Check the contents of the response
@@ -73,11 +78,26 @@ export const Parameters = ({}) => {
     return;
   }, []);
 
+  // Used to receive data from a Parameter component
+  // const dataCallback = (data: ParameterProps) => {
+  //   console.debug("Received data:", data);
+  // };
+
+  // Removal callback
+  const removeCallback = (identifier: string) => {
+    console.debug("Identifier to remove:", identifier);
+    
+    // We need to filter the removed parameter from the total collection
+    const newList = parameters.filter((parameter) => parameter.identifier !== identifier);
+    console.debug("Parameters (adjusted):", newList);
+    setParameters(newList);
+  };
+
   return (
     <>
     {isLoaded && isError === false ?
       <>
-        <Heading level="2">Apply Parameters</Heading>
+        <Heading level="2">Apply Parameters for "{name}"</Heading>
         <Box fill>
           <Form
             onChange={() => {}}
@@ -85,37 +105,28 @@ export const Parameters = ({}) => {
               setShowConfirmation(true);
             }}
           >
-            {/* Display all existing parameters */}
-            <Heading level="3">Parameters</Heading>
-            <Box direction="column" gap="small" margin="small">
-              {parameterData.length > 0 ?
-                parameterData.map((parameter) => {
-                  return (
-                    <Parameter
-                      name={parameter.name}
-                      description={parameter.description}
-                      type={parameter.type}
-                      attributes={parameter.attributes}
-                    />
-                  );
-                })
-              :
-                <Text>No parameters have been added.</Text>
-              }
-            </Box>
-
             {/* Field to create new parameters */}
             <Box justify="center" align="center" direction="row" gap="small">
               <Box>
                 <Button icon={<Add />} label="Create new parameter" primary onClick={() => {
-                  setParameterData([
-                    ...parameterData,
+                  // Create a unique identifier
+                  const identifier = `parameter_${Math.round(performance.now())}`;
+                  console.debug("Created new parameter with identifier:", identifier);
+
+                  // Create an 'empty' parameter and add the data structure to the 'parameterData' collection
+                  setParameters([
+                    ...parameters,
                     {
-                      name: "",
-                      description: "",
-                      type: "data",
-                      attributes: []
-                    }]);
+                      identifier: identifier,
+                      data: {
+                        _id: "",
+                        name: "",
+                        description: "",
+                        type: "data",
+                        attributes: []
+                      }
+                    }
+                  ]);
                 }} />
               </Box>
 
@@ -128,14 +139,18 @@ export const Parameters = ({}) => {
                   labelKey="name"
                   onChange={({ option }) => {
                     // We need to get the existing parameter and insert it here
-                    getData(`/parameters/${option.id}`).then((value: ParameterStruct) => {
-                      setParameterData([
-                        ...parameterData,
+                    getData(`/parameters/${option.id}`).then((value: ParameterModel) => {
+                      setParameters([
+                        ...parameters,
                         {
-                          name: value.name,
-                          description: value.description,
-                          type: value.type,
-                          attributes: value.attributes,
+                          identifier: option.id,
+                          data: {
+                            _id: option.id,
+                            name: value.name,
+                            description: value.description,
+                            type: value.type,
+                            attributes: value.attributes,
+                          }
                         }
                       ])
                     })
@@ -144,14 +159,20 @@ export const Parameters = ({}) => {
                   onSearch={(query) => {
                     const escapedText = query.replace(/[-\\^$*+?.()|[\]{}]/g, '\\$&');
                     const exp = new RegExp(escapedText, 'i');
-                    setParameterOptions(parameterData.filter((parameter) => exp.test(parameter.name)));
+                    setParameterOptions(parameters.filter((parameter) => exp.test(parameter.data.name)).map((parameter) => { return parameter.data}));
                   }}
                 />
               </FormField>
             </Box>
 
+            {/* Display all existing parameters */}
+            <Heading level="3">Parameter</Heading>
+            <Box direction="column" gap="small" margin="small">
+              <ParameterGroup parameters={parameters} onRemove={removeCallback} />
+            </Box>
+
             {/* Action buttons */}
-            <Box direction="row" flex={false} justify="between">
+            <Box direction="row" flex={false} justify="between" margin="medium">
               <Button label="Cancel" />
               <Button label="Back" icon={<LinkPrevious />} onClick={() => navigate("/create/associations")}/>
               <Button type="submit" label="Finish" icon={<Checkmark />} reverse primary />
@@ -196,11 +217,11 @@ export const Parameters = ({}) => {
                   );
                 })}</Text>
               }
-              {parameterData.length > 0 &&
-                <Text><b>Parameters:</b> {parameterData.map((parameter) => {
+              {parameters.length > 0 &&
+                <Text><b>Parameters:</b> {parameters.map((parameter) => {
                   return (
                     <>
-                      <Tag name={parameter.name} value={parameter.name} />
+                      <Tag name={parameter.data.name} value={parameter.data.name} />
                     </>
                   );
                 })}</Text>
