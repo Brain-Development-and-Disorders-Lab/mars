@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   Box,
   Button,
@@ -8,6 +8,7 @@ import {
   Layer,
   ResponsiveContext,
   Avatar,
+  Drop,
 } from "grommet";
 import {
   AddCircle,
@@ -45,6 +46,9 @@ import Samples from "./view/pages/Samples";
 export const App = () => {
   const [showSidebar, setShowSidebar] = useState(false);
 
+  const createRef = useRef(null);
+  const [createVisible, setCreateVisible] = useState(false);
+
   return (
     <BrowserRouter>
       <Grommet theme={theme} full>
@@ -67,16 +71,49 @@ export const App = () => {
                       <Link to="#">Search</Link>
                     </Heading>
                   </Box>
+                  <Box
+                    direction="row"
+                    gap="small"
+                  >
+                    <Button
+                      ref={createRef}
+                      onClick={() => setCreateVisible(!createVisible)}
+                      plain
+                    >
+                      <Box
+                        direction="row"
+                        gap="small"
+                      >
+                        <AddCircle />
+                        <Heading level="4" margin="none">Create</Heading>
+                      </Box>
+                    </Button>
+                    {createRef.current && createVisible &&
+                      <Drop
+                        align={{ top: 'bottom', left: 'left' }}
+                        target={createRef.current}
+                        elevation="large"
+                        margin={{ top: 'medium' }}
+                        style={{ position: "absolute" }}
+                      >
+                        <Box background="light-2" pad="small" direction="column" gap="small">
+                          <Heading level="4" margin="small">
+                            <Link to="/create/start" onClick={() => setCreateVisible(false)} >Sample</Link>
+                          </Heading>
+                          <Heading level="4" margin="small">
+                            <Link to="#" onClick={() => setCreateVisible(false)} >Project</Link>
+                          </Heading>
+                          <Heading level="4" margin="small">
+                            <Link to="#" onClick={() => setCreateVisible(false)} >Parameter</Link>
+                          </Heading>
+                        </Box>
+                      </Drop>
+                    }
+                  </Box>
                   <Box direction="row" gap="small">
                     <List />
                     <Heading level="4" margin="none">
                       <Link to="/projects">Projects</Link>
-                    </Heading>
-                  </Box>
-                  <Box direction="row" gap="small">
-                    <AddCircle />
-                    <Heading level="4" margin="none">
-                      <Link to="/create/start">Create</Link>
                     </Heading>
                   </Box>
                   <Box direction="row" gap="small">
