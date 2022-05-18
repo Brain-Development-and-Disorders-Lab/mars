@@ -57,7 +57,6 @@ samplesRoute
       },
       parameters: req.body.parameters,
     };
-    console.debug("Received sample data:", data);
 
     // Insert the new sample
     database
