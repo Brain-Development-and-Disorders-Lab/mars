@@ -1,11 +1,4 @@
-import {
-  Box,
-  Button,
-  Heading,
-  Select,
-  TextArea,
-  TextInput,
-} from "grommet";
+import { Box, Button, Heading, Select, TextArea, TextInput } from "grommet";
 import { Add, Save, SettingsOption, StatusDisabled } from "grommet-icons";
 
 import React, { useState } from "react";
@@ -19,7 +12,7 @@ const Parameter = (props: ParameterProps) => {
   const [type, setType] = useState(props.type);
   const [description, setDescription] = useState(props.description);
   const [finished, setFinished] = useState(false);
-  
+
   const [attributes, setAttributes] = useState([] as AttributeStruct[]);
   const parameterData: ParameterProps = {
     identifier: props.identifier,
@@ -61,18 +54,28 @@ const Parameter = (props: ParameterProps) => {
           disabled={finished}
         />
       </Box>
-      <Box direction="column" margin="small" gap="small" pad="small" color="light-2" align="center" fill round border>
+      <Box
+        direction="column"
+        margin="small"
+        gap="small"
+        pad="small"
+        color="light-2"
+        align="center"
+        fill
+        round
+        border
+      >
         <Box direction="row" align="center">
-          <Heading level="4" margin="xsmall">Attributes</Heading>
+          <Heading level="4" margin="xsmall">
+            Attributes
+          </Heading>
           <Button
             icon={<Add />}
             label="Create new attribute"
             primary
             onClick={() => {
               // Create a unique identifier
-              const identifier = `parameter_${Math.round(
-                performance.now()
-              )}`;
+              const identifier = `parameter_${Math.round(performance.now())}`;
 
               // Create an 'empty' parameter and add the data structure to the 'parameterData' collection
               setAttributes([
@@ -96,14 +99,16 @@ const Parameter = (props: ParameterProps) => {
               // Store the received attribute information
               // Get the relevant attribute
               console.debug("Data:", data);
-              setAttributes(attributes.filter((attribute) => {
-                if (attribute.identifier === data.identifier) {
-                  attribute.name = data.name;
-                  attribute.type = data.type;
-                  attribute.data = data.data;
-                }
-                return attribute;
-              }));
+              setAttributes(
+                attributes.filter((attribute) => {
+                  if (attribute.identifier === data.identifier) {
+                    attribute.name = data.name;
+                    attribute.type = data.type;
+                    attribute.data = data.data;
+                  }
+                  return attribute;
+                })
+              );
             }}
           />
         </Box>

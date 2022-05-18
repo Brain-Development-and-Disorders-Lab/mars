@@ -25,7 +25,7 @@ const Attribute = (props: AttributeProps) => {
 
   useEffect(() => {
     updateData();
-  }, [name, type, data])
+  }, [name, type, data]);
 
   return (
     <Box direction="row" gap="small">
@@ -59,6 +59,6 @@ const Attribute = (props: AttributeProps) => {
       />
     </Box>
   );
-}
+};
 
 export default Attribute;

@@ -22,16 +22,16 @@ export const theme = {
   card: {
     hover: {
       container: {
-        elevation: 'large',
+        elevation: "large",
       },
     },
     container: {
-      elevation: 'medium',
+      elevation: "medium",
       extend: `transition: all 0.2s ease-in-out;`,
     },
     footer: {
-      pad: { horizontal: 'medium', vertical: 'small' },
-      background: '#00000008',
+      pad: { horizontal: "medium", vertical: "small" },
+      background: "#00000008",
     },
   },
 };

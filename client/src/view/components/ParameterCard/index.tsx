@@ -1,4 +1,20 @@
-import { Anchor, Box, Card, CardBody, CardFooter, CardHeader, Heading, Layer, Paragraph, Table, TableBody, TableCell, TableHeader, TableRow, Text } from "grommet";
+import {
+  Anchor,
+  Box,
+  Card,
+  CardBody,
+  CardFooter,
+  CardHeader,
+  Heading,
+  Layer,
+  Paragraph,
+  Table,
+  TableBody,
+  TableCell,
+  TableHeader,
+  TableRow,
+  Text,
+} from "grommet";
 import { Note, Storage } from "grommet-icons";
 import React, { useState } from "react";
 
@@ -18,29 +34,43 @@ const ParameterCard = (props: ParameterCardProps) => {
         }}
       >
         <CardHeader pad="small" align="center" margin="none">
-          <Text><strong>Parameter: {props.data.name}</strong></Text>
+          <Text>
+            <strong>Parameter: {props.data.name}</strong>
+          </Text>
         </CardHeader>
         <CardBody pad="small">
           <Box direction="row" flex gap="small">
             <Storage color="brand" />
-            <Text><strong>Storage type:</strong></Text>
+            <Text>
+              <strong>Storage type:</strong>
+            </Text>
             <Text>{props.data.type}</Text>
           </Box>
           <Box direction="row" flex gap="small" width={{ max: "medium" }}>
             <Note color="brand" />
-            <Text><strong>Description:</strong></Text>
+            <Text>
+              <strong>Description:</strong>
+            </Text>
             <Text truncate>{props.data.description}</Text>
           </Box>
         </CardBody>
 
-        <CardFooter pad={{ horizontal: "medium", vertical: "none" }} background="light-2">
+        <CardFooter
+          pad={{ horizontal: "medium", vertical: "none" }}
+          background="light-2"
+        >
           {/* Populate footer depending on the attributes that are configured */}
         </CardFooter>
       </Card>
-      {showDetails &&
-        <Layer onEsc={() => setShowDetails(false)} onClickOutside={() => setShowDetails(false)}>
-          <Box margin="small" >
-            <Heading level="2" margin="small">Parameter: {props.data.name}</Heading>
+      {showDetails && (
+        <Layer
+          onEsc={() => setShowDetails(false)}
+          onClickOutside={() => setShowDetails(false)}
+        >
+          <Box margin="small">
+            <Heading level="2" margin="small">
+              Parameter: {props.data.name}
+            </Heading>
 
             <Heading level="4">Details</Heading>
             <Table>
@@ -114,38 +144,43 @@ const ParameterCard = (props: ParameterCardProps) => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {props.data.attributes && props.data.attributes.map((attribute) => {
-                  // Adjust the type of element displayed depending on the content
-                  let dataElement = <Text>{attribute.data}</Text>;
-                  switch (attribute.type) {
-                    case "url":
-                      dataElement = <Anchor href={attribute.data.toString()} color="dark-2" label={attribute.data}/>;
-                      break;
-                    default:
-                      break;
-                  }
+                {props.data.attributes &&
+                  props.data.attributes.map((attribute) => {
+                    // Adjust the type of element displayed depending on the content
+                    let dataElement = <Text>{attribute.data}</Text>;
+                    switch (attribute.type) {
+                      case "url":
+                        dataElement = (
+                          <Anchor
+                            href={attribute.data.toString()}
+                            color="dark-2"
+                            label={attribute.data}
+                          />
+                        );
+                        break;
+                      default:
+                        break;
+                    }
 
-                  return (
-                    <TableRow>
-                      <TableCell scope="row" align="right" border>
-                        <Heading level="4" margin="small">
-                          {attribute.name}
-                        </Heading>
-                      </TableCell>
-                      <TableCell border>
-                        <Text>{attribute.type}</Text>
-                      </TableCell>
-                      <TableCell border>
-                        {dataElement}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
+                    return (
+                      <TableRow>
+                        <TableCell scope="row" align="right" border>
+                          <Heading level="4" margin="small">
+                            {attribute.name}
+                          </Heading>
+                        </TableCell>
+                        <TableCell border>
+                          <Text>{attribute.type}</Text>
+                        </TableCell>
+                        <TableCell border>{dataElement}</TableCell>
+                      </TableRow>
+                    );
+                  })}
               </TableBody>
             </Table>
           </Box>
         </Layer>
-      }
+      )}
     </>
   );
 };

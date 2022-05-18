@@ -94,10 +94,13 @@ samplesRoute
                   name: origin.associations.origin.name,
                   id: origin.associations.origin.id,
                 },
-                products: [...origin.associations.products, {
-                  name: data.name,
-                  id: insertedId,
-                }],
+                products: [
+                  ...origin.associations.products,
+                  {
+                    name: data.name,
+                    id: insertedId,
+                  },
+                ],
               },
             },
           };

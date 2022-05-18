@@ -183,11 +183,7 @@ export const Sample = () => {
                     </TableCell>
                     <TableCell border>
                       {sampleData.parameters.map((parameter) => {
-                        return (
-                          <ParameterCard
-                            data={parameter}
-                          />
-                        );
+                        return <ParameterCard data={parameter} />;
                       })}
                     </TableCell>
                   </TableRow>
