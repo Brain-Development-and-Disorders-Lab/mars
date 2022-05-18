@@ -20,6 +20,7 @@ const AttributeGroup = (props: AttributeGroupProps) => {
               data={attribute.data}
               removeCallback={props.onRemove}
               dataCallback={props.onDataUpdate}
+              disabled={props.disabled}
             />
           );
         })

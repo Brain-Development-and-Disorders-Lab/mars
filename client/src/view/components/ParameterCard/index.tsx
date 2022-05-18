@@ -103,6 +103,11 @@ const ParameterCard = (props: ParameterCardProps) => {
                   </TableCell>
                   <TableCell scope="col" border align="center">
                     <Heading level="3" margin="small">
+                      Type
+                    </Heading>
+                  </TableCell>
+                  <TableCell scope="col" border align="center">
+                    <Heading level="3" margin="small">
                       Value
                     </Heading>
                   </TableCell>
@@ -126,6 +131,9 @@ const ParameterCard = (props: ParameterCardProps) => {
                         <Heading level="4" margin="small">
                           {attribute.name}
                         </Heading>
+                      </TableCell>
+                      <TableCell border>
+                        <Text>{attribute.type}</Text>
                       </TableCell>
                       <TableCell border>
                         {dataElement}

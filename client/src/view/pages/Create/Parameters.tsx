@@ -200,7 +200,6 @@ export const Parameters = ({}) => {
               </Box>
 
               {/* Display all existing parameters */}
-              <Heading level="3">Parameter</Heading>
               <Box direction="column" gap="small" margin="small">
                 <ParameterGroup
                   parameters={parameters}

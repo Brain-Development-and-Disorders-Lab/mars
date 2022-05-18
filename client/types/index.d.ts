@@ -81,19 +81,21 @@ export type SampleModel = SampleStruct & {
 };
 
 export type AttributeStruct = {
+  identifier: string;
   name: string;
   type: "number" | "file" | "url" | "date" | "string";
   data: number | string;
 };
 
 export type AttributeProps = AttributeStruct & {
-  identifier: string;
-  dataCallback?: (data: AttributeProps) => void;
+  disabled: boolean;
+  dataCallback?: (data: AttributeStruct) => void;
   removeCallback?: (identifier: string) => void;
 };
 
 export type AttributeGroupProps = {
-  attributes: AttributeProps[];
+  disabled: boolean;
+  attributes: AttributeStruct[];
   onRemove?: (identifier: string) => void;
   onDataUpdate?: (data: AttributeStruct) => void;
 };

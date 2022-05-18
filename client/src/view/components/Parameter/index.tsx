@@ -9,11 +9,10 @@ import {
 import { Add, Save, SettingsOption, StatusDisabled } from "grommet-icons";
 
 import React, { useState } from "react";
-import { AttributeProps, ParameterProps } from "types";
+import { AttributeStruct, ParameterProps } from "types";
 import AttributeGroup from "../AttributeGroup";
 
 const validTypes = ["physical", "digital"];
-
 
 const Parameter = (props: ParameterProps) => {
   const [name, setName] = useState(props.name);
@@ -21,12 +20,13 @@ const Parameter = (props: ParameterProps) => {
   const [description, setDescription] = useState(props.description);
   const [finished, setFinished] = useState(false);
   
-  const [attributes, setAttributes] = useState([] as AttributeProps[]);
+  const [attributes, setAttributes] = useState([] as AttributeStruct[]);
   const parameterData: ParameterProps = {
     identifier: props.identifier,
     name: name,
     type: type,
     description: description,
+    attributes: attributes,
   };
 
   return (
@@ -61,8 +61,8 @@ const Parameter = (props: ParameterProps) => {
           disabled={finished}
         />
       </Box>
-      <Box direction="column" margin="small" gap="small" align="center" fill>
-        <Box  direction="row" align="center" >
+      <Box direction="column" margin="small" gap="small" pad="small" color="light-2" align="center" fill round border>
+        <Box direction="row" align="center">
           <Heading level="4" margin="xsmall">Attributes</Heading>
           <Button
             icon={<Add />}
@@ -85,10 +85,27 @@ const Parameter = (props: ParameterProps) => {
                 },
               ]);
             }}
+            disabled={finished}
           />
         </Box>
         <Box direction="column" gap="small" margin="small" fill>
-          <AttributeGroup attributes={attributes}/>
+          <AttributeGroup
+            attributes={attributes}
+            disabled={finished}
+            onDataUpdate={(data: AttributeStruct) => {
+              // Store the received attribute information
+              // Get the relevant attribute
+              console.debug("Data:", data);
+              setAttributes(attributes.filter((attribute) => {
+                if (attribute.identifier === data.identifier) {
+                  attribute.name = data.name;
+                  attribute.type = data.type;
+                  attribute.data = data.data;
+                }
+                return attribute;
+              }));
+            }}
+          />
         </Box>
       </Box>
       <Box direction="column" width="small" gap="small">
