@@ -46,6 +46,7 @@ declare type ParameterProps = {
 declare type ParameterGroupProps = {
   parameters: ParameterModel[];
   onRemove?: (identifier: string) => void;
+  onDataUpdate?: (data: ParameterProps) => void;
 }
 
 export type ProjectStruct = {

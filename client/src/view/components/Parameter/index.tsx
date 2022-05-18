@@ -1,5 +1,5 @@
 import { Box, Button, Heading, Paragraph, Select, TextArea, TextInput } from "grommet";
-import { Add, Checkmark, SettingsOption, StatusDisabled } from "grommet-icons";
+import { Add, Save, SettingsOption, StatusDisabled } from "grommet-icons";
 
 import React, { useState } from "react";
 import { ParameterProps } from "types";
@@ -60,9 +60,9 @@ const Parameter = (props: ParameterProps) => {
       </Box>
       <Box direction="column" width="small" gap="small">
         <Button
-          label="Apply"
+          label="Save"
           color="green"
-          icon={<Checkmark />}
+          icon={<Save />}
           onClick={() => {
             setFinished(true);
             if (props.dataCallback) {
@@ -82,6 +82,7 @@ const Parameter = (props: ParameterProps) => {
           }}
           icon={<StatusDisabled />}
           reverse
+          disabled={finished}
         />
       </Box>
     </Box>

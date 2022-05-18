@@ -12,12 +12,11 @@ import {
 } from "grommet";
 import {
   AddCircle,
-  Catalog,
   FormClose,
-  List,
   Search,
   SettingsOption,
   User,
+  View,
 } from "grommet-icons";
 
 // Styling
@@ -48,6 +47,9 @@ export const App = () => {
 
   const createRef = useRef(null);
   const [createVisible, setCreateVisible] = useState(false);
+
+  const viewRef = useRef(null);
+  const [viewVisible, setViewVisible] = useState(false);
 
   return (
     <BrowserRouter>
@@ -93,10 +95,9 @@ export const App = () => {
                         align={{ top: 'bottom', left: 'left' }}
                         target={createRef.current}
                         elevation="large"
-                        margin={{ top: 'medium' }}
-                        style={{ position: "absolute" }}
+                        margin={{ top: "medium" }}
                       >
-                        <Box background="light-2" pad="small" direction="column" gap="small">
+                        <Box background="brand" pad="small" direction="column" gap="small">
                           <Heading level="4" margin="small">
                             <Link to="/create/start" onClick={() => setCreateVisible(false)} >Sample</Link>
                           </Heading>
@@ -110,17 +111,40 @@ export const App = () => {
                       </Drop>
                     }
                   </Box>
-                  <Box direction="row" gap="small">
-                    <List />
-                    <Heading level="4" margin="none">
-                      <Link to="/projects">Projects</Link>
-                    </Heading>
-                  </Box>
-                  <Box direction="row" gap="small">
-                    <Catalog />
-                    <Heading level="4" margin="none">
-                      <Link to="/samples">Samples</Link>
-                    </Heading>
+                  <Box
+                    direction="row"
+                    gap="small"
+                  >
+                    <Button
+                      ref={viewRef}
+                      onClick={() => setViewVisible(!viewVisible)}
+                      plain
+                    >
+                      <Box
+                        direction="row"
+                        gap="small"
+                      >
+                        <View />
+                        <Heading level="4" margin="none">View</Heading>
+                      </Box>
+                    </Button>
+                    {viewRef.current && viewVisible &&
+                      <Drop
+                        align={{ top: 'bottom', left: 'left' }}
+                        target={viewRef.current}
+                        elevation="large"
+                        margin={{ top: "medium" }}
+                      >
+                        <Box background="brand" pad="small" direction="column" gap="small">
+                          <Heading level="4" margin="small">
+                            <Link to="/projects" onClick={() => setViewVisible(false)} >Projects</Link>
+                          </Heading>
+                          <Heading level="4" margin="small">
+                            <Link to="/samples" onClick={() => setViewVisible(false)} >Samples</Link>
+                          </Heading>
+                        </Box>
+                      </Drop>
+                    }
                   </Box>
                 </Box>
                 <Button

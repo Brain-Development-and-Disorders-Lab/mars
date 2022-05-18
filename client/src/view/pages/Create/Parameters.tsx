@@ -22,7 +22,7 @@ import Linky from "src/view/components/Linky";
 // Custom components
 // import Parameter from "src/view/components/Parameter";
 import ParameterGroup from "src/view/components/ParameterGroup";
-import { Create, ParameterModel } from "types";
+import { Create, ParameterModel, ParameterProps } from "types";
 
 export const Parameters = ({}) => {
   const navigate = useNavigate();
@@ -33,10 +33,12 @@ export const Parameters = ({}) => {
 
   // Used to manage React components
   const [parameters, setParameters] = useState([] as ParameterModel[]);
+  const [parameterData, setParameterData] = useState([] as ParameterModel[]);
 
   // Used for filtering selectable options
   const [parameterOptions, setParameterOptions] = useState([] as ParameterModel[]);
 
+  // Loading state and error state
   const [isLoaded, setIsLoaded] = useState(false);
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("An error has occurred.");
@@ -55,7 +57,7 @@ export const Parameters = ({}) => {
       origin: origin,
       products: products,
     },
-    // parameters: parameterData
+    parameters: parameters,
   };
 
   useEffect(() => {
@@ -78,9 +80,18 @@ export const Parameters = ({}) => {
   }, []);
 
   // Used to receive data from a Parameter component
-  // const dataCallback = (data: ParameterProps) => {
-  //   console.debug("Received data:", data);
-  // };
+  const dataCallback = (data: ParameterProps) => {
+    setParameterData([
+      ...parameterData,
+      {
+        _id: data.identifier,
+        name: data.name,
+        description: data.description,
+        type: data.type,
+        attributes: data.attributes || [],
+      }
+    ])
+  };
 
   // Removal callback
   const removeCallback = (identifier: string) => {
@@ -157,7 +168,7 @@ export const Parameters = ({}) => {
             {/* Display all existing parameters */}
             <Heading level="3">Parameter</Heading>
             <Box direction="column" gap="small" margin="small">
-              <ParameterGroup parameters={parameters} onRemove={removeCallback} />
+              <ParameterGroup parameters={parameters} onRemove={removeCallback} onDataUpdate={dataCallback} />
             </Box>
 
             {/* Action buttons */}
@@ -191,11 +202,13 @@ export const Parameters = ({}) => {
             </Box>
             <Box direction="column" gap="medium">
               <Text><b>Primary project:</b> <Linky key={project.id} type="projects" id={project.id} /></Text>
-              <Text><b>Associated projects:</b> {projects.map((project) => {
-                return (
-                  <Linky key={`_${project.id}`} type="projects" id={project.id} />
-                );
-              })}</Text>
+              {projects.length > 0 &&
+                <Text><b>Associated projects:</b> {projects.map((project) => {
+                  return (
+                    <Linky key={`_${project.id}`} type="projects" id={project.id} />
+                  );
+                })}</Text>
+              }
               {origin.name !== "" &&
                 <Text><b>Origin sample:</b> <Linky type="samples" id={origin.id} /></Text>
               }
@@ -206,11 +219,11 @@ export const Parameters = ({}) => {
                   );
                 })}</Text>
               }
-              {parameters.length > 0 &&
-                <Text><b>Parameters:</b> {parameters.map((parameter) => {
+              {parameterData.length > 0 &&
+                <Text><b>Parameters:</b> {parameterData.map((parameter) => {
                   return (
                     <>
-                      <Tag name={parameter.name} value={parameter.name} />
+                      <Tag key={`tag_${parameter._id}}`} name={parameter.name} value={parameter.name} />
                     </>
                   );
                 })}</Text>

@@ -18,8 +18,8 @@ const ParameterGroup = (props: ParameterGroupProps) => {
               name={parameter.name}
               description={parameter.description}
               type={parameter.type}
-              dataCallback={() => {}}
               removeCallback={props.onRemove}
+              dataCallback={props.onDataUpdate}
             />
           );
         })
