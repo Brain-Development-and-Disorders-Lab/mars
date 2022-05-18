@@ -62,12 +62,11 @@ export const Parameters = ({}) => {
     project: project,
     description: description,
     projects: projects,
-    storage: {},
     associations: {
       origin: origin,
       products: products,
     },
-    parameters: parameters,
+    parameters: parameterData,
   };
 
   useEffect(() => {
@@ -101,6 +100,8 @@ export const Parameters = ({}) => {
         attributes: data.attributes || [],
       },
     ]);
+    console.debug("Saving data:", data);
+    console.debug("Parameter data:", parameterData);
   };
 
   // Removal callback
@@ -135,10 +136,6 @@ export const Parameters = ({}) => {
                       const identifier = `parameter_${Math.round(
                         performance.now()
                       )}`;
-                      console.debug(
-                        "Created new parameter with identifier:",
-                        identifier
-                      );
 
                       // Create an 'empty' parameter and add the data structure to the 'parameterData' collection
                       setParameters([
@@ -346,6 +343,8 @@ export const Parameters = ({}) => {
                 primary
                 onClick={() => {
                   // Create new parameters
+                  console.debug("Submitting data:", sampleData);
+
                   // Push the data and parameters
                   pushData(`/samples/add`, sampleData).then(() =>
                     navigate("/samples")

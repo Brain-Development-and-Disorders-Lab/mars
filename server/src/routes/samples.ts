@@ -57,6 +57,7 @@ samplesRoute
       },
       parameters: req.body.parameters,
     };
+    console.debug("Received sample data:", data);
 
     // Insert the new sample
     database
@@ -94,7 +95,10 @@ samplesRoute
                   name: origin.associations.origin.name,
                   id: origin.associations.origin.id,
                 },
-                products: [...origin.associations.products, insertedId],
+                products: [...origin.associations.products, {
+                  name: data.name,
+                  id: insertedId,
+                }],
               },
             },
           };

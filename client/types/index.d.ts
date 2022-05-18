@@ -26,19 +26,19 @@ export type ParameterStruct = {
   name: string;
   description: string;
   type: "sample" | "number" | "data";
-  attributes: { name: string; data: number | string }[];
+  attributes?: {
+    name: string;
+    type: "number" | "file" | "url" | "string";
+    data: number | string;
+  }[];
 };
 
 export type ParameterModel = ParameterStruct & {
   _id: string;
 };
 
-declare type ParameterProps = {
+declare type ParameterProps = ParameterStruct & {
   identifier: string;
-  name: string;
-  description: string;
-  type: "sample" | "number" | "data";
-  attributes?: { name: string; data: number | string }[];
   dataCallback?: (data: ParameterProps) => void;
   removeCallback?: (identifier: string) => void;
 };
@@ -47,6 +47,10 @@ declare type ParameterGroupProps = {
   parameters: ParameterModel[];
   onRemove?: (identifier: string) => void;
   onDataUpdate?: (data: ParameterProps) => void;
+};
+
+export type ParameterCardProps = {
+  data: ParameterStruct;
 };
 
 export type ProjectStruct = {
@@ -73,7 +77,7 @@ export type SampleStruct = {
     origin: { name: string; id: string };
     products: { name: string; id: string }[];
   };
-  parameters: string[];
+  parameters: ParameterStruct[];
 };
 
 export type SampleModel = SampleStruct & {

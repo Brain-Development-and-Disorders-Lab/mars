@@ -18,6 +18,7 @@ import { getData } from "src/lib/database/getData";
 import { SampleStruct } from "types";
 import ErrorLayer from "../components/ErrorLayer";
 import Linky from "../components/Linky";
+import ParameterCard from "../components/ParameterCard";
 
 export const Sample = () => {
   const { id } = useParams();
@@ -166,6 +167,25 @@ export const Sample = () => {
                             key={product.id}
                             type="samples"
                             id={product.id}
+                          />
+                        );
+                      })}
+                    </TableCell>
+                  </TableRow>
+                )}
+
+                {sampleData.parameters.length > 0 && (
+                  <TableRow>
+                    <TableCell scope="row" border align="right">
+                      <Heading level="4" margin="small">
+                        Parameters
+                      </Heading>
+                    </TableCell>
+                    <TableCell border>
+                      {sampleData.parameters.map((parameter) => {
+                        return (
+                          <ParameterCard
+                            data={parameter}
                           />
                         );
                       })}

@@ -19,4 +19,19 @@ export const theme = {
     color: "#FFFFFF",
     outline: "#FFFFFF",
   },
+  card: {
+    hover: {
+      container: {
+        elevation: 'large',
+      },
+    },
+    container: {
+      elevation: 'medium',
+      extend: `transition: all 0.2s ease-in-out;`,
+    },
+    footer: {
+      pad: { horizontal: 'medium', vertical: 'small' },
+      background: '#00000008',
+    },
+  },
 };

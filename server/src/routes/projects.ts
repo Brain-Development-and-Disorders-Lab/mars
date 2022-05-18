@@ -42,33 +42,6 @@ projectsRoute
       });
   });
 
-// This section will help you create a new record.
-// sampleRoutes.route("/sample/add").post(function (req: { body: { name: any; position: any; level: any; }; }, response: { json: (arg0: any) => void; }) {
-//  let db_connect = dbo.getDb();
-//  let myobj = {
-//    name: req.body.name,
-//    position: req.body.position,
-//    level: req.body.level,
-//  };
-//  db_connect.collection("records").insertOne(myobj, function (err, res) {
-//    if (err) throw err;
-//    response.json(res);
-//  });
-// });
-
-// This section will help you update a record by id.
-// recordRoutes.route("/update/:id").post(function (req, response) {
-//  let db_connect = dbo.getDb();
-//  let myquery = { _id: ObjectId( req.params.id )};
-//  let newvalues = {
-//    $set: {
-//      name: req.body.name,
-//      position: req.body.position,
-//      level: req.body.level,
-//    },
-//   }
-// });
-
 // This section will help you delete a record
 projectsRoute
   .route("/:id")

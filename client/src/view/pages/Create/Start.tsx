@@ -101,6 +101,7 @@ export const Start = ({}) => {
                     name="name"
                     value={name}
                     onChange={(event) => setName(event.target.value)}
+                    required
                   />
                 </FormField>
                 <FormField
@@ -112,6 +113,7 @@ export const Start = ({}) => {
                     name="owner"
                     value={owner}
                     onChange={(event) => setOwner(event.target.value)}
+                    required
                   />
                 </FormField>
                 <FormField
@@ -123,6 +125,7 @@ export const Start = ({}) => {
                     format="mm/dd/yyyy"
                     value={created}
                     onChange={({ value }) => setCreated(value.toString())}
+                    required
                   />
                 </FormField>
               </Box>
