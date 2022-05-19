@@ -20,42 +20,42 @@ declare namespace Create {
     };
   };
 
-  type Parameters = Associations & {
-    parameters: ParameterProps[];
+  type Attributes = Associations & {
+    attributes: AttributeProps[];
   };
 }
 
-export type ParameterStruct = {
+export type AttributeStruct = {
   name: string;
   description: string;
   type: "physical" | "digital";
-  attributes: AttributeStruct[];
+  blocks: BlockStruct[];
 };
 
-export type ParameterModel = ParameterStruct & {
+export type AttributeModel = AttributeStruct & {
   _id: string;
 };
 
-declare type ParameterProps = ParameterStruct & {
+declare type AttributeProps = AttributeStruct & {
   identifier: string;
-  dataCallback?: (data: ParameterProps) => void;
+  dataCallback?: (data: AttributeProps) => void;
   removeCallback?: (identifier: string) => void;
 };
 
-declare type ParameterGroupProps = {
-  parameters: ParameterModel[];
+declare type AttributeGroupProps = {
+  attributes: AttributeModel[];
   onRemove?: (identifier: string) => void;
-  onDataUpdate?: (data: ParameterProps) => void;
+  onDataUpdate?: (data: AttributeProps) => void;
 };
 
-export type ParameterCardProps = {
-  data: ParameterStruct;
+export type AttributeCardProps = {
+  data: AttributeStruct;
 };
 
 export type GroupStruct = {
   name: string;
   description: string;
-  attributes: string[];
+  blocks: string[];
   associations: {
     samples: string[];
   };
@@ -76,34 +76,34 @@ export type SampleStruct = {
     origin: { name: string; id: string };
     products: { name: string; id: string }[];
   };
-  parameters: ParameterStruct[];
+  attributes: AttributeStruct[];
 };
 
 export type SampleModel = SampleStruct & {
   _id: string;
 };
 
-export type AttributeStruct = {
+export type BlockStruct = {
   identifier: string;
   name: string;
   type: "number" | "file" | "url" | "date" | "string" | "sample";
   data: number | string | ReactElement;
 };
 
-export type AttributeProps = AttributeStruct & {
+export type BlockProps = BlockStruct & {
   disabled: boolean;
-  dataCallback?: (data: AttributeStruct) => void;
+  dataCallback?: (data: BlockStruct) => void;
   removeCallback?: (identifier: string) => void;
 };
 
-export type AttributeGroupProps = {
+export type BlockGroupProps = {
   disabled: boolean;
-  attributes: AttributeStruct[];
+  blocks: BlockStruct[];
   onRemove?: (identifier: string) => void;
-  onDataUpdate?: (data: AttributeStruct) => void;
+  onDataUpdate?: (data: BlockStruct) => void;
 };
 
 declare type LinkyProps = {
-  type: "samples" | "groups" | "parameters";
+  type: "samples" | "groups" | "attributes";
   id: string;
 };

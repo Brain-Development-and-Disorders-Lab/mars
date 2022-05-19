@@ -7,20 +7,20 @@ import Attribute from "../Attribute";
 
 const AttributeGroup = (props: AttributeGroupProps) => {
   return (
-    <Box gap="small" align="center">
+    <Box gap="small">
       {props.attributes.length > 0 ? (
         // Extract and return only components
         props.attributes.map((attribute) => {
           return (
             <Attribute
-              key={attribute.identifier}
-              identifier={attribute.identifier}
+              key={attribute._id}
+              identifier={attribute._id}
               name={attribute.name}
+              description={attribute.description}
               type={attribute.type}
-              data={attribute.data}
               removeCallback={props.onRemove}
               dataCallback={props.onDataUpdate}
-              disabled={props.disabled}
+              blocks={attribute.blocks}
             />
           );
         })

@@ -1,188 +1,145 @@
-import React, { useEffect, useState } from "react";
+import { Box, Button, Heading, Select, TextArea, TextInput } from "grommet";
+import { Add, Save, SettingsOption, StatusDisabled } from "grommet-icons";
 
-import { Anchor, Box, DateInput, FileInput, Select, Spinner, Text, TextInput } from "grommet";
-import { AttributeProps, AttributeStruct, SampleModel } from "types";
-import { getData } from "src/lib/database/getData";
-import ErrorLayer from "../ErrorLayer";
-import Linky from "../Linky";
+import React, { useState } from "react";
+import { BlockStruct, AttributeProps } from "types";
+import BlockGroup from "../BlockGroup";
 
-const VALID_TYPES = ["number", "file", "url", "date", "string", "sample"];
+const validTypes = ["physical", "digital"];
 
 const Attribute = (props: AttributeProps) => {
   const [name, setName] = useState(props.name);
   const [type, setType] = useState(props.type);
-  const [data, setData] = useState(props.data);
+  const [description, setDescription] = useState(props.description);
+  const [blocks, setBlocks] = useState(props.blocks);
+  const [finished, setFinished] = useState(false);
 
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [isError, setIsError] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("An error has occurred.");
-
-  const [sampleData, setSampleData] = useState([] as SampleModel[]);
-  const [optionData, setOptionData] = useState([] as SampleModel[]);
-
-  useEffect(() => {
-    const samples = getData(`/samples`);
-
-    // Handle the response from the database
-    samples.then((value) => {
-      setSampleData(value);
-      setOptionData(value);
-
-      // Check the contents of the response
-      if (value["error"] !== undefined) {
-        setErrorMessage(value["error"]);
-        setIsError(true);
-      }
-
-      setIsLoaded(true);
-    });
-    return;
-  }, []);
-
-  const attributeData: AttributeStruct = {
+  const attributeData: AttributeProps = {
     identifier: props.identifier,
     name: name,
     type: type,
-    data: data,
+    description: description,
+    blocks: blocks,
   };
-
-  const updateData = () => {
-    if (props.dataCallback) {
-      props.dataCallback(attributeData);
-    }
-  };
-
-  useEffect(() => {
-    updateData();
-  }, [data]);
-
-  let dataElement = (
-    <Text>Data:</Text>
-  );
-
-  // Set the data input field depending on the selected type
-  if (type === "file") {
-    // File input
-    dataElement = (props.disabled ?
-        <Text>Filename</Text>
-      :
-      <Box background="brand">
-        <FileInput
-          name="file"
-          color="light-1"
-          onChange={event => {
-            const fileList = event.target.files;
-            if (fileList) {
-              for (let i = 0; i < fileList.length; i += 1) {
-                const file = fileList[i];
-                console.debug("File:", file);
-              }
-            }
-          }}
-          disabled={props.disabled}
-        />
-      </Box>
-    )
-  } else if (type === "date") {
-    // Date picker
-    dataElement = (
-      <DateInput
-        name="date"
-        format="mm/dd/yyyy"
-        value={data as string}
-        onChange={({ value }) => setData(value.toString())}
-        disabled={props.disabled}
-      />
-    );
-  } else if (type === "sample") {
-    // Sample picker
-    dataElement = (props.disabled ?
-        <Linky type="samples" id={(data as unknown as {name: string, id: string}).id} />
-      :
-        <Select
-          options={optionData.map((sample) => {
-            return { name: sample.name, id: sample._id };
-          })}
-          labelKey="name"
-          value={data as string}
-          valueKey="name"
-          onChange={({ value }) => {
-            setData(value);
-          }}
-          searchPlaceholder="Search..."
-          onSearch={(query) => {
-            const escapedText = query.replace(
-              /[-\\^$*+?.()|[\]{}]/g,
-              "\\$&"
-            );
-            const exp = new RegExp(escapedText, "i");
-            setOptionData(
-              sampleData
-                .filter((sample) => exp.test(sample.name))
-            );
-          }}
-        disabled={props.disabled}
-      />
-    );
-  } else if (type === "url") {
-    // URL field
-    dataElement = (props.disabled ?
-      <Anchor
-        label={data as string}
-        href={data as string}
-        color="dark-1"
-      />
-    :
-      <TextInput
-        name="url"
-        placeholder="URL"
-        value={data as string}
-        onChange={(event) => setData(event.target.value.toString())}
-        disabled={props.disabled}
-      />
-    );
-  } else {
-    // Basic data is displayed as-is
-    dataElement = (
-      <TextInput
-        name="data"
-        placeholder={type}
-        value={data as string | number}
-        onChange={(event) => setData(event.target.value)}
-        disabled={props.disabled}
-      />
-    );
-  }
 
   return (
-    <Box direction="row" gap="small" align="center">
-      <Box width="medium">
+    <Box
+      direction="row"
+      align="center"
+      gap="small"
+      pad="small"
+      background="light-1"
+      round
+    >
+      <SettingsOption />
+      <Box direction="column" margin="small" gap="small" width="medium">
         <TextInput
-          width="small"
-          placeholder="Attribute name"
+          placeholder={"Attribute Name"}
           value={name}
-          onChange={(event) => {
-            setName(event.target.value);
-          }}
-          disabled={props.disabled}
+          onChange={(event) => setName(event.target.value)}
+          disabled={finished}
+        />
+        <Select
+          placeholder="Type"
+          options={validTypes}
+          value={type}
+          width="auto"
+          onChange={({ option }) => setType(option)}
+          disabled={finished}
+        />
+        <TextArea
+          value={description}
+          placeholder={"Attribute description"}
+          onChange={(event) => setDescription(event.target.value)}
+          disabled={finished}
         />
       </Box>
-      <Select
-        options={VALID_TYPES}
-        value={type}
-        onChange={({ option }) => {
-          setType(option);
-        }}
-        disabled={props.disabled}
-      />
-      {isLoaded ?
-        dataElement
-      :
-        <Spinner size="small" />
-      }
-      {isError && <ErrorLayer message={errorMessage} />}
+      <Box
+        direction="column"
+        margin="small"
+        gap="small"
+        pad="small"
+        color="light-2"
+        align="center"
+        fill
+        round
+        border
+      >
+        <Box direction="row" align="center">
+          <Heading level="4" margin="xsmall">
+            Blocks
+          </Heading>
+          <Button
+            icon={<Add />}
+            label="Create new block"
+            primary
+            onClick={() => {
+              // Create a unique identifier
+              const identifier = `attribute_${Math.round(performance.now())}`;
+
+              // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
+              setBlocks([
+                ...blocks,
+                {
+                  identifier: identifier,
+                  name: "",
+                  type: "string",
+                  data: "",
+                },
+              ]);
+            }}
+            disabled={finished}
+          />
+        </Box>
+        <Box direction="column" gap="small" margin="small" fill>
+          <BlockGroup
+            blocks={blocks}
+            disabled={finished}
+            onDataUpdate={(data: BlockStruct) => {
+              // Store the received block information
+              // Get the relevant block
+              setBlocks(
+                blocks.filter((block) => {
+                  if (block.identifier === data.identifier) {
+                    block.name = data.name;
+                    block.type = data.type;
+                    block.data = data.data;
+                  }
+                  return block;
+                })
+              );
+            }}
+          />
+        </Box>
+      </Box>
+      <Box direction="column" width="small" gap="small">
+        <Button
+          label="Save"
+          color="green"
+          icon={<Save />}
+          onClick={() => {
+            setFinished(true);
+            if (props.dataCallback) {
+              props.dataCallback(attributeData);
+            }
+          }}
+          reverse
+          disabled={finished}
+        />
+        <Button
+          color="red"
+          label="Remove"
+          onClick={() => {
+            if (props.removeCallback) {
+              props.removeCallback(props.identifier);
+            }
+          }}
+          icon={<StatusDisabled />}
+          reverse
+          disabled={finished}
+        />
+      </Box>
     </Box>
-    
   );
 };
 

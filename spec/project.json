@@ -2,7 +2,7 @@
   "id": "group_1",
   "name": "Example Group",
   "description": "This is an example group that is used as a template for testing.",
-  "parameters": [],
+  "attributes": [],
   "associations": {
     "samples": []
   }

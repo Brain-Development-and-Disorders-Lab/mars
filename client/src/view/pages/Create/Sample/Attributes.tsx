@@ -20,11 +20,10 @@ import ErrorLayer from "src/view/components/ErrorLayer";
 import Linky from "src/view/components/Linky";
 
 // Custom components
-// import Parameter from "src/view/components/Parameter";
-import ParameterGroup from "src/view/components/ParameterGroup";
-import { Create, ParameterModel, ParameterProps } from "types";
+import AttributeGroup from "src/view/components/AttributeGroup";
+import { Create, AttributeModel, AttributeProps } from "types";
 
-export const Parameters = ({}) => {
+export const Attributes = ({}) => {
   const navigate = useNavigate();
 
   // Extract state from prior page
@@ -40,12 +39,12 @@ export const Parameters = ({}) => {
   } = state as Create.Associations;
 
   // Used to manage React components
-  const [parameters, setParameters] = useState([] as ParameterModel[]);
-  const [parameterData, setParameterData] = useState([] as ParameterModel[]);
+  const [attributes, setAttributes] = useState([] as AttributeModel[]);
+  const [attributeData, setAttributeData] = useState([] as AttributeModel[]);
 
   // Used for filtering selectable options
-  const [parameterOptions, setParameterOptions] = useState(
-    [] as ParameterModel[]
+  const [attributeOptions, setAttributeOptions] = useState(
+    [] as AttributeModel[]
   );
 
   // Loading state and error state
@@ -66,15 +65,15 @@ export const Parameters = ({}) => {
       origin: origin,
       products: products,
     },
-    parameters: parameterData,
+    attributes: attributeData,
   };
 
   useEffect(() => {
-    const parameters = getData(`/parameters`);
+    const attributes = getData(`/attributes`);
 
     // Handle the response from the database
-    parameters.then((value) => {
-      setParameterOptions(value);
+    attributes.then((value) => {
+      setAttributeOptions(value);
 
       // Check the contents of the response
       if (value["error"] !== undefined) {
@@ -87,25 +86,25 @@ export const Parameters = ({}) => {
     return;
   }, []);
 
-  // Used to receive data from a Parameter component
-  const dataCallback = (data: ParameterProps) => {
-    setParameterData([
-      ...parameterData,
+  // Used to receive data from a Attribute component
+  const dataCallback = (data: AttributeProps) => {
+    setAttributeData([
+      ...attributeData,
       {
         _id: data.identifier,
         name: data.name,
         description: data.description,
         type: data.type,
-        attributes: data.attributes || [],
+        blocks: data.blocks || [],
       },
     ]);
   };
 
   // Removal callback
   const removeCallback = (identifier: string) => {
-    // We need to filter the removed parameter from the total collection
-    setParameters(
-      parameters.filter((parameter) => parameter._id !== identifier)
+    // We need to filter the removed attribute from the total collection
+    setAttributes(
+      attributes.filter((attribute) => attribute._id !== identifier)
     );
   };
 
@@ -113,7 +112,7 @@ export const Parameters = ({}) => {
     <>
       {isLoaded && isError === false ? (
         <>
-          <Heading level="2">Apply Parameters for "{name}"</Heading>
+          <Heading level="2">Apply Attributes for "{name}"</Heading>
           <Box fill>
             <Form
               onChange={() => {}}
@@ -121,28 +120,28 @@ export const Parameters = ({}) => {
                 setShowConfirmation(true);
               }}
             >
-              {/* Field to create new parameters */}
+              {/* Field to create new attributes */}
               <Box justify="center" align="center" direction="row" gap="small">
                 <Box>
                   <Button
                     icon={<Add />}
-                    label="Create new parameter"
+                    label="Create new attribute"
                     primary
                     onClick={() => {
                       // Create a unique identifier
-                      const identifier = `parameter_${Math.round(
+                      const identifier = `attribute_${Math.round(
                         performance.now()
                       )}`;
 
-                      // Create an 'empty' parameter and add the data structure to the 'parameterData' collection
-                      setParameters([
-                        ...parameters,
+                      // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
+                      setAttributes([
+                        ...attributes,
                         {
                           _id: identifier,
                           name: "",
                           description: "",
                           type: "physical",
-                          attributes: [],
+                          blocks: [],
                         },
                       ]);
                     }}
@@ -151,29 +150,29 @@ export const Parameters = ({}) => {
 
                 <Text>Or</Text>
 
-                {/* Drop-down to select existing parameters */}
+                {/* Drop-down to select existing attributes */}
                 <FormField
-                  label="Add existing parameter"
+                  label="Add existing attribute"
                   name="existing"
-                  info="Search for and add an existing parameter."
+                  info="Search for and add an existing attribute."
                 >
                   <Select
-                    options={parameterOptions.map((parameter) => {
-                      return { name: parameter.name, id: parameter._id };
+                    options={attributeOptions.map((attribute) => {
+                      return { name: attribute.name, id: attribute._id };
                     })}
                     labelKey="name"
                     onChange={({ option }) => {
-                      // We need to get the existing parameter and insert it here
-                      getData(`/parameters/${option.id}`).then(
-                        (value: ParameterModel) => {
-                          setParameters([
-                            ...parameters,
+                      // We need to get the existing attribute and insert it here
+                      getData(`/attributes/${option.id}`).then(
+                        (value: AttributeModel) => {
+                          setAttributes([
+                            ...attributes,
                             {
                               _id: option.id,
                               name: value.name,
                               description: value.description,
                               type: value.type,
-                              attributes: value.attributes,
+                              blocks: value.blocks,
                             },
                           ]);
                         }
@@ -186,9 +185,9 @@ export const Parameters = ({}) => {
                         "\\$&"
                       );
                       const exp = new RegExp(escapedText, "i");
-                      setParameterOptions(
-                        parameters.filter((parameter) =>
-                          exp.test(parameter.name)
+                      setAttributeOptions(
+                        attributes.filter((attribute) =>
+                          exp.test(attribute.name)
                         )
                       );
                     }}
@@ -196,10 +195,10 @@ export const Parameters = ({}) => {
                 </FormField>
               </Box>
 
-              {/* Display all existing parameters */}
+              {/* Display all existing attributes */}
               <Box direction="column" gap="small" margin="small">
-                <ParameterGroup
-                  parameters={parameters}
+                <AttributeGroup
+                  attributes={attributes}
                   onRemove={removeCallback}
                   onDataUpdate={dataCallback}
                 />
@@ -306,16 +305,16 @@ export const Parameters = ({}) => {
                     })}
                   </Text>
                 )}
-                {parameterData.length > 0 && (
+                {attributeData.length > 0 && (
                   <Text>
-                    <b>Parameters:</b>{" "}
-                    {parameterData.map((parameter) => {
+                    <b>Attributes:</b>{" "}
+                    {attributeData.map((attribute) => {
                       return (
                         <>
                           <Tag
-                            key={`tag_${parameter._id}}`}
-                            name={parameter.name}
-                            value={parameter.name}
+                            key={`tag_${attribute._id}}`}
+                            name={attribute.name}
+                            value={attribute.name}
                           />
                         </>
                       );
@@ -338,10 +337,10 @@ export const Parameters = ({}) => {
                 reverse
                 primary
                 onClick={() => {
-                  // Create new parameters
+                  // Create new attribute
                   console.debug("Submitting data:", sampleData);
 
-                  // Push the data and parameters
+                  // Push the data and attribute
                   pushData(`/samples/add`, sampleData).then(() =>
                     navigate("/samples")
                   );
@@ -354,4 +353,4 @@ export const Parameters = ({}) => {
     </>
   );
 };
-export default Parameters;
+export default Attributes;

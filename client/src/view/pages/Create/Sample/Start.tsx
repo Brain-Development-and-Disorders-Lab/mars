@@ -151,7 +151,7 @@ export const Start = ({}) => {
               <FormField
                 label="Description"
                 name="description"
-                info="A brief description of the new sample. Most details should be inputted as Parameters."
+                info="A brief description of the new sample. Most details should be inputted as Attributes with Blocks."
               >
                 <TextArea
                   value={description}

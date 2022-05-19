@@ -12,17 +12,16 @@ import {
   Table,
   TableBody,
   TableCell,
-  // TableHeader,
   TableRow,
   Text,
 } from "grommet";
 import { Close, Note, Storage } from "grommet-icons";
 import React, { useState } from "react";
 
-import { ParameterCardProps } from "types";
-import Attribute from "../Attribute";
+import { AttributeCardProps } from "types";
+import Block from "../Block";
 
-const ParameterCard = (props: ParameterCardProps) => {
+const AttributeCard = (props: AttributeCardProps) => {
   const [showDetails, setShowDetails] = useState(false);
 
   return (
@@ -61,7 +60,7 @@ const ParameterCard = (props: ParameterCardProps) => {
           pad={{ horizontal: "medium", vertical: "none" }}
           background="light-2"
         >
-          {/* Populate footer depending on the attributes that are configured */}
+          {/* Populate footer depending on the blocks that are configured */}
         </CardFooter>
       </Card>
       {showDetails && (
@@ -120,19 +119,19 @@ const ParameterCard = (props: ParameterCardProps) => {
               </Table>
             </Box>
 
-            <Heading level="4">Attributes</Heading>
+            <Heading level="4">Blocks</Heading>
             <Box gap="small">
-              {props.data.attributes &&
-                props.data.attributes.map((attribute) => {
+              {props.data.blocks &&
+                props.data.blocks.map((block) => {
                   // Adjust the type of element displayed depending on the content
-                  let dataElement = <Text>{attribute.data}</Text>;
-                  switch (attribute.type) {
+                  let dataElement = <Text>{block.data}</Text>;
+                  switch (block.type) {
                     case "url":
                       dataElement = (
                         <Anchor
-                          href={attribute.data.toString()}
+                          href={block.data.toString()}
                           color="dark-2"
-                          label={<Text truncate>{attribute.data}</Text>}
+                          label={<Text truncate>{block.data}</Text>}
                         />
                       );
                       break;
@@ -141,10 +140,10 @@ const ParameterCard = (props: ParameterCardProps) => {
                   }
 
                   return (
-                    <Attribute
-                      identifier={attribute.identifier}
-                      name={attribute.name}
-                      type={attribute.type}
+                    <Block
+                      identifier={block.identifier}
+                      name={block.name}
+                      type={block.type}
                       data={dataElement}
                       disabled
                     />
@@ -158,4 +157,4 @@ const ParameterCard = (props: ParameterCardProps) => {
   );
 };
 
-export default ParameterCard;
+export default AttributeCard;

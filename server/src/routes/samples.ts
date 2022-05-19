@@ -55,7 +55,7 @@ samplesRoute
         origin: req.body.associations.origin,
         products: req.body.associations.products,
       },
-      parameters: req.body.parameters,
+      attributes: req.body.attributes,
     };
 
     // Insert the new sample

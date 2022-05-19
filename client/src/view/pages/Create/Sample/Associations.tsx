@@ -114,7 +114,7 @@ export const Associations = ({}) => {
             <Form
               onChange={() => {}}
               onSubmit={() => {
-                navigate("/create/sample/parameters", {
+                navigate("/create/sample/attributes", {
                   state: associationState,
                 });
               }}

@@ -21,7 +21,7 @@ import Flow from "src/view/components/Flow";
 import { SampleModel } from "types";
 import ErrorLayer from "../../components/ErrorLayer";
 import Linky from "../../components/Linky";
-import ParameterCard from "../../components/ParameterCard";
+import AttributeCard from "../../components/AttributeCard";
 
 export const Sample = () => {
   const { id } = useParams();
@@ -185,7 +185,7 @@ export const Sample = () => {
 
           <Box direction="row" align="center" background="light-2" round>
             <Heading level="4" margin="small">
-              Parameters
+              Attributes
             </Heading>
             <Box
               wrap
@@ -198,12 +198,12 @@ export const Sample = () => {
               gap="small"
               background="light-2"
             >
-              {sampleData.parameters.length > 0 ? (
-                sampleData.parameters.map((parameter) => {
-                  return <ParameterCard data={parameter} />;
+              {sampleData.attributes.length > 0 ? (
+                sampleData.attributes.map((attribute) => {
+                  return <AttributeCard data={attribute} />;
                 })
               ) : (
-                <Text>No parameters specified.</Text>
+                <Text>No attributes specified.</Text>
               )}
             </Box>
           </Box>

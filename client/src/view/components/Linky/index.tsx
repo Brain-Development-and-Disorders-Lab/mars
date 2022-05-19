@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { getData } from "src/lib/database/getData";
 import {
   LinkyProps,
-  ParameterStruct,
+  AttributeStruct,
   GroupStruct,
   SampleStruct,
 } from "types";
@@ -18,7 +18,7 @@ const Linky = (props: LinkyProps) => {
   const [errorMessage, setErrorMessage] = useState("An error has occurred.");
 
   const [linkData, setLinkData] = useState(
-    {} as ParameterStruct | GroupStruct | SampleStruct
+    {} as AttributeStruct | GroupStruct | SampleStruct
   );
 
   useEffect(() => {

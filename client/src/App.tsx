@@ -35,7 +35,7 @@ import Start from "./view/pages/Create/Sample/Start";
 import Groups from "./view/pages/View/Groups";
 import Search from "./view/pages/Search";
 import Associations from "./view/pages/Create/Sample/Associations";
-import Parameters from "./view/pages/Create/Sample/Parameters";
+import Attributes from "./view/pages/Create/Sample/Attributes";
 import Home from "./view/pages/Home";
 
 // Theme
@@ -129,7 +129,7 @@ export const App = () => {
                               to="#"
                               onClick={() => setCreateVisible(false)}
                             >
-                              Parameter
+                              Attributes
                             </Link>
                           </Heading>
                         </Box>
@@ -206,8 +206,8 @@ export const App = () => {
                       element={<Associations />}
                     />
                     <Route
-                      path="/create/sample/parameters"
-                      element={<Parameters />}
+                      path="/create/sample/attributes"
+                      element={<Attributes />}
                     />
                     <Route path="/groups" element={<Groups />} />
                     <Route path="/samples" element={<Samples />} />
