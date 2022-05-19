@@ -53,12 +53,9 @@ const Flow = (props: { id: string }) => {
 
   const onInit = (reactFlowInstance: ReactFlowInstance) => {
     console.info("React Flow instance:", reactFlowInstance);
-    console.debug("Sample:", sampleData);
   };
 
   const createFlow = () => {
-    console.debug("Preparing flow...");
-
     const initialNodes = [];
     const initialEdges = [];
 

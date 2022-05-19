@@ -98,7 +98,6 @@ const Parameter = (props: ParameterProps) => {
             onDataUpdate={(data: AttributeStruct) => {
               // Store the received attribute information
               // Get the relevant attribute
-              console.debug("Data:", data);
               setAttributes(
                 attributes.filter((attribute) => {
                   if (attribute.identifier === data.identifier) {

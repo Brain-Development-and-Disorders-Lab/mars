@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-import { Box, Select, Text, TextInput } from "grommet";
+import { Box, DateInput, FileInput, Select, Text, TextInput } from "grommet";
 import { AttributeProps, AttributeStruct } from "types";
 
 const VALID_TYPES = ["number", "file", "url", "date", "string"];
@@ -25,7 +25,49 @@ const Attribute = (props: AttributeProps) => {
 
   useEffect(() => {
     updateData();
-  }, [name, type, data]);
+  }, [data]);
+
+  let dataElement = (
+    <Text>Data:</Text>
+  );
+
+  // Set the data input field depending on the selected type
+  if (type === "file") {
+    // File input
+    dataElement = (
+      <FileInput
+        name="file"
+        onChange={event => {
+          const fileList = event.target.files;
+          if (fileList) {
+            for (let i = 0; i < fileList.length; i += 1) {
+              const file = fileList[i];
+              console.debug("File:", file);
+            }
+          }
+        }}
+      />
+    )
+  } else if (type === "date") {
+    // Date picker
+    dataElement = (
+      <DateInput
+        name="date"
+        format="mm/dd/yyyy"
+        value={data.toString()}
+        onChange={({ value }) => setData(value.toString())}
+      />
+    );
+  } else {
+    // Basic data is displayed as-is
+    dataElement = (
+      <TextInput
+        name="data"
+        value={data.toString()}
+        onChange={(event) => setData(event.target.value)}
+      />
+    );
+  }
 
   return (
     <Box direction="row" gap="small" align="center">
@@ -48,22 +90,7 @@ const Attribute = (props: AttributeProps) => {
         }}
         disabled={props.disabled}
       />
-      {typeof data === "string" || typeof data === "number" ? (
-        <TextInput
-          width="small"
-          placeholder={"Value"}
-          value={data}
-          onChange={(event) => {
-            setData(event.target.value);
-          }}
-          disabled={props.disabled}
-        />
-      ) : (
-        <Box align="center" direction="row" gap="small">
-          <Text>Data:</Text>
-          {data}
-        </Box>
-      )}
+      {dataElement}
     </Box>
   );
 };

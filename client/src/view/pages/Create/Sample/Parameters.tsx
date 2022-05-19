@@ -100,8 +100,6 @@ export const Parameters = ({}) => {
         attributes: data.attributes || [],
       },
     ]);
-    console.debug("Saving data:", data);
-    console.debug("Parameter data:", parameterData);
   };
 
   // Removal callback
