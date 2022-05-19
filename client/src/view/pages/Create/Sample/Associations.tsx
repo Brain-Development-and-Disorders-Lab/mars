@@ -114,7 +114,7 @@ export const Associations = ({}) => {
             <Form
               onChange={() => {}}
               onSubmit={() => {
-                navigate("/create/parameters", { state: associationState });
+                navigate("/create/sample/parameters", { state: associationState });
               }}
             >
               <Box direction="row">
@@ -242,7 +242,7 @@ export const Associations = ({}) => {
                   label="Back"
                   icon={<LinkPrevious />}
                   onClick={() =>
-                    navigate("/create/start", { state: associationState })
+                    navigate("/create/sample/start", { state: associationState })
                   }
                 />
                 <Button

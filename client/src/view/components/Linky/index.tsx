@@ -16,6 +16,7 @@ const Linky = (props: LinkyProps) => {
 
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("An error has occurred.");
+
   const [linkData, setLinkData] = useState(
     {} as ParameterStruct | ProjectStruct | SampleStruct
   );

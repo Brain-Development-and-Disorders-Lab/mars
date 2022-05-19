@@ -219,7 +219,7 @@ export const Parameters = ({}) => {
                 <Button
                   label="Back"
                   icon={<LinkPrevious />}
-                  onClick={() => navigate("/create/associations")}
+                  onClick={() => navigate("/create/sample/associations")}
                 />
                 <Button
                   type="submit"

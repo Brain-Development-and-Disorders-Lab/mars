@@ -13,7 +13,7 @@ import {
 import {
   AddCircle,
   FormClose,
-  Search,
+  Search as SearchIcon,
   SettingsOption,
   User,
   View,
@@ -31,10 +31,11 @@ import Navigation from "./view/components/Navigation";
 import Sidebar from "./view/components/Sidebar";
 
 // Custom pages
-import Start from "./view/pages/Create/Start";
+import Start from "./view/pages/Create/Sample/Start";
 import Projects from "./view/pages/Projects";
-import Associations from "./view/pages/Create/Associations";
-import Parameters from "./view/pages/Create/Parameters";
+import Search from "./view/pages/Search";
+import Associations from "./view/pages/Create/Sample/Associations";
+import Parameters from "./view/pages/Create/Sample/Parameters";
 import Home from "./view/pages/Home";
 
 // Theme
@@ -68,9 +69,9 @@ export const App = () => {
                   pad={{ left: "medium", right: "small", vertical: "small" }}
                 >
                   <Box direction="row" gap="small">
-                    <Search />
+                    <SearchIcon />
                     <Heading level="4" margin="none">
-                      <Link to="#">Search</Link>
+                      <Link to="/search">Search</Link>
                     </Heading>
                   </Box>
                   <Box direction="row" gap="small">
@@ -101,7 +102,7 @@ export const App = () => {
                         >
                           <Heading level="4" margin="small">
                             <Link
-                              to="/create/start"
+                              to="/create/sample/start"
                               onClick={() => setCreateVisible(false)}
                             >
                               Sample
@@ -199,14 +200,15 @@ export const App = () => {
                 <Box flex align="left">
                   <Routes>
                     <Route path="/" element={<Home />} />
-                    <Route path="/create/start" element={<Start />} />
+                    <Route path="/create/sample/start" element={<Start />} />
                     <Route
-                      path="/create/associations"
+                      path="/create/sample/associations"
                       element={<Associations />}
                     />
-                    <Route path="/create/parameters" element={<Parameters />} />
+                    <Route path="/create/sample/parameters" element={<Parameters />} />
                     <Route path="/projects" element={<Projects />} />
                     <Route path="/samples" element={<Samples />} />
+                    <Route path="/search" element={<Search />} />
                     <Route path="samples">
                       <Route path=":id" element={<Sample />} />
                     </Route>

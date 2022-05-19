@@ -113,6 +113,43 @@ samplesRoute
               }
             });
         });
+    } else if (data.associations.products.length > 0) {
+      // Iterate over each product, setting their origin to the current sample being added
+      data.associations.products.forEach((product) => {
+        const productQuery = { _id: new ObjectId(product.id) };
+
+        let productSample: SampleModel;
+        database
+          .collection(SAMPLES_COLLECTION)
+          .findOne(productQuery, (error: any, result: any) => {
+            if (error) {
+              throw error;
+            }
+  
+            productSample = result;
+  
+            // Update origin record of the product to include this sample as a origin
+            const updatedValues = {
+              $set: {
+                associations: {
+                  origin: {
+                    name: data.name,
+                    id: insertedId,
+                  },
+                  products: productSample.associations.products,
+                },
+              },
+            };
+  
+            database
+              .collection(SAMPLES_COLLECTION)
+              .updateOne(productQuery, updatedValues, (error: any, res: any) => {
+                if (error) {
+                  throw error;
+                }
+              });
+          });
+      });
     }
   });
 

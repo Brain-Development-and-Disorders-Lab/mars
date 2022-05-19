@@ -11,6 +11,7 @@ import { run } from "./lib/connection";
 import samplesRoute from "./routes/samples";
 import projectsRoute from "./routes/projects";
 import parametersRoute from "./routes/parameters";
+import searchRoute from "./routes/search";
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -18,7 +19,7 @@ const port = process.env.PORT || 8000;
 // Configure middleware
 app.use(cors());
 app.use(express.json());
-app.use(samplesRoute, projectsRoute, parametersRoute);
+app.use(samplesRoute, projectsRoute, parametersRoute, searchRoute);
 
 // Start the server
 app.listen(port, () => {

@@ -88,7 +88,7 @@ export const Start = ({}) => {
               onChange={() => {}}
               onReset={() => {}}
               onSubmit={() => {
-                navigate("/create/associations", { state: startState });
+                navigate("/create/sample/associations", { state: startState });
               }}
             >
               <Box direction="row" justify="between">
