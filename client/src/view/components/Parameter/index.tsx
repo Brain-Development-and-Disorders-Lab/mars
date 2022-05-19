@@ -22,8 +22,6 @@ const Parameter = (props: ParameterProps) => {
     attributes: attributes,
   };
 
-  console.debug("Attributes:", attributes);
-
   return (
     <Box
       direction="row"

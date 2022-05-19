@@ -122,14 +122,14 @@ export const Sample = () => {
               <TableRow>
                 <TableCell scope="row" align="right" border>
                   <Heading level="4" margin="xsmall">
-                    Primary project
+                    Primary group
                   </Heading>
                 </TableCell>
                 <TableCell border>
                   <Linky
-                    key={sampleData.project.id}
-                    type="projects"
-                    id={sampleData.project.id}
+                    key={sampleData.group.id}
+                    type="groups"
+                    id={sampleData.group.id}
                   />
                 </TableCell>
               </TableRow>
@@ -138,7 +138,7 @@ export const Sample = () => {
 
           <Box direction="row" align="center" background="light-2" round>
             <Heading level="4" margin="small">
-              Associated projects
+              Associated groups
             </Heading>
             <Box
               wrap
@@ -150,14 +150,14 @@ export const Sample = () => {
               pad="small"
               gap="small"
             >
-              {sampleData.projects.length > 0 ? (
-                sampleData.projects.map((project) => {
+              {sampleData.groups.length > 0 ? (
+                sampleData.groups.map((group) => {
                   return (
-                    <Linky key={project.id} type="projects" id={project.id} />
+                    <Linky key={group.id} type="groups" id={group.id} />
                   );
                 })
               ) : (
-                <Text>No associated projects specified.</Text>
+                <Text>No associated groups specified.</Text>
               )}
             </Box>
           </Box>

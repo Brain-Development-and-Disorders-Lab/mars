@@ -1,8 +1,8 @@
 import express from "express";
 
-// 'projectsRoute' is an instance of the express router.
+// 'groupsRoute' is an instance of the express router.
 // The router will be added as a middleware and will take control of requests starting with path /record.
-const projectsRoute = express.Router();
+const groupsRoute = express.Router();
 
 // This will help us connect to the database
 import { getDatabase } from "../lib/connection";
@@ -11,10 +11,10 @@ import { getDatabase } from "../lib/connection";
 const ObjectId = require("mongodb").ObjectId;
 
 // This section will help you get a list of all the records.
-projectsRoute.route("/projects").get(function (req: any, res: any) {
+groupsRoute.route("/groups").get(function (req: any, res: any) {
   let _connect = getDatabase();
   _connect
-    .collection("projects")
+    .collection("groups")
     .find({})
     .toArray(function (err: any, result: any) {
       if (err) throw err;
@@ -23,8 +23,8 @@ projectsRoute.route("/projects").get(function (req: any, res: any) {
 });
 
 // This section will help you get a single record by id
-projectsRoute
-  .route("/projects/:id")
+groupsRoute
+  .route("/groups/:id")
   .get(function (
     req: { params: { id: any } },
     res: { json: (arg0: any) => void }
@@ -32,7 +32,7 @@ projectsRoute
     let _connect = getDatabase();
     let query = { _id: ObjectId(req.params.id) };
     _connect
-      .collection("projects")
+      .collection("groups")
       .findOne(query, function (err: any, result: any) {
         if (err) {
           throw err;
@@ -43,23 +43,23 @@ projectsRoute
   });
 
 // This section will help you delete a record
-projectsRoute
+groupsRoute
   .route("/:id")
   .delete(
     (req: { params: { id: any } }, response: { json: (arg0: any) => void }) => {
       let _connect = getDatabase();
       let query = { _id: ObjectId(req.params.id) };
       _connect
-        .collection("projects")
+        .collection("groups")
         .deleteOne(query, function (err: any, obj: any) {
           if (err) {
             throw err;
           }
-          console.log("1 project deleted");
+          console.log("1 group deleted");
 
           response.json(obj);
         });
     }
   );
 
-export default projectsRoute;
+export default groupsRoute;

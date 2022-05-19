@@ -9,7 +9,7 @@ import { run } from "./lib/connection";
 
 // Routes
 import samplesRoute from "./routes/samples";
-import projectsRoute from "./routes/projects";
+import groupsRoute from "./routes/groups";
 import parametersRoute from "./routes/parameters";
 import searchRoute from "./routes/search";
 
@@ -19,7 +19,7 @@ const port = process.env.PORT || 8000;
 // Configure middleware
 app.use(cors());
 app.use(express.json());
-app.use(samplesRoute, projectsRoute, parametersRoute, searchRoute);
+app.use(samplesRoute, groupsRoute, parametersRoute, searchRoute);
 
 // Start the server
 app.listen(port, () => {

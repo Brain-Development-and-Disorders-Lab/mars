@@ -8,12 +8,12 @@ declare namespace Create {
     name: string;
     created: string;
     owner: string;
-    project: { name: string; id: string };
+    group: { name: string; id: string };
     description: string;
   };
 
   type Associations = Start & {
-    projects: { name: string; id: string }[];
+    groups: { name: string; id: string }[];
     associations: {
       origin: { name: string; id: string };
       products: { name: string; id: string }[];
@@ -52,7 +52,7 @@ export type ParameterCardProps = {
   data: ParameterStruct;
 };
 
-export type ProjectStruct = {
+export type GroupStruct = {
   name: string;
   description: string;
   attributes: string[];
@@ -61,7 +61,7 @@ export type ProjectStruct = {
   };
 };
 
-export type ProjectModel = ProjectStruct & {
+export type GroupModel = GroupStruct & {
   _id: string;
 };
 
@@ -69,9 +69,9 @@ export type SampleStruct = {
   name: string;
   created: string;
   owner: string;
-  project: { name: string; id: string };
+  group: { name: string; id: string };
   description: string;
-  projects: { name: string; id: string }[];
+  groups: { name: string; id: string }[];
   associations: {
     origin: { name: string; id: string };
     products: { name: string; id: string }[];
@@ -86,7 +86,7 @@ export type SampleModel = SampleStruct & {
 export type AttributeStruct = {
   identifier: string;
   name: string;
-  type: "number" | "file" | "url" | "date" | "string";
+  type: "number" | "file" | "url" | "date" | "string" | "sample";
   data: number | string | ReactElement;
 };
 
@@ -104,6 +104,6 @@ export type AttributeGroupProps = {
 };
 
 declare type LinkyProps = {
-  type: "samples" | "projects" | "parameters";
+  type: "samples" | "groups" | "parameters";
   id: string;
 };

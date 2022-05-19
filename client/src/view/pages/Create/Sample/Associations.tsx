@@ -15,21 +15,21 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getData } from "src/lib/database/getData";
 import ErrorLayer from "src/view/components/ErrorLayer";
-import { Create, ProjectModel, SampleModel } from "types";
+import { Create, GroupModel, SampleModel } from "types";
 
 export const Associations = ({}) => {
   const navigate = useNavigate();
 
   // Extract state from prior page
   const { state } = useLocation();
-  const { name, created, project, description, owner } = state as Create.Start;
+  const { name, created, group, description, owner } = state as Create.Start;
 
   // Setup state data
   const [origin, setOrigin] = useState({ name: "", id: "" });
   const [products, setProducts] = useState(
     [] as { name: string; id: string }[]
   );
-  const [additionalProjects, setAdditionalProjects] = useState(
+  const [additionalGroups, setAdditionalGroups] = useState(
     [] as { name: string; id: string }[]
   );
 
@@ -37,7 +37,7 @@ export const Associations = ({}) => {
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("An error has occurred.");
 
-  const [projectData, setProjectData] = useState([] as ProjectModel[]);
+  const [groupData, setGroupData] = useState([] as GroupModel[]);
   const [sampleData, setSampleData] = useState([] as SampleModel[]);
 
   // Options for Select element drop-down menu
@@ -52,8 +52,8 @@ export const Associations = ({}) => {
     name: name,
     created: created,
     owner: owner,
-    project: project,
-    projects: additionalProjects,
+    group: group,
+    groups: additionalGroups,
     description: description,
     associations: {
       origin: origin,
@@ -85,11 +85,11 @@ export const Associations = ({}) => {
       }
     });
 
-    const projects = getData(`/projects`);
+    const groups = getData(`/groups`);
 
     // Handle the response from the database
-    projects.then((value) => {
-      setProjectData(value);
+    groups.then((value) => {
+      setGroupData(value);
 
       // Check the contents of the response
       if (value["error"] !== undefined) {
@@ -122,24 +122,24 @@ export const Associations = ({}) => {
               <Box direction="row">
                 <Box direction="column">
                   <FormField
-                    label="Associated Projects"
-                    name="projects"
-                    info="Specify the projects that this new sample should be associated with. The sample will then show up underneath the specified projects."
+                    label="Associated Groups"
+                    name="groups"
+                    info="Specify the groups that this new sample should be associated with. The sample will then show up underneath the specified groups."
                   >
                     <CheckBoxGroup
-                      options={projectData
-                        .filter((p) => {
-                          return p._id !== project.id;
+                      options={groupData
+                        .filter((g) => {
+                          return g._id !== group.id;
                         })
-                        .map((project) => {
-                          return { name: project.name, id: project._id };
+                        .map((group) => {
+                          return { name: group.name, id: group._id };
                         })}
                       labelKey="name"
                       valueKey="id"
                       onChange={(event) => {
                         if (event) {
-                          setAdditionalProjects([
-                            ...additionalProjects,
+                          setAdditionalGroups([
+                            ...additionalGroups,
                             {
                               name: (
                                 event.option as { name: string; id: string }

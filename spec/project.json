@@ -1,8 +1,8 @@
 {
-  "id": "project_1",
-  "name": "Example Project",
-  "description": "This is an example project that is used as a template for testing.",
-  "attributes": [],
+  "id": "group_1",
+  "name": "Example Group",
+  "description": "This is an example group that is used as a template for testing.",
+  "parameters": [],
   "associations": {
     "samples": []
   }

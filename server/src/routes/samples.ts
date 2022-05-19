@@ -48,9 +48,9 @@ samplesRoute
       name: req.body.name,
       created: req.body.created,
       owner: req.body.owner,
-      project: req.body.project,
+      group: req.body.group,
       description: req.body.description,
-      projects: req.body.projects,
+      groups: req.body.groups,
       associations: {
         origin: req.body.associations.origin,
         products: req.body.associations.products,

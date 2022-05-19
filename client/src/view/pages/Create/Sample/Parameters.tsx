@@ -32,8 +32,8 @@ export const Parameters = ({}) => {
   const {
     name,
     created,
-    project,
-    projects,
+    group,
+    groups,
     description,
     owner,
     associations: { origin, products },
@@ -59,9 +59,9 @@ export const Parameters = ({}) => {
     name: name,
     created: created,
     owner: owner,
-    project: project,
+    group: group,
     description: description,
-    projects: projects,
+    groups: groups,
     associations: {
       origin: origin,
       products: products,
@@ -269,18 +269,18 @@ export const Parameters = ({}) => {
               </Box>
               <Box direction="column" gap="medium">
                 <Text>
-                  <b>Primary project:</b>{" "}
-                  <Linky key={project.id} type="projects" id={project.id} />
+                  <b>Primary group:</b>{" "}
+                  <Linky key={group.id} type="groups" id={group.id} />
                 </Text>
-                {projects.length > 0 && (
+                {groups.length > 0 && (
                   <Text>
-                    <b>Associated projects:</b>{" "}
-                    {projects.map((project) => {
+                    <b>Associated groups:</b>{" "}
+                    {groups.map((group) => {
                       return (
                         <Linky
-                          key={`_${project.id}`}
-                          type="projects"
-                          id={project.id}
+                          key={`_${group.id}`}
+                          type="groups"
+                          id={group.id}
                         />
                       );
                     })}

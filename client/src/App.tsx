@@ -32,7 +32,7 @@ import Sidebar from "./view/components/Sidebar";
 
 // Custom pages
 import Start from "./view/pages/Create/Sample/Start";
-import Projects from "./view/pages/View/Projects";
+import Groups from "./view/pages/View/Groups";
 import Search from "./view/pages/Search";
 import Associations from "./view/pages/Create/Sample/Associations";
 import Parameters from "./view/pages/Create/Sample/Parameters";
@@ -105,7 +105,7 @@ export const App = () => {
                               to="#"
                               onClick={() => setCreateVisible(false)}
                             >
-                              Project
+                              Group
                             </Link>
                           </Heading>
                           <Heading level="4" margin="small">
@@ -164,10 +164,10 @@ export const App = () => {
                         >
                           <Heading level="4" margin="small">
                             <Link
-                              to="/projects"
+                              to="/groups"
                               onClick={() => setViewVisible(false)}
                             >
-                              Projects
+                              Groups
                             </Link>
                           </Heading>
                           <Heading level="4" margin="small">
@@ -209,7 +209,7 @@ export const App = () => {
                       path="/create/sample/parameters"
                       element={<Parameters />}
                     />
-                    <Route path="/projects" element={<Projects />} />
+                    <Route path="/groups" element={<Groups />} />
                     <Route path="/samples" element={<Samples />} />
                     <Route path="/search" element={<Search />} />
                     <Route path="samples">

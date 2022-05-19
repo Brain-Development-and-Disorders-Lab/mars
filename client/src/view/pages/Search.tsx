@@ -77,7 +77,7 @@ const Search = () => {
                 Owner
               </TableCell>
               <TableCell scope="col" border="bottom" align="center">
-                Primary project
+                Primary group
               </TableCell>
               <TableCell scope="col" border="bottom"></TableCell>
             </TableRow>
@@ -97,7 +97,7 @@ const Search = () => {
                       <strong>{result.owner}</strong>
                     </TableCell>
                     <TableCell border="right" align="center">
-                      <Linky type="projects" id={result.project.id} />
+                      <Linky type="groups" id={result.group.id} />
                     </TableCell>
                     <TableCell align="center">
                       <Button
