@@ -50,11 +50,11 @@ export const Sample = () => {
   return (
     <>
       {isLoaded && isError === false ? (
-        <>
+        <Box>
           <Heading level="2" margin="small">
             Sample "{sampleData.name}"
           </Heading>
-          <Box width="large" margin="small">
+          <Box>
             <Table>
               <TableHeader>
                 <TableRow>
@@ -63,6 +63,7 @@ export const Sample = () => {
                       Field
                     </Heading>
                   </TableCell>
+
                   <TableCell scope="col" border align="center">
                     <Heading level="3" margin="small">
                       Value
@@ -81,6 +82,7 @@ export const Sample = () => {
                     <Text>{new Date(sampleData.created).toDateString()}</Text>
                   </TableCell>
                 </TableRow>
+
                 <TableRow>
                   <TableCell scope="row" align="right" border>
                     <Heading level="4" margin="small">
@@ -93,6 +95,7 @@ export const Sample = () => {
                     </Text>
                   </TableCell>
                 </TableRow>
+
                 <TableRow>
                   <TableCell scope="row" align="right" border>
                     <Heading level="4" margin="small">
@@ -103,6 +106,7 @@ export const Sample = () => {
                     <Paragraph>{sampleData.description}</Paragraph>
                   </TableCell>
                 </TableRow>
+
                 <TableRow>
                   <TableCell scope="row" align="right" border>
                     <Heading level="4" margin="small">
@@ -115,24 +119,6 @@ export const Sample = () => {
                       type="projects"
                       id={sampleData.project.id}
                     />
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell scope="row" border align="right">
-                    <Heading level="4" margin="small">
-                      Associated projects
-                    </Heading>
-                  </TableCell>
-                  <TableCell border>
-                    {sampleData.projects.map((project) => {
-                      return (
-                        <Linky
-                          key={project.id}
-                          type="projects"
-                          id={project.id}
-                        />
-                      );
-                    })}
                   </TableCell>
                 </TableRow>
 
@@ -152,46 +138,93 @@ export const Sample = () => {
                     </TableCell>
                   </TableRow>
                 )}
-
-                {sampleData.associations.products.length > 0 && (
-                  <TableRow>
-                    <TableCell scope="row" border align="right">
-                      <Heading level="4" margin="small">
-                        Products
-                      </Heading>
-                    </TableCell>
-                    <TableCell border>
-                      {sampleData.associations.products.map((product) => {
-                        return (
-                          <Linky
-                            key={product.id}
-                            type="samples"
-                            id={product.id}
-                          />
-                        );
-                      })}
-                    </TableCell>
-                  </TableRow>
-                )}
-
-                {sampleData.parameters.length > 0 && (
-                  <TableRow>
-                    <TableCell scope="row" border align="right">
-                      <Heading level="4" margin="small">
-                        Parameters
-                      </Heading>
-                    </TableCell>
-                    <TableCell border>
-                      {sampleData.parameters.map((parameter) => {
-                        return <ParameterCard data={parameter} />;
-                      })}
-                    </TableCell>
-                  </TableRow>
-                )}
               </TableBody>
             </Table>
           </Box>
-        </>
+
+          {sampleData.projects.length > 0 &&
+            <Box>
+              <Heading level="4" margin="small">
+                Associated projects
+              </Heading>
+              <Box
+                wrap
+                round
+                direction="row"
+                justify="center"
+                align="center"
+                margin="small"
+                pad="small"
+                gap="small"
+                background="light-2"
+              >
+                {sampleData.projects.map((project) => {
+                  return (
+                    <Linky
+                      key={project.id}
+                      type="projects"
+                      id={project.id}
+                    />
+                  );
+                })}
+              </Box>
+            </Box>
+          }
+
+          {sampleData.associations.products.length > 0 && (
+            <Box>
+              <Heading level="4" margin="small">
+                Products
+              </Heading>
+              <Box
+                wrap
+                round
+                direction="row"
+                justify="center"
+                align="center"
+                margin="small"
+                pad="small"
+                gap="small"
+                background="light-2"
+              >
+                {sampleData.associations.products.map((product) => {
+                  return (
+                    <Linky
+                      key={product.id}
+                      type="samples"
+                      id={product.id}
+                    />
+                  );
+                })}
+              </Box>
+            </Box>
+          )}
+
+          {sampleData.parameters.length > 0 && (
+            <Box>
+              <Heading level="4" margin="small">
+                Parameters
+              </Heading>
+              <Box
+                wrap
+                round
+                direction="row"
+                justify="center"
+                align="center"
+                margin="small"
+                pad="small"
+                gap="small"
+                background="light-2"
+              >
+                {sampleData.parameters.map((parameter) => {
+                  return (
+                    <ParameterCard data={parameter} />
+                  );
+                })}
+              </Box>
+            </Box>
+          )}
+        </Box>
       ) : (
         <Box fill align="center" justify="center">
           <Spinner size="large" />

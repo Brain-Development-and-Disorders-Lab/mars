@@ -1,4 +1,7 @@
 // Types for incrementally creating a new sample.
+
+import { ReactElement } from "react";
+
 // A new type is declared for each step.
 declare namespace Create {
   type Start = {
@@ -84,7 +87,7 @@ export type AttributeStruct = {
   identifier: string;
   name: string;
   type: "number" | "file" | "url" | "date" | "string";
-  data: number | string;
+  data: number | string | ReactElement;
 };
 
 export type AttributeProps = AttributeStruct & {

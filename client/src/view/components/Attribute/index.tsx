@@ -28,7 +28,7 @@ const Attribute = (props: AttributeProps) => {
   }, [name, type, data]);
 
   return (
-    <Box direction="row" gap="small">
+    <Box direction="row" gap="small" align="center">
       <Box width="medium">
         <TextInput
           width="small"
@@ -48,15 +48,22 @@ const Attribute = (props: AttributeProps) => {
         }}
         disabled={props.disabled}
       />
-      <TextInput
-        width="small"
-        placeholder={"Value"}
-        value={data}
-        onChange={(event) => {
-          setData(event.target.value);
-        }}
-        disabled={props.disabled}
-      />
+      {typeof data === "string" || typeof data === "number" ?
+        <TextInput
+          width="small"
+          placeholder={"Value"}
+          value={data}
+          onChange={(event) => {
+            setData(event.target.value);
+          }}
+          disabled={props.disabled}
+        />
+      :
+        <>
+          {data}
+        </>
+      }
+      
     </Box>
   );
 };

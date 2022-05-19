@@ -1,6 +1,7 @@
 import {
   Anchor,
   Box,
+  Button,
   Card,
   CardBody,
   CardFooter,
@@ -11,14 +12,15 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableHeader,
+  // TableHeader,
   TableRow,
   Text,
 } from "grommet";
-import { Note, Storage } from "grommet-icons";
+import { Close, Note, Storage } from "grommet-icons";
 import React, { useState } from "react";
 
 import { ParameterCardProps } from "types";
+import Attribute from "../Attribute";
 
 const ParameterCard = (props: ParameterCardProps) => {
   const [showDetails, setShowDetails] = useState(false);
@@ -64,30 +66,24 @@ const ParameterCard = (props: ParameterCardProps) => {
       </Card>
       {showDetails && (
         <Layer
+          full
           onEsc={() => setShowDetails(false)}
           onClickOutside={() => setShowDetails(false)}
         >
           <Box margin="small">
-            <Heading level="2" margin="small">
-              Parameter: {props.data.name}
-            </Heading>
+            <Box direction="row" justify="between" margin={{ right: "small" }}>
+              <Heading level="2" margin="small">
+                Parameter details: {props.data.name}
+              </Heading>
+              <Button
+                icon={<Close />}
+                onClick={() => setShowDetails(false)}
+                plain
+              />
+            </Box>
 
             <Heading level="4">Details</Heading>
             <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableCell scope="col" border align="center">
-                    <Heading level="3" margin="small">
-                      Field
-                    </Heading>
-                  </TableCell>
-                  <TableCell scope="col" border align="center">
-                    <Heading level="3" margin="small">
-                      Value
-                    </Heading>
-                  </TableCell>
-                </TableRow>
-              </TableHeader>
               <TableBody>
                 <TableRow>
                   <TableCell scope="row" align="right" border>
@@ -123,61 +119,36 @@ const ParameterCard = (props: ParameterCardProps) => {
             </Table>
 
             <Heading level="4">Attributes</Heading>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableCell scope="col" border align="center">
-                    <Heading level="3" margin="small">
-                      Attribute
-                    </Heading>
-                  </TableCell>
-                  <TableCell scope="col" border align="center">
-                    <Heading level="3" margin="small">
-                      Type
-                    </Heading>
-                  </TableCell>
-                  <TableCell scope="col" border align="center">
-                    <Heading level="3" margin="small">
-                      Value
-                    </Heading>
-                  </TableCell>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {props.data.attributes &&
-                  props.data.attributes.map((attribute) => {
-                    // Adjust the type of element displayed depending on the content
-                    let dataElement = <Text>{attribute.data}</Text>;
-                    switch (attribute.type) {
-                      case "url":
-                        dataElement = (
-                          <Anchor
-                            href={attribute.data.toString()}
-                            color="dark-2"
-                            label={attribute.data}
-                          />
-                        );
-                        break;
-                      default:
-                        break;
-                    }
+            <Box gap="small">
+              {props.data.attributes &&
+                props.data.attributes.map((attribute) => {
+                  // Adjust the type of element displayed depending on the content
+                  let dataElement = <Text>{attribute.data}</Text>;
+                  switch (attribute.type) {
+                    case "url":
+                      dataElement = (
+                        <Anchor
+                          href={attribute.data.toString()}
+                          color="dark-2"
+                          label={<Text truncate>{attribute.data}</Text>}
+                        />
+                      );
+                      break;
+                    default:
+                      break;
+                  }
 
-                    return (
-                      <TableRow>
-                        <TableCell scope="row" align="right" border>
-                          <Heading level="4" margin="small">
-                            {attribute.name}
-                          </Heading>
-                        </TableCell>
-                        <TableCell border>
-                          <Text>{attribute.type}</Text>
-                        </TableCell>
-                        <TableCell border>{dataElement}</TableCell>
-                      </TableRow>
-                    );
-                  })}
-              </TableBody>
-            </Table>
+                  return (
+                    <Attribute
+                      identifier={attribute.identifier}
+                      name={attribute.name}
+                      type={attribute.type}
+                      data={dataElement}
+                      disabled
+                    />
+                  );
+                })}
+            </Box>
           </Box>
         </Layer>
       )}

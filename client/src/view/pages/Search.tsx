@@ -19,8 +19,6 @@ const Search = () => {
   const [errorMessage, setErrorMessage] = useState("An error has occurred.");
 
   useEffect(() => {
-    console.info("Query:", query);
-
     if (query !== "") {
       const data = getData(`/search/${query}`);
 
