@@ -205,7 +205,10 @@ export const App = () => {
                       path="/create/sample/associations"
                       element={<Associations />}
                     />
-                    <Route path="/create/sample/parameters" element={<Parameters />} />
+                    <Route
+                      path="/create/sample/parameters"
+                      element={<Parameters />}
+                    />
                     <Route path="/projects" element={<Projects />} />
                     <Route path="/samples" element={<Samples />} />
                     <Route path="/search" element={<Search />} />

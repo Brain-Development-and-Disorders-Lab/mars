@@ -12,8 +12,7 @@ import ReactFlow, {
   useNodesState,
   useEdgesState,
   MarkerType,
-} from 'react-flow-renderer';
-
+} from "react-flow-renderer";
 
 const Flow = (props: { id: string }) => {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -70,20 +69,16 @@ const Flow = (props: { id: string }) => {
         id: "origin",
         type: "input",
         data: {
-          label: (
-            <>
-              Origin: {sampleData.associations.origin.name}
-            </>
-          ),
+          label: <>Origin: {sampleData.associations.origin.name}</>,
         },
         position: { x: 250, y: 0 },
       });
 
       // Create edge
       initialEdges.push({
-        id: 'origin-sample',
-        source: 'origin',
-        target: 'current',
+        id: "origin-sample",
+        source: "origin",
+        target: "current",
         markerEnd: {
           type: MarkerType.ArrowClosed,
         },
@@ -101,13 +96,9 @@ const Flow = (props: { id: string }) => {
           id: `product_${i}`,
           type: "output",
           data: {
-            label: (
-              <>
-                Product: {product.name}
-              </>
-            ),
+            label: <>Product: {product.name}</>,
           },
-          position: { x: (100 * i), y: 200 },
+          position: { x: 100 * i, y: 200 },
         });
 
         // Create edge
@@ -124,12 +115,21 @@ const Flow = (props: { id: string }) => {
 
     // Default assuming origin and products
     let currentType = "group";
-    if (sampleData.associations.origin.id === "" && sampleData.associations.products.length > 0) {
+    if (
+      sampleData.associations.origin.id === "" &&
+      sampleData.associations.products.length > 0
+    ) {
       // If we have no origin, set to input if we have output
       currentType = "input";
-    } else if (sampleData.associations.origin.id !== "" && sampleData.associations.products.length > 0) {
+    } else if (
+      sampleData.associations.origin.id !== "" &&
+      sampleData.associations.products.length > 0
+    ) {
       currentType = "default";
-    } else if (sampleData.associations.origin.id !== "" && sampleData.associations.products.length === 0) {
+    } else if (
+      sampleData.associations.origin.id !== "" &&
+      sampleData.associations.products.length === 0
+    ) {
       currentType = "output";
     }
 
@@ -138,11 +138,7 @@ const Flow = (props: { id: string }) => {
       id: "current",
       type: currentType,
       data: {
-        label: (
-          <>
-            Current: {sampleData.name}
-          </>
-        ),
+        label: <>Current: {sampleData.name}</>,
       },
       style: {
         color: "#333",
@@ -153,23 +149,17 @@ const Flow = (props: { id: string }) => {
     });
 
     // Set the nodes
-    setNodes([
-      ...nodes,
-      ...initialNodes,
-    ]);
+    setNodes([...nodes, ...initialNodes]);
 
     // Set the edges
-    setEdges([
-      ...edges,
-      ...initialEdges,
-    ]);
+    setEdges([...edges, ...initialEdges]);
 
     setFlowReady(true);
-  }
+  };
 
   return (
     <Box fill background="light-2">
-      {flowReady ?
+      {flowReady ? (
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -182,30 +172,30 @@ const Flow = (props: { id: string }) => {
           <MiniMap
             nodeStrokeColor={(n: any) => {
               if (n.style?.background) return n.style.background;
-              if (n.type === 'input') return '#0041d0';
-              if (n.type === 'output') return '#ff0072';
-              if (n.type === 'default') return '#1a192b';
-    
-              return '#eee';
+              if (n.type === "input") return "#0041d0";
+              if (n.type === "output") return "#ff0072";
+              if (n.type === "default") return "#1a192b";
+
+              return "#eee";
             }}
             nodeColor={(n: any) => {
               if (n.style?.background) return n.style.background;
-    
-              return '#fff';
+
+              return "#fff";
             }}
             nodeBorderRadius={2}
           />
           <Controls />
           <Background color="#aaa" gap={16} />
         </ReactFlow>
-      :
-      <Box fill align="center" justify="center">
-        <Spinner size="large" />
-      </Box>
-     }
-    {isError && <ErrorLayer message={errorMessage} />}
+      ) : (
+        <Box fill align="center" justify="center">
+          <Spinner size="large" />
+        </Box>
+      )}
+      {isError && <ErrorLayer message={errorMessage} />}
     </Box>
   );
-}
+};
 
 export default Flow;

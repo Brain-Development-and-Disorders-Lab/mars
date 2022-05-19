@@ -48,7 +48,7 @@ const Attribute = (props: AttributeProps) => {
         }}
         disabled={props.disabled}
       />
-      {typeof data === "string" || typeof data === "number" ?
+      {typeof data === "string" || typeof data === "number" ? (
         <TextInput
           width="small"
           placeholder={"Value"}
@@ -58,13 +58,12 @@ const Attribute = (props: AttributeProps) => {
           }}
           disabled={props.disabled}
         />
-      :
+      ) : (
         <Box align="center" direction="row" gap="small">
           <Text>Data:</Text>
           {data}
         </Box>
-      }
-      
+      )}
     </Box>
   );
 };

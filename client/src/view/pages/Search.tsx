@@ -1,4 +1,15 @@
-import { Box, Button, Heading, Table, TableBody, TableCell, TableHeader, TableRow, Text, TextInput } from "grommet";
+import {
+  Box,
+  Button,
+  Heading,
+  Table,
+  TableBody,
+  TableCell,
+  TableHeader,
+  TableRow,
+  Text,
+  TextInput,
+} from "grommet";
 import { Search as SearchIcon } from "grommet-icons";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -38,7 +49,10 @@ const Search = () => {
 
   return (
     <>
-      <Heading level="2" margin="small"><SearchIcon />Search</Heading>
+      <Heading level="2" margin="small">
+        <SearchIcon />
+        Search
+      </Heading>
       <Box gap="small" margin="xsmall" pad="small">
         <Text>Begin typing below:</Text>
         <TextInput
@@ -47,7 +61,9 @@ const Search = () => {
         />
       </Box>
       <Box gap="small" margin="xsmall" pad="small">
-      <Heading level="3" margin="small">Results</Heading>
+        <Heading level="3" margin="small">
+          Results
+        </Heading>
         <Table>
           <TableHeader>
             <TableRow>
@@ -67,7 +83,7 @@ const Search = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {results.length > 0 ?
+            {results.length > 0 ? (
               results.map((result) => {
                 return (
                   <TableRow key={result._id}>
@@ -75,9 +91,7 @@ const Search = () => {
                       <strong>{result.name}</strong>
                     </TableCell>
                     <TableCell align="center">
-                      <strong>
-                        {new Date(result.created).toDateString()}
-                      </strong>
+                      <strong>{new Date(result.created).toDateString()}</strong>
                     </TableCell>
                     <TableCell align="center">
                       <strong>{result.owner}</strong>
@@ -95,15 +109,15 @@ const Search = () => {
                   </TableRow>
                 );
               })
-            :
+            ) : (
               <Text>No results for "{query}".</Text>
-            }
+            )}
           </TableBody>
         </Table>
       </Box>
       {isError && <ErrorLayer message={errorMessage} />}
     </>
   );
-}
+};
 
 export default Search;

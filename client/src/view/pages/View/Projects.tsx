@@ -42,53 +42,53 @@ const Projects = () => {
   }, []);
   return (
     <>
-    {isLoaded && isError === false ? (
-      <>
-        <Heading>Projects</Heading>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableCell scope="col" border="bottom" align="center">
-                Name
-              </TableCell>
-              <TableCell scope="col" border="bottom" align="center">
-                Description
-              </TableCell>
-              <TableCell scope="col" border="bottom"></TableCell>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoaded &&
-              projectData.map((value) => {
-                return (
-                  <TableRow key={value._id}>
-                    <TableCell scope="row" border="right" align="center">
-                      <strong>{value.name}</strong>
-                    </TableCell>
-                    <TableCell border="right" align="center">
-                      <Paragraph fill>{value.description}</Paragraph>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Button
-                        primary
-                        label="Details"
-                        onClick={() => navigate(`/projects/${value._id}`)}
-                      />
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-          </TableBody>
-        </Table>
-      </>
-        ) : (
-          <Box fill align="center" justify="center">
-            <Spinner size="large" />
-          </Box>
-        )}
-        {isError && <ErrorLayer message={errorMessage} />}
-      </>
-    );
-}
+      {isLoaded && isError === false ? (
+        <>
+          <Heading>Projects</Heading>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableCell scope="col" border="bottom" align="center">
+                  Name
+                </TableCell>
+                <TableCell scope="col" border="bottom" align="center">
+                  Description
+                </TableCell>
+                <TableCell scope="col" border="bottom"></TableCell>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {isLoaded &&
+                projectData.map((value) => {
+                  return (
+                    <TableRow key={value._id}>
+                      <TableCell scope="row" border="right" align="center">
+                        <strong>{value.name}</strong>
+                      </TableCell>
+                      <TableCell border="right" align="center">
+                        <Paragraph fill>{value.description}</Paragraph>
+                      </TableCell>
+                      <TableCell align="center">
+                        <Button
+                          primary
+                          label="Details"
+                          onClick={() => navigate(`/projects/${value._id}`)}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+            </TableBody>
+          </Table>
+        </>
+      ) : (
+        <Box fill align="center" justify="center">
+          <Spinner size="large" />
+        </Box>
+      )}
+      {isError && <ErrorLayer message={errorMessage} />}
+    </>
+  );
+};
 
 export default Projects;

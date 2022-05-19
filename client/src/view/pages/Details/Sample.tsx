@@ -52,10 +52,9 @@ export const Sample = () => {
     return;
   }, [id]);
 
-
   return (
     <>
-      {isLoaded && isError === false ?
+      {isLoaded && isError === false ? (
         <Box gap="small" margin="small">
           <Box direction="row" justify="between">
             <Heading level="2" margin="small">
@@ -108,16 +107,15 @@ export const Sample = () => {
                   </Heading>
                 </TableCell>
                 <TableCell border>
-                  {sampleData.associations.origin.id !== "" ?
+                  {sampleData.associations.origin.id !== "" ? (
                     <Linky
                       key={sampleData.associations.origin.id}
                       type="samples"
                       id={sampleData.associations.origin.id}
                     />
-                  :
+                  ) : (
                     <Text>No origin specified.</Text>
-                  }
-                  
+                  )}
                 </TableCell>
               </TableRow>
 
@@ -152,19 +150,15 @@ export const Sample = () => {
               pad="small"
               gap="small"
             >
-              {sampleData.projects.length > 0 ?
+              {sampleData.projects.length > 0 ? (
                 sampleData.projects.map((project) => {
                   return (
-                    <Linky
-                      key={project.id}
-                      type="projects"
-                      id={project.id}
-                    />
+                    <Linky key={project.id} type="projects" id={project.id} />
                   );
                 })
-              :
+              ) : (
                 <Text>No associated projects specified.</Text>
-              }
+              )}
             </Box>
           </Box>
 
@@ -183,11 +177,7 @@ export const Sample = () => {
             >
               {sampleData.associations.products.map((product) => {
                 return (
-                  <Linky
-                    key={product.id}
-                    type="samples"
-                    id={product.id}
-                  />
+                  <Linky key={product.id} type="samples" id={product.id} />
                 );
               })}
             </Box>
@@ -208,25 +198,23 @@ export const Sample = () => {
               gap="small"
               background="light-2"
             >
-              {sampleData.parameters.length > 0 ?
+              {sampleData.parameters.length > 0 ? (
                 sampleData.parameters.map((parameter) => {
-                  return (
-                    <ParameterCard data={parameter} />
-                  );
+                  return <ParameterCard data={parameter} />;
                 })
-              :
+              ) : (
                 <Text>No parameters specified.</Text>
-              }
+              )}
             </Box>
           </Box>
         </Box>
-      :
+      ) : (
         <Box fill align="center" justify="center">
           <Spinner size="large" />
         </Box>
-      }
+      )}
       {isError && <ErrorLayer message={errorMessage} />}
-      {showFlow &&
+      {showFlow && (
         <Layer
           full
           onEsc={() => setShowFlow(false)}
@@ -236,15 +224,11 @@ export const Sample = () => {
             <Heading level="2" margin="small">
               Flow: {sampleData.name}
             </Heading>
-            <Button
-              icon={<Close />}
-              onClick={() => setShowFlow(false)}
-              plain
-            />
+            <Button icon={<Close />} onClick={() => setShowFlow(false)} plain />
           </Box>
           <Flow id={sampleData._id} />
         </Layer>
-      }
+      )}
     </>
   );
 };
