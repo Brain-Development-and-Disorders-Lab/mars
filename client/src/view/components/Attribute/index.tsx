@@ -54,7 +54,7 @@ const Attribute = (props: AttributeProps) => {
       <DateInput
         name="date"
         format="mm/dd/yyyy"
-        value={data.toString()}
+        value={data as string}
         onChange={({ value }) => setData(value.toString())}
       />
     );
@@ -63,7 +63,7 @@ const Attribute = (props: AttributeProps) => {
     dataElement = (
       <TextInput
         name="data"
-        value={data.toString()}
+        value={data as string | number}
         onChange={(event) => setData(event.target.value)}
       />
     );

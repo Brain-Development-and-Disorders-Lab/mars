@@ -74,7 +74,6 @@ export const Parameters = ({}) => {
 
     // Handle the response from the database
     parameters.then((value) => {
-      // setParameters(value);
       setParameterOptions(value);
 
       // Check the contents of the response

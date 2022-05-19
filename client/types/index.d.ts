@@ -29,7 +29,7 @@ export type ParameterStruct = {
   name: string;
   description: string;
   type: "physical" | "digital";
-  attributes?: AttributeStruct[];
+  attributes: AttributeStruct[];
 };
 
 export type ParameterModel = ParameterStruct & {

@@ -20,6 +20,7 @@ const ParameterGroup = (props: ParameterGroupProps) => {
               type={parameter.type}
               removeCallback={props.onRemove}
               dataCallback={props.onDataUpdate}
+              attributes={parameter.attributes}
             />
           );
         })

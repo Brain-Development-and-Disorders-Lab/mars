@@ -11,9 +11,9 @@ const Parameter = (props: ParameterProps) => {
   const [name, setName] = useState(props.name);
   const [type, setType] = useState(props.type);
   const [description, setDescription] = useState(props.description);
+  const [attributes, setAttributes] = useState(props.attributes);
   const [finished, setFinished] = useState(false);
 
-  const [attributes, setAttributes] = useState([] as AttributeStruct[]);
   const parameterData: ParameterProps = {
     identifier: props.identifier,
     name: name,
@@ -21,6 +21,8 @@ const Parameter = (props: ParameterProps) => {
     description: description,
     attributes: attributes,
   };
+
+  console.debug("Attributes:", attributes);
 
   return (
     <Box
