@@ -16,9 +16,9 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getData } from "src/lib/database/getData";
 import { SampleStruct } from "types";
-import ErrorLayer from "../components/ErrorLayer";
-import Linky from "../components/Linky";
-import ParameterCard from "../components/ParameterCard";
+import ErrorLayer from "../../components/ErrorLayer";
+import Linky from "../../components/Linky";
+import ParameterCard from "../../components/ParameterCard";
 
 export const Sample = () => {
   const { id } = useParams();

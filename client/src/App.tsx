@@ -32,7 +32,7 @@ import Sidebar from "./view/components/Sidebar";
 
 // Custom pages
 import Start from "./view/pages/Create/Sample/Start";
-import Projects from "./view/pages/Projects";
+import Projects from "./view/pages/View/Projects";
 import Search from "./view/pages/Search";
 import Associations from "./view/pages/Create/Sample/Associations";
 import Parameters from "./view/pages/Create/Sample/Parameters";
@@ -40,8 +40,8 @@ import Home from "./view/pages/Home";
 
 // Theme
 import { theme } from "./theme";
-import Sample from "./view/pages/Sample";
-import Samples from "./view/pages/Samples";
+import Sample from "./view/pages/Details/Sample";
+import Samples from "./view/pages/View/Samples";
 
 export const App = () => {
   const [showSidebar, setShowSidebar] = useState(false);
@@ -102,6 +102,14 @@ export const App = () => {
                         >
                           <Heading level="4" margin="small">
                             <Link
+                              to="#"
+                              onClick={() => setCreateVisible(false)}
+                            >
+                              Project
+                            </Link>
+                          </Heading>
+                          <Heading level="4" margin="small">
+                            <Link
                               to="/create/sample/start"
                               onClick={() => setCreateVisible(false)}
                             >
@@ -114,14 +122,6 @@ export const App = () => {
                               onClick={() => setCreateVisible(false)}
                             >
                               Transform
-                            </Link>
-                          </Heading>
-                          <Heading level="4" margin="small">
-                            <Link
-                              to="#"
-                              onClick={() => setCreateVisible(false)}
-                            >
-                              Project
                             </Link>
                           </Heading>
                           <Heading level="4" margin="small">

@@ -98,7 +98,7 @@ const Search = () => {
                 );
               })
             :
-              <Text>No results for "{query}"...</Text>
+              <Text>No results for "{query}".</Text>
             }
           </TableBody>
         </Table>

@@ -13,8 +13,8 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getData } from "src/lib/database/getData";
 import { SampleModel } from "types";
-import ErrorLayer from "../components/ErrorLayer";
-import Linky from "../components/Linky";
+import ErrorLayer from "../../components/ErrorLayer";
+import Linky from "../../components/Linky";
 
 const Samples = () => {
   const navigate = useNavigate();
