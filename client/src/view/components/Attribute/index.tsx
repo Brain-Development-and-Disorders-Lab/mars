@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-import { Box, Select, TextInput } from "grommet";
+import { Box, Select, Text, TextInput } from "grommet";
 import { AttributeProps, AttributeStruct } from "types";
 
 const VALID_TYPES = ["number", "file", "url", "date", "string"];
@@ -59,9 +59,10 @@ const Attribute = (props: AttributeProps) => {
           disabled={props.disabled}
         />
       :
-        <>
+        <Box align="center" direction="row" gap="small">
+          <Text>Data:</Text>
           {data}
-        </>
+        </Box>
       }
       
     </Box>

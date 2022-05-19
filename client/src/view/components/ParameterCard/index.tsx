@@ -82,41 +82,43 @@ const ParameterCard = (props: ParameterCardProps) => {
               />
             </Box>
 
-            <Heading level="4">Details</Heading>
-            <Table>
-              <TableBody>
-                <TableRow>
-                  <TableCell scope="row" align="right" border>
-                    <Heading level="4" margin="small">
-                      Name
-                    </Heading>
-                  </TableCell>
-                  <TableCell border>
-                    <Text>{props.data.name}</Text>
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell scope="row" align="right" border>
-                    <Heading level="4" margin="small">
-                      Description
-                    </Heading>
-                  </TableCell>
-                  <TableCell border>
-                    <Paragraph>{props.data.description}</Paragraph>
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell scope="row" align="right" border>
-                    <Heading level="4" margin="small">
-                      Type
-                    </Heading>
-                  </TableCell>
-                  <TableCell border>
-                    <Text>{props.data.type}</Text>
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
+            <Box width={{ min: "small", max: "medium" }}>
+              <Heading level="4">Details</Heading>
+              <Table>
+                <TableBody>
+                  <TableRow>
+                    <TableCell scope="row" align="right" border>
+                      <Heading level="4" margin="small">
+                        Name
+                      </Heading>
+                    </TableCell>
+                    <TableCell border>
+                      <Text>{props.data.name}</Text>
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell scope="row" align="right" border>
+                      <Heading level="4" margin="small">
+                        Description
+                      </Heading>
+                    </TableCell>
+                    <TableCell border>
+                      <Paragraph>{props.data.description}</Paragraph>
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell scope="row" align="right" border>
+                      <Heading level="4" margin="small">
+                        Type
+                      </Heading>
+                    </TableCell>
+                    <TableCell border>
+                      <Text>{props.data.type}</Text>
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </Box>
 
             <Heading level="4">Attributes</Heading>
             <Box gap="small">
