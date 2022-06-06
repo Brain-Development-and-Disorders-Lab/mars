@@ -1,18 +1,19 @@
+// React and Grommet
 import React, { useRef, useState } from "react";
 import {
+  Avatar,
   Box,
   Button,
   Collapsible,
-  Heading,
-  Grommet,
-  Layer,
-  ResponsiveContext,
-  Avatar,
   Drop,
-} from "grommet";
+  Grommet,
+  Heading,
+} from "grommet/components";
+import { ResponsiveContext } from "grommet/contexts/ResponsiveContext";
 import {
   AddCircle,
   FormClose,
+  Layer,
   Search as SearchIcon,
   SettingsOption,
   User,
@@ -37,11 +38,11 @@ import Search from "./view/pages/Search";
 import Associations from "./view/pages/Create/Sample/Associations";
 import Attributes from "./view/pages/Create/Sample/Attributes";
 import Home from "./view/pages/Home";
+import Sample from "./view/pages/Details/Sample";
+import Samples from "./view/pages/View/Samples";
 
 // Theme
 import { theme } from "./theme";
-import Sample from "./view/pages/Details/Sample";
-import Samples from "./view/pages/View/Samples";
 
 export const App = () => {
   const [showSidebar, setShowSidebar] = useState(false);

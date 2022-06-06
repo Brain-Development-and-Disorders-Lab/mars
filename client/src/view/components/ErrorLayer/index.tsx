@@ -1,6 +1,9 @@
+// React and Grommet
+import React from "react";
 import { Box, Button, Heading, Layer, Text } from "grommet";
 import { LinkNext } from "grommet-icons";
-import React from "react";
+
+// Navigation
 import { useNavigate } from "react-router-dom";
 
 const ErrorLayer = (props: { message: string }) => {

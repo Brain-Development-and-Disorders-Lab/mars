@@ -1,7 +1,11 @@
-import { Button } from "grommet";
+// React and Grommet
 import React, { useEffect, useState } from "react";
+import { Button } from "grommet/components";
 
+// Navigation
 import { useNavigate } from "react-router-dom";
+
+// Database and models
 import { getData } from "src/lib/database/getData";
 import {
   LinkyProps,
@@ -9,6 +13,8 @@ import {
   CollectionStruct,
   SampleStruct,
 } from "types";
+
+// Custom components
 import ErrorLayer from "../ErrorLayer";
 
 const Linky = (props: LinkyProps) => {

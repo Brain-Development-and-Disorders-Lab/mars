@@ -1,9 +1,12 @@
+// React and Grommet
 import React from "react";
+import { Box, Text } from "grommet/components";
 
-import { Box, Text } from "grommet";
-
+// Types
 import { BlockGroupProps } from "types";
-import Block from "../Block";
+
+// Custom components
+import Block from "src/view/components/Block";
 
 const BlockGroup = (props: BlockGroupProps) => {
   return (

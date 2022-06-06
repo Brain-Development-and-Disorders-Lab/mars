@@ -1,5 +1,6 @@
+// React and Grommet
 import React from "react";
-import { Box, Heading } from "grommet";
+import { Box, Heading } from "grommet/components";
 import { SettingsOption } from "grommet-icons";
 
 const Sidebar = () => (

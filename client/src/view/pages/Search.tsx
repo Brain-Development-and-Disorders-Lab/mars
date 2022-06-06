@@ -1,3 +1,5 @@
+// React and Grommet
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -9,12 +11,17 @@ import {
   TableRow,
   Text,
   TextInput,
-} from "grommet";
+} from "grommet/components";
 import { Search as SearchIcon } from "grommet-icons";
-import React, { useEffect, useState } from "react";
+
+// Navigation
 import { useNavigate } from "react-router-dom";
+
+// Database and models
 import { getData } from "src/lib/database/getData";
 import { SampleModel } from "types";
+
+// Custom components
 import ErrorLayer from "../components/ErrorLayer";
 import Linky from "../components/Linky";
 

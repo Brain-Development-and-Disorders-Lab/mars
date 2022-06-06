@@ -1,3 +1,5 @@
+// React and Grommet
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -9,19 +11,21 @@ import {
   Spinner,
   Tag,
   Text,
-} from "grommet";
+} from "grommet/components";
 import { Add, Checkmark, LinkPrevious } from "grommet-icons";
 
-import React, { useEffect, useState } from "react";
+// Navigation
 import { useLocation, useNavigate } from "react-router-dom";
+
+// Database and models
 import { getData } from "src/lib/database/getData";
 import { pushData } from "src/lib/database/pushData";
-import ErrorLayer from "src/view/components/ErrorLayer";
-import Linky from "src/view/components/Linky";
+import { Create, AttributeModel, AttributeProps } from "types";
 
 // Custom components
 import AttributeGroup from "src/view/components/AttributeGroup";
-import { Create, AttributeModel, AttributeProps } from "types";
+import ErrorLayer from "src/view/components/ErrorLayer";
+import Linky from "src/view/components/Linky";
 
 export const Attributes = ({}) => {
   const navigate = useNavigate();
@@ -269,7 +273,11 @@ export const Attributes = ({}) => {
               <Box direction="column" gap="medium">
                 <Text>
                   <b>Primary collection:</b>{" "}
-                  <Linky key={collection.id} type="collections" id={collection.id} />
+                  <Linky
+                    key={collection.id}
+                    type="collections"
+                    id={collection.id}
+                  />
                 </Text>
                 {collections.length > 0 && (
                   <Text>

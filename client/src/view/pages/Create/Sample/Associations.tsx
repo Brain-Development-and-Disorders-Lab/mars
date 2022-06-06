@@ -1,3 +1,5 @@
+// React and Grommet
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -8,21 +10,26 @@ import {
   Select,
   Spinner,
   Tag,
-} from "grommet";
+} from "grommet/components";
 import { LinkNext, LinkPrevious } from "grommet-icons";
 
-import React, { useEffect, useState } from "react";
+// Navigation
 import { useLocation, useNavigate } from "react-router-dom";
+
+// Database and models
 import { getData } from "src/lib/database/getData";
-import ErrorLayer from "src/view/components/ErrorLayer";
 import { Create, CollectionModel, SampleModel } from "types";
+
+// Custom components
+import ErrorLayer from "src/view/components/ErrorLayer";
 
 export const Associations = ({}) => {
   const navigate = useNavigate();
 
   // Extract state from prior page
   const { state } = useLocation();
-  const { name, created, collection, description, owner } = state as Create.Start;
+  const { name, created, collection, description, owner } =
+    state as Create.Start;
 
   // Setup state data
   const [origin, setOrigin] = useState({ name: "", id: "" });

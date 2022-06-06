@@ -15,7 +15,7 @@
     "@fontsource/roboto": "^4.5.5",
     "@types/react-router-dom": "^5.3.3",
     "consola": "^2.15.3",
-    "grommet": "^2.23.0",
+    "grommet": "^2.24.0",
     "grommet-icons": "^4.7.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",

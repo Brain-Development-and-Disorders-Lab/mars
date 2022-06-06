@@ -1,3 +1,5 @@
+// React and Grommet
+import React, { useState } from "react";
 import {
   Anchor,
   Box,
@@ -14,12 +16,14 @@ import {
   TableCell,
   TableRow,
   Text,
-} from "grommet";
+} from "grommet/components";
 import { Close, Note, Storage } from "grommet-icons";
-import React, { useState } from "react";
 
+// Types
 import { AttributeCardProps } from "types";
-import Block from "../Block";
+
+// Custom components
+import Block from "src/view/components/Block";
 
 const AttributeCard = (props: AttributeCardProps) => {
   const [showDetails, setShowDetails] = useState(false);

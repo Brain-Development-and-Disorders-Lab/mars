@@ -1,3 +1,8 @@
+/**
+ * Generate a mixed-format ID:
+ *   `id_ABCDE_123`
+ * @return {string}
+ */
 export const pseudoId = () => {
   return (
     "id_" +

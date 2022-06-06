@@ -1,5 +1,6 @@
+// React and Grommet
 import React from "react";
-import { Box } from "grommet";
+import { Box } from "grommet/components";
 
 const Navigation = (props: any) => (
   <Box

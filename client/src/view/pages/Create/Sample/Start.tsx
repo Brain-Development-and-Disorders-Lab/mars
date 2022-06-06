@@ -1,3 +1,5 @@
+// React and Grommet
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -9,15 +11,21 @@ import {
   Spinner,
   TextArea,
   TextInput,
-} from "grommet";
+} from "grommet/components";
 import { LinkNext } from "grommet-icons";
 
-import React, { useEffect, useState } from "react";
+// Navigation
 import { useLocation, useNavigate } from "react-router-dom";
+
+// Database and models
 import { getData } from "src/lib/database/getData";
-import { pseudoId } from "src/lib/functions";
-import ErrorLayer from "src/view/components/ErrorLayer";
 import { Create, CollectionModel } from "types";
+
+// Utility functions
+import { pseudoId } from "src/lib/functions";
+
+// Custom components
+import ErrorLayer from "src/view/components/ErrorLayer";
 
 export const Start = ({}) => {
   const navigate = useNavigate();

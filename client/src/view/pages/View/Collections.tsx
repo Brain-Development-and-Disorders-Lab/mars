@@ -1,3 +1,5 @@
+// React and Grommet
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -9,19 +11,27 @@ import {
   TableCell,
   TableHeader,
   TableRow,
-} from "grommet";
-import React, { useEffect, useState } from "react";
+} from "grommet/components";
+import { Folder } from "grommet-icons";
+
+// Navigation
 import { useNavigate } from "react-router-dom";
+
+// Database and models
 import { getData } from "src/lib/database/getData";
-import ErrorLayer from "src/view/components/ErrorLayer";
 import { CollectionModel } from "types";
+
+// Custom components
+import ErrorLayer from "src/view/components/ErrorLayer";
 
 const Collections = () => {
   const navigate = useNavigate();
   const [isLoaded, setIsLoaded] = useState(false);
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("An error has occurred.");
-  const [collectionsData, setCollectionsData] = useState([] as CollectionModel[]);
+  const [collectionsData, setCollectionsData] = useState(
+    [] as CollectionModel[]
+  );
 
   useEffect(() => {
     const response = getData(`/collections`);
@@ -44,7 +54,10 @@ const Collections = () => {
     <>
       {isLoaded && isError === false ? (
         <>
-          <Heading>Collections</Heading>
+          <Box direction="row" align="center" gap="small">
+            <Heading level="2">Collections</Heading>
+            <Folder size="medium" />
+          </Box>
           <Table>
             <TableHeader>
               <TableRow>

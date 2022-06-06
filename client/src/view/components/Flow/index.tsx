@@ -1,7 +1,12 @@
-import { Box, Spinner } from "grommet";
+// React and Grommet
 import React, { useEffect, useState } from "react";
+import { Box, Spinner } from "grommet/components";
+
+// Database and models
 import { getData } from "src/lib/database/getData";
 import { SampleModel } from "types";
+
+// Custom components
 import ErrorLayer from "../ErrorLayer";
 
 import ReactFlow, {

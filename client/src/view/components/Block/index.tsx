@@ -1,11 +1,25 @@
+// React and Grommet
 import React, { useEffect, useState } from "react";
+import {
+  Anchor,
+  Box,
+  DateInput,
+  FileInput,
+  Select,
+  Spinner,
+  Text,
+  TextInput,
+} from "grommet/components";
 
-import { Anchor, Box, DateInput, FileInput, Select, Spinner, Text, TextInput } from "grommet";
-import { BlockProps, BlockStruct, SampleModel } from "types";
+// Database and models
 import { getData } from "src/lib/database/getData";
-import ErrorLayer from "../ErrorLayer";
-import Linky from "../Linky";
+import { BlockProps, BlockStruct, SampleModel } from "types";
 
+// Custom components
+import ErrorLayer from "src/view/components/ErrorLayer";
+import Linky from "src/view/components/Linky";
+
+// Constants
 const VALID_TYPES = ["number", "file", "url", "date", "string", "sample"];
 
 const Block = (props: BlockProps) => {
@@ -56,33 +70,33 @@ const Block = (props: BlockProps) => {
     updateData();
   }, [data]);
 
-  let dataElement = (
-    <Text>Data:</Text>
-  );
+  let dataElement = <Text>Data:</Text>;
 
   // Set the data input field depending on the selected type
   if (type === "file") {
     // File input
-    dataElement = (props.disabled ?
-        <Text>Filename</Text>
-      :
+    dataElement = props.disabled ? (
+      <Text>Filename</Text>
+    ) : (
       <Box background="brand">
         <FileInput
           name="file"
           color="light-1"
-          onChange={event => {
-            const fileList = event.target.files;
-            if (fileList) {
-              for (let i = 0; i < fileList.length; i += 1) {
-                const file = fileList[i];
-                console.debug("File:", file);
+          onChange={(event) => {
+            if (event) {
+              const fileList = event.target.files;
+              if (fileList) {
+                for (let i = 0; i < fileList.length; i += 1) {
+                  const file = fileList[i];
+                  console.debug("File:", file);
+                }
               }
             }
           }}
           disabled={props.disabled}
         />
       </Box>
-    )
+    );
   } else if (type === "date") {
     // Date picker
     dataElement = (
@@ -96,43 +110,36 @@ const Block = (props: BlockProps) => {
     );
   } else if (type === "sample") {
     // Sample picker
-    dataElement = (props.disabled ?
-        <Linky type="samples" id={(data as unknown as {name: string, id: string}).id} />
-      :
-        <Select
-          options={optionData.map((sample) => {
-            return { name: sample.name, id: sample._id };
-          })}
-          labelKey="name"
-          value={data as string}
-          valueKey="name"
-          onChange={({ value }) => {
-            setData(value);
-          }}
-          searchPlaceholder="Search..."
-          onSearch={(query) => {
-            const escapedText = query.replace(
-              /[-\\^$*+?.()|[\]{}]/g,
-              "\\$&"
-            );
-            const exp = new RegExp(escapedText, "i");
-            setOptionData(
-              sampleData
-                .filter((sample) => exp.test(sample.name))
-            );
-          }}
+    dataElement = props.disabled ? (
+      <Linky
+        type="samples"
+        id={(data as unknown as { name: string; id: string }).id}
+      />
+    ) : (
+      <Select
+        options={optionData.map((sample) => {
+          return { name: sample.name, id: sample._id };
+        })}
+        labelKey="name"
+        value={data as string}
+        valueKey="name"
+        onChange={({ value }) => {
+          setData(value);
+        }}
+        searchPlaceholder="Search..."
+        onSearch={(query) => {
+          const escapedText = query.replace(/[-\\^$*+?.()|[\]{}]/g, "\\$&");
+          const exp = new RegExp(escapedText, "i");
+          setOptionData(sampleData.filter((sample) => exp.test(sample.name)));
+        }}
         disabled={props.disabled}
       />
     );
   } else if (type === "url") {
     // URL field
-    dataElement = (props.disabled ?
-      <Anchor
-        label={data as string}
-        href={data as string}
-        color="dark-1"
-      />
-    :
+    dataElement = props.disabled ? (
+      <Anchor label={data as string} href={data as string} color="dark-1" />
+    ) : (
       <TextInput
         name="url"
         placeholder="URL"
@@ -175,14 +182,9 @@ const Block = (props: BlockProps) => {
         }}
         disabled={props.disabled}
       />
-      {isLoaded ?
-        dataElement
-      :
-        <Spinner size="small" />
-      }
+      {isLoaded ? dataElement : <Spinner size="small" />}
       {isError && <ErrorLayer message={errorMessage} />}
     </Box>
-    
   );
 };
 

@@ -1,9 +1,12 @@
+// React and Grommet
 import React from "react";
+import { Box, Text } from "grommet/components";
 
-import { Box, Text } from "grommet";
-
+// Types
 import { AttributeGroupProps } from "types";
-import Attribute from "../Attribute";
+
+// Custom components
+import Attribute from "src/view/components/Attribute";
 
 const AttributeGroup = (props: AttributeGroupProps) => {
   return (

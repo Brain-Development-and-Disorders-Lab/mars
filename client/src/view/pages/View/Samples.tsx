@@ -1,18 +1,26 @@
+// React and Grommet
+import React, { useEffect, useState } from "react";
 import {
+  Anchor,
   Box,
   Button,
-  Heading,
+  PageHeader,
   Spinner,
   Table,
   TableBody,
   TableCell,
   TableHeader,
   TableRow,
-} from "grommet";
-import React, { useEffect, useState } from "react";
+} from "grommet/components";
+
+// Navigation
 import { useNavigate } from "react-router-dom";
+
+// Database and models
 import { getData } from "src/lib/database/getData";
 import { SampleModel } from "types";
+
+// Custom components
 import ErrorLayer from "../../components/ErrorLayer";
 import Linky from "../../components/Linky";
 
@@ -46,7 +54,11 @@ const Samples = () => {
     <>
       {isLoaded && isError === false ? (
         <>
-          <Heading>Samples</Heading>
+          <PageHeader
+            title="Samples"
+            subtitle="View all Samples currently tracked by the system."
+            parent={<Anchor label="Dashboard" href="/" />}
+          />
           <Table>
             <TableHeader>
               <TableRow>

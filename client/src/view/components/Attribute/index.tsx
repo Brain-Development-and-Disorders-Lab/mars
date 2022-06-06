@@ -1,11 +1,23 @@
-import { Box, Button, Heading, Select, TextArea, TextInput } from "grommet";
+// React and Grommet
+import React, { useState } from "react";
+import {
+  Box,
+  Button,
+  Heading,
+  Select,
+  TextArea,
+  TextInput,
+} from "grommet/components";
 import { Add, Save, SettingsOption, StatusDisabled } from "grommet-icons";
 
-import React, { useState } from "react";
+// Types
 import { BlockStruct, AttributeProps } from "types";
-import BlockGroup from "../BlockGroup";
 
-const validTypes = ["physical", "digital"];
+// Custom components
+import BlockGroup from "src/view/components/BlockGroup";
+
+// Constants
+const VALID_TYPES = ["physical", "digital"];
 
 const Attribute = (props: AttributeProps) => {
   const [name, setName] = useState(props.name);
@@ -41,7 +53,7 @@ const Attribute = (props: AttributeProps) => {
         />
         <Select
           placeholder="Type"
-          options={validTypes}
+          options={VALID_TYPES}
           value={type}
           width="auto"
           onChange={({ option }) => setType(option)}

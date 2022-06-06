@@ -16,8 +16,7 @@ export const theme = {
     },
   },
   anchor: {
-    color: "#FFFFFF",
-    outline: "#FFFFFF",
+    color: "brand",
   },
   card: {
     hover: {

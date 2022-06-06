@@ -1,27 +1,33 @@
+// React and Grommet
+import React, { useEffect, useState } from "react";
 import {
   Anchor,
   Box,
   Button,
   Heading,
   Layer,
-  Paragraph,
   Spinner,
   Table,
   TableBody,
   TableCell,
   TableRow,
   Text,
-} from "grommet";
-import { Close } from "grommet-icons";
+  TextInput,
+} from "grommet/components";
+import { Add, Close } from "grommet-icons";
 
-import React, { useEffect, useState } from "react";
+// Navigation
 import { useParams } from "react-router-dom";
+
+// Database and models
 import { getData } from "src/lib/database/getData";
-import Flow from "src/view/components/Flow";
 import { SampleModel } from "types";
-import ErrorLayer from "../../components/ErrorLayer";
-import Linky from "../../components/Linky";
-import AttributeCard from "../../components/AttributeCard";
+
+// Custom components
+import Flow from "src/view/components/Flow";
+import ErrorLayer from "src/view/components/ErrorLayer";
+import Linky from "src/view/components/Linky";
+import AttributeCard from "src/view/components/AttributeCard";
 
 export const Sample = () => {
   const { id } = useParams();
@@ -35,7 +41,16 @@ export const Sample = () => {
   const [showFlow, setShowFlow] = useState(false);
 
   const [editing, setEditing] = useState(false);
-  const [changed, setChanged] = useState(false);
+  // const [changed, setChanged] = useState(false);
+  const [description, setDescription] = useState("");
+
+  const handleEditClick = () => {
+    if (editing) {
+      setEditing(false);
+    } else {
+      setEditing(true);
+    }
+  };
 
   useEffect(() => {
     const response = getData(`/samples/${id}`);
@@ -55,6 +70,13 @@ export const Sample = () => {
     return;
   }, [id]);
 
+  useEffect(() => {
+    if (isLoaded) {
+      // Update the state of editable data fields
+      setDescription(sampleData.description);
+    }
+  }, [isLoaded]);
+
   return (
     <>
       {isLoaded && isError === false ? (
@@ -63,7 +85,18 @@ export const Sample = () => {
             <Heading level="2" margin="small">
               Sample "{sampleData.name}"
             </Heading>
-            <Button label={"Flow"} primary onClick={() => setShowFlow(true)} />
+            <Box direction="row" gap="small">
+              <Button
+                label={"View Flow"}
+                primary
+                onClick={() => setShowFlow(true)}
+              />
+              <Button
+                label={editing ? "Save" : "Edit"}
+                primary
+                onClick={() => handleEditClick()}
+              />
+            </Box>
           </Box>
 
           <Table>
@@ -99,7 +132,13 @@ export const Sample = () => {
                   </Heading>
                 </TableCell>
                 <TableCell border>
-                  <Paragraph>{sampleData.description}</Paragraph>
+                  <TextInput
+                    value={description}
+                    onChange={(event) => setDescription(event.target.value)}
+                    disabled={!editing}
+                    size="large"
+                    plain
+                  />
                 </TableCell>
               </TableRow>
 
@@ -110,15 +149,20 @@ export const Sample = () => {
                   </Heading>
                 </TableCell>
                 <TableCell border>
-                  {sampleData.associations.origin.id !== "" ? (
-                    <Linky
-                      key={sampleData.associations.origin.id}
-                      type="samples"
-                      id={sampleData.associations.origin.id}
-                    />
-                  ) : (
-                    <Text>No origin specified.</Text>
-                  )}
+                  <Box direction="row" gap="small" align="center">
+                    {sampleData.associations.origin.id !== "" ? (
+                      <Linky
+                        key={sampleData.associations.origin.id}
+                        type="samples"
+                        id={sampleData.associations.origin.id}
+                      />
+                    ) : (
+                      <Text>No origin specified.</Text>
+                    )}
+                    {editing ? (
+                      <Button icon={<Add />} primary disabled={!editing} />
+                    ) : null}
+                  </Box>
                 </TableCell>
               </TableRow>
 
@@ -156,7 +200,11 @@ export const Sample = () => {
               {sampleData.collections.length > 0 ? (
                 sampleData.collections.map((collection) => {
                   return (
-                    <Linky key={collection.id} type="collections" id={collection.id} />
+                    <Linky
+                      key={collection.id}
+                      type="collections"
+                      id={collection.id}
+                    />
                   );
                 })
               ) : (

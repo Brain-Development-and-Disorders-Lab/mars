@@ -1,5 +1,6 @@
 import consola from "consola";
 
+// Get the URL of the database
 import { DATABASE_URL } from "src/variables";
 
 /**
