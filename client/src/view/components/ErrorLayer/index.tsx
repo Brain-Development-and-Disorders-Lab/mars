@@ -1,6 +1,6 @@
 // React and Grommet
 import React from "react";
-import { Box, Button, Heading, Layer, Text } from "grommet";
+import { Box, Button, Heading, Layer, Text } from "grommet/components";
 import { LinkNext } from "grommet-icons";
 
 // Navigation
