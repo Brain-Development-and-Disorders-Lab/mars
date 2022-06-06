@@ -2,7 +2,7 @@ import express, { response } from "express";
 import { ObjectId } from "mongodb";
 
 // Utility functions
-import { getDatabase } from "../lib/connection";
+import { getDatabase } from "../lib/database/connection";
 
 const searchRoute = express.Router();
 

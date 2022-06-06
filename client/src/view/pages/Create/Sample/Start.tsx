@@ -17,7 +17,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { getData } from "src/lib/database/getData";
 import { pseudoId } from "src/lib/functions";
 import ErrorLayer from "src/view/components/ErrorLayer";
-import { Create, GroupModel } from "types";
+import { Create, CollectionModel } from "types";
 
 export const Start = ({}) => {
   const navigate = useNavigate();
@@ -33,39 +33,39 @@ export const Start = ({}) => {
       : (state as Create.Associations).created;
   const initialOwner =
     state === null ? "" : (state as Create.Associations).owner;
-  const initialGroup =
+  const initialCollection =
     state === null
       ? { name: "", id: "" }
-      : (state as Create.Associations).group;
+      : (state as Create.Associations).collection;
   const initialDescription =
     state === null ? "" : (state as Create.Associations).description;
 
   const [name, setName] = useState(initialName);
   const [created, setCreated] = useState(initialCreated);
   const [owner, setOwner] = useState(initialOwner);
-  const [group, setGroup] = useState(initialGroup);
+  const [collection, setCollection] = useState(initialCollection);
   const [description, setDescription] = useState(initialDescription);
 
   const [isLoaded, setIsLoaded] = useState(false);
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("An error has occurred.");
 
-  const [groupData, setGroupData] = useState([] as GroupModel[]);
+  const [collectionData, setCollectionData] = useState([] as CollectionModel[]);
 
   const startState: Create.Start = {
     name: name,
     created: created,
     owner: owner,
-    group: group,
+    collection: collection,
     description: description,
   };
 
   useEffect(() => {
-    const groups = getData(`/groups`);
+    const collections = getData(`/collections`);
 
     // Handle the response from the database
-    groups.then((value) => {
-      setGroupData(value);
+    collections.then((value) => {
+      setCollectionData(value);
 
       // Check the contents of the response
       if (value["error"] !== undefined) {
@@ -131,19 +131,19 @@ export const Start = ({}) => {
               </Box>
 
               <FormField
-                label="Group"
-                name="group"
-                info="Select the primary group that this sample should be associated with. Additional groups can be specified as an Association."
+                label="Collection"
+                name="collection"
+                info="Select the primary collection that this sample should be associated with. Additional collections can be specified as an Association."
               >
                 <Select
-                  options={groupData.map((group) => {
-                    return { name: group.name, id: group._id };
+                  options={collectionData.map((collection) => {
+                    return { name: collection.name, id: collection._id };
                   })}
-                  value={group}
+                  value={collection}
                   valueKey="name"
                   labelKey="name"
                   onChange={({ option }) => {
-                    setGroup(option);
+                    setCollection(option);
                   }}
                 />
               </FormField>

@@ -1,2 +1,3 @@
-# SampleFlow
-SampleFlow is a fully-customizable workflow tool for tracking and managing laboratory samples and equipment.
+# Lab
+
+Lab is an un-named and fully-customizable workflow tool for tracking and managing laboratory samples and equipment.

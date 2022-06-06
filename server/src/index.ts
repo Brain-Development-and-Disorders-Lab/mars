@@ -5,11 +5,11 @@ import express from "express";
 import cors from "cors";
 
 // Get the connection functions
-import { run } from "./lib/connection";
+import { run } from "./lib/database/connection";
 
 // Routes
 import samplesRoute from "./routes/samples";
-import groupsRoute from "./routes/groups";
+import collectionsRoute from "./routes/collections";
 import attributesRoute from "./routes/attributes";
 import searchRoute from "./routes/search";
 
@@ -19,7 +19,7 @@ const port = process.env.PORT || 8000;
 // Configure middleware
 app.use(cors());
 app.use(express.json());
-app.use(samplesRoute, groupsRoute, attributesRoute, searchRoute);
+app.use(samplesRoute, collectionsRoute, attributesRoute, searchRoute);
 
 // Start the server
 app.listen(port, () => {

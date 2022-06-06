@@ -14,21 +14,21 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getData } from "src/lib/database/getData";
 import ErrorLayer from "src/view/components/ErrorLayer";
-import { GroupModel } from "types";
+import { CollectionModel } from "types";
 
-const Groups = () => {
+const Collections = () => {
   const navigate = useNavigate();
   const [isLoaded, setIsLoaded] = useState(false);
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("An error has occurred.");
-  const [groupsData, setGroupsData] = useState([] as GroupModel[]);
+  const [collectionsData, setCollectionsData] = useState([] as CollectionModel[]);
 
   useEffect(() => {
-    const response = getData(`/groups`);
+    const response = getData(`/collections`);
 
     // Handle the response from the database
     response.then((value) => {
-      setGroupsData(value);
+      setCollectionsData(value);
 
       // Check the contents of the response
       if (value["error"] !== undefined) {
@@ -44,7 +44,7 @@ const Groups = () => {
     <>
       {isLoaded && isError === false ? (
         <>
-          <Heading>Groups</Heading>
+          <Heading>Collections</Heading>
           <Table>
             <TableHeader>
               <TableRow>
@@ -59,7 +59,7 @@ const Groups = () => {
             </TableHeader>
             <TableBody>
               {isLoaded &&
-                groupsData.map((value) => {
+                collectionsData.map((value) => {
                   return (
                     <TableRow key={value._id}>
                       <TableCell scope="row" border="right" align="center">
@@ -72,7 +72,7 @@ const Groups = () => {
                         <Button
                           primary
                           label="Details"
-                          onClick={() => navigate(`/groups/${value._id}`)}
+                          onClick={() => navigate(`/collections/${value._id}`)}
                         />
                       </TableCell>
                     </TableRow>
@@ -91,4 +91,4 @@ const Groups = () => {
   );
 };
 
-export default Groups;
+export default Collections;

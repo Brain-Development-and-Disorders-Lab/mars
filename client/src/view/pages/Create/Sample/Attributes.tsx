@@ -31,8 +31,8 @@ export const Attributes = ({}) => {
   const {
     name,
     created,
-    group,
-    groups,
+    collection,
+    collections,
     description,
     owner,
     associations: { origin, products },
@@ -58,9 +58,9 @@ export const Attributes = ({}) => {
     name: name,
     created: created,
     owner: owner,
-    group: group,
+    collection: collection,
     description: description,
-    groups: groups,
+    collections: collections,
     associations: {
       origin: origin,
       products: products,
@@ -268,18 +268,18 @@ export const Attributes = ({}) => {
               </Box>
               <Box direction="column" gap="medium">
                 <Text>
-                  <b>Primary group:</b>{" "}
-                  <Linky key={group.id} type="groups" id={group.id} />
+                  <b>Primary collection:</b>{" "}
+                  <Linky key={collection.id} type="collections" id={collection.id} />
                 </Text>
-                {groups.length > 0 && (
+                {collections.length > 0 && (
                   <Text>
-                    <b>Associated groups:</b>{" "}
-                    {groups.map((group) => {
+                    <b>Associated collections:</b>{" "}
+                    {collections.map((collection) => {
                       return (
                         <Linky
-                          key={`_${group.id}`}
-                          type="groups"
-                          id={group.id}
+                          key={`_${collection.id}`}
+                          type="collections"
+                          id={collection.id}
                         />
                       );
                     })}

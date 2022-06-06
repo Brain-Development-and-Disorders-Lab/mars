@@ -6,7 +6,7 @@ import { getData } from "src/lib/database/getData";
 import {
   LinkyProps,
   AttributeStruct,
-  GroupStruct,
+  CollectionStruct,
   SampleStruct,
 } from "types";
 import ErrorLayer from "../ErrorLayer";
@@ -18,7 +18,7 @@ const Linky = (props: LinkyProps) => {
   const [errorMessage, setErrorMessage] = useState("An error has occurred.");
 
   const [linkData, setLinkData] = useState(
-    {} as AttributeStruct | GroupStruct | SampleStruct
+    {} as AttributeStruct | CollectionStruct | SampleStruct
   );
 
   useEffect(() => {

@@ -60,7 +60,7 @@ const Samples = () => {
                   Owner
                 </TableCell>
                 <TableCell scope="col" border="bottom" align="center">
-                  Primary group
+                  Primary collection
                 </TableCell>
                 <TableCell scope="col" border="bottom"></TableCell>
               </TableRow>
@@ -82,7 +82,7 @@ const Samples = () => {
                         <strong>{value.owner}</strong>
                       </TableCell>
                       <TableCell border="right" align="center">
-                        <Linky type="groups" id={value.group.id} />
+                        <Linky type="collections" id={value.collection.id} />
                       </TableCell>
                       <TableCell align="center">
                         <Button

@@ -34,6 +34,9 @@ export const Sample = () => {
 
   const [showFlow, setShowFlow] = useState(false);
 
+  const [editing, setEditing] = useState(false);
+  const [changed, setChanged] = useState(false);
+
   useEffect(() => {
     const response = getData(`/samples/${id}`);
 
@@ -122,14 +125,14 @@ export const Sample = () => {
               <TableRow>
                 <TableCell scope="row" align="right" border>
                   <Heading level="4" margin="xsmall">
-                    Primary group
+                    Primary collection
                   </Heading>
                 </TableCell>
                 <TableCell border>
                   <Linky
-                    key={sampleData.group.id}
-                    type="groups"
-                    id={sampleData.group.id}
+                    key={sampleData.collection.id}
+                    type="collections"
+                    id={sampleData.collection.id}
                   />
                 </TableCell>
               </TableRow>
@@ -138,7 +141,7 @@ export const Sample = () => {
 
           <Box direction="row" align="center" background="light-2" round>
             <Heading level="4" margin="small">
-              Associated groups
+              Associated collections
             </Heading>
             <Box
               wrap
@@ -150,14 +153,14 @@ export const Sample = () => {
               pad="small"
               gap="small"
             >
-              {sampleData.groups.length > 0 ? (
-                sampleData.groups.map((group) => {
+              {sampleData.collections.length > 0 ? (
+                sampleData.collections.map((collection) => {
                   return (
-                    <Linky key={group.id} type="groups" id={group.id} />
+                    <Linky key={collection.id} type="collections" id={collection.id} />
                   );
                 })
               ) : (
-                <Text>No associated groups specified.</Text>
+                <Text>No associated collections specified.</Text>
               )}
             </Box>
           </Box>

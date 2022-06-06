@@ -8,12 +8,12 @@ declare namespace Create {
     name: string;
     created: string;
     owner: string;
-    group: { name: string; id: string };
+    collection: { name: string; id: string };
     description: string;
   };
 
   type Associations = Start & {
-    groups: { name: string; id: string }[];
+    collections: { name: string; id: string }[];
     associations: {
       origin: { name: string; id: string };
       products: { name: string; id: string }[];
@@ -52,7 +52,7 @@ export type AttributeCardProps = {
   data: AttributeStruct;
 };
 
-export type GroupStruct = {
+export type CollectionStruct = {
   name: string;
   description: string;
   blocks: string[];
@@ -61,7 +61,7 @@ export type GroupStruct = {
   };
 };
 
-export type GroupModel = GroupStruct & {
+export type CollectionModel = CollectionStruct & {
   _id: string;
 };
 
@@ -69,9 +69,9 @@ export type SampleStruct = {
   name: string;
   created: string;
   owner: string;
-  group: { name: string; id: string };
+  collection: { name: string; id: string };
   description: string;
-  groups: { name: string; id: string }[];
+  collections: { name: string; id: string }[];
   associations: {
     origin: { name: string; id: string };
     products: { name: string; id: string }[];
@@ -104,6 +104,6 @@ export type BlockGroupProps = {
 };
 
 declare type LinkyProps = {
-  type: "samples" | "groups" | "attributes";
+  type: "samples" | "collections" | "attributes";
   id: string;
 };

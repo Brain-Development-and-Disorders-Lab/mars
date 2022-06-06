@@ -65,7 +65,7 @@ const AttributeCard = (props: AttributeCardProps) => {
       </Card>
       {showDetails && (
         <Layer
-          full
+          // full
           onEsc={() => setShowDetails(false)}
           onClickOutside={() => setShowDetails(false)}
         >

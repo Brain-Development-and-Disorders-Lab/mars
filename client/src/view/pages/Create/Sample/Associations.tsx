@@ -15,21 +15,21 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getData } from "src/lib/database/getData";
 import ErrorLayer from "src/view/components/ErrorLayer";
-import { Create, GroupModel, SampleModel } from "types";
+import { Create, CollectionModel, SampleModel } from "types";
 
 export const Associations = ({}) => {
   const navigate = useNavigate();
 
   // Extract state from prior page
   const { state } = useLocation();
-  const { name, created, group, description, owner } = state as Create.Start;
+  const { name, created, collection, description, owner } = state as Create.Start;
 
   // Setup state data
   const [origin, setOrigin] = useState({ name: "", id: "" });
   const [products, setProducts] = useState(
     [] as { name: string; id: string }[]
   );
-  const [additionalGroups, setAdditionalGroups] = useState(
+  const [additionalCollections, setAdditionalCollections] = useState(
     [] as { name: string; id: string }[]
   );
 
@@ -37,7 +37,7 @@ export const Associations = ({}) => {
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("An error has occurred.");
 
-  const [groupData, setGroupData] = useState([] as GroupModel[]);
+  const [collectionData, setCollectionData] = useState([] as CollectionModel[]);
   const [sampleData, setSampleData] = useState([] as SampleModel[]);
 
   // Options for Select element drop-down menu
@@ -52,8 +52,8 @@ export const Associations = ({}) => {
     name: name,
     created: created,
     owner: owner,
-    group: group,
-    groups: additionalGroups,
+    collection: collection,
+    collections: additionalCollections,
     description: description,
     associations: {
       origin: origin,
@@ -85,11 +85,11 @@ export const Associations = ({}) => {
       }
     });
 
-    const groups = getData(`/groups`);
+    const collections = getData(`/collections`);
 
     // Handle the response from the database
-    groups.then((value) => {
-      setGroupData(value);
+    collections.then((value) => {
+      setCollectionData(value);
 
       // Check the contents of the response
       if (value["error"] !== undefined) {
@@ -122,24 +122,24 @@ export const Associations = ({}) => {
               <Box direction="row">
                 <Box direction="column">
                   <FormField
-                    label="Associated Groups"
-                    name="groups"
-                    info="Specify the groups that this new sample should be associated with. The sample will then show up underneath the specified groups."
+                    label="Associated Collections"
+                    name="collections"
+                    info="Specify the collections that this new sample should be associated with. The sample will then show up underneath the specified collections."
                   >
                     <CheckBoxGroup
-                      options={groupData
-                        .filter((g) => {
-                          return g._id !== group.id;
+                      options={collectionData
+                        .filter((c) => {
+                          return c._id !== collection.id;
                         })
-                        .map((group) => {
-                          return { name: group.name, id: group._id };
+                        .map((collection) => {
+                          return { name: collection.name, id: collection._id };
                         })}
                       labelKey="name"
                       valueKey="id"
                       onChange={(event) => {
                         if (event) {
-                          setAdditionalGroups([
-                            ...additionalGroups,
+                          setAdditionalCollections([
+                            ...additionalCollections,
                             {
                               name: (
                                 event.option as { name: string; id: string }

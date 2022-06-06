@@ -32,7 +32,7 @@ import Sidebar from "./view/components/Sidebar";
 
 // Custom pages
 import Start from "./view/pages/Create/Sample/Start";
-import Groups from "./view/pages/View/Groups";
+import Collections from "./view/pages/View/Collections";
 import Search from "./view/pages/Search";
 import Associations from "./view/pages/Create/Sample/Associations";
 import Attributes from "./view/pages/Create/Sample/Attributes";
@@ -60,7 +60,7 @@ export const App = () => {
             <Box fill>
               <Navigation>
                 <Heading level="3" margin="none">
-                  <Link to="/">🧪 SampleFlow</Link>
+                  <Link to="/">🧪 Lab</Link>
                 </Heading>
                 <Box
                   flex
@@ -105,7 +105,7 @@ export const App = () => {
                               to="#"
                               onClick={() => setCreateVisible(false)}
                             >
-                              Group
+                              Collection
                             </Link>
                           </Heading>
                           <Heading level="4" margin="small">
@@ -114,14 +114,6 @@ export const App = () => {
                               onClick={() => setCreateVisible(false)}
                             >
                               Sample
-                            </Link>
-                          </Heading>
-                          <Heading level="4" margin="small">
-                            <Link
-                              to="#"
-                              onClick={() => setCreateVisible(false)}
-                            >
-                              Transform
                             </Link>
                           </Heading>
                           <Heading level="4" margin="small">
@@ -164,10 +156,10 @@ export const App = () => {
                         >
                           <Heading level="4" margin="small">
                             <Link
-                              to="/groups"
+                              to="/collections"
                               onClick={() => setViewVisible(false)}
                             >
-                              Groups
+                              Collections
                             </Link>
                           </Heading>
                           <Heading level="4" margin="small">
@@ -209,7 +201,7 @@ export const App = () => {
                       path="/create/sample/attributes"
                       element={<Attributes />}
                     />
-                    <Route path="/groups" element={<Groups />} />
+                    <Route path="/collections" element={<Collections />} />
                     <Route path="/samples" element={<Samples />} />
                     <Route path="/search" element={<Search />} />
                     <Route path="samples">

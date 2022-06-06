@@ -7,7 +7,7 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       favicon: "src/img/Favicon.png",
-      title: "SampleFlow",
+      title: "Lab",
       template: "src/index.html",
     }),
   ],

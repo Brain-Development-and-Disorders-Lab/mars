@@ -111,7 +111,7 @@ const Flow = (props: { id: string }) => {
     }
 
     // Default assuming origin and products
-    let currentType = "group";
+    let currentType = "collection";
     if (
       sampleData.associations.origin.id === "" &&
       sampleData.associations.products.length > 0

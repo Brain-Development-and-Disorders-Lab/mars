@@ -5,7 +5,7 @@ import { ObjectId } from "mongodb";
 import { SampleModel, SampleStruct } from "../../../client/types";
 
 // Utility functions
-import { getDatabase } from "../lib/connection";
+import { getDatabase } from "../lib/database/connection";
 
 const samplesRoute = express.Router();
 
@@ -48,9 +48,9 @@ samplesRoute
       name: req.body.name,
       created: req.body.created,
       owner: req.body.owner,
-      group: req.body.group,
+      collection: req.body.collection,
       description: req.body.description,
-      groups: req.body.groups,
+      collections: req.body.collections,
       associations: {
         origin: req.body.associations.origin,
         products: req.body.associations.products,

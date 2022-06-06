@@ -3,7 +3,7 @@ import consola from "consola";
 import { DATABASE_URL } from "src/variables";
 
 /**
- * Get data from the SampleFlow API using the JavaScript `fetch` API
+ * Get data from the Lab API using the JavaScript `fetch` API
  * @param {string} path exact API path to get data from
  * @return {Promise<any>} an object containing information from the database
  */
