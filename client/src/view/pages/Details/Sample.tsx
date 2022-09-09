@@ -87,7 +87,7 @@ export const Sample = () => {
             <Box direction="column" justify="between">
               <PageHeader
                 title={"Sample \"" + sampleData.name + "\""}
-                parent={<Anchor label="Return to Samples" href="/view/samples" />}
+                parent={<Anchor label="Return to Samples" href="/samples" />}
               />
               <Box direction="row" gap="small">
                 <Button
