@@ -1,17 +1,20 @@
 // React and Grommet
 import React, { useEffect, useState } from "react";
 import {
+  Anchor,
   Box,
   Button,
   Form,
   FormField,
   Heading,
   Layer,
+  PageHeader,
   Select,
   Spinner,
   Tag,
   Text,
 } from "grommet/components";
+import { Page, PageContent } from "grommet";
 import { Add, Checkmark, LinkPrevious } from "grommet-icons";
 
 // Navigation
@@ -113,252 +116,257 @@ export const Attributes = ({}) => {
   };
 
   return (
-    <>
-      {isLoaded && isError === false ? (
-        <>
-          <Heading level="2">Apply Attributes for "{name}"</Heading>
-          <Box fill>
-            <Form
-              onChange={() => {}}
-              onSubmit={() => {
-                setShowConfirmation(true);
-              }}
-            >
-              {/* Field to create new attributes */}
-              <Box justify="center" align="center" direction="row" gap="small">
-                <Box>
-                  <Button
-                    icon={<Add />}
-                    label="Create new attribute"
-                    primary
-                    onClick={() => {
-                      // Create a unique identifier
-                      const identifier = `attribute_${Math.round(
-                        performance.now()
-                      )}`;
+    <Page kind="wide">
+      <PageContent>
+        <PageHeader
+          title="Create a Sample: Add attributes"
+          parent={<Anchor label="Return to Dashboard" href="/" />}
+        />
+        {isLoaded && isError === false ? (
+          <>
+            <Box fill>
+              <Form
+                onChange={() => {}}
+                onSubmit={() => {
+                  setShowConfirmation(true);
+                }}
+              >
+                {/* Field to create new attributes */}
+                <Box justify="center" align="center" direction="row" gap="small">
+                  <Box>
+                    <Button
+                      icon={<Add />}
+                      label="Create new attribute"
+                      primary
+                      onClick={() => {
+                        // Create a unique identifier
+                        const identifier = `attribute_${Math.round(
+                          performance.now()
+                        )}`;
 
-                      // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
-                      setAttributes([
-                        ...attributes,
-                        {
-                          _id: identifier,
-                          name: "",
-                          description: "",
-                          type: "physical",
-                          blocks: [],
-                        },
-                      ]);
-                    }}
+                        // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
+                        setAttributes([
+                          ...attributes,
+                          {
+                            _id: identifier,
+                            name: "",
+                            description: "",
+                            type: "physical",
+                            blocks: [],
+                          },
+                        ]);
+                      }}
+                    />
+                  </Box>
+
+                  <Text>Or</Text>
+
+                  {/* Drop-down to select existing attributes */}
+                  <FormField
+                    label="Add existing attribute"
+                    name="existing"
+                    info="Search for and add an existing attribute."
+                  >
+                    <Select
+                      options={attributeOptions.map((attribute) => {
+                        return { name: attribute.name, id: attribute._id };
+                      })}
+                      labelKey="name"
+                      onChange={({ option }) => {
+                        // We need to get the existing attribute and insert it here
+                        getData(`/attributes/${option.id}`).then(
+                          (value: AttributeModel) => {
+                            setAttributes([
+                              ...attributes,
+                              {
+                                _id: option.id,
+                                name: value.name,
+                                description: value.description,
+                                type: value.type,
+                                blocks: value.blocks,
+                              },
+                            ]);
+                          }
+                        );
+                      }}
+                      searchPlaceholder="Search..."
+                      onSearch={(query) => {
+                        const escapedText = query.replace(
+                          /[-\\^$*+?.()|[\]{}]/g,
+                          "\\$&"
+                        );
+                        const exp = new RegExp(escapedText, "i");
+                        setAttributeOptions(
+                          attributes.filter((attribute) =>
+                            exp.test(attribute.name)
+                          )
+                        );
+                      }}
+                    />
+                  </FormField>
+                </Box>
+
+                {/* Display all existing attributes */}
+                <Box direction="column" gap="small" margin="small">
+                  <AttributeGroup
+                    attributes={attributes}
+                    onRemove={removeCallback}
+                    onDataUpdate={dataCallback}
                   />
                 </Box>
 
-                <Text>Or</Text>
-
-                {/* Drop-down to select existing attributes */}
-                <FormField
-                  label="Add existing attribute"
-                  name="existing"
-                  info="Search for and add an existing attribute."
+                {/* Action buttons */}
+                <Box
+                  direction="row"
+                  flex={false}
+                  justify="between"
+                  margin="medium"
                 >
-                  <Select
-                    options={attributeOptions.map((attribute) => {
-                      return { name: attribute.name, id: attribute._id };
-                    })}
-                    labelKey="name"
-                    onChange={({ option }) => {
-                      // We need to get the existing attribute and insert it here
-                      getData(`/attributes/${option.id}`).then(
-                        (value: AttributeModel) => {
-                          setAttributes([
-                            ...attributes,
-                            {
-                              _id: option.id,
-                              name: value.name,
-                              description: value.description,
-                              type: value.type,
-                              blocks: value.blocks,
-                            },
-                          ]);
-                        }
-                      );
-                    }}
-                    searchPlaceholder="Search..."
-                    onSearch={(query) => {
-                      const escapedText = query.replace(
-                        /[-\\^$*+?.()|[\]{}]/g,
-                        "\\$&"
-                      );
-                      const exp = new RegExp(escapedText, "i");
-                      setAttributeOptions(
-                        attributes.filter((attribute) =>
-                          exp.test(attribute.name)
-                        )
-                      );
-                    }}
+                  <Button label="Cancel" />
+                  <Button
+                    label="Back"
+                    icon={<LinkPrevious />}
+                    onClick={() => navigate("/create/sample/associations")}
                   />
-                </FormField>
+                  <Button
+                    type="submit"
+                    label="Finish"
+                    icon={<Checkmark />}
+                    reverse
+                    primary
+                  />
+                </Box>
+              </Form>
+            </Box>
+          </>
+        ) : (
+          <Box fill align="center" justify="center">
+            <Spinner size="large" />
+          </Box>
+        )}
+
+        {isError && <ErrorLayer message={errorMessage} />}
+
+        {showConfirmation && (
+          <Layer>
+            <Box
+              width="large"
+              direction="column"
+              gap="small"
+              margin="small"
+              pad="medium"
+              align="center"
+            >
+              <Heading level="3" margin={{ top: "small" }}>
+                Sample Summary
+              </Heading>
+              <Box direction="row" gap="small">
+                <Box
+                  direction="column"
+                  gap="small"
+                  pad="medium"
+                  width={{ max: "medium" }}
+                >
+                  <Text>
+                    <b>Identifier:</b> {name}
+                  </Text>
+                  <Text>
+                    <b>Created:</b> {new Date(created).toDateString()}
+                  </Text>
+                  <Text truncate="tip">
+                    <b>Description:</b> {description}
+                  </Text>
+                </Box>
+                <Box direction="column" gap="medium">
+                  <Text>
+                    <b>Primary collection:</b>{" "}
+                    <Linky
+                      key={collection.id}
+                      type="collections"
+                      id={collection.id}
+                    />
+                  </Text>
+                  {collections.length > 0 && (
+                    <Text>
+                      <b>Associated collections:</b>{" "}
+                      {collections.map((collection) => {
+                        return (
+                          <Linky
+                            key={`_${collection.id}`}
+                            type="collections"
+                            id={collection.id}
+                          />
+                        );
+                      })}
+                    </Text>
+                  )}
+                  {origin.name !== "" && (
+                    <Text>
+                      <b>Origin sample:</b>{" "}
+                      <Linky type="samples" id={origin.id} />
+                    </Text>
+                  )}
+                  {products.length > 0 && (
+                    <Text>
+                      <b>Product samples:</b>{" "}
+                      {products.map((product) => {
+                        return (
+                          <Linky
+                            key={product.id}
+                            type="samples"
+                            id={product.id}
+                          />
+                        );
+                      })}
+                    </Text>
+                  )}
+                  {attributeData.length > 0 && (
+                    <Text>
+                      <b>Attributes:</b>{" "}
+                      {attributeData.map((attribute) => {
+                        return (
+                          <>
+                            <Tag
+                              key={`tag_${attribute._id}}`}
+                              name={attribute.name}
+                              value={attribute.name}
+                            />
+                          </>
+                        );
+                      })}
+                    </Text>
+                  )}
+                </Box>
               </Box>
 
-              {/* Display all existing attributes */}
-              <Box direction="column" gap="small" margin="small">
-                <AttributeGroup
-                  attributes={attributes}
-                  onRemove={removeCallback}
-                  onDataUpdate={dataCallback}
-                />
-              </Box>
-
-              {/* Action buttons */}
-              <Box
-                direction="row"
-                flex={false}
-                justify="between"
-                margin="medium"
-              >
-                <Button label="Cancel" />
+              <Box direction="row" justify="between" fill>
                 <Button
-                  label="Back"
-                  icon={<LinkPrevious />}
-                  onClick={() => navigate("/create/sample/associations")}
+                  type="submit"
+                  label="Go Back"
+                  onClick={() => setShowConfirmation(false)}
                 />
                 <Button
                   type="submit"
-                  label="Finish"
+                  label="Confirm"
                   icon={<Checkmark />}
                   reverse
                   primary
+                  onClick={() => {
+                    // Create new attribute
+                    console.debug("Submitting data:", sampleData);
+
+                    // Push the data and attribute
+                    pushData(`/samples/add`, sampleData).then(() =>
+                      navigate("/samples")
+                    );
+                  }}
                 />
               </Box>
-            </Form>
-          </Box>
-        </>
-      ) : (
-        <Box fill align="center" justify="center">
-          <Spinner size="large" />
-        </Box>
-      )}
-
-      {isError && <ErrorLayer message={errorMessage} />}
-
-      {showConfirmation && (
-        <Layer>
-          <Box
-            width="large"
-            direction="column"
-            gap="small"
-            margin="small"
-            pad="medium"
-            align="center"
-          >
-            <Heading level="3" margin={{ top: "small" }}>
-              Sample Summary
-            </Heading>
-            <Box direction="row" gap="small">
-              <Box
-                direction="column"
-                gap="small"
-                pad="medium"
-                width={{ max: "medium" }}
-              >
-                <Text>
-                  <b>Identifier:</b> {name}
-                </Text>
-                <Text>
-                  <b>Created:</b> {new Date(created).toDateString()}
-                </Text>
-                <Text truncate="tip">
-                  <b>Description:</b> {description}
-                </Text>
-              </Box>
-              <Box direction="column" gap="medium">
-                <Text>
-                  <b>Primary collection:</b>{" "}
-                  <Linky
-                    key={collection.id}
-                    type="collections"
-                    id={collection.id}
-                  />
-                </Text>
-                {collections.length > 0 && (
-                  <Text>
-                    <b>Associated collections:</b>{" "}
-                    {collections.map((collection) => {
-                      return (
-                        <Linky
-                          key={`_${collection.id}`}
-                          type="collections"
-                          id={collection.id}
-                        />
-                      );
-                    })}
-                  </Text>
-                )}
-                {origin.name !== "" && (
-                  <Text>
-                    <b>Origin sample:</b>{" "}
-                    <Linky type="samples" id={origin.id} />
-                  </Text>
-                )}
-                {products.length > 0 && (
-                  <Text>
-                    <b>Product samples:</b>{" "}
-                    {products.map((product) => {
-                      return (
-                        <Linky
-                          key={product.id}
-                          type="samples"
-                          id={product.id}
-                        />
-                      );
-                    })}
-                  </Text>
-                )}
-                {attributeData.length > 0 && (
-                  <Text>
-                    <b>Attributes:</b>{" "}
-                    {attributeData.map((attribute) => {
-                      return (
-                        <>
-                          <Tag
-                            key={`tag_${attribute._id}}`}
-                            name={attribute.name}
-                            value={attribute.name}
-                          />
-                        </>
-                      );
-                    })}
-                  </Text>
-                )}
-              </Box>
             </Box>
-
-            <Box direction="row" justify="between" fill>
-              <Button
-                type="submit"
-                label="Go Back"
-                onClick={() => setShowConfirmation(false)}
-              />
-              <Button
-                type="submit"
-                label="Confirm"
-                icon={<Checkmark />}
-                reverse
-                primary
-                onClick={() => {
-                  // Create new attribute
-                  console.debug("Submitting data:", sampleData);
-
-                  // Push the data and attribute
-                  pushData(`/samples/add`, sampleData).then(() =>
-                    navigate("/samples")
-                  );
-                }}
-              />
-            </Box>
-          </Box>
-        </Layer>
-      )}
-    </>
+          </Layer>
+        )}
+      </PageContent>
+    </Page>
   );
 };
 export default Attributes;

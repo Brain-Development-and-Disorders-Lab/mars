@@ -12,6 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from "grommet/components";
+import { Page, PageContent } from "grommet";
 
 // Navigation
 import { useNavigate } from "react-router-dom";
@@ -51,71 +52,73 @@ const Samples = () => {
   }, []);
 
   return (
-    <>
-      {isLoaded && isError === false ? (
-        <>
-          <PageHeader
-            title="Samples"
-            subtitle="View all Samples currently tracked by the system."
-            parent={<Anchor label="Dashboard" href="/" />}
-          />
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableCell scope="col" border="bottom" align="center">
-                  Identifier
-                </TableCell>
-                <TableCell scope="col" border="bottom" align="center">
-                  Created
-                </TableCell>
-                <TableCell scope="col" border="bottom" align="center">
-                  Owner
-                </TableCell>
-                <TableCell scope="col" border="bottom" align="center">
-                  Primary collection
-                </TableCell>
-                <TableCell scope="col" border="bottom"></TableCell>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoaded &&
-                sampleData.map((value) => {
-                  return (
-                    <TableRow key={value._id}>
-                      <TableCell scope="row" border="right" align="center">
-                        <strong>{value.name}</strong>
-                      </TableCell>
-                      <TableCell align="center">
-                        <strong>
-                          {new Date(value.created).toDateString()}
-                        </strong>
-                      </TableCell>
-                      <TableCell align="center">
-                        <strong>{value.owner}</strong>
-                      </TableCell>
-                      <TableCell border="right" align="center">
-                        <Linky type="collections" id={value.collection.id} />
-                      </TableCell>
-                      <TableCell align="center">
-                        <Button
-                          primary
-                          label="Details"
-                          onClick={() => navigate(`/samples/${value._id}`)}
-                        />
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-            </TableBody>
-          </Table>
-        </>
-      ) : (
-        <Box fill align="center" justify="center">
-          <Spinner size="large" />
-        </Box>
-      )}
-      {isError && <ErrorLayer message={errorMessage} />}
-    </>
+    <Page kind="wide">
+      <PageContent>
+        {isLoaded && isError === false ? (
+          <>
+            <PageHeader
+              title="Samples"
+              subtitle="View all Samples currently tracked by the system."
+              parent={<Anchor label="Return to Dashboard" href="/" />}
+            />
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableCell scope="col" border="bottom" align="center">
+                    Identifier
+                  </TableCell>
+                  <TableCell scope="col" border="bottom" align="center">
+                    Created
+                  </TableCell>
+                  <TableCell scope="col" border="bottom" align="center">
+                    Owner
+                  </TableCell>
+                  <TableCell scope="col" border="bottom" align="center">
+                    Primary collection
+                  </TableCell>
+                  <TableCell scope="col" border="bottom"></TableCell>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {isLoaded &&
+                  sampleData.map((value) => {
+                    return (
+                      <TableRow key={value._id}>
+                        <TableCell scope="row" border="right" align="center">
+                          <strong>{value.name}</strong>
+                        </TableCell>
+                        <TableCell align="center">
+                          <strong>
+                            {new Date(value.created).toDateString()}
+                          </strong>
+                        </TableCell>
+                        <TableCell align="center">
+                          <strong>{value.owner}</strong>
+                        </TableCell>
+                        <TableCell border="right" align="center">
+                          <Linky type="collections" id={value.collection.id} />
+                        </TableCell>
+                        <TableCell align="center">
+                          <Button
+                            primary
+                            label="Details"
+                            onClick={() => navigate(`/samples/${value._id}`)}
+                          />
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+              </TableBody>
+            </Table>
+          </>
+        ) : (
+          <Box fill align="center" justify="center">
+            <Spinner size="large" />
+          </Box>
+        )}
+        {isError && <ErrorLayer message={errorMessage} />}
+      </PageContent>
+    </Page>
   );
 };
 

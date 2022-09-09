@@ -40,7 +40,7 @@ const AttributeCard = (props: AttributeCardProps) => {
       >
         <CardHeader pad="small" align="center" margin="none">
           <Text>
-            <strong>Parameter: {props.data.name}</strong>
+            <strong>Attribute: {props.data.name}</strong>
           </Text>
         </CardHeader>
         <CardBody pad="small">
@@ -76,7 +76,7 @@ const AttributeCard = (props: AttributeCardProps) => {
           <Box margin="small">
             <Box direction="row" justify="between" margin={{ right: "small" }}>
               <Heading level="2" margin="small">
-                Parameter details: {props.data.name}
+                Attribute details: {props.data.name}
               </Heading>
               <Button
                 icon={<Close />}
