@@ -71,7 +71,7 @@ const Block = (props: BlockProps) => {
     updateData();
   }, [data]);
 
-  let dataElement = <Text>Data:</Text>;
+  let dataElement;
 
   // Set the data input field depending on the selected type
   if (type === "file") {

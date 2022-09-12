@@ -1,7 +1,6 @@
 // React and Grommet
 import React, { useState } from "react";
 import {
-  Anchor,
   Box,
   Button,
   Card,
@@ -134,28 +133,12 @@ const AttributeCard = (props: AttributeCardProps) => {
               <Box pad="small">
                 {props.data.blocks &&
                   props.data.blocks.map((block) => {
-                    // Adjust the type of element displayed depending on the content
-                    let dataElement = <Text>{block.data}</Text>;
-                    switch (block.type) {
-                      case "url":
-                        dataElement = (
-                          <Anchor
-                            href={block.data.toString()}
-                            color="dark-2"
-                            label={<Text truncate>{block.data}</Text>}
-                          />
-                        );
-                        break;
-                      default:
-                        break;
-                    }
-
                     return (
                       <Block
                         identifier={block.identifier}
                         name={block.name}
                         type={block.type}
-                        data={dataElement}
+                        data={block.data}
                         disabled
                       />
                     );
