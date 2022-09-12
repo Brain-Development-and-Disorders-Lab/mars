@@ -54,6 +54,21 @@ export const Attributes = ({}) => {
     [] as AttributeModel[]
   );
 
+  // Configure state for current page
+  const attributeState: Create.Attributes = {
+    name: name,
+    created: created,
+    owner: owner,
+    collection: collection,
+    collections: collections,
+    description: description,
+    associations:{
+      origin: origin,
+      products: products,
+    },
+    attributes: attributes,
+  };
+
   // Loading state and error state
   const [isLoaded, setIsLoaded] = useState(false);
   const [isError, setIsError] = useState(false);
@@ -66,8 +81,8 @@ export const Attributes = ({}) => {
     created: created,
     owner: owner,
     collection: collection,
-    description: description,
     collections: collections,
+    description: description,
     associations: {
       origin: origin,
       products: products,
@@ -226,7 +241,9 @@ export const Attributes = ({}) => {
                   <Button
                     label="Back"
                     icon={<LinkPrevious />}
-                    onClick={() => navigate("/create/sample/associations")}
+                    onClick={() => navigate("/create/sample/associations", {
+                      state: attributeState,
+                    })}
                   />
                   <Button
                     type="submit"
@@ -339,12 +356,17 @@ export const Attributes = ({}) => {
                 </Box>
               </Box>
 
-              <Box direction="row" justify="between" fill>
+              <Box direction="row" justify="between" margin="medium">
                 <Button
-                  type="submit"
-                  label="Go Back"
-                  onClick={() => setShowConfirmation(false)}
+                  label="Back"
+                  icon={<LinkPrevious />}
+                  onClick={() =>
+                      navigate("/create/sample/associations", {
+                        state: attributeState,
+                      })
+                  }
                 />
+
                 <Button
                   type="submit"
                   label="Confirm"

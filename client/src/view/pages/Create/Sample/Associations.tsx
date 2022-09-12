@@ -30,8 +30,11 @@ export const Associations = ({}) => {
 
   // Extract state from prior page
   const { state } = useLocation();
+  console.debug("Associations:", state);
+
   const { name, created, collection, description, owner } =
     state as Create.Start;
+  // To Do: Unpack Create.Attribute state
 
   // Setup state data
   const [origin, setOrigin] = useState({ name: "", id: "" });
@@ -119,157 +122,156 @@ export const Associations = ({}) => {
           parent={<Anchor label="Return to Dashboard" href="/" />}
         />
         {isLoaded && isError === false ? (
-          <>
-            <Box margin="small">
-              <Form
-                onChange={() => {}}
-                onSubmit={() => {
-                  navigate("/create/sample/attributes", {
-                    state: associationState,
-                  });
-                }}
-              >
-                <Box direction="row">
-                  <Box direction="column">
-                    <FormField
-                      label="Associated Collections"
-                      name="collections"
-                      info="Specify the collections that this new sample should be associated with. The sample will then show up underneath the specified collections."
-                    >
-                      <CheckBoxGroup
-                        options={collectionData
-                          .filter((c) => {
-                            return c._id !== collection.id;
-                          })
-                          .map((collection) => {
-                            return { name: collection.name, id: collection._id };
-                          })}
-                        labelKey="name"
-                        valueKey="id"
-                        onChange={(event) => {
-                          if (event) {
-                            setAdditionalCollections([
-                              ...additionalCollections,
-                              {
-                                name: (
-                                  event.option as { name: string; id: string }
-                                ).name,
-                                id: (event.option as { name: string; id: string })
-                                  .id,
-                              },
-                            ]);
-                          }
-                        }}
-                      />
-                    </FormField>
-
-                    <FormField
-                      label="Linked Origin"
-                      name="origin"
-                      info="If the source of this sample currently exists or did exist in this system, specify that association here by searching for the origin sample."
-                    >
-                      <Select
-                        options={originOptions}
-                        labelKey="name"
-                        value={origin}
-                        valueKey="name"
-                        onChange={({ option }) => {
-                          setOrigin(option);
-                        }}
-                        searchPlaceholder="Search..."
-                        onSearch={(query) => {
-                          const escapedText = query.replace(
-                            /[-\\^$*+?.()|[\]{}]/g,
-                            "\\$&"
-                          );
-                          const exp = new RegExp(escapedText, "i");
-                          setOriginOptions(
-                            sampleData
-                              .filter((sample) => exp.test(sample.name))
-                              .map((sample) => {
-                                return { name: sample.name, id: sample._id };
-                              })
-                          );
-                        }}
-                      />
-                    </FormField>
-                  </Box>
-                  <Box direction="column">
-                    <FormField
-                      label="Linked Products"
-                      name="products"
-                      info="If this sample has any derivatives or samples that have been created from it, specify those associations here by searching for the corresponding sample."
-                    >
-                      <Select
-                        options={productOptions}
-                        labelKey="name"
-                        value={products}
-                        valueKey="name"
-                        onChange={({ value }) => {
-                          if (!products.includes(value)) {
-                            setProducts([...products, value]);
-                          }
-                        }}
-                        searchPlaceholder="Search..."
-                        onSearch={(query) => {
-                          const escapedText = query.replace(
-                            /[-\\^$*+?.()|[\]{}]/g,
-                            "\\$&"
-                          );
-                          const exp = new RegExp(escapedText, "i");
-                          setProductOptions(
-                            sampleData
-                              .filter((sample) => exp.test(sample.name))
-                              .map((sample) => {
-                                return { name: sample.name, id: sample._id };
-                              })
-                          );
-                        }}
-                      />
-                    </FormField>
-                    <Box direction="column" gap="xsmall">
-                      {products.map((product) => {
-                        return (
-                          <Tag
-                            name="Product"
-                            value={product.name}
-                            key={product.name}
-                            onRemove={() => {
-                              setProducts(
-                                products.filter((item) => {
-                                  return item !== product;
-                                })
-                              );
-                            }}
-                          />
+          <Box margin="small">
+            <Form
+              onChange={() => {}}
+              onSubmit={() => {
+                navigate("/create/sample/attributes", {
+                  state: associationState,
+                });
+              }}
+            >
+              <Box direction="row" gap="medium">
+                <Box direction="column" justify="between">
+                  <FormField
+                    label="Origin Sample"
+                    name="origin"
+                    info="If the source of this sample currently exists or did exist in this system, specify that association here by searching for the origin sample."
+                  >
+                    <Select
+                      options={originOptions}
+                      labelKey="name"
+                      value={origin}
+                      valueKey="name"
+                      onChange={({ option }) => {
+                        setOrigin(option);
+                      }}
+                      searchPlaceholder="Search..."
+                      onSearch={(query) => {
+                        const escapedText = query.replace(
+                          /[-\\^$*+?.()|[\]{}]/g,
+                          "\\$&"
                         );
-                      })}
-                    </Box>
-                  </Box>
+                        const exp = new RegExp(escapedText, "i");
+                        setOriginOptions(
+                          sampleData
+                            .filter((sample) => exp.test(sample.name))
+                            .map((sample) => {
+                              return { name: sample.name, id: sample._id };
+                            })
+                        );
+                      }}
+                    />
+                  </FormField>
                 </Box>
 
-                <Box direction="row" flex={false} justify="between">
-                  <Button label="Cancel" />
-                  <Button
-                    label="Back"
-                    icon={<LinkPrevious />}
-                    onClick={() =>
-                      navigate("/create/sample/start", {
-                        state: associationState,
-                      })
-                    }
-                  />
-                  <Button
-                    type="submit"
-                    label="Continue"
-                    icon={<LinkNext />}
-                    reverse
-                    primary
-                  />
+                <Box direction="column">
+                  <FormField
+                    label="Associated Collections"
+                    name="collections"
+                    info="Specify the collections that this new sample should be associated with. The sample will then show up underneath the specified collections."
+                  >
+                    <CheckBoxGroup
+                      options={collectionData
+                        .filter((c) => {
+                          return c._id !== collection.id;
+                        })
+                        .map((collection) => {
+                          return { name: collection.name, id: collection._id };
+                        })}
+                      labelKey="name"
+                      valueKey="id"
+                      onChange={(event) => {
+                        if (event) {
+                          setAdditionalCollections([
+                            ...additionalCollections,
+                            {
+                              name: (
+                                event.option as { name: string; id: string }
+                              ).name,
+                              id: (event.option as { name: string; id: string })
+                                .id,
+                            },
+                          ]);
+                        }
+                      }}
+                    />
+                  </FormField>
+
+                  <FormField
+                    label="Linked Products"
+                    name="products"
+                    info="If this sample has any derivatives or samples that have been created from it, specify those associations here by searching for the corresponding sample."
+                  >
+                    <Select
+                      options={productOptions}
+                      labelKey="name"
+                      value={products}
+                      valueKey="name"
+                      onChange={({ value }) => {
+                        if (!products.includes(value)) {
+                          setProducts([...products, value]);
+                        }
+                      }}
+                      searchPlaceholder="Search..."
+                      onSearch={(query) => {
+                        const escapedText = query.replace(
+                          /[-\\^$*+?.()|[\]{}]/g,
+                          "\\$&"
+                        );
+                        const exp = new RegExp(escapedText, "i");
+                        setProductOptions(
+                          sampleData
+                            .filter((sample) => exp.test(sample.name))
+                            .map((sample) => {
+                              return { name: sample.name, id: sample._id };
+                            })
+                        );
+                      }}
+                    />
+                  </FormField>
+                  <Box direction="column" gap="xsmall">
+                    {products.map((product) => {
+                      return (
+                        <Tag
+                          name="Product"
+                          value={product.name}
+                          key={product.name}
+                          onRemove={() => {
+                            setProducts(
+                              products.filter((item) => {
+                                return item !== product;
+                              })
+                            );
+                          }}
+                        />
+                      );
+                    })}
+                  </Box>
                 </Box>
-              </Form>
-            </Box>
-          </>
+              </Box>
+
+              <Box direction="row" justify="between" margin="medium">
+                <Button label="Cancel" />
+                <Button
+                  label="Back"
+                  icon={<LinkPrevious />}
+                  onClick={() =>
+                    navigate("/create/sample/start", {
+                      state: associationState,
+                    })
+                  }
+                />
+                <Button
+                  type="submit"
+                  label="Continue"
+                  icon={<LinkNext />}
+                  reverse
+                  primary
+                />
+              </Box>
+            </Form>
+          </Box>
         ) : (
           <Box fill align="center" justify="center">
             <Spinner size="large" />

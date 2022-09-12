@@ -148,7 +148,6 @@ const Attribute = (props: AttributeProps) => {
           }}
           icon={<StatusDisabled />}
           reverse
-          disabled={finished}
         />
       </Box>
     </Box>

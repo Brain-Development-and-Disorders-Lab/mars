@@ -21,7 +21,7 @@ declare namespace Create {
   };
 
   type Attributes = Associations & {
-    attributes: AttributeProps[];
+    attributes: AttributeStruct[];
   };
 }
 
