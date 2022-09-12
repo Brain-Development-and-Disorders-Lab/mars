@@ -5,6 +5,7 @@ import {
   Box,
   DateInput,
   FileInput,
+  FormField,
   Select,
   Spinner,
   Text,
@@ -163,9 +164,10 @@ const Block = (props: BlockProps) => {
 
   return (
     <Box direction="row" gap="small" align="center">
-      <Box width="medium">
+      {/* Block name */}
+      <FormField label="Name">
         <TextInput
-          width="small"
+          width="medium"
           placeholder="Block name"
           value={name}
           onChange={(event) => {
@@ -173,16 +175,25 @@ const Block = (props: BlockProps) => {
           }}
           disabled={props.disabled}
         />
-      </Box>
-      <Select
-        options={VALID_TYPES}
-        value={type}
-        onChange={({ option }) => {
-          setType(option);
-        }}
-        disabled={props.disabled}
-      />
-      {isLoaded ? dataElement : <Spinner size="small" />}
+      </FormField>
+
+      {/* Block type */}
+      <FormField label="Type">
+        <Select
+          options={VALID_TYPES}
+          value={type}
+          onChange={({ option }) => {
+            setType(option);
+          }}
+          disabled={props.disabled}
+        />
+      </FormField>
+
+      {/* Block data */}
+      <FormField label="Data">
+        {isLoaded ? dataElement : <Spinner size="small" />}
+      </FormField>
+
       {isError && <ErrorLayer message={errorMessage} />}
     </Box>
   );

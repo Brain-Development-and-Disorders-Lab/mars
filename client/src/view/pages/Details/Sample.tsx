@@ -103,155 +103,175 @@ export const Sample = () => {
               </Box>
             </Box>
 
-            <Table>
-              <TableBody>
-                <TableRow>
-                  <TableCell scope="row" align="right" border>
-                    <Heading level="4" margin="xsmall">
-                      Created
-                    </Heading>
-                  </TableCell>
-                  <TableCell border>
-                    <Text>{new Date(sampleData.created).toDateString()}</Text>
-                  </TableCell>
-                </TableRow>
+            <Box direction="row" gap="small">
+              {/* Metadata table */}
+              <Box direction="column" align="center" background="light-2" basis="1/2" round>
+                <Heading level="3" margin="small">
+                  Metadata
+                </Heading>
 
-                <TableRow>
-                  <TableCell scope="row" align="right" border>
-                    <Heading level="4" margin="xsmall">
-                      Owner
-                    </Heading>
-                  </TableCell>
-                  <TableCell border>
-                    <Text>
-                      <Anchor label={sampleData.owner} color="dark-2" />
-                    </Text>
-                  </TableCell>
-                </TableRow>
+                <Box fill pad={{ left: "small", right: "small", bottom: "small" }}>
+                  <Table>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell scope="row" border>
+                          <Heading level="4" margin="xsmall">
+                            Created
+                          </Heading>
+                        </TableCell>
+                        <TableCell border>
+                          <Text>{new Date(sampleData.created).toDateString()}</Text>
+                        </TableCell>
+                      </TableRow>
 
-                <TableRow>
-                  <TableCell scope="row" align="right" border>
-                    <Heading level="4" margin="xsmall">
-                      Description
-                    </Heading>
-                  </TableCell>
-                  <TableCell border>
-                    <TextInput
-                      value={description}
-                      onChange={(event) => setDescription(event.target.value)}
-                      disabled={!editing}
-                      size="large"
-                      plain
-                    />
-                  </TableCell>
-                </TableRow>
+                      <TableRow>
+                        <TableCell scope="row" border>
+                          <Heading level="4" margin="xsmall">
+                            Owner
+                          </Heading>
+                        </TableCell>
+                        <TableCell border>
+                          <Text>
+                            <Anchor label={sampleData.owner} color="dark-2" />
+                          </Text>
+                        </TableCell>
+                      </TableRow>
 
-                <TableRow>
-                  <TableCell scope="row" border align="right">
-                    <Heading level="4" margin="xsmall">
-                      Origin
-                    </Heading>
-                  </TableCell>
-                  <TableCell border>
-                    <Box direction="row" gap="small" align="center">
-                      {sampleData.associations.origin.id !== "" ? (
+                      <TableRow>
+                        <TableCell scope="row" border>
+                          <Heading level="4" margin="xsmall">
+                            Description
+                          </Heading>
+                        </TableCell>
+                        <TableCell border>
+                          <TextInput
+                            value={description}
+                            onChange={(event) => setDescription(event.target.value)}
+                            disabled={!editing}
+                            size="medium"
+                            plain
+                          />
+                        </TableCell>
+                      </TableRow>
+
+                      <TableRow>
+                        <TableCell scope="row" border>
+                          <Heading level="4" margin="xsmall">
+                            Origin
+                          </Heading>
+                        </TableCell>
+                        <TableCell border>
+                          <Box direction="row" gap="small" align="center">
+                            {sampleData.associations.origin.id !== "" ? (
+                              <Linky
+                                key={sampleData.associations.origin.id}
+                                type="samples"
+                                id={sampleData.associations.origin.id}
+                              />
+                            ) : (
+                              <Text>No origin specified.</Text>
+                            )}
+                            {editing ? (
+                              <Button icon={<Add size="small" />} primary disabled={!editing} />
+                            ) : null}
+                          </Box>
+                        </TableCell>
+                      </TableRow>
+
+                      <TableRow>
+                        <TableCell scope="row"border>
+                          <Heading level="4" margin="xsmall">
+                            Primary collection
+                          </Heading>
+                        </TableCell>
+                        <TableCell border>
+                          <Linky
+                            key={sampleData.collection.id}
+                            type="collections"
+                            id={sampleData.collection.id}
+                          />
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </Box>
+              </Box>
+
+              {/* Associated collections */}
+              <Box direction="column" align="center" background="light-2" basis="1/4" round>
+                <Heading level="3" margin="small">
+                  Associated collections
+                </Heading>
+                <Box
+                  wrap
+                  round
+                  direction="row"
+                  justify="center"
+                  align="center"
+                  margin="small"
+                  pad="small"
+                  gap="small"
+                  fill
+                >
+                  {sampleData.collections.length > 0 ? (
+                    sampleData.collections.map((collection) => {
+                      return (
                         <Linky
-                          key={sampleData.associations.origin.id}
-                          type="samples"
-                          id={sampleData.associations.origin.id}
+                          key={collection.id}
+                          type="collections"
+                          id={collection.id}
                         />
-                      ) : (
-                        <Text>No origin specified.</Text>
-                      )}
-                      {editing ? (
-                        <Button icon={<Add />} primary disabled={!editing} />
-                      ) : null}
-                    </Box>
-                  </TableCell>
-                </TableRow>
+                      );
+                    })
+                  ) : (
+                    <Text>No associated collections specified.</Text>
+                  )}
+                </Box>
+              </Box>
 
-                <TableRow>
-                  <TableCell scope="row" align="right" border>
-                    <Heading level="4" margin="xsmall">
-                      Primary collection
-                    </Heading>
-                  </TableCell>
-                  <TableCell border>
-                    <Linky
-                      key={sampleData.collection.id}
-                      type="collections"
-                      id={sampleData.collection.id}
-                    />
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-
-            <Box direction="row" align="center" background="light-2" round>
-              <Heading level="4" margin="small">
-                Associated collections
-              </Heading>
-              <Box
-                wrap
-                round
-                direction="row"
-                justify="center"
-                align="center"
-                margin="small"
-                pad="small"
-                gap="small"
-              >
-                {sampleData.collections.length > 0 ? (
-                  sampleData.collections.map((collection) => {
-                    return (
-                      <Linky
-                        key={collection.id}
-                        type="collections"
-                        id={collection.id}
-                      />
-                    );
-                  })
-                ) : (
-                  <Text>No associated collections specified.</Text>
-                )}
+              {/* Products */}
+              <Box direction="column" align="center" background="light-2" basis="1/4" round>
+                <Heading level="3" margin="small">
+                  Products
+                </Heading>
+                <Box
+                  wrap
+                  direction="row"
+                  justify="center"
+                  align="center"
+                  margin="small"
+                  pad="small"
+                  gap="small"
+                  fill
+                >
+                  {sampleData.collections.length > 0 ? (
+                    sampleData.associations.products.map((product) => {
+                      return (
+                        <Linky key={product.id} type="samples" id={product.id} />
+                      );
+                    })
+                  ) : (
+                    <Text>No products specified.</Text>
+                  )}
+                </Box>
               </Box>
             </Box>
 
-            <Box direction="row" align="center" background="light-2" round>
-              <Heading level="4" margin="small">
-                Products
-              </Heading>
-              <Box
-                wrap
-                direction="row"
-                justify="center"
-                align="center"
-                margin="small"
-                pad="small"
-                gap="small"
-              >
-                {sampleData.associations.products.map((product) => {
-                  return (
-                    <Linky key={product.id} type="samples" id={product.id} />
-                  );
-                })}
-              </Box>
-            </Box>
-
-            <Box direction="row" align="center" background="light-2" round>
-              <Heading level="4" margin="small">
+            <Box direction="column" align="center" background="light-2" round>
+              <Heading level="3" margin="small">
                 Attributes
               </Heading>
               <Box
                 wrap
                 round
                 direction="row"
-                justify="center"
                 align="center"
+                justify="start"
                 margin="small"
                 pad="small"
                 gap="small"
                 background="light-2"
+                fill
               >
                 {sampleData.attributes.length > 0 ? (
                   sampleData.attributes.map((attribute) => {

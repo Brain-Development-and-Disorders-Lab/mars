@@ -43,6 +43,7 @@ const AttributeCard = (props: AttributeCardProps) => {
             <strong>Attribute: {props.data.name}</strong>
           </Text>
         </CardHeader>
+
         <CardBody pad="small">
           <Box direction="row" flex gap="small">
             <Storage color="brand" />
@@ -67,92 +68,99 @@ const AttributeCard = (props: AttributeCardProps) => {
           {/* Populate footer depending on the blocks that are configured */}
         </CardFooter>
       </Card>
+
       {showDetails && (
         <Layer
-          // full
           onEsc={() => setShowDetails(false)}
           onClickOutside={() => setShowDetails(false)}
         >
-          <Box margin="small">
-            <Box direction="row" justify="between" margin={{ right: "small" }}>
-              <Heading level="2" margin="small">
-                Attribute details: {props.data.name}
-              </Heading>
-              <Button
-                icon={<Close />}
-                onClick={() => setShowDetails(false)}
-                plain
-              />
+          {/* Heading and close button */}
+          <Box direction="row" justify="between" pad={{ left: "medium", right: "medium" }}>
+            <Heading level="2">
+              Attribute: {props.data.name}
+            </Heading>
+
+            <Button
+              icon={<Close />}
+              onClick={() => setShowDetails(false)}
+              plain
+            />
+          </Box>
+
+          {/* Content */}
+          <Box pad={{ left: "medium", right: "medium", bottom: "medium" }}direction="column" gap="small" width="large">
+            <Box direction="column" align="center" background="light-2" round>
+              <Heading level="3">Details</Heading>
+              <Box pad="small" fill>
+                <Table>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell scope="row" border>
+                        <Heading level="4" margin="small">
+                          Name
+                        </Heading>
+                      </TableCell>
+                      <TableCell border>
+                        <Text>{props.data.name}</Text>
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell scope="row" border>
+                        <Heading level="4" margin="small">
+                          Description
+                        </Heading>
+                      </TableCell>
+                      <TableCell border>
+                        <Paragraph>{props.data.description}</Paragraph>
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell scope="row" border>
+                        <Heading level="4" margin="small">
+                          Type
+                        </Heading>
+                      </TableCell>
+                      <TableCell border>
+                        <Text>{props.data.type}</Text>
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </Box>
             </Box>
 
-            <Box width={{ min: "small", max: "medium" }}>
-              <Heading level="4">Details</Heading>
-              <Table>
-                <TableBody>
-                  <TableRow>
-                    <TableCell scope="row" align="right" border>
-                      <Heading level="4" margin="small">
-                        Name
-                      </Heading>
-                    </TableCell>
-                    <TableCell border>
-                      <Text>{props.data.name}</Text>
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell scope="row" align="right" border>
-                      <Heading level="4" margin="small">
-                        Description
-                      </Heading>
-                    </TableCell>
-                    <TableCell border>
-                      <Paragraph>{props.data.description}</Paragraph>
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell scope="row" align="right" border>
-                      <Heading level="4" margin="small">
-                        Type
-                      </Heading>
-                    </TableCell>
-                    <TableCell border>
-                      <Text>{props.data.type}</Text>
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </Box>
+            <Box direction="column" align="center" background="light-2" round>
+              <Heading level="3">Blocks</Heading>
+              <Box pad="small">
+                {props.data.blocks &&
+                  props.data.blocks.map((block) => {
+                    // Adjust the type of element displayed depending on the content
+                    let dataElement = <Text>{block.data}</Text>;
+                    switch (block.type) {
+                      case "url":
+                        dataElement = (
+                          <Anchor
+                            href={block.data.toString()}
+                            color="dark-2"
+                            label={<Text truncate>{block.data}</Text>}
+                          />
+                        );
+                        break;
+                      default:
+                        break;
+                    }
 
-            <Heading level="4">Blocks</Heading>
-            <Box gap="small">
-              {props.data.blocks &&
-                props.data.blocks.map((block) => {
-                  // Adjust the type of element displayed depending on the content
-                  let dataElement = <Text>{block.data}</Text>;
-                  switch (block.type) {
-                    case "url":
-                      dataElement = (
-                        <Anchor
-                          href={block.data.toString()}
-                          color="dark-2"
-                          label={<Text truncate>{block.data}</Text>}
-                        />
-                      );
-                      break;
-                    default:
-                      break;
-                  }
-
-                  return (
-                    <Block
-                      identifier={block.identifier}
-                      name={block.name}
-                      type={block.type}
-                      data={dataElement}
-                      disabled
-                    />
-                  );
-                })}
+                    return (
+                      <Block
+                        identifier={block.identifier}
+                        name={block.name}
+                        type={block.type}
+                        data={dataElement}
+                        disabled
+                      />
+                    );
+                  })}
+                </Box>
             </Box>
           </Box>
         </Layer>

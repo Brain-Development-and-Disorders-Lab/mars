@@ -25,7 +25,7 @@ const ErrorLayer = (props: { message: string }) => {
           <b>Message:</b> {props.message}
         </Text>
         <Button
-          label="Return"
+          label="Return to Dashboard"
           icon={<LinkNext />}
           onClick={() => navigate("/")}
           primary
