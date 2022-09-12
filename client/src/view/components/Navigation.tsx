@@ -11,6 +11,7 @@ import {
 } from "grommet/components";
 import {
   AddCircle,
+  HomeRounded,
   Search as SearchIcon,
   SettingsOption,
   User,
@@ -26,17 +27,11 @@ const Navigation = () => {
       sticky="scrollup"
       pad="small"
     >
-      <Nav align="center" direction="row">
+      <Nav align="center" direction="row" pad={{ left: "medium" }} gap="large">
         <Anchor
-          label="Home"
+          label="Dashboard"
           href="/"
-          color="text"
-          size="large"
-        />
-        <Anchor
-          label="Search"
-          href="/search"
-          icon={<SearchIcon />}
+          icon={<HomeRounded />}
           color="text"
           size="large"
           reverse
@@ -45,9 +40,10 @@ const Navigation = () => {
           dropProps={{ align: { top: "bottom", left: "left" } }}
           label="Create"
           icon={<AddCircle />}
+          dropBackground="brand"
           items={[
             { label: "Collection" },
-            { label: <Anchor label="Sample" href="/create/sample/start" /> },
+            { label: <Anchor label="Sample" href="/create/sample/start" color="white"/> },
             { label: "Attribute" },
           ]}
           size="large"
@@ -56,16 +52,25 @@ const Navigation = () => {
           dropProps={{ align: { top: "bottom", left: "left" } }}
           label="View"
           icon={<View />}
+          dropBackground="brand"
           items={[
-            { label: <Anchor label="Collections" href="/collections" /> },
-            { label: <Anchor label="Samples" href="/samples" /> },
-            { label: <Anchor label="Attributes" href="/attributes" /> },
+            { label: <Anchor label="Collections" href="/collections" color="white"/> },
+            { label: <Anchor label="Samples" href="/samples" color="white"/> },
+            { label: <Anchor label="Attributes" href="/attributes" color="white"/> },
           ]}
           size="large"
         />
       </Nav>
 
-      <Box direction="row" align="center">
+      <Box direction="row" align="center" pad={{ right: "medium" }}>
+        <Anchor
+          label="Search"
+          href="/search"
+          icon={<SearchIcon />}
+          color="text"
+          size="large"
+          margin={{ right: "large" }}
+        />
         <Button
           icon={<SettingsOption />}
           onClick={() => setShowSidebar(!showSidebar)}
