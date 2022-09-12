@@ -36,6 +36,7 @@ export const Attributes = ({}) => {
   // Extract state from prior page
   const { state } = useLocation();
   const {
+    from,
     name,
     created,
     collection,
@@ -56,6 +57,7 @@ export const Attributes = ({}) => {
 
   // Configure state for current page
   const attributeState: Create.Attributes = {
+    from: from,
     name: name,
     created: created,
     owner: owner,
@@ -241,9 +243,12 @@ export const Attributes = ({}) => {
                   <Button
                     label="Back"
                     icon={<LinkPrevious />}
-                    onClick={() => navigate("/create/sample/associations", {
-                      state: attributeState,
-                    })}
+                    onClick={() => {
+                      attributeState.from = "attributes";
+                      navigate("/create/sample/associations", {
+                        state: attributeState,
+                      })
+                    }}
                   />
                   <Button
                     type="submit"

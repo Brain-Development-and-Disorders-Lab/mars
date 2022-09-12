@@ -32,9 +32,8 @@ export const Associations = ({}) => {
   const { state } = useLocation();
   console.debug("Associations:", state);
 
-  const { name, created, collection, description, owner } =
+  const { from, name, created, collection, description, owner } =
     state as Create.Start;
-  // To Do: Unpack Create.Attribute state
 
   // Setup state data
   const [origin, setOrigin] = useState({ name: "", id: "" });
@@ -61,6 +60,7 @@ export const Associations = ({}) => {
   );
 
   const associationState: Create.Associations = {
+    from: from,
     name: name,
     created: created,
     owner: owner,
@@ -126,6 +126,7 @@ export const Associations = ({}) => {
             <Form
               onChange={() => {}}
               onSubmit={() => {
+                associationState.from = "associations";
                 navigate("/create/sample/attributes", {
                   state: associationState,
                 });
@@ -256,11 +257,12 @@ export const Associations = ({}) => {
                 <Button
                   label="Back"
                   icon={<LinkPrevious />}
-                  onClick={() =>
+                  onClick={() => {
+                    associationState.from = "associations";
                     navigate("/create/sample/start", {
                       state: associationState,
                     })
-                  }
+                  }}
                 />
                 <Button
                   type="submit"

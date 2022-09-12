@@ -4,7 +4,11 @@ import { ReactElement } from "react";
 
 // A new type is declared for each step.
 declare namespace Create {
-  type Start = {
+  type Base = {
+    from: "none" | "start" | "associations" | "attributes";
+  };
+
+  type Start = Base & {
     name: string;
     created: string;
     owner: string;

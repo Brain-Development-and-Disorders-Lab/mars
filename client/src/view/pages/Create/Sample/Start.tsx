@@ -63,6 +63,7 @@ export const Start = ({}) => {
   const [collectionData, setCollectionData] = useState([] as CollectionModel[]);
 
   const startState: Create.Start = {
+    from: "none",
     name: name,
     created: created,
     owner: owner,
@@ -102,7 +103,10 @@ export const Start = ({}) => {
                 onChange={() => {}}
                 onReset={() => {}}
                 onSubmit={() => {
-                  navigate("/create/sample/associations", { state: startState });
+                  startState.from = "start";
+                  navigate("/create/sample/associations", {
+                    state: startState
+                  });
                 }}
               >
                 <Box direction="row" gap="medium">
