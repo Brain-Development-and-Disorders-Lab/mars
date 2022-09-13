@@ -1,63 +1,60 @@
+// Libraries
 import express from "express";
+import consola from "consola";
 
-// 'attributesRoute' is an instance of the express router.
-// The router will be added as a middleware and will take control of requests starting with path /record.
+// Database connection
+import { getDatabase } from "../database/connection";
+
 const attributesRoute = express.Router();
 
-// This will help us connect to the database
-import { getDatabase } from "../lib/database/connection";
-
-// This help convert the id from string to ObjectId for the _id.
+// Convert the id from a string to a MongoDB ObjectId for the _id.
 const ObjectId = require("mongodb").ObjectId;
 
-// This section will help you get a list of all the records.
-attributesRoute.route("/attributes").get(function (req: any, res: any) {
-  let _connect = getDatabase();
-  _connect
+// Route: View all attributes
+attributesRoute.route("/attributes").get((request: any, response: any) => {
+  let connection = getDatabase();
+  connection
     .collection("attributes")
     .find({})
-    .toArray(function (err: any, result: any) {
-      if (err) throw err;
-      res.json(result);
+    .toArray((error: any, result: any) => {
+      if (error) throw error;
+      response.json(result);
     });
 });
 
-// This section will help you get a single record by id
+// Route: View a specific attribute
 attributesRoute
   .route("/attributes/:id")
-  .get(function (
-    req: { params: { id: any } },
-    res: { json: (arg0: any) => void }
-  ) {
-    let _connect = getDatabase();
-    let query = { _id: ObjectId(req.params.id) };
-    _connect
-      .collection("attributes")
-      .findOne(query, function (err: any, result: any) {
-        if (err) {
-          throw err;
-        }
+  .get((
+    request: { params: { id: any } },
+    response: { json: (content: any) => void }
+  ) => {
+    // Connect to the database and assemble a query
+    let connection = getDatabase();
+    let query = { _id: ObjectId(request.params.id) };
 
-        res.json(result);
+    connection
+      .collection("attributes")
+      .findOne(query, (error: any, result: any) => {
+        if (error) throw error;
+        consola.success("Retrieved attribute with ID:", request.params.id);
+        response.json(result);
       });
   });
 
-// This section will help you delete a record
+// Route: Remove an attribute
 attributesRoute
   .route("/:id")
   .delete(
-    (req: { params: { id: any } }, response: { json: (arg0: any) => void }) => {
-      let _connect = getDatabase();
+    (req: { params: { id: any } }, response: { json: (content: any) => void }) => {
+      let connection = getDatabase();
       let query = { _id: ObjectId(req.params.id) };
-      _connect
+      connection
         .collection("attributes")
-        .deleteOne(query, function (err: any, obj: any) {
-          if (err) {
-            throw err;
-          }
-          console.log("1 attribute deleted");
-
-          response.json(obj);
+        .deleteOne(query, (error: any, content: any) => {
+          if (error) throw error;
+          consola.success("1 attribute deleted");
+          response.json(content);
         });
     }
   );

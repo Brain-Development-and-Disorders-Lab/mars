@@ -1,27 +1,29 @@
-import express, { response } from "express";
-import { ObjectId } from "mongodb";
+// Libraries
+import express from "express";
 
-// Utility functions
-import { getDatabase } from "../lib/database/connection";
+// Database connection
+import { getDatabase } from "../database/connection";
 
 const searchRoute = express.Router();
 
+// Name of MongoDB collection storing Samples
 const SAMPLES_COLLECTION = "samples";
 
-searchRoute.route("/search/:query").get(async(req: any, res: any) => {
+// Route: Search for a specific string in the colleciton of samples
+searchRoute.route("/search/:query").get(async (request: any, response: any) => {
   const database = getDatabase();
-  const query = { $text: { $search: req.params.query } };
+
+  // Configure database query
+  const query = { $text: { $search: request.params.query } };
   const sort = { score: { $meta: "textScore" } };
 
   database
     .collection(SAMPLES_COLLECTION)
     .find(query)
     .sort(sort)
-    .toArray(function(error, docs) {
-      if (error) {
-        throw error;
-      }
-      res.json(docs);
+    .toArray((error, content) => {
+      if (error) throw error;
+      response.json(content);
     });
 });
 

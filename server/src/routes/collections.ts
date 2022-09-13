@@ -1,63 +1,57 @@
+// Libraries
 import express from "express";
+import consola from "consola";
 
-// 'collectionsRoute' is an instance of the express router.
-// The router will be added as a middleware and will take control of requests starting with path /record.
+// Database connection
+import { getDatabase } from "../database/connection";
+
 const collectionsRoute = express.Router();
 
-// This will help us connect to the database
-import { getDatabase } from "../lib/database/connection";
-
-// This help convert the id from string to ObjectId for the _id.
+// Convert the id from a string to a MongoDB ObjectId for the _id.
 const ObjectId = require("mongodb").ObjectId;
 
-// This section will help you get a list of all the records.
-collectionsRoute.route("/collections").get(function (req: any, res: any) {
-  let _connect = getDatabase();
-  _connect
+// Route: View all collections
+collectionsRoute.route("/collections").get((request: any, response: any) => {
+  let connection = getDatabase();
+  connection
     .collection("collections")
     .find({})
-    .toArray(function (err: any, result: any) {
-      if (err) throw err;
-      res.json(result);
+    .toArray((error: any, result: any) => {
+      if (error) throw error;
+      response.json(result);
     });
 });
 
-// This section will help you get a single record by id
+// Route: View a specific collection
 collectionsRoute
   .route("/collections/:id")
-  .get(function (
-    req: { params: { id: any } },
-    res: { json: (arg0: any) => void }
-  ) {
-    let _connect = getDatabase();
-    let query = { _id: ObjectId(req.params.id) };
-    _connect
+  .get((
+    request: { params: { id: any } },
+    response: { json: (content: any) => void }
+  ) => {
+    let connection = getDatabase();
+    let query = { _id: ObjectId(request.params.id) };
+    connection
       .collection("collections")
-      .findOne(query, function (err: any, result: any) {
-        if (err) {
-          throw err;
-        }
-
-        res.json(result);
+      .findOne(query, (error: any, result: any) => {
+        if (error) throw error;
+        response.json(result);
       });
   });
 
-// This section will help you delete a record
+// Route: Remove a collection
 collectionsRoute
   .route("/:id")
   .delete(
-    (req: { params: { id: any } }, response: { json: (arg0: any) => void }) => {
-      let _connect = getDatabase();
-      let query = { _id: ObjectId(req.params.id) };
-      _connect
+    (request: { params: { id: any } }, response: { json: (content: any) => void }) => {
+      let connection = getDatabase();
+      let query = { _id: ObjectId(request.params.id) };
+      connection
         .collection("collections")
-        .deleteOne(query, function (err: any, obj: any) {
-          if (err) {
-            throw err;
-          }
-          console.log("1 collection deleted");
-
-          response.json(obj);
+        .deleteOne(query, (error: any, content: any) => {
+          if (error) throw error;
+          consola.success("1 collection deleted");
+          response.json(content);
         });
     }
   );
