@@ -142,7 +142,7 @@ samplesRoute
     }
 
     // We need to apply the collections that have been specified
-    if (data.collection && data.collection.name !== "") {
+    if (data.collection.name !== "") {
       consola.info("Collection specified, applying...");
       const collectionQuery = { _id: new ObjectId(data.collection.id) };
       let collection: CollectionModel;
