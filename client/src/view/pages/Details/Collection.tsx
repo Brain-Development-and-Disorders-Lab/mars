@@ -41,7 +41,6 @@ export const Collection = () => {
     // Handle the response from the database
     response.then((value) => {
       setCollectionData(value);
-      console.debug("Collection:", value);
 
       // Check the contents of the response
       if (value["error"] !== undefined) {

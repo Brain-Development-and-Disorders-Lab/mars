@@ -20,6 +20,9 @@ import { BlockProps, BlockStruct, SampleModel } from "types";
 import ErrorLayer from "src/view/components/ErrorLayer";
 import Linky from "src/view/components/Linky";
 
+// Consola
+import consola from "consola";
+
 // Constants
 const VALID_TYPES = ["number", "file", "url", "date", "string", "sample"];
 
@@ -89,7 +92,7 @@ const Block = (props: BlockProps) => {
               if (fileList) {
                 for (let i = 0; i < fileList.length; i += 1) {
                   const file = fileList[i];
-                  console.debug("File:", file);
+                  consola.debug("File:", file);
                 }
               }
             }

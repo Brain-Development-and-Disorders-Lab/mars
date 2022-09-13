@@ -1,14 +1,5 @@
 // React and Grommet
 import React, { useEffect, useState } from "react";
-import { Box, Spinner } from "grommet/components";
-
-// Database and models
-import { getData } from "src/lib/database/getData";
-import { SampleModel } from "types";
-
-// Custom components
-import ErrorLayer from "../ErrorLayer";
-
 import ReactFlow, {
   MiniMap,
   Controls,
@@ -18,6 +9,17 @@ import ReactFlow, {
   useEdgesState,
   MarkerType,
 } from "react-flow-renderer";
+import { Box, Spinner } from "grommet/components";
+
+// Database and models
+import { getData } from "src/lib/database/getData";
+import { SampleModel } from "types";
+
+// Custom components
+import ErrorLayer from "../ErrorLayer";
+
+// Consola
+import consola from "consola";
 
 const Flow = (props: { id: string }) => {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -57,7 +59,7 @@ const Flow = (props: { id: string }) => {
   }, [isLoaded]);
 
   const onInit = (reactFlowInstance: ReactFlowInstance) => {
-    console.info("React Flow instance:", reactFlowInstance);
+    consola.info("React Flow instance:", reactFlowInstance);
   };
 
   const createFlow = () => {

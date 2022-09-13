@@ -30,6 +30,9 @@ import AttributeGroup from "src/view/components/AttributeGroup";
 import ErrorLayer from "src/view/components/ErrorLayer";
 import Linky from "src/view/components/Linky";
 
+// Consola
+import consola from "consola";
+
 export const Attributes = ({}) => {
   const navigate = useNavigate();
 
@@ -380,7 +383,7 @@ export const Attributes = ({}) => {
                   primary
                   onClick={() => {
                     // Create new attribute
-                    console.debug("Submitting data:", sampleData);
+                    consola.info("Submitting data:", sampleData);
 
                     // Push the data and attribute
                     pushData(`/samples/add`, sampleData).then(() =>

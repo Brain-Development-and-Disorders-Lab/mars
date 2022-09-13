@@ -43,7 +43,6 @@ export const Sample = () => {
   const [showFlow, setShowFlow] = useState(false);
 
   const [editing, setEditing] = useState(false);
-  // const [changed, setChanged] = useState(false);
   const [description, setDescription] = useState("");
 
   const handleEditClick = () => {

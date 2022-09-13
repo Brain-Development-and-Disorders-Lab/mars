@@ -30,7 +30,6 @@ export const Associations = ({}) => {
 
   // Extract state from prior page
   const { state } = useLocation();
-  console.debug("Associations:", state);
 
   const { from, name, created, collection, description, owner } =
     state as Create.Start;
