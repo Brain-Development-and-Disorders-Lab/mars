@@ -142,8 +142,8 @@ samplesRoute
     }
 
     // We need to apply the collections that have been specified
-    if (data.collection.name !== "") {
-      consola.info("Collection specified, applying...")
+    if (data.collection && data.collection.name !== "") {
+      consola.info("Collection specified, applying...");
       const collectionQuery = { _id: new ObjectId(data.collection.id) };
       let collection: CollectionModel;
 
@@ -172,6 +172,40 @@ samplesRoute
               consola.success("Added Sample to collection:", data.collection.name);
           });
         });
+    }
+
+    if (data.collections.length > 0) {
+      consola.info("Additional Collections specified, applying...");
+      data.collections.map((collection) => {
+        const collectionQuery = { _id: new ObjectId(collection.id) };
+        let collectionResult: CollectionModel;
+
+        database
+          .collection(COLLECTIONS_COLLECTION)
+          .findOne(collectionQuery, (error: any, result: any) => {
+            if (error) throw error;
+            collectionResult = result;
+
+            // Update the collection to include the sample as an association
+            const updatedValues = {
+              $set: {
+                associations: {
+                  samples: [
+                    ...collectionResult.associations.samples,
+                    insertedId,
+                  ]
+                },
+              },
+            };
+
+            database
+              .collection(COLLECTIONS_COLLECTION)
+              .updateOne(collectionQuery, updatedValues, (error: any, response: any) => {
+                if (error) throw error;
+                consola.success("Added Sample to collection:", collection.name);
+            });
+          });
+      });
     }
   });
 
