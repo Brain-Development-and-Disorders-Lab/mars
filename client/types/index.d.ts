@@ -59,7 +59,7 @@ export type AttributeCardProps = {
 export type CollectionStruct = {
   name: string;
   description: string;
-  blocks: string[];
+  parameters: string[];
   associations: {
     samples: string[];
   };
