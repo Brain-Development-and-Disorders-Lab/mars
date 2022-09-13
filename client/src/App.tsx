@@ -14,6 +14,7 @@ import Navigation from "./view/components/Navigation";
 
 // Custom pages
 import Start from "./view/pages/Create/Sample/Start";
+import Collection from "./view/pages/Details/Collection";
 import Collections from "./view/pages/View/Collections";
 import Search from "./view/pages/Search";
 import Associations from "./view/pages/Create/Sample/Associations";
@@ -42,12 +43,15 @@ export const App = () => {
             path="/create/sample/attributes"
             element={<Attributes />}
           />
+          <Route path="collections">
+            <Route path=":id" element={<Collection />} />
+          </Route>
           <Route path="/collections" element={<Collections />} />
-          <Route path="/samples" element={<Samples />} />
-          <Route path="/search" element={<Search />} />
           <Route path="samples">
             <Route path=":id" element={<Sample />} />
           </Route>
+          <Route path="/samples" element={<Samples />} />
+          <Route path="/search" element={<Search />} />
         </Routes>
       </Grommet>
     </BrowserRouter>
