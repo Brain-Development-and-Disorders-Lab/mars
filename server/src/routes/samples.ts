@@ -4,7 +4,7 @@ import consola from "consola";
 import { ObjectId } from "mongodb";
 
 // Import types from the client to enforce structure
-import { SampleModel, SampleStruct } from "../../../client/types";
+import { CollectionModel, SampleModel, SampleStruct } from "../../../client/types";
 
 // Utility functions
 import { getDatabase } from "../database/connection";
@@ -13,6 +13,7 @@ const samplesRoute = express.Router();
 
 // Constants
 const SAMPLES_COLLECTION = "samples";
+const COLLECTIONS_COLLECTION = "collections";
 
 // Route: View all samples
 samplesRoute.route("/samples").get((request: any, response: any) => {
@@ -61,9 +62,9 @@ samplesRoute
     // Insert the new sample
     database
       .collection(SAMPLES_COLLECTION)
-      .insertOne(data, (error: any, response: any) => {
+      .insertOne(data, (error: any, content: any) => {
         if (error) throw error;
-        response.json(response);
+        response.json(content);
       });
 
     // Retrieve the ID of the inserted sample
@@ -138,6 +139,39 @@ samplesRoute
               });
           });
       });
+    }
+
+    // We need to apply the collections that have been specified
+    if (data.collection.name !== "") {
+      consola.info("Collection specified, applying...")
+      const collectionQuery = { _id: new ObjectId(data.collection.id) };
+      let collection: CollectionModel;
+
+      database
+        .collection(COLLECTIONS_COLLECTION)
+        .findOne(collectionQuery, (error: any, result: any) => {
+          if (error) throw error;
+          collection = result;
+
+          // Update the collection to include the sample as an association
+          const updatedValues = {
+            $set: {
+              associations: {
+                samples: [
+                  ...collection.associations.samples,
+                  insertedId,
+                ]
+              },
+            },
+          };
+
+          database
+            .collection(COLLECTIONS_COLLECTION)
+            .updateOne(collectionQuery, updatedValues, (error: any, response: any) => {
+              if (error) throw error;
+              consola.success("Added Sample to collection:", data.collection.name);
+          });
+        });
     }
   });
 
