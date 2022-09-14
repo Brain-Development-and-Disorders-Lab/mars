@@ -4,7 +4,11 @@ import consola from "consola";
 import { ObjectId } from "mongodb";
 
 // Import types from the client to enforce structure
-import { CollectionModel, EntityModel, EntityStruct } from "../../../client/types";
+import {
+  CollectionModel,
+  EntityModel,
+  EntityStruct,
+} from "../../../client/types";
 
 // Utility functions
 import { getDatabase } from "../database/connection";
@@ -46,9 +50,8 @@ EntitiesRoute.route("/entities/:id").get((request: any, response: any) => {
 });
 
 // Route: Create a new Entity, expects EntityStruct data
-EntitiesRoute
-  .route("/entities/add")
-  .post((request: { body: EntityStruct }, response: any) => {
+EntitiesRoute.route("/entities/add").post(
+  (request: { body: EntityStruct }, response: any) => {
     const database = getDatabase();
     let data = {
       name: request.body.name,
@@ -75,7 +78,7 @@ EntitiesRoute
     // Retrieve the ID of the inserted Entity
     const insertedId = (data as EntityStruct & { _id: string })._id;
 
-    consola.debug("Create new Entity:", "/entities/add", "\"" + data.name + "\"");
+    consola.debug("Create new Entity:", "/entities/add", '"' + data.name + '"');
 
     // We need to apply the associations that have been specified
     if (data.associations.origin.id !== "") {
@@ -110,9 +113,13 @@ EntitiesRoute
           // Apply the updated structure to the target Entity
           database
             .collection(ENTITIES_COLLECTION)
-            .updateOne(originQuery, updatedValues, (error: any, response: any) => {
-              if (error) throw error;
-            });
+            .updateOne(
+              originQuery,
+              updatedValues,
+              (error: any, response: any) => {
+                if (error) throw error;
+              }
+            );
         });
     } else if (data.associations.products.length > 0) {
       // Iterate over each product, setting their origin to the current Entity being added
@@ -138,12 +145,16 @@ EntitiesRoute
                 },
               },
             };
-  
+
             database
               .collection(ENTITIES_COLLECTION)
-              .updateOne(productQuery, updatedValues, (error: any, response: any) => {
-                if (error) throw error;
-              });
+              .updateOne(
+                productQuery,
+                updatedValues,
+                (error: any, response: any) => {
+                  if (error) throw error;
+                }
+              );
           });
       });
     }
@@ -164,20 +175,24 @@ EntitiesRoute
           const updatedValues = {
             $set: {
               associations: {
-                entities: [
-                  ...collection.associations.entities,
-                  insertedId,
-                ]
+                entities: [...collection.associations.entities, insertedId],
               },
             },
           };
 
           database
             .collection(COLLECTIONS_COLLECTION)
-            .updateOne(collectionQuery, updatedValues, (error: any, response: any) => {
-              if (error) throw error;
-              consola.success("Added Entity to collection:", data.collection.name);
-          });
+            .updateOne(
+              collectionQuery,
+              updatedValues,
+              (error: any, response: any) => {
+                if (error) throw error;
+                consola.success(
+                  "Added Entity to collection:",
+                  data.collection.name
+                );
+              }
+            );
         });
     }
 
@@ -200,26 +215,33 @@ EntitiesRoute
                   entities: [
                     ...collectionResult.associations.entities,
                     insertedId,
-                  ]
+                  ],
                 },
               },
             };
 
             database
               .collection(COLLECTIONS_COLLECTION)
-              .updateOne(collectionQuery, updatedValues, (error: any, response: any) => {
-                if (error) throw error;
-                consola.success("Added Entity to collection:", collection.name);
-            });
+              .updateOne(
+                collectionQuery,
+                updatedValues,
+                (error: any, response: any) => {
+                  if (error) throw error;
+                  consola.success(
+                    "Added Entity to collection:",
+                    collection.name
+                  );
+                }
+              );
           });
       });
     }
-  });
+  }
+);
 
 // Route: Remove an Entity
-EntitiesRoute
-  .route("/:id")
-  .delete((request: { params: { id: any } }, response: any) => {
+EntitiesRoute.route("/:id").delete(
+  (request: { params: { id: any } }, response: any) => {
     const database = getDatabase();
     let query = { _id: new ObjectId(request.params.id) };
 
@@ -232,6 +254,7 @@ EntitiesRoute
         consola.success("1 Entity deleted");
         response.json(content);
       });
-  });
+  }
+);
 
 export default EntitiesRoute;

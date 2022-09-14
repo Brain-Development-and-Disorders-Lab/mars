@@ -22,11 +22,7 @@ const Navigation = () => {
   const [showSidebar, setShowSidebar] = useState(false);
 
   return (
-    <Header
-      background="brand"
-      sticky="scrollup"
-      pad="small"
-    >
+    <Header background="brand" sticky="scrollup" pad="small">
       <Nav align="center" direction="row" pad={{ left: "medium" }} gap="large">
         <Anchor
           label="Dashboard"
@@ -43,7 +39,15 @@ const Navigation = () => {
           dropBackground="brand"
           items={[
             { label: "Collection" },
-            { label: <Anchor label="Entity" href="/create/entity/start" color="white"/> },
+            {
+              label: (
+                <Anchor
+                  label="Entity"
+                  href="/create/entity/start"
+                  color="white"
+                />
+              ),
+            },
             { label: "Attribute" },
           ]}
           size="large"
@@ -54,9 +58,19 @@ const Navigation = () => {
           icon={<View />}
           dropBackground="brand"
           items={[
-            { label: <Anchor label="Collections" href="/collections" color="white"/> },
-            { label: <Anchor label="Entities" href="/entities" color="white"/> },
-            { label: <Anchor label="Attributes" href="/attributes" color="white"/> },
+            {
+              label: (
+                <Anchor label="Collections" href="/collections" color="white" />
+              ),
+            },
+            {
+              label: <Anchor label="Entities" href="/entities" color="white" />,
+            },
+            {
+              label: (
+                <Anchor label="Attributes" href="/attributes" color="white" />
+              ),
+            },
           ]}
           size="large"
         />
@@ -81,6 +95,6 @@ const Navigation = () => {
       </Box>
     </Header>
   );
-}
+};
 
 export default Navigation;

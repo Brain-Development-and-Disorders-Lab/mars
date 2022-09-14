@@ -14,20 +14,19 @@ import Navigation from "./view/components/Navigation";
 
 // Custom pages
 import Start from "./view/pages/Create/Entity/Start";
-import Collection from "./view/pages/Details/Collection";
-import Collections from "./view/pages/View/Collections";
+import Collection from "./view/pages/Collection";
+import Collections from "./view/pages/Collections";
 import Search from "./view/pages/Search";
 import Associations from "./view/pages/Create/Entity/Associations";
 import Attributes from "./view/pages/Create/Entity/Attributes";
 import Home from "./view/pages/Home";
-import Entity from "./view/pages/Details/Entity";
-import Entities from "./view/pages/View/Entities";
+import Entity from "./view/pages/Entity";
+import Entities from "./view/pages/Entities";
 
 // Theme
 import { theme } from "./theme";
 
 export const App = () => {
-
   return (
     <BrowserRouter>
       <Grommet theme={theme} full>
@@ -39,10 +38,7 @@ export const App = () => {
             path="/create/entity/associations"
             element={<Associations />}
           />
-          <Route
-            path="/create/entity/attributes"
-            element={<Attributes />}
-          />
+          <Route path="/create/entity/attributes" element={<Attributes />} />
           <Route path="/collections" element={<Collections />} />
           <Route path="collections">
             <Route path=":id" element={<Collection />} />

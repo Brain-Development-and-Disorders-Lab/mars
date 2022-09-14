@@ -25,13 +25,13 @@ export const watchFiles = async (path: string) => {
       logInfo(`File ${path} has been added`);
       logInfo(stats);
     })
-    .on("change", path => logInfo(`File ${path} has been changed`))
-    .on("unlink", path => logInfo(`File ${path} has been removed`))
+    .on("change", (path) => logInfo(`File ${path} has been changed`))
+    .on("unlink", (path) => logInfo(`File ${path} has been removed`))
     .on("addDir", (path, stats) => {
       logSuccess(`Directory ${path} has been added`);
       logInfo(stats);
     })
-    .on("unlinkDir", path => logInfo(`Directory ${path} has been removed`))
-    .on("error", error => logError(`Watcher error: ${error}`))
+    .on("unlinkDir", (path) => logInfo(`Directory ${path} has been removed`))
+    .on("error", (error) => logError(`Watcher error: ${error}`))
     .on("ready", () => logSuccess("Initial scan complete. Ready for changes"));
-}
+};

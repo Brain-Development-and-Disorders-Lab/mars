@@ -5,13 +5,13 @@ import {
   Box,
   Button,
   PageHeader,
-  Paragraph,
   Spinner,
   Table,
   TableBody,
   TableCell,
   TableHeader,
   TableRow,
+  Text,
 } from "grommet/components";
 import { Page, PageContent } from "grommet";
 
@@ -20,26 +20,26 @@ import { useNavigate } from "react-router-dom";
 
 // Database and models
 import { getData } from "src/lib/database/getData";
-import { CollectionModel } from "types";
+import { EntityModel } from "types";
 
 // Custom components
-import ErrorLayer from "src/view/components/ErrorLayer";
+import ErrorLayer from "../components/ErrorLayer";
+import Linky from "../components/Linky";
 
-const Collections = () => {
+const Entities = () => {
   const navigate = useNavigate();
+
   const [isLoaded, setIsLoaded] = useState(false);
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("An error has occurred.");
-  const [collectionsData, setCollectionsData] = useState(
-    [] as CollectionModel[]
-  );
+  const [entityData, setEntityData] = useState([] as EntityModel[]);
 
   useEffect(() => {
-    const response = getData(`/collections`);
+    const response = getData(`/entities`);
 
     // Handle the response from the database
     response.then((value) => {
-      setCollectionsData(value);
+      setEntityData(value);
 
       // Check the contents of the response
       if (value["error"] !== undefined) {
@@ -51,44 +51,66 @@ const Collections = () => {
     });
     return;
   }, []);
+
   return (
     <Page kind="wide">
       <PageContent>
         {isLoaded && isError === false ? (
           <>
             <PageHeader
-              title="Collections"
-              subtitle="View all Collections currently managed by the system."
+              title="Entities"
+              subtitle="View all Entities currently tracked by the system."
               parent={<Anchor label="Return to Dashboard" href="/" />}
             />
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableCell scope="col" border="bottom" align="center">
-                    Name
+                    Identifier
                   </TableCell>
                   <TableCell scope="col" border="bottom" align="center">
-                    Description
+                    Created
+                  </TableCell>
+                  <TableCell scope="col" border="bottom" align="center">
+                    Owner
+                  </TableCell>
+                  <TableCell scope="col" border="bottom" align="center">
+                    Primary Collection
                   </TableCell>
                   <TableCell scope="col" border="bottom"></TableCell>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoaded &&
-                  collectionsData.map((value) => {
+                  entityData.map((entity) => {
                     return (
-                      <TableRow key={value._id}>
+                      <TableRow key={entity._id}>
                         <TableCell scope="row" border="right" align="center">
-                          <strong>{value.name}</strong>
+                          <strong>{entity.name}</strong>
+                        </TableCell>
+                        <TableCell align="center">
+                          <strong>
+                            {new Date(entity.created).toDateString()}
+                          </strong>
+                        </TableCell>
+                        <TableCell align="center">
+                          <strong>{entity.owner}</strong>
                         </TableCell>
                         <TableCell border="right" align="center">
-                          <Paragraph fill>{value.description}</Paragraph>
+                          {entity.collection.id !== "" ? (
+                            <Linky
+                              type="collections"
+                              id={entity.collection.id}
+                            />
+                          ) : (
+                            <Text>No Collection</Text>
+                          )}
                         </TableCell>
                         <TableCell align="center">
                           <Button
                             primary
                             label="Details"
-                            onClick={() => navigate(`/collections/${value._id}`)}
+                            onClick={() => navigate(`/entities/${entity._id}`)}
                           />
                         </TableCell>
                       </TableRow>
@@ -108,4 +130,4 @@ const Collections = () => {
   );
 };
 
-export default Collections;
+export default Entities;

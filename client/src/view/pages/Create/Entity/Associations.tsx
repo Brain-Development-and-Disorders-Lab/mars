@@ -260,7 +260,7 @@ export const Associations = ({}) => {
                     associationState.from = "associations";
                     navigate("/create/entity/start", {
                       state: associationState,
-                    })
+                    });
                   }}
                 />
                 <Button

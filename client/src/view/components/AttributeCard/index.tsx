@@ -74,10 +74,12 @@ const AttributeCard = (props: AttributeCardProps) => {
           onClickOutside={() => setShowDetails(false)}
         >
           {/* Heading and close button */}
-          <Box direction="row" justify="between" pad={{ left: "medium", right: "medium" }}>
-            <Heading level="2">
-              Attribute: {props.data.name}
-            </Heading>
+          <Box
+            direction="row"
+            justify="between"
+            pad={{ left: "medium", right: "medium" }}
+          >
+            <Heading level="2">Attribute: {props.data.name}</Heading>
 
             <Button
               icon={<Close />}
@@ -87,7 +89,12 @@ const AttributeCard = (props: AttributeCardProps) => {
           </Box>
 
           {/* Content */}
-          <Box pad={{ left: "medium", right: "medium", bottom: "medium" }}direction="column" gap="small" width="large">
+          <Box
+            pad={{ left: "medium", right: "medium", bottom: "medium" }}
+            direction="column"
+            gap="small"
+            width="large"
+          >
             <Box direction="column" align="center" background="light-2" round>
               <Heading level="3">Details</Heading>
               <Box pad="small" fill>
@@ -143,7 +150,7 @@ const AttributeCard = (props: AttributeCardProps) => {
                       />
                     );
                   })}
-                </Box>
+              </Box>
             </Box>
           </Box>
         </Layer>

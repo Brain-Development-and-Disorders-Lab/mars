@@ -62,7 +62,7 @@ const Search = () => {
         setIsError(true);
       }
     });
-  }
+  };
 
   return (
     <Page kind="wide">
@@ -88,76 +88,74 @@ const Search = () => {
           />
         </Box>
 
-        <Heading level="3">
-          Search Results
-        </Heading>
+        <Heading level="3">Search Results</Heading>
 
         <Box gap="small">
-          {isSearching ?
+          {isSearching ? (
             <Box direction="row" align="center" justify="center" gap="small">
               <Spinner size="large" />
             </Box>
-          :
-            hasSearched ?
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableCell scope="col" border="bottom" align="center">
-                      Identifier
-                    </TableCell>
-                    <TableCell scope="col" border="bottom" align="center">
-                      Created
-                    </TableCell>
-                    <TableCell scope="col" border="bottom" align="center">
-                      Owner
-                    </TableCell>
-                    <TableCell scope="col" border="bottom" align="center">
-                      Primary collection
-                    </TableCell>
-                    <TableCell scope="col" border="bottom"></TableCell>
-                  </TableRow>
-                </TableHeader>
+          ) : hasSearched ? (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableCell scope="col" border="bottom" align="center">
+                    Identifier
+                  </TableCell>
+                  <TableCell scope="col" border="bottom" align="center">
+                    Created
+                  </TableCell>
+                  <TableCell scope="col" border="bottom" align="center">
+                    Owner
+                  </TableCell>
+                  <TableCell scope="col" border="bottom" align="center">
+                    Primary collection
+                  </TableCell>
+                  <TableCell scope="col" border="bottom"></TableCell>
+                </TableRow>
+              </TableHeader>
 
-                <TableBody>
-                  {results.length > 0 ? (
-                    results.map((result) => {
-                      return (
-                        <TableRow key={result._id}>
-                          <TableCell scope="row" border="right" align="center">
-                            <strong>{result.name}</strong>
-                          </TableCell>
-                          <TableCell align="center">
-                            <strong>{new Date(result.created).toDateString()}</strong>
-                          </TableCell>
-                          <TableCell align="center">
-                            <strong>{result.owner}</strong>
-                          </TableCell>
-                          <TableCell border="right" align="center">
-                            <Linky type="collections" id={result.collection.id} />
-                          </TableCell>
-                          <TableCell align="center">
-                            <Button
-                              primary
-                              label="Details"
-                              onClick={() => navigate(`/entities/${result._id}`)}
-                            />
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })
-                  ) : (
-                    <Text>No results found.</Text>
-                  )}
-                </TableBody>
-              </Table>
-            :
-              <Text>Search results will appear here.</Text>
-          }
+              <TableBody>
+                {results.length > 0 ? (
+                  results.map((result) => {
+                    return (
+                      <TableRow key={result._id}>
+                        <TableCell scope="row" border="right" align="center">
+                          <strong>{result.name}</strong>
+                        </TableCell>
+                        <TableCell align="center">
+                          <strong>
+                            {new Date(result.created).toDateString()}
+                          </strong>
+                        </TableCell>
+                        <TableCell align="center">
+                          <strong>{result.owner}</strong>
+                        </TableCell>
+                        <TableCell border="right" align="center">
+                          <Linky type="collections" id={result.collection.id} />
+                        </TableCell>
+                        <TableCell align="center">
+                          <Button
+                            primary
+                            label="Details"
+                            onClick={() => navigate(`/entities/${result._id}`)}
+                          />
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
+                ) : (
+                  <Text>No results found.</Text>
+                )}
+              </TableBody>
+            </Table>
+          ) : (
+            <Text>Search results will appear here.</Text>
+          )}
         </Box>
 
         {/* Error component */}
         {isError && <ErrorLayer message={errorMessage} />}
-
       </PageContent>
     </Page>
   );

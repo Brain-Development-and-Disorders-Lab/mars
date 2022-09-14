@@ -1,6 +1,14 @@
 // React and Grommet
 import React, { useEffect, useState } from "react";
-import { Box, Button, Heading, List, Main, PageHeader, Text } from "grommet/components";
+import {
+  Box,
+  Button,
+  Heading,
+  List,
+  Main,
+  PageHeader,
+  Text,
+} from "grommet/components";
 import { History, LinkNext } from "grommet-icons";
 import { Page, PageContent } from "grommet";
 
@@ -72,10 +80,10 @@ const Home = () => {
         <Main direction="row" gap="medium" fill>
           <Box direction="column" basis="2/3" pad="medium">
             <Heading level="2">Entities</Heading>
-            {isLoaded && entityData.length > 0 ?
+            {isLoaded && entityData.length > 0 ? (
               <List
                 primaryKey="name"
-                secondaryKey={value => (
+                secondaryKey={(value) => (
                   <Button
                     primary
                     label="View"
@@ -88,14 +96,14 @@ const Home = () => {
                 step={4}
                 paginate
               />
-            :
+            ) : (
               <Text>There are no Entities to display.</Text>
-            }
+            )}
             <Heading level="2">Collections</Heading>
-            {isLoaded && collectionData.length > 0 ?
+            {isLoaded && collectionData.length > 0 ? (
               <List
                 primaryKey="name"
-                secondaryKey={value => (
+                secondaryKey={(value) => (
                   <Button
                     primary
                     label="View"
@@ -108,9 +116,9 @@ const Home = () => {
                 show={4}
                 paginate
               />
-            :
+            ) : (
               <Text>There are no Collections to display.</Text>
-            }
+            )}
           </Box>
 
           <Box direction="column" background="light-2" basis="1/3" pad="medium">
@@ -118,7 +126,9 @@ const Home = () => {
               <Heading level="2">Recent Changes</Heading>
               <History size="medium" />
             </Box>
-            <Text>9:23 AM: <b>Henry</b> updated ...</Text>
+            <Text>
+              9:23 AM: <b>Henry</b> updated ...
+            </Text>
           </Box>
         </Main>
 

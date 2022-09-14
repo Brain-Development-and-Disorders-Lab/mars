@@ -85,7 +85,7 @@ export const Entity = () => {
           <Box gap="small" margin="small">
             <Box direction="column" justify="between">
               <PageHeader
-                title={"Entity \"" + entityData.name + "\""}
+                title={'Entity "' + entityData.name + '"'}
                 parent={<Anchor label="Return to Entities" href="/entities" />}
               />
               <Box direction="row" gap="small">
@@ -104,12 +104,21 @@ export const Entity = () => {
 
             <Box direction="row" gap="small">
               {/* Metadata table */}
-              <Box direction="column" align="center" background="light-2" basis="1/2" round>
+              <Box
+                direction="column"
+                align="center"
+                background="light-2"
+                basis="1/2"
+                round
+              >
                 <Heading level="3" margin="small">
                   Metadata
                 </Heading>
 
-                <Box fill pad={{ left: "small", right: "small", bottom: "small" }}>
+                <Box
+                  fill
+                  pad={{ left: "small", right: "small", bottom: "small" }}
+                >
                   <Table>
                     <TableBody>
                       <TableRow>
@@ -119,7 +128,9 @@ export const Entity = () => {
                           </Heading>
                         </TableCell>
                         <TableCell border>
-                          <Text>{new Date(entityData.created).toDateString()}</Text>
+                          <Text>
+                            {new Date(entityData.created).toDateString()}
+                          </Text>
                         </TableCell>
                       </TableRow>
 
@@ -154,7 +165,12 @@ export const Entity = () => {
                           </Heading>
                         </TableCell>
                         <TableCell border>
-                          <Box direction="row" gap="small" align="center" margin="none">
+                          <Box
+                            direction="row"
+                            gap="small"
+                            align="center"
+                            margin="none"
+                          >
                             {entityData.associations.origin.id !== "" ? (
                               <Linky
                                 key={entityData.associations.origin.id}
@@ -165,28 +181,32 @@ export const Entity = () => {
                               <Text>No origin specified.</Text>
                             )}
                             {editing ? (
-                              <Button icon={<Add size="small" />} primary disabled={!editing} />
+                              <Button
+                                icon={<Add size="small" />}
+                                primary
+                                disabled={!editing}
+                              />
                             ) : null}
                           </Box>
                         </TableCell>
                       </TableRow>
 
                       <TableRow>
-                        <TableCell scope="row"border>
+                        <TableCell scope="row" border>
                           <Heading level="4" margin="xsmall">
                             Primary Collection
                           </Heading>
                         </TableCell>
                         <TableCell border>
-                          {entityData.collection.id !== "" ?
+                          {entityData.collection.id !== "" ? (
                             <Linky
                               key={entityData.collection.id}
                               type="collections"
                               id={entityData.collection.id}
                             />
-                          :
+                          ) : (
                             <Text>No primary Collection specified.</Text>
-                          }
+                          )}
                         </TableCell>
                       </TableRow>
                     </TableBody>
@@ -195,7 +215,13 @@ export const Entity = () => {
               </Box>
 
               {/* Associated Collections */}
-              <Box direction="column" align="center" background="light-2" basis="1/4" round>
+              <Box
+                direction="column"
+                align="center"
+                background="light-2"
+                basis="1/4"
+                round
+              >
                 <Heading level="3" margin="small">
                   Associated Collections
                 </Heading>
@@ -227,7 +253,13 @@ export const Entity = () => {
               </Box>
 
               {/* Products */}
-              <Box direction="column" align="center" background="light-2" basis="1/4" round>
+              <Box
+                direction="column"
+                align="center"
+                background="light-2"
+                basis="1/4"
+                round
+              >
                 <Heading level="3" margin="small">
                   Products
                 </Heading>
@@ -244,7 +276,11 @@ export const Entity = () => {
                   {entityData.collections.length > 0 ? (
                     entityData.associations.products.map((product) => {
                       return (
-                        <Linky key={product.id} type="entities" id={product.id} />
+                        <Linky
+                          key={product.id}
+                          type="entities"
+                          id={product.id}
+                        />
                       );
                     })
                   ) : (
@@ -296,7 +332,11 @@ export const Entity = () => {
               <Heading level="2" margin="small">
                 Flow: {entityData.name}
               </Heading>
-              <Button icon={<Close />} onClick={() => setShowFlow(false)} plain />
+              <Button
+                icon={<Close />}
+                onClick={() => setShowFlow(false)}
+                plain
+              />
             </Box>
             <Flow id={entityData._id} />
           </Layer>

@@ -67,7 +67,7 @@ export const Attributes = ({}) => {
     collection: collection,
     collections: collections,
     description: description,
-    associations:{
+    associations: {
       origin: origin,
       products: products,
     },
@@ -152,7 +152,12 @@ export const Attributes = ({}) => {
                 }}
               >
                 {/* Field to create new attributes */}
-                <Box justify="center" align="center" direction="row" gap="small">
+                <Box
+                  justify="center"
+                  align="center"
+                  direction="row"
+                  gap="small"
+                >
                   <Box>
                     <Button
                       icon={<Add />}
@@ -250,7 +255,7 @@ export const Attributes = ({}) => {
                       attributeState.from = "attributes";
                       navigate("/create/entity/associations", {
                         state: attributeState,
-                      })
+                      });
                     }}
                   />
                   <Button
@@ -369,9 +374,9 @@ export const Attributes = ({}) => {
                   label="Back"
                   icon={<LinkPrevious />}
                   onClick={() =>
-                      navigate("/create/entity/associations", {
-                        state: attributeState,
-                      })
+                    navigate("/create/entity/associations", {
+                      state: attributeState,
+                    })
                   }
                 />
 

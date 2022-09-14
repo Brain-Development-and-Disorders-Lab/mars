@@ -105,7 +105,7 @@ export const Start = ({}) => {
                 onSubmit={() => {
                   startState.from = "start";
                   navigate("/create/entity/associations", {
-                    state: startState
+                    state: startState,
                   });
                 }}
               >
@@ -180,7 +180,7 @@ export const Start = ({}) => {
                     </FormField>
                   </Box>
                 </Box>
-                
+
                 <Box direction="row" justify="between" margin="medium">
                   <Button label="Cancel" onClick={() => navigate("/")} />
                   <Button

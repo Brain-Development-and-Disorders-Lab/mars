@@ -60,19 +60,30 @@ export const Collection = () => {
           <Box gap="small" margin="small">
             <Box direction="column" justify="between">
               <PageHeader
-                title={"Collection \"" + collectionData.name + "\""}
-                parent={<Anchor label="Return to Collections" href="/collections" />}
+                title={'Collection "' + collectionData.name + '"'}
+                parent={
+                  <Anchor label="Return to Collections" href="/collections" />
+                }
               />
             </Box>
 
             <Box direction="row" gap="small">
               {/* Metadata table */}
-              <Box direction="column" align="center" background="light-2" basis="1/2" round>
+              <Box
+                direction="column"
+                align="center"
+                background="light-2"
+                basis="1/2"
+                round
+              >
                 <Heading level="3" margin="small">
                   Metadata
                 </Heading>
 
-                <Box fill pad={{ left: "small", right: "small", bottom: "small" }}>
+                <Box
+                  fill
+                  pad={{ left: "small", right: "small", bottom: "small" }}
+                >
                   <Table>
                     <TableBody>
                       <TableRow>
@@ -91,7 +102,13 @@ export const Collection = () => {
               </Box>
 
               {/* Associated Parameters */}
-              <Box direction="column" align="center" background="light-2" basis="1/4" round>
+              <Box
+                direction="column"
+                align="center"
+                background="light-2"
+                basis="1/4"
+                round
+              >
                 <Heading level="3" margin="small">
                   Associated Parameters
                 </Heading>
@@ -108,9 +125,7 @@ export const Collection = () => {
                 >
                   {collectionData.parameters.length > 0 ? (
                     collectionData.parameters.map((parameter) => {
-                      return (
-                        <Text>Parameter "{parameter}"</Text>
-                      );
+                      return <Text>Parameter "{parameter}"</Text>;
                     })
                   ) : (
                     <Text>No associated Parameters specified.</Text>
@@ -119,7 +134,13 @@ export const Collection = () => {
               </Box>
 
               {/* Associated Entities */}
-              <Box direction="column" align="center" background="light-2" basis="1/4" round>
+              <Box
+                direction="column"
+                align="center"
+                background="light-2"
+                basis="1/4"
+                round
+              >
                 <Heading level="3" margin="small">
                   Associated Entities
                 </Heading>
@@ -135,9 +156,7 @@ export const Collection = () => {
                 >
                   {collectionData.associations.entities.length > 0 ? (
                     collectionData.associations.entities.map((entity) => {
-                      return (
-                        <Linky key={entity} type="entities" id={entity} />
-                      );
+                      return <Linky key={entity} type="entities" id={entity} />;
                     })
                   ) : (
                     <Text>No associated Entities specified.</Text>

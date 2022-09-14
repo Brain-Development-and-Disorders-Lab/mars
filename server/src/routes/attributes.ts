@@ -23,9 +23,8 @@ AttributesRoute.route("/attributes").get((request: any, response: any) => {
 });
 
 // Route: View a specific attribute
-AttributesRoute
-  .route("/attributes/:id")
-  .get((
+AttributesRoute.route("/attributes/:id").get(
+  (
     request: { params: { id: any } },
     response: { json: (content: any) => void }
   ) => {
@@ -40,23 +39,25 @@ AttributesRoute
         consola.success("Retrieved attribute with ID:", request.params.id);
         response.json(result);
       });
-  });
+  }
+);
 
 // Route: Remove an attribute
-AttributesRoute
-  .route("/:id")
-  .delete(
-    (req: { params: { id: any } }, response: { json: (content: any) => void }) => {
-      let connection = getDatabase();
-      let query = { _id: ObjectId(req.params.id) };
-      connection
-        .collection("attributes")
-        .deleteOne(query, (error: any, content: any) => {
-          if (error) throw error;
-          consola.success("1 attribute deleted");
-          response.json(content);
-        });
-    }
-  );
+AttributesRoute.route("/:id").delete(
+  (
+    req: { params: { id: any } },
+    response: { json: (content: any) => void }
+  ) => {
+    let connection = getDatabase();
+    let query = { _id: ObjectId(req.params.id) };
+    connection
+      .collection("attributes")
+      .deleteOne(query, (error: any, content: any) => {
+        if (error) throw error;
+        consola.success("1 attribute deleted");
+        response.json(content);
+      });
+  }
+);
 
 export default AttributesRoute;
