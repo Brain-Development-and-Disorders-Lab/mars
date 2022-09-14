@@ -184,11 +184,15 @@ export const Sample = () => {
                           </Heading>
                         </TableCell>
                         <TableCell border>
-                          <Linky
-                            key={sampleData.collection.id}
-                            type="collections"
-                            id={sampleData.collection.id}
-                          />
+                          {sampleData.collection.id !== "" ?
+                            <Linky
+                              key={sampleData.collection.id}
+                              type="collections"
+                              id={sampleData.collection.id}
+                            />
+                          :
+                            <Text>No primary collection specified.</Text>
+                          }
                         </TableCell>
                       </TableRow>
                     </TableBody>

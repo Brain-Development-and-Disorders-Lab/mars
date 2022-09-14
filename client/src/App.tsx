@@ -43,14 +43,14 @@ export const App = () => {
             path="/create/sample/attributes"
             element={<Attributes />}
           />
+          <Route path="/collections" element={<Collections />} />
           <Route path="collections">
             <Route path=":id" element={<Collection />} />
           </Route>
-          <Route path="/collections" element={<Collections />} />
+          <Route path="/samples" element={<Samples />} />
           <Route path="samples">
             <Route path=":id" element={<Sample />} />
           </Route>
-          <Route path="/samples" element={<Samples />} />
           <Route path="/search" element={<Search />} />
         </Routes>
       </Grommet>
