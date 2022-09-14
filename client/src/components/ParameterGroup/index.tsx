@@ -6,7 +6,7 @@ import { Box, Text } from "grommet/components";
 import { ParameterGroupProps } from "types";
 
 // Custom components
-import Parameter from "src/view/components/Parameter";
+import Parameter from "src/components/Parameter";
 
 const ParameterGroup = (props: ParameterGroupProps) => {
   return (

@@ -26,9 +26,9 @@ import { pushData } from "src/lib/database/pushData";
 import { Create, AttributeModel, AttributeProps } from "types";
 
 // Custom components
-import AttributeGroup from "src/view/components/AttributeGroup";
-import ErrorLayer from "src/view/components/ErrorLayer";
-import Linky from "src/view/components/Linky";
+import AttributeGroup from "src/components/AttributeGroup";
+import ErrorLayer from "src/components/ErrorLayer";
+import Linky from "src/components/Linky";
 
 // Consola
 import consola from "consola";

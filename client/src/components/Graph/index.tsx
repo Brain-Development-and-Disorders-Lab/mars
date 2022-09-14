@@ -4,7 +4,6 @@ import ReactFlow, {
   MiniMap,
   Controls,
   Background,
-  ReactFlowInstance,
   useNodesState,
   useEdgesState,
   MarkerType,
@@ -18,10 +17,7 @@ import { EntityModel } from "types";
 // Custom components
 import ErrorLayer from "../ErrorLayer";
 
-// Consola
-import consola from "consola";
-
-const Flow = (props: { id: string }) => {
+const Graph = (props: { id: string }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("An error has occurred.");
@@ -30,7 +26,7 @@ const Flow = (props: { id: string }) => {
 
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-  const [flowReady, setFlowReady] = useState(false);
+  const [graphReady, setGraphReady] = useState(false);
 
   // Get the data and setup the initial nodes and edges
   useEffect(() => {
@@ -53,16 +49,12 @@ const Flow = (props: { id: string }) => {
 
   useEffect(() => {
     if (isLoaded === true) {
-      // Create the flow
-      createFlow();
+      // Create the Graph
+      createGraph();
     }
   }, [isLoaded]);
 
-  const onInit = (reactFlowInstance: ReactFlowInstance) => {
-    consola.info("React Flow instance:", reactFlowInstance);
-  };
-
-  const createFlow = () => {
+  const createGraph = () => {
     const initialNodes = [];
     const initialEdges = [];
 
@@ -158,16 +150,15 @@ const Flow = (props: { id: string }) => {
     // Set the edges
     setEdges([...edges, ...initialEdges]);
 
-    setFlowReady(true);
+    setGraphReady(true);
   };
 
   return (
     <Box fill background="light-2">
-      {flowReady ? (
+      {graphReady ? (
         <ReactFlow
           nodes={nodes}
           edges={edges}
-          onInit={onInit}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           fitView
@@ -202,4 +193,4 @@ const Flow = (props: { id: string }) => {
   );
 };
 
-export default Flow;
+export default Graph;

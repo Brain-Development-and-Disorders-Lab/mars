@@ -22,7 +22,7 @@ import { Close, Note, Storage } from "grommet-icons";
 import { AttributeCardProps } from "types";
 
 // Custom components
-import Parameter from "src/view/components/Parameter";
+import Parameter from "src/components/Parameter";
 
 const AttributeCard = (props: AttributeCardProps) => {
   const [showDetails, setShowDetails] = useState(false);

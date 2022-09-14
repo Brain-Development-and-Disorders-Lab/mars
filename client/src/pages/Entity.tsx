@@ -26,10 +26,10 @@ import { getData } from "src/lib/database/getData";
 import { EntityModel } from "types";
 
 // Custom components
-import Flow from "src/view/components/Flow";
-import ErrorLayer from "src/view/components/ErrorLayer";
-import Linky from "src/view/components/Linky";
-import AttributeCard from "src/view/components/AttributeCard";
+import Graph from "src/components/Graph";
+import ErrorLayer from "src/components/ErrorLayer";
+import Linky from "src/components/Linky";
+import AttributeCard from "src/components/AttributeCard";
 
 export const Entity = () => {
   const { id } = useParams();
@@ -40,7 +40,7 @@ export const Entity = () => {
 
   const [entityData, setEntityData] = useState({} as EntityModel);
 
-  const [showFlow, setShowFlow] = useState(false);
+  const [showGraph, setShowGraph] = useState(false);
 
   const [editing, setEditing] = useState(false);
   const [description, setDescription] = useState("");
@@ -90,9 +90,9 @@ export const Entity = () => {
               />
               <Box direction="row" gap="small">
                 <Button
-                  label={"View Flow"}
+                  label={"View Graph"}
                   primary
-                  onClick={() => setShowFlow(true)}
+                  onClick={() => setShowGraph(true)}
                 />
                 <Button
                   label={editing ? "Save" : "Edit"}
@@ -322,23 +322,23 @@ export const Entity = () => {
           </Box>
         )}
         {isError && <ErrorLayer message={errorMessage} />}
-        {showFlow && (
+        {showGraph && (
           <Layer
             full
-            onEsc={() => setShowFlow(false)}
-            onClickOutside={() => setShowFlow(false)}
+            onEsc={() => setShowGraph(false)}
+            onClickOutside={() => setShowGraph(false)}
           >
             <Box direction="row" justify="between" margin={{ right: "small" }}>
               <Heading level="2" margin="small">
-                Flow: {entityData.name}
+                Graph: {entityData.name}
               </Heading>
               <Button
                 icon={<Close />}
-                onClick={() => setShowFlow(false)}
+                onClick={() => setShowGraph(false)}
                 plain
               />
             </Box>
-            <Flow id={entityData._id} />
+            <Graph id={entityData._id} />
           </Layer>
         )}
       </PageContent>

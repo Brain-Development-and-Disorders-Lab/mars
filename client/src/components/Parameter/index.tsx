@@ -17,8 +17,8 @@ import { getData } from "src/lib/database/getData";
 import { ParameterProps, ParameterStruct, EntityModel } from "types";
 
 // Custom components
-import ErrorLayer from "src/view/components/ErrorLayer";
-import Linky from "src/view/components/Linky";
+import ErrorLayer from "src/components/ErrorLayer";
+import Linky from "src/components/Linky";
 
 // Consola
 import consola from "consola";

@@ -23,7 +23,7 @@ import { getData } from "src/lib/database/getData";
 import { CollectionModel } from "types";
 
 // Custom components
-import ErrorLayer from "src/view/components/ErrorLayer";
+import ErrorLayer from "src/components/ErrorLayer";
 
 const Collections = () => {
   const navigate = useNavigate();

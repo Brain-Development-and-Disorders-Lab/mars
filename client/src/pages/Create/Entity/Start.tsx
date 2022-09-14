@@ -27,7 +27,7 @@ import { Create, CollectionModel } from "types";
 import { pseudoId } from "src/lib/functions";
 
 // Custom components
-import ErrorLayer from "src/view/components/ErrorLayer";
+import ErrorLayer from "src/components/ErrorLayer";
 
 export const Start = ({}) => {
   const navigate = useNavigate();

@@ -6,7 +6,7 @@ import { Box, Text } from "grommet/components";
 import { AttributeGroupProps } from "types";
 
 // Custom components
-import Attribute from "src/view/components/Attribute";
+import Attribute from "src/components/Attribute";
 
 const AttributeGroup = (props: AttributeGroupProps) => {
   return (

@@ -23,8 +23,8 @@ import { getData } from "src/lib/database/getData";
 import { CollectionModel } from "types";
 
 // Custom components
-import ErrorLayer from "src/view/components/ErrorLayer";
-import Linky from "src/view/components/Linky";
+import ErrorLayer from "src/components/ErrorLayer";
+import Linky from "src/components/Linky";
 
 export const Collection = () => {
   const { id } = useParams();

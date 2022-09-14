@@ -1,8 +1,8 @@
 {
-  "name": "LaboratoryDataManagement",
+  "name": "laboratory-data-management",
   "version": "1.0.0",
   "main": "index.js",
-  "repository": "https://github.com/henry-burgess/LaboratoryDataManagement.git",
+  "repository": "https://github.com/henry-burgess/laboratory-data-management.git",
   "author": "Henry Burgess <henryjburg@gmail.com>",
   "license": "MIT"
 }

@@ -14,7 +14,7 @@ import { Add, Save, SettingsOption, StatusDisabled } from "grommet-icons";
 import { ParameterStruct, AttributeProps } from "types";
 
 // Custom components
-import ParameterGroup from "src/view/components/ParameterGroup";
+import ParameterGroup from "src/components/ParameterGroup";
 
 // Constants
 const VALID_TYPES = ["physical", "digital"];

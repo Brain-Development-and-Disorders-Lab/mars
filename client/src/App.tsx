@@ -10,18 +10,18 @@ import "@fontsource/roboto";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 // Custom components
-import Navigation from "./view/components/Navigation";
+import Navigation from "./components/Navigation";
 
 // Custom pages
-import Start from "./view/pages/Create/Entity/Start";
-import Collection from "./view/pages/Collection";
-import Collections from "./view/pages/Collections";
-import Search from "./view/pages/Search";
-import Associations from "./view/pages/Create/Entity/Associations";
-import Attributes from "./view/pages/Create/Entity/Attributes";
-import Home from "./view/pages/Home";
-import Entity from "./view/pages/Entity";
-import Entities from "./view/pages/Entities";
+import Start from "./pages/Create/Entity/Start";
+import Collection from "./pages/Collection";
+import Collections from "./pages/Collections";
+import Search from "./pages/Search";
+import Associations from "./pages/Create/Entity/Associations";
+import Attributes from "./pages/Create/Entity/Attributes";
+import Home from "./pages/Home";
+import Entity from "./pages/Entity";
+import Entities from "./pages/Entities";
 
 // Theme
 import { theme } from "./theme";
