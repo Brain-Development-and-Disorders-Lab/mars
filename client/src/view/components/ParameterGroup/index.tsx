@@ -3,24 +3,24 @@ import React from "react";
 import { Box, Text } from "grommet/components";
 
 // Types
-import { BlockGroupProps } from "types";
+import { ParameterGroupProps } from "types";
 
 // Custom components
-import Block from "src/view/components/Parameter";
+import Parameter from "src/view/components/Parameter";
 
-const BlockGroup = (props: BlockGroupProps) => {
+const ParameterGroup = (props: ParameterGroupProps) => {
   return (
     <Box gap="small" align="center">
-      {props.blocks.length > 0 ? (
+      {props.parameters.length > 0 ? (
         // Extract and return only components
-        props.blocks.map((block) => {
+        props.parameters.map((parameter) => {
           return (
-            <Block
-              key={block.identifier}
-              identifier={block.identifier}
-              name={block.name}
-              type={block.type}
-              data={block.data}
+            <Parameter
+              key={parameter.identifier}
+              identifier={parameter.identifier}
+              name={parameter.name}
+              type={parameter.type}
+              data={parameter.data}
               removeCallback={props.onRemove}
               dataCallback={props.onDataUpdate}
               disabled={props.disabled}
@@ -28,10 +28,10 @@ const BlockGroup = (props: BlockGroupProps) => {
           );
         })
       ) : (
-        <Text>No blocks have been added yet.</Text>
+        <Text>No Parameters have been added yet.</Text>
       )}
     </Box>
   );
 };
 
-export default BlockGroup;
+export default ParameterGroup;

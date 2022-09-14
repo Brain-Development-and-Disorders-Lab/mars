@@ -122,7 +122,7 @@ export const Attributes = ({}) => {
         name: data.name,
         description: data.description,
         type: data.type,
-        blocks: data.blocks || [],
+        parameters: data.parameters || [],
       },
     ]);
   };
@@ -172,7 +172,7 @@ export const Attributes = ({}) => {
                             name: "",
                             description: "",
                             type: "physical",
-                            blocks: [],
+                            parameters: [],
                           },
                         ]);
                       }}
@@ -203,7 +203,7 @@ export const Attributes = ({}) => {
                                 name: value.name,
                                 description: value.description,
                                 type: value.type,
-                                blocks: value.blocks,
+                                parameters: value.parameters,
                               },
                             ]);
                           }

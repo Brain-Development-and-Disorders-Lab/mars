@@ -14,7 +14,7 @@ import {
 
 // Database and models
 import { getData } from "src/lib/database/getData";
-import { BlockProps, BlockStruct, EntityModel } from "types";
+import { ParameterProps, ParameterStruct, EntityModel } from "types";
 
 // Custom components
 import ErrorLayer from "src/view/components/ErrorLayer";
@@ -26,7 +26,7 @@ import consola from "consola";
 // Constants
 const VALID_TYPES = ["number", "file", "url", "date", "string", "entity"];
 
-const Block = (props: BlockProps) => {
+const Parameter = (props: ParameterProps) => {
   const [name, setName] = useState(props.name);
   const [type, setType] = useState(props.type);
   const [data, setData] = useState(props.data);
@@ -57,7 +57,7 @@ const Block = (props: BlockProps) => {
     return;
   }, []);
 
-  const blockData: BlockStruct = {
+  const parameterData: ParameterStruct = {
     identifier: props.identifier,
     name: name,
     type: type,
@@ -66,7 +66,7 @@ const Block = (props: BlockProps) => {
 
   const updateData = () => {
     if (props.dataCallback) {
-      props.dataCallback(blockData);
+      props.dataCallback(parameterData);
     }
   };
 
@@ -167,11 +167,11 @@ const Block = (props: BlockProps) => {
 
   return (
     <Box direction="row" gap="small" align="center">
-      {/* Block name */}
+      {/* Parameter name */}
       <FormField label="Name">
         <TextInput
           width="medium"
-          placeholder="Block name"
+          placeholder="Parameter name"
           value={name}
           onChange={(event) => {
             setName(event.target.value);
@@ -180,7 +180,7 @@ const Block = (props: BlockProps) => {
         />
       </FormField>
 
-      {/* Block type */}
+      {/* Parameter type */}
       <FormField label="Type">
         <Select
           options={VALID_TYPES}
@@ -192,7 +192,7 @@ const Block = (props: BlockProps) => {
         />
       </FormField>
 
-      {/* Block data */}
+      {/* Parameter data */}
       <FormField label="Data">
         {isLoaded ? dataElement : <Spinner size="small" />}
       </FormField>
@@ -202,4 +202,4 @@ const Block = (props: BlockProps) => {
   );
 };
 
-export default Block;
+export default Parameter;

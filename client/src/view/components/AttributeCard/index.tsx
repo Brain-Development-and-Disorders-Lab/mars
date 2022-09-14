@@ -22,7 +22,7 @@ import { Close, Note, Storage } from "grommet-icons";
 import { AttributeCardProps } from "types";
 
 // Custom components
-import Block from "src/view/components/Parameter";
+import Parameter from "src/view/components/Parameter";
 
 const AttributeCard = (props: AttributeCardProps) => {
   const [showDetails, setShowDetails] = useState(false);
@@ -64,7 +64,7 @@ const AttributeCard = (props: AttributeCardProps) => {
           pad={{ horizontal: "medium", vertical: "none" }}
           background="light-2"
         >
-          {/* Populate footer depending on the blocks that are configured */}
+          {/* Populate footer depending on the Parameters that are configured */}
         </CardFooter>
       </Card>
 
@@ -129,16 +129,16 @@ const AttributeCard = (props: AttributeCardProps) => {
             </Box>
 
             <Box direction="column" align="center" background="light-2" round>
-              <Heading level="3">Blocks</Heading>
+              <Heading level="3">Parameters</Heading>
               <Box pad="small">
-                {props.data.blocks &&
-                  props.data.blocks.map((block) => {
+                {props.data.parameters &&
+                  props.data.parameters.map((parameter) => {
                     return (
-                      <Block
-                        identifier={block.identifier}
-                        name={block.name}
-                        type={block.type}
-                        data={block.data}
+                      <Parameter
+                        identifier={parameter.identifier}
+                        name={parameter.name}
+                        type={parameter.type}
+                        data={parameter.data}
                         disabled
                       />
                     );

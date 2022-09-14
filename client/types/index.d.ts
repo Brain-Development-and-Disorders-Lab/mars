@@ -33,7 +33,7 @@ export type AttributeStruct = {
   name: string;
   description: string;
   type: "physical" | "digital";
-  blocks: BlockStruct[];
+  parameters: ParameterStruct[];
 };
 
 export type AttributeModel = AttributeStruct & {
@@ -87,24 +87,24 @@ export type EntityModel = EntityStruct & {
   _id: string;
 };
 
-export type BlockStruct = {
+export type ParameterStruct = {
   identifier: string;
   name: string;
   type: "number" | "file" | "url" | "date" | "string" | "entity";
   data: number | string | ReactElement;
 };
 
-export type BlockProps = BlockStruct & {
+export type ParameterProps = ParameterStruct & {
   disabled: boolean;
-  dataCallback?: (data: BlockStruct) => void;
+  dataCallback?: (data: ParameterStruct) => void;
   removeCallback?: (identifier: string) => void;
 };
 
-export type BlockGroupProps = {
+export type ParameterGroupProps = {
   disabled: boolean;
-  blocks: BlockStruct[];
+  parameters: ParameterStruct[];
   onRemove?: (identifier: string) => void;
-  onDataUpdate?: (data: BlockStruct) => void;
+  onDataUpdate?: (data: ParameterStruct) => void;
 };
 
 declare type LinkyProps = {

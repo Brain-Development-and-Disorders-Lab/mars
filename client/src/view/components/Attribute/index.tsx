@@ -11,10 +11,10 @@ import {
 import { Add, Save, SettingsOption, StatusDisabled } from "grommet-icons";
 
 // Types
-import { BlockStruct, AttributeProps } from "types";
+import { ParameterStruct, AttributeProps } from "types";
 
 // Custom components
-import BlockGroup from "src/view/components/ParameterGroup";
+import ParameterGroup from "src/view/components/ParameterGroup";
 
 // Constants
 const VALID_TYPES = ["physical", "digital"];
@@ -23,7 +23,7 @@ const Attribute = (props: AttributeProps) => {
   const [name, setName] = useState(props.name);
   const [type, setType] = useState(props.type);
   const [description, setDescription] = useState(props.description);
-  const [blocks, setBlocks] = useState(props.blocks);
+  const [parameters, setParameters] = useState(props.parameters);
   const [finished, setFinished] = useState(false);
 
   const attributeData: AttributeProps = {
@@ -31,7 +31,7 @@ const Attribute = (props: AttributeProps) => {
     name: name,
     type: type,
     description: description,
-    blocks: blocks,
+    parameters: parameters,
   };
 
   return (
@@ -79,19 +79,19 @@ const Attribute = (props: AttributeProps) => {
       >
         <Box direction="row" align="center">
           <Heading level="4" margin="xsmall">
-            Blocks
+            Parameters
           </Heading>
           <Button
             icon={<Add />}
-            label="Create new block"
+            label="Create new Parameter"
             primary
             onClick={() => {
               // Create a unique identifier
               const identifier = `attribute_${Math.round(performance.now())}`;
 
               // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
-              setBlocks([
-                ...blocks,
+              setParameters([
+                ...parameters,
                 {
                   identifier: identifier,
                   name: "",
@@ -104,20 +104,20 @@ const Attribute = (props: AttributeProps) => {
           />
         </Box>
         <Box direction="column" gap="small" margin="small" fill>
-          <BlockGroup
-            blocks={blocks}
+          <ParameterGroup
+            parameters={parameters}
             disabled={finished}
-            onDataUpdate={(data: BlockStruct) => {
-              // Store the received block information
-              // Get the relevant block
-              setBlocks(
-                blocks.filter((block) => {
-                  if (block.identifier === data.identifier) {
-                    block.name = data.name;
-                    block.type = data.type;
-                    block.data = data.data;
+            onDataUpdate={(data: ParameterStruct) => {
+              // Store the received Parameter information
+              // Get the relevant Parameter
+              setParameters(
+                parameters.filter((parameter) => {
+                  if (parameter.identifier === data.identifier) {
+                    parameter.name = data.name;
+                    parameter.type = data.type;
+                    parameter.data = data.data;
                   }
-                  return block;
+                  return parameter;
                 })
               );
             }}

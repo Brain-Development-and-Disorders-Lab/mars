@@ -23,7 +23,7 @@ const AttributeGroup = (props: AttributeGroupProps) => {
               type={attribute.type}
               removeCallback={props.onRemove}
               dataCallback={props.onDataUpdate}
-              blocks={attribute.blocks}
+              parameters={attribute.parameters}
             />
           );
         })

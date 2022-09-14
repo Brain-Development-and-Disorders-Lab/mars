@@ -3,7 +3,7 @@
   "name": "Box File",
   "description": "A link to a file stored on Box.",
   "type": "data",
-  "blocks": [
+  "parameters": [
     {
       "name": "URL",
       "type": "url",
