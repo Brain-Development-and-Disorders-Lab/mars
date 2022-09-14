@@ -49,7 +49,6 @@ const Linky = (props: LinkyProps) => {
         label={linkData.name}
         color="dark-2"
         onClick={() => navigate(`/${props.type}/${props.id}`)}
-        margin={{ left: "small", right: "small" }}
       />
       {isError && <ErrorLayer message={errorMessage} />}
     </>

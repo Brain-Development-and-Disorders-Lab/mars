@@ -5,13 +5,13 @@ import {
   Box,
   Heading,
   PageHeader,
+  Paragraph,
   Spinner,
   Table,
   TableBody,
   TableCell,
   TableRow,
   Text,
-  TextInput,
 } from "grommet/components";
 import { Page, PageContent } from "grommet";
 
@@ -82,12 +82,7 @@ export const Collection = () => {
                           </Heading>
                         </TableCell>
                         <TableCell border>
-                          <TextInput
-                            value={collectionData.description}
-                            disabled
-                            size="medium"
-                            plain
-                          />
+                          <Paragraph>{collectionData.description}</Paragraph>
                         </TableCell>
                       </TableRow>
                     </TableBody>
@@ -95,10 +90,10 @@ export const Collection = () => {
                 </Box>
               </Box>
 
-              {/* Associated parameters */}
+              {/* Associated Parameters */}
               <Box direction="column" align="center" background="light-2" basis="1/4" round>
                 <Heading level="3" margin="small">
-                  Associated parameters
+                  Associated Parameters
                 </Heading>
                 <Box
                   wrap
@@ -118,7 +113,7 @@ export const Collection = () => {
                       );
                     })
                   ) : (
-                    <Text>No associated parameters specified.</Text>
+                    <Text>No associated Parameters specified.</Text>
                   )}
                 </Box>
               </Box>

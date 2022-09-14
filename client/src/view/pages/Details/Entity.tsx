@@ -7,13 +7,13 @@ import {
   Heading,
   Layer,
   PageHeader,
+  Paragraph,
   Spinner,
   Table,
   TableBody,
   TableCell,
   TableRow,
   Text,
-  TextInput,
 } from "grommet/components";
 import { Page, PageContent } from "grommet";
 import { Add, Close } from "grommet-icons";
@@ -143,13 +143,7 @@ export const Entity = () => {
                           </Heading>
                         </TableCell>
                         <TableCell border>
-                          <TextInput
-                            value={description}
-                            onChange={(event) => setDescription(event.target.value)}
-                            disabled={!editing}
-                            size="medium"
-                            plain
-                          />
+                          <Paragraph>{description}</Paragraph>
                         </TableCell>
                       </TableRow>
 
@@ -160,7 +154,7 @@ export const Entity = () => {
                           </Heading>
                         </TableCell>
                         <TableCell border>
-                          <Box direction="row" gap="small" align="center">
+                          <Box direction="row" gap="small" align="center" margin="none">
                             {entityData.associations.origin.id !== "" ? (
                               <Linky
                                 key={entityData.associations.origin.id}
@@ -180,7 +174,7 @@ export const Entity = () => {
                       <TableRow>
                         <TableCell scope="row"border>
                           <Heading level="4" margin="xsmall">
-                            Primary collection
+                            Primary Collection
                           </Heading>
                         </TableCell>
                         <TableCell border>
@@ -191,7 +185,7 @@ export const Entity = () => {
                               id={entityData.collection.id}
                             />
                           :
-                            <Text>No primary collection specified.</Text>
+                            <Text>No primary Collection specified.</Text>
                           }
                         </TableCell>
                       </TableRow>
@@ -200,10 +194,10 @@ export const Entity = () => {
                 </Box>
               </Box>
 
-              {/* Associated collections */}
+              {/* Associated Collections */}
               <Box direction="column" align="center" background="light-2" basis="1/4" round>
                 <Heading level="3" margin="small">
-                  Associated collections
+                  Associated Collections
                 </Heading>
                 <Box
                   wrap
@@ -227,7 +221,7 @@ export const Entity = () => {
                       );
                     })
                   ) : (
-                    <Text>No associated collections specified.</Text>
+                    <Text>No associated Collections specified.</Text>
                   )}
                 </Box>
               </Box>

@@ -11,7 +11,7 @@ const CollectionsRoute = express.Router();
 // Constants
 const COLLECTIONS_COLLECTION = "collections";
 
-// Route: View all collections
+// Route: View all Collections
 CollectionsRoute.route("/collections").get((request: any, response: any) => {
   let connection = getDatabase();
   connection
@@ -23,7 +23,7 @@ CollectionsRoute.route("/collections").get((request: any, response: any) => {
     });
 });
 
-// Route: View a specific collection
+// Route: View a specific Collection
 CollectionsRoute.route("/collections/:id").get((request: any, response: any) => {
   const database = getDatabase();
   const query = { _id: new ObjectId(request.params.id) };
@@ -36,7 +36,7 @@ CollectionsRoute.route("/collections/:id").get((request: any, response: any) => 
   });
 });
 
-// Route: Remove a collection
+// Route: Remove a Collection
 CollectionsRoute
   .route("/:id")
   .delete(

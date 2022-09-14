@@ -153,7 +153,7 @@ export const Start = ({}) => {
                     <FormField
                       label="Primary Collection"
                       name="collection"
-                      info="Select the primary collection that this Entity should be associated with. Additional collections can be specified as an Association."
+                      info="Select the primary Collection that this Entity should be associated with. Additional Collections can be specified as an Association."
                     >
                       <Select
                         options={collectionData.map((collection) => {

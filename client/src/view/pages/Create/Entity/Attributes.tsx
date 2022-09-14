@@ -304,7 +304,7 @@ export const Attributes = ({}) => {
                 </Box>
                 <Box direction="column" gap="medium">
                   <Text>
-                    <b>Primary collection:</b>{" "}
+                    <b>Primary Collection:</b>{" "}
                     <Linky
                       key={collection.id}
                       type="collections"
@@ -313,7 +313,7 @@ export const Attributes = ({}) => {
                   </Text>
                   {collections.length > 0 && (
                     <Text>
-                      <b>Associated collections:</b>{" "}
+                      <b>Associated Collections:</b>{" "}
                       {collections.map((collection) => {
                         return (
                           <Linky

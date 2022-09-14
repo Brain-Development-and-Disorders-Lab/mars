@@ -11,6 +11,7 @@ import {
   TableCell,
   TableHeader,
   TableRow,
+  Text,
 } from "grommet/components";
 import { Page, PageContent } from "grommet";
 
@@ -74,7 +75,7 @@ const Entities = () => {
                     Owner
                   </TableCell>
                   <TableCell scope="col" border="bottom" align="center">
-                    Primary collection
+                    Primary Collection
                   </TableCell>
                   <TableCell scope="col" border="bottom"></TableCell>
                 </TableRow>
@@ -96,7 +97,11 @@ const Entities = () => {
                           <strong>{entity.owner}</strong>
                         </TableCell>
                         <TableCell border="right" align="center">
-                          <Linky type="collections" id={entity.collection.id} />
+                          {entity.collection.id !== "" ?
+                            <Linky type="collections" id={entity.collection.id} />
+                          :
+                            <Text>No Collection</Text>
+                          }
                         </TableCell>
                         <TableCell align="center">
                           <Button

@@ -1,7 +1,7 @@
 {
   "id": "collection_1",
   "name": "Example Collection",
-  "description": "This is an example collection that is used as a template for testing.",
+  "description": "This is an example Collection that is used as a template for testing.",
   "attributes": [],
   "associations": {
     "entities": []
