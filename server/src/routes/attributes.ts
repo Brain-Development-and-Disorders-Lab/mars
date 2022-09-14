@@ -5,13 +5,13 @@ import consola from "consola";
 // Database connection
 import { getDatabase } from "../database/connection";
 
-const attributesRoute = express.Router();
+const AttributesRoute = express.Router();
 
 // Convert the id from a string to a MongoDB ObjectId for the _id.
 const ObjectId = require("mongodb").ObjectId;
 
 // Route: View all attributes
-attributesRoute.route("/attributes").get((request: any, response: any) => {
+AttributesRoute.route("/attributes").get((request: any, response: any) => {
   let connection = getDatabase();
   connection
     .collection("attributes")
@@ -23,7 +23,7 @@ attributesRoute.route("/attributes").get((request: any, response: any) => {
 });
 
 // Route: View a specific attribute
-attributesRoute
+AttributesRoute
   .route("/attributes/:id")
   .get((
     request: { params: { id: any } },
@@ -43,7 +43,7 @@ attributesRoute
   });
 
 // Route: Remove an attribute
-attributesRoute
+AttributesRoute
   .route("/:id")
   .delete(
     (req: { params: { id: any } }, response: { json: (content: any) => void }) => {
@@ -59,4 +59,4 @@ attributesRoute
     }
   );
 
-export default attributesRoute;
+export default AttributesRoute;

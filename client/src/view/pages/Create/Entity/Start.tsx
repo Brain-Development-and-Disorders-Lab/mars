@@ -95,7 +95,7 @@ export const Start = ({}) => {
         {isLoaded && isError === false ? (
           <>
             <PageHeader
-              title="Create a Sample: Start"
+              title="Create an Entity: Start"
               parent={<Anchor label="Return to Dashboard" href="/" />}
             />
             <Box width="large" fill>
@@ -104,7 +104,7 @@ export const Start = ({}) => {
                 onReset={() => {}}
                 onSubmit={() => {
                   startState.from = "start";
-                  navigate("/create/sample/associations", {
+                  navigate("/create/entity/associations", {
                     state: startState
                   });
                 }}
@@ -114,7 +114,7 @@ export const Start = ({}) => {
                     <FormField
                       label="Name"
                       name="name"
-                      info="A standardised name or ID for the sample."
+                      info="A standardised name or ID for the Entity."
                     >
                       <TextInput
                         name="name"
@@ -126,7 +126,7 @@ export const Start = ({}) => {
                     <FormField
                       label="Owner"
                       name="owner"
-                      info="Owner of the sample."
+                      info="Owner of the Entity."
                     >
                       <TextInput
                         name="owner"
@@ -138,7 +138,7 @@ export const Start = ({}) => {
                     <FormField
                       label="Created"
                       name="created"
-                      info="Date the sample was created."
+                      info="Date the Entity was created."
                     >
                       <DateInput
                         format="mm/dd/yyyy"
@@ -153,7 +153,7 @@ export const Start = ({}) => {
                     <FormField
                       label="Primary Collection"
                       name="collection"
-                      info="Select the primary collection that this sample should be associated with. Additional collections can be specified as an Association."
+                      info="Select the primary collection that this Entity should be associated with. Additional collections can be specified as an Association."
                     >
                       <Select
                         options={collectionData.map((collection) => {
@@ -171,7 +171,7 @@ export const Start = ({}) => {
                     <FormField
                       label="Description"
                       name="description"
-                      info="A brief description of the new sample. Most details should be inputted as Attributes with Blocks."
+                      info="A brief description of the new Entity. Most details should be inputted as Attributes with Blocks."
                     >
                       <TextArea
                         value={description}

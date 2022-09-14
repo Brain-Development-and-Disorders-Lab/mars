@@ -20,7 +20,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 // Database and models
 import { getData } from "src/lib/database/getData";
-import { Create, CollectionModel, SampleModel } from "types";
+import { Create, CollectionModel, EntityModel } from "types";
 
 // Custom components
 import ErrorLayer from "src/view/components/ErrorLayer";
@@ -48,7 +48,7 @@ export const Associations = ({}) => {
   const [errorMessage, setErrorMessage] = useState("An error has occurred.");
 
   const [collectionData, setCollectionData] = useState([] as CollectionModel[]);
-  const [sampleData, setSampleData] = useState([] as SampleModel[]);
+  const [entityData, setEntityData] = useState([] as EntityModel[]);
 
   // Options for Select element drop-down menu
   const [originOptions, setOriginOptions] = useState(
@@ -73,25 +73,25 @@ export const Associations = ({}) => {
   };
 
   useEffect(() => {
-    const samples = getData(`/samples`);
+    const entities = getData(`/entities`);
 
     // Handle the response from the database
-    samples.then((value) => {
-      setSampleData(value);
+    entities.then((entity) => {
+      setEntityData(entity);
       setProductOptions(
-        value.map((e: SampleModel) => {
+        entity.map((e: EntityModel) => {
           return { name: e.name, id: e._id };
         })
       );
       setOriginOptions(
-        value.map((e: SampleModel) => {
+        entity.map((e: EntityModel) => {
           return { name: e.name, id: e._id };
         })
       );
 
       // Check the contents of the response
-      if (value["error"] !== undefined) {
-        setErrorMessage(value["error"]);
+      if (entity["error"] !== undefined) {
+        setErrorMessage(entity["error"]);
         setIsError(true);
       }
     });
@@ -117,7 +117,7 @@ export const Associations = ({}) => {
     <Page kind="wide">
       <PageContent>
         <PageHeader
-          title="Create a Sample: Add associations"
+          title="Create an Entity: Add associations"
           parent={<Anchor label="Return to Dashboard" href="/" />}
         />
         {isLoaded && isError === false ? (
@@ -126,7 +126,7 @@ export const Associations = ({}) => {
               onChange={() => {}}
               onSubmit={() => {
                 associationState.from = "associations";
-                navigate("/create/sample/attributes", {
+                navigate("/create/entity/attributes", {
                   state: associationState,
                 });
               }}
@@ -134,9 +134,9 @@ export const Associations = ({}) => {
               <Box direction="row" gap="medium">
                 <Box direction="column" justify="between">
                   <FormField
-                    label="Origin Sample"
+                    label="Origin Entity"
                     name="origin"
-                    info="If the source of this sample currently exists or did exist in this system, specify that association here by searching for the origin sample."
+                    info="If the source of this Entity currently exists or did exist in this system, specify that association here by searching for the origin Entity."
                   >
                     <Select
                       options={originOptions}
@@ -154,10 +154,10 @@ export const Associations = ({}) => {
                         );
                         const exp = new RegExp(escapedText, "i");
                         setOriginOptions(
-                          sampleData
-                            .filter((sample) => exp.test(sample.name))
-                            .map((sample) => {
-                              return { name: sample.name, id: sample._id };
+                          entityData
+                            .filter((entity) => exp.test(entity.name))
+                            .map((entity) => {
+                              return { name: entity.name, id: entity._id };
                             })
                         );
                       }}
@@ -169,7 +169,7 @@ export const Associations = ({}) => {
                   <FormField
                     label="Associated Collections"
                     name="collections"
-                    info="Specify the collections that this new sample should be associated with. The sample will then show up underneath the specified collections."
+                    info="Specify the collections that this new Entity should be associated with. The Entity will then show up underneath the specified collections."
                   >
                     <CheckBoxGroup
                       options={collectionData
@@ -201,7 +201,7 @@ export const Associations = ({}) => {
                   <FormField
                     label="Linked Products"
                     name="products"
-                    info="If this sample has any derivatives or samples that have been created from it, specify those associations here by searching for the corresponding sample."
+                    info="If this Entity has any derivatives or Entities that have been created from it, specify those associations here by searching for the corresponding Entity."
                   >
                     <Select
                       options={productOptions}
@@ -219,12 +219,12 @@ export const Associations = ({}) => {
                           /[-\\^$*+?.()|[\]{}]/g,
                           "\\$&"
                         );
-                        const exp = new RegExp(escapedText, "i");
+                        const filteredText = new RegExp(escapedText, "i");
                         setProductOptions(
-                          sampleData
-                            .filter((sample) => exp.test(sample.name))
-                            .map((sample) => {
-                              return { name: sample.name, id: sample._id };
+                          entityData
+                            .filter((entity) => filteredText.test(entity.name))
+                            .map((entity) => {
+                              return { name: entity.name, id: entity._id };
                             })
                         );
                       }}
@@ -258,7 +258,7 @@ export const Associations = ({}) => {
                   icon={<LinkPrevious />}
                   onClick={() => {
                     associationState.from = "associations";
-                    navigate("/create/sample/start", {
+                    navigate("/create/entity/start", {
                       state: associationState,
                     })
                   }}

@@ -81,7 +81,7 @@ export const Attributes = ({}) => {
 
   const [showConfirmation, setShowConfirmation] = useState(false);
 
-  const sampleData = {
+  const entityData = {
     name: name,
     created: created,
     owner: owner,
@@ -139,7 +139,7 @@ export const Attributes = ({}) => {
     <Page kind="wide">
       <PageContent>
         <PageHeader
-          title="Create a Sample: Add attributes"
+          title="Create an Entity: Add attributes"
           parent={<Anchor label="Return to Dashboard" href="/" />}
         />
         {isLoaded && isError === false ? (
@@ -248,7 +248,7 @@ export const Attributes = ({}) => {
                     icon={<LinkPrevious />}
                     onClick={() => {
                       attributeState.from = "attributes";
-                      navigate("/create/sample/associations", {
+                      navigate("/create/entity/associations", {
                         state: attributeState,
                       })
                     }}
@@ -283,7 +283,7 @@ export const Attributes = ({}) => {
               align="center"
             >
               <Heading level="3" margin={{ top: "small" }}>
-                Sample Summary
+                Entity Summary
               </Heading>
               <Box direction="row" gap="small">
                 <Box
@@ -327,18 +327,18 @@ export const Attributes = ({}) => {
                   )}
                   {origin.name !== "" && (
                     <Text>
-                      <b>Origin sample:</b>{" "}
-                      <Linky type="samples" id={origin.id} />
+                      <b>Origin Entity:</b>{" "}
+                      <Linky type="entities" id={origin.id} />
                     </Text>
                   )}
                   {products.length > 0 && (
                     <Text>
-                      <b>Product samples:</b>{" "}
+                      <b>Product Entities:</b>{" "}
                       {products.map((product) => {
                         return (
                           <Linky
                             key={product.id}
-                            type="samples"
+                            type="entities"
                             id={product.id}
                           />
                         );
@@ -369,7 +369,7 @@ export const Attributes = ({}) => {
                   label="Back"
                   icon={<LinkPrevious />}
                   onClick={() =>
-                      navigate("/create/sample/associations", {
+                      navigate("/create/entity/associations", {
                         state: attributeState,
                       })
                   }
@@ -383,11 +383,11 @@ export const Attributes = ({}) => {
                   primary
                   onClick={() => {
                     // Create new attribute
-                    consola.info("Submitting data:", sampleData);
+                    consola.info("Submitting data:", entityData);
 
                     // Push the data and attribute
-                    pushData(`/samples/add`, sampleData).then(() =>
-                      navigate("/samples")
+                    pushData(`/entities/add`, entityData).then(() =>
+                      navigate("/entities")
                     );
                   }}
                 />

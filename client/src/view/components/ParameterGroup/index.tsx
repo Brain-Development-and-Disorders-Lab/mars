@@ -6,7 +6,7 @@ import { Box, Text } from "grommet/components";
 import { BlockGroupProps } from "types";
 
 // Custom components
-import Block from "src/view/components/Block";
+import Block from "src/view/components/Parameter";
 
 const BlockGroup = (props: BlockGroupProps) => {
   return (

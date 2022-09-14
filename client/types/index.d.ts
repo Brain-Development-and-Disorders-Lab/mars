@@ -1,4 +1,4 @@
-// Types for incrementally creating a new sample.
+// Types for incrementally creating a new Entity.
 
 import { ReactElement } from "react";
 
@@ -61,7 +61,7 @@ export type CollectionStruct = {
   description: string;
   parameters: string[];
   associations: {
-    samples: string[];
+    entities: string[];
   };
 };
 
@@ -69,7 +69,7 @@ export type CollectionModel = CollectionStruct & {
   _id: string;
 };
 
-export type SampleStruct = {
+export type EntityStruct = {
   name: string;
   created: string;
   owner: string;
@@ -83,14 +83,14 @@ export type SampleStruct = {
   attributes: AttributeStruct[];
 };
 
-export type SampleModel = SampleStruct & {
+export type EntityModel = EntityStruct & {
   _id: string;
 };
 
 export type BlockStruct = {
   identifier: string;
   name: string;
-  type: "number" | "file" | "url" | "date" | "string" | "sample";
+  type: "number" | "file" | "url" | "date" | "string" | "entity";
   data: number | string | ReactElement;
 };
 
@@ -108,6 +108,6 @@ export type BlockGroupProps = {
 };
 
 declare type LinkyProps = {
-  type: "samples" | "collections" | "attributes";
+  type: "entities" | "collections" | "attributes";
   id: string;
 };

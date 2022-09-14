@@ -19,26 +19,26 @@ import { useNavigate } from "react-router-dom";
 
 // Database and models
 import { getData } from "src/lib/database/getData";
-import { SampleModel } from "types";
+import { EntityModel } from "types";
 
 // Custom components
 import ErrorLayer from "../../components/ErrorLayer";
 import Linky from "../../components/Linky";
 
-const Samples = () => {
+const Entities = () => {
   const navigate = useNavigate();
 
   const [isLoaded, setIsLoaded] = useState(false);
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("An error has occurred.");
-  const [sampleData, setSampleData] = useState([] as SampleModel[]);
+  const [entityData, setEntityData] = useState([] as EntityModel[]);
 
   useEffect(() => {
-    const response = getData(`/samples`);
+    const response = getData(`/entities`);
 
     // Handle the response from the database
     response.then((value) => {
-      setSampleData(value);
+      setEntityData(value);
 
       // Check the contents of the response
       if (value["error"] !== undefined) {
@@ -57,8 +57,8 @@ const Samples = () => {
         {isLoaded && isError === false ? (
           <>
             <PageHeader
-              title="Samples"
-              subtitle="View all Samples currently tracked by the system."
+              title="Entities"
+              subtitle="View all Entities currently tracked by the system."
               parent={<Anchor label="Return to Dashboard" href="/" />}
             />
             <Table>
@@ -81,28 +81,28 @@ const Samples = () => {
               </TableHeader>
               <TableBody>
                 {isLoaded &&
-                  sampleData.map((value) => {
+                  entityData.map((entity) => {
                     return (
-                      <TableRow key={value._id}>
+                      <TableRow key={entity._id}>
                         <TableCell scope="row" border="right" align="center">
-                          <strong>{value.name}</strong>
+                          <strong>{entity.name}</strong>
                         </TableCell>
                         <TableCell align="center">
                           <strong>
-                            {new Date(value.created).toDateString()}
+                            {new Date(entity.created).toDateString()}
                           </strong>
                         </TableCell>
                         <TableCell align="center">
-                          <strong>{value.owner}</strong>
+                          <strong>{entity.owner}</strong>
                         </TableCell>
                         <TableCell border="right" align="center">
-                          <Linky type="collections" id={value.collection.id} />
+                          <Linky type="collections" id={entity.collection.id} />
                         </TableCell>
                         <TableCell align="center">
                           <Button
                             primary
                             label="Details"
-                            onClick={() => navigate(`/samples/${value._id}`)}
+                            onClick={() => navigate(`/entities/${entity._id}`)}
                           />
                         </TableCell>
                       </TableRow>
@@ -122,4 +122,4 @@ const Samples = () => {
   );
 };
 
-export default Samples;
+export default Entities;

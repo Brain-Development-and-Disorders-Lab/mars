@@ -11,7 +11,7 @@ import {
   LinkyProps,
   AttributeStruct,
   CollectionStruct,
-  SampleStruct,
+  EntityStruct,
 } from "types";
 
 // Custom components
@@ -24,7 +24,7 @@ const Linky = (props: LinkyProps) => {
   const [errorMessage, setErrorMessage] = useState("An error has occurred.");
 
   const [linkData, setLinkData] = useState(
-    {} as AttributeStruct | CollectionStruct | SampleStruct
+    {} as AttributeStruct | CollectionStruct | EntityStruct
   );
 
   useEffect(() => {

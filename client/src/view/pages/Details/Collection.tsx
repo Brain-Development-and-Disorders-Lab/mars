@@ -123,10 +123,10 @@ export const Collection = () => {
                 </Box>
               </Box>
 
-              {/* Associated samples */}
+              {/* Associated Entities */}
               <Box direction="column" align="center" background="light-2" basis="1/4" round>
                 <Heading level="3" margin="small">
-                  Associated samples
+                  Associated Entities
                 </Heading>
                 <Box
                   wrap
@@ -138,14 +138,14 @@ export const Collection = () => {
                   gap="small"
                   fill
                 >
-                  {collectionData.associations.samples.length > 0 ? (
-                    collectionData.associations.samples.map((sample) => {
+                  {collectionData.associations.entities.length > 0 ? (
+                    collectionData.associations.entities.map((entity) => {
                       return (
-                        <Linky key={sample} type="samples" id={sample} />
+                        <Linky key={entity} type="entities" id={entity} />
                       );
                     })
                   ) : (
-                    <Text>No associated samples specified.</Text>
+                    <Text>No associated Entities specified.</Text>
                   )}
                 </Box>
               </Box>

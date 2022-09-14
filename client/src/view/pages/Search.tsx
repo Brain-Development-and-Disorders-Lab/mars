@@ -23,7 +23,7 @@ import { useNavigate } from "react-router-dom";
 
 // Database and models
 import { getData } from "src/lib/database/getData";
-import { SampleModel } from "types";
+import { EntityModel } from "types";
 
 // Custom components
 import ErrorLayer from "../components/ErrorLayer";
@@ -39,7 +39,7 @@ const Search = () => {
   const navigate = useNavigate();
 
   // Store results as a set of IDs
-  const [results, setResults] = useState([] as SampleModel[]);
+  const [results, setResults] = useState([] as EntityModel[]);
 
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("An error has occurred.");
@@ -139,7 +139,7 @@ const Search = () => {
                             <Button
                               primary
                               label="Details"
-                              onClick={() => navigate(`/samples/${result._id}`)}
+                              onClick={() => navigate(`/entities/${result._id}`)}
                             />
                           </TableCell>
                         </TableRow>

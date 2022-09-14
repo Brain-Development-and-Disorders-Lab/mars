@@ -6,13 +6,13 @@ import { ObjectId } from "mongodb";
 // Database connection
 import { getDatabase } from "../database/connection";
 
-const collectionsRoute = express.Router();
+const CollectionsRoute = express.Router();
 
 // Constants
 const COLLECTIONS_COLLECTION = "collections";
 
 // Route: View all collections
-collectionsRoute.route("/collections").get((request: any, response: any) => {
+CollectionsRoute.route("/collections").get((request: any, response: any) => {
   let connection = getDatabase();
   connection
     .collection(COLLECTIONS_COLLECTION)
@@ -24,7 +24,7 @@ collectionsRoute.route("/collections").get((request: any, response: any) => {
 });
 
 // Route: View a specific collection
-collectionsRoute.route("/collections/:id").get((request: any, response: any) => {
+CollectionsRoute.route("/collections/:id").get((request: any, response: any) => {
   const database = getDatabase();
   const query = { _id: new ObjectId(request.params.id) };
 
@@ -37,7 +37,7 @@ collectionsRoute.route("/collections/:id").get((request: any, response: any) => 
 });
 
 // Route: Remove a collection
-collectionsRoute
+CollectionsRoute
   .route("/:id")
   .delete(
     (request: { params: { id: any } }, response: { json: (content: any) => void }) => {
@@ -52,4 +52,4 @@ collectionsRoute
       });
 });
 
-export default collectionsRoute;
+export default CollectionsRoute;

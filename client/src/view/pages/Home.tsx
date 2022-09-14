@@ -6,7 +6,7 @@ import { Page, PageContent } from "grommet";
 
 // Database and models
 import { getData } from "src/lib/database/getData";
-import { CollectionModel, SampleModel } from "types";
+import { CollectionModel, EntityModel } from "types";
 
 // Navigation
 import { useNavigate } from "react-router-dom";
@@ -20,16 +20,16 @@ const Home = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("An error has occurred.");
-  const [sampleData, setSampleData] = useState([] as SampleModel[]);
+  const [entityData, setEntityData] = useState([] as EntityModel[]);
   const [collectionData, setCollectionData] = useState([] as CollectionModel[]);
 
-  // Get all Samples
+  // Get all Entities
   useEffect(() => {
-    const response = getData(`/samples`);
+    const response = getData(`/entities`);
 
     // Handle the response from the database
     response.then((value) => {
-      setSampleData(value);
+      setEntityData(value);
 
       // Check the contents of the response
       if (value["error"] !== undefined) {
@@ -71,8 +71,8 @@ const Home = () => {
 
         <Main direction="row" gap="medium" fill>
           <Box direction="column" basis="2/3" pad="medium">
-            <Heading level="2">Samples</Heading>
-            {isLoaded && sampleData.length > 0 ?
+            <Heading level="2">Entities</Heading>
+            {isLoaded && entityData.length > 0 ?
               <List
                 primaryKey="name"
                 secondaryKey={value => (
@@ -80,16 +80,16 @@ const Home = () => {
                     primary
                     label="View"
                     icon={<LinkNext />}
-                    onClick={() => navigate(`/samples/${value._id}`)}
+                    onClick={() => navigate(`/entities/${value._id}`)}
                     reverse
                   />
                 )}
-                data={sampleData}
-                show={4}
+                data={entityData}
+                step={4}
                 paginate
               />
             :
-              <Text>There are no Samples to display.</Text>
+              <Text>There are no Entities to display.</Text>
             }
             <Heading level="2">Collections</Heading>
             {isLoaded && collectionData.length > 0 ?

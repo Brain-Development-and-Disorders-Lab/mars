@@ -1,8 +1,8 @@
 {
-  "name": "lab",
+  "name": "LaboratoryDataManagement",
   "version": "1.0.0",
   "main": "index.js",
-  "repository": "https://github.com/henry-burgess/SampleFlow.git",
+  "repository": "https://github.com/henry-burgess/LaboratoryDataManagement.git",
   "author": "Henry Burgess <henryjburg@gmail.com>",
   "license": "MIT"
 }

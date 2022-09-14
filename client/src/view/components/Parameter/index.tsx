@@ -14,7 +14,7 @@ import {
 
 // Database and models
 import { getData } from "src/lib/database/getData";
-import { BlockProps, BlockStruct, SampleModel } from "types";
+import { BlockProps, BlockStruct, EntityModel } from "types";
 
 // Custom components
 import ErrorLayer from "src/view/components/ErrorLayer";
@@ -24,7 +24,7 @@ import Linky from "src/view/components/Linky";
 import consola from "consola";
 
 // Constants
-const VALID_TYPES = ["number", "file", "url", "date", "string", "sample"];
+const VALID_TYPES = ["number", "file", "url", "date", "string", "entity"];
 
 const Block = (props: BlockProps) => {
   const [name, setName] = useState(props.name);
@@ -35,15 +35,15 @@ const Block = (props: BlockProps) => {
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("An error has occurred.");
 
-  const [sampleData, setSampleData] = useState([] as SampleModel[]);
-  const [optionData, setOptionData] = useState([] as SampleModel[]);
+  const [entityData, setEntityData] = useState([] as EntityModel[]);
+  const [optionData, setOptionData] = useState([] as EntityModel[]);
 
   useEffect(() => {
-    const samples = getData(`/samples`);
+    const entities = getData(`/entities`);
 
     // Handle the response from the database
-    samples.then((value) => {
-      setSampleData(value);
+    entities.then((value) => {
+      setEntityData(value);
       setOptionData(value);
 
       // Check the contents of the response
@@ -112,17 +112,17 @@ const Block = (props: BlockProps) => {
         disabled={props.disabled}
       />
     );
-  } else if (type === "sample") {
-    // Sample picker
+  } else if (type === "entity") {
+    // Entity picker
     dataElement = props.disabled ? (
       <Linky
-        type="samples"
+        type="entities"
         id={(data as unknown as { name: string; id: string }).id}
       />
     ) : (
       <Select
-        options={optionData.map((sample) => {
-          return { name: sample.name, id: sample._id };
+        options={optionData.map((entity) => {
+          return { name: entity.name, id: entity._id };
         })}
         labelKey="name"
         value={data as string}
@@ -134,7 +134,7 @@ const Block = (props: BlockProps) => {
         onSearch={(query) => {
           const escapedText = query.replace(/[-\\^$*+?.()|[\]{}]/g, "\\$&");
           const exp = new RegExp(escapedText, "i");
-          setOptionData(sampleData.filter((sample) => exp.test(sample.name)));
+          setOptionData(entityData.filter((entity) => exp.test(entity.name)));
         }}
         disabled={props.disabled}
       />

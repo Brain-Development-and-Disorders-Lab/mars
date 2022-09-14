@@ -16,7 +16,7 @@ let database: Db;
 export const connect = (callback: any) => {
   client.connect((error: any, result: any): Callback<MongoClient> => {
     if (result) {
-      database = result.db("flow");
+      database = result.db("laboratory");
       consola.success("Successfully connected to MongoDB.");
     }
 

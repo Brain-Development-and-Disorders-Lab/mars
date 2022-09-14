@@ -13,7 +13,7 @@ import { Box, Spinner } from "grommet/components";
 
 // Database and models
 import { getData } from "src/lib/database/getData";
-import { SampleModel } from "types";
+import { EntityModel } from "types";
 
 // Custom components
 import ErrorLayer from "../ErrorLayer";
@@ -26,7 +26,7 @@ const Flow = (props: { id: string }) => {
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("An error has occurred.");
 
-  const [sampleData, setSampleData] = useState({} as SampleModel);
+  const [entityData, setEntityData] = useState({} as EntityModel);
 
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
@@ -34,11 +34,11 @@ const Flow = (props: { id: string }) => {
 
   // Get the data and setup the initial nodes and edges
   useEffect(() => {
-    const response = getData(`/samples/${props.id}`);
+    const response = getData(`/entities/${props.id}`);
 
     // Handle the response from the database
     response.then((value) => {
-      setSampleData(value);
+      setEntityData(value);
 
       // Check the contents of the response
       if (value["error"] !== undefined) {
@@ -67,20 +67,20 @@ const Flow = (props: { id: string }) => {
     const initialEdges = [];
 
     // Add the origin
-    if (sampleData.associations.origin.id !== "") {
+    if (entityData.associations.origin.id !== "") {
       // Add node
       initialNodes.push({
         id: "origin",
         type: "input",
         data: {
-          label: <>Origin: {sampleData.associations.origin.name}</>,
+          label: <>Origin: {entityData.associations.origin.name}</>,
         },
         position: { x: 250, y: 0 },
       });
 
       // Create edge
       initialEdges.push({
-        id: "origin-sample",
+        id: "origin-entitiy",
         source: "origin",
         target: "current",
         markerEnd: {
@@ -90,10 +90,10 @@ const Flow = (props: { id: string }) => {
     }
 
     // Add products
-    if (sampleData.associations.products.length > 0) {
+    if (entityData.associations.products.length > 0) {
       // Add nodes and edges
-      for (let i = 0; i < sampleData.associations.products.length; i++) {
-        const product = sampleData.associations.products[i];
+      for (let i = 0; i < entityData.associations.products.length; i++) {
+        const product = entityData.associations.products[i];
 
         // Add node
         initialNodes.push({
@@ -120,29 +120,29 @@ const Flow = (props: { id: string }) => {
     // Default assuming origin and products
     let currentType = "collection";
     if (
-      sampleData.associations.origin.id === "" &&
-      sampleData.associations.products.length > 0
+      entityData.associations.origin.id === "" &&
+      entityData.associations.products.length > 0
     ) {
       // If we have no origin, set to input if we have output
       currentType = "input";
     } else if (
-      sampleData.associations.origin.id !== "" &&
-      sampleData.associations.products.length > 0
+      entityData.associations.origin.id !== "" &&
+      entityData.associations.products.length > 0
     ) {
       currentType = "default";
     } else if (
-      sampleData.associations.origin.id !== "" &&
-      sampleData.associations.products.length === 0
+      entityData.associations.origin.id !== "" &&
+      entityData.associations.products.length === 0
     ) {
       currentType = "output";
     }
 
-    // Add the current sample to the diagram
+    // Add the current Entity to the diagram
     initialNodes.push({
       id: "current",
       type: currentType,
       data: {
-        label: <>Current: {sampleData.name}</>,
+        label: <>Current: {entityData.name}</>,
       },
       style: {
         color: "#333",

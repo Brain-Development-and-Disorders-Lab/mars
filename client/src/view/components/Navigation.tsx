@@ -43,7 +43,7 @@ const Navigation = () => {
           dropBackground="brand"
           items={[
             { label: "Collection" },
-            { label: <Anchor label="Sample" href="/create/sample/start" color="white"/> },
+            { label: <Anchor label="Entity" href="/create/entity/start" color="white"/> },
             { label: "Attribute" },
           ]}
           size="large"
@@ -55,7 +55,7 @@ const Navigation = () => {
           dropBackground="brand"
           items={[
             { label: <Anchor label="Collections" href="/collections" color="white"/> },
-            { label: <Anchor label="Samples" href="/samples" color="white"/> },
+            { label: <Anchor label="Entities" href="/entities" color="white"/> },
             { label: <Anchor label="Attributes" href="/attributes" color="white"/> },
           ]}
           size="large"

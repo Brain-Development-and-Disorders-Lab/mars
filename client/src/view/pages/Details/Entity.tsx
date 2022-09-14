@@ -23,7 +23,7 @@ import { useParams } from "react-router-dom";
 
 // Database and models
 import { getData } from "src/lib/database/getData";
-import { SampleModel } from "types";
+import { EntityModel } from "types";
 
 // Custom components
 import Flow from "src/view/components/Flow";
@@ -31,14 +31,14 @@ import ErrorLayer from "src/view/components/ErrorLayer";
 import Linky from "src/view/components/Linky";
 import AttributeCard from "src/view/components/AttributeCard";
 
-export const Sample = () => {
+export const Entity = () => {
   const { id } = useParams();
 
   const [isLoaded, setIsLoaded] = useState(false);
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("An error has occurred.");
 
-  const [sampleData, setSampleData] = useState({} as SampleModel);
+  const [entityData, setEntityData] = useState({} as EntityModel);
 
   const [showFlow, setShowFlow] = useState(false);
 
@@ -54,11 +54,11 @@ export const Sample = () => {
   };
 
   useEffect(() => {
-    const response = getData(`/samples/${id}`);
+    const response = getData(`/entities/${id}`);
 
     // Handle the response from the database
     response.then((value) => {
-      setSampleData(value);
+      setEntityData(value);
 
       // Check the contents of the response
       if (value["error"] !== undefined) {
@@ -74,7 +74,7 @@ export const Sample = () => {
   useEffect(() => {
     if (isLoaded) {
       // Update the state of editable data fields
-      setDescription(sampleData.description);
+      setDescription(entityData.description);
     }
   }, [isLoaded]);
 
@@ -85,8 +85,8 @@ export const Sample = () => {
           <Box gap="small" margin="small">
             <Box direction="column" justify="between">
               <PageHeader
-                title={"Sample \"" + sampleData.name + "\""}
-                parent={<Anchor label="Return to Samples" href="/samples" />}
+                title={"Entity \"" + entityData.name + "\""}
+                parent={<Anchor label="Return to Entities" href="/entities" />}
               />
               <Box direction="row" gap="small">
                 <Button
@@ -119,7 +119,7 @@ export const Sample = () => {
                           </Heading>
                         </TableCell>
                         <TableCell border>
-                          <Text>{new Date(sampleData.created).toDateString()}</Text>
+                          <Text>{new Date(entityData.created).toDateString()}</Text>
                         </TableCell>
                       </TableRow>
 
@@ -131,7 +131,7 @@ export const Sample = () => {
                         </TableCell>
                         <TableCell border>
                           <Text>
-                            <Anchor label={sampleData.owner} color="dark-2" />
+                            <Anchor label={entityData.owner} color="dark-2" />
                           </Text>
                         </TableCell>
                       </TableRow>
@@ -161,11 +161,11 @@ export const Sample = () => {
                         </TableCell>
                         <TableCell border>
                           <Box direction="row" gap="small" align="center">
-                            {sampleData.associations.origin.id !== "" ? (
+                            {entityData.associations.origin.id !== "" ? (
                               <Linky
-                                key={sampleData.associations.origin.id}
-                                type="samples"
-                                id={sampleData.associations.origin.id}
+                                key={entityData.associations.origin.id}
+                                type="entities"
+                                id={entityData.associations.origin.id}
                               />
                             ) : (
                               <Text>No origin specified.</Text>
@@ -184,11 +184,11 @@ export const Sample = () => {
                           </Heading>
                         </TableCell>
                         <TableCell border>
-                          {sampleData.collection.id !== "" ?
+                          {entityData.collection.id !== "" ?
                             <Linky
-                              key={sampleData.collection.id}
+                              key={entityData.collection.id}
                               type="collections"
-                              id={sampleData.collection.id}
+                              id={entityData.collection.id}
                             />
                           :
                             <Text>No primary collection specified.</Text>
@@ -216,8 +216,8 @@ export const Sample = () => {
                   gap="small"
                   fill
                 >
-                  {sampleData.collections.length > 0 ? (
-                    sampleData.collections.map((collection) => {
+                  {entityData.collections.length > 0 ? (
+                    entityData.collections.map((collection) => {
                       return (
                         <Linky
                           key={collection.id}
@@ -247,10 +247,10 @@ export const Sample = () => {
                   gap="small"
                   fill
                 >
-                  {sampleData.collections.length > 0 ? (
-                    sampleData.associations.products.map((product) => {
+                  {entityData.collections.length > 0 ? (
+                    entityData.associations.products.map((product) => {
                       return (
-                        <Linky key={product.id} type="samples" id={product.id} />
+                        <Linky key={product.id} type="entities" id={product.id} />
                       );
                     })
                   ) : (
@@ -276,8 +276,8 @@ export const Sample = () => {
                 background="light-2"
                 fill
               >
-                {sampleData.attributes.length > 0 ? (
-                  sampleData.attributes.map((attribute) => {
+                {entityData.attributes.length > 0 ? (
+                  entityData.attributes.map((attribute) => {
                     return <AttributeCard data={attribute} />;
                   })
                 ) : (
@@ -300,11 +300,11 @@ export const Sample = () => {
           >
             <Box direction="row" justify="between" margin={{ right: "small" }}>
               <Heading level="2" margin="small">
-                Flow: {sampleData.name}
+                Flow: {entityData.name}
               </Heading>
               <Button icon={<Close />} onClick={() => setShowFlow(false)} plain />
             </Box>
-            <Flow id={sampleData._id} />
+            <Flow id={entityData._id} />
           </Layer>
         )}
       </PageContent>
@@ -312,4 +312,4 @@ export const Sample = () => {
   );
 };
 
-export default Sample;
+export default Entity;

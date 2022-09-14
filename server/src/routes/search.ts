@@ -4,13 +4,13 @@ import express from "express";
 // Database connection
 import { getDatabase } from "../database/connection";
 
-const searchRoute = express.Router();
+const SearchRoute = express.Router();
 
-// Name of MongoDB collection storing Samples
-const SAMPLES_COLLECTION = "samples";
+// Name of MongoDB collection storing Entities
+const ENTITIES_COLLECTION = "entities";
 
-// Route: Search for a specific string in the colleciton of samples
-searchRoute.route("/search/:query").get(async (request: any, response: any) => {
+// Route: Search for a specific string in the colleciton of Entities
+SearchRoute.route("/search/:query").get(async (request: any, response: any) => {
   const database = getDatabase();
 
   // Configure database query
@@ -18,7 +18,7 @@ searchRoute.route("/search/:query").get(async (request: any, response: any) => {
   const sort = { score: { $meta: "textScore" } };
 
   database
-    .collection(SAMPLES_COLLECTION)
+    .collection(ENTITIES_COLLECTION)
     .find(query)
     .sort(sort)
     .toArray((error, content) => {
@@ -27,4 +27,4 @@ searchRoute.route("/search/:query").get(async (request: any, response: any) => {
     });
 });
 
-export default searchRoute;
+export default SearchRoute;
