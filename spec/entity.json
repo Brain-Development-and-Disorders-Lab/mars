@@ -17,5 +17,19 @@
     "origin": "",
     "products": []
   },
-  "attributes": []
+  "attributes": [
+    {
+      "id": "attribute_0",
+      "name": "Test Attribute",
+      "description": "An example attribute.",
+      "type": "data",
+      "parameters": [
+        {
+          "name": "URL",
+          "type": "url",
+          "value": "box.wustl.edu"
+        }
+      ]
+    }
+  ]
 }

@@ -6,8 +6,8 @@ module.exports = {
   mode: "development",
   plugins: [
     new HtmlWebpackPlugin({
-      favicon: "src/img/Favicon.png",
-      title: "Lab",
+      favicon: "img/Favicon.png",
+      title: "Laboratory Data Management",
       template: "src/index.html",
     }),
   ],

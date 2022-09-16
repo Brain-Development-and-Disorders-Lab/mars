@@ -4,9 +4,9 @@ import ReactFlow, {
   MiniMap,
   Controls,
   Background,
+  MarkerType,
   useNodesState,
   useEdgesState,
-  MarkerType,
 } from "react-flow-renderer";
 import { Box, Spinner } from "grommet/components";
 
@@ -65,7 +65,11 @@ const Graph = (props: { id: string }) => {
         id: "origin",
         type: "input",
         data: {
-          label: <>Origin: {entityData.associations.origin.name}</>,
+          label: (
+            <>
+              Origin: {entityData.associations.origin.name}
+            </>
+          ),
         },
         position: { x: 250, y: 0 },
       });
@@ -94,7 +98,7 @@ const Graph = (props: { id: string }) => {
           data: {
             label: <>Product: {product.name}</>,
           },
-          position: { x: 100 * i, y: 200 },
+          position: { x: 100, y: 200 },
         });
 
         // Create edge
@@ -102,9 +106,7 @@ const Graph = (props: { id: string }) => {
           id: `edge_product_${i}`,
           source: "current",
           target: `product_${i}`,
-          markerEnd: {
-            type: MarkerType.ArrowClosed,
-          },
+          animated: true,
         });
       }
     }
@@ -139,7 +141,6 @@ const Graph = (props: { id: string }) => {
       style: {
         color: "#333",
         border: "2px solid green",
-        width: 180,
       },
       position: { x: 250, y: 100 },
     });
@@ -161,8 +162,8 @@ const Graph = (props: { id: string }) => {
           edges={edges}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
+          attributionPosition="bottom-right"
           fitView
-          attributionPosition="top-right"
         >
           <MiniMap
             nodeStrokeColor={(n: any) => {

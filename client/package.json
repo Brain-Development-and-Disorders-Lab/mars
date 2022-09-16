@@ -19,7 +19,7 @@
     "grommet-icons": "^4.7.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
-    "react-flow-renderer": "^10.2.3",
+    "react-flow-renderer": "^10.3.17",
     "react-router-dom": "^6.3.0"
   },
   "devDependencies": {
