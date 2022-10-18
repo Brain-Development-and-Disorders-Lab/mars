@@ -3,12 +3,13 @@
   "name": "Entity Name",
   "created": "2022-05-19T22:34:29.501Z",
   "owner": "henry.burgess@wustl.edu",
-  "collection": {
-    "name": "Collection name",
-    "id": "abcd1234"
-  },
   "description": "Entity description",
-  "collections": [],
+  "collections": [
+    {
+      "name": "Collection name",
+      "id": "abcd1234"
+    }
+  ],
   "associations": {
     "origin": {
       "name": "Origin name",

@@ -42,7 +42,6 @@ export const Attributes = ({}) => {
     from,
     name,
     created,
-    collection,
     collections,
     description,
     owner,
@@ -64,7 +63,6 @@ export const Attributes = ({}) => {
     name: name,
     created: created,
     owner: owner,
-    collection: collection,
     collections: collections,
     description: description,
     associations: {
@@ -85,7 +83,6 @@ export const Attributes = ({}) => {
     name: name,
     created: created,
     owner: owner,
-    collection: collection,
     collections: collections,
     description: description,
     associations: {
@@ -308,14 +305,6 @@ export const Attributes = ({}) => {
                   </Text>
                 </Box>
                 <Box direction="column" gap="medium">
-                  <Text>
-                    <b>Primary Collection:</b>{" "}
-                    <Linky
-                      key={collection.id}
-                      type="collections"
-                      id={collection.id}
-                    />
-                  </Text>
                   {collections.length > 0 && (
                     <Text>
                       <b>Associated Collections:</b>{" "}

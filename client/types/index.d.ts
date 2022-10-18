@@ -12,7 +12,6 @@ declare namespace Create.Entity {
     name: string;
     created: string;
     owner: string;
-    collection: { name: string; id: string };
     description: string;
   };
 
@@ -99,6 +98,8 @@ declare type LinkyProps = {
 export type CollectionStruct = {
   name: string;
   description: string;
+  owner: string;
+  created: string;
   attributes: AttributeModel[];
   associations: {
     entities: string[];
@@ -113,7 +114,6 @@ export type EntityStruct = {
   name: string;
   created: string;
   owner: string;
-  collection: { name: string; id: string };
   description: string;
   collections: { name: string; id: string }[];
   associations: {

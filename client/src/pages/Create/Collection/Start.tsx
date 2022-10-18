@@ -21,7 +21,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 // Database and models
 import { getData } from "src/lib/database/getData";
-import { CollectionModel, Create, EntityModel } from "types";
+import { pushData } from "src/lib/database/pushData";
+import { CollectionStruct, Create, EntityModel } from "types";
 
 // Utility functions
 import { pseudoId } from "src/lib/functions";
@@ -57,19 +58,12 @@ export const Start = ({}) => {
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("An error has occurred.");
 
-  const [collectionData, setCollectionData] = useState([] as CollectionModel[]);
   const [entityOptions, setEntityOptions] = useState(
-    [] as { name: string; id?: string }[]
+    [] as { name: string; id: string }[]
   );
-  const [entities, setEntities] = useState([] as EntityModel[]);
-
-  const startState: Create.Collection.Start = {
-    from: "none",
-    name: name,
-    created: created,
-    owner: owner,
-    description: description,
-  };
+  const [entitiesSelected, setEntitiesSelected] = useState(
+    [] as { name: string; id: string }[]
+  );
 
   useEffect(() => {
     const entities = getData(`/entities`);
@@ -85,26 +79,22 @@ export const Start = ({}) => {
         setErrorMessage(entity["error"]);
         setIsError(true);
       }
-    });
-
-    const collections = getData(`/collections`);
-
-    // Handle the response from the database
-    collections.then((value) => {
-      setCollectionData(value);
-
-      // Check the contents of the response
-      if (value["error"] !== undefined) {
-        setErrorMessage(value["error"]);
-        setIsError(true);
-      }
 
       setIsLoaded(true);
     });
-
-    consola.debug("Collection data:", collectionData);
     return;
   }, []);
+
+  const collectionData: CollectionStruct = {
+    name: name,
+    description: description,
+    owner: owner,
+    created: created,
+    attributes: [],
+    associations: {
+      entities: [],
+    }
+  };
 
   return (
     <Page kind="wide" pad={{left: "small", right: "small"}}>
@@ -120,10 +110,16 @@ export const Start = ({}) => {
                 onChange={() => {}}
                 onReset={() => {}}
                 onSubmit={() => {
-                  startState.from = "start";
-                  navigate("/create/collection/add", {
-                    state: startState,
+                  // Update the selected entities
+                  collectionData.associations.entities = entitiesSelected.map((entity) => {
+                    return entity.id;
                   });
+
+                  // Push the data
+                  consola.debug("Creating collection:", collectionData);
+                  pushData(`/collections/add`, collectionData).then(() =>
+                    navigate("/collections")
+                  );
                 }}
               >
                 <Box direction="row" gap="medium">
@@ -187,11 +183,11 @@ export const Start = ({}) => {
                       <Select
                         options={entityOptions}
                         labelKey="name"
-                        value={entities}
+                        value={entitiesSelected}
                         valueKey="name"
                         onChange={({ value }) => {
-                          if (!entities.includes(value)) {
-                            setEntities([...entities, value]);
+                          if (!entitiesSelected.includes(value)) {
+                            setEntitiesSelected([...entitiesSelected, value]);
                           }
                         }}
                         searchPlaceholder="Search..."
@@ -212,15 +208,15 @@ export const Start = ({}) => {
                       />
                     </FormField>
                     <Box direction="column" gap="xsmall">
-                      {entities.map((entity) => {
+                      {entitiesSelected.map((entity) => {
                         return (
                           <Tag
                             name="Entity"
                             value={entity.name}
                             key={entity.name}
                             onRemove={() => {
-                              setEntities(
-                                entities.filter((item) => {
+                              setEntitiesSelected(
+                                entitiesSelected.filter((item) => {
                                   return item !== entity;
                                 })
                               );

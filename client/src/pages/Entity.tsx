@@ -190,25 +190,6 @@ export const Entity = () => {
                           </Box>
                         </TableCell>
                       </TableRow>
-
-                      <TableRow>
-                        <TableCell scope="row" border>
-                          <Heading level="4" margin="xsmall">
-                            Primary Collection
-                          </Heading>
-                        </TableCell>
-                        <TableCell border>
-                          {entityData.collection.id !== "" ? (
-                            <Linky
-                              key={entityData.collection.id}
-                              type="collections"
-                              id={entityData.collection.id}
-                            />
-                          ) : (
-                            <Text>No primary Collection specified.</Text>
-                          )}
-                        </TableCell>
-                      </TableRow>
                     </TableBody>
                   </Table>
                 </Box>

@@ -30,9 +30,7 @@ export const Associations = ({}) => {
 
   // Extract state from prior page
   const { state } = useLocation();
-
-  const { from, name, created, collection, description, owner } =
-    state as Create.Entity.Start;
+  const { from, name, created, description, owner } = state as Create.Entity.Start;
 
   // Setup state data
   const [origin, setOrigin] = useState({ name: "", id: "" });
@@ -63,7 +61,6 @@ export const Associations = ({}) => {
     name: name,
     created: created,
     owner: owner,
-    collection: collection,
     collections: additionalCollections,
     description: description,
     associations: {
@@ -163,9 +160,7 @@ export const Associations = ({}) => {
                       }}
                     />
                   </FormField>
-                </Box>
 
-                <Box direction="column">
                   <FormField
                     label="Associated Collections"
                     name="collections"
@@ -173,9 +168,6 @@ export const Associations = ({}) => {
                   >
                     <CheckBoxGroup
                       options={collectionData
-                        .filter((c) => {
-                          return c._id !== collection.id;
-                        })
                         .map((collection) => {
                           return { name: collection.name, id: collection._id };
                         })}
@@ -197,7 +189,9 @@ export const Associations = ({}) => {
                       }}
                     />
                   </FormField>
+                </Box>
 
+                <Box direction="column">
                   <FormField
                     label="Linked Products"
                     name="products"

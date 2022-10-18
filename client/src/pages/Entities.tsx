@@ -11,7 +11,6 @@ import {
   TableCell,
   TableHeader,
   TableRow,
-  Text,
 } from "grommet/components";
 import { Page, PageContent } from "grommet";
 
@@ -24,7 +23,6 @@ import { EntityModel } from "types";
 
 // Custom components
 import ErrorLayer from "../components/ErrorLayer";
-import Linky from "../components/Linky";
 
 const Entities = () => {
   const navigate = useNavigate();
@@ -95,16 +93,6 @@ const Entities = () => {
                         </TableCell>
                         <TableCell align="center">
                           <strong>{entity.owner}</strong>
-                        </TableCell>
-                        <TableCell border="right" align="center">
-                          {entity.collection.id !== "" ? (
-                            <Linky
-                              type="collections"
-                              id={entity.collection.id}
-                            />
-                          ) : (
-                            <Text>No Collection</Text>
-                          )}
                         </TableCell>
                         <TableCell align="center">
                           <Button

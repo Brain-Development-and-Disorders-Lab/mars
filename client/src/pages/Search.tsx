@@ -27,7 +27,6 @@ import { EntityModel } from "types";
 
 // Custom components
 import ErrorLayer from "../components/ErrorLayer";
-import Linky from "../components/Linky";
 
 const Search = () => {
   const [query, setQuery] = useState("");
@@ -130,9 +129,6 @@ const Search = () => {
                         </TableCell>
                         <TableCell align="center">
                           <strong>{result.owner}</strong>
-                        </TableCell>
-                        <TableCell border="right" align="center">
-                          <Linky type="collections" id={result.collection.id} />
                         </TableCell>
                         <TableCell align="center">
                           <Button
