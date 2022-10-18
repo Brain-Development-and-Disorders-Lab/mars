@@ -13,15 +13,16 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Navigation from "./components/Navigation";
 
 // Custom pages
-import Start from "./pages/Create/Entity/Start";
 import Collection from "./pages/Collection";
 import Collections from "./pages/Collections";
 import Search from "./pages/Search";
-import Associations from "./pages/Create/Entity/Associations";
-import Attributes from "./pages/Create/Entity/Attributes";
-import Home from "./pages/Home";
 import Entity from "./pages/Entity";
 import Entities from "./pages/Entities";
+import {Start as EntityStart} from "./pages/Create/Entity/Start";
+import {Associations as EntityAssociations} from "./pages/Create/Entity/Associations";
+import {Attributes as EntityAttributes} from "./pages/Create/Entity/Attributes";
+import {Start as CollectionStart} from "./pages/Create/Collection/Start";
+import Home from "./pages/Home";
 
 // Theme
 import { theme } from "./theme";
@@ -33,20 +34,23 @@ export const App = () => {
         <Navigation />
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/create/entity/start" element={<Start />} />
-          <Route
-            path="/create/entity/associations"
-            element={<Associations />}
-          />
-          <Route path="/create/entity/attributes" element={<Attributes />} />
-          <Route path="/collections" element={<Collections />} />
-          <Route path="collections">
-            <Route path=":id" element={<Collection />} />
-          </Route>
+          {/* Entity routes */}
+          <Route path="/create/entity/start" element={<EntityStart />} />
+          <Route path="/create/entity/associations" element={<EntityAssociations />} />
+          <Route path="/create/entity/attributes" element={<EntityAttributes />} />
           <Route path="/entities" element={<Entities />} />
           <Route path="entities">
             <Route path=":id" element={<Entity />} />
           </Route>
+
+          {/* Collections routes */}
+          <Route path="/create/collection/start" element={<CollectionStart />} />
+          <Route path="/collections" element={<Collections />} />
+          <Route path="collections">
+            <Route path=":id" element={<Collection />} />
+          </Route>
+
+          {/* Other routes */}
           <Route path="/search" element={<Search />} />
         </Routes>
       </Grommet>
