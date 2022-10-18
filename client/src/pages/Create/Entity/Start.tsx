@@ -58,7 +58,7 @@ export const Start = ({}) => {
       <PageContent>
         <PageHeader
           title="Create an Entity: Start"
-          parent={<Anchor label="Return to Dashboard" href="/" />}
+          parent={<Anchor label="Home" href="/" />}
         />
         <Box width="large" fill>
           <Form

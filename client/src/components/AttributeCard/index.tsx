@@ -38,17 +38,13 @@ const AttributeCard = (props: AttributeCardProps) => {
         }}
       >
         <CardHeader pad="small" align="center" margin="none">
-          <Text>
-            <strong>Attribute: {props.data.name}</strong>
-          </Text>
+          <Heading level={3} margin="none">{props.data.name}</Heading>
         </CardHeader>
 
         <CardBody pad="small">
           <Box direction="row" flex gap="small">
             <Storage color="brand" />
-            <Text>
-              <strong>Storage type:</strong>
-            </Text>
+            <Heading level={4} margin="none">Storage:</Heading>
             <Text>{props.data.type}</Text>
           </Box>
           <Box direction="row" flex gap="small" width={{ max: "medium" }}>
@@ -61,7 +57,8 @@ const AttributeCard = (props: AttributeCardProps) => {
         </CardBody>
 
         <CardFooter
-          pad={{ horizontal: "medium", vertical: "none" }}
+          pad={{ horizontal: "medium"}}
+          margin="none"
           background="light-2"
         >
           {/* Populate footer depending on the Parameters that are configured */}
@@ -79,7 +76,7 @@ const AttributeCard = (props: AttributeCardProps) => {
             justify="between"
             pad={{ left: "medium", right: "medium" }}
           >
-            <Heading level="2">Attribute: {props.data.name}</Heading>
+            <Heading level="2">{props.data.name}</Heading>
 
             <Button
               icon={<Close />}

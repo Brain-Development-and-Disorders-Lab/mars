@@ -69,7 +69,7 @@ const Search = () => {
         <PageHeader
           title="Search"
           subtitle="Search across the entire database system."
-          parent={<Anchor label="Return to Dashboard" href="/" />}
+          parent={<Anchor label="Home" href="/" />}
         />
 
         <Box direction="row" align="center" gap="small">

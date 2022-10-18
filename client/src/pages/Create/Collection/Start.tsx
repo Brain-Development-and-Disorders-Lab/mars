@@ -103,7 +103,7 @@ export const Start = ({}) => {
           <>
             <PageHeader
               title="Create a Collection"
-              parent={<Anchor label="Return to Dashboard" href="/" />}
+              parent={<Anchor label="Home" href="/" />}
             />
             <Box width="large" fill>
               <Form

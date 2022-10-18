@@ -57,7 +57,6 @@ EntitiesRoute.route("/entities/add").post(
       name: request.body.name,
       created: request.body.created,
       owner: request.body.owner,
-      collection: request.body.collection,
       description: request.body.description,
       collections: request.body.collections,
       associations: {
@@ -160,44 +159,8 @@ EntitiesRoute.route("/entities/add").post(
     }
 
     // We need to apply the collections that have been specified
-    if (data.collection.name !== "") {
-      consola.info("Collection specified, applying...");
-      const collectionQuery = { _id: new ObjectId(data.collection.id) };
-      let collection: CollectionModel;
-
-      database
-        .collection(COLLECTIONS_COLLECTION)
-        .findOne(collectionQuery, (error: any, result: any) => {
-          if (error) throw error;
-          collection = result;
-
-          // Update the collection to include the Entity as an association
-          const updatedValues = {
-            $set: {
-              associations: {
-                entities: [...collection.associations.entities, insertedId],
-              },
-            },
-          };
-
-          database
-            .collection(COLLECTIONS_COLLECTION)
-            .updateOne(
-              collectionQuery,
-              updatedValues,
-              (error: any, response: any) => {
-                if (error) throw error;
-                consola.success(
-                  "Added Entity to collection:",
-                  data.collection.name
-                );
-              }
-            );
-        });
-    }
-
     if (data.collections.length > 0) {
-      consola.info("Additional Collections specified, applying...");
+      consola.info("Collections specified, applying...");
       data.collections.map((collection) => {
         const collectionQuery = { _id: new ObjectId(collection.id) };
         let collectionResult: CollectionModel;

@@ -137,7 +137,7 @@ export const Attributes = ({}) => {
       <PageContent>
         <PageHeader
           title="Create an Entity: Add attributes"
-          parent={<Anchor label="Return to Dashboard" href="/" />}
+          parent={<Anchor label="Home" href="/" />}
         />
         {isLoaded && isError === false ? (
           <>
@@ -307,7 +307,7 @@ export const Attributes = ({}) => {
                 <Box direction="column" gap="medium">
                   {collections.length > 0 && (
                     <Text>
-                      <b>Associated Collections:</b>{" "}
+                      <b>Collections:</b>{" "}
                       {collections.map((collection) => {
                         return (
                           <Linky

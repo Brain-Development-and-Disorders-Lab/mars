@@ -115,7 +115,7 @@ export const Associations = ({}) => {
       <PageContent>
         <PageHeader
           title="Create an Entity: Add associations"
-          parent={<Anchor label="Return to Dashboard" href="/" />}
+          parent={<Anchor label="Home" href="/" />}
         />
         {isLoaded && isError === false ? (
           <Box margin="small">
@@ -162,9 +162,9 @@ export const Associations = ({}) => {
                   </FormField>
 
                   <FormField
-                    label="Associated Collections"
+                    label="Collections"
                     name="collections"
-                    info="Specify the collections that this new Entity should be associated with. The Entity will then show up underneath the specified collections."
+                    info="Specify the collections that this new Entity should be included with. The Entity will then show up underneath the specified collections."
                   >
                     <CheckBoxGroup
                       options={collectionData

@@ -63,9 +63,9 @@ export const Collection = () => {
           <Box gap="small" margin="small">
             <Box direction="row" justify="between">
               <PageHeader
-                title={'Collection "' + collectionData.name + '"'}
+                title={collectionData.name}
                 parent={
-                  <Anchor label="Return to Collections" href="/collections" />
+                  <Anchor label="View all Collections" href="/collections" />
                 }
               />
             </Box>
@@ -158,7 +158,7 @@ export const Collection = () => {
                 >
                   <Box direction="row" justify="between" fill>
                     <Heading level="3" margin="none" alignSelf="center">
-                      Associated Entities
+                      Entities
                     </Heading>
                     <Button
                       label="Add"

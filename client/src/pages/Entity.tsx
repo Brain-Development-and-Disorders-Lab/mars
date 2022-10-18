@@ -6,6 +6,7 @@ import {
   Button,
   Heading,
   Layer,
+  List,
   PageHeader,
   Paragraph,
   Spinner,
@@ -14,12 +15,13 @@ import {
   TableCell,
   TableRow,
   Text,
+  TextInput,
 } from "grommet/components";
 import { Page, PageContent } from "grommet";
-import { Add, Close } from "grommet-icons";
+import { Add, Close, LinkNext } from "grommet-icons";
 
 // Navigation
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 
 // Database and models
 import { getData } from "src/lib/database/getData";
@@ -33,6 +35,7 @@ import AttributeCard from "src/components/AttributeCard";
 
 export const Entity = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
 
   const [isLoaded, setIsLoaded] = useState(false);
   const [isError, setIsError] = useState(false);
@@ -85,8 +88,8 @@ export const Entity = () => {
           <Box gap="small" margin="small">
             <Box direction="column" justify="between">
               <PageHeader
-                title={'Entity "' + entityData.name + '"'}
-                parent={<Anchor label="Return to Entities" href="/entities" />}
+                title={entityData.name}
+                parent={<Anchor label="View all Entities" href="/entities" />}
               />
               <Box direction="row" gap="small">
                 <Button
@@ -102,199 +105,190 @@ export const Entity = () => {
               </Box>
             </Box>
 
-            <Box direction="row" gap="small">
-              {/* Metadata table */}
-              <Box
-                direction="column"
-                align="center"
-                background="light-2"
-                basis="1/2"
-                round
-              >
-                <Heading level="3" margin="small">
-                  Metadata
-                </Heading>
+            {/* Metadata table */}
+            <Box pad="small">
+              <Heading level="3" margin="none">
+                Metadata
+              </Heading>
 
-                <Box
-                  fill
-                  pad={{ left: "small", right: "small", bottom: "small" }}
-                >
-                  <Table>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell scope="row" border>
-                          <Heading level="4" margin="xsmall">
-                            Created
-                          </Heading>
-                        </TableCell>
-                        <TableCell border>
-                          <Text>
-                            {new Date(entityData.created).toDateString()}
-                          </Text>
-                        </TableCell>
-                      </TableRow>
+              <Table>
+                <TableBody>
+                  <TableRow>
+                    <TableCell scope="row" border>
+                      <Heading level="4" margin="xsmall">
+                        Created
+                      </Heading>
+                    </TableCell>
+                    <TableCell border>
+                      <Text>
+                        {new Date(entityData.created).toDateString()}
+                      </Text>
+                    </TableCell>
+                  </TableRow>
 
-                      <TableRow>
-                        <TableCell scope="row" border>
-                          <Heading level="4" margin="xsmall">
-                            Owner
-                          </Heading>
-                        </TableCell>
-                        <TableCell border>
-                          <Text>
-                            <Anchor label={entityData.owner} color="dark-2" />
-                          </Text>
-                        </TableCell>
-                      </TableRow>
+                  <TableRow>
+                    <TableCell scope="row" border>
+                      <Heading level="4" margin="xsmall">
+                        Owner
+                      </Heading>
+                    </TableCell>
+                    <TableCell border>
+                      <Text>
+                        <Anchor label={entityData.owner} color="dark-2" />
+                      </Text>
+                    </TableCell>
+                  </TableRow>
 
-                      <TableRow>
-                        <TableCell scope="row" border>
-                          <Heading level="4" margin="xsmall">
-                            Description
-                          </Heading>
-                        </TableCell>
-                        <TableCell border>
-                          <Paragraph>{description}</Paragraph>
-                        </TableCell>
-                      </TableRow>
+                  <TableRow>
+                    <TableCell scope="row" border>
+                      <Heading level="4" margin="xsmall">
+                        Origin
+                      </Heading>
+                    </TableCell>
+                    <TableCell border>
+                      <Box
+                        direction="row"
+                        gap="small"
+                        align="center"
+                        margin="none"
+                      >
+                        {entityData.associations.origin.id !== "" ? (
+                          <Linky
+                            key={entityData.associations.origin.id}
+                            type="entities"
+                            id={entityData.associations.origin.id}
+                          />
+                        ) : (
+                          <Text>No origin specified.</Text>
+                        )}
+                      </Box>
+                    </TableCell>
+                  </TableRow>
 
-                      <TableRow>
-                        <TableCell scope="row" border>
-                          <Heading level="4" margin="xsmall">
-                            Origin
-                          </Heading>
-                        </TableCell>
-                        <TableCell border>
-                          <Box
-                            direction="row"
-                            gap="small"
-                            align="center"
-                            margin="none"
-                          >
-                            {entityData.associations.origin.id !== "" ? (
-                              <Linky
-                                key={entityData.associations.origin.id}
-                                type="entities"
-                                id={entityData.associations.origin.id}
-                              />
-                            ) : (
-                              <Text>No origin specified.</Text>
-                            )}
-                            {editing ? (
-                              <Button
-                                icon={<Add size="small" />}
-                                primary
-                                disabled={!editing}
-                              />
-                            ) : null}
-                          </Box>
-                        </TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </Box>
-              </Box>
-
-              {/* Associated Collections */}
-              <Box
-                direction="column"
-                align="center"
-                background="light-2"
-                basis="1/4"
-                round
-              >
-                <Heading level="3" margin="small">
-                  Associated Collections
-                </Heading>
-                <Box
-                  wrap
-                  round
-                  direction="row"
-                  justify="center"
-                  align="center"
-                  margin="small"
-                  pad="small"
-                  gap="small"
-                  fill
-                >
-                  {entityData.collections.length > 0 ? (
-                    entityData.collections.map((collection) => {
-                      return (
-                        <Linky
-                          key={collection.id}
-                          type="collections"
-                          id={collection.id}
-                        />
-                      );
-                    })
-                  ) : (
-                    <Text>No associated Collections specified.</Text>
-                  )}
-                </Box>
-              </Box>
-
-              {/* Products */}
-              <Box
-                direction="column"
-                align="center"
-                background="light-2"
-                basis="1/4"
-                round
-              >
-                <Heading level="3" margin="small">
-                  Products
-                </Heading>
-                <Box
-                  wrap
-                  direction="row"
-                  justify="center"
-                  align="center"
-                  margin="small"
-                  pad="small"
-                  gap="small"
-                  fill
-                >
-                  {entityData.collections.length > 0 ? (
-                    entityData.associations.products.map((product) => {
-                      return (
-                        <Linky
-                          key={product.id}
-                          type="entities"
-                          id={product.id}
-                        />
-                      );
-                    })
-                  ) : (
-                    <Text>No products specified.</Text>
-                  )}
-                </Box>
-              </Box>
+                  <TableRow>
+                    <TableCell scope="row" border>
+                      <Heading level="4" margin="xsmall">
+                        Description
+                      </Heading>
+                    </TableCell>
+                    <TableCell border>
+                      {editing ? (
+                        <TextInput value={description} />
+                      ) : (
+                        <Paragraph>{description}</Paragraph>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
             </Box>
 
-            <Box direction="column" align="center" background="light-2" round>
-              <Heading level="3" margin="small">
-                Attributes
-              </Heading>
-              <Box
-                wrap
-                round
-                direction="row"
-                align="center"
-                justify="start"
-                margin="small"
-                pad="small"
-                gap="small"
-                background="light-2"
-                fill
-              >
-                {entityData.attributes.length > 0 ? (
-                  entityData.attributes.map((attribute) => {
-                    return <AttributeCard data={attribute} />;
-                  })
-                ) : (
-                  <Text>No attributes specified.</Text>
-                )}
+            {/* Collections */}
+            <Box pad="small">
+              <Box direction="row" justify="between" margin={{bottom: "small"}}>
+                <Heading level="3" margin="none">
+                  Collections
+                </Heading>
+                {editing ? (
+                  <Button
+                    icon={<Add size="small" />}
+                    label="Add"
+                    primary
+                    disabled={!editing}
+                  />
+                ) : null}
               </Box>
+              {entityData.collections.length > 0 ? (
+                <List
+                  primaryKey={(collection) => {
+                    return <Linky type="collections" id={collection.id} />
+                  }}
+                  secondaryKey={(collection) => {
+                    return (
+                      <Box direction="row" gap="small" margin="none">
+                        <Button
+                          icon={<LinkNext />}
+                          primary
+                          label="View"
+                          onClick={() => {navigate(`/collections/${collection}`)}}
+                          reverse
+                        />
+                      </Box>
+                    )
+                  }}
+                  data={entityData.collections}
+                  show={4}
+                  paginate
+                />
+              ) : (
+                <Text>Not present in any Collections.</Text>
+              )}
+            </Box>
+
+            {/* Products */}
+            <Box pad="small">
+              <Box direction="row" justify="between" margin={{bottom: "small"}}>
+                <Heading level="3"  margin="none">
+                  Products
+                </Heading>
+                {editing ? (
+                  <Button
+                    icon={<Add size="small" />}
+                    label="Add"
+                    primary
+                    disabled={!editing}
+                  />
+                ) : null}
+              </Box>
+              {entityData.associations.products.length > 0 ? (
+                <List
+                  primaryKey={(product) => {
+                    return <Linky type="entities" id={product.id} />
+                  }}
+                  secondaryKey={(product) => {
+                    return (
+                      <Box direction="row" gap="small" margin="none">
+                        <Button
+                          icon={<LinkNext />}
+                          primary
+                          label="View"
+                          onClick={() => {navigate(`/entity/${product}`)}}
+                          reverse
+                        />
+                      </Box>
+                    )
+                  }}
+                  data={entityData.associations.products}
+                  show={4}
+                  paginate
+                />
+              ) : (
+                <Text>No products specified.</Text>
+              )}
+            </Box>
+
+            {/* Attributes */}
+            <Box pad="small">
+              <Box direction="row" justify="between" margin={{bottom: "small"}}>
+                <Heading level="3" margin="none">
+                  Attributes
+                </Heading>
+                {editing ? (
+                  <Button
+                    icon={<Add size="small" />}
+                    label="Add"
+                    primary
+                    disabled={!editing}
+                  />
+                ) : null}
+              </Box>
+              {entityData.attributes.length > 0 ? (
+                entityData.attributes.map((attribute) => {
+                  return <AttributeCard data={attribute} />;
+                })
+              ) : (
+                <Text>No attributes specified.</Text>
+              )}
             </Box>
           </Box>
         ) : (
@@ -302,7 +296,7 @@ export const Entity = () => {
             <Spinner size="large" />
           </Box>
         )}
-        {isError && <ErrorLayer message={errorMessage} />}
+
         {showGraph && (
           <Layer
             full
@@ -322,6 +316,8 @@ export const Entity = () => {
             <Graph id={entityData._id} />
           </Layer>
         )}
+
+        {isError && <ErrorLayer message={errorMessage} />}
       </PageContent>
     </Page>
   );

@@ -72,6 +72,7 @@ CollectionsRoute.route("/collections/add").post(
     if (data.associations.entities.length > 0) {
       consola.info("Additional Entities specified, applying...");
       data.associations.entities.map((entity) => {
+        consola.debug("Linking Collection with Entity:", entity);
         const entityQuery = { _id: new ObjectId(entity) };
         let entityResult: EntityModel;
 
@@ -84,26 +85,24 @@ CollectionsRoute.route("/collections/add").post(
             // Update the collection to include the Entity as an association
             const updatedValues = {
               $set: {
-                associations: {
-                  entities: [
-                    ...entityResult.associations.entities,
-                    insertedId,
-                  ],
-                },
+                collections: [
+                  ...entityResult.collections,
+                  {
+                    name: data.name,
+                    id: insertedId,
+                  },
+                ],
               },
             };
 
             database
-              .collection(COLLECTIONS_COLLECTION)
+              .collection(ENTITIES_COLLECTION)
               .updateOne(
-                collectionQuery,
+                entityQuery,
                 updatedValues,
                 (error: any, response: any) => {
                   if (error) throw error;
-                  consola.success(
-                    "Added Entity to collection:",
-                    collection.name
-                  );
+                  consola.success("Added Collection to Entity:", entityResult.name);
                 }
               );
           });

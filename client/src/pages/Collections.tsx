@@ -60,7 +60,7 @@ const Collections = () => {
           <>
             <PageHeader
               title="Collections"
-              parent={<Anchor label="Return to Dashboard" href="/" />}
+              parent={<Anchor label="Home" href="/" />}
             />
             <Table>
               <TableHeader>

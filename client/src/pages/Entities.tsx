@@ -58,7 +58,7 @@ const Entities = () => {
             <PageHeader
               title="Entities"
               subtitle="View all Entities currently tracked by the system."
-              parent={<Anchor label="Return to Dashboard" href="/" />}
+              parent={<Anchor label="Home" href="/" />}
             />
             <Table>
               <TableHeader>
