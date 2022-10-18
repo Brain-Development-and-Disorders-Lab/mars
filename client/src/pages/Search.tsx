@@ -16,7 +16,7 @@ import {
   TextInput,
 } from "grommet/components";
 import { Page, PageContent } from "grommet";
-import { Search as SearchIcon } from "grommet-icons";
+import { LinkNext, Search as SearchIcon } from "grommet-icons";
 
 // Navigation
 import { useNavigate } from "react-router-dom";
@@ -107,10 +107,7 @@ const Search = () => {
                   <TableCell scope="col" border="bottom" align="center">
                     Owner
                   </TableCell>
-                  <TableCell scope="col" border="bottom" align="center">
-                    Primary collection
-                  </TableCell>
-                  <TableCell scope="col" border="bottom"></TableCell>
+                  <TableCell scope="col" border="bottom" align="center"></TableCell>
                 </TableRow>
               </TableHeader>
 
@@ -132,9 +129,11 @@ const Search = () => {
                         </TableCell>
                         <TableCell align="center">
                           <Button
-                            primary
-                            label="Details"
+                            label="View"
+                            icon={<LinkNext />}
                             onClick={() => navigate(`/entities/${result._id}`)}
+                            primary
+                            reverse
                           />
                         </TableCell>
                       </TableRow>
