@@ -1,0 +1,12 @@
+{
+  "_id": "abcd1234",
+  "owner": "henry.burgess@wustl.edu",
+  "modified": {
+    "type": "entity",
+    "id": "abcd1234"
+  },
+  "change": {
+    "old": {},
+    "new": {}
+  }
+}

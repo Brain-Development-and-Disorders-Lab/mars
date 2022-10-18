@@ -1,8 +1,8 @@
 {
-  "id": "collection_1",
+  "id": "abcd1234",
   "name": "Example Collection",
   "description": "This is an example Collection that is used as a template for testing.",
-  "attributes": [],
+  "parameters": [],
   "associations": {
     "entities": []
   }

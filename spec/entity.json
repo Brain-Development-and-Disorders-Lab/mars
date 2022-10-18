@@ -1,25 +1,29 @@
 {
-  "_id": "027e4180beedb29744413a7ea6b84a42",
+  "_id": "abcd1234",
   "name": "Entity Name",
-  "created": "05132022-143644",
+  "created": "2022-05-19T22:34:29.501Z",
   "owner": "henry.burgess@wustl.edu",
-  "collection": "",
-  "description": "",
-  "collections": [],
-  "storage": {
-    "types": ["physical", "digital"],
-    "data": [
-      { "type": "physical", "location": "Shelf" },
-      { "type": "digital", "location": "Box" }
-    ]
+  "collection": {
+    "name": "Collection name",
+    "id": "abcd1234"
   },
+  "description": "Entity description",
+  "collections": [],
   "associations": {
-    "origin": "",
-    "products": []
+    "origin": {
+      "name": "Origin name",
+      "id": "abcd1234"
+    },
+    "products": [
+      {
+        "name": "Product name",
+        "id": "abcd1234"
+      }
+    ]
   },
   "attributes": [
     {
-      "id": "attribute_0",
+      "id": "abcd1234",
       "name": "Test Attribute",
       "description": "An example attribute.",
       "type": "data",
@@ -27,7 +31,7 @@
         {
           "name": "URL",
           "type": "url",
-          "value": "box.wustl.edu"
+          "data": "https://box.wustl.edu"
         }
       ]
     }
