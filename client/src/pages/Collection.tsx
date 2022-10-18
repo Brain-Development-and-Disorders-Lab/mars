@@ -3,7 +3,9 @@ import React, { useEffect, useState } from "react";
 import {
   Anchor,
   Box,
+  Button,
   Heading,
+  List,
   PageHeader,
   Paragraph,
   Spinner,
@@ -11,12 +13,11 @@ import {
   TableBody,
   TableCell,
   TableRow,
-  Text,
 } from "grommet/components";
 import { Page, PageContent } from "grommet";
 
 // Navigation
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 
 // Database and models
 import { getData } from "src/lib/database/getData";
@@ -25,9 +26,11 @@ import { CollectionModel } from "types";
 // Custom components
 import ErrorLayer from "src/components/ErrorLayer";
 import Linky from "src/components/Linky";
+import { Add, LinkNext, StatusDisabled } from "grommet-icons";
 
 export const Collection = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
 
   const [isLoaded, setIsLoaded] = useState(false);
   const [isError, setIsError] = useState(false);
@@ -58,7 +61,7 @@ export const Collection = () => {
       <PageContent>
         {isLoaded && isError === false ? (
           <Box gap="small" margin="small">
-            <Box direction="column" justify="between">
+            <Box direction="row" justify="between">
               <PageHeader
                 title={'Collection "' + collectionData.name + '"'}
                 parent={
@@ -67,23 +70,21 @@ export const Collection = () => {
               />
             </Box>
 
-            <Box direction="row" gap="small">
+            <Box direction="column" gap="small">
               {/* Metadata table */}
               <Box
                 direction="column"
                 align="center"
+                pad="small"
+                gap="small"
                 background="light-2"
-                basis="1/2"
                 round
               >
-                <Heading level="3" margin="small">
+                <Heading level="3" margin="none">
                   Metadata
                 </Heading>
 
-                <Box
-                  fill
-                  pad={{ left: "small", right: "small", bottom: "small" }}
-                >
+                <Box pad="small" fill>
                   <Table>
                     <TableBody>
                       <TableRow>
@@ -101,68 +102,105 @@ export const Collection = () => {
                 </Box>
               </Box>
 
-              {/* Associated Parameters */}
-              <Box
-                direction="column"
-                align="center"
-                background="light-2"
-                basis="1/4"
-                round
-              >
-                <Heading level="3" margin="small">
-                  Associated Parameters
-                </Heading>
+              {/* Associated Attributes */}
+              {collectionData.attributes.length > 0 ? (
                 <Box
-                  wrap
-                  round
-                  direction="row"
-                  justify="center"
+                  direction="column"
                   align="center"
-                  margin="small"
                   pad="small"
                   gap="small"
-                  fill
+                  background="light-2"
+                  round
                 >
-                  {collectionData.parameters.length > 0 ? (
-                    collectionData.parameters.map((parameter) => {
-                      return <Text>Parameter "{parameter}"</Text>;
-                    })
-                  ) : (
-                    <Text>No associated Parameters specified.</Text>
-                  )}
+                  <Heading level="3" margin="none">
+                    Associated Attributes
+                  </Heading>
+                  <List
+                    primaryKey={(attribute) => {
+                      return <Linky type="attributes" id={attribute._id} />
+                    }}
+                    secondaryKey={(attribute) => {
+                      return (
+                        <Box direction="row" gap="small" margin="none">
+                          <Button
+                            icon={<LinkNext />}
+                            primary
+                            label="View"
+                            onClick={() => {navigate(`/attributes/${attribute}`)}}
+                            reverse
+                          />
+                          <Button
+                            icon={<StatusDisabled />}
+                            primary
+                            label="Remove"
+                            color="red"
+                            onClick={() => {navigate(`/attributes/${attribute}`)}}
+                            reverse
+                          />
+                        </Box>
+                      )
+                    }}
+                    data={collectionData.attributes}
+                    show={4}
+                    paginate
+                  />
                 </Box>
-              </Box>
+              ) : (
+                <></>
+              )}
 
               {/* Associated Entities */}
-              <Box
-                direction="column"
-                align="center"
-                background="light-2"
-                basis="1/4"
-                round
-              >
-                <Heading level="3" margin="small">
-                  Associated Entities
-                </Heading>
+              {collectionData.associations.entities.length > 0 ? (
                 <Box
-                  wrap
-                  direction="row"
-                  justify="center"
-                  align="center"
-                  margin="small"
+                  direction="column"
                   pad="small"
                   gap="small"
-                  fill
                 >
-                  {collectionData.associations.entities.length > 0 ? (
-                    collectionData.associations.entities.map((entity) => {
-                      return <Linky key={entity} type="entities" id={entity} />;
-                    })
-                  ) : (
-                    <Text>No associated Entities specified.</Text>
-                  )}
+                  <Box direction="row" justify="between" fill>
+                    <Heading level="3" margin="none" alignSelf="center">
+                      Associated Entities
+                    </Heading>
+                    <Button
+                      label="Add"
+                      icon={<Add />}
+                      primary
+                      reverse
+                    />
+                  </Box>
+
+                  <List
+                    primaryKey={(entity) => {
+                      return <Linky type="entities" id={entity} />
+                    }}
+                    secondaryKey={(entity) => {
+                      return (
+                        <Box direction="row" gap="small" margin="none">
+                          <Button
+                            icon={<LinkNext />}
+                            primary
+                            label="View"
+                            onClick={() => {navigate(`/entities/${entity}`)}}
+                            reverse
+                          />
+                          <Button
+                            icon={<StatusDisabled />}
+                            primary
+                            label="Remove"
+                            color="red"
+                            onClick={() => {navigate(`/entities/${entity}`)}}
+                            reverse
+                          />
+                        </Box>
+                      )
+                    }}
+                    data={collectionData.associations.entities}
+                    show={4}
+                    paginate
+                  />
                 </Box>
-              </Box>
+              ) : (
+                <></>
+              )}
             </Box>
           </Box>
         ) : (

@@ -4,6 +4,7 @@ import {
   Anchor,
   Box,
   Button,
+  Heading,
   PageHeader,
   Paragraph,
   Spinner,
@@ -14,6 +15,7 @@ import {
   TableRow,
 } from "grommet/components";
 import { Page, PageContent } from "grommet";
+import { LinkNext } from "grommet-icons";
 
 // Navigation
 import { useNavigate } from "react-router-dom";
@@ -58,7 +60,6 @@ const Collections = () => {
           <>
             <PageHeader
               title="Collections"
-              subtitle="View all Collections currently managed by the system."
               parent={<Anchor label="Return to Dashboard" href="/" />}
             />
             <Table>
@@ -79,7 +80,7 @@ const Collections = () => {
                     return (
                       <TableRow key={value._id}>
                         <TableCell scope="row" border="right" align="center">
-                          <strong>{value.name}</strong>
+                          <Heading level={4} margin="none">{value.name}</Heading>
                         </TableCell>
                         <TableCell border="right" align="center">
                           <Paragraph fill>{value.description}</Paragraph>
@@ -87,10 +88,12 @@ const Collections = () => {
                         <TableCell align="center">
                           <Button
                             primary
-                            label="Details"
+                            icon={<LinkNext />}
+                            label="View"
                             onClick={() =>
                               navigate(`/collections/${value._id}`)
                             }
+                            reverse
                           />
                         </TableCell>
                       </TableRow>

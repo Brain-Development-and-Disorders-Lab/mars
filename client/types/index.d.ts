@@ -29,6 +29,7 @@ declare namespace Create {
   };
 }
 
+// Attributes
 export type AttributeStruct = {
   name: string;
   description: string;
@@ -56,10 +57,36 @@ export type AttributeCardProps = {
   data: AttributeStruct;
 };
 
+// Parameters
+export type ParameterStruct = {
+  identifier: string;
+  name: string;
+  type: "number" | "file" | "url" | "date" | "string" | "entity";
+  data: number | string | ReactElement;
+};
+
+export type ParameterProps = ParameterStruct & {
+  disabled: boolean;
+  dataCallback?: (data: ParameterStruct) => void;
+  removeCallback?: (identifier: string) => void;
+};
+
+export type ParameterGroupProps = {
+  disabled: boolean;
+  parameters: ParameterStruct[];
+  onRemove?: (identifier: string) => void;
+  onDataUpdate?: (data: ParameterStruct) => void;
+};
+
+declare type LinkyProps = {
+  type: "entities" | "collections" | "attributes";
+  id: string;
+};
+
 export type CollectionStruct = {
   name: string;
   description: string;
-  parameters: string[];
+  attributes: AttributeModel[];
   associations: {
     entities: string[];
   };
@@ -85,29 +112,4 @@ export type EntityStruct = {
 
 export type EntityModel = EntityStruct & {
   _id: string;
-};
-
-export type ParameterStruct = {
-  identifier: string;
-  name: string;
-  type: "number" | "file" | "url" | "date" | "string" | "entity";
-  data: number | string | ReactElement;
-};
-
-export type ParameterProps = ParameterStruct & {
-  disabled: boolean;
-  dataCallback?: (data: ParameterStruct) => void;
-  removeCallback?: (identifier: string) => void;
-};
-
-export type ParameterGroupProps = {
-  disabled: boolean;
-  parameters: ParameterStruct[];
-  onRemove?: (identifier: string) => void;
-  onDataUpdate?: (data: ParameterStruct) => void;
-};
-
-declare type LinkyProps = {
-  type: "entities" | "collections" | "attributes";
-  id: string;
 };
