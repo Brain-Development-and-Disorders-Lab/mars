@@ -70,7 +70,7 @@ const Home = () => {
   }, []);
 
   return (
-    <Page kind="wide">
+    <Page kind="wide" pad={{left: "small", right: "small"}}>
       <PageContent>
         <PageHeader
           title="Dashboard"

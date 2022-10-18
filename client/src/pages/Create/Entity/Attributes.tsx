@@ -136,7 +136,7 @@ export const Attributes = ({}) => {
   };
 
   return (
-    <Page kind="wide">
+    <Page kind="wide" pad={{left: "small", right: "small"}}>
       <PageContent>
         <PageHeader
           title="Create an Entity: Add attributes"

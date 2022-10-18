@@ -114,7 +114,7 @@ export const Associations = ({}) => {
   }, []);
 
   return (
-    <Page kind="wide">
+    <Page kind="wide" pad={{left: "small", right: "small"}}>
       <PageContent>
         <PageHeader
           title="Create an Entity: Add associations"

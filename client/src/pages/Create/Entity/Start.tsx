@@ -90,7 +90,7 @@ export const Start = ({}) => {
   }, []);
 
   return (
-    <Page kind="wide">
+    <Page kind="wide" pad={{left: "small", right: "small"}}>
       <PageContent>
         {isLoaded && isError === false ? (
           <>

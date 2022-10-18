@@ -65,7 +65,7 @@ const Search = () => {
   };
 
   return (
-    <Page kind="wide">
+    <Page kind="wide" pad={{left: "small", right: "small"}}>
       <PageContent>
         <PageHeader
           title="Search"

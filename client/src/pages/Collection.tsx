@@ -54,7 +54,7 @@ export const Collection = () => {
   }, [id]);
 
   return (
-    <Page kind="wide">
+    <Page kind="wide" pad={{left: "small", right: "small"}}>
       <PageContent>
         {isLoaded && isError === false ? (
           <Box gap="small" margin="small">
