@@ -1,10 +1,9 @@
 // React and Grommet
-import React, { useState } from "react";
+import React from "react";
 import {
   Anchor,
   Avatar,
   Box,
-  Button,
   Header,
   Menu,
   Nav,
@@ -13,25 +12,33 @@ import {
   AddCircle,
   HomeRounded,
   Search as SearchIcon,
-  SettingsOption,
   User,
   View,
 } from "grommet-icons";
 
 const Navigation = () => {
-  const [showSidebar, setShowSidebar] = useState(false);
-
   return (
     <Header background="brand" sticky="scrollup" pad="small">
-      <Nav align="center" direction="row" pad={{ left: "medium" }} gap="large">
+      <Nav align="center" direction="row" pad={{ left: "medium" }} gap="large" margin="none">
+        {/* Home */}
         <Anchor
-          label="Dashboard"
+          label="Home"
           href="/"
           icon={<HomeRounded />}
           color="text"
           size="large"
-          reverse
         />
+
+        {/* Search */}
+        <Anchor
+          label="Search"
+          href="/search"
+          icon={<SearchIcon />}
+          color="text"
+          size="large"
+        />
+
+        {/* Create */}
         <Menu
           dropProps={{ align: { top: "bottom", left: "left" } }}
           label="Create"
@@ -52,6 +59,8 @@ const Navigation = () => {
           ]}
           size="large"
         />
+
+        {/* View */}
         <Menu
           dropProps={{ align: { top: "bottom", left: "left" } }}
           label="View"
@@ -76,19 +85,8 @@ const Navigation = () => {
         />
       </Nav>
 
+      {/* Avatar */}
       <Box direction="row" align="center" pad={{ right: "medium" }}>
-        <Anchor
-          label="Search"
-          href="/search"
-          icon={<SearchIcon />}
-          color="text"
-          size="large"
-          margin={{ right: "large" }}
-        />
-        <Button
-          icon={<SettingsOption />}
-          onClick={() => setShowSidebar(!showSidebar)}
-        />
         <Avatar background="white">
           <User color="black" />
         </Avatar>
