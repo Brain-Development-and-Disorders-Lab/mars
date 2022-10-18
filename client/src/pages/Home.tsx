@@ -74,31 +74,10 @@ const Home = () => {
       <PageContent>
         <PageHeader
           title="Dashboard"
-          subtitle="Overview of the database system."
         />
 
         <Main direction="row" gap="medium" fill>
           <Box direction="column" basis="2/3" pad="medium">
-            <Heading level="2">Entities</Heading>
-            {isLoaded && entityData.length > 0 ? (
-              <List
-                primaryKey="name"
-                secondaryKey={(value) => (
-                  <Button
-                    primary
-                    label="View"
-                    icon={<LinkNext />}
-                    onClick={() => navigate(`/entities/${value._id}`)}
-                    reverse
-                  />
-                )}
-                data={entityData}
-                step={4}
-                paginate
-              />
-            ) : (
-              <Text>There are no Entities to display.</Text>
-            )}
             <Heading level="2">Collections</Heading>
             {isLoaded && collectionData.length > 0 ? (
               <List
@@ -118,6 +97,27 @@ const Home = () => {
               />
             ) : (
               <Text>There are no Collections to display.</Text>
+            )}
+
+            <Heading level="2">Entities</Heading>
+            {isLoaded && entityData.length > 0 ? (
+              <List
+                primaryKey="name"
+                secondaryKey={(value) => (
+                  <Button
+                    primary
+                    label="View"
+                    icon={<LinkNext />}
+                    onClick={() => navigate(`/entities/${value._id}`)}
+                    reverse
+                  />
+                )}
+                data={entityData}
+                step={4}
+                paginate
+              />
+            ) : (
+              <Text>There are no Entities to display.</Text>
             )}
           </Box>
 
