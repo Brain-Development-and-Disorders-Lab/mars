@@ -3,7 +3,7 @@
 import { ReactElement } from "react";
 
 // A new type is declared for each step.
-declare namespace Create {
+declare namespace Create.Entity {
   type Base = {
     from: "none" | "start" | "associations" | "attributes";
   };
@@ -26,6 +26,19 @@ declare namespace Create {
 
   type Attributes = Associations & {
     attributes: AttributeStruct[];
+  };
+}
+
+declare namespace Create.Collection {
+  type Base = {
+    from: "none" | "start" | "add";
+  };
+
+  type Start = Base & {
+    name: string;
+    created: string;
+    owner: string;
+    description: string;
   };
 }
 

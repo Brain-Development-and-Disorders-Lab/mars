@@ -45,7 +45,14 @@ const Navigation = () => {
           icon={<AddCircle />}
           dropBackground="brand"
           items={[
-            { label: "Collection" },
+            { label: (
+                <Anchor
+                  label="Collection"
+                  href="/create/collection/start"
+                  color="white"
+                />
+              ),
+            },
             {
               label: (
                 <Anchor

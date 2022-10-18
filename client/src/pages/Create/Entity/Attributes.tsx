@@ -47,7 +47,7 @@ export const Attributes = ({}) => {
     description,
     owner,
     associations: { origin, products },
-  } = state as Create.Associations;
+  } = state as Create.Entity.Associations;
 
   // Used to manage React components
   const [attributes, setAttributes] = useState([] as AttributeModel[]);
@@ -59,7 +59,7 @@ export const Attributes = ({}) => {
   );
 
   // Configure state for current page
-  const attributeState: Create.Attributes = {
+  const attributeState: Create.Entity.Attributes = {
     from: from,
     name: name,
     created: created,

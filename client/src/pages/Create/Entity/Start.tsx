@@ -36,19 +36,19 @@ export const Start = ({}) => {
   const { state } = useLocation();
 
   const initialName =
-    state === null ? pseudoId() : (state as Create.Associations).name;
+    state === null ? pseudoId() : (state as Create.Entity.Associations).name;
   const initialCreated =
     state === null
       ? new Date().toISOString()
-      : (state as Create.Associations).created;
+      : (state as Create.Entity.Associations).created;
   const initialOwner =
-    state === null ? "" : (state as Create.Associations).owner;
+    state === null ? "" : (state as Create.Entity.Associations).owner;
   const initialCollection =
     state === null
       ? { name: "", id: "" }
-      : (state as Create.Associations).collection;
+      : (state as Create.Entity.Associations).collection;
   const initialDescription =
-    state === null ? "" : (state as Create.Associations).description;
+    state === null ? "" : (state as Create.Entity.Associations).description;
 
   const [name, setName] = useState(initialName);
   const [created, setCreated] = useState(initialCreated);
@@ -62,7 +62,7 @@ export const Start = ({}) => {
 
   const [collectionData, setCollectionData] = useState([] as CollectionModel[]);
 
-  const startState: Create.Start = {
+  const startState: Create.Entity.Start = {
     from: "none",
     name: name,
     created: created,

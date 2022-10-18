@@ -32,7 +32,7 @@ export const Associations = ({}) => {
   const { state } = useLocation();
 
   const { from, name, created, collection, description, owner } =
-    state as Create.Start;
+    state as Create.Entity.Start;
 
   // Setup state data
   const [origin, setOrigin] = useState({ name: "", id: "" });
@@ -58,7 +58,7 @@ export const Associations = ({}) => {
     [] as { name: string; id?: string }[]
   );
 
-  const associationState: Create.Associations = {
+  const associationState: Create.Entity.Associations = {
     from: from,
     name: name,
     created: created,
