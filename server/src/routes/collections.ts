@@ -40,8 +40,8 @@ CollectionsRoute.route("/collections/:id").get(
   }
 );
 
-// Route: Create a new Entity, expects EntityStruct data
-CollectionsRoute.route("/collections/add").post(
+// Route: Create a new Collection, expects CollectionStruct data
+CollectionsRoute.route("/collections/create").post(
   (request: { body: CollectionStruct }, response: any) => {
     const database = getDatabase();
     let data = {
@@ -66,7 +66,7 @@ CollectionsRoute.route("/collections/add").post(
     // Retrieve the ID of the inserted Entity
     const insertedId = (data as CollectionStruct & { _id: string })._id;
 
-    consola.debug("Create new Collection:", "/collections/add", '"' + data.name + '"');
+    consola.debug("Create new Collection:", "/collections/create", '"' + data.name + '"');
 
     // We need to apply the collections that have been specified
     if (data.associations.entities.length > 0) {
@@ -110,6 +110,9 @@ CollectionsRoute.route("/collections/add").post(
     }
   }
 );
+
+// Route: Add an Entity to a Collection, expects Entity and Collection ID data.
+CollectionsRoute.route("/collections/add").post();
 
 // Route: Remove a Collection
 CollectionsRoute.route("/:id").delete(

@@ -51,7 +51,7 @@ EntitiesRoute.route("/entities/:id").get((request: any, response: any) => {
 });
 
 // Route: Create a new Entity, expects EntityStruct data
-EntitiesRoute.route("/entities/add").post(
+EntitiesRoute.route("/entities/create").post(
   (request: { body: EntityStruct }, response: any) => {
     const database = getDatabase();
     let data = {
@@ -78,7 +78,7 @@ EntitiesRoute.route("/entities/add").post(
     // Retrieve the ID of the inserted Entity
     const insertedId = (data as EntityStruct & { _id: string })._id;
 
-    consola.debug("Create new Entity:", "/entities/add", '"' + data.name + '"');
+    consola.debug("Create new Entity:", "/entities/create", '"' + data.name + '"');
 
     // We need to apply the associations that have been specified
     if (data.associations.origin.id !== "") {

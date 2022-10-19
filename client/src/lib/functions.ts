@@ -3,7 +3,7 @@
  *   `id_ABCDE_123`
  * @return {string}
  */
-export const pseudoId = () => {
+export const pseudoId = (): string => {
   return (
     "id_" +
     Math.random()
