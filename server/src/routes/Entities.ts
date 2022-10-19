@@ -203,10 +203,6 @@ EntitiesRoute.route("/entities/create").post(
   }
 );
 
-const updateEntity = () => {
-
-}
-
 // Route: Update an Entity
 EntitiesRoute.route("/entities/update").post((request: { body: EntityModel }, response: any) => {
   const database = getDatabase();
