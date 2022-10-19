@@ -1,7 +1,3 @@
-// Types for incrementally creating a new Entity.
-
-import { ReactElement } from "react";
-
 // A new type is declared for each step.
 declare namespace Create.Entity {
   type Base = {

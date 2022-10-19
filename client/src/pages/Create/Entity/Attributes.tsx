@@ -380,7 +380,7 @@ export const Attributes = ({}) => {
                     consola.info("Submitting data:", entityData);
 
                     // Push the data and attribute
-                    pushData(`/entities/add`, entityData).then(() =>
+                    pushData(`/entities/create`, entityData).then(() =>
                       navigate("/entities")
                     );
                   }}
