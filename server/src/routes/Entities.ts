@@ -2,6 +2,7 @@
 import express from "express";
 import consola from "consola";
 import { ObjectId } from "mongodb";
+import _ from "underscore";
 
 // Import types from the client to enforce structure
 import {
@@ -13,11 +14,11 @@ import {
 // Utility functions
 import { getDatabase } from "../database/connection";
 
-const EntitiesRoute = express.Router();
-
 // Constants
 const ENTITIES_COLLECTION = "entities";
 const COLLECTIONS_COLLECTION = "collections";
+
+const EntitiesRoute = express.Router();
 
 // Route: View all Entities
 EntitiesRoute.route("/entities").get((request: any, response: any) => {
@@ -202,8 +203,100 @@ EntitiesRoute.route("/entities/add").post(
   }
 );
 
+const updateEntity = () => {
+
+}
+
+// Route: Update an Entity
+EntitiesRoute.route("/entities/update").post((request: { body: EntityModel }, response: any) => {
+  const database = getDatabase();
+
+  // Extract data from the request
+  let entityRequest: EntityModel = {
+    _id: request.body._id,
+    name: request.body.name,
+    created: request.body.created,
+    owner: request.body.owner,
+    description: request.body.description,
+    collections: request.body.collections,
+    associations: {
+      origin: request.body.associations.origin,
+      products: request.body.associations.products,
+    },
+    attributes: request.body.attributes,
+  };
+
+  const entityQuery = { _id: new ObjectId(entityRequest._id) };
+  let entityResult: EntityModel;
+
+  database
+    .collection(ENTITIES_COLLECTION)
+    .findOne(entityQuery, (error: any, result: any) => {
+      if (error) throw error;
+      entityResult = result;
+
+      // Apply ID field to allow direct comparison
+      entityResult._id = entityRequest._id;
+
+      // Construct to track required changes
+      const toUpdate = {
+        name: false,
+        description: false,
+        collections: false,
+        associations: {
+          origin: false,
+          products: false,
+        },
+        attributes: false,
+      };
+
+      // Overall equality check
+      if (_.isEqual(entityRequest, entityResult)) {
+        consola.success("No changes to Entity:", entityRequest.name);
+      }
+      if (!_.isEqual(entityRequest.name, entityResult.name)) {
+        toUpdate.name = true;
+      }
+      if (!_.isEqual(entityRequest.description, entityResult.description)) {
+        toUpdate.description = true;
+      }
+
+      // Update the Entity to use the received values
+      const entityUpdates = {
+        $set: {
+          name: entityRequest.name,
+          description: entityRequest.description,
+          collections: entityRequest.collections,
+          associations: {
+            origin: entityRequest.associations.origin,
+            products: entityRequest.associations.products,
+          },
+          attributes: entityRequest.attributes,
+        },
+      };
+
+      database
+        .collection(ENTITIES_COLLECTION)
+        .updateOne(
+          entityQuery,
+          entityUpdates,
+          (error: any, response: any) => {
+            if (error) throw error;
+            consola.success("Updated Entity:", entityRequest.name);
+          }
+          );
+        });
+
+    // Respond
+    response.json({
+      id: entityRequest._id,
+      name: entityRequest.name,
+      status: "success"
+    });
+});
+
 // Route: Remove an Entity
-EntitiesRoute.route("/:id").delete(
+EntitiesRoute.route("/entities/:id").delete(
   (request: { params: { id: any } }, response: any) => {
     const database = getDatabase();
     let query = { _id: new ObjectId(request.params.id) };
