@@ -163,7 +163,7 @@ EntitiesRoute.route("/entities/create").post(
     if (data.collections.length > 0) {
       consola.info("Collections specified, applying...");
       data.collections.map((collection) => {
-        const collectionQuery = { _id: new ObjectId(collection.id) };
+        const collectionQuery = { _id: new ObjectId(collection) };
         let collectionResult: CollectionModel;
 
         database
@@ -191,10 +191,7 @@ EntitiesRoute.route("/entities/create").post(
                 updatedValues,
                 (error: any, response: any) => {
                   if (error) throw error;
-                  consola.success(
-                    "Added Entity to collection:",
-                    collection.name
-                  );
+                  consola.success("Added Entity to collection:", collection);
                 }
               );
           });

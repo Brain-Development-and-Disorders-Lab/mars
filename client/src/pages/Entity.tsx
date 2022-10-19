@@ -201,7 +201,7 @@ export const Entity = () => {
               {entityData.collections.length > 0 ? (
                 <List
                   primaryKey={(collection) => {
-                    return <Linky type="collections" id={collection.id} />
+                    return <Linky type="collections" id={collection} />
                   }}
                   secondaryKey={(collection) => {
                     return (

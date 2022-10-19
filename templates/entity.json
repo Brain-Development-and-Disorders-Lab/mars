@@ -5,10 +5,7 @@
   "owner": "henry.burgess@wustl.edu",
   "description": "Entity description",
   "collections": [
-    {
-      "name": "Collection name",
-      "id": "abcd1234"
-    }
+    "abcd1234"
   ],
   "associations": {
     "origin": {

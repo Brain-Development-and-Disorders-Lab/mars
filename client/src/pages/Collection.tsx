@@ -4,17 +4,22 @@ import {
   Anchor,
   Box,
   Button,
+  FormField,
   Heading,
+  Layer,
   List,
   PageHeader,
   Paragraph,
+  Select,
   Spinner,
   Table,
   TableBody,
   TableCell,
   TableRow,
+  Tag,
 } from "grommet/components";
 import { Page, PageContent } from "grommet";
+import { Add, Close, LinkNext, StatusDisabled } from "grommet-icons";
 
 // Navigation
 import { useParams, useNavigate } from "react-router-dom";
@@ -22,12 +27,11 @@ import { useParams, useNavigate } from "react-router-dom";
 // Database and models
 import { getData } from "src/lib/database/getData";
 import { postData } from "src/lib/database/postData";
-import { CollectionModel } from "types";
+import { CollectionModel, EntityModel } from "types";
 
 // Custom components
 import ErrorLayer from "src/components/ErrorLayer";
 import Linky from "src/components/Linky";
-import { Add, LinkNext, StatusDisabled } from "grommet-icons";
 
 export const Collection = () => {
   const { id } = useParams();
@@ -37,9 +41,18 @@ export const Collection = () => {
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("An error has occurred.");
 
+  const [showAdd, setShowAdd] = useState(false);
+
   const [collectionData, setCollectionData] = useState({} as CollectionModel);
+  const [entityOptions, setEntityOptions] = useState(
+    [] as { name: string; id: string }[]
+  );
+  const [entitiesSelected, setEntitiesSelected] = useState(
+    [] as { name: string; id: string }[]
+  );
 
   useEffect(() => {
+    // Populate Collection data
     const response = getData(`/collections/${id}`);
 
     // Handle the response from the database
@@ -57,11 +70,42 @@ export const Collection = () => {
     return;
   }, [id, isLoaded]);
 
+  useEffect(() => {
+    // Populate Entity data
+    const entities = getData(`/entities`);
+
+    // Handle the response from the database
+    entities.then((entity) => {
+      setEntityOptions(entity.map((e: EntityModel) => {
+        return { name: e.name, id: e._id };
+      }));
+
+      // Check the contents of the response
+      if (entity["error"] !== undefined) {
+        setErrorMessage(entity["error"]);
+        setIsError(true);
+      }
+
+      setIsLoaded(true);
+    });
+    return;
+  }, [id, isLoaded]);
+
+  const onAdd = (data: { entities: string[], collection: string }) => {
+    postData(`/collections/add`, data).then(() => {
+      navigate(`/collections/${id}`);
+    });
+  };
+
+  /**
+   * Callback function to remove the Entity from the Collection, and refresh the page
+   * @param data ID of the Entity and Collection to remove the Entity from
+   */
   const onRemove = (data: { entity: string, collection: string }) => {
-    postData(`/collections/remove`, data).then(() =>
-      navigate(`/collections/${id}`)
-    );
-  }
+    postData(`/collections/remove`, data).then(() => {
+      navigate(`/collections/${id}`);
+    });
+  };
 
   return (
     <Page kind="wide" pad={{left: "small", right: "small"}}>
@@ -122,6 +166,9 @@ export const Collection = () => {
                   <Button
                     label="Add"
                     icon={<Add />}
+                    onClick={() => {
+                      setShowAdd(!showAdd);
+                    }}
                     primary
                     reverse
                   />
@@ -173,6 +220,93 @@ export const Collection = () => {
                 )}
               </Box>
             </Box>
+
+            {showAdd && (
+              <Layer
+                onEsc={() => setShowAdd(false)}
+                onClickOutside={() => setShowAdd(false)}
+              >
+                <Box direction="row" justify="between" margin={{ right: "small" }}>
+                  <Heading level="2" margin="small">
+                    Add Entities
+                  </Heading>
+                  <Button
+                    icon={<Close />}
+                    onClick={() => setShowAdd(false)}
+                    plain
+                  />
+                </Box>
+                <Box direction="column" margin="small">
+                  <FormField
+                    name="add"
+                    info="Add existing Entities to the Collection."
+                  >
+                    <Select
+                      options={entityOptions}
+                      labelKey="name"
+                      value={entitiesSelected}
+                      valueKey="name"
+                      onChange={({ value }) => {
+                        if (!entitiesSelected.includes(value)) {
+                          setEntitiesSelected([...entitiesSelected, value]);
+                        }
+                      }}
+                      searchPlaceholder="Search..."
+                      onSearch={(query) => {
+                        const escapedText = query.replace(
+                          /[-\\^$*+?.()|[\]{}]/g,
+                          "\\$&"
+                        );
+                        const filteredText = new RegExp(escapedText, "i");
+                        setEntityOptions(
+                          entityOptions
+                            .filter((entity) => filteredText.test(entity.name))
+                            .map((entity) => {
+                              return { name: entity.name, id: entity.id };
+                            })
+                        );
+                      }}
+                    />
+                  </FormField>
+                  <Box direction="column" gap="xsmall">
+                    {entitiesSelected.map((entity) => {
+                      return (
+                        <Tag
+                          name="Entity"
+                          value={entity.name}
+                          key={entity.name}
+                          onRemove={() => {
+                            setEntitiesSelected(
+                              entitiesSelected.filter((item) => {
+                                return item !== entity;
+                              })
+                            );
+                          }}
+                        />
+                      );
+                    })}
+                  </Box>
+                  <Button
+                    label="Done"
+                    onClick={() => {
+                      if (id) {
+                        // Add the Entities to the Collection
+                        onAdd({
+                          entities: entitiesSelected.map((entity) => entity.id),
+                          collection: id,
+                        });
+
+                        setEntitiesSelected([]);
+                        setShowAdd(false);
+
+                        // Force the page to reload by setting the isLoaded state
+                        setIsLoaded(false);
+                      }
+                    }}
+                  />
+                </Box>
+              </Layer>
+            )}
           </Box>
         ) : (
           <Box fill align="center" justify="center">

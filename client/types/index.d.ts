@@ -110,7 +110,7 @@ export type EntityStruct = {
   created: string;
   owner: string;
   description: string;
-  collections: { name: string; id: string }[];
+  collections: string[];
   associations: {
     origin: { name: string; id: string };
     products: { name: string; id: string }[];
