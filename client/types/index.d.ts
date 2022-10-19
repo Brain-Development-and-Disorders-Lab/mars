@@ -98,10 +98,7 @@ export type CollectionStruct = {
   description: string;
   owner: string;
   created: string;
-  attributes: AttributeModel[];
-  associations: {
-    entities: string[];
-  };
+  entities: string[];
 };
 
 export type CollectionModel = CollectionStruct & {

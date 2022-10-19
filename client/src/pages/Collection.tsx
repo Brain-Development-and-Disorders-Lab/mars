@@ -21,6 +21,7 @@ import { useParams, useNavigate } from "react-router-dom";
 
 // Database and models
 import { getData } from "src/lib/database/getData";
+import { postData } from "src/lib/database/postData";
 import { CollectionModel } from "types";
 
 // Custom components
@@ -54,7 +55,13 @@ export const Collection = () => {
       setIsLoaded(true);
     });
     return;
-  }, [id]);
+  }, [id, isLoaded]);
+
+  const onRemove = (data: { entity: string, collection: string }) => {
+    postData(`/collections/remove`, data).then(() =>
+      navigate(`/collections/${id}`)
+    );
+  }
 
   return (
     <Page kind="wide" pad={{left: "small", right: "small"}}>
@@ -102,72 +109,25 @@ export const Collection = () => {
                 </Box>
               </Box>
 
-              {/* Associated Attributes */}
-              {collectionData.attributes.length > 0 ? (
-                <Box
-                  direction="column"
-                  align="center"
-                  pad="small"
-                  gap="small"
-                  background="light-2"
-                  round
-                >
-                  <Heading level="3" margin="none">
-                    Associated Attributes
+              {/* Associated Entities */}
+              <Box
+                direction="column"
+                pad="small"
+                gap="small"
+              >
+                <Box direction="row" justify="between" fill>
+                  <Heading level="3" margin="none" alignSelf="center">
+                    Entities
                   </Heading>
-                  <List
-                    primaryKey={(attribute) => {
-                      return <Linky type="attributes" id={attribute._id} />
-                    }}
-                    secondaryKey={(attribute) => {
-                      return (
-                        <Box direction="row" gap="small" margin="none">
-                          <Button
-                            icon={<LinkNext />}
-                            primary
-                            label="View"
-                            onClick={() => {navigate(`/attributes/${attribute}`)}}
-                            reverse
-                          />
-                          <Button
-                            icon={<StatusDisabled />}
-                            primary
-                            label="Remove"
-                            color="red"
-                            onClick={() => {navigate(`/attributes/${attribute}`)}}
-                            reverse
-                          />
-                        </Box>
-                      )
-                    }}
-                    data={collectionData.attributes}
-                    show={4}
-                    paginate
+                  <Button
+                    label="Add"
+                    icon={<Add />}
+                    primary
+                    reverse
                   />
                 </Box>
-              ) : (
-                <></>
-              )}
 
-              {/* Associated Entities */}
-              {collectionData.associations.entities.length > 0 ? (
-                <Box
-                  direction="column"
-                  pad="small"
-                  gap="small"
-                >
-                  <Box direction="row" justify="between" fill>
-                    <Heading level="3" margin="none" alignSelf="center">
-                      Entities
-                    </Heading>
-                    <Button
-                      label="Add"
-                      icon={<Add />}
-                      primary
-                      reverse
-                    />
-                  </Box>
-
+                {collectionData.entities.length > 0 ? (
                   <List
                     primaryKey={(entity) => {
                       return <Linky type="entities" id={entity} />
@@ -187,20 +147,31 @@ export const Collection = () => {
                             primary
                             label="Remove"
                             color="red"
-                            onClick={() => {navigate(`/entities/${entity}`)}}
+                            onClick={() => {
+                              if (id) {
+                                // Remove the entity from the collection
+                                onRemove({
+                                  entity: entity,
+                                  collection: id,
+                                });
+
+                                // Force the page to reload by setting the isLoaded state
+                                setIsLoaded(false);
+                              }
+                            }}
                             reverse
                           />
                         </Box>
                       )
                     }}
-                    data={collectionData.associations.entities}
+                    data={collectionData.entities}
                     show={4}
                     paginate
                   />
-                </Box>
-              ) : (
-                <></>
-              )}
+                ) : (
+                  <></>
+                )}
+              </Box>
             </Box>
           </Box>
         ) : (

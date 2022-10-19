@@ -22,7 +22,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 // Database and models
 import { getData } from "src/lib/database/getData";
-import { pushData } from "src/lib/database/pushData";
+import { postData } from "src/lib/database/postData";
 import { Create, AttributeModel, AttributeProps } from "types";
 
 // Custom components
@@ -380,7 +380,7 @@ export const Attributes = ({}) => {
                     consola.info("Submitting data:", entityData);
 
                     // Push the data and attribute
-                    pushData(`/entities/create`, entityData).then(() =>
+                    postData(`/entities/create`, entityData).then(() =>
                       navigate("/entities")
                     );
                   }}

@@ -21,7 +21,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 // Database and models
 import { getData } from "src/lib/database/getData";
-import { pushData } from "src/lib/database/pushData";
+import { postData } from "src/lib/database/postData";
 import { CollectionStruct, Create, EntityModel } from "types";
 
 // Utility functions
@@ -90,10 +90,7 @@ export const Start = ({}) => {
     description: description,
     owner: owner,
     created: created,
-    attributes: [],
-    associations: {
-      entities: [],
-    }
+    entities: [],
   };
 
   return (
@@ -111,13 +108,13 @@ export const Start = ({}) => {
                 onReset={() => {}}
                 onSubmit={() => {
                   // Update the selected entities
-                  collectionData.associations.entities = entitiesSelected.map((entity) => {
+                  collectionData.entities = entitiesSelected.map((entity) => {
                     return entity.id;
                   });
 
                   // Push the data
                   consola.debug("Creating collection:", collectionData);
-                  pushData(`/collections/create`, collectionData).then(() =>
+                  postData(`/collections/create`, collectionData).then(() =>
                     navigate("/collections")
                   );
                 }}

@@ -177,7 +177,7 @@ EntitiesRoute.route("/entities/create").post(
               $set: {
                 associations: {
                   entities: [
-                    ...collectionResult.associations.entities,
+                    ...collectionResult.entities,
                     insertedId,
                   ],
                 },

@@ -53,6 +53,7 @@ const Collections = () => {
     });
     return;
   }, []);
+
   return (
     <Page kind="wide" pad={{left: "small", right: "small"}}>
       <PageContent>

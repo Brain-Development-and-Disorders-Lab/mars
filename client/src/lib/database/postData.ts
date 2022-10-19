@@ -4,11 +4,11 @@ import consola from "consola";
 import { DATABASE_URL } from "src/variables";
 
 /**
- * Push data to the Lab API using the JavaScript `fetch` API
- * @param {string} path exact API path to push data to
- * @param {any} data the data to be pushed to Lab
+ * Post data to the Lab API using the JavaScript `fetch` API
+ * @param {string} path exact API path to post data to
+ * @param {any} data the data to be posted to Lab
  */
-export const pushData = async (path: string, data: any): Promise<any> => {
+export const postData = async (path: string, data: any): Promise<any> => {
   await fetch(`${DATABASE_URL}${path}`, {
     method: "POST",
     headers: {
@@ -16,7 +16,7 @@ export const pushData = async (path: string, data: any): Promise<any> => {
     },
     body: JSON.stringify(data),
   }).catch((error) => {
-    consola.error("Error when pushing data");
+    consola.error("Error when posting data");
     return {
       error: error,
     };
