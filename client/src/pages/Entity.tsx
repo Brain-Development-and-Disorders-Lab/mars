@@ -244,17 +244,17 @@ export const Entity = () => {
               {entityData.associations.products.length > 0 ? (
                 <List
                   primaryKey={(product) => {
-                    return <Linky type="entities" id={product.id} key={`linky-product-${product}`}/>
+                    return <Linky type="entities" id={product.id} key={`linky-product-${product.id}`}/>
                   }}
                   secondaryKey={(product) => {
                     return (
-                      <Box direction="row" gap="small" margin="none" key={`box-product-${product}`}>
+                      <Box direction="row" gap="small" margin="none" key={`box-product-${product.id}`}>
                         <Button
-                          key={`view-product-${product}`}
+                          key={`view-product-${product.id}`}
                           icon={<LinkNext />}
                           primary
                           label="View"
-                          onClick={() => {navigate(`/entity/${product}`)}}
+                          onClick={() => {navigate(`/entities/${product.id}`)}}
                           reverse
                         />
                       </Box>
