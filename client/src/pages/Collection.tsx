@@ -64,13 +64,8 @@ export const Collection = () => {
         setErrorMessage(value["error"]);
         setIsError(true);
       }
-
-      setIsLoaded(true);
     });
-    return;
-  }, [id, isLoaded]);
 
-  useEffect(() => {
     // Populate Entity data
     const entities = getData(`/entities`);
 
@@ -88,10 +83,15 @@ export const Collection = () => {
 
       setIsLoaded(true);
     });
+
     return;
   }, [id, isLoaded]);
 
-  const onAdd = (data: { entities: string[], collection: string }) => {
+  /**
+   * Callback function to add Entities to a Collection
+   * @param {{ entities: string[], collection: string }} data List of Entities and a Collection to add the Entities to
+   */
+  const onAdd = (data: { entities: string[], collection: string }): void => {
     postData(`/collections/add`, data).then(() => {
       navigate(`/collections/${id}`);
     });
