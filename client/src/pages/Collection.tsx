@@ -64,24 +64,26 @@ export const Collection = () => {
         setErrorMessage(value["error"]);
         setIsError(true);
       }
-    });
-
-    // Populate Entity data
-    const entities = getData(`/entities`);
-
-    // Handle the response from the database
-    entities.then((entity) => {
-      setEntityOptions(entity.map((e: EntityModel) => {
-        return { name: e.name, id: e._id };
-      }));
-
-      // Check the contents of the response
-      if (entity["error"] !== undefined) {
-        setErrorMessage(entity["error"]);
-        setIsError(true);
-      }
 
       setIsLoaded(true);
+    }).then(() => {
+      // Populate Entity data
+      const entities = getData(`/entities`);
+
+      // Handle the response from the database
+      entities.then((entity) => {
+        setEntityOptions(entity.map((e: EntityModel) => {
+          return { name: e.name, id: e._id };
+        }));
+
+        // Check the contents of the response
+        if (entity["error"] !== undefined) {
+          setErrorMessage(entity["error"]);
+          setIsError(true);
+        }
+
+        setIsLoaded(true);
+      });
     });
 
     return;
@@ -99,9 +101,9 @@ export const Collection = () => {
 
   /**
    * Callback function to remove the Entity from the Collection, and refresh the page
-   * @param data ID of the Entity and Collection to remove the Entity from
+   * @param {{ entities: string, collection: string }} data ID of the Entity and Collection to remove the Entity from
    */
-  const onRemove = (data: { entity: string, collection: string }) => {
+  const onRemove = (data: { entity: string, collection: string }): void => {
     postData(`/collections/remove`, data).then(() => {
       navigate(`/collections/${id}`);
     });
@@ -153,7 +155,7 @@ export const Collection = () => {
                 </Box>
               </Box>
 
-              {/* Associated Entities */}
+              {/* List of Entities in the Collection */}
               <Box
                 direction="column"
                 pad="small"
@@ -176,13 +178,15 @@ export const Collection = () => {
 
                 {collectionData.entities.length > 0 ? (
                   <List
+                    itemKey={(entity) => `entity-${entity}`}
                     primaryKey={(entity) => {
-                      return <Linky type="entities" id={entity} />
+                      return <Linky type="entities" id={entity} key={`linky-${entity}`}/>
                     }}
                     secondaryKey={(entity) => {
                       return (
-                        <Box direction="row" gap="small" margin="none">
+                        <Box direction="row" gap="small" margin="none" key={`box-${entity}`}>
                           <Button
+                            key={`view-${entity}`}
                             icon={<LinkNext />}
                             primary
                             label="View"
@@ -190,6 +194,7 @@ export const Collection = () => {
                             reverse
                           />
                           <Button
+                            key={`remove-${entity}`}
                             icon={<StatusDisabled />}
                             primary
                             label="Remove"
