@@ -201,12 +201,13 @@ export const Entity = () => {
               {entityData.collections.length > 0 ? (
                 <List
                   primaryKey={(collection) => {
-                    return <Linky type="collections" id={collection} />
+                    return <Linky type="collections" id={collection} key={`linky-collection-${collection}`}/>
                   }}
                   secondaryKey={(collection) => {
                     return (
-                      <Box direction="row" gap="small" margin="none">
+                      <Box direction="row" gap="small" margin="none" key={`box-collection-${collection}`}>
                         <Button
+                          key={`view-${collection}`}
                           icon={<LinkNext />}
                           primary
                           label="View"
@@ -243,12 +244,13 @@ export const Entity = () => {
               {entityData.associations.products.length > 0 ? (
                 <List
                   primaryKey={(product) => {
-                    return <Linky type="entities" id={product.id} />
+                    return <Linky type="entities" id={product.id} key={`linky-product-${product}`}/>
                   }}
                   secondaryKey={(product) => {
                     return (
-                      <Box direction="row" gap="small" margin="none">
+                      <Box direction="row" gap="small" margin="none" key={`box-product-${product}`}>
                         <Button
+                          key={`view-product-${product}`}
                           icon={<LinkNext />}
                           primary
                           label="View"
@@ -284,7 +286,7 @@ export const Entity = () => {
               </Box>
               {entityData.attributes.length > 0 ? (
                 entityData.attributes.map((attribute) => {
-                  return <AttributeCard data={attribute} />;
+                  return <AttributeCard data={attribute} key={`attribute-${attribute}`}/>;
                 })
               ) : (
                 <Text>No attributes specified.</Text>
