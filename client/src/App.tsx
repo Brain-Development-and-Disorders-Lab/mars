@@ -24,6 +24,7 @@ import {Start as EntityStart} from "./pages/Create/Entity/Start";
 import {Associations as EntityAssociations} from "./pages/Create/Entity/Associations";
 import {Attributes as EntityAttributes} from "./pages/Create/Entity/Attributes";
 import {Start as CollectionStart} from "./pages/Create/Collection/Start";
+import {Start as AttributeStart} from "./pages/Create/Attribute/Start";
 import Home from "./pages/Home";
 
 // Theme
@@ -53,7 +54,7 @@ export const App = () => {
           </Route>
 
           {/* Attributes routes */}
-          {/* <Route path="/create/attribute/start" element={<CollectionStart />} /> */}
+          <Route path="/create/attribute/start" element={<AttributeStart />} />
           <Route path="/attributes" element={<Attributes />} />
           <Route path="attributes">
             <Route path=":id" element={<Attribute />} />

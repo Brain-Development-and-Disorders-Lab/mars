@@ -9,6 +9,8 @@ import { DATABASE_URL } from "src/variables";
  * @param {any} data the data to be posted to Lab
  */
 export const postData = async (path: string, data: any): Promise<any> => {
+  consola.debug("Posting data:", path, data);
+
   await fetch(`${DATABASE_URL}${path}`, {
     method: "POST",
     headers: {
@@ -16,10 +18,10 @@ export const postData = async (path: string, data: any): Promise<any> => {
     },
     body: JSON.stringify(data),
   }).catch((error) => {
-    consola.error("Error when posting data");
-    return {
-      error: error,
-    };
+    consola.error("Error posting data to database");
+    return { error: error };
   });
+
+  consola.success("Successfully posted data:", path, data);
   return;
 };

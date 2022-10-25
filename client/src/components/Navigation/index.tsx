@@ -62,7 +62,15 @@ const Navigation = () => {
                 />
               ),
             },
-            { label: "Attribute" },
+            {
+              label: (
+                <Anchor
+                  label="Attribute"
+                  href="/create/attribute/start"
+                  color="white"
+                />
+              ),
+            },
           ]}
           size="large"
         />

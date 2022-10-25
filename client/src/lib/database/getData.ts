@@ -9,25 +9,22 @@ import { DATABASE_URL } from "src/variables";
  * @return {Promise<any>} an object containing information from the database
  */
 export const getData = async (path: string): Promise<any> => {
+  consola.debug("Running query:", path);
   const response = await fetch(`${DATABASE_URL}${path}`);
 
   // Check response status
   if (!response.ok) {
-    consola.error("Response from database not OK");
-    return {
-      error: "Received an invalid response from the database",
-    };
+    consola.error("Invalid response from database");
+    return { error: "Invalid response from database" };
   }
 
   // Check the contents of the response
   const record = await response.json();
   if (!record) {
-    consola.warn("No records received");
-    return {
-      error: "Did not receive any records",
-    };
+    consola.warn("Response contents were empty");
+    return { error: "Response contents were empty" };
   }
 
-  consola.success("Successful database query");
+  consola.success("Successful database query:", path);
   return record;
 };

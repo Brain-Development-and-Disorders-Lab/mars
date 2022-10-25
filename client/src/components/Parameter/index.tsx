@@ -166,7 +166,7 @@ const Parameter = (props: ParameterProps) => {
   }
 
   return (
-    <Box direction="row" gap="small" align="center">
+    <Box direction="row" gap="small">
       {/* Parameter name */}
       <FormField label="Name">
         <TextInput
@@ -183,6 +183,7 @@ const Parameter = (props: ParameterProps) => {
       {/* Parameter type */}
       <FormField label="Type">
         <Select
+          width="medium"
           options={VALID_TYPES}
           value={type}
           onChange={({ option }) => {
