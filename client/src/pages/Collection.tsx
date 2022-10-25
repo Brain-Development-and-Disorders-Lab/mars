@@ -125,105 +125,86 @@ export const Collection = () => {
 
             <Box direction="column" gap="small">
               {/* Metadata table */}
-              <Box
-                direction="column"
-                align="center"
-                pad="small"
-                gap="small"
-                background="light-2"
-                round
-              >
-                <Heading level="3" margin="none">
-                  Metadata
-                </Heading>
+              <Heading level="3" margin="none">
+                Metadata
+              </Heading>
 
-                <Box pad="small" fill>
-                  <Table>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell scope="row" border>
-                          <Heading level="4" margin="xsmall">
-                            Description
-                          </Heading>
-                        </TableCell>
-                        <TableCell border>
-                          <Paragraph>{collectionData.description}</Paragraph>
-                        </TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </Box>
-              </Box>
+              <Table>
+                <TableBody>
+                  <TableRow>
+                    <TableCell scope="row" border>
+                      <Heading level="4" margin="xsmall">
+                        Description
+                      </Heading>
+                    </TableCell>
+                    <TableCell border>
+                      <Paragraph>{collectionData.description}</Paragraph>
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
 
               {/* List of Entities in the Collection */}
-              <Box
-                direction="column"
-                pad="small"
-                gap="small"
-              >
-                <Box direction="row" justify="between" fill>
-                  <Heading level="3" margin="none" alignSelf="center">
-                    Entities
-                  </Heading>
-                  <Button
-                    label="Add"
-                    icon={<Add />}
-                    onClick={() => {
-                      setShowAdd(!showAdd);
-                    }}
-                    primary
-                    reverse
-                  />
-                </Box>
-
-                {collectionData.entities.length > 0 ? (
-                  <List
-                    itemKey={(entity) => `entity-${entity}`}
-                    primaryKey={(entity) => {
-                      return <Linky type="entities" id={entity} key={`linky-${entity}`}/>
-                    }}
-                    secondaryKey={(entity) => {
-                      return (
-                        <Box direction="row" gap="small" margin="none" key={`box-${entity}`}>
-                          <Button
-                            key={`view-${entity}`}
-                            icon={<LinkNext />}
-                            primary
-                            label="View"
-                            onClick={() => {navigate(`/entities/${entity}`)}}
-                            reverse
-                          />
-                          <Button
-                            key={`remove-${entity}`}
-                            icon={<StatusDisabled />}
-                            primary
-                            label="Remove"
-                            color="red"
-                            onClick={() => {
-                              if (id) {
-                                // Remove the entity from the collection
-                                onRemove({
-                                  entity: entity,
-                                  collection: id,
-                                });
-
-                                // Force the page to reload by setting the isLoaded state
-                                setIsLoaded(false);
-                              }
-                            }}
-                            reverse
-                          />
-                        </Box>
-                      )
-                    }}
-                    data={collectionData.entities}
-                    show={4}
-                    paginate
-                  />
-                ) : (
-                  <></>
-                )}
+              <Box direction="row" justify="between" margin="small" fill>
+                <Heading level="3" margin="none" alignSelf="center">
+                  Entities{collectionData.entities.length > 0 && " (" + collectionData.entities.length + ")"}
+                </Heading>
+                <Button
+                  label="Add"
+                  icon={<Add />}
+                  onClick={() => {
+                    setShowAdd(!showAdd);
+                  }}
+                  primary
+                  reverse
+                />
               </Box>
+
+              {collectionData.entities.length > 0 && (
+                <List
+                  itemKey={(entity) => `entity-${entity}`}
+                  primaryKey={(entity) => {
+                    return <Linky type="entities" id={entity} key={`linky-${entity}`}/>
+                  }}
+                  secondaryKey={(entity) => {
+                    return (
+                      <Box direction="row" gap="small" margin="none" key={`box-${entity}`}>
+                        <Button
+                          key={`view-${entity}`}
+                          icon={<LinkNext />}
+                          primary
+                          label="View"
+                          onClick={() => {navigate(`/entities/${entity}`)}}
+                          reverse
+                        />
+                        <Button
+                          key={`remove-${entity}`}
+                          icon={<StatusDisabled />}
+                          primary
+                          label="Remove"
+                          color="red"
+                          onClick={() => {
+                            if (id) {
+                              // Remove the entity from the collection
+                              onRemove({
+                                entity: entity,
+                                collection: id,
+                              });
+
+                              // Force the page to reload by setting the isLoaded state
+                              setIsLoaded(false);
+                            }
+                          }}
+                          reverse
+                        />
+                      </Box>
+                    )
+                  }}
+                  data={collectionData.entities}
+                  show={4}
+                  paginate
+                />
+              )}
             </Box>
 
             {showAdd && (

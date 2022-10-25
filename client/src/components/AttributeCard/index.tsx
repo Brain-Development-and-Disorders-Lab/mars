@@ -75,8 +75,9 @@ const AttributeCard = (props: AttributeCardProps) => {
             direction="row"
             justify="between"
             pad={{ left: "medium", right: "medium" }}
+            width="large"
           >
-            <Heading level="2">{props.data.name}</Heading>
+            <Heading level="2">Attribute: {props.data.name}</Heading>
 
             <Button
               icon={<Close />}
@@ -87,53 +88,48 @@ const AttributeCard = (props: AttributeCardProps) => {
 
           {/* Content */}
           <Box
-            pad={{ left: "medium", right: "medium", bottom: "medium" }}
+            pad="medium"
             direction="column"
             gap="small"
-            width="large"
           >
-            <Box direction="column" align="center" background="light-2" round>
-              <Heading level="3">Details</Heading>
-              <Box pad="small" fill>
-                <Table>
-                  <TableBody>
-                    <TableRow>
-                      <TableCell scope="row" border>
-                        <Heading level="4" margin="small">
-                          Name
-                        </Heading>
-                      </TableCell>
-                      <TableCell border>
-                        <Text>{props.data.name}</Text>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell scope="row" border>
-                        <Heading level="4" margin="small">
-                          Description
-                        </Heading>
-                      </TableCell>
-                      <TableCell border>
-                        <Paragraph>{props.data.description}</Paragraph>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell scope="row" border>
-                        <Heading level="4" margin="small">
-                          Type
-                        </Heading>
-                      </TableCell>
-                      <TableCell border>
-                        <Text>{props.data.type}</Text>
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </Box>
-            </Box>
+            <Heading level="3" margin="none">Metadata</Heading>
+            <Table>
+              <TableBody>
+                <TableRow>
+                  <TableCell scope="row" border>
+                    <Heading level="4" margin="small">
+                      Name
+                    </Heading>
+                  </TableCell>
+                  <TableCell border>
+                    <Text>{props.data.name}</Text>
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell scope="row" border>
+                    <Heading level="4" margin="small">
+                      Description
+                    </Heading>
+                  </TableCell>
+                  <TableCell border>
+                    <Paragraph>{props.data.description}</Paragraph>
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell scope="row" border>
+                    <Heading level="4" margin="small">
+                      Storage Type
+                    </Heading>
+                  </TableCell>
+                  <TableCell border>
+                    <Text>{props.data.type}</Text>
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
 
             <Box direction="column" align="center" background="light-2" round>
-              <Heading level="3">Parameters</Heading>
+              <Heading level="3">Parameters{props.data.parameters && " (" + props.data.parameters.length + ")"}</Heading>
               <Box pad="small">
                 {props.data.parameters &&
                   props.data.parameters.map((parameter) => {

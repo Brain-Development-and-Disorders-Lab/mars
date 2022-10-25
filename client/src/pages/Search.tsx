@@ -91,7 +91,7 @@ const Search = () => {
           </Box>
         </Form>
 
-        <Heading level="3">{results.length + " "}Search Results</Heading>
+        <Heading level="3">Search Results{hasSearched && " (" + results.length + ")"}</Heading>
 
         <Box gap="small">
           {isSearching ? (

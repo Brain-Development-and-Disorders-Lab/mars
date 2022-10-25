@@ -83,7 +83,7 @@ const Collections = () => {
                         <TableCell scope="row" border="right" align="center">
                           <Heading level={4} margin="none">{value.name}</Heading>
                         </TableCell>
-                        <TableCell border="right" align="center">
+                        <TableCell border="right" align="left">
                           <Paragraph fill>{value.description}</Paragraph>
                         </TableCell>
                         <TableCell align="center">

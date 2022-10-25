@@ -111,7 +111,7 @@ export const Entity = () => {
                 Metadata
               </Heading>
 
-              <Table>
+              <Table margin={{top: "small"}}>
                 <TableBody>
                   <TableRow>
                     <TableCell scope="row" border>
@@ -187,7 +187,7 @@ export const Entity = () => {
             <Box pad="small">
               <Box direction="row" justify="between" margin={{bottom: "small"}}>
                 <Heading level="3" margin="none">
-                  Collections
+                  Collections{entityData.collections.length > 0 && " (" + entityData.collections.length + ")"}
                 </Heading>
                 {editing ? (
                   <Button
@@ -230,7 +230,7 @@ export const Entity = () => {
             <Box pad="small">
               <Box direction="row" justify="between" margin={{bottom: "small"}}>
                 <Heading level="3"  margin="none">
-                  Products
+                  Products{entityData.associations.products.length > 0 && " (" + entityData.associations.products.length + ")"}
                 </Heading>
                 {editing ? (
                   <Button
@@ -273,7 +273,7 @@ export const Entity = () => {
             <Box pad="small">
               <Box direction="row" justify="between" margin={{bottom: "small"}}>
                 <Heading level="3" margin="none">
-                  Attributes
+                  Attributes{entityData.attributes.length > 0 && " (" + entityData.attributes.length + ")"}
                 </Heading>
                 {editing ? (
                   <Button
