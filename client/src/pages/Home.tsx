@@ -84,6 +84,7 @@ const Home = () => {
                 primaryKey="name"
                 secondaryKey={(value) => (
                   <Button
+                    key={`view-collection-${value._id}`}
                     primary
                     label="View"
                     icon={<LinkNext />}
@@ -105,6 +106,7 @@ const Home = () => {
                 primaryKey="name"
                 secondaryKey={(value) => (
                   <Button
+                    key={`view-entity-${value._id}`}
                     primary
                     label="View"
                     icon={<LinkNext />}
