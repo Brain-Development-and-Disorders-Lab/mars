@@ -13,6 +13,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Navigation from "./components/Navigation";
 
 // Custom pages
+import Attribute from "./pages/Attribute";
+import Attributes from "./pages/Attributes";
 import Collection from "./pages/Collection";
 import Collections from "./pages/Collections";
 import Search from "./pages/Search";
@@ -48,6 +50,13 @@ export const App = () => {
           <Route path="/collections" element={<Collections />} />
           <Route path="collections">
             <Route path=":id" element={<Collection />} />
+          </Route>
+
+          {/* Attributes routes */}
+          {/* <Route path="/create/attribute/start" element={<CollectionStart />} /> */}
+          <Route path="/attributes" element={<Attributes />} />
+          <Route path="attributes">
+            <Route path=":id" element={<Attribute />} />
           </Route>
 
           {/* Other routes */}
