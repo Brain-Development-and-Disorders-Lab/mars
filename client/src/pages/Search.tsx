@@ -4,6 +4,7 @@ import {
   Anchor,
   Box,
   Button,
+  Form,
   Heading,
   PageHeader,
   Spinner,
@@ -72,22 +73,25 @@ const Search = () => {
           parent={<Anchor label="Home" href="/" />}
         />
 
-        <Box direction="row" align="center" gap="small">
-          <TextInput
-            value={query}
-            placeholder="Enter search query..."
-            onChange={(event) => setQuery(event.target.value)}
-          />
-          <Button
-            primary
-            icon={<SearchIcon />}
-            label="Go"
-            disabled={query === ""}
-            onClick={() => runSearch()}
-          />
-        </Box>
+        <Form onSubmit={() => runSearch()}>
+          <Box direction="row" align="center" gap="small">
+            <TextInput
+              value={query}
+              placeholder="Enter search query..."
+              onChange={(event) => setQuery(event.target.value)}
+            />
 
-        <Heading level="3">Search Results</Heading>
+            <Button
+              primary
+              icon={<SearchIcon />}
+              label="Search"
+              disabled={query === ""}
+              onClick={() => runSearch()}
+            />
+          </Box>
+        </Form>
+
+        <Heading level="3">{results.length + " "}Search Results</Heading>
 
         <Box gap="small">
           {isSearching ? (
@@ -112,7 +116,7 @@ const Search = () => {
               </TableHeader>
 
               <TableBody>
-                {results.length > 0 ? (
+                {results.length > 0 && (
                   results.map((result) => {
                     return (
                       <TableRow key={result._id}>
@@ -139,8 +143,6 @@ const Search = () => {
                       </TableRow>
                     );
                   })
-                ) : (
-                  <Text>No results found.</Text>
                 )}
               </TableBody>
             </Table>
