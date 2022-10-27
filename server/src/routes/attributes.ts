@@ -69,47 +69,6 @@ AttributesRoute.route("/attributes/create").post(
     const insertedId = (data as AttributeStruct & { _id: string })._id;
 
     consola.debug("Create new Attribute:", "/attributes/create", '"' + data.name + '"');
-
-    // We need to apply the collections that have been specified
-    // if (data.entities.length > 0) {
-    //   consola.info("Additional Entities specified, applying...");
-    //   data.entities.map((entity) => {
-    //     consola.debug("Linking Collection with Entity:", entity);
-    //     const entityQuery = { _id: new ObjectId(entity) };
-    //     let entityResult: EntityModel;
-
-    //     database
-    //       .collection(ENTITIES_COLLECTION)
-    //       .findOne(entityQuery, (error: any, result: any) => {
-    //         if (error) throw error;
-    //         entityResult = result;
-
-    //         // Update the collection to include the Entity as an association
-    //         const updatedValues = {
-    //           $set: {
-    //             collections: [
-    //               ...entityResult.collections,
-    //               {
-    //                 name: data.name,
-    //                 id: insertedId,
-    //               },
-    //             ],
-    //           },
-    //         };
-
-    //         database
-    //           .collection(ENTITIES_COLLECTION)
-    //           .updateOne(
-    //             entityQuery,
-    //             updatedValues,
-    //             (error: any, response: any) => {
-    //               if (error) throw error;
-    //               consola.success("Added Collection to Entity:", entityResult.name);
-    //             }
-    //           );
-    //       });
-    //   });
-    // }
   }
 );
 

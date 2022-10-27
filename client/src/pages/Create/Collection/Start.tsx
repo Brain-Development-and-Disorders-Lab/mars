@@ -113,7 +113,7 @@ export const Start = ({}) => {
                   });
 
                   // Push the data
-                  consola.debug("Creating collection:", collectionData);
+                  consola.debug("Creating Collection:", collectionData);
                   postData(`/collections/create`, collectionData).then(() =>
                     navigate("/collections")
                   );

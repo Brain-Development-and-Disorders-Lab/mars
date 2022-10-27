@@ -107,7 +107,7 @@ const Attribute = (props: AttributeProps) => {
           <ParameterGroup
             parameters={parameters}
             disabled={finished}
-            onDataUpdate={(data: ParameterStruct) => {
+            onUpdate={(data: ParameterStruct) => {
               // Store the received Parameter information
               // Get the relevant Parameter
               setParameters(
@@ -131,8 +131,8 @@ const Attribute = (props: AttributeProps) => {
           icon={<Save />}
           onClick={() => {
             setFinished(true);
-            if (props.dataCallback) {
-              props.dataCallback(attributeData);
+            if (props.onUpdate) {
+              props.onUpdate(attributeData);
             }
           }}
           reverse
@@ -142,8 +142,8 @@ const Attribute = (props: AttributeProps) => {
           color="red"
           label="Remove"
           onClick={() => {
-            if (props.removeCallback) {
-              props.removeCallback(props.identifier);
+            if (props.onRemove) {
+              props.onRemove(props.identifier);
             }
           }}
           icon={<StatusDisabled />}

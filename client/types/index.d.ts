@@ -51,16 +51,18 @@ export type AttributeModel = AttributeStruct & {
   _id: string;
 };
 
-declare type AttributeProps = AttributeStruct & {
-  identifier: string;
-  dataCallback?: (data: AttributeProps) => void;
-  removeCallback?: (identifier: string) => void;
+declare type AttributeActions = {
+  showRemove?: boolean;
+  onUpdate?: (data: AttributeProps) => void;
+  onRemove?: (identifier: string) => void;
 };
 
-declare type AttributeGroupProps = {
+declare type AttributeProps = AttributeStruct & AttributeActions & {
+  identifier: string;
+};
+
+declare type AttributeGroupProps = AttributeActions & {
   attributes: AttributeModel[];
-  onRemove?: (identifier: string) => void;
-  onDataUpdate?: (data: AttributeProps) => void;
 };
 
 export type AttributeCardProps = {
@@ -75,17 +77,17 @@ export type ParameterStruct = {
   data: number | string | ReactElement;
 };
 
-export type ParameterProps = ParameterStruct & {
+export type ParameterActions = {
   disabled: boolean;
-  dataCallback?: (data: ParameterStruct) => void;
-  removeCallback?: (identifier: string) => void;
+  showRemove?: boolean;
+  onRemove?: (identifier: string) => void;
+  onUpdate?: (data: ParameterStruct) => void;
 };
 
-export type ParameterGroupProps = {
-  disabled: boolean;
+export type ParameterProps = ParameterStruct & ParameterActions;
+
+export type ParameterGroupProps = ParameterActions & {
   parameters: ParameterStruct[];
-  onRemove?: (identifier: string) => void;
-  onDataUpdate?: (data: ParameterStruct) => void;
 };
 
 declare type LinkyProps = {

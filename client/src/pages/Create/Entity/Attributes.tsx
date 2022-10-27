@@ -233,7 +233,7 @@ export const Attributes = ({}) => {
                   <AttributeGroup
                     attributes={attributes}
                     onRemove={removeCallback}
-                    onDataUpdate={dataCallback}
+                    onUpdate={dataCallback}
                   />
                 </Box>
 

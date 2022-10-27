@@ -21,8 +21,8 @@ const AttributeGroup = (props: AttributeGroupProps) => {
               name={attribute.name}
               description={attribute.description}
               type={attribute.type}
-              removeCallback={props.onRemove}
-              dataCallback={props.onDataUpdate}
+              onRemove={props.onRemove}
+              onUpdate={props.onUpdate}
               parameters={attribute.parameters}
             />
           );

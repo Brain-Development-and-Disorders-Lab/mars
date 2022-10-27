@@ -14,20 +14,36 @@ import {
 import { Page, PageContent } from "grommet";
 import { Add, Checkmark } from "grommet-icons";
 
+// Navigation
+import { useNavigate } from "react-router-dom";
+
 import _ from "underscore";
+import consola from "consola";
 
 // Parameter components and custom types
-import { ParameterStruct } from "types";
+import { AttributeStruct, ParameterStruct } from "types";
 import ParameterGroup from "src/components/ParameterGroup";
+
+// Database functions
+import { postData } from "src/lib/database/postData";
 
 // Constants
 const VALID_TYPES = ["physical", "digital"];
 
 export const Start = ({}) => {
+  const navigate = useNavigate();
+
   const [name, setName] = useState("");
-  const [type, setType] = useState();
+  const [type, setType] = useState("physical");
   const [description, setDescription] = useState("");
   const [parameters, setParameters] = useState([] as ParameterStruct[]);
+
+  const attributeData: AttributeStruct = {
+    name: name,
+    type: type as "physical" | "digital",
+    description: description,
+    parameters: parameters,
+  }
 
   return (
     <Page kind="wide" pad={{left: "small", right: "small"}}>
@@ -39,7 +55,13 @@ export const Start = ({}) => {
           <Box fill>
             <Form
               onChange={() => {}}
-              onSubmit={() => {}}
+              onSubmit={() => {
+                // Push the data
+                consola.debug("Creating Attribute:", attributeData);
+                postData(`/attributes/create`, attributeData).then(() =>
+                  navigate("/attributes")
+                );
+              }}
             >
               <Box direction="row" gap="medium">
                 <Box direction="column" basis="1/3" gap="small">
@@ -95,6 +117,7 @@ export const Start = ({}) => {
                   <Box direction="column" gap="small" margin="small">
                     <ParameterGroup
                       parameters={parameters}
+                      showRemove
                       onRemove={(identifier: string) => {
                         setParameters(parameters.filter((parameter) => {
                           // Filter out the Parameter to be removed
@@ -105,7 +128,7 @@ export const Start = ({}) => {
                           }
                         }))
                       }}
-                      onDataUpdate={(data: ParameterStruct) => {
+                      onUpdate={(data: ParameterStruct) => {
                         // Store the received Parameter information
                         setParameters(
                           parameters.filter((parameter) => {

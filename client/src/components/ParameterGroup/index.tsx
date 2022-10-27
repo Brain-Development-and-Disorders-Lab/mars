@@ -21,8 +21,9 @@ const ParameterGroup = (props: ParameterGroupProps) => {
               name={parameter.name}
               type={parameter.type}
               data={parameter.data}
-              removeCallback={props.onRemove}
-              dataCallback={props.onDataUpdate}
+              showRemove={props.showRemove}
+              onRemove={props.onRemove}
+              onUpdate={props.onUpdate}
               disabled={props.disabled}
             />
           );

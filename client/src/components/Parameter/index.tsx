@@ -68,8 +68,8 @@ const Parameter = (props: ParameterProps) => {
   };
 
   const updateData = () => {
-    if (props.dataCallback) {
-      props.dataCallback(parameterData);
+    if (props.onUpdate) {
+      props.onUpdate(parameterData);
     }
   };
 
@@ -206,19 +206,19 @@ const Parameter = (props: ParameterProps) => {
       </Form>
       <Box justify="center">
         {/* Remove Parameter */}
-        <Button
+        {props.showRemove && <Button
           key={`remove-${props.identifier}`}
           icon={<StatusDisabled />}
           primary
           label="Remove"
           color="red"
           onClick={() => {
-            if (props.removeCallback) {
-              props.removeCallback(props.identifier);
+            if (props.onRemove) {
+              props.onRemove(props.identifier);
             }
           }}
           reverse
-        />
+        />}
       </Box>
       {isError && <ErrorLayer message={errorMessage} />}
     </Box>
