@@ -3,14 +3,17 @@ import React, { useEffect, useState } from "react";
 import {
   Anchor,
   Box,
+  Button,
   DateInput,
   FileInput,
+  Form,
   FormField,
   Select,
   Spinner,
   Text,
   TextInput,
 } from "grommet/components";
+import { StatusDisabled } from "grommet-icons";
 
 // Database and models
 import { getData } from "src/lib/database/getData";
@@ -166,38 +169,57 @@ const Parameter = (props: ParameterProps) => {
   }
 
   return (
-    <Box direction="row" gap="small">
-      {/* Parameter name */}
-      <FormField label="Name">
-        <TextInput
-          width="medium"
-          placeholder="Parameter name"
-          value={name}
-          onChange={(event) => {
-            setName(event.target.value);
+    <Box direction="row" gap="medium" fill="horizontal">
+      <Form>
+        <Box direction="row" gap="small" justify="center">
+          {/* Parameter name */}
+          <FormField label="Name">
+            <TextInput
+              width="medium"
+              placeholder="Parameter name"
+              value={name}
+              onChange={(event) => {
+                setName(event.target.value);
+              }}
+              disabled={props.disabled}
+            />
+          </FormField>
+
+          {/* Parameter type */}
+          <FormField label="Type">
+            <Select
+              width="medium"
+              options={VALID_TYPES}
+              value={type}
+              onChange={({ option }) => {
+                setType(option);
+              }}
+              disabled={props.disabled}
+            />
+          </FormField>
+
+          {/* Parameter data */}
+          <FormField label="Data">
+            {isLoaded ? dataElement : <Spinner size="small" />}
+          </FormField>
+        </Box>
+      </Form>
+      <Box justify="center">
+        {/* Remove Parameter */}
+        <Button
+          key={`remove-${props.identifier}`}
+          icon={<StatusDisabled />}
+          primary
+          label="Remove"
+          color="red"
+          onClick={() => {
+            if (props.removeCallback) {
+              props.removeCallback(props.identifier);
+            }
           }}
-          disabled={props.disabled}
+          reverse
         />
-      </FormField>
-
-      {/* Parameter type */}
-      <FormField label="Type">
-        <Select
-          width="medium"
-          options={VALID_TYPES}
-          value={type}
-          onChange={({ option }) => {
-            setType(option);
-          }}
-          disabled={props.disabled}
-        />
-      </FormField>
-
-      {/* Parameter data */}
-      <FormField label="Data">
-        {isLoaded ? dataElement : <Spinner size="small" />}
-      </FormField>
-
+      </Box>
       {isError && <ErrorLayer message={errorMessage} />}
     </Box>
   );

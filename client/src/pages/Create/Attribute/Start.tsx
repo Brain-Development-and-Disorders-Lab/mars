@@ -14,6 +14,9 @@ import {
 import { Page, PageContent } from "grommet";
 import { Add, Checkmark } from "grommet-icons";
 
+import _ from "underscore";
+
+// Parameter components and custom types
 import { ParameterStruct } from "types";
 import ParameterGroup from "src/components/ParameterGroup";
 
@@ -92,11 +95,21 @@ export const Start = ({}) => {
                   <Box direction="column" gap="small" margin="small">
                     <ParameterGroup
                       parameters={parameters}
+                      onRemove={(identifier: string) => {
+                        setParameters(parameters.filter((parameter) => {
+                          // Filter out the Parameter to be removed
+                          if (!_.isEqual(parameter.identifier, identifier)) {
+                            return parameter;
+                          } else {
+                            return;
+                          }
+                        }))
+                      }}
                       onDataUpdate={(data: ParameterStruct) => {
                         // Store the received Parameter information
-                        // Get the relevant Parameter
                         setParameters(
                           parameters.filter((parameter) => {
+                            // Get the relevant Parameter
                             if (parameter.identifier === data.identifier) {
                               parameter.name = data.name;
                               parameter.type = data.type;
