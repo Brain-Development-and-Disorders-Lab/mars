@@ -13,6 +13,7 @@ import {
   TableRow,
 } from "grommet/components";
 import { Page, PageContent } from "grommet";
+import { LinkNext } from "grommet-icons";
 
 // Navigation
 import { useNavigate } from "react-router-dom";
@@ -92,9 +93,12 @@ const Entities = () => {
                         </TableCell>
                         <TableCell align="center">
                           <Button
+                            color="accent-4"
                             primary
-                            label="Details"
+                            icon={<LinkNext />}
+                            label="View"
                             onClick={() => navigate(`/entities/${entity._id}`)}
+                            reverse
                           />
                         </TableCell>
                       </TableRow>

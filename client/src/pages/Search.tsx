@@ -90,7 +90,7 @@ const Search = () => {
           </Box>
         </Form>
 
-        <Heading level="3">Search Results{hasSearched && " (" + results.length + ")"}</Heading>
+        <Heading level="3">Search Results</Heading>
 
         <Box gap="small">
           {isSearching ? (

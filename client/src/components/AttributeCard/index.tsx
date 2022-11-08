@@ -128,7 +128,7 @@ const AttributeCard = (props: AttributeCardProps) => {
             </Table>
 
             <Box direction="column" align="center" background="light-2" round>
-              <Heading level="3">Parameters{props.data.parameters && " (" + props.data.parameters.length + ")"}</Heading>
+              <Heading level="3">Parameters</Heading>
               <Box pad="small">
                 {props.data.parameters && props.data.parameters.length > 0 ?
                   props.data.parameters.map((parameter) => {

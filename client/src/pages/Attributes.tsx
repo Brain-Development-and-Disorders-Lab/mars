@@ -92,9 +92,7 @@ const Attributes = () => {
                             color="accent-4"
                             icon={<LinkNext />}
                             label="View"
-                            onClick={() =>
-                              navigate(`/attributes/${value._id}`)
-                            }
+                            onClick={() => navigate(`/attributes/${value._id}`)}
                             reverse
                           />
                         </TableCell>

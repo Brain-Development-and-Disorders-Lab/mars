@@ -145,10 +145,8 @@ export const Collection = () => {
               </Table>
 
               {/* List of Entities in the Collection */}
-              <Box direction="row" justify="between" margin="small" fill>
-                <Heading level="3" margin="none" alignSelf="center">
-                  Entities{collectionData.entities.length > 0 && " (" + collectionData.entities.length + ")"}
-                </Heading>
+              <Box direction="row" justify="between" margin="small">
+                <Heading level="3" margin="none" alignSelf="center">Entities</Heading>
                 <Button
                   label="Add"
                   icon={<Add />}
@@ -213,7 +211,8 @@ export const Collection = () => {
                 onEsc={() => setShowAdd(false)}
                 onClickOutside={() => setShowAdd(false)}
               >
-                <Box direction="row" justify="between" margin={{ right: "small" }}>
+                {/* Heading and close button */}
+                <Box direction="row" width="large" justify="between" margin={{ right: "small" }} pad="medium">
                   <Heading level="2" margin="small">
                     Add Entities
                   </Heading>
@@ -223,7 +222,9 @@ export const Collection = () => {
                     plain
                   />
                 </Box>
-                <Box direction="column" margin="small">
+
+                {/* Select component for Entities */}
+                <Box direction="column" pad="medium">
                   <FormField
                     name="add"
                     info="Add existing Entities to the Collection."
@@ -273,8 +274,14 @@ export const Collection = () => {
                       );
                     })}
                   </Box>
+                </Box>
+
+                {/* "Done" button */}
+                <Box direction="row" pad="medium" justify="center">
                   <Button
                     label="Done"
+                    color="status-ok"
+                    primary
                     onClick={() => {
                       if (id) {
                         // Add the Entities to the Collection

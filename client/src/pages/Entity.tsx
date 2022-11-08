@@ -235,9 +235,7 @@ export const Entity = () => {
             {/* Collections */}
             <Box pad="small">
               <Box direction="row" justify="between" margin={{bottom: "small"}}>
-                <Heading level="3" margin="none">
-                  Collections{collections.length > 0 && " (" + collections.length + ")"}
-                </Heading>
+                <Heading level="3" margin="none">Collections</Heading>
                 {editing ? (
                   <Button
                     icon={<Add size="small" />}
@@ -292,9 +290,7 @@ export const Entity = () => {
             {/* Products */}
             <Box pad="small">
               <Box direction="row" justify="between" margin={{bottom: "small"}}>
-                <Heading level="3"  margin="none">
-                  Products{products.length > 0 && " (" + products.length + ")"}
-                </Heading>
+                <Heading level="3"  margin="none">Products</Heading>
                 {editing ? (
                   <Button
                     icon={<Add size="small" />}
@@ -349,9 +345,7 @@ export const Entity = () => {
             {/* Attributes */}
             <Box pad="small">
               <Box direction="row" justify="between" margin={{bottom: "small"}}>
-                <Heading level="3" margin="none">
-                  Attributes{attributes.length > 0 && " (" + attributes.length + ")"}
-                </Heading>
+                <Heading level="3" margin="none">Attributes</Heading>
                 {editing ? (
                   <Button
                     icon={<Add size="small" />}
