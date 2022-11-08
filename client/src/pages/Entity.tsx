@@ -111,6 +111,12 @@ export const Entity = () => {
     }
   }, [isLoaded]);
 
+  const removeProduct = (id: string) => {
+    setProducts(products.filter((product) => {
+      return product.id !== id;
+    }));
+  };
+
   const removeCollection = (id: string) => {
     setCollections(collections.filter((collection) => {
       return collection !== id;
@@ -304,14 +310,27 @@ export const Entity = () => {
                   secondaryKey={(product) => {
                     return (
                       <Box direction="row" gap="small" margin="none" key={`box-product-${product.id}`}>
-                        <Button
-                          key={`view-product-${product.id}`}
-                          icon={<LinkNext />}
-                          primary
-                          label="View"
-                          onClick={() => {navigate(`/entities/${product.id}`)}}
-                          reverse
-                        />
+                        {editing &&
+                          <Button
+                            key={`remove-product-${product.id}`}
+                            icon={<Close />}
+                            color="red"
+                            primary
+                            label="Remove"
+                            onClick={() => {removeProduct(product.id)}}
+                            reverse
+                          />
+                        }
+                        {!editing &&
+                          <Button
+                            key={`view-product-${product.id}`}
+                            icon={<LinkNext />}
+                            primary
+                            label="View"
+                            onClick={() => {navigate(`/entities/${product.id}`)}}
+                            reverse
+                          />
+                        }
                       </Box>
                     )
                   }}
