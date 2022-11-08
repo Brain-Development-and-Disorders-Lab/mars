@@ -16,7 +16,7 @@ import {
   TableRow,
   Text,
 } from "grommet/components";
-import { Close, Note, Storage } from "grommet-icons";
+import { Close, Note, SettingsOption } from "grommet-icons";
 
 // Types
 import { AttributeCardProps } from "types";
@@ -37,15 +37,12 @@ const AttributeCard = (props: AttributeCardProps) => {
           setShowDetails(true);
         }}
       >
-        <CardHeader pad="small" align="center" margin="none">
+        <CardHeader pad="small" align="center" margin="none" justify="start" gap="small">
+          <SettingsOption color="brand" />
           <Heading level={3} margin="none">{props.data.name}</Heading>
         </CardHeader>
 
         <CardBody pad="small">
-          <Box direction="row" flex gap="small">
-            <Storage color="brand" />
-            <Heading level={4} margin="none">Storage:</Heading>
-          </Box>
           <Box direction="row" flex gap="small" width={{ max: "medium" }}>
             <Note color="brand" />
             <Text>
@@ -61,12 +58,13 @@ const AttributeCard = (props: AttributeCardProps) => {
           </Box>
         </CardBody>
 
-        <CardFooter
-          pad={{ horizontal: "medium"}}
-          margin="none"
-          background="light-2"
-        >
-          {/* Populate footer depending on the Parameters that are configured */}
+        <CardFooter pad="small" margin="none" background="light-2" justify="start">
+          <Text>
+            <strong>Parameters:</strong>
+          </Text>
+          <Text>
+            {props.data.parameters.length} configured
+          </Text>
         </CardFooter>
       </Card>
 
