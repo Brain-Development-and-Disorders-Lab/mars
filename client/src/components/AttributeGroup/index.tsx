@@ -20,7 +20,6 @@ const AttributeGroup = (props: AttributeGroupProps) => {
               identifier={attribute._id}
               name={attribute.name}
               description={attribute.description}
-              type={attribute.type}
               onRemove={props.onRemove}
               onUpdate={props.onUpdate}
               parameters={attribute.parameters}

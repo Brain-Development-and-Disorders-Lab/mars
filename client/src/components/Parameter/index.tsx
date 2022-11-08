@@ -184,7 +184,7 @@ const Parameter = (props: ParameterProps) => {
           icon={<Close />}
           primary
           label="Remove"
-          color="red"
+          color="status-critical"
           onClick={() => {
             if (props.onRemove) {
               props.onRemove(props.identifier);

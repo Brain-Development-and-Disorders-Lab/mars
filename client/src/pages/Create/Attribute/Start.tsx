@@ -7,7 +7,6 @@ import {
   Form,
   Heading,
   PageHeader,
-  Select,
   TextArea,
   TextInput,
 } from "grommet/components";
@@ -27,20 +26,15 @@ import ParameterGroup from "src/components/ParameterGroup";
 // Database functions
 import { postData } from "src/lib/database/postData";
 
-// Constants
-const VALID_TYPES = ["physical", "digital"];
-
 export const Start = ({}) => {
   const navigate = useNavigate();
 
   const [name, setName] = useState("");
-  const [type, setType] = useState("physical");
   const [description, setDescription] = useState("");
   const [parameters, setParameters] = useState([] as ParameterStruct[]);
 
   const attributeData: AttributeStruct = {
     name: name,
-    type: type as "physical" | "digital",
     description: description,
     parameters: parameters,
   }
@@ -73,13 +67,6 @@ export const Start = ({}) => {
                     value={name}
                     onChange={(event) => setName(event.target.value)}
                     required
-                  />
-                  <Select
-                    placeholder="Attribute Type"
-                    options={VALID_TYPES}
-                    value={type}
-                    width="auto"
-                    onChange={({ option }) => setType(option)}
                   />
                   <TextArea
                     value={description}
@@ -156,7 +143,7 @@ export const Start = ({}) => {
                 justify="between"
                 margin="medium"
               >
-                <Button label="Cancel" onClick={() => navigate("/attributes")} />
+                <Button label="Cancel" color="status-critical" onClick={() => navigate("/attributes")} />
                 <Button
                   type="submit"
                   label="Finish"

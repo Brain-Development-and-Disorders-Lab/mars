@@ -89,6 +89,7 @@ const Attributes = () => {
                         <TableCell align="center">
                           <Button
                             primary
+                            color="accent-4"
                             icon={<LinkNext />}
                             label="View"
                             onClick={() =>

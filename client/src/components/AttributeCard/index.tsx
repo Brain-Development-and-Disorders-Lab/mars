@@ -45,7 +45,6 @@ const AttributeCard = (props: AttributeCardProps) => {
           <Box direction="row" flex gap="small">
             <Storage color="brand" />
             <Heading level={4} margin="none">Storage:</Heading>
-            <Text>{props.data.type}</Text>
           </Box>
           <Box direction="row" flex gap="small" width={{ max: "medium" }}>
             <Note color="brand" />
@@ -125,16 +124,6 @@ const AttributeCard = (props: AttributeCardProps) => {
                         "No description."
                       }
                     </Paragraph>
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell scope="row" border>
-                    <Heading level="4" margin="small">
-                      Storage Type
-                    </Heading>
-                  </TableCell>
-                  <TableCell border>
-                    <Text>{props.data.type}</Text>
                   </TableCell>
                 </TableRow>
               </TableBody>

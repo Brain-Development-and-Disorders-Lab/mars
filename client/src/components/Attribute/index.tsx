@@ -4,7 +4,6 @@ import {
   Box,
   Button,
   Heading,
-  Select,
   TextArea,
   TextInput,
 } from "grommet/components";
@@ -17,11 +16,8 @@ import { ParameterStruct, AttributeProps } from "types";
 import ParameterGroup from "src/components/ParameterGroup";
 
 // Constants
-const VALID_TYPES = ["physical", "digital"];
-
 const Attribute = (props: AttributeProps) => {
   const [name, setName] = useState(props.name);
-  const [type, setType] = useState(props.type);
   const [description, setDescription] = useState(props.description);
   const [parameters, setParameters] = useState(props.parameters);
   const [finished, setFinished] = useState(false);
@@ -29,7 +25,6 @@ const Attribute = (props: AttributeProps) => {
   const attributeData: AttributeProps = {
     identifier: props.identifier,
     name: name,
-    type: type,
     description: description,
     parameters: parameters,
   };
@@ -51,14 +46,6 @@ const Attribute = (props: AttributeProps) => {
           onChange={(event) => setName(event.target.value)}
           disabled={finished}
           required
-        />
-        <Select
-          placeholder="Type"
-          options={VALID_TYPES}
-          value={type}
-          width="auto"
-          onChange={({ option }) => setType(option)}
-          disabled={finished}
         />
         <TextArea
           value={description}
@@ -84,7 +71,7 @@ const Attribute = (props: AttributeProps) => {
           </Heading>
           <Button
             icon={<Add />}
-            label="Create new Parameter"
+            label="Add a Parameter"
             primary
             onClick={() => {
               // Create a unique identifier
@@ -108,19 +95,23 @@ const Attribute = (props: AttributeProps) => {
           <ParameterGroup
             parameters={parameters}
             disabled={finished}
+            showRemove
+            onRemove={(identifier) => {
+              setParameters(parameters.filter((parameter) => {
+                return parameter.identifier !== identifier;
+              }));
+            }}
             onUpdate={(data: ParameterStruct) => {
               // Store the received Parameter information
               // Get the relevant Parameter
-              setParameters(
-                parameters.filter((parameter) => {
-                  if (parameter.identifier === data.identifier) {
-                    parameter.name = data.name;
-                    parameter.type = data.type;
-                    parameter.data = data.data;
-                  }
-                  return parameter;
-                })
-              );
+              setParameters(parameters.filter((parameter) => {
+                if (parameter.identifier === data.identifier) {
+                  parameter.name = data.name;
+                  parameter.type = data.type;
+                  parameter.data = data.data;
+                }
+                return parameter;
+              }));
             }}
           />
         </Box>
@@ -128,7 +119,8 @@ const Attribute = (props: AttributeProps) => {
       <Box direction="column" width="small" gap="small">
         <Button
           label="Save"
-          color="green"
+          color="status-ok"
+          primary
           icon={<Save />}
           onClick={() => {
             setFinished(true);
@@ -140,8 +132,9 @@ const Attribute = (props: AttributeProps) => {
           disabled={finished}
         />
         <Button
-          color="red"
           label="Remove"
+          color="status-critical"
+          primary
           onClick={() => {
             if (props.onRemove) {
               props.onRemove(props.identifier);

@@ -172,6 +172,7 @@ export const Collection = () => {
                         <Button
                           key={`view-${entity}`}
                           icon={<LinkNext />}
+                          color="accent-4"
                           primary
                           label="View"
                           onClick={() => {navigate(`/entities/${entity}`)}}
@@ -182,7 +183,7 @@ export const Collection = () => {
                           icon={<Close />}
                           primary
                           label="Remove"
-                          color="red"
+                          color="status-critical"
                           onClick={() => {
                             if (id) {
                               // Remove the entity from the collection

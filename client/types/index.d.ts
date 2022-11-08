@@ -43,7 +43,6 @@ declare namespace Create.Collection {
 export type AttributeStruct = {
   name: string;
   description: string;
-  type: "physical" | "digital";
   parameters: ParameterStruct[];
 };
 

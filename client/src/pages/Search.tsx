@@ -133,6 +133,7 @@ const Search = () => {
                         </TableCell>
                         <TableCell align="center">
                           <Button
+                            color="accent-4"
                             label="View"
                             icon={<LinkNext />}
                             onClick={() => navigate(`/entities/${result._id}`)}

@@ -226,7 +226,7 @@ export const Start = ({}) => {
                 </Box>
 
                 <Box direction="row" justify="between" margin="medium">
-                  <Button label="Cancel" onClick={() => navigate("/")} />
+                  <Button label="Cancel" color="status-critical" onClick={() => navigate("/")} />
                   <Button
                     type="submit"
                     label="Finish"

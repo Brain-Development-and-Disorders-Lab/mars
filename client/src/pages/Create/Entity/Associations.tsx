@@ -246,7 +246,7 @@ export const Associations = ({}) => {
               </Box>
 
               <Box direction="row" justify="between" margin="medium">
-                <Button label="Cancel" />
+                <Button label="Cancel" color="status-critical" />
                 <Button
                   label="Back"
                   icon={<LinkPrevious />}
@@ -260,9 +260,10 @@ export const Associations = ({}) => {
                 <Button
                   type="submit"
                   label="Continue"
+                  color="status-ok"
+                  primary
                   icon={<LinkNext />}
                   reverse
-                  primary
                 />
               </Box>
             </Form>

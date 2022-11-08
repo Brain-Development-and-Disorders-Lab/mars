@@ -118,7 +118,6 @@ export const Attributes = ({}) => {
         _id: data.identifier,
         name: data.name,
         description: data.description,
-        type: data.type,
         parameters: data.parameters || [],
       },
     ]);
@@ -158,7 +157,7 @@ export const Attributes = ({}) => {
                   <Box>
                     <Button
                       icon={<Add />}
-                      label="Create new attribute"
+                      label="Create an attribute"
                       primary
                       onClick={() => {
                         // Create a unique identifier
@@ -173,7 +172,6 @@ export const Attributes = ({}) => {
                             _id: identifier,
                             name: "",
                             description: "",
-                            type: "physical",
                             parameters: [],
                           },
                         ]);
@@ -181,13 +179,13 @@ export const Attributes = ({}) => {
                     />
                   </Box>
 
-                  <Text>Or</Text>
+                  <Text>or</Text>
 
                   {/* Drop-down to select existing attributes */}
                   <FormField
                     label="Add existing attribute"
                     name="existing"
-                    info="Search for and add an existing attribute."
+                    info="Search and add an existing attribute."
                   >
                     <Select
                       options={attributeOptions.map((attribute) => {
@@ -204,7 +202,6 @@ export const Attributes = ({}) => {
                                 _id: option.id,
                                 name: value.name,
                                 description: value.description,
-                                type: value.type,
                                 parameters: value.parameters,
                               },
                             ]);
@@ -244,7 +241,7 @@ export const Attributes = ({}) => {
                   justify="between"
                   margin="medium"
                 >
-                  <Button label="Cancel" />
+                  <Button label="Cancel" color="status-critical" />
                   <Button
                     label="Back"
                     icon={<LinkPrevious />}
@@ -272,20 +269,17 @@ export const Attributes = ({}) => {
           </Box>
         )}
 
-        {isError && <ErrorLayer message={errorMessage} />}
-
         {showConfirmation && (
           <Layer>
             <Box
               width="large"
               direction="column"
               gap="small"
-              margin="small"
-              pad="medium"
+              pad="small"
               align="center"
             >
               <Heading level="3" margin={{ top: "small" }}>
-                Entity Summary
+                Summary
               </Heading>
               <Box direction="row" gap="small">
                 <Box
@@ -358,14 +352,12 @@ export const Attributes = ({}) => {
                 </Box>
               </Box>
 
-              <Box direction="row" justify="between" margin="medium">
+              <Box direction="row" gap="small" justify="between" margin="medium">
                 <Button
                   label="Back"
                   icon={<LinkPrevious />}
                   onClick={() =>
-                    navigate("/create/entity/associations", {
-                      state: attributeState,
-                    })
+                    setShowConfirmation(false)
                   }
                 />
 
@@ -389,6 +381,8 @@ export const Attributes = ({}) => {
             </Box>
           </Layer>
         )}
+
+        {isError && <ErrorLayer message={errorMessage} />}
       </PageContent>
     </Page>
   );

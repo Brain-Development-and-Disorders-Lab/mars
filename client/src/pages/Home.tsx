@@ -86,6 +86,7 @@ const Home = () => {
                   <Button
                     key={`view-collection-${value._id}`}
                     primary
+                    color="accent-4"
                     label="View"
                     icon={<LinkNext />}
                     onClick={() => navigate(`/collections/${value._id}`)}
@@ -108,6 +109,7 @@ const Home = () => {
                   <Button
                     key={`view-entity-${value._id}`}
                     primary
+                    color="accent-4"
                     label="View"
                     icon={<LinkNext />}
                     onClick={() => navigate(`/entities/${value._id}`)}

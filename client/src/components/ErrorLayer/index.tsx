@@ -18,7 +18,7 @@ const ErrorLayer = (props: { message: string }) => {
         direction="column"
         gap="small"
       >
-        <Heading margin="small" color="red">
+        <Heading margin="small" color="status-critical">
           Error!
         </Heading>
         <Text>

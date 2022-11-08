@@ -136,6 +136,7 @@ export const Entity = () => {
               <Box direction="row" gap="small">
                 <Button
                   label={"View Graph"}
+                  color="accent-4"
                   primary
                   onClick={() => setShowGraph(true)}
                 />
@@ -258,7 +259,7 @@ export const Entity = () => {
                           <Button
                             key={`remove-${collection}`}
                             icon={<Close />}
-                            color="red"
+                            color="status-critical"
                             primary
                             label="Remove"
                             onClick={() => {removeCollection(collection)}}
@@ -269,6 +270,7 @@ export const Entity = () => {
                           <Button
                             key={`view-${collection}`}
                             icon={<LinkNext />}
+                            color="accent-4"
                             primary
                             label="View"
                             onClick={() => {navigate(`/collections/${collection}`)}}
@@ -314,7 +316,7 @@ export const Entity = () => {
                           <Button
                             key={`remove-product-${product.id}`}
                             icon={<Close />}
-                            color="red"
+                            color="status-critical"
                             primary
                             label="Remove"
                             onClick={() => {removeProduct(product.id)}}
@@ -325,6 +327,7 @@ export const Entity = () => {
                           <Button
                             key={`view-product-${product.id}`}
                             icon={<LinkNext />}
+                            color="accent-4"
                             primary
                             label="View"
                             onClick={() => {navigate(`/entities/${product.id}`)}}

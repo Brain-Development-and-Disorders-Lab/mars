@@ -88,6 +88,7 @@ const Collections = () => {
                         </TableCell>
                         <TableCell align="center">
                           <Button
+                            color="accent-4"
                             primary
                             icon={<LinkNext />}
                             label="View"
