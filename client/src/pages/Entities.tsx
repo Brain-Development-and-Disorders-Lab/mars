@@ -71,9 +71,6 @@ const Entities = () => {
                   <TableCell scope="col" border="bottom" align="center">
                     Owner
                   </TableCell>
-                  <TableCell scope="col" border="bottom" align="center">
-                    Primary Collection
-                  </TableCell>
                   <TableCell scope="col" border="bottom"></TableCell>
                 </TableRow>
               </TableHeader>

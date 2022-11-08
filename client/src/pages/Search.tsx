@@ -69,7 +69,6 @@ const Search = () => {
       <PageContent>
         <PageHeader
           title="Search"
-          subtitle="Search across the entire database system."
           parent={<Anchor label="Home" href="/" />}
         />
 
