@@ -6,27 +6,25 @@ import _ from "underscore";
 
 // Import types from the client to enforce structure
 import {
-  CollectionModel,
   EntityModel,
   EntityStruct,
 } from "../../../client/types";
 
 // Utility functions
 import { getDatabase } from "../database/connection";
+import { addEntity } from "../database/operations/Collections";
+import { setOrigin, addProduct } from "../database/operations/Entities";
 
 // Constants
 const ENTITIES_COLLECTION = "entities";
-const COLLECTIONS_COLLECTION = "collections";
 
 const EntitiesRoute = express.Router();
 
 // Route: View all Entities
 EntitiesRoute.route("/entities").get((request: any, response: any) => {
-  const database = getDatabase();
-
   consola.debug("View all Entities:", "/entities");
 
-  database
+  getDatabase()
     .collection(ENTITIES_COLLECTION)
     .find({})
     .toArray((error: any, result: any) => {
@@ -37,12 +35,10 @@ EntitiesRoute.route("/entities").get((request: any, response: any) => {
 
 // Route: View specific Entity
 EntitiesRoute.route("/entities/:id").get((request: any, response: any) => {
-  const database = getDatabase();
-  const query = { _id: new ObjectId(request.params.id) };
-
   consola.debug("View Entity:", "/entities/" + request.params.id);
 
-  database
+  const query = { _id: new ObjectId(request.params.id) };
+  getDatabase()
     .collection(ENTITIES_COLLECTION)
     .findOne(query, (error: any, result: any) => {
       if (error) throw error;
@@ -51,10 +47,10 @@ EntitiesRoute.route("/entities/:id").get((request: any, response: any) => {
 });
 
 // Route: Create a new Entity, expects EntityStruct data
-EntitiesRoute.route("/entities/create").post(
-  (request: { body: EntityStruct }, response: any) => {
-    const database = getDatabase();
-    let data = {
+EntitiesRoute.route("/entities/create").post((request: { body: EntityStruct }, response: any) => {
+    consola.debug("Create new Entity:", "/entities/create", '"' + request.body.name + '"');
+
+    let entityData = {
       name: request.body.name,
       created: request.body.created,
       owner: request.body.owner,
@@ -68,133 +64,37 @@ EntitiesRoute.route("/entities/create").post(
     };
 
     // Insert the new Entity
-    database
+    getDatabase()
       .collection(ENTITIES_COLLECTION)
-      .insertOne(data, (error: any, content: any) => {
+      .insertOne(entityData, (error: any, content: any) => {
         if (error) throw error;
         response.json(content);
       });
 
     // Retrieve the ID of the inserted Entity
-    const insertedId = (data as EntityStruct & { _id: string })._id;
-
-    consola.debug("Create new Entity:", "/entities/create", '"' + data.name + '"');
+    const insertedId = (entityData as EntityStruct & { _id: string })._id;
 
     // We need to apply the associations that have been specified
-    if (data.associations.origin.id !== "") {
-      // Get the origin record's products list
-      const originQuery = { _id: new ObjectId(data.associations.origin.id) };
-
-      database
-        .collection(ENTITIES_COLLECTION)
-        .findOne(originQuery, (error: any, result: any) => {
-          if (error) throw error;
-
-          // Update product record of the origin to include this Entity as a product
-          // Create an updated set of values
-          const updatedValues = {
-            $set: {
-              associations: {
-                origin: {
-                  name: result.associations.origin.name,
-                  id: result.associations.origin.id,
-                },
-                products: [
-                  ...result.associations.products,
-                  {
-                    name: data.name,
-                    id: insertedId,
-                  },
-                ],
-              },
-            },
-          };
-
-          // Apply the updated structure to the target Entity
-          database
-            .collection(ENTITIES_COLLECTION)
-            .updateOne(
-              originQuery,
-              updatedValues,
-              (error: any, response: any) => {
-                if (error) throw error;
-              }
-            );
-        });
-    } else if (data.associations.products.length > 0) {
+    if (entityData.associations.origin.id !== "") {
+      addProduct(entityData.associations.origin.id, {
+        name: entityData.name,
+        id: insertedId,
+      });
+    } else if (entityData.associations.products.length > 0) {
       // Iterate over each product, setting their origin to the current Entity being added
-      data.associations.products.forEach((product) => {
-        const productQuery = { _id: new ObjectId(product.id) };
-        let productEntity: EntityModel;
-
-        database
-          .collection(ENTITIES_COLLECTION)
-          .findOne(productQuery, (error: any, result: any) => {
-            if (error) throw error;
-            productEntity = result;
-
-            // Update origin record of the product to include this Entity as a origin
-            const updatedValues = {
-              $set: {
-                associations: {
-                  origin: {
-                    name: data.name,
-                    id: insertedId,
-                  },
-                  products: productEntity.associations.products,
-                },
-              },
-            };
-
-            database
-              .collection(ENTITIES_COLLECTION)
-              .updateOne(
-                productQuery,
-                updatedValues,
-                (error: any, response: any) => {
-                  if (error) throw error;
-                }
-              );
-          });
+      entityData.associations.products.forEach((product) => {
+        setOrigin(product, {
+          name: entityData.name,
+          id: insertedId,
+        });
       });
     }
 
     // We need to apply the collections that have been specified
-    if (data.collections.length > 0) {
-      consola.info("Collections specified, applying...");
-      data.collections.map((collection) => {
-        const collectionQuery = { _id: new ObjectId(collection) };
-        let collectionResult: CollectionModel;
-
-        database
-          .collection(COLLECTIONS_COLLECTION)
-          .findOne(collectionQuery, (error: any, result: any) => {
-            if (error) throw error;
-            collectionResult = result;
-
-            // Update the collection to include the Entity as an association
-            const updatedValues = {
-              $set: {
-                associations: {
-                  entities: [
-                    ...collectionResult.entities,
-                    insertedId,
-                  ],
-                },
-              },
-            };
-
-            database
-              .collection(COLLECTIONS_COLLECTION)
-              .updateOne(
-                collectionQuery,
-                updatedValues,
-                (error: any, response: any) => {
-                  if (error) throw error;
-                  consola.success("Added Entity to collection:", collection);
-                }
-              );
-          });
+    if (entityData.collections.length > 0) {
+      consola.info("Collections specified, adding new Entity to each...");
+      entityData.collections.map((collection) => {
+        addEntity(collection, insertedId);
       });
     }
   }
@@ -202,8 +102,6 @@ EntitiesRoute.route("/entities/create").post(
 
 // Route: Update an Entity
 EntitiesRoute.route("/entities/update").post((request: { body: EntityModel }, response: any) => {
-  const database = getDatabase();
-
   // Extract data from the request
   let entityRequest: EntityModel = {
     _id: request.body._id,
@@ -219,10 +117,9 @@ EntitiesRoute.route("/entities/update").post((request: { body: EntityModel }, re
     attributes: request.body.attributes,
   };
 
-  const entityQuery = { _id: new ObjectId(entityRequest._id) };
   let entityResult: EntityModel;
-
-  database
+  const entityQuery = { _id: new ObjectId(entityRequest._id) };
+  getDatabase()
     .collection(ENTITIES_COLLECTION)
     .findOne(entityQuery, (error: any, result: any) => {
       if (error) throw error;
@@ -268,7 +165,9 @@ EntitiesRoute.route("/entities/update").post((request: { body: EntityModel }, re
         },
       };
 
-      database
+      // If there are changes to the products or collections, we need to update those
+
+      getDatabase()
         .collection(ENTITIES_COLLECTION)
         .updateOne(
           entityQuery,
@@ -289,14 +188,11 @@ EntitiesRoute.route("/entities/update").post((request: { body: EntityModel }, re
 });
 
 // Route: Remove an Entity
-EntitiesRoute.route("/entities/:id").delete(
-  (request: { params: { id: any } }, response: any) => {
-    const database = getDatabase();
-    let query = { _id: new ObjectId(request.params.id) };
-
+EntitiesRoute.route("/entities/:id").delete((request: { params: { id: any } }, response: any) => {
     consola.debug("Remove an Entity:", "/entities");
 
-    database
+    let query = { _id: new ObjectId(request.params.id) };
+    getDatabase()
       .collection(ENTITIES_COLLECTION)
       .deleteOne(query, (error: any, content: any) => {
         if (error) throw error;
