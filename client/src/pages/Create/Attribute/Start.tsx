@@ -72,6 +72,7 @@ export const Start = ({}) => {
                     placeholder={"Attribute Name"}
                     value={name}
                     onChange={(event) => setName(event.target.value)}
+                    required
                   />
                   <Select
                     placeholder="Attribute Type"
@@ -155,7 +156,7 @@ export const Start = ({}) => {
                 justify="between"
                 margin="medium"
               >
-                <Button label="Cancel" />
+                <Button label="Cancel" onClick={() => navigate("/attributes")} />
                 <Button
                   type="submit"
                   label="Finish"

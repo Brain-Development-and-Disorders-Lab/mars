@@ -284,13 +284,15 @@ export const Entity = () => {
                   />
                 ) : null}
               </Box>
-              {entityData.attributes.length > 0 ? (
-                entityData.attributes.map((attribute) => {
-                  return <AttributeCard data={attribute} key={`attribute-${attribute}`}/>;
-                })
-              ) : (
-                <Text>No attributes specified.</Text>
-              )}
+              <Box gap="small" direction="row">
+                {entityData.attributes.length > 0 ? (
+                  entityData.attributes.map((attribute) => {
+                    return <AttributeCard data={attribute} key={`attribute-${attribute.name}`}/>;
+                  })
+                ) : (
+                  <Text>No attributes specified.</Text>
+                )}
+              </Box>
             </Box>
           </Box>
         ) : (

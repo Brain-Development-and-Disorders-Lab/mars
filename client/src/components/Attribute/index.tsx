@@ -50,6 +50,7 @@ const Attribute = (props: AttributeProps) => {
           value={name}
           onChange={(event) => setName(event.target.value)}
           disabled={finished}
+          required
         />
         <Select
           placeholder="Type"

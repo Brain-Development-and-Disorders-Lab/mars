@@ -5,12 +5,9 @@ import {
   Box,
   Button,
   DateInput,
-  FileInput,
-  Form,
   FormField,
   Select,
   Spinner,
-  Text,
   TextInput,
 } from "grommet/components";
 import { StatusDisabled } from "grommet-icons";
@@ -23,11 +20,8 @@ import { ParameterProps, ParameterStruct, EntityModel } from "types";
 import ErrorLayer from "src/components/ErrorLayer";
 import Linky from "src/components/Linky";
 
-// Consola
-import consola from "consola";
-
 // Constants
-const VALID_TYPES = ["number", "file", "url", "date", "string", "entity"];
+const VALID_TYPES = ["number", "url", "date", "string", "entity"];
 
 const Parameter = (props: ParameterProps) => {
   const [name, setName] = useState(props.name);
@@ -80,31 +74,7 @@ const Parameter = (props: ParameterProps) => {
   let dataElement;
 
   // Set the data input field depending on the selected type
-  if (type === "file") {
-    // File input
-    dataElement = props.disabled ? (
-      <Text>Filename</Text>
-    ) : (
-      <Box background="brand">
-        <FileInput
-          name="file"
-          color="light-1"
-          onChange={(event) => {
-            if (event) {
-              const fileList = event.target.files;
-              if (fileList) {
-                for (let i = 0; i < fileList.length; i += 1) {
-                  const file = fileList[i];
-                  consola.debug("File:", file);
-                }
-              }
-            }
-          }}
-          disabled={props.disabled}
-        />
-      </Box>
-    );
-  } else if (type === "date") {
+  if (type === "date") {
     // Date picker
     dataElement = (
       <DateInput
@@ -113,6 +83,7 @@ const Parameter = (props: ParameterProps) => {
         value={data as string}
         onChange={({ value }) => setData(value.toString())}
         disabled={props.disabled}
+        required
       />
     );
   } else if (type === "entity") {
@@ -140,6 +111,7 @@ const Parameter = (props: ParameterProps) => {
           setOptionData(entityData.filter((entity) => exp.test(entity.name)));
         }}
         disabled={props.disabled}
+        required
       />
     );
   } else if (type === "url") {
@@ -153,6 +125,7 @@ const Parameter = (props: ParameterProps) => {
         value={data as string}
         onChange={(event) => setData(event.target.value.toString())}
         disabled={props.disabled}
+        required
       />
     );
   } else {
@@ -164,46 +137,46 @@ const Parameter = (props: ParameterProps) => {
         value={data as string | number}
         onChange={(event) => setData(event.target.value)}
         disabled={props.disabled}
+        required
       />
     );
   }
 
   return (
     <Box direction="row" gap="medium" fill="horizontal">
-      <Form>
-        <Box direction="row" gap="small" justify="center">
-          {/* Parameter name */}
-          <FormField label="Name">
-            <TextInput
-              width="medium"
-              placeholder="Parameter name"
-              value={name}
-              onChange={(event) => {
-                setName(event.target.value);
-              }}
-              disabled={props.disabled}
-            />
-          </FormField>
+      <Box direction="row" gap="small" justify="center">
+        {/* Parameter name */}
+        <FormField label="Name">
+          <TextInput
+            width="medium"
+            placeholder="Parameter name"
+            value={name}
+            onChange={(event) => {
+              setName(event.target.value);
+            }}
+            disabled={props.disabled}
+            required
+          />
+        </FormField>
 
-          {/* Parameter type */}
-          <FormField label="Type">
-            <Select
-              width="medium"
-              options={VALID_TYPES}
-              value={type}
-              onChange={({ option }) => {
-                setType(option);
-              }}
-              disabled={props.disabled}
-            />
-          </FormField>
+        {/* Parameter type */}
+        <FormField label="Type">
+          <Select
+            width="medium"
+            options={VALID_TYPES}
+            value={type}
+            onChange={({ option }) => {
+              setType(option);
+            }}
+            disabled={props.disabled}
+          />
+        </FormField>
 
-          {/* Parameter data */}
-          <FormField label="Data">
-            {isLoaded ? dataElement : <Spinner size="small" />}
-          </FormField>
-        </Box>
-      </Form>
+        {/* Parameter data */}
+        <FormField label="Data">
+          {isLoaded ? dataElement : <Spinner size="small" />}
+        </FormField>
+      </Box>
       <Box justify="center">
         {/* Remove Parameter */}
         {props.showRemove && <Button
