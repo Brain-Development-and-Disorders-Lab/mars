@@ -15,10 +15,6 @@ import CollectionsRoute from "./routes/Collections";
 import AttributesRoute from "./routes/Attributes";
 import SearchRoute from "./routes/Search";
 
-// File watching
-const PATH = "/Volumes/linda.richards/Active/CCD Neurocognitive Task Data";
-import { watchFiles } from "./lib/watcher";
-
 // Console logging configuration
 consola.level = LogLevel.Debug;
 
@@ -39,6 +35,3 @@ app.listen(port, () => {
 
   consola.info(`Server is running on port: ${port}`);
 });
-
-// Start file watcher
-watchFiles(PATH);
