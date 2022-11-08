@@ -52,7 +52,13 @@ const AttributeCard = (props: AttributeCardProps) => {
             <Text>
               <strong>Description:</strong>
             </Text>
-            <Text truncate>{props.data.description}</Text>
+            <Text truncate>
+              {props.data.description.length > 0 ?
+                props.data.description
+              :
+                "No description."
+              }
+            </Text>
           </Box>
         </CardBody>
 
@@ -112,7 +118,13 @@ const AttributeCard = (props: AttributeCardProps) => {
                     </Heading>
                   </TableCell>
                   <TableCell border>
-                    <Paragraph>{props.data.description}</Paragraph>
+                    <Paragraph>
+                      {props.data.description.length > 0 ?
+                        props.data.description
+                      :
+                        "No description."
+                      }
+                    </Paragraph>
                   </TableCell>
                 </TableRow>
                 <TableRow>
@@ -131,7 +143,7 @@ const AttributeCard = (props: AttributeCardProps) => {
             <Box direction="column" align="center" background="light-2" round>
               <Heading level="3">Parameters{props.data.parameters && " (" + props.data.parameters.length + ")"}</Heading>
               <Box pad="small">
-                {props.data.parameters &&
+                {props.data.parameters && props.data.parameters.length > 0 ?
                   props.data.parameters.map((parameter) => {
                     return (
                       <Parameter
@@ -143,7 +155,10 @@ const AttributeCard = (props: AttributeCardProps) => {
                         disabled
                       />
                     );
-                  })}
+                  })
+                :
+                  <Paragraph>No parameters.</Paragraph>
+                }
               </Box>
             </Box>
           </Box>
