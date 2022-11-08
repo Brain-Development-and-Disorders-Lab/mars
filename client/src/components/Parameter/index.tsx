@@ -143,12 +143,11 @@ const Parameter = (props: ParameterProps) => {
   }
 
   return (
-    <Box direction="row" gap="medium" fill="horizontal">
-      <Box direction="row" gap="small" justify="center">
+    <Box direction="row" gap="medium" justify="between" fill>
+      <Box direction="row" gap="small">
         {/* Parameter name */}
         <FormField label="Name">
           <TextInput
-            width="medium"
             placeholder="Parameter name"
             value={name}
             onChange={(event) => {

@@ -7,6 +7,7 @@ import {
   Form,
   Heading,
   PageHeader,
+  Text,
   TextArea,
   TextInput,
 } from "grommet/components";
@@ -16,15 +17,18 @@ import { Add, Checkmark } from "grommet-icons";
 // Navigation
 import { useNavigate } from "react-router-dom";
 
+// Utility library
 import _ from "underscore";
+
+// Consola
 import consola from "consola";
 
 // Parameter components and custom types
 import { AttributeStruct, ParameterStruct } from "types";
-import ParameterGroup from "src/components/ParameterGroup";
 
 // Database functions
 import { postData } from "src/lib/database/postData";
+import Parameter from "src/components/Parameter";
 
 export const Start = ({}) => {
   const navigate = useNavigate();
@@ -37,7 +41,33 @@ export const Start = ({}) => {
     name: name,
     description: description,
     parameters: parameters,
-  }
+  };
+
+  const onUpdate = (data: ParameterStruct) => {
+    // Store the received Parameter information
+    setParameters(
+      parameters.filter((parameter) => {
+        // Get the relevant Parameter
+        if (parameter.identifier === data.identifier) {
+          parameter.name = data.name;
+          parameter.type = data.type;
+          parameter.data = data.data;
+        }
+        return parameter;
+      })
+    );
+  };
+
+  const onRemove = (identifier: string) => {
+    setParameters(parameters.filter((parameter) => {
+      // Filter out the Parameter to be removed
+      if (!_.isEqual(parameter.identifier, identifier)) {
+        return parameter;
+      } else {
+        return;
+      }
+    }))
+  };
 
   return (
     <Page kind="wide" pad={{left: "small", right: "small"}}>
@@ -102,36 +132,25 @@ export const Start = ({}) => {
                     />
                   </Box>
 
-                  <Box direction="column" gap="small" margin="small">
-                    <ParameterGroup
-                      parameters={parameters}
-                      showRemove
-                      onRemove={(identifier: string) => {
-                        setParameters(parameters.filter((parameter) => {
-                          // Filter out the Parameter to be removed
-                          if (!_.isEqual(parameter.identifier, identifier)) {
-                            return parameter;
-                          } else {
-                            return;
-                          }
-                        }))
-                      }}
-                      onUpdate={(data: ParameterStruct) => {
-                        // Store the received Parameter information
-                        setParameters(
-                          parameters.filter((parameter) => {
-                            // Get the relevant Parameter
-                            if (parameter.identifier === data.identifier) {
-                              parameter.name = data.name;
-                              parameter.type = data.type;
-                              parameter.data = data.data;
-                            }
-                            return parameter;
-                          })
-                        );
-                      }}
-                      disabled={false}
-                    />
+                  <Box direction="column" gap="small" margin="small" align="center">
+                    {parameters.length > 0 ?
+                      parameters.map((parameter) => {
+                        return (
+                          <Parameter
+                            identifier={parameter.identifier}
+                            name={parameter.name}
+                            type={parameter.type}
+                            data={parameter.data}
+                            disabled={false}
+                            onRemove={onRemove}
+                            onUpdate={onUpdate}
+                            showRemove
+                          />
+                        )
+                      })
+                    :
+                      <Text>No parameters have been added.</Text>
+                    }
                   </Box>
                 </Box>
               </Box>

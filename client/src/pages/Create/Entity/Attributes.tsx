@@ -26,7 +26,7 @@ import { postData } from "src/lib/database/postData";
 import { Create, AttributeModel, AttributeProps } from "types";
 
 // Custom components
-import AttributeGroup from "src/components/AttributeGroup";
+import Attribute from "src/components/Attribute";
 import ErrorLayer from "src/components/ErrorLayer";
 import Linky from "src/components/Linky";
 
@@ -111,7 +111,7 @@ export const Attributes = ({}) => {
   }, []);
 
   // Used to receive data from a Attribute component
-  const dataCallback = (data: AttributeProps) => {
+  const onUpdate = (data: AttributeProps) => {
     setAttributeData([
       ...attributeData,
       {
@@ -124,7 +124,7 @@ export const Attributes = ({}) => {
   };
 
   // Removal callback
-  const removeCallback = (identifier: string) => {
+  const onRemove = (identifier: string) => {
     // We need to filter the removed attribute from the total collection
     setAttributes(
       attributes.filter((attribute) => attribute._id !== identifier)
@@ -227,11 +227,18 @@ export const Attributes = ({}) => {
 
                 {/* Display all existing attributes */}
                 <Box direction="column" gap="small" margin="small">
-                  <AttributeGroup
-                    attributes={attributes}
-                    onRemove={removeCallback}
-                    onUpdate={dataCallback}
-                  />
+                  {attributes.map((attribute) => {
+                    return (
+                      <Attribute
+                        identifier={attribute._id}
+                        name={attribute.name}
+                        description={attribute.description}
+                        parameters={attribute.parameters}
+                        onRemove={onRemove}
+                        onUpdate={onUpdate}
+                      />
+                    )
+                  })}
                 </Box>
 
                 {/* Action buttons */}
