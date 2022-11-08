@@ -23,15 +23,19 @@ import { Add, Close, LinkNext } from "grommet-icons";
 // Navigation
 import { useParams, useNavigate } from "react-router-dom";
 
+// Consola
+import consola from "consola";
+
 // Database and models
 import { getData } from "src/lib/database/getData";
-import { EntityModel } from "types";
+import { AttributeStruct, EntityModel } from "types";
 
 // Custom components
 import Graph from "src/components/Graph";
 import ErrorLayer from "src/components/ErrorLayer";
 import Linky from "src/components/Linky";
 import AttributeCard from "src/components/AttributeCard";
+import { postData } from "src/lib/database/postData";
 
 export const Entity = () => {
   const { id } = useParams();
@@ -45,12 +49,35 @@ export const Entity = () => {
 
   const [showGraph, setShowGraph] = useState(false);
 
+  // Break up entity data into editable fields
   const [editing, setEditing] = useState(false);
   const [description, setDescription] = useState("");
+  const [collections, setCollections] = useState([] as string[]);
+  const [products, setProducts] = useState([] as { name: string; id: string }[]);
+  const [attributes, setAttributes] = useState([] as AttributeStruct[]);
 
+  // Toggle editing status
   const handleEditClick = () => {
     if (editing) {
-      setEditing(false);
+      // Collate data for updating
+      const updateData: EntityModel = {
+        _id: entityData._id,
+        name: entityData.name,
+        created: entityData.created,
+        owner: entityData.owner,
+        description: description,
+        collections: collections,
+        associations: {
+          origin: entityData.associations.origin,
+          products: products,
+        },
+        attributes: attributes,
+      };
+
+      // Update data
+      postData(`/entities/update`, updateData).then(() => {
+        setEditing(false);
+      });
     } else {
       setEditing(true);
     }
@@ -64,7 +91,7 @@ export const Entity = () => {
       setEntityData(value);
 
       // Check the contents of the response
-      if (value["error"] !== undefined) {
+      if (value["error"]) {
         setErrorMessage(value["error"]);
         setIsError(true);
       }
@@ -78,8 +105,17 @@ export const Entity = () => {
     if (isLoaded) {
       // Update the state of editable data fields
       setDescription(entityData.description);
+      setCollections(entityData.collections);
+      setProducts(entityData.associations.products);
+      setAttributes(entityData.attributes);
     }
   }, [isLoaded]);
+
+  const removeCollection = (id: string) => {
+    setCollections(collections.filter((collection) => {
+      return collection !== id;
+    }));
+  };
 
   return (
     <Page kind="wide" pad={{left: "small", right: "small"}}>
@@ -173,7 +209,13 @@ export const Entity = () => {
                     </TableCell>
                     <TableCell border>
                       {editing ? (
-                        <TextInput value={description} />
+                        <TextInput
+                          value={description}
+                          onChange={(event) => {
+                            consola.debug("Updating Entity description");
+                            setDescription(event.target.value);
+                          }}
+                        />
                       ) : (
                         <Paragraph>{description}</Paragraph>
                       )}
@@ -187,7 +229,7 @@ export const Entity = () => {
             <Box pad="small">
               <Box direction="row" justify="between" margin={{bottom: "small"}}>
                 <Heading level="3" margin="none">
-                  Collections{entityData.collections.length > 0 && " (" + entityData.collections.length + ")"}
+                  Collections{collections.length > 0 && " (" + collections.length + ")"}
                 </Heading>
                 {editing ? (
                   <Button
@@ -198,7 +240,7 @@ export const Entity = () => {
                   />
                 ) : null}
               </Box>
-              {entityData.collections.length > 0 ? (
+              {collections.length > 0 ? (
                 <List
                   primaryKey={(collection) => {
                     return <Linky type="collections" id={collection} key={`linky-collection-${collection}`}/>
@@ -206,18 +248,31 @@ export const Entity = () => {
                   secondaryKey={(collection) => {
                     return (
                       <Box direction="row" gap="small" margin="none" key={`box-collection-${collection}`}>
-                        <Button
-                          key={`view-${collection}`}
-                          icon={<LinkNext />}
-                          primary
-                          label="View"
-                          onClick={() => {navigate(`/collections/${collection}`)}}
-                          reverse
-                        />
+                        {editing &&
+                          <Button
+                            key={`remove-${collection}`}
+                            icon={<Close />}
+                            color="red"
+                            primary
+                            label="Remove"
+                            onClick={() => {removeCollection(collection)}}
+                            reverse
+                          />
+                        }
+                        {!editing &&
+                          <Button
+                            key={`view-${collection}`}
+                            icon={<LinkNext />}
+                            primary
+                            label="View"
+                            onClick={() => {navigate(`/collections/${collection}`)}}
+                            reverse
+                          />
+                        }
                       </Box>
                     )
                   }}
-                  data={entityData.collections}
+                  data={collections}
                   show={4}
                   paginate
                 />
@@ -230,7 +285,7 @@ export const Entity = () => {
             <Box pad="small">
               <Box direction="row" justify="between" margin={{bottom: "small"}}>
                 <Heading level="3"  margin="none">
-                  Products{entityData.associations.products.length > 0 && " (" + entityData.associations.products.length + ")"}
+                  Products{products.length > 0 && " (" + products.length + ")"}
                 </Heading>
                 {editing ? (
                   <Button
@@ -241,7 +296,7 @@ export const Entity = () => {
                   />
                 ) : null}
               </Box>
-              {entityData.associations.products.length > 0 ? (
+              {products.length > 0 ? (
                 <List
                   primaryKey={(product) => {
                     return <Linky type="entities" id={product.id} key={`linky-product-${product.id}`}/>
@@ -260,7 +315,7 @@ export const Entity = () => {
                       </Box>
                     )
                   }}
-                  data={entityData.associations.products}
+                  data={products}
                   show={4}
                   paginate
                 />
@@ -273,7 +328,7 @@ export const Entity = () => {
             <Box pad="small">
               <Box direction="row" justify="between" margin={{bottom: "small"}}>
                 <Heading level="3" margin="none">
-                  Attributes{entityData.attributes.length > 0 && " (" + entityData.attributes.length + ")"}
+                  Attributes{attributes.length > 0 && " (" + attributes.length + ")"}
                 </Heading>
                 {editing ? (
                   <Button
@@ -285,8 +340,8 @@ export const Entity = () => {
                 ) : null}
               </Box>
               <Box gap="small" direction="row">
-                {entityData.attributes.length > 0 ? (
-                  entityData.attributes.map((attribute) => {
+                {attributes.length > 0 ? (
+                  attributes.map((attribute) => {
                     return <AttributeCard data={attribute} key={`attribute-${attribute.name}`}/>;
                   })
                 ) : (

@@ -8,7 +8,7 @@ import {
   TextArea,
   TextInput,
 } from "grommet/components";
-import { Add, Save, SettingsOption, StatusDisabled } from "grommet-icons";
+import { Add, Close, Save, SettingsOption } from "grommet-icons";
 
 // Types
 import { ParameterStruct, AttributeProps } from "types";
@@ -147,7 +147,7 @@ const Attribute = (props: AttributeProps) => {
               props.onRemove(props.identifier);
             }
           }}
-          icon={<StatusDisabled />}
+          icon={<Close />}
           reverse
         />
       </Box>

@@ -19,7 +19,7 @@ import {
   Tag,
 } from "grommet/components";
 import { Page, PageContent } from "grommet";
-import { Add, Close, LinkNext, StatusDisabled } from "grommet-icons";
+import { Add, Close, LinkNext } from "grommet-icons";
 
 // Navigation
 import { useParams, useNavigate } from "react-router-dom";
@@ -179,7 +179,7 @@ export const Collection = () => {
                         />
                         <Button
                           key={`remove-${entity}`}
-                          icon={<StatusDisabled />}
+                          icon={<Close />}
                           primary
                           label="Remove"
                           color="red"

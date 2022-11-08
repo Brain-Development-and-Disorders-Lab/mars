@@ -10,7 +10,7 @@ import {
   Spinner,
   TextInput,
 } from "grommet/components";
-import { StatusDisabled } from "grommet-icons";
+import { Close } from "grommet-icons";
 
 // Database and models
 import { getData } from "src/lib/database/getData";
@@ -181,7 +181,7 @@ const Parameter = (props: ParameterProps) => {
         {/* Remove Parameter */}
         {props.showRemove && <Button
           key={`remove-${props.identifier}`}
-          icon={<StatusDisabled />}
+          icon={<Close />}
           primary
           label="Remove"
           color="red"
