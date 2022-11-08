@@ -21,7 +21,7 @@ import { LinkNext } from "grommet-icons";
 import { useNavigate } from "react-router-dom";
 
 // Database and models
-import { getData } from "src/lib/database/getData";
+import { getData } from "src/database/functions";
 import { AttributeModel } from "types";
 
 // Custom components

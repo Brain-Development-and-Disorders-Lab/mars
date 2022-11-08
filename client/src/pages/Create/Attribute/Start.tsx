@@ -27,7 +27,7 @@ import consola from "consola";
 import { AttributeStruct, ParameterStruct } from "types";
 
 // Database functions
-import { postData } from "src/lib/database/postData";
+import { postData } from "src/database/functions";
 import Parameter from "src/components/Parameter";
 
 export const Start = ({}) => {

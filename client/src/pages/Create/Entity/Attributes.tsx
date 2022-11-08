@@ -21,8 +21,7 @@ import { Add, Checkmark, LinkPrevious } from "grommet-icons";
 import { useLocation, useNavigate } from "react-router-dom";
 
 // Database and models
-import { getData } from "src/lib/database/getData";
-import { postData } from "src/lib/database/postData";
+import { getData, postData } from "src/database/functions";
 import { Create, AttributeModel, AttributeProps } from "types";
 
 // Custom components

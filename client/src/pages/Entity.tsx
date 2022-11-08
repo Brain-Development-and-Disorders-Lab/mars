@@ -27,7 +27,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import consola from "consola";
 
 // Database and models
-import { getData } from "src/lib/database/getData";
+import { getData, postData } from "src/database/functions";
 import { AttributeStruct, EntityModel } from "types";
 
 // Custom components
@@ -35,7 +35,6 @@ import Graph from "src/components/Graph";
 import ErrorLayer from "src/components/ErrorLayer";
 import Linky from "src/components/Linky";
 import AttributeCard from "src/components/AttributeCard";
-import { postData } from "src/lib/database/postData";
 
 export const Entity = () => {
   const { id } = useParams();

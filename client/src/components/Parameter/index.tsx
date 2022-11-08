@@ -13,7 +13,7 @@ import {
 import { Close } from "grommet-icons";
 
 // Database and models
-import { getData } from "src/lib/database/getData";
+import { getData } from "src/database/functions";
 import { ParameterProps, ParameterStruct, EntityModel } from "types";
 
 // Custom components

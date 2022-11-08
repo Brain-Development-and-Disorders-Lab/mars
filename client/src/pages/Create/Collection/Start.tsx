@@ -20,12 +20,11 @@ import { Checkmark } from "grommet-icons";
 import { useLocation, useNavigate } from "react-router-dom";
 
 // Database and models
-import { getData } from "src/lib/database/getData";
-import { postData } from "src/lib/database/postData";
+import { getData, postData } from "src/database/functions";
 import { CollectionStruct, Create, EntityModel } from "types";
 
 // Utility functions
-import { pseudoId } from "src/lib/functions";
+import { pseudoId } from "src/database/functions";
 
 // Custom components
 import ErrorLayer from "src/components/ErrorLayer";

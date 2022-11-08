@@ -14,12 +14,12 @@ import Navigation from "./components/Navigation";
 
 // Custom pages
 import Attribute from "./pages/Attribute";
-import Attributes from "./pages/Attributes";
+import Attributes from "./pages/View/Attributes";
 import Collection from "./pages/Collection";
-import Collections from "./pages/Collections";
+import Collections from "./pages/View/Collections";
 import Search from "./pages/Search";
 import Entity from "./pages/Entity";
-import Entities from "./pages/Entities";
+import Entities from "./pages/View/Entities";
 import {Start as EntityStart} from "./pages/Create/Entity/Start";
 import {Associations as EntityAssociations} from "./pages/Create/Entity/Associations";
 import {Attributes as EntityAttributes} from "./pages/Create/Entity/Attributes";

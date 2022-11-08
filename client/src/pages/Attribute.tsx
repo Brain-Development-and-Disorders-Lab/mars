@@ -18,7 +18,7 @@ import { Page, PageContent } from "grommet";
 import { useParams } from "react-router-dom";
 
 // Database and models
-import { getData } from "src/lib/database/getData";
+import { getData } from "src/database/functions";
 import { AttributeModel } from "types";
 
 // Custom components

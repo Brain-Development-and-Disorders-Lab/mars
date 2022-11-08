@@ -19,7 +19,7 @@ import { LinkNext, LinkPrevious } from "grommet-icons";
 import { useLocation, useNavigate } from "react-router-dom";
 
 // Database and models
-import { getData } from "src/lib/database/getData";
+import { getData } from "src/database/functions";
 import { Create, CollectionModel, EntityModel } from "types";
 
 // Custom components

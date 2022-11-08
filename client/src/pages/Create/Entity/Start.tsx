@@ -21,7 +21,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Create } from "types";
 
 // Utility functions
-import { pseudoId } from "src/lib/functions";
+import { pseudoId } from "src/database/functions";
 
 export const Start = ({}) => {
   const navigate = useNavigate();

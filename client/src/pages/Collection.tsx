@@ -25,8 +25,7 @@ import { Add, Close, LinkNext } from "grommet-icons";
 import { useParams, useNavigate } from "react-router-dom";
 
 // Database and models
-import { getData } from "src/lib/database/getData";
-import { postData } from "src/lib/database/postData";
+import { getData, postData } from "src/database/functions";
 import { CollectionModel, EntityModel } from "types";
 
 // Custom components

@@ -13,7 +13,7 @@ import { History, LinkNext } from "grommet-icons";
 import { Page, PageContent } from "grommet";
 
 // Database and models
-import { getData } from "src/lib/database/getData";
+import { getData } from "src/database/functions";
 import { CollectionModel, EntityModel } from "types";
 
 // Navigation

@@ -4,7 +4,9 @@ import {
   Anchor,
   Box,
   Button,
+  Heading,
   PageHeader,
+  Paragraph,
   Spinner,
   Table,
   TableBody,
@@ -19,26 +21,27 @@ import { LinkNext } from "grommet-icons";
 import { useNavigate } from "react-router-dom";
 
 // Database and models
-import { getData } from "src/lib/database/getData";
-import { EntityModel } from "types";
+import { getData } from "src/database/functions";
+import { CollectionModel } from "types";
 
 // Custom components
-import ErrorLayer from "../components/ErrorLayer";
+import ErrorLayer from "src/components/ErrorLayer";
 
-const Entities = () => {
+const Collections = () => {
   const navigate = useNavigate();
-
   const [isLoaded, setIsLoaded] = useState(false);
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("An error has occurred.");
-  const [entityData, setEntityData] = useState([] as EntityModel[]);
+  const [collectionsData, setCollectionsData] = useState(
+    [] as CollectionModel[]
+  );
 
   useEffect(() => {
-    const response = getData(`/entities`);
+    const response = getData(`/collections`);
 
     // Handle the response from the database
     response.then((value) => {
-      setEntityData(value);
+      setCollectionsData(value);
 
       // Check the contents of the response
       if (value["error"] !== undefined) {
@@ -57,39 +60,31 @@ const Entities = () => {
         {isLoaded && isError === false ? (
           <>
             <PageHeader
-              title="Entities"
+              title="Collections"
               parent={<Anchor label="Home" href="/" />}
             />
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableCell scope="col" border="bottom" align="center">
-                    Identifier
+                    Name
                   </TableCell>
                   <TableCell scope="col" border="bottom" align="center">
-                    Created
-                  </TableCell>
-                  <TableCell scope="col" border="bottom" align="center">
-                    Owner
+                    Description
                   </TableCell>
                   <TableCell scope="col" border="bottom"></TableCell>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoaded &&
-                  entityData.map((entity) => {
+                  collectionsData.map((value) => {
                     return (
-                      <TableRow key={entity._id}>
+                      <TableRow key={value._id}>
                         <TableCell scope="row" border="right" align="center">
-                          <strong>{entity.name}</strong>
+                          <Heading level={4} margin="none">{value.name}</Heading>
                         </TableCell>
-                        <TableCell align="center">
-                          <strong>
-                            {new Date(entity.created).toDateString()}
-                          </strong>
-                        </TableCell>
-                        <TableCell align="center">
-                          <strong>{entity.owner}</strong>
+                        <TableCell align="left">
+                          <Paragraph fill>{value.description}</Paragraph>
                         </TableCell>
                         <TableCell align="center">
                           <Button
@@ -97,7 +92,9 @@ const Entities = () => {
                             primary
                             icon={<LinkNext />}
                             label="View"
-                            onClick={() => navigate(`/entities/${entity._id}`)}
+                            onClick={() =>
+                              navigate(`/collections/${value._id}`)
+                            }
                             reverse
                           />
                         </TableCell>
@@ -118,4 +115,4 @@ const Entities = () => {
   );
 };
 
-export default Entities;
+export default Collections;
