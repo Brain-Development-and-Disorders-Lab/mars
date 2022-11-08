@@ -6,6 +6,9 @@ import express from "express";
 import cors from "cors";
 import consola, { LogLevel } from "consola";
 
+// Console logging configuration
+consola.level = LogLevel.Debug;
+
 // Get the connection functions
 import { connect } from "./database/connection";
 
@@ -14,9 +17,6 @@ import EntitiesRoute from "./routes/Entities";
 import CollectionsRoute from "./routes/Collections";
 import AttributesRoute from "./routes/Attributes";
 import SearchRoute from "./routes/Search";
-
-// Console logging configuration
-consola.level = LogLevel.Debug;
 
 const app = express();
 const port = process.env.PORT || 8000;

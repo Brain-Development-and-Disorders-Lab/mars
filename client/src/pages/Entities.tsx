@@ -57,7 +57,6 @@ const Entities = () => {
           <>
             <PageHeader
               title="Entities"
-              subtitle="View all Entities currently tracked by the system."
               parent={<Anchor label="Home" href="/" />}
             />
             <Table>

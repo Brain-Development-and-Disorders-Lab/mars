@@ -16,12 +16,9 @@ const ENTITIES_COLLECTION = "entities";
  * @param {{ name: string, id: string }} product an Entity to add as a "product" association
  */
 export const addProduct = (entity: string, product: { name: string, id: string }) => {
-  const database = getDatabase();
-
   // Get the origin record's products list
   const originQuery = { _id: new ObjectId(entity) };
-
-  database
+  getDatabase()
     .collection(ENTITIES_COLLECTION)
     .findOne(originQuery, (error: any, result: any) => {
       if (error) throw error;
@@ -47,7 +44,7 @@ export const addProduct = (entity: string, product: { name: string, id: string }
       };
 
       // Apply the updated structure to the target Entity
-      database
+      getDatabase()
         .collection(ENTITIES_COLLECTION)
         .updateOne(
           originQuery,
@@ -65,9 +62,8 @@ export const addProduct = (entity: string, product: { name: string, id: string }
  * @param {{ name: string, id: string }} origin an Entity to add as an "origin" association
  */
 export const setOrigin = (entity: { name: string, id: string }, origin: { name: string, id: string }) => {
-  const productQuery = { _id: new ObjectId(entity.id) };
   let productEntity: EntityModel;
-
+  const productQuery = { _id: new ObjectId(entity.id) };
   getDatabase()
     .collection(ENTITIES_COLLECTION)
     .findOne(productQuery, (error: any, result: any) => {
