@@ -5,7 +5,7 @@ import { ObjectId } from "mongodb";
 import { getDatabase } from "../connection";
 
 // Custom types
-import { CollectionModel } from "../../../../client/types";
+import { CollectionModel } from "../../../types";
 
 // Consola
 import consola from "consola";

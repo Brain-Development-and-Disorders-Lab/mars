@@ -5,7 +5,7 @@ import { ObjectId } from "mongodb";
 import { getDatabase } from "../connection";
 
 // Custom types
-import { EntityModel } from "../../../../client/types";
+import { EntityModel } from "../../../types";
 
 // Constants
 const ENTITIES_COLLECTION = "entities";

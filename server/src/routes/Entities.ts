@@ -8,7 +8,7 @@ import _ from "underscore";
 import {
   EntityModel,
   EntityStruct,
-} from "../../../client/types";
+} from "../../types";
 
 // Utility functions
 import { getDatabase } from "../database/connection";

@@ -4,7 +4,9 @@ import consola from "consola";
 
 // Database connection
 import { getDatabase } from "../database/connection";
-import { AttributeStruct } from "../../../client/types";
+
+// Custom types
+import { AttributeStruct } from "../../types";
 
 // Constants
 const ATTRIBUTES_COLLECTION = "attributes";
@@ -53,7 +55,6 @@ AttributesRoute.route("/attributes/create").post(
     let data = {
       name: request.body.name,
       description: request.body.description,
-      type: request.body.type,
       parameters: request.body.parameters,
     };
 
