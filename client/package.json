@@ -9,6 +9,7 @@
     "start": "webpack serve",
     "build": "webpack",
     "clean": "rm -rf dist",
+    "container": "docker build --file=client/client.dockerfile -t client .",
     "lint": "prettier --write ."
   },
   "dependencies": {

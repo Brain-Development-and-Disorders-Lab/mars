@@ -22,3 +22,17 @@ services:
       ME_CONFIG_MONGODB_ADMINUSERNAME: admin
       ME_CONFIG_MONGODB_ADMINPASSWORD: metadataadmin
       ME_CONFIG_MONGODB_URL: mongodb://admin:metadataadmin@database:27017/
+
+  server:
+    image: server
+    ports:
+      - 8000:8000
+    depends_on:
+      - database
+
+  client:
+    image: client
+    ports:
+      - 8080:8080
+    depends_on:
+      - server
