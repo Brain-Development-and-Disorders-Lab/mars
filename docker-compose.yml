@@ -24,14 +24,18 @@ services:
       ME_CONFIG_MONGODB_URL: mongodb://admin:metadataadmin@database:27017/
 
   server:
-    image: server
+    build:
+      context: .
+      dockerfile: ./server/server.dockerfile
     ports:
       - 8000:8000
     depends_on:
       - database
 
   client:
-    image: client
+    build:
+      context: .
+      dockerfile: ./client/client.dockerfile
     ports:
       - 8080:8080
     depends_on:
