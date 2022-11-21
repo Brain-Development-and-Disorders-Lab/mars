@@ -1,6 +1,7 @@
 version: '3.1'
 
 services:
+  # MongoDB instance
   database:
     image: mongo
     restart: always
@@ -13,6 +14,7 @@ services:
     volumes:
       - ./server/src/setup.js:/docker-entrypoint-initdb.d/setup.js:ro
 
+  # mongo-express instance to view database
   viewer:
     image: mongo-express
     restart: always
@@ -23,6 +25,7 @@ services:
       ME_CONFIG_MONGODB_ADMINPASSWORD: metadataadmin
       ME_CONFIG_MONGODB_URL: mongodb://admin:metadataadmin@database:27017/
 
+  # Server to route queries and interact with the database
   server:
     build:
       context: .
@@ -32,6 +35,7 @@ services:
     depends_on:
       - database
 
+  # The React-based interactive frontend to the database
   client:
     build:
       context: .
