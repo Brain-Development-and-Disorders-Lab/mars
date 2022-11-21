@@ -1,3 +1,3 @@
-# laboratory-data-management
+# metadata-manager
 
-An un-named and fully-customizable workflow tool for tracking and managing laboratory samples and equipment.
+A fully-customizable workflow tool for tracking and managing metadata generated from scientific experiments.
