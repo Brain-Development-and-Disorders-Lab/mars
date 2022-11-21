@@ -31,3 +31,13 @@ Attributes are the primary method of expressing metadata associated with Entitie
 ### Collections
 
 Collections are simply groups of Entities. Collections can be of one type of Entities, or a mixture of multiple types.
+
+## Deployment
+
+The application has been entirely containerized using Docker containers. To start a fresh instance of the application, use `docker-compose`:
+
+```Bash
+$ docker-compose up
+```
+
+This command will build all required containers before starting the containers required to run the system. The system can then be viewed in the browser at `localhost:8080`, and the MongoDB database can be browsed using the `mongo-express` interface accessible at `localhost:8081`.
