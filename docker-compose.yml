@@ -34,6 +34,9 @@ services:
       - 8000:8000
     depends_on:
       - database
+    environment:
+      - CONNECTION_STRING=mongodb://admin:metadataadmin@database:27017/
+      - PORT=8000
 
   # The React-based interactive frontend to the database
   client:
