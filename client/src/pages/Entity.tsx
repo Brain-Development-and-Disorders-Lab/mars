@@ -100,17 +100,20 @@ export const Entity = () => {
       products: entityData.associations.products.join(),
     };
 
+    let fields = ["id", "name", "created", "owner", "description", "collections", "origin", "products"];
+
     // Create columns for each Attribute and corresponding Parameter
     entityData.attributes.forEach((attribute) => {
       attribute.parameters.forEach((parameter) => {
-        labelData[`${attribute.name} - Parameter ${parameter.name}`] = parameter.data;
+        labelData[`${attribute.name}_${parameter.name}`] = parameter.data;
+        fields = [...fields, `${attribute.name}_${parameter.name}`];
       });
     });
 
     // Convert to CSV format
-    const parsedData = parse(labelData);
+    const parsedData = parse(labelData, { fields: fields });
     const downloadURL = window.URL.createObjectURL(new Blob([parsedData], {
-      type: "text/plain",
+      type: "text/csv",
     }));
 
     // Create hidden link to click, triggering download automatically
