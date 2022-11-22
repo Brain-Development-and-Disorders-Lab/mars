@@ -23,6 +23,9 @@ import { Add, Close, LinkNext } from "grommet-icons";
 // Navigation
 import { useParams, useNavigate } from "react-router-dom";
 
+// JSON to CSV tool
+import { parse } from "json2csv";
+
 // Consola
 import consola from "consola";
 
@@ -40,16 +43,17 @@ export const Entity = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
+  // Toggles
   const [isLoaded, setIsLoaded] = useState(false);
+  const [showGraph, setShowGraph] = useState(false);
+  const [editing, setEditing] = useState(false);
+
+  // Error state
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("An error has occurred.");
 
-  const [entityData, setEntityData] = useState({} as EntityModel);
-
-  const [showGraph, setShowGraph] = useState(false);
-
   // Break up entity data into editable fields
-  const [editing, setEditing] = useState(false);
+  const [entityData, setEntityData] = useState({} as EntityModel);
   const [description, setDescription] = useState("");
   const [collections, setCollections] = useState([] as string[]);
   const [products, setProducts] = useState([] as { name: string; id: string }[]);
@@ -80,6 +84,42 @@ export const Entity = () => {
     } else {
       setEditing(true);
     }
+  };
+
+  // Toggle showing printer details
+  const handlePrintClick = () => {
+    // Generate string representations of all data
+    const labelData: {[k: string]: any} = {
+      id: entityData._id,
+      name: entityData.name,
+      created: entityData.created,
+      owner: entityData.owner,
+      description: entityData.description,
+      collections: entityData.collections.join(),
+      origin: entityData.associations.origin.name,
+      products: entityData.associations.products.join(),
+    };
+
+    // Create columns for each Attribute and corresponding Parameter
+    entityData.attributes.forEach((attribute) => {
+      attribute.parameters.forEach((parameter) => {
+        labelData[`${attribute.name} - Parameter ${parameter.name}`] = parameter.data;
+      });
+    });
+
+    // Convert to CSV format
+    const parsedData = parse(labelData);
+    const downloadURL = window.URL.createObjectURL(new Blob([parsedData], {
+      type: "text/plain",
+    }));
+
+    // Create hidden link to click, triggering download automatically
+    const link = document.createElement("a");
+    link.style.display = "none";
+    link.download = `${entityData.name}.csv`;
+    link.href = downloadURL;
+
+    link.click();
   };
 
   useEffect(() => {
@@ -143,6 +183,11 @@ export const Entity = () => {
                   label={editing ? "Save" : "Edit"}
                   primary
                   onClick={() => handleEditClick()}
+                />
+                <Button
+                  label={"Print Label"}
+                  primary
+                  onClick={() => handlePrintClick()}
                 />
               </Box>
             </Box>

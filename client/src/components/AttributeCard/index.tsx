@@ -134,7 +134,7 @@ const AttributeCard = (props: AttributeCardProps) => {
                   props.data.parameters.map((parameter) => {
                     return (
                       <Parameter
-                        key={`parameter-${parameter}`}
+                        key={`parameter-${parameter.identifier}`}
                         identifier={parameter.identifier}
                         name={parameter.name}
                         type={parameter.type}

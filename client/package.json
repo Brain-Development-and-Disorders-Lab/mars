@@ -18,6 +18,7 @@
     "consola": "^2.15.3",
     "grommet": "^2.24.0",
     "grommet-icons": "^4.7.0",
+    "json2csv": "^5.0.7",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-flow-renderer": "^10.3.17",
@@ -25,6 +26,7 @@
     "underscore": "^1.13.6"
   },
   "devDependencies": {
+    "@types/json2csv": "^5.0.3",
     "@types/react": "^18.0.5",
     "@types/react-dom": "^18.0.1",
     "@types/underscore": "^1.11.4",
