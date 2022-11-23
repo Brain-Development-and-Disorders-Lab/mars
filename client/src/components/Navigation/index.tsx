@@ -60,8 +60,8 @@ const Navigation = () => {
             spacing={4}
             display={{ base: "none", md: "flex" }}
           >
-            <Button key={"dashboard"}>
-              <RouterLink to={"/"}>Dashboard</RouterLink>
+            <Button key={"home"}>
+              <RouterLink to={"/"}>Home</RouterLink>
             </Button>
 
             {/* Create menu */}

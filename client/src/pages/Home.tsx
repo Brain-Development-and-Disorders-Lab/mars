@@ -1,16 +1,6 @@
 // React and Grommet
 import React, { useEffect, useState } from "react";
-import {
-  Box,
-  Button,
-  Heading,
-  List,
-  Main,
-  PageHeader,
-  Text,
-} from "grommet/components";
-import { History, LinkNext } from "grommet-icons";
-import { Page, PageContent } from "grommet";
+import { Box, Button, Flex, Heading, Table, TableContainer, Text, Thead, Tr, Th, useToast, Stat, StatLabel, StatNumber, StatHelpText, Spacer, List, ListItem } from "@chakra-ui/react";
 
 // Database and models
 import { getData } from "src/database/functions";
@@ -20,14 +10,20 @@ import { CollectionModel, EntityModel } from "types";
 import { useNavigate } from "react-router-dom";
 
 // Custom components
-import ErrorLayer from "../components/ErrorLayer";
+import { Loading } from "src/components/Loading";
+import { ChevronRightIcon, RepeatClockIcon } from "@chakra-ui/icons";
 
 const Home = () => {
+  // Enable navigation
   const navigate = useNavigate();
 
+  // Toast to show errors
+  const toast = useToast();
+
+  // Page state
   const [isLoaded, setIsLoaded] = useState(false);
-  const [isError, setIsError] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("An error has occurred.");
+
+  // Page data
   const [entityData, setEntityData] = useState([] as EntityModel[]);
   const [collectionData, setCollectionData] = useState([] as CollectionModel[]);
 
@@ -41,8 +37,14 @@ const Home = () => {
 
       // Check the contents of the response
       if (value["error"] !== undefined) {
-        setErrorMessage(value["error"]);
-        setIsError(true);
+        toast({
+          title: "Database Error",
+          description: value["error"],
+          status: "error",
+          duration: 4000,
+          position: "bottom-right",
+          isClosable: true,
+        });
       }
 
       setIsLoaded(true);
@@ -60,8 +62,14 @@ const Home = () => {
 
       // Check the contents of the response
       if (value["error"] !== undefined) {
-        setErrorMessage(value["error"]);
-        setIsError(true);
+        toast({
+          title: "Database Error",
+          description: value["error"],
+          status: "error",
+          duration: 4000,
+          position: "bottom-right",
+          isClosable: true,
+        });
       }
 
       setIsLoaded(true);
@@ -70,75 +78,150 @@ const Home = () => {
   }, []);
 
   return (
-    <Page kind="wide" pad={{left: "small", right: "small"}}>
-      <PageContent>
-        <PageHeader
-          title="Dashboard"
-        />
+    isLoaded ?
+    <Box>
+      <Flex m={"2"} p={"2"} direction={"row"}>
+        <Heading size={"2xl"}>Dashboard</Heading>
+      </Flex>
 
-        <Main direction="row" gap="medium" fill>
-          <Box direction="column" basis="2/3" pad="medium">
-            <Heading level="2">Collections</Heading>
+      <Flex m={"2"} p={"2"} direction={"row"} gap={"5"}>
+        <Flex direction={"column"} w={"2xl"} gap={"5"}>
+          <Flex
+            direction={"column"}
+            p={"4"}
+            background={"#cce3de"}
+            rounded={"xl"}
+            gap={"1.5"}
+          >
+            {/* Collections listing */}
+            <Heading color={"gray.700"}>Collections</Heading>
+
+            <Stat
+              rounded={"md"}
+              background={"#83c5be"}
+              color={"white"}
+              p={"2"}
+              maxW={"fit-content"}
+            >
+              <StatLabel>Total Collections</StatLabel>
+              <StatNumber>{collectionData.length}</StatNumber>
+              <StatHelpText>Updated just now.</StatHelpText>
+            </Stat>
+
+            <Spacer />
+
             {isLoaded && collectionData.length > 0 ? (
-              <List
-                primaryKey="name"
-                secondaryKey={(value) => (
-                  <Button
-                    key={`view-collection-${value._id}`}
-                    primary
-                    color="accent-4"
-                    label="View"
-                    icon={<LinkNext />}
-                    onClick={() => navigate(`/collections/${value._id}`)}
-                    reverse
-                  />
-                )}
-                data={collectionData}
-                show={4}
-                paginate
-              />
+              <TableContainer>
+                <Table variant={"simple"}>
+                  <Thead>
+                    <Tr>
+                      <Th><Heading color={"gray.600"} size={"sm"}>Collection Name</Heading></Th>
+                      <Th></Th>
+                    </Tr>
+                  </Thead>
+                  {collectionData.map((collection) => {
+                    return (
+                      <Tr>
+                        <Th>{collection.name}</Th>
+                        <Th>
+                          <Flex justify={"right"}>
+                            <Button
+                              key={`view-collection-${collection._id}`}
+                              color="grey.400"
+                              rightIcon={<ChevronRightIcon />}
+                              onClick={() => navigate(`/collections/${collection._id}`)}
+                            >
+                              View
+                            </Button>
+                          </Flex>
+                        </Th>
+                      </Tr>
+                    );
+                  })}
+                </Table>
+              </TableContainer>
             ) : (
               <Text>There are no Collections to display.</Text>
             )}
+          </Flex>
 
-            <Heading level="2">Entities</Heading>
+          {/* Entities listing */}
+          <Flex
+            direction={"column"}
+            p={"4"}
+            background={"#61a5c2"}
+            rounded={"xl"}
+            gap={"1.5"}
+          >
+            <Heading color={"white"}>Entities</Heading>
+
+            <Stat
+              rounded={"md"}
+              background={"#89c2d9"}
+              color={"white"}
+              p={"2"}
+              maxW={"fit-content"}
+            >
+              <StatLabel>Total Entities</StatLabel>
+              <StatNumber>{entityData.length}</StatNumber>
+              <StatHelpText>Updated just now.</StatHelpText>
+            </Stat>
+
+            <Spacer />
+
             {isLoaded && entityData.length > 0 ? (
-              <List
-                primaryKey="name"
-                secondaryKey={(value) => (
-                  <Button
-                    key={`view-entity-${value._id}`}
-                    primary
-                    color="accent-4"
-                    label="View"
-                    icon={<LinkNext />}
-                    onClick={() => navigate(`/entities/${value._id}`)}
-                    reverse
-                  />
-                )}
-                data={entityData}
-                step={4}
-                paginate
-              />
+              <TableContainer>
+                <Table variant={"simple"}>
+                  <Thead>
+                    <Tr>
+                      <Th><Heading color={"white"} size={"sm"}>Entity Name</Heading></Th>
+                      <Th></Th>
+                    </Tr>
+                  </Thead>
+                  {entityData.map((entity) => {
+                    return (
+                      <Tr>
+                        <Th color={"white"}>{entity.name}</Th>
+                        <Th>
+                          <Flex justify={"right"}>
+                            <Button
+                              key={`view-entity-${entity._id}`}
+                              color="accent-4"
+                              rightIcon={<ChevronRightIcon />}
+                              onClick={() => navigate(`/entities/${entity._id}`)}
+                            >
+                              View
+                            </Button>
+                          </Flex>
+                        </Th>
+                      </Tr>
+                    );
+                  })}
+                </Table>
+              </TableContainer>
             ) : (
               <Text>There are no Entities to display.</Text>
             )}
-          </Box>
+          </Flex>
+        </Flex>
 
-          <Box direction="column" background="light-2" basis="1/3" pad="medium">
-            <Box direction="row" align="center" gap="small">
-              <Heading level="2">Recent Changes</Heading>
-              <History size="medium" />
-            </Box>
-            <Text>
-              9:23 AM: <b>Henry</b> updated ...
-            </Text>
-          </Box>
-        </Main>
-
-        {isError && <ErrorLayer message={errorMessage} />}
-      </PageContent>
-    </Page>
+        {/* Recent changes */}
+        <Flex
+          direction={"column"}
+          p={"4"}
+          background={"#ffe1a8"}
+          rounded={"xl"}
+          gap={"1.5"}
+        >
+          <Heading color={"gray.600"}>Recent Changes{" "}<RepeatClockIcon color={"gray.600"} w={8} h={8} /></Heading>
+          <List>
+            <ListItem><Text fontSize={"md"}>9:23 AM: <b>Henry</b> updated ...</Text></ListItem>
+          </List>
+        </Flex>
+      </Flex>
+    </Box>
+    :
+    <Loading />
   );
 };
 
