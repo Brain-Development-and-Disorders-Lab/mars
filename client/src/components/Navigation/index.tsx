@@ -1,112 +1,178 @@
-// React and Grommet
-import React from "react";
+// React and interface library
+import React, { ReactNode } from "react";
+import { Link as RouterLink } from "react-router-dom";
 import {
-  Anchor,
-  Avatar,
   Box,
-  Header,
+  Flex,
+  Avatar,
+  HStack,
+  Link,
+  IconButton,
+  Button,
   Menu,
-  Nav,
-} from "grommet/components";
-import {
-  AddCircle,
-  HomeRounded,
-  Search as SearchIcon,
-  User,
-  View,
-} from "grommet-icons";
+  MenuButton,
+  MenuList,
+  MenuItem,
+  useDisclosure,
+  useColorModeValue,
+  Stack,
+  StackItem,
+  StackDivider,
+} from "@chakra-ui/react";
+import { HamburgerIcon, CloseIcon, SearchIcon, ChevronDownIcon, ViewIcon, PlusSquareIcon } from "@chakra-ui/icons";
+
+// NavigationElement sub-component to generalize links
+const NavigationElement = ({ href, children }: { href: string, children: ReactNode }) => (
+  <Link
+    as={RouterLink}
+    to={href}
+    px={2}
+    py={2}
+    rounded={"md"}
+    _hover={{
+      textDecoration: "none",
+      bg: useColorModeValue("gray.200", "gray.700"),
+    }}
+  >
+    {children}
+  </Link>
+);
 
 const Navigation = () => {
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
   return (
-    <Header background="brand" sticky="scrollup" pad="small">
-      <Nav align="center" direction="row" pad={{ left: "medium" }} gap="large" margin="none">
-        {/* Home */}
-        <Anchor
-          label="Home"
-          href="/"
-          icon={<HomeRounded />}
-          color="text"
-          size="large"
+    <Box bg={useColorModeValue("gray.100", "gray.900")} px={4}>
+      <Flex h={16} alignItems={"center"} justifyContent={"space-between"}>
+        {/* Icon to show menu in responsive context */}
+        <IconButton
+          size={"md"}
+          icon={isOpen ? <CloseIcon /> : <HamburgerIcon />}
+          aria-label={"Open Menu"}
+          display={{ md: "none" }}
+          onClick={isOpen ? onClose : onOpen}
         />
 
-        {/* Search */}
-        <Anchor
-          label="Search"
-          href="/search"
-          icon={<SearchIcon />}
-          color="text"
-          size="large"
-        />
+        {/* Main navigation group */}
+        <HStack spacing={8} alignItems={"center"}>
+          <HStack
+            as={"nav"}
+            spacing={4}
+            display={{ base: "none", md: "flex" }}
+          >
+            <Button key={"dashboard"}>
+              <RouterLink to={"/"}>Dashboard</RouterLink>
+            </Button>
 
-        {/* Create */}
-        <Menu
-          dropProps={{ align: { top: "bottom", left: "left" } }}
-          label="Create"
-          icon={<AddCircle />}
-          dropBackground="brand"
-          items={[
-            { label: (
-                <Anchor
-                  label="Collection"
-                  href="/create/collection/start"
-                  color="white"
-                />
-              ),
-            },
-            {
-              label: (
-                <Anchor
-                  label="Entity"
-                  href="/create/entity/start"
-                  color="white"
-                />
-              ),
-            },
-            {
-              label: (
-                <Anchor
-                  label="Attribute"
-                  href="/create/attribute/start"
-                  color="white"
-                />
-              ),
-            },
-          ]}
-          size="large"
-        />
+            {/* Create menu */}
+            <Menu>
+              <MenuButton
+                as={Button}
+                rounded={"md"}
+                cursor={"pointer"}
+                minW={0}
+                rightIcon={<ChevronDownIcon />}
+              >
+                Create
+              </MenuButton>
+              <MenuList>
+                <MenuItem as={RouterLink} to={"/create/collection/start"}>Collection</MenuItem>
+                <MenuItem as={RouterLink} to={"/create/attribute/start"}>Template Attribute</MenuItem>
+                <MenuItem as={RouterLink} to={"/create/entity/start"}>Entity</MenuItem>
+              </MenuList>
+            </Menu>
 
-        {/* View */}
-        <Menu
-          dropProps={{ align: { top: "bottom", left: "left" } }}
-          label="View"
-          icon={<View />}
-          dropBackground="brand"
-          items={[
-            {
-              label: (
-                <Anchor label="Collections" href="/collections" color="white" />
-              ),
-            },
-            {
-              label: <Anchor label="Entities" href="/entities" color="white" />,
-            },
-            {
-              label: (
-                <Anchor label="Attributes" href="/attributes" color="white" />
-              ),
-            },
-          ]}
-          size="large"
-        />
-      </Nav>
+            {/* View menu */}
+            <Menu>
+              <MenuButton
+                as={Button}
+                rounded={"md"}
+                cursor={"pointer"}
+                minW={0}
+                rightIcon={<ChevronDownIcon />}
+              >
+                View
+              </MenuButton>
+              <MenuList>
+                <MenuItem as={RouterLink} to={"/entities"}>All Entities</MenuItem>
+                <MenuItem as={RouterLink} to={"/collections"}>All Collections</MenuItem>
+                <MenuItem as={RouterLink} to={"/attributes"}>All Attributes</MenuItem>
+              </MenuList>
+            </Menu>
+          </HStack>
+        </HStack>
 
-      {/* Avatar */}
-      <Box direction="row" align="center" pad={{ right: "medium" }}>
-        <Avatar background="white">
-          <User color="black" />
-        </Avatar>
-      </Box>
-    </Header>
+        {/* Action and avatar component */}
+        <Flex alignItems={"center"}>
+          <Button
+            as={RouterLink}
+            to={"/search"}
+            variant={"solid"}
+            colorScheme={"teal"}
+            px={2}
+            py={2}
+            mr={4}
+            leftIcon={<SearchIcon />}
+          >
+            Search
+          </Button>
+          <Menu>
+            <MenuButton
+              as={Button}
+              rounded={"full"}
+              variant={"link"}
+              cursor={"pointer"}
+              minW={0}
+            >
+              <Avatar size={"sm"} />
+            </MenuButton>
+            <MenuList>
+              <MenuItem>Logout</MenuItem>
+            </MenuList>
+          </Menu>
+        </Flex>
+      </Flex>
+
+      {/* Responsive display */}
+      {isOpen ? (
+        <Box pb={4} display={{ md: "none" }}>
+          <Stack as={"nav"} spacing={4}>
+            <StackDivider>
+              Home
+            </StackDivider>
+            <StackItem>
+              <NavigationElement href={"/"}>Dashboard</NavigationElement>
+            </StackItem>
+
+            <StackDivider>
+              <PlusSquareIcon />{" "}Create
+            </StackDivider>
+            <StackItem>
+              <NavigationElement href={"/create/entity/start"}>Entity</NavigationElement>
+            </StackItem>
+            <StackItem>
+              <NavigationElement href={"/create/collection/start"}>Collection</NavigationElement>
+            </StackItem>
+            <StackItem>
+              <NavigationElement href={"/create/attribute/start"}>Template Attribute</NavigationElement>
+            </StackItem>
+
+            <StackDivider>
+              <ViewIcon />{" "}View
+            </StackDivider>
+            <StackItem>
+              <NavigationElement href={"/entities"}>Entities</NavigationElement>
+            </StackItem>
+            <StackItem>
+              <NavigationElement href={"/collections"}>Collections</NavigationElement>
+            </StackItem>
+            <StackItem>
+              <NavigationElement href={"/attributes"}>Attributes</NavigationElement>
+            </StackItem>
+          </Stack>
+        </Box>
+      ) : null}
+    </Box>
   );
 };
 

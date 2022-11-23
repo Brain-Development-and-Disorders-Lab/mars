@@ -13,9 +13,14 @@
     "lint": "prettier --write ."
   },
   "dependencies": {
+    "@chakra-ui/icons": "^2.0.12",
+    "@chakra-ui/react": "^2.4.1",
+    "@emotion/react": "^11.10.5",
+    "@emotion/styled": "^11.10.5",
     "@fontsource/roboto": "^4.5.5",
     "@types/react-router-dom": "^5.3.3",
     "consola": "^2.15.3",
+    "framer-motion": "^7.6.9",
     "grommet": "^2.24.0",
     "grommet-icons": "^4.7.0",
     "json2csv": "^5.0.7",
