@@ -2,18 +2,16 @@
 import React, { useEffect, useState } from "react";
 import {
   Anchor,
-  Box,
   Button,
   PageHeader,
-  Spinner,
   Table,
   TableBody,
   TableCell,
   TableHeader,
   TableRow,
 } from "grommet/components";
-import { Page, PageContent } from "grommet";
 import { LinkNext } from "grommet-icons";
+import { Flex, useToast } from "@chakra-ui/react";
 
 // Navigation
 import { useNavigate } from "react-router-dom";
@@ -23,14 +21,14 @@ import { getData } from "src/database/functions";
 import { EntityModel } from "types";
 
 // Custom components
-import ErrorLayer from "../../components/ErrorLayer";
+import { Loading } from "src/components/Loading";
 
 const Entities = () => {
   const navigate = useNavigate();
 
+  const toast = useToast();
+
   const [isLoaded, setIsLoaded] = useState(false);
-  const [isError, setIsError] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("An error has occurred.");
   const [entityData, setEntityData] = useState([] as EntityModel[]);
 
   useEffect(() => {
@@ -42,8 +40,14 @@ const Entities = () => {
 
       // Check the contents of the response
       if (value["error"] !== undefined) {
-        setErrorMessage(value["error"]);
-        setIsError(true);
+        toast({
+          title: "Database Error",
+          description: value["error"],
+          status: "error",
+          duration: 4000,
+          position: "bottom-right",
+          isClosable: true,
+        });
       }
 
       setIsLoaded(true);
@@ -52,69 +56,61 @@ const Entities = () => {
   }, []);
 
   return (
-    <Page kind="wide" pad={{left: "small", right: "small"}}>
-      <PageContent>
-        {isLoaded && isError === false ? (
-          <>
-            <PageHeader
-              title="Entities"
-              parent={<Anchor label="Home" href="/" />}
-            />
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableCell scope="col" border="bottom" align="center">
-                    Identifier
+    isLoaded ? 
+    <Flex>
+      <PageHeader
+        title="Entities"
+        parent={<Anchor label="Home" href="/" />}
+      />
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableCell scope="col" border="bottom" align="center">
+              Identifier
+            </TableCell>
+            <TableCell scope="col" border="bottom" align="center">
+              Created
+            </TableCell>
+            <TableCell scope="col" border="bottom" align="center">
+              Owner
+            </TableCell>
+            <TableCell scope="col" border="bottom"></TableCell>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {isLoaded &&
+            entityData.map((entity) => {
+              return (
+                <TableRow key={entity._id}>
+                  <TableCell scope="row" border="right" align="center">
+                    <strong>{entity.name}</strong>
                   </TableCell>
-                  <TableCell scope="col" border="bottom" align="center">
-                    Created
+                  <TableCell align="center">
+                    <strong>
+                      {new Date(entity.created).toDateString()}
+                    </strong>
                   </TableCell>
-                  <TableCell scope="col" border="bottom" align="center">
-                    Owner
+                  <TableCell align="center">
+                    <strong>{entity.owner}</strong>
                   </TableCell>
-                  <TableCell scope="col" border="bottom"></TableCell>
+                  <TableCell align="center">
+                    <Button
+                      color="accent-4"
+                      primary
+                      icon={<LinkNext />}
+                      label="View"
+                      onClick={() => navigate(`/entities/${entity._id}`)}
+                      reverse
+                    />
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {isLoaded &&
-                  entityData.map((entity) => {
-                    return (
-                      <TableRow key={entity._id}>
-                        <TableCell scope="row" border="right" align="center">
-                          <strong>{entity.name}</strong>
-                        </TableCell>
-                        <TableCell align="center">
-                          <strong>
-                            {new Date(entity.created).toDateString()}
-                          </strong>
-                        </TableCell>
-                        <TableCell align="center">
-                          <strong>{entity.owner}</strong>
-                        </TableCell>
-                        <TableCell align="center">
-                          <Button
-                            color="accent-4"
-                            primary
-                            icon={<LinkNext />}
-                            label="View"
-                            onClick={() => navigate(`/entities/${entity._id}`)}
-                            reverse
-                          />
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-              </TableBody>
-            </Table>
-          </>
-        ) : (
-          <Box fill align="center" justify="center">
-            <Spinner size="large" />
-          </Box>
-        )}
-        {isError && <ErrorLayer message={errorMessage} />}
-      </PageContent>
-    </Page>
+              );
+            })}
+        </TableBody>
+      </Table>
+    </Flex>
+    :
+    <Loading />
   );
 };
 
