@@ -1,33 +1,18 @@
 // React and Grommet
-import React, { useEffect, useState } from "react";
-import {
-  Anchor,
-  Box,
-  Button,
-  DateInput,
-  Form,
-  FormField,
-  PageHeader,
-  Select,
-  Spinner,
-  Tag,
-  TextInput,
-} from "grommet/components";
-import { Page, PageContent } from "grommet";
-import { Checkmark } from "grommet-icons";
+import React, { useState } from "react";
+import { SingleDatepicker } from "chakra-dayzed-datepicker";
+import { Box, Button, Flex, FormControl, FormLabel, Heading, Input, Textarea } from "@chakra-ui/react";
+import { CheckIcon } from "@chakra-ui/icons";
 
 // Navigation
 import { useLocation, useNavigate } from "react-router-dom";
 
 // Database and models
-import { getData, postData } from "src/database/functions";
-import { CollectionStruct, Create, EntityModel } from "types";
+import { postData } from "src/database/functions";
+import { CollectionStruct, Create } from "types";
 
 // Utility functions
 import { pseudoId } from "src/database/functions";
-
-// Custom components
-import ErrorLayer from "src/components/ErrorLayer";
 
 import consola from "consola";
 
@@ -41,7 +26,7 @@ export const Start = ({}) => {
     state === null ? pseudoId() : (state as Create.Collection.Start).name;
   const initialCreated =
     state === null
-      ? new Date().toISOString()
+      ? new Date()
       : (state as Create.Collection.Start).created;
   const initialOwner =
     state === null ? "" : (state as Create.Collection.Start).owner;
@@ -53,37 +38,6 @@ export const Start = ({}) => {
   const [owner, setOwner] = useState(initialOwner);
   const [description, setDescription] = useState(initialDescription);
 
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [isError, setIsError] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("An error has occurred.");
-
-  const [entityOptions, setEntityOptions] = useState(
-    [] as { name: string; id: string }[]
-  );
-  const [entitiesSelected, setEntitiesSelected] = useState(
-    [] as { name: string; id: string }[]
-  );
-
-  useEffect(() => {
-    const entities = getData(`/entities`);
-
-    // Handle the response from the database
-    entities.then((entity) => {
-      setEntityOptions(entity.map((e: EntityModel) => {
-        return { name: e.name, id: e._id };
-      }));
-
-      // Check the contents of the response
-      if (entity["error"] !== undefined) {
-        setErrorMessage(entity["error"]);
-        setIsError(true);
-      }
-
-      setIsLoaded(true);
-    });
-    return;
-  }, []);
-
   const collectionData: CollectionStruct = {
     name: name,
     description: description,
@@ -93,158 +47,127 @@ export const Start = ({}) => {
   };
 
   return (
-    <Page kind="wide" pad={{left: "small", right: "small"}}>
-      <PageContent>
-        {isLoaded && isError === false ? (
-          <>
-            <PageHeader
-              title="Create a Collection"
-              parent={<Anchor label="Home" href="/" />}
-            />
-            <Box width="large" fill>
-              <Form
-                onChange={() => {}}
-                onReset={() => {}}
-                onSubmit={() => {
-                  // Update the selected entities
-                  collectionData.entities = entitiesSelected.map((entity) => {
-                    return entity.id;
-                  });
+    <Flex h={"92vh"} justifyContent={"center"} align={"center"} direction={"column"}>
+      <Box
+        p={"4"}
+        rounded={"xl"}
+        gap={"1.5"}
+        shadow={"lg"}
+      >
+        <Flex m={"2"} p={"2"} direction={"row"} justifyContent={"center"}>
+          <Heading size={"2xl"}>Create Collection</Heading>
+        </Flex>
 
-                  // Push the data
-                  consola.debug("Creating Collection:", collectionData);
-                  postData(`/collections/create`, collectionData).then(() =>
-                    navigate("/collections")
-                  );
-                }}
-              >
-                <Box direction="row" gap="medium">
-                  <Box direction="column" justify="between" basis="1/3">
-                    <FormField
-                      label="Name"
-                      name="name"
-                      info="A standardised name or ID for the Collection."
-                    >
-                      <TextInput
-                        name="name"
-                        value={name}
-                        onChange={(event) => setName(event.target.value)}
-                        required
-                      />
-                    </FormField>
-                    <FormField
-                      label="Owner"
-                      name="owner"
-                      info="Owner of the Collection."
-                      type="email"
-                    >
-                      <TextInput
-                        name="owner"
-                        value={owner}
-                        onChange={(event) => setOwner(event.target.value)}
-                        required
-                      />
-                    </FormField>
-                    <FormField
-                      label="Created"
-                      name="created"
-                      info="Date the Collection was created."
-                    >
-                      <DateInput
-                        format="mm/dd/yyyy"
-                        value={created}
-                        onChange={({ value }) => setCreated(value.toString())}
-                        required
-                      />
-                    </FormField>
-                  </Box>
-                  <Box direction="column" basis="2/3">
-                    <FormField
-                      label="Description"
-                      name="description"
-                      info="Description of the Collection."
-                    >
-                      <TextInput
-                        name="description"
-                        value={description}
-                        onChange={(event) => setDescription(event.target.value)}
-                        required
-                      />
-                    </FormField>
-                    <FormField
-                      label="Add"
-                      name="add"
-                      info="Add existing Entities to the Collection."
-                    >
-                      <Select
-                        options={entityOptions}
-                        labelKey="name"
-                        value={entitiesSelected}
-                        valueKey="name"
-                        onChange={({ value }) => {
-                          if (!entitiesSelected.includes(value)) {
-                            setEntitiesSelected([...entitiesSelected, value]);
-                          }
-                        }}
-                        searchPlaceholder="Search..."
-                        onSearch={(query) => {
-                          const escapedText = query.replace(
-                            /[-\\^$*+?.()|[\]{}]/g,
-                            "\\$&"
-                          );
-                          const filteredText = new RegExp(escapedText, "i");
-                          setEntityOptions(
-                            entityOptions
-                              .filter((entity) => filteredText.test(entity.name))
-                              .map((entity) => {
-                                return { name: entity.name, id: entity.id };
-                              })
-                          );
-                        }}
-                      />
-                    </FormField>
-                    <Box direction="column" gap="xsmall">
-                      {entitiesSelected.map((entity) => {
-                        return (
-                          <Tag
-                            name="Entity"
-                            value={entity.name}
-                            key={entity.name}
-                            onRemove={() => {
-                              setEntitiesSelected(
-                                entitiesSelected.filter((item) => {
-                                  return item !== entity;
-                                })
-                              );
-                            }}
-                          />
-                        );
-                      })}
-                    </Box>
-                  </Box>
-                </Box>
+        <Flex m={"2"} p={"2"} direction={"column"} gap={"5"}>
+          <Flex direction="row" gap={"4"}>
+            <Flex direction="column" justify="between" gap={"4"}>
+              <FormControl isRequired>
+                <FormLabel htmlFor="name" fontWeight={'normal'}>
+                  Collection Name
+                </FormLabel>
+                <Input
+                  id="name"
+                  name="name"
+                  borderColor={"blackAlpha.300"}
+                  focusBorderColor={"black"}
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                />
+              </FormControl>
 
-                <Box direction="row" justify="between" margin="medium">
-                  <Button label="Cancel" color="status-critical" onClick={() => navigate("/")} />
-                  <Button
-                    type="submit"
-                    label="Finish"
-                    icon={<Checkmark />}
-                    reverse
-                    primary
-                  />
-                </Box>
-              </Form>
-            </Box>
-          </>
-        ) : (
-          <Box fill align="center" justify="center">
-            <Spinner size="large" />
-          </Box>
-        )}
-        {isError && <ErrorLayer message={errorMessage} />}
-      </PageContent>
-    </Page>
+              <FormControl isRequired>
+                <FormLabel htmlFor="owner" fontWeight={'normal'}>
+                  Collection Owner
+                </FormLabel>
+                <Input
+                  id="owner"
+                  name="owner"
+                  borderColor={"blackAlpha.300"}
+                  focusBorderColor={"black"}
+                  value={owner}
+                  onChange={(event) => setOwner(event.target.value)}
+                />
+              </FormControl>
+
+              <FormControl>
+                <FormLabel htmlFor="date" fontWeight={'normal'}>
+                  Creation Date
+                </FormLabel>
+                
+                <SingleDatepicker
+                  id="owner"
+                  name="owner"
+                  propsConfigs={{
+                    dateNavBtnProps: {
+                      colorScheme: "gray"
+                    },
+                    dayOfMonthBtnProps: {
+                      defaultBtnProps: {
+                        borderColor: "blackAlpha.300",
+                        _hover: {
+                          background: "black",
+                          color: "white",
+                        }
+                      },
+                      selectedBtnProps: {
+                        background: "black",
+                        color: "white",
+                      },
+                      todayBtnProps: {
+                        borderColor: "blackAlpha.300",
+                        background: "gray.50",
+                        color: "black",
+                      }
+                    },
+                  }}
+                  date={created}
+                  onDateChange={setCreated}
+                />
+              </FormControl>
+            </Flex>
+
+            <Flex direction="column">
+              <FormControl isRequired>
+                <FormLabel htmlFor="description" fontWeight={'normal'}>
+                  Description
+                </FormLabel>
+                <Textarea
+                  id="description"
+                  name="description"
+                  value={description}
+                  onChange={(event) => setDescription(event.target.value)}
+                />
+              </FormControl>
+            </Flex>
+          </Flex>
+
+          <Flex direction={"row"} justify={"between"} margin={"md"} gap={"4"} justifyContent={"center"}>
+            <Button
+              background={"red"}
+              color={"white"}
+              variant={"outline"}
+              onClick={() => navigate("/")}
+            >
+              Cancel
+            </Button>
+            <Button
+              background={"green"}
+              color={"white"}
+              rightIcon={<CheckIcon />}
+              onClick={() => {
+                // Push the data
+                consola.debug("Creating Collection:", collectionData);
+                postData(`/collections/create`, collectionData).then(() =>
+                  navigate("/collections")
+                );
+              }}
+            >
+              Finish
+            </Button>
+          </Flex>
+        </Flex>
+      </Box>
+    </Flex>
   );
 };
 export default Start;

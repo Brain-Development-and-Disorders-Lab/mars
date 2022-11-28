@@ -33,7 +33,7 @@ declare namespace Create.Collection {
 
   type Start = Base & {
     name: string;
-    created: string;
+    created: Date;
     owner: string;
     description: string;
   };
@@ -98,7 +98,7 @@ export type CollectionStruct = {
   name: string;
   description: string;
   owner: string;
-  created: string;
+  created: Date;
   entities: string[];
 };
 

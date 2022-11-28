@@ -43,7 +43,7 @@ const Navigation = () => {
 
   return (
     <Box bg={useColorModeValue("gray.100", "gray.900")} px={4}>
-      <Flex h={16} alignItems={"center"} justifyContent={"space-between"}>
+      <Flex h={"8vh"} alignItems={"center"} justifyContent={"space-between"}>
         {/* Icon to show menu in responsive context */}
         <IconButton
           size={"md"}
