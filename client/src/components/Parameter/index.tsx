@@ -2,26 +2,22 @@
 import React, { useEffect, useState } from "react";
 import {
   Anchor,
-  Box,
   Button,
   DateInput,
   FormField,
-  Select,
   Spinner,
   TextInput,
 } from "grommet/components";
 import { Close } from "grommet-icons";
+import { Flex, FormControl, FormLabel, Input, Select } from "@chakra-ui/react";
 
 // Database and models
 import { getData } from "src/database/functions";
-import { ParameterProps, ParameterStruct, EntityModel } from "types";
+import { EntityModel, ParameterProps, ParameterStruct, ParameterTypes } from "types";
 
 // Custom components
 import ErrorLayer from "src/components/ErrorLayer";
 import Linky from "src/components/Linky";
-
-// Constants
-const VALID_TYPES = ["number", "url", "date", "string", "entity"];
 
 const Parameter = (props: ParameterProps) => {
   const [name, setName] = useState(props.name);
@@ -33,7 +29,6 @@ const Parameter = (props: ParameterProps) => {
   const [errorMessage, setErrorMessage] = useState("An error has occurred.");
 
   const [entityData, setEntityData] = useState([] as EntityModel[]);
-  const [optionData, setOptionData] = useState([] as EntityModel[]);
 
   useEffect(() => {
     const entities = getData(`/entities`);
@@ -41,7 +36,6 @@ const Parameter = (props: ParameterProps) => {
     // Handle the response from the database
     entities.then((value) => {
       setEntityData(value);
-      setOptionData(value);
 
       // Check the contents of the response
       if (value["error"] !== undefined) {
@@ -95,24 +89,20 @@ const Parameter = (props: ParameterProps) => {
       />
     ) : (
       <Select
-        options={optionData.map((entity) => {
-          return { name: entity.name, id: entity._id };
-        })}
-        labelKey="name"
-        value={data as string}
-        valueKey="name"
-        onChange={({ value }) => {
-          setData(value);
-        }}
-        searchPlaceholder="Search..."
-        onSearch={(query) => {
-          const escapedText = query.replace(/[-\\^$*+?.()|[\]{}]/g, "\\$&");
-          const exp = new RegExp(escapedText, "i");
-          setOptionData(entityData.filter((entity) => exp.test(entity.name)));
-        }}
+        title="Select Entity"
+        value={type}
         disabled={props.disabled}
-        required
-      />
+        onChange={(event) => {
+          console.info(event.target.labels);
+          setData(event.target.value.toString());
+        }}
+      >
+        {entityData.map((entity) => {
+          return (
+            <option value={entity._id}>{entity.name}</option>
+          );
+        })};
+      </Select>
     );
   } else if (type === "url") {
     // URL field
@@ -143,40 +133,49 @@ const Parameter = (props: ParameterProps) => {
   }
 
   return (
-    <Box direction="row" gap="medium" justify="between" fill>
-      <Box direction="row" gap="small">
-        {/* Parameter name */}
-        <FormField label="Name">
-          <TextInput
-            placeholder="Parameter name"
-            value={name}
-            onChange={(event) => {
-              setName(event.target.value);
-            }}
-            disabled={props.disabled}
-            required
-          />
-        </FormField>
+    <Flex direction="row" gap="medium" justify="between">
+      {/* Parameter name */}
+      <FormControl label="Name">
+        <FormLabel htmlFor={"name"}>
+          Name
+        </FormLabel>
+        <Input
+          id="name"
+          placeholder="Name"
+          value={name}
+          onChange={(event) => {
+            setName(event.target.value);
+          }}
+          disabled={props.disabled}
+          required
+        />
+      </FormControl>
 
-        {/* Parameter type */}
-        <FormField label="Type">
-          <Select
-            width="medium"
-            options={VALID_TYPES}
-            value={type}
-            onChange={({ option }) => {
-              setType(option);
-            }}
-            disabled={props.disabled}
-          />
-        </FormField>
+      {/* Parameter type */}
+      <FormControl label="Type">
+        <Select
+          title={"Select Type"}
+          name="typeselect"
+          value={type}
+          disabled={props.disabled}
+          onChange={(event) => {
+            setType(event.target.value as ParameterTypes);
+          }}
+        >
+          <option value={"string"}>{"String"}</option>
+          <option value={"number"}>{"Number"}</option>
+          <option value={"url"}>{"URL"}</option>
+          <option value={"date"}>{"Date"}</option>
+          <option value={"entity"}>{"Entity"}</option>
+        </Select>
+      </FormControl>
 
-        {/* Parameter data */}
-        <FormField label="Data">
-          {isLoaded ? dataElement : <Spinner size="small" />}
-        </FormField>
-      </Box>
-      <Box justify="center">
+      {/* Parameter data */}
+      <FormField label="Data">
+        {isLoaded ? dataElement : <Spinner size="small" />}
+      </FormField>
+
+      <Flex justify="center">
         {/* Remove Parameter */}
         {props.showRemove && <Button
           key={`remove-${props.identifier}`}
@@ -191,9 +190,9 @@ const Parameter = (props: ParameterProps) => {
           }}
           reverse
         />}
-      </Box>
+      </Flex>
       {isError && <ErrorLayer message={errorMessage} />}
-    </Box>
+    </Flex>
   );
 };
 

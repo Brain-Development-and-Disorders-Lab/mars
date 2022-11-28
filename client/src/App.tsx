@@ -27,15 +27,13 @@ import {Start as CollectionStart} from "./pages/Create/Collection/Start";
 import {Start as AttributeStart} from "./pages/Create/Attribute/Start";
 import Home from "./pages/Home";
 
-// Theme
-import { theme } from "./theme";
 import { ChakraProvider } from "@chakra-ui/react";
 
 export const App = () => {
   return (
     <BrowserRouter>
       <ChakraProvider>
-        <Grommet theme={theme} full>
+        <Grommet full>
           <Navigation />
           <Routes>
             <Route path="/" element={<Home />} />

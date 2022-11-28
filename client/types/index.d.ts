@@ -69,10 +69,12 @@ export type AttributeCardProps = {
 };
 
 // Parameters
+export type ParameterTypes = "number" | "url" | "date" | "string" | "entity";
+
 export type ParameterStruct = {
   identifier: string;
   name: string;
-  type: "number" | "url" | "date" | "string" | "entity";
+  type: ParameterTypes;
   data: number | string | ReactElement;
 };
 

@@ -20,7 +20,6 @@
     "@fontsource/roboto": "^4.5.5",
     "@types/react-router-dom": "^5.3.3",
     "chakra-dayzed-datepicker": "^0.2.5",
-    "chakra-multiselect": "^0.3.7",
     "consola": "^2.15.3",
     "date-fns": "^2.29.3",
     "dayzed": "^3.2.3",
