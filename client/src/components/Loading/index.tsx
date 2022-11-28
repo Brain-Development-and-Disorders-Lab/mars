@@ -1,12 +1,11 @@
 import React from "react";
-import { VStack, StackDivider, Spinner, Heading } from "@chakra-ui/react";
+import { Flex, Spinner, Heading } from "@chakra-ui/react";
 
 export const Loading = () => {
   return (
-    <VStack align={"center"} justify={"center"} direction={"row"} gap={"3"}>
-      <StackDivider h={"sm"} />
+    <Flex h={"90vh"} align={"center"} justify={"center"} direction={"column"} gap={"3"}>
       <Spinner size="xl" />
       <Heading>Loading</Heading>
-    </VStack>
+    </Flex>
   );
 };

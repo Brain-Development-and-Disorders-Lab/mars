@@ -19,10 +19,11 @@ import {
   StackItem,
   StackDivider,
 } from "@chakra-ui/react";
-import { HamburgerIcon, CloseIcon, SearchIcon, ChevronDownIcon, ViewIcon, PlusSquareIcon } from "@chakra-ui/icons";
+import { HamburgerIcon, CloseIcon, ChevronDownIcon, ViewIcon, PlusSquareIcon, InfoOutlineIcon } from "@chakra-ui/icons";
+import { AiOutlineDashboard } from "react-icons/ai";
 
 // NavigationElement sub-component to generalize links
-const NavigationElement = ({ href, children }: { href: string, children: ReactNode }) => (
+const NavigationElement = ({ href, children, onClick }: { href: string, children: ReactNode, onClick?: () => void }) => (
   <Link
     as={RouterLink}
     to={href}
@@ -33,6 +34,7 @@ const NavigationElement = ({ href, children }: { href: string, children: ReactNo
       textDecoration: "none",
       bg: useColorModeValue("gray.200", "gray.700"),
     }}
+    onClick={onClick}
   >
     {children}
   </Link>
@@ -60,8 +62,8 @@ const Navigation = () => {
             spacing={4}
             display={{ base: "none", md: "flex" }}
           >
-            <Button key={"home"}>
-              <RouterLink to={"/"}>Home</RouterLink>
+            <Button key={"dashboard"} leftIcon={<AiOutlineDashboard />}>
+              <RouterLink to={"/"}>Dashboard</RouterLink>
             </Button>
 
             {/* Create menu */}
@@ -71,6 +73,7 @@ const Navigation = () => {
                 rounded={"md"}
                 cursor={"pointer"}
                 minW={0}
+                leftIcon={<PlusSquareIcon />}
                 rightIcon={<ChevronDownIcon />}
               >
                 Create
@@ -89,6 +92,7 @@ const Navigation = () => {
                 rounded={"md"}
                 cursor={"pointer"}
                 minW={0}
+                leftIcon={<InfoOutlineIcon />}
                 rightIcon={<ChevronDownIcon />}
               >
                 View
@@ -104,18 +108,6 @@ const Navigation = () => {
 
         {/* Action and avatar component */}
         <Flex alignItems={"center"}>
-          <Button
-            as={RouterLink}
-            to={"/search"}
-            variant={"solid"}
-            colorScheme={"teal"}
-            px={2}
-            py={2}
-            mr={4}
-            leftIcon={<SearchIcon />}
-          >
-            Search
-          </Button>
           <Menu>
             <MenuButton
               as={Button}
@@ -141,33 +133,33 @@ const Navigation = () => {
               Home
             </StackDivider>
             <StackItem>
-              <NavigationElement href={"/"}>Dashboard</NavigationElement>
+              <NavigationElement href={"/"} onClick={isOpen ? onClose : onOpen}>Dashboard</NavigationElement>
             </StackItem>
 
             <StackDivider>
               <PlusSquareIcon />{" "}Create
             </StackDivider>
             <StackItem>
-              <NavigationElement href={"/create/entity/start"}>Entity</NavigationElement>
+              <NavigationElement href={"/create/entity/start"} onClick={isOpen ? onClose : onOpen}>Entity</NavigationElement>
             </StackItem>
             <StackItem>
-              <NavigationElement href={"/create/collection/start"}>Collection</NavigationElement>
+              <NavigationElement href={"/create/collection/start"} onClick={isOpen ? onClose : onOpen}>Collection</NavigationElement>
             </StackItem>
             <StackItem>
-              <NavigationElement href={"/create/attribute/start"}>Template Attribute</NavigationElement>
+              <NavigationElement href={"/create/attribute/start"} onClick={isOpen ? onClose : onOpen}>Template Attribute</NavigationElement>
             </StackItem>
 
             <StackDivider>
               <ViewIcon />{" "}View
             </StackDivider>
             <StackItem>
-              <NavigationElement href={"/entities"}>Entities</NavigationElement>
+              <NavigationElement href={"/entities"} onClick={isOpen ? onClose : onOpen}>Entities</NavigationElement>
             </StackItem>
             <StackItem>
-              <NavigationElement href={"/collections"}>Collections</NavigationElement>
+              <NavigationElement href={"/collections"} onClick={isOpen ? onClose : onOpen}>Collections</NavigationElement>
             </StackItem>
             <StackItem>
-              <NavigationElement href={"/attributes"}>Attributes</NavigationElement>
+              <NavigationElement href={"/attributes"} onClick={isOpen ? onClose : onOpen}>Attributes</NavigationElement>
             </StackItem>
           </Stack>
         </Box>

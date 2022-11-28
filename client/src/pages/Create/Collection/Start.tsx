@@ -47,9 +47,10 @@ export const Start = ({}) => {
   };
 
   return (
-    <Flex h={"92vh"} justifyContent={"center"} align={"center"} direction={"column"}>
+    <Flex h={"90vh"} justifyContent={"center"} align={"center"} direction={"column"}>
       <Box
         p={"4"}
+        m={"2"}
         rounded={"xl"}
         gap={"1.5"}
         shadow={"lg"}
@@ -141,7 +142,7 @@ export const Start = ({}) => {
             </Flex>
           </Flex>
 
-          <Flex direction={"row"} justify={"between"} margin={"md"} gap={"4"} justifyContent={"center"}>
+          <Flex direction={"row"} justify={"space-between"} margin={"md"} gap={"4"}>
             <Button
               background={"red"}
               color={"white"}
@@ -150,6 +151,7 @@ export const Start = ({}) => {
             >
               Cancel
             </Button>
+
             <Button
               background={"green"}
               color={"white"}
@@ -170,4 +172,5 @@ export const Start = ({}) => {
     </Flex>
   );
 };
+
 export default Start;

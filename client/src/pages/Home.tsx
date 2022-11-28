@@ -7,11 +7,11 @@ import { getData } from "src/database/functions";
 import { CollectionModel, EntityModel } from "types";
 
 // Navigation
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link as RouterLink } from "react-router-dom";
 
 // Custom components
 import { Loading } from "src/components/Loading";
-import { ChevronRightIcon, RepeatClockIcon } from "@chakra-ui/icons";
+import { ChevronRightIcon, PlusSquareIcon, RepeatClockIcon, SearchIcon } from "@chakra-ui/icons";
 
 const Home = () => {
   // Enable navigation
@@ -79,13 +79,25 @@ const Home = () => {
 
   return (
     isLoaded ?
-    <Box>
-      <Flex m={"2"} p={"2"} direction={"row"}>
-        <Heading size={"2xl"}>Dashboard</Heading>
+    <Box m={"2"}>
+      <Flex p={"2"} pt={"8"} pb={"8"} direction={"row"} justify={"space-between"} align={"center"}>
+        <Heading size={"3xl"}>Dashboard</Heading>
+        <Button
+            as={RouterLink}
+            to={"/search"}
+            variant={"solid"}
+            colorScheme={"teal"}
+            px={2}
+            py={2}
+            mr={4}
+            leftIcon={<SearchIcon />}
+          >
+          Search
+        </Button>
       </Flex>
 
-      <Flex m={"2"} p={"2"} direction={"row"} gap={"5"}>
-        <Flex direction={"column"} w={"2xl"} gap={"5"}>
+      <Flex p={"2"} direction={"row"} w={"full"} flexWrap={"wrap"} gap={"6"}>
+        <Flex direction={"column"} gap={"6"} w={"2xl"} grow={"2"}>
           <Flex
             direction={"column"}
             p={"4"}
@@ -94,7 +106,16 @@ const Home = () => {
             gap={"1.5"}
           >
             {/* Collections listing */}
-            <Heading color={"gray.700"}>Collections</Heading>
+            <Flex direction={"row"} justify={"space-between"} align={"center"}>
+              <Heading color={"gray.700"}>Collections</Heading>
+              <Button
+                rightIcon={<PlusSquareIcon />}
+                as={RouterLink}
+                to={"/create/collection/start"}
+              >
+                Create
+              </Button>
+            </Flex>
 
             <Stat
               rounded={"md"}
@@ -115,15 +136,26 @@ const Home = () => {
                 <Table variant={"simple"}>
                   <Thead>
                     <Tr>
-                      <Th><Heading color={"gray.600"} size={"sm"}>Collection Name</Heading></Th>
-                      <Th></Th>
+                      <Th pl={"0"}><Heading color={"gray.600"} size={"sm"}>Newest Collections</Heading></Th>
+                      <Th pr={"0"}>
+                        <Flex justify={"right"}>
+                          <Button
+                            key={`view-collection-all`}
+                            color="accent-4"
+                            rightIcon={<ChevronRightIcon />}
+                            onClick={() => navigate(`/collections`)}
+                          >
+                            View All
+                          </Button>
+                        </Flex>
+                      </Th>
                     </Tr>
                   </Thead>
-                  {collectionData.map((collection) => {
+                  {collectionData.slice(0, 3).map((collection) => {
                     return (
                       <Tr>
-                        <Th>{collection.name}</Th>
-                        <Th>
+                        <Th pl={"0"}>{collection.name}</Th>
+                        <Th pr={"0"}>
                           <Flex justify={"right"}>
                             <Button
                               key={`view-collection-${collection._id}`}
@@ -153,7 +185,16 @@ const Home = () => {
             rounded={"xl"}
             gap={"1.5"}
           >
-            <Heading color={"white"}>Entities</Heading>
+            <Flex direction={"row"} justify={"space-between"} align={"center"}>
+              <Heading color={"white"}>Entities</Heading>
+              <Button
+                rightIcon={<PlusSquareIcon />}
+                as={RouterLink}
+                to={"/create/entity/start"}
+              >
+                Create
+              </Button>
+            </Flex>
 
             <Stat
               rounded={"md"}
@@ -174,15 +215,26 @@ const Home = () => {
                 <Table variant={"simple"}>
                   <Thead>
                     <Tr>
-                      <Th><Heading color={"white"} size={"sm"}>Entity Name</Heading></Th>
-                      <Th></Th>
+                      <Th pl={"0"}><Heading color={"white"} size={"sm"}>Newest Entities</Heading></Th>
+                      <Th pr={"0"}>
+                        <Flex justify={"right"}>
+                          <Button
+                            key={`view-entity-all`}
+                            color="accent-4"
+                            rightIcon={<ChevronRightIcon />}
+                            onClick={() => navigate(`/entities`)}
+                          >
+                            View All
+                          </Button>
+                        </Flex>
+                      </Th>
                     </Tr>
                   </Thead>
-                  {entityData.map((entity) => {
+                  {entityData.slice(0, 3).map((entity) => {
                     return (
                       <Tr>
-                        <Th color={"white"}>{entity.name}</Th>
-                        <Th>
+                        <Th pl={"0"} color={"white"}>{entity.name}</Th>
+                        <Th pr={"0"}>
                           <Flex justify={"right"}>
                             <Button
                               key={`view-entity-${entity._id}`}
@@ -212,6 +264,7 @@ const Home = () => {
           background={"#ffe1a8"}
           rounded={"xl"}
           gap={"1.5"}
+          grow={"1"} 
         >
           <Heading color={"gray.600"}>Recent Changes{" "}<RepeatClockIcon color={"gray.600"} w={8} h={8} /></Heading>
           <List>
