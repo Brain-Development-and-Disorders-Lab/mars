@@ -1,139 +1,22 @@
 // React and Grommet
 import React, { useEffect, useState } from "react";
-import {
-  Anchor,
-  Button,
-  DateInput,
-  FormField,
-  Spinner,
-  TextInput,
-} from "grommet/components";
-import { Close } from "grommet-icons";
-import { Flex, FormControl, FormLabel, Input, Select } from "@chakra-ui/react";
+import { Button, Flex, FormControl, FormLabel, Input, Link, Select } from "@chakra-ui/react";
+import { CloseIcon } from "@chakra-ui/icons";
+import { SingleDatepicker } from "chakra-dayzed-datepicker";
 
 // Database and models
 import { getData } from "src/database/functions";
-import { EntityModel, ParameterProps, ParameterStruct, ParameterTypes } from "types";
+import { EntityModel, Parameter } from "types";
 
 // Custom components
-import ErrorLayer from "src/components/ErrorLayer";
 import Linky from "src/components/Linky";
 
-const Parameter = (props: ParameterProps) => {
+export const NumberParameter = (props: Parameter.Number) => {
   const [name, setName] = useState(props.name);
-  const [type, setType] = useState(props.type);
-  const [data, setData] = useState(props.data);
-
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [isError, setIsError] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("An error has occurred.");
-
-  const [entityData, setEntityData] = useState([] as EntityModel[]);
-
-  useEffect(() => {
-    const entities = getData(`/entities`);
-
-    // Handle the response from the database
-    entities.then((value) => {
-      setEntityData(value);
-
-      // Check the contents of the response
-      if (value["error"] !== undefined) {
-        setErrorMessage(value["error"]);
-        setIsError(true);
-      }
-
-      setIsLoaded(true);
-    });
-    return;
-  }, []);
-
-  const parameterData: ParameterStruct = {
-    identifier: props.identifier,
-    name: name,
-    type: type,
-    data: data,
-  };
-
-  const updateData = () => {
-    if (props.onUpdate) {
-      props.onUpdate(parameterData);
-    }
-  };
-
-  useEffect(() => {
-    updateData();
-  }, [data]);
-
-  let dataElement;
-
-  // Set the data input field depending on the selected type
-  if (type === "date") {
-    // Date picker
-    dataElement = (
-      <DateInput
-        name="date"
-        format="mm/dd/yyyy"
-        value={data as string}
-        onChange={({ value }) => setData(value.toString())}
-        disabled={props.disabled}
-        required
-      />
-    );
-  } else if (type === "entity") {
-    // Entity picker
-    dataElement = props.disabled ? (
-      <Linky
-        type="entities"
-        id={(data as unknown as { name: string; id: string }).id}
-      />
-    ) : (
-      <Select
-        title="Select Entity"
-        value={type}
-        disabled={props.disabled}
-        onChange={(event) => {
-          console.info(event.target.labels);
-          setData(event.target.value.toString());
-        }}
-      >
-        {entityData.map((entity) => {
-          return (
-            <option value={entity._id}>{entity.name}</option>
-          );
-        })};
-      </Select>
-    );
-  } else if (type === "url") {
-    // URL field
-    dataElement = props.disabled ? (
-      <Anchor label={data as string} href={data as string} color="dark-1" />
-    ) : (
-      <TextInput
-        name="url"
-        placeholder="URL"
-        value={data as string}
-        onChange={(event) => setData(event.target.value.toString())}
-        disabled={props.disabled}
-        required
-      />
-    );
-  } else {
-    // Basic data is displayed as-is
-    dataElement = (
-      <TextInput
-        name="data"
-        placeholder={type}
-        value={data as string | number}
-        onChange={(event) => setData(event.target.value)}
-        disabled={props.disabled}
-        required
-      />
-    );
-  }
+  const [value, setValue] = useState(0);
 
   return (
-    <Flex direction="row" gap="medium" justify="between">
+    <Flex direction={"row"} gap={"4"} p={"2"} justify={"space-between"} align={"center"}>
       {/* Parameter name */}
       <FormControl label="Name">
         <FormLabel htmlFor={"name"}>
@@ -151,49 +34,344 @@ const Parameter = (props: ParameterProps) => {
         />
       </FormControl>
 
-      {/* Parameter type */}
-      <FormControl label="Type">
-        <Select
-          title={"Select Type"}
-          name="typeselect"
-          value={type}
-          disabled={props.disabled}
-          onChange={(event) => {
-            setType(event.target.value as ParameterTypes);
-          }}
-        >
-          <option value={"string"}>{"String"}</option>
-          <option value={"number"}>{"Number"}</option>
-          <option value={"url"}>{"URL"}</option>
-          <option value={"date"}>{"Date"}</option>
-          <option value={"entity"}>{"Entity"}</option>
-        </Select>
-      </FormControl>
-
       {/* Parameter data */}
-      <FormField label="Data">
-        {isLoaded ? dataElement : <Spinner size="small" />}
-      </FormField>
+      <FormControl label="Data">
+        <FormLabel>
+          Data
+        </FormLabel>
+        <Input
+          name="data"
+          placeholder={"0"}
+          value={value}
+          onChange={(event) => setValue(Number(event.target.value))}
+          disabled={props.disabled}
+          required
+        />
+        </FormControl>
 
       <Flex justify="center">
         {/* Remove Parameter */}
-        {props.showRemove && <Button
-          key={`remove-${props.identifier}`}
-          icon={<Close />}
-          primary
-          label="Remove"
-          color="status-critical"
-          onClick={() => {
-            if (props.onRemove) {
-              props.onRemove(props.identifier);
-            }
-          }}
-          reverse
-        />}
+        {props.showRemove &&
+          <Button
+            key={`remove-${props.identifier}`}
+            rightIcon={<CloseIcon />}
+            color={"white"}
+            background={"red"}
+            onClick={() => {
+              if (props.onRemove) {
+                props.onRemove(props.identifier);
+              }
+            }}
+          >
+            Remove
+          </Button>
+        }
       </Flex>
-      {isError && <ErrorLayer message={errorMessage} />}
     </Flex>
   );
 };
 
-export default Parameter;
+export const StringParameter = (props: Parameter.String) => {
+  const [name, setName] = useState(props.name);
+  const [value, setValue] = useState("");
+
+  return (
+    <Flex direction={"row"} gap={"4"} p={"2"} justify={"space-between"} align={"center"}>
+      {/* Parameter name */}
+      <FormControl label="Name">
+        <FormLabel htmlFor={"name"}>
+          Name
+        </FormLabel>
+        <Input
+          id="name"
+          placeholder="Name"
+          value={name}
+          onChange={(event) => {
+            setName(event.target.value);
+          }}
+          disabled={props.disabled}
+          required
+        />
+      </FormControl>
+
+      {/* Parameter data */}
+      <FormControl label="Data">
+        <FormLabel>
+          Data
+        </FormLabel>
+        <Input
+          name="data"
+          placeholder={""}
+          value={value}
+          onChange={(event) => setValue(event.target.value)}
+          disabled={props.disabled}
+          required
+        />
+      </FormControl>
+
+      <Flex justify="center">
+        {/* Remove Parameter */}
+        {props.showRemove &&
+          <Button
+            key={`remove-${props.identifier}`}
+            rightIcon={<CloseIcon />}
+            color={"white"}
+            background={"red"}
+            onClick={() => {
+              if (props.onRemove) {
+                props.onRemove(props.identifier);
+              }
+            }}
+          >
+            Remove
+          </Button>
+        }
+      </Flex>
+    </Flex>
+  );
+};
+
+export const URLParameter = (props: Parameter.URL) => {
+  const [name, setName] = useState(props.name);
+  const [URL, setURL] = useState(props.data);
+
+  return (
+    <Flex direction={"row"} gap={"4"} p={"2"} justify={"space-between"} align={"center"}>
+      {/* Parameter name */}
+      <FormControl label="Name">
+        <FormLabel htmlFor={"name"}>
+          Name
+        </FormLabel>
+        <Input
+          id="name"
+          placeholder="Name"
+          value={name}
+          onChange={(event) => {
+            setName(event.target.value);
+          }}
+          disabled={props.disabled}
+          required
+        />
+      </FormControl>
+
+      {/* Parameter data */}
+      <FormControl label="Data">
+        <FormLabel>
+          Data
+        </FormLabel>
+        {props.disabled ?
+          <Link href={URL} color="dark-1">
+            {URL}
+          </Link>
+        :
+          <Input
+            name="url"
+            placeholder="URL"
+            value={URL}
+            onChange={(event) => setURL(event.target.value.toString())}
+            disabled={props.disabled}
+            required
+          />}
+      </FormControl>
+
+      <Flex justify="center">
+        {/* Remove Parameter */}
+        {props.showRemove &&
+          <Button
+            key={`remove-${props.identifier}`}
+            rightIcon={<CloseIcon />}
+            color={"white"}
+            background={"red"}
+            onClick={() => {
+              if (props.onRemove) {
+                props.onRemove(props.identifier);
+              }
+            }}
+          >
+            Remove
+          </Button>
+        }
+      </Flex>
+    </Flex>
+  );
+};
+
+export const DateParameter = (props: Parameter.Date) => {
+  const [name, setName] = useState(props.name);
+
+  const [date, setDate] = useState(new Date());
+
+  return (
+    <Flex direction={"row"} gap={"4"} p={"2"} justify={"space-between"} align={"center"}>
+      {/* Parameter name */}
+      <FormControl label="Name">
+        <FormLabel htmlFor={"name"}>
+          Name
+        </FormLabel>
+        <Input
+          id="name"
+          placeholder="Name"
+          value={name}
+          onChange={(event) => {
+            setName(event.target.value);
+          }}
+          disabled={props.disabled}
+          required
+        />
+      </FormControl>
+
+      {/* Parameter data */}
+      <FormControl label="Data">
+        <FormLabel>
+          Data
+        </FormLabel>
+        <SingleDatepicker
+          id="owner"
+          name="owner"
+          propsConfigs={{
+            dateNavBtnProps: {
+              colorScheme: "gray"
+            },
+            dayOfMonthBtnProps: {
+              defaultBtnProps: {
+                borderColor: "blackAlpha.300",
+                _hover: {
+                  background: "black",
+                  color: "white",
+                }
+              },
+              selectedBtnProps: {
+                background: "black",
+                color: "white",
+              },
+              todayBtnProps: {
+                borderColor: "blackAlpha.300",
+                background: "gray.50",
+                color: "black",
+              }
+            },
+          }}
+          date={date}
+          onDateChange={setDate}
+        />
+      </FormControl>
+
+      <Flex justify="center">
+        {/* Remove Parameter */}
+        {props.showRemove &&
+          <Button
+            key={`remove-${props.identifier}`}
+            rightIcon={<CloseIcon />}
+            color={"white"}
+            background={"red"}
+            onClick={() => {
+              if (props.onRemove) {
+                props.onRemove(props.identifier);
+              }
+            }}
+          >
+            Remove
+          </Button>
+        }
+      </Flex>
+    </Flex>
+  );
+};
+
+export const EntityParameter = (props: Parameter.Entity) => {
+  // Data state
+  const [name, setName] = useState(props.name);
+  const [entity, setEntity] = useState("");
+  const [entities, setEntities] = useState([] as EntityModel[])
+
+  // Status state
+  // const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    const result = getData(`/entities`);
+
+    // Handle the response from the database
+    result.then((value) => {
+      setEntities(value);
+
+      // Check the contents of the response
+      if (value["error"] !== undefined) {
+
+      }
+
+      // setIsLoaded(true);
+    });
+    return;
+  }, []);
+
+  return (
+    <Flex direction={"row"} gap={"4"} p={"2"} justify={"space-between"} align={"center"}>
+      {/* Parameter name */}
+      <FormControl label="Name">
+        <FormLabel htmlFor={"name"}>
+          Name
+        </FormLabel>
+        <Input
+          id="name"
+          placeholder="Name"
+          value={name}
+          onChange={(event) => {
+            setName(event.target.value);
+          }}
+          disabled={props.disabled}
+          required
+        />
+      </FormControl>
+
+      {/* Parameter data */}
+      <FormControl label="Data">
+        <FormLabel>
+          Data
+        </FormLabel>
+        {props.disabled ?
+          <Linky
+            type="entities"
+            id={entity}
+          />
+        :
+          <Select
+            title="Select Entity"
+            value={entity}
+            disabled={props.disabled}
+            onChange={(event) => {
+              console.info(event.target.labels);
+              setEntity(event.target.value.toString());
+            }}
+          >
+            {entities.map((entity) => {
+              return (
+                <option value={entity._id}>{entity.name}</option>
+              );
+            })};
+          </Select>
+        }
+      </FormControl>
+
+      <Flex justify="center">
+        {/* Remove Parameter */}
+        {props.showRemove &&
+          <Button
+            key={`remove-${props.identifier}`}
+            rightIcon={<CloseIcon />}
+            color={"white"}
+            background={"red"}
+            onClick={() => {
+              if (props.onRemove) {
+                props.onRemove(props.identifier);
+              }
+            }}
+          >
+            Remove
+          </Button>
+        }
+      </Flex>
+    </Flex>
+  );
+};
+
+export default { NumberParameter, StringParameter, URLParameter, DateParameter, EntityParameter };

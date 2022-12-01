@@ -69,34 +69,51 @@ export type AttributeCardProps = {
 };
 
 // Parameters
-export type ParameterTypes = "number" | "url" | "date" | "string" | "entity";
+declare namespace Parameter {
+  interface Base {
+    identifier: string;
+    name: string;
+    disabled?: boolean;
+    showRemove?: boolean;
+    onRemove?: (identifier: string) => void;
+    onUpdate?: (data: ParameterStruct) => void;
+  };
 
-export type ParameterStruct = {
-  identifier: string;
-  name: string;
-  type: ParameterTypes;
-  data: number | string | ReactElement;
+  type Number = Base & {
+    type: "number";
+    data: number;
+  };
+
+  type String = Base & {
+    type: "string";
+    data: string;
+  }
+
+  type URL = Base & {
+    type: "url";
+    data: string;
+  }
+
+  type Date = Base & {
+    type: "date";
+    data: Date;
+  };
+
+  type Entity = Base & {
+    type: "entity";
+    data: string;
+  }
 };
 
-export type ParameterActions = {
-  disabled: boolean;
-  showRemove?: boolean;
-  onRemove?: (identifier: string) => void;
-  onUpdate?: (data: ParameterStruct) => void;
-};
-
-export type ParameterProps = ParameterStruct & ParameterActions;
-
-export type ParameterGroupProps = ParameterActions & {
-  parameters: ParameterStruct[];
-};
+declare type Parameters = Parameter.Date | Parameter.Entity | Parameter.Number | Parameter.String | Parameter.URL;
 
 declare type LinkyProps = {
   type: "entities" | "collections" | "attributes";
   id: string;
 };
 
-export type CollectionStruct = {
+// Collection types
+declare type CollectionStruct = {
   name: string;
   description: string;
   owner: string;
@@ -104,11 +121,12 @@ export type CollectionStruct = {
   entities: string[];
 };
 
-export type CollectionModel = CollectionStruct & {
+declare type CollectionModel = CollectionStruct & {
   _id: string;
 };
 
-export type EntityStruct = {
+// Entity types
+declare type EntityStruct = {
   name: string;
   created: string;
   owner: string;

@@ -1,18 +1,7 @@
 // React and Grommet
 import React, { useState } from "react";
-import {
-  Anchor,
-  Box,
-  Button,
-  Form,
-  Heading,
-  PageHeader,
-  Text,
-  TextArea,
-  TextInput,
-} from "grommet/components";
-import { Page, PageContent } from "grommet";
-import { Add, Checkmark } from "grommet-icons";
+import { Box, Button, Flex, Heading, Input, Textarea } from "@chakra-ui/react";
+import ParameterGroup from "src/components/ParameterGroup";
 
 // Navigation
 import { useNavigate } from "react-router-dom";
@@ -24,18 +13,18 @@ import _ from "underscore";
 import consola from "consola";
 
 // Parameter components and custom types
-import { AttributeStruct, ParameterStruct } from "types";
+import { AttributeStruct, Parameters } from "types";
 
 // Database functions
 import { postData } from "src/database/functions";
-import Parameter from "src/components/Parameter";
+import { CheckIcon } from "@chakra-ui/icons";
 
 export const Start = ({}) => {
   const navigate = useNavigate();
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [parameters, setParameters] = useState([] as ParameterStruct[]);
+  const [parameters, setParameters] = useState([] as Parameters[]);
 
   const attributeData: AttributeStruct = {
     name: name,
@@ -43,138 +32,53 @@ export const Start = ({}) => {
     parameters: parameters,
   };
 
-  const onUpdate = (data: ParameterStruct) => {
-    // Store the received Parameter information
-    setParameters(
-      parameters.filter((parameter) => {
-        // Get the relevant Parameter
-        if (parameter.identifier === data.identifier) {
-          parameter.name = data.name;
-          parameter.type = data.type;
-          parameter.data = data.data;
-        }
-        return parameter;
-      })
+  const onSubmit = () => {
+    // Push the data
+    consola.debug("Creating Attribute:", attributeData);
+    postData(`/attributes/create`, attributeData).then(() =>
+      navigate("/attributes")
     );
   };
 
-  const onRemove = (identifier: string) => {
-    setParameters(parameters.filter((parameter) => {
-      // Filter out the Parameter to be removed
-      if (!_.isEqual(parameter.identifier, identifier)) {
-        return parameter;
-      } else {
-        return;
-      }
-    }))
-  };
-
   return (
-    <Page kind="wide" pad={{left: "small", right: "small"}}>
-      <PageContent>
-        <PageHeader
-          title="Create an Attribute"
-          parent={<Anchor label="Home" href="/" />}
-        />
-          <Box fill>
-            <Form
-              onChange={() => {}}
-              onSubmit={() => {
-                // Push the data
-                consola.debug("Creating Attribute:", attributeData);
-                postData(`/attributes/create`, attributeData).then(() =>
-                  navigate("/attributes")
-                );
-              }}
-            >
-              <Box direction="row" gap="medium">
-                <Box direction="column" basis="1/3" gap="small">
-                  <Heading level="4" margin="xsmall">
-                    Details
-                  </Heading>
-                  <TextInput
-                    placeholder={"Attribute Name"}
-                    value={name}
-                    onChange={(event) => setName(event.target.value)}
-                    required
-                  />
-                  <TextArea
-                    value={description}
-                    placeholder={"Attribute Description"}
-                    onChange={(event) => setDescription(event.target.value)}
-                  />
-                </Box>
+    <Box m={"2"}>
+      <Flex direction={"column"} p={"2"} pt={"8"} pb={"8"} >
+        <Flex direction={"row"}>
+          <Heading size={"2xl"}>Create Attribute</Heading>
+        </Flex>
+      </Flex>
 
-                <Box direction="column" fill>
-                  <Box direction="row" gap="small" justify="between">
-                    <Heading level="4" margin="xsmall">
-                      Parameters
-                    </Heading>
-                    <Button
-                      icon={<Add />}
-                      label="Add Parameter"
-                      primary
-                      onClick={() => {
-                        // Create a unique identifier
-                        const identifier = `parameter_${Math.round(performance.now())}`;
+      <Flex p={"2"} direction={"row"} w={"full"} flexWrap={"wrap"} gap={"6"}>
+        <Flex direction={"column"} gap={"2"} grow={"1"}>
+          <Heading size={"xl"} margin={"xs"}>
+            Details
+          </Heading>
+          <Input
+            placeholder={"Attribute Name"}
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            required
+          />
+          <Textarea
+            value={description}
+            placeholder={"Attribute Description"}
+            onChange={(event) => setDescription(event.target.value)}
+          />
+        </Flex>
+      </Flex>
 
-                        // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
-                        setParameters([
-                          ...parameters,
-                          {
-                            identifier: identifier,
-                            name: "",
-                            type: "string",
-                            data: "",
-                          },
-                        ]);
-                      }}
-                    />
-                  </Box>
+      <ParameterGroup parameters={parameters} setParameters={setParameters} />
 
-                  <Box direction="column" gap="small" margin="small" align="center">
-                    {parameters.length > 0 ?
-                      parameters.map((parameter) => {
-                        return (
-                          <Parameter
-                            identifier={parameter.identifier}
-                            name={parameter.name}
-                            type={parameter.type}
-                            data={parameter.data}
-                            disabled={false}
-                            onRemove={onRemove}
-                            onUpdate={onUpdate}
-                            showRemove
-                          />
-                        )
-                      })
-                    :
-                      <Text>No parameters have been added.</Text>
-                    }
-                  </Box>
-                </Box>
-              </Box>
-
-              {/* Action buttons */}
-              <Box
-                direction="row"
-                flex={false}
-                justify="between"
-                margin="medium"
-              >
-                <Button label="Cancel" color="status-critical" onClick={() => navigate("/attributes")} />
-                <Button
-                  type="submit"
-                  label="Finish"
-                  icon={<Checkmark />}
-                  reverse
-                  primary
-                />
-              </Box>
-            </Form>
-          </Box>
-      </PageContent>
-    </Page>
+      {/* Action buttons */}
+      <Flex p={"2"} direction={"row"} w={"full"} flexWrap={"wrap"} gap={"6"} justify={"space-between"}>
+        <Button color="white" background={"red"} onClick={() => navigate("/attributes")}>
+          Cancel
+        </Button>
+        <Button rightIcon={<CheckIcon />} color={"white"} background={"green"} onClick={onSubmit}>
+          Finish
+        </Button>
+      </Flex>
+    </Box>
   );
 };
 export default Start;

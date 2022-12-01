@@ -22,7 +22,7 @@ import { Close, Note, SettingsOption } from "grommet-icons";
 import { AttributeCardProps } from "types";
 
 // Custom components
-import Parameter from "src/components/Parameter";
+import ParameterGroup from "../ParameterGroup";
 
 const AttributeCard = (props: AttributeCardProps) => {
   const [showDetails, setShowDetails] = useState(false);
@@ -131,18 +131,19 @@ const AttributeCard = (props: AttributeCardProps) => {
               <Heading level="3">Parameters</Heading>
               <Box pad="small">
                 {props.data.parameters && props.data.parameters.length > 0 ?
-                  props.data.parameters.map((parameter) => {
-                    return (
-                      <Parameter
-                        key={`parameter-${parameter.identifier}`}
-                        identifier={parameter.identifier}
-                        name={parameter.name}
-                        type={parameter.type}
-                        data={parameter.data}
-                        disabled
-                      />
-                    );
-                  })
+                  <ParameterGroup parameters={props.data.parameters} />
+                  // props.data.parameters.map((parameter) => {
+                  //   return (
+                  //     <Parameter
+                  //       key={`parameter-${parameter.identifier}`}
+                  //       identifier={parameter.identifier}
+                  //       name={parameter.name}
+                  //       type={parameter.type}
+                  //       data={parameter.data}
+                  //       disabled
+                  //     />
+                  //   );
+                  // })
                 :
                   <Paragraph>No parameters.</Paragraph>
                 }
