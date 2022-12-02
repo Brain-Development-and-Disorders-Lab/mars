@@ -79,33 +79,33 @@ declare namespace Parameter {
     onUpdate?: (data: ParameterStruct) => void;
   };
 
-  type Number = Base & {
+  type PNumber = Base & {
     type: "number";
     data: number;
   };
 
-  type String = Base & {
+  type PString = Base & {
     type: "string";
     data: string;
   }
 
-  type URL = Base & {
+  type PURL = Base & {
     type: "url";
     data: string;
   }
 
-  type Date = Base & {
+  type PDate = Base & {
     type: "date";
     data: Date;
   };
 
-  type Entity = Base & {
+  type PEntity = Base & {
     type: "entity";
     data: string;
   }
 };
 
-declare type Parameters = Parameter.Date | Parameter.Entity | Parameter.Number | Parameter.String | Parameter.URL;
+declare type Parameters = Parameter.PDate | Parameter.PEntity | Parameter.PNumber | Parameter.PString | Parameter.PURL;
 
 declare type LinkyProps = {
   type: "entities" | "collections" | "attributes";

@@ -1,6 +1,6 @@
-import { AddIcon } from "@chakra-ui/icons";
-import { Button, Flex, Heading, Text } from "@chakra-ui/react";
+import { Button, Flex } from "@chakra-ui/react";
 import React, { Dispatch, SetStateAction } from "react";
+import { SmallAddIcon } from "@chakra-ui/icons";
 
 import _ from "underscore";
 
@@ -8,7 +8,6 @@ import { Parameters } from "types";
 import { DateParameter, EntityParameter, NumberParameter, StringParameter, URLParameter } from "../Parameter";
 
 const ParameterGroup = (props: { parameters: Parameters[], setParameters?: Dispatch<SetStateAction<Parameters[]>> }) => {
-
   const onUpdate = (data: Parameters) => {
     // Store the received Parameter information
     props.setParameters &&
@@ -37,39 +36,107 @@ const ParameterGroup = (props: { parameters: Parameters[], setParameters?: Dispa
   };
 
   return (
-    <Flex direction={"column"} grow={"2"}>
-      <Flex direction={"row"} gap={"2"} justify={"space-between"}>
-        <Heading size={"xl"} margin="xs">
-          Parameters
-        </Heading>
+    <Flex direction={"column"} gap={"4"} maxW={"2xl"}>
+      <Flex direction={"row"} gap={"2"} flexWrap={"wrap"} justify={"center"} align={"center"}>
+        {/* Buttons to add Parameters */}
+        <Button
+          leftIcon={<SmallAddIcon />}
+          onClick={() => {
+            // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
+            props.setParameters &&
+              props.setParameters([
+                ...props.parameters,
+                {
+                  identifier: `parameter_${Math.round(performance.now())}`,
+                  name: "",
+                  type: "date",
+                  data: new Date(),
+                },
+              ]);
+          }}
+        >
+          Date
+        </Button>
 
-        {props.setParameters &&
-          <Button
-            rightIcon={<AddIcon />}
-            onClick={() => {
-              // Create a unique identifier
-              const identifier = `parameter_${Math.round(performance.now())}`;
+        <Button
+          leftIcon={<SmallAddIcon />}
+          onClick={() => {
+            // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
+            props.setParameters &&
+              props.setParameters([
+                ...props.parameters,
+                {
+                  identifier: `parameter_${Math.round(performance.now())}`,
+                  name: "",
+                  type: "string",
+                  data: "",
+                },
+              ]);
+          }}
+        >
+          String
+        </Button>
 
-              // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
-              props.setParameters &&
-                props.setParameters([
-                  ...props.parameters,
-                  {
-                    identifier: identifier,
-                    name: "",
-                    type: "string",
-                    data: "",
-                  },
-                ]);
-            }}
-          >
-            Add Parameter
-          </Button>
-        }
+        <Button
+          leftIcon={<SmallAddIcon />}
+          onClick={() => {
+            // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
+            props.setParameters &&
+              props.setParameters([
+                ...props.parameters,
+                {
+                  identifier: `parameter_${Math.round(performance.now())}`,
+                  name: "",
+                  type: "number",
+                  data: 0,
+                },
+              ]);
+          }}
+        >
+          Number
+        </Button>
+
+        <Button
+          leftIcon={<SmallAddIcon />}
+          onClick={() => {
+            // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
+            props.setParameters &&
+              props.setParameters([
+                ...props.parameters,
+                {
+                  identifier: `parameter_${Math.round(performance.now())}`,
+                  name: "",
+                  type: "url",
+                  data: "",
+                },
+              ]);
+          }}
+        >
+          URL
+        </Button>
+
+        <Button
+          leftIcon={<SmallAddIcon />}
+          onClick={() => {
+            // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
+            props.setParameters &&
+              props.setParameters([
+                ...props.parameters,
+                {
+                  identifier: `parameter_${Math.round(performance.now())}`,
+                  name: "",
+                  type: "entity",
+                  data: "",
+                },
+              ]);
+          }}
+        >
+          Entity
+        </Button>
       </Flex>
 
-      <Flex direction={"column"} gap={"2"} w={"2xl"} margin={"sm"} align={"center"}>
-        {props.parameters.length > 0 ?
+      <Flex gap={"4"} margin={"sm"} p={"4"} maxW={"2xl"} h={"100%"} overflowX={"auto"} >
+        {props.parameters.length > 0 &&
           props.parameters.map((parameter) => {
             switch (parameter.type) {
               case "date": {
@@ -149,8 +216,6 @@ const ParameterGroup = (props: { parameters: Parameters[], setParameters?: Dispa
               }
             }
           })
-        :
-          <Text>No parameters have been added.</Text>
         }
       </Flex>
     </Flex>

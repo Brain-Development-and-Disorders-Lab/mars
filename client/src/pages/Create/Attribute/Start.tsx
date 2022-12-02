@@ -1,6 +1,6 @@
 // React and Grommet
 import React, { useState } from "react";
-import { Box, Button, Flex, Heading, Input, Textarea } from "@chakra-ui/react";
+import { Box, Button, Flex, Heading, Input, Text, Textarea } from "@chakra-ui/react";
 import ParameterGroup from "src/components/ParameterGroup";
 
 // Navigation
@@ -41,44 +41,56 @@ export const Start = ({}) => {
   };
 
   return (
-    <Box m={"2"}>
-      <Flex direction={"column"} p={"2"} pt={"8"} pb={"8"} >
-        <Flex direction={"row"}>
-          <Heading size={"2xl"}>Create Attribute</Heading>
+    <Flex h={"90vh"} justifyContent={"center"} align={"center"} direction={"column"}>
+      <Box
+        p={"4"}
+        m={"2"}
+        rounded={"xl"}
+        gap={"1.5"}
+        shadow={"lg"}
+      >
+        <Flex direction={"column"} p={"2"} pt={"8"} pb={"8"} >
+          <Flex direction={"row"}>
+            <Heading size={"2xl"}>Create Attribute</Heading>
+          </Flex>
         </Flex>
-      </Flex>
 
-      <Flex p={"2"} direction={"row"} w={"full"} flexWrap={"wrap"} gap={"6"}>
-        <Flex direction={"column"} gap={"2"} grow={"1"}>
-          <Heading size={"xl"} margin={"xs"}>
-            Details
-          </Heading>
-          <Input
-            placeholder={"Attribute Name"}
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            required
-          />
-          <Textarea
-            value={description}
-            placeholder={"Attribute Description"}
-            onChange={(event) => setDescription(event.target.value)}
-          />
+        <Flex p={"2"} direction={"row"} w={"full"} flexWrap={"wrap"} gap={"6"}>
+          <Flex direction={"column"} gap={"2"} grow={"1"} maxW={"md"}>
+            <Heading size={"xl"} margin={"xs"}>
+              Details
+            </Heading>
+            <Text>
+              Specify some basic details about this template Attribute.
+              The metadata associated with this template should be specified using Parameters.
+            </Text>
+            <Input
+              placeholder={"Attribute Name"}
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              required
+            />
+            <Textarea
+              value={description}
+              placeholder={"Attribute Description"}
+              onChange={(event) => setDescription(event.target.value)}
+            />
+          </Flex>
+
+          <ParameterGroup parameters={parameters} setParameters={setParameters} />
         </Flex>
-      </Flex>
 
-      <ParameterGroup parameters={parameters} setParameters={setParameters} />
-
-      {/* Action buttons */}
-      <Flex p={"2"} direction={"row"} w={"full"} flexWrap={"wrap"} gap={"6"} justify={"space-between"}>
-        <Button color="white" background={"red"} onClick={() => navigate("/attributes")}>
-          Cancel
-        </Button>
-        <Button rightIcon={<CheckIcon />} color={"white"} background={"green"} onClick={onSubmit}>
-          Finish
-        </Button>
-      </Flex>
-    </Box>
+        {/* Action buttons */}
+        <Flex p={"2"} direction={"row"} w={"full"} flexWrap={"wrap"} gap={"6"} justify={"space-between"}>
+          <Button color="white" background={"red"} onClick={() => navigate("/attributes")}>
+            Cancel
+          </Button>
+          <Button rightIcon={<CheckIcon />} color={"white"} background={"green"} onClick={onSubmit}>
+            Finish
+          </Button>
+        </Flex>
+      </Box>
+    </Flex>
   );
 };
 export default Start;
