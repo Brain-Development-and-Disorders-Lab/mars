@@ -77,7 +77,7 @@ export const Start = ({}) => {
             />
           </Flex>
 
-          <ParameterGroup parameters={parameters} setParameters={setParameters} />
+          <ParameterGroup parameters={parameters} viewOnly={false} setParameters={setParameters} />
         </Flex>
 
         {/* Action buttons */}

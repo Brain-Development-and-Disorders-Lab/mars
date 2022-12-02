@@ -1,8 +1,8 @@
 // React and Grommet
 import React, { useEffect, useState } from "react";
-import { Badge, Card, CardBody, CardHeader, Flex, FormControl, FormLabel, IconButton, Input, Link, Select, Tag, TagLabel } from "@chakra-ui/react";
-import { CloseIcon } from "@chakra-ui/icons";
+import { Badge, Card, CardBody, CardHeader, Flex, FormControl, FormLabel, IconButton, Input, Link, Select, Tag, TagLabel, useToast } from "@chakra-ui/react";
 import { SingleDatepicker } from "chakra-dayzed-datepicker";
+import { CloseIcon } from "@chakra-ui/icons";
 
 // Database and models
 import { getData } from "src/database/functions";
@@ -13,10 +13,21 @@ import Linky from "src/components/Linky";
 
 export const NumberParameter = (props: Parameter.PNumber) => {
   const [name, setName] = useState(props.name);
-  const [value, setValue] = useState(0);
+  const [value, setValue] = useState(props.data);
+
+  // Propagate data updates
+  useEffect(() => {
+    if (props.onUpdate) {
+      props.onUpdate({
+        identifier: props.identifier,
+        name: name,
+        data: value,
+      });
+    }
+  }, [name, value]);
 
   return (
-    <Card minW={"xs"} shadow={"md"}>
+    <Card minW={"xs"} h={"fit-content"} shadow={"md"}>
       <CardHeader>
         <Flex justify={"space-between"} align={"center"}>
           <Flex gap={"2"}>
@@ -24,12 +35,12 @@ export const NumberParameter = (props: Parameter.PNumber) => {
               <TagLabel>Number</TagLabel>
             </Tag>
 
-            <Badge bg={"green.200"}>
+            <Badge bg={"green.200"} visibility={props.disabled ? "hidden" : "visible"}>
               New
             </Badge>
           </Flex>
           {/* Remove Parameter */}
-          {props.showRemove &&
+          {props.showRemove && !props.disabled &&
             <IconButton
               aria-label={"Remove Parameter"}
               key={`remove-${props.identifier}`}
@@ -66,7 +77,7 @@ export const NumberParameter = (props: Parameter.PNumber) => {
           {/* Parameter data */}
           <FormControl label="Data">
             <FormLabel>
-              Data
+              Value
             </FormLabel>
             <Input
               name="data"
@@ -85,10 +96,21 @@ export const NumberParameter = (props: Parameter.PNumber) => {
 
 export const StringParameter = (props: Parameter.PString) => {
   const [name, setName] = useState(props.name);
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState(props.data);
+
+  // Propagate data updates
+  useEffect(() => {
+    if (props.onUpdate) {
+      props.onUpdate({
+        identifier: props.identifier,
+        name: name,
+        data: value,
+      });
+    }
+  }, [name, value]);
 
   return (
-    <Card minW={"xs"} shadow={"md"}>
+    <Card minW={"xs"} h={"fit-content"} shadow={"md"}>
       <CardHeader>
         <Flex justify={"space-between"} align={"center"}>
           <Flex gap={"2"}>
@@ -96,12 +118,12 @@ export const StringParameter = (props: Parameter.PString) => {
               <TagLabel>String</TagLabel>
             </Tag>
 
-            <Badge bg={"green.200"}>
+            <Badge bg={"green.200"} visibility={props.disabled ? "hidden" : "visible"}>
               New
             </Badge>
           </Flex>
           {/* Remove Parameter */}
-          {props.showRemove &&
+          {props.showRemove && !props.disabled &&
             <IconButton
               aria-label={"Remove Parameter"}
               key={`remove-${props.identifier}`}
@@ -138,7 +160,7 @@ export const StringParameter = (props: Parameter.PString) => {
           {/* Parameter data */}
           <FormControl label="Data">
             <FormLabel>
-              Data
+              Value
             </FormLabel>
             <Input
               name="data"
@@ -159,8 +181,19 @@ export const URLParameter = (props: Parameter.PURL) => {
   const [name, setName] = useState(props.name);
   const [value, setValue] = useState(props.data);
 
+  // Propagate data updates
+  useEffect(() => {
+    if (props.onUpdate) {
+      props.onUpdate({
+        identifier: props.identifier,
+        name: name,
+        data: value,
+      });
+    }
+  }, [name, value]);
+
   return (
-    <Card minW={"xs"} shadow={"md"}>
+    <Card minW={"xs"} h={"fit-content"} shadow={"md"}>
       <CardHeader>
         <Flex justify={"space-between"} align={"center"}>
           <Flex gap={"2"}>
@@ -168,12 +201,12 @@ export const URLParameter = (props: Parameter.PURL) => {
               <TagLabel>URL</TagLabel>
             </Tag>
 
-            <Badge bg={"green.200"}>
+            <Badge bg={"green.200"} visibility={props.disabled ? "hidden" : "visible"}>
               New
             </Badge>
           </Flex>
           {/* Remove Parameter */}
-          {props.showRemove &&
+          {props.showRemove && !props.disabled &&
             <IconButton
               aria-label={"Remove Parameter"}
               key={`remove-${props.identifier}`}
@@ -212,7 +245,7 @@ export const URLParameter = (props: Parameter.PURL) => {
           {/* Parameter data */}
           <FormControl label="Data">
             <FormLabel>
-              Data
+              URL
             </FormLabel>
             {props.disabled ?
               <Link href={value} color="dark-1">
@@ -236,10 +269,21 @@ export const URLParameter = (props: Parameter.PURL) => {
 
 export const DateParameter = (props: Parameter.PDate) => {
   const [name, setName] = useState(props.name);
-  const [value, setValue] = useState(new Date());
+  const [value, setValue] = useState(props.data);
+
+  // Propagate data updates
+  useEffect(() => {
+    if (props.onUpdate) {
+      props.onUpdate({
+        identifier: props.identifier,
+        name: name,
+        data: value,
+      });
+    }
+  }, [name, value]);
 
   return (
-    <Card minW={"xs"} shadow={"md"}>
+    <Card minW={"xs"} h={"fit-content"} shadow={"md"}>
       <CardHeader>
         <Flex justify={"space-between"} align={"center"}>
           <Flex gap={"2"}>
@@ -247,12 +291,12 @@ export const DateParameter = (props: Parameter.PDate) => {
               <TagLabel>Date</TagLabel>
             </Tag>
 
-            <Badge bg={"green.200"}>
+            <Badge bg={"green.200"} visibility={props.disabled ? "hidden" : "visible"}>
               New
             </Badge>
           </Flex>
           {/* Remove Parameter */}
-          {props.showRemove &&
+          {props.showRemove && !props.disabled &&
             <IconButton
               aria-label={"Remove Parameter"}
               key={`remove-${props.identifier}`}
@@ -291,7 +335,7 @@ export const DateParameter = (props: Parameter.PDate) => {
           {/* Parameter data */}
           <FormControl label="Data">
             <FormLabel>
-              Data
+              Date
             </FormLabel>
             <SingleDatepicker
               id="owner"
@@ -330,15 +374,28 @@ export const DateParameter = (props: Parameter.PDate) => {
 };
 
 export const EntityParameter = (props: Parameter.PEntity) => {
+  const toast = useToast();
+
   // All entities
   const [entities, setEntities] = useState([] as EntityModel[]);
 
   // Data state
   const [name, setName] = useState(props.name);
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState(props.data);
+
+  // Propagate data updates
+  useEffect(() => {
+    if (props.onUpdate) {
+      props.onUpdate({
+        identifier: props.identifier,
+        name: name,
+        data: value,
+      });
+    }
+  }, [name, value]);
 
   // Status state
-  // const [isLoaded, setIsLoaded] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     const result = getData(`/entities`);
@@ -349,16 +406,23 @@ export const EntityParameter = (props: Parameter.PEntity) => {
 
       // Check the contents of the response
       if (value["error"] !== undefined) {
-
+        toast({
+          title: "Database Error",
+          description: value["error"],
+          status: "error",
+          duration: 4000,
+          position: "bottom-right",
+          isClosable: true,
+        });
       }
 
-      // setIsLoaded(true);
+      setIsLoaded(true);
     });
     return;
   }, []);
 
   return (
-    <Card minW={"xs"} shadow={"md"}>
+    <Card minW={"xs"} h={"fit-content"} shadow={"md"}>
       <CardHeader>
         <Flex justify={"space-between"} align={"center"}>
           <Flex gap={"2"}>
@@ -366,12 +430,12 @@ export const EntityParameter = (props: Parameter.PEntity) => {
               <TagLabel>Entity</TagLabel>
             </Tag>
 
-            <Badge bg={"green.200"}>
+            <Badge bg={"green.200"} visibility={props.disabled ? "hidden" : "visible"}>
               New
             </Badge>
           </Flex>
           {/* Remove Parameter */}
-          {props.showRemove &&
+          {props.showRemove && !props.disabled &&
             <IconButton
               aria-label={"Remove Parameter"}
               key={`remove-${props.identifier}`}
@@ -410,7 +474,7 @@ export const EntityParameter = (props: Parameter.PEntity) => {
           {/* Parameter data */}
           <FormControl label="Data">
             <FormLabel>
-              Data
+              Entity
             </FormLabel>
             {props.disabled ?
               <Linky
@@ -421,17 +485,19 @@ export const EntityParameter = (props: Parameter.PEntity) => {
               <Select
                 title="Select Entity"
                 value={value}
+                placeholder={"Select Entity"}
                 disabled={props.disabled}
                 onChange={(event) => {
-                  console.info(event.target.labels);
                   setValue(event.target.value.toString());
                 }}
               >
-                {entities.map((entity) => {
-                  return (
-                    <option value={entity._id}>{entity.name}</option>
-                  );
-                })};
+                {isLoaded &&
+                  entities.map((entity) => {
+                    return (
+                      <option key={entity._id} value={entity._id}>{entity.name}</option>
+                    );
+                  })
+                };
               </Select>
             }
           </FormControl>

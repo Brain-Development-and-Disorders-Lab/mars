@@ -131,19 +131,7 @@ const AttributeCard = (props: AttributeCardProps) => {
               <Heading level="3">Parameters</Heading>
               <Box pad="small">
                 {props.data.parameters && props.data.parameters.length > 0 ?
-                  <ParameterGroup parameters={props.data.parameters} />
-                  // props.data.parameters.map((parameter) => {
-                  //   return (
-                  //     <Parameter
-                  //       key={`parameter-${parameter.identifier}`}
-                  //       identifier={parameter.identifier}
-                  //       name={parameter.name}
-                  //       type={parameter.type}
-                  //       data={parameter.data}
-                  //       disabled
-                  //     />
-                  //   );
-                  // })
+                  <ParameterGroup parameters={props.data.parameters} viewOnly={true} />
                 :
                   <Paragraph>No parameters.</Paragraph>
                 }

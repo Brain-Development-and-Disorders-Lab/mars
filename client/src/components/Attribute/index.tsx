@@ -53,7 +53,7 @@ const Attribute = (props: AttributeProps) => {
         />
       </Box>
 
-      <ParameterGroup parameters={parameters} setParameters={setParameters} />
+      <ParameterGroup parameters={parameters} viewOnly={true} setParameters={setParameters} />
 
       <Box direction="column" width="small" gap="small">
         <Button

@@ -1,13 +1,20 @@
-import { Button, Flex } from "@chakra-ui/react";
+import { Button, Flex, Heading } from "@chakra-ui/react";
 import React, { Dispatch, SetStateAction } from "react";
 import { SmallAddIcon } from "@chakra-ui/icons";
 
 import _ from "underscore";
 
+// Custom types and components
 import { Parameters } from "types";
 import { DateParameter, EntityParameter, NumberParameter, StringParameter, URLParameter } from "../Parameter";
 
-const ParameterGroup = (props: { parameters: Parameters[], setParameters?: Dispatch<SetStateAction<Parameters[]>> }) => {
+/**
+ * ParameterGroup component use to display a collection of Parameters and enable
+ * creating and deleting Parameters. Displays collection as cards.
+ * @param props collection of props to construct component
+ * @return
+ */
+const ParameterGroup = (props: { parameters: Parameters[], viewOnly: boolean, setParameters?: Dispatch<SetStateAction<Parameters[]>> }) => {
   const onUpdate = (data: Parameters) => {
     // Store the received Parameter information
     props.setParameters &&
@@ -36,8 +43,11 @@ const ParameterGroup = (props: { parameters: Parameters[], setParameters?: Dispa
   };
 
   return (
-    <Flex direction={"column"} gap={"4"} maxW={"2xl"}>
-      <Flex direction={"row"} gap={"2"} flexWrap={"wrap"} justify={"center"} align={"center"}>
+    <Flex direction={"column"} gap={"4"} maxW={"2xl"} overflow={"hidden"}>
+      <Heading>Parameters</Heading>
+
+      {/* Button Group */}
+      <Flex visibility={props.viewOnly ? "hidden" : "visible"} direction={"row"} gap={"2"} flexWrap={"wrap"} justify={"center"} align={"center"}>
         {/* Buttons to add Parameters */}
         <Button
           leftIcon={<SmallAddIcon />}
@@ -47,7 +57,7 @@ const ParameterGroup = (props: { parameters: Parameters[], setParameters?: Dispa
               props.setParameters([
                 ...props.parameters,
                 {
-                  identifier: `parameter_${Math.round(performance.now())}`,
+                  identifier: `p_date_${Math.round(performance.now())}`,
                   name: "",
                   type: "date",
                   data: new Date(),
@@ -66,7 +76,7 @@ const ParameterGroup = (props: { parameters: Parameters[], setParameters?: Dispa
               props.setParameters([
                 ...props.parameters,
                 {
-                  identifier: `parameter_${Math.round(performance.now())}`,
+                  identifier: `p_string_${Math.round(performance.now())}`,
                   name: "",
                   type: "string",
                   data: "",
@@ -85,7 +95,7 @@ const ParameterGroup = (props: { parameters: Parameters[], setParameters?: Dispa
               props.setParameters([
                 ...props.parameters,
                 {
-                  identifier: `parameter_${Math.round(performance.now())}`,
+                  identifier: `p_number_${Math.round(performance.now())}`,
                   name: "",
                   type: "number",
                   data: 0,
@@ -104,7 +114,7 @@ const ParameterGroup = (props: { parameters: Parameters[], setParameters?: Dispa
               props.setParameters([
                 ...props.parameters,
                 {
-                  identifier: `parameter_${Math.round(performance.now())}`,
+                  identifier: `p_url_${Math.round(performance.now())}`,
                   name: "",
                   type: "url",
                   data: "",
@@ -123,7 +133,7 @@ const ParameterGroup = (props: { parameters: Parameters[], setParameters?: Dispa
               props.setParameters([
                 ...props.parameters,
                 {
-                  identifier: `parameter_${Math.round(performance.now())}`,
+                  identifier: `p_entity_${Math.round(performance.now())}`,
                   name: "",
                   type: "entity",
                   data: "",
@@ -135,7 +145,8 @@ const ParameterGroup = (props: { parameters: Parameters[], setParameters?: Dispa
         </Button>
       </Flex>
 
-      <Flex gap={"4"} margin={"sm"} p={"4"} maxW={"2xl"} h={"100%"} overflowX={"auto"} >
+      {/* Card Group */}
+      <Flex gap={"4"} margin={"sm"} p={"4"} maxW={"xl"} h={"sm"} overflowX={"auto"} >
         {props.parameters.length > 0 &&
           props.parameters.map((parameter) => {
             switch (parameter.type) {
@@ -149,7 +160,7 @@ const ParameterGroup = (props: { parameters: Parameters[], setParameters?: Dispa
                     data={parameter.data}
                     onRemove={onRemove}
                     onUpdate={onUpdate}
-                    disabled={false}
+                    disabled={props.viewOnly}
                     showRemove
                   />
                 );
@@ -164,7 +175,7 @@ const ParameterGroup = (props: { parameters: Parameters[], setParameters?: Dispa
                     data={parameter.data}
                     onRemove={onRemove}
                     onUpdate={onUpdate}
-                    disabled={false}
+                    disabled={props.viewOnly}
                     showRemove
                   />
                 );
@@ -179,7 +190,7 @@ const ParameterGroup = (props: { parameters: Parameters[], setParameters?: Dispa
                     data={parameter.data}
                     onRemove={onRemove}
                     onUpdate={onUpdate}
-                    disabled={false}
+                    disabled={props.viewOnly}
                     showRemove
                   />
                 );
@@ -194,7 +205,7 @@ const ParameterGroup = (props: { parameters: Parameters[], setParameters?: Dispa
                     data={parameter.data}
                     onRemove={onRemove}
                     onUpdate={onUpdate}
-                    disabled={false}
+                    disabled={props.viewOnly}
                     showRemove
                   />
                 );
@@ -209,7 +220,7 @@ const ParameterGroup = (props: { parameters: Parameters[], setParameters?: Dispa
                     data={parameter.data}
                     onRemove={onRemove}
                     onUpdate={onUpdate}
-                    disabled={false}
+                    disabled={props.viewOnly}
                     showRemove
                   />
                 );
