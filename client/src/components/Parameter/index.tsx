@@ -57,13 +57,12 @@ export const NumberParameter = (props: Parameter.PNumber) => {
               id="name"
               placeholder="Name"
               value={name}
-              onChange={(event) => {
-                setName(event.target.value);
-              }}
+              onChange={(event) => setName(event.target.value)}
               disabled={props.disabled}
               required
             />
           </FormControl>
+
           {/* Parameter data */}
           <FormControl label="Data">
             <FormLabel>
@@ -130,13 +129,12 @@ export const StringParameter = (props: Parameter.PString) => {
               id="name"
               placeholder="Name"
               value={name}
-              onChange={(event) => {
-                setName(event.target.value);
-              }}
+              onChange={(event) => setName(event.target.value)}
               disabled={props.disabled}
               required
             />
           </FormControl>
+
           {/* Parameter data */}
           <FormControl label="Data">
             <FormLabel>
@@ -159,7 +157,7 @@ export const StringParameter = (props: Parameter.PString) => {
 
 export const URLParameter = (props: Parameter.PURL) => {
   const [name, setName] = useState(props.name);
-  const [URL, setURL] = useState(props.data);
+  const [value, setValue] = useState(props.data);
 
   return (
     <Card minW={"xs"} shadow={"md"}>
@@ -217,15 +215,15 @@ export const URLParameter = (props: Parameter.PURL) => {
               Data
             </FormLabel>
             {props.disabled ?
-              <Link href={URL} color="dark-1">
-                {URL}
+              <Link href={value} color="dark-1">
+                {value}
               </Link>
             :
               <Input
                 name="url"
                 placeholder="URL"
-                value={URL}
-                onChange={(event) => setURL(event.target.value.toString())}
+                value={value}
+                onChange={(event) => setValue(event.target.value.toString())}
                 disabled={props.disabled}
                 required
               />}
@@ -238,8 +236,7 @@ export const URLParameter = (props: Parameter.PURL) => {
 
 export const DateParameter = (props: Parameter.PDate) => {
   const [name, setName] = useState(props.name);
-
-  const [date, setDate] = useState(new Date());
+  const [value, setValue] = useState(new Date());
 
   return (
     <Card minW={"xs"} shadow={"md"}>
@@ -322,8 +319,8 @@ export const DateParameter = (props: Parameter.PDate) => {
                   }
                 },
               }}
-              date={date}
-              onDateChange={setDate}
+              date={value}
+              onDateChange={setValue}
             />
           </FormControl>
         </Flex>
@@ -333,10 +330,12 @@ export const DateParameter = (props: Parameter.PDate) => {
 };
 
 export const EntityParameter = (props: Parameter.PEntity) => {
+  // All entities
+  const [entities, setEntities] = useState([] as EntityModel[]);
+
   // Data state
   const [name, setName] = useState(props.name);
-  const [entity, setEntity] = useState("");
-  const [entities, setEntities] = useState([] as EntityModel[])
+  const [value, setValue] = useState("");
 
   // Status state
   // const [isLoaded, setIsLoaded] = useState(false);
@@ -416,16 +415,16 @@ export const EntityParameter = (props: Parameter.PEntity) => {
             {props.disabled ?
               <Linky
                 type="entities"
-                id={entity}
+                id={value}
               />
             :
               <Select
                 title="Select Entity"
-                value={entity}
+                value={value}
                 disabled={props.disabled}
                 onChange={(event) => {
                   console.info(event.target.labels);
-                  setEntity(event.target.value.toString());
+                  setValue(event.target.value.toString());
                 }}
               >
                 {entities.map((entity) => {
