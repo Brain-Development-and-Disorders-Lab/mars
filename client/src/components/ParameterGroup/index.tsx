@@ -1,6 +1,9 @@
-import { Button, Flex, Heading } from "@chakra-ui/react";
+import { Button, Flex, Heading, Icon } from "@chakra-ui/react";
 import React, { Dispatch, SetStateAction } from "react";
 import { SmallAddIcon } from "@chakra-ui/icons";
+import { AiOutlineBlock, AiOutlineLink } from "react-icons/ai";
+import { MdDateRange, MdOutlineTextFields } from "react-icons/md";
+import { RiNumbersLine } from "react-icons/ri";
 
 import _ from "underscore";
 
@@ -51,6 +54,7 @@ const ParameterGroup = (props: { parameters: Parameters[], viewOnly: boolean, se
         {/* Buttons to add Parameters */}
         <Button
           leftIcon={<SmallAddIcon />}
+          rightIcon={<Icon as={MdDateRange} />}
           onClick={() => {
             // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
             props.setParameters &&
@@ -70,6 +74,7 @@ const ParameterGroup = (props: { parameters: Parameters[], viewOnly: boolean, se
 
         <Button
           leftIcon={<SmallAddIcon />}
+          rightIcon={<Icon as={MdOutlineTextFields} />}
           onClick={() => {
             // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
             props.setParameters &&
@@ -89,6 +94,7 @@ const ParameterGroup = (props: { parameters: Parameters[], viewOnly: boolean, se
 
         <Button
           leftIcon={<SmallAddIcon />}
+          rightIcon={<Icon as={RiNumbersLine} />}
           onClick={() => {
             // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
             props.setParameters &&
@@ -108,6 +114,7 @@ const ParameterGroup = (props: { parameters: Parameters[], viewOnly: boolean, se
 
         <Button
           leftIcon={<SmallAddIcon />}
+          rightIcon={<Icon as={AiOutlineLink} />}
           onClick={() => {
             // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
             props.setParameters &&
@@ -127,6 +134,7 @@ const ParameterGroup = (props: { parameters: Parameters[], viewOnly: boolean, se
 
         <Button
           leftIcon={<SmallAddIcon />}
+          rightIcon={<Icon as={AiOutlineBlock} />}
           onClick={() => {
             // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
             props.setParameters &&
