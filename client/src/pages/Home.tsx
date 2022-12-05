@@ -1,6 +1,6 @@
 // React and Grommet
 import React, { useEffect, useState } from "react";
-import { Box, Button, Flex, Heading, Table, TableContainer, Text, Thead, Tr, Th, useToast, Stat, StatLabel, StatNumber, StatHelpText, Spacer, List, ListItem } from "@chakra-ui/react";
+import { Box, Button, Flex, Heading, Table, TableContainer, Text, Thead, Tr, Th, useToast, Stat, StatLabel, StatNumber, StatHelpText, Spacer, List, ListItem, Tbody } from "@chakra-ui/react";
 
 // Database and models
 import { getData } from "src/database/functions";
@@ -101,7 +101,7 @@ const Home = () => {
           <Flex
             direction={"column"}
             p={"4"}
-            background={"#cce3de"}
+            background={"gray.300"}
             rounded={"xl"}
             gap={"1.5"}
           >
@@ -119,8 +119,7 @@ const Home = () => {
 
             <Stat
               rounded={"md"}
-              background={"#83c5be"}
-              color={"white"}
+              background={"gray.200"}
               p={"2"}
               maxW={"fit-content"}
             >
@@ -151,25 +150,27 @@ const Home = () => {
                       </Th>
                     </Tr>
                   </Thead>
-                  {collectionData.slice(0, 3).map((collection) => {
-                    return (
-                      <Tr>
-                        <Th pl={"0"}>{collection.name}</Th>
-                        <Th pr={"0"}>
-                          <Flex justify={"right"}>
-                            <Button
-                              key={`view-collection-${collection._id}`}
-                              color="grey.400"
-                              rightIcon={<ChevronRightIcon />}
-                              onClick={() => navigate(`/collections/${collection._id}`)}
-                            >
-                              View
-                            </Button>
-                          </Flex>
-                        </Th>
-                      </Tr>
-                    );
-                  })}
+                  <Tbody>
+                    {collectionData.slice(0, 3).map((collection) => {
+                      return (
+                        <Tr key={collection._id}>
+                          <Th pl={"0"}>{collection.name}</Th>
+                          <Th pr={"0"}>
+                            <Flex justify={"right"}>
+                              <Button
+                                key={`view-collection-${collection._id}`}
+                                color="grey.400"
+                                rightIcon={<ChevronRightIcon />}
+                                onClick={() => navigate(`/collections/${collection._id}`)}
+                              >
+                                View
+                              </Button>
+                            </Flex>
+                          </Th>
+                        </Tr>
+                      );
+                    })}
+                  </Tbody>
                 </Table>
               </TableContainer>
             ) : (
@@ -181,7 +182,7 @@ const Home = () => {
           <Flex
             direction={"column"}
             p={"4"}
-            background={"#61a5c2"}
+            background={"blue.300"}
             rounded={"xl"}
             gap={"1.5"}
           >
@@ -198,7 +199,7 @@ const Home = () => {
 
             <Stat
               rounded={"md"}
-              background={"#89c2d9"}
+              background={"blue.200"}
               color={"white"}
               p={"2"}
               maxW={"fit-content"}
@@ -212,7 +213,7 @@ const Home = () => {
 
             {isLoaded && entityData.length > 0 ? (
               <TableContainer>
-                <Table variant={"simple"}>
+                <Table variant={"simple"} colorScheme={"blue"}>
                   <Thead>
                     <Tr>
                       <Th pl={"0"}><Heading color={"white"} size={"sm"}>Newest Entities</Heading></Th>
@@ -220,7 +221,6 @@ const Home = () => {
                         <Flex justify={"right"}>
                           <Button
                             key={`view-entity-all`}
-                            color="accent-4"
                             rightIcon={<ChevronRightIcon />}
                             onClick={() => navigate(`/entities`)}
                           >
@@ -230,25 +230,26 @@ const Home = () => {
                       </Th>
                     </Tr>
                   </Thead>
-                  {entityData.slice(0, 3).map((entity) => {
-                    return (
-                      <Tr>
-                        <Th pl={"0"} color={"white"}>{entity.name}</Th>
-                        <Th pr={"0"}>
-                          <Flex justify={"right"}>
-                            <Button
-                              key={`view-entity-${entity._id}`}
-                              color="accent-4"
-                              rightIcon={<ChevronRightIcon />}
-                              onClick={() => navigate(`/entities/${entity._id}`)}
-                            >
-                              View
-                            </Button>
-                          </Flex>
-                        </Th>
-                      </Tr>
-                    );
-                  })}
+                  <Tbody>
+                    {entityData.slice(0, 3).map((entity) => {
+                      return (
+                        <Tr key={entity._id}>
+                          <Th pl={"0"} color={"white"}>{entity.name}</Th>
+                          <Th pr={"0"}>
+                            <Flex justify={"right"}>
+                              <Button
+                                key={`view-entity-${entity._id}`}
+                                rightIcon={<ChevronRightIcon />}
+                                onClick={() => navigate(`/entities/${entity._id}`)}
+                              >
+                                View
+                              </Button>
+                            </Flex>
+                          </Th>
+                        </Tr>
+                      );
+                    })}
+                  </Tbody>
                 </Table>
               </TableContainer>
             ) : (
@@ -261,14 +262,14 @@ const Home = () => {
         <Flex
           direction={"column"}
           p={"4"}
-          background={"#ffe1a8"}
+          background={"teal"}
           rounded={"xl"}
           gap={"1.5"}
           grow={"1"} 
         >
-          <Heading color={"gray.600"}>Recent Changes{" "}<RepeatClockIcon color={"gray.600"} w={8} h={8} /></Heading>
+          <Heading color={"white"}>Recent Changes{" "}<RepeatClockIcon color={"white"} w={8} h={8} /></Heading>
           <List>
-            <ListItem><Text fontSize={"md"}>9:23 AM: <b>Henry</b> updated ...</Text></ListItem>
+            <ListItem><Text fontSize={"md"} textColor={"white"}>9:23 AM: <b>Henry</b> updated ...</Text></ListItem>
           </List>
         </Flex>
       </Flex>
