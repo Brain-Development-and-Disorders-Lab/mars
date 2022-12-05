@@ -1,37 +1,22 @@
-// React and Grommet
 import React, { useEffect, useState } from "react";
-import {
-  Anchor,
-  Box,
-  Button,
-  Heading,
-  PageHeader,
-  Paragraph,
-  Spinner,
-  Table,
-  TableBody,
-  TableCell,
-  TableHeader,
-  TableRow,
-} from "grommet/components";
-import { Page, PageContent } from "grommet";
-import { LinkNext } from "grommet-icons";
+import { Box, Button, Flex, Heading, Table, TableContainer, Tag, TagLabel, TagRightIcon, Tbody, Text, Th, Thead, Tr, useToast } from "@chakra-ui/react";
+import { ChevronRightIcon, PlusSquareIcon, WarningIcon } from "@chakra-ui/icons";
+import { Loading } from "src/components/Loading";
 
 // Navigation
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link as RouterLink } from "react-router-dom";
 
 // Database and models
 import { getData } from "src/database/functions";
 import { AttributeModel } from "types";
 
-// Custom components
-import ErrorLayer from "src/components/ErrorLayer";
+import _ from "underscore";
 
 const Attributes = () => {
   const navigate = useNavigate();
+  const toast = useToast();
+
   const [isLoaded, setIsLoaded] = useState(false);
-  const [isError, setIsError] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("An error has occurred.");
   const [attributesData, setAttributesData] = useState(
     [] as AttributeModel[]
   );
@@ -45,8 +30,14 @@ const Attributes = () => {
 
       // Check the contents of the response
       if (value["error"] !== undefined) {
-        setErrorMessage(value["error"]);
-        setIsError(true);
+        toast({
+          title: "Database Error",
+          description: value["error"],
+          status: "error",
+          duration: 4000,
+          position: "bottom-right",
+          isClosable: true,
+        });
       }
 
       setIsLoaded(true);
@@ -55,61 +46,77 @@ const Attributes = () => {
   }, []);
 
   return (
-    <Page kind="wide" pad={{left: "small", right: "small"}}>
-      <PageContent>
-        {isLoaded && isError === false ? (
-          <>
-            <PageHeader
-              title="Attributes"
-              parent={<Anchor label="Home" href="/" />}
-            />
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableCell scope="col" border="bottom" align="center">
-                    Name
-                  </TableCell>
-                  <TableCell scope="col" border="bottom" align="center">
-                    Description
-                  </TableCell>
-                  <TableCell scope="col" border="bottom"></TableCell>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {isLoaded &&
-                  attributesData.map((value) => {
+    isLoaded ?
+      <Box m={"2"}>
+        <Flex p={"2"} pt={"8"} pb={"8"} direction={"row"} justify={"space-between"} align={"center"}>
+          <Heading size={"3xl"}>Attributes</Heading>
+          <Button
+            rightIcon={<PlusSquareIcon />}
+            as={RouterLink}
+            to={"/create/attribute/start"}
+          >
+            Create
+          </Button>
+        </Flex>
+
+        <Flex m={"2"} p={"4"} direction={"row"} rounded={"2xl"} background={"teal.300"} flexWrap={"wrap"} gap={"6"}>
+          {isLoaded && attributesData.length > 0 ? (
+            <TableContainer w={"full"}>
+              <Table variant={"simple"} colorScheme={"teal"}>
+                <Thead>
+                  <Tr>
+                    <Th pl={"0"}><Heading color={"white"} size={"sm"}>Name</Heading></Th>
+                    <Th><Heading color={"white"} size={"sm"}>Description</Heading></Th>
+                    <Th pr={"0"}></Th>
+                  </Tr>
+                </Thead>
+                <Tbody>
+                  {attributesData.map((attribute) => {
                     return (
-                      <TableRow key={value._id}>
-                        <TableCell scope="row" border="right" align="center">
-                          <Heading level={4} margin="none">{value.name}</Heading>
-                        </TableCell>
-                        <TableCell border="right" align="left">
-                          <Paragraph fill>{value.description}</Paragraph>
-                        </TableCell>
-                        <TableCell align="center">
-                          <Button
-                            primary
-                            color="accent-4"
-                            icon={<LinkNext />}
-                            label="View"
-                            onClick={() => navigate(`/attributes/${value._id}`)}
-                            reverse
-                          />
-                        </TableCell>
-                      </TableRow>
+                      <Tr key={attribute._id}>
+                        <Th pl={"0"} color={"white"}>{
+                          _.isEqual(attribute.name, "") ?
+                            <Tag size={"md"} key={`warn-${attribute._id}`} colorScheme={"orange"}>
+                              <TagLabel>Not specified</TagLabel>
+                              <TagRightIcon as={WarningIcon} />
+                            </Tag>
+                          :
+                            attribute.name
+                        }</Th>
+                        <Th color={"white"}>{
+                          _.isEqual(attribute.description, "") ?
+                            <Tag size={"md"} key={`warn-${attribute._id}`} colorScheme={"orange"}>
+                              <TagLabel>Not specified</TagLabel>
+                              <TagRightIcon as={WarningIcon} />
+                            </Tag>
+                          :
+                            <Text noOfLines={2}>{attribute.description}</Text>
+                        }</Th>
+                        <Th pr={"0"}>
+                          <Flex justify={"right"}>
+                            <Button
+                              key={`view-attribute-${attribute._id}`}
+                              color="grey.400"
+                              rightIcon={<ChevronRightIcon />}
+                              onClick={() => navigate(`/attributes/${attribute._id}`)}
+                            >
+                              View
+                            </Button>
+                          </Flex>
+                        </Th>
+                      </Tr>
                     );
                   })}
-              </TableBody>
-            </Table>
-          </>
-        ) : (
-          <Box fill align="center" justify="center">
-            <Spinner size="large" />
-          </Box>
-        )}
-        {isError && <ErrorLayer message={errorMessage} />}
-      </PageContent>
-    </Page>
+                </Tbody>
+              </Table>
+            </TableContainer>
+          ) : (
+            <Text>There are no Attributes to display.</Text>
+          )}
+        </Flex>
+      </Box>
+    :
+      <Loading />
   );
 };
 

@@ -1,20 +1,9 @@
 // React and Grommet
 import React, { useEffect, useState } from "react";
-import {
-  Anchor,
-  Button,
-  PageHeader,
-  Table,
-  TableBody,
-  TableCell,
-  TableHeader,
-  TableRow,
-} from "grommet/components";
-import { LinkNext } from "grommet-icons";
-import { Flex, useToast } from "@chakra-ui/react";
+import { Box, Flex, Heading, Table, TableContainer, Th, Thead, Tr, Text, useToast, Button, Tbody } from "@chakra-ui/react";
 
 // Navigation
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link as RouterLink } from "react-router-dom";
 
 // Database and models
 import { getData } from "src/database/functions";
@@ -22,10 +11,10 @@ import { EntityModel } from "types";
 
 // Custom components
 import { Loading } from "src/components/Loading";
+import { ChevronRightIcon, PlusSquareIcon } from "@chakra-ui/icons";
 
 const Entities = () => {
   const navigate = useNavigate();
-
   const toast = useToast();
 
   const [isLoaded, setIsLoaded] = useState(false);
@@ -57,60 +46,62 @@ const Entities = () => {
 
   return (
     isLoaded ? 
-    <Flex>
-      <PageHeader
-        title="Entities"
-        parent={<Anchor label="Home" href="/" />}
-      />
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableCell scope="col" border="bottom" align="center">
-              Identifier
-            </TableCell>
-            <TableCell scope="col" border="bottom" align="center">
-              Created
-            </TableCell>
-            <TableCell scope="col" border="bottom" align="center">
-              Owner
-            </TableCell>
-            <TableCell scope="col" border="bottom"></TableCell>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {isLoaded &&
-            entityData.map((entity) => {
-              return (
-                <TableRow key={entity._id}>
-                  <TableCell scope="row" border="right" align="center">
-                    <strong>{entity.name}</strong>
-                  </TableCell>
-                  <TableCell align="center">
-                    <strong>
-                      {new Date(entity.created).toDateString()}
-                    </strong>
-                  </TableCell>
-                  <TableCell align="center">
-                    <strong>{entity.owner}</strong>
-                  </TableCell>
-                  <TableCell align="center">
-                    <Button
-                      color="accent-4"
-                      primary
-                      icon={<LinkNext />}
-                      label="View"
-                      onClick={() => navigate(`/entities/${entity._id}`)}
-                      reverse
-                    />
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-        </TableBody>
-      </Table>
-    </Flex>
+      <Box m={"2"}>
+        <Flex p={"2"} pt={"8"} pb={"8"} direction={"row"} justify={"space-between"} align={"center"}>
+          <Heading size={"3xl"}>Entities</Heading>
+          <Button
+            rightIcon={<PlusSquareIcon />}
+            as={RouterLink}
+            to={"/create/entity/start"}
+          >
+            Create
+          </Button>
+        </Flex>
+
+        <Flex m={"2"} p={"4"} direction={"row"} rounded={"2xl"} background={"blue.300"} flexWrap={"wrap"} gap={"6"}>
+          {isLoaded && entityData.length > 0 ? (
+            <TableContainer w={"full"}>
+              <Table variant={"simple"} colorScheme={"blue"}>
+                <Thead>
+                  <Tr>
+                    <Th pl={"0"}><Heading color={"white"} size={"sm"}>Name</Heading></Th>
+                    <Th><Heading color={"white"} size={"sm"}>Owner</Heading></Th>
+                    <Th><Heading color={"white"} size={"sm"}>Description</Heading></Th>
+                    <Th pr={"0"}></Th>
+                  </Tr>
+                </Thead>
+                <Tbody>
+                  {entityData.map((entity) => {
+                    return (
+                      <Tr key={entity._id}>
+                        <Th pl={"0"} color={"white"}>{entity.name}</Th>
+                        <Th color={"white"}>{entity.owner}</Th>
+                        <Th><Text noOfLines={2} color={"white"}>{entity.description}</Text></Th>
+                        <Th pr={"0"}>
+                          <Flex justify={"right"}>
+                            <Button
+                              key={`view-entity-${entity._id}`}
+                              color="grey.400"
+                              rightIcon={<ChevronRightIcon />}
+                              onClick={() => navigate(`/entities/${entity._id}`)}
+                            >
+                              View
+                            </Button>
+                          </Flex>
+                        </Th>
+                      </Tr>
+                    );
+                  })}
+                </Tbody>
+              </Table>
+            </TableContainer>
+          ) : (
+            <Text>There are no Entities to display.</Text>
+          )}
+        </Flex>
+      </Box>
     :
-    <Loading />
+      <Loading />
   );
 };
 

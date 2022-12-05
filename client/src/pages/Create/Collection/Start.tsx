@@ -55,7 +55,7 @@ export const Start = ({}) => {
         gap={"1.5"}
         shadow={"lg"}
       >
-        <Flex m={"2"} p={"2"} direction={"row"} justifyContent={"center"}>
+        <Flex m={"2"} p={"2"} direction={"row"}>
           <Heading size={"2xl"}>Create Collection</Heading>
         </Flex>
 

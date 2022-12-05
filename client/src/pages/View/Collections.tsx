@@ -1,37 +1,21 @@
-// React and Grommet
 import React, { useEffect, useState } from "react";
-import {
-  Anchor,
-  Box,
-  Button,
-  Heading,
-  PageHeader,
-  Paragraph,
-  Spinner,
-  Table,
-  TableBody,
-  TableCell,
-  TableHeader,
-  TableRow,
-} from "grommet/components";
-import { Page, PageContent } from "grommet";
-import { LinkNext } from "grommet-icons";
+import { Box, Button, Flex, Heading, Table, TableContainer, Tag, TagLabel, TagRightIcon, Tbody, Text, Th, Thead, Tr, useToast } from "@chakra-ui/react";
+import { ChevronRightIcon, PlusSquareIcon, WarningIcon } from "@chakra-ui/icons";
+
+import { Loading } from "src/components/Loading";
+import _ from "underscore";
 
 // Navigation
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link as RouterLink } from "react-router-dom";
 
 // Database and models
 import { getData } from "src/database/functions";
 import { CollectionModel } from "types";
 
-// Custom components
-import ErrorLayer from "src/components/ErrorLayer";
-
 const Collections = () => {
+  const toast = useToast();
   const navigate = useNavigate();
   const [isLoaded, setIsLoaded] = useState(false);
-  const [isError, setIsError] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("An error has occurred.");
   const [collectionsData, setCollectionsData] = useState(
     [] as CollectionModel[]
   );
@@ -45,8 +29,14 @@ const Collections = () => {
 
       // Check the contents of the response
       if (value["error"] !== undefined) {
-        setErrorMessage(value["error"]);
-        setIsError(true);
+        toast({
+          title: "Database Error",
+          description: value["error"],
+          status: "error",
+          duration: 4000,
+          position: "bottom-right",
+          isClosable: true,
+        });
       }
 
       setIsLoaded(true);
@@ -55,63 +45,87 @@ const Collections = () => {
   }, []);
 
   return (
-    <Page kind="wide" pad={{left: "small", right: "small"}}>
-      <PageContent>
-        {isLoaded && isError === false ? (
-          <>
-            <PageHeader
-              title="Collections"
-              parent={<Anchor label="Home" href="/" />}
-            />
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableCell scope="col" border="bottom" align="center">
-                    Name
-                  </TableCell>
-                  <TableCell scope="col" border="bottom" align="center">
-                    Description
-                  </TableCell>
-                  <TableCell scope="col" border="bottom"></TableCell>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {isLoaded &&
-                  collectionsData.map((value) => {
+    isLoaded ?
+      <Box m={"2"}>
+        <Flex p={"2"} pt={"8"} pb={"8"} direction={"row"} justify={"space-between"} align={"center"}>
+          <Heading size={"3xl"}>Collections</Heading>
+          <Button
+            rightIcon={<PlusSquareIcon />}
+            as={RouterLink}
+            to={"/create/collection/start"}
+          >
+            Create
+          </Button>
+        </Flex>
+
+        <Flex m={"2"} p={"4"} direction={"row"} rounded={"2xl"} background={"gray.300"} flexWrap={"wrap"} gap={"6"}>
+          {isLoaded && collectionsData.length > 0 ? (
+            <TableContainer w={"full"}>
+              <Table variant={"simple"} colorScheme={"gray"}>
+                <Thead>
+                  <Tr>
+                    <Th pl={"0"}><Heading color={"gray.600"} size={"sm"}>Name</Heading></Th>
+                    <Th><Heading color={"gray.600"} size={"sm"}>Owner</Heading></Th>
+                    <Th><Heading color={"gray.600"} size={"sm"}>Description</Heading></Th>
+                    <Th pr={"0"}></Th>
+                  </Tr>
+                </Thead>
+                <Tbody>
+                  {collectionsData.map((collection) => {
                     return (
-                      <TableRow key={value._id}>
-                        <TableCell scope="row" border="right" align="center">
-                          <Heading level={4} margin="none">{value.name}</Heading>
-                        </TableCell>
-                        <TableCell align="left">
-                          <Paragraph fill>{value.description}</Paragraph>
-                        </TableCell>
-                        <TableCell align="center">
-                          <Button
-                            color="accent-4"
-                            primary
-                            icon={<LinkNext />}
-                            label="View"
-                            onClick={() =>
-                              navigate(`/collections/${value._id}`)
-                            }
-                            reverse
-                          />
-                        </TableCell>
-                      </TableRow>
+                      <Tr key={collection._id}>
+                        <Th pl={"0"}>{
+                          _.isEqual(collection.name, "") ?
+                            <Tag size={"md"} key={`warn-${collection._id}`} colorScheme={"orange"}>
+                              <TagLabel>Not specified</TagLabel>
+                              <TagRightIcon as={WarningIcon} />
+                            </Tag>
+                          :
+                            <Text>{collection.name}</Text>
+                        }</Th>
+                        <Th pl={"0"}>{
+                          _.isEqual(collection.owner, "") ?
+                            <Tag size={"md"} key={`warn-${collection._id}`} colorScheme={"orange"}>
+                              <TagLabel>Not specified</TagLabel>
+                              <TagRightIcon as={WarningIcon} />
+                            </Tag>
+                          :
+                            <Text>{collection.owner}</Text>
+                        }</Th>
+                        <Th pl={"0"}>{
+                          _.isEqual(collection.description, "") ?
+                            <Tag size={"md"} key={`warn-${collection._id}`} colorScheme={"orange"}>
+                              <TagLabel>Not specified</TagLabel>
+                              <TagRightIcon as={WarningIcon} />
+                            </Tag>
+                          :
+                            <Text noOfLines={2}>{collection.description}</Text>
+                        }</Th>
+                        <Th pr={"0"}>
+                          <Flex justify={"right"}>
+                            <Button
+                              key={`view-collection-${collection._id}`}
+                              color="grey.400"
+                              rightIcon={<ChevronRightIcon />}
+                              onClick={() => navigate(`/collections/${collection._id}`)}
+                            >
+                              View
+                            </Button>
+                          </Flex>
+                        </Th>
+                      </Tr>
                     );
                   })}
-              </TableBody>
-            </Table>
-          </>
-        ) : (
-          <Box fill align="center" justify="center">
-            <Spinner size="large" />
-          </Box>
-        )}
-        {isError && <ErrorLayer message={errorMessage} />}
-      </PageContent>
-    </Page>
+                </Tbody>
+              </Table>
+            </TableContainer>
+          ) : (
+            <Text>There are no Collections to display.</Text>
+          )}
+        </Flex>
+      </Box>
+    :
+      <Loading />
   );
 };
 
