@@ -1,4 +1,5 @@
 import consola from "consola";
+import _ from "underscore";
 
 // Get the URL of the database
 import { DATABASE_URL } from "src/variables";
@@ -52,19 +53,20 @@ export const getData = async (path: string): Promise<any> => {
  * @param {any} data the data to be posted to Lab
  */
  export const postData = async (path: string, data: any): Promise<any> => {
-  consola.debug("Posting data:", path, data);
-
-  await fetch(`${DATABASE_URL}${path}`, {
+  return await fetch(`${DATABASE_URL}${path}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify(data),
+  }).then((response) => {
+    if (_.isEqual(response.ok, true)) {
+      consola.success("Successfully posted data:", path, data);
+      return { status: "success" };
+    }
+    throw new Error("Failed to POST data");
   }).catch((error) => {
-    consola.error("Error posting data to database");
-    return { error: error };
+    consola.error("Error occurred when POSTing data");
+    return { status: "error", error: error };
   });
-
-  consola.success("Successfully posted data:", path, data);
-  return;
 };
