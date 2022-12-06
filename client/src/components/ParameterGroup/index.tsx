@@ -1,5 +1,5 @@
-import { Button, Flex, Icon } from "@chakra-ui/react";
 import React, { Dispatch, SetStateAction } from "react";
+import { Button, Center, Flex, Icon, Text } from "@chakra-ui/react";
 import { SmallAddIcon } from "@chakra-ui/icons";
 import { AiOutlineBlock, AiOutlineLink } from "react-icons/ai";
 import { MdDateRange, MdOutlineTextFields } from "react-icons/md";
@@ -46,7 +46,7 @@ const ParameterGroup = (props: { parameters: Parameters[], viewOnly: boolean, se
   };
 
   return (
-    <Flex direction={"column"} gap={"4"} maxW={"2xl"} overflow={"hidden"}>
+    <Flex direction={"column"} gap={"4"}>
       {/* Button Group */}
       {!props.viewOnly &&
         <Flex direction={"row"} gap={"2"} flexWrap={"wrap"} justify={"center"} align={"center"}>
@@ -154,88 +154,94 @@ const ParameterGroup = (props: { parameters: Parameters[], viewOnly: boolean, se
       }
 
       {/* Card Group */}
-      <Flex gap={"4"} margin={"sm"} p={"4"} maxW={"xl"} overflowX={"auto"} >
-        {props.parameters.length > 0 &&
-          props.parameters.map((parameter) => {
-            switch (parameter.type) {
-              case "date": {
-                return (
-                  <DateParameter
-                    key={parameter.identifier}
-                    identifier={parameter.identifier}
-                    name={parameter.name}
-                    type={"date"}
-                    data={parameter.data}
-                    onRemove={onRemove}
-                    onUpdate={onUpdate}
-                    disabled={props.viewOnly}
-                    showRemove
-                  />
-                );
+      <Flex p={"2"} margin={"2"} direction={"row"} gap={"4"} wrap={"wrap"} justify={"center"}>
+        <Flex direction={"row"} overflowX={"auto"} gap={"2"} p={"2"}>
+          {props.parameters.length > 0 ?
+            props.parameters.map((parameter) => {
+              switch (parameter.type) {
+                case "date": {
+                  return (
+                    <DateParameter
+                      key={parameter.identifier}
+                      identifier={parameter.identifier}
+                      name={parameter.name}
+                      type={"date"}
+                      data={parameter.data}
+                      onRemove={onRemove}
+                      onUpdate={onUpdate}
+                      disabled={props.viewOnly}
+                      showRemove
+                    />
+                  );
+                }
+                case "entity": {
+                  return (
+                    <EntityParameter
+                      key={parameter.identifier}
+                      identifier={parameter.identifier}
+                      name={parameter.name}
+                      type={"entity"}
+                      data={parameter.data}
+                      onRemove={onRemove}
+                      onUpdate={onUpdate}
+                      disabled={props.viewOnly}
+                      showRemove
+                    />
+                  );
+                }
+                case "number": {
+                  return (
+                    <NumberParameter
+                      key={parameter.identifier}
+                      identifier={parameter.identifier}
+                      name={parameter.name}
+                      type={"number"}
+                      data={parameter.data}
+                      onRemove={onRemove}
+                      onUpdate={onUpdate}
+                      disabled={props.viewOnly}
+                      showRemove
+                    />
+                  );
+                }
+                case "url": {
+                  return (
+                    <URLParameter
+                      key={parameter.identifier}
+                      identifier={parameter.identifier}
+                      name={parameter.name}
+                      type={"url"}
+                      data={parameter.data}
+                      onRemove={onRemove}
+                      onUpdate={onUpdate}
+                      disabled={props.viewOnly}
+                      showRemove
+                    />
+                  );
+                }
+                default: {
+                  return (
+                    <StringParameter
+                      key={parameter.identifier}
+                      identifier={parameter.identifier}
+                      name={parameter.name}
+                      type={"string"}
+                      data={parameter.data}
+                      onRemove={onRemove}
+                      onUpdate={onUpdate}
+                      disabled={props.viewOnly}
+                      showRemove
+                    />
+                  );
+                }
               }
-              case "entity": {
-                return (
-                  <EntityParameter
-                    key={parameter.identifier}
-                    identifier={parameter.identifier}
-                    name={parameter.name}
-                    type={"entity"}
-                    data={parameter.data}
-                    onRemove={onRemove}
-                    onUpdate={onUpdate}
-                    disabled={props.viewOnly}
-                    showRemove
-                  />
-                );
-              }
-              case "number": {
-                return (
-                  <NumberParameter
-                    key={parameter.identifier}
-                    identifier={parameter.identifier}
-                    name={parameter.name}
-                    type={"number"}
-                    data={parameter.data}
-                    onRemove={onRemove}
-                    onUpdate={onUpdate}
-                    disabled={props.viewOnly}
-                    showRemove
-                  />
-                );
-              }
-              case "url": {
-                return (
-                  <URLParameter
-                    key={parameter.identifier}
-                    identifier={parameter.identifier}
-                    name={parameter.name}
-                    type={"url"}
-                    data={parameter.data}
-                    onRemove={onRemove}
-                    onUpdate={onUpdate}
-                    disabled={props.viewOnly}
-                    showRemove
-                  />
-                );
-              }
-              default: {
-                return (
-                  <StringParameter
-                    key={parameter.identifier}
-                    identifier={parameter.identifier}
-                    name={parameter.name}
-                    type={"string"}
-                    data={parameter.data}
-                    onRemove={onRemove}
-                    onUpdate={onUpdate}
-                    disabled={props.viewOnly}
-                    showRemove
-                  />
-                );
-              }
-            }
-          })
-        }
+            })
+          :
+            <Center>
+              <Text>No Parameters specified. Use the buttons above to add a new Parameter.</Text>
+            </Center>
+          }
+        </Flex>
       </Flex>
     </Flex>
   );

@@ -80,7 +80,7 @@ const Navigation = () => {
               </MenuButton>
               <MenuList>
                 <MenuItem as={RouterLink} to={"/create/collection/start"}>Collection</MenuItem>
-                <MenuItem as={RouterLink} to={"/create/attribute/start"}>Template Attribute</MenuItem>
+                <MenuItem as={RouterLink} to={"/create/attribute/start"}>Attribute</MenuItem>
                 <MenuItem as={RouterLink} to={"/create/entity/start"}>Entity</MenuItem>
               </MenuList>
             </Menu>

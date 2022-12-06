@@ -114,6 +114,7 @@ export const DateParameter = (props: Parameter.PDate) => {
               }}
               date={value}
               onDateChange={setValue}
+              disabled={props.disabled}
             />
           </FormControl>
         </Flex>

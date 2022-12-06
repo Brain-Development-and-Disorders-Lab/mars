@@ -1,6 +1,9 @@
 // React and Grommet
 import React, { useState } from "react";
-import { Box, Button, Flex, Heading, Input, Text, Textarea } from "@chakra-ui/react";
+import { Box, Button, Flex, Heading, Input, List, ListIcon, ListItem, Text, Textarea } from "@chakra-ui/react";
+import { AiOutlineBlock, AiOutlineLink } from "react-icons/ai";
+import { MdDateRange, MdOutlineTextFields } from "react-icons/md";
+import { RiNumbersLine } from "react-icons/ri";
 import ParameterGroup from "src/components/ParameterGroup";
 
 // Navigation
@@ -17,7 +20,7 @@ import { AttributeStruct, Parameters } from "types";
 
 // Database functions
 import { postData } from "src/database/functions";
-import { CheckIcon } from "@chakra-ui/icons";
+import { CheckIcon, InfoOutlineIcon } from "@chakra-ui/icons";
 
 export const Start = ({}) => {
   const navigate = useNavigate();
@@ -41,56 +44,77 @@ export const Start = ({}) => {
   };
 
   return (
-    <Flex h={"90vh"} justifyContent={"center"} align={"center"} direction={"column"}>
-      <Box
-        p={"4"}
-        m={"2"}
-        rounded={"xl"}
-        gap={"1.5"}
-        shadow={"lg"}
-      >
-        <Flex direction={"column"} p={"2"} pt={"8"} pb={"8"} >
-          <Flex direction={"row"}>
-            <Heading size={"2xl"}>Create Attribute</Heading>
-          </Flex>
+    <Box m={"2"}>
+      <Flex direction={"column"} p={"2"} pt={"8"} pb={"8"} >
+        <Flex direction={"row"}>
+          <Heading size={"2xl"}>Create Attribute</Heading>
+        </Flex>
+      </Flex>
+
+      <Flex p={"2"} pb={"6"} direction={"row"} wrap={"wrap"} justify={"space-between"} gap={"6"}>
+        <Flex direction={"column"} gap={"2"} grow={"1"} maxW={"md"} p={"2"} rounded={"2xl"}>
+          <Heading size={"xl"} margin={"xs"}>
+            Details
+          </Heading>
+          <Text>
+            Specify some basic details about this template Attribute.
+            The metadata associated with this template should be specified using Parameters.
+          </Text>
+          <Input
+            placeholder={"Attribute Name"}
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            required
+          />
+          <Textarea
+            value={description}
+            placeholder={"Attribute Description"}
+            onChange={(event) => setDescription(event.target.value)}
+          />
         </Flex>
 
-        <Flex p={"2"} direction={"row"} w={"full"} flexWrap={"wrap"} gap={"6"}>
-          <Flex direction={"column"} gap={"2"} grow={"1"} maxW={"md"}>
-            <Heading size={"xl"} margin={"xs"}>
-              Details
-            </Heading>
-            <Text>
-              Specify some basic details about this template Attribute.
-              The metadata associated with this template should be specified using Parameters.
-            </Text>
-            <Input
-              placeholder={"Attribute Name"}
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              required
-            />
-            <Textarea
-              value={description}
-              placeholder={"Attribute Description"}
-              onChange={(event) => setDescription(event.target.value)}
-            />
-          </Flex>
-
-          <ParameterGroup parameters={parameters} viewOnly={false} setParameters={setParameters} />
+        <Flex direction={"column"} gap={"2"} p={"4"} rounded={"2xl"} background={"whitesmoke"}>
+          <Flex align={"center"} gap={"2"}><InfoOutlineIcon boxSize={"8"} /><Heading>Parameters</Heading></Flex>
+          <Text>Individual pieces of metadata should be expressed as Parameters.</Text>
+          <Text>There are five supported types of metadata:</Text>
+          <List spacing={2}>
+            <ListItem>
+              <ListIcon as={MdDateRange} />
+              <Text as={"b"}>Date</Text>{": "}Used to specify a point in time.
+            </ListItem>
+            <ListItem>
+              <ListIcon as={MdOutlineTextFields} />
+              <Text as={"b"}>String</Text>{": "}Used to specify text of variable length.
+            </ListItem>
+            <ListItem>
+              <ListIcon as={RiNumbersLine} />
+              <Text as={"b"}>Number</Text>{": "}Used to specify a numerical value.
+            </ListItem>
+            <ListItem>
+              <ListIcon as={AiOutlineLink} />
+              <Text as={"b"}>URL</Text>{": "}Used to specify a link.
+            </ListItem>
+            <ListItem>
+              <ListIcon as={AiOutlineBlock} />
+              <Text as={"b"}>Entity</Text>{": "}Used to specify a relation to another Entity.
+            </ListItem>
+          </List>
+          <Text>Parameters can be specified using the buttons below.</Text>
         </Flex>
+      </Flex>
 
-        {/* Action buttons */}
-        <Flex p={"2"} direction={"row"} w={"full"} flexWrap={"wrap"} gap={"6"} justify={"space-between"}>
-          <Button color="white" background={"red"} onClick={() => navigate("/attributes")}>
-            Cancel
-          </Button>
-          <Button rightIcon={<CheckIcon />} color={"white"} background={"green"} onClick={onSubmit}>
-            Finish
-          </Button>
-        </Flex>
-      </Box>
-    </Flex>
+      <ParameterGroup parameters={parameters} viewOnly={false} setParameters={setParameters} />
+
+      {/* Action buttons */}
+      <Flex p={"2"} direction={"row"} w={"full"} flexWrap={"wrap"} gap={"6"} justify={"space-between"}>
+        <Button color="white" background={"red"} onClick={() => navigate("/attributes")}>
+          Cancel
+        </Button>
+        <Button rightIcon={<CheckIcon />} color={"white"} background={"green"} onClick={onSubmit}>
+          Finish
+        </Button>
+      </Flex>
+    </Box>
   );
 };
 export default Start;

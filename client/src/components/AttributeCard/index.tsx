@@ -1,10 +1,12 @@
-// React and Grommet
+// React
 import React from "react";
 import { Button, Card, CardBody, CardFooter, CardHeader, Flex, Heading, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, ModalOverlay, ScaleFade, Tag, TagLabel, TagRightIcon, Text, useDisclosure } from "@chakra-ui/react";
 import { CloseIcon, InfoOutlineIcon } from "@chakra-ui/icons";
 import { AiOutlineBlock, AiOutlineLink } from "react-icons/ai";
 import { MdDateRange, MdOutlineTextFields } from "react-icons/md";
 import { RiNumbersLine } from "react-icons/ri";
+
+import _ from "underscore";
 
 // Types
 import { AttributeCardProps } from "types";
@@ -26,7 +28,7 @@ const AttributeCard = (props: AttributeCardProps) => {
         </CardHeader>
 
         <CardBody>
-          <Flex direction={"column"} p={"sm"} gap={"2"} maxW={"md"}>
+          <Flex direction={"column"} p={"sm"} gap={"6"} maxW={"md"}>
             <Flex>
               <Text noOfLines={3}>
                 {props.data.description.length > 0 ?
@@ -38,33 +40,51 @@ const AttributeCard = (props: AttributeCardProps) => {
             </Flex>
 
             <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
-              {/* {props.data.parameters.map((parameter) => {
-                if (parameter.)
-              })} */}
-              <Tag>
-                <TagLabel>Date</TagLabel>
-                <TagRightIcon as={MdDateRange} />
-              </Tag>
-
-              <Tag>
-                <TagLabel>Entity</TagLabel>
-                <TagRightIcon as={AiOutlineBlock} />
-              </Tag>
-
-              <Tag>
-                <TagLabel>URL</TagLabel>
-                <TagRightIcon as={AiOutlineLink} />
-              </Tag>
-
-              <Tag>
-                <TagLabel>Number</TagLabel>
-                <TagRightIcon as={RiNumbersLine} />
-              </Tag>
-
-              <Tag>
-                <TagLabel>String</TagLabel>
-                <TagRightIcon as={MdOutlineTextFields} />
-              </Tag>
+              {props.data.parameters.map((parameter) => {
+                switch (parameter.type) {
+                  case "date": {
+                    return (
+                      <Tag key={parameter.identifier}>
+                        <TagLabel>{parameter.name}:{" "}Date</TagLabel>
+                        <TagRightIcon as={MdDateRange} />
+                      </Tag>
+                    );
+                  };
+                  case "entity": {
+                    return (
+                      <Tag key={parameter.identifier}>
+                        <TagLabel>{parameter.name}:{" "}Entity</TagLabel>
+                        <TagRightIcon as={AiOutlineBlock} />
+                      </Tag>
+                    );
+                  };
+                  case "number": {
+                    return (
+                      <Tag key={parameter.identifier}>
+                        <TagLabel>{parameter.name}:{" "}Number</TagLabel>
+                        <TagRightIcon as={RiNumbersLine} />
+                      </Tag>
+                    );
+                  };
+                  
+                  case "url": {
+                    return (
+                      <Tag key={parameter.identifier}>
+                        <TagLabel>{parameter.name}:{" "}URL</TagLabel>
+                        <TagRightIcon as={AiOutlineLink} />
+                      </Tag>
+                    );
+                  };
+                  default: {
+                    return (
+                      <Tag key={parameter.identifier}>
+                        <TagLabel>{parameter.name}:{" "}String</TagLabel>
+                        <TagRightIcon as={MdOutlineTextFields} />
+                      </Tag>
+                    );
+                  };
+                };
+              })}
             </Flex>
           </Flex>
         </CardBody>
