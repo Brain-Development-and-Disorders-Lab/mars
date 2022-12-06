@@ -1,4 +1,4 @@
-import { Button, Flex, Heading, Icon } from "@chakra-ui/react";
+import { Button, Flex, Icon } from "@chakra-ui/react";
 import React, { Dispatch, SetStateAction } from "react";
 import { SmallAddIcon } from "@chakra-ui/icons";
 import { AiOutlineBlock, AiOutlineLink } from "react-icons/ai";
@@ -47,8 +47,6 @@ const ParameterGroup = (props: { parameters: Parameters[], viewOnly: boolean, se
 
   return (
     <Flex direction={"column"} gap={"4"} maxW={"2xl"} overflow={"hidden"}>
-      <Heading>Parameters</Heading>
-
       {/* Button Group */}
       {!props.viewOnly &&
         <Flex direction={"row"} gap={"2"} flexWrap={"wrap"} justify={"center"} align={"center"}>
@@ -156,7 +154,7 @@ const ParameterGroup = (props: { parameters: Parameters[], viewOnly: boolean, se
       }
 
       {/* Card Group */}
-      <Flex gap={"4"} margin={"sm"} p={"4"} maxW={"xl"} h={"sm"} overflowX={"auto"} >
+      <Flex gap={"4"} margin={"sm"} p={"4"} maxW={"xl"} overflowX={"auto"} >
         {props.parameters.length > 0 &&
           props.parameters.map((parameter) => {
             switch (parameter.type) {

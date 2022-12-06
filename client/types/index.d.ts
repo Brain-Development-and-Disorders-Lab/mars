@@ -43,7 +43,7 @@ declare namespace Create.Collection {
 export type AttributeStruct = {
   name: string;
   description: string;
-  parameters: ParameterStruct[];
+  parameters: Parameters[];
 };
 
 export type AttributeModel = AttributeStruct & {
@@ -76,33 +76,37 @@ declare namespace Parameter {
     disabled?: boolean;
     showRemove?: boolean;
     onRemove?: (identifier: string) => void;
-    onUpdate?: (data: ParameterStruct) => void;
   };
 
   type PNumber = Base & {
     type: "number";
     data: number;
+    onUpdate?: (data: PNumber) => void;
   };
 
   type PString = Base & {
     type: "string";
     data: string;
-  }
+    onUpdate?: (data: PString) => void;
+  };
 
   type PURL = Base & {
     type: "url";
     data: string;
-  }
+    onUpdate?: (data: PURL) => void;
+  };
 
   type PDate = Base & {
     type: "date";
     data: Date;
+    onUpdate?: (data: PDate) => void;
   };
 
   type PEntity = Base & {
     type: "entity";
     data: string;
-  }
+    onUpdate?: (data: PEntity) => void;
+  };
 };
 
 declare type Parameters = Parameter.PDate | Parameter.PEntity | Parameter.PNumber | Parameter.PString | Parameter.PURL;

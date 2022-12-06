@@ -1,6 +1,10 @@
 // React and Grommet
-import { Button, Card, CardBody, CardFooter, CardHeader, Flex, Heading, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Table, TableContainer, Tbody, Td, Text, Tr, useDisclosure } from "@chakra-ui/react";
 import React from "react";
+import { Button, Card, CardBody, CardFooter, CardHeader, Flex, Heading, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, ModalOverlay, ScaleFade, Tag, TagLabel, TagRightIcon, Text, useDisclosure } from "@chakra-ui/react";
+import { CloseIcon, InfoOutlineIcon } from "@chakra-ui/icons";
+import { AiOutlineBlock, AiOutlineLink } from "react-icons/ai";
+import { MdDateRange, MdOutlineTextFields } from "react-icons/md";
+import { RiNumbersLine } from "react-icons/ri";
 
 // Types
 import { AttributeCardProps } from "types";
@@ -17,86 +21,85 @@ const AttributeCard = (props: AttributeCardProps) => {
       <Card w={"md"} onClick={onOpen}>
         <CardHeader>
           <Flex p={"sm"} align={"center"} m="none" justify="start" gap="small">
-            {/* <SettingsOption color="brand" /> */}
-            {props.data.name}
+            <Heading size={"md"}>{props.data.name}</Heading>
           </Flex>
         </CardHeader>
 
         <CardBody>
-          <Flex direction={"row"} p={"sm"} gap={"2"} maxW={"md"}>
-            {/* <Note color="brand" /> */}
-            <Text>
-              <strong>Description:</strong>
-            </Text>
+          <Flex direction={"column"} p={"sm"} gap={"2"} maxW={"md"}>
+            <Flex>
+              <Text noOfLines={3}>
+                {props.data.description.length > 0 ?
+                  props.data.description
+                :
+                  "No description."
+                }
+              </Text>
+            </Flex>
 
-            <Text noOfLines={2}>
-              {props.data.description.length > 0 ?
-                props.data.description
-              :
-                "No description."
-              }
-            </Text>
-            <Text>
-              <strong>Parameters:</strong>
-            </Text>
-            <Text>
-              {props.data.parameters.length} configured
-            </Text>
+            <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
+              {/* {props.data.parameters.map((parameter) => {
+                if (parameter.)
+              })} */}
+              <Tag>
+                <TagLabel>Date</TagLabel>
+                <TagRightIcon as={MdDateRange} />
+              </Tag>
+
+              <Tag>
+                <TagLabel>Entity</TagLabel>
+                <TagRightIcon as={AiOutlineBlock} />
+              </Tag>
+
+              <Tag>
+                <TagLabel>URL</TagLabel>
+                <TagRightIcon as={AiOutlineLink} />
+              </Tag>
+
+              <Tag>
+                <TagLabel>Number</TagLabel>
+                <TagRightIcon as={RiNumbersLine} />
+              </Tag>
+
+              <Tag>
+                <TagLabel>String</TagLabel>
+                <TagRightIcon as={MdOutlineTextFields} />
+              </Tag>
+            </Flex>
           </Flex>
         </CardBody>
 
-        <CardFooter>
-          <Flex p={"sm"} m={"none"} justify="start">
-            <Button onClick={onOpen}>View</Button>
-          </Flex>
+        <CardFooter justify={"right"}>
+          <Button onClick={onOpen} rightIcon={<InfoOutlineIcon />}>View Details</Button>
         </CardFooter>
       </Card>
 
-      <Modal onEsc={onClose} onClose={onClose} isOpen={isOpen} size={"2xl"}>
-        <ModalOverlay />
-        <ModalContent p={"2"}>
-          <ModalHeader>Attribute: {props.data.name}</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            <Heading>Metadata</Heading>
-            <TableContainer>
-              <Table>
-                <Tbody>
-                  <Tr>
-                    <Td>Name</Td>
-                    <Td><Text>{props.data.name}</Text></Td>
-                  </Tr>
-                  <Tr>
-                    <Td>Description</Td>
-                    <Td>
-                      <Text>
-                        {props.data.description.length > 0 ?
-                          props.data.description
-                        :
-                          <WarningLabel key={props.data.name} text={"No description"} />
-                        }
-                      </Text>
-                    </Td>
-                  </Tr>
-                </Tbody>
-              </Table>
-            </TableContainer>
+      <ScaleFade initialScale={0.9} in={isOpen}>
+        <Modal onEsc={onClose} onClose={onClose} isOpen={isOpen} size={"3xl"}>
+          <ModalOverlay />
+          <ModalContent p={"2"}>
+            <ModalHeader><Heading size={"md"}>Attribute: {props.data.name}</Heading></ModalHeader>
+            <ModalBody>
+              {props.data.description.length > 0 ?
+                <Text>{props.data.description}</Text>
+              :
+                <WarningLabel key={props.data.name} text={"No description"} />
+              }
 
-            <Flex direction={"column"} align={"center"}>
-              <Flex p={"small"}>
+              <Flex p={"sm"}>
                 {props.data.parameters && props.data.parameters.length > 0 ?
-                  <ParameterGroup parameters={props.data.parameters} viewOnly={true} />
+                  <ParameterGroup parameters={props.data.parameters} viewOnly />
                 :
                   <Text>No parameters.</Text>
                 }
               </Flex>
-            </Flex>
-          </ModalBody>
-          <ModalFooter>
-
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+            </ModalBody>
+            <ModalFooter>
+              <Button onClick={onClose} rightIcon={<CloseIcon />}>Close</Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+      </ScaleFade>
     </>
   );
 };

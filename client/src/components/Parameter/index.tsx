@@ -16,7 +16,7 @@ import Linky from "src/components/Linky";
 
 export const DateParameter = (props: Parameter.PDate) => {
   const [name, setName] = useState(props.name);
-  const [value, setValue] = useState(props.data);
+  const [value, setValue] = useState(new Date(props.data));
 
   // Propagate data updates
   useEffect(() => {
@@ -24,6 +24,7 @@ export const DateParameter = (props: Parameter.PDate) => {
       props.onUpdate({
         identifier: props.identifier,
         name: name,
+        type: "date",
         data: value,
       });
     }
@@ -131,6 +132,7 @@ export const StringParameter = (props: Parameter.PString) => {
       props.onUpdate({
         identifier: props.identifier,
         name: name,
+        type: "string",
         data: value,
       });
     }
@@ -215,6 +217,7 @@ export const NumberParameter = (props: Parameter.PNumber) => {
       props.onUpdate({
         identifier: props.identifier,
         name: name,
+        type: "number",
         data: value,
       });
     }
@@ -299,6 +302,7 @@ export const URLParameter = (props: Parameter.PURL) => {
       props.onUpdate({
         identifier: props.identifier,
         name: name,
+        type: "url",
         data: value,
       });
     }
@@ -396,6 +400,7 @@ export const EntityParameter = (props: Parameter.PEntity) => {
       props.onUpdate({
         identifier: props.identifier,
         name: name,
+        type: "entity",
         data: value,
       });
     }
