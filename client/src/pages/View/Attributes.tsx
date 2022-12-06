@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Box, Button, Flex, Heading, Table, TableContainer, Tag, TagLabel, TagRightIcon, Tbody, Text, Th, Thead, Tr, useToast } from "@chakra-ui/react";
-import { ChevronRightIcon, PlusSquareIcon, WarningIcon } from "@chakra-ui/icons";
+import { Box, Button, Flex, Heading, Table, TableContainer, Tbody, Text, Th, Thead, Tr, useToast } from "@chakra-ui/react";
+import { ChevronRightIcon, PlusSquareIcon } from "@chakra-ui/icons";
 import { Loading } from "src/components/Loading";
 
 // Navigation
@@ -11,6 +11,7 @@ import { getData } from "src/database/functions";
 import { AttributeModel } from "types";
 
 import _ from "underscore";
+import { WarningLabel } from "src/components/Label";
 
 const Attributes = () => {
   const navigate = useNavigate();
@@ -76,19 +77,13 @@ const Attributes = () => {
                       <Tr key={attribute._id}>
                         <Th pl={"0"} color={"white"}>{
                           _.isEqual(attribute.name, "") ?
-                            <Tag size={"md"} key={`warn-${attribute._id}`} colorScheme={"orange"}>
-                              <TagLabel>Not specified</TagLabel>
-                              <TagRightIcon as={WarningIcon} />
-                            </Tag>
+                            <WarningLabel key={`warn-${attribute._id}`} text={"Not specified"} />
                           :
                             attribute.name
                         }</Th>
                         <Th color={"white"}>{
                           _.isEqual(attribute.description, "") ?
-                            <Tag size={"md"} key={`warn-${attribute._id}`} colorScheme={"orange"}>
-                              <TagLabel>Not specified</TagLabel>
-                              <TagRightIcon as={WarningIcon} />
-                            </Tag>
+                            <WarningLabel key={`warn-${attribute._id}`} text={"Not specified"} />
                           :
                             <Text noOfLines={2}>{attribute.description}</Text>
                         }</Th>

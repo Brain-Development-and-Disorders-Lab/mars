@@ -1,145 +1,102 @@
 // React and Grommet
-import React, { useState } from "react";
-import {
-  Box,
-  Button,
-  Card,
-  CardBody,
-  CardFooter,
-  CardHeader,
-  Heading,
-  Layer,
-  Paragraph,
-  Table,
-  TableBody,
-  TableCell,
-  TableRow,
-  Text,
-} from "grommet/components";
-import { Close, Note, SettingsOption } from "grommet-icons";
+import { Button, Card, CardBody, CardFooter, CardHeader, Flex, Heading, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Table, TableContainer, Tbody, Td, Text, Tr, useDisclosure } from "@chakra-ui/react";
+import React from "react";
 
 // Types
 import { AttributeCardProps } from "types";
 
 // Custom components
 import ParameterGroup from "../ParameterGroup";
+import { WarningLabel } from "../Label";
 
 const AttributeCard = (props: AttributeCardProps) => {
-  const [showDetails, setShowDetails] = useState(false);
+  const { isOpen, onOpen, onClose } = useDisclosure()
 
   return (
     <>
-      <Card
-        height="small"
-        width="medium"
-        background="light-1"
-        onClick={() => {
-          setShowDetails(true);
-        }}
-      >
-        <CardHeader pad="small" align="center" margin="none" justify="start" gap="small">
-          <SettingsOption color="brand" />
-          <Heading level={3} margin="none">{props.data.name}</Heading>
+      <Card w={"md"} onClick={onOpen}>
+        <CardHeader>
+          <Flex p={"sm"} align={"center"} m="none" justify="start" gap="small">
+            {/* <SettingsOption color="brand" /> */}
+            {props.data.name}
+          </Flex>
         </CardHeader>
 
-        <CardBody pad="small">
-          <Box direction="row" flex gap="small" width={{ max: "medium" }}>
-            <Note color="brand" />
+        <CardBody>
+          <Flex direction={"row"} p={"sm"} gap={"2"} maxW={"md"}>
+            {/* <Note color="brand" /> */}
             <Text>
               <strong>Description:</strong>
             </Text>
-            <Text truncate>
+
+            <Text noOfLines={2}>
               {props.data.description.length > 0 ?
                 props.data.description
               :
                 "No description."
               }
             </Text>
-          </Box>
+            <Text>
+              <strong>Parameters:</strong>
+            </Text>
+            <Text>
+              {props.data.parameters.length} configured
+            </Text>
+          </Flex>
         </CardBody>
 
-        <CardFooter pad="small" margin="none" background="light-2" justify="start">
-          <Text>
-            <strong>Parameters:</strong>
-          </Text>
-          <Text>
-            {props.data.parameters.length} configured
-          </Text>
+        <CardFooter>
+          <Flex p={"sm"} m={"none"} justify="start">
+            <Button onClick={onOpen}>View</Button>
+          </Flex>
         </CardFooter>
       </Card>
 
-      {showDetails && (
-        <Layer
-          onEsc={() => setShowDetails(false)}
-          onClickOutside={() => setShowDetails(false)}
-        >
-          {/* Heading and close button */}
-          <Box
-            direction="row"
-            justify="between"
-            pad={{ left: "medium", right: "medium" }}
-            width="large"
-          >
-            <Heading level="2">Attribute: {props.data.name}</Heading>
+      <Modal onEsc={onClose} onClose={onClose} isOpen={isOpen} size={"2xl"}>
+        <ModalOverlay />
+        <ModalContent p={"2"}>
+          <ModalHeader>Attribute: {props.data.name}</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <Heading>Metadata</Heading>
+            <TableContainer>
+              <Table>
+                <Tbody>
+                  <Tr>
+                    <Td>Name</Td>
+                    <Td><Text>{props.data.name}</Text></Td>
+                  </Tr>
+                  <Tr>
+                    <Td>Description</Td>
+                    <Td>
+                      <Text>
+                        {props.data.description.length > 0 ?
+                          props.data.description
+                        :
+                          <WarningLabel key={props.data.name} text={"No description"} />
+                        }
+                      </Text>
+                    </Td>
+                  </Tr>
+                </Tbody>
+              </Table>
+            </TableContainer>
 
-            <Button
-              icon={<Close />}
-              onClick={() => setShowDetails(false)}
-              plain
-            />
-          </Box>
-
-          {/* Content */}
-          <Box
-            pad="medium"
-            direction="column"
-            gap="small"
-          >
-            <Heading level="3" margin="none">Metadata</Heading>
-            <Table>
-              <TableBody>
-                <TableRow>
-                  <TableCell scope="row" border>
-                    <Heading level="4" margin="small">
-                      Name
-                    </Heading>
-                  </TableCell>
-                  <TableCell border>
-                    <Text>{props.data.name}</Text>
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell scope="row" border>
-                    <Heading level="4" margin="small">
-                      Description
-                    </Heading>
-                  </TableCell>
-                  <TableCell border>
-                    <Paragraph>
-                      {props.data.description.length > 0 ?
-                        props.data.description
-                      :
-                        "No description."
-                      }
-                    </Paragraph>
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-
-            <Box direction="column" align="center" background="light-2" round>
-              <Heading level="3">Parameters</Heading>
-              <Box pad="small">
+            <Flex direction={"column"} align={"center"}>
+              <Flex p={"small"}>
                 {props.data.parameters && props.data.parameters.length > 0 ?
                   <ParameterGroup parameters={props.data.parameters} viewOnly={true} />
                 :
-                  <Paragraph>No parameters.</Paragraph>
+                  <Text>No parameters.</Text>
                 }
-              </Box>
-            </Box>
-          </Box>
-        </Layer>
-      )}
+              </Flex>
+            </Flex>
+          </ModalBody>
+          <ModalFooter>
+
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </>
   );
 };

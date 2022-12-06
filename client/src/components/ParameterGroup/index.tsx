@@ -50,108 +50,110 @@ const ParameterGroup = (props: { parameters: Parameters[], viewOnly: boolean, se
       <Heading>Parameters</Heading>
 
       {/* Button Group */}
-      <Flex visibility={props.viewOnly ? "hidden" : "visible"} direction={"row"} gap={"2"} flexWrap={"wrap"} justify={"center"} align={"center"}>
-        {/* Buttons to add Parameters */}
-        <Button
-          leftIcon={<SmallAddIcon />}
-          rightIcon={<Icon as={MdDateRange} />}
-          onClick={() => {
-            // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
-            props.setParameters &&
-              props.setParameters([
-                ...props.parameters,
-                {
-                  identifier: `p_date_${Math.round(performance.now())}`,
-                  name: "",
-                  type: "date",
-                  data: new Date(),
-                },
-              ]);
-          }}
-        >
-          Date
-        </Button>
+      {!props.viewOnly &&
+        <Flex direction={"row"} gap={"2"} flexWrap={"wrap"} justify={"center"} align={"center"}>
+          {/* Buttons to add Parameters */}
+          <Button
+            leftIcon={<SmallAddIcon />}
+            rightIcon={<Icon as={MdDateRange} />}
+            onClick={() => {
+              // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
+              props.setParameters &&
+                props.setParameters([
+                  ...props.parameters,
+                  {
+                    identifier: `p_date_${Math.round(performance.now())}`,
+                    name: "",
+                    type: "date",
+                    data: new Date(),
+                  },
+                ]);
+            }}
+          >
+            Date
+          </Button>
 
-        <Button
-          leftIcon={<SmallAddIcon />}
-          rightIcon={<Icon as={MdOutlineTextFields} />}
-          onClick={() => {
-            // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
-            props.setParameters &&
-              props.setParameters([
-                ...props.parameters,
-                {
-                  identifier: `p_string_${Math.round(performance.now())}`,
-                  name: "",
-                  type: "string",
-                  data: "",
-                },
-              ]);
-          }}
-        >
-          String
-        </Button>
+          <Button
+            leftIcon={<SmallAddIcon />}
+            rightIcon={<Icon as={MdOutlineTextFields} />}
+            onClick={() => {
+              // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
+              props.setParameters &&
+                props.setParameters([
+                  ...props.parameters,
+                  {
+                    identifier: `p_string_${Math.round(performance.now())}`,
+                    name: "",
+                    type: "string",
+                    data: "",
+                  },
+                ]);
+            }}
+          >
+            String
+          </Button>
 
-        <Button
-          leftIcon={<SmallAddIcon />}
-          rightIcon={<Icon as={RiNumbersLine} />}
-          onClick={() => {
-            // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
-            props.setParameters &&
-              props.setParameters([
-                ...props.parameters,
-                {
-                  identifier: `p_number_${Math.round(performance.now())}`,
-                  name: "",
-                  type: "number",
-                  data: 0,
-                },
-              ]);
-          }}
-        >
-          Number
-        </Button>
+          <Button
+            leftIcon={<SmallAddIcon />}
+            rightIcon={<Icon as={RiNumbersLine} />}
+            onClick={() => {
+              // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
+              props.setParameters &&
+                props.setParameters([
+                  ...props.parameters,
+                  {
+                    identifier: `p_number_${Math.round(performance.now())}`,
+                    name: "",
+                    type: "number",
+                    data: 0,
+                  },
+                ]);
+            }}
+          >
+            Number
+          </Button>
 
-        <Button
-          leftIcon={<SmallAddIcon />}
-          rightIcon={<Icon as={AiOutlineLink} />}
-          onClick={() => {
-            // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
-            props.setParameters &&
-              props.setParameters([
-                ...props.parameters,
-                {
-                  identifier: `p_url_${Math.round(performance.now())}`,
-                  name: "",
-                  type: "url",
-                  data: "",
-                },
-              ]);
-          }}
-        >
-          URL
-        </Button>
+          <Button
+            leftIcon={<SmallAddIcon />}
+            rightIcon={<Icon as={AiOutlineLink} />}
+            onClick={() => {
+              // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
+              props.setParameters &&
+                props.setParameters([
+                  ...props.parameters,
+                  {
+                    identifier: `p_url_${Math.round(performance.now())}`,
+                    name: "",
+                    type: "url",
+                    data: "",
+                  },
+                ]);
+            }}
+          >
+            URL
+          </Button>
 
-        <Button
-          leftIcon={<SmallAddIcon />}
-          rightIcon={<Icon as={AiOutlineBlock} />}
-          onClick={() => {
-            // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
-            props.setParameters &&
-              props.setParameters([
-                ...props.parameters,
-                {
-                  identifier: `p_entity_${Math.round(performance.now())}`,
-                  name: "",
-                  type: "entity",
-                  data: "",
-                },
-              ]);
-          }}
-        >
-          Entity
-        </Button>
-      </Flex>
+          <Button
+            leftIcon={<SmallAddIcon />}
+            rightIcon={<Icon as={AiOutlineBlock} />}
+            onClick={() => {
+              // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
+              props.setParameters &&
+                props.setParameters([
+                  ...props.parameters,
+                  {
+                    identifier: `p_entity_${Math.round(performance.now())}`,
+                    name: "",
+                    type: "entity",
+                    data: "",
+                  },
+                ]);
+            }}
+          >
+            Entity
+          </Button>
+        </Flex>
+      }
 
       {/* Card Group */}
       <Flex gap={"4"} margin={"sm"} p={"4"} maxW={"xl"} h={"sm"} overflowX={"auto"} >

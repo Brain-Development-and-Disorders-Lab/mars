@@ -1,6 +1,6 @@
 // React
 import React, { useEffect, useState } from "react";
-import { Box, Button, Flex, Heading, Table, TableContainer, Tbody, Th, Text, Tr, Link, useToast, Modal, CloseButton, Icon, Thead, Td, Textarea } from "@chakra-ui/react";
+import { Box, Button, Flex, Heading, Table, TableContainer, Tbody, Th, Text, Tr, Link, useToast, Modal, Icon, Thead, Td, Textarea, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, useDisclosure } from "@chakra-ui/react";
 import { AddIcon, ChevronRightIcon, CloseIcon } from "@chakra-ui/icons";
 import { AiOutlineEdit, AiOutlineSave } from "react-icons/ai";
 import { BsPrinter } from "react-icons/bs";
@@ -32,10 +32,10 @@ export const Entity = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const toast = useToast();
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   // Toggles
   const [isLoaded, setIsLoaded] = useState(false);
-  const [showGraph, setShowGraph] = useState(false);
   const [editing, setEditing] = useState(false);
 
   // Break up entity data into editable fields
@@ -190,10 +190,10 @@ export const Entity = () => {
     isLoaded ? (
       <Box m={"2"}>
         <Flex p={"2"} pt={"8"} pb={"8"} direction={"row"} justify={"space-between"} align={"center"}>
-          <Heading size={"2xl"}>{entityData.name}</Heading>
+          <Heading size={"2xl"}>Entity:{" "}{entityData.name}</Heading>
 
           <Flex direction={"row"} p={"2"} gap={"2"}>
-            <Button onClick={() => setShowGraph(true)} rightIcon={<Icon as={SlGraph} />} colorScheme={"orange"}>
+            <Button onClick={onOpen} rightIcon={<Icon as={SlGraph} />} colorScheme={"orange"}>
               View Graph
             </Button>
             <Button
@@ -417,22 +417,15 @@ export const Entity = () => {
           </Flex>
         </Flex>
 
-        <Modal
-          size={"full"}
-          onEsc={() => setShowGraph(false)}
-          onClose={() => setShowGraph(false)}
-          isOpen={showGraph}
-        >
-          <Flex direction={"row"} justify={"space-between"} mr={"small"}>
-            <Heading m={"sm"}>
-              Graph: {entityData.name}
-            </Heading>
-            <Button
-              rightIcon={<CloseButton />}
-              onClick={() => setShowGraph(false)}
-            />
-          </Flex>
-          <Graph id={entityData._id} />
+        <Modal size={"full"} onEsc={onClose} onClose={onClose} isOpen={isOpen}>
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader>Graph: {entityData.name}</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody>
+              <Graph id={entityData._id} />
+            </ModalBody>
+          </ModalContent>
         </Modal>
       </Box>
     ) : (
