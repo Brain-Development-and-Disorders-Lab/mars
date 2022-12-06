@@ -287,7 +287,7 @@ export const Entity = () => {
               <Table>
                 <Thead>
                   <Tr>
-                    <Th>Collection</Th>
+                    <Th pl={"1"}>Collection</Th>
                     <Th></Th>
                   </Tr>
                 </Thead>
@@ -295,7 +295,7 @@ export const Entity = () => {
                 <Tbody>
                   {collections.map((collection) => {
                     return (
-                      <Tr>
+                      <Tr key={collection}>
                         <Td><Linky type="collections" id={collection} /></Td>
                         <Td>
                           <Flex w={"full"} gap={"2"} justify={"right"}>
@@ -344,38 +344,54 @@ export const Entity = () => {
               ) : null}
             </Flex>
 
-            <Flex>
-              {products.map((product) => {
-                return (
-                  <Flex>
-                    <Linky type="entities" id={product.id} key={`linky-product-${product.id}`}/>
-                    {editing &&
-                      <Button
-                        key={`remove-${product}`}
-                        rightIcon={<CloseIcon />}
-                        colorScheme={"red"}
-                        onClick={() => {removeProduct(product.id)}}
-                      >
-                        Remove
-                      </Button>
-                    }
-                    {!editing &&
-                      <Button
-                        key={`view-${product.id}`}
-                        rightIcon={<ChevronRightIcon />}
-                        onClick={() => {navigate(`/entities/${product.id}`)}}
-                      >
-                        View
-                      </Button>
-                    }
-                  </Flex>
-                )
-              })}
+            <TableContainer>
+              <Table>
+                <Thead>
+                  <Tr>
+                    <Th pl={"1"}>Product</Th>
+                    <Th></Th>
+                  </Tr>
+                </Thead>
 
-              {products.length === 0 &&
-                <Text>Entity {entityData.name} does not have any Products.</Text>
-              }
-            </Flex>
+                <Tbody>
+                  {products.map((product) => {
+                    return (
+                      <Tr key={product.id}>
+                        <Td><Linky type="entities" id={product.id} /></Td>
+                        <Td>
+                          <Flex w={"full"} gap={"2"} justify={"right"}>
+                            {editing &&
+                              <Button
+                                key={`remove-${product.id}`}
+                                rightIcon={<CloseIcon />}
+                                colorScheme={"red"}
+                                onClick={() => {removeProduct(product.id)}}
+                              >
+                                Remove
+                              </Button>
+                            }
+
+                            {!editing &&
+                              <Button
+                                key={`view-${product.id}`}
+                                rightIcon={<ChevronRightIcon />}
+                                onClick={() => {navigate(`/entities/${product.id}`)}}
+                              >
+                                View
+                              </Button>
+                            }
+                          </Flex>
+                        </Td>
+                      </Tr>
+                    )
+                  })}
+                </Tbody>
+              </Table>
+            </TableContainer>
+
+            {products.length === 0 &&
+              <Text>Entity {entityData.name} does not have any Products.</Text>
+            }
           </Flex>
         </Flex>
 
