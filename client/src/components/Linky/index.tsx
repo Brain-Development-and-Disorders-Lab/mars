@@ -1,6 +1,5 @@
 // React and Grommet
 import React, { useEffect, useState } from "react";
-import { Button } from "grommet/components";
 
 // Navigation
 import { useNavigate } from "react-router-dom";
@@ -13,15 +12,11 @@ import {
   CollectionStruct,
   EntityStruct,
 } from "types";
-
-// Custom components
-import ErrorLayer from "../ErrorLayer";
+import { Button, useToast } from "@chakra-ui/react";
 
 const Linky = (props: LinkyProps) => {
   const navigate = useNavigate();
-
-  const [isError, setIsError] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("An error has occurred.");
+  const toast = useToast();
 
   const [linkData, setLinkData] = useState(
     {} as AttributeStruct | CollectionStruct | EntityStruct
@@ -36,22 +31,27 @@ const Linky = (props: LinkyProps) => {
 
       // Check the contents of the response
       if (value["error"] !== undefined) {
-        setErrorMessage(value["error"]);
-        setIsError(true);
+        toast({
+          title: "Database Error",
+          description: value["error"],
+          status: "error",
+          duration: 4000,
+          position: "bottom-right",
+          isClosable: true,
+        });
       }
     });
     return;
   }, []);
 
   return (
-    <>
-      <Button
-        label={linkData.name}
-        color="dark-2"
-        onClick={() => navigate(`/${props.type}/${props.id}`)}
-      />
-      {isError && <ErrorLayer message={errorMessage} />}
-    </>
+    <Button
+      variant={"link"}
+      color={"gray.600"}
+      onClick={() => navigate(`/${props.type}/${props.id}`)}
+    >
+      {linkData.name}
+    </Button>
   );
 };
 
