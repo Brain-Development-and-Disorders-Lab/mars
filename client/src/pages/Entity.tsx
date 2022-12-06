@@ -1,6 +1,6 @@
 // React
 import React, { useEffect, useState } from "react";
-import { Box, Button, Flex, Heading, Table, TableContainer, Tbody, Th, Text, Tr, Link, useToast, Modal, Icon, Thead, Td, Textarea, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, useDisclosure } from "@chakra-ui/react";
+import { Box, Button, Flex, Heading, Table, TableContainer, Tbody, Th, Text, Tr, Link, useToast, Modal, Icon, Thead, Td, Textarea, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, useDisclosure, Container } from "@chakra-ui/react";
 import { AddIcon, ChevronRightIcon, CloseIcon } from "@chakra-ui/icons";
 import { AiOutlineEdit, AiOutlineSave } from "react-icons/ai";
 import { BsPrinter } from "react-icons/bs";
@@ -209,14 +209,14 @@ export const Entity = () => {
           </Flex>
         </Flex>
 
-        <Flex p={"2"} gap={"2"} direction={"row"} w={"full"} wrap={"wrap"}>
+        <Flex p={"2"} direction={"row"} wrap={"wrap"}>
           {/* Metadata table */}
           <Flex p={"2"} gap={"2"} direction={"column"} grow={"1"}>
             <TableContainer background={"gray.50"} rounded={"2xl"} p={"4"}>
               <Table mt={"sm"} colorScheme={"gray"}>
                 <Thead>
                   <Tr>
-                    <Th w={"xs"}>Field</Th>
+                    <Th maxW={"xs"}>Field</Th>
                     <Th>Value</Th>
                   </Tr>
                 </Thead>
@@ -425,7 +425,9 @@ export const Entity = () => {
             <ModalHeader>Graph: {entityData.name}</ModalHeader>
             <ModalCloseButton />
             <ModalBody>
-              <Graph id={entityData._id} />
+              <Container h={"90vh"} minW={"90vw"}>
+                <Graph id={entityData._id} />
+              </Container>
             </ModalBody>
           </ModalContent>
         </Modal>

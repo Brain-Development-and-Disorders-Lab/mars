@@ -1,4 +1,5 @@
 // React and Grommet
+import { Box, useToast } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
 import ReactFlow, {
   MiniMap,
@@ -8,22 +9,19 @@ import ReactFlow, {
   useNodesState,
   useEdgesState,
 } from "react-flow-renderer";
-import { Box, Spinner } from "grommet/components";
 
 // Database and models
 import { getData } from "src/database/functions";
 import { EntityModel } from "types";
 
 // Custom components
-import ErrorLayer from "../ErrorLayer";
+import { Loading } from "../Loading";
 
 const Graph = (props: { id: string }) => {
+  const toast = useToast();
   const [isLoaded, setIsLoaded] = useState(false);
-  const [isError, setIsError] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("An error has occurred.");
 
   const [entityData, setEntityData] = useState({} as EntityModel);
-
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [graphReady, setGraphReady] = useState(false);
@@ -38,8 +36,14 @@ const Graph = (props: { id: string }) => {
 
       // Check the contents of the response
       if (value["error"] !== undefined) {
-        setErrorMessage(value["error"]);
-        setIsError(true);
+        toast({
+          title: "Database Error",
+          description: value["error"],
+          status: "error",
+          duration: 4000,
+          position: "bottom-right",
+          isClosable: true,
+        });
       }
 
       setIsLoaded(true);
@@ -112,22 +116,10 @@ const Graph = (props: { id: string }) => {
     }
 
     // Default assuming origin and products
-    let currentType = "collection";
-    if (
-      entityData.associations.origin.id === "" &&
-      entityData.associations.products.length > 0
-    ) {
-      // If we have no origin, set to input if we have output
+    let currentType = "default";
+    if (entityData.associations.origin.id === "" && entityData.associations.products.length > 0) {
       currentType = "input";
-    } else if (
-      entityData.associations.origin.id !== "" &&
-      entityData.associations.products.length > 0
-    ) {
-      currentType = "default";
-    } else if (
-      entityData.associations.origin.id !== "" &&
-      entityData.associations.products.length === 0
-    ) {
+    } else if (entityData.associations.origin.id !== "" && entityData.associations.products.length === 0) {
       currentType = "output";
     }
 
@@ -155,7 +147,7 @@ const Graph = (props: { id: string }) => {
   };
 
   return (
-    <Box fill background="light-2">
+    <Box h={"full"}>
       {graphReady ? (
         <ReactFlow
           nodes={nodes}
@@ -185,11 +177,8 @@ const Graph = (props: { id: string }) => {
           <Background color="#aaa" gap={16} />
         </ReactFlow>
       ) : (
-        <Box fill align="center" justify="center">
-          <Spinner size="large" />
-        </Box>
+        <Loading />
       )}
-      {isError && <ErrorLayer message={errorMessage} />}
     </Box>
   );
 };
