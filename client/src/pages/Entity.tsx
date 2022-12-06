@@ -1,24 +1,10 @@
 // React and Grommet
 import React, { useEffect, useState } from "react";
-import {
-  Anchor,
-  Box,
-  Button,
-  Heading,
-  Layer,
-  List,
-  PageHeader,
-  Paragraph,
-  Spinner,
-  Table,
-  TableBody,
-  TableCell,
-  TableRow,
-  Text,
-  TextInput,
-} from "grommet/components";
-import { Page, PageContent } from "grommet";
-import { Add, Close, LinkNext } from "grommet-icons";
+import { Box, Button, Flex, Heading, Table, TableContainer, Tbody, Th, Text, Tr, Link, Input, useToast, Modal, CloseButton, Icon, Thead, Td } from "@chakra-ui/react";
+import { AddIcon, ChevronRightIcon, CloseIcon } from "@chakra-ui/icons";
+import { AiOutlineEdit } from "react-icons/ai";
+import { BsPrinter } from "react-icons/bs";
+import { SlGraph } from "react-icons/sl";
 
 // Navigation
 import { useParams, useNavigate } from "react-router-dom";
@@ -34,23 +20,21 @@ import { getData, postData } from "src/database/functions";
 import { AttributeStruct, EntityModel } from "types";
 
 // Custom components
-import Graph from "src/components/Graph";
-import ErrorLayer from "src/components/ErrorLayer";
+// import Graph from "src/components/Graph";
 import Linky from "src/components/Linky";
 import AttributeCard from "src/components/AttributeCard";
+import { Loading } from "src/components/Loading";
+import Graph from "src/components/Graph";
 
 export const Entity = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const toast = useToast();
 
   // Toggles
   const [isLoaded, setIsLoaded] = useState(false);
   const [showGraph, setShowGraph] = useState(false);
   const [editing, setEditing] = useState(false);
-
-  // Error state
-  const [isError, setIsError] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("An error has occurred.");
 
   // Break up entity data into editable fields
   const [entityData, setEntityData] = useState({} as EntityModel);
@@ -133,9 +117,15 @@ export const Entity = () => {
       setEntityData(value);
 
       // Check the contents of the response
-      if (value["error"]) {
-        setErrorMessage(value["error"]);
-        setIsError(true);
+      if (value["error"] !== undefined) {
+        toast({
+          title: "Database Error",
+          description: value["error"],
+          status: "error",
+          duration: 4000,
+          position: "bottom-right",
+          isClosable: true,
+        });
       }
 
       setIsLoaded(true);
@@ -166,283 +156,214 @@ export const Entity = () => {
   };
 
   return (
-    <Page kind="wide" pad={{left: "small", right: "small"}}>
-      <PageContent>
-        {isLoaded && isError === false ? (
-          <Box gap="small" margin="small">
-            <Box direction="column" justify="between">
-              <PageHeader
-                title={entityData.name}
-                parent={<Anchor label="View all Entities" href="/entities" />}
-              />
-              <Box direction="row" gap="small">
-                <Button
-                  label={"View Graph"}
-                  color="accent-4"
-                  primary
-                  onClick={() => setShowGraph(true)}
-                />
-                <Button
-                  label={editing ? "Save" : "Edit"}
-                  primary
-                  onClick={() => handleEditClick()}
-                />
-                <Button
-                  label={"Print Label"}
-                  primary
-                  onClick={() => handlePrintClick()}
-                />
-              </Box>
-            </Box>
+    isLoaded ? (
+      <Box m={"2"}>
+        <Flex p={"2"} pt={"8"} pb={"8"} direction={"row"} justify={"space-between"} align={"center"}>
+          <Heading size={"3xl"}>{entityData.name}</Heading>
 
-            {/* Metadata table */}
-            <Box pad="small">
-              <Heading level="3" margin="none">
-                Metadata
-              </Heading>
+          <Flex direction={"row"} p={"2"} gap={"2"}>
+            <Button onClick={() => setShowGraph(true)} rightIcon={<Icon as={SlGraph} />} colorScheme={"orange"}>
+              View Graph
+            </Button>
+            <Button onClick={() => handleEditClick()} rightIcon={<Icon as={AiOutlineEdit} />}>
+              {editing ? "Save" : "Edit"}
+            </Button>
+            <Button onClick={() => handlePrintClick()} rightIcon={<Icon as={BsPrinter} />} colorScheme={"blue"}>
+              Print Label
+            </Button>
+          </Flex>
+        </Flex>
 
-              <Table margin={{top: "small"}}>
-                <TableBody>
-                  <TableRow>
-                    <TableCell scope="row" border>
-                      <Heading level="4" margin="xsmall">
-                        Created
-                      </Heading>
-                    </TableCell>
-                    <TableCell border>
-                      <Text>
-                        {new Date(entityData.created).toDateString()}
-                      </Text>
-                    </TableCell>
-                  </TableRow>
+        {/* Metadata table */}
+        <Flex p={"2"} gap={"2"} direction={"column"}>
+          <Heading size={"xl"} margin={"none"}>
+            Metadata
+          </Heading>
 
-                  <TableRow>
-                    <TableCell scope="row" border>
-                      <Heading level="4" margin="xsmall">
-                        Owner
-                      </Heading>
-                    </TableCell>
-                    <TableCell border>
-                      <Text>
-                        <Anchor label={entityData.owner} color="dark-2" />
-                      </Text>
-                    </TableCell>
-                  </TableRow>
+          <TableContainer background={"gray.50"} rounded={"2xl"} p={"4"}>
+            <Table mt={"sm"} colorScheme={"gray"}>
+              <Thead>
+                <Tr>
+                  <Th>Field</Th>
+                  <Th>Value</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                <Tr>
+                  <Td>Created</Td>
+                  <Td><Text>{new Date(entityData.created).toDateString()}</Text></Td>
+                </Tr>
 
-                  <TableRow>
-                    <TableCell scope="row" border>
-                      <Heading level="4" margin="xsmall">
-                        Origin
-                      </Heading>
-                    </TableCell>
-                    <TableCell border>
-                      <Box
-                        direction="row"
-                        gap="small"
-                        align="center"
-                        margin="none"
-                      >
-                        {entityData.associations.origin.id !== "" ? (
-                          <Linky
-                            key={entityData.associations.origin.id}
-                            type="entities"
-                            id={entityData.associations.origin.id}
-                          />
-                        ) : (
-                          <Text>No origin specified.</Text>
-                        )}
-                      </Box>
-                    </TableCell>
-                  </TableRow>
+                <Tr>
+                  <Td>Owner</Td>
+                  <Td><Text><Link>{entityData.owner}</Link></Text></Td>
+                </Tr>
 
-                  <TableRow>
-                    <TableCell scope="row" border>
-                      <Heading level="4" margin="xsmall">
-                        Description
-                      </Heading>
-                    </TableCell>
-                    <TableCell border>
-                      {editing ? (
-                        <TextInput
-                          value={description}
-                          onChange={(event) => {
-                            consola.debug("Updating Entity description");
-                            setDescription(event.target.value);
-                          }}
+                <Tr>
+                  <Td>Origin</Td>
+                  <Td>
+                    <Flex
+                      direction={"row"}
+                      gap={"small"}
+                      align={"center"}
+                      margin={"none"}
+                    >
+                      {entityData.associations.origin.id !== "" ? (
+                        <Linky
+                          key={entityData.associations.origin.id}
+                          type="entities"
+                          id={entityData.associations.origin.id}
                         />
                       ) : (
-                        <Paragraph>{description}</Paragraph>
+                        <Text>No origin specified.</Text>
                       )}
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </Box>
+                    </Flex>
+                  </Td>
+                </Tr>
 
-            {/* Collections */}
-            <Box pad="small">
-              <Box direction="row" justify="between" margin={{bottom: "small"}}>
-                <Heading level="3" margin="none">Collections</Heading>
-                {editing ? (
-                  <Button
-                    icon={<Add size="small" />}
-                    label="Add"
-                    primary
-                    disabled={!editing}
-                  />
-                ) : null}
-              </Box>
-              {collections.length > 0 ? (
-                <List
-                  primaryKey={(collection) => {
-                    return <Linky type="collections" id={collection} key={`linky-collection-${collection}`}/>
-                  }}
-                  secondaryKey={(collection) => {
-                    return (
-                      <Box direction="row" gap="small" margin="none" key={`box-collection-${collection}`}>
-                        {editing &&
-                          <Button
-                            key={`remove-${collection}`}
-                            icon={<Close />}
-                            color="status-critical"
-                            primary
-                            label="Remove"
-                            onClick={() => {removeCollection(collection)}}
-                            reverse
-                          />
-                        }
-                        {!editing &&
-                          <Button
-                            key={`view-${collection}`}
-                            icon={<LinkNext />}
-                            color="accent-4"
-                            primary
-                            label="View"
-                            onClick={() => {navigate(`/collections/${collection}`)}}
-                            reverse
-                          />
-                        }
-                      </Box>
-                    )
-                  }}
-                  data={collections}
-                  show={4}
-                  paginate
-                />
-              ) : (
-                <Text>Not present in any Collections.</Text>
-              )}
-            </Box>
+                <Tr>
+                  <Td>Description</Td>
+                  <Td>
+                    {editing ? (
+                      <Input
+                        value={description}
+                        onChange={(event) => {
+                          consola.debug("Updating Entity description");
+                          setDescription(event.target.value);
+                        }}
+                      />
+                    ) : (
+                      <Text>{description}</Text>
+                    )}
+                  </Td>
+                </Tr>
+              </Tbody>
+            </Table>
+          </TableContainer>
+        </Flex>
 
-            {/* Products */}
-            <Box pad="small">
-              <Box direction="row" justify="between" margin={{bottom: "small"}}>
-                <Heading level="3"  margin="none">Products</Heading>
-                {editing ? (
-                  <Button
-                    icon={<Add size="small" />}
-                    label="Add"
-                    primary
-                    disabled={!editing}
-                  />
-                ) : null}
-              </Box>
-              {products.length > 0 ? (
-                <List
-                  primaryKey={(product) => {
-                    return <Linky type="entities" id={product.id} key={`linky-product-${product.id}`}/>
-                  }}
-                  secondaryKey={(product) => {
-                    return (
-                      <Box direction="row" gap="small" margin="none" key={`box-product-${product.id}`}>
-                        {editing &&
-                          <Button
-                            key={`remove-product-${product.id}`}
-                            icon={<Close />}
-                            color="status-critical"
-                            primary
-                            label="Remove"
-                            onClick={() => {removeProduct(product.id)}}
-                            reverse
-                          />
-                        }
-                        {!editing &&
-                          <Button
-                            key={`view-product-${product.id}`}
-                            icon={<LinkNext />}
-                            color="accent-4"
-                            primary
-                            label="View"
-                            onClick={() => {navigate(`/entities/${product.id}`)}}
-                            reverse
-                          />
-                        }
-                      </Box>
-                    )
-                  }}
-                  data={products}
-                  show={4}
-                  paginate
-                />
-              ) : (
-                <Text>No products specified.</Text>
-              )}
-            </Box>
+        {/* Collections */}
+        <Flex p={"2"} gap={"2"} direction={"column"}>
+          <Flex direction={"row"} justify={"space-between"} mb={"sm"}>
+            <Heading margin={"none"}>Collections</Heading>
+            {editing ? (
+              <Button rightIcon={<AddIcon />} disabled={!editing}>
+                Add
+              </Button>
+            ) : null}
+          </Flex>
 
-            {/* Attributes */}
-            <Box pad="small">
-              <Box direction="row" justify="between" margin={{bottom: "small"}}>
-                <Heading level="3" margin="none">Attributes</Heading>
-                {editing ? (
-                  <Button
-                    icon={<Add size="small" />}
-                    label="Add"
-                    primary
-                    disabled={!editing}
-                  />
-                ) : null}
-              </Box>
-              <Box gap="small" direction="row">
-                {attributes.length > 0 ? (
-                  attributes.map((attribute) => {
-                    return <AttributeCard data={attribute} key={`attribute-${attribute.name}`}/>;
-                  })
-                ) : (
-                  <Text>No attributes specified.</Text>
-                )}
-              </Box>
-            </Box>
-          </Box>
-        ) : (
-          <Box fill align="center" justify="center">
-            <Spinner size="large" />
-          </Box>
-        )}
+          <Flex>
+            {collections.map((collection) => {
+              return (
+                <Flex>
+                  <Linky type="collections" id={collection} key={`linky-collection-${collection}`}/>
+                  {editing &&
+                    <Button
+                      key={`remove-${collection}`}
+                      rightIcon={<CloseIcon />}
+                      onClick={() => {removeCollection(collection)}}
+                    >
+                      Remove
+                    </Button>
+                  }
+                  {!editing &&
+                    <Button
+                      key={`view-${collection}`}
+                      rightIcon={<ChevronRightIcon />}
+                      onClick={() => {navigate(`/collections/${collection}`)}}
+                    >
+                      View
+                    </Button>
+                  }
+                </Flex>
+              )
+            })}
+          </Flex>
+        </Flex>
 
-        {showGraph && (
-          <Layer
-            full
-            onEsc={() => setShowGraph(false)}
-            onClickOutside={() => setShowGraph(false)}
-          >
-            <Box direction="row" justify="between" margin={{ right: "small" }}>
-              <Heading level="2" margin="small">
-                Graph: {entityData.name}
-              </Heading>
-              <Button
-                icon={<Close />}
-                onClick={() => setShowGraph(false)}
-                plain
-              />
-            </Box>
-            <Graph id={entityData._id} />
-          </Layer>
-        )}
+        {/* Products */}
+        <Flex p={"sm"}>
+          <Flex direction={"row"} justify={"space-between"} mb={"sm"}>
+            <Heading m={"none"}>Products</Heading>
+            {editing ? (
+              <Button rightIcon={<AddIcon />} disabled={!editing}>
+                Add
+              </Button>
+            ) : null}
+          </Flex>
+          <Flex>
+            {products.map((product) => {
+              return (
+                <Flex>
+                  <Linky type="entities" id={product.id} key={`linky-product-${product.id}`}/>
+                  {editing &&
+                    <Button
+                      key={`remove-${product}`}
+                      rightIcon={<CloseIcon />}
+                      onClick={() => {removeProduct(product.id)}}
+                    >
+                      Remove
+                    </Button>
+                  }
+                  {!editing &&
+                    <Button
+                      key={`view-${product.id}`}
+                      rightIcon={<ChevronRightIcon />}
+                      onClick={() => {navigate(`/entities/${product.id}`)}}
+                    >
+                      View
+                    </Button>
+                  }
+                </Flex>
+              )
+            })}
+          </Flex>
+        </Flex>
 
-        {isError && <ErrorLayer message={errorMessage} />}
-      </PageContent>
-    </Page>
-  );
-};
+        {/* Attributes */}
+        <Flex p={"sm"}>
+          <Flex direction={"row"} justify={"space-between"} mb={"sm"}>
+            <Heading margin={"none"}>Attributes</Heading>
+            {editing ? (
+              <Button rightIcon={<AddIcon />} disabled={!editing}>
+                Add
+              </Button>
+            ) : null}
+          </Flex>
+
+          <Flex direction={"row"} gap={"sm"}>
+            {attributes.length > 0 ? (
+              attributes.map((attribute) => {
+                return <AttributeCard data={attribute} key={`attribute-${attribute.name}`}/>;
+              })
+            ) : (
+              <Text>No attributes specified.</Text>
+            )}
+          </Flex>
+        </Flex>
+
+        <Modal
+          size={"full"}
+          onEsc={() => setShowGraph(false)}
+          onClose={() => setShowGraph(false)}
+          isOpen={showGraph}
+        >
+          <Flex direction={"row"} justify={"space-between"} mr={"small"}>
+            <Heading m={"sm"}>
+              Graph: {entityData.name}
+            </Heading>
+            <Button
+              rightIcon={<CloseButton />}
+              onClick={() => setShowGraph(false)}
+            />
+          </Flex>
+          <Graph id={entityData._id} />
+        </Modal>
+      </Box>
+    ) : (
+      <Loading />
+    )
+)};
 
 export default Entity;
