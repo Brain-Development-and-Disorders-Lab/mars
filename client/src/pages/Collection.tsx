@@ -1,25 +1,7 @@
-// React and Grommet
+// React
 import React, { useEffect, useState } from "react";
-import {
-  Anchor,
-  Box,
-  Button,
-  FormField,
-  Heading,
-  Layer,
-  List,
-  PageHeader,
-  Paragraph,
-  Select,
-  Spinner,
-  Table,
-  TableBody,
-  TableCell,
-  TableRow,
-  Tag,
-} from "grommet/components";
-import { Page, PageContent } from "grommet";
-import { Add, Close, LinkNext } from "grommet-icons";
+import { Box, Button, Flex, FormControl, FormLabel, Heading, Modal, ModalCloseButton, ModalContent, ModalHeader, ModalOverlay, Select, Table, TableContainer, Tag, TagCloseButton, Tbody, Td, Text, Th, Thead, Tr, useDisclosure, useToast } from "@chakra-ui/react";
+import { AddIcon, ChevronRightIcon, CloseIcon } from "@chakra-ui/icons";
 
 // Navigation
 import { useParams, useNavigate } from "react-router-dom";
@@ -29,26 +11,20 @@ import { getData, postData } from "src/database/functions";
 import { CollectionModel, EntityModel } from "types";
 
 // Custom components
-import ErrorLayer from "src/components/ErrorLayer";
 import Linky from "src/components/Linky";
+import { Loading } from "src/components/Loading";
 
 export const Collection = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const toast = useToast();
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   const [isLoaded, setIsLoaded] = useState(false);
-  const [isError, setIsError] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("An error has occurred.");
-
-  const [showAdd, setShowAdd] = useState(false);
 
   const [collectionData, setCollectionData] = useState({} as CollectionModel);
-  const [entityOptions, setEntityOptions] = useState(
-    [] as { name: string; id: string }[]
-  );
-  const [entitiesSelected, setEntitiesSelected] = useState(
-    [] as { name: string; id: string }[]
-  );
+  const [entities, setEntities] = useState([] as { name: string; id: string }[]);
+  const [entity, setEntity] = useState("");
 
   useEffect(() => {
     // Populate Collection data
@@ -60,8 +36,14 @@ export const Collection = () => {
 
       // Check the contents of the response
       if (value["error"] !== undefined) {
-        setErrorMessage(value["error"]);
-        setIsError(true);
+        toast({
+          title: "Database Error",
+          description: value["error"],
+          status: "error",
+          duration: 4000,
+          position: "bottom-right",
+          isClosable: true,
+        });
       }
 
       setIsLoaded(true);
@@ -71,14 +53,20 @@ export const Collection = () => {
 
       // Handle the response from the database
       entities.then((entity) => {
-        setEntityOptions(entity.map((e: EntityModel) => {
+        setEntities(entity.map((e: EntityModel) => {
           return { name: e.name, id: e._id };
         }));
 
         // Check the contents of the response
         if (entity["error"] !== undefined) {
-          setErrorMessage(entity["error"]);
-          setIsError(true);
+          toast({
+            title: "Database Error",
+            description: entity["error"],
+            status: "error",
+            duration: 4000,
+            position: "bottom-right",
+            isClosable: true,
+          });
         }
 
         setIsLoaded(true);
@@ -109,207 +97,176 @@ export const Collection = () => {
   };
 
   return (
-    <Page kind="wide" pad={{left: "small", right: "small"}}>
-      <PageContent>
-        {isLoaded && isError === false ? (
-          <Box gap="small" margin="small">
-            <Box direction="row" justify="between">
-              <PageHeader
-                title={collectionData.name}
-                parent={
-                  <Anchor label="View all Collections" href="/collections" />
-                }
-              />
-            </Box>
+    isLoaded ? (
+      <Box m={"2"}>
+        <Flex p={"2"} pt={"8"} pb={"8"} direction={"row"} justify={"space-between"} align={"center"} wrap={"wrap"}>
+          <Heading size={"2xl"}>Collection:{" "}{collectionData.name}</Heading>
+        </Flex>
 
-            <Box direction="column" gap="small">
-              {/* Metadata table */}
-              <Heading level="3" margin="none">
-                Metadata
-              </Heading>
+        <Flex direction={"column"} p={"2"} gap={"2"}>
+          {/* Metadata table */}
+          <Heading m={"0"}>
+            Metadata
+          </Heading>
 
-              <Table>
-                <TableBody>
-                  <TableRow>
-                    <TableCell scope="row" border>
-                      <Heading level="4" margin="xsmall">
-                        Description
-                      </Heading>
-                    </TableCell>
-                    <TableCell border>
-                      <Paragraph>{collectionData.description}</Paragraph>
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
+          <TableContainer background={"gray.50"} rounded={"2xl"} p={"4"}>
+            <Table mt={"sm"} colorScheme={"gray"}>
+              <Thead>
+                <Tr>
+                  <Th>Field</Th>
+                  <Th>Value</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                <Tr>
+                  <Td>Description</Td>
+                  <Td><Text>{collectionData.description}</Text></Td>
+                </Tr>
+              </Tbody>
+            </Table>
+          </TableContainer>
 
-              {/* List of Entities in the Collection */}
-              <Box direction="row" justify="between" margin="small">
-                <Heading level="3" margin="none" alignSelf="center">Entities</Heading>
-                <Button
-                  label="Add"
-                  icon={<Add />}
-                  onClick={() => {
-                    setShowAdd(!showAdd);
-                  }}
-                  primary
-                  reverse
-                />
-              </Box>
+          {/* List of Entities in the Collection */}
+          <Flex direction={"row"} justify={"space-between"} m={"2"}>
+            <Heading m={"0"} alignSelf={"center"}>Entities</Heading>
+            <Button leftIcon={<AddIcon />} onClick={onOpen} colorScheme={"green"}>
+              Add
+            </Button>
+          </Flex>
 
-              {collectionData.entities.length > 0 && (
-                <List
-                  itemKey={(entity) => `entity-${entity}`}
-                  primaryKey={(entity) => {
-                    return <Linky type="entities" id={entity} key={`linky-${entity}`}/>
-                  }}
-                  secondaryKey={(entity) => {
+          {collectionData.entities.length > 0 && (
+            <TableContainer background={"gray.50"} rounded={"2xl"} p={"4"}>
+              <Table variant={"simple"} colorScheme={"gray"}>
+                <Thead>
+                  <Tr>
+                    <Th>Name</Th>
+                    <Th></Th>
+                  </Tr>
+                </Thead>
+                <Tbody>
+                  {collectionData.entities.map((entity) => {
                     return (
-                      <Box direction="row" gap="small" margin="none" key={`box-${entity}`}>
-                        <Button
-                          key={`view-${entity}`}
-                          icon={<LinkNext />}
-                          color="accent-4"
-                          primary
-                          label="View"
-                          onClick={() => {navigate(`/entities/${entity}`)}}
-                          reverse
-                        />
-                        <Button
-                          key={`remove-${entity}`}
-                          icon={<Close />}
-                          primary
-                          label="Remove"
-                          color="status-critical"
-                          onClick={() => {
-                            if (id) {
-                              // Remove the entity from the collection
-                              onRemove({
-                                entity: entity,
-                                collection: id,
-                              });
+                      <Tr key={entity}>
+                        <Th>
+                          <Linky id={entity} type={"entities"} />
+                        </Th>
+                        <Th>
+                          <Flex justify={"right"} gap={"6"}>
+                            <Button
+                              key={`view-collection-${entity}`}
+                              color="grey.400"
+                              rightIcon={<ChevronRightIcon />}
+                              onClick={() => navigate(`/entities/${entity}`)}
+                            >
+                              View
+                            </Button>
+                            <Button
+                              key={`remove-${entity}`}
+                              rightIcon={<CloseIcon />}
+                              colorScheme={"red"}
+                              onClick={() => {
+                                if (id) {
+                                  // Remove the entity from the collection
+                                  onRemove({
+                                    entity: entity,
+                                    collection: id,
+                                  });
 
-                              // Force the page to reload by setting the isLoaded state
-                              setIsLoaded(false);
-                            }
-                          }}
-                          reverse
-                        />
-                      </Box>
-                    )
+                                  // Force the page to reload by setting the isLoaded state
+                                  setIsLoaded(false);
+                                }
+                              }}
+                            >
+                              Remove
+                            </Button>
+                          </Flex>
+                        </Th>
+                      </Tr>
+                    );
+                  })}
+                </Tbody>
+              </Table>
+            </TableContainer>
+          )}
+        </Flex>
+
+        <Modal isOpen={isOpen} onClose={onClose}>
+          <ModalOverlay />
+          <ModalContent>
+            {/* Heading and close button */}
+            <ModalHeader>Add Entities</ModalHeader>
+            <ModalCloseButton />
+
+            {/* Select component for Entities */}
+            <Flex direction={"column"} p={"md"}>
+              <FormControl>
+                <FormLabel>Add Entities</FormLabel>
+                <Select
+                  title="Select Entity"
+                  value={entity}
+                  placeholder={"Select Entity"}
+                  onChange={(event) => {
+                    setEntity(event.target.value.toString());
+                    setEntities([...entities]);
                   }}
-                  data={collectionData.entities}
-                  show={4}
-                  paginate
-                />
-              )}
-            </Box>
-
-            {showAdd && (
-              <Layer
-                onEsc={() => setShowAdd(false)}
-                onClickOutside={() => setShowAdd(false)}
-              >
-                {/* Heading and close button */}
-                <Box direction="row" width="large" justify="between" margin={{ right: "small" }} pad="medium">
-                  <Heading level="2" margin="small">
-                    Add Entities
-                  </Heading>
-                  <Button
-                    icon={<Close />}
-                    onClick={() => setShowAdd(false)}
-                    plain
-                  />
-                </Box>
-
-                {/* Select component for Entities */}
-                <Box direction="column" pad="medium">
-                  <FormField
-                    name="add"
-                    info="Add existing Entities to the Collection."
-                  >
-                    <Select
-                      options={entityOptions}
-                      labelKey="name"
-                      value={entitiesSelected}
-                      valueKey="name"
-                      onChange={({ value }) => {
-                        if (!entitiesSelected.includes(value)) {
-                          setEntitiesSelected([...entitiesSelected, value]);
-                        }
-                      }}
-                      searchPlaceholder="Search..."
-                      onSearch={(query) => {
-                        const escapedText = query.replace(
-                          /[-\\^$*+?.()|[\]{}]/g,
-                          "\\$&"
-                        );
-                        const filteredText = new RegExp(escapedText, "i");
-                        setEntityOptions(
-                          entityOptions
-                            .filter((entity) => filteredText.test(entity.name))
-                            .map((entity) => {
-                              return { name: entity.name, id: entity.id };
-                            })
-                        );
-                      }}
-                    />
-                  </FormField>
-                  <Box direction="column" gap="xsmall">
-                    {entitiesSelected.map((entity) => {
+                >
+                  {isLoaded &&
+                    entities.map((entity) => {
                       return (
-                        <Tag
-                          name="Entity"
-                          value={entity.name}
-                          key={entity.name}
-                          onRemove={() => {
-                            setEntitiesSelected(
-                              entitiesSelected.filter((item) => {
-                                return item !== entity;
-                              })
-                            );
-                          }}
-                        />
+                        <option key={entity.id} value={entity.id}>{entity.name}</option>
                       );
-                    })}
-                  </Box>
-                </Box>
+                    })
+                  };
+                </Select>
+              </FormControl>
 
-                {/* "Done" button */}
-                <Box direction="row" pad="medium" justify="center">
-                  <Button
-                    label="Done"
-                    color="status-ok"
-                    primary
-                    onClick={() => {
-                      if (id) {
-                        // Add the Entities to the Collection
-                        onAdd({
-                          entities: entitiesSelected.map((entity) => entity.id),
-                          collection: id,
-                        });
+              <Flex direction={"row"} gap={"xs"}>
+                {entities.map((entity) => {
+                  return (
+                    <Tag>
+                      {entity.name}
+                      <TagCloseButton onClick={() => {
+                        setEntities(
+                          entities.filter((item) => {
+                            return item !== entity;
+                          })
+                        );
+                      }} />
+                    </Tag>
+                  );
+                })}
+              </Flex>
+            </Flex>
 
-                        setEntitiesSelected([]);
-                        setShowAdd(false);
+            {/* "Done" button */}
+            <Flex direction={"row"} p={"md"} justify={"center"}>
+              <Button
+                colorScheme="green"
+                onClick={() => {
+                  if (id) {
+                    // Add the Entities to the Collection
+                    onAdd({
+                      entities: entities.map((entity) => entity.id),
+                      collection: id,
+                    });
 
-                        // Force the page to reload by setting the isLoaded state
-                        setIsLoaded(false);
-                      }
-                    }}
-                  />
-                </Box>
-              </Layer>
-            )}
-          </Box>
-        ) : (
-          <Box fill align="center" justify="center">
-            <Spinner size="large" />
-          </Box>
-        )}
+                    setEntities([]);
+                    onClose();
 
-        {isError && <ErrorLayer message={errorMessage} />}
-      </PageContent>
-    </Page>
+                    // Force the page to reload by setting the isLoaded state
+                    setIsLoaded(false);
+                  }
+                }}
+              >
+                Done
+              </Button>
+            </Flex>
+          </ModalContent>
+        </Modal>
+      </Box>
+    ) : (
+      <Loading />
+    )
   );
 };
 
