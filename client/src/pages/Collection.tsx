@@ -13,6 +13,7 @@ import { CollectionModel, EntityModel } from "types";
 // Custom components
 import Linky from "src/components/Linky";
 import { Loading } from "src/components/Loading";
+import _ from "underscore";
 
 export const Collection = () => {
   const { id } = useParams();
@@ -23,8 +24,8 @@ export const Collection = () => {
   const [isLoaded, setIsLoaded] = useState(false);
 
   const [collectionData, setCollectionData] = useState({} as CollectionModel);
-  const [entities, setEntities] = useState([] as { name: string; id: string }[]);
-  const [entity, setEntity] = useState("");
+  const [allEntities, setAllEntities] = useState([] as { name: string; id: string }[]);
+  const [selectedEntities, setSelectedEntities] = useState([] as string[]);
 
   useEffect(() => {
     // Populate Collection data
@@ -53,7 +54,7 @@ export const Collection = () => {
 
       // Handle the response from the database
       entities.then((entity) => {
-        setEntities(entity.map((e: EntityModel) => {
+        setAllEntities(entity.map((e: EntityModel) => {
           return { name: e.name, id: e._id };
         }));
 
@@ -198,20 +199,18 @@ export const Collection = () => {
             <ModalCloseButton />
 
             {/* Select component for Entities */}
-            <Flex direction={"column"} p={"md"}>
+            <Flex direction={"column"} p={"2"} gap={"2"}>
               <FormControl>
                 <FormLabel>Add Entities</FormLabel>
                 <Select
                   title="Select Entity"
-                  value={entity}
                   placeholder={"Select Entity"}
                   onChange={(event) => {
-                    setEntity(event.target.value.toString());
-                    setEntities([...entities]);
+                    setSelectedEntities([...selectedEntities, event.target.value.toString()]);
                   }}
                 >
                   {isLoaded &&
-                    entities.map((entity) => {
+                    allEntities.map((entity) => {
                       return (
                         <option key={entity.id} value={entity.id}>{entity.name}</option>
                       );
@@ -220,17 +219,15 @@ export const Collection = () => {
                 </Select>
               </FormControl>
 
-              <Flex direction={"row"} gap={"xs"}>
-                {entities.map((entity) => {
+              <Flex direction={"row"} p={"2"} gap={"2"}>
+                {selectedEntities.map((entity) => {
                   return (
                     <Tag>
-                      {entity.name}
+                      <Linky id={entity} type={"entities"} />
                       <TagCloseButton onClick={() => {
-                        setEntities(
-                          entities.filter((item) => {
-                            return item !== entity;
-                          })
-                        );
+                        setSelectedEntities(selectedEntities.filter((selected) => {
+                          return !_.isEqual(entity, selected);
+                        }));
                       }} />
                     </Tag>
                   );
@@ -241,16 +238,12 @@ export const Collection = () => {
             {/* "Done" button */}
             <Flex direction={"row"} p={"md"} justify={"center"}>
               <Button
-                colorScheme="green"
+                colorScheme={"green"}
                 onClick={() => {
                   if (id) {
                     // Add the Entities to the Collection
-                    onAdd({
-                      entities: entities.map((entity) => entity.id),
-                      collection: id,
-                    });
-
-                    setEntities([]);
+                    onAdd({ entities: selectedEntities, collection: id });
+                    setSelectedEntities([]);
                     onClose();
 
                     // Force the page to reload by setting the isLoaded state
