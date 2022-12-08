@@ -200,6 +200,8 @@ EntitiesRoute.route("/entities/:id").delete((request: { params: { id: any } }, r
         response.json(content);
       });
   }
+
+  // To Do: Remove references to Entity.
 );
 
 export default EntitiesRoute;

@@ -112,6 +112,7 @@ const Home = () => {
                 rightIcon={<PlusSquareIcon />}
                 as={RouterLink}
                 to={"/create/collection/start"}
+                colorScheme={"green"}
               >
                 Create
               </Button>
@@ -192,6 +193,7 @@ const Home = () => {
                 rightIcon={<PlusSquareIcon />}
                 as={RouterLink}
                 to={"/create/entity/start"}
+                colorScheme={"green"}
               >
                 Create
               </Button>

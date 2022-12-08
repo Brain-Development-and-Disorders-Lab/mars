@@ -14,7 +14,7 @@ declare namespace Create.Entity {
   };
 
   type Associations = Start & {
-    collections: { name: string; id: string }[];
+    collections: string[];
     associations: {
       origin: { name: string; id: string };
       products: { name: string; id: string }[];

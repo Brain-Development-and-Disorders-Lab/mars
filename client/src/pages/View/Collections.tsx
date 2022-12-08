@@ -53,6 +53,7 @@ const Collections = () => {
             rightIcon={<PlusSquareIcon />}
             as={RouterLink}
             to={"/create/collection/start"}
+            colorScheme={"green"}
           >
             Create
           </Button>

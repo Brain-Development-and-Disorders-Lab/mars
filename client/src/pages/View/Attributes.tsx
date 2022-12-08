@@ -55,6 +55,7 @@ const Attributes = () => {
             rightIcon={<PlusSquareIcon />}
             as={RouterLink}
             to={"/create/attribute/start"}
+            colorScheme={"green"}
           >
             Create
           </Button>

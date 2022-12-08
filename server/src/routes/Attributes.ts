@@ -30,10 +30,7 @@ AttributesRoute.route("/attributes").get((request: any, response: any) => {
 
 // Route: View a specific attribute
 AttributesRoute.route("/attributes/:id").get(
-  (
-    request: { params: { id: any } },
-    response: { json: (content: any) => void }
-  ) => {
+  (request: { params: { id: any } }, response: { json: (content: any) => void }) => {
     // Connect to the database and assemble a query
     let connection = getDatabase();
     let query = { _id: ObjectId(request.params.id) };
@@ -51,7 +48,6 @@ AttributesRoute.route("/attributes/:id").get(
 // Route: Create a new Attribute, expects AttributeStruct data
 AttributesRoute.route("/attributes/create").post(
   (request: { body: AttributeStruct }, response: any) => {
-    const database = getDatabase();
     let data = {
       name: request.body.name,
       description: request.body.description,
@@ -59,7 +55,7 @@ AttributesRoute.route("/attributes/create").post(
     };
 
     // Insert the new Attribute
-    database
+    getDatabase()
       .collection(ATTRIBUTES_COLLECTION)
       .insertOne(data, (error: any, content: any) => {
         if (error) throw error;
@@ -73,21 +69,20 @@ AttributesRoute.route("/attributes/create").post(
   }
 );
 
-// Route: Remove an attribute
-AttributesRoute.route("/:id").delete(
-  (
-    req: { params: { id: any } },
-    response: { json: (content: any) => void }
-  ) => {
-    let connection = getDatabase();
-    let query = { _id: ObjectId(req.params.id) };
-    connection
+// Route: Remove an Attribute
+AttributesRoute.route("/attributes/:id").delete(
+  (request: { params: { id: any } }, response: { json: (content: any) => void }) => {
+    let query = { _id: ObjectId(request.params.id) };
+
+    getDatabase()
       .collection("attributes")
       .deleteOne(query, (error: any, content: any) => {
         if (error) throw error;
         consola.success("1 attribute deleted");
         response.json(content);
       });
+
+    // To Do: Remove references to Attribute.
   }
 );
 

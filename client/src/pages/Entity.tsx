@@ -1,7 +1,7 @@
 // React
 import React, { useEffect, useState } from "react";
-import { Box, Button, Flex, Heading, Table, TableContainer, Tbody, Th, Text, Tr, Link, useToast, Modal, Icon, Thead, Td, Textarea, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, useDisclosure, Container } from "@chakra-ui/react";
-import { AddIcon, ChevronRightIcon, CloseIcon } from "@chakra-ui/icons";
+import { Box, Button, Flex, Heading, Table, TableContainer, Tbody, Th, Text, Tr, Link, useToast, Modal, Icon, Thead, Td, Textarea, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, useDisclosure, Container, Spacer, Popover, PopoverTrigger, PopoverContent, PopoverCloseButton, PopoverHeader, PopoverBody, PopoverArrow } from "@chakra-ui/react";
+import { AddIcon, CheckIcon, ChevronRightIcon, CloseIcon } from "@chakra-ui/icons";
 import { AiOutlineEdit, AiOutlineSave } from "react-icons/ai";
 import { BsPrinter } from "react-icons/bs";
 import { SlGraph } from "react-icons/sl";
@@ -18,15 +18,14 @@ import consola from "consola";
 import _ from "underscore";
 
 // Database and models
-import { getData, postData } from "src/database/functions";
+import { deleteData, getData, postData } from "src/database/functions";
 import { AttributeStruct, EntityModel } from "types";
 
 // Custom components
-// import Graph from "src/components/Graph";
 import Linky from "src/components/Linky";
 import AttributeCard from "src/components/AttributeCard";
-import { Loading } from "src/components/Loading";
 import Graph from "src/components/Graph";
+import { Loading } from "src/components/Loading";
 
 export const Entity = () => {
   const { id } = useParams();
@@ -44,6 +43,36 @@ export const Entity = () => {
   const [collections, setCollections] = useState([] as string[]);
   const [products, setProducts] = useState([] as { name: string; id: string }[]);
   const [attributes, setAttributes] = useState([] as AttributeStruct[]);
+
+  useEffect(() => {
+    getData(`/entities/${id}`).then((response) => {
+      if(_.isEqual(response.status, "error")) {
+        throw new Error(response.error);
+      } else {
+        setEntityData(response);
+        setIsLoaded(true);
+      }
+    }).catch(() => {
+      toast({
+        title: "Database Error",
+        description: "Error retrieving Entity data",
+        status: "error",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    });
+  }, [id]);
+
+  useEffect(() => {
+    if (isLoaded) {
+      // Update the state of editable data fields
+      setDescription(entityData.description);
+      setCollections(entityData.collections);
+      setProducts(entityData.associations.products);
+      setAttributes(entityData.attributes);
+    }
+  }, [isLoaded]);
 
   // Toggle editing status
   const handleEditClick = () => {
@@ -140,39 +169,35 @@ export const Entity = () => {
     });
   };
 
-  useEffect(() => {
-    const response = getData(`/entities/${id}`);
+  // Delete the Entity when confirmed
+  const handleDeleteClick = () => {
+    // Update data
+    deleteData(`/entities/${id}`).then((response) => {
+      if (_.isEqual(response.status, "success")) {
+        setEditing(false);
+        navigate("/entities")
 
-    // Handle the response from the database
-    response.then((value) => {
-      setEntityData(value);
-
-      // Check the contents of the response
-      if (value["error"] !== undefined) {
         toast({
-          title: "Database Error",
-          description: value["error"],
-          status: "error",
-          duration: 4000,
+          title: "Deleted!",
+          status: "success",
+          duration: 2000,
           position: "bottom-right",
           isClosable: true,
         });
+        return;
       }
-
-      setIsLoaded(true);
+      throw new Error("Could not DELETE ID");
+    }).catch(() => {
+      toast({
+        title: "Error",
+        description: `An error occurred when deleting ID "${entityData._id}"`,
+        status: "error",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
     });
-    return;
-  }, [id]);
-
-  useEffect(() => {
-    if (isLoaded) {
-      // Update the state of editable data fields
-      setDescription(entityData.description);
-      setCollections(entityData.collections);
-      setProducts(entityData.associations.products);
-      setAttributes(entityData.attributes);
-    }
-  }, [isLoaded]);
+  }
 
   const removeProduct = (id: string) => {
     setProducts(products.filter((product) => {
@@ -191,27 +216,58 @@ export const Entity = () => {
       <Box m={"2"}>
         <Flex p={"2"} pt={"8"} pb={"8"} direction={"row"} justify={"space-between"} align={"center"} wrap={"wrap"}>
           <Heading size={"2xl"}>Entity:{" "}{entityData.name}</Heading>
+        </Flex>
 
-          <Flex direction={"row"} p={"2"} gap={"2"}>
-            <Button onClick={onOpen} rightIcon={<Icon as={SlGraph} />} colorScheme={"orange"}>
-              View Graph
-            </Button>
-            <Button
-              onClick={() => handleEditClick()}
-              colorScheme={editing ? "green" : "gray"}
-              rightIcon={editing ? <Icon as={AiOutlineSave} /> : <Icon as={AiOutlineEdit} />}
-            >
-              {editing ? "Save" : "Edit"}
-            </Button>
-            <Button onClick={() => handlePrintClick()} rightIcon={<Icon as={BsPrinter} />} colorScheme={"blue"}>
-              Print Label
-            </Button>
-          </Flex>
+        {/* Buttons */}
+        <Flex direction={"row"} p={"2"} gap={"2"}>
+          <Button onClick={onOpen} rightIcon={<Icon as={SlGraph} />} colorScheme={"orange"}>
+            View Graph
+          </Button>
+          <Button onClick={handlePrintClick} rightIcon={<Icon as={BsPrinter} />} colorScheme={"blue"}>
+            Print Label
+          </Button>
+
+          <Spacer />
+          <Button
+            onClick={handleEditClick}
+            colorScheme={editing ? "green" : "gray"}
+            rightIcon={editing ? <Icon as={AiOutlineSave} /> : <Icon as={AiOutlineEdit} />}
+          >
+            {editing ? "Save" : "Edit"}
+          </Button>
+          <Popover>
+            <PopoverTrigger>
+              <Button
+                colorScheme={"red"}
+                rightIcon={<CloseIcon />}
+              >
+                Delete
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent>
+              <PopoverArrow />
+              <PopoverCloseButton />
+              <PopoverHeader>Confirmation</PopoverHeader>
+              <PopoverBody>
+                Are you sure you want to delete this Entity?
+                <Flex direction={"row"} p={"2"} justify={"center"}>
+                  <Button
+                    colorScheme={"green"}
+                    rightIcon={<CheckIcon />}
+                    onClick={handleDeleteClick}
+                  >
+                    Confirm
+                  </Button>
+                </Flex>
+              </PopoverBody>
+            </PopoverContent>
+          </Popover>
+          
         </Flex>
 
         <Flex p={"2"} direction={"row"} wrap={"wrap"}>
           {/* Metadata table */}
-          <Flex p={"2"} gap={"2"} direction={"column"} grow={"1"}>
+          <Flex gap={"2"} direction={"column"} grow={"1"}>
             <TableContainer background={"gray.50"} rounded={"2xl"} p={"4"}>
               <Table mt={"sm"} colorScheme={"gray"}>
                 <Thead>

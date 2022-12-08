@@ -53,6 +53,7 @@ const Entities = () => {
             rightIcon={<PlusSquareIcon />}
             as={RouterLink}
             to={"/create/entity/start"}
+            colorScheme={"green"}
           >
             Create
           </Button>

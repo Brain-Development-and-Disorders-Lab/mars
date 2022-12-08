@@ -311,9 +311,9 @@ export const Attributes = ({}) => {
                       {collections.map((collection) => {
                         return (
                           <Linky
-                            key={`_${collection.id}`}
+                            key={`_${collection}`}
                             type="collections"
-                            id={collection.id}
+                            id={collection}
                           />
                         );
                       })}

@@ -1,6 +1,6 @@
 // React
 import React from "react";
-import { Button, Card, CardBody, CardFooter, CardHeader, Flex, Heading, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, ModalOverlay, ScaleFade, Tag, TagLabel, TagRightIcon, Text, useDisclosure } from "@chakra-ui/react";
+import { Button, Card, CardBody, CardFooter, CardHeader, Flex, Heading, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, ModalOverlay, ScaleFade, Tag, TagLabel, TagLeftIcon, Text, useDisclosure } from "@chakra-ui/react";
 import { CloseIcon, InfoOutlineIcon } from "@chakra-ui/icons";
 import { AiOutlineBlock, AiOutlineLink } from "react-icons/ai";
 import { MdDateRange, MdOutlineTextFields } from "react-icons/md";
@@ -45,24 +45,36 @@ const AttributeCard = (props: AttributeCardProps) => {
                   case "date": {
                     return (
                       <Tag key={parameter.identifier}>
-                        <TagLabel>{parameter.name}:{" "}Date</TagLabel>
-                        <TagRightIcon as={MdDateRange} />
+                        <TagLeftIcon as={MdDateRange} />
+                        <TagLabel>
+                          <Flex align={"center"} gap={"1"}>
+                            <Flex p={"1"} m={"1"} rounded={"md"} background={"white"}>{parameter.name}</Flex>
+                          </Flex>
+                        </TagLabel>
                       </Tag>
                     );
                   };
                   case "entity": {
                     return (
                       <Tag key={parameter.identifier}>
-                        <TagLabel>{parameter.name}:{" "}Entity</TagLabel>
-                        <TagRightIcon as={AiOutlineBlock} />
+                        <TagLeftIcon as={AiOutlineBlock} />
+                        <TagLabel>
+                          <Flex align={"center"} gap={"1"}>
+                            <Flex p={"1"} m={"1"} rounded={"md"} background={"white"}>{parameter.name}</Flex>
+                          </Flex>
+                        </TagLabel>
                       </Tag>
                     );
                   };
                   case "number": {
                     return (
                       <Tag key={parameter.identifier}>
-                        <TagLabel>{parameter.name}:{" "}Number</TagLabel>
-                        <TagRightIcon as={RiNumbersLine} />
+                        <TagLeftIcon as={RiNumbersLine} />
+                        <TagLabel>
+                          <Flex align={"center"} gap={"1"}>
+                            <Flex p={"1"} m={"1"} rounded={"md"} background={"white"}>{parameter.name}</Flex>
+                          </Flex>
+                        </TagLabel>
                       </Tag>
                     );
                   };
@@ -70,16 +82,24 @@ const AttributeCard = (props: AttributeCardProps) => {
                   case "url": {
                     return (
                       <Tag key={parameter.identifier}>
-                        <TagLabel>{parameter.name}:{" "}URL</TagLabel>
-                        <TagRightIcon as={AiOutlineLink} />
+                        <TagLeftIcon as={AiOutlineLink} />
+                        <TagLabel>
+                          <Flex align={"center"} gap={"1"}>
+                            <Flex p={"1"} m={"1"} rounded={"md"} background={"white"}>{parameter.name}</Flex>
+                          </Flex>
+                        </TagLabel>
                       </Tag>
                     );
                   };
                   default: {
                     return (
                       <Tag key={parameter.identifier}>
-                        <TagLabel>{parameter.name}:{" "}String</TagLabel>
-                        <TagRightIcon as={MdOutlineTextFields} />
+                        <TagLeftIcon as={MdOutlineTextFields} />
+                        <TagLabel>
+                          <Flex align={"center"} gap={"1"}>
+                            <Flex p={"1"} m={"1"} rounded={"md"} background={"white"}>{parameter.name}</Flex>
+                          </Flex>
+                        </TagLabel>
                       </Tag>
                     );
                   };
@@ -106,7 +126,7 @@ const AttributeCard = (props: AttributeCardProps) => {
                 <WarningLabel key={props.data.name} text={"No description"} />
               }
 
-              <Flex p={"sm"}>
+              <Flex direction={"column"} p={"2"} gap={"2"}>
                 {props.data.parameters && props.data.parameters.length > 0 ?
                   <ParameterGroup parameters={props.data.parameters} viewOnly />
                 :

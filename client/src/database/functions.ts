@@ -27,24 +27,26 @@ export const pseudoId = (): string => {
  * @return {Promise<any>} an object containing information from the database
  */
 export const getData = async (path: string): Promise<any> => {
-  consola.debug("Running query:", path);
-  const response = await fetch(`${DATABASE_URL}${path}`);
+  return await fetch(`${DATABASE_URL}${path}`).then(async (response) => {
+    // Check response status
+    if (!response.ok) {
+      consola.error("GET:", path);
+      throw new Error("Invalid response from database");
+    }
 
-  // Check response status
-  if (!response.ok) {
-    consola.error("Invalid response from database");
-    return { error: "Invalid response from database" };
-  }
-
-  // Check the contents of the response
-  const record = await response.json();
-  if (!record) {
-    consola.warn("Response contents were empty");
-    return { error: "Response contents were empty" };
-  }
-
-  consola.success("Successful database query:", path);
-  return record;
+    // Check the contents of the response
+    const record = await response.json();
+    if (!record) {
+      consola.error("GET:", path);
+      throw new Error("Response contents were empty");
+    } else {
+      consola.success("GET:", path);
+      return record;
+    }
+  }).catch((error) => {
+    consola.error("GET:", path);
+    return { status: "error", error: error };
+  });
 };
 
 /**
@@ -52,7 +54,7 @@ export const getData = async (path: string): Promise<any> => {
  * @param {string} path exact API path to post data to
  * @param {any} data the data to be posted to Lab
  */
- export const postData = async (path: string, data: any): Promise<any> => {
+export const postData = async (path: string, data: any): Promise<any> => {
   return await fetch(`${DATABASE_URL}${path}`, {
     method: "POST",
     headers: {
@@ -61,12 +63,34 @@ export const getData = async (path: string): Promise<any> => {
     body: JSON.stringify(data),
   }).then((response) => {
     if (_.isEqual(response.ok, true)) {
-      consola.success("Successfully posted data:", path, data);
+      consola.success("POST:", path, data);
       return { status: "success" };
     }
     throw new Error("Failed to POST data");
   }).catch((error) => {
-    consola.error("Error occurred when POSTing data");
+    consola.error("POST:", path, data);
+    return { status: "error", error: error };
+  });
+};
+
+/**
+ * Delete data to the Lab API using the JavaScript `fetch` API
+ * @param {string} path the path of the database objected to be deleted
+ */
+ export const deleteData = async (path: string): Promise<any> => {
+  return await fetch(`${DATABASE_URL}${path}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  }).then((response) => {
+    if (_.isEqual(response.ok, true)) {
+      consola.success("DELETE:", path);
+      return { status: "success" };
+    }
+    throw new Error("Failed to DELETE");
+  }).catch((error) => {
+    consola.error("DELETE:", path);
     return { status: "error", error: error };
   });
 };

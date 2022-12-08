@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 
 // Navigation
-import { useNavigate } from "react-router-dom";
+import { Link as RouterLink } from "react-router-dom";
 
 // Database and models
 import { getData } from "src/database/functions";
@@ -15,7 +15,6 @@ import {
 import { Button, useToast } from "@chakra-ui/react";
 
 const Linky = (props: LinkyProps) => {
-  const navigate = useNavigate();
   const toast = useToast();
 
   const [linkData, setLinkData] = useState(
@@ -48,7 +47,8 @@ const Linky = (props: LinkyProps) => {
     <Button
       variant={"link"}
       color={"gray.600"}
-      onClick={() => navigate(`/${props.type}/${props.id}`)}
+      as={RouterLink}
+      to={`/${props.type}/${props.id}`}
     >
       {linkData.name}
     </Button>

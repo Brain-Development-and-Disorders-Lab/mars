@@ -1,11 +1,13 @@
 // React and Grommet
 import React, { useEffect, useState } from "react";
-import { Badge, Card, CardBody, CardHeader, Flex, FormControl, FormLabel, IconButton, Input, Link, Select, Tag, TagLabel, TagRightIcon, useToast } from "@chakra-ui/react";
+import { Badge, Card, CardBody, CardHeader, Flex, FormControl, FormLabel, IconButton, Input, Link, Select, Tag, TagLabel, TagLeftIcon, useToast } from "@chakra-ui/react";
 import { SingleDatepicker } from "chakra-dayzed-datepicker";
 import { CloseIcon } from "@chakra-ui/icons";
 import { AiOutlineBlock, AiOutlineLink } from "react-icons/ai";
 import { MdDateRange, MdOutlineTextFields } from "react-icons/md";
 import { RiNumbersLine } from "react-icons/ri";
+
+import { Link as RouterLink } from "react-router-dom";
 
 // Database and models
 import { getData } from "src/database/functions";
@@ -36,8 +38,8 @@ export const DateParameter = (props: Parameter.PDate) => {
         <Flex justify={"space-between"} align={"center"}>
           <Flex gap={"2"}>
             <Tag>
+              <TagLeftIcon as={MdDateRange} />
               <TagLabel>Date</TagLabel>
-              <TagRightIcon as={MdDateRange} />
             </Tag>
 
             <Badge bg={"green.200"} visibility={props.disabled ? "hidden" : "visible"}>
@@ -145,8 +147,8 @@ export const StringParameter = (props: Parameter.PString) => {
         <Flex justify={"space-between"} align={"center"}>
           <Flex gap={"2"}>
             <Tag>
+              <TagLeftIcon as={MdOutlineTextFields} />
               <TagLabel>String</TagLabel>
-              <TagRightIcon as={MdOutlineTextFields} />
             </Tag>
 
             <Badge bg={"green.200"} visibility={props.disabled ? "hidden" : "visible"}>
@@ -230,8 +232,8 @@ export const NumberParameter = (props: Parameter.PNumber) => {
         <Flex justify={"space-between"} align={"center"}>
           <Flex gap={"2"}>
             <Tag>
+              <TagLeftIcon as={RiNumbersLine} />
               <TagLabel>Number</TagLabel>
-              <TagRightIcon as={RiNumbersLine} />
             </Tag>
 
             <Badge bg={"green.200"} visibility={props.disabled ? "hidden" : "visible"}>
@@ -315,8 +317,8 @@ export const URLParameter = (props: Parameter.PURL) => {
         <Flex justify={"space-between"} align={"center"}>
           <Flex gap={"2"}>
             <Tag>
+              <TagLeftIcon as={AiOutlineLink} />
               <TagLabel>URL</TagLabel>
-              <TagRightIcon as={AiOutlineLink} />
             </Tag>
 
             <Badge bg={"green.200"} visibility={props.disabled ? "hidden" : "visible"}>
@@ -366,7 +368,7 @@ export const URLParameter = (props: Parameter.PURL) => {
               URL
             </FormLabel>
             {props.disabled ?
-              <Link href={value} color="dark-1">
+              <Link as={RouterLink} to={value} color="dark-1">
                 {value}
               </Link>
             :
@@ -440,8 +442,8 @@ export const EntityParameter = (props: Parameter.PEntity) => {
         <Flex justify={"space-between"} align={"center"}>
           <Flex gap={"2"}>
             <Tag>
+              <TagLeftIcon as={AiOutlineBlock} />
               <TagLabel>Entity</TagLabel>
-              <TagRightIcon as={AiOutlineBlock} />
             </Tag>
 
             <Badge bg={"green.200"} visibility={props.disabled ? "hidden" : "visible"}>

@@ -13,7 +13,9 @@ import { CollectionModel, EntityModel } from "types";
 // Custom components
 import Linky from "src/components/Linky";
 import { Loading } from "src/components/Loading";
+
 import _ from "underscore";
+import consola from "consola";
 
 export const Collection = () => {
   const { id } = useParams();
@@ -29,52 +31,44 @@ export const Collection = () => {
 
   useEffect(() => {
     // Populate Collection data
-    const response = getData(`/collections/${id}`);
-
-    // Handle the response from the database
-    response.then((value) => {
-      setCollectionData(value);
-
-      // Check the contents of the response
-      if (value["error"] !== undefined) {
-        toast({
-          title: "Database Error",
-          description: value["error"],
-          status: "error",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-      }
-
-      setIsLoaded(true);
-    }).then(() => {
-      // Populate Entity data
-      const entities = getData(`/entities`);
-
-      // Handle the response from the database
-      entities.then((entity) => {
-        setAllEntities(entity.map((e: EntityModel) => {
-          return { name: e.name, id: e._id };
-        }));
-
-        // Check the contents of the response
-        if (entity["error"] !== undefined) {
-          toast({
-            title: "Database Error",
-            description: entity["error"],
-            status: "error",
-            duration: 4000,
-            position: "bottom-right",
-            isClosable: true,
-          });
-        }
-
+    getData(`/collections/${id}`).then((response) => {
+      if(_.isEqual(response.status, "error")) {
+        throw new Error(response.error);
+      } else {
+        setCollectionData(response);
         setIsLoaded(true);
+      }
+    }).catch(() => {
+      toast({
+        title: "Database Error",
+        description: "Error retrieving Collection data",
+        status: "error",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
       });
     });
 
-    return;
+    // Populate Entity data
+    getData(`/entities`).then((response) => {
+      if(_.isEqual(response.status, "error")) {
+        throw new Error(response.error);
+      } else {
+        setAllEntities(response.map((e: EntityModel) => {
+          return { name: e.name, id: e._id };
+        }));
+        setIsLoaded(true);
+      }
+    }).catch(() => {
+      toast({
+        title: "Database Error",
+        description: "Error retrieving Entity data",
+        status: "error",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    });
   }, [id, isLoaded]);
 
   /**
@@ -82,7 +76,8 @@ export const Collection = () => {
    * @param {{ entities: string[], collection: string }} data List of Entities and a Collection to add the Entities to
    */
   const onAdd = (data: { entities: string[], collection: string }): void => {
-    postData(`/collections/add`, data).then(() => {
+    postData(`/collections/add`, data).then((response) => {
+      consola.debug("Response:", response);
       navigate(`/collections/${id}`);
     });
   };
@@ -128,14 +123,14 @@ export const Collection = () => {
           </TableContainer>
 
           {/* List of Entities in the Collection */}
-          <Flex direction={"row"} justify={"space-between"} m={"2"}>
+          <Flex direction={"row"} justify={"space-between"}>
             <Heading m={"0"} alignSelf={"center"}>Entities</Heading>
             <Button leftIcon={<AddIcon />} onClick={onOpen} colorScheme={"green"}>
               Add
             </Button>
           </Flex>
 
-          {collectionData.entities.length > 0 && (
+          {collectionData.entities && collectionData.entities.length > 0 && (
             <TableContainer background={"gray.50"} rounded={"2xl"} p={"4"}>
               <Table variant={"simple"} colorScheme={"gray"}>
                 <Thead>
@@ -193,7 +188,7 @@ export const Collection = () => {
 
         <Modal isOpen={isOpen} onClose={onClose}>
           <ModalOverlay />
-          <ModalContent>
+          <ModalContent p={"4"}>
             {/* Heading and close button */}
             <ModalHeader>Add Entities</ModalHeader>
             <ModalCloseButton />
@@ -206,7 +201,19 @@ export const Collection = () => {
                   title="Select Entity"
                   placeholder={"Select Entity"}
                   onChange={(event) => {
-                    setSelectedEntities([...selectedEntities, event.target.value.toString()]);
+                    const selectedEntity = event.target.value.toString();
+                    if (selectedEntities.includes(selectedEntity)) {
+                      toast({
+                        title: "Warning",
+                        description: "Entity has already been selected.",
+                        status: "warning",
+                        duration: 2000,
+                        position: "bottom-right",
+                        isClosable: true,
+                      });
+                    } else {
+                      setSelectedEntities([...selectedEntities, selectedEntity]);
+                    }
                   }}
                 >
                   {isLoaded &&
@@ -221,16 +228,20 @@ export const Collection = () => {
 
               <Flex direction={"row"} p={"2"} gap={"2"}>
                 {selectedEntities.map((entity) => {
-                  return (
-                    <Tag>
-                      <Linky id={entity} type={"entities"} />
-                      <TagCloseButton onClick={() => {
-                        setSelectedEntities(selectedEntities.filter((selected) => {
-                          return !_.isEqual(entity, selected);
-                        }));
-                      }} />
-                    </Tag>
-                  );
+                  if (!_.isEqual(entity, "")) {
+                    return (
+                      <Tag key={`tag-${entity}`}>
+                        <Linky id={entity} type={"entities"} />
+                        <TagCloseButton onClick={() => {
+                          setSelectedEntities(selectedEntities.filter((selected) => {
+                            return !_.isEqual(entity, selected);
+                          }));
+                        }} />
+                      </Tag>
+                    );
+                  } else {
+                    return null;
+                  }
                 })}
               </Flex>
             </Flex>

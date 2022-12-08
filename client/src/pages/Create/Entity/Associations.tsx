@@ -38,7 +38,7 @@ export const Associations = ({}) => {
     [] as { name: string; id: string }[]
   );
   const [additionalCollections, setAdditionalCollections] = useState(
-    [] as { name: string; id: string }[]
+    [] as string[]
   );
 
   const [isLoaded, setIsLoaded] = useState(false);
@@ -177,13 +177,7 @@ export const Associations = ({}) => {
                         if (event) {
                           setAdditionalCollections([
                             ...additionalCollections,
-                            {
-                              name: (
-                                event.option as { name: string; id: string }
-                              ).name,
-                              id: (event.option as { name: string; id: string })
-                                .id,
-                            },
+                            (event.option as { name: string; id: string }).id,
                           ]);
                         }
                       }}

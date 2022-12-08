@@ -136,60 +136,61 @@ CollectionsRoute.route("/collections/remove").post((request: { body: { entity: s
  * @param response Object to return to the client
  */
 export const add = (data: { entityId: string[], collectionId: string }, response: any) => {
-  consola.info("Adding Entity to Collection:", "/collections/add", "Entity:", '"' + data.entityId + '"', "Collection:", '"' + data.collectionId + '"');
-
-  // Get the Collection
+  let status = "success";
   const database = getDatabase();
   const collectionQuery = { _id: new ObjectId(data.collectionId) };
   let collectionResult: CollectionModel;
 
-  database
-    .collection(COLLECTIONS_COLLECTION)
-    .findOne(collectionQuery, (error: any, result: any) => {
-      if (error) throw error;
-      collectionResult = result;
+  consola.info("Adding Entity to Collection:", "/collections/add", "Entity:", '"' + data.entityId + '"', "Collection:", '"' + data.collectionId + '"');
 
-      // Check if the Entity exists in the Collection already
-      let entityExists = false;
-      for (let collectionEntity of collectionResult.entities) {
-        if (_.isEqual((new ObjectId(collectionEntity)).toString(), data.entityId)) {
-          consola.warn("Collection", collectionResult.name, "already contains Entity", data.entityId);
-          entityExists = true;
+  for (let entity of data.entityId) {
+    // Add Entity to Collection
+    database
+      .collection(COLLECTIONS_COLLECTION)
+      .findOne(collectionQuery, (error: any, result: any) => {
+        if (error) throw error;
+        collectionResult = result;
+
+        // Check if an Entity exists in the Collection already
+        let entityExists = false;
+        for (let collectionEntity of collectionResult.entities) {
+          if (_.isEqual((new ObjectId(collectionEntity)).toString(), entity)) {
+            consola.warn("Collection", collectionResult.name, "already contains Entity", entity);
+            status = "existed";
+            entityExists = true;
+          }
         }
-      }
 
-      if (!entityExists) {
-        // Add the Entity to the collection
-        const updatedValues = {
-          $set: {
-            entities: [
-              // Existing Entities
-              ...collectionResult.entities,
-              // New Entities
-              ...data.entityId.map((entity) => {
-                return new ObjectId(entity);
-              }),
-            ],
-          },
-        };
+        if (!entityExists) {
+          // Add the Entity to the collection
+          const updatedValues = {
+            $set: {
+              entities: [
+                // Existing Entities
+                ...collectionResult.entities,
+                // New Entity
+                (new ObjectId(entity)),
+              ],
+            },
+          };
 
-        database
-          .collection(COLLECTIONS_COLLECTION)
-          .updateOne(
-            collectionQuery,
-            updatedValues,
-            (error: any, response: any) => {
-              if (error) throw error;
-              consola.success("Added Entity to Collection:", "/collections/add", "Entity:", '"' + data.entityId + '"', "Collection:", '"' + data.collectionId + '"');
-            }
-          );
-      }
-    });
+          database
+            .collection(COLLECTIONS_COLLECTION)
+            .updateOne(
+              collectionQuery,
+              updatedValues,
+              (error: any, response: any) => {
+                if (error) throw error;
+                consola.success("Added Entity to Collection:", "/collections/add", "Entity:", '"' + data.entityId + '"', "Collection:", '"' + data.collectionId + '"');
+              }
+            );
+        }
+      });
 
-  data.entityId.map((entity) => {
-    // Get the Entity
+    // Add Collection to list of Collections on Entity
     const entityQuery = { _id: new ObjectId(entity) };
     let entityResult: EntityModel;
+
     database
       .collection(ENTITIES_COLLECTION)
       .findOne(entityQuery, (error: any, result: any) => {
@@ -200,7 +201,8 @@ export const add = (data: { entityId: string[], collectionId: string }, response
         let entityExists = false;
         for (let collection of entityResult.collections) {
           if (_.isEqual((new ObjectId(collection)).toString(), data.collectionId)) {
-            consola.warn("Entity", entityResult.name, "already is present in Collection", data.collectionId);
+            consola.warn("Entity", entityResult.name, "is already in Collection", data.collectionId);
+            status = "existed";
             entityExists = true;
           }
         }
@@ -228,12 +230,12 @@ export const add = (data: { entityId: string[], collectionId: string }, response
             );
         }
       });
-  })
+  }
 
   // Respond
   response.json({
     id: data.collectionId,
-    status: "success"
+    status: status,
   });
 };
 
@@ -346,11 +348,7 @@ export const remove = (data: { entityId: string, collectionId: string }, respons
 };
 
 // Route: Remove a Collection
-CollectionsRoute.route("/:id").delete(
-  (
-    request: { params: { id: any } },
-    response: { json: (content: any) => void }
-  ) => {
+CollectionsRoute.route("/collections/:id").delete((request: { params: { id: any } }, response: { json: (content: any) => void }) => {
     let connection = getDatabase();
     let query = { _id: new ObjectId(request.params.id) };
     connection
@@ -361,6 +359,8 @@ CollectionsRoute.route("/:id").delete(
         response.json(content);
       });
   }
+
+  // To Do: Remove references to Collection.
 );
 
 export default CollectionsRoute;

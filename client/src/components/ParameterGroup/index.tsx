@@ -52,8 +52,8 @@ const ParameterGroup = (props: { parameters: Parameters[], viewOnly: boolean, se
         <Flex direction={"row"} gap={"2"} flexWrap={"wrap"} justify={"center"} align={"center"}>
           {/* Buttons to add Parameters */}
           <Button
-            leftIcon={<SmallAddIcon />}
-            rightIcon={<Icon as={MdDateRange} />}
+            leftIcon={<Icon as={MdDateRange} />}
+            rightIcon={<SmallAddIcon />}
             onClick={() => {
               // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
               props.setParameters &&
@@ -72,8 +72,8 @@ const ParameterGroup = (props: { parameters: Parameters[], viewOnly: boolean, se
           </Button>
 
           <Button
-            leftIcon={<SmallAddIcon />}
-            rightIcon={<Icon as={MdOutlineTextFields} />}
+            leftIcon={<Icon as={MdOutlineTextFields} />}
+            rightIcon={<SmallAddIcon />}
             onClick={() => {
               // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
               props.setParameters &&
@@ -92,8 +92,8 @@ const ParameterGroup = (props: { parameters: Parameters[], viewOnly: boolean, se
           </Button>
 
           <Button
-            leftIcon={<SmallAddIcon />}
-            rightIcon={<Icon as={RiNumbersLine} />}
+            leftIcon={<Icon as={RiNumbersLine} />}
+            rightIcon={<SmallAddIcon />}
             onClick={() => {
               // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
               props.setParameters &&
@@ -112,8 +112,8 @@ const ParameterGroup = (props: { parameters: Parameters[], viewOnly: boolean, se
           </Button>
 
           <Button
-            leftIcon={<SmallAddIcon />}
-            rightIcon={<Icon as={AiOutlineLink} />}
+            leftIcon={<Icon as={AiOutlineLink} />}
+            rightIcon={<SmallAddIcon />}
             onClick={() => {
               // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
               props.setParameters &&
@@ -132,8 +132,8 @@ const ParameterGroup = (props: { parameters: Parameters[], viewOnly: boolean, se
           </Button>
 
           <Button
-            leftIcon={<SmallAddIcon />}
-            rightIcon={<Icon as={AiOutlineBlock} />}
+            leftIcon={<Icon as={AiOutlineBlock} />}
+            rightIcon={<SmallAddIcon />}
             onClick={() => {
               // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
               props.setParameters &&
