@@ -1,6 +1,7 @@
 // React and Grommet
 import React, { useState } from "react";
 import { Box, Button, Flex, Heading, Input, List, ListIcon, ListItem, Text, Textarea } from "@chakra-ui/react";
+import { CheckIcon, CloseIcon, InfoOutlineIcon } from "@chakra-ui/icons";
 import { AiOutlineBlock, AiOutlineLink } from "react-icons/ai";
 import { MdDateRange, MdOutlineTextFields } from "react-icons/md";
 import { RiNumbersLine } from "react-icons/ri";
@@ -20,7 +21,6 @@ import { AttributeStruct, Parameters } from "types";
 
 // Database functions
 import { postData } from "src/database/functions";
-import { CheckIcon, InfoOutlineIcon } from "@chakra-ui/icons";
 
 export const Start = ({}) => {
   const navigate = useNavigate();
@@ -107,10 +107,10 @@ export const Start = ({}) => {
 
       {/* Action buttons */}
       <Flex p={"2"} direction={"row"} w={"full"} flexWrap={"wrap"} gap={"6"} justify={"space-between"}>
-        <Button color="white" background={"red"} onClick={() => navigate("/attributes")}>
+        <Button colorScheme={"red"} variant={"outline"} rightIcon={<CloseIcon />} onClick={() => navigate("/attributes")}>
           Cancel
         </Button>
-        <Button rightIcon={<CheckIcon />} color={"white"} background={"green"} onClick={onSubmit}>
+        <Button colorScheme={"green"} rightIcon={<CheckIcon />} onClick={onSubmit}>
           Finish
         </Button>
       </Flex>

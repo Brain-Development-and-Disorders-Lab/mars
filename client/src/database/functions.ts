@@ -5,8 +5,7 @@ import _ from "underscore";
 import { DATABASE_URL } from "src/variables";
 
 /**
- * Generate a mixed-format ID:
- *   `id_ABCDE_123`
+ * Generate a mixed-format ID: `id_ABCDE_123`
  * @return {string}
  */
 export const pseudoId = (): string => {

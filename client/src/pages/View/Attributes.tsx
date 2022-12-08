@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Box, Button, Flex, Heading, Table, TableContainer, Tbody, Text, Th, Thead, Tr, useToast } from "@chakra-ui/react";
-import { ChevronRightIcon, PlusSquareIcon } from "@chakra-ui/icons";
+import { ChevronRightIcon, AddIcon } from "@chakra-ui/icons";
 import { Loading } from "src/components/Loading";
 
 // Navigation
@@ -52,7 +52,7 @@ const Attributes = () => {
         <Flex p={"2"} pt={"8"} pb={"8"} direction={"row"} justify={"space-between"} align={"center"}>
           <Heading size={"3xl"}>Attributes</Heading>
           <Button
-            rightIcon={<PlusSquareIcon />}
+            rightIcon={<AddIcon />}
             as={RouterLink}
             to={"/create/attribute/start"}
             colorScheme={"green"}

@@ -11,7 +11,7 @@ import { EntityModel } from "types";
 
 // Custom components
 import { Loading } from "src/components/Loading";
-import { ChevronRightIcon, PlusSquareIcon } from "@chakra-ui/icons";
+import { ChevronRightIcon, AddIcon } from "@chakra-ui/icons";
 
 const Entities = () => {
   const navigate = useNavigate();
@@ -50,7 +50,7 @@ const Entities = () => {
         <Flex p={"2"} pt={"8"} pb={"8"} direction={"row"} justify={"space-between"} align={"center"}>
           <Heading size={"3xl"}>Entities</Heading>
           <Button
-            rightIcon={<PlusSquareIcon />}
+            rightIcon={<AddIcon />}
             as={RouterLink}
             to={"/create/entity/start"}
             colorScheme={"green"}

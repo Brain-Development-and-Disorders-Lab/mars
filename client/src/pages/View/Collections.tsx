@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Box, Button, Flex, Heading, Table, TableContainer, Tag, TagLabel, TagRightIcon, Tbody, Text, Th, Thead, Tr, useToast } from "@chakra-ui/react";
-import { ChevronRightIcon, PlusSquareIcon, WarningIcon } from "@chakra-ui/icons";
+import { ChevronRightIcon, AddIcon, WarningIcon } from "@chakra-ui/icons";
 
 import { Loading } from "src/components/Loading";
 import _ from "underscore";
@@ -50,7 +50,7 @@ const Collections = () => {
         <Flex p={"2"} pt={"8"} pb={"8"} direction={"row"} justify={"space-between"} align={"center"}>
           <Heading size={"3xl"}>Collections</Heading>
           <Button
-            rightIcon={<PlusSquareIcon />}
+            rightIcon={<AddIcon />}
             as={RouterLink}
             to={"/create/collection/start"}
             colorScheme={"green"}
