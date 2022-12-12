@@ -1,36 +1,94 @@
 // React
-import React, { useState } from "react";
-import { Box, Button, Flex, FormControl, FormHelperText, FormLabel, Heading, Input, Text, Textarea } from "@chakra-ui/react";
+import React, { useEffect, useState } from "react";
+import { Box, Button, Checkbox, CheckboxGroup, Flex, FormControl, FormHelperText, FormLabel, Heading, Input, Select, Stack, Tag, TagCloseButton, Text, Textarea, useToast } from "@chakra-ui/react";
 import { SingleDatepicker } from "chakra-dayzed-datepicker";
-import { ChevronLeftIcon, ChevronRightIcon, CloseIcon, InfoOutlineIcon } from "@chakra-ui/icons";
+import { CheckIcon, ChevronLeftIcon, ChevronRightIcon, CloseIcon, InfoOutlineIcon } from "@chakra-ui/icons";
+import Linky from "src/components/Linky";
 
 import _ from "underscore";
+import consola from "consola";
 
 // Navigation
-import { useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 // Database and models
-import { Create } from "types";
+import { CollectionModel, EntityModel, EntityStruct } from "types";
 
 // Utility functions
-import { pseudoId } from "src/database/functions";
+import { getData, pseudoId } from "src/database/functions";
 
 export const Start = ({}) => {
   // Used to manage what detail inputs are presented
   const [pageState, setPageState] = useState("start" as "start" | "attributes" | "associations");
 
   // Extract prior state and apply
-  const { state } = useLocation();
+  const navigate = useNavigate();
+  const toast = useToast();
 
-  const initialName = state === null ? pseudoId() : (state as Create.Entity.Associations).name;
-  const initialCreated = state === null ? new Date().toISOString() : (state as Create.Entity.Associations).created;
-  const initialOwner = state === null ? "" : (state as Create.Entity.Associations).owner;
-  const initialDescription = state === null ? "" : (state as Create.Entity.Associations).description;
+  const [entities, setEntities] = useState([] as EntityModel[]);
+  const [collections, setCollections] = useState([] as CollectionModel[]);
+  const [isLoaded, setIsLoaded] = useState(false);
 
-  const [name, setName] = useState(initialName);
-  const [created, setCreated] = useState(new Date(initialCreated));
-  const [owner, setOwner] = useState(initialOwner);
-  const [description, setDescription] = useState(initialDescription);
+  const [name, setName] = useState(pseudoId("entity"));
+  const [created, setCreated] = useState(new Date());
+  const [owner, setOwner] = useState("");
+  const [description, setDescription] = useState("");
+  const [origin, setOrigin] = useState({} as { name: string, id: string });
+  const [selectedCollections, setSelectedCollections] = useState([] as string[]);
+  const [selectedProducts, setSelectedProducts] = useState([] as { name: string, id: string }[]);
+
+  const entityState: EntityStruct = {
+    name: name,
+    created: created.toISOString(),
+    owner: owner,
+    description: description,
+    associations: {
+      origin: origin,
+      products: selectedProducts,
+    },
+    collections: selectedCollections,
+    attributes: [],
+  };
+  consola.debug("Initial Entity state:", entityState);
+
+  useEffect(() => {
+    // Get all Entities
+    getData(`/entities`).then((response) => {
+      if(_.isEqual(response.status, "error")) {
+        throw new Error(response.error);
+      } else {
+        setEntities(response);
+      }
+    }).catch(() => {
+      toast({
+        title: "Database Error",
+        description: "Error retrieving Entity data",
+        status: "error",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    });
+
+    // Get all Collections
+    getData(`/collections`).then((response) => {
+      if(_.isEqual(response.status, "error")) {
+        throw new Error(response.error);
+      } else {
+        setCollections(response);
+        setIsLoaded(true);
+      }
+    }).catch(() => {
+      toast({
+        title: "Database Error",
+        description: "Error retrieving Collection data",
+        status: "error",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    });
+  }, []);
 
   // Handle clicking "Next"
   const onNext = () => {
@@ -51,9 +109,9 @@ export const Start = ({}) => {
   };
 
   // Handle clicking "Cancel"
-  // const onCancel = () => {
-    
-  // };
+  const onCancel = () => {
+    navigate("/entities");
+  };
 
   return (
     <Box m={"2"}>
@@ -153,10 +211,115 @@ export const Start = ({}) => {
 
         {/* "Associations" page */}
         {_.isEqual("associations", pageState) &&
-          <Flex direction={"column"} gap={"2"} maxW={"xl"} p={"2"} rounded={"2xl"}>
+          <Flex direction={"column"} gap={"2"} p={"2"} rounded={"2xl"}>
             <Heading size={"xl"} margin={"xs"}>
               Associations
             </Heading>
+            <Text>
+              Specify some basic details about this Entity.
+              Relations between Entities and membership to Collections can be specified on the following page.
+              Finally, the metadata associated with this Entity should be specified using Attributes and corresponding Parameters.
+            </Text>
+            <Flex direction={"row"} gap={"2"} grow={"1"}>
+              <Flex direction={"column"} justify={"space-between"}>
+                {/* Origin */}
+                <FormControl>
+                  <FormLabel>Origin Entity</FormLabel>
+                    <Select
+                      placeholder={"Select Origin Entity"}
+                      onChange={(event) => {
+                        setOrigin({
+                          id: event.target.value.toString(),
+                          name: event.target.options[event.target.selectedIndex].text,
+                        });
+                      }}
+                    >
+                      {isLoaded &&
+                        entities.map((entity) => {
+                          return (
+                            <option key={entity._id} value={entity._id}>{entity.name}</option>
+                          );
+                        })
+                      };
+                    </Select>
+                  <FormHelperText>If the source of this Entity currently exists or did exist in this system, specify that association here by searching for the origin Entity.</FormHelperText>
+                </FormControl>
+
+                {/* Products */}
+                <FormControl>
+                  <FormLabel>Linked Products</FormLabel>
+                  <Select
+                    title="Select Entity"
+                    placeholder={"Select Entity"}
+                    onChange={(event) => {
+                      if (_.find(selectedProducts, (product) => { return _.isEqual(product.id, event.target.value) })) {
+                        toast({
+                          title: "Warning",
+                          description: "Entity has already been selected.",
+                          status: "warning",
+                          duration: 2000,
+                          position: "bottom-right",
+                          isClosable: true,
+                        });
+                      } else if (!_.isEqual(event.target.value.toString(), "")) {
+                        setSelectedProducts([
+                          ...selectedProducts,
+                          {
+                            id: event.target.value.toString(),
+                            name: event.target.options[event.target.selectedIndex].text,
+                          },
+                        ]);
+                      }
+                    }}
+                  >
+                    {isLoaded &&
+                      entities.map((entity) => {
+                        return (
+                          <option key={entity._id} value={entity._id}>{entity.name}</option>
+                        );
+                      })
+                    };
+                  </Select>
+                  <FormHelperText>If this Entity has any derivatives or Entities that have been created from it, specify those associations here by searching for the corresponding Entity.</FormHelperText>
+                  <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
+                    {selectedProducts.map((product) => {
+                      return (
+                        <Tag key={`tag-${product.id}`}>
+                          <Linky id={product.id} type={"entities"} />
+                          <TagCloseButton onClick={() => {
+                            setSelectedProducts(selectedProducts.filter((selected) => {
+                              return !_.isEqual(product.id, selected.id);
+                            }));
+                          }} />
+                      </Tag>
+                      );
+                    })}
+                  </Flex>
+                </FormControl>
+              </Flex>
+
+              {/* Collections */}
+              <FormControl>
+                <FormLabel>Collections</FormLabel>
+                <CheckboxGroup
+                  value={selectedCollections}
+                  onChange={(event: string[]) => {
+                    if (event) {
+                      setSelectedCollections([...event]);
+                    }
+                  }}
+                >
+                  <Stack spacing={[1, 5]} direction={"column"}>
+                    {collections.map((collection) => {
+                      return(
+                        <Checkbox key={collection._id} value={collection._id}>{collection.name}</Checkbox>
+                      );
+                    })}
+                  </Stack>
+                </CheckboxGroup>
+                <FormHelperText>Specify the collections that this new Entity should be included with. The Entity will then show up underneath the specified collections.</FormHelperText>
+              </FormControl>
+            </Flex>
           </Flex>}
 
         {/* "Attributes" page */}
@@ -170,15 +333,18 @@ export const Start = ({}) => {
 
       {/* Action buttons */}
       <Flex p={"2"} direction={"row"} w={"full"} flexWrap={"wrap"} gap={"6"} justify={"space-between"}>
-        <Button colorScheme={"red"} variant={"outline"} rightIcon={<CloseIcon />}>
-          Cancel
-        </Button>
-        {!_.isEqual("start", pageState) &&
-          <Button colorScheme={"orange"} variant={"outline"} rightIcon={<ChevronLeftIcon />} onClick={onBack}>
-            Back
+        <Flex gap={"4"}>
+          <Button colorScheme={"red"} variant={"outline"} rightIcon={<CloseIcon />} onClick={onCancel}>
+            Cancel
           </Button>
-        }
-        <Button colorScheme={"green"} rightIcon={<ChevronRightIcon />} onClick={onNext}>
+          {!_.isEqual("start", pageState) &&
+            <Button colorScheme={"orange"} variant={"outline"} leftIcon={<ChevronLeftIcon />} onClick={onBack}>
+              Back
+            </Button>
+          }
+        </Flex>
+
+        <Button colorScheme={"green"} rightIcon={_.isEqual("attributes", pageState) ? <CheckIcon /> : <ChevronRightIcon />} onClick={onNext}>
           {_.isEqual("attributes", pageState) ? "Finish" : "Next"}
         </Button>
       </Flex>

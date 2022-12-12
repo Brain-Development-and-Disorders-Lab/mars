@@ -8,15 +8,30 @@ import { DATABASE_URL } from "src/variables";
  * Generate a mixed-format ID: `id_ABCDE_123`
  * @return {string}
  */
-export const pseudoId = (): string => {
+export const pseudoId = (type?: "entity" | "collection" | "attribute"): string => {
+  let prefix = "id_";
+  if (type) {
+    switch (type) {
+      case "collection":
+        prefix = "col_";
+        break;
+      case "attribute":
+        prefix = "att_";
+        break;
+      default:
+        prefix = "id_";
+        break;
+    }
+  }
+
   return (
-    "id_" +
+    prefix +
     Math.random()
       .toString(36)
       .replace(/[^a-z]+/g, "")
-      .slice(0, 5) +
+      .slice(0, 3) +
     "_" +
-    Math.round(Math.random() * 1000)
+    Math.round(performance.now() * (Math.random()))
   );
 };
 
