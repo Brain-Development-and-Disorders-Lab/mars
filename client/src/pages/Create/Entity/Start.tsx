@@ -117,7 +117,7 @@ export const Start = ({}) => {
 
   return (
     <Flex m={["0", "2"]} p={["2", "4"]} align={"center"} justify={"center"}>
-      <Flex direction={"column"} maxW={"7xl"} shadow={"lg"} p={"4"} rounded={"xl"}>
+      <Flex direction={"column"} maxW={"7xl"} p={"4"} rounded={"xl"}>
         <Flex direction={"column"} p={"2"} pt={"8"} pb={"8"} >
           <Flex direction={"row"}>
             <Heading size={"2xl"}>Create Entity</Heading>
@@ -205,7 +205,7 @@ export const Start = ({}) => {
               </Flex>
             </Flex>}
           {_.isEqual("start", pageState) &&
-            <Flex direction={"column"} gap={"2"} h={"fit-content"} p={"4"} rounded={"2xl"} background={"whitesmoke"} maxW={"xl"}>
+            <Flex direction={"column"} gap={"2"} h={"fit-content"} p={"4"} rounded={"2xl"} border={"1px"} borderColor={"gray.200"} maxW={"xl"}>
               <Flex align={"center"} gap={"2"}><InfoOutlineIcon boxSize={"8"} /><Heading>Entities</Heading></Flex>
               <Text>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</Text>
               <Text>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</Text>

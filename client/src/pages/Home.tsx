@@ -1,6 +1,6 @@
 // React and Grommet
 import React, { useEffect, useState } from "react";
-import { Box, Button, Flex, Heading, Table, TableContainer, Text, Thead, Tr, Th, useToast, Stat, StatLabel, StatNumber, StatHelpText, Spacer, List, ListItem, Tbody } from "@chakra-ui/react";
+import { Button, Flex, Heading, Table, TableContainer, Text, Thead, Tr, Th, useToast, Stat, StatLabel, StatNumber, StatHelpText, Spacer, List, ListItem, Tbody } from "@chakra-ui/react";
 import { AddIcon, ChevronRightIcon, RepeatClockIcon } from "@chakra-ui/icons";
 
 // Database and models
@@ -79,8 +79,8 @@ const Home = () => {
 
   return (
     isLoaded ?
-      <Box m={"2"} mt={"0"}>
-        <Flex p={"2"} pt={"0"} direction={"row"} w={"full"} flexWrap={"wrap"} gap={"6"}>
+      <Flex m={"2"} align={"center"} justify={"center"}>
+        <Flex p={"2"} pt={"0"} direction={"row"} w={"full"} maxW={"7xl"} wrap={"wrap"} gap={"6"}>
           <Flex direction={"column"} gap={"6"} w={"2xl"} grow={"2"}>
             <Flex
               direction={"column"}
@@ -259,7 +259,7 @@ const Home = () => {
             </List>
           </Flex>
         </Flex>
-      </Box>
+      </Flex>
     :
       <Loading />
   );
