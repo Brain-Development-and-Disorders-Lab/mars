@@ -46,7 +46,7 @@ const ParameterGroup = (props: { parameters: Parameters[], viewOnly: boolean, se
   };
 
   return (
-    <Flex direction={"column"} gap={"4"}>
+    <Flex direction={"column"} gap={"4"} maxW={"inherit"}>
       {/* Button Group */}
       {!props.viewOnly &&
         <Flex direction={"row"} gap={"2"} flexWrap={"wrap"} justify={"center"} align={"center"}>
@@ -154,8 +154,8 @@ const ParameterGroup = (props: { parameters: Parameters[], viewOnly: boolean, se
       }
 
       {/* Card Group */}
-      <Flex p={"2"} margin={"2"} direction={"row"} gap={"4"} wrap={"wrap"} justify={"center"}>
-        <Flex direction={"row"} overflowX={"auto"} gap={"2"} p={"2"}>
+      <Flex p={"2"} margin={"2"} direction={"row"} gap={"4"} wrap={"wrap"} justify={"center"} maxW={"inherit"}>
+        <Flex direction={"row"} overflowX={"auto"} gap={"2"} p={"2"} maxW={"inherit"}>
           {props.parameters.length > 0 ?
             props.parameters.map((parameter) => {
               switch (parameter.type) {

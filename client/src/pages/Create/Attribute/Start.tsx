@@ -20,12 +20,12 @@ import consola from "consola";
 import { AttributeStruct, Parameters } from "types";
 
 // Database functions
-import { postData } from "src/database/functions";
+import { postData, pseudoId } from "src/database/functions";
 
 export const Start = ({}) => {
   const navigate = useNavigate();
 
-  const [name, setName] = useState("");
+  const [name, setName] = useState(pseudoId("attribute"));
   const [description, setDescription] = useState("");
   const [parameters, setParameters] = useState([] as Parameters[]);
 
@@ -73,7 +73,7 @@ export const Start = ({}) => {
           />
         </Flex>
 
-        <Flex direction={"column"} gap={"2"} p={"4"} rounded={"2xl"} background={"whitesmoke"}>
+        <Flex direction={"column"} gap={"2"} h={"fit-content"} p={"4"} rounded={"2xl"} background={"whitesmoke"}>
           <Flex align={"center"} gap={"2"}><InfoOutlineIcon boxSize={"8"} /><Heading>Parameters</Heading></Flex>
           <Text>Individual pieces of metadata should be expressed as Parameters.</Text>
           <Text>There are five supported types of metadata:</Text>

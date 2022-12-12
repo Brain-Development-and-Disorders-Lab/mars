@@ -5,11 +5,11 @@ import { Box, Button, Flex, FormControl, FormLabel, Heading, Input, Text, Textar
 import { CheckIcon, CloseIcon, InfoOutlineIcon } from "@chakra-ui/icons";
 
 // Navigation
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 // Database and models
 import { postData } from "src/database/functions";
-import { CollectionStruct, Create } from "types";
+import { CollectionStruct } from "types";
 
 // Utility functions
 import { pseudoId } from "src/database/functions";
@@ -17,24 +17,10 @@ import { pseudoId } from "src/database/functions";
 export const Start = ({}) => {
   const navigate = useNavigate();
 
-  // Extract prior state and apply
-  const { state } = useLocation();
-
-  const initialName =
-    state === null ? pseudoId() : (state as Create.Collection.Start).name;
-  const initialCreated =
-    state === null
-      ? new Date()
-      : (state as Create.Collection.Start).created;
-  const initialOwner =
-    state === null ? "" : (state as Create.Collection.Start).owner;
-  const initialDescription =
-    state === null ? "" : (state as Create.Collection.Start).description;
-
-  const [name, setName] = useState(initialName);
-  const [created, setCreated] = useState(initialCreated);
-  const [owner, setOwner] = useState(initialOwner);
-  const [description, setDescription] = useState(initialDescription);
+  const [name, setName] = useState(pseudoId("collection"));
+  const [created, setCreated] = useState(new Date());
+  const [owner, setOwner] = useState("");
+  const [description, setDescription] = useState("");
 
   const collectionData: CollectionStruct = {
     name: name,
@@ -143,7 +129,7 @@ export const Start = ({}) => {
           </Flex>
         </Flex>
 
-        <Flex direction={"column"} gap={"2"} p={"4"} rounded={"2xl"} background={"whitesmoke"}>
+        <Flex direction={"column"} gap={"2"} h={"fit-content"} p={"4"} rounded={"2xl"} background={"whitesmoke"} >
           <Flex align={"center"} gap={"2"}><InfoOutlineIcon boxSize={"8"} /><Heading>Collections</Heading></Flex>
           <Text>Collections can be used to organize Entities. Any type of Entity can be included in a Collection.</Text>
           <Text>Entities can be added and removed from a Collection after it has been created.</Text>
