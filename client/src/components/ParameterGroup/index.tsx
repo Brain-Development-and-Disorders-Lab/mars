@@ -1,5 +1,5 @@
 import React, { Dispatch, SetStateAction } from "react";
-import { Button, Center, Flex, Icon, Text } from "@chakra-ui/react";
+import { Button, Flex, Icon, Text } from "@chakra-ui/react";
 import { SmallAddIcon } from "@chakra-ui/icons";
 import { AiOutlineBlock, AiOutlineLink } from "react-icons/ai";
 import { MdDateRange, MdOutlineTextFields } from "react-icons/md";
@@ -46,7 +46,7 @@ const ParameterGroup = (props: { parameters: Parameters[], viewOnly: boolean, se
   };
 
   return (
-    <Flex direction={"column"} gap={"4"} maxW={"inherit"}>
+    <Flex direction={"column"} gap={"4"} w={"3xl"} maxW={"3xl"}>
       {/* Button Group */}
       {!props.viewOnly &&
         <Flex direction={"row"} gap={"2"} flexWrap={"wrap"} justify={"center"} align={"center"}>
@@ -154,7 +154,7 @@ const ParameterGroup = (props: { parameters: Parameters[], viewOnly: boolean, se
       }
 
       {/* Card Group */}
-      <Flex p={"2"} margin={"2"} direction={"row"} gap={"4"} wrap={"wrap"} justify={"center"} maxW={"inherit"}>
+      <Flex p={"2"} margin={"2"} direction={"row"} gap={"4"} wrap={"wrap"} rounded={"xl"} border={"1px"} borderColor={"gray.200"} minH={"xs"} justify={"center"} align={"center"} maxW={"inherit"}>
         <Flex direction={"row"} overflowX={"auto"} gap={"2"} p={"2"} maxW={"inherit"}>
           {props.parameters.length > 0 ?
             props.parameters.map((parameter) => {
@@ -237,9 +237,7 @@ const ParameterGroup = (props: { parameters: Parameters[], viewOnly: boolean, se
               }
             })
           :
-            <Center>
-              <Text>No Parameters specified. Use the buttons above to add a new Parameter.</Text>
-            </Center>
+            <Text>No Parameters specified. Use the buttons above to add a new Parameter.</Text>
           }
         </Flex>
       </Flex>

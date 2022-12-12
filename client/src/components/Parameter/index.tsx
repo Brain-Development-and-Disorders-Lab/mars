@@ -1,6 +1,6 @@
 // React and Grommet
 import React, { useEffect, useState } from "react";
-import { Badge, Card, CardBody, CardHeader, Flex, FormControl, FormLabel, IconButton, Input, Link, Select, Tag, TagLabel, TagLeftIcon, useToast } from "@chakra-ui/react";
+import { Card, CardBody, CardHeader, Flex, FormControl, FormLabel, Icon, IconButton, Input, Link, Select, useToast } from "@chakra-ui/react";
 import { SingleDatepicker } from "chakra-dayzed-datepicker";
 import { CloseIcon } from "@chakra-ui/icons";
 import { AiOutlineBlock, AiOutlineLink } from "react-icons/ai";
@@ -33,19 +33,10 @@ export const DateParameter = (props: Parameter.PDate) => {
   }, [name, value]);
 
   return (
-    <Card minW={"xs"} h={"fit-content"} shadow={"md"}>
+    <Card minW={"xs"} h={"fit-content"} variant={"outline"}>
       <CardHeader>
         <Flex justify={"space-between"} align={"center"}>
-          <Flex gap={"2"}>
-            <Tag>
-              <TagLeftIcon as={MdDateRange} />
-              <TagLabel>Date</TagLabel>
-            </Tag>
-
-            <Badge bg={"green.200"} visibility={props.disabled ? "hidden" : "visible"}>
-              New
-            </Badge>
-          </Flex>
+          <Icon as={MdDateRange} w={"8"} h={"8"}/>
           {/* Remove Parameter */}
           {props.showRemove && !props.disabled &&
             <IconButton
@@ -142,19 +133,11 @@ export const StringParameter = (props: Parameter.PString) => {
   }, [name, value]);
 
   return (
-    <Card minW={"xs"} h={"fit-content"} shadow={"md"}>
+    <Card minW={"xs"} h={"fit-content"} variant={"outline"}>
       <CardHeader>
         <Flex justify={"space-between"} align={"center"}>
-          <Flex gap={"2"}>
-            <Tag>
-              <TagLeftIcon as={MdOutlineTextFields} />
-              <TagLabel>String</TagLabel>
-            </Tag>
+          <Icon as={MdOutlineTextFields} w={"8"} h={"8"}/>
 
-            <Badge bg={"green.200"} visibility={props.disabled ? "hidden" : "visible"}>
-              New
-            </Badge>
-          </Flex>
           {/* Remove Parameter */}
           {props.showRemove && !props.disabled &&
             <IconButton
@@ -227,19 +210,11 @@ export const NumberParameter = (props: Parameter.PNumber) => {
   }, [name, value]);
 
   return (
-    <Card minW={"xs"} h={"fit-content"} shadow={"md"}>
+    <Card minW={"xs"} h={"fit-content"} variant={"outline"} bg={"white"}>
       <CardHeader>
         <Flex justify={"space-between"} align={"center"}>
-          <Flex gap={"2"}>
-            <Tag>
-              <TagLeftIcon as={RiNumbersLine} />
-              <TagLabel>Number</TagLabel>
-            </Tag>
+          <Icon as={RiNumbersLine} w={"8"} h={"8"}/>
 
-            <Badge bg={"green.200"} visibility={props.disabled ? "hidden" : "visible"}>
-              New
-            </Badge>
-          </Flex>
           {/* Remove Parameter */}
           {props.showRemove && !props.disabled &&
             <IconButton
@@ -312,19 +287,11 @@ export const URLParameter = (props: Parameter.PURL) => {
   }, [name, value]);
 
   return (
-    <Card minW={"xs"} h={"fit-content"} shadow={"md"}>
+    <Card minW={"xs"} h={"fit-content"} variant={"outline"}>
       <CardHeader>
         <Flex justify={"space-between"} align={"center"}>
-          <Flex gap={"2"}>
-            <Tag>
-              <TagLeftIcon as={AiOutlineLink} />
-              <TagLabel>URL</TagLabel>
-            </Tag>
+          <Icon as={AiOutlineLink} w={"8"} h={"8"}/>
 
-            <Badge bg={"green.200"} visibility={props.disabled ? "hidden" : "visible"}>
-              New
-            </Badge>
-          </Flex>
           {/* Remove Parameter */}
           {props.showRemove && !props.disabled &&
             <IconButton
@@ -437,19 +404,11 @@ export const EntityParameter = (props: Parameter.PEntity) => {
   }, []);
 
   return (
-    <Card minW={"xs"} h={"fit-content"} shadow={"md"}>
+    <Card minW={"xs"} h={"fit-content"} variant={"outline"}>
       <CardHeader>
         <Flex justify={"space-between"} align={"center"}>
-          <Flex gap={"2"}>
-            <Tag>
-              <TagLeftIcon as={AiOutlineBlock} />
-              <TagLabel>Entity</TagLabel>
-            </Tag>
+          <Icon as={AiOutlineBlock} w={"8"} h={"8"}/>
 
-            <Badge bg={"green.200"} visibility={props.disabled ? "hidden" : "visible"}>
-              New
-            </Badge>
-          </Flex>
           {/* Remove Parameter */}
           {props.showRemove && !props.disabled &&
             <IconButton
