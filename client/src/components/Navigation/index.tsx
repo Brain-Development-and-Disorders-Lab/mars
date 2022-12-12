@@ -19,8 +19,7 @@ import {
   StackDivider,
   Icon,
 } from "@chakra-ui/react";
-import { HamburgerIcon, CloseIcon, ChevronDownIcon, InfoOutlineIcon, SearchIcon, AddIcon } from "@chakra-ui/icons";
-import { AiOutlineDashboard } from "react-icons/ai";
+import { HamburgerIcon, CloseIcon, InfoOutlineIcon, SearchIcon, AddIcon } from "@chakra-ui/icons";
 import { BsCollection, BsGear, BsHexagon } from "react-icons/bs";
 
 // NavigationElement sub-component to generalize links
@@ -45,7 +44,7 @@ const Navigation = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
-    <Box px={4}>
+    <Box px={4} bg={"white"}>
       <Flex h={"8vh"} alignItems={"center"} justifyContent={"space-between"}>
         {/* Icon to show menu in responsive context */}
         <IconButton
@@ -63,7 +62,7 @@ const Navigation = () => {
             spacing={4}
             display={{ base: "none", md: "flex" }}
           >
-            <Button key={"dashboard"} bg={"white"} leftIcon={<AiOutlineDashboard />}>
+            <Button key={"dashboard"} bg={"white"}>
               <RouterLink to={"/"}>Dashboard</RouterLink>
             </Button>
 
@@ -76,7 +75,6 @@ const Navigation = () => {
                 cursor={"pointer"}
                 minW={0}
                 leftIcon={<AddIcon />}
-                rightIcon={<ChevronDownIcon />}
               >
                 Create
               </MenuButton>
@@ -96,7 +94,6 @@ const Navigation = () => {
                 cursor={"pointer"}
                 minW={0}
                 leftIcon={<InfoOutlineIcon />}
-                rightIcon={<ChevronDownIcon />}
               >
                 View
               </MenuButton>
@@ -106,23 +103,15 @@ const Navigation = () => {
                 <MenuItem icon={<BsGear />} as={RouterLink} to={"/attributes"}>All Attributes</MenuItem>
               </MenuList>
             </Menu>
+
+            <Button key={"dashboard"} bg={"white"} leftIcon={<SearchIcon />}>
+              <RouterLink to={"/search"}>Search</RouterLink>
+            </Button>
           </HStack>
         </HStack>
 
         {/* Action and avatar component */}
         <Flex alignItems={"center"}>
-          <Button
-            as={RouterLink}
-            to={"/search"}
-            variant={"solid"}
-            colorScheme={"teal"}
-            px={2}
-            py={2}
-            mr={4}
-            leftIcon={<SearchIcon />}
-          >
-            Search
-          </Button>
           <Menu>
             <MenuButton
               as={Button}
@@ -146,7 +135,7 @@ const Navigation = () => {
           <Stack as={"nav"} spacing={4} divider={<StackDivider />}>
             {/* Dashboard */}
             <Flex direction={"row"} align={"center"} gap={"2"}>
-              <Icon as={AiOutlineDashboard} /><NavigationElement href={"/"} onClick={isOpen ? onClose : onOpen}>Dashboard</NavigationElement>
+              <NavigationElement href={"/"} onClick={isOpen ? onClose : onOpen}>Dashboard</NavigationElement>
             </Flex>
 
             {/* Create */}
