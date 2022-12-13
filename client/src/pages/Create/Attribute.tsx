@@ -34,8 +34,8 @@ export const Start = ({}) => {
   };
 
   return (
-    <Flex m={["0", "2"]} p={["2", "4"]} direction={"column"} align={"center"} justify={"center"}>
-      <Flex direction={"column"} maxW={"7xl"} p={"4"} align={"center"} rounded={"xl"}>
+    <Flex m={["0", "2"]} p={["2", "4"]} align={"center"} justify={"center"}>
+      <Flex direction={"column"} maxW={"7xl"} w={["full", "4xl", "7xl"]} p={"4"}>
         <Flex direction={"row"} p={"2"} pt={"8"} pb={"8"} w={"full"} align={"center"} justify={"space-between"}>
           <Heading size={"2xl"}>Create Attribute</Heading>
           <Button
@@ -48,7 +48,7 @@ export const Start = ({}) => {
         </Flex>
 
         <Flex p={"2"} pb={"6"} direction={"row"} wrap={"wrap"} justify={"space-between"} gap={"6"}>
-          <Flex direction={"column"} gap={"2"} grow={"1"} maxW={"md"} p={"2"} rounded={"2xl"}>
+          <Flex direction={"column"} gap={"2"} grow={"1"} maxW={"sm"} p={"2"} rounded={"2xl"}>
             <Text>
               Specify some basic details about this template Attribute.
               The metadata associated with this template should be specified using Parameters.

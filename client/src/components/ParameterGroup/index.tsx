@@ -154,7 +154,7 @@ const ParameterGroup = (props: { parameters: Parameters[], viewOnly: boolean, se
       }
 
       {/* Card Group */}
-      <Flex p={"2"} margin={"2"} direction={"column"} gap={"4"}>
+      <Flex p={"2"} m={"2"} direction={"column"} gap={"4"} bg={"white"} rounded={"lg"}>
         {props.parameters.length > 0 ? 
           props.parameters.map((parameter) => {
             switch (parameter.type) {

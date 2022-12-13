@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { SingleDatepicker } from "chakra-dayzed-datepicker";
-import { Button, Flex, FormControl, FormLabel, Heading, Input, Text, Textarea } from "@chakra-ui/react";
+import { Button, Flex, FormControl, FormLabel, Heading, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalHeader, ModalOverlay, Text, Textarea, useDisclosure } from "@chakra-ui/react";
 import { CheckIcon, CloseIcon, InfoOutlineIcon } from "@chakra-ui/icons";
 import { useNavigate } from "react-router-dom";
 import { postData } from "src/database/functions";
@@ -9,6 +9,7 @@ import { pseudoId } from "src/database/functions";
 
 export const Start = ({}) => {
   const navigate = useNavigate();
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   const [name, setName] = useState(pseudoId("collection"));
   const [created, setCreated] = useState(new Date());
@@ -24,16 +25,23 @@ export const Start = ({}) => {
   };
 
   return (
-    <Flex m={["0", "2"]} p={["2", "4"]} direction={"column"} align={"center"} justify={"center"}>
-      <Flex direction={"column"} maxW={"7xl"} p={"4"} rounded={"xl"}>
+    <Flex m={["0", "2"]} p={["2", "4"]} align={"center"} justify={"center"}>
+      <Flex direction={"column"} maxW={"7xl"} w={["full", "4xl", "7xl"]} p={"4"}>
         <Flex direction={"column"} p={"2"} pt={"8"} pb={"8"}>
-          <Flex direction={"row"}>
+          <Flex direction={"row"} align={"center"} justify={"space-between"}>
             <Heading size={"2xl"}>Create Collection</Heading>
+            <Button
+              rightIcon={<InfoOutlineIcon />}
+              variant={"outline"}
+              onClick={onOpen}
+            >
+              Info
+            </Button>
           </Flex>
         </Flex>
 
         <Flex p={"2"} pb={"6"} direction={"row"} wrap={"wrap"} gap={"6"}>
-          <Flex direction={"column"} gap={"2"} grow={"1"} maxW={"md"} p={"2"} rounded={"2xl"}>
+          <Flex direction={"column"} gap={"2"} grow={"1"} maxW={"xl"} p={"2"} rounded={"2xl"}>
             <Heading size={"xl"} margin={"xs"}>
               Details
             </Heading>
@@ -122,14 +130,9 @@ export const Start = ({}) => {
               </Flex>
             </Flex>
           </Flex>
-
-          <Flex direction={"column"} gap={"2"} h={"fit-content"} maxW={"md"} p={"4"} rounded={"2xl"} border={"1px"} borderColor={"gray.200"}>
-            <Flex align={"center"} gap={"2"}><InfoOutlineIcon boxSize={"8"} /><Heading>Collections</Heading></Flex>
-            <Text>Collections can be used to organize Entities. Any type of Entity can be included in a Collection. Entities can be added and removed from a Collection after it has been created.</Text>
-          </Flex>
         </Flex>
 
-        <Flex p={"2"} direction={"row"} w={"full"} flexWrap={"wrap"} gap={"6"} justify={"space-between"}>
+        <Flex p={"2"} direction={"row"} flexWrap={"wrap"} gap={"6"} justify={"space-between"}>
           <Button colorScheme={"red"} rightIcon={<CloseIcon />} variant={"outline"} onClick={() => navigate("/")}>
             Cancel
           </Button>
@@ -148,6 +151,18 @@ export const Start = ({}) => {
           </Button>
         </Flex>
       </Flex>
+
+      {/* Information modal */}
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Collections</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <Text>Collections can be used to organize Entities. Any type of Entity can be included in a Collection. Entities can be added and removed from a Collection after it has been created.</Text>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
     </Flex>
   );
 };

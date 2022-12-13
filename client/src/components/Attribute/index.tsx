@@ -1,8 +1,9 @@
 import React, { useState } from "react";
-import { Button, Flex, Input, Textarea } from "@chakra-ui/react";
+import { Button, Flex, Icon, Input, Textarea } from "@chakra-ui/react";
 import { AttributeProps } from "types";
 import ParameterGroup from "../ParameterGroup";
-import { CheckIcon, CloseIcon } from "@chakra-ui/icons";
+import { CloseIcon } from "@chakra-ui/icons";
+import { AiOutlineSave } from "react-icons/ai";
 
 const Attribute = (props: AttributeProps) => {
   const [name, setName] = useState(props.name);
@@ -18,7 +19,7 @@ const Attribute = (props: AttributeProps) => {
   };
 
   return (
-    <Flex direction="row" align="center" gap={"2"} p={"2"}>
+    <Flex direction={"row"} align={"center"} gap={"2"} p={"2"} bg={"gray.50"} rounded={"lg"}>
       <Flex p={"2"} pb={"6"} direction={"row"} wrap={"wrap"} gap={"6"}>
         <Flex direction={"column"} gap={"2"} maxW={"md"} p={"2"} rounded={"2xl"} grow={"1"}>
           <Input
@@ -33,36 +34,36 @@ const Attribute = (props: AttributeProps) => {
             disabled={finished}
             onChange={(event) => setDescription(event.target.value)}
           />
+          <Flex direction={"row"} gap={"2"}>
+            <Button
+              colorScheme={"red"}
+              variant={"outline"}
+              onClick={() => {
+                if (props.onRemove) {
+                  props.onRemove(props.identifier);
+                }
+              }}
+              rightIcon={<CloseIcon />}
+            >
+              Remove
+            </Button>
+            <Button
+              rightIcon={<Icon as={AiOutlineSave} />}
+              colorScheme={"green"}
+              onClick={() => {
+                setFinished(true);
+                if (props.onUpdate) {
+                  props.onUpdate(attributeData);
+                }
+              }}
+              disabled={finished}
+            >
+              Save
+            </Button>
+          </Flex>
         </Flex>
 
         <ParameterGroup parameters={parameters} viewOnly={finished} setParameters={setParameters} />
-
-        <Flex direction={"column"} gap={"2"}>
-          <Button
-            rightIcon={<CheckIcon />}
-            colorScheme={"green"}
-            onClick={() => {
-              setFinished(true);
-              if (props.onUpdate) {
-                props.onUpdate(attributeData);
-              }
-            }}
-            disabled={finished}
-          >
-            Save
-          </Button>
-          <Button
-            colorScheme={"red"}
-            onClick={() => {
-              if (props.onRemove) {
-                props.onRemove(props.identifier);
-              }
-            }}
-            rightIcon={<CloseIcon />}
-          >
-            Remove
-          </Button>
-        </Flex>
       </Flex>
     </Flex>
   );
