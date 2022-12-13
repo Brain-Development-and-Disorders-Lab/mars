@@ -1,16 +1,9 @@
-// React and Grommet
 import React, { useEffect, useState } from "react";
 import { Button, Flex, Heading, Table, TableContainer, Text, Thead, Tr, Th, useToast, Stat, StatLabel, StatNumber, StatHelpText, Spacer, List, ListItem, Tbody } from "@chakra-ui/react";
 import { AddIcon, ChevronRightIcon, RepeatClockIcon } from "@chakra-ui/icons";
-
-// Database and models
 import { getData } from "src/database/functions";
 import { CollectionModel, EntityModel } from "types";
-
-// Navigation
 import { useNavigate, Link as RouterLink } from "react-router-dom";
-
-// Custom components
 import { Loading } from "src/components/Loading";
 
 const Home = () => {

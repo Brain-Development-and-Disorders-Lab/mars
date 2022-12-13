@@ -1,17 +1,10 @@
-// React and Grommet
 import React, { useState } from "react";
 import { SingleDatepicker } from "chakra-dayzed-datepicker";
 import { Button, Flex, FormControl, FormLabel, Heading, Input, Text, Textarea } from "@chakra-ui/react";
 import { CheckIcon, CloseIcon, InfoOutlineIcon } from "@chakra-ui/icons";
-
-// Navigation
 import { useNavigate } from "react-router-dom";
-
-// Database and models
 import { postData } from "src/database/functions";
 import { CollectionStruct } from "types";
-
-// Utility functions
 import { pseudoId } from "src/database/functions";
 
 export const Start = ({}) => {

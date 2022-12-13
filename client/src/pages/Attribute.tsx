@@ -1,18 +1,11 @@
-// React and Grommet
 import React, { useEffect, useState } from "react";
 import { Box, Flex, Heading, Table, TableContainer, Tbody, Td, Text, Th, Thead, Tr, useToast } from "@chakra-ui/react";
-
 import { Loading } from "src/components/Loading";
-
-import _ from "underscore";
-
-// Navigation
 import { useParams } from "react-router-dom";
-
-// Database and models
+import ParameterGroup from "src/components/ParameterGroup";
+import _ from "underscore";
 import { getData } from "src/database/functions";
 import { AttributeModel } from "types";
-import ParameterGroup from "src/components/ParameterGroup";
 
 export const Attribute = () => {
   const { id } = useParams();

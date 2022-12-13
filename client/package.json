@@ -24,8 +24,6 @@
     "date-fns": "^2.29.3",
     "dayzed": "^3.2.3",
     "framer-motion": "^7.6.9",
-    "grommet": "^2.24.0",
-    "grommet-icons": "^4.7.0",
     "json2csv": "^5.0.7",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",

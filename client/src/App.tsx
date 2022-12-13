@@ -1,15 +1,10 @@
-// React and Grommet
 import React from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ChakraProvider } from "@chakra-ui/react";
+import Navigation from "./components/Navigation";
 
-// Styling
 import "./styles/styles.css";
 import "@fontsource/roboto";
-
-// Routing
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-
-// Custom components
-import Navigation from "./components/Navigation";
 
 // Custom pages
 import Attribute from "./pages/Attribute";
@@ -19,14 +14,10 @@ import Collections from "./pages/View/Collections";
 import Search from "./pages/Search";
 import Entity from "./pages/Entity";
 import Entities from "./pages/View/Entities";
-import {Start as EntityStart} from "./pages/Create/Entity/Start";
-import {Associations as EntityAssociations} from "./pages/Create/Entity/Associations";
-import {Attributes as EntityAttributes} from "./pages/Create/Entity/Attributes";
-import {Start as CollectionStart} from "./pages/Create/Collection/Start";
-import {Start as AttributeStart} from "./pages/Create/Attribute/Start";
+import {Start as EntityStart} from "./pages/Create/Entity";
+import {Start as CollectionStart} from "./pages/Create/Collection";
+import {Start as AttributeStart} from "./pages/Create/Attribute";
 import Home from "./pages/Home";
-
-import { ChakraProvider } from "@chakra-ui/react";
 
 export const App = () => {
   return (
@@ -37,8 +28,6 @@ export const App = () => {
           <Route path="/" element={<Home />} />
           {/* Entity routes */}
           <Route path="/create/entity/start" element={<EntityStart />} />
-          <Route path="/create/entity/associations" element={<EntityAssociations />} />
-          <Route path="/create/entity/attributes" element={<EntityAttributes />} />
           <Route path="/entities" element={<Entities />} />
           <Route path="entities">
             <Route path=":id" element={<Entity />} />

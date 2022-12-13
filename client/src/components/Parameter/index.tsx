@@ -1,4 +1,3 @@
-// React and Grommet
 import React, { useEffect, useState } from "react";
 import { Card, CardBody, CardHeader, Flex, FormControl, FormLabel, Icon, IconButton, Input, Link, Select, useToast } from "@chakra-ui/react";
 import { SingleDatepicker } from "chakra-dayzed-datepicker";
@@ -6,14 +5,9 @@ import { CloseIcon } from "@chakra-ui/icons";
 import { AiOutlineBlock, AiOutlineLink } from "react-icons/ai";
 import { MdDateRange, MdOutlineTextFields } from "react-icons/md";
 import { RiNumbersLine } from "react-icons/ri";
-
 import { Link as RouterLink } from "react-router-dom";
-
-// Database and models
 import { getData } from "src/database/functions";
 import { EntityModel, Parameter } from "types";
-
-// Custom components
 import Linky from "src/components/Linky";
 
 export const DateParameter = (props: Parameter.PDate) => {

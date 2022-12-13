@@ -1,8 +1,6 @@
-// React and Grommet
 import React, { useEffect, useState } from "react";
-
-// Navigation
 import { Link as RouterLink } from "react-router-dom";
+import { Button, useToast } from "@chakra-ui/react";
 
 // Database and models
 import { getData } from "src/database/functions";
@@ -12,14 +10,11 @@ import {
   CollectionStruct,
   EntityStruct,
 } from "types";
-import { Button, useToast } from "@chakra-ui/react";
 
 const Linky = (props: LinkyProps) => {
   const toast = useToast();
 
-  const [linkData, setLinkData] = useState(
-    {} as AttributeStruct | CollectionStruct | EntityStruct
-  );
+  const [linkData, setLinkData] = useState({} as AttributeStruct | CollectionStruct | EntityStruct);
 
   useEffect(() => {
     const data = getData(`/${props.type}/${props.id}`);

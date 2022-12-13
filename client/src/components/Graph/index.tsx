@@ -1,6 +1,5 @@
-// React and Grommet
-import { Box, useToast } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
+import { Box, useToast } from "@chakra-ui/react";
 import ReactFlow, {
   MiniMap,
   Controls,
@@ -9,13 +8,11 @@ import ReactFlow, {
   useNodesState,
   useEdgesState,
 } from "react-flow-renderer";
+import { Loading } from "../Loading";
 
 // Database and models
 import { getData } from "src/database/functions";
 import { EntityModel } from "types";
-
-// Custom components
-import { Loading } from "../Loading";
 
 const Graph = (props: { id: string }) => {
   const toast = useToast();

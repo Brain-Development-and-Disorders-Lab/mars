@@ -1,4 +1,3 @@
-// React and Grommet
 import React, { useState } from "react";
 import { Button, Flex, Heading, Input, List, ListIcon, ListItem, Text, Textarea } from "@chakra-ui/react";
 import { CheckIcon, CloseIcon, InfoOutlineIcon } from "@chakra-ui/icons";
@@ -6,20 +5,10 @@ import { AiOutlineBlock, AiOutlineLink } from "react-icons/ai";
 import { MdDateRange, MdOutlineTextFields } from "react-icons/md";
 import { RiNumbersLine } from "react-icons/ri";
 import ParameterGroup from "src/components/ParameterGroup";
-
-// Navigation
 import { useNavigate } from "react-router-dom";
-
-// Utility library
 import _ from "underscore";
-
-// Consola
 import consola from "consola";
-
-// Parameter components and custom types
 import { AttributeStruct, Parameters } from "types";
-
-// Database functions
 import { postData, pseudoId } from "src/database/functions";
 
 export const Start = ({}) => {
