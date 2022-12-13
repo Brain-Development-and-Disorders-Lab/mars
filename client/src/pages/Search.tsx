@@ -1,23 +1,7 @@
-// React and Grommet
+// React
 import React, { useState } from "react";
-import {
-  Anchor,
-  Box,
-  Button,
-  Form,
-  Heading,
-  PageHeader,
-  Spinner,
-  Table,
-  TableBody,
-  TableCell,
-  TableHeader,
-  TableRow,
-  Text,
-  TextInput,
-} from "grommet/components";
-import { Page, PageContent } from "grommet";
-import { LinkNext, Search as SearchIcon } from "grommet-icons";
+import { Button, Flex, Heading, Icon, Input, Table, TableContainer, Tbody, Td, Text, Th, Thead, Tr, useToast } from "@chakra-ui/react";
+import { ChevronRightIcon, SearchIcon } from "@chakra-ui/icons";
 
 // Navigation
 import { useNavigate } from "react-router-dom";
@@ -25,9 +9,7 @@ import { useNavigate } from "react-router-dom";
 // Database and models
 import { getData } from "src/database/functions";
 import { EntityModel } from "types";
-
-// Custom components
-import ErrorLayer from "../components/ErrorLayer";
+import { Loading } from "src/components/Loading";
 
 const Search = () => {
   const [query, setQuery] = useState("");
@@ -37,124 +19,106 @@ const Search = () => {
   const [isSearching, setIsSearching] = useState(false);
 
   const navigate = useNavigate();
+  const toast = useToast();
 
   // Store results as a set of IDs
   const [results, setResults] = useState([] as EntityModel[]);
-
-  const [isError, setIsError] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("An error has occurred.");
 
   const runSearch = () => {
     // Update state
     setIsSearching(true);
     setHasSearched(true);
 
-    const data = getData(`/search/${query}`);
-
-    // Handle the response from the database
-    data.then((value) => {
+    getData(`/search/${query}`).then((value) => {
       setResults(value);
       setIsSearching(false);
 
       // Check the contents of the response
       if (value["error"] !== undefined) {
-        setErrorMessage(value["error"]);
-        setIsError(true);
+        toast({
+          title: "Database Error",
+          description: value["error"],
+          status: "error",
+          duration: 4000,
+          position: "bottom-right",
+          isClosable: true,
+        });
       }
+
     });
   };
 
   return (
-    <Page kind="wide" pad={{left: "small", right: "small"}}>
-      <PageContent>
-        <PageHeader
-          title="Search"
-          parent={<Anchor label="Home" href="/" />}
-        />
+    <Flex m={"2"} align={"center"} justify={"center"}>
+      <Flex p={"2"} pt={"0"} direction={"column"} w={"full"} maxW={"7xl"} wrap={"wrap"} gap={"6"}>
+        <Flex direction={"row"} align={"center"} gap={"2"}>
+          <Input
+            value={query}
+            placeholder="Enter search query..."
+            onChange={(event) => setQuery(event.target.value)}
+          />
 
-        <Form onSubmit={() => runSearch()}>
-          <Box direction="row" align="center" gap="small">
-            <TextInput
-              value={query}
-              placeholder="Enter search query..."
-              onChange={(event) => setQuery(event.target.value)}
-            />
+          <Button
+            rightIcon={<Icon as={SearchIcon} />}
+            disabled={query === ""}
+            onClick={() => runSearch()}
+          >
+            Search
+          </Button>
+        </Flex>
 
-            <Button
-              primary
-              icon={<SearchIcon />}
-              label="Search"
-              disabled={query === ""}
-              onClick={() => runSearch()}
-            />
-          </Box>
-        </Form>
+        <Heading size={"md"}>Search Results</Heading>
 
-        <Heading level="3">Search Results</Heading>
-
-        <Box gap="small">
+        <Flex gap={"2"}>
           {isSearching ? (
-            <Box direction="row" align="center" justify="center" gap="small">
-              <Spinner size="large" />
-            </Box>
+            <Loading />
           ) : hasSearched ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableCell scope="col" border="bottom" align="center">
-                    Identifier
-                  </TableCell>
-                  <TableCell scope="col" border="bottom" align="center">
-                    Created
-                  </TableCell>
-                  <TableCell scope="col" border="bottom" align="center">
-                    Owner
-                  </TableCell>
-                  <TableCell scope="col" border="bottom" align="center"></TableCell>
-                </TableRow>
-              </TableHeader>
+            <TableContainer w={"full"}>
+              <Table>
+                <Thead>
+                  <Tr>
+                    <Th>
+                      Identifier
+                    </Th>
+                    <Th>
+                      Created
+                    </Th>
+                    <Th>
+                      Owner
+                    </Th>
+                    <Th></Th>
+                  </Tr>
+                </Thead>
 
-              <TableBody>
-                {results.length > 0 && (
-                  results.map((result) => {
-                    return (
-                      <TableRow key={result._id}>
-                        <TableCell scope="row" border="right" align="center">
-                          <strong>{result.name}</strong>
-                        </TableCell>
-                        <TableCell align="center">
-                          <strong>
-                            {new Date(result.created).toDateString()}
-                          </strong>
-                        </TableCell>
-                        <TableCell align="center">
-                          <strong>{result.owner}</strong>
-                        </TableCell>
-                        <TableCell align="center">
-                          <Button
-                            color="accent-4"
-                            label="View"
-                            icon={<LinkNext />}
-                            onClick={() => navigate(`/entities/${result._id}`)}
-                            primary
-                            reverse
-                          />
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })
-                )}
-              </TableBody>
-            </Table>
+                <Tbody>
+                  {results.length > 0 && (
+                    results.map((result) => {
+                      return (
+                        <Tr key={result._id}>
+                          <Td>{result.name}</Td>
+                          <Td>{new Date(result.created).toDateString()}</Td>
+                          <Td>{result.owner}</Td>
+                          <Td>
+                            <Button
+                              rightIcon={<ChevronRightIcon />}
+                              onClick={() => navigate(`/entities/${result._id}`)}
+                            >
+                              View
+                            </Button>
+                          </Td>
+                        </Tr>
+                      );
+                    })
+                  )}
+                </Tbody>
+              </Table>
+            </TableContainer>
           ) : (
             <Text>Search results will appear here.</Text>
           )}
-        </Box>
-
-        {/* Error component */}
-        {isError && <ErrorLayer message={errorMessage} />}
-      </PageContent>
-    </Page>
+        </Flex>
+      </Flex>
+    </Flex>
   );
 };
 
