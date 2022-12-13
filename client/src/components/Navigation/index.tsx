@@ -104,7 +104,7 @@ const Navigation = () => {
               </MenuList>
             </Menu>
 
-            <Button key={"dashboard"} bg={"white"} leftIcon={<SearchIcon />}>
+            <Button key={"search"} bg={"white"} leftIcon={<SearchIcon />}>
               <RouterLink to={"/search"}>Search</RouterLink>
             </Button>
           </HStack>

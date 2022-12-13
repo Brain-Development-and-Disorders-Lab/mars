@@ -154,7 +154,7 @@ const ParameterGroup = (props: { parameters: Parameters[], viewOnly: boolean, se
       }
 
       {/* Card Group */}
-      <Flex p={"2"} margin={"2"} direction={"row"} gap={"4"} wrap={"wrap"} rounded={"xl"} border={"1px"} borderColor={"gray.200"} minH={"xs"} justify={"center"} align={"center"} maxW={"inherit"}>
+      <Flex p={"2"} margin={"2"} direction={"row"} gap={"4"} wrap={"wrap"} minH={"xs"} justify={"center"} align={"center"} maxW={"inherit"}>
         <Flex direction={"row"} overflowX={"auto"} gap={"2"} p={"2"} maxW={"inherit"}>
           {props.parameters.length > 0 ?
             props.parameters.map((parameter) => {

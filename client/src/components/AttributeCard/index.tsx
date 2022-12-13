@@ -115,18 +115,21 @@ const AttributeCard = (props: AttributeCardProps) => {
       </Card>
 
       <ScaleFade initialScale={0.9} in={isOpen}>
-        <Modal onEsc={onClose} onClose={onClose} isOpen={isOpen} size={"3xl"}>
+        <Modal onEsc={onClose} onClose={onClose} isOpen={isOpen} size={"4xl"}>
           <ModalOverlay />
           <ModalContent p={"2"}>
             <ModalHeader><Heading size={"md"}>Attribute: {props.data.name}</Heading></ModalHeader>
-            <ModalBody>
-              {props.data.description.length > 0 ?
-                <Text>{props.data.description}</Text>
-              :
-                <WarningLabel key={props.data.name} text={"No description"} />
-              }
+            <ModalBody gap={"4"}>
+              <Flex mb={"4"}>
+                {props.data.description.length > 0 ?
+                  <Text>{props.data.description}</Text>
+                :
+                  <WarningLabel key={props.data.name} text={"No description provided"} />
+                }
+              </Flex>
 
-              <Flex direction={"column"} p={"2"} gap={"2"}>
+              <Heading size={"md"}>Parameters</Heading>
+              <Flex direction={"column"} p={"2"} gap={"2"} align={"center"} justify={"center"}>
                 {props.data.parameters && props.data.parameters.length > 0 ?
                   <ParameterGroup parameters={props.data.parameters} viewOnly />
                 :
