@@ -1,8 +1,8 @@
 // React
 import React, { useEffect, useState } from "react";
-import { Button, Checkbox, CheckboxGroup, Flex, FormControl, FormHelperText, FormLabel, Heading, Input, Select, Stack, Tag, TagCloseButton, Text, Textarea, useToast } from "@chakra-ui/react";
+import { Button, Checkbox, CheckboxGroup, Flex, FormControl, FormHelperText, FormLabel, Heading, Icon, Input, Select, Stack, Tag, TagCloseButton, Text, Textarea, useToast } from "@chakra-ui/react";
 import { SingleDatepicker } from "chakra-dayzed-datepicker";
-import { CheckIcon, ChevronLeftIcon, ChevronRightIcon, CloseIcon, InfoOutlineIcon } from "@chakra-ui/icons";
+import { AddIcon, CheckIcon, ChevronLeftIcon, ChevronRightIcon, CloseIcon, InfoOutlineIcon } from "@chakra-ui/icons";
 import Linky from "src/components/Linky";
 
 import _ from "underscore";
@@ -12,11 +12,11 @@ import consola from "consola";
 import { useNavigate } from "react-router-dom";
 
 // Database and models
-import { CollectionModel, EntityModel, EntityStruct, Parameters } from "types";
+import { AttributeModel, AttributeProps, CollectionModel, EntityModel, EntityStruct } from "types";
 
 // Utility functions
 import { getData, pseudoId } from "src/database/functions";
-import ParameterGroup from "src/components/ParameterGroup";
+import Attribute from "src/components/Attribute";
 
 export const Start = ({}) => {
   // Used to manage what detail inputs are presented
@@ -28,6 +28,7 @@ export const Start = ({}) => {
 
   const [entities, setEntities] = useState([] as EntityModel[]);
   const [collections, setCollections] = useState([] as CollectionModel[]);
+  const [attributes, setAttributes] = useState([] as AttributeModel[]);
   const [isLoaded, setIsLoaded] = useState(false);
 
   const [name, setName] = useState(pseudoId("entity"));
@@ -37,7 +38,7 @@ export const Start = ({}) => {
   const [origin, setOrigin] = useState({} as { name: string, id: string });
   const [selectedCollections, setSelectedCollections] = useState([] as string[]);
   const [selectedProducts, setSelectedProducts] = useState([] as { name: string, id: string }[]);
-  const [parameters, setParameters] = useState([] as Parameters[]);
+  const [selectedAttributes, setSelectedAttributes] = useState([] as AttributeModel[]);
 
   const entityState: EntityStruct = {
     name: name,
@@ -49,7 +50,7 @@ export const Start = ({}) => {
       products: selectedProducts,
     },
     collections: selectedCollections,
-    attributes: [],
+    attributes: attributes,
   };
   consola.debug("Initial Entity state:", entityState);
 
@@ -57,6 +58,7 @@ export const Start = ({}) => {
     // Get all Entities
     getData(`/entities`).then((response) => {
       if(_.isEqual(response.status, "error")) {
+        setIsLoaded(false);
         throw new Error(response.error);
       } else {
         setEntities(response);
@@ -75,6 +77,7 @@ export const Start = ({}) => {
     // Get all Collections
     getData(`/collections`).then((response) => {
       if(_.isEqual(response.status, "error")) {
+        setIsLoaded(false);
         throw new Error(response.error);
       } else {
         setCollections(response);
@@ -84,6 +87,26 @@ export const Start = ({}) => {
       toast({
         title: "Database Error",
         description: "Error retrieving Collection data",
+        status: "error",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    });
+
+    // Get all Attributes
+    getData(`/attributes`).then((response) => {
+      if(_.isEqual(response.status, "error")) {
+        setIsLoaded(false);
+        throw new Error(response.error);
+      } else {
+        setAttributes(response);
+        setIsLoaded(true);
+      }
+    }).catch(() => {
+      toast({
+        title: "Database Error",
+        description: "Error retrieving Attribute data",
         status: "error",
         duration: 4000,
         position: "bottom-right",
@@ -113,6 +136,29 @@ export const Start = ({}) => {
   // Handle clicking "Cancel"
   const onCancel = () => {
     navigate("/entities");
+  };
+
+  // Removal callback
+  const onRemoveAttribute = (identifier: string) => {
+    // We need to filter the removed attribute from the total collection
+    setSelectedAttributes(
+      selectedAttributes.filter((attribute) => attribute._id !== identifier)
+    );
+  };
+
+  // Used to receive data from a Attribute component
+  const onUpdateAttribute = (data: AttributeProps) => {
+    setSelectedAttributes([...(selectedAttributes.map((attribute) => {
+      if (_.isEqual(attribute._id, data.identifier)) {
+        return {
+          _id: data.identifier,
+          name: data.name,
+          description: data.description,
+          parameters: data.parameters,
+        };
+      }
+      return attribute;
+    }))]);
   };
 
   return (
@@ -332,37 +378,78 @@ export const Start = ({}) => {
               <Heading size={"xl"} margin={"xs"}>
                 Attributes
               </Heading>
-              <Flex direction={"row"} justify={"center"}>
-                <Button>Add Attribute</Button>
-                <Button>Use Existing Attribute</Button>
+              <Flex justify={"center"} align={"center"} direction={"row"} gap={"2"}>
+                <Button
+                  rightIcon={<Icon as={AddIcon} />}
+                  onClick={() => {
+                    // Create an 'empty' Attribute and add the data structure to the 'selectedAttributes' collection
+                    setSelectedAttributes([
+                      ...selectedAttributes,
+                      {
+                        _id: pseudoId("attribute"),
+                        name: "",
+                        description: "",
+                        parameters: [],
+                      },
+                    ]);
+                  }}
+                >
+                  Create an attribute
+                </Button>
+
+                <Text>or</Text>
+
+                {/* Drop-down to select existing Attributes */}
+                <FormControl>
+                  <FormLabel>Add existing attribute</FormLabel>
+                    <Select
+                      title="Select Attribute"
+                      placeholder={"Select Attribute"}
+                      onChange={(event) => {
+                        if (!_.isEqual(event.target.value.toString(), "")) {
+                          for (let attribute of attributes) {
+                            if (_.isEqual(event.target.value.toString(), attribute._id)) {
+                              setSelectedAttributes([
+                                ...selectedAttributes,
+                                {
+                                  _id:  pseudoId("attribute"),
+                                  name: attribute.name,
+                                  description: attribute.description,
+                                  parameters: attribute.parameters,
+                                },
+                              ]);
+                              break;
+                            }
+                          }
+                        }
+                      }}
+                    >
+                      {isLoaded &&
+                        attributes.map((attribute) => {
+                          return (
+                            <option key={attribute._id} value={attribute._id}>{attribute.name}</option>
+                          );
+                        })
+                      };
+                    </Select>
+                  <FormHelperText>Search and add an existing attribute.</FormHelperText>
+                </FormControl>
               </Flex>
 
-              <Flex p={"2"} pb={"6"} direction={"row"} wrap={"wrap"} gap={"6"}>
-                <Flex direction={"column"} gap={"2"} maxW={"md"} p={"2"} rounded={"2xl"} grow={"1"}>
-                  <Heading size={"xl"} margin={"xs"}>
-                    Details
-                  </Heading>
-                  <Text>
-                    Specify some basic details about this template Attribute.
-                    The metadata associated with this template should be specified using Parameters.
-                  </Text>
-                  <Input
-                    placeholder={"Attribute Name"}
-                    value={name}
-                    onChange={(event) => setName(event.target.value)}
-                    required
+              {/* Display all Attributes */}
+              {selectedAttributes.map((attribute) => {
+                return (
+                  <Attribute
+                    key={attribute._id}
+                    identifier={attribute._id}
+                    name={attribute.name}
+                    description={attribute.description}
+                    parameters={attribute.parameters}
+                    onRemove={onRemoveAttribute}
+                    onUpdate={onUpdateAttribute}
                   />
-                  <Textarea
-                    value={description}
-                    placeholder={"Attribute Description"}
-                    onChange={(event) => setDescription(event.target.value)}
-                  />
-                </Flex>
-
-                <Flex grow={"1"} maxW={"2xl"}>
-                  <ParameterGroup parameters={parameters} viewOnly={false} setParameters={setParameters} />
-                </Flex>
-              </Flex>
+                );
+              })}
             </Flex>}
         </Flex>
 

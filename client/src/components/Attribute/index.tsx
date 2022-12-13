@@ -1,16 +1,11 @@
-// React and Grommet
+// React
 import React, { useState } from "react";
-import {
-  Box,
-  Button,
-  TextArea,
-  TextInput,
-} from "grommet/components";
-import { Close, Save, SettingsOption } from "grommet-icons";
+import { Button, Flex, Heading, Input, Textarea } from "@chakra-ui/react";
 
 // Types
 import { AttributeProps } from "types";
 import ParameterGroup from "../ParameterGroup";
+import { CheckIcon, CloseIcon } from "@chakra-ui/icons";
 
 // Constants
 const Attribute = (props: AttributeProps) => {
@@ -27,63 +22,58 @@ const Attribute = (props: AttributeProps) => {
   };
 
   return (
-    <Box
-      direction="row"
-      align="center"
-      gap="small"
-      pad="small"
-      background="light-1"
-      round
-      fill
-    >
-      <SettingsOption />
-      <Box direction="column" margin="small" gap="small" width="medium">
-        <TextInput
-          placeholder={"Attribute Name"}
-          value={name}
-          onChange={(event) => setName(event.target.value)}
-          disabled={finished}
-          required
-        />
-        <TextArea
-          value={description}
-          placeholder={"Attribute description"}
-          onChange={(event) => setDescription(event.target.value)}
-          disabled={finished}
-        />
-      </Box>
+    <Flex direction="row" align="center" gap={"2"} p={"2"}>
+      <Flex p={"2"} pb={"6"} direction={"row"} wrap={"wrap"} gap={"6"}>
+        <Flex direction={"column"} gap={"2"} maxW={"md"} p={"2"} rounded={"2xl"} grow={"1"}>
+          <Heading size={"xl"} margin={"xs"}>
+            Details
+          </Heading>
+          <Input
+            placeholder={"Attribute Name"}
+            value={name}
+            disabled={finished}
+            onChange={(event) => setName(event.target.value)}
+          />
+          <Textarea
+            value={description}
+            placeholder={"Attribute Description"}
+            disabled={finished}
+            onChange={(event) => setDescription(event.target.value)}
+          />
+        </Flex>
 
-      <ParameterGroup parameters={parameters} viewOnly={true} setParameters={setParameters} />
+        <Flex grow={"1"} maxW={"2xl"}>
+          <ParameterGroup parameters={parameters} viewOnly={finished} setParameters={setParameters} />
+        </Flex>
+      </Flex>
 
-      <Box direction="column" width="small" gap="small">
+      <Flex direction="column" width="small" gap="small">
         <Button
-          label="Save"
-          color="status-ok"
-          primary
-          icon={<Save />}
+          rightIcon={<CheckIcon />}
+          colorScheme={"green"}
           onClick={() => {
             setFinished(true);
             if (props.onUpdate) {
               props.onUpdate(attributeData);
             }
           }}
-          reverse
           disabled={finished}
-        />
+        >
+          Save
+        </Button>
         <Button
-          label="Remove"
-          color="status-critical"
-          primary
+          colorScheme={"red"}
           onClick={() => {
             if (props.onRemove) {
               props.onRemove(props.identifier);
             }
           }}
-          icon={<Close />}
-          reverse
-        />
-      </Box>
-    </Box>
+          rightIcon={<CloseIcon />}
+        >
+          Remove
+        </Button>
+      </Flex>
+    </Flex>
   );
 };
 
