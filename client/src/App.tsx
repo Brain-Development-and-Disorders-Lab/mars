@@ -7,12 +7,12 @@ import "./styles/styles.css";
 import "@fontsource/roboto";
 
 // Custom pages
-import Attribute from "./pages/Attribute";
+import Attribute from "./pages/View/Attribute";
 import Attributes from "./pages/View/Attributes";
-import Collection from "./pages/Collection";
+import Collection from "./pages/View/Collection";
 import Collections from "./pages/View/Collections";
 import Search from "./pages/Search";
-import Entity from "./pages/Entity";
+import Entity from "./pages/View/Entity";
 import Entities from "./pages/View/Entities";
 import {Start as EntityStart} from "./pages/Create/Entity";
 import {Start as CollectionStart} from "./pages/Create/Collection";

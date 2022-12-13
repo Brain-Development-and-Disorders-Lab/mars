@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Card, CardBody, CardHeader, Flex, FormControl, FormLabel, Icon, IconButton, Input, Link, Select, useToast } from "@chakra-ui/react";
+import { Flex, FormControl, Icon, IconButton, Input, Link, Select, useToast } from "@chakra-ui/react";
 import { SingleDatepicker } from "chakra-dayzed-datepicker";
 import { CloseIcon } from "@chakra-ui/icons";
 import { AiOutlineBlock, AiOutlineLink } from "react-icons/ai";
@@ -27,86 +27,72 @@ export const DateParameter = (props: Parameter.PDate) => {
   }, [name, value]);
 
   return (
-    <Card minW={"xs"} h={"fit-content"} variant={"outline"}>
-      <CardHeader>
-        <Flex justify={"space-between"} align={"center"}>
-          <Icon as={MdDateRange} w={"8"} h={"8"}/>
-          {/* Remove Parameter */}
-          {props.showRemove && !props.disabled &&
-            <IconButton
-              aria-label={"Remove Parameter"}
-              key={`remove-${props.identifier}`}
-              icon={<CloseIcon />}
-              color={"white"}
-              background={"red"}
-              onClick={() => {
-                if (props.onRemove) {
-                  props.onRemove(props.identifier);
+    <Flex direction={"row"} gap={"2"} align={"center"}>
+      <Icon as={MdDateRange} w={"8"} h={"8"}/>
+
+      {/* Parameter name */}
+      <FormControl>
+        <Input
+          id={"name"}
+          placeholder={"Name"}
+          value={name}
+          onChange={(event) => {
+            setName(event.target.value);
+          }}
+          disabled={props.disabled}
+        />
+      </FormControl>
+
+      {/* Parameter data */}
+      <FormControl>
+        <SingleDatepicker
+          id="owner"
+          name="owner"
+          propsConfigs={{
+            dateNavBtnProps: {
+              colorScheme: "gray"
+            },
+            dayOfMonthBtnProps: {
+              defaultBtnProps: {
+                borderColor: "blackAlpha.300",
+                _hover: {
+                  background: "black",
+                  color: "white",
                 }
-              }}
-            />
-          }
-        </Flex>
-      </CardHeader>
+              },
+              selectedBtnProps: {
+                background: "black",
+                color: "white",
+              },
+              todayBtnProps: {
+                borderColor: "blackAlpha.300",
+                background: "gray.50",
+                color: "black",
+              }
+            },
+          }}
+          date={value}
+          onDateChange={setValue}
+          disabled={props.disabled}
+        />
+      </FormControl>
 
-      <CardBody pt={"0"}>
-        <Flex direction={"column"} gap={"4"} p={"2"} justify={"space-between"} align={"center"}>
-          {/* Parameter name */}
-          <FormControl label="Name">
-            <FormLabel htmlFor={"name"}>
-              Name
-            </FormLabel>
-            <Input
-              id="name"
-              placeholder="Name"
-              value={name}
-              onChange={(event) => {
-                setName(event.target.value);
-              }}
-              disabled={props.disabled}
-              required
-            />
-          </FormControl>
-
-          {/* Parameter data */}
-          <FormControl label="Data">
-            <FormLabel>
-              Date
-            </FormLabel>
-            <SingleDatepicker
-              id="owner"
-              name="owner"
-              propsConfigs={{
-                dateNavBtnProps: {
-                  colorScheme: "gray"
-                },
-                dayOfMonthBtnProps: {
-                  defaultBtnProps: {
-                    borderColor: "blackAlpha.300",
-                    _hover: {
-                      background: "black",
-                      color: "white",
-                    }
-                  },
-                  selectedBtnProps: {
-                    background: "black",
-                    color: "white",
-                  },
-                  todayBtnProps: {
-                    borderColor: "blackAlpha.300",
-                    background: "gray.50",
-                    color: "black",
-                  }
-                },
-              }}
-              date={value}
-              onDateChange={setValue}
-              disabled={props.disabled}
-            />
-          </FormControl>
-        </Flex>
-      </CardBody>
-    </Card>
+      {/* Remove Parameter */}
+      {props.showRemove && !props.disabled &&
+        <IconButton
+          aria-label={"Remove Parameter"}
+          key={`remove-${props.identifier}`}
+          icon={<CloseIcon />}
+          color={"white"}
+          background={"red"}
+          onClick={() => {
+            if (props.onRemove) {
+              props.onRemove(props.identifier);
+            }
+          }}
+        />
+      }
+    </Flex>
   );
 };
 
@@ -127,63 +113,49 @@ export const StringParameter = (props: Parameter.PString) => {
   }, [name, value]);
 
   return (
-    <Card minW={"xs"} h={"fit-content"} variant={"outline"}>
-      <CardHeader>
-        <Flex justify={"space-between"} align={"center"}>
-          <Icon as={MdOutlineTextFields} w={"8"} h={"8"}/>
+    <Flex direction={"row"} gap={"2"} align={"center"}>
+      <Icon as={MdOutlineTextFields} w={"8"} h={"8"}/>
 
-          {/* Remove Parameter */}
-          {props.showRemove && !props.disabled &&
-            <IconButton
-              aria-label={"Remove Parameter"}
-              key={`remove-${props.identifier}`}
-              icon={<CloseIcon />}
-              color={"white"}
-              background={"red"}
-              onClick={() => {
-                if (props.onRemove) {
-                  props.onRemove(props.identifier);
-                }
-              }}
-            />
-          }
-        </Flex>
-      </CardHeader>
+      {/* Parameter name */}
+      <FormControl label="Name">
+        <Input
+          id="name"
+          placeholder="Name"
+          value={name}
+          onChange={(event) => setName(event.target.value)}
+          disabled={props.disabled}
+          required
+        />
+      </FormControl>
 
-      <CardBody pt={"0"}>
-        <Flex direction={"column"} gap={"4"} p={"2"} justify={"center"} align={"center"}>
-          {/* Parameter name */}
-          <FormControl label="Name">
-            <FormLabel htmlFor={"name"}>
-              Name
-            </FormLabel>
-            <Input
-              id="name"
-              placeholder="Name"
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              disabled={props.disabled}
-              required
-            />
-          </FormControl>
+      {/* Parameter data */}
+      <FormControl label="Data">
+        <Input
+          name="data"
+          placeholder={""}
+          value={value}
+          onChange={(event) => setValue(event.target.value)}
+          disabled={props.disabled}
+          required
+        />
+      </FormControl>
 
-          {/* Parameter data */}
-          <FormControl label="Data">
-            <FormLabel>
-              Value
-            </FormLabel>
-            <Input
-              name="data"
-              placeholder={""}
-              value={value}
-              onChange={(event) => setValue(event.target.value)}
-              disabled={props.disabled}
-              required
-            />
-          </FormControl>
-        </Flex>
-      </CardBody>
-    </Card>
+      {/* Remove Parameter */}
+      {props.showRemove && !props.disabled &&
+        <IconButton
+          aria-label={"Remove Parameter"}
+          key={`remove-${props.identifier}`}
+          icon={<CloseIcon />}
+          color={"white"}
+          background={"red"}
+          onClick={() => {
+            if (props.onRemove) {
+              props.onRemove(props.identifier);
+            }
+          }}
+        />
+      }
+    </Flex>
   );
 };
 
@@ -204,63 +176,49 @@ export const NumberParameter = (props: Parameter.PNumber) => {
   }, [name, value]);
 
   return (
-    <Card minW={"xs"} h={"fit-content"} variant={"outline"} bg={"white"}>
-      <CardHeader>
-        <Flex justify={"space-between"} align={"center"}>
-          <Icon as={RiNumbersLine} w={"8"} h={"8"}/>
+    <Flex direction={"row"} gap={"2"} align={"center"}>
+      <Icon as={RiNumbersLine} w={"8"} h={"8"}/>
 
-          {/* Remove Parameter */}
-          {props.showRemove && !props.disabled &&
-            <IconButton
-              aria-label={"Remove Parameter"}
-              key={`remove-${props.identifier}`}
-              icon={<CloseIcon />}
-              color={"white"}
-              background={"red"}
-              onClick={() => {
-                if (props.onRemove) {
-                  props.onRemove(props.identifier);
-                }
-              }}
-            />
-          }
-        </Flex>
-      </CardHeader>
+      {/* Parameter name */}
+      <FormControl label="Name">
+        <Input
+          id="name"
+          placeholder="Name"
+          value={name}
+          onChange={(event) => setName(event.target.value)}
+          disabled={props.disabled}
+          required
+        />
+      </FormControl>
 
-      <CardBody pt={"0"}>
-        <Flex direction={"column"} gap={"4"} p={"2"} justify={"space-between"} align={"center"}>
-          {/* Parameter name */}
-          <FormControl label="Name">
-            <FormLabel htmlFor={"name"}>
-              Name
-            </FormLabel>
-            <Input
-              id="name"
-              placeholder="Name"
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              disabled={props.disabled}
-              required
-            />
-          </FormControl>
+      {/* Parameter data */}
+      <FormControl label="Data">
+        <Input
+          name="data"
+          placeholder={"0"}
+          value={value}
+          onChange={(event) => setValue(Number(event.target.value))}
+          disabled={props.disabled}
+          required
+        />
+        </FormControl>
 
-          {/* Parameter data */}
-          <FormControl label="Data">
-            <FormLabel>
-              Value
-            </FormLabel>
-            <Input
-              name="data"
-              placeholder={"0"}
-              value={value}
-              onChange={(event) => setValue(Number(event.target.value))}
-              disabled={props.disabled}
-              required
-            />
-            </FormControl>
-        </Flex>
-      </CardBody>
-    </Card>
+      {/* Remove Parameter */}
+      {props.showRemove && !props.disabled &&
+        <IconButton
+          aria-label={"Remove Parameter"}
+          key={`remove-${props.identifier}`}
+          icon={<CloseIcon />}
+          color={"white"}
+          background={"red"}
+          onClick={() => {
+            if (props.onRemove) {
+              props.onRemove(props.identifier);
+            }
+          }}
+        />
+      }
+    </Flex>
   );
 };
 
@@ -281,70 +239,56 @@ export const URLParameter = (props: Parameter.PURL) => {
   }, [name, value]);
 
   return (
-    <Card minW={"xs"} h={"fit-content"} variant={"outline"}>
-      <CardHeader>
-        <Flex justify={"space-between"} align={"center"}>
-          <Icon as={AiOutlineLink} w={"8"} h={"8"}/>
+    <Flex direction={"row"} gap={"2"} align={"center"}>
+      <Icon as={AiOutlineLink} w={"8"} h={"8"}/>
 
-          {/* Remove Parameter */}
-          {props.showRemove && !props.disabled &&
-            <IconButton
-              aria-label={"Remove Parameter"}
-              key={`remove-${props.identifier}`}
-              icon={<CloseIcon />}
-              color={"white"}
-              background={"red"}
-              onClick={() => {
-                if (props.onRemove) {
-                  props.onRemove(props.identifier);
-                }
-              }}
-            />
-          }
-        </Flex>
-      </CardHeader>
+      {/* Parameter name */}
+      <FormControl label="Name">
+        <Input
+          id="name"
+          placeholder="Name"
+          value={name}
+          onChange={(event) => {
+            setName(event.target.value);
+          }}
+          disabled={props.disabled}
+          required
+        />
+      </FormControl>
 
-      <CardBody pt={"0"}>
-        <Flex direction={"column"} gap={"4"} p={"2"} justify={"center"} align={"center"}>
-          {/* Parameter name */}
-          <FormControl label="Name">
-            <FormLabel htmlFor={"name"}>
-              Name
-            </FormLabel>
-            <Input
-              id="name"
-              placeholder="Name"
-              value={name}
-              onChange={(event) => {
-                setName(event.target.value);
-              }}
-              disabled={props.disabled}
-              required
-            />
-          </FormControl>
+      {/* Parameter data */}
+      <FormControl label="Data">
+        {props.disabled ?
+          <Link as={RouterLink} to={value} color="dark-1">
+            {value}
+          </Link>
+        :
+          <Input
+            name="url"
+            placeholder="URL"
+            value={value}
+            onChange={(event) => setValue(event.target.value.toString())}
+            disabled={props.disabled}
+            required
+          />}
+      </FormControl>
 
-          {/* Parameter data */}
-          <FormControl label="Data">
-            <FormLabel>
-              URL
-            </FormLabel>
-            {props.disabled ?
-              <Link as={RouterLink} to={value} color="dark-1">
-                {value}
-              </Link>
-            :
-              <Input
-                name="url"
-                placeholder="URL"
-                value={value}
-                onChange={(event) => setValue(event.target.value.toString())}
-                disabled={props.disabled}
-                required
-              />}
-          </FormControl>
-        </Flex>
-      </CardBody>
-    </Card>
+      {/* Remove button */}
+      {props.showRemove && !props.disabled &&
+        <IconButton
+          aria-label={"Remove Parameter"}
+          key={`remove-${props.identifier}`}
+          icon={<CloseIcon />}
+          color={"white"}
+          background={"red"}
+          onClick={() => {
+            if (props.onRemove) {
+              props.onRemove(props.identifier);
+            }
+          }}
+        />
+      }
+    </Flex>
   );
 };
 
@@ -398,81 +342,66 @@ export const EntityParameter = (props: Parameter.PEntity) => {
   }, []);
 
   return (
-    <Card minW={"xs"} h={"fit-content"} variant={"outline"}>
-      <CardHeader>
-        <Flex justify={"space-between"} align={"center"}>
-          <Icon as={AiOutlineBlock} w={"8"} h={"8"}/>
+    <Flex direction={"row"} gap={"2"} align={"center"}>
+      <Icon as={AiOutlineBlock} w={"8"} h={"8"}/>
 
-          {/* Remove Parameter */}
-          {props.showRemove && !props.disabled &&
-            <IconButton
-              aria-label={"Remove Parameter"}
-              key={`remove-${props.identifier}`}
-              icon={<CloseIcon />}
-              color={"white"}
-              background={"red"}
-              onClick={() => {
-                if (props.onRemove) {
-                  props.onRemove(props.identifier);
-                }
-              }}
-            />
-          }
-        </Flex>
-      </CardHeader>
+      {/* Parameter name */}
+      <FormControl>
+        <Input
+          id="name"
+          placeholder="Name"
+          value={name}
+          onChange={(event) => {
+            setName(event.target.value);
+          }}
+          disabled={props.disabled}
+        />
+      </FormControl>
 
-      <CardBody pt={"0"}>
-        <Flex direction={"column"} gap={"4"} p={"2"} justify={"space-between"} align={"center"}>
-          {/* Parameter name */}
-          <FormControl label="Name">
-            <FormLabel htmlFor={"name"}>
-              Name
-            </FormLabel>
-            <Input
-              id="name"
-              placeholder="Name"
-              value={name}
-              onChange={(event) => {
-                setName(event.target.value);
-              }}
-              disabled={props.disabled}
-              required
-            />
-          </FormControl>
+      {/* Parameter data */}
+      <FormControl>
+        {props.disabled ?
+          <Linky
+            type="entities"
+            id={value}
+          />
+        :
+          <Select
+            title="Select Entity"
+            value={value}
+            placeholder={"Select Entity"}
+            disabled={props.disabled}
+            onChange={(event) => {
+              setValue(event.target.value.toString());
+            }}
+          >
+            {isLoaded &&
+              entities.map((entity) => {
+                return (
+                  <option key={entity._id} value={entity._id}>{entity.name}</option>
+                );
+              })
+            };
+          </Select>
+        }
+      </FormControl>
 
-          {/* Parameter data */}
-          <FormControl label="Data">
-            <FormLabel>
-              Entity
-            </FormLabel>
-            {props.disabled ?
-              <Linky
-                type="entities"
-                id={value}
-              />
-            :
-              <Select
-                title="Select Entity"
-                value={value}
-                placeholder={"Select Entity"}
-                disabled={props.disabled}
-                onChange={(event) => {
-                  setValue(event.target.value.toString());
-                }}
-              >
-                {isLoaded &&
-                  entities.map((entity) => {
-                    return (
-                      <option key={entity._id} value={entity._id}>{entity.name}</option>
-                    );
-                  })
-                };
-              </Select>
+      {/* Remove button */}
+      {props.showRemove && !props.disabled &&
+        <IconButton
+          aria-label={"Remove Parameter"}
+          key={`remove-${props.identifier}`}
+          icon={<CloseIcon />}
+          color={"white"}
+          background={"red"}
+          onClick={() => {
+            if (props.onRemove) {
+              props.onRemove(props.identifier);
             }
-          </FormControl>
-        </Flex>
-      </CardBody>
-    </Card>
+          }}
+        />
+      }
+    </Flex>
   );
 };
 

@@ -46,7 +46,7 @@ const ParameterGroup = (props: { parameters: Parameters[], viewOnly: boolean, se
   };
 
   return (
-    <Flex direction={"column"} gap={"4"} w={"3xl"} maxW={"3xl"}>
+    <Flex direction={"column"} gap={"4"}>
       {/* Button Group */}
       {!props.viewOnly &&
         <Flex direction={"row"} gap={"2"} flexWrap={"wrap"} justify={"center"} align={"center"}>
@@ -154,92 +154,92 @@ const ParameterGroup = (props: { parameters: Parameters[], viewOnly: boolean, se
       }
 
       {/* Card Group */}
-      <Flex p={"2"} margin={"2"} direction={"row"} gap={"4"} wrap={"wrap"} minH={"xs"} justify={"center"} align={"center"} maxW={"inherit"}>
-        <Flex direction={"row"} overflowX={"auto"} gap={"2"} p={"2"} maxW={"inherit"}>
-          {props.parameters.length > 0 ?
-            props.parameters.map((parameter) => {
-              switch (parameter.type) {
-                case "date": {
-                  return (
-                    <DateParameter
-                      key={parameter.identifier}
-                      identifier={parameter.identifier}
-                      name={parameter.name}
-                      type={"date"}
-                      data={parameter.data}
-                      onRemove={onRemove}
-                      onUpdate={onUpdate}
-                      disabled={props.viewOnly}
-                      showRemove
-                    />
-                  );
-                }
-                case "entity": {
-                  return (
-                    <EntityParameter
-                      key={parameter.identifier}
-                      identifier={parameter.identifier}
-                      name={parameter.name}
-                      type={"entity"}
-                      data={parameter.data}
-                      onRemove={onRemove}
-                      onUpdate={onUpdate}
-                      disabled={props.viewOnly}
-                      showRemove
-                    />
-                  );
-                }
-                case "number": {
-                  return (
-                    <NumberParameter
-                      key={parameter.identifier}
-                      identifier={parameter.identifier}
-                      name={parameter.name}
-                      type={"number"}
-                      data={parameter.data}
-                      onRemove={onRemove}
-                      onUpdate={onUpdate}
-                      disabled={props.viewOnly}
-                      showRemove
-                    />
-                  );
-                }
-                case "url": {
-                  return (
-                    <URLParameter
-                      key={parameter.identifier}
-                      identifier={parameter.identifier}
-                      name={parameter.name}
-                      type={"url"}
-                      data={parameter.data}
-                      onRemove={onRemove}
-                      onUpdate={onUpdate}
-                      disabled={props.viewOnly}
-                      showRemove
-                    />
-                  );
-                }
-                default: {
-                  return (
-                    <StringParameter
-                      key={parameter.identifier}
-                      identifier={parameter.identifier}
-                      name={parameter.name}
-                      type={"string"}
-                      data={parameter.data}
-                      onRemove={onRemove}
-                      onUpdate={onUpdate}
-                      disabled={props.viewOnly}
-                      showRemove
-                    />
-                  );
-                }
+      <Flex p={"2"} margin={"2"} direction={"column"} gap={"4"}>
+        {props.parameters.length > 0 ? 
+          props.parameters.map((parameter) => {
+            switch (parameter.type) {
+              case "date": {
+                return (
+                  <DateParameter
+                    key={parameter.identifier}
+                    identifier={parameter.identifier}
+                    name={parameter.name}
+                    type={"date"}
+                    data={parameter.data}
+                    onRemove={onRemove}
+                    onUpdate={onUpdate}
+                    disabled={props.viewOnly}
+                    showRemove
+                  />
+                );
               }
-            })
-          :
+              case "entity": {
+                return (
+                  <EntityParameter
+                    key={parameter.identifier}
+                    identifier={parameter.identifier}
+                    name={parameter.name}
+                    type={"entity"}
+                    data={parameter.data}
+                    onRemove={onRemove}
+                    onUpdate={onUpdate}
+                    disabled={props.viewOnly}
+                    showRemove
+                  />
+                );
+              }
+              case "number": {
+                return (
+                  <NumberParameter
+                    key={parameter.identifier}
+                    identifier={parameter.identifier}
+                    name={parameter.name}
+                    type={"number"}
+                    data={parameter.data}
+                    onRemove={onRemove}
+                    onUpdate={onUpdate}
+                    disabled={props.viewOnly}
+                    showRemove
+                  />
+                );
+              }
+              case "url": {
+                return (
+                  <URLParameter
+                    key={parameter.identifier}
+                    identifier={parameter.identifier}
+                    name={parameter.name}
+                    type={"url"}
+                    data={parameter.data}
+                    onRemove={onRemove}
+                    onUpdate={onUpdate}
+                    disabled={props.viewOnly}
+                    showRemove
+                  />
+                );
+              }
+              default: {
+                return (
+                  <StringParameter
+                    key={parameter.identifier}
+                    identifier={parameter.identifier}
+                    name={parameter.name}
+                    type={"string"}
+                    data={parameter.data}
+                    onRemove={onRemove}
+                    onUpdate={onUpdate}
+                    disabled={props.viewOnly}
+                    showRemove
+                  />
+                );
+              }
+            }
+          })
+        :
+          <Flex align={"center"} justify={"center"}>
             <Text>No Parameters specified. Use the buttons above to add a new Parameter.</Text>
-          }
-        </Flex>
+          </Flex>
+        }
       </Flex>
     </Flex>
   );

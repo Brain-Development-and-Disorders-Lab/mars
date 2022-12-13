@@ -266,9 +266,7 @@ export const Start = ({}) => {
                 Associations
               </Heading>
               <Text>
-                Specify some basic details about this Entity.
-                Relations between Entities and membership to Collections can be specified on the following page.
-                Finally, the metadata associated with this Entity should be specified using Attributes and corresponding Parameters.
+                Relations between Entities and membership to Collections can be specified on this page.
               </Text>
               <Flex direction={"row"} gap={"2"} grow={"1"} wrap={"wrap"}>
                 <Flex direction={"row"} gap={"2"}>
@@ -374,11 +372,14 @@ export const Start = ({}) => {
 
           {/* "Attributes" page */}
           {_.isEqual("attributes", pageState) &&
-            <Flex direction={"column"} gap={"2"} p={"2"} w={"full"} rounded={"2xl"}>
+            <Flex direction={"column"} gap={"2"} p={"2"} rounded={"2xl"}>
               <Heading size={"xl"} margin={"xs"}>
                 Attributes
               </Heading>
-              <Flex justify={"center"} align={"center"} direction={"row"} gap={"2"}>
+              <Text>
+                The metadata associated with this Entity should be specified using Attributes and corresponding Parameters.
+              </Text>
+              <Flex justify={"center"} align={"center"} direction={"row"} gap={"2"} w={"full"} wrap={"wrap"}>
                 <Button
                   rightIcon={<Icon as={AddIcon} />}
                   onClick={() => {

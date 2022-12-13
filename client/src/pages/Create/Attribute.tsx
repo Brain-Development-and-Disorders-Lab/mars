@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Button, Flex, Heading, Input, List, ListIcon, ListItem, Text, Textarea } from "@chakra-ui/react";
+import { Button, Flex, Heading, Input, List, ListIcon, ListItem, Modal, ModalBody, ModalCloseButton, ModalContent, ModalHeader, ModalOverlay, Text, Textarea, useDisclosure } from "@chakra-ui/react";
 import { CheckIcon, CloseIcon, InfoOutlineIcon } from "@chakra-ui/icons";
 import { AiOutlineBlock, AiOutlineLink } from "react-icons/ai";
 import { MdDateRange, MdOutlineTextFields } from "react-icons/md";
@@ -13,6 +13,7 @@ import { postData, pseudoId } from "src/database/functions";
 
 export const Start = ({}) => {
   const navigate = useNavigate();
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   const [name, setName] = useState(pseudoId("attribute"));
   const [description, setDescription] = useState("");
@@ -35,17 +36,19 @@ export const Start = ({}) => {
   return (
     <Flex m={["0", "2"]} p={["2", "4"]} direction={"column"} align={"center"} justify={"center"}>
       <Flex direction={"column"} maxW={"7xl"} p={"4"} align={"center"} rounded={"xl"}>
-        <Flex direction={"column"} p={"2"} pt={"8"} pb={"8"} >
-          <Flex direction={"row"}>
-            <Heading size={"2xl"}>Create Attribute</Heading>
-          </Flex>
+        <Flex direction={"row"} p={"2"} pt={"8"} pb={"8"} w={"full"} align={"center"} justify={"space-between"}>
+          <Heading size={"2xl"}>Create Attribute</Heading>
+          <Button
+            rightIcon={<InfoOutlineIcon />}
+            variant={"outline"}
+            onClick={onOpen}
+          >
+            Info
+          </Button>
         </Flex>
 
         <Flex p={"2"} pb={"6"} direction={"row"} wrap={"wrap"} justify={"space-between"} gap={"6"}>
           <Flex direction={"column"} gap={"2"} grow={"1"} maxW={"md"} p={"2"} rounded={"2xl"}>
-            <Heading size={"xl"} margin={"xs"}>
-              Details
-            </Heading>
             <Text>
               Specify some basic details about this template Attribute.
               The metadata associated with this template should be specified using Parameters.
@@ -62,10 +65,28 @@ export const Start = ({}) => {
               onChange={(event) => setDescription(event.target.value)}
             />
           </Flex>
+          <ParameterGroup parameters={parameters} viewOnly={false} setParameters={setParameters} />
+        </Flex>
 
-          <Flex direction={"column"} gap={"2"} h={"fit-content"} p={"4"} maxW={"md"} rounded={"2xl"} border={"1px"} borderColor={"gray.200"}>
-            <Flex align={"center"} gap={"2"}><InfoOutlineIcon boxSize={"8"} /><Heading>Parameters</Heading></Flex>
-            <Text>Individual pieces of metadata should be expressed as Parameters.</Text>
+        {/* Action buttons */}
+        <Flex p={"2"} direction={"row"} w={"full"} flexWrap={"wrap"} gap={"6"} justify={"space-between"}>
+          <Button colorScheme={"red"} variant={"outline"} rightIcon={<CloseIcon />} onClick={() => navigate("/attributes")}>
+            Cancel
+          </Button>
+          <Button colorScheme={"green"} rightIcon={<CheckIcon />} onClick={onSubmit}>
+            Finish
+          </Button>
+        </Flex>
+      </Flex>
+
+      {/* Information modal */}
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Attributes</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+          <Text>Individual pieces of metadata should be expressed as Parameters.</Text>
             <Text>There are five supported types of metadata:</Text>
             <List spacing={2}>
               <ListItem>
@@ -89,22 +110,10 @@ export const Start = ({}) => {
                 <Text as={"b"}>Entity</Text>{": "}Used to specify a relation to another Entity.
               </ListItem>
             </List>
-            <Text>Parameters can be specified using the buttons below.</Text>
-          </Flex>
-        </Flex>
-
-        <ParameterGroup parameters={parameters} viewOnly={false} setParameters={setParameters} />
-
-        {/* Action buttons */}
-        <Flex p={"2"} direction={"row"} w={"full"} flexWrap={"wrap"} gap={"6"} justify={"space-between"}>
-          <Button colorScheme={"red"} variant={"outline"} rightIcon={<CloseIcon />} onClick={() => navigate("/attributes")}>
-            Cancel
-          </Button>
-          <Button colorScheme={"green"} rightIcon={<CheckIcon />} onClick={onSubmit}>
-            Finish
-          </Button>
-        </Flex>
-      </Flex>
+            <Text>Parameters can be specified using the buttons.</Text>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
     </Flex>
   );
 };
