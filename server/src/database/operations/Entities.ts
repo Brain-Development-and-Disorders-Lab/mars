@@ -3,6 +3,7 @@ import { ObjectId } from "mongodb";
 
 // Utility functions
 import { getDatabase } from "../connection";
+import { registerUpdate } from "./Updates";
 
 // Custom types
 import { EntityModel } from "../../../types";
@@ -51,6 +52,7 @@ export const addProduct = (entity: string, product: { name: string, id: string }
           updatedValues,
           (error: any, response: any) => {
             if (error) throw error;
+            registerUpdate(entity, { type: "added", info: `Added Product ${product.id}`});
           }
         );
     });
@@ -90,6 +92,7 @@ export const setOrigin = (entity: { name: string, id: string }, origin: { name: 
           updatedValues,
           (error: any, response: any) => {
             if (error) throw error;
+            registerUpdate(entity.id, { type: "added", info: `Added Origin ${origin.id}`});
           }
         );
     });
