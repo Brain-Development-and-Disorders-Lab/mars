@@ -41,7 +41,7 @@ const Linky = (props: LinkyProps) => {
   return (
     <Button
       variant={"link"}
-      color={"gray.600"}
+      color={props.color ? props.color : "gray.600"}
       as={RouterLink}
       to={`/${props.type}/${props.id}`}
     >
