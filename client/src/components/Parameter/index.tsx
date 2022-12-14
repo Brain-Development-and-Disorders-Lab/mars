@@ -5,7 +5,6 @@ import { CloseIcon } from "@chakra-ui/icons";
 import { AiOutlineBlock, AiOutlineLink } from "react-icons/ai";
 import { MdDateRange, MdOutlineTextFields } from "react-icons/md";
 import { RiNumbersLine } from "react-icons/ri";
-import { Link as RouterLink } from "react-router-dom";
 import { getData } from "src/database/functions";
 import { EntityModel, Parameter } from "types";
 import Linky from "src/components/Linky";
@@ -259,7 +258,7 @@ export const URLParameter = (props: Parameter.PURL) => {
       {/* Parameter data */}
       <FormControl label="Data">
         {props.disabled ?
-          <Link as={RouterLink} to={value} color="dark-1">
+          <Link href={value} color="dark-1">
             {value}
           </Link>
         :
