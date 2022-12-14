@@ -26,12 +26,10 @@ export const addEntity = (collection: string, entity: string) => {
       // Update the collection to include the Entity as an association
       const updatedValues = {
         $set: {
-          associations: {
-            entities: [
-              ...collectionResult.entities,
-              entity,
-            ],
-          },
+          entities: [
+            ...collectionResult.entities,
+            entity,
+          ],
         },
       };
 
@@ -43,7 +41,23 @@ export const addEntity = (collection: string, entity: string) => {
           (error: any, response: any) => {
             if (error) throw error;
             consola.success("Added Entity to collection:", collection);
-            registerUpdate(entity, { type: "added", info: `Added Entity to Collection ${collection}`});
+            registerUpdate({
+              targets: {
+                primary: {
+                  id: collection,
+                  type: "collections",
+                },
+                secondary: {
+                  id: entity,
+                  type: "entities",
+                },
+              },
+              operation: {
+                timestamp: new Date(Date.now()),
+                type: "add",
+                details: "add Entity"
+              }
+            });
           }
         );
     });

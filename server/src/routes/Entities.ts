@@ -14,6 +14,7 @@ import {
 import { getDatabase } from "../database/connection";
 import { addEntity } from "../database/operations/Collections";
 import { setOrigin, addProduct } from "../database/operations/Entities";
+import { registerUpdate } from "../database/operations/Updates";
 
 // Constants
 const ENTITIES_COLLECTION = "entities";
@@ -73,6 +74,18 @@ EntitiesRoute.route("/entities/create").post((request: { body: EntityStruct }, r
 
     // Retrieve the ID of the inserted Entity
     const insertedId = (entityData as EntityStruct & { _id: string })._id;
+    registerUpdate({
+      targets: {
+        primary: {
+          id: insertedId,
+          type: "entities",
+        },
+      },
+      operation: {
+        timestamp: new Date(Date.now()),
+        type: "add",
+      }
+    });
 
     // We need to apply the associations that have been specified
     if (entityData.associations.origin.id) {
@@ -175,6 +188,18 @@ EntitiesRoute.route("/entities/update").post((request: { body: EntityModel }, re
           (error: any, response: any) => {
             if (error) throw error;
             consola.success("Updated Entity:", entityRequest.name);
+            registerUpdate({
+              targets: {
+                primary: {
+                  id: entityRequest._id,
+                  type: "entities",
+                },
+              },
+              operation: {
+                timestamp: new Date(Date.now()),
+                type: "modify",
+              }
+            });
           }
           );
         });

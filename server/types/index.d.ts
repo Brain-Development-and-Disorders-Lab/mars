@@ -78,3 +78,25 @@ export type EntityStruct = {
 export type EntityModel = EntityStruct & {
   _id: string;
 };
+
+export type UpdateStruct = {
+  targets: {
+    primary: {
+      type: "entities" | "collections" | "attributes",
+      id: string,
+    },
+    secondary?: {
+      type: "entities" | "collections" | "attributes",
+      id: string,
+    },
+  };
+  operation: {
+    type: "modify" | "add" | "remove",
+    timestamp: Date;
+    details?: string,
+  };
+};
+
+export type UpdateModel = UpdateStruct & {
+  _id: string;
+};

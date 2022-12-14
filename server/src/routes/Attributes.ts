@@ -7,6 +7,7 @@ import { getDatabase } from "../database/connection";
 
 // Custom types
 import { AttributeStruct } from "../../types";
+import { registerUpdate } from "../database/operations/Updates";
 
 // Constants
 const ATTRIBUTES_COLLECTION = "attributes";
@@ -64,6 +65,18 @@ AttributesRoute.route("/attributes/create").post(
 
     // Retrieve the ID of the inserted Entity
     const insertedId = (data as AttributeStruct & { _id: string })._id;
+    registerUpdate({
+      targets: {
+        primary: {
+          id: insertedId,
+          type: "attributes",
+        },
+      },
+      operation: {
+        timestamp: new Date(Date.now()),
+        type: "add",
+      }
+    });
 
     consola.debug("Create new Attribute:", "/attributes/create", '"' + data.name + '"');
   }

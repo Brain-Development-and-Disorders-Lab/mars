@@ -7,6 +7,7 @@ import _ from "underscore";
 // Database connection
 import { getDatabase } from "../database/connection";
 import { CollectionModel, CollectionStruct, EntityModel } from "../../types";
+import { registerUpdate } from "../database/operations/Updates";
 
 const CollectionsRoute = express.Router();
 
@@ -65,6 +66,18 @@ CollectionsRoute.route("/collections/create").post(
     const insertedId = (data as CollectionStruct & { _id: string })._id;
 
     consola.debug("Create new Collection:", "/collections/create", '"' + data.name + '"');
+    registerUpdate({
+      targets: {
+        primary: {
+          id: insertedId,
+          type: "collections",
+        },
+      },
+      operation: {
+        timestamp: new Date(Date.now()),
+        type: "add",
+      }
+    });
 
     // We need to apply the collections that have been specified
     if (data.entities.length > 0) {
@@ -101,6 +114,22 @@ CollectionsRoute.route("/collections/create").post(
                 (error: any, response: any) => {
                   if (error) throw error;
                   consola.success("Added Collection to Entity:", entityResult.name);
+                  registerUpdate({
+                    targets: {
+                      primary: {
+                        id: insertedId,
+                        type: "collections",
+                      },
+                      secondary: {
+                        id: entity,
+                        type: "entities",
+                      },
+                    },
+                    operation: {
+                      timestamp: new Date(Date.now()),
+                      type: "add",
+                    }
+                  });
                 }
               );
           });
@@ -182,6 +211,22 @@ export const add = (data: { entityId: string[], collectionId: string }, response
               (error: any, response: any) => {
                 if (error) throw error;
                 consola.success("Added Entity to Collection:", "/collections/add", "Entity:", '"' + data.entityId + '"', "Collection:", '"' + data.collectionId + '"');
+                registerUpdate({
+                  targets: {
+                    primary: {
+                      id: data.collectionId,
+                      type: "collections",
+                    },
+                    secondary: {
+                      id: entity,
+                      type: "entities",
+                    },
+                  },
+                  operation: {
+                    timestamp: new Date(Date.now()),
+                    type: "add",
+                  }
+                });
               }
             );
         }
@@ -335,6 +380,22 @@ export const remove = (data: { entityId: string, collectionId: string }, respons
             (error: any, response: any) => {
               if (error) throw error;
               consola.success("Removed Collection from Entity:", "/collections/remove", "Entity:", '"' + data.entityId + '"', "Collection:", '"' + data.collectionId + '"');
+              registerUpdate({
+                targets: {
+                  primary: {
+                    id: data.collectionId,
+                    type: "collections",
+                  },
+                  secondary: {
+                    id: data.entityId,
+                    type: "entities",
+                  },
+                },
+                operation: {
+                  timestamp: new Date(Date.now()),
+                  type: "remove",
+                }
+              });
             }
           );
       }

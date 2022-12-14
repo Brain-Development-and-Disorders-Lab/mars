@@ -52,7 +52,23 @@ export const addProduct = (entity: string, product: { name: string, id: string }
           updatedValues,
           (error: any, response: any) => {
             if (error) throw error;
-            registerUpdate(entity, { type: "added", info: `Added Product ${product.id}`});
+            registerUpdate({
+              targets: {
+                primary: {
+                  id: entity,
+                  type: "entities",
+                },
+                secondary: {
+                  id: product.id,
+                  type: "entities",
+                },
+              },
+              operation: {
+                timestamp: new Date(Date.now()),
+                type: "add",
+                details: "add Product"
+              }
+            });
           }
         );
     });
@@ -92,7 +108,23 @@ export const setOrigin = (entity: { name: string, id: string }, origin: { name: 
           updatedValues,
           (error: any, response: any) => {
             if (error) throw error;
-            registerUpdate(entity.id, { type: "added", info: `Added Origin ${origin.id}`});
+            registerUpdate({
+              targets: {
+                primary: {
+                  id: entity.id,
+                  type: "entities",
+                },
+                secondary: {
+                  id: origin.id,
+                  type: "entities",
+                },
+              },
+              operation: {
+                timestamp: new Date(Date.now()),
+                type: "add",
+                details: "add Origin"
+              }
+            });
           }
         );
     });

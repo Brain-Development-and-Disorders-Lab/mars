@@ -17,6 +17,7 @@ import EntitiesRoute from "./routes/Entities";
 import CollectionsRoute from "./routes/Collections";
 import AttributesRoute from "./routes/Attributes";
 import SearchRoute from "./routes/Search";
+import UpdatesRoute from "./routes/Updates";
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -24,7 +25,7 @@ const port = process.env.PORT || 8000;
 // Configure Express, enable CORS middleware and routes
 app.use(cors());
 app.use(express.json());
-app.use(EntitiesRoute, CollectionsRoute, AttributesRoute, SearchRoute);
+app.use(EntitiesRoute, CollectionsRoute, AttributesRoute, SearchRoute, UpdatesRoute);
 
 // Start the Express server
 app.listen(port, () => {

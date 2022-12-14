@@ -2,9 +2,10 @@ import React, { useEffect, useState } from "react";
 import { Button, Flex, Heading, Table, TableContainer, Text, Thead, Tr, Th, useToast, Stat, StatLabel, StatNumber, StatHelpText, Spacer, List, ListItem, Tbody } from "@chakra-ui/react";
 import { AddIcon, ChevronRightIcon, RepeatClockIcon } from "@chakra-ui/icons";
 import { getData } from "src/database/functions";
-import { CollectionModel, EntityModel } from "types";
+import { CollectionModel, EntityModel, UpdateModel } from "types";
 import { useNavigate, Link as RouterLink } from "react-router-dom";
 import { Loading } from "src/components/Loading";
+import Linky from "src/components/Linky";
 
 const Home = () => {
   // Enable navigation
@@ -19,16 +20,11 @@ const Home = () => {
   // Page data
   const [entityData, setEntityData] = useState([] as EntityModel[]);
   const [collectionData, setCollectionData] = useState([] as CollectionModel[]);
+  const [updateData, setUpdateData] = useState([] as UpdateModel[]);
 
   // Get all Entities
   useEffect(() => {
-    const response = getData(`/entities`);
-
-    // Handle the response from the database
-    response.then((value) => {
-      setEntityData(value);
-
-      // Check the contents of the response
+    getData(`/entities`).then((value) => {
       if (value["error"] !== undefined) {
         toast({
           title: "Database Error",
@@ -39,7 +35,7 @@ const Home = () => {
           isClosable: true,
         });
       }
-
+      setEntityData(value);
       setIsLoaded(true);
     });
     return;
@@ -47,12 +43,26 @@ const Home = () => {
 
   // Get all Collections
   useEffect(() => {
-    const response = getData(`/collections`);
-
-    // Handle the response from the database
-    response.then((value) => {
+    getData(`/collections`).then((value) => {
+      if (value["error"] !== undefined) {
+        toast({
+          title: "Database Error",
+          description: value["error"],
+          status: "error",
+          duration: 4000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+      }
       setCollectionData(value);
+      setIsLoaded(true);
+    });
+    return;
+  }, []);
 
+  // Get all Updates
+  useEffect(() => {
+    getData(`/updates`).then((value) => {
       // Check the contents of the response
       if (value["error"] !== undefined) {
         toast({
@@ -64,7 +74,7 @@ const Home = () => {
           isClosable: true,
         });
       }
-
+      setUpdateData(value);
       setIsLoaded(true);
     });
     return;
@@ -242,13 +252,31 @@ const Home = () => {
             direction={"column"}
             p={"4"}
             background={"teal"}
+            color={"white"}
             rounded={"xl"}
             gap={"1.5"}
             grow={"1"} 
           >
-            <Heading color={"white"}>Recent Changes{" "}<RepeatClockIcon color={"white"} w={8} h={8} /></Heading>
+            <Heading>Recent Changes{" "}<RepeatClockIcon w={8} h={8} /></Heading>
             <List>
-              <ListItem><Text fontSize={"md"} textColor={"white"}>9:23 AM: <b>Henry</b> updated ...</Text></ListItem>
+              {updateData.length > 0 ?
+                updateData.map((update) => {
+                  return (
+                    <ListItem key={`update-${update._id}`}>
+                      <Flex direction={"row"} gap={"2"}>
+                        <Text fontSize={"md"} as={"b"} >{new Date(update.operation.timestamp).toDateString()}:</Text>
+                        <Text>{update.operation.type}</Text>
+                        <Text><Linky color={"white"} id={update.targets.primary.id} type={update.targets.primary.type} /></Text>
+                        {update.targets.secondary &&
+                          <Text><Linky color={"white"} id={update.targets.secondary.id} type={update.targets.secondary.type} /></Text>
+                        }
+                      </Flex>
+                    </ListItem>
+                  );
+                })
+              :
+                <Text fontSize={"md"}>No updates yet.</Text>
+              }
             </List>
           </Flex>
         </Flex>
