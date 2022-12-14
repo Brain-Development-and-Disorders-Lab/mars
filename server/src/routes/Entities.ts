@@ -75,7 +75,7 @@ EntitiesRoute.route("/entities/create").post((request: { body: EntityStruct }, r
     const insertedId = (entityData as EntityStruct & { _id: string })._id;
 
     // We need to apply the associations that have been specified
-    if (entityData.associations.origin.id !== "") {
+    if (entityData.associations.origin.id) {
       addProduct(entityData.associations.origin.id, {
         name: entityData.name,
         id: insertedId,

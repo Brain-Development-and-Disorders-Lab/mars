@@ -15,6 +15,7 @@ db.createUser({
 db.createCollection("entities");
 db.createCollection("collections");
 db.createCollection("attributes");
+db.createCollection("updates");
 
 // Step 3: Add indexes to allow searching through all fields
 db["entities"].createIndex({ "$**": "text" });

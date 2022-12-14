@@ -15,7 +15,7 @@ import { useNavigate } from "react-router-dom";
 import { AttributeModel, AttributeProps, CollectionModel, EntityModel, EntityStruct } from "types";
 
 // Utility functions
-import { getData, pseudoId } from "src/database/functions";
+import { getData, postData, pseudoId } from "src/database/functions";
 import Attribute from "src/components/Attribute";
 
 export const Start = ({}) => {
@@ -50,7 +50,7 @@ export const Start = ({}) => {
       products: selectedProducts,
     },
     collections: selectedCollections,
-    attributes: attributes,
+    attributes: selectedAttributes,
   };
   consola.debug("Initial Entity state:", entityState);
 
@@ -121,6 +121,10 @@ export const Start = ({}) => {
       setPageState("associations");
     } else if (_.isEqual("associations", pageState)) {
       setPageState("attributes");
+    } else if (_.isEqual("attributes", pageState)) {
+      postData(`/entities/create`, entityState).then(() => {
+        navigate(`/entities`);
+      });
     }
   };
 

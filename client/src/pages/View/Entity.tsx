@@ -296,7 +296,7 @@ export const Entity = () => {
                         align={"center"}
                         margin={"none"}
                       >
-                        {entityData.associations.origin.id !== "" ? (
+                        {entityData.associations.origin.id ? (
                           <Linky
                             key={entityData.associations.origin.id}
                             type="entities"
