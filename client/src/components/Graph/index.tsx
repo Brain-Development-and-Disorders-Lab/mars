@@ -194,7 +194,7 @@ const Graph = (props: { id: string }) => {
           for (let product of entity.associations.products) {
             if (containsNode(product.id) === false) {
               // Firstly, update the current node type (if required)
-              updatedNodes = [...(nodes.map((node) => {
+              updatedNodes = [...(updatedNodes.map((node) => {
                 if (_.isEqual(node.id, entity._id)) {
                   if (!_.isNull(entity.associations.origin.id)) {
                     // If an Origin is specified as well, we need to set it to
@@ -210,7 +210,7 @@ const Graph = (props: { id: string }) => {
               }))];
 
               // Add node
-              updatedNodes = [...nodes, {
+              updatedNodes = [...updatedNodes, {
                 id: product.id,
                 type: "output",
                 data: {
@@ -220,7 +220,7 @@ const Graph = (props: { id: string }) => {
               }];
   
               // Create edge
-              updatedEdges = [...edges, {
+              updatedEdges = [...updatedEdges, {
                 id: `edge_${node.id}_${product.id}`,
                 source: node.id,
                 target: product.id,
@@ -231,7 +231,6 @@ const Graph = (props: { id: string }) => {
             }
           }
 
-          consola.info("Updated Nodes:", updatedNodes);
           setNodes(updatedNodes);
           setEdges(updatedEdges);
         }
