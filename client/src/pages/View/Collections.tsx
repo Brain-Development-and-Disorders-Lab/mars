@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Button, Flex, Heading, Table, TableContainer, Tag, TagLabel, TagRightIcon, Tbody, Text, Th, Thead, Tr, useToast } from "@chakra-ui/react";
+import { Button, Flex, Heading, Link, Table, TableContainer, Tag, TagLabel, TagRightIcon, Tbody, Text, Th, Thead, Tr, useToast } from "@chakra-ui/react";
 import { ChevronRightIcon, AddIcon, WarningIcon } from "@chakra-ui/icons";
 
 import { Loading } from "src/components/Loading";
 import _ from "underscore";
 
 // Navigation
-import { useNavigate, Link as RouterLink } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 // Database and models
 import { getData } from "src/database/functions";
@@ -52,8 +52,8 @@ const Collections = () => {
             <Heading size={"3xl"}>Collections</Heading>
             <Button
               rightIcon={<AddIcon />}
-              as={RouterLink}
-              to={"/create/collection/start"}
+              as={Link}
+              href={"/create/collection/start"}
               colorScheme={"green"}
             >
               Create

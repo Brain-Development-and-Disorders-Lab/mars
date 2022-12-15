@@ -7,8 +7,11 @@ import ReactFlow, {
   MarkerType,
   useNodesState,
   useEdgesState,
+  Node,
 } from "react-flow-renderer";
 import { Loading } from "../Loading";
+import _ from "underscore";
+import consola from "consola";
 
 // Database and models
 import { getData } from "src/database/functions";
@@ -23,53 +26,45 @@ const Graph = (props: { id: string }) => {
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [graphReady, setGraphReady] = useState(false);
 
-  // Get the data and setup the initial nodes and edges
-  useEffect(() => {
-    const response = getData(`/entities/${props.id}`);
-
-    // Handle the response from the database
-    response.then((value) => {
-      setEntityData(value);
-
-      // Check the contents of the response
-      if (value["error"] !== undefined) {
-        toast({
-          title: "Database Error",
-          description: value["error"],
-          status: "error",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-      }
-
-      setIsLoaded(true);
-    });
-    return;
-  }, []);
-
-  useEffect(() => {
-    if (isLoaded === true) {
-      // Create the Graph
-      createGraph();
+  const getEntityData = async (id: string): Promise<EntityModel> => {
+    const value = await getData(`/entities/${id}`);
+    if (value["error"] !== undefined) {
+      toast({
+        title: "Database Error",
+        description: value["error"],
+        status: "error",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true
+      });
+      throw new Error("Database Error");
+    } else {
+      return value;
     }
-  }, [isLoaded]);
+  };
+
+  const containsNode = (id: string): boolean => {
+    for (let node of nodes) {
+      if (_.isEqual(node.id, id)) {
+        return true;
+      }
+    }
+    return false;
+  };
 
   const createGraph = () => {
     const initialNodes = [];
     const initialEdges = [];
 
     // Add the origin
-    if (entityData.associations.origin.id !== "") {
+    if (!_.isNull(entityData.associations.origin.id)) {
       // Add node
       initialNodes.push({
-        id: "origin",
+        id: entityData.associations.origin.id,
         type: "input",
         data: {
           label: (
-            <>
-              Origin: {entityData.associations.origin.name}
-            </>
+            <>{entityData.associations.origin.name}</>
           ),
         },
         position: { x: 250, y: 0 },
@@ -77,9 +72,9 @@ const Graph = (props: { id: string }) => {
 
       // Create edge
       initialEdges.push({
-        id: "origin-entitiy",
-        source: "origin",
-        target: "current",
+        id: entityData.associations.origin.id,
+        source: entityData.associations.origin.id,
+        target: entityData._id,
         markerEnd: {
           type: MarkerType.ArrowClosed,
         },
@@ -89,43 +84,43 @@ const Graph = (props: { id: string }) => {
     // Add products
     if (entityData.associations.products.length > 0) {
       // Add nodes and edges
-      for (let i = 0; i < entityData.associations.products.length; i++) {
-        const product = entityData.associations.products[i];
-
+      for (let product of entityData.associations.products) {
         // Add node
         initialNodes.push({
-          id: `product_${i}`,
+          id: product.id,
           type: "output",
           data: {
-            label: <>Product: {product.name}</>,
+            label: <>{product.name}</>,
           },
           position: { x: 100, y: 200 },
         });
 
         // Create edge
         initialEdges.push({
-          id: `edge_product_${i}`,
-          source: "current",
-          target: `product_${i}`,
-          animated: true,
+          id: `edge_${entityData._id}_${product.id}`,
+          source: entityData._id,
+          target: product.id,
+          markerEnd: {
+            type: MarkerType.ArrowClosed,
+          },
         });
       }
     }
 
     // Default assuming origin and products
     let currentType = "default";
-    if (entityData.associations.origin.id === "" && entityData.associations.products.length > 0) {
-      currentType = "input";
-    } else if (entityData.associations.origin.id !== "" && entityData.associations.products.length === 0) {
+    if (!_.isNull(entityData.associations.origin.id) && entityData.associations.products.length === 0) {
       currentType = "output";
+    } else if (_.isNull(entityData.associations.origin.id) && entityData.associations.products.length > 0) {
+      currentType = "input";
     }
 
     // Add the current Entity to the diagram
     initialNodes.push({
-      id: "current",
+      id: entityData._id,
       type: currentType,
       data: {
-        label: <>Current: {entityData.name}</>,
+        label: <>{entityData.name}</>,
       },
       style: {
         color: "#333",
@@ -143,6 +138,122 @@ const Graph = (props: { id: string }) => {
     setGraphReady(true);
   };
 
+  const onNodeClick = (event: React.MouseEvent, node: Node) => {
+    consola.debug("Event:", event);
+
+    if (!_.isEqual(node.id, entityData._id)) {
+      // If the primary Entity hasn't been clicked, obtain Origin and Product nodes
+      // for the selected Entity
+      getEntityData(node.id).then((entity) => {
+        // Origin
+        if (!_.isNull(entity.associations.origin.id)) {
+          if (containsNode(entity.associations.origin.id) === false) {
+            // Firstly, update the current node type (if required)
+            setNodes([...(nodes.map((node) => {
+              if (_.isEqual(node.id, entity._id)) {
+                if (entity.associations.products.length > 0) {
+                  // If Products are specified as well, we need to set it to
+                  // "default" type
+                  node.type = "default";
+                } else {
+                  // If no Products are specified, the Entity only has Origin,
+                  // making it "output" type
+                  node.type = "output";
+                }
+              }
+              return node;
+            }))]);
+
+            // Add node
+            setNodes([...nodes, {
+              id: entity.associations.origin.id,
+              type: "input",
+              data: {
+                label: <>{entity.associations.origin.name}</>,
+              },
+              position: { x: 100, y: 200 },
+            }]);
+
+            // Create edge
+            setEdges([...edges, {
+              id: `edge_${entity.associations.origin.id}_${node.id}`,
+              source: entity.associations.origin.id,
+              target: node.id,
+              markerEnd: {
+                type: MarkerType.ArrowClosed,
+              },
+            }]);
+          }
+        }
+
+        // Products
+        if (entity.associations.products.length > 0) {
+          let updatedNodes = nodes;
+          let updatedEdges = edges;
+
+          for (let product of entity.associations.products) {
+            if (containsNode(product.id) === false) {
+              // Firstly, update the current node type (if required)
+              updatedNodes = [...(nodes.map((node) => {
+                if (_.isEqual(node.id, entity._id)) {
+                  if (!_.isNull(entity.associations.origin.id)) {
+                    // If an Origin is specified as well, we need to set it to
+                    // "default" type
+                    node.type = "default";
+                  } else {
+                    // If no Origin is specified, the Entity only has Products,
+                    // making it "input" type
+                    node.type = "input";
+                  }
+                }
+                return node;
+              }))];
+
+              // Add node
+              updatedNodes = [...nodes, {
+                id: product.id,
+                type: "output",
+                data: {
+                  label: <>{product.name}</>,
+                },
+                position: { x: 100, y: 200 },
+              }];
+  
+              // Create edge
+              updatedEdges = [...edges, {
+                id: `edge_${node.id}_${product.id}`,
+                source: node.id,
+                target: product.id,
+                markerEnd: {
+                  type: MarkerType.ArrowClosed,
+                },
+              }];
+            }
+          }
+
+          consola.info("Updated Nodes:", updatedNodes);
+          setNodes(updatedNodes);
+          setEdges(updatedEdges);
+        }
+      });
+    }
+  };
+
+  // Get the data and setup the initial nodes and edges
+  useEffect(() => {
+    getEntityData(props.id).then((entity) => {
+      setEntityData(entity);
+      setIsLoaded(true);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (isLoaded === true) {
+      // Create the Graph
+      createGraph();
+    }
+  }, [isLoaded]);
+
   return (
     <Box h={"full"}>
       {graphReady ? (
@@ -151,6 +262,7 @@ const Graph = (props: { id: string }) => {
           edges={edges}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
+          onNodeClick={onNodeClick}
           attributionPosition="bottom-right"
           fitView
         >

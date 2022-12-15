@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Button, Flex, Heading, Table, TableContainer, Tbody, Text, Th, Thead, Tr, useToast } from "@chakra-ui/react";
+import { Button, Flex, Heading, Link, Table, TableContainer, Tbody, Text, Th, Thead, Tr, useToast } from "@chakra-ui/react";
 import { ChevronRightIcon, AddIcon } from "@chakra-ui/icons";
 import { Loading } from "src/components/Loading";
 
 // Navigation
-import { useNavigate, Link as RouterLink } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 // Database and models
 import { getData } from "src/database/functions";
@@ -54,8 +54,8 @@ const Attributes = () => {
             <Heading size={"3xl"}>Attributes</Heading>
             <Button
               rightIcon={<AddIcon />}
-              as={RouterLink}
-              to={"/create/attribute/start"}
+              as={Link}
+              href={"/create/attribute/start"}
               colorScheme={"green"}
             >
               Create

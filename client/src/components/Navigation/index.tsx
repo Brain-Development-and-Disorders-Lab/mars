@@ -1,6 +1,5 @@
 // React and interface library
 import React, { ReactNode } from "react";
-import { Link as RouterLink } from "react-router-dom";
 import {
   Box,
   Flex,
@@ -25,8 +24,7 @@ import { BsCollection, BsGear, BsHexagon } from "react-icons/bs";
 // NavigationElement sub-component to generalize links
 const NavigationElement = ({ href, children, onClick }: { href: string, children: ReactNode, onClick?: () => void }) => (
   <Link
-    as={RouterLink}
-    to={href}
+    href={href}
     px={"2"}
     py={"2"}
     rounded={"md"}
@@ -63,7 +61,7 @@ const Navigation = () => {
             display={{ base: "none", md: "flex" }}
           >
             <Button key={"dashboard"} bg={"white"}>
-              <RouterLink to={"/"}>Dashboard</RouterLink>
+              <Link href={"/"}>Dashboard</Link>
             </Button>
 
             {/* Create menu */}
@@ -79,9 +77,9 @@ const Navigation = () => {
                 Create
               </MenuButton>
               <MenuList>
-                <MenuItem icon={<BsHexagon />} as={RouterLink} to={"/create/entity/start"}>Entity</MenuItem>
-                <MenuItem icon={<BsCollection />} as={RouterLink} to={"/create/collection/start"}>Collection</MenuItem>
-                <MenuItem icon={<BsGear />} as={RouterLink} to={"/create/attribute/start"}>Attribute</MenuItem>
+                <MenuItem icon={<BsHexagon />} as={Link} href={"/create/entity/start"}>Entity</MenuItem>
+                <MenuItem icon={<BsCollection />} as={Link} href={"/create/collection/start"}>Collection</MenuItem>
+                <MenuItem icon={<BsGear />} as={Link} href={"/create/attribute/start"}>Attribute</MenuItem>
               </MenuList>
             </Menu>
 
@@ -98,14 +96,14 @@ const Navigation = () => {
                 View
               </MenuButton>
               <MenuList>
-                <MenuItem icon={<BsHexagon />} as={RouterLink} to={"/entities"}>All Entities</MenuItem>
-                <MenuItem icon={<BsCollection />} as={RouterLink} to={"/collections"}>All Collections</MenuItem>
-                <MenuItem icon={<BsGear />} as={RouterLink} to={"/attributes"}>All Attributes</MenuItem>
+                <MenuItem icon={<BsHexagon />} as={Link} href={"/entities"}>All Entities</MenuItem>
+                <MenuItem icon={<BsCollection />} as={Link} href={"/collections"}>All Collections</MenuItem>
+                <MenuItem icon={<BsGear />} as={Link} href={"/attributes"}>All Attributes</MenuItem>
               </MenuList>
             </Menu>
 
             <Button key={"search"} bg={"white"} leftIcon={<SearchIcon />}>
-              <RouterLink to={"/search"}>Search</RouterLink>
+              <Link href={"/search"}>Search</Link>
             </Button>
           </HStack>
         </HStack>

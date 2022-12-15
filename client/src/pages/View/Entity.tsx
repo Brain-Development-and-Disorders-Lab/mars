@@ -371,7 +371,8 @@ export const Entity = () => {
                                 <Button
                                   key={`view-${collection}`}
                                   rightIcon={<ChevronRightIcon />}
-                                  onClick={() => {navigate(`/collections/${collection}`)}}
+                                  as={Link}
+                                  href={`/collections/${collection}`}
                                 >
                                   View
                                 </Button>
@@ -432,7 +433,8 @@ export const Entity = () => {
                                 <Button
                                   key={`view-${product.id}`}
                                   rightIcon={<ChevronRightIcon />}
-                                  onClick={() => {navigate(`/entities/${product.id}`)}}
+                                  as={Link}
+                                  href={`/entities/${product.id}`}
                                 >
                                   View
                                 </Button>

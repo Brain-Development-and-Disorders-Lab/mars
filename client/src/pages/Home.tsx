@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { Button, Flex, Heading, Table, TableContainer, Text, Thead, Tr, Th, useToast, Stat, StatLabel, StatNumber, StatHelpText, Spacer, List, ListItem, Tbody } from "@chakra-ui/react";
+import { Button, Flex, Heading, Table, TableContainer, Text, Thead, Tr, Th, useToast, Stat, StatLabel, StatNumber, StatHelpText, Spacer, List, ListItem, Tbody, Link } from "@chakra-ui/react";
 import { AddIcon, ChevronRightIcon, RepeatClockIcon } from "@chakra-ui/icons";
 import { getData } from "src/database/functions";
 import { CollectionModel, EntityModel, UpdateModel } from "types";
-import { useNavigate, Link as RouterLink } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Loading } from "src/components/Loading";
 import Linky from "src/components/Linky";
 
@@ -97,8 +97,8 @@ const Home = () => {
                 <Heading color={"gray.700"}>Collections</Heading>
                 <Button
                   leftIcon={<AddIcon />}
-                  as={RouterLink}
-                  to={"/create/collection/start"}
+                  as={Link}
+                  href={"/create/collection/start"}
                   colorScheme={"green"}
                 >
                   Create
@@ -178,8 +178,8 @@ const Home = () => {
                 <Heading color={"white"}>Entities</Heading>
                 <Button
                   leftIcon={<AddIcon />}
-                  as={RouterLink}
-                  to={"/create/entity/start"}
+                  as={Link}
+                  href={"/create/entity/start"}
                   colorScheme={"green"}
                 >
                   Create

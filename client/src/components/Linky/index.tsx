@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link as RouterLink } from "react-router-dom";
-import { Button, useToast } from "@chakra-ui/react";
+import { Button, Link, useToast } from "@chakra-ui/react";
 
 // Database and models
 import { getData } from "src/database/functions";
@@ -42,8 +41,8 @@ const Linky = (props: LinkyProps) => {
     <Button
       variant={"link"}
       color={props.color ? props.color : "gray.600"}
-      as={RouterLink}
-      to={`/${props.type}/${props.id}`}
+      as={Link}
+      href={`/${props.type}/${props.id}`}
     >
       {linkData.name}
     </Button>

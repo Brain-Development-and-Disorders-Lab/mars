@@ -1,9 +1,9 @@
 // React
 import React, { useEffect, useState } from "react";
-import { Flex, Heading, Table, TableContainer, Th, Thead, Tr, Text, useToast, Button, Tbody } from "@chakra-ui/react";
+import { Flex, Heading, Table, TableContainer, Th, Thead, Tr, Text, useToast, Button, Tbody, Link } from "@chakra-ui/react";
 
 // Navigation
-import { useNavigate, Link as RouterLink } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 // Database and models
 import { getData } from "src/database/functions";
@@ -52,8 +52,8 @@ const Entities = () => {
             <Heading size={"3xl"}>Entities</Heading>
             <Button
               rightIcon={<AddIcon />}
-              as={RouterLink}
-              to={"/create/entity/start"}
+              as={Link}
+              href={"/create/entity/start"}
               colorScheme={"green"}
             >
               Create
