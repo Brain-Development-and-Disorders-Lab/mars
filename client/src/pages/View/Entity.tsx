@@ -133,7 +133,7 @@ export const Entity = () => {
       description: entityData.description,
       collections: entityData.collections.join(),
       origin: entityData.associations.origin.name,
-      products: entityData.associations.products.join(),
+      products: entityData.associations.products.map((product) => { return product.name }).join(),
     };
 
     let fields = ["id", "name", "created", "owner", "description", "collections", "origin", "products"];
