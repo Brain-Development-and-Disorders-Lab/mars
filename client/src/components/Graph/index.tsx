@@ -8,10 +8,12 @@ import ReactFlow, {
   useNodesState,
   useEdgesState,
   Node,
+  Edge,
 } from "react-flow-renderer";
 import { Loading } from "../Loading";
 import _ from "underscore";
 import consola from "consola";
+// import ELK from "elkjs";
 
 // Database and models
 import { getData } from "src/database/functions";
@@ -53,8 +55,8 @@ const Graph = (props: { id: string }) => {
   };
 
   const createGraph = () => {
-    const initialNodes = [];
-    const initialEdges = [];
+    const initialNodes = [] as Node[];
+    const initialEdges = [] as Edge[];
 
     // Add the origin
     if (!_.isNull(entityData.associations.origin.id)) {
@@ -128,6 +130,31 @@ const Graph = (props: { id: string }) => {
       },
       position: { x: 250, y: 100 },
     });
+
+    // const elk = new ELK();
+    // const layout = () => {
+    //   const layoutNodes = initialNodes.map((node) => {
+    //     return {
+    //       id: node.id,
+    //       width: 70,
+    //       height: 30,
+    //     };
+    //   });
+
+    //   const graph = {
+    //     id: "root",
+    //     layoutOptions: {
+    //       "elk.algorithm": "layered",
+    //       "elk.direction": "DOWN",
+    //       "nodePlacement.strategy": "SIMPLE"
+    //     },
+     
+    //     children: layoutNodes,
+    //     edges: initialEdges,
+    //   };
+
+    //   return elk.layout(graph);
+    // }
 
     // Set the nodes
     setNodes([...nodes, ...initialNodes]);
