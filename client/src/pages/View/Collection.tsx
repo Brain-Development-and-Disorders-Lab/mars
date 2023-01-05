@@ -1,6 +1,6 @@
 // React
 import React, { useEffect, useState } from "react";
-import { Box, Button, Flex, FormControl, FormLabel, Heading, Modal, ModalCloseButton, ModalContent, ModalHeader, ModalOverlay, Select, Table, TableContainer, Tag, TagCloseButton, Tbody, Td, Text, Th, Thead, Tr, useDisclosure, useToast } from "@chakra-ui/react";
+import { Button, Flex, FormControl, FormLabel, Heading, Modal, ModalCloseButton, ModalContent, ModalHeader, ModalOverlay, Select, Table, TableContainer, Tag, TagCloseButton, Tbody, Td, Text, Th, Thead, Tr, useDisclosure, useToast } from "@chakra-ui/react";
 import { AddIcon, ChevronRightIcon, CloseIcon } from "@chakra-ui/icons";
 
 // Navigation
@@ -13,6 +13,7 @@ import { CollectionModel, EntityModel } from "types";
 // Custom components
 import Linky from "src/components/Linky";
 import { Loading } from "src/components/Loading";
+import { PageContainer } from "src/components/PageContainer";
 
 import _ from "underscore";
 import consola from "consola";
@@ -94,7 +95,7 @@ export const Collection = () => {
 
   return (
     isLoaded ? (
-      <Box m={"2"}>
+      <PageContainer>
         <Flex p={"2"} pt={"8"} pb={"8"} direction={"row"} justify={"space-between"} align={"center"} wrap={"wrap"}>
           <Heading size={"2xl"}>Collection:{" "}{collectionData.name}</Heading>
         </Flex>
@@ -267,7 +268,7 @@ export const Collection = () => {
             </Flex>
           </ModalContent>
         </Modal>
-      </Box>
+      </PageContainer>
     ) : (
       <Loading />
     )

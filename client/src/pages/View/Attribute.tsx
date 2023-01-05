@@ -1,11 +1,19 @@
 import React, { useEffect, useState } from "react";
-import { Box, Flex, Heading, Table, TableContainer, Tbody, Td, Text, Th, Thead, Tr, useToast } from "@chakra-ui/react";
-import { Loading } from "src/components/Loading";
-import { useParams } from "react-router-dom";
+import { Flex, Heading, Table, TableContainer, Tbody, Td, Text, Th, Thead, Tr, useToast } from "@chakra-ui/react";
+
+// Custom components
 import ParameterGroup from "src/components/ParameterGroup";
-import _ from "underscore";
+import { Loading } from "src/components/Loading";
+import { PageContainer } from "src/components/PageContainer";
+
+// Navigation
+import { useParams } from "react-router-dom";
+
+// Database and models
 import { getData } from "src/database/functions";
 import { AttributeModel } from "types";
+
+import _ from "underscore";
 
 export const Attribute = () => {
   const { id } = useParams();
@@ -37,7 +45,7 @@ export const Attribute = () => {
 
   return (
     isLoaded ? (
-      <Box m={"2"}>
+      <PageContainer>
          <Flex p={"2"} pt={"8"} pb={"8"} direction={"row"} justify={"space-between"} align={"center"} wrap={"wrap"}>
           <Heading size={"2xl"}>Attribute:{" "}{attributeData.name}</Heading>
         </Flex>
@@ -76,7 +84,7 @@ export const Attribute = () => {
             <Text>No parameters.</Text>
           }
         </Flex>
-      </Box>
+      </PageContainer>
     ) : (
       <Loading />
     )

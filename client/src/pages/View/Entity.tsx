@@ -1,6 +1,6 @@
 // React
 import React, { useEffect, useState } from "react";
-import { Box, Button, Flex, Heading, Table, TableContainer, Tbody, Th, Text, Tr, Link, useToast, Modal, Icon, Thead, Td, Textarea, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, useDisclosure, Container, Spacer, Popover, PopoverTrigger, PopoverContent, PopoverCloseButton, PopoverHeader, PopoverBody, PopoverArrow } from "@chakra-ui/react";
+import { Button, Flex, Heading, Table, TableContainer, Tbody, Th, Text, Tr, Link, useToast, Modal, Icon, Thead, Td, Textarea, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, useDisclosure, Container, Popover, PopoverTrigger, PopoverContent, PopoverCloseButton, PopoverHeader, PopoverBody, PopoverArrow } from "@chakra-ui/react";
 import { AddIcon, CheckIcon, ChevronRightIcon, CloseIcon } from "@chakra-ui/icons";
 import { AiOutlineEdit, AiOutlineSave } from "react-icons/ai";
 import { BsPrinter } from "react-icons/bs";
@@ -26,6 +26,7 @@ import Linky from "src/components/Linky";
 import AttributeCard from "src/components/AttributeCard";
 import Graph from "src/components/Graph";
 import { Loading } from "src/components/Loading";
+import { PageContainer } from "src/components/PageContainer";
 
 export const Entity = () => {
   const { id } = useParams();
@@ -213,62 +214,57 @@ export const Entity = () => {
 
   return (
     isLoaded ? (
-      <Box m={"2"}>
+      <PageContainer>
         <Flex p={"2"} pt={"8"} pb={"8"} direction={"row"} justify={"space-between"} align={"center"} wrap={"wrap"}>
           <Heading size={"2xl"}>Entity:{" "}{entityData.name}</Heading>
-        </Flex>
 
-        {/* Buttons */}
-        <Flex direction={"row"} p={"2"} gap={"2"}>
-          <Button onClick={onOpen} rightIcon={<Icon as={SlGraph} />} colorScheme={"orange"}>
-            View Graph
-          </Button>
-          <Button onClick={handlePrintClick} rightIcon={<Icon as={BsPrinter} />} colorScheme={"blue"}>
-            Print Label
-          </Button>
-
-          <Spacer />
-          <Button
-            onClick={handleEditClick}
-            colorScheme={editing ? "green" : "gray"}
-            rightIcon={editing ? <Icon as={AiOutlineSave} /> : <Icon as={AiOutlineEdit} />}
-          >
-            {editing ? "Save" : "Edit"}
-          </Button>
-          <Popover>
-            <PopoverTrigger>
-              <Button
-                colorScheme={"red"}
-                rightIcon={<CloseIcon />}
-              >
-                Delete
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent>
-              <PopoverArrow />
-              <PopoverCloseButton />
-              <PopoverHeader>Confirmation</PopoverHeader>
-              <PopoverBody>
-                Are you sure you want to delete this Entity?
-                <Flex direction={"row"} p={"2"} justify={"center"}>
-                  <Button
-                    colorScheme={"green"}
-                    rightIcon={<CheckIcon />}
-                    onClick={handleDeleteClick}
-                  >
-                    Confirm
-                  </Button>
-                </Flex>
-              </PopoverBody>
-            </PopoverContent>
-          </Popover>
-          
+          {/* Buttons */}
+          <Flex direction={"row"} p={"2"} gap={"2"}>
+            <Button
+              onClick={handleEditClick}
+              colorScheme={editing ? "green" : "gray"}
+              rightIcon={editing ? <Icon as={AiOutlineSave} /> : <Icon as={AiOutlineEdit} />}
+            >
+              {editing ? "Save" : "Edit"}
+            </Button>
+            <Popover>
+              <PopoverTrigger>
+                <Button
+                  colorScheme={"red"}
+                  rightIcon={<CloseIcon />}
+                >
+                  Delete
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent>
+                <PopoverArrow />
+                <PopoverCloseButton />
+                <PopoverHeader>Confirmation</PopoverHeader>
+                <PopoverBody>
+                  Are you sure you want to delete this Entity?
+                  <Flex direction={"row"} p={"2"} justify={"center"}>
+                    <Button
+                      colorScheme={"green"}
+                      rightIcon={<CheckIcon />}
+                      onClick={handleDeleteClick}
+                    >
+                      Confirm
+                    </Button>
+                  </Flex>
+                </PopoverBody>
+              </PopoverContent>
+            </Popover>
+          </Flex>
         </Flex>
 
         <Flex p={"2"} direction={"row"} wrap={"wrap"}>
           {/* Metadata table */}
-          <Flex gap={"2"} direction={"column"} grow={"1"}>
-            <TableContainer background={"gray.50"} rounded={"2xl"} p={"4"}>
+          <Flex p={"2"} gap={"2"} grow={"1"} direction={"column"}>
+            <Flex direction={"row"} justify={"space-between"} mb={"sm"}>
+              <Heading margin={"none"}>Overview</Heading>
+            </Flex>
+
+            <TableContainer>
               <Table mt={"sm"} colorScheme={"gray"}>
                 <Thead>
                   <Tr>
@@ -325,6 +321,16 @@ export const Entity = () => {
                 </Tbody>
               </Table>
             </TableContainer>
+
+            {/* Buttons */}
+            <Flex direction={"row"} gap={"2"}>
+              <Button onClick={onOpen} rightIcon={<Icon as={SlGraph} />} colorScheme={"orange"}>
+                View Graph
+              </Button>
+              <Button onClick={handlePrintClick} rightIcon={<Icon as={BsPrinter} />} colorScheme={"blue"}>
+                Print Label
+              </Button>
+            </Flex>
           </Flex>
 
           <Flex p={"2"} gap={"2"} direction={"column"} grow={"2"}>
@@ -489,7 +495,7 @@ export const Entity = () => {
             </ModalBody>
           </ModalContent>
         </Modal>
-      </Box>
+      </PageContainer>
     ) : (
       <Loading />
     )
