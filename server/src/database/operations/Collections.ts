@@ -44,17 +44,14 @@ export const addEntity = (collection: string, entity: string) => {
             registerUpdate({
               targets: {
                 primary: {
-                  id: collection,
                   type: "collections",
-                },
-                secondary: {
-                  id: entity,
-                  type: "entities",
+                  id: collection,
+                  name: collectionResult.name,
                 },
               },
               operation: {
                 timestamp: new Date(Date.now()),
-                type: "add",
+                type: "modify",
                 details: "add Entity"
               }
             });

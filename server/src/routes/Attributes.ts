@@ -68,8 +68,9 @@ AttributesRoute.route("/attributes/create").post(
     registerUpdate({
       targets: {
         primary: {
-          id: insertedId,
           type: "attributes",
+          id: insertedId,
+          name: data.name,
         },
       },
       operation: {

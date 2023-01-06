@@ -22,6 +22,7 @@
     "chakra-dayzed-datepicker": "^0.2.5",
     "consola": "^2.15.3",
     "date-fns": "^2.29.3",
+    "dayjs": "^1.11.7",
     "dayzed": "^3.2.3",
     "elkjs": "^0.8.2",
     "framer-motion": "^7.6.9",

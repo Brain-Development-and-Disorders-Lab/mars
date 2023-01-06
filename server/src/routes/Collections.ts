@@ -69,8 +69,9 @@ CollectionsRoute.route("/collections/create").post(
     registerUpdate({
       targets: {
         primary: {
-          id: insertedId,
           type: "collections",
+          id: insertedId,
+          name: data.name,
         },
       },
       operation: {
@@ -117,17 +118,19 @@ CollectionsRoute.route("/collections/create").post(
                   registerUpdate({
                     targets: {
                       primary: {
-                        id: insertedId,
                         type: "collections",
+                        id: insertedId,
+                        name: data.name,
                       },
                       secondary: {
-                        id: entity,
                         type: "entities",
+                        id: entity,
+                        name: result.name,
                       },
                     },
                     operation: {
                       timestamp: new Date(Date.now()),
-                      type: "add",
+                      type: "modify",
                     }
                   });
                 }
@@ -214,17 +217,14 @@ export const add = (data: { entityId: string[], collectionId: string }, response
                 registerUpdate({
                   targets: {
                     primary: {
-                      id: data.collectionId,
                       type: "collections",
-                    },
-                    secondary: {
-                      id: entity,
-                      type: "entities",
+                      id: data.collectionId,
+                      name: result.name,
                     },
                   },
                   operation: {
                     timestamp: new Date(Date.now()),
-                    type: "add",
+                    type: "modify",
                   }
                 });
               }
@@ -383,17 +383,19 @@ export const remove = (data: { entityId: string, collectionId: string }, respons
               registerUpdate({
                 targets: {
                   primary: {
-                    id: data.collectionId,
                     type: "collections",
+                    id: data.collectionId,
+                    name: collectionResult.name,
                   },
                   secondary: {
-                    id: data.entityId,
                     type: "entities",
+                    id: data.entityId,
+                    name: entityResult.name,
                   },
                 },
                 operation: {
                   timestamp: new Date(Date.now()),
-                  type: "remove",
+                  type: "modify",
                 }
               });
             }

@@ -1,8 +1,3 @@
-// MongoDB
-import { ObjectId } from "mongodb";
-
-import consola from "consola";
-
 // Utility functions
 import { getDatabase } from "../connection";
 

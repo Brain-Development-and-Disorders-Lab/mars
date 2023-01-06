@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Button, Flex, Heading, Table, TableContainer, Text, Thead, Tr, Th, useToast, Stat, StatLabel, StatNumber, StatHelpText, Spacer, List, ListItem, Tbody, Link } from "@chakra-ui/react";
+import { Button, Flex, Heading, Table, TableContainer, Text, Thead, Tr, Th, useToast, Stat, StatLabel, StatNumber, StatHelpText, Spacer, List, ListItem, Tbody, Link, Badge } from "@chakra-ui/react";
 import { AddIcon, ChevronRightIcon, RepeatClockIcon } from "@chakra-ui/icons";
 import { getData } from "src/database/functions";
 import { CollectionModel, EntityModel, UpdateModel } from "types";
 import { useNavigate } from "react-router-dom";
 import { Loading } from "src/components/Loading";
-import Linky from "src/components/Linky";
+import dayjs from "dayjs";
 
 const Home = () => {
   // Enable navigation
@@ -260,19 +260,37 @@ const Home = () => {
             <Heading>Recent Changes{" "}<RepeatClockIcon w={8} h={8} /></Heading>
             <List>
               {updateData.length > 0 ?
-                updateData.map((update) => {
-                  return (
-                    <ListItem key={`update-${update._id}`}>
-                      <Flex direction={"row"} gap={"2"}>
-                        <Text fontSize={"md"} as={"b"} >{new Date(update.operation.timestamp).toDateString()}:</Text>
-                        <Text>{update.operation.type}</Text>
-                        <Text><Linky color={"white"} id={update.targets.primary.id} type={update.targets.primary.type} /></Text>
-                        {update.targets.secondary &&
-                          <Text><Linky color={"white"} id={update.targets.secondary.id} type={update.targets.secondary.type} /></Text>
-                        }
-                      </Flex>
-                    </ListItem>
-                  );
+                updateData.reverse().map((update, index) => {
+                  if (index < 10) {
+                    // Configure the badge
+                    let badgeColor = "green";
+                    switch (update.operation.type) {
+                      case "add":
+                        badgeColor = "green";
+                        break;
+                      case "modify":
+                        badgeColor = "blue";
+                        break;
+                      case "remove":
+                        badgeColor = "red";
+                        break;
+                    }
+
+                    return (
+                      <ListItem key={`update-${update._id}`}>
+                        <Flex direction={"row"} p={"2"} gap={"2"} mt={"2"} mb={"2"} align={"center"} color={"gray.400"} background={"white"} rounded={"xl"}>
+                          <Text fontSize={"md"} as={"b"} >{dayjs(update.operation.timestamp).format("DD MMM")}</Text>
+                          <Text>{update.targets.primary.name}</Text>
+                          {update.targets.secondary &&
+                            <Text>{update.targets.secondary.name}</Text>
+                          }
+                          <Spacer />
+                          <Badge colorScheme={badgeColor}>{update.operation.type}</Badge>
+                        </Flex>
+                      </ListItem>
+                    );
+                  }
+                  return;
                 })
               :
                 <Text fontSize={"md"}>No updates yet.</Text>

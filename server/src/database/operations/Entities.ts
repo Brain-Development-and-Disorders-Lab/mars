@@ -55,17 +55,19 @@ export const addProduct = (entity: string, product: { name: string, id: string }
             registerUpdate({
               targets: {
                 primary: {
-                  id: entity,
                   type: "entities",
+                  id: entity,
+                  name: result.name,
                 },
                 secondary: {
-                  id: product.id,
                   type: "entities",
+                  id: product.id,
+                  name: product.name,
                 },
               },
               operation: {
                 timestamp: new Date(Date.now()),
-                type: "add",
+                type: "modify",
                 details: "add Product"
               }
             });
@@ -111,17 +113,19 @@ export const setOrigin = (entity: { name: string, id: string }, origin: { name: 
             registerUpdate({
               targets: {
                 primary: {
-                  id: entity.id,
                   type: "entities",
+                  id: entity.id,
+                  name: "",
                 },
                 secondary: {
-                  id: origin.id,
                   type: "entities",
+                  id: origin.id,
+                  name: "",
                 },
               },
               operation: {
                 timestamp: new Date(Date.now()),
-                type: "add",
+                type: "modify",
                 details: "add Origin"
               }
             });

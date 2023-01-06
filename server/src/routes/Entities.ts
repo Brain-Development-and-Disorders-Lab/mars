@@ -77,8 +77,9 @@ EntitiesRoute.route("/entities/create").post((request: { body: EntityStruct }, r
     registerUpdate({
       targets: {
         primary: {
-          id: insertedId,
           type: "entities",
+          id: insertedId,
+          name: entityData.name,
         },
       },
       operation: {
@@ -191,8 +192,9 @@ EntitiesRoute.route("/entities/update").post((request: { body: EntityModel }, re
             registerUpdate({
               targets: {
                 primary: {
-                  id: entityRequest._id,
                   type: "entities",
+                  id: entityRequest._id,
+                  name: entityRequest.name,
                 },
               },
               operation: {
@@ -217,11 +219,36 @@ EntitiesRoute.route("/entities/:id").delete((request: { params: { id: any } }, r
     consola.debug("Remove an Entity:", "/entities");
 
     let query = { _id: new ObjectId(request.params.id) };
+
+    // Get the Entity data
+    let entityResult: EntityModel;
+    getDatabase()
+      .collection(ENTITIES_COLLECTION)
+      .findOne(query, (error: any, result: any) => {
+        if (error) throw error;
+        entityResult = result;
+        response.json(result);
+      });
+
+    // Delete the Entity
     getDatabase()
       .collection(ENTITIES_COLLECTION)
       .deleteOne(query, (error: any, content: any) => {
         if (error) throw error;
         consola.success("1 Entity deleted");
+        registerUpdate({
+          targets: {
+            primary: {
+              type: "entities",
+              id: entityResult._id,
+              name: entityResult.name,
+            },
+          },
+          operation: {
+            timestamp: new Date(Date.now()),
+            type: "remove",
+          }
+        });
         response.json(content);
       });
   }

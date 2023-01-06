@@ -84,10 +84,12 @@ export type UpdateStruct = {
     primary: {
       type: "entities" | "collections" | "attributes",
       id: string,
+      name: string,
     },
     secondary?: {
       type: "entities" | "collections" | "attributes",
       id: string,
+      name: string,
     },
   };
   operation: {
