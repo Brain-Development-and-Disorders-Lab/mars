@@ -1,6 +1,8 @@
 # Metadata Manager
 
-An open-source and fully-customizable workflow tool for tracking and managing metadata generated from scientific experiments.
+An open-source and customizable workflow tool for tracking and managing metadata generated from scientific experiments.
+
+**⚠️ WARNING: This software is still in early development. It should not be used to manage real scientific data at this stage. There are known issues updating and deleting Entities and Collections.**
 
 ## Concepts
 
@@ -20,7 +22,7 @@ Entities have the following metadata configured:
 
 ### Attributes
 
-Attributes are the primary method of expressing metadata associated with Entities. Attributes contain points of metadata known as Parameters. Parameters can be of the following types:
+Attributes are the primary method of expressing metadata associated with Entities. Attributes contain points of metadata known as *Parameters*. Parameters can be of the following types:
 
 - `string`: A textual description of any length.
 - `number`: A numerical value.
@@ -34,10 +36,14 @@ Collections are simply groups of Entities. Collections can be of one type of Ent
 
 ## Deployment
 
-The application has been entirely containerized using Docker containers. To start a fresh instance of the application, use `docker-compose`:
+The application has (⚠️ almost) been entirely containerized using Docker containers. To start a fresh instance of the application, use `docker compose`:
 
 ```Bash
-$ docker-compose up
+$ docker compose up
 ```
 
 This command will build all required containers before starting the containers required to run the system. The system can then be viewed in the browser at `localhost:8080`, and the MongoDB database can be browsed using the `mongo-express` interface accessible at `localhost:8081`.
+
+**⚠️ Note: Currently, only the MongoDB instance and `mongo-express` interface are started. See the below instructions to start the client frontend and Express.js server.**
+
+To start the client frontent, run `yarn start` in the `/client` directory. Start the Express.js server by running `yarn build` and `yarn start` in the `/server` directory. Both the client and server should be running alongside the MongoDB instance before attempting to access the frontend at `localhost:8080`.
