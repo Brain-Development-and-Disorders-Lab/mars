@@ -34,6 +34,15 @@ Attributes are the primary method of expressing metadata associated with Entitie
 
 Collections are simply groups of Entities. Collections can be of one type of Entities, or a mixture of multiple types.
 
+## Features
+
+- Searchable database of all metadata.
+- Customizable assignment of metadata elements.
+- Extensible and configurable "Entity" concept.
+- Graph illustrations of relationships between and evolutions of Entities.
+- Data export for label creation.
+- Changelog system.
+
 ## Deployment
 
 The application has (⚠️ almost) been entirely containerized using Docker containers. To start a fresh instance of the application, use `docker compose`:
