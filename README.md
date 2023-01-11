@@ -2,6 +2,8 @@
 
 An open-source and customizable workflow tool for tracking and managing metadata generated from scientific experiments.
 
+<img src="metadata-manager.png">
+
 **⚠️ WARNING: This software is still in early development. It should not be used to manage real scientific data at this stage. There are known issues updating and deleting Entities and Collections.**
 
 ## Concepts
