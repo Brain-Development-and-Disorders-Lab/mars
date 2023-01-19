@@ -12,9 +12,8 @@ import {
 
 // Utility functions
 import { getDatabase } from "../database/connection";
-import { addEntity } from "../database/operations/Collections";
-import { setOrigin, addProduct } from "../database/operations/Entities";
 import { registerUpdate } from "../database/operations/Updates";
+import { Entities } from "../database/operations/Entities";
 
 // Constants
 const ENTITIES_COLLECTION = "entities";
@@ -23,94 +22,41 @@ const EntitiesRoute = express.Router();
 
 // Route: View all Entities
 EntitiesRoute.route("/entities").get((request: any, response: any) => {
-  consola.debug("View all Entities:", "/entities");
-
-  getDatabase()
-    .collection(ENTITIES_COLLECTION)
-    .find({})
-    .toArray((error: any, result: any) => {
-      if (error) throw error;
-      response.json(result);
-    });
+  Entities.getAll().then((entities: EntityStruct[]) => {
+    response.json(entities);
+  });
 });
 
 // Route: View specific Entity
 EntitiesRoute.route("/entities/:id").get((request: any, response: any) => {
-  consola.debug("View Entity:", "/entities/" + request.params.id);
-
-  const query = { _id: new ObjectId(request.params.id) };
-  getDatabase()
-    .collection(ENTITIES_COLLECTION)
-    .findOne(query, (error: any, result: any) => {
-      if (error) throw error;
-      response.json(result);
-    });
+  Entities.getOne(request.params.id).then((entity: EntityStruct) => {
+    response.json(entity);
+  });
 });
 
 // Route: Create a new Entity, expects EntityStruct data
 EntitiesRoute.route("/entities/create").post((request: { body: EntityStruct }, response: any) => {
-    consola.debug("Create new Entity:", "/entities/create", '"' + request.body.name + '"');
-
-    let entityData = {
-      name: request.body.name,
-      created: request.body.created,
-      owner: request.body.owner,
-      description: request.body.description,
-      collections: request.body.collections,
-      associations: {
-        origin: request.body.associations.origin,
-        products: request.body.associations.products,
-      },
-      attributes: request.body.attributes,
-    };
-
-    // Insert the new Entity
-    getDatabase()
-      .collection(ENTITIES_COLLECTION)
-      .insertOne(entityData, (error: any, content: any) => {
-        if (error) throw error;
-        response.json(content);
-      });
-
-    // Retrieve the ID of the inserted Entity
-    const insertedId = (entityData as EntityStruct & { _id: string })._id;
-    registerUpdate({
-      targets: {
-        primary: {
-          type: "entities",
-          id: insertedId,
-          name: entityData.name,
+  Entities.addOne(request.body).then((entity: EntityModel) => {
+      registerUpdate({
+        targets: {
+          primary: {
+            type: "entities",
+            id: entity._id,
+            name: entity.name,
+          },
         },
-      },
-      operation: {
-        timestamp: new Date(Date.now()),
-        type: "add",
-      }
+        operation: {
+          timestamp: new Date(Date.now()),
+          type: "add",
+        }
+      });
+
+      response.json({
+        id: entity._id,
+        name: entity.name,
+        status: "success",
+      });
     });
-
-    // We need to apply the associations that have been specified
-    if (entityData.associations.origin.id) {
-      addProduct(entityData.associations.origin.id, {
-        name: entityData.name,
-        id: insertedId,
-      });
-    } else if (entityData.associations.products.length > 0) {
-      // Iterate over each product, setting their origin to the current Entity being added
-      entityData.associations.products.forEach((product) => {
-        setOrigin(product, {
-          name: entityData.name,
-          id: insertedId,
-        });
-      });
-    }
-
-    // We need to apply the collections that have been specified
-    if (entityData.collections.length > 0) {
-      consola.info("Collections specified, adding new Entity to each...");
-      entityData.collections.map((collection) => {
-        addEntity(collection, insertedId);
-      });
-    }
   }
 );
 
@@ -180,7 +126,6 @@ EntitiesRoute.route("/entities/update").post((request: { body: EntityModel }, re
       };
 
       // If there are changes to the products or collections, we need to update those
-
       getDatabase()
         .collection(ENTITIES_COLLECTION)
         .updateOne(
