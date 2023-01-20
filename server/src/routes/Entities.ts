@@ -5,10 +5,7 @@ import { ObjectId } from "mongodb";
 import _ from "underscore";
 
 // Import types from the client to enforce structure
-import {
-  EntityModel,
-  EntityStruct,
-} from "../../types";
+import { EntityModel, EntityStruct } from "@types";
 
 // Utility functions
 import { getDatabase } from "../database/connection";
@@ -36,7 +33,7 @@ EntitiesRoute.route("/entities/:id").get((request: any, response: any) => {
 
 // Route: Create a new Entity, expects EntityStruct data
 EntitiesRoute.route("/entities/create").post((request: { body: EntityStruct }, response: any) => {
-  Entities.addOne(request.body).then((entity: EntityModel) => {
+  Entities.insert(request.body).then((entity: EntityModel) => {
       registerUpdate({
         targets: {
           primary: {

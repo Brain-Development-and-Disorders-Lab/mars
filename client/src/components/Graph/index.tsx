@@ -10,14 +10,14 @@ import ReactFlow, {
   Node,
   Edge,
 } from "react-flow-renderer";
-import { Loading } from "../Loading";
+import { Loading } from "@components/Loading";
 import _ from "underscore";
 import consola from "consola";
 // import ELK from "elkjs";
 
 // Database and models
-import { getData } from "src/database/functions";
-import { EntityModel } from "types";
+import { getData } from "@database/functions";
+import { EntityModel } from "@types";
 
 const Graph = (props: { id: string }) => {
   const toast = useToast();

@@ -7,13 +7,13 @@ import { AddIcon, ChevronRightIcon, CloseIcon } from "@chakra-ui/icons";
 import { useParams, useNavigate } from "react-router-dom";
 
 // Database and models
-import { getData, postData } from "src/database/functions";
-import { CollectionModel, EntityModel } from "types";
+import { getData, postData } from "@database/functions";
+import { CollectionModel, EntityModel } from "@types";
 
 // Custom components
-import Linky from "src/components/Linky";
-import { Loading } from "src/components/Loading";
-import { PageContainer } from "src/components/PageContainer";
+import Linky from "@components/Linky";
+import { Loading } from "@components/Loading";
+import { PageContainer } from "@components/PageContainer";
 
 import _ from "underscore";
 import consola from "consola";

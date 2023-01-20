@@ -1,5 +1,3 @@
-import { ReactElement } from "react";
-
 // A new type is declared for each step.
 declare namespace Create.Entity {
   type Base = {
@@ -76,7 +74,7 @@ declare namespace Parameter {
     disabled?: boolean;
     showRemove?: boolean;
     onRemove?: (identifier: string) => void;
-  };
+  }
 
   type PNumber = Base & {
     type: "number";
@@ -107,7 +105,7 @@ declare namespace Parameter {
     data: string;
     onUpdate?: (data: PEntity) => void;
   };
-};
+}
 
 declare type Parameters = Parameter.PDate | Parameter.PEntity | Parameter.PNumber | Parameter.PString | Parameter.PURL;
 

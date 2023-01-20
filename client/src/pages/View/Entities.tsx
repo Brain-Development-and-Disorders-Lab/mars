@@ -7,12 +7,12 @@ import { ChevronRightIcon, AddIcon } from "@chakra-ui/icons";
 import { useNavigate } from "react-router-dom";
 
 // Database and models
-import { getData } from "src/database/functions";
-import { EntityModel } from "types";
+import { getData } from "@database/functions";
+import { EntityModel } from "@types";
 
 // Custom components
-import { PageContainer } from "src/components/PageContainer";
-import { Loading } from "src/components/Loading";
+import { PageContainer } from "@components/PageContainer";
+import { Loading } from "@components/Loading";
 
 const Entities = () => {
   const navigate = useNavigate();

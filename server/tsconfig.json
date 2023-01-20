@@ -1,7 +1,11 @@
 {
-  "include": ["src", "types"],
+  "include": ["src"],
   "compilerOptions": {
     "strict": true,
+    "baseUrl": "./",
+    "paths": {
+      "@types": ["../types"],
+    },
     "forceConsistentCasingInFileNames": true,
     "outDir": "dist",
     "noImplicitAny": true,

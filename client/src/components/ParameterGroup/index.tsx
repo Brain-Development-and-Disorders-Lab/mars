@@ -8,8 +8,8 @@ import { RiNumbersLine } from "react-icons/ri";
 import _ from "underscore";
 
 // Custom types and components
-import { Parameters } from "types";
-import { DateParameter, EntityParameter, NumberParameter, StringParameter, URLParameter } from "../Parameter";
+import { Parameters } from "@types";
+import { DateParameter, EntityParameter, NumberParameter, StringParameter, URLParameter } from "@components/Parameter";
 
 /**
  * ParameterGroup component use to display a collection of Parameters and enable

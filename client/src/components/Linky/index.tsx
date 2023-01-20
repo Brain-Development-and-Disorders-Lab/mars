@@ -2,13 +2,13 @@ import React, { useEffect, useState } from "react";
 import { Button, Link, useToast } from "@chakra-ui/react";
 
 // Database and models
-import { getData } from "src/database/functions";
+import { getData } from "@database/functions";
 import {
   LinkyProps,
   AttributeStruct,
   CollectionStruct,
   EntityStruct,
-} from "types";
+} from "@types";
 
 const Linky = (props: LinkyProps) => {
   const toast = useToast();

@@ -2,9 +2,9 @@ import React, { useEffect, useState } from "react";
 import { Button, Flex, Heading, Table, TableContainer, Text, Thead, Tr, Th, useToast, Stat, StatLabel, StatNumber, StatHelpText, Spacer, List, ListItem, Tbody, Link, Badge } from "@chakra-ui/react";
 import { AddIcon, ChevronRightIcon, RepeatClockIcon } from "@chakra-ui/icons";
 import { getData } from "src/database/functions";
-import { CollectionModel, EntityModel, UpdateModel } from "types";
+import { CollectionModel, EntityModel, UpdateModel } from "@types";
 import { useNavigate } from "react-router-dom";
-import { Loading } from "src/components/Loading";
+import { Loading } from "@components/Loading";
 import dayjs from "dayjs";
 
 const Home = () => {

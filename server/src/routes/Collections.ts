@@ -6,7 +6,7 @@ import _ from "underscore";
 
 // Database connection
 import { getDatabase } from "../database/connection";
-import { CollectionModel, CollectionStruct, EntityModel } from "../../types";
+import { CollectionModel, CollectionStruct, EntityModel } from "@types";
 import { registerUpdate } from "../database/operations/Updates";
 
 const CollectionsRoute = express.Router();

@@ -2,16 +2,16 @@ import React, { useEffect, useState } from "react";
 import { Flex, Heading, Table, TableContainer, Tbody, Td, Text, Th, Thead, Tr, useToast } from "@chakra-ui/react";
 
 // Custom components
-import ParameterGroup from "src/components/ParameterGroup";
-import { Loading } from "src/components/Loading";
-import { PageContainer } from "src/components/PageContainer";
+import ParameterGroup from "@components/ParameterGroup";
+import { Loading } from "@components/Loading";
+import { PageContainer } from "@components/PageContainer";
 
 // Navigation
 import { useParams } from "react-router-dom";
 
 // Database and models
-import { getData } from "src/database/functions";
-import { AttributeModel } from "types";
+import { getData } from "@database/functions";
+import { AttributeModel } from "@types";
 
 import _ from "underscore";
 

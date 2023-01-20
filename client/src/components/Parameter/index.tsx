@@ -6,8 +6,8 @@ import { AiOutlineBlock, AiOutlineLink } from "react-icons/ai";
 import { MdDateRange, MdOutlineTextFields } from "react-icons/md";
 import { RiNumbersLine } from "react-icons/ri";
 import { getData } from "src/database/functions";
-import { EntityModel, Parameter } from "types";
-import Linky from "src/components/Linky";
+import { EntityModel, Parameter } from "@types";
+import Linky from "@components/Linky";
 
 export const DateParameter = (props: Parameter.PDate) => {
   const [name, setName] = useState(props.name);

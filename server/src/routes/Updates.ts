@@ -6,7 +6,7 @@ import _ from "underscore";
 // Utility functions
 import { getDatabase } from "../database/connection";
 import { registerUpdate } from "../database/operations/Updates";
-import { UpdateStruct } from "../../types";
+import { UpdateStruct } from "@types";
 
 // Constants
 const UPDATES_COLLECTION = "updates";

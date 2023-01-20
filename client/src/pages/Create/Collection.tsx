@@ -3,9 +3,8 @@ import { SingleDatepicker } from "chakra-dayzed-datepicker";
 import { Button, Flex, FormControl, FormLabel, Heading, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalHeader, ModalOverlay, Text, Textarea, useDisclosure } from "@chakra-ui/react";
 import { CheckIcon, CloseIcon, InfoOutlineIcon } from "@chakra-ui/icons";
 import { useNavigate } from "react-router-dom";
-import { postData } from "src/database/functions";
-import { CollectionStruct } from "types";
-import { pseudoId } from "src/database/functions";
+import { postData, pseudoId } from "@database/functions";
+import { CollectionStruct } from "@types";
 
 export const Start = ({}) => {
   const navigate = useNavigate();

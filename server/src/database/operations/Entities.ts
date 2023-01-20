@@ -9,19 +9,62 @@ import { registerUpdate } from "./Updates";
 import consola from "consola";
 
 // Custom types
-import { EntityModel, EntityStruct } from "../../../types";
+import { EntityModel, EntityStruct } from "@types";
 import { Collections } from "./Collections";
 
 // Constants
 const ENTITIES_COLLECTION = "entities";
 
-
 export class Entities {
+  /**
+   * Insert a new Entity to the collection of Entities
+   * @param entity
+   * @return {Promise<EntityModel>}
+   */
+  static insert = (entity: any): Promise<EntityModel> => {
+    return new Promise((resolve, _reject) => {
+      getDatabase()
+        .collection(ENTITIES_COLLECTION)
+        .insertOne(entity, (error: any, content: any) => {
+          if (error) {
+            throw error;
+          }
+          // Add the ID to the Entity
+          entity["_id"] = content.insertedId;
+        });
+
+        if (entity.associations.origin.id) {
+          // If this Entity has an origin, add this Entity as a product of that origin Entity
+          Entities.addProduct(entity.associations.origin, {
+            name: entity.name,
+            id: entity._id,
+          });
+        } else if (entity.associations.products.length > 0) {
+          // If this Entity has products, set this Entity as the origin of each product Entity-
+          entity.associations.products.forEach((product: { name: string, id: string }) => {
+            Entities.setOrigin(product, {
+              name: entity.name,
+              id: entity._id,
+            });
+          });
+        }
+        if (entity.collections.length > 0) {
+          // If this Entity has been added to Collections, add the Entity to each Collection
+          entity.collections.map((collection: string) => {
+            Collections.addEntity(collection, entity._id);
+          });
+        }
+
+        // Finally, resolve the Promise
+        resolve(entity);
+    });
+  };
+
   /**
    * Retrieve all Entities
    */
   static getAll = (): Promise<EntityStruct[]> => {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES_COLLECTION)
         .find({})
@@ -38,11 +81,10 @@ export class Entities {
    * Get a single Entity
    */
   static getOne = (id: string): Promise<EntityStruct> => {
-    return new Promise((resolve, reject) => {
-      const query = { _id: new ObjectId(id) };
+    return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES_COLLECTION)
-        .findOne(query, (error: any, result: any) => {
+        .findOne({ _id: new ObjectId(id) }, (error: any, result: any) => {
           if (error) {
             throw error;
           };
@@ -52,114 +94,66 @@ export class Entities {
   };
 
   /**
-   * Add a new Entity to the collection of Entities
-   * @param entity
-   * @return {Promise<EntityModel>}
+   * Add another Entity to a collection of "product" associations
+   * @param {{ name: string, id: string }} entity the Entity of interest
+   * @param {{ name: string, id: string }} product an Entity to add as a "product" association
    */
-  static addOne = (entity: any): Promise<EntityModel> => {
-    return new Promise((resolve, reject) => {
+  static addProduct = (entity: { name: string, id: string }, product: { name: string, id: string }): Promise<{ name: string, id: string }> => {
+    return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES_COLLECTION)
-        .insertOne(entity, (error: any, content: any) => {
+        .findOne({ _id: new ObjectId(entity.id) }, (error: any, result: any) => {
           if (error) {
             throw error;
           }
 
-          // Add the ID to the Entity
-          entity["_id"] = content.insertedId;
-        });
-
-        // We need to apply the associations that have been specified
-        if (entity.associations.origin.id) {
-          Entities.addProduct(entity.associations.origin.id, {
-            name: entity.name,
-            id: entity._id,
-          });
-        } else if (entity.associations.products.length > 0) {
-          // Iterate over each product, setting their origin to the current Entity being added
-          entity.associations.products.forEach((product: { name: string, id: string }) => {
-            Entities.setOrigin(product, {
-              name: entity.name,
-              id: entity._id,
-            });
-          });
-        }
-    
-        // We need to apply the collections that have been specified
-        if (entity.collections.length > 0) {
-          consola.info("Collections specified, adding new Entity to each...");
-          entity.collections.map((collection: string) => {
-            Collections.addEntity(collection, entity._id);
-          });
-        }
-
-        resolve(entity);
-    });
-  };
-
-  /**
-   * Add an Entity to a collection of "product" associations
-   * @param {string} entity the Entity of interest
-   * @param {{ name: string, id: string }} product an Entity to add as a "product" association
-   */
-  static addProduct = (entity: string, product: { name: string, id: string }) => {
-    // Get the origin record's products list
-    const originQuery = { _id: new ObjectId(entity) };
-    getDatabase()
-      .collection(ENTITIES_COLLECTION)
-      .findOne(originQuery, (error: any, result: any) => {
-        if (error) throw error;
-
-        // Update product record of the origin to include this Entity as a product
-        // Create an updated set of values
-        const updatedValues = {
-          $set: {
-            associations: {
-              origin: {
-                name: result.associations.origin.name,
-                id: result.associations.origin.id,
-              },
-              products: [
-                ...result.associations.products,
-                {
-                  name: product.name,
-                  id: product.id,
-                },
-              ],
-            },
-          },
-        };
-
-        // Apply the updated structure to the target Entity
-        getDatabase()
-          .collection(ENTITIES_COLLECTION)
-          .updateOne(
-            originQuery,
-            updatedValues,
-            (error: any, response: any) => {
-              if (error) throw error;
-              registerUpdate({
-                targets: {
-                  primary: {
-                    type: "entities",
-                    id: entity,
-                    name: result.name,
-                  },
-                  secondary: {
-                    type: "entities",
-                    id: product.id,
+          const updates = {
+            $set: {
+              associations: {
+                origin:  result.associations.origin,
+                products: [
+                  ...result.associations.products,
+                  {
                     name: product.name,
+                    id: product.id,
                   },
-                },
-                operation: {
-                  timestamp: new Date(Date.now()),
-                  type: "modify",
-                  details: "add Product"
+                ],
+              },
+            },
+          };
+
+          getDatabase()
+            .collection(ENTITIES_COLLECTION)
+            .updateOne({ _id: new ObjectId(entity.id) }, updates, (error: any, response: any) => {
+                if (error) {
+                  throw error;
                 }
-              });
-            }
-          );
-      });
+                registerUpdate({
+                  targets: {
+                    primary: {
+                      type: "entities",
+                      id: entity.id,
+                      name: entity.name,
+                    },
+                    secondary: {
+                      type: "entities",
+                      id: product.id,
+                      name: product.name,
+                    },
+                  },
+                  operation: {
+                    timestamp: new Date(Date.now()),
+                    type: "modify",
+                    details: "add Product"
+                  }
+                });
+
+                // Resolve the Promise
+                resolve(entity);
+              }
+            );
+        });
+    });
   };
 
   /**
@@ -167,56 +161,62 @@ export class Entities {
    * @param {{ name: string, id: string }} entity the Entity of interest
    * @param {{ name: string, id: string }} origin an Entity to add as an "origin" association
    */
-  static setOrigin = (entity: { name: string, id: string }, origin: { name: string, id: string }) => {
-    let productEntity: EntityModel;
-    const productQuery = { _id: new ObjectId(entity.id) };
-    getDatabase()
-      .collection(ENTITIES_COLLECTION)
-      .findOne(productQuery, (error: any, result: any) => {
-        if (error) throw error;
-        productEntity = result;
+  static setOrigin = (entity: { name: string, id: string }, origin: { name: string, id: string }): Promise<{ name: string, id: string }> => {
+    return new Promise((resolve, reject) => {
+      getDatabase()
+        .collection(ENTITIES_COLLECTION)
+        .findOne({ _id: new ObjectId(entity.id) }, (error: any, result: any) => {
+          if (error) {
+            throw error;
+          }
 
-        // Update origin record of the product to include this Entity as a origin
-        const updatedValues = {
-          $set: {
-            associations: {
-              origin: {
-                name: origin.name,
-                id: origin.id,
-              },
-              products: productEntity.associations.products,
-            },
-          },
-        };
-
-        getDatabase()
-          .collection(ENTITIES_COLLECTION)
-          .updateOne(
-            productQuery,
-            updatedValues,
-            (error: any, response: any) => {
-              if (error) throw error;
-              registerUpdate({
-                targets: {
-                  primary: {
-                    type: "entities",
-                    id: entity.id,
-                    name: "",
-                  },
-                  secondary: {
-                    type: "entities",
-                    id: origin.id,
-                    name: "",
-                  },
+          const updates = {
+            $set: {
+              associations: {
+                origin: {
+                  name: origin.name,
+                  id: origin.id,
                 },
-                operation: {
-                  timestamp: new Date(Date.now()),
-                  type: "modify",
-                  details: "add Origin"
+                products: result.associations.products,
+              },
+            },
+          };
+
+          getDatabase()
+            .collection(ENTITIES_COLLECTION)
+            .updateOne({ _id: new ObjectId(entity.id) }, updates, (error: any, response: any) => {
+                if (error) {
+                  throw error;
                 }
-              });
-            }
-          );
-      });
+
+                registerUpdate({
+                  targets: {
+                    primary: {
+                      type: "entities",
+                      id: entity.id,
+                      name: "",
+                    },
+                    secondary: {
+                      type: "entities",
+                      id: origin.id,
+                      name: "",
+                    },
+                  },
+                  operation: {
+                    timestamp: new Date(Date.now()),
+                    type: "modify",
+                    details: "add Origin"
+                  }
+                });
+
+                // Resolve the Promise
+                resolve(entity);
+              }
+            );
+        });
+    });
+
   };
+
+
 };

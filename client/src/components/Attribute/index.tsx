@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Button, Flex, Icon, Input, Textarea } from "@chakra-ui/react";
-import { AttributeProps } from "types";
-import ParameterGroup from "../ParameterGroup";
+import { AttributeProps } from "@types";
+import ParameterGroup from "@components/ParameterGroup";
 import { CloseIcon } from "@chakra-ui/icons";
 import { AiOutlineSave } from "react-icons/ai";
 

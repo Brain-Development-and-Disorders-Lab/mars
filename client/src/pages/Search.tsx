@@ -7,9 +7,9 @@ import { ChevronRightIcon, SearchIcon } from "@chakra-ui/icons";
 import { useNavigate } from "react-router-dom";
 
 // Database and models
-import { getData } from "src/database/functions";
-import { EntityModel } from "types";
-import { Loading } from "src/components/Loading";
+import { getData } from "@database/functions";
+import { EntityModel } from "@types";
+import { Loading } from "@components/Loading";
 
 const Search = () => {
   const [query, setQuery] = useState("");

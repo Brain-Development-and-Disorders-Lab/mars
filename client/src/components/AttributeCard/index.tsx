@@ -9,11 +9,11 @@ import { RiNumbersLine } from "react-icons/ri";
 import _ from "underscore";
 
 // Types
-import { AttributeCardProps } from "types";
+import { AttributeCardProps } from "@types";
 
 // Custom components
-import ParameterGroup from "../ParameterGroup";
-import { WarningLabel } from "../Label";
+import ParameterGroup from "@components/ParameterGroup";
+import { WarningLabel } from "@components/Label";
 
 const AttributeCard = (props: AttributeCardProps) => {
   const { isOpen, onOpen, onClose } = useDisclosure()

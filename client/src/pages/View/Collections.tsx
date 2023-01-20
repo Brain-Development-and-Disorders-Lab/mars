@@ -3,15 +3,15 @@ import { Button, Flex, Heading, Link, Table, TableContainer, Tag, TagLabel, TagR
 import { ChevronRightIcon, AddIcon, WarningIcon } from "@chakra-ui/icons";
 
 // Custom components
-import { Loading } from "src/components/Loading";
-import { PageContainer } from "src/components/PageContainer";
+import { Loading } from "@components/Loading";
+import { PageContainer } from "@components/PageContainer";
 
 // Navigation
 import { useNavigate } from "react-router-dom";
 
 // Database and models
-import { getData } from "src/database/functions";
-import { CollectionModel } from "types";
+import { getData } from "@database/functions";
+import { CollectionModel } from "@types";
 
 import _ from "underscore";
 

@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Button, Checkbox, CheckboxGroup, Flex, FormControl, FormHelperText, FormLabel, Heading, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalHeader, ModalOverlay, Select, Stack, Tag, TagCloseButton, Text, Textarea, useDisclosure, useToast } from "@chakra-ui/react";
 import { SingleDatepicker } from "chakra-dayzed-datepicker";
 import { AddIcon, CheckIcon, ChevronLeftIcon, ChevronRightIcon, CloseIcon, InfoOutlineIcon } from "@chakra-ui/icons";
-import Linky from "src/components/Linky";
+import Linky from "@components/Linky";
 
 import _ from "underscore";
 import consola from "consola";
@@ -12,11 +12,11 @@ import consola from "consola";
 import { useNavigate } from "react-router-dom";
 
 // Database and models
-import { AttributeModel, AttributeProps, CollectionModel, EntityModel, EntityStruct } from "types";
+import { AttributeModel, AttributeProps, CollectionModel, EntityModel, EntityStruct } from "@types";
 
 // Utility functions
-import { getData, postData, pseudoId } from "src/database/functions";
-import Attribute from "src/components/Attribute";
+import { getData, postData, pseudoId } from "@database/functions";
+import Attribute from "@components/Attribute";
 
 export const Start = ({}) => {
   // Used to manage what detail inputs are presented

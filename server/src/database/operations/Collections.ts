@@ -6,7 +6,7 @@ import { getDatabase } from "../connection";
 import { registerUpdate } from "./Updates";
 
 // Custom types
-import { CollectionModel } from "../../../types";
+import { CollectionModel } from "@types";
 
 // Consola
 import consola from "consola";

@@ -1,7 +1,7 @@
 // Utility functions
 import { getDatabase } from "../connection";
 
-import { UpdateStruct } from "../../../types";
+import { UpdateStruct } from "@types";
 
 // Constants
 const UPDATES_COLLECTION = "updates";

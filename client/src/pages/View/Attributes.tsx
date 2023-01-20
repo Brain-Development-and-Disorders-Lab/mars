@@ -1,18 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { Button, Flex, Heading, Link, Table, TableContainer, Tbody, Text, Th, Thead, Tr, useToast } from "@chakra-ui/react";
 import { ChevronRightIcon, AddIcon } from "@chakra-ui/icons";
-import { Loading } from "src/components/Loading";
+import { Loading } from "@components/Loading";
 
 // Custom components
-import { WarningLabel } from "src/components/Label";
-import { PageContainer } from "src/components/PageContainer";
+import { WarningLabel } from "@components/Label";
+import { PageContainer } from "@components/PageContainer";
 
 // Navigation
 import { useNavigate } from "react-router-dom";
 
 // Database and models
-import { getData } from "src/database/functions";
-import { AttributeModel } from "types";
+import { getData } from "@database/functions";
+import { AttributeModel } from "@types";
 
 import _ from "underscore";
 

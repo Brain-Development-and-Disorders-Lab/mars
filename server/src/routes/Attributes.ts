@@ -6,7 +6,7 @@ import consola from "consola";
 import { getDatabase } from "../database/connection";
 
 // Custom types
-import { AttributeStruct } from "../../types";
+import { AttributeStruct } from "@types";
 import { registerUpdate } from "../database/operations/Updates";
 
 // Constants

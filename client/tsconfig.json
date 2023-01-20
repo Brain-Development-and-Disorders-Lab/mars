@@ -1,5 +1,5 @@
 {
-  "include": ["src", "types"],
+  "include": ["src"],
   "compilerOptions": {
     "module": "esnext",
     "lib": ["dom", "esnext"],
@@ -7,6 +7,12 @@
     "declaration": true,
     "sourceMap": true,
     "baseUrl": "./",
+    "paths": {
+      "@components/*": ["./src/components/*"],
+      "@database/*": ["./src/database/*"],
+      "@pages/*": ["./src/pages/*"],
+      "@types": ["../types"],
+    },
     "rootDirs": ["src"],
     "strict": true,
     "noImplicitReturns": true,

@@ -19,7 +19,7 @@ import _ from "underscore";
 
 // Database and models
 import { deleteData, getData, postData } from "src/database/functions";
-import { AttributeStruct, EntityModel } from "types";
+import { AttributeStruct, EntityModel } from "@types";
 
 // Custom components
 import Linky from "src/components/Linky";

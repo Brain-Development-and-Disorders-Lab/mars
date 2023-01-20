@@ -4,12 +4,12 @@ import { CheckIcon, CloseIcon, InfoOutlineIcon } from "@chakra-ui/icons";
 import { AiOutlineBlock, AiOutlineLink } from "react-icons/ai";
 import { MdDateRange, MdOutlineTextFields } from "react-icons/md";
 import { RiNumbersLine } from "react-icons/ri";
-import ParameterGroup from "src/components/ParameterGroup";
+import ParameterGroup from "@components/ParameterGroup";
 import { useNavigate } from "react-router-dom";
 import _ from "underscore";
 import consola from "consola";
-import { AttributeStruct, Parameters } from "types";
-import { postData, pseudoId } from "src/database/functions";
+import { AttributeStruct, Parameters } from "@types";
+import { postData, pseudoId } from "@database/functions";
 
 export const Start = ({}) => {
   const navigate = useNavigate();
