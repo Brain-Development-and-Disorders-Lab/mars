@@ -1,25 +1,40 @@
-import React from "react";
+// React and React Router
+import React, { ReactElement } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+
+// Chakra UI provider component
 import { ChakraProvider } from "@chakra-ui/react";
+
+// Custom Navigation component shown as the header of each page
 import Navigation from "@components/Navigation";
 
+// Styling to be applied across the application
 import "./styles/styles.css";
 import "@fontsource/roboto";
 
-// Custom pages
+// Pages
+// Page type - View
 import Attribute from "@pages/View/Attribute";
 import Attributes from "@pages/View/Attributes";
 import Collection from "@pages/View/Collection";
 import Collections from "@pages/View/Collections";
-import Search from "@pages/Search";
 import Entity from "@pages/View/Entity";
 import Entities from "@pages/View/Entities";
+
+// Page type - Create
 import {Start as EntityStart} from "@pages/Create/Entity";
 import {Start as CollectionStart} from "@pages/Create/Collection";
 import {Start as AttributeStart} from "@pages/Create/Attribute";
+
+// Page type - Unique
+import Search from "@pages/Search";
 import Home from "@pages/Home";
 
-export const App = () => {
+/**
+ * 
+ * @return {ReactElement}
+ */
+export const App = (): ReactElement => {
   return (
     <BrowserRouter>
       <ChakraProvider>
