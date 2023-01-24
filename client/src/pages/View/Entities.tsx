@@ -1,7 +1,7 @@
 // React
 import React, { useEffect, useState } from "react";
-import { Flex, Heading, Table, TableContainer, Th, Thead, Tr, Text, useToast, Button, Tbody, Link } from "@chakra-ui/react";
-import { ChevronRightIcon, AddIcon } from "@chakra-ui/icons";
+import { Flex, Heading, Table, TableContainer, Th, Thead, Tr, Text, useToast, Button, Tbody, Link, Tag, TagLabel, TagRightIcon } from "@chakra-ui/react";
+import { ChevronRightIcon, AddIcon, WarningIcon } from "@chakra-ui/icons";
 
 // Navigation
 import { useNavigate } from "react-router-dom";
@@ -9,6 +9,9 @@ import { useNavigate } from "react-router-dom";
 // Database and models
 import { getData } from "@database/functions";
 import { EntityModel } from "@types";
+
+// Utility libraries
+import _ from "underscore";
 
 // Custom components
 import { PageContainer } from "@components/PageContainer";
@@ -77,8 +80,28 @@ const Entities = () => {
                     return (
                       <Tr key={entity._id}>
                         <Th pl={"0"} color={"white"}>{entity.name}</Th>
-                        <Th color={"white"}>{entity.owner}</Th>
-                        <Th><Text noOfLines={2} color={"white"}>{entity.description}</Text></Th>
+                        <Th color={"white"}>
+                          {_.isEqual(entity.owner, "") ? (
+                            <Tag size={"md"} key={`warn-${entity._id}`} colorScheme={"orange"}>
+                              <TagLabel>Not specified</TagLabel>
+                              <TagRightIcon as={WarningIcon} />
+                            </Tag>
+                          ) : (
+                            entity.owner
+                          )}
+                        </Th>
+                        <Th>
+                          <Text noOfLines={2} color={"white"}>
+                            {_.isEqual(entity.description, "") ? (
+                              <Tag size={"md"} key={`warn-${entity._id}`} colorScheme={"orange"}>
+                                <TagLabel>Not specified</TagLabel>
+                                <TagRightIcon as={WarningIcon} />
+                              </Tag>
+                            ) : (
+                              entity.description
+                            )}
+                          </Text>
+                        </Th>
                         <Th pr={"0"}>
                           <Flex justify={"right"}>
                             <Button

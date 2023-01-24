@@ -298,7 +298,7 @@ const Home = () => {
                             <Text>{update.targets.secondary.name}</Text>
                           }
                           <Spacer />
-                          <Text fontSize={"md"} as={"b"} >{dayjs(update.operation.timestamp).format("DD MMM")}</Text>
+                          <Text fontSize={"md"} as={"b"} >{dayjs(update.operation.timestamp).format("HH:mm DD MMM.")}</Text>
                         </Flex>
                       </ListItem>
                     );

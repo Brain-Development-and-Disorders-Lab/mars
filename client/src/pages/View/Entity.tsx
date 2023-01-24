@@ -1,7 +1,7 @@
 // React
 import React, { useEffect, useState } from "react";
-import { Button, Flex, Heading, Table, TableContainer, Tbody, Th, Text, Tr, Link, useToast, Modal, Icon, Thead, Td, Textarea, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, useDisclosure, Container, Popover, PopoverTrigger, PopoverContent, PopoverCloseButton, PopoverHeader, PopoverBody, PopoverArrow } from "@chakra-ui/react";
-import { AddIcon, CheckIcon, ChevronRightIcon, CloseIcon } from "@chakra-ui/icons";
+import { Button, Flex, Heading, Table, TableContainer, Tbody, Th, Text, Tr, Link, useToast, Modal, Icon, Thead, Td, Textarea, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, useDisclosure, Container, Popover, PopoverTrigger, PopoverContent, PopoverCloseButton, PopoverHeader, PopoverBody, PopoverArrow, Tag, TagLabel, TagRightIcon } from "@chakra-ui/react";
+import { AddIcon, CheckIcon, ChevronRightIcon, CloseIcon, WarningIcon } from "@chakra-ui/icons";
 import { AiOutlineEdit, AiOutlineSave } from "react-icons/ai";
 import { BsPrinter } from "react-icons/bs";
 import { SlGraph } from "react-icons/sl";
@@ -9,13 +9,11 @@ import { SlGraph } from "react-icons/sl";
 // Navigation
 import { useParams, useNavigate } from "react-router-dom";
 
-// JSON to CSV tool
-import { parse } from "json2csv";
 
-// Consola
+// Utility libraries
 import consola from "consola";
-
 import _ from "underscore";
+import { parse } from "json2csv";
 
 // Database and models
 import { deleteData, getData, postData } from "src/database/functions";
@@ -280,7 +278,16 @@ export const Entity = () => {
 
                   <Tr>
                     <Td>Owner</Td>
-                    <Td><Text><Link>{entityData.owner}</Link></Text></Td>
+                    <Td>
+                      {_.isEqual(entityData.owner, "") ? (
+                        <Tag size={"md"} key={`warn-${entityData._id}`} colorScheme={"orange"}>
+                          <TagLabel>Not specified</TagLabel>
+                          <TagRightIcon as={WarningIcon} />
+                        </Tag>
+                      ) : (
+                        <Text><Link>{entityData.owner}</Link></Text>
+                      )}
+                    </Td>
                   </Tr>
 
                   <Tr>
@@ -299,7 +306,10 @@ export const Entity = () => {
                             id={entityData.associations.origin.id}
                           />
                         ) : (
-                          <Text>No origin specified.</Text>
+                          <Tag size={"md"} key={`warn-${entityData._id}`} colorScheme={"orange"}>
+                            <TagLabel>Not specified</TagLabel>
+                            <TagRightIcon as={WarningIcon} />
+                          </Tag>
                         )}
                       </Flex>
                     </Td>
@@ -340,7 +350,7 @@ export const Entity = () => {
                 <Heading margin={"none"}>Collections</Heading>
 
                 {editing ? (
-                  <Button rightIcon={<AddIcon />} disabled={!editing}>
+                  <Button colorScheme={"green"} rightIcon={<AddIcon />} disabled={!editing}>
                     Add
                   </Button>
                 ) : null}
@@ -402,7 +412,7 @@ export const Entity = () => {
                 <Heading m={"none"}>Products</Heading>
 
                 {editing ? (
-                  <Button rightIcon={<AddIcon />} disabled={!editing}>
+                  <Button colorScheme={"green"} rightIcon={<AddIcon />} disabled={!editing}>
                     Add
                   </Button>
                 ) : null}
