@@ -465,11 +465,6 @@ export const Entity = () => {
         <Flex p={"2"} gap={"2"} direction={"column"}>
           <Flex p={"2"} gap={"2"} direction={"row"} justify={"space-between"} mb={"sm"}>
             <Heading margin={"none"}>Attributes</Heading>
-            {editing ? (
-              <Button rightIcon={<AddIcon />} disabled={!editing}>
-                Add
-              </Button>
-            ) : null}
           </Flex>
 
           <Flex p={"2"} gap={"2"} direction={"row"}>

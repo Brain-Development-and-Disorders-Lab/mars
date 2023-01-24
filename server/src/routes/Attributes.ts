@@ -7,7 +7,7 @@ import { getDatabase } from "../database/connection";
 
 // Custom types
 import { AttributeStruct } from "@types";
-import { registerUpdate } from "../database/operations/Updates";
+import { registerUpdate } from "../operations/Updates";
 
 // Constants
 const ATTRIBUTES_COLLECTION = "attributes";

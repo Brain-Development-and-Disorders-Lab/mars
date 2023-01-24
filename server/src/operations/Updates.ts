@@ -1,5 +1,5 @@
 // Utility functions
-import { getDatabase } from "../connection";
+import { getDatabase } from "../database/connection";
 
 import { UpdateStruct } from "@types";
 
