@@ -263,29 +263,42 @@ const Home = () => {
                 updateData.reverse().map((update, index) => {
                   if (index < 10) {
                     // Configure the badge
-                    let badgeColor = "green";
+                    let operationBadgeColor = "green";
                     switch (update.operation.type) {
                       case "add":
-                        badgeColor = "green";
+                        operationBadgeColor = "green";
                         break;
                       case "modify":
-                        badgeColor = "blue";
+                        operationBadgeColor = "blue";
                         break;
                       case "remove":
-                        badgeColor = "red";
+                        operationBadgeColor = "red";
                         break;
                     }
 
+                    let typeBadgeColor = "yellow";
+                    switch (update.targets.primary.type) {
+                      case "entities":
+                        typeBadgeColor = "yellow";
+                        break;
+                      case "collections":
+                        typeBadgeColor = "orange";
+                        break;
+                      case "attributes":
+                        typeBadgeColor = "gray";
+                        break;
+                    }
                     return (
                       <ListItem key={`update-${update._id}`}>
                         <Flex direction={"row"} p={"2"} gap={"2"} mt={"2"} mb={"2"} align={"center"} color={"gray.400"} background={"white"} rounded={"xl"}>
-                          <Text fontSize={"md"} as={"b"} >{dayjs(update.operation.timestamp).format("DD MMM")}</Text>
+                          <Badge colorScheme={operationBadgeColor}>{update.operation.type}</Badge>
+                          <Badge colorScheme={typeBadgeColor}>{update.targets.primary.type}</Badge>
                           <Text>{update.targets.primary.name}</Text>
                           {update.targets.secondary &&
                             <Text>{update.targets.secondary.name}</Text>
                           }
                           <Spacer />
-                          <Badge colorScheme={badgeColor}>{update.operation.type}</Badge>
+                          <Text fontSize={"md"} as={"b"} >{dayjs(update.operation.timestamp).format("DD MMM")}</Text>
                         </Flex>
                       </ListItem>
                     );
@@ -293,7 +306,7 @@ const Home = () => {
                   return;
                 })
               :
-                <Text fontSize={"md"}>No updates yet.</Text>
+                <Text fontSize={"md"}>No recent changes to show.</Text>
               }
             </List>
           </Flex>

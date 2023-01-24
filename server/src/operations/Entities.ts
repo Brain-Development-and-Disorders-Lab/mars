@@ -254,12 +254,12 @@ export class Entities {
                     primary: {
                       type: "entities",
                       id: entity.id,
-                      name: "",
+                      name: entity.name,
                     },
                     secondary: {
                       type: "entities",
                       id: origin.id,
-                      name: "",
+                      name: origin.name,
                     },
                   },
                   operation: {
@@ -311,7 +311,7 @@ export class Entities {
                     primary: {
                       type: "entities",
                       id: entity.id,
-                      name: "",
+                      name: entity.name,
                     },
                   },
                   operation: {
@@ -408,7 +408,7 @@ export class Entities {
                     primary: {
                       type: "entities",
                       id: updatedEntity._id,
-                      name: "",
+                      name: updatedEntity.name,
                     },
                   },
                   operation: {
