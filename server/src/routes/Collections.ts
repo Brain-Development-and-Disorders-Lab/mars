@@ -7,19 +7,22 @@ import _ from "underscore";
 // Database connection
 import { getDatabase } from "../database/connection";
 import { CollectionModel, CollectionStruct, EntityModel } from "@types";
-import { registerUpdate } from "../database/operations/Updates";
+
+// Operations
+import { registerUpdate } from "../operations/Updates";
+import { Collections } from "../operations/Collections";
 
 const CollectionsRoute = express.Router();
 
 // Constants
-const ENTITIES_COLLECTION = "entities";
-const COLLECTIONS_COLLECTION = "collections";
+const ENTITIES = "entities";
+const COLLECTIONS = "collections";
 
 // Route: View all Collections
 CollectionsRoute.route("/collections").get((request: any, response: any) => {
   let connection = getDatabase();
   connection
-    .collection(COLLECTIONS_COLLECTION)
+    .collection(COLLECTIONS)
     .find({})
     .toArray((error: any, result: any) => {
       if (error) throw error;
@@ -34,7 +37,7 @@ CollectionsRoute.route("/collections/:id").get(
     const query = { _id: new ObjectId(request.params.id) };
 
     database
-      .collection(COLLECTIONS_COLLECTION)
+      .collection(COLLECTIONS)
       .findOne(query, (error: any, result: any) => {
         if (error) throw error;
         response.json(result);
@@ -56,7 +59,7 @@ CollectionsRoute.route("/collections/create").post(
 
     // Insert the new Collection
     database
-      .collection(COLLECTIONS_COLLECTION)
+      .collection(COLLECTIONS)
       .insertOne(data, (error: any, content: any) => {
         if (error) throw error;
         response.json(content);
@@ -89,7 +92,7 @@ CollectionsRoute.route("/collections/create").post(
         let entityResult: EntityModel;
 
         database
-          .collection(ENTITIES_COLLECTION)
+          .collection(ENTITIES)
           .findOne(entityQuery, (error: any, result: any) => {
             if (error) throw error;
             entityResult = result;
@@ -108,7 +111,7 @@ CollectionsRoute.route("/collections/create").post(
             };
 
             database
-              .collection(ENTITIES_COLLECTION)
+              .collection(ENTITIES)
               .updateOne(
                 entityQuery,
                 updatedValues,
@@ -156,10 +159,13 @@ CollectionsRoute.route("/collections/add").post((request: { body: { entities: st
  * Route: Remove an Entity from a Collection, expects Entity and Collection ID data.
  */
 CollectionsRoute.route("/collections/remove").post((request: { body: { entity: string, collection: string } }, response: any) => {
-  remove({
-    entityId: request.body.entity,
-    collectionId: request.body.collection,
-  }, response);
+  Collections.removeEntity(request.body.collection, request.body.entity).then((collection) => {
+    response.json({
+      id: collection,
+      name: collection,
+      status: "success",
+    });
+  });
 });
 
 /**
@@ -178,7 +184,7 @@ export const add = (data: { entityId: string[], collectionId: string }, response
   for (let entity of data.entityId) {
     // Add Entity to Collection
     database
-      .collection(COLLECTIONS_COLLECTION)
+      .collection(COLLECTIONS)
       .findOne(collectionQuery, (error: any, result: any) => {
         if (error) throw error;
         collectionResult = result;
@@ -207,13 +213,15 @@ export const add = (data: { entityId: string[], collectionId: string }, response
           };
 
           database
-            .collection(COLLECTIONS_COLLECTION)
+            .collection(COLLECTIONS)
             .updateOne(
               collectionQuery,
               updatedValues,
               (error: any, response: any) => {
-                if (error) throw error;
-                consola.success("Added Entity to Collection:", "/collections/add", "Entity:", '"' + data.entityId + '"', "Collection:", '"' + data.collectionId + '"');
+                if (error) {
+                  throw error;
+                }
+
                 registerUpdate({
                   targets: {
                     primary: {
@@ -237,7 +245,7 @@ export const add = (data: { entityId: string[], collectionId: string }, response
     let entityResult: EntityModel;
 
     database
-      .collection(ENTITIES_COLLECTION)
+      .collection(ENTITIES)
       .findOne(entityQuery, (error: any, result: any) => {
         if (error) throw error;
         entityResult = result;
@@ -264,161 +272,31 @@ export const add = (data: { entityId: string[], collectionId: string }, response
           };
 
           database
-            .collection(ENTITIES_COLLECTION)
-            .updateOne(
-              entityQuery,
-              updatedValues,
-              (error: any, response: any) => {
-                if (error) throw error;
-                consola.success("Added Collection to Entity:", "/collections/add", "Entity:", '"' + data.entityId + '"', "Collection:", '"' + data.collectionId + '"');
+            .collection(ENTITIES)
+            .updateOne(entityQuery, updatedValues, (error: any, response: any) => {
+              if (error) {
+                throw error;
               }
-            );
+            });
         }
+
+        // Respond
+        response.json({
+          id: data.collectionId,
+          status: status,
+        });
       });
   }
-
-  // Respond
-  response.json({
-    id: data.collectionId,
-    status: status,
-  });
-};
-
-/**
- * Remove an Entity from a Collection
- * @param data ID of Entity and ID of Collection
- * @param response Object to return to the client
- */
-export const remove = (data: { entityId: string, collectionId: string }, response: any) => {
-  consola.info("Removing Entity from Collection:", "/collections/remove", "Entity:", '"' + data.entityId + '"', "Collection:", '"' + data.collectionId + '"');
-
-  // Get the Collection
-  const database = getDatabase();
-  const collectionQuery = { _id: new ObjectId(data.collectionId) };
-  let collectionResult: CollectionModel;
-
-  database
-    .collection(COLLECTIONS_COLLECTION)
-    .findOne(collectionQuery, (error: any, result: any) => {
-      if (error) throw error;
-      collectionResult = result;
-
-      // Check if the Entity exists in the Collection already
-      let entityExists = false;
-      for (let collectionEntity of collectionResult.entities) {
-        if (_.isEqual((new ObjectId(collectionEntity)).toString(), data.entityId)) {
-          entityExists = true;
-        }
-      }
-
-      if (entityExists) {
-        const reducedEntityCollection = collectionResult.entities.filter((entity) => {
-          return !_.isEqual((new ObjectId(entity)).toString(), data.entityId)
-        });
-
-        // Add the Entity to the collection
-        const updatedValues = {
-          $set: {
-            entities: [
-              ...reducedEntityCollection,
-            ],
-          },
-        };
-
-        database
-          .collection(COLLECTIONS_COLLECTION)
-          .updateOne(
-            collectionQuery,
-            updatedValues,
-            (error: any, response: any) => {
-              if (error) throw error;
-              consola.success("Removed Entity from Collection:", "/collections/remove", "Entity:", '"' + data.entityId + '"', "Collection:", '"' + data.collectionId + '"');
-            }
-          );
-      } else {
-        consola.warn("Collection", collectionResult.name, "does not contain Entity", data.entityId);
-      }
-    });
-  
-  // Get the Entity
-  const entityQuery = { _id: new ObjectId(data.entityId) };
-  let entityResult: EntityModel;
-
-  database
-    .collection(ENTITIES_COLLECTION)
-    .findOne(entityQuery, (error: any, result: any) => {
-      if (error) throw error;
-      entityResult = result;
-
-      // Check if the Entity exists in the Collection already
-      let entityExists = false;
-      for (let collections of entityResult.collections) {
-        if (_.isEqual((new ObjectId(collections)).toString(), data.collectionId)) {
-          entityExists = true;
-        }
-      }
-
-      if (entityExists) {
-        const reducedEntityCollection = entityResult.collections.filter((collection) => {
-          return !_.isEqual((new ObjectId(collection)).toString(), data.collectionId)
-        });
-
-        // Add the Entity to the collection
-        const updatedValues = {
-          $set: {
-            collections: [
-              ...reducedEntityCollection,
-            ],
-          },
-        };
-
-        database
-          .collection(ENTITIES_COLLECTION)
-          .updateOne(
-            entityQuery,
-            updatedValues,
-            (error: any, response: any) => {
-              if (error) throw error;
-              consola.success("Removed Collection from Entity:", "/collections/remove", "Entity:", '"' + data.entityId + '"', "Collection:", '"' + data.collectionId + '"');
-              registerUpdate({
-                targets: {
-                  primary: {
-                    type: "collections",
-                    id: data.collectionId,
-                    name: collectionResult.name,
-                  },
-                  secondary: {
-                    type: "entities",
-                    id: data.entityId,
-                    name: entityResult.name,
-                  },
-                },
-                operation: {
-                  timestamp: new Date(Date.now()),
-                  type: "modify",
-                }
-              });
-            }
-          );
-      }
-    });
-
-  // Respond
-  response.json({
-    id: data.collectionId,
-    status: "success"
-  });
 };
 
 // Route: Remove a Collection
 CollectionsRoute.route("/collections/:id").delete((request: { params: { id: any } }, response: { json: (content: any) => void }) => {
-    let connection = getDatabase();
-    let query = { _id: new ObjectId(request.params.id) };
-    connection
-      .collection(COLLECTIONS_COLLECTION)
-      .deleteOne(query, (error: any, content: any) => {
-        if (error) throw error;
-        consola.success("1 collection deleted");
+    getDatabase()
+      .collection(COLLECTIONS)
+      .deleteOne({ _id: new ObjectId(request.params.id) }, (error: any, content: any) => {
+        if (error) {
+          throw error;
+        }
         response.json(content);
       });
   }

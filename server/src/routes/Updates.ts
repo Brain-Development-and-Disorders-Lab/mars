@@ -5,7 +5,7 @@ import _ from "underscore";
 
 // Utility functions
 import { getDatabase } from "../database/connection";
-import { registerUpdate } from "../database/operations/Updates";
+import { registerUpdate } from "../operations/Updates";
 import { UpdateStruct } from "@types";
 
 // Constants
