@@ -26,24 +26,24 @@ services:
       ME_CONFIG_MONGODB_URL: mongodb://admin:metadataadmin@database:27017/
 
   # Server to route queries and interact with the database
-  server:
-    build:
-      context: .
-      dockerfile: ./server/server.dockerfile
-    ports:
-      - 8000:8000
-    depends_on:
-      - database
-    environment:
-      - CONNECTION_STRING=mongodb://admin:metadataadmin@database:27017/
-      - PORT=8000
+  # server:
+  #   build:
+  #     context: .
+  #     dockerfile: ./server/server.dockerfile
+  #   ports:
+  #     - 8000:8000
+  #   depends_on:
+  #     - database
+  #   environment:
+  #     - CONNECTION_STRING=mongodb://admin:metadataadmin@database:27017/
+  #     - PORT=8000
 
   # The React-based interactive frontend to the database
-  client:
-    build:
-      context: .
-      dockerfile: ./client/client.dockerfile
-    ports:
-      - 8080:8080
-    depends_on:
-      - server
+  # client:
+  #   build:
+  #     context: .
+  #     dockerfile: ./client/client.dockerfile
+  #   ports:
+  #     - 8080:8080
+  #   depends_on:
+  #     - server
