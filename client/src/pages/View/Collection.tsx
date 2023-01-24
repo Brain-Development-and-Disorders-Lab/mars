@@ -16,7 +16,6 @@ import { Loading } from "@components/Loading";
 import { PageContainer } from "@components/PageContainer";
 
 import _ from "underscore";
-import consola from "consola";
 import { AiOutlineEdit, AiOutlineSave } from "react-icons/ai";
 
 export const Collection = () => {
@@ -79,22 +78,24 @@ export const Collection = () => {
    * @param {{ entities: string[], collection: string }} data List of Entities and a Collection to add the Entities to
    */
   const onAdd = (data: { entities: string[], collection: string }): void => {
-    postData(`/collections/add`, data).then((response) => {
-      consola.debug("Response:", response);
+    postData(`/collections/add`, data).then((_response) => {
       navigate(`/collections/${id}`);
     });
   };
 
   /**
    * Callback function to remove the Entity from the Collection, and refresh the page
-   * @param {{ entities: string, collection: string }} data ID of the Entity and Collection to remove the Entity from
+   * @param {{ collection: string, entity: string }} data ID of the Collection and the ID of the Entity to remove
    */
-  const onRemove = (data: { entity: string, collection: string }): void => {
+  const onRemove = (data: { collection: string, entity: string }): void => {
     postData(`/collections/remove`, data).then(() => {
       navigate(`/collections/${id}`);
     });
   };
 
+  /**
+   * Handle the edit button being clicked
+   */
   const handleEditClick = () => {
     setEditing(!editing);
   };
@@ -239,8 +240,8 @@ export const Collection = () => {
                                     if (id) {
                                       // Remove the entity from the collection
                                       onRemove({
-                                        entity: entity,
                                         collection: id,
+                                        entity: entity,
                                       });
 
                                       // Force the page to reload by setting the isLoaded state
