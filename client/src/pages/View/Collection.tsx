@@ -131,7 +131,7 @@ export const Collection = () => {
             </Button>
           </Flex>
 
-          {collectionData.entities && collectionData.entities.length > 0 && (
+          {collectionData.entities && collectionData.entities.length > 0 ? (
             <TableContainer background={"gray.50"} rounded={"2xl"} p={"4"}>
               <Table variant={"simple"} colorScheme={"gray"}>
                 <Thead>
@@ -184,6 +184,8 @@ export const Collection = () => {
                 </Tbody>
               </Table>
             </TableContainer>
+          ) : (
+            <Text>This Collection is empty.</Text>
           )}
         </Flex>
 
