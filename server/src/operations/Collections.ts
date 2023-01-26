@@ -72,10 +72,10 @@ export class Collections {
             throw error;
           }
 
-          // Update the collection to include the Entity
+          // Update the collection to remove the Entity
           const updatedValues = {
             $set: {
-              entities: (result as CollectionModel).entities.filter(content => _.isEqual(entity, content)),
+              entities: (result as CollectionModel).entities.filter(content => !_.isEqual(entity, content)),
             },
           };
     

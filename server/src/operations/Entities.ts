@@ -369,7 +369,7 @@ export class Entities {
             Collections.removeEntity(collection, updatedEntity._id);
           });
 
-          updatedCollections = updatedEntity.collections;
+          updatedCollections = [...collectionsToKeep, ...collectionsToAdd];
 
           // Products
           const productsToKeep = currentEntity.associations.products.map(product => product.id).filter(product => updatedEntity.associations.products.map(product => product.id).includes(product));
@@ -383,7 +383,7 @@ export class Entities {
             Entities.removeProduct({ name: updatedEntity.name, id: updatedEntity._id }, product);
           });
 
-          updatedProducts = updatedEntity.associations.products;
+          updatedProducts = [...currentEntity.associations.products.filter(product => productsToKeep.includes(product.id)), ...productsToAdd];
 
           const updates = {
             $set: {

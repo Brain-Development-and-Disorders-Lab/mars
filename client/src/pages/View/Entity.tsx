@@ -227,6 +227,7 @@ export const Entity = () => {
   };
 
   const removeCollection = (id: string) => {
+    // postData(`/collections/remove`, { collection: id, entity: entityData._id });
     setEntityCollections(entityCollections.filter((collection) => {
       return collection !== id;
     }));
@@ -236,10 +237,12 @@ export const Entity = () => {
    * Callback function to the Entity to Collections
    * @param {{ entities: string[], collection: string }} data List of Entities and a Collection to add the Entities to
    */
-  const addCollection = (entity: string, collections: string[]): void => {
+  const addCollection = (collections: string[]): void => {
     for (const collection of collections) {
-      postData(`/collections/add`, { entities: [entity], collection: collection });
-      setEntityCollections([...entityCollections, collection]);
+      if (!_.isEqual("", collection)) {
+        // postData(`/collections/add`, { entities: [entity], collection: collection });
+        setEntityCollections([...entityCollections, collection]);
+      }
     }
     setSelectedCollections([]);
     onAddCollectionsClose();
@@ -585,7 +588,7 @@ export const Entity = () => {
             <Flex direction={"row"} p={"md"} justify={"center"}>
               <Button
                 colorScheme={"green"}
-                onClick={() => { addCollection(entityData._id, selectedCollections); }}
+                onClick={() => { addCollection(selectedCollections); }}
               >
                 Done
               </Button>
