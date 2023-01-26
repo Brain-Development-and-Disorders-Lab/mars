@@ -33,29 +33,14 @@ EntitiesRoute.route("/entities/:id").get((request: any, response: any) => {
 
 // Route: Create a new Entity, expects EntityStruct data
 EntitiesRoute.route("/entities/create").post((request: { body: EntityStruct }, response: any) => {
-  Entities.insert(request.body).then((entity: EntityModel) => {
-      registerUpdate({
-        targets: {
-          primary: {
-            type: "entities",
-            id: entity._id,
-            name: entity.name,
-          },
-        },
-        operation: {
-          timestamp: new Date(Date.now()),
-          type: "add",
-        }
-      });
-
-      response.json({
-        id: entity._id,
-        name: entity.name,
-        status: "success",
-      });
+  Entities.create(request.body).then((entity: EntityModel) => {
+    response.json({
+      id: entity._id,
+      name: entity.name,
+      status: "success",
     });
-  }
-);
+  });
+});
 
 // Route: Update an Entity
 EntitiesRoute.route("/entities/update").post((request: { body: EntityModel }, response: any) => {
@@ -89,21 +74,10 @@ EntitiesRoute.route("/entities/:id").delete((request: { params: { id: any } }, r
     getDatabase()
       .collection(ENTITIES_COLLECTION)
       .deleteOne(query, (error: any, content: any) => {
-        if (error) throw error;
-        consola.success("1 Entity deleted");
-        registerUpdate({
-          targets: {
-            primary: {
-              type: "entities",
-              id: entityResult._id,
-              name: entityResult.name,
-            },
-          },
-          operation: {
-            timestamp: new Date(Date.now()),
-            type: "remove",
-          }
-        });
+        if (error) {
+          throw error;
+        }
+
         response.json(content);
       });
   }

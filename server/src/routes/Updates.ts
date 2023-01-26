@@ -28,8 +28,6 @@ UpdatesRoute.route("/updates").get((request: any, response: any) => {
 
 // Route: Create a new Update
 UpdatesRoute.route("/updates/create").post((request: { body: UpdateStruct }, response: any) => {
-  consola.debug("Create new Update:", "/updates/create", '"' + request.body + '"');
-
   registerUpdate(request.body);
 });
 

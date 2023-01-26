@@ -9,7 +9,6 @@ import { getDatabase } from "../database/connection";
 import { CollectionModel, CollectionStruct, EntityModel } from "@types";
 
 // Operations
-import { registerUpdate } from "../operations/Updates";
 import { Collections } from "../operations/Collections";
 
 const CollectionsRoute = express.Router();
@@ -68,21 +67,6 @@ CollectionsRoute.route("/collections/create").post(
     // Retrieve the ID of the inserted Entity
     const insertedId = (data as CollectionStruct & { _id: string })._id;
 
-    consola.debug("Create new Collection:", "/collections/create", '"' + data.name + '"');
-    registerUpdate({
-      targets: {
-        primary: {
-          type: "collections",
-          id: insertedId,
-          name: data.name,
-        },
-      },
-      operation: {
-        timestamp: new Date(Date.now()),
-        type: "add",
-      }
-    });
-
     // We need to apply the collections that have been specified
     if (data.entities.length > 0) {
       consola.info("Additional Entities specified, applying...");
@@ -115,27 +99,10 @@ CollectionsRoute.route("/collections/create").post(
               .updateOne(
                 entityQuery,
                 updatedValues,
-                (error: any, response: any) => {
-                  if (error) throw error;
-                  consola.success("Added Collection to Entity:", entityResult.name);
-                  registerUpdate({
-                    targets: {
-                      primary: {
-                        type: "collections",
-                        id: insertedId,
-                        name: data.name,
-                      },
-                      secondary: {
-                        type: "entities",
-                        id: entity,
-                        name: result.name,
-                      },
-                    },
-                    operation: {
-                      timestamp: new Date(Date.now()),
-                      type: "modify",
-                    }
-                  });
+                (error: any, _response: any) => {
+                  if (error) {
+                    throw error;
+                  }
                 }
               );
           });
@@ -233,20 +200,6 @@ export const add = (data: { entityId: string[], collectionId: string }, response
                 if (error) {
                   throw error;
                 }
-
-                registerUpdate({
-                  targets: {
-                    primary: {
-                      type: "collections",
-                      id: data.collectionId,
-                      name: result.name,
-                    },
-                  },
-                  operation: {
-                    timestamp: new Date(Date.now()),
-                    type: "modify",
-                  }
-                });
               }
             );
         }

@@ -3,7 +3,6 @@ import { ObjectId } from "mongodb";
 
 // Utility functions
 import { getDatabase } from "../database/connection";
-import { registerUpdate } from "./Updates";
 import { Entities } from "./Entities";
 
 // Custom types
@@ -42,21 +41,6 @@ export class Collections {
                 throw error;
               }
 
-              registerUpdate({
-                targets: {
-                  primary: {
-                    type: "collections",
-                    id: collection,
-                    name: result.name,
-                  },
-                },
-                operation: {
-                  timestamp: new Date(Date.now()),
-                  type: "modify",
-                  details: "add Entity"
-                }
-              });
-
               // Resolve the Promise
               resolve(collection);
             });
@@ -86,21 +70,6 @@ export class Collections {
               if (error) {
                 throw error;
               }
-
-              registerUpdate({
-                targets: {
-                  primary: {
-                    type: "collections",
-                    id: collection,
-                    name: (result as CollectionModel).name,
-                  },
-                },
-                operation: {
-                  timestamp: new Date(Date.now()),
-                  type: "modify",
-                  details: "remove Entity"
-                }
-              });
 
               // Resolve the Promise
               resolve(collection);
@@ -151,21 +120,6 @@ export class Collections {
                 if (error) {
                   throw error;
                 }
-
-                registerUpdate({
-                  targets: {
-                    primary: {
-                      type: "collections",
-                      id: updatedCollection._id,
-                      name: updatedCollection.name,
-                    },
-                  },
-                  operation: {
-                    timestamp: new Date(Date.now()),
-                    type: "modify",
-                    details: "modify Collection"
-                  }
-                });
 
                 // Resolve the Promise
                 resolve(updatedCollection);

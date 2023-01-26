@@ -264,7 +264,7 @@ const Home = () => {
                   if (index < 10) {
                     // Configure the badge
                     let operationBadgeColor = "green";
-                    switch (update.operation.type) {
+                    switch (update.type) {
                       case "add":
                         operationBadgeColor = "green";
                         break;
@@ -277,7 +277,7 @@ const Home = () => {
                     }
 
                     let typeBadgeColor = "yellow";
-                    switch (update.targets.primary.type) {
+                    switch (update.target.type) {
                       case "entities":
                         typeBadgeColor = "yellow";
                         break;
@@ -291,14 +291,11 @@ const Home = () => {
                     return (
                       <ListItem key={`update-${update._id}`}>
                         <Flex direction={"row"} p={"2"} gap={"2"} mt={"2"} mb={"2"} align={"center"} color={"gray.400"} background={"white"} rounded={"xl"}>
-                          <Badge colorScheme={operationBadgeColor}>{update.operation.type}</Badge>
-                          <Badge colorScheme={typeBadgeColor}>{update.targets.primary.type}</Badge>
-                          <Text>{update.targets.primary.name}</Text>
-                          {update.targets.secondary &&
-                            <Text>{update.targets.secondary.name}</Text>
-                          }
+                          <Badge colorScheme={operationBadgeColor}>{update.type}</Badge>
+                          <Badge colorScheme={typeBadgeColor}>{update.target.type}</Badge>
+                          <Text>{update.target.name}</Text>
                           <Spacer />
-                          <Text fontSize={"md"} as={"b"} >{dayjs(update.operation.timestamp).format("HH:mm DD MMM.")}</Text>
+                          <Text fontSize={"md"} as={"b"} >{dayjs(update.timestamp).format("HH:mm DD MMM.")}</Text>
                         </Flex>
                       </ListItem>
                     );

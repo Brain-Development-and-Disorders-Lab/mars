@@ -147,22 +147,13 @@ export type EntityModel = EntityStruct & {
 };
 
 export type UpdateStruct = {
-  targets: {
-    primary: {
-      type: "entities" | "collections" | "attributes",
-      id: string,
-      name: string,
-    },
-    secondary?: {
-      type: "entities" | "collections" | "attributes",
-      id: string,
-      name: string,
-    },
-  };
-  operation: {
-    type: "modify" | "add" | "remove",
-    timestamp: Date;
-    details?: string,
+  timestamp: Date;
+  type: "modify" | "add" | "remove";
+  details: string;
+  target: {
+    type: "entities" | "collections" | "attributes",
+    id: string,
+    name: string,
   };
 };
 

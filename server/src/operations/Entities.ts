@@ -7,7 +7,6 @@ import _ from "underscore";
 
 // Utility functions
 import { getDatabase } from "../database/connection";
-import { registerUpdate } from "./Updates";
 
 // Custom types
 import { EntityModel, EntityStruct } from "@types";
@@ -22,7 +21,7 @@ export class Entities {
    * @param entity
    * @return {Promise<EntityModel>}
    */
-  static insert = (entity: any): Promise<EntityModel> => {
+  static create = (entity: any): Promise<EntityModel> => {
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES_COLLECTION)
@@ -61,375 +60,6 @@ export class Entities {
     });
   };
 
-  /**
-   * Retrieve all Entities
-   * @return {Promise<EntityStruct[]>}
-   */
-  static getAll = (): Promise<EntityStruct[]> => {
-    return new Promise((resolve, _reject) => {
-      getDatabase()
-        .collection(ENTITIES_COLLECTION)
-        .find({})
-        .toArray((error: any, result: any) => {
-          if (error) {
-            throw error;
-          }
-          resolve(result as EntityStruct[]);
-        });
-    });
-  };
-
-  /**
-   * Get a single Entity
-   * @return {Promise<EntityStruct>}
-   */
-  static getOne = (id: string): Promise<EntityStruct> => {
-    return new Promise((resolve, _reject) => {
-      getDatabase()
-        .collection(ENTITIES_COLLECTION)
-        .findOne({ _id: new ObjectId(id) }, (error: any, result: any) => {
-          if (error) {
-            throw error;
-          };
-          resolve(result as EntityStruct);
-        });
-    });
-  };
-
-  /**
-   * Add another Entity to a collection of "product" associations
-   * @param {{ name: string, id: string }} entity the Entity of interest
-   * @param {{ name: string, id: string }} product an Entity to add as a "product" association
-   * @return {Promise<{ name: string, id: string }>}
-   */
-  static addProduct = (entity: { name: string, id: string }, product: { name: string, id: string }): Promise<{ name: string, id: string }> => {
-    return new Promise((resolve, _reject) => {
-      getDatabase()
-        .collection(ENTITIES_COLLECTION)
-        .findOne({ _id: new ObjectId(entity.id) }, (error: any, result: any) => {
-          if (error) {
-            throw error;
-          }
-
-          // Update the collection of Products associated with the Entity to include this extra product
-          // We aren't updating the Origin of the Product
-          const updates = {
-            $set: {
-              associations: {
-                origin:  result.associations.origin,
-                products: [
-                  ...result.associations.products,
-                  product,
-                ],
-              },
-            },
-          };
-
-          getDatabase()
-            .collection(ENTITIES_COLLECTION)
-            .updateOne({ _id: new ObjectId(entity.id) }, updates, (error: any, response: any) => {
-                if (error) {
-                  throw error;
-                }
-
-                registerUpdate({
-                  targets: {
-                    primary: {
-                      type: "entities",
-                      id: entity.id,
-                      name: entity.name,
-                    },
-                    secondary: {
-                      type: "entities",
-                      id: product.id,
-                      name: product.name,
-                    },
-                  },
-                  operation: {
-                    timestamp: new Date(Date.now()),
-                    type: "modify",
-                    details: "add Product"
-                  }
-                });
-
-                // Resolve the Promise
-                resolve(entity);
-              }
-            );
-        });
-    });
-  };
-
-  static removeProduct = (entity: { name: string, id: string }, product: { name: string, id: string }): Promise<{ name: string, id: string }> => {
-    return new Promise((resolve, _reject) => {
-      getDatabase()
-        .collection(ENTITIES_COLLECTION)
-        .findOne({ _id: new ObjectId(entity.id) }, (error: any, result: any) => {
-          if (error) {
-            throw error;
-          }
-
-          // Update the collection of Products associated with the Entity to remove this Product
-          const updates = {
-            $set: {
-              associations: {
-                origin:  (result as EntityModel).associations.origin,
-                products: (result as EntityModel).associations.products.filter(content => !_.isEqual(product.id, content.id)),
-              },
-            },
-          };
-
-          getDatabase()
-            .collection(ENTITIES_COLLECTION)
-            .updateOne({ _id: new ObjectId(entity.id) }, updates, (error: any, response: any) => {
-                if (error) {
-                  throw error;
-                }
-
-                registerUpdate({
-                  targets: {
-                    primary: {
-                      type: "entities",
-                      id: entity.id,
-                      name: entity.name,
-                    },
-                    secondary: {
-                      type: "entities",
-                      id: product.id,
-                      name: product.name,
-                    },
-                  },
-                  operation: {
-                    timestamp: new Date(Date.now()),
-                    type: "modify",
-                    details: "remove Product"
-                  }
-                });
-
-                // Resolve the Promise
-                resolve(entity);
-              }
-            );
-        });
-    });
-  };
-
-  static addCollection = (entity: string, collection: string): Promise<string> => {
-    return new Promise((resolve, _reject) => {
-      getDatabase()
-        .collection(ENTITIES_COLLECTION)
-        .findOne({ _id: new ObjectId(entity) }, (error: any, result: any) => {
-          if (error) {
-            throw error;
-          }
-
-          // Update the collection of Collections associated with the Entity to include this extra Collection
-          const updates = {
-            $set: {
-              collections: [...(result as EntityModel).collections, collection],
-            },
-          };
-
-          getDatabase()
-            .collection(ENTITIES_COLLECTION)
-            .updateOne({ _id: new ObjectId(entity) }, updates, (error: any, response: any) => {
-                if (error) {
-                  throw error;
-                }
-
-                registerUpdate({
-                  targets: {
-                    primary: {
-                      type: "entities",
-                      id: entity,
-                      name: entity,
-                    },
-                    secondary: {
-                      type: "collections",
-                      id: collection,
-                      name: collection,
-                    },
-                  },
-                  operation: {
-                    timestamp: new Date(Date.now()),
-                    type: "modify",
-                    details: "add Collection"
-                  }
-                });
-
-                // Resolve the Promise
-                resolve(entity);
-              }
-            );
-        });
-    });
-  };
-
-  static removeCollection = (entity: string, collection: string): Promise<string> => {
-    return new Promise((resolve, _reject) => {
-      getDatabase()
-        .collection(ENTITIES_COLLECTION)
-        .findOne({ _id: new ObjectId(entity) }, (error: any, result: any) => {
-          if (error) {
-            throw error;
-          }
-
-          // Update the collection of Collections associated with the Entity to remove this Collection
-          const updates = {
-            $set: {
-              collections: [...(result as EntityModel).collections.filter(content => !_.isEqual(content, collection))],
-            },
-          };
-
-          getDatabase()
-            .collection(ENTITIES_COLLECTION)
-            .updateOne({ _id: new ObjectId(entity) }, updates, (error: any, _response: any) => {
-                if (error) {
-                  throw error;
-                }
-
-                registerUpdate({
-                  targets: {
-                    primary: {
-                      type: "entities",
-                      id: entity,
-                      name: entity,
-                    },
-                    secondary: {
-                      type: "collections",
-                      id: collection,
-                      name: collection,
-                    },
-                  },
-                  operation: {
-                    timestamp: new Date(Date.now()),
-                    type: "modify",
-                    details: "remove Collection"
-                  }
-                });
-
-                // Resolve the Promise
-                resolve(entity);
-              }
-            );
-        });
-    });
-  };
-
-  /**
-   * Specify an Entity acting as an Origin
-   * @param {{ name: string, id: string }} entity the Entity of interest
-   * @param {{ name: string, id: string }} origin an Entity to add as an "origin" association
-   * @return {Promise<{ name: string, id: string }>}
-   */
-  static setOrigin = (entity: { name: string, id: string }, origin: { name: string, id: string }): Promise<{ name: string, id: string }> => {
-    return new Promise((resolve, _reject) => {
-      getDatabase()
-        .collection(ENTITIES_COLLECTION)
-        .findOne({ _id: new ObjectId(entity.id) }, (error: any, result: any) => {
-          if (error) {
-            throw error;
-          }
-
-          // Update the Origin of this Entity
-          const updates = {
-            $set: {
-              associations: {
-                origin: {
-                  name: origin.name,
-                  id: origin.id,
-                },
-                products: result.associations.products,
-              },
-            },
-          };
-
-          getDatabase()
-            .collection(ENTITIES_COLLECTION)
-            .updateOne({ _id: new ObjectId(entity.id) }, updates, (error: any, response: any) => {
-                if (error) {
-                  throw error;
-                }
-
-                registerUpdate({
-                  targets: {
-                    primary: {
-                      type: "entities",
-                      id: entity.id,
-                      name: entity.name,
-                    },
-                    secondary: {
-                      type: "entities",
-                      id: origin.id,
-                      name: origin.name,
-                    },
-                  },
-                  operation: {
-                    timestamp: new Date(Date.now()),
-                    type: "modify",
-                    details: "add Origin"
-                  }
-                });
-
-                // Resolve the Promise
-                resolve(entity);
-              }
-            );
-        });
-    });
-  };
-
-  /**
-   * Update the description of an Entity
-   * @param entity the Entity of interest
-   * @param description an updated description
-   * @return {Promise<{ name: string, id: string }>}
-   */
-  static setDescription = (entity: { name: string, id: string }, description: string): Promise<{ name: string, id: string }> => {
-    return new Promise((resolve, _reject) => {
-      getDatabase()
-        .collection(ENTITIES_COLLECTION)
-        .findOne({ _id: new ObjectId(entity.id) }, (error: any, result: any) => {
-          if (error) {
-            throw error;
-          }
-
-          // Update the description of this Entity
-          const updates = {
-            $set: {
-              description: description,
-            },
-          };
-
-          getDatabase()
-            .collection(ENTITIES_COLLECTION)
-            .updateOne({ _id: new ObjectId(entity.id) }, updates, (error: any, response: any) => {
-                if (error) {
-                  throw error;
-                }
-
-                registerUpdate({
-                  targets: {
-                    primary: {
-                      type: "entities",
-                      id: entity.id,
-                      name: entity.name,
-                    },
-                  },
-                  operation: {
-                    timestamp: new Date(Date.now()),
-                    type: "modify",
-                    details: "add Origin"
-                  }
-                });
-
-                // Resolve the Promise
-                resolve(entity);
-              }
-            );
-        });
-    });
-  };
 
   /**
    * Perform a complete modification of an Entity, comparing a new version with the existing version
@@ -505,25 +135,265 @@ export class Entities {
                   throw error;
                 }
 
-                registerUpdate({
-                  targets: {
-                    primary: {
-                      type: "entities",
-                      id: updatedEntity._id,
-                      name: updatedEntity.name,
-                    },
-                  },
-                  operation: {
-                    timestamp: new Date(Date.now()),
-                    type: "modify",
-                    details: "modify Entity"
-                  }
-                });
-
                 // Resolve the Promise
                 resolve(updatedEntity);
               }
             );
+        });
+    });
+  };
+
+  /**
+   * Add another Entity to a collection of "product" associations
+   * @param {{ name: string, id: string }} entity the Entity of interest
+   * @param {{ name: string, id: string }} product an Entity to add as a "product" association
+   * @return {Promise<{ name: string, id: string }>}
+   */
+  static addProduct = (entity: { name: string, id: string }, product: { name: string, id: string }): Promise<{ name: string, id: string }> => {
+    return new Promise((resolve, _reject) => {
+      getDatabase()
+        .collection(ENTITIES_COLLECTION)
+        .findOne({ _id: new ObjectId(entity.id) }, (error: any, result: any) => {
+          if (error) {
+            throw error;
+          }
+
+          // Update the collection of Products associated with the Entity to include this extra product
+          // We aren't updating the Origin of the Product
+          const updates = {
+            $set: {
+              associations: {
+                origin:  result.associations.origin,
+                products: [
+                  ...result.associations.products,
+                  product,
+                ],
+              },
+            },
+          };
+
+          getDatabase()
+            .collection(ENTITIES_COLLECTION)
+            .updateOne({ _id: new ObjectId(entity.id) }, updates, (error: any, response: any) => {
+                if (error) {
+                  throw error;
+                }
+
+                // Resolve the Promise
+                resolve(entity);
+              }
+            );
+        });
+    });
+  };
+
+  static removeProduct = (entity: { name: string, id: string }, product: { name: string, id: string }): Promise<{ name: string, id: string }> => {
+    return new Promise((resolve, _reject) => {
+      getDatabase()
+        .collection(ENTITIES_COLLECTION)
+        .findOne({ _id: new ObjectId(entity.id) }, (error: any, result: any) => {
+          if (error) {
+            throw error;
+          }
+
+          // Update the collection of Products associated with the Entity to remove this Product
+          const updates = {
+            $set: {
+              associations: {
+                origin:  (result as EntityModel).associations.origin,
+                products: (result as EntityModel).associations.products.filter(content => !_.isEqual(product.id, content.id)),
+              },
+            },
+          };
+
+          getDatabase()
+            .collection(ENTITIES_COLLECTION)
+            .updateOne({ _id: new ObjectId(entity.id) }, updates, (error: any, response: any) => {
+                if (error) {
+                  throw error;
+                }
+
+                // Resolve the Promise
+                resolve(entity);
+              }
+            );
+        });
+    });
+  };
+
+  static addCollection = (entity: string, collection: string): Promise<string> => {
+    return new Promise((resolve, _reject) => {
+      getDatabase()
+        .collection(ENTITIES_COLLECTION)
+        .findOne({ _id: new ObjectId(entity) }, (error: any, result: any) => {
+          if (error) {
+            throw error;
+          }
+
+          // Update the collection of Collections associated with the Entity to include this extra Collection
+          const updates = {
+            $set: {
+              collections: [...(result as EntityModel).collections, collection],
+            },
+          };
+
+          getDatabase()
+            .collection(ENTITIES_COLLECTION)
+            .updateOne({ _id: new ObjectId(entity) }, updates, (error: any, response: any) => {
+                if (error) {
+                  throw error;
+                }
+
+                // Resolve the Promise
+                resolve(entity);
+              }
+            );
+        });
+    });
+  };
+
+  static removeCollection = (entity: string, collection: string): Promise<string> => {
+    return new Promise((resolve, _reject) => {
+      getDatabase()
+        .collection(ENTITIES_COLLECTION)
+        .findOne({ _id: new ObjectId(entity) }, (error: any, result: any) => {
+          if (error) {
+            throw error;
+          }
+
+          // Update the collection of Collections associated with the Entity to remove this Collection
+          const updates = {
+            $set: {
+              collections: [...(result as EntityModel).collections.filter(content => !_.isEqual(content, collection))],
+            },
+          };
+
+          getDatabase()
+            .collection(ENTITIES_COLLECTION)
+            .updateOne({ _id: new ObjectId(entity) }, updates, (error: any, _response: any) => {
+                if (error) {
+                  throw error;
+                }
+
+                // Resolve the Promise
+                resolve(entity);
+              }
+            );
+        });
+    });
+  };
+
+  /**
+   * Specify an Entity acting as an Origin
+   * @param {{ name: string, id: string }} entity the Entity of interest
+   * @param {{ name: string, id: string }} origin an Entity to add as an "origin" association
+   * @return {Promise<{ name: string, id: string }>}
+   */
+  static setOrigin = (entity: { name: string, id: string }, origin: { name: string, id: string }): Promise<{ name: string, id: string }> => {
+    return new Promise((resolve, _reject) => {
+      getDatabase()
+        .collection(ENTITIES_COLLECTION)
+        .findOne({ _id: new ObjectId(entity.id) }, (error: any, result: any) => {
+          if (error) {
+            throw error;
+          }
+
+          // Update the Origin of this Entity
+          const updates = {
+            $set: {
+              associations: {
+                origin: {
+                  name: origin.name,
+                  id: origin.id,
+                },
+                products: result.associations.products,
+              },
+            },
+          };
+
+          getDatabase()
+            .collection(ENTITIES_COLLECTION)
+            .updateOne({ _id: new ObjectId(entity.id) }, updates, (error: any, response: any) => {
+                if (error) {
+                  throw error;
+                }
+
+                // Resolve the Promise
+                resolve(entity);
+              }
+            );
+        });
+    });
+  };
+
+  /**
+   * Update the description of an Entity
+   * @param entity the Entity of interest
+   * @param description an updated description
+   * @return {Promise<{ name: string, id: string }>}
+   */
+  static setDescription = (entity: { name: string, id: string }, description: string): Promise<{ name: string, id: string }> => {
+    return new Promise((resolve, _reject) => {
+      getDatabase()
+        .collection(ENTITIES_COLLECTION)
+        .findOne({ _id: new ObjectId(entity.id) }, (error: any, result: any) => {
+          if (error) {
+            throw error;
+          }
+
+          // Update the description of this Entity
+          const updates = {
+            $set: {
+              description: description,
+            },
+          };
+
+          getDatabase()
+            .collection(ENTITIES_COLLECTION)
+            .updateOne({ _id: new ObjectId(entity.id) }, updates, (error: any, response: any) => {
+                if (error) {
+                  throw error;
+                }
+
+                // Resolve the Promise
+                resolve(entity);
+              }
+            );
+        });
+    });
+  };
+
+  /**
+   * Retrieve all Entities
+   * @return {Promise<EntityStruct[]>}
+   */
+  static getAll = (): Promise<EntityStruct[]> => {
+    return new Promise((resolve, _reject) => {
+      getDatabase()
+        .collection(ENTITIES_COLLECTION)
+        .find({})
+        .toArray((error: any, result: any) => {
+          if (error) {
+            throw error;
+          }
+          resolve(result as EntityStruct[]);
+        });
+    });
+  };
+
+  /**
+   * Get a single Entity
+   * @return {Promise<EntityStruct>}
+   */
+  static getOne = (id: string): Promise<EntityStruct> => {
+    return new Promise((resolve, _reject) => {
+      getDatabase()
+        .collection(ENTITIES_COLLECTION)
+        .findOne({ _id: new ObjectId(id) }, (error: any, result: any) => {
+          if (error) {
+            throw error;
+          };
+          resolve(result as EntityStruct);
         });
     });
   };

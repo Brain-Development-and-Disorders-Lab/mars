@@ -7,7 +7,6 @@ import { getDatabase } from "../database/connection";
 
 // Custom types
 import { AttributeStruct } from "@types";
-import { registerUpdate } from "../operations/Updates";
 
 // Constants
 const ATTRIBUTES_COLLECTION = "attributes";
@@ -47,57 +46,30 @@ AttributesRoute.route("/attributes/:id").get(
 );
 
 // Route: Create a new Attribute, expects AttributeStruct data
-AttributesRoute.route("/attributes/create").post(
-  (request: { body: AttributeStruct }, response: any) => {
-    let data = {
-      name: request.body.name,
-      description: request.body.description,
-      parameters: request.body.parameters,
-    };
-
-    // Insert the new Attribute
-    getDatabase()
-      .collection(ATTRIBUTES_COLLECTION)
-      .insertOne(data, (error: any, content: any) => {
-        if (error) throw error;
-        response.json(content);
-      });
-
-    // Retrieve the ID of the inserted Entity
-    const insertedId = (data as AttributeStruct & { _id: string })._id;
-    registerUpdate({
-      targets: {
-        primary: {
-          type: "attributes",
-          id: insertedId,
-          name: data.name,
-        },
-      },
-      operation: {
-        timestamp: new Date(Date.now()),
-        type: "add",
+AttributesRoute.route("/attributes/create").post((request: { body: AttributeStruct }, response: any) => {
+  // Insert the new Attribute
+  getDatabase()
+    .collection(ATTRIBUTES_COLLECTION)
+    .insertOne(request.body, (error: any, content: any) => {
+      if (error) {
+        throw error;
       }
-    });
 
-    consola.debug("Create new Attribute:", "/attributes/create", '"' + data.name + '"');
-  }
-);
+      response.json(content);
+    });
+});
 
 // Route: Remove an Attribute
-AttributesRoute.route("/attributes/:id").delete(
-  (request: { params: { id: any } }, response: { json: (content: any) => void }) => {
-    let query = { _id: ObjectId(request.params.id) };
+AttributesRoute.route("/attributes/:id").delete((request: { params: { id: any } }, response: { json: (content: any) => void }) => {
+  getDatabase()
+    .collection("attributes")
+    .deleteOne({ _id: ObjectId(request.params.id) }, (error: any, content: any) => {
+      if (error) {
+        throw error;
+      }
 
-    getDatabase()
-      .collection("attributes")
-      .deleteOne(query, (error: any, content: any) => {
-        if (error) throw error;
-        consola.success("1 attribute deleted");
-        response.json(content);
-      });
-
-    // To Do: Remove references to Attribute.
-  }
-);
+      response.json(content);
+    });
+});
 
 export default AttributesRoute;
