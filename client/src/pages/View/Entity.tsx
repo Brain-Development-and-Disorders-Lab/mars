@@ -117,7 +117,6 @@ export const Entity = () => {
       postData(`/entities/update`, updateData).then((response) => {
         if (_.isEqual(response.status, "success")) {
           setEditing(false);
-
           toast({
             title: "Saved!",
             status: "success",
@@ -236,12 +235,8 @@ export const Entity = () => {
    * Callback function to the Entity to Collections
    * @param {{ entities: string[], collection: string }} data List of Entities and a Collection to add the Entities to
    */
-  const addCollection = (collections: string[]): void => {
-    for (const collection of collections) {
-      if (!_.isEqual("", collection)) {
-        setEntityCollections([...entityCollections, collection]);
-      }
-    }
+  const addCollections = (collections: string[]): void => {
+    setEntityCollections([...entityCollections, ...collections.filter(collection => !_.isEqual("", collection))]);
     setSelectedCollections([]);
     onAddCollectionsClose();
   };
@@ -586,7 +581,7 @@ export const Entity = () => {
             <Flex direction={"row"} p={"md"} justify={"center"}>
               <Button
                 colorScheme={"green"}
-                onClick={() => { addCollection(selectedCollections); }}
+                onClick={() => { addCollections(selectedCollections); }}
               >
                 Done
               </Button>
