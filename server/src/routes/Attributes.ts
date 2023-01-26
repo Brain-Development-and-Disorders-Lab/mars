@@ -29,8 +29,7 @@ AttributesRoute.route("/attributes").get((request: any, response: any) => {
 });
 
 // Route: View a specific attribute
-AttributesRoute.route("/attributes/:id").get(
-  (request: { params: { id: any } }, response: { json: (content: any) => void }) => {
+AttributesRoute.route("/attributes/:id").get((request: { params: { id: any } }, response: { json: (content: any) => void }) => {
     // Connect to the database and assemble a query
     let connection = getDatabase();
     let query = { _id: ObjectId(request.params.id) };

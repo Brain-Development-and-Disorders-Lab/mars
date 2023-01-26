@@ -17,8 +17,8 @@ const ENTITIES_COLLECTION = "entities";
 
 export class Entities {
   /**
-   * Insert a new Entity to the collection of Entities
-   * @param entity
+   * Create a new Entity
+   * @param {any} entity all data associated with the new Entity
    * @return {Promise<EntityModel>}
    */
   static create = (entity: any): Promise<EntityModel> => {
@@ -60,13 +60,12 @@ export class Entities {
     });
   };
 
-
   /**
-   * Perform a complete modification of an Entity, comparing a new version with the existing version
+   * Update an Entity, comparing a new version with the existing version
    * @param {EntityModel} updatedEntity updated Entity
    * @return {Promise<EntityModel>}
    */
-  static modify = (updatedEntity: EntityModel): Promise<EntityModel> => {
+  static update = (updatedEntity: EntityModel): Promise<EntityModel> => {
     // Get current state of the Entity
     return new Promise((resolve, _reject) => {
       getDatabase()
@@ -78,30 +77,16 @@ export class Entities {
           // Cast and store current state of the Entity
           const currentEntity = result as EntityModel;
 
-          // Create set of variables to store current or updated state values
-          let updatedDescription = currentEntity.description;
-          let updatedCollections = currentEntity.collections;
-          let updatedProducts = currentEntity.associations.products;
-
-          // Description
-          if (!_.isEqual(updatedEntity.description, currentEntity.description)) {
-            updatedDescription = updatedEntity.description;
-          }
-
           // Collections
           const collectionsToKeep = currentEntity.collections.filter(collection => updatedEntity.collections.includes(collection));
-
           const collectionsToAdd = updatedEntity.collections.filter(collection => !collectionsToKeep.includes(collection));
           collectionsToAdd.map((collection: string) => {
             Collections.addEntity(collection, updatedEntity._id);
           });
-
           const collectionsToRemove = currentEntity.collections.filter(collection => !collectionsToKeep.includes(collection));
           collectionsToRemove.map((collection: string) => {
             Collections.removeEntity(collection, updatedEntity._id);
           });
-
-          updatedCollections = [...collectionsToKeep, ...collectionsToAdd];
 
           // Products
           const productsToKeep = currentEntity.associations.products.map(product => product.id).filter(product => updatedEntity.associations.products.map(product => product.id).includes(product));
@@ -109,28 +94,25 @@ export class Entities {
           productsToAdd.map((product: {id: string, name: string}) => {
             Entities.addProduct({ name: updatedEntity.name, id: updatedEntity._id }, product);
           });
-
           const productsToRemove = currentEntity.associations.products.filter(product => !productsToKeep.includes(product.id));
           productsToRemove.map((product: {id: string, name: string}) => {
             Entities.removeProduct({ name: updatedEntity.name, id: updatedEntity._id }, product);
           });
 
-          updatedProducts = [...currentEntity.associations.products.filter(product => productsToKeep.includes(product.id)), ...productsToAdd];
-
           const updates = {
             $set: {
-              description: updatedDescription,
-              collections: updatedCollections,
+              description: updatedEntity.description,
+              collections: [...collectionsToKeep, ...collectionsToAdd],
               associations: {
                 origin: updatedEntity.associations.origin,
-                products: updatedProducts,
+                products: [...currentEntity.associations.products.filter(product => productsToKeep.includes(product.id)), ...productsToAdd],
               },
             },
           };
 
           getDatabase()
             .collection(ENTITIES_COLLECTION)
-            .updateOne({ _id: new ObjectId(updatedEntity._id) }, updates, (error: any, response: any) => {
+            .updateOne({ _id: new ObjectId(updatedEntity._id) }, updates, (error: any, _response: any) => {
                 if (error) {
                   throw error;
                 }
@@ -174,7 +156,7 @@ export class Entities {
 
           getDatabase()
             .collection(ENTITIES_COLLECTION)
-            .updateOne({ _id: new ObjectId(entity.id) }, updates, (error: any, response: any) => {
+            .updateOne({ _id: new ObjectId(entity.id) }, updates, (error: any, _response: any) => {
                 if (error) {
                   throw error;
                 }
@@ -208,7 +190,7 @@ export class Entities {
 
           getDatabase()
             .collection(ENTITIES_COLLECTION)
-            .updateOne({ _id: new ObjectId(entity.id) }, updates, (error: any, response: any) => {
+            .updateOne({ _id: new ObjectId(entity.id) }, updates, (error: any, _response: any) => {
                 if (error) {
                   throw error;
                 }
@@ -239,7 +221,7 @@ export class Entities {
 
           getDatabase()
             .collection(ENTITIES_COLLECTION)
-            .updateOne({ _id: new ObjectId(entity) }, updates, (error: any, response: any) => {
+            .updateOne({ _id: new ObjectId(entity) }, updates, (error: any, _response: any) => {
                 if (error) {
                   throw error;
                 }
@@ -313,7 +295,7 @@ export class Entities {
 
           getDatabase()
             .collection(ENTITIES_COLLECTION)
-            .updateOne({ _id: new ObjectId(entity.id) }, updates, (error: any, response: any) => {
+            .updateOne({ _id: new ObjectId(entity.id) }, updates, (error: any, _response: any) => {
                 if (error) {
                   throw error;
                 }
@@ -365,9 +347,9 @@ export class Entities {
 
   /**
    * Retrieve all Entities
-   * @return {Promise<EntityStruct[]>}
+   * @return {Promise<EntityModel[]>}
    */
-  static getAll = (): Promise<EntityStruct[]> => {
+  static getAll = (): Promise<EntityModel[]> => {
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES_COLLECTION)
@@ -376,16 +358,16 @@ export class Entities {
           if (error) {
             throw error;
           }
-          resolve(result as EntityStruct[]);
+          resolve(result as EntityModel[]);
         });
     });
   };
 
   /**
    * Get a single Entity
-   * @return {Promise<EntityStruct>}
+   * @return {Promise<EntityModel>}
    */
-  static getOne = (id: string): Promise<EntityStruct> => {
+  static getOne = (id: string): Promise<EntityModel> => {
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES_COLLECTION)
@@ -393,7 +375,7 @@ export class Entities {
           if (error) {
             throw error;
           };
-          resolve(result as EntityStruct);
+          resolve(result as EntityModel);
         });
     });
   };

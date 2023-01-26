@@ -11,7 +11,6 @@ const UPDATES = "updates";
  * @param {UpdateStruct} update information related to an Update
  */
 export const registerUpdate = (update: UpdateStruct) => {
-  // Insert the new Update
   getDatabase()
     .collection(UPDATES)
     .insertOne(update, (error: any, _content: any) => {

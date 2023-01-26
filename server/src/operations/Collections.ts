@@ -6,7 +6,7 @@ import { getDatabase } from "../database/connection";
 import { Entities } from "./Entities";
 
 // Custom types
-import { CollectionModel } from "@types";
+import { CollectionModel, CollectionStruct } from "@types";
 
 // Utility libraries
 import consola from "consola";
@@ -15,68 +15,29 @@ import _ from "underscore";
 const COLLECTIONS = "collections";
 
 export class Collections {
-  static addEntity = (collection: string, entity: string): Promise<string> => {
-    return new Promise((resolve, _reject) => {
-      getDatabase()
-        .collection(COLLECTIONS)
-        .findOne({ _id: new ObjectId(collection) }, (error: any, result: any) => {
-          if (error) {
-            throw error;
-          }
+  /**
+   * Create a new Collection
+   * @param {any} collection all data associated with the new Collection
+   * @return {Promise<CollectionModel>}
+   */
+    static create = (collection: any): Promise<CollectionModel> => {
+      return new Promise((resolve, _reject) => {
+        getDatabase()
+          .collection(COLLECTIONS)
+          .insertOne(collection, (error: any, result: any) => {
+            if (error) {
+              throw error;
+            }
 
-          // Update the collection to include the Entity
-          const updatedValues = {
-            $set: {
-              entities: [
-                ...result.entities,
-                entity,
-              ],
-            },
-          };
-    
-          getDatabase()
-            .collection(COLLECTIONS)
-            .updateOne({ _id: new ObjectId(collection) }, updatedValues, (error: any, response: any) => {
-              if (error) {
-                throw error;
-              }
+            // Add any Entities to the Collection
+            for (const entity of (collection as CollectionStruct).entities) {
+              Collections.addEntity(result.insertedId, entity);
+            }
 
-              // Resolve the Promise
-              resolve(collection);
-            });
-        });
-    });
-  };
-
-  static removeEntity = (collection: string, entity: string): Promise<string> => {
-    return new Promise((resolve, _reject) => {
-      getDatabase()
-        .collection(COLLECTIONS)
-        .findOne({ _id: new ObjectId(collection) }, (error: any, result: any) => {
-          if (error) {
-            throw error;
-          }
-
-          // Update the collection to remove the Entity
-          const updatedValues = {
-            $set: {
-              entities: (result as CollectionModel).entities.filter(content => !_.isEqual(entity, content)),
-            },
-          };
-    
-          getDatabase()
-            .collection(COLLECTIONS)
-            .updateOne({ _id: new ObjectId(collection) }, updatedValues, (error: any, _response: any) => {
-              if (error) {
-                throw error;
-              }
-
-              // Resolve the Promise
-              resolve(collection);
-            });
-        });
-    });
-  };
+            resolve(result as CollectionModel);
+          });
+      });
+    };
 
   static modify = (updatedCollection: CollectionModel): Promise<CollectionModel> => {
     return new Promise((resolve, _reject) => {
@@ -125,6 +86,100 @@ export class Collections {
                 resolve(updatedCollection);
               }
             );
+        });
+    });
+  };
+
+  static addEntity = (collection: string, entity: string): Promise<string> => {
+    return new Promise((resolve, _reject) => {
+      getDatabase()
+        .collection(COLLECTIONS)
+        .findOne({ _id: new ObjectId(collection) }, (error: any, result: any) => {
+          if (error) {
+            throw error;
+          }
+
+          // Update the collection to include the Entity
+          const updatedValues = {
+            $set: {
+              entities: [
+                ...result.entities,
+                entity,
+              ],
+            },
+          };
+    
+          getDatabase()
+            .collection(COLLECTIONS)
+            .updateOne({ _id: new ObjectId(collection) }, updatedValues, (error: any, _response: any) => {
+              if (error) {
+                throw error;
+              }
+
+              // Resolve the Promise
+              resolve(collection);
+            });
+        });
+    });
+  };
+
+  static removeEntity = (collection: string, entity: string): Promise<string> => {
+    return new Promise((resolve, _reject) => {
+      getDatabase()
+        .collection(COLLECTIONS)
+        .findOne({ _id: new ObjectId(collection) }, (error: any, result: any) => {
+          if (error) {
+            throw error;
+          }
+
+          // Update the collection to remove the Entity
+          const updatedValues = {
+            $set: {
+              entities: (result as CollectionModel).entities.filter(content => !_.isEqual(entity, content)),
+            },
+          };
+    
+          getDatabase()
+            .collection(COLLECTIONS)
+            .updateOne({ _id: new ObjectId(collection) }, updatedValues, (error: any, _response: any) => {
+              if (error) {
+                throw error;
+              }
+
+              // Resolve the Promise
+              resolve(collection);
+            });
+        });
+    });
+  };
+
+  static getAll = (): Promise<CollectionModel[]> => {
+    return new Promise((resolve, _reject) => {
+      getDatabase()
+        .collection(COLLECTIONS)
+        .find({})
+        .toArray((error: any, result: any) => {
+          if (error) {
+            throw error;
+          }
+          resolve(result as CollectionModel[]);
+        });
+    });
+  };
+
+  /**
+   * Get a single Collection
+   * @return {Promise<CollectionModel>}
+   */
+  static getOne = (id: string): Promise<CollectionModel> => {
+    return new Promise((resolve, _reject) => {
+      getDatabase()
+        .collection(COLLECTIONS)
+        .findOne({ _id: new ObjectId(id) }, (error: any, result: any) => {
+          if (error) {
+            throw error;
+          };
+          resolve(result as CollectionModel);
         });
     });
   };

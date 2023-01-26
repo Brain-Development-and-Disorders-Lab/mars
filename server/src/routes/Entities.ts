@@ -13,25 +13,25 @@ import { registerUpdate } from "../operations/Updates";
 import { Entities } from "../operations/Entities";
 
 // Constants
-const ENTITIES_COLLECTION = "entities";
+const ENTITIES = "entities";
 
 const EntitiesRoute = express.Router();
 
-// Route: View all Entities
-EntitiesRoute.route("/entities").get((request: any, response: any) => {
-  Entities.getAll().then((entities: EntityStruct[]) => {
+// View all Entities
+EntitiesRoute.route("/entities").get((_request: any, response: any) => {
+  Entities.getAll().then((entities: EntityModel[]) => {
     response.json(entities);
   });
 });
 
-// Route: View specific Entity
+// View specific Entity
 EntitiesRoute.route("/entities/:id").get((request: any, response: any) => {
-  Entities.getOne(request.params.id).then((entity: EntityStruct) => {
+  Entities.getOne(request.params.id).then((entity: EntityModel) => {
     response.json(entity);
   });
 });
 
-// Route: Create a new Entity, expects EntityStruct data
+// Create a new Entity, expects EntityStruct data
 EntitiesRoute.route("/entities/create").post((request: { body: EntityStruct }, response: any) => {
   Entities.create(request.body).then((entity: EntityModel) => {
     response.json({
@@ -42,10 +42,9 @@ EntitiesRoute.route("/entities/create").post((request: { body: EntityStruct }, r
   });
 });
 
-// Route: Update an Entity
+// Update an Entity
 EntitiesRoute.route("/entities/update").post((request: { body: EntityModel }, response: any) => {
-  Entities.modify(request.body).then((updatedEntity: EntityModel) => {
-    // Respond
+  Entities.update(request.body).then((updatedEntity: EntityModel) => {
     response.json({
       id: updatedEntity._id,
       name: updatedEntity.name,
@@ -54,35 +53,29 @@ EntitiesRoute.route("/entities/update").post((request: { body: EntityModel }, re
   });
 });
 
-// Route: Remove an Entity
-EntitiesRoute.route("/entities/:id").delete((request: { params: { id: any } }, response: any) => {
-    consola.debug("Remove an Entity:", "/entities");
+// Delete an Entity
+EntitiesRoute.route("/entities/:id").delete((request: { params: { id: string } }, response: any) => {
+  getDatabase()
+    .collection(ENTITIES)
+    .findOne({ _id: new ObjectId(request.params.id) }, (error: any, result: any) => {
+      if (error) {
+        throw error;
+      }
 
-    let query = { _id: new ObjectId(request.params.id) };
+      // Remove the Entity from all Collections
 
-    // Get the Entity data
-    let entityResult: EntityModel;
-    getDatabase()
-      .collection(ENTITIES_COLLECTION)
-      .findOne(query, (error: any, result: any) => {
-        if (error) throw error;
-        entityResult = result;
-        response.json(result);
+      // Remove the Entity as a product of the listed Origin
+
+      // Delete the Entity
+      getDatabase()
+        .collection(ENTITIES)
+        .deleteOne({ _id: new ObjectId(request.params.id) }, (error: any, content: any) => {
+          if (error) {
+            throw error;
+          }
+          response.json(content);
       });
-
-    // Delete the Entity
-    getDatabase()
-      .collection(ENTITIES_COLLECTION)
-      .deleteOne(query, (error: any, content: any) => {
-        if (error) {
-          throw error;
-        }
-
-        response.json(content);
-      });
-  }
-
-  // To Do: Remove references to Entity.
-);
+    });
+});
 
 export default EntitiesRoute;
