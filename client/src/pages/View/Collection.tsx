@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { Button, Flex, FormControl, FormLabel, Heading, Icon, Link, Modal, ModalCloseButton, ModalContent, ModalHeader, ModalOverlay, Popover, PopoverArrow, PopoverBody, PopoverCloseButton, PopoverContent, PopoverHeader, PopoverTrigger, Select, Table, TableContainer, Tag, TagCloseButton, TagLabel, TagRightIcon, Tbody, Td, Text, Th, Thead, Tr, useDisclosure, useToast } from "@chakra-ui/react";
 import { AddIcon, CheckIcon, ChevronRightIcon, CloseIcon, WarningIcon } from "@chakra-ui/icons";
+import { AiOutlineEdit } from "react-icons/ai";
 
 // Navigation
 import { useParams, useNavigate } from "react-router-dom";
@@ -16,7 +17,6 @@ import { Loading } from "@components/Loading";
 import { PageContainer } from "@components/PageContainer";
 
 import _ from "underscore";
-import { AiOutlineEdit, AiOutlineSave } from "react-icons/ai";
 
 export const Collection = () => {
   const { id } = useParams();
@@ -28,6 +28,7 @@ export const Collection = () => {
   const [isLoaded, setIsLoaded] = useState(false);
 
   const [collectionData, setCollectionData] = useState({} as CollectionModel);
+  const [collectionEntities, setCollectionEntities] = useState([] as string[]);
   const [allEntities, setAllEntities] = useState([] as { name: string; id: string }[]);
   const [selectedEntities, setSelectedEntities] = useState([] as string[]);
 
@@ -38,6 +39,7 @@ export const Collection = () => {
         throw new Error(response.error);
       } else {
         setCollectionData(response);
+        setCollectionEntities(response.entities);
         setIsLoaded(true);
       }
     }).catch(() => {
@@ -73,31 +75,79 @@ export const Collection = () => {
     });
   }, [id, isLoaded]);
 
+  useEffect(() => {
+    if (isLoaded) {
+      // Update the state of editable data fields
+      setCollectionEntities(collectionData.entities);
+    }
+  }, [isLoaded]);
+
   /**
    * Callback function to add Entities to a Collection
-   * @param {{ entities: string[], collection: string }} data List of Entities and a Collection to add the Entities to
+   * @param {string[]} entities List of Entities to add
    */
-  const onAdd = (data: { entities: string[], collection: string }): void => {
-    postData(`/collections/add`, data).then((_response) => {
-      navigate(`/collections/${id}`);
-    });
+  const addEntities = (entities: string[]): void => {
+    for (const entity of entities) {
+      if (!_.isEqual("", entity)) {
+        setCollectionEntities([...collectionEntities, entity]);
+      }
+    }
+    setSelectedEntities([]);
+    onClose();
   };
 
   /**
    * Callback function to remove the Entity from the Collection, and refresh the page
    * @param {{ collection: string, entity: string }} data ID of the Collection and the ID of the Entity to remove
    */
-  const onRemove = (data: { collection: string, entity: string }): void => {
-    postData(`/collections/remove`, data).then(() => {
-      navigate(`/collections/${id}`);
-    });
+  const removeEntity = (id: string): void => {
+    setCollectionEntities(collectionEntities.filter((entity) => {
+      entity !== id;
+    }));
   };
 
   /**
    * Handle the edit button being clicked
    */
   const handleEditClick = () => {
-    setEditing(!editing);
+    if (editing) {
+      const updateData: CollectionModel = {
+        _id: collectionData._id,
+        name: collectionData.name,
+        description: collectionData.description,
+        owner: collectionData.owner,
+        created: collectionData.created,
+        entities: collectionEntities,
+      };
+
+      // Update data
+      postData(`/collections/update`, updateData).then((response) => {
+        if (_.isEqual(response.status, "success")) {
+          setEditing(false);
+
+          toast({
+            title: "Saved!",
+            status: "success",
+            duration: 2000,
+            position: "bottom-right",
+            isClosable: true,
+          });
+          return;
+        }
+        throw new Error("Could not POST data");
+      }).catch(() => {
+        toast({
+          title: "Error",
+          description: "An error occurred when saving updates.",
+          status: "error",
+          duration: 2000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+      });
+    } else {
+      setEditing(true);
+    }
   };
 
   return (
@@ -109,10 +159,10 @@ export const Collection = () => {
           <Flex direction={"row"} p={"2"} gap={"2"}>
             <Button
               colorScheme={editing ? "green" : "gray"}
-              rightIcon={editing ? <Icon as={AiOutlineSave} /> : <Icon as={AiOutlineEdit} />}
+              rightIcon={editing ? <Icon as={CheckIcon} /> : <Icon as={AiOutlineEdit} />}
               onClick={handleEditClick}
             >
-              {editing ? "Save" : "Edit"}
+              {editing ? "Done" : "Edit"}
             </Button>
             <Popover>
               <PopoverTrigger>
@@ -202,7 +252,7 @@ export const Collection = () => {
               }
             </Flex>
 
-            {collectionData.entities && collectionData.entities.length > 0 ? (
+            {collectionEntities && collectionEntities.length > 0 ? (
               <TableContainer>
                 <Table variant={"simple"} colorScheme={"gray"}>
                   <Thead>
@@ -212,7 +262,7 @@ export const Collection = () => {
                     </Tr>
                   </Thead>
                   <Tbody>
-                    {collectionData.entities.map((entity) => {
+                    {collectionEntities.map((entity) => {
                       return (
                         <Tr key={entity}>
                           <Th>
@@ -238,14 +288,7 @@ export const Collection = () => {
                                   colorScheme={"red"}
                                   onClick={() => {
                                     if (id) {
-                                      // Remove the entity from the collection
-                                      onRemove({
-                                        collection: id,
-                                        entity: entity,
-                                      });
-
-                                      // Force the page to reload by setting the isLoaded state
-                                      setIsLoaded(false);
+                                      removeEntity(entity);
                                     }
                                   }}
                                 >
@@ -333,12 +376,7 @@ export const Collection = () => {
                 onClick={() => {
                   if (id) {
                     // Add the Entities to the Collection
-                    onAdd({ entities: selectedEntities, collection: id });
-                    setSelectedEntities([]);
-                    onClose();
-
-                    // Force the page to reload by setting the isLoaded state
-                    setIsLoaded(false);
+                    addEntities(selectedEntities);
                   }
                 }}
               >

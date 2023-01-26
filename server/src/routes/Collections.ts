@@ -155,6 +155,18 @@ CollectionsRoute.route("/collections/add").post((request: { body: { entities: st
   }, response);
 });
 
+// Route: Update a Collection
+CollectionsRoute.route("/collections/update").post((request: { body: CollectionModel }, response: any) => {
+  Collections.modify(request.body).then((updatedCollection: CollectionModel) => {
+    // Respond
+    response.json({
+      id: updatedCollection._id,
+      name: updatedCollection.name,
+      status: "success"
+    });
+  });
+});
+
 /**
  * Route: Remove an Entity from a Collection, expects Entity and Collection ID data.
  */
