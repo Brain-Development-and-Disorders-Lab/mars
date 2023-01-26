@@ -214,6 +214,108 @@ export class Entities {
     });
   };
 
+  static addCollection = (entity: string, collection: string): Promise<string> => {
+    return new Promise((resolve, _reject) => {
+      getDatabase()
+        .collection(ENTITIES_COLLECTION)
+        .findOne({ _id: new ObjectId(entity) }, (error: any, result: any) => {
+          if (error) {
+            throw error;
+          }
+
+          // Update the collection of Collections associated with the Entity to include this extra Collection
+          const updates = {
+            $set: {
+              collections: [...(result as EntityModel).collections, collection],
+            },
+          };
+
+          getDatabase()
+            .collection(ENTITIES_COLLECTION)
+            .updateOne({ _id: new ObjectId(entity) }, updates, (error: any, response: any) => {
+                if (error) {
+                  throw error;
+                }
+
+                registerUpdate({
+                  targets: {
+                    primary: {
+                      type: "entities",
+                      id: entity,
+                      name: entity,
+                    },
+                    secondary: {
+                      type: "collections",
+                      id: collection,
+                      name: collection,
+                    },
+                  },
+                  operation: {
+                    timestamp: new Date(Date.now()),
+                    type: "modify",
+                    details: "add Collection"
+                  }
+                });
+
+                // Resolve the Promise
+                resolve(entity);
+              }
+            );
+        });
+    });
+  };
+
+  static removeCollection = (entity: string, collection: string): Promise<string> => {
+    return new Promise((resolve, _reject) => {
+      getDatabase()
+        .collection(ENTITIES_COLLECTION)
+        .findOne({ _id: new ObjectId(entity) }, (error: any, result: any) => {
+          if (error) {
+            throw error;
+          }
+
+          // Update the collection of Collections associated with the Entity to remove this Collection
+          const updates = {
+            $set: {
+              collections: [...(result as EntityModel).collections.filter(content => !_.isEqual(content, collection))],
+            },
+          };
+
+          getDatabase()
+            .collection(ENTITIES_COLLECTION)
+            .updateOne({ _id: new ObjectId(entity) }, updates, (error: any, _response: any) => {
+                if (error) {
+                  throw error;
+                }
+
+                registerUpdate({
+                  targets: {
+                    primary: {
+                      type: "entities",
+                      id: entity,
+                      name: entity,
+                    },
+                    secondary: {
+                      type: "collections",
+                      id: collection,
+                      name: collection,
+                    },
+                  },
+                  operation: {
+                    timestamp: new Date(Date.now()),
+                    type: "modify",
+                    details: "remove Collection"
+                  }
+                });
+
+                // Resolve the Promise
+                resolve(entity);
+              }
+            );
+        });
+    });
+  };
+
   /**
    * Specify an Entity acting as an Origin
    * @param {{ name: string, id: string }} entity the Entity of interest

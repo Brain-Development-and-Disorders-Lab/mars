@@ -4,11 +4,12 @@ import { ObjectId } from "mongodb";
 // Utility functions
 import { getDatabase } from "../database/connection";
 import { registerUpdate } from "./Updates";
+import { Entities } from "./Entities";
 
 // Custom types
 import { CollectionModel } from "@types";
 
-// Consola
+// Utility libraries
 import consola from "consola";
 import _ from "underscore";
 
@@ -116,7 +117,8 @@ export class Collections {
           if (error) {
             throw error;
           }
-          // Cast and store current state of the Entity
+
+          // Cast and store current state of the Collection
           const currentCollection = result as CollectionModel;
 
           // Create set of variables to store current or updated state values
@@ -127,12 +129,12 @@ export class Collections {
 
           const entitiesToAdd = updatedCollection.entities.filter(entity => !currentCollection.entities.includes(entity));
           entitiesToAdd.map((entity: string) => {
-            Collections.addEntity(currentCollection._id, entity);
+            Entities.addCollection(entity, currentCollection._id);
           });
 
           const entitiesToRemove = currentCollection.entities.filter(entity => !entitiesToKeep.includes(entity));
           entitiesToRemove.map((entity: string) => {
-            Collections.removeEntity(currentCollection._id, entity);
+            Entities.removeCollection(entity, currentCollection._id);
           });
 
           updatedEntities = [...entitiesToKeep, ...entitiesToAdd];

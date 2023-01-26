@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { Button, Flex, Heading, Table, TableContainer, Tbody, Th, Text, Tr, Link, useToast, Modal, Icon, Thead, Td, Textarea, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, useDisclosure, Container, Popover, PopoverTrigger, PopoverContent, PopoverCloseButton, PopoverHeader, PopoverBody, PopoverArrow, Tag, TagLabel, TagRightIcon, FormControl, FormLabel, Select, TagCloseButton } from "@chakra-ui/react";
 import { AddIcon, CheckIcon, ChevronRightIcon, CloseIcon, WarningIcon } from "@chakra-ui/icons";
-import { AiOutlineEdit, AiOutlineSave } from "react-icons/ai";
+import { AiOutlineEdit } from "react-icons/ai";
 import { BsPrinter } from "react-icons/bs";
 import { SlGraph } from "react-icons/sl";
 
@@ -227,7 +227,6 @@ export const Entity = () => {
   };
 
   const removeCollection = (id: string) => {
-    // postData(`/collections/remove`, { collection: id, entity: entityData._id });
     setEntityCollections(entityCollections.filter((collection) => {
       return collection !== id;
     }));
@@ -240,7 +239,6 @@ export const Entity = () => {
   const addCollection = (collections: string[]): void => {
     for (const collection of collections) {
       if (!_.isEqual("", collection)) {
-        // postData(`/collections/add`, { entities: [entity], collection: collection });
         setEntityCollections([...entityCollections, collection]);
       }
     }
@@ -259,9 +257,9 @@ export const Entity = () => {
             <Button
               onClick={handleEditClick}
               colorScheme={editing ? "green" : "gray"}
-              rightIcon={editing ? <Icon as={AiOutlineSave} /> : <Icon as={AiOutlineEdit} />}
+              rightIcon={editing ? <Icon as={CheckIcon} /> : <Icon as={AiOutlineEdit} />}
             >
-              {editing ? "Save" : "Edit"}
+              {editing ? "Done" : "Edit"}
             </Button>
             <Popover>
               <PopoverTrigger>
