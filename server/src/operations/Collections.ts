@@ -176,6 +176,36 @@ export class Collections {
         });
     });
   };
+
+  static delete = (id: string): Promise<CollectionModel> => {
+    return new Promise((resolve, _reject) => {
+      getDatabase()
+        .collection(COLLECTIONS)
+        .findOne({ _id: new ObjectId(id) }, (error: any, result: any) => {
+          if (error) {
+            throw error;
+          }
+
+          // Remove the Entities from the Collection
+          Promise.all((result as CollectionModel).entities.map((entity) => {
+            Entities.removeCollection(entity, (result as CollectionModel)._id);
+          })).then((_result) => {
+            // Remove the Entity as a product of the listed Origin
+          }).then((_result) => {
+            // Delete the Entity
+            getDatabase()
+              .collection(COLLECTIONS)
+              .deleteOne({ _id: new ObjectId(id) }, (error: any, _content: any) => {
+                if (error) {
+                  throw error;
+                }
+
+                resolve(result);
+            });
+        });
+      });
+    });
+  };
 };
 
 

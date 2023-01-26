@@ -206,18 +206,18 @@ export const Entity = () => {
         });
         return;
       }
-      throw new Error("Could not DELETE ID");
+      throw new Error("Could not delete Entity");
     }).catch(() => {
       toast({
         title: "Error",
-        description: `An error occurred when deleting ID "${entityData._id}"`,
+        description: `An error occurred when deleting Entity "${entityData._id}"`,
         status: "error",
         duration: 2000,
         position: "bottom-right",
         isClosable: true,
       });
     });
-  }
+  };
 
   const removeProduct = (id: string) => {
     setEntityProducts(entityProducts.filter((product) => {

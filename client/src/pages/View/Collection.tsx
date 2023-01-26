@@ -8,7 +8,7 @@ import { AiOutlineEdit } from "react-icons/ai";
 import { useParams, useNavigate } from "react-router-dom";
 
 // Database and models
-import { getData, postData } from "@database/functions";
+import { deleteData, getData, postData } from "@database/functions";
 import { CollectionModel, EntityModel } from "@types";
 
 // Custom components
@@ -146,6 +146,36 @@ export const Collection = () => {
     }
   };
 
+  // Delete the Entity when confirmed
+  const handleDeleteClick = () => {
+    // Update data
+    deleteData(`/collections/${id}`).then((response) => {
+      if (_.isEqual(response.status, "success")) {
+        setEditing(false);
+        navigate("/collections")
+
+        toast({
+          title: "Deleted!",
+          status: "success",
+          duration: 2000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+        return;
+      }
+      throw new Error("Could not delete Entity");
+    }).catch(() => {
+      toast({
+        title: "Error",
+        description: `An error occurred when deleting Collection "${collectionData._id}"`,
+        status: "error",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    });
+  };
+
   return (
     isLoaded ? (
       <PageContainer>
@@ -179,6 +209,7 @@ export const Collection = () => {
                     <Button
                       colorScheme={"green"}
                       rightIcon={<CheckIcon />}
+                      onClick={handleDeleteClick}
                     >
                       Confirm
                     </Button>

@@ -79,15 +79,13 @@ CollectionsRoute.route("/collections/remove").post((request: { body: { entity: s
 
 // Route: Remove a Collection
 CollectionsRoute.route("/collections/:id").delete((request: { params: { id: any } }, response: any) => {
-    getDatabase()
-      .collection(COLLECTIONS)
-      .deleteOne({ _id: new ObjectId(request.params.id) }, (error: any, content: any) => {
-        if (error) {
-          throw error;
-        }
-        response.json(content);
-      });
-  }
-);
+  Collections.delete(request.params.id).then((collection) => {
+    response.json({
+      id: collection._id,
+      name: collection.name,
+      status: "success"
+    });
+  });
+});
 
 export default CollectionsRoute;
