@@ -87,7 +87,7 @@ const Collections = () => {
                           :
                             <Text>{collection.name}</Text>
                         }</Th>
-                        <Th pl={"0"}>{
+                        <Th>{
                           _.isEqual(collection.owner, "") ?
                             <Tag size={"md"} key={`warn-${collection._id}`} colorScheme={"orange"}>
                               <TagLabel>Not specified</TagLabel>
@@ -96,7 +96,7 @@ const Collections = () => {
                           :
                             <Text>{collection.owner}</Text>
                         }</Th>
-                        <Th pl={"0"}>{
+                        <Th>{
                           _.isEqual(collection.description, "") ?
                             <Tag size={"md"} key={`warn-${collection._id}`} colorScheme={"orange"}>
                               <TagLabel>Not specified</TagLabel>

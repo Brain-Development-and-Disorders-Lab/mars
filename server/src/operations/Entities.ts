@@ -7,10 +7,9 @@ import _ from "underscore";
 
 // Utility functions
 import { getDatabase } from "../database/connection";
-import { registerUpdate } from "./Updates";
 
 // Custom types
-import { EntityModel, EntityStruct } from "@types";
+import { EntityModel } from "@types";
 import { Collections } from "./Collections";
 
 // Constants
@@ -18,11 +17,11 @@ const ENTITIES_COLLECTION = "entities";
 
 export class Entities {
   /**
-   * Insert a new Entity to the collection of Entities
-   * @param entity
+   * Create a new Entity
+   * @param {any} entity all data associated with the new Entity
    * @return {Promise<EntityModel>}
    */
-  static insert = (entity: any): Promise<EntityModel> => {
+  static create = (entity: any): Promise<EntityModel> => {
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES_COLLECTION)
@@ -62,36 +61,66 @@ export class Entities {
   };
 
   /**
-   * Retrieve all Entities
-   * @return {Promise<EntityStruct[]>}
+   * Update an Entity, comparing a new version with the existing version
+   * @param {EntityModel} updatedEntity updated Entity
+   * @return {Promise<EntityModel>}
    */
-  static getAll = (): Promise<EntityStruct[]> => {
+  static update = (updatedEntity: EntityModel): Promise<EntityModel> => {
+    // Get current state of the Entity
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES_COLLECTION)
-        .find({})
-        .toArray((error: any, result: any) => {
+        .findOne({ _id: new ObjectId(updatedEntity._id) }, (error: any, result: any) => {
           if (error) {
             throw error;
           }
-          resolve(result as EntityStruct[]);
-        });
-    });
-  };
+          // Cast and store current state of the Entity
+          const currentEntity = result as EntityModel;
 
-  /**
-   * Get a single Entity
-   * @return {Promise<EntityStruct>}
-   */
-  static getOne = (id: string): Promise<EntityStruct> => {
-    return new Promise((resolve, _reject) => {
-      getDatabase()
-        .collection(ENTITIES_COLLECTION)
-        .findOne({ _id: new ObjectId(id) }, (error: any, result: any) => {
-          if (error) {
-            throw error;
+          // Collections
+          const collectionsToKeep = currentEntity.collections.filter(collection => updatedEntity.collections.includes(collection));
+          const collectionsToAdd = updatedEntity.collections.filter(collection => !collectionsToKeep.includes(collection));
+          collectionsToAdd.map((collection: string) => {
+            Collections.addEntity(collection, updatedEntity._id);
+          });
+          const collectionsToRemove = currentEntity.collections.filter(collection => !collectionsToKeep.includes(collection));
+          collectionsToRemove.map((collection: string) => {
+            Collections.removeEntity(collection, updatedEntity._id);
+          });
+
+          // Products
+          const productsToKeep = currentEntity.associations.products.map(product => product.id).filter(product => updatedEntity.associations.products.map(product => product.id).includes(product));
+          const productsToAdd = updatedEntity.associations.products.filter(product => !productsToKeep.includes(product.id));
+          productsToAdd.map((product: {id: string, name: string}) => {
+            Entities.addProduct({ name: updatedEntity.name, id: updatedEntity._id }, product);
+          });
+          const productsToRemove = currentEntity.associations.products.filter(product => !productsToKeep.includes(product.id));
+          productsToRemove.map((product: {id: string, name: string}) => {
+            Entities.removeProduct({ name: updatedEntity.name, id: updatedEntity._id }, product);
+          });
+
+          const updates = {
+            $set: {
+              description: updatedEntity.description,
+              collections: [...collectionsToKeep, ...collectionsToAdd],
+              associations: {
+                origin: updatedEntity.associations.origin,
+                products: [...currentEntity.associations.products.filter(product => productsToKeep.includes(product.id)), ...productsToAdd],
+              },
+            },
           };
-          resolve(result as EntityStruct);
+
+          getDatabase()
+            .collection(ENTITIES_COLLECTION)
+            .updateOne({ _id: new ObjectId(updatedEntity._id) }, updates, (error: any, _response: any) => {
+                if (error) {
+                  throw error;
+                }
+
+                // Resolve the Promise
+                resolve(updatedEntity);
+              }
+            );
         });
     });
   };
@@ -127,30 +156,10 @@ export class Entities {
 
           getDatabase()
             .collection(ENTITIES_COLLECTION)
-            .updateOne({ _id: new ObjectId(entity.id) }, updates, (error: any, response: any) => {
+            .updateOne({ _id: new ObjectId(entity.id) }, updates, (error: any, _response: any) => {
                 if (error) {
                   throw error;
                 }
-
-                registerUpdate({
-                  targets: {
-                    primary: {
-                      type: "entities",
-                      id: entity.id,
-                      name: entity.name,
-                    },
-                    secondary: {
-                      type: "entities",
-                      id: product.id,
-                      name: product.name,
-                    },
-                  },
-                  operation: {
-                    timestamp: new Date(Date.now()),
-                    type: "modify",
-                    details: "add Product"
-                  }
-                });
 
                 // Resolve the Promise
                 resolve(entity);
@@ -181,30 +190,72 @@ export class Entities {
 
           getDatabase()
             .collection(ENTITIES_COLLECTION)
-            .updateOne({ _id: new ObjectId(entity.id) }, updates, (error: any, response: any) => {
+            .updateOne({ _id: new ObjectId(entity.id) }, updates, (error: any, _response: any) => {
                 if (error) {
                   throw error;
                 }
 
-                registerUpdate({
-                  targets: {
-                    primary: {
-                      type: "entities",
-                      id: entity.id,
-                      name: entity.name,
-                    },
-                    secondary: {
-                      type: "entities",
-                      id: product.id,
-                      name: product.name,
-                    },
-                  },
-                  operation: {
-                    timestamp: new Date(Date.now()),
-                    type: "modify",
-                    details: "remove Product"
-                  }
-                });
+                // Resolve the Promise
+                resolve(entity);
+              }
+            );
+        });
+    });
+  };
+
+  static addCollection = (entity: string, collection: string): Promise<string> => {
+    return new Promise((resolve, _reject) => {
+      getDatabase()
+        .collection(ENTITIES_COLLECTION)
+        .findOne({ _id: new ObjectId(entity) }, (error: any, result: any) => {
+          if (error) {
+            throw error;
+          }
+
+          // Update the collection of Collections associated with the Entity to include this extra Collection
+          const updates = {
+            $set: {
+              collections: [...(result as EntityModel).collections, collection],
+            },
+          };
+
+          getDatabase()
+            .collection(ENTITIES_COLLECTION)
+            .updateOne({ _id: new ObjectId(entity) }, updates, (error: any, _response: any) => {
+                if (error) {
+                  throw error;
+                }
+
+                // Resolve the Promise
+                resolve(entity);
+              }
+            );
+        });
+    });
+  };
+
+  static removeCollection = (entity: string, collection: string): Promise<string> => {
+    return new Promise((resolve, _reject) => {
+      getDatabase()
+        .collection(ENTITIES_COLLECTION)
+        .findOne({ _id: new ObjectId(entity) }, (error: any, result: any) => {
+          if (error) {
+            throw error;
+          }
+
+          // Update the collection of Collections associated with the Entity to remove this Collection
+          const updates = {
+            $set: {
+              collections: [...(result as EntityModel).collections.filter(content => !_.isEqual(content, collection.toString()))],
+            },
+          };
+
+          getDatabase()
+            .collection(ENTITIES_COLLECTION)
+            .updateOne({ _id: new ObjectId(entity) }, updates, (error: any, _response: any) => {
+                if (error) {
+                  throw error;
+                }
 
                 // Resolve the Promise
                 resolve(entity);
@@ -244,30 +295,10 @@ export class Entities {
 
           getDatabase()
             .collection(ENTITIES_COLLECTION)
-            .updateOne({ _id: new ObjectId(entity.id) }, updates, (error: any, response: any) => {
+            .updateOne({ _id: new ObjectId(entity.id) }, updates, (error: any, _response: any) => {
                 if (error) {
                   throw error;
                 }
-
-                registerUpdate({
-                  targets: {
-                    primary: {
-                      type: "entities",
-                      id: entity.id,
-                      name: "",
-                    },
-                    secondary: {
-                      type: "entities",
-                      id: origin.id,
-                      name: "",
-                    },
-                  },
-                  operation: {
-                    timestamp: new Date(Date.now()),
-                    type: "modify",
-                    details: "add Origin"
-                  }
-                });
 
                 // Resolve the Promise
                 resolve(entity);
@@ -306,21 +337,6 @@ export class Entities {
                   throw error;
                 }
 
-                registerUpdate({
-                  targets: {
-                    primary: {
-                      type: "entities",
-                      id: entity.id,
-                      name: "",
-                    },
-                  },
-                  operation: {
-                    timestamp: new Date(Date.now()),
-                    type: "modify",
-                    details: "add Origin"
-                  }
-                });
-
                 // Resolve the Promise
                 resolve(entity);
               }
@@ -330,99 +346,67 @@ export class Entities {
   };
 
   /**
-   * Perform a complete modification of an Entity, comparing a new version with the existing version
-   * @param {EntityModel} updatedEntity updated Entity
-   * @return {Promise<EntityModel>}
+   * Retrieve all Entities
+   * @return {Promise<EntityModel[]>}
    */
-  static modify = (updatedEntity: EntityModel): Promise<EntityModel> => {
-    // Get current state of the Entity
+  static getAll = (): Promise<EntityModel[]> => {
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES_COLLECTION)
-        .findOne({ _id: new ObjectId(updatedEntity._id) }, (error: any, result: any) => {
+        .find({})
+        .toArray((error: any, result: any) => {
           if (error) {
             throw error;
           }
-          // Cast and store current state of the Entity
-          const currentEntity = result as EntityModel;
+          resolve(result as EntityModel[]);
+        });
+    });
+  };
 
-          // Create set of variables to store current or updated state values
-          let updatedDescription = currentEntity.description;
-          let updatedCollections = currentEntity.collections;
-          let updatedProducts = currentEntity.associations.products;
+  /**
+   * Get a single Entity
+   * @return {Promise<EntityModel>}
+   */
+  static getOne = (id: string): Promise<EntityModel> => {
+    return new Promise((resolve, _reject) => {
+      getDatabase()
+        .collection(ENTITIES_COLLECTION)
+        .findOne({ _id: new ObjectId(id) }, (error: any, result: any) => {
+          if (error) {
+            throw error;
+          };
+          resolve(result as EntityModel);
+        });
+    });
+  };
 
-          // Description
-          if (!_.isEqual(updatedEntity.description, currentEntity.description)) {
-            updatedDescription = updatedEntity.description;
+  static delete = (id: string): Promise<EntityModel> => {
+    return new Promise((resolve, _reject) => {
+      getDatabase()
+        .collection(ENTITIES_COLLECTION)
+        .findOne({ _id: new ObjectId(id) }, (error: any, result: any) => {
+          if (error) {
+            throw error;
           }
 
-          // Collections
-          const collectionsToKeep = currentEntity.collections.filter(collection => updatedEntity.collections.includes(collection));
-
-          const collectionsToAdd = updatedEntity.collections.filter(collection => !collectionsToKeep.includes(collection));
-          collectionsToAdd.map((collection: string) => {
-            Collections.addEntity(collection, updatedEntity._id);
-          });
-
-          const collectionsToRemove = currentEntity.collections.filter(collection => !collectionsToKeep.includes(collection));
-          collectionsToRemove.map((collection: string) => {
-            Collections.removeEntity(collection, updatedEntity._id);
-          });
-
-          updatedCollections = updatedEntity.collections;
-
-          // Products
-          const productsToKeep = currentEntity.associations.products.map(product => product.id).filter(product => updatedEntity.associations.products.map(product => product.id).includes(product));
-          const productsToAdd = updatedEntity.associations.products.filter(product => !productsToKeep.includes(product.id));
-          productsToAdd.map((product: {id: string, name: string}) => {
-            Entities.addProduct({ name: updatedEntity.name, id: updatedEntity._id }, product);
-          });
-
-          const productsToRemove = currentEntity.associations.products.filter(product => !productsToKeep.includes(product.id));
-          productsToRemove.map((product: {id: string, name: string}) => {
-            Entities.removeProduct({ name: updatedEntity.name, id: updatedEntity._id }, product);
-          });
-
-          updatedProducts = updatedEntity.associations.products;
-
-          const updates = {
-            $set: {
-              description: updatedDescription,
-              collections: updatedCollections,
-              associations: {
-                origin: updatedEntity.associations.origin,
-                products: updatedProducts,
-              },
-            },
-          };
-
-          getDatabase()
-            .collection(ENTITIES_COLLECTION)
-            .updateOne({ _id: new ObjectId(updatedEntity._id) }, updates, (error: any, response: any) => {
+          // Remove the Entity from all Collections
+          Promise.all((result as EntityModel).collections.map((collection) => {
+            Collections.removeEntity(collection, (result as EntityModel)._id);
+          })).then((_result) => {
+            // Remove the Entity as a product of the listed Origin
+          }).then((_result) => {
+            // Delete the Entity
+            getDatabase()
+              .collection(ENTITIES_COLLECTION)
+              .deleteOne({ _id: new ObjectId(id) }, (error: any, _content: any) => {
                 if (error) {
                   throw error;
                 }
 
-                registerUpdate({
-                  targets: {
-                    primary: {
-                      type: "entities",
-                      id: updatedEntity._id,
-                      name: "",
-                    },
-                  },
-                  operation: {
-                    timestamp: new Date(Date.now()),
-                    type: "modify",
-                    details: "modify Entity"
-                  }
-                });
-
-                // Resolve the Promise
-                resolve(updatedEntity);
-              }
-            );
+                resolve(result);
+            });
         });
+      });
     });
   };
 };

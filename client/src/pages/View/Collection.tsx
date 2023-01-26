@@ -1,13 +1,14 @@
 // React
 import React, { useEffect, useState } from "react";
-import { Button, Flex, FormControl, FormLabel, Heading, Modal, ModalCloseButton, ModalContent, ModalHeader, ModalOverlay, Select, Table, TableContainer, Tag, TagCloseButton, Tbody, Td, Text, Th, Thead, Tr, useDisclosure, useToast } from "@chakra-ui/react";
-import { AddIcon, ChevronRightIcon, CloseIcon } from "@chakra-ui/icons";
+import { Button, Flex, FormControl, FormLabel, Heading, Icon, Link, Modal, ModalCloseButton, ModalContent, ModalHeader, ModalOverlay, Popover, PopoverArrow, PopoverBody, PopoverCloseButton, PopoverContent, PopoverHeader, PopoverTrigger, Select, Table, TableContainer, Tag, TagCloseButton, TagLabel, TagRightIcon, Tbody, Td, Text, Th, Thead, Tr, useDisclosure, useToast } from "@chakra-ui/react";
+import { AddIcon, CheckIcon, ChevronRightIcon, CloseIcon, WarningIcon } from "@chakra-ui/icons";
+import { AiOutlineEdit } from "react-icons/ai";
 
 // Navigation
 import { useParams, useNavigate } from "react-router-dom";
 
 // Database and models
-import { getData, postData } from "@database/functions";
+import { deleteData, getData, postData } from "@database/functions";
 import { CollectionModel, EntityModel } from "@types";
 
 // Custom components
@@ -16,7 +17,6 @@ import { Loading } from "@components/Loading";
 import { PageContainer } from "@components/PageContainer";
 
 import _ from "underscore";
-import consola from "consola";
 
 export const Collection = () => {
   const { id } = useParams();
@@ -24,9 +24,11 @@ export const Collection = () => {
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
 
+  const [editing, setEditing] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
 
   const [collectionData, setCollectionData] = useState({} as CollectionModel);
+  const [collectionEntities, setCollectionEntities] = useState([] as string[]);
   const [allEntities, setAllEntities] = useState([] as { name: string; id: string }[]);
   const [selectedEntities, setSelectedEntities] = useState([] as string[]);
 
@@ -37,6 +39,7 @@ export const Collection = () => {
         throw new Error(response.error);
       } else {
         setCollectionData(response);
+        setCollectionEntities(response.entities);
         setIsLoaded(true);
       }
     }).catch(() => {
@@ -72,24 +75,103 @@ export const Collection = () => {
     });
   }, [id, isLoaded]);
 
+  useEffect(() => {
+    if (isLoaded) {
+      // Update the state of editable data fields
+      setCollectionEntities(collectionData.entities);
+    }
+  }, [isLoaded]);
+
   /**
    * Callback function to add Entities to a Collection
-   * @param {{ entities: string[], collection: string }} data List of Entities and a Collection to add the Entities to
+   * @param {string[]} entities List of Entities to add
    */
-  const onAdd = (data: { entities: string[], collection: string }): void => {
-    postData(`/collections/add`, data).then((response) => {
-      consola.debug("Response:", response);
-      navigate(`/collections/${id}`);
-    });
+  const addEntities = (entities: string[]): void => {
+    setCollectionEntities([...collectionEntities, ...entities.filter(entity => !_.isEqual("", entity))]);
+    setSelectedEntities([]);
+    onClose();
   };
 
   /**
    * Callback function to remove the Entity from the Collection, and refresh the page
-   * @param {{ entities: string, collection: string }} data ID of the Entity and Collection to remove the Entity from
+   * @param {{ collection: string, entity: string }} data ID of the Collection and the ID of the Entity to remove
    */
-  const onRemove = (data: { entity: string, collection: string }): void => {
-    postData(`/collections/remove`, data).then(() => {
-      navigate(`/collections/${id}`);
+  const removeEntity = (id: string): void => {
+    setCollectionEntities(collectionEntities.filter((entity) => {
+      entity !== id;
+    }));
+  };
+
+  /**
+   * Handle the edit button being clicked
+   */
+  const handleEditClick = () => {
+    if (editing) {
+      const updateData: CollectionModel = {
+        _id: collectionData._id,
+        name: collectionData.name,
+        description: collectionData.description,
+        owner: collectionData.owner,
+        created: collectionData.created,
+        entities: collectionEntities,
+      };
+
+      // Update data
+      postData(`/collections/update`, updateData).then((response) => {
+        if (_.isEqual(response.status, "success")) {
+          setEditing(false);
+          toast({
+            title: "Saved!",
+            status: "success",
+            duration: 2000,
+            position: "bottom-right",
+            isClosable: true,
+          });
+          return;
+        }
+        throw new Error("Could not POST data");
+      }).catch(() => {
+        toast({
+          title: "Error",
+          description: "An error occurred when saving updates.",
+          status: "error",
+          duration: 2000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+      });
+    } else {
+      setEditing(true);
+    }
+  };
+
+  // Delete the Entity when confirmed
+  const handleDeleteClick = () => {
+    // Update data
+    deleteData(`/collections/${id}`).then((response) => {
+      if (_.isEqual(response.status, "success")) {
+        setEditing(false);
+        navigate("/collections")
+
+        toast({
+          title: "Deleted!",
+          status: "success",
+          duration: 2000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+        return;
+      }
+      throw new Error("Could not delete Entity");
+    }).catch(() => {
+      toast({
+        title: "Error",
+        description: `An error occurred when deleting Collection "${collectionData._id}"`,
+        status: "error",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
     });
   };
 
@@ -98,95 +180,159 @@ export const Collection = () => {
       <PageContainer>
         <Flex p={"2"} pt={"8"} pb={"8"} direction={"row"} justify={"space-between"} align={"center"} wrap={"wrap"}>
           <Heading size={"2xl"}>Collection:{" "}{collectionData.name}</Heading>
+          {/* Buttons */}
+          <Flex direction={"row"} p={"2"} gap={"2"}>
+            <Button
+              colorScheme={editing ? "green" : "gray"}
+              rightIcon={editing ? <Icon as={CheckIcon} /> : <Icon as={AiOutlineEdit} />}
+              onClick={handleEditClick}
+            >
+              {editing ? "Done" : "Edit"}
+            </Button>
+            <Popover>
+              <PopoverTrigger>
+                <Button
+                  colorScheme={"red"}
+                  rightIcon={<CloseIcon />}
+                >
+                  Delete
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent>
+                <PopoverArrow />
+                <PopoverCloseButton />
+                <PopoverHeader>Confirmation</PopoverHeader>
+                <PopoverBody>
+                  Are you sure you want to delete this Collection?
+                  <Flex direction={"row"} p={"2"} justify={"center"}>
+                    <Button
+                      colorScheme={"green"}
+                      rightIcon={<CheckIcon />}
+                      onClick={handleDeleteClick}
+                    >
+                      Confirm
+                    </Button>
+                  </Flex>
+                </PopoverBody>
+              </PopoverContent>
+            </Popover>
+          </Flex>
         </Flex>
 
-        <Flex direction={"column"} p={"2"} gap={"2"}>
-          {/* Metadata table */}
-          <Heading m={"0"}>
-            Metadata
-          </Heading>
+        <Flex direction={"row"} p={"2"} wrap={"wrap"}>
+          <Flex direction={"column"} p={"2"} gap={"2"} grow={"1"}>
+            {/* Metadata table */}
+            <Heading m={"0"}>
+              Overview
+            </Heading>
 
-          <TableContainer background={"gray.50"} rounded={"2xl"} p={"4"}>
-            <Table mt={"sm"} colorScheme={"gray"}>
-              <Thead>
-                <Tr>
-                  <Th>Field</Th>
-                  <Th>Value</Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                <Tr>
-                  <Td>Description</Td>
-                  <Td><Text>{collectionData.description}</Text></Td>
-                </Tr>
-              </Tbody>
-            </Table>
-          </TableContainer>
-
-          {/* List of Entities in the Collection */}
-          <Flex direction={"row"} justify={"space-between"}>
-            <Heading m={"0"} alignSelf={"center"}>Entities</Heading>
-            <Button leftIcon={<AddIcon />} onClick={onOpen} colorScheme={"green"}>
-              Add
-            </Button>
-          </Flex>
-
-          {collectionData.entities && collectionData.entities.length > 0 ? (
-            <TableContainer background={"gray.50"} rounded={"2xl"} p={"4"}>
-              <Table variant={"simple"} colorScheme={"gray"}>
+            <TableContainer>
+              <Table mt={"sm"} colorScheme={"gray"}>
                 <Thead>
                   <Tr>
-                    <Th>Name</Th>
-                    <Th></Th>
+                    <Th>Field</Th>
+                    <Th>Value</Th>
                   </Tr>
                 </Thead>
                 <Tbody>
-                  {collectionData.entities.map((entity) => {
-                    return (
-                      <Tr key={entity}>
-                        <Th>
-                          <Linky id={entity} type={"entities"} />
-                        </Th>
-                        <Th>
-                          <Flex justify={"right"} gap={"6"}>
-                            <Button
-                              key={`view-collection-${entity}`}
-                              color="grey.400"
-                              rightIcon={<ChevronRightIcon />}
-                              onClick={() => navigate(`/entities/${entity}`)}
-                            >
-                              View
-                            </Button>
-                            <Button
-                              key={`remove-${entity}`}
-                              rightIcon={<CloseIcon />}
-                              colorScheme={"red"}
-                              onClick={() => {
-                                if (id) {
-                                  // Remove the entity from the collection
-                                  onRemove({
-                                    entity: entity,
-                                    collection: id,
-                                  });
-
-                                  // Force the page to reload by setting the isLoaded state
-                                  setIsLoaded(false);
-                                }
-                              }}
-                            >
-                              Remove
-                            </Button>
-                          </Flex>
-                        </Th>
-                      </Tr>
-                    );
-                  })}
+                  <Tr>
+                    <Td>Owner</Td>
+                    <Td>
+                      {_.isEqual(collectionData.owner, "") ? (
+                        <Tag size={"md"} key={`warn-${collectionData._id}`} colorScheme={"orange"}>
+                          <TagLabel>Not specified</TagLabel>
+                          <TagRightIcon as={WarningIcon} />
+                        </Tag>
+                      ) : (
+                        <Text><Link>{collectionData.owner}</Link></Text>
+                      )}
+                    </Td>
+                  </Tr>
+                  <Tr>
+                    <Td>Description</Td>
+                    <Td>
+                      {_.isEqual(collectionData.description, "") ? (
+                        <Tag size={"md"} key={`warn-${collectionData._id}`} colorScheme={"orange"}>
+                          <TagLabel>Not specified</TagLabel>
+                          <TagRightIcon as={WarningIcon} />
+                        </Tag>
+                      ) : (
+                        <Text>{collectionData.description}</Text>
+                      )}
+                    </Td>
+                  </Tr>
                 </Tbody>
               </Table>
             </TableContainer>
-          ) : (
-            <Text>This Collection is empty.</Text>
-          )}
+
+          </Flex>
+
+          <Flex direction={"column"} p={"2"} gap={"2"} grow={"2"}>
+            {/* List of Entities in the Collection */}
+            <Flex direction={"row"} justify={"space-between"}>
+              <Heading m={"0"} alignSelf={"center"}>Entities</Heading>
+              {editing &&
+                <Button leftIcon={<AddIcon />} onClick={onOpen} colorScheme={"green"}>
+                  Add
+                </Button>
+              }
+            </Flex>
+
+            {collectionEntities && collectionEntities.length > 0 ? (
+              <TableContainer>
+                <Table variant={"simple"} colorScheme={"gray"}>
+                  <Thead>
+                    <Tr>
+                      <Th>Name</Th>
+                      <Th></Th>
+                    </Tr>
+                  </Thead>
+                  <Tbody>
+                    {collectionEntities.map((entity) => {
+                      return (
+                        <Tr key={entity}>
+                          <Th>
+                            <Linky id={entity} type={"entities"} />
+                          </Th>
+                          <Th>
+                            <Flex justify={"right"} gap={"6"}>
+                              {!editing &&
+                                <Button
+                                  key={`view-collection-${entity}`}
+                                  color="grey.400"
+                                  rightIcon={<ChevronRightIcon />}
+                                  onClick={() => navigate(`/entities/${entity}`)}
+                                >
+                                  View
+                                </Button>
+                              }
+
+                              {editing &&
+                                <Button
+                                  key={`remove-${entity}`}
+                                  rightIcon={<CloseIcon />}
+                                  colorScheme={"red"}
+                                  onClick={() => {
+                                    if (id) {
+                                      removeEntity(entity);
+                                    }
+                                  }}
+                                >
+                                  Remove
+                                </Button>
+                              }
+                            </Flex>
+                          </Th>
+                        </Tr>
+                      );
+                    })}
+                  </Tbody>
+                </Table>
+              </TableContainer>
+            ) : (
+              <Text>This Collection is empty.</Text>
+            )}
+          </Flex>
         </Flex>
 
         <Modal isOpen={isOpen} onClose={onClose}>
@@ -256,12 +402,7 @@ export const Collection = () => {
                 onClick={() => {
                   if (id) {
                     // Add the Entities to the Collection
-                    onAdd({ entities: selectedEntities, collection: id });
-                    setSelectedEntities([]);
-                    onClose();
-
-                    // Force the page to reload by setting the isLoaded state
-                    setIsLoaded(false);
+                    addEntities(selectedEntities);
                   }
                 }}
               >

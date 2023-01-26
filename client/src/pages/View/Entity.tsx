@@ -1,25 +1,21 @@
 // React
 import React, { useEffect, useState } from "react";
-import { Button, Flex, Heading, Table, TableContainer, Tbody, Th, Text, Tr, Link, useToast, Modal, Icon, Thead, Td, Textarea, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, useDisclosure, Container, Popover, PopoverTrigger, PopoverContent, PopoverCloseButton, PopoverHeader, PopoverBody, PopoverArrow } from "@chakra-ui/react";
-import { AddIcon, CheckIcon, ChevronRightIcon, CloseIcon } from "@chakra-ui/icons";
-import { AiOutlineEdit, AiOutlineSave } from "react-icons/ai";
+import { Button, Flex, Heading, Table, TableContainer, Tbody, Th, Text, Tr, Link, useToast, Modal, Icon, Thead, Td, Textarea, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, useDisclosure, Container, Popover, PopoverTrigger, PopoverContent, PopoverCloseButton, PopoverHeader, PopoverBody, PopoverArrow, Tag, TagLabel, TagRightIcon, FormControl, FormLabel, Select, TagCloseButton } from "@chakra-ui/react";
+import { AddIcon, CheckIcon, ChevronRightIcon, CloseIcon, WarningIcon } from "@chakra-ui/icons";
+import { AiOutlineEdit } from "react-icons/ai";
 import { BsPrinter } from "react-icons/bs";
 import { SlGraph } from "react-icons/sl";
 
 // Navigation
 import { useParams, useNavigate } from "react-router-dom";
 
-// JSON to CSV tool
-import { parse } from "json2csv";
-
-// Consola
-import consola from "consola";
-
+// Utility libraries
 import _ from "underscore";
+import { parse } from "json2csv";
 
 // Database and models
 import { deleteData, getData, postData } from "src/database/functions";
-import { AttributeStruct, EntityModel } from "@types";
+import { AttributeStruct, CollectionModel, EntityModel } from "@types";
 
 // Custom components
 import Linky from "src/components/Linky";
@@ -32,7 +28,17 @@ export const Entity = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const toast = useToast();
-  const { isOpen, onOpen, onClose } = useDisclosure();
+
+  const { isOpen: isGraphOpen, onOpen: onGraphOpen, onClose: onGraphClose } = useDisclosure();
+
+  
+  const { isOpen: isAddCollectionsOpen, onOpen: onAddCollectionsOpen, onClose: onAddCollectionsClose } = useDisclosure();
+  const [collectionData, setCollectionData] = useState([] as CollectionModel[]);
+  const [selectedCollections, setSelectedCollections] = useState([] as string[]);
+  
+  const { isOpen: isAddProductsOpen, onOpen: onAddProductsOpen, onClose: onAddProductsClose } = useDisclosure();
+  const [allEntities, setAllEntities] = useState([] as { name: string; id: string }[]);
+  const [selectedProducts, setSelectedProducts] = useState([] as string[]);
 
   // Toggles
   const [isLoaded, setIsLoaded] = useState(false);
@@ -40,10 +46,10 @@ export const Entity = () => {
 
   // Break up entity data into editable fields
   const [entityData, setEntityData] = useState({} as EntityModel);
-  const [description, setDescription] = useState("");
-  const [collections, setCollections] = useState([] as string[]);
-  const [products, setProducts] = useState([] as { name: string; id: string }[]);
-  const [attributes, setAttributes] = useState([] as AttributeStruct[]);
+  const [entityDescription, setEntityDescription] = useState("");
+  const [entityCollections, setEntityCollections] = useState([] as string[]);
+  const [entityProducts, setEntityProducts] = useState([] as { name: string; id: string }[]);
+  const [entityAttributes, setEntityAttributes] = useState([] as AttributeStruct[]);
 
   useEffect(() => {
     getData(`/entities/${id}`).then((response) => {
@@ -63,15 +69,53 @@ export const Entity = () => {
         isClosable: true,
       });
     });
+
+    // Populate Collection data
+    getData(`/collections`).then((response) => {
+      if(_.isEqual(response.status, "error")) {
+        throw new Error(response.error);
+      } else {
+        setCollectionData(response);
+        setIsLoaded(true);
+      }
+    }).catch(() => {
+      toast({
+        title: "Database Error",
+        description: "Error retrieving Collection data",
+        status: "error",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    });
+
+    // Populate Entities data
+    getData(`/entities`).then((response) => {
+      if(_.isEqual(response.status, "error")) {
+        throw new Error(response.error);
+      } else {
+        setAllEntities((response as EntityModel[]).filter(entity => !_.isEqual(entityData._id, entity._id)).map(entity => { return { id: entity._id, name: entity.name } }));
+        setIsLoaded(true);
+      }
+    }).catch(() => {
+      toast({
+        title: "Database Error",
+        description: "Error retrieving Collection data",
+        status: "error",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    });
   }, [id]);
 
   useEffect(() => {
     if (isLoaded) {
       // Update the state of editable data fields
-      setDescription(entityData.description);
-      setCollections(entityData.collections);
-      setProducts(entityData.associations.products);
-      setAttributes(entityData.attributes);
+      setEntityDescription(entityData.description);
+      setEntityCollections(entityData.collections);
+      setEntityProducts(entityData.associations.products);
+      setEntityAttributes(entityData.attributes);
     }
   }, [isLoaded]);
 
@@ -84,20 +128,19 @@ export const Entity = () => {
         name: entityData.name,
         created: entityData.created,
         owner: entityData.owner,
-        description: description,
-        collections: collections,
+        description: entityDescription,
+        collections: entityCollections,
         associations: {
           origin: entityData.associations.origin,
-          products: products,
+          products: entityProducts,
         },
-        attributes: attributes,
+        attributes: entityAttributes,
       };
 
       // Update data
       postData(`/entities/update`, updateData).then((response) => {
         if (_.isEqual(response.status, "success")) {
           setEditing(false);
-
           toast({
             title: "Saved!",
             status: "success",
@@ -187,29 +230,45 @@ export const Entity = () => {
         });
         return;
       }
-      throw new Error("Could not DELETE ID");
+      throw new Error("Could not delete Entity");
     }).catch(() => {
       toast({
         title: "Error",
-        description: `An error occurred when deleting ID "${entityData._id}"`,
+        description: `An error occurred when deleting Entity "${entityData._id}"`,
         status: "error",
         duration: 2000,
         position: "bottom-right",
         isClosable: true,
       });
     });
-  }
+  };
+
+  const addProducts = (products: string[]): void => {
+    setEntityProducts([...entityProducts, ...allEntities.filter(entity => products.includes(entity.id))]);
+    setSelectedProducts([]);
+    onAddProductsClose();
+  };
 
   const removeProduct = (id: string) => {
-    setProducts(products.filter((product) => {
+    setEntityProducts(entityProducts.filter((product) => {
       return product.id !== id;
     }));
   };
 
   const removeCollection = (id: string) => {
-    setCollections(collections.filter((collection) => {
+    setEntityCollections(entityCollections.filter((collection) => {
       return collection !== id;
     }));
+  };
+
+  /**
+   * Callback function to the Entity to Collections
+   * @param {{ entities: string[], collection: string }} data List of Entities and a Collection to add the Entities to
+   */
+  const addCollections = (collections: string[]): void => {
+    setEntityCollections([...entityCollections, ...collections.filter(collection => !_.isEqual("", collection))]);
+    setSelectedCollections([]);
+    onAddCollectionsClose();
   };
 
   return (
@@ -223,9 +282,9 @@ export const Entity = () => {
             <Button
               onClick={handleEditClick}
               colorScheme={editing ? "green" : "gray"}
-              rightIcon={editing ? <Icon as={AiOutlineSave} /> : <Icon as={AiOutlineEdit} />}
+              rightIcon={editing ? <Icon as={CheckIcon} /> : <Icon as={AiOutlineEdit} />}
             >
-              {editing ? "Save" : "Edit"}
+              {editing ? "Done" : "Edit"}
             </Button>
             <Popover>
               <PopoverTrigger>
@@ -280,7 +339,16 @@ export const Entity = () => {
 
                   <Tr>
                     <Td>Owner</Td>
-                    <Td><Text><Link>{entityData.owner}</Link></Text></Td>
+                    <Td>
+                      {_.isEqual(entityData.owner, "") ? (
+                        <Tag size={"md"} key={`warn-${entityData._id}`} colorScheme={"orange"}>
+                          <TagLabel>Not specified</TagLabel>
+                          <TagRightIcon as={WarningIcon} />
+                        </Tag>
+                      ) : (
+                        <Text><Link>{entityData.owner}</Link></Text>
+                      )}
+                    </Td>
                   </Tr>
 
                   <Tr>
@@ -299,7 +367,10 @@ export const Entity = () => {
                             id={entityData.associations.origin.id}
                           />
                         ) : (
-                          <Text>No origin specified.</Text>
+                          <Tag size={"md"} key={`warn-${entityData._id}`} colorScheme={"orange"}>
+                            <TagLabel>Not specified</TagLabel>
+                            <TagRightIcon as={WarningIcon} />
+                          </Tag>
                         )}
                       </Flex>
                     </Td>
@@ -309,10 +380,9 @@ export const Entity = () => {
                     <Td>Description</Td>
                     <Td>
                       <Textarea
-                        value={description}
+                        value={entityDescription}
                         onChange={(event) => {
-                          consola.debug("Updating Entity description");
-                          setDescription(event.target.value);
+                          setEntityDescription(event.target.value);
                         }}
                         disabled={!editing}
                       />
@@ -324,7 +394,7 @@ export const Entity = () => {
 
             {/* Buttons */}
             <Flex direction={"row"} gap={"2"}>
-              <Button onClick={onOpen} rightIcon={<Icon as={SlGraph} />} colorScheme={"orange"}>
+              <Button onClick={onGraphOpen} rightIcon={<Icon as={SlGraph} />} colorScheme={"orange"}>
                 View Graph
               </Button>
               <Button onClick={handlePrintClick} rightIcon={<Icon as={BsPrinter} />} colorScheme={"blue"}>
@@ -338,9 +408,8 @@ export const Entity = () => {
             <Flex p={"2"} gap={"2"} grow={"1"} direction={"column"}>
               <Flex direction={"row"} justify={"space-between"} mb={"sm"}>
                 <Heading margin={"none"}>Collections</Heading>
-
                 {editing ? (
-                  <Button rightIcon={<AddIcon />} disabled={!editing}>
+                  <Button colorScheme={"green"} rightIcon={<AddIcon />} disabled={!editing} onClick={onAddCollectionsOpen}>
                     Add
                   </Button>
                 ) : null}
@@ -356,7 +425,7 @@ export const Entity = () => {
                   </Thead>
 
                   <Tbody>
-                    {collections.map((collection) => {
+                    {entityCollections.map((collection) => {
                       return (
                         <Tr key={collection}>
                           <Td><Linky type="collections" id={collection} /></Td>
@@ -391,7 +460,7 @@ export const Entity = () => {
                   </Tbody>
                 </Table>
               </TableContainer>
-              {collections.length === 0 &&
+              {entityCollections.length === 0 &&
                 <Text>Entity {entityData.name} is not a member of any Collections.</Text>
               }
             </Flex>
@@ -402,7 +471,7 @@ export const Entity = () => {
                 <Heading m={"none"}>Products</Heading>
 
                 {editing ? (
-                  <Button rightIcon={<AddIcon />} disabled={!editing}>
+                  <Button colorScheme={"green"} rightIcon={<AddIcon />} disabled={!editing} onClick={onAddProductsOpen}>
                     Add
                   </Button>
                 ) : null}
@@ -418,7 +487,7 @@ export const Entity = () => {
                   </Thead>
 
                   <Tbody>
-                    {products.map((product) => {
+                    {entityProducts.map((product) => {
                       return (
                         <Tr key={product.id}>
                           <Td><Linky type="entities" id={product.id} /></Td>
@@ -454,7 +523,7 @@ export const Entity = () => {
                 </Table>
               </TableContainer>
 
-              {products.length === 0 &&
+              {entityProducts.length === 0 &&
                 <Text>Entity {entityData.name} does not have any Products.</Text>
               }
             </Flex>
@@ -468,8 +537,8 @@ export const Entity = () => {
           </Flex>
 
           <Flex p={"2"} gap={"2"} direction={"row"}>
-            {attributes.length > 0 ? (
-              attributes.map((attribute) => {
+            {entityAttributes.length > 0 ? (
+              entityAttributes.map((attribute) => {
                 return <AttributeCard data={attribute} key={`attribute-${attribute.name}`}/>;
               })
             ) : (
@@ -478,7 +547,155 @@ export const Entity = () => {
           </Flex>
         </Flex>
 
-        <Modal size={"full"} onEsc={onClose} onClose={onClose} isOpen={isOpen}>
+        <Modal isOpen={isAddCollectionsOpen} onClose={onAddCollectionsClose}>
+          <ModalOverlay />
+          <ModalContent p={"4"}>
+            {/* Heading and close button */}
+            <ModalHeader>Add to Collection</ModalHeader>
+            <ModalCloseButton />
+
+            {/* Select component for Collections */}
+            <Flex direction={"column"} p={"2"} gap={"2"}>
+              <FormControl>
+                <FormLabel>Add Entity to Collections</FormLabel>
+                <Select
+                  title="Select Collection"
+                  placeholder={"Select Collection"}
+                  onChange={(event) => {
+                    const selectedCollection = event.target.value.toString();
+                    if (selectedCollections.includes(selectedCollection)) {
+                      toast({
+                        title: "Warning",
+                        description: "Collection has already been selected.",
+                        status: "warning",
+                        duration: 2000,
+                        position: "bottom-right",
+                        isClosable: true,
+                      });
+                    } else {
+                      setSelectedCollections([...selectedCollections, selectedCollection]);
+                    }
+                  }}
+                >
+                  {isLoaded &&
+                    collectionData.map((collection) => {
+                      return (
+                        <option key={collection._id} value={collection._id}>{collection.name}</option>
+                      );
+                    })
+                  };
+                </Select>
+              </FormControl>
+
+              <Flex direction={"row"} p={"2"} gap={"2"}>
+                {selectedCollections.map((collection) => {
+                  if (!_.isEqual(collection, "")) {
+                    return (
+                      <Tag key={`tag-${collection}`}>
+                        <Linky id={collection} type={"collections"} />
+                        <TagCloseButton onClick={() => {
+                          setSelectedCollections(selectedCollections.filter((selected) => {
+                            return !_.isEqual(collection, selected);
+                          }));
+                        }} />
+                      </Tag>
+                    );
+                  } else {
+                    return null;
+                  }
+                })}
+              </Flex>
+            </Flex>
+
+            {/* "Done" button */}
+            <Flex direction={"row"} p={"md"} justify={"center"}>
+              <Button
+                colorScheme={"green"}
+                onClick={() => { addCollections(selectedCollections); }}
+              >
+                Done
+              </Button>
+            </Flex>
+          </ModalContent>
+        </Modal>
+
+        <Modal isOpen={isAddProductsOpen} onClose={onAddProductsClose}>
+          <ModalOverlay />
+          <ModalContent p={"4"}>
+            {/* Heading and close button */}
+            <ModalHeader>Add Products</ModalHeader>
+            <ModalCloseButton />
+
+            {/* Select component for Entities */}
+            <Flex direction={"column"} p={"2"} gap={"2"}>
+              <FormControl>
+                <FormLabel>Add Products</FormLabel>
+                <Select
+                  title="Select Products"
+                  placeholder={"Select Product"}
+                  onChange={(event) => {
+                    if (entityProducts.map(product => product.id).includes(event.target.value.toString())) {
+                      toast({
+                        title: "Warning",
+                        description: "Product has already been selected.",
+                        status: "warning",
+                        duration: 2000,
+                        position: "bottom-right",
+                        isClosable: true,
+                      });
+                    } else {
+                      setSelectedProducts([...selectedProducts, event.target.value.toString()]);
+                    }
+                  }}
+                >
+                  {isLoaded &&
+                    allEntities.map((entity) => {
+                      return (
+                        <option key={entity.id} value={entity.id}>{entity.name}</option>
+                      );
+                    })
+                  };
+                </Select>
+              </FormControl>
+
+              <Flex direction={"row"} p={"2"} gap={"2"}>
+                {selectedProducts.map((entity) => {
+                  if (!_.isEqual(entity, "")) {
+                    return (
+                      <Tag key={`tag-${entity}`}>
+                        <Linky id={entity} type={"entities"} />
+                        <TagCloseButton onClick={() => {
+                          setSelectedProducts(selectedProducts.filter((selected) => {
+                            return !_.isEqual(entity, selected);
+                          }));
+                        }} />
+                      </Tag>
+                    );
+                  } else {
+                    return null;
+                  }
+                })}
+              </Flex>
+            </Flex>
+
+            {/* "Done" button */}
+            <Flex direction={"row"} p={"md"} justify={"center"}>
+              <Button
+                colorScheme={"green"}
+                onClick={() => {
+                  if (id) {
+                    // Add the Entities to the Collection
+                    addProducts(selectedProducts);
+                  }
+                }}
+              >
+                Done
+              </Button>
+            </Flex>
+          </ModalContent>
+        </Modal>
+
+        <Modal size={"full"} onEsc={onGraphClose} onClose={onGraphClose} isOpen={isGraphOpen}>
           <ModalOverlay />
           <ModalContent>
             <ModalHeader>Graph: {entityData.name}</ModalHeader>
