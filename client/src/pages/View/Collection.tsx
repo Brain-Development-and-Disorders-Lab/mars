@@ -87,11 +87,7 @@ export const Collection = () => {
    * @param {string[]} entities List of Entities to add
    */
   const addEntities = (entities: string[]): void => {
-    for (const entity of entities) {
-      if (!_.isEqual("", entity)) {
-        setCollectionEntities([...collectionEntities, entity]);
-      }
-    }
+    setCollectionEntities([...collectionEntities, ...entities.filter(entity => !_.isEqual("", entity))]);
     setSelectedEntities([]);
     onClose();
   };

@@ -39,7 +39,7 @@ export class Collections {
       });
     };
 
-  static modify = (updatedCollection: CollectionModel): Promise<CollectionModel> => {
+  static update = (updatedCollection: CollectionModel): Promise<CollectionModel> => {
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(COLLECTIONS)
@@ -51,27 +51,20 @@ export class Collections {
           // Cast and store current state of the Collection
           const currentCollection = result as CollectionModel;
 
-          // Create set of variables to store current or updated state values
-          let updatedEntities = currentCollection.entities;
-
           // Collections
           const entitiesToKeep = currentCollection.entities.filter(entity => updatedCollection.entities.includes(entity));
-
           const entitiesToAdd = updatedCollection.entities.filter(entity => !currentCollection.entities.includes(entity));
           entitiesToAdd.map((entity: string) => {
             Entities.addCollection(entity, currentCollection._id);
           });
-
           const entitiesToRemove = currentCollection.entities.filter(entity => !entitiesToKeep.includes(entity));
           entitiesToRemove.map((entity: string) => {
             Entities.removeCollection(entity, currentCollection._id);
           });
 
-          updatedEntities = [...entitiesToKeep, ...entitiesToAdd];
-
           const updates = {
             $set: {
-              entities: updatedEntities,
+              entities: [...entitiesToKeep, ...entitiesToAdd],
             },
           };
 

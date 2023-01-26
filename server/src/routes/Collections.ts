@@ -55,7 +55,7 @@ CollectionsRoute.route("/collections/add").post((request: { body: { collection: 
 
 // Route: Update a Collection
 CollectionsRoute.route("/collections/update").post((request: { body: CollectionModel }, response: any) => {
-  Collections.modify(request.body).then((updatedCollection: CollectionModel) => {
+  Collections.update(request.body).then((updatedCollection: CollectionModel) => {
     response.json({
       id: updatedCollection._id,
       name: updatedCollection.name,
