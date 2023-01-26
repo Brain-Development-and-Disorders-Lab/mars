@@ -120,7 +120,6 @@ export const Collection = () => {
       postData(`/collections/update`, updateData).then((response) => {
         if (_.isEqual(response.status, "success")) {
           setEditing(false);
-
           toast({
             title: "Saved!",
             status: "success",

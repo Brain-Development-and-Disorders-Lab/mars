@@ -30,10 +30,15 @@ export const Entity = () => {
   const toast = useToast();
 
   const { isOpen: isGraphOpen, onOpen: onGraphOpen, onClose: onGraphClose } = useDisclosure();
-  const { isOpen: isAddCollectionsOpen, onOpen: onAddCollectionsOpen, onClose: onAddCollectionsClose } = useDisclosure();
 
+  
+  const { isOpen: isAddCollectionsOpen, onOpen: onAddCollectionsOpen, onClose: onAddCollectionsClose } = useDisclosure();
   const [collectionData, setCollectionData] = useState([] as CollectionModel[]);
   const [selectedCollections, setSelectedCollections] = useState([] as string[]);
+  
+  const { isOpen: isAddProductsOpen, onOpen: onAddProductsOpen, onClose: onAddProductsClose } = useDisclosure();
+  const [allEntities, setAllEntities] = useState([] as { name: string; id: string }[]);
+  const [selectedProducts, setSelectedProducts] = useState([] as string[]);
 
   // Toggles
   const [isLoaded, setIsLoaded] = useState(false);
@@ -71,6 +76,25 @@ export const Entity = () => {
         throw new Error(response.error);
       } else {
         setCollectionData(response);
+        setIsLoaded(true);
+      }
+    }).catch(() => {
+      toast({
+        title: "Database Error",
+        description: "Error retrieving Collection data",
+        status: "error",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    });
+
+    // Populate Entities data
+    getData(`/entities`).then((response) => {
+      if(_.isEqual(response.status, "error")) {
+        throw new Error(response.error);
+      } else {
+        setAllEntities((response as EntityModel[]).filter(entity => !_.isEqual(entityData._id, entity._id)).map(entity => { return { id: entity._id, name: entity.name } }));
         setIsLoaded(true);
       }
     }).catch(() => {
@@ -217,6 +241,12 @@ export const Entity = () => {
         isClosable: true,
       });
     });
+  };
+
+  const addProducts = (products: string[]): void => {
+    setEntityProducts([...entityProducts, ...allEntities.filter(entity => products.includes(entity.id))]);
+    setSelectedProducts([]);
+    onAddProductsClose();
   };
 
   const removeProduct = (id: string) => {
@@ -441,7 +471,7 @@ export const Entity = () => {
                 <Heading m={"none"}>Products</Heading>
 
                 {editing ? (
-                  <Button colorScheme={"green"} rightIcon={<AddIcon />} disabled={!editing}>
+                  <Button colorScheme={"green"} rightIcon={<AddIcon />} disabled={!editing} onClick={onAddProductsOpen}>
                     Add
                   </Button>
                 ) : null}
@@ -582,6 +612,82 @@ export const Entity = () => {
               <Button
                 colorScheme={"green"}
                 onClick={() => { addCollections(selectedCollections); }}
+              >
+                Done
+              </Button>
+            </Flex>
+          </ModalContent>
+        </Modal>
+
+        <Modal isOpen={isAddProductsOpen} onClose={onAddProductsClose}>
+          <ModalOverlay />
+          <ModalContent p={"4"}>
+            {/* Heading and close button */}
+            <ModalHeader>Add Products</ModalHeader>
+            <ModalCloseButton />
+
+            {/* Select component for Entities */}
+            <Flex direction={"column"} p={"2"} gap={"2"}>
+              <FormControl>
+                <FormLabel>Add Products</FormLabel>
+                <Select
+                  title="Select Products"
+                  placeholder={"Select Product"}
+                  onChange={(event) => {
+                    if (entityProducts.map(product => product.id).includes(event.target.value.toString())) {
+                      toast({
+                        title: "Warning",
+                        description: "Product has already been selected.",
+                        status: "warning",
+                        duration: 2000,
+                        position: "bottom-right",
+                        isClosable: true,
+                      });
+                    } else {
+                      setSelectedProducts([...selectedProducts, event.target.value.toString()]);
+                    }
+                  }}
+                >
+                  {isLoaded &&
+                    allEntities.map((entity) => {
+                      return (
+                        <option key={entity.id} value={entity.id}>{entity.name}</option>
+                      );
+                    })
+                  };
+                </Select>
+              </FormControl>
+
+              <Flex direction={"row"} p={"2"} gap={"2"}>
+                {selectedProducts.map((entity) => {
+                  if (!_.isEqual(entity, "")) {
+                    return (
+                      <Tag key={`tag-${entity}`}>
+                        <Linky id={entity} type={"entities"} />
+                        <TagCloseButton onClick={() => {
+                          setSelectedProducts(selectedProducts.filter((selected) => {
+                            return !_.isEqual(entity, selected);
+                          }));
+                        }} />
+                      </Tag>
+                    );
+                  } else {
+                    return null;
+                  }
+                })}
+              </Flex>
+            </Flex>
+
+            {/* "Done" button */}
+            <Flex direction={"row"} p={"md"} justify={"center"}>
+              <Button
+                colorScheme={"green"}
+                onClick={() => {
+                  if (id) {
+                    // Add the Entities to the Collection
+                    addProducts(selectedProducts);
+                  }
+                }}
               >
                 Done
               </Button>
