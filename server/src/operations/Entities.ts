@@ -9,7 +9,7 @@ import _ from "underscore";
 import { getDatabase } from "../database/connection";
 
 // Custom types
-import { EntityModel, EntityStruct } from "@types";
+import { EntityModel } from "@types";
 import { Collections } from "./Collections";
 
 // Constants
@@ -246,7 +246,7 @@ export class Entities {
           // Update the collection of Collections associated with the Entity to remove this Collection
           const updates = {
             $set: {
-              collections: [...(result as EntityModel).collections.filter(content => !_.isEqual(content, collection))],
+              collections: [...(result as EntityModel).collections.filter(content => !_.isEqual(content, collection.toString()))],
             },
           };
 
@@ -377,6 +377,36 @@ export class Entities {
           };
           resolve(result as EntityModel);
         });
+    });
+  };
+
+  static delete = (id: string): Promise<EntityModel> => {
+    return new Promise((resolve, _reject) => {
+      getDatabase()
+        .collection(ENTITIES_COLLECTION)
+        .findOne({ _id: new ObjectId(id) }, (error: any, result: any) => {
+          if (error) {
+            throw error;
+          }
+
+          // Remove the Entity from all Collections
+          Promise.all((result as EntityModel).collections.map((collection) => {
+            Collections.removeEntity(collection, (result as EntityModel)._id);
+          })).then((_result) => {
+            // Remove the Entity as a product of the listed Origin
+          }).then((_result) => {
+            // Delete the Entity
+            getDatabase()
+              .collection(ENTITIES_COLLECTION)
+              .deleteOne({ _id: new ObjectId(id) }, (error: any, _content: any) => {
+                if (error) {
+                  throw error;
+                }
+
+                resolve(result);
+            });
+        });
+      });
     });
   };
 };

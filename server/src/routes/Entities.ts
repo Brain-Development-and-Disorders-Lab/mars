@@ -55,27 +55,13 @@ EntitiesRoute.route("/entities/update").post((request: { body: EntityModel }, re
 
 // Delete an Entity
 EntitiesRoute.route("/entities/:id").delete((request: { params: { id: string } }, response: any) => {
-  getDatabase()
-    .collection(ENTITIES)
-    .findOne({ _id: new ObjectId(request.params.id) }, (error: any, result: any) => {
-      if (error) {
-        throw error;
-      }
-
-      // Remove the Entity from all Collections
-
-      // Remove the Entity as a product of the listed Origin
-
-      // Delete the Entity
-      getDatabase()
-        .collection(ENTITIES)
-        .deleteOne({ _id: new ObjectId(request.params.id) }, (error: any, content: any) => {
-          if (error) {
-            throw error;
-          }
-          response.json(content);
-      });
+  Entities.delete(request.params.id).then((entity) => {
+    response.json({
+      id: entity._id,
+      name: entity.name,
+      status: "success"
     });
+  });
 });
 
 export default EntitiesRoute;

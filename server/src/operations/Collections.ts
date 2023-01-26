@@ -128,10 +128,10 @@ export class Collections {
           // Update the collection to remove the Entity
           const updatedValues = {
             $set: {
-              entities: (result as CollectionModel).entities.filter(content => !_.isEqual(entity, content)),
+              entities: (result as CollectionModel).entities.filter(content => !_.isEqual(content, entity.toString())),
             },
           };
-    
+
           getDatabase()
             .collection(COLLECTIONS)
             .updateOne({ _id: new ObjectId(collection) }, updatedValues, (error: any, _response: any) => {
