@@ -246,7 +246,7 @@ export class Entities {
           // Update the collection of Collections associated with the Entity to remove this Collection
           const updates = {
             $set: {
-              collections: [...(result as EntityModel).collections.filter(content => !_.isEqual(content, collection.toString()))],
+              collections: [...(result as EntityModel).collections.filter(content => !_.isEqual(new ObjectId(content), new ObjectId(collection)))],
             },
           };
 

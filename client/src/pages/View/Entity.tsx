@@ -31,7 +31,6 @@ export const Entity = () => {
 
   const { isOpen: isGraphOpen, onOpen: onGraphOpen, onClose: onGraphClose } = useDisclosure();
 
-  
   const { isOpen: isAddCollectionsOpen, onOpen: onAddCollectionsOpen, onClose: onAddCollectionsClose } = useDisclosure();
   const [collectionData, setCollectionData] = useState([] as CollectionModel[]);
   const [selectedCollections, setSelectedCollections] = useState([] as string[]);
@@ -360,7 +359,7 @@ export const Entity = () => {
                         align={"center"}
                         margin={"none"}
                       >
-                        {entityData.associations.origin.id ? (
+                        {entityData.associations.origin["id"] ? (
                           <Linky
                             key={entityData.associations.origin.id}
                             type="entities"
