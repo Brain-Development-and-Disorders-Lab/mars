@@ -47,7 +47,14 @@ Collections are simply groups of Entities. Collections can be of one type of Ent
 
 ## Deployment
 
-The application has (⚠️ almost) been entirely containerized using Docker containers. To start a fresh instance of the application, use `docker compose`:
+The application has (⚠️ almost) been entirely containerized using Docker containers. Before starting the Docker containers, two environment variables must be configured in an `.env` file that should be placed in the `/server` directory. The two variables are `CONNECTION_STRING` and `PORT`, the MongoDB connection string and the port of the server to listen on respectively. Example contents are shown below:
+
+```Text
+CONNECTION_STRING=mongodb://admin:metadataadmin@localhost:27017/
+PORT=8000
+```
+
+Then, to start a fresh instance of the application, use `docker compose`:
 
 ```Bash
 $ docker compose up
