@@ -147,7 +147,7 @@ export class Entities {
           const updates = {
             $set: {
               associations: {
-                origin:  result.associations.origin,
+                origins:  result.associations.origin,
                 products: [
                   ...result.associations.products,
                   product,
