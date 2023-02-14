@@ -34,10 +34,13 @@ export const Entity = () => {
   const { isOpen: isAddCollectionsOpen, onOpen: onAddCollectionsOpen, onClose: onAddCollectionsClose } = useDisclosure();
   const [collectionData, setCollectionData] = useState([] as CollectionModel[]);
   const [selectedCollections, setSelectedCollections] = useState([] as string[]);
-  
-  const { isOpen: isAddProductsOpen, onOpen: onAddProductsOpen, onClose: onAddProductsClose } = useDisclosure();
+
   const [allEntities, setAllEntities] = useState([] as { name: string; id: string }[]);
+
+  const { isOpen: isAddProductsOpen, onOpen: onAddProductsOpen, onClose: onAddProductsClose } = useDisclosure();
+  const { isOpen: isAddOriginsOpen, onOpen: onAddOriginsOpen, onClose: onAddOriginsClose } = useDisclosure();
   const [selectedProducts, setSelectedProducts] = useState([] as string[]);
+  const [selectedOrigins, setSelectedOrigins] = useState([] as string[]);
 
   // Toggles
   const [isLoaded, setIsLoaded] = useState(false);
@@ -47,6 +50,7 @@ export const Entity = () => {
   const [entityData, setEntityData] = useState({} as EntityModel);
   const [entityDescription, setEntityDescription] = useState("");
   const [entityCollections, setEntityCollections] = useState([] as string[]);
+  const [entityOrigins, setEntityOrigins] = useState([] as { name: string; id: string }[]);
   const [entityProducts, setEntityProducts] = useState([] as { name: string; id: string }[]);
   const [entityAttributes, setEntityAttributes] = useState([] as AttributeStruct[]);
 
@@ -113,6 +117,7 @@ export const Entity = () => {
       // Update the state of editable data fields
       setEntityDescription(entityData.description);
       setEntityCollections(entityData.collections);
+      setEntityOrigins(entityData.associations.origins);
       setEntityProducts(entityData.associations.products);
       setEntityAttributes(entityData.attributes);
     }
@@ -130,7 +135,7 @@ export const Entity = () => {
         description: entityDescription,
         collections: entityCollections,
         associations: {
-          origin: entityData.associations.origin,
+          origins: entityOrigins,
           products: entityProducts,
         },
         attributes: entityAttributes,
@@ -175,11 +180,11 @@ export const Entity = () => {
       owner: entityData.owner,
       description: entityData.description,
       collections: entityData.collections.join(),
-      origin: entityData.associations.origin.name,
+      origins: entityData.associations.origins.map((origin) => { return origin.name }).join(),
       products: entityData.associations.products.map((product) => { return product.name }).join(),
     };
 
-    let fields = ["id", "name", "created", "owner", "description", "collections", "origin", "products"];
+    let fields = ["id", "name", "created", "owner", "description", "collections", "origins", "products"];
 
     // Create columns for each Attribute and corresponding Parameter
     entityData.attributes.forEach((attribute) => {
@@ -254,6 +259,18 @@ export const Entity = () => {
     }));
   };
 
+  const addOrigins = (origins: string[]): void => {
+    setEntityOrigins([...entityOrigins, ...allEntities.filter(entity => origins.includes(entity.id))]);
+    setSelectedOrigins([]);
+    onAddOriginsClose();
+  };
+
+  const removeOrigin = (id: string) => {
+    setEntityOrigins(entityOrigins.filter((origin) => {
+      return origin.id !== id;
+    }));
+  };
+
   const removeCollection = (id: string) => {
     setEntityCollections(entityCollections.filter((collection) => {
       return collection !== id;
@@ -275,6 +292,16 @@ export const Entity = () => {
       <PageContainer>
         <Flex p={"2"} pt={"8"} pb={"8"} direction={"row"} justify={"space-between"} align={"center"} wrap={"wrap"}>
           <Heading size={"2xl"}>Entity:{" "}{entityData.name}</Heading>
+
+          {/* Buttons */}
+          <Flex direction={"row"} gap={"2"}>
+            <Button onClick={onGraphOpen} rightIcon={<Icon as={SlGraph} />} colorScheme={"orange"}>
+              View Graph
+            </Button>
+            <Button onClick={handlePrintClick} rightIcon={<Icon as={BsPrinter} />} colorScheme={"blue"}>
+              Print Label
+            </Button>
+          </Flex>
 
           {/* Buttons */}
           <Flex direction={"row"} p={"2"} gap={"2"}>
@@ -351,31 +378,6 @@ export const Entity = () => {
                   </Tr>
 
                   <Tr>
-                    <Td>Origin</Td>
-                    <Td>
-                      <Flex
-                        direction={"row"}
-                        gap={"small"}
-                        align={"center"}
-                        margin={"none"}
-                      >
-                        {entityData.associations.origin["id"] ? (
-                          <Linky
-                            key={entityData.associations.origin.id}
-                            type="entities"
-                            id={entityData.associations.origin.id}
-                          />
-                        ) : (
-                          <Tag size={"md"} key={`warn-${entityData._id}`} colorScheme={"orange"}>
-                            <TagLabel>Not specified</TagLabel>
-                            <TagRightIcon as={WarningIcon} />
-                          </Tag>
-                        )}
-                      </Flex>
-                    </Td>
-                  </Tr>
-
-                  <Tr>
                     <Td>Description</Td>
                     <Td>
                       <Textarea
@@ -391,18 +393,6 @@ export const Entity = () => {
               </Table>
             </TableContainer>
 
-            {/* Buttons */}
-            <Flex direction={"row"} gap={"2"}>
-              <Button onClick={onGraphOpen} rightIcon={<Icon as={SlGraph} />} colorScheme={"orange"}>
-                View Graph
-              </Button>
-              <Button onClick={handlePrintClick} rightIcon={<Icon as={BsPrinter} />} colorScheme={"blue"}>
-                Print Label
-              </Button>
-            </Flex>
-          </Flex>
-
-          <Flex p={"2"} gap={"2"} direction={"column"} grow={"2"}>
             {/* Collections */}
             <Flex p={"2"} gap={"2"} grow={"1"} direction={"column"}>
               <Flex direction={"row"} justify={"space-between"} mb={"sm"}>
@@ -463,12 +453,75 @@ export const Entity = () => {
                 <Text>Entity {entityData.name} is not a member of any Collections.</Text>
               }
             </Flex>
+          </Flex>
+
+          <Flex direction={"column"} grow={"2"}>
+            {/* Origins */}
+            <Flex p={"2"} gap={"2"} grow={"1"} direction={"column"}>
+              <Flex direction={"row"} justify={"space-between"} mb={"sm"}>
+                <Heading m={"none"}>Origins</Heading>
+                {editing ? (
+                  <Button colorScheme={"green"} rightIcon={<AddIcon />} disabled={!editing} onClick={onAddOriginsOpen}>
+                    Add
+                  </Button>
+                ) : null}
+              </Flex>
+
+              <TableContainer>
+                <Table>
+                  <Thead>
+                    <Tr>
+                      <Th pl={"1"}>Origin</Th>
+                      <Th></Th>
+                    </Tr>
+                  </Thead>
+
+                  <Tbody>
+                    {entityOrigins.map((origin) => {
+                      return (
+                        <Tr key={origin.id}>
+                          <Td><Linky type="entities" id={origin.id} /></Td>
+                          <Td>
+                            <Flex w={"full"} gap={"2"} justify={"right"}>
+                              {editing &&
+                                <Button
+                                  key={`remove-${origin.id}`}
+                                  rightIcon={<CloseIcon />}
+                                  colorScheme={"red"}
+                                  onClick={() => {removeOrigin(origin.id)}}
+                                >
+                                  Remove
+                                </Button>
+                              }
+
+                              {!editing &&
+                                <Button
+                                  key={`view-${origin.id}`}
+                                  rightIcon={<ChevronRightIcon />}
+                                  as={Link}
+                                  href={`/entities/${origin.id}`}
+                                >
+                                  View
+                                </Button>
+                              }
+                            </Flex>
+                          </Td>
+                        </Tr>
+                      )
+                    })}
+                  </Tbody>
+                </Table>
+              </TableContainer>
+
+              {entityOrigins.length === 0 &&
+                <Text>Entity {entityData.name} does not have any Origins.</Text>
+              }
+            </Flex>
 
             {/* Products */}
             <Flex p={"2"} gap={"2"} grow={"1"} direction={"column"}>
               <Flex direction={"row"} justify={"space-between"} mb={"sm"}>
                 <Heading m={"none"}>Products</Heading>
-
                 {editing ? (
                   <Button colorScheme={"green"} rightIcon={<AddIcon />} disabled={!editing} onClick={onAddProductsOpen}>
                     Add
@@ -685,6 +738,82 @@ export const Entity = () => {
                   if (id) {
                     // Add the Entities to the Collection
                     addProducts(selectedProducts);
+                  }
+                }}
+              >
+                Done
+              </Button>
+            </Flex>
+          </ModalContent>
+        </Modal>
+
+        <Modal isOpen={isAddOriginsOpen} onClose={onAddOriginsClose}>
+          <ModalOverlay />
+          <ModalContent p={"4"}>
+            {/* Heading and close button */}
+            <ModalHeader>Add Origins</ModalHeader>
+            <ModalCloseButton />
+
+            {/* Select component for Entities */}
+            <Flex direction={"column"} p={"2"} gap={"2"}>
+              <FormControl>
+                <FormLabel>Add Origins</FormLabel>
+                <Select
+                  title="Select Origins"
+                  placeholder={"Select Origin"}
+                  onChange={(event) => {
+                    if (entityOrigins.map(origin => origin.id).includes(event.target.value.toString())) {
+                      toast({
+                        title: "Warning",
+                        description: "Origin has already been selected.",
+                        status: "warning",
+                        duration: 2000,
+                        position: "bottom-right",
+                        isClosable: true,
+                      });
+                    } else {
+                      setSelectedOrigins([...selectedOrigins, event.target.value.toString()]);
+                    }
+                  }}
+                >
+                  {isLoaded &&
+                    allEntities.map((entity) => {
+                      return (
+                        <option key={entity.id} value={entity.id}>{entity.name}</option>
+                      );
+                    })
+                  };
+                </Select>
+              </FormControl>
+
+              <Flex direction={"row"} p={"2"} gap={"2"}>
+                {selectedOrigins.map((entity) => {
+                  if (!_.isEqual(entity, "")) {
+                    return (
+                      <Tag key={`tag-${entity}`}>
+                        <Linky id={entity} type={"entities"} />
+                        <TagCloseButton onClick={() => {
+                          setSelectedOrigins(selectedOrigins.filter((selected) => {
+                            return !_.isEqual(entity, selected);
+                          }));
+                        }} />
+                      </Tag>
+                    );
+                  } else {
+                    return null;
+                  }
+                })}
+              </Flex>
+            </Flex>
+
+            {/* "Done" button */}
+            <Flex direction={"row"} p={"md"} justify={"center"}>
+              <Button
+                colorScheme={"green"}
+                onClick={() => {
+                  if (id) {
+                    // Add the Entities to the Collection
+                    addOrigins(selectedOrigins);
                   }
                 }}
               >

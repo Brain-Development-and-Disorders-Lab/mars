@@ -13,7 +13,6 @@ import ReactFlow, {
 import { Loading } from "@components/Loading";
 import _ from "underscore";
 import consola from "consola";
-// import ELK from "elkjs";
 
 // Database and models
 import { getData } from "@database/functions";
@@ -58,29 +57,32 @@ const Graph = (props: { id: string }) => {
     const initialNodes = [] as Node[];
     const initialEdges = [] as Edge[];
 
-    // Add the origin
-    if (!_.isNull(entityData.associations.origin.id)) {
-      // Add node
-      initialNodes.push({
-        id: entityData.associations.origin.id,
-        type: "input",
-        data: {
-          label: (
-            <>{entityData.associations.origin.name}</>
-          ),
-        },
-        position: { x: 250, y: 0 },
-      });
+    // Add the Origins
+    if (entityData.associations.origins.length > 0) {
+      // Add nodes and edges
+      for (let origin of entityData.associations.origins) {
+        // Add node
+        initialNodes.push({
+          id: origin.id,
+          type: "input",
+          data: {
+            label: (
+              <>{origin.name}</>
+            ),
+          },
+          position: { x: 250, y: 0 },
+        });
 
-      // Create edge
-      initialEdges.push({
-        id: entityData.associations.origin.id,
-        source: entityData.associations.origin.id,
-        target: entityData._id,
-        markerEnd: {
-          type: MarkerType.ArrowClosed,
-        },
-      });
+        // Create edge
+        initialEdges.push({
+          id: origin.id,
+          source: origin.id,
+          target: entityData._id,
+          markerEnd: {
+            type: MarkerType.ArrowClosed,
+          },
+        });
+      }
     }
 
     // Add products
@@ -111,9 +113,9 @@ const Graph = (props: { id: string }) => {
 
     // Default assuming origin and products
     let currentType = "default";
-    if (!_.isNull(entityData.associations.origin.id) && entityData.associations.products.length === 0) {
+    if (entityData.associations.origins.length > 0 && entityData.associations.products.length === 0) {
       currentType = "output";
-    } else if (_.isNull(entityData.associations.origin.id) && entityData.associations.products.length > 0) {
+    } else if (entityData.associations.origins.length === 0 && entityData.associations.products.length > 0) {
       currentType = "input";
     }
 
@@ -131,31 +133,6 @@ const Graph = (props: { id: string }) => {
       position: { x: 250, y: 100 },
     });
 
-    // const elk = new ELK();
-    // const layout = () => {
-    //   const layoutNodes = initialNodes.map((node) => {
-    //     return {
-    //       id: node.id,
-    //       width: 70,
-    //       height: 30,
-    //     };
-    //   });
-
-    //   const graph = {
-    //     id: "root",
-    //     layoutOptions: {
-    //       "elk.algorithm": "layered",
-    //       "elk.direction": "DOWN",
-    //       "nodePlacement.strategy": "SIMPLE"
-    //     },
-     
-    //     children: layoutNodes,
-    //     edges: initialEdges,
-    //   };
-
-    //   return elk.layout(graph);
-    // }
-
     // Set the nodes
     setNodes([...nodes, ...initialNodes]);
 
@@ -172,44 +149,46 @@ const Graph = (props: { id: string }) => {
       // If the primary Entity hasn't been clicked, obtain Origin and Product nodes
       // for the selected Entity
       getEntityData(node.id).then((entity) => {
-        // Origin
-        if (!_.isNull(entity.associations.origin.id)) {
-          if (containsNode(entity.associations.origin.id) === false) {
-            // Firstly, update the current node type (if required)
-            setNodes([...(nodes.map((node) => {
-              if (_.isEqual(node.id, entity._id)) {
-                if (entity.associations.products.length > 0) {
-                  // If Products are specified as well, we need to set it to
-                  // "default" type
-                  node.type = "default";
-                } else {
-                  // If no Products are specified, the Entity only has Origin,
-                  // making it "output" type
-                  node.type = "output";
+        // Origins
+        if (entity.associations.origins.length > 0) {
+          for (let origin of entity.associations.origins) {
+            if (containsNode(origin.id) === false) {
+              // Firstly, update the current node type (if required)
+              setNodes([...(nodes.map((node) => {
+                if (_.isEqual(node.id, entity._id)) {
+                  if (entity.associations.products.length > 0) {
+                    // If Products are specified as well, we need to set it to
+                    // "default" type
+                    node.type = "default";
+                  } else {
+                    // If no Products are specified, the Entity only has Origin,
+                    // making it "output" type
+                    node.type = "output";
+                  }
                 }
-              }
-              return node;
-            }))]);
+                return node;
+              }))]);
 
-            // Add node
-            setNodes([...nodes, {
-              id: entity.associations.origin.id,
-              type: "input",
-              data: {
-                label: <>{entity.associations.origin.name}</>,
-              },
-              position: { x: 100, y: 200 },
-            }]);
+              // Add node
+              setNodes([...nodes, {
+                id: origin.id,
+                type: "input",
+                data: {
+                  label: <>{origin.name}</>,
+                },
+                position: { x: 100, y: 200 },
+              }]);
 
-            // Create edge
-            setEdges([...edges, {
-              id: `edge_${entity.associations.origin.id}_${node.id}`,
-              source: entity.associations.origin.id,
-              target: node.id,
-              markerEnd: {
-                type: MarkerType.ArrowClosed,
-              },
-            }]);
+              // Create edge
+              setEdges([...edges, {
+                id: `edge_${origin.id}_${node.id}`,
+                source: origin.id,
+                target: node.id,
+                markerEnd: {
+                  type: MarkerType.ArrowClosed,
+                },
+              }]);
+            }
           }
         }
 
@@ -223,7 +202,7 @@ const Graph = (props: { id: string }) => {
               // Firstly, update the current node type (if required)
               updatedNodes = [...(updatedNodes.map((node) => {
                 if (_.isEqual(node.id, entity._id)) {
-                  if (!_.isNull(entity.associations.origin.id)) {
+                  if (entity.associations.origins.length > 0) {
                     // If an Origin is specified as well, we need to set it to
                     // "default" type
                     node.type = "default";
@@ -245,7 +224,7 @@ const Graph = (props: { id: string }) => {
                 },
                 position: { x: 100, y: 200 },
               }];
-  
+
               // Create edge
               updatedEdges = [...updatedEdges, {
                 id: `edge_${node.id}_${product.id}`,

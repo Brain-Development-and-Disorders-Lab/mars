@@ -8,10 +8,12 @@
     "abcd1234"
   ],
   "associations": {
-    "origin": {
-      "name": "Origin name",
-      "id": "abcd1234"
-    },
+    "origins": [
+      {
+        "name": "Origin name",
+        "id": "abcd1234"
+      }
+    ],
     "products": [
       {
         "name": "Product name",

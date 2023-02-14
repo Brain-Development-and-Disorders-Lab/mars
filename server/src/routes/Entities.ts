@@ -1,19 +1,12 @@
 // Libraries
 import express from "express";
-import consola from "consola";
-import { ObjectId } from "mongodb";
 import _ from "underscore";
 
 // Import types from the client to enforce structure
 import { EntityModel, EntityStruct } from "@types";
 
 // Utility functions
-import { getDatabase } from "../database/connection";
-import { registerUpdate } from "../operations/Updates";
 import { Entities } from "../operations/Entities";
-
-// Constants
-const ENTITIES = "entities";
 
 const EntitiesRoute = express.Router();
 

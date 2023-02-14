@@ -33,16 +33,18 @@ export class Entities {
           entity["_id"] = content.insertedId;
         });
 
-        if (entity.associations.origin.id) {
+        if (entity.associations.origins.length > 0) {
           // If this Entity has an origin, add this Entity as a product of that origin Entity
-          Entities.addProduct(entity.associations.origin, {
-            name: entity.name,
-            id: entity._id,
+          entity.associations.origins.forEach((origin: { name: string, id: string }) => {
+            Entities.addProduct(origin, {
+              name: entity.name,
+              id: entity._id,
+            });
           });
         } else if (entity.associations.products.length > 0) {
           // If this Entity has products, set this Entity as the origin of each product Entity-
           entity.associations.products.forEach((product: { name: string, id: string }) => {
-            Entities.setOrigin(product, {
+            Entities.addOrigin(product, {
               name: entity.name,
               id: entity._id,
             });
@@ -104,7 +106,7 @@ export class Entities {
               description: updatedEntity.description,
               collections: [...collectionsToKeep, ...collectionsToAdd],
               associations: {
-                origin: updatedEntity.associations.origin,
+                origins: updatedEntity.associations.origins,
                 products: [...currentEntity.associations.products.filter(product => productsToKeep.includes(product.id)), ...productsToAdd],
               },
             },
@@ -182,7 +184,7 @@ export class Entities {
           const updates = {
             $set: {
               associations: {
-                origin:  (result as EntityModel).associations.origin,
+                origins:  (result as EntityModel).associations.origins,
                 products: (result as EntityModel).associations.products.filter(content => !_.isEqual(product.id, content.id)),
               },
             },
@@ -271,7 +273,7 @@ export class Entities {
    * @param {{ name: string, id: string }} origin an Entity to add as an "origin" association
    * @return {Promise<{ name: string, id: string }>}
    */
-  static setOrigin = (entity: { name: string, id: string }, origin: { name: string, id: string }): Promise<{ name: string, id: string }> => {
+  static addOrigin = (entity: { name: string, id: string }, origin: { name: string, id: string }): Promise<{ name: string, id: string }> => {
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES_COLLECTION)
@@ -280,14 +282,14 @@ export class Entities {
             throw error;
           }
 
-          // Update the Origin of this Entity
+          // Add the Origin to this Entity
           const updates = {
             $set: {
               associations: {
-                origin: {
+                origins: [...result.associations.origins, {
                   name: origin.name,
                   id: origin.id,
-                },
+                }],
                 products: result.associations.products,
               },
             },

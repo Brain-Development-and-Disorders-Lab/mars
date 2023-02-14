@@ -35,9 +35,9 @@ export const Start = ({}) => {
   const [created, setCreated] = useState(new Date());
   const [owner, setOwner] = useState("");
   const [description, setDescription] = useState("");
-  const [origin, setOrigin] = useState({} as { name: string, id: string });
   const [selectedCollections, setSelectedCollections] = useState([] as string[]);
   const [selectedProducts, setSelectedProducts] = useState([] as { name: string, id: string }[]);
+  const [selectedOrigins, setSelectedOrigins] = useState([] as { name: string, id: string }[]);
   const [selectedAttributes, setSelectedAttributes] = useState([] as AttributeModel[]);
 
   const entityState: EntityStruct = {
@@ -46,7 +46,7 @@ export const Start = ({}) => {
     owner: owner,
     description: description,
     associations: {
-      origin: origin,
+      origins: selectedOrigins,
       products: selectedProducts,
     },
     collections: selectedCollections,
@@ -277,24 +277,53 @@ export const Start = ({}) => {
                   {/* Origin */}
                   <FormControl>
                     <FormLabel>Origin Entity</FormLabel>
-                      <Select
-                        placeholder={"Select Origin Entity"}
-                        onChange={(event) => {
-                          setOrigin({
-                            id: event.target.value.toString(),
-                            name: event.target.options[event.target.selectedIndex].text,
+                    <Select
+                      title="Select Entity"
+                      placeholder={"Select Entity"}
+                      onChange={(event) => {
+                        if (_.find(selectedOrigins, (product) => { return _.isEqual(product.id, event.target.value) })) {
+                          toast({
+                            title: "Warning",
+                            description: "Origin has already been selected.",
+                            status: "warning",
+                            duration: 2000,
+                            position: "bottom-right",
+                            isClosable: true,
                           });
-                        }}
-                      >
-                        {isLoaded &&
-                          entities.map((entity) => {
-                            return (
-                              <option key={entity._id} value={entity._id}>{entity.name}</option>
-                            );
-                          })
-                        };
-                      </Select>
+                        } else if (!_.isEqual(event.target.value.toString(), "")) {
+                          setSelectedOrigins([
+                            ...selectedOrigins,
+                            {
+                              id: event.target.value.toString(),
+                              name: event.target.options[event.target.selectedIndex].text,
+                            },
+                          ]);
+                        }
+                      }}
+                    >
+                      {isLoaded &&
+                        entities.map((entity) => {
+                          return (
+                            <option key={entity._id} value={entity._id}>{entity.name}</option>
+                          );
+                        })
+                      };
+                    </Select>
                     <FormHelperText>If the source of this Entity currently exists or did exist in this system, specify that association here by searching for the origin Entity.</FormHelperText>
+                    <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
+                      {selectedOrigins.map((product) => {
+                        return (
+                          <Tag key={`tag-${product.id}`}>
+                            <Linky id={product.id} type={"entities"} />
+                            <TagCloseButton onClick={() => {
+                              setSelectedOrigins(selectedOrigins.filter((selected) => {
+                                return !_.isEqual(product.id, selected.id);
+                              }));
+                            }} />
+                        </Tag>
+                        );
+                      })}
+                    </Flex>
                   </FormControl>
 
                   {/* Products */}
