@@ -6,7 +6,6 @@ import { AddIcon, CheckIcon, ChevronLeftIcon, ChevronRightIcon, CloseIcon, InfoO
 import Linky from "@components/Linky";
 
 import _ from "underscore";
-import consola from "consola";
 
 // Navigation
 import { useNavigate } from "react-router-dom";
@@ -52,7 +51,6 @@ export const Start = ({}) => {
     collections: selectedCollections,
     attributes: selectedAttributes,
   };
-  consola.debug("Initial Entity state:", entityState);
 
   useEffect(() => {
     // Get all Entities

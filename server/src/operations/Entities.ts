@@ -2,7 +2,6 @@
 import { ObjectId } from "mongodb";
 
 // Utility libraries
-import consola from "consola";
 import _ from "underscore";
 
 // Utility functions
@@ -41,7 +40,9 @@ export class Entities {
               id: entity._id,
             });
           });
-        } else if (entity.associations.products.length > 0) {
+        }
+
+        if (entity.associations.products.length > 0) {
           // If this Entity has products, set this Entity as the origin of each product Entity-
           entity.associations.products.forEach((product: { name: string, id: string }) => {
             Entities.addOrigin(product, {
@@ -50,6 +51,7 @@ export class Entities {
             });
           });
         }
+
         if (entity.collections.length > 0) {
           // If this Entity has been added to Collections, add the Entity to each Collection
           entity.collections.map((collection: string) => {
@@ -101,12 +103,23 @@ export class Entities {
             Entities.removeProduct({ name: updatedEntity.name, id: updatedEntity._id }, product);
           });
 
+          // Origins
+          const originsToKeep = currentEntity.associations.origins.map(origin => origin.id).filter(origin => updatedEntity.associations.origins.map(origin => origin.id).includes(origin));
+          const originsToAdd = updatedEntity.associations.origins.filter(origin => !originsToKeep.includes(origin.id));
+          originsToAdd.map((origin: {id: string, name: string}) => {
+            Entities.addOrigin({ name: updatedEntity.name, id: updatedEntity._id }, origin);
+          });
+          const originsToRemove = currentEntity.associations.origins.filter(origin => !originsToKeep.includes(origin.id));
+          originsToRemove.map((origin: {id: string, name: string}) => {
+            Entities.removeOrigin({ name: updatedEntity.name, id: updatedEntity._id }, origin);
+          });
+
           const updates = {
             $set: {
               description: updatedEntity.description,
               collections: [...collectionsToKeep, ...collectionsToAdd],
               associations: {
-                origins: updatedEntity.associations.origins,
+                origins: [...currentEntity.associations.origins.filter(origin => originsToKeep.includes(origin.id)), ...originsToAdd],
                 products: [...currentEntity.associations.products.filter(product => productsToKeep.includes(product.id)), ...productsToAdd],
               },
             },
@@ -143,7 +156,6 @@ export class Entities {
           }
 
           // Update the collection of Products associated with the Entity to include this extra product
-          // We aren't updating the Origin of the Product
           const updates = {
             $set: {
               associations: {
@@ -155,6 +167,9 @@ export class Entities {
               },
             },
           };
+
+          // Add this Entity as the Origin of the Product
+          Entities.addOrigin(product, entity);
 
           getDatabase()
             .collection(ENTITIES_COLLECTION)
@@ -189,6 +204,9 @@ export class Entities {
               },
             },
           };
+
+          // Remove this Entity as the Origin of the Product
+          Entities.removeOrigin(product, entity);
 
           getDatabase()
             .collection(ENTITIES_COLLECTION)
@@ -310,6 +328,40 @@ export class Entities {
     });
   };
 
+  static removeOrigin = (entity: { name: string, id: string }, origin: { name: string, id: string }): Promise<{ name: string, id: string }> => {
+    return new Promise((resolve, _reject) => {
+      getDatabase()
+        .collection(ENTITIES_COLLECTION)
+        .findOne({ _id: new ObjectId(entity.id) }, (error: any, result: any) => {
+          if (error) {
+            throw error;
+          }
+
+          // Update the collection of Origins associated with the Entity to remove this Origin
+          const updates = {
+            $set: {
+              associations: {
+                origins: (result as EntityModel).associations.origins.filter(content => !_.isEqual(origin.id, content.id)),
+                products:  (result as EntityModel).associations.products,
+              },
+            },
+          };
+
+          getDatabase()
+            .collection(ENTITIES_COLLECTION)
+            .updateOne({ _id: new ObjectId(entity.id) }, updates, (error: any, _response: any) => {
+                if (error) {
+                  throw error;
+                }
+
+                // Resolve the Promise
+                resolve(entity);
+              }
+            );
+        });
+    });
+  };
+
   /**
    * Update the description of an Entity
    * @param entity the Entity of interest
@@ -390,12 +442,20 @@ export class Entities {
           if (error) {
             throw error;
           }
+          // Store the Entity data
+          const entity: EntityModel = result;
 
           // Remove the Entity from all Collections
-          Promise.all((result as EntityModel).collections.map((collection) => {
-            Collections.removeEntity(collection, (result as EntityModel)._id);
+          Promise.all(entity.collections.map((collection) => {
+            Collections.removeEntity(collection, entity._id);
           })).then((_result) => {
-            // Remove the Entity as a product of the listed Origin
+            // Remove the Entity as a Product of the listed Origins
+            entity.associations.origins.map((origin) => {
+              Entities.removeProduct(origin, { id: entity._id, name: entity.name });
+            });
+          }).then((_result) => {
+            // Remove the Entity as a Origin of the listed Products
+
           }).then((_result) => {
             // Delete the Entity
             getDatabase()
@@ -405,7 +465,7 @@ export class Entities {
                   throw error;
                 }
 
-                resolve(result);
+                resolve(entity);
             });
         });
       });
