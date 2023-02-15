@@ -81,6 +81,11 @@ export class Entities {
           // Cast and store current state of the Entity
           const currentEntity = result as EntityModel;
 
+          // Remedy storage of empty arrays as "null"
+          if (currentEntity.associations.origins === null) {
+            currentEntity.associations.origins = [];
+          }
+
           // Collections
           const collectionsToKeep = currentEntity.collections.filter(collection => updatedEntity.collections.includes(collection));
           const collectionsToAdd = updatedEntity.collections.filter(collection => !collectionsToKeep.includes(collection));
@@ -445,18 +450,20 @@ export class Entities {
           // Store the Entity data
           const entity: EntityModel = result;
 
-          // Remove the Entity from all Collections
-          Promise.all(entity.collections.map((collection) => {
-            Collections.removeEntity(collection, entity._id);
-          })).then((_result) => {
+          Promise.all([
+            // Remove the Entity from all Collections
+            entity.collections.map((collection) => {
+              Collections.removeEntity(collection, entity._id);
+            }),
             // Remove the Entity as a Product of the listed Origins
             entity.associations.origins.map((origin) => {
               Entities.removeProduct(origin, { id: entity._id, name: entity.name });
-            });
-          }).then((_result) => {
+            }),
             // Remove the Entity as a Origin of the listed Products
-
-          }).then((_result) => {
+            entity.associations.products.map((product) => {
+              Entities.removeOrigin(product, { id: entity._id, name: entity.name });
+            }),
+          ]).then((_result) => {
             // Delete the Entity
             getDatabase()
               .collection(ENTITIES_COLLECTION)
@@ -467,7 +474,7 @@ export class Entities {
 
                 resolve(entity);
             });
-        });
+          });
       });
     });
   };
