@@ -59,6 +59,12 @@ export const Entity = () => {
       if(_.isEqual(response.status, "error")) {
         throw new Error(response.error);
       } else {
+        // Check for issues with an empty array being stored haphazardly as "null"
+        if (response.associations.origins === null) {
+          response.associations.origins = [];
+        }
+
+        // Store data and signal data retrieval being completed
         setEntityData(response);
         setIsLoaded(true);
       }
