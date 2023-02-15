@@ -119,7 +119,7 @@ export const Entity = () => {
   }, [id]);
 
   useEffect(() => {
-    if (isLoaded) {
+    if (isLoaded && entityData) {
       // Update the state of editable data fields
       setEntityDescription(entityData.description);
       setEntityCollections(entityData.collections);
@@ -127,7 +127,7 @@ export const Entity = () => {
       setEntityProducts(entityData.associations.products);
       setEntityAttributes(entityData.attributes);
     }
-  }, [isLoaded]);
+  }, [isLoaded, entityData]);
 
   // Toggle editing status
   const handleEditClick = () => {
