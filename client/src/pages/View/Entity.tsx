@@ -66,6 +66,13 @@ export const Entity = () => {
 
         // Store data and signal data retrieval being completed
         setEntityData(response);
+        setEntityDescription(response.description);
+        setEntityCollections(response.collections);
+        setEntityOrigins(response.associations.origins);
+        setEntityProducts(response.associations.products);
+        setEntityAttributes(response.attributes);
+
+        // Set the loaded state
         setIsLoaded(true);
       }
     }).catch(() => {
@@ -117,17 +124,6 @@ export const Entity = () => {
       });
     });
   }, [id]);
-
-  useEffect(() => {
-    if (isLoaded && entityData) {
-      // Update the state of editable data fields
-      setEntityDescription(entityData.description);
-      setEntityCollections(entityData.collections);
-      setEntityOrigins(entityData.associations.origins);
-      setEntityProducts(entityData.associations.products);
-      setEntityAttributes(entityData.attributes);
-    }
-  }, [isLoaded, entityData]);
 
   // Toggle editing status
   const handleEditClick = () => {
