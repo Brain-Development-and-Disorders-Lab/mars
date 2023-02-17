@@ -3,6 +3,7 @@ import { ObjectId } from "mongodb";
 
 // Utility libraries
 import _ from "underscore";
+import consola from "consola";
 
 // Utility functions
 import { getDatabase } from "../database/connection";
@@ -21,6 +22,7 @@ export class Entities {
    * @return {Promise<EntityModel>}
    */
   static create = (entity: any): Promise<EntityModel> => {
+    consola.info("Creating new Entity:", entity.name);
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES_COLLECTION)
@@ -60,6 +62,7 @@ export class Entities {
         }
 
         // Finally, resolve the Promise
+        consola.success("Created Entity:", entity.name);
         resolve(entity);
     });
   };
@@ -70,7 +73,7 @@ export class Entities {
    * @return {Promise<EntityModel>}
    */
   static update = (updatedEntity: EntityModel): Promise<EntityModel> => {
-    // Get current state of the Entity
+    consola.info("Updating Entity:", updatedEntity.name);
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES_COLLECTION)
@@ -138,6 +141,7 @@ export class Entities {
                 }
 
                 // Resolve the Promise
+                consola.success("Updated Entity:", updatedEntity.name);
                 resolve(updatedEntity);
               }
             );
@@ -152,6 +156,7 @@ export class Entities {
    * @return {Promise<{ name: string, id: string }>}
    */
   static addProduct = (entity: { name: string, id: string }, product: { name: string, id: string }): Promise<{ name: string, id: string }> => {
+    consola.info("Adding Product", product.name, "to Entity", entity.name);
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES_COLLECTION)
@@ -184,6 +189,7 @@ export class Entities {
                 }
 
                 // Resolve the Promise
+                consola.success("Added Product", product.name, "to Entity", entity.name);
                 resolve(entity);
               }
             );
@@ -192,6 +198,7 @@ export class Entities {
   };
 
   static removeProduct = (entity: { name: string, id: string }, product: { name: string, id: string }): Promise<{ name: string, id: string }> => {
+    consola.info("Removing Product", product.name, "from Entity", entity.name);
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES_COLLECTION)
@@ -221,6 +228,7 @@ export class Entities {
                 }
 
                 // Resolve the Promise
+                consola.info("Removed Product", product.name, "from Entity", entity.name);
                 resolve(entity);
               }
             );
@@ -229,6 +237,7 @@ export class Entities {
   };
 
   static addCollection = (entity: string, collection: string): Promise<string> => {
+    consola.info("Adding Entity (id:)", entity, "to Collection (id:)", collection);
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES_COLLECTION)
@@ -252,6 +261,7 @@ export class Entities {
                 }
 
                 // Resolve the Promise
+                consola.success("Added Entity (id:)", entity, "to Collection (id:)", collection);
                 resolve(entity);
               }
             );
@@ -260,6 +270,7 @@ export class Entities {
   };
 
   static removeCollection = (entity: string, collection: string): Promise<string> => {
+    consola.info("Removing Entity (id:)", entity, "from Collection (id:)", collection);
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES_COLLECTION)
@@ -283,6 +294,7 @@ export class Entities {
                 }
 
                 // Resolve the Promise
+                consola.success("Removed Entity (id:)", entity, "from Collection (id:)", collection);
                 resolve(entity);
               }
             );
@@ -297,6 +309,7 @@ export class Entities {
    * @return {Promise<{ name: string, id: string }>}
    */
   static addOrigin = (entity: { name: string, id: string }, origin: { name: string, id: string }): Promise<{ name: string, id: string }> => {
+    consola.info("Adding Origin", origin.name, "to Entity", entity.name);
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES_COLLECTION)
@@ -326,6 +339,7 @@ export class Entities {
                 }
 
                 // Resolve the Promise
+                consola.success("Added Origin", origin.name, "to Entity", entity.name);
                 resolve(entity);
               }
             );
@@ -334,6 +348,7 @@ export class Entities {
   };
 
   static removeOrigin = (entity: { name: string, id: string }, origin: { name: string, id: string }): Promise<{ name: string, id: string }> => {
+    consola.info("Removing Origin", origin.name, "from Entity", entity.name);
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES_COLLECTION)
@@ -360,6 +375,7 @@ export class Entities {
                 }
 
                 // Resolve the Promise
+                consola.success("Removed Origin", origin.name, "from Entity", entity.name);
                 resolve(entity);
               }
             );
@@ -374,6 +390,7 @@ export class Entities {
    * @return {Promise<{ name: string, id: string }>}
    */
   static setDescription = (entity: { name: string, id: string }, description: string): Promise<{ name: string, id: string }> => {
+    consola.info("Setting description of Entity", entity.name, "to", description);
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES_COLLECTION)
@@ -397,6 +414,7 @@ export class Entities {
                 }
 
                 // Resolve the Promise
+                consola.success("Set description of Entity", entity.name, "to", description);
                 resolve(entity);
               }
             );
@@ -417,6 +435,7 @@ export class Entities {
           if (error) {
             throw error;
           }
+          consola.success("Retrieved all Entities");
           resolve(result as EntityModel[]);
         });
     });
@@ -427,6 +446,7 @@ export class Entities {
    * @return {Promise<EntityModel>}
    */
   static getOne = (id: string): Promise<EntityModel> => {
+    consola.info("Retrieving Entity (id:)", id);
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES_COLLECTION)
@@ -434,12 +454,14 @@ export class Entities {
           if (error) {
             throw error;
           };
+          consola.success("Retrieved Entity (id:)", id);
           resolve(result as EntityModel);
         });
     });
   };
 
   static delete = (id: string): Promise<EntityModel> => {
+    consola.info("Deleting Entity (id:)", id);
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES_COLLECTION)
@@ -472,6 +494,7 @@ export class Entities {
                   throw error;
                 }
 
+                consola.success("Deleted Entity (id:)", id);
                 resolve(entity);
             });
           });
