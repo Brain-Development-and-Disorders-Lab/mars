@@ -89,62 +89,88 @@ export class Entities {
             currentEntity.associations.origins = [];
           }
 
+          const operations = [];
+
           // Collections
           const collectionsToKeep = currentEntity.collections.filter(collection => updatedEntity.collections.includes(collection));
+
           const collectionsToAdd = updatedEntity.collections.filter(collection => !collectionsToKeep.includes(collection));
-          collectionsToAdd.map((collection: string) => {
-            Collections.addEntity(collection, updatedEntity._id);
-          });
+          if (collectionsToAdd.length > 0) {
+            operations.push(collectionsToAdd.map((collection: string) => {
+              Collections.addEntity(collection, updatedEntity._id);
+            }));
+          }
+
           const collectionsToRemove = currentEntity.collections.filter(collection => !collectionsToKeep.includes(collection));
-          collectionsToRemove.map((collection: string) => {
-            Collections.removeEntity(collection, updatedEntity._id);
-          });
+          if (collectionsToRemove.length > 0) {
+            operations.push(collectionsToRemove.map((collection: string) => {
+              Collections.removeEntity(collection, updatedEntity._id);
+            }));
+          }
 
           // Products
           const productsToKeep = currentEntity.associations.products.map(product => product.id).filter(product => updatedEntity.associations.products.map(product => product.id).includes(product));
+
           const productsToAdd = updatedEntity.associations.products.filter(product => !productsToKeep.includes(product.id));
-          productsToAdd.map((product: {id: string, name: string}) => {
-            Entities.addProduct({ name: updatedEntity.name, id: updatedEntity._id }, product);
-          });
+          if (productsToAdd.length > 0) {
+            operations.push(productsToAdd.map((product: {id: string, name: string}) => {
+              Entities.addOrigin(product, { name: updatedEntity.name, id: updatedEntity._id });
+              Entities.addProduct({ name: updatedEntity.name, id: updatedEntity._id }, product);
+            }));
+          }
+
           const productsToRemove = currentEntity.associations.products.filter(product => !productsToKeep.includes(product.id));
-          productsToRemove.map((product: {id: string, name: string}) => {
-            Entities.removeProduct({ name: updatedEntity.name, id: updatedEntity._id }, product);
-          });
+          if (productsToRemove.length > 0) {
+            operations.push(productsToRemove.map((product: {id: string, name: string}) => {
+              Entities.removeOrigin(product, { name: updatedEntity.name, id: updatedEntity._id })
+              Entities.removeProduct({ name: updatedEntity.name, id: updatedEntity._id }, product);
+            }));
+          }
 
           // Origins
           const originsToKeep = currentEntity.associations.origins.map(origin => origin.id).filter(origin => updatedEntity.associations.origins.map(origin => origin.id).includes(origin));
+
           const originsToAdd = updatedEntity.associations.origins.filter(origin => !originsToKeep.includes(origin.id));
-          originsToAdd.map((origin: {id: string, name: string}) => {
-            Entities.addOrigin({ name: updatedEntity.name, id: updatedEntity._id }, origin);
-          });
+          if (originsToAdd.length > 0) {
+            operations.push(originsToAdd.map((origin: {id: string, name: string}) => {
+              Entities.addOrigin({ name: updatedEntity.name, id: updatedEntity._id }, origin);
+              Entities.addProduct(origin, { name: updatedEntity.name, id: updatedEntity._id });
+            }));
+          }
+
           const originsToRemove = currentEntity.associations.origins.filter(origin => !originsToKeep.includes(origin.id));
-          originsToRemove.map((origin: {id: string, name: string}) => {
-            Entities.removeOrigin({ name: updatedEntity.name, id: updatedEntity._id }, origin);
-          });
+          if (originsToRemove.length > 0) {
+            operations.push(originsToRemove.map((origin: {id: string, name: string}) => {
+              Entities.removeOrigin({ name: updatedEntity.name, id: updatedEntity._id }, origin);
+              Entities.removeProduct(origin, { name: updatedEntity.name, id: updatedEntity._id });
+            }));
+          }
 
-          const updates = {
-            $set: {
-              description: updatedEntity.description,
-              collections: [...collectionsToKeep, ...collectionsToAdd],
-              associations: {
-                origins: [...currentEntity.associations.origins.filter(origin => originsToKeep.includes(origin.id)), ...originsToAdd],
-                products: [...currentEntity.associations.products.filter(product => productsToKeep.includes(product.id)), ...productsToAdd],
+          Promise.all(operations).then((_result) => {
+            const updates = {
+              $set: {
+                description: updatedEntity.description,
+                collections: [...collectionsToKeep, ...collectionsToAdd],
+                associations: {
+                  origins: [...currentEntity.associations.origins.filter(origin => originsToKeep.includes(origin.id)), ...originsToAdd],
+                  products: [...currentEntity.associations.products.filter(product => productsToKeep.includes(product.id)), ...productsToAdd],
+                },
               },
-            },
-          };
+            };
 
-          getDatabase()
-            .collection(ENTITIES_COLLECTION)
-            .updateOne({ _id: new ObjectId(updatedEntity._id) }, updates, (error: any, _response: any) => {
-                if (error) {
-                  throw error;
+            getDatabase()
+              .collection(ENTITIES_COLLECTION)
+              .updateOne({ _id: new ObjectId(updatedEntity._id) }, updates, (error: any, _response: any) => {
+                  if (error) {
+                    throw error;
+                  }
+
+                  // Resolve the Promise
+                  consola.success("Updated Entity:", updatedEntity.name);
+                  resolve(updatedEntity);
                 }
-
-                // Resolve the Promise
-                consola.success("Updated Entity:", updatedEntity.name);
-                resolve(updatedEntity);
-              }
-            );
+              );
+          });
         });
     });
   };
@@ -177,9 +203,6 @@ export class Entities {
               },
             },
           };
-
-          // Add this Entity as the Origin of the Product
-          Entities.addOrigin(product, entity);
 
           getDatabase()
             .collection(ENTITIES_COLLECTION)
@@ -216,9 +239,6 @@ export class Entities {
               },
             },
           };
-
-          // Remove this Entity as the Origin of the Product
-          Entities.removeOrigin(product, entity);
 
           getDatabase()
             .collection(ENTITIES_COLLECTION)
@@ -472,7 +492,7 @@ export class Entities {
           // Store the Entity data
           const entity: EntityModel = result;
 
-          Promise.all([
+          const operations = [
             // Remove the Entity from all Collections
             entity.collections.map((collection) => {
               Collections.removeEntity(collection, entity._id);
@@ -485,7 +505,9 @@ export class Entities {
             entity.associations.products.map((product) => {
               Entities.removeOrigin(product, { id: entity._id, name: entity.name });
             }),
-          ]).then((_result) => {
+          ];
+
+          Promise.all(operations).then((_result) => {
             // Delete the Entity
             getDatabase()
               .collection(ENTITIES_COLLECTION)
