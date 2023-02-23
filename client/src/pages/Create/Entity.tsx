@@ -35,8 +35,8 @@ export const Start = ({}) => {
   const [owner, setOwner] = useState("");
   const [description, setDescription] = useState("");
   const [selectedCollections, setSelectedCollections] = useState([] as string[]);
-  const [selectedProducts, setSelectedProducts] = useState([] as { name: string, id: string }[]);
   const [selectedOrigins, setSelectedOrigins] = useState([] as { name: string, id: string }[]);
+  const [selectedProducts, setSelectedProducts] = useState([] as { name: string, id: string }[]);
   const [selectedAttributes, setSelectedAttributes] = useState([] as AttributeModel[]);
 
   const entityState: EntityStruct = {

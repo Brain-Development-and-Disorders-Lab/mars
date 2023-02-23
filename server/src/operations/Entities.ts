@@ -32,38 +32,38 @@ export class Entities {
           }
           // Add the ID to the Entity
           entity["_id"] = content.insertedId;
+
+          if (entity.associations.origins.length > 0) {
+            // If this Entity has an origin, add this Entity as a product of that origin Entity
+            entity.associations.origins.forEach((origin: { name: string, id: string }) => {
+              Entities.addProduct(origin, {
+                name: entity.name,
+                id: entity._id,
+              });
+            });
+          }
+
+          if (entity.associations.products.length > 0) {
+            // If this Entity has products, set this Entity as the origin of each product Entity-
+            entity.associations.products.forEach((product: { name: string, id: string }) => {
+              Entities.addOrigin(product, {
+                name: entity.name,
+                id: entity._id,
+              });
+            });
+          }
+
+          if (entity.collections.length > 0) {
+            // If this Entity has been added to Collections, add the Entity to each Collection
+            entity.collections.map((collection: string) => {
+              Collections.addEntity(collection, entity._id);
+            });
+          }
+
+          // Finally, resolve the Promise
+          consola.success("Created Entity:", entity.name);
+          resolve(entity);
         });
-
-        if (entity.associations.origins.length > 0) {
-          // If this Entity has an origin, add this Entity as a product of that origin Entity
-          entity.associations.origins.forEach((origin: { name: string, id: string }) => {
-            Entities.addProduct(origin, {
-              name: entity.name,
-              id: entity._id,
-            });
-          });
-        }
-
-        if (entity.associations.products.length > 0) {
-          // If this Entity has products, set this Entity as the origin of each product Entity-
-          entity.associations.products.forEach((product: { name: string, id: string }) => {
-            Entities.addOrigin(product, {
-              name: entity.name,
-              id: entity._id,
-            });
-          });
-        }
-
-        if (entity.collections.length > 0) {
-          // If this Entity has been added to Collections, add the Entity to each Collection
-          entity.collections.map((collection: string) => {
-            Collections.addEntity(collection, entity._id);
-          });
-        }
-
-        // Finally, resolve the Promise
-        consola.success("Created Entity:", entity.name);
-        resolve(entity);
     });
   };
 
@@ -84,11 +84,7 @@ export class Entities {
           // Cast and store current state of the Entity
           const currentEntity = result as EntityModel;
 
-          // Remedy storage of empty arrays as "null"
-          if (currentEntity.associations.origins === null) {
-            currentEntity.associations.origins = [];
-          }
-
+          // List of operations to perform the update
           const operations = [];
 
           // Collections
@@ -110,7 +106,6 @@ export class Entities {
 
           // Products
           const productsToKeep = currentEntity.associations.products.map(product => product.id).filter(product => updatedEntity.associations.products.map(product => product.id).includes(product));
-
           const productsToAdd = updatedEntity.associations.products.filter(product => !productsToKeep.includes(product.id));
           if (productsToAdd.length > 0) {
             operations.push(productsToAdd.map((product: {id: string, name: string}) => {
@@ -118,7 +113,6 @@ export class Entities {
               Entities.addProduct({ name: updatedEntity.name, id: updatedEntity._id }, product);
             }));
           }
-
           const productsToRemove = currentEntity.associations.products.filter(product => !productsToKeep.includes(product.id));
           if (productsToRemove.length > 0) {
             operations.push(productsToRemove.map((product: {id: string, name: string}) => {
@@ -129,7 +123,6 @@ export class Entities {
 
           // Origins
           const originsToKeep = currentEntity.associations.origins.map(origin => origin.id).filter(origin => updatedEntity.associations.origins.map(origin => origin.id).includes(origin));
-
           const originsToAdd = updatedEntity.associations.origins.filter(origin => !originsToKeep.includes(origin.id));
           if (originsToAdd.length > 0) {
             operations.push(originsToAdd.map((origin: {id: string, name: string}) => {
@@ -137,7 +130,6 @@ export class Entities {
               Entities.addProduct(origin, { name: updatedEntity.name, id: updatedEntity._id });
             }));
           }
-
           const originsToRemove = currentEntity.associations.origins.filter(origin => !originsToKeep.includes(origin.id));
           if (originsToRemove.length > 0) {
             operations.push(originsToRemove.map((origin: {id: string, name: string}) => {
@@ -195,7 +187,7 @@ export class Entities {
           const updates = {
             $set: {
               associations: {
-                origins:  result.associations.origin,
+                origins:  result.associations.origins,
                 products: [
                   ...result.associations.products,
                   product,
@@ -235,7 +227,7 @@ export class Entities {
             $set: {
               associations: {
                 origins:  (result as EntityModel).associations.origins,
-                products: (result as EntityModel).associations.products.filter(content => !_.isEqual(product.id, content.id)),
+                products: (result as EntityModel).associations.products.filter(content => !_.isEqual(new ObjectId(product.id), new ObjectId(content.id))),
               },
             },
           };
@@ -381,7 +373,7 @@ export class Entities {
           const updates = {
             $set: {
               associations: {
-                origins: (result as EntityModel).associations.origins.filter(content => !_.isEqual(origin.id, content.id)),
+                origins: (result as EntityModel).associations.origins.filter(content => !_.isEqual(new ObjectId(origin.id), new ObjectId(content.id))),
                 products:  (result as EntityModel).associations.products,
               },
             },
@@ -414,7 +406,7 @@ export class Entities {
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES_COLLECTION)
-        .findOne({ _id: new ObjectId(entity.id) }, (error: any, result: any) => {
+        .findOne({ _id: new ObjectId(entity.id) }, (error: any, _result: any) => {
           if (error) {
             throw error;
           }
@@ -428,7 +420,7 @@ export class Entities {
 
           getDatabase()
             .collection(ENTITIES_COLLECTION)
-            .updateOne({ _id: new ObjectId(entity.id) }, updates, (error: any, response: any) => {
+            .updateOne({ _id: new ObjectId(entity.id) }, updates, (error: any, _response: any) => {
                 if (error) {
                   throw error;
                 }
@@ -455,6 +447,7 @@ export class Entities {
           if (error) {
             throw error;
           }
+
           consola.success("Retrieved all Entities");
           resolve(result as EntityModel[]);
         });
@@ -474,6 +467,7 @@ export class Entities {
           if (error) {
             throw error;
           };
+
           consola.success("Retrieved Entity (id:)", id);
           resolve(result as EntityModel);
         });
@@ -492,20 +486,22 @@ export class Entities {
           // Store the Entity data
           const entity: EntityModel = result;
 
-          const operations = [
-            // Remove the Entity from all Collections
-            entity.collections.map((collection) => {
-              Collections.removeEntity(collection, entity._id);
-            }),
-            // Remove the Entity as a Product of the listed Origins
-            entity.associations.origins.map((origin) => {
-              Entities.removeProduct(origin, { id: entity._id, name: entity.name });
-            }),
-            // Remove the Entity as a Origin of the listed Products
-            entity.associations.products.map((product) => {
-              Entities.removeOrigin(product, { id: entity._id, name: entity.name });
-            }),
-          ];
+          const operations: Promise<any>[] = [];
+
+          // Remove the Entity from all Collections
+          entity.collections.map((collection) => {
+            operations.push(Collections.removeEntity(collection, entity._id));
+          });
+
+          // Remove the Entity as a Product of the listed Origins
+          entity.associations.origins.map((origin) => {
+            operations.push(Entities.removeProduct(origin, { id: entity._id, name: entity.name }));
+          });
+
+          // Remove the Entity as a Origin of the listed Products
+          entity.associations.products.map((product) => {
+            operations.push(Entities.removeOrigin(product, { id: entity._id, name: entity.name }));
+          });
 
           Promise.all(operations).then((_result) => {
             // Delete the Entity
