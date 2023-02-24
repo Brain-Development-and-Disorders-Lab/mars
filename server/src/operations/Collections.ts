@@ -33,7 +33,8 @@ export class Collections {
               Collections.addEntity(result.insertedId, entity);
             }
 
-            resolve(result as CollectionModel);
+            collection["_id"] = result.insertedId;
+            resolve(collection as CollectionModel);
           });
       });
     };
@@ -170,7 +171,7 @@ export class Collections {
         .findOne({ _id: new ObjectId(id) }, (error: any, result: any) => {
           if (error) {
             throw error;
-          };
+          }
           resolve(result as CollectionModel);
         });
     });

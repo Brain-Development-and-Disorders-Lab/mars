@@ -30,39 +30,45 @@ export class Entities {
           if (error) {
             throw error;
           }
+
+          // Database operations to perform outside of creating a new Entity
+          const operations: Promise<any>[] = [];
+
           // Add the ID to the Entity
           entity["_id"] = content.insertedId;
 
           if (entity.associations.origins.length > 0) {
             // If this Entity has an origin, add this Entity as a product of that origin Entity
             entity.associations.origins.forEach((origin: { name: string, id: string }) => {
-              Entities.addProduct(origin, {
+              operations.push(Entities.addProduct(origin, {
                 name: entity.name,
                 id: entity._id,
-              });
+              }));
             });
           }
 
           if (entity.associations.products.length > 0) {
             // If this Entity has products, set this Entity as the origin of each product Entity-
             entity.associations.products.forEach((product: { name: string, id: string }) => {
-              Entities.addOrigin(product, {
+              operations.push(Entities.addOrigin(product, {
                 name: entity.name,
                 id: entity._id,
-              });
+              }));
             });
           }
 
           if (entity.collections.length > 0) {
             // If this Entity has been added to Collections, add the Entity to each Collection
             entity.collections.map((collection: string) => {
-              Collections.addEntity(collection, entity._id);
+              operations.push(Collections.addEntity(collection, entity._id));
             });
           }
 
           // Finally, resolve the Promise
-          consola.success("Created Entity:", entity.name);
-          resolve(entity);
+          Promise.all(operations).then((_result) => {
+            consola.success("Created Entity:", entity.name);
+            resolve(entity);
+          });
         });
     });
   };
@@ -466,7 +472,7 @@ export class Entities {
         .findOne({ _id: new ObjectId(id) }, (error: any, result: any) => {
           if (error) {
             throw error;
-          };
+          }
 
           consola.success("Retrieved Entity (id:)", id);
           resolve(result as EntityModel);
