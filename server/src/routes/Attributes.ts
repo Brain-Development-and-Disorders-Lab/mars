@@ -17,7 +17,7 @@ const AttributesRoute = express.Router();
 const ObjectId = require("mongodb").ObjectId;
 
 // Route: View all attributes
-AttributesRoute.route("/attributes").get((request: any, response: any) => {
+AttributesRoute.route("/attributes").get((_request: any, response: any) => {
   let connection = getDatabase();
   connection
     .collection("attributes")

@@ -25,6 +25,13 @@ export const connect = (callback: any) => {
 };
 
 /**
+ * Disconnect from the database
+ */
+export const disconnect = () => {
+  client.close();
+};
+
+/**
  * Get the MongoDB database object
  * @return {Db}
  */

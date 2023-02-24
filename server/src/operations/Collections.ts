@@ -9,7 +9,6 @@ import { Entities } from "./Entities";
 import { CollectionModel, CollectionStruct } from "@types";
 
 // Utility libraries
-import consola from "consola";
 import _ from "underscore";
 
 const COLLECTIONS = "collections";
@@ -101,7 +100,7 @@ export class Collections {
               ],
             },
           };
-    
+
           getDatabase()
             .collection(COLLECTIONS)
             .updateOne({ _id: new ObjectId(collection) }, updatedValues, (error: any, _response: any) => {

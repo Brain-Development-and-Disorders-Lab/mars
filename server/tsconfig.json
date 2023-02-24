@@ -1,18 +1,24 @@
 {
   "include": ["src"],
   "compilerOptions": {
-    "strict": true,
+    "module": "esnext",
+    "lib": ["dom", "esnext"],
+    "target": "ES6",
+    "importHelpers": true,
     "baseUrl": "./",
     "paths": {
       "@types": ["../types"],
     },
-    "forceConsistentCasingInFileNames": true,
-    "outDir": "dist",
-    "noImplicitAny": true,
-    "module": "commonjs",
-    "target": "es5",
-    "allowJs": true,
+    "rootDirs": ["src"],
+    "strict": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "preserveConstEnums": true,
+    "moduleResolution": "node",
     "esModuleInterop": true,
-    "moduleResolution": "node"
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
   }
 }
