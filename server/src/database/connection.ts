@@ -1,5 +1,5 @@
 // Libraries
-import { Callback, Db, MongoClient } from "mongodb";
+import { Db, MongoClient } from "mongodb";
 import consola from "consola";
 
 // Get the connection string from the environment variables
@@ -11,24 +11,23 @@ let database: Db;
 
 /**
  * Connect to the database
- * @param callback callback function
  */
-export const connect = (callback: any) => {
-  client.connect((error: any, result: any): Callback<MongoClient> => {
-    if (result) {
-      database = result.db("metadata");
+export const connect = (): Promise<Db> => {
+  return new Promise((resolve, _reject) => {
+    client.connect().then((result) => {
       consola.success("Successfully connected to MongoDB.");
-    }
 
-    return callback(error);
+      database = result.db("metadata");
+      resolve(database);
+    });
   });
 };
 
 /**
  * Disconnect from the database
  */
-export const disconnect = () => {
-  client.close();
+export const disconnect = (): Promise<void> => {
+  return client.close();
 };
 
 /**

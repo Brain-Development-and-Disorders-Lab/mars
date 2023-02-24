@@ -11,6 +11,7 @@
     },
     "rootDirs": ["src"],
     "strict": true,
+    "noEmit": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "noUnusedLocals": true,
