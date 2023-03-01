@@ -1,4 +1,4 @@
-name: Build client and server
+name: Test server
 
 on:
   push:
@@ -7,33 +7,13 @@ on:
     branches: ["main"]
 
 jobs:
-  client:
-    runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [14.x, 16.x, 18.x]
-
-    steps:
-    - uses: actions/checkout@v3
-
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
-      with:
-        node-version: ${{ matrix.node-version }}
-
-    - name: Build
-      working-directory: ./client
-      run: |
-        yarn
-        yarn build
-
   server:
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
         node-version: [14.x, 16.x, 18.x]
+        mongodb-version: ["6.0"]
 
     steps:
     - uses: actions/checkout@v3
@@ -43,7 +23,19 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
 
-    - name: Build
+    - name: Start MongoDB
+      uses: supercharge/mongodb-github-action@1.8.0
+      with:
+        mongodb-version: ${{ matrix.mongodb-version }}
+        mongodb-username: admin
+        mongodb-password: metadataadmin
+        mongodb-db: metadata
+
+    - name: Setup MongoDB
+      working-directory: ./server
+      run: mongo localhost:27017/metadata ./setup.js
+
+    - name: Test
       working-directory: ./server
       run: |
         yarn
