@@ -2,9 +2,9 @@ name: Build client and server
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   client:
@@ -27,7 +27,7 @@ jobs:
       run: |
         yarn
         yarn build
-        
+
   server:
     runs-on: ubuntu-latest
 

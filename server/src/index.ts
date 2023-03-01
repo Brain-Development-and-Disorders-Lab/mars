@@ -30,9 +30,7 @@ app.use(EntitiesRoute, CollectionsRoute, AttributesRoute, SearchRoute, UpdatesRo
 // Start the Express server
 app.listen(port, () => {
   // Connect to the database when the server starts
-  connect((error: any) => {
-    if (error) consola.error(error);
+  connect().then(() => {
+    consola.info(`Server is running on port: ${port}`);
   });
-
-  consola.info(`Server is running on port: ${port}`);
 });

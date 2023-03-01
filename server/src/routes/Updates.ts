@@ -14,7 +14,7 @@ const UPDATES_COLLECTION = "updates";
 const UpdatesRoute = express.Router();
 
 // Route: View all Updates
-UpdatesRoute.route("/updates").get((request: any, response: any) => {
+UpdatesRoute.route("/updates").get((_request: any, response: any) => {
   consola.debug("View all Updates:", "/updates");
 
   getDatabase()
@@ -27,7 +27,7 @@ UpdatesRoute.route("/updates").get((request: any, response: any) => {
 });
 
 // Route: Create a new Update
-UpdatesRoute.route("/updates/create").post((request: { body: UpdateStruct }, response: any) => {
+UpdatesRoute.route("/updates/create").post((request: { body: UpdateStruct }, _response: any) => {
   registerUpdate(request.body);
 });
 

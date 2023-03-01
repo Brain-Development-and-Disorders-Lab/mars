@@ -280,10 +280,10 @@ export const Collection = () => {
 
             {collectionEntities && collectionEntities.length > 0 ? (
               <TableContainer>
-                <Table variant={"simple"} colorScheme={"gray"}>
+                <Table colorScheme={"gray"}>
                   <Thead>
                     <Tr>
-                      <Th>Name</Th>
+                      <Th pl={"1"}>Name</Th>
                       <Th></Th>
                     </Tr>
                   </Thead>
@@ -291,10 +291,10 @@ export const Collection = () => {
                     {collectionEntities.map((entity) => {
                       return (
                         <Tr key={entity}>
-                          <Th>
+                          <Td>
                             <Linky id={entity} type={"entities"} />
-                          </Th>
-                          <Th>
+                          </Td>
+                          <Td>
                             <Flex justify={"right"} gap={"6"}>
                               {!editing &&
                                 <Button
@@ -322,7 +322,7 @@ export const Collection = () => {
                                 </Button>
                               }
                             </Flex>
-                          </Th>
+                          </Td>
                         </Tr>
                       );
                     })}

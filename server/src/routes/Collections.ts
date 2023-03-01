@@ -1,20 +1,14 @@
 // Libraries
 import express from "express";
-import consola from "consola";
-import { ObjectId } from "mongodb";
 import _ from "underscore";
 
 // Database connection
-import { getDatabase } from "../database/connection";
-import { CollectionModel, CollectionStruct, EntityModel } from "@types";
+import { CollectionModel, CollectionStruct } from "@types";
 
 // Operations
 import { Collections } from "../operations/Collections";
 
 const CollectionsRoute = express.Router();
-
-// Constants
-const COLLECTIONS = "collections";
 
 // View all Collections
 CollectionsRoute.route("/collections").get((_request: any, response: any) => {
