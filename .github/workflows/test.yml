@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: ["main"]
 
+env:
+  CONNECTION_STRING: mongodb://admin:metadataadmin@localhost:27017/
+  PORT: 8000
+
 jobs:
   server:
     runs-on: ubuntu-latest
