@@ -1,17 +1,16 @@
 {
   "include": ["src"],
   "compilerOptions": {
-    "module": "esnext",
-    "lib": ["dom", "esnext"],
-    "target": "ES6",
+    "module": "CommonJS",
+    "target": "ES2016",
     "importHelpers": true,
     "baseUrl": "./",
     "paths": {
       "@types": ["../types"],
     },
     "rootDirs": ["src"],
+    "outDir": "dist",
     "strict": true,
-    "noEmit": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "noUnusedLocals": true,
