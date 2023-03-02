@@ -1,34 +1,30 @@
 // Libraries
 import express from "express";
-import consola from "consola";
 import _ from "underscore";
 
 // Utility functions
-import { getDatabase } from "../database/connection";
-import { registerUpdate } from "../operations/Updates";
-import { UpdateStruct } from "@types";
+import { UpdateModel, UpdateStruct } from "@types";
 
-// Constants
-const UPDATES_COLLECTION = "updates";
+import { Updates } from "../operations/Updates";
 
 const UpdatesRoute = express.Router();
 
 // Route: View all Updates
 UpdatesRoute.route("/updates").get((_request: any, response: any) => {
-  consola.debug("View all Updates:", "/updates");
-
-  getDatabase()
-    .collection(UPDATES_COLLECTION)
-    .find({})
-    .toArray((error: any, result: any) => {
-      if (error) throw error;
-      response.json(result);
-    });
+  Updates.getAll().then((updates: UpdateModel[]) => {
+    response.json(updates);
+  });
 });
 
 // Route: Create a new Update
-UpdatesRoute.route("/updates/create").post((request: { body: UpdateStruct }, _response: any) => {
-  registerUpdate(request.body);
+UpdatesRoute.route("/updates/create").post((request: { body: UpdateStruct }, response: any) => {
+  Updates.create(request.body).then((update: UpdateStruct) => {
+    response.json({
+      id: update.target.id,
+      name: update.target.name,
+      status: "success",
+    });
+  });
 });
 
 export default UpdatesRoute;

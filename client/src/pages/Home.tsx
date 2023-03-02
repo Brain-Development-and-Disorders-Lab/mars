@@ -255,7 +255,7 @@ const Home = () => {
             color={"white"}
             rounded={"xl"}
             gap={"1.5"}
-            grow={"1"} 
+            grow={"1"}
           >
             <Heading>Recent Changes{" "}<RepeatClockIcon w={8} h={8} /></Heading>
             <List>
@@ -265,13 +265,13 @@ const Home = () => {
                     // Configure the badge
                     let operationBadgeColor = "green";
                     switch (update.type) {
-                      case "add":
+                      case "create":
                         operationBadgeColor = "green";
                         break;
-                      case "modify":
+                      case "update":
                         operationBadgeColor = "blue";
                         break;
-                      case "remove":
+                      case "delete":
                         operationBadgeColor = "red";
                         break;
                     }
