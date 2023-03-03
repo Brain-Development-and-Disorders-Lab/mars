@@ -148,7 +148,7 @@ export type EntityModel = EntityStruct & {
 
 export type UpdateStruct = {
   timestamp: Date;
-  type: "modify" | "add" | "remove";
+  type: "create" | "update" | "delete";
   details: string;
   target: {
     type: "entities" | "collections" | "attributes",

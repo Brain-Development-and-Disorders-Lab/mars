@@ -7,6 +7,7 @@ import consola from "consola";
 
 // Utility functions
 import { getDatabase } from "../database/connection";
+import { Updates } from "./Updates";
 
 // Custom types
 import { EntityModel } from "@types";
@@ -63,6 +64,20 @@ export class Entities {
               operations.push(Collections.addEntity(collection, entity._id));
             });
           }
+
+          // Add Update operation
+          operations.push(
+            Updates.create({
+              timestamp: new Date(Date.now()),
+              type: "create",
+              details: "Created new Entity",
+              target: {
+                type: "entities",
+                id: entity._id,
+                name: entity.name,
+              },
+            }),
+          );
 
           // Finally, resolve the Promise
           Promise.all(operations).then((_result) => {
