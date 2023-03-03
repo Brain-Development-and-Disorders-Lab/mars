@@ -17,14 +17,16 @@ UpdatesRoute.route("/updates").get((_request: any, response: any) => {
 });
 
 // Route: Create a new Update
-UpdatesRoute.route("/updates/create").post((request: { body: UpdateStruct }, response: any) => {
-  Updates.create(request.body).then((update: UpdateStruct) => {
-    response.json({
-      id: update.target.id,
-      name: update.target.name,
-      status: "success",
+UpdatesRoute.route("/updates/create").post(
+  (request: { body: UpdateStruct }, response: any) => {
+    Updates.create(request.body).then((update: UpdateStruct) => {
+      response.json({
+        id: update.target.id,
+        name: update.target.name,
+        status: "success",
+      });
     });
-  });
-});
+  }
+);
 
 export default UpdatesRoute;

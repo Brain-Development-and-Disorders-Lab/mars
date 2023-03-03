@@ -2,7 +2,14 @@
 import "dotenv/config";
 
 // Jest imports
-import { afterAll, afterEach, beforeEach, describe, expect, it } from "@jest/globals";
+import {
+  afterAll,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+} from "@jest/globals";
 
 // Entity operations and types
 import { CollectionModel, EntityModel } from "../../types";
@@ -71,7 +78,8 @@ describe("POST /entities", () => {
         products: [],
       },
       attributes: [],
-    }).then((result: EntityModel) => {
+    })
+      .then((result: EntityModel) => {
         // Create a second Entity that is a Product of the initial Entity
         return Entities.create({
           name: "TestProductEntity",
@@ -80,31 +88,42 @@ describe("POST /entities", () => {
           description: "Test Product",
           collections: [],
           associations: {
-            origins: [{
-              name: result.name,
-              id: result._id,
-            }],
+            origins: [
+              {
+                name: result.name,
+                id: result._id,
+              },
+            ],
             products: [],
           },
           attributes: [],
         });
-      }).then((entity: EntityModel) => {
+      })
+      .then((entity: EntityModel) => {
         // Confirm Product Entity created before retrieving Origin Entity
         expect(entity.name).toBe("TestProductEntity");
         expect(entity.associations.origins.length).toBe(1);
 
-        return Promise.all([entity, Entities.getOne(entity.associations.origins[0].id)]);
-      }).then((entities: EntityModel[]) => {
+        return Promise.all([
+          entity,
+          Entities.getOne(entity.associations.origins[0].id),
+        ]);
+      })
+      .then((entities: EntityModel[]) => {
         const productEntity = entities[0];
         const originEntity = entities[1];
 
         // Check the Origin of the Product
         expect(productEntity.associations.origins.length).toBe(1);
-        expect(productEntity.associations.origins[0].id).toStrictEqual(originEntity._id);
+        expect(productEntity.associations.origins[0].id).toStrictEqual(
+          originEntity._id
+        );
 
         // Check the Product of the Origin
         expect(originEntity.associations.products.length).toBe(1);
-        expect(originEntity.associations.products[0].id).toStrictEqual(productEntity._id);
+        expect(originEntity.associations.products[0].id).toStrictEqual(
+          productEntity._id
+        );
       });
   });
 
@@ -121,7 +140,8 @@ describe("POST /entities", () => {
         products: [],
       },
       attributes: [],
-    }).then((result: EntityModel) => {
+    })
+      .then((result: EntityModel) => {
         // Create a second Entity that is an Origin of the initial Entity
         return Entities.create({
           name: "TestOriginEntity",
@@ -131,30 +151,41 @@ describe("POST /entities", () => {
           collections: [],
           associations: {
             origins: [],
-            products: [{
-              name: result.name,
-              id: result._id,
-            }],
+            products: [
+              {
+                name: result.name,
+                id: result._id,
+              },
+            ],
           },
           attributes: [],
         });
-      }).then((entity: EntityModel) => {
+      })
+      .then((entity: EntityModel) => {
         // Confirm Origin Entity created before retrieving Product Entity
         expect(entity.name).toBe("TestOriginEntity");
         expect(entity.associations.products.length).toBe(1);
 
-        return Promise.all([entity, Entities.getOne(entity.associations.products[0].id)]);
-      }).then((entities: EntityModel[]) => {
+        return Promise.all([
+          entity,
+          Entities.getOne(entity.associations.products[0].id),
+        ]);
+      })
+      .then((entities: EntityModel[]) => {
         const originEntity = entities[0];
         const productEntity = entities[1];
 
         // Check the Product of the Origin
         expect(originEntity.associations.products.length).toBe(1);
-        expect(originEntity.associations.products[0].id).toStrictEqual(productEntity._id);
+        expect(originEntity.associations.products[0].id).toStrictEqual(
+          productEntity._id
+        );
 
         // Check the Origin of the Product
         expect(productEntity.associations.origins.length).toBe(1);
-        expect(productEntity.associations.origins[0].id).toStrictEqual(originEntity._id);
+        expect(productEntity.associations.origins[0].id).toStrictEqual(
+          originEntity._id
+        );
       });
   });
 
@@ -166,7 +197,8 @@ describe("POST /entities", () => {
       owner: "henry.burgess@wustl.edu",
       description: "Test Collection",
       entities: [],
-    }).then((result: CollectionModel) => {
+    })
+      .then((result: CollectionModel) => {
         // Create an Entity that is a member of the Collection
         return Entities.create({
           name: "TestEntity",
@@ -180,13 +212,15 @@ describe("POST /entities", () => {
           },
           attributes: [],
         });
-      }).then((entity: EntityModel) => {
+      })
+      .then((entity: EntityModel) => {
         // Confirm Entity created before retrieving Collection
         expect(entity.name).toBe("TestEntity");
         expect(entity.collections.length).toBe(1);
 
         return Promise.all([entity, Collections.getOne(entity.collections[0])]);
-      }).then((entities: any[]) => {
+      })
+      .then((entities: any[]) => {
         const entity: EntityModel = entities[0];
         const collection: CollectionModel = entities[1];
 

@@ -29,7 +29,11 @@ AttributesRoute.route("/attributes").get((_request: any, response: any) => {
 });
 
 // Route: View a specific attribute
-AttributesRoute.route("/attributes/:id").get((request: { params: { id: any } }, response: { json: (content: any) => void }) => {
+AttributesRoute.route("/attributes/:id").get(
+  (
+    request: { params: { id: any } },
+    response: { json: (content: any) => void }
+  ) => {
     // Connect to the database and assemble a query
     let connection = getDatabase();
     let query = { _id: ObjectId(request.params.id) };
@@ -45,30 +49,40 @@ AttributesRoute.route("/attributes/:id").get((request: { params: { id: any } }, 
 );
 
 // Route: Create a new Attribute, expects AttributeStruct data
-AttributesRoute.route("/attributes/create").post((request: { body: AttributeStruct }, response: any) => {
-  // Insert the new Attribute
-  getDatabase()
-    .collection(ATTRIBUTES_COLLECTION)
-    .insertOne(request.body, (error: any, content: any) => {
-      if (error) {
-        throw error;
-      }
+AttributesRoute.route("/attributes/create").post(
+  (request: { body: AttributeStruct }, response: any) => {
+    // Insert the new Attribute
+    getDatabase()
+      .collection(ATTRIBUTES_COLLECTION)
+      .insertOne(request.body, (error: any, content: any) => {
+        if (error) {
+          throw error;
+        }
 
-      response.json(content);
-    });
-});
+        response.json(content);
+      });
+  }
+);
 
 // Route: Remove an Attribute
-AttributesRoute.route("/attributes/:id").delete((request: { params: { id: any } }, response: { json: (content: any) => void }) => {
-  getDatabase()
-    .collection("attributes")
-    .deleteOne({ _id: ObjectId(request.params.id) }, (error: any, content: any) => {
-      if (error) {
-        throw error;
-      }
+AttributesRoute.route("/attributes/:id").delete(
+  (
+    request: { params: { id: any } },
+    response: { json: (content: any) => void }
+  ) => {
+    getDatabase()
+      .collection("attributes")
+      .deleteOne(
+        { _id: ObjectId(request.params.id) },
+        (error: any, content: any) => {
+          if (error) {
+            throw error;
+          }
 
-      response.json(content);
-    });
-});
+          response.json(content);
+        }
+      );
+  }
+);
 
 export default AttributesRoute;
