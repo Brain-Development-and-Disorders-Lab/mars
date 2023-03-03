@@ -17,6 +17,7 @@ import {
   Stack,
   StackDivider,
   Icon,
+  Image,
 } from "@chakra-ui/react";
 import {
   HamburgerIcon,
@@ -25,7 +26,7 @@ import {
   SearchIcon,
   AddIcon,
 } from "@chakra-ui/icons";
-import { BsCollection, BsGear, BsHexagon } from "react-icons/bs";
+import { BsBox, BsCollection, BsGear } from "react-icons/bs";
 
 // NavigationElement sub-component to generalize links
 const NavigationElement = ({
@@ -68,10 +69,13 @@ const Navigation = () => {
         />
 
         {/* Main navigation group */}
-        <HStack spacing={8} alignItems={"center"}>
+        <HStack spacing={8} alignItems={"center"} justify={"center"}>
           <HStack as={"nav"} spacing={4} display={{ base: "none", md: "flex" }}>
-            <Button key={"dashboard"} bg={"white"}>
-              <Link href={"/"}>Dashboard</Link>
+            {/* Icon */}
+            <Image src="Favicon.png" boxSize={"36px"}/>
+
+            <Button key={"home"} bg={"white"}>
+              <Link href={"/"}>Home</Link>
             </Button>
 
             {/* Create menu */}
@@ -88,7 +92,7 @@ const Navigation = () => {
               </MenuButton>
               <MenuList>
                 <MenuItem
-                  icon={<BsHexagon />}
+                  icon={<BsBox />}
                   as={Link}
                   href={"/create/entity/start"}
                 >
@@ -124,7 +128,7 @@ const Navigation = () => {
                 View
               </MenuButton>
               <MenuList>
-                <MenuItem icon={<BsHexagon />} as={Link} href={"/entities"}>
+                <MenuItem icon={<BsBox />} as={Link} href={"/entities"}>
                   All Entities
                 </MenuItem>
                 <MenuItem
@@ -184,7 +188,7 @@ const Navigation = () => {
               </Flex>
               <Flex direction={"column"} px={"6"}>
                 <Flex direction={"row"} align={"center"}>
-                  <Icon as={BsHexagon} />
+                  <Icon as={BsBox} />
                   <NavigationElement
                     href={"/create/entity/start"}
                     onClick={isOpen ? onClose : onOpen}
@@ -221,7 +225,7 @@ const Navigation = () => {
               </Flex>
               <Flex direction={"column"} px={"6"}>
                 <Flex direction={"row"} align={"center"}>
-                  <Icon as={BsHexagon} />
+                  <Icon as={BsBox} />
                   <NavigationElement
                     href={"/entities"}
                     onClick={isOpen ? onClose : onOpen}

@@ -21,7 +21,7 @@ import {
   Link,
   Badge,
 } from "@chakra-ui/react";
-import { AddIcon, ChevronRightIcon, RepeatClockIcon } from "@chakra-ui/icons";
+import { AddIcon, ChevronRightIcon } from "@chakra-ui/icons";
 import { getData } from "src/database/functions";
 import { CollectionModel, EntityModel, UpdateModel } from "@types";
 import { useNavigate } from "react-router-dom";
@@ -116,13 +116,13 @@ const Home = () => {
           <Flex
             direction={"column"}
             p={"4"}
-            background={"gray.300"}
+            background={"whitesmoke"}
             rounded={"xl"}
             gap={"1.5"}
           >
             {/* Collections listing */}
             <Flex direction={"row"} justify={"space-between"} align={"center"}>
-              <Heading color={"gray.700"}>Collections</Heading>
+              <Heading fontWeight={"semibold"}>Collections</Heading>
               <Button
                 leftIcon={<AddIcon />}
                 as={Link}
@@ -135,7 +135,7 @@ const Home = () => {
 
             <Stat
               rounded={"md"}
-              background={"gray.200"}
+              background={"white"}
               p={"2"}
               maxW={"fit-content"}
             >
@@ -148,11 +148,11 @@ const Home = () => {
 
             {isLoaded && collectionData.length > 0 ? (
               <TableContainer>
-                <Table variant={"simple"}>
+                <Table variant={"simple"} colorScheme={"blackAlpha"}>
                   <Thead>
                     <Tr>
                       <Th pl={"0"}>
-                        <Heading color={"gray.600"} size={"sm"}>
+                        <Heading fontWeight={"semibold"} size={"sm"}>
                           Newest Collections
                         </Heading>
                       </Th>
@@ -160,7 +160,7 @@ const Home = () => {
                         <Flex justify={"right"}>
                           <Button
                             key={`view-collection-all`}
-                            color="accent-4"
+                            colorScheme={"blackAlpha"}
                             rightIcon={<ChevronRightIcon />}
                             onClick={() => navigate(`/collections`)}
                           >
@@ -179,7 +179,7 @@ const Home = () => {
                             <Flex justify={"right"}>
                               <Button
                                 key={`view-collection-${collection._id}`}
-                                color="grey.400"
+                                colorScheme={"blackAlpha"}
                                 rightIcon={<ChevronRightIcon />}
                                 onClick={() =>
                                   navigate(`/collections/${collection._id}`)
@@ -204,12 +204,12 @@ const Home = () => {
           <Flex
             direction={"column"}
             p={"4"}
-            background={"blue.300"}
+            background={"whitesmoke"}
             rounded={"xl"}
             gap={"1.5"}
           >
             <Flex direction={"row"} justify={"space-between"} align={"center"}>
-              <Heading color={"white"}>Entities</Heading>
+              <Heading fontWeight={"semibold"}>Entities</Heading>
               <Button
                 leftIcon={<AddIcon />}
                 as={Link}
@@ -222,8 +222,7 @@ const Home = () => {
 
             <Stat
               rounded={"md"}
-              background={"blue.200"}
-              color={"white"}
+              background={"white"}
               p={"2"}
               maxW={"fit-content"}
             >
@@ -236,11 +235,11 @@ const Home = () => {
 
             {isLoaded && entityData.length > 0 ? (
               <TableContainer>
-                <Table variant={"simple"} colorScheme={"blue"}>
+                <Table variant={"simple"} colorScheme={"blackAlpha"}>
                   <Thead>
                     <Tr>
                       <Th pl={"0"}>
-                        <Heading color={"white"} size={"sm"}>
+                        <Heading fontWeight={"semibold"} size={"sm"}>
                           Newest Entities
                         </Heading>
                       </Th>
@@ -248,6 +247,7 @@ const Home = () => {
                         <Flex justify={"right"}>
                           <Button
                             key={`view-entity-all`}
+                            colorScheme={"blackAlpha"}
                             rightIcon={<ChevronRightIcon />}
                             onClick={() => navigate(`/entities`)}
                           >
@@ -261,13 +261,14 @@ const Home = () => {
                     {entityData.slice(0, 3).map((entity) => {
                       return (
                         <Tr key={entity._id}>
-                          <Th pl={"0"} color={"white"}>
+                          <Th pl={"0"}>
                             {entity.name}
                           </Th>
                           <Th pr={"0"}>
                             <Flex justify={"right"}>
                               <Button
                                 key={`view-entity-${entity._id}`}
+                                colorScheme={"blackAlpha"}
                                 rightIcon={<ChevronRightIcon />}
                                 onClick={() =>
                                   navigate(`/entities/${entity._id}`)
@@ -289,19 +290,16 @@ const Home = () => {
           </Flex>
         </Flex>
 
-        {/* Recent changes */}
+        {/* Activity */}
         <Flex
           direction={"column"}
           p={"4"}
-          background={"teal"}
-          color={"white"}
+          background={"whitesmoke"}
           rounded={"xl"}
           gap={"1.5"}
           grow={"1"}
         >
-          <Heading>
-            Recent Changes <RepeatClockIcon w={8} h={8} />
-          </Heading>
+          <Heading fontWeight={"semibold"}>Activity</Heading>
           <List>
             {updateData.length > 0 ? (
               updateData.reverse().map((update, index) => {
@@ -341,21 +339,21 @@ const Home = () => {
                         mt={"2"}
                         mb={"2"}
                         align={"center"}
-                        color={"gray.400"}
-                        background={"white"}
+                        color={"white"}
+                        background={"blackAlpha.500"}
                         rounded={"xl"}
                       >
-                        <Badge colorScheme={operationBadgeColor}>
-                          {update.type}
-                        </Badge>
+                        <Text fontSize={"md"} as={"b"}>
+                          {dayjs(update.timestamp).format("DD MMM HH:mm")}
+                        </Text>
                         <Badge colorScheme={typeBadgeColor}>
                           {update.target.type}
                         </Badge>
-                        <Text>{update.target.name}</Text>
+                        <Badge colorScheme={operationBadgeColor}>
+                          {update.type}
+                        </Badge>
                         <Spacer />
-                        <Text fontSize={"md"} as={"b"}>
-                          {dayjs(update.timestamp).format("HH:mm DD MMM.")}
-                        </Text>
+                        <Text fontSize={"md"} as={"b"}>{update.target.name}</Text>
                       </Flex>
                     </ListItem>
                   );
@@ -363,7 +361,7 @@ const Home = () => {
                 return;
               })
             ) : (
-              <Text fontSize={"md"}>No recent changes to show.</Text>
+              <Text fontSize={"md"}>No recent activity to show.</Text>
             )}
           </List>
         </Flex>

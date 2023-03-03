@@ -226,9 +226,9 @@ export const Start = ({}) => {
         w={["full", "4xl", "7xl"]}
         p={"4"}
       >
-        <Flex direction={"column"} p={"2"} pt={"8"} pb={"8"}>
+        <Flex direction={"column"} p={"2"} pt={"4"} pb={"4"}>
           <Flex direction={"row"} align={"center"} justify={"space-between"}>
-            <Heading size={"2xl"}>Create Entity</Heading>
+            <Heading fontWeight={"semibold"}>Create Entity</Heading>
             <Button
               rightIcon={<InfoOutlineIcon />}
               variant={"outline"}
@@ -247,6 +247,7 @@ export const Start = ({}) => {
           wrap={"wrap"}
           justify={"space-between"}
           gap={"6"}
+          mb={["12", "8"]}
         >
           {/* "Start" page */}
           {_.isEqual("start", pageState) && (
@@ -254,12 +255,10 @@ export const Start = ({}) => {
               direction={"column"}
               gap={"2"}
               maxW={"xl"}
-              p={"2"}
+              p={"1"}
               rounded={"2xl"}
             >
-              <Heading size={"xl"} margin={"xs"}>
-                Details
-              </Heading>
+              <Heading fontWeight={"semibold"} size={"lg"}>Details</Heading>
               <Text>
                 Specify some basic details about this Entity. Relations between
                 Entities and membership to Collections can be specified on the
@@ -617,51 +616,57 @@ export const Start = ({}) => {
             </Flex>
           )}
         </Flex>
+      </Flex>
 
-        {/* Action buttons */}
-        <Flex
-          p={"2"}
-          direction={"row"}
-          w={"full"}
-          flexWrap={"wrap"}
-          gap={"6"}
-          justify={"space-between"}
-        >
-          <Flex gap={"4"}>
-            <Button
-              colorScheme={"red"}
-              variant={"outline"}
-              rightIcon={<CloseIcon />}
-              onClick={onCancel}
-            >
-              Cancel
-            </Button>
-            {!_.isEqual("start", pageState) && (
-              <Button
-                colorScheme={"orange"}
-                variant={"outline"}
-                leftIcon={<ChevronLeftIcon />}
-                onClick={onBack}
-              >
-                Back
-              </Button>
-            )}
-          </Flex>
-
+      {/* Action buttons */}
+      <Flex
+        direction={"row"}
+        flexWrap={"wrap"}
+        gap={"6"}
+        justify={"space-between"}
+        w={["sm", "xl", "3xl"]}
+        maxW={"7xl"}
+        p={"4"}
+        m={"4"}
+        position={"fixed"}
+        bottom={"0%"}
+        bg={"gray.50"}
+        rounded={"20px"}
+      >
+        <Flex gap={"4"}>
           <Button
-            colorScheme={"green"}
-            rightIcon={
-              _.isEqual("attributes", pageState) ? (
-                <CheckIcon />
-              ) : (
-                <ChevronRightIcon />
-              )
-            }
-            onClick={onNext}
+            colorScheme={"red"}
+            variant={"outline"}
+            rightIcon={<CloseIcon />}
+            onClick={onCancel}
           >
-            {_.isEqual("attributes", pageState) ? "Finish" : "Next"}
+            Cancel
           </Button>
+          {!_.isEqual("start", pageState) && (
+            <Button
+              colorScheme={"orange"}
+              variant={"outline"}
+              leftIcon={<ChevronLeftIcon />}
+              onClick={onBack}
+            >
+              Back
+            </Button>
+          )}
         </Flex>
+
+        <Button
+          colorScheme={"green"}
+          rightIcon={
+            _.isEqual("attributes", pageState) ? (
+              <CheckIcon />
+            ) : (
+              <ChevronRightIcon />
+            )
+          }
+          onClick={onNext}
+        >
+          {_.isEqual("attributes", pageState) ? "Finish" : "Next"}
+        </Button>
       </Flex>
 
       {/* Information modal */}
