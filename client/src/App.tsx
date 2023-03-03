@@ -22,16 +22,16 @@ import Entity from "@pages/View/Entity";
 import Entities from "@pages/View/Entities";
 
 // Page type - Create
-import {Start as EntityStart} from "@pages/Create/Entity";
-import {Start as CollectionStart} from "@pages/Create/Collection";
-import {Start as AttributeStart} from "@pages/Create/Attribute";
+import { Start as EntityStart } from "@pages/Create/Entity";
+import { Start as CollectionStart } from "@pages/Create/Collection";
+import { Start as AttributeStart } from "@pages/Create/Attribute";
 
 // Page type - Unique
 import Search from "@pages/Search";
 import Home from "@pages/Home";
 
 /**
- * 
+ *
  * @return {ReactElement}
  */
 export const App = (): ReactElement => {
@@ -49,7 +49,10 @@ export const App = (): ReactElement => {
           </Route>
 
           {/* Collections routes */}
-          <Route path="/create/collection/start" element={<CollectionStart />} />
+          <Route
+            path="/create/collection/start"
+            element={<CollectionStart />}
+          />
           <Route path="/collections" element={<Collections />} />
           <Route path="collections">
             <Route path=":id" element={<Collection />} />

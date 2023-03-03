@@ -19,9 +19,23 @@ const Attribute = (props: AttributeProps) => {
   };
 
   return (
-    <Flex direction={"row"} align={"center"} gap={"2"} p={"2"} bg={"gray.50"} rounded={"lg"}>
+    <Flex
+      direction={"row"}
+      align={"center"}
+      gap={"2"}
+      p={"2"}
+      bg={"gray.50"}
+      rounded={"lg"}
+    >
       <Flex p={"2"} pb={"6"} direction={"row"} wrap={"wrap"} gap={"6"}>
-        <Flex direction={"column"} gap={"2"} maxW={"md"} p={"2"} rounded={"2xl"} grow={"1"}>
+        <Flex
+          direction={"column"}
+          gap={"2"}
+          maxW={"md"}
+          p={"2"}
+          rounded={"2xl"}
+          grow={"1"}
+        >
           <Input
             placeholder={"Attribute Name"}
             value={name}
@@ -63,7 +77,11 @@ const Attribute = (props: AttributeProps) => {
           </Flex>
         </Flex>
 
-        <ParameterGroup parameters={parameters} viewOnly={finished} setParameters={setParameters} />
+        <ParameterGroup
+          parameters={parameters}
+          viewOnly={finished}
+          setParameters={setParameters}
+        />
       </Flex>
     </Flex>
   );

@@ -13,7 +13,9 @@ import {
 const Linky = (props: LinkyProps) => {
   const toast = useToast();
 
-  const [linkData, setLinkData] = useState({} as AttributeStruct | CollectionStruct | EntityStruct);
+  const [linkData, setLinkData] = useState(
+    {} as AttributeStruct | CollectionStruct | EntityStruct
+  );
 
   useEffect(() => {
     const data = getData(`/${props.type}/${props.id}`);

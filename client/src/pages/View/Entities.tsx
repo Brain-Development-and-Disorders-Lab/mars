@@ -1,6 +1,22 @@
 // React
 import React, { useEffect, useState } from "react";
-import { Flex, Heading, Table, TableContainer, Th, Thead, Tr, Text, useToast, Button, Tbody, Link, Tag, TagLabel, TagRightIcon } from "@chakra-ui/react";
+import {
+  Flex,
+  Heading,
+  Table,
+  TableContainer,
+  Th,
+  Thead,
+  Tr,
+  Text,
+  useToast,
+  Button,
+  Tbody,
+  Link,
+  Tag,
+  TagLabel,
+  TagRightIcon,
+} from "@chakra-ui/react";
 import { ChevronRightIcon, AddIcon, WarningIcon } from "@chakra-ui/icons";
 
 // Navigation
@@ -48,85 +64,121 @@ const Entities = () => {
     return;
   }, []);
 
-  return (
-    isLoaded ? 
-      <PageContainer>
-        <Flex p={"2"} pt={"8"} pb={"8"} direction={"row"} justify={"space-between"} align={"center"}>
-          <Heading size={"3xl"}>Entities</Heading>
-          <Button
-            rightIcon={<AddIcon />}
-            as={Link}
-            href={"/create/entity/start"}
-            colorScheme={"green"}
-          >
-            Create
-          </Button>
-        </Flex>
+  return isLoaded ? (
+    <PageContainer>
+      <Flex
+        p={"2"}
+        pt={"8"}
+        pb={"8"}
+        direction={"row"}
+        justify={"space-between"}
+        align={"center"}
+      >
+        <Heading size={"3xl"}>Entities</Heading>
+        <Button
+          rightIcon={<AddIcon />}
+          as={Link}
+          href={"/create/entity/start"}
+          colorScheme={"green"}
+        >
+          Create
+        </Button>
+      </Flex>
 
-        <Flex m={"2"} p={"4"} direction={"row"} rounded={"2xl"} background={"blue.300"} flexWrap={"wrap"} gap={"6"}>
-          {isLoaded && entityData.length > 0 ? (
-            <TableContainer w={"full"}>
-              <Table variant={"simple"} colorScheme={"blue"}>
-                <Thead>
-                  <Tr>
-                    <Th pl={"0"}><Heading color={"white"} size={"sm"}>Name</Heading></Th>
-                    <Th><Heading color={"white"} size={"sm"}>Owner</Heading></Th>
-                    <Th><Heading color={"white"} size={"sm"}>Description</Heading></Th>
-                    <Th pr={"0"}></Th>
-                  </Tr>
-                </Thead>
-                <Tbody>
-                  {entityData.map((entity) => {
-                    return (
-                      <Tr key={entity._id}>
-                        <Th pl={"0"} color={"white"}>{entity.name}</Th>
-                        <Th color={"white"}>
-                          {_.isEqual(entity.owner, "") ? (
-                            <Tag size={"md"} key={`warn-${entity._id}`} colorScheme={"orange"}>
+      <Flex
+        m={"2"}
+        p={"4"}
+        direction={"row"}
+        rounded={"2xl"}
+        background={"blue.300"}
+        flexWrap={"wrap"}
+        gap={"6"}
+      >
+        {isLoaded && entityData.length > 0 ? (
+          <TableContainer w={"full"}>
+            <Table variant={"simple"} colorScheme={"blue"}>
+              <Thead>
+                <Tr>
+                  <Th pl={"0"}>
+                    <Heading color={"white"} size={"sm"}>
+                      Name
+                    </Heading>
+                  </Th>
+                  <Th>
+                    <Heading color={"white"} size={"sm"}>
+                      Owner
+                    </Heading>
+                  </Th>
+                  <Th>
+                    <Heading color={"white"} size={"sm"}>
+                      Description
+                    </Heading>
+                  </Th>
+                  <Th pr={"0"}></Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {entityData.map((entity) => {
+                  return (
+                    <Tr key={entity._id}>
+                      <Th pl={"0"} color={"white"}>
+                        {entity.name}
+                      </Th>
+                      <Th color={"white"}>
+                        {_.isEqual(entity.owner, "") ? (
+                          <Tag
+                            size={"md"}
+                            key={`warn-${entity._id}`}
+                            colorScheme={"orange"}
+                          >
+                            <TagLabel>Not specified</TagLabel>
+                            <TagRightIcon as={WarningIcon} />
+                          </Tag>
+                        ) : (
+                          entity.owner
+                        )}
+                      </Th>
+                      <Th>
+                        <Text noOfLines={2} color={"white"}>
+                          {_.isEqual(entity.description, "") ? (
+                            <Tag
+                              size={"md"}
+                              key={`warn-${entity._id}`}
+                              colorScheme={"orange"}
+                            >
                               <TagLabel>Not specified</TagLabel>
                               <TagRightIcon as={WarningIcon} />
                             </Tag>
                           ) : (
-                            entity.owner
+                            entity.description
                           )}
-                        </Th>
-                        <Th>
-                          <Text noOfLines={2} color={"white"}>
-                            {_.isEqual(entity.description, "") ? (
-                              <Tag size={"md"} key={`warn-${entity._id}`} colorScheme={"orange"}>
-                                <TagLabel>Not specified</TagLabel>
-                                <TagRightIcon as={WarningIcon} />
-                              </Tag>
-                            ) : (
-                              entity.description
-                            )}
-                          </Text>
-                        </Th>
-                        <Th pr={"0"}>
-                          <Flex justify={"right"}>
-                            <Button
-                              key={`view-entity-${entity._id}`}
-                              color="grey.400"
-                              rightIcon={<ChevronRightIcon />}
-                              onClick={() => navigate(`/entities/${entity._id}`)}
-                            >
-                              View
-                            </Button>
-                          </Flex>
-                        </Th>
-                      </Tr>
-                    );
-                  })}
-                </Tbody>
-              </Table>
-            </TableContainer>
-          ) : (
-            <Text>There are no Entities to display.</Text>
-          )}
-        </Flex>
-      </PageContainer>
-    :
-      <Loading />
+                        </Text>
+                      </Th>
+                      <Th pr={"0"}>
+                        <Flex justify={"right"}>
+                          <Button
+                            key={`view-entity-${entity._id}`}
+                            color="grey.400"
+                            rightIcon={<ChevronRightIcon />}
+                            onClick={() => navigate(`/entities/${entity._id}`)}
+                          >
+                            View
+                          </Button>
+                        </Flex>
+                      </Th>
+                    </Tr>
+                  );
+                })}
+              </Tbody>
+            </Table>
+          </TableContainer>
+        ) : (
+          <Text>There are no Entities to display.</Text>
+        )}
+      </Flex>
+    </PageContainer>
+  ) : (
+    <Loading />
   );
 };
 

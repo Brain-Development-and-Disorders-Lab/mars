@@ -18,11 +18,25 @@ import {
   StackDivider,
   Icon,
 } from "@chakra-ui/react";
-import { HamburgerIcon, CloseIcon, InfoOutlineIcon, SearchIcon, AddIcon } from "@chakra-ui/icons";
+import {
+  HamburgerIcon,
+  CloseIcon,
+  InfoOutlineIcon,
+  SearchIcon,
+  AddIcon,
+} from "@chakra-ui/icons";
 import { BsCollection, BsGear, BsHexagon } from "react-icons/bs";
 
 // NavigationElement sub-component to generalize links
-const NavigationElement = ({ href, children, onClick }: { href: string, children: ReactNode, onClick?: () => void }) => (
+const NavigationElement = ({
+  href,
+  children,
+  onClick,
+}: {
+  href: string;
+  children: ReactNode;
+  onClick?: () => void;
+}) => (
   <Link
     href={href}
     px={"2"}
@@ -55,11 +69,7 @@ const Navigation = () => {
 
         {/* Main navigation group */}
         <HStack spacing={8} alignItems={"center"}>
-          <HStack
-            as={"nav"}
-            spacing={4}
-            display={{ base: "none", md: "flex" }}
-          >
+          <HStack as={"nav"} spacing={4} display={{ base: "none", md: "flex" }}>
             <Button key={"dashboard"} bg={"white"}>
               <Link href={"/"}>Dashboard</Link>
             </Button>
@@ -77,9 +87,27 @@ const Navigation = () => {
                 Create
               </MenuButton>
               <MenuList>
-                <MenuItem icon={<BsHexagon />} as={Link} href={"/create/entity/start"}>Entity</MenuItem>
-                <MenuItem icon={<BsCollection />} as={Link} href={"/create/collection/start"}>Collection</MenuItem>
-                <MenuItem icon={<BsGear />} as={Link} href={"/create/attribute/start"}>Attribute</MenuItem>
+                <MenuItem
+                  icon={<BsHexagon />}
+                  as={Link}
+                  href={"/create/entity/start"}
+                >
+                  Entity
+                </MenuItem>
+                <MenuItem
+                  icon={<BsCollection />}
+                  as={Link}
+                  href={"/create/collection/start"}
+                >
+                  Collection
+                </MenuItem>
+                <MenuItem
+                  icon={<BsGear />}
+                  as={Link}
+                  href={"/create/attribute/start"}
+                >
+                  Attribute
+                </MenuItem>
               </MenuList>
             </Menu>
 
@@ -96,9 +124,19 @@ const Navigation = () => {
                 View
               </MenuButton>
               <MenuList>
-                <MenuItem icon={<BsHexagon />} as={Link} href={"/entities"}>All Entities</MenuItem>
-                <MenuItem icon={<BsCollection />} as={Link} href={"/collections"}>All Collections</MenuItem>
-                <MenuItem icon={<BsGear />} as={Link} href={"/attributes"}>All Attributes</MenuItem>
+                <MenuItem icon={<BsHexagon />} as={Link} href={"/entities"}>
+                  All Entities
+                </MenuItem>
+                <MenuItem
+                  icon={<BsCollection />}
+                  as={Link}
+                  href={"/collections"}
+                >
+                  All Collections
+                </MenuItem>
+                <MenuItem icon={<BsGear />} as={Link} href={"/attributes"}>
+                  All Attributes
+                </MenuItem>
               </MenuList>
             </Menu>
 
@@ -133,26 +171,82 @@ const Navigation = () => {
           <Stack as={"nav"} spacing={4} divider={<StackDivider />}>
             {/* Dashboard */}
             <Flex direction={"row"} align={"center"} gap={"2"}>
-              <NavigationElement href={"/"} onClick={isOpen ? onClose : onOpen}>Dashboard</NavigationElement>
+              <NavigationElement href={"/"} onClick={isOpen ? onClose : onOpen}>
+                Dashboard
+              </NavigationElement>
             </Flex>
 
             {/* Create */}
             <Flex direction={"column"}>
-              <Flex direction={"row"} align={"center"} gap={"2"}><Icon as={AddIcon} />Create</Flex>
+              <Flex direction={"row"} align={"center"} gap={"2"}>
+                <Icon as={AddIcon} />
+                Create
+              </Flex>
               <Flex direction={"column"} px={"6"}>
-                <Flex direction={"row"} align={"center"}><Icon as={BsHexagon} /><NavigationElement href={"/create/entity/start"} onClick={isOpen ? onClose : onOpen}>Entity</NavigationElement></Flex>
-                <Flex direction={"row"} align={"center"}><Icon as={BsCollection} /><NavigationElement href={"/create/collection/start"} onClick={isOpen ? onClose : onOpen}>Collection</NavigationElement></Flex>
-                <Flex direction={"row"} align={"center"}><Icon as={BsGear} /><NavigationElement href={"/create/attribute/start"} onClick={isOpen ? onClose : onOpen}>Attribute</NavigationElement></Flex>
+                <Flex direction={"row"} align={"center"}>
+                  <Icon as={BsHexagon} />
+                  <NavigationElement
+                    href={"/create/entity/start"}
+                    onClick={isOpen ? onClose : onOpen}
+                  >
+                    Entity
+                  </NavigationElement>
+                </Flex>
+                <Flex direction={"row"} align={"center"}>
+                  <Icon as={BsCollection} />
+                  <NavigationElement
+                    href={"/create/collection/start"}
+                    onClick={isOpen ? onClose : onOpen}
+                  >
+                    Collection
+                  </NavigationElement>
+                </Flex>
+                <Flex direction={"row"} align={"center"}>
+                  <Icon as={BsGear} />
+                  <NavigationElement
+                    href={"/create/attribute/start"}
+                    onClick={isOpen ? onClose : onOpen}
+                  >
+                    Attribute
+                  </NavigationElement>
+                </Flex>
               </Flex>
             </Flex>
 
             {/* View */}
             <Flex direction={"column"}>
-              <Flex direction={"row"} align={"center"} gap={"2"}><Icon as={InfoOutlineIcon} />View</Flex>
+              <Flex direction={"row"} align={"center"} gap={"2"}>
+                <Icon as={InfoOutlineIcon} />
+                View
+              </Flex>
               <Flex direction={"column"} px={"6"}>
-                <Flex direction={"row"} align={"center"}><Icon as={BsHexagon} /><NavigationElement href={"/entities"} onClick={isOpen ? onClose : onOpen}>Entities</NavigationElement></Flex>
-                <Flex direction={"row"} align={"center"}><Icon as={BsCollection} /><NavigationElement href={"/collections"} onClick={isOpen ? onClose : onOpen}>Collections</NavigationElement></Flex>
-                <Flex direction={"row"} align={"center"}><Icon as={BsGear} /><NavigationElement href={"/attributes"} onClick={isOpen ? onClose : onOpen}>Attributes</NavigationElement></Flex>
+                <Flex direction={"row"} align={"center"}>
+                  <Icon as={BsHexagon} />
+                  <NavigationElement
+                    href={"/entities"}
+                    onClick={isOpen ? onClose : onOpen}
+                  >
+                    Entities
+                  </NavigationElement>
+                </Flex>
+                <Flex direction={"row"} align={"center"}>
+                  <Icon as={BsCollection} />
+                  <NavigationElement
+                    href={"/collections"}
+                    onClick={isOpen ? onClose : onOpen}
+                  >
+                    Collections
+                  </NavigationElement>
+                </Flex>
+                <Flex direction={"row"} align={"center"}>
+                  <Icon as={BsGear} />
+                  <NavigationElement
+                    href={"/attributes"}
+                    onClick={isOpen ? onClose : onOpen}
+                  >
+                    Attributes
+                  </NavigationElement>
+                </Flex>
               </Flex>
             </Flex>
           </Stack>

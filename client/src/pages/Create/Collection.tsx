@@ -1,6 +1,22 @@
 import React, { useState } from "react";
 import { SingleDatepicker } from "chakra-dayzed-datepicker";
-import { Button, Flex, FormControl, FormLabel, Heading, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalHeader, ModalOverlay, Text, Textarea, useDisclosure } from "@chakra-ui/react";
+import {
+  Button,
+  Flex,
+  FormControl,
+  FormLabel,
+  Heading,
+  Input,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalHeader,
+  ModalOverlay,
+  Text,
+  Textarea,
+  useDisclosure,
+} from "@chakra-ui/react";
 import { CheckIcon, CloseIcon, InfoOutlineIcon } from "@chakra-ui/icons";
 import { useNavigate } from "react-router-dom";
 import { postData, pseudoId } from "@database/functions";
@@ -25,7 +41,12 @@ export const Start = ({}) => {
 
   return (
     <Flex m={["0", "2"]} p={["2", "4"]} align={"center"} justify={"center"}>
-      <Flex direction={"column"} maxW={"7xl"} w={["full", "4xl", "7xl"]} p={"4"}>
+      <Flex
+        direction={"column"}
+        maxW={"7xl"}
+        w={["full", "4xl", "7xl"]}
+        p={"4"}
+      >
         <Flex direction={"column"} p={"2"} pt={"8"} pb={"8"}>
           <Flex direction={"row"} align={"center"} justify={"space-between"}>
             <Heading size={"2xl"}>Create Collection</Heading>
@@ -40,17 +61,22 @@ export const Start = ({}) => {
         </Flex>
 
         <Flex p={"2"} pb={"6"} direction={"row"} wrap={"wrap"} gap={"6"}>
-          <Flex direction={"column"} gap={"2"} grow={"1"} maxW={"xl"} p={"2"} rounded={"2xl"}>
+          <Flex
+            direction={"column"}
+            gap={"2"}
+            grow={"1"}
+            maxW={"xl"}
+            p={"2"}
+            rounded={"2xl"}
+          >
             <Heading size={"xl"} margin={"xs"}>
               Details
             </Heading>
-            <Text>
-              Specify some basic details about this Collection.
-            </Text>
+            <Text>Specify some basic details about this Collection.</Text>
             <Flex direction="row" gap={"4"}>
               <Flex direction="column" justify="between" gap={"4"}>
                 <FormControl isRequired>
-                  <FormLabel htmlFor="name" fontWeight={'normal'}>
+                  <FormLabel htmlFor="name" fontWeight={"normal"}>
                     Collection Name
                   </FormLabel>
                   <Input
@@ -64,7 +90,7 @@ export const Start = ({}) => {
                 </FormControl>
 
                 <FormControl isRequired>
-                  <FormLabel htmlFor="owner" fontWeight={'normal'}>
+                  <FormLabel htmlFor="owner" fontWeight={"normal"}>
                     Collection Owner
                   </FormLabel>
                   <Input
@@ -78,16 +104,16 @@ export const Start = ({}) => {
                 </FormControl>
 
                 <FormControl>
-                  <FormLabel htmlFor="date" fontWeight={'normal'}>
+                  <FormLabel htmlFor="date" fontWeight={"normal"}>
                     Creation Date
                   </FormLabel>
-                  
+
                   <SingleDatepicker
                     id="owner"
                     name="owner"
                     propsConfigs={{
                       dateNavBtnProps: {
-                        colorScheme: "gray"
+                        colorScheme: "gray",
                       },
                       dayOfMonthBtnProps: {
                         defaultBtnProps: {
@@ -95,7 +121,7 @@ export const Start = ({}) => {
                           _hover: {
                             background: "black",
                             color: "white",
-                          }
+                          },
                         },
                         selectedBtnProps: {
                           background: "black",
@@ -105,7 +131,7 @@ export const Start = ({}) => {
                           borderColor: "blackAlpha.300",
                           background: "gray.50",
                           color: "black",
-                        }
+                        },
                       },
                     }}
                     date={created}
@@ -116,7 +142,7 @@ export const Start = ({}) => {
 
               <Flex direction="column">
                 <FormControl isRequired>
-                  <FormLabel htmlFor="description" fontWeight={'normal'}>
+                  <FormLabel htmlFor="description" fontWeight={"normal"}>
                     Description
                   </FormLabel>
                   <Textarea
@@ -131,8 +157,19 @@ export const Start = ({}) => {
           </Flex>
         </Flex>
 
-        <Flex p={"2"} direction={"row"} flexWrap={"wrap"} gap={"6"} justify={"space-between"}>
-          <Button colorScheme={"red"} rightIcon={<CloseIcon />} variant={"outline"} onClick={() => navigate("/")}>
+        <Flex
+          p={"2"}
+          direction={"row"}
+          flexWrap={"wrap"}
+          gap={"6"}
+          justify={"space-between"}
+        >
+          <Button
+            colorScheme={"red"}
+            rightIcon={<CloseIcon />}
+            variant={"outline"}
+            onClick={() => navigate("/")}
+          >
             Cancel
           </Button>
 
@@ -158,7 +195,11 @@ export const Start = ({}) => {
           <ModalHeader>Collections</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <Text>Collections can be used to organize Entities. Any type of Entity can be included in a Collection. Entities can be added and removed from a Collection after it has been created.</Text>
+            <Text>
+              Collections can be used to organize Entities. Any type of Entity
+              can be included in a Collection. Entities can be added and removed
+              from a Collection after it has been created.
+            </Text>
           </ModalBody>
         </ModalContent>
       </Modal>

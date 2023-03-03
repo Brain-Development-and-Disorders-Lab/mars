@@ -1,6 +1,26 @@
 // React
 import React from "react";
-import { Button, Card, CardBody, CardFooter, CardHeader, Flex, Heading, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, ModalOverlay, ScaleFade, Tag, TagLabel, TagLeftIcon, Text, useDisclosure } from "@chakra-ui/react";
+import {
+  Button,
+  Card,
+  CardBody,
+  CardFooter,
+  CardHeader,
+  Flex,
+  Heading,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+  ScaleFade,
+  Tag,
+  TagLabel,
+  TagLeftIcon,
+  Text,
+  useDisclosure,
+} from "@chakra-ui/react";
 import { CloseIcon, InfoOutlineIcon } from "@chakra-ui/icons";
 import { AiOutlineBlock, AiOutlineLink } from "react-icons/ai";
 import { MdDateRange, MdOutlineTextFields } from "react-icons/md";
@@ -16,7 +36,7 @@ import ParameterGroup from "@components/ParameterGroup";
 import { WarningLabel } from "@components/Label";
 
 const AttributeCard = (props: AttributeCardProps) => {
-  const { isOpen, onOpen, onClose } = useDisclosure()
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
     <>
@@ -31,11 +51,9 @@ const AttributeCard = (props: AttributeCardProps) => {
           <Flex direction={"column"} p={"sm"} gap={"6"} maxW={"md"}>
             <Flex>
               <Text noOfLines={3}>
-                {props.data.description.length > 0 ?
-                  props.data.description
-                :
-                  "No description."
-                }
+                {props.data.description.length > 0
+                  ? props.data.description
+                  : "No description."}
               </Text>
             </Flex>
 
@@ -48,69 +66,106 @@ const AttributeCard = (props: AttributeCardProps) => {
                         <TagLeftIcon as={MdDateRange} />
                         <TagLabel>
                           <Flex align={"center"} gap={"1"}>
-                            <Flex p={"1"} m={"1"} rounded={"md"} background={"white"}>{parameter.name}</Flex>
+                            <Flex
+                              p={"1"}
+                              m={"1"}
+                              rounded={"md"}
+                              background={"white"}
+                            >
+                              {parameter.name}
+                            </Flex>
                           </Flex>
                         </TagLabel>
                       </Tag>
                     );
-                  };
+                  }
                   case "entity": {
                     return (
                       <Tag key={parameter.identifier}>
                         <TagLeftIcon as={AiOutlineBlock} />
                         <TagLabel>
                           <Flex align={"center"} gap={"1"}>
-                            <Flex p={"1"} m={"1"} rounded={"md"} background={"white"}>{parameter.name}</Flex>
+                            <Flex
+                              p={"1"}
+                              m={"1"}
+                              rounded={"md"}
+                              background={"white"}
+                            >
+                              {parameter.name}
+                            </Flex>
                           </Flex>
                         </TagLabel>
                       </Tag>
                     );
-                  };
+                  }
                   case "number": {
                     return (
                       <Tag key={parameter.identifier}>
                         <TagLeftIcon as={RiNumbersLine} />
                         <TagLabel>
                           <Flex align={"center"} gap={"1"}>
-                            <Flex p={"1"} m={"1"} rounded={"md"} background={"white"}>{parameter.name}</Flex>
+                            <Flex
+                              p={"1"}
+                              m={"1"}
+                              rounded={"md"}
+                              background={"white"}
+                            >
+                              {parameter.name}
+                            </Flex>
                           </Flex>
                         </TagLabel>
                       </Tag>
                     );
-                  };
-                  
+                  }
+
                   case "url": {
                     return (
                       <Tag key={parameter.identifier}>
                         <TagLeftIcon as={AiOutlineLink} />
                         <TagLabel>
                           <Flex align={"center"} gap={"1"}>
-                            <Flex p={"1"} m={"1"} rounded={"md"} background={"white"}>{parameter.name}</Flex>
+                            <Flex
+                              p={"1"}
+                              m={"1"}
+                              rounded={"md"}
+                              background={"white"}
+                            >
+                              {parameter.name}
+                            </Flex>
                           </Flex>
                         </TagLabel>
                       </Tag>
                     );
-                  };
+                  }
                   default: {
                     return (
                       <Tag key={parameter.identifier}>
                         <TagLeftIcon as={MdOutlineTextFields} />
                         <TagLabel>
                           <Flex align={"center"} gap={"1"}>
-                            <Flex p={"1"} m={"1"} rounded={"md"} background={"white"}>{parameter.name}</Flex>
+                            <Flex
+                              p={"1"}
+                              m={"1"}
+                              rounded={"md"}
+                              background={"white"}
+                            >
+                              {parameter.name}
+                            </Flex>
                           </Flex>
                         </TagLabel>
                       </Tag>
                     );
-                  };
-                };
+                  }
+                }
               })}
             </Flex>
           </Flex>
         </CardBody>
 
         <CardFooter justify={"right"}>
-          <Button onClick={onOpen} rightIcon={<InfoOutlineIcon />}>View Details</Button>
+          <Button onClick={onOpen} rightIcon={<InfoOutlineIcon />}>
+            View Details
+          </Button>
         </CardFooter>
       </Card>
 
@@ -118,27 +173,40 @@ const AttributeCard = (props: AttributeCardProps) => {
         <Modal onEsc={onClose} onClose={onClose} isOpen={isOpen} size={"4xl"}>
           <ModalOverlay />
           <ModalContent p={"2"}>
-            <ModalHeader><Heading size={"md"}>Attribute: {props.data.name}</Heading></ModalHeader>
+            <ModalHeader>
+              <Heading size={"md"}>Attribute: {props.data.name}</Heading>
+            </ModalHeader>
             <ModalBody gap={"4"}>
               <Flex mb={"4"}>
-                {props.data.description.length > 0 ?
+                {props.data.description.length > 0 ? (
                   <Text>{props.data.description}</Text>
-                :
-                  <WarningLabel key={props.data.name} text={"No description provided"} />
-                }
+                ) : (
+                  <WarningLabel
+                    key={props.data.name}
+                    text={"No description provided"}
+                  />
+                )}
               </Flex>
 
               <Heading size={"md"}>Parameters</Heading>
-              <Flex direction={"column"} p={"2"} gap={"2"} align={"center"} justify={"center"}>
-                {props.data.parameters && props.data.parameters.length > 0 ?
+              <Flex
+                direction={"column"}
+                p={"2"}
+                gap={"2"}
+                align={"center"}
+                justify={"center"}
+              >
+                {props.data.parameters && props.data.parameters.length > 0 ? (
                   <ParameterGroup parameters={props.data.parameters} viewOnly />
-                :
+                ) : (
                   <Text>No parameters.</Text>
-                }
+                )}
               </Flex>
             </ModalBody>
             <ModalFooter>
-              <Button onClick={onClose} rightIcon={<CloseIcon />}>Close</Button>
+              <Button onClick={onClose} rightIcon={<CloseIcon />}>
+                Close
+              </Button>
             </ModalFooter>
           </ModalContent>
         </Modal>

@@ -1,6 +1,21 @@
 // React
 import React, { useState } from "react";
-import { Button, Flex, Heading, Icon, Input, Table, TableContainer, Tbody, Td, Text, Th, Thead, Tr, useToast } from "@chakra-ui/react";
+import {
+  Button,
+  Flex,
+  Heading,
+  Icon,
+  Input,
+  Table,
+  TableContainer,
+  Tbody,
+  Td,
+  Text,
+  Th,
+  Thead,
+  Tr,
+  useToast,
+} from "@chakra-ui/react";
 import { ChevronRightIcon, SearchIcon } from "@chakra-ui/icons";
 
 // Navigation
@@ -44,13 +59,20 @@ const Search = () => {
           isClosable: true,
         });
       }
-
     });
   };
 
   return (
     <Flex m={"2"} align={"center"} justify={"center"}>
-      <Flex p={"2"} pt={"0"} direction={"column"} w={"full"} maxW={"7xl"} wrap={"wrap"} gap={"6"}>
+      <Flex
+        p={"2"}
+        pt={"0"}
+        direction={"column"}
+        w={"full"}
+        maxW={"7xl"}
+        wrap={"wrap"}
+        gap={"6"}
+      >
         <Flex direction={"row"} align={"center"} gap={"2"}>
           <Input
             value={query}
@@ -77,21 +99,15 @@ const Search = () => {
               <Table>
                 <Thead>
                   <Tr>
-                    <Th>
-                      Identifier
-                    </Th>
-                    <Th>
-                      Created
-                    </Th>
-                    <Th>
-                      Owner
-                    </Th>
+                    <Th>Identifier</Th>
+                    <Th>Created</Th>
+                    <Th>Owner</Th>
                     <Th></Th>
                   </Tr>
                 </Thead>
 
                 <Tbody>
-                  {results.length > 0 && (
+                  {results.length > 0 &&
                     results.map((result) => {
                       return (
                         <Tr key={result._id}>
@@ -101,15 +117,16 @@ const Search = () => {
                           <Td>
                             <Button
                               rightIcon={<ChevronRightIcon />}
-                              onClick={() => navigate(`/entities/${result._id}`)}
+                              onClick={() =>
+                                navigate(`/entities/${result._id}`)
+                              }
                             >
                               View
                             </Button>
                           </Td>
                         </Tr>
                       );
-                    })
-                  )}
+                    })}
                 </Tbody>
               </Table>
             </TableContainer>

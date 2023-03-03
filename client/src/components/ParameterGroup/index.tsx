@@ -9,7 +9,13 @@ import _ from "underscore";
 
 // Custom types and components
 import { Parameters } from "@types";
-import { DateParameter, EntityParameter, NumberParameter, StringParameter, URLParameter } from "@components/Parameter";
+import {
+  DateParameter,
+  EntityParameter,
+  NumberParameter,
+  StringParameter,
+  URLParameter,
+} from "@components/Parameter";
 
 /**
  * ParameterGroup component use to display a collection of Parameters and enable
@@ -17,7 +23,11 @@ import { DateParameter, EntityParameter, NumberParameter, StringParameter, URLPa
  * @param props collection of props to construct component
  * @return
  */
-const ParameterGroup = (props: { parameters: Parameters[], viewOnly: boolean, setParameters?: Dispatch<SetStateAction<Parameters[]>> }) => {
+const ParameterGroup = (props: {
+  parameters: Parameters[];
+  viewOnly: boolean;
+  setParameters?: Dispatch<SetStateAction<Parameters[]>>;
+}) => {
   const onUpdate = (data: Parameters) => {
     // Store the received Parameter information
     props.setParameters &&
@@ -35,21 +45,29 @@ const ParameterGroup = (props: { parameters: Parameters[], viewOnly: boolean, se
 
   const onRemove = (identifier: string) => {
     props.setParameters &&
-      props.setParameters(props.parameters.filter((parameter) => {
-        // Filter out the Parameter to be removed
-        if (!_.isEqual(parameter.identifier, identifier)) {
-          return parameter;
-        } else {
-          return;
-        }
-      }));
+      props.setParameters(
+        props.parameters.filter((parameter) => {
+          // Filter out the Parameter to be removed
+          if (!_.isEqual(parameter.identifier, identifier)) {
+            return parameter;
+          } else {
+            return;
+          }
+        })
+      );
   };
 
   return (
     <Flex direction={"column"} gap={"4"}>
       {/* Button Group */}
-      {!props.viewOnly &&
-        <Flex direction={"row"} gap={"2"} flexWrap={"wrap"} justify={"center"} align={"center"}>
+      {!props.viewOnly && (
+        <Flex
+          direction={"row"}
+          gap={"2"}
+          flexWrap={"wrap"}
+          justify={"center"}
+          align={"center"}
+        >
           {/* Buttons to add Parameters */}
           <Button
             leftIcon={<Icon as={MdDateRange} />}
@@ -151,11 +169,18 @@ const ParameterGroup = (props: { parameters: Parameters[], viewOnly: boolean, se
             Entity
           </Button>
         </Flex>
-      }
+      )}
 
       {/* Card Group */}
-      <Flex p={"2"} m={"2"} direction={"column"} gap={"4"} bg={"white"} rounded={"lg"}>
-        {props.parameters.length > 0 ? 
+      <Flex
+        p={"2"}
+        m={"2"}
+        direction={"column"}
+        gap={"4"}
+        bg={"white"}
+        rounded={"lg"}
+      >
+        {props.parameters.length > 0 ? (
           props.parameters.map((parameter) => {
             switch (parameter.type) {
               case "date": {
@@ -235,14 +260,17 @@ const ParameterGroup = (props: { parameters: Parameters[], viewOnly: boolean, se
               }
             }
           })
-        :
+        ) : (
           <Flex align={"center"} justify={"center"}>
-            <Text>No Parameters specified. Use the buttons above to add a new Parameter.</Text>
+            <Text>
+              No Parameters specified. Use the buttons above to add a new
+              Parameter.
+            </Text>
           </Flex>
-        }
+        )}
       </Flex>
     </Flex>
   );
-}
+};
 
 export default ParameterGroup;

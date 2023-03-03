@@ -1,5 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { Flex, FormControl, Icon, IconButton, Input, Link, Select, useToast } from "@chakra-ui/react";
+import {
+  Flex,
+  FormControl,
+  Icon,
+  IconButton,
+  Input,
+  Link,
+  Select,
+  useToast,
+} from "@chakra-ui/react";
 import { SingleDatepicker } from "chakra-dayzed-datepicker";
 import { CloseIcon } from "@chakra-ui/icons";
 import { AiOutlineBlock, AiOutlineLink } from "react-icons/ai";
@@ -27,7 +36,7 @@ export const DateParameter = (props: Parameter.PDate) => {
 
   return (
     <Flex direction={"row"} gap={"2"} align={"center"}>
-      <Icon as={MdDateRange} w={"8"} h={"8"}/>
+      <Icon as={MdDateRange} w={"8"} h={"8"} />
 
       {/* Parameter name */}
       <FormControl>
@@ -49,7 +58,7 @@ export const DateParameter = (props: Parameter.PDate) => {
           name="owner"
           propsConfigs={{
             dateNavBtnProps: {
-              colorScheme: "gray"
+              colorScheme: "gray",
             },
             dayOfMonthBtnProps: {
               defaultBtnProps: {
@@ -57,7 +66,7 @@ export const DateParameter = (props: Parameter.PDate) => {
                 _hover: {
                   background: "black",
                   color: "white",
-                }
+                },
               },
               selectedBtnProps: {
                 background: "black",
@@ -67,7 +76,7 @@ export const DateParameter = (props: Parameter.PDate) => {
                 borderColor: "blackAlpha.300",
                 background: "gray.50",
                 color: "black",
-              }
+              },
             },
           }}
           date={value}
@@ -77,7 +86,7 @@ export const DateParameter = (props: Parameter.PDate) => {
       </FormControl>
 
       {/* Remove Parameter */}
-      {props.showRemove && !props.disabled &&
+      {props.showRemove && !props.disabled && (
         <IconButton
           aria-label={"Remove Parameter"}
           key={`remove-${props.identifier}`}
@@ -90,7 +99,7 @@ export const DateParameter = (props: Parameter.PDate) => {
             }
           }}
         />
-      }
+      )}
     </Flex>
   );
 };
@@ -113,7 +122,7 @@ export const StringParameter = (props: Parameter.PString) => {
 
   return (
     <Flex direction={"row"} gap={"2"} align={"center"}>
-      <Icon as={MdOutlineTextFields} w={"8"} h={"8"}/>
+      <Icon as={MdOutlineTextFields} w={"8"} h={"8"} />
 
       {/* Parameter name */}
       <FormControl label="Name">
@@ -140,7 +149,7 @@ export const StringParameter = (props: Parameter.PString) => {
       </FormControl>
 
       {/* Remove Parameter */}
-      {props.showRemove && !props.disabled &&
+      {props.showRemove && !props.disabled && (
         <IconButton
           aria-label={"Remove Parameter"}
           key={`remove-${props.identifier}`}
@@ -153,7 +162,7 @@ export const StringParameter = (props: Parameter.PString) => {
             }
           }}
         />
-      }
+      )}
     </Flex>
   );
 };
@@ -176,7 +185,7 @@ export const NumberParameter = (props: Parameter.PNumber) => {
 
   return (
     <Flex direction={"row"} gap={"2"} align={"center"}>
-      <Icon as={RiNumbersLine} w={"8"} h={"8"}/>
+      <Icon as={RiNumbersLine} w={"8"} h={"8"} />
 
       {/* Parameter name */}
       <FormControl label="Name">
@@ -200,10 +209,10 @@ export const NumberParameter = (props: Parameter.PNumber) => {
           disabled={props.disabled}
           required
         />
-        </FormControl>
+      </FormControl>
 
       {/* Remove Parameter */}
-      {props.showRemove && !props.disabled &&
+      {props.showRemove && !props.disabled && (
         <IconButton
           aria-label={"Remove Parameter"}
           key={`remove-${props.identifier}`}
@@ -216,7 +225,7 @@ export const NumberParameter = (props: Parameter.PNumber) => {
             }
           }}
         />
-      }
+      )}
     </Flex>
   );
 };
@@ -239,7 +248,7 @@ export const URLParameter = (props: Parameter.PURL) => {
 
   return (
     <Flex direction={"row"} gap={"2"} align={"center"}>
-      <Icon as={AiOutlineLink} w={"8"} h={"8"}/>
+      <Icon as={AiOutlineLink} w={"8"} h={"8"} />
 
       {/* Parameter name */}
       <FormControl label="Name">
@@ -257,11 +266,11 @@ export const URLParameter = (props: Parameter.PURL) => {
 
       {/* Parameter data */}
       <FormControl label="Data">
-        {props.disabled ?
+        {props.disabled ? (
           <Link href={value} color="dark-1">
             {value}
           </Link>
-        :
+        ) : (
           <Input
             name="url"
             placeholder="URL"
@@ -269,11 +278,12 @@ export const URLParameter = (props: Parameter.PURL) => {
             onChange={(event) => setValue(event.target.value.toString())}
             disabled={props.disabled}
             required
-          />}
+          />
+        )}
       </FormControl>
 
       {/* Remove button */}
-      {props.showRemove && !props.disabled &&
+      {props.showRemove && !props.disabled && (
         <IconButton
           aria-label={"Remove Parameter"}
           key={`remove-${props.identifier}`}
@@ -286,7 +296,7 @@ export const URLParameter = (props: Parameter.PURL) => {
             }
           }}
         />
-      }
+      )}
     </Flex>
   );
 };
@@ -342,7 +352,7 @@ export const EntityParameter = (props: Parameter.PEntity) => {
 
   return (
     <Flex direction={"row"} gap={"2"} align={"center"}>
-      <Icon as={AiOutlineBlock} w={"8"} h={"8"}/>
+      <Icon as={AiOutlineBlock} w={"8"} h={"8"} />
 
       {/* Parameter name */}
       <FormControl>
@@ -359,12 +369,9 @@ export const EntityParameter = (props: Parameter.PEntity) => {
 
       {/* Parameter data */}
       <FormControl>
-        {props.disabled ?
-          <Linky
-            type="entities"
-            id={value}
-          />
-        :
+        {props.disabled ? (
+          <Linky type="entities" id={value} />
+        ) : (
           <Select
             title="Select Entity"
             value={value}
@@ -377,16 +384,18 @@ export const EntityParameter = (props: Parameter.PEntity) => {
             {isLoaded &&
               entities.map((entity) => {
                 return (
-                  <option key={entity._id} value={entity._id}>{entity.name}</option>
+                  <option key={entity._id} value={entity._id}>
+                    {entity.name}
+                  </option>
                 );
-              })
-            };
+              })}
+            ;
           </Select>
-        }
+        )}
       </FormControl>
 
       {/* Remove button */}
-      {props.showRemove && !props.disabled &&
+      {props.showRemove && !props.disabled && (
         <IconButton
           aria-label={"Remove Parameter"}
           key={`remove-${props.identifier}`}
@@ -399,9 +408,15 @@ export const EntityParameter = (props: Parameter.PEntity) => {
             }
           }}
         />
-      }
+      )}
     </Flex>
   );
 };
 
-export default { NumberParameter, StringParameter, URLParameter, DateParameter, EntityParameter };
+export default {
+  NumberParameter,
+  StringParameter,
+  URLParameter,
+  DateParameter,
+  EntityParameter,
+};

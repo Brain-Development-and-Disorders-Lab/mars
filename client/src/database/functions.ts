@@ -8,7 +8,9 @@ import { DATABASE_URL } from "src/variables";
  * Generate a mixed-format ID: `id_ABCDE_123`
  * @return {string}
  */
-export const pseudoId = (type?: "entity" | "collection" | "attribute"): string => {
+export const pseudoId = (
+  type?: "entity" | "collection" | "attribute"
+): string => {
   let prefix = "id_";
   if (type) {
     switch (type) {
@@ -31,7 +33,7 @@ export const pseudoId = (type?: "entity" | "collection" | "attribute"): string =
       .replace(/[^a-z]+/g, "")
       .slice(0, 3) +
     "_" +
-    Math.round(performance.now() * (Math.random()))
+    Math.round(performance.now() * Math.random())
   );
 };
 
@@ -41,26 +43,28 @@ export const pseudoId = (type?: "entity" | "collection" | "attribute"): string =
  * @return {Promise<any>} an object containing information from the database
  */
 export const getData = async (path: string): Promise<any> => {
-  return await fetch(`${DATABASE_URL}${path}`).then(async (response) => {
-    // Check response status
-    if (!response.ok) {
-      consola.error("GET:", path);
-      throw new Error("Invalid response from database");
-    }
+  return await fetch(`${DATABASE_URL}${path}`)
+    .then(async (response) => {
+      // Check response status
+      if (!response.ok) {
+        consola.error("GET:", path);
+        throw new Error("Invalid response from database");
+      }
 
-    // Check the contents of the response
-    const record = await response.json();
-    if (!record) {
+      // Check the contents of the response
+      const record = await response.json();
+      if (!record) {
+        consola.error("GET:", path);
+        throw new Error("Response contents were empty");
+      } else {
+        consola.success("GET:", path);
+        return record;
+      }
+    })
+    .catch((error) => {
       consola.error("GET:", path);
-      throw new Error("Response contents were empty");
-    } else {
-      consola.success("GET:", path);
-      return record;
-    }
-  }).catch((error) => {
-    consola.error("GET:", path);
-    return { status: "error", error: error };
-  });
+      return { status: "error", error: error };
+    });
 };
 
 /**
@@ -75,36 +79,40 @@ export const postData = async (path: string, data: any): Promise<any> => {
       "Content-Type": "application/json",
     },
     body: JSON.stringify(data),
-  }).then((response) => {
-    if (_.isEqual(response.ok, true)) {
-      consola.success("POST:", path, data);
-      return { status: "success" };
-    }
-    throw new Error("Failed to POST data");
-  }).catch((error) => {
-    consola.error("POST:", path, data);
-    return { status: "error", error: error };
-  });
+  })
+    .then((response) => {
+      if (_.isEqual(response.ok, true)) {
+        consola.success("POST:", path, data);
+        return { status: "success" };
+      }
+      throw new Error("Failed to POST data");
+    })
+    .catch((error) => {
+      consola.error("POST:", path, data);
+      return { status: "error", error: error };
+    });
 };
 
 /**
  * Delete data to the Lab API using the JavaScript `fetch` API
  * @param {string} path the path of the database objected to be deleted
  */
- export const deleteData = async (path: string): Promise<any> => {
+export const deleteData = async (path: string): Promise<any> => {
   return await fetch(`${DATABASE_URL}${path}`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
     },
-  }).then((response) => {
-    if (_.isEqual(response.ok, true)) {
-      consola.success("DELETE:", path);
-      return { status: "success" };
-    }
-    throw new Error("Failed to DELETE");
-  }).catch((error) => {
-    consola.error("DELETE:", path);
-    return { status: "error", error: error };
-  });
+  })
+    .then((response) => {
+      if (_.isEqual(response.ok, true)) {
+        consola.success("DELETE:", path);
+        return { status: "success" };
+      }
+      throw new Error("Failed to DELETE");
+    })
+    .catch((error) => {
+      consola.error("DELETE:", path);
+      return { status: "error", error: error };
+    });
 };

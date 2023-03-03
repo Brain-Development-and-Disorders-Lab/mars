@@ -36,7 +36,7 @@ const Graph = (props: { id: string }) => {
         status: "error",
         duration: 4000,
         position: "bottom-right",
-        isClosable: true
+        isClosable: true,
       });
       throw new Error("Database Error");
     } else {
@@ -66,9 +66,7 @@ const Graph = (props: { id: string }) => {
           id: origin.id,
           type: "input",
           data: {
-            label: (
-              <>{origin.name}</>
-            ),
+            label: <>{origin.name}</>,
           },
           position: { x: 250, y: 0 },
         });
@@ -113,9 +111,15 @@ const Graph = (props: { id: string }) => {
 
     // Default assuming origin and products
     let currentType = "default";
-    if (entityData.associations.origins.length > 0 && entityData.associations.products.length === 0) {
+    if (
+      entityData.associations.origins.length > 0 &&
+      entityData.associations.products.length === 0
+    ) {
       currentType = "output";
-    } else if (entityData.associations.origins.length === 0 && entityData.associations.products.length > 0) {
+    } else if (
+      entityData.associations.origins.length === 0 &&
+      entityData.associations.products.length > 0
+    ) {
       currentType = "input";
     }
 
@@ -154,40 +158,48 @@ const Graph = (props: { id: string }) => {
           for (let origin of entity.associations.origins) {
             if (containsNode(origin.id) === false) {
               // Firstly, update the current node type (if required)
-              setNodes([...(nodes.map((node) => {
-                if (_.isEqual(node.id, entity._id)) {
-                  if (entity.associations.products.length > 0) {
-                    // If Products are specified as well, we need to set it to
-                    // "default" type
-                    node.type = "default";
-                  } else {
-                    // If no Products are specified, the Entity only has Origin,
-                    // making it "output" type
-                    node.type = "output";
+              setNodes([
+                ...nodes.map((node) => {
+                  if (_.isEqual(node.id, entity._id)) {
+                    if (entity.associations.products.length > 0) {
+                      // If Products are specified as well, we need to set it to
+                      // "default" type
+                      node.type = "default";
+                    } else {
+                      // If no Products are specified, the Entity only has Origin,
+                      // making it "output" type
+                      node.type = "output";
+                    }
                   }
-                }
-                return node;
-              }))]);
+                  return node;
+                }),
+              ]);
 
               // Add node
-              setNodes([...nodes, {
-                id: origin.id,
-                type: "input",
-                data: {
-                  label: <>{origin.name}</>,
+              setNodes([
+                ...nodes,
+                {
+                  id: origin.id,
+                  type: "input",
+                  data: {
+                    label: <>{origin.name}</>,
+                  },
+                  position: { x: 100, y: 200 },
                 },
-                position: { x: 100, y: 200 },
-              }]);
+              ]);
 
               // Create edge
-              setEdges([...edges, {
-                id: `edge_${origin.id}_${node.id}`,
-                source: origin.id,
-                target: node.id,
-                markerEnd: {
-                  type: MarkerType.ArrowClosed,
+              setEdges([
+                ...edges,
+                {
+                  id: `edge_${origin.id}_${node.id}`,
+                  source: origin.id,
+                  target: node.id,
+                  markerEnd: {
+                    type: MarkerType.ArrowClosed,
+                  },
                 },
-              }]);
+              ]);
             }
           }
         }
@@ -200,40 +212,48 @@ const Graph = (props: { id: string }) => {
           for (let product of entity.associations.products) {
             if (containsNode(product.id) === false) {
               // Firstly, update the current node type (if required)
-              updatedNodes = [...(updatedNodes.map((node) => {
-                if (_.isEqual(node.id, entity._id)) {
-                  if (entity.associations.origins.length > 0) {
-                    // If an Origin is specified as well, we need to set it to
-                    // "default" type
-                    node.type = "default";
-                  } else {
-                    // If no Origin is specified, the Entity only has Products,
-                    // making it "input" type
-                    node.type = "input";
+              updatedNodes = [
+                ...updatedNodes.map((node) => {
+                  if (_.isEqual(node.id, entity._id)) {
+                    if (entity.associations.origins.length > 0) {
+                      // If an Origin is specified as well, we need to set it to
+                      // "default" type
+                      node.type = "default";
+                    } else {
+                      // If no Origin is specified, the Entity only has Products,
+                      // making it "input" type
+                      node.type = "input";
+                    }
                   }
-                }
-                return node;
-              }))];
+                  return node;
+                }),
+              ];
 
               // Add node
-              updatedNodes = [...updatedNodes, {
-                id: product.id,
-                type: "output",
-                data: {
-                  label: <>{product.name}</>,
+              updatedNodes = [
+                ...updatedNodes,
+                {
+                  id: product.id,
+                  type: "output",
+                  data: {
+                    label: <>{product.name}</>,
+                  },
+                  position: { x: 100, y: 200 },
                 },
-                position: { x: 100, y: 200 },
-              }];
+              ];
 
               // Create edge
-              updatedEdges = [...updatedEdges, {
-                id: `edge_${node.id}_${product.id}`,
-                source: node.id,
-                target: product.id,
-                markerEnd: {
-                  type: MarkerType.ArrowClosed,
+              updatedEdges = [
+                ...updatedEdges,
+                {
+                  id: `edge_${node.id}_${product.id}`,
+                  source: node.id,
+                  target: product.id,
+                  markerEnd: {
+                    type: MarkerType.ArrowClosed,
+                  },
                 },
-              }];
+              ];
             }
           }
 
