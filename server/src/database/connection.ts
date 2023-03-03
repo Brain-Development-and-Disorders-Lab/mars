@@ -1,9 +1,14 @@
 // Libraries
 import { Db, MongoClient } from "mongodb";
 import consola from "consola";
+import _ from "underscore";
 
 // Get the connection string from the environment variables
 const CONNECTION_STRING = process.env.CONNECTION_STRING as string;
+if (_.isUndefined(CONNECTION_STRING)) {
+  consola.error("Connection string is not defined, see README.md for instructions to specify environment variables prior to starting server");
+  throw new Error("Connection string is not defined");
+}
 
 // Setup the MongoDB client and database
 const client: MongoClient = new MongoClient(CONNECTION_STRING, {});
