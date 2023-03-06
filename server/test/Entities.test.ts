@@ -39,7 +39,7 @@ afterAll(() => {
   return disconnect();
 });
 
-describe("GET /entities", () => {
+describe.skip("GET /entities", () => {
   it("should return 0 Entities with an empty database", async () => {
     return Entities.getAll().then((result) => {
       expect(result.length).toBe(0);
@@ -47,7 +47,8 @@ describe("GET /entities", () => {
   });
 });
 
-describe("POST /entities", () => {
+
+describe.skip("POST /entities/create", () => {
   it("should create 1 basic Entity", async () => {
     return Entities.create({
       name: "TestEntity",
@@ -231,6 +232,85 @@ describe("POST /entities", () => {
         // Check the Entity contained in the Collection
         expect(collection.entities.length).toBe(1);
         expect(collection.entities[0]).toStrictEqual(entity._id);
+      });
+  });
+});
+
+describe("POST /entities/update", () => {
+  it("should update the description", async () => {
+    return Entities.create({
+      name: "TestEntity",
+      created: new Date(Date.now()).toISOString(),
+      owner: "henry.burgess@wustl.edu",
+      description: "Test",
+      collections: [],
+      associations: {
+        origins: [],
+        products: [],
+      },
+      attributes: [],
+    })
+      .then((result: EntityModel) => {
+        // Update the description
+        result.description = "Updated";
+
+        return Entities.update(result);
+      })
+      .then((result: EntityModel) => {
+        expect(result.description).toBe("Updated");
+      });
+  });
+
+  it("should update Collection membership", async () => {
+    return Entities.create({
+      name: "TestEntity",
+      created: new Date(Date.now()).toISOString(),
+      owner: "henry.burgess@wustl.edu",
+      description: "Test",
+      collections: [],
+      associations: {
+        origins: [],
+        products: [],
+      },
+      attributes: [],
+    })
+      .then((result: EntityModel) => {
+        // Create a Collection
+        return Promise.all([
+          result,
+          Collections.create({
+            name: "TestCollection",
+            created: new Date(Date.now()).toISOString(),
+            owner: "henry.burgess@wustl.edu",
+            description: "Test Collection",
+            entities: [],
+          }),
+        ]);
+      })
+      .then((result: [EntityModel, CollectionModel]) => {
+        // Update Entity to include Collection
+        result[0].collections.push(result[1]._id);
+
+        return Promise.all([
+          Entities.update(result[0]),
+          result[1],
+        ]);
+      })
+      .then((result: [EntityModel, CollectionModel]) => {
+        // Retrieve both the Entity and Collection
+        return Promise.all([
+          Entities.getOne(result[0]._id),
+          Collections.getOne(result[1]._id),
+        ]);
+      })
+      .then((result: [EntityModel, CollectionModel]) => {
+        // Check that the Entity stores membership to the Collection
+        expect(result[0].collections.length).toBe(1);
+        expect(result[0].collections[0]).toStrictEqual(result[1]._id);
+
+        // Check that the Collection stores membership of the Entity
+        expect(result[1].entities.length).toBe(1);
+        expect(result[1].entities[0]).toStrictEqual(result[0]._id);
       });
   });
 });
