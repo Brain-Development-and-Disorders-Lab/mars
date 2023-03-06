@@ -35,6 +35,8 @@ import {
   InfoOutlineIcon,
 } from "@chakra-ui/icons";
 import Linky from "@components/Linky";
+import { PageContainer } from "@components/PageContainer";
+import Attribute from "@components/Attribute";
 
 import _ from "underscore";
 
@@ -52,7 +54,6 @@ import {
 
 // Utility functions
 import { getData, postData, pseudoId } from "@database/functions";
-import Attribute from "@components/Attribute";
 
 export const Start = ({}) => {
   // Used to manage what detail inputs are presented
@@ -219,12 +220,9 @@ export const Start = ({}) => {
   };
 
   return (
-    <Flex m={["0", "2"]} p={["2", "4"]} align={"center"} justify={"center"}>
-      <Flex
-        direction={"column"}
-        w={["full", "4xl", "7xl"]}
-        maxW={"7xl"}
-      >
+    <PageContainer>
+      <Flex direction={"column"} w={["full", "4xl", "7xl"]}>
+        {/* Page header */}
         <Flex direction={"column"} p={"2"} pt={"4"} pb={"4"}>
           <Flex direction={"row"} align={"center"} justify={"space-between"}>
             <Heading fontWeight={"semibold"}>Create Entity</Heading>
@@ -628,6 +626,7 @@ export const Start = ({}) => {
         flexWrap={"wrap"}
         gap={"6"}
         justify={"space-between"}
+        alignSelf={"center"}
         w={["sm", "xl", "3xl"]}
         maxW={"7xl"}
         p={"4"}
@@ -699,7 +698,7 @@ export const Start = ({}) => {
           </ModalBody>
         </ModalContent>
       </Modal>
-    </Flex>
+    </PageContainer>
   );
 };
 

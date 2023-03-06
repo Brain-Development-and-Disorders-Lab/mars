@@ -68,13 +68,13 @@ const Entities = () => {
     <PageContainer>
       <Flex
         p={"2"}
-        pt={"8"}
-        pb={"8"}
+        pt={"4"}
+        pb={"4"}
         direction={"row"}
         justify={"space-between"}
         align={"center"}
       >
-        <Heading size={"3xl"}>Entities</Heading>
+        <Heading fontWeight={"semibold"}>Entities</Heading>
         <Button
           rightIcon={<AddIcon />}
           as={Link}
@@ -90,7 +90,7 @@ const Entities = () => {
         p={"4"}
         direction={"row"}
         rounded={"2xl"}
-        background={"blue.300"}
+        bg={"whitesmoke"}
         flexWrap={"wrap"}
         gap={"6"}
       >

@@ -21,12 +21,15 @@ import { CheckIcon, CloseIcon, InfoOutlineIcon } from "@chakra-ui/icons";
 import { AiOutlineBlock, AiOutlineLink } from "react-icons/ai";
 import { MdDateRange, MdOutlineTextFields } from "react-icons/md";
 import { RiNumbersLine } from "react-icons/ri";
+import { PageContainer } from "@components/PageContainer";
 import ParameterGroup from "@components/ParameterGroup";
 import { useNavigate } from "react-router-dom";
-import _ from "underscore";
-import consola from "consola";
+
 import { AttributeStruct, Parameters } from "@types";
 import { postData, pseudoId } from "@database/functions";
+
+import _ from "underscore";
+import consola from "consola";
 
 export const Start = ({}) => {
   const navigate = useNavigate();
@@ -51,64 +54,56 @@ export const Start = ({}) => {
   };
 
   return (
-    <Flex m={["0", "2"]} p={["2", "4"]} align={"center"} justify={"center"}>
-      <Flex
-        direction={"column"}
-        maxW={"7xl"}
-        w={["full", "4xl", "7xl"]}
-        p={"4"}
-      >
-        <Flex
-          direction={"row"}
-          p={"2"}
-          pt={"8"}
-          pb={"8"}
-          w={"full"}
-          align={"center"}
-          justify={"space-between"}
-        >
-          <Heading size={"2xl"}>Create Attribute</Heading>
-          <Button
-            rightIcon={<InfoOutlineIcon />}
-            variant={"outline"}
-            onClick={onOpen}
-          >
-            Info
-          </Button>
+    <PageContainer>
+      <Flex direction={"column"} w={["full", "4xl", "7xl"]}>
+        {/* Page header */}
+        <Flex direction={"column"} p={"2"} pt={"4"} pb={"4"}>
+          <Flex direction={"row"} align={"center"} justify={"space-between"}>
+            <Heading fontWeight={"semibold"}>Create Attribute</Heading>
+            <Button
+              rightIcon={<InfoOutlineIcon />}
+              variant={"outline"}
+              onClick={onOpen}
+            >
+              Info
+            </Button>
+          </Flex>
         </Flex>
 
         <Flex
+          direction={"column"}
+          justify={"center"}
+          align={"center"}
+          gap={"6"}
           p={"2"}
           pb={"6"}
-          direction={"row"}
-          wrap={"wrap"}
-          justify={"space-between"}
-          gap={"6"}
+          mb={["12", "8"]}
         >
           <Flex
             direction={"column"}
             gap={"2"}
-            grow={"1"}
-            maxW={"sm"}
-            p={"2"}
-            rounded={"2xl"}
+            w={["full", "4xl"]}
+            maxW={"4xl"}
           >
+            <Heading fontWeight={"semibold"} size={"lg"}>Details</Heading>
             <Text>
               Specify some basic details about this template Attribute. The
               metadata associated with this template should be specified using
               Parameters.
             </Text>
-            <Input
-              placeholder={"Attribute Name"}
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              required
-            />
-            <Textarea
-              value={description}
-              placeholder={"Attribute Description"}
-              onChange={(event) => setDescription(event.target.value)}
-            />
+            <Flex direction="row" gap={"4"} wrap={["wrap", "nowrap"]}>
+              <Input
+                placeholder={"Attribute Name"}
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+                required
+              />
+              <Textarea
+                value={description}
+                placeholder={"Attribute Description"}
+                onChange={(event) => setDescription(event.target.value)}
+              />
+            </Flex>
           </Flex>
           <ParameterGroup
             parameters={parameters}
@@ -116,32 +111,39 @@ export const Start = ({}) => {
             setParameters={setParameters}
           />
         </Flex>
+      </Flex>
 
-        {/* Action buttons */}
-        <Flex
-          p={"2"}
-          direction={"row"}
-          w={"full"}
-          flexWrap={"wrap"}
-          gap={"6"}
-          justify={"space-between"}
+      {/* Action buttons */}
+      <Flex
+        direction={"row"}
+        flexWrap={"wrap"}
+        gap={"6"}
+        justify={"space-between"}
+        alignSelf={"center"}
+        w={["sm", "xl", "3xl"]}
+        maxW={"7xl"}
+        p={"4"}
+        m={"4"}
+        position={"fixed"}
+        bottom={"0%"}
+        bg={"gray.50"}
+        rounded={"20px"}
+      >
+        <Button
+          colorScheme={"red"}
+          variant={"outline"}
+          rightIcon={<CloseIcon />}
+          onClick={() => navigate("/attributes")}
         >
-          <Button
-            colorScheme={"red"}
-            variant={"outline"}
-            rightIcon={<CloseIcon />}
-            onClick={() => navigate("/attributes")}
-          >
-            Cancel
-          </Button>
-          <Button
-            colorScheme={"green"}
-            rightIcon={<CheckIcon />}
-            onClick={onSubmit}
-          >
-            Finish
-          </Button>
-        </Flex>
+          Cancel
+        </Button>
+        <Button
+          colorScheme={"green"}
+          rightIcon={<CheckIcon />}
+          onClick={onSubmit}
+        >
+          Finish
+        </Button>
       </Flex>
 
       {/* Information modal */}
@@ -186,7 +188,7 @@ export const Start = ({}) => {
           </ModalBody>
         </ModalContent>
       </Modal>
-    </Flex>
+    </PageContainer>
   );
 };
 export default Start;

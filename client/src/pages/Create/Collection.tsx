@@ -18,6 +18,7 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import { CheckIcon, CloseIcon, InfoOutlineIcon } from "@chakra-ui/icons";
+import { PageContainer } from "@components/PageContainer";
 import { useNavigate } from "react-router-dom";
 import { postData, pseudoId } from "@database/functions";
 import { CollectionStruct } from "@types";
@@ -40,16 +41,12 @@ export const Start = ({}) => {
   };
 
   return (
-    <Flex m={["0", "2"]} p={["2", "4"]} align={"center"} justify={"center"}>
-      <Flex
-        direction={"column"}
-        maxW={"7xl"}
-        w={["full", "4xl", "7xl"]}
-        p={"4"}
-      >
-        <Flex direction={"column"} p={"2"} pt={"8"} pb={"8"}>
+    <PageContainer>
+      <Flex direction={"column"} w={["full", "4xl", "7xl"]}>
+        {/* Page header */}
+        <Flex direction={"column"} p={"2"} pt={"4"} pb={"4"}>
           <Flex direction={"row"} align={"center"} justify={"space-between"}>
-            <Heading size={"2xl"}>Create Collection</Heading>
+            <Heading fontWeight={"semibold"}>Create Collection</Heading>
             <Button
               rightIcon={<InfoOutlineIcon />}
               variant={"outline"}
@@ -60,132 +57,143 @@ export const Start = ({}) => {
           </Flex>
         </Flex>
 
-        <Flex p={"2"} pb={"6"} direction={"row"} wrap={"wrap"} gap={"6"}>
+        {/* Data input */}
+        <Flex
+          direction={"row"}
+          justify={"center"}
+          gap={"6"}
+          p={"2"}
+          pb={"6"}
+          mb={["12", "8"]}
+        >
           <Flex
             direction={"column"}
             gap={"2"}
-            grow={"1"}
-            maxW={"xl"}
-            p={"2"}
-            rounded={"2xl"}
+            w={["full", "4xl"]}
+            maxW={"4xl"}
           >
-            <Heading size={"xl"} margin={"xs"}>
-              Details
-            </Heading>
+            <Heading fontWeight={"semibold"} size={"lg"}>Details</Heading>
             <Text>Specify some basic details about this Collection.</Text>
-            <Flex direction="row" gap={"4"}>
-              <Flex direction="column" justify="between" gap={"4"}>
-                <FormControl isRequired>
-                  <FormLabel htmlFor="name" fontWeight={"normal"}>
-                    Collection Name
-                  </FormLabel>
-                  <Input
-                    id="name"
-                    name="name"
-                    borderColor={"blackAlpha.300"}
-                    focusBorderColor={"black"}
-                    value={name}
-                    onChange={(event) => setName(event.target.value)}
-                  />
-                </FormControl>
+            <Flex direction="row" gap={"4"} wrap={["wrap", "nowrap"]}>
+              <FormControl isRequired>
+                <FormLabel htmlFor="name" fontWeight={"normal"}>
+                  Collection Name
+                </FormLabel>
+                <Input
+                  id="name"
+                  name="name"
+                  borderColor={"blackAlpha.300"}
+                  focusBorderColor={"black"}
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                />
+              </FormControl>
 
-                <FormControl isRequired>
-                  <FormLabel htmlFor="owner" fontWeight={"normal"}>
-                    Collection Owner
-                  </FormLabel>
-                  <Input
-                    id="owner"
-                    name="owner"
-                    borderColor={"blackAlpha.300"}
-                    focusBorderColor={"black"}
-                    value={owner}
-                    onChange={(event) => setOwner(event.target.value)}
-                  />
-                </FormControl>
+              <FormControl isRequired>
+                <FormLabel htmlFor="owner" fontWeight={"normal"}>
+                  Collection Owner
+                </FormLabel>
+                <Input
+                  id="owner"
+                  name="owner"
+                  borderColor={"blackAlpha.300"}
+                  focusBorderColor={"black"}
+                  value={owner}
+                  onChange={(event) => setOwner(event.target.value)}
+                />
+              </FormControl>
+            </Flex>
 
-                <FormControl>
-                  <FormLabel htmlFor="date" fontWeight={"normal"}>
-                    Creation Date
-                  </FormLabel>
+            <Flex direction="row" gap={"4"} wrap={["wrap", "nowrap"]}>
+              <FormControl>
+                <FormLabel htmlFor="date" fontWeight={"normal"}>
+                  Creation Date
+                </FormLabel>
 
-                  <SingleDatepicker
-                    id="owner"
-                    name="owner"
-                    propsConfigs={{
-                      dateNavBtnProps: {
-                        colorScheme: "gray",
-                      },
-                      dayOfMonthBtnProps: {
-                        defaultBtnProps: {
-                          borderColor: "blackAlpha.300",
-                          _hover: {
-                            background: "black",
-                            color: "white",
-                          },
-                        },
-                        selectedBtnProps: {
+                <SingleDatepicker
+                  id="owner"
+                  name="owner"
+                  propsConfigs={{
+                    dateNavBtnProps: {
+                      colorScheme: "gray",
+                    },
+                    dayOfMonthBtnProps: {
+                      defaultBtnProps: {
+                        borderColor: "blackAlpha.300",
+                        _hover: {
                           background: "black",
                           color: "white",
                         },
-                        todayBtnProps: {
-                          borderColor: "blackAlpha.300",
-                          background: "gray.50",
-                          color: "black",
-                        },
                       },
-                    }}
-                    date={created}
-                    onDateChange={setCreated}
-                  />
-                </FormControl>
-              </Flex>
+                      selectedBtnProps: {
+                        background: "black",
+                        color: "white",
+                      },
+                      todayBtnProps: {
+                        borderColor: "blackAlpha.300",
+                        background: "gray.50",
+                        color: "black",
+                      },
+                    },
+                  }}
+                  date={created}
+                  onDateChange={setCreated}
+                />
+              </FormControl>
 
-              <Flex direction="column">
-                <FormControl isRequired>
-                  <FormLabel htmlFor="description" fontWeight={"normal"}>
-                    Description
-                  </FormLabel>
-                  <Textarea
-                    id="description"
-                    name="description"
-                    value={description}
-                    onChange={(event) => setDescription(event.target.value)}
-                  />
-                </FormControl>
-              </Flex>
+              <FormControl isRequired>
+                <FormLabel htmlFor="description" fontWeight={"normal"}>
+                  Description
+                </FormLabel>
+                <Textarea
+                  id="description"
+                  name="description"
+                  value={description}
+                  onChange={(event) => setDescription(event.target.value)}
+                />
+              </FormControl>
             </Flex>
           </Flex>
         </Flex>
+      </Flex>
 
-        <Flex
-          p={"2"}
-          direction={"row"}
-          flexWrap={"wrap"}
-          gap={"6"}
-          justify={"space-between"}
+      {/* Action buttons */}
+      <Flex
+        direction={"row"}
+        flexWrap={"wrap"}
+        gap={"6"}
+        justify={"space-between"}
+        alignSelf={"center"}
+        w={["sm", "xl", "3xl"]}
+        maxW={"7xl"}
+        p={"4"}
+        m={"4"}
+        position={"fixed"}
+        bottom={"0%"}
+        bg={"gray.50"}
+        rounded={"20px"}
+      >
+        <Button
+          colorScheme={"red"}
+          rightIcon={<CloseIcon />}
+          variant={"outline"}
+          onClick={() => navigate("/")}
         >
-          <Button
-            colorScheme={"red"}
-            rightIcon={<CloseIcon />}
-            variant={"outline"}
-            onClick={() => navigate("/")}
-          >
-            Cancel
-          </Button>
+          Cancel
+        </Button>
 
-          <Button
-            colorScheme={"green"}
-            rightIcon={<CheckIcon />}
-            onClick={() => {
-              // Push the data
-              postData(`/collections/create`, collectionData).then(() =>
-                navigate("/collections")
-              );
-            }}
-          >
-            Finish
-          </Button>
-        </Flex>
+        <Button
+          colorScheme={"green"}
+          rightIcon={<CheckIcon />}
+          onClick={() => {
+            // Push the data
+            postData(`/collections/create`, collectionData).then(() =>
+              navigate("/collections")
+            );
+          }}
+        >
+          Finish
+        </Button>
       </Flex>
 
       {/* Information modal */}
@@ -203,7 +211,7 @@ export const Start = ({}) => {
           </ModalBody>
         </ModalContent>
       </Modal>
-    </Flex>
+    </PageContainer>
   );
 };
 
