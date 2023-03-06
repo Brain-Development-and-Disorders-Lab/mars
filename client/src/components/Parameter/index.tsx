@@ -11,7 +11,8 @@ import {
 } from "@chakra-ui/react";
 import { SingleDatepicker } from "chakra-dayzed-datepicker";
 import { CloseIcon } from "@chakra-ui/icons";
-import { AiOutlineBlock, AiOutlineLink } from "react-icons/ai";
+import { AiOutlineLink } from "react-icons/ai";
+import { BsBox } from "react-icons/bs";
 import { MdDateRange, MdOutlineTextFields } from "react-icons/md";
 import { RiNumbersLine } from "react-icons/ri";
 import { getData } from "src/database/functions";
@@ -36,7 +37,7 @@ export const DateParameter = (props: Parameter.PDate) => {
 
   return (
     <Flex direction={"row"} gap={"2"} align={"center"}>
-      <Icon as={MdDateRange} w={"8"} h={"8"} />
+      <Icon as={MdDateRange} w={"4"} h={"4"} />
 
       {/* Parameter name */}
       <FormControl>
@@ -91,8 +92,7 @@ export const DateParameter = (props: Parameter.PDate) => {
           aria-label={"Remove Parameter"}
           key={`remove-${props.identifier}`}
           icon={<CloseIcon />}
-          color={"white"}
-          background={"red"}
+          colorScheme={"red"}
           onClick={() => {
             if (props.onRemove) {
               props.onRemove(props.identifier);
@@ -104,7 +104,7 @@ export const DateParameter = (props: Parameter.PDate) => {
   );
 };
 
-export const StringParameter = (props: Parameter.PString) => {
+export const TextParameter = (props: Parameter.PText) => {
   const [name, setName] = useState(props.name);
   const [value, setValue] = useState(props.data);
 
@@ -114,7 +114,7 @@ export const StringParameter = (props: Parameter.PString) => {
       props.onUpdate({
         identifier: props.identifier,
         name: name,
-        type: "string",
+        type: "text",
         data: value,
       });
     }
@@ -122,7 +122,7 @@ export const StringParameter = (props: Parameter.PString) => {
 
   return (
     <Flex direction={"row"} gap={"2"} align={"center"}>
-      <Icon as={MdOutlineTextFields} w={"8"} h={"8"} />
+      <Icon as={MdOutlineTextFields} w={"4"} h={"4"} />
 
       {/* Parameter name */}
       <FormControl label="Name">
@@ -140,7 +140,7 @@ export const StringParameter = (props: Parameter.PString) => {
       <FormControl label="Data">
         <Input
           name="data"
-          placeholder={""}
+          placeholder={"Text"}
           value={value}
           onChange={(event) => setValue(event.target.value)}
           disabled={props.disabled}
@@ -154,8 +154,7 @@ export const StringParameter = (props: Parameter.PString) => {
           aria-label={"Remove Parameter"}
           key={`remove-${props.identifier}`}
           icon={<CloseIcon />}
-          color={"white"}
-          background={"red"}
+          colorScheme={"red"}
           onClick={() => {
             if (props.onRemove) {
               props.onRemove(props.identifier);
@@ -185,7 +184,7 @@ export const NumberParameter = (props: Parameter.PNumber) => {
 
   return (
     <Flex direction={"row"} gap={"2"} align={"center"}>
-      <Icon as={RiNumbersLine} w={"8"} h={"8"} />
+      <Icon as={RiNumbersLine} w={"4"} h={"4"} />
 
       {/* Parameter name */}
       <FormControl label="Name">
@@ -217,8 +216,7 @@ export const NumberParameter = (props: Parameter.PNumber) => {
           aria-label={"Remove Parameter"}
           key={`remove-${props.identifier}`}
           icon={<CloseIcon />}
-          color={"white"}
-          background={"red"}
+          colorScheme={"red"}
           onClick={() => {
             if (props.onRemove) {
               props.onRemove(props.identifier);
@@ -248,7 +246,7 @@ export const URLParameter = (props: Parameter.PURL) => {
 
   return (
     <Flex direction={"row"} gap={"2"} align={"center"}>
-      <Icon as={AiOutlineLink} w={"8"} h={"8"} />
+      <Icon as={AiOutlineLink} w={"4"} h={"4"} />
 
       {/* Parameter name */}
       <FormControl label="Name">
@@ -288,8 +286,7 @@ export const URLParameter = (props: Parameter.PURL) => {
           aria-label={"Remove Parameter"}
           key={`remove-${props.identifier}`}
           icon={<CloseIcon />}
-          color={"white"}
-          background={"red"}
+          colorScheme={"red"}
           onClick={() => {
             if (props.onRemove) {
               props.onRemove(props.identifier);
@@ -352,7 +349,7 @@ export const EntityParameter = (props: Parameter.PEntity) => {
 
   return (
     <Flex direction={"row"} gap={"2"} align={"center"}>
-      <Icon as={AiOutlineBlock} w={"8"} h={"8"} />
+      <Icon as={BsBox} w={"4"} h={"4"} />
 
       {/* Parameter name */}
       <FormControl>
@@ -400,8 +397,7 @@ export const EntityParameter = (props: Parameter.PEntity) => {
           aria-label={"Remove Parameter"}
           key={`remove-${props.identifier}`}
           icon={<CloseIcon />}
-          color={"white"}
-          background={"red"}
+          colorScheme={"red"}
           onClick={() => {
             if (props.onRemove) {
               props.onRemove(props.identifier);
@@ -415,7 +411,7 @@ export const EntityParameter = (props: Parameter.PEntity) => {
 
 export default {
   NumberParameter,
-  StringParameter,
+  TextParameter,
   URLParameter,
   DateParameter,
   EntityParameter,

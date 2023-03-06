@@ -2,8 +2,7 @@ import React, { useState } from "react";
 import { Button, Card, CardBody, CardFooter, Divider, Flex, Icon, Input, Textarea } from "@chakra-ui/react";
 import { AttributeProps } from "@types";
 import ParameterGroup from "@components/ParameterGroup";
-import { CloseIcon } from "@chakra-ui/icons";
-import { AiOutlineSave } from "react-icons/ai";
+import { CheckIcon, CloseIcon } from "@chakra-ui/icons";
 
 const Attribute = (props: AttributeProps) => {
   const [name, setName] = useState(props.name);
@@ -24,14 +23,14 @@ const Attribute = (props: AttributeProps) => {
         <Flex direction={"row"} gap={"2"}>
           <Flex direction={"column"} gap={"2"}>
             <Input
-              placeholder={"Attribute Name"}
+              placeholder={"Name"}
               value={name}
               disabled={finished}
               onChange={(event) => setName(event.target.value)}
             />
             <Textarea
               value={description}
-              placeholder={"Attribute Description"}
+              placeholder={"Description"}
               disabled={finished}
               onChange={(event) => setDescription(event.target.value)}
             />
@@ -62,7 +61,7 @@ const Attribute = (props: AttributeProps) => {
             Remove
           </Button>
           <Button
-            rightIcon={<Icon as={AiOutlineSave} />}
+            rightIcon={<Icon as={CheckIcon} />}
             colorScheme={"green"}
             onClick={() => {
               setFinished(true);
@@ -72,7 +71,7 @@ const Attribute = (props: AttributeProps) => {
             }}
             disabled={finished}
           >
-            Save
+            Done
           </Button>
         </Flex>
       </CardFooter>

@@ -82,10 +82,10 @@ declare namespace Parameter {
     onUpdate?: (data: PNumber) => void;
   };
 
-  type PString = Base & {
-    type: "string";
+  type PText = Base & {
+    type: "text";
     data: string;
-    onUpdate?: (data: PString) => void;
+    onUpdate?: (data: PText) => void;
   };
 
   type PURL = Base & {
@@ -107,7 +107,7 @@ declare namespace Parameter {
   };
 }
 
-declare type Parameters = Parameter.PDate | Parameter.PEntity | Parameter.PNumber | Parameter.PString | Parameter.PURL;
+declare type Parameters = Parameter.PDate | Parameter.PEntity | Parameter.PNumber | Parameter.PText | Parameter.PURL;
 
 declare type LinkyProps = {
   type: "entities" | "collections" | "attributes";

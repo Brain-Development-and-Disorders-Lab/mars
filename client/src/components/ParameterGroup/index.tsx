@@ -1,7 +1,7 @@
 import React, { Dispatch, SetStateAction } from "react";
 import { Button, Flex, Icon, Text } from "@chakra-ui/react";
-import { SmallAddIcon } from "@chakra-ui/icons";
-import { AiOutlineBlock, AiOutlineLink } from "react-icons/ai";
+import { AiOutlineLink } from "react-icons/ai";
+import { BsBox } from "react-icons/bs";
 import { MdDateRange, MdOutlineTextFields } from "react-icons/md";
 import { RiNumbersLine } from "react-icons/ri";
 
@@ -13,7 +13,7 @@ import {
   DateParameter,
   EntityParameter,
   NumberParameter,
-  StringParameter,
+  TextParameter,
   URLParameter,
 } from "@components/Parameter";
 
@@ -58,7 +58,7 @@ const ParameterGroup = (props: {
   };
 
   return (
-    <Flex direction={"column"} gap={"4"}>
+    <Flex direction={"column"} gap={"2"}>
       {/* Button Group */}
       {!props.viewOnly && (
         <Flex
@@ -71,7 +71,6 @@ const ParameterGroup = (props: {
           {/* Buttons to add Parameters */}
           <Button
             leftIcon={<Icon as={MdDateRange} />}
-            rightIcon={<SmallAddIcon />}
             onClick={() => {
               // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
               props.setParameters &&
@@ -91,27 +90,25 @@ const ParameterGroup = (props: {
 
           <Button
             leftIcon={<Icon as={MdOutlineTextFields} />}
-            rightIcon={<SmallAddIcon />}
             onClick={() => {
               // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
               props.setParameters &&
                 props.setParameters([
                   ...props.parameters,
                   {
-                    identifier: `p_string_${Math.round(performance.now())}`,
+                    identifier: `p_text_${Math.round(performance.now())}`,
                     name: "",
-                    type: "string",
+                    type: "text",
                     data: "",
                   },
                 ]);
             }}
           >
-            String
+            Text
           </Button>
 
           <Button
             leftIcon={<Icon as={RiNumbersLine} />}
-            rightIcon={<SmallAddIcon />}
             onClick={() => {
               // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
               props.setParameters &&
@@ -131,7 +128,6 @@ const ParameterGroup = (props: {
 
           <Button
             leftIcon={<Icon as={AiOutlineLink} />}
-            rightIcon={<SmallAddIcon />}
             onClick={() => {
               // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
               props.setParameters &&
@@ -150,8 +146,7 @@ const ParameterGroup = (props: {
           </Button>
 
           <Button
-            leftIcon={<Icon as={AiOutlineBlock} />}
-            rightIcon={<SmallAddIcon />}
+            leftIcon={<Icon as={BsBox} />}
             onClick={() => {
               // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
               props.setParameters &&
@@ -245,11 +240,11 @@ const ParameterGroup = (props: {
               }
               default: {
                 return (
-                  <StringParameter
+                  <TextParameter
                     key={parameter.identifier}
                     identifier={parameter.identifier}
                     name={parameter.name}
-                    type={"string"}
+                    type={"text"}
                     data={parameter.data}
                     onRemove={onRemove}
                     onUpdate={onUpdate}
@@ -263,8 +258,7 @@ const ParameterGroup = (props: {
         ) : (
           <Flex align={"center"} justify={"center"}>
             <Text>
-              No Parameters specified. Use the buttons above to add a new
-              Parameter.
+              No Parameters specified.
             </Text>
           </Flex>
         )}
