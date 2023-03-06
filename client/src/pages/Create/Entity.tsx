@@ -245,7 +245,6 @@ export const Start = ({}) => {
           pb={"6"}
           direction={"row"}
           wrap={"wrap"}
-          justify={"space-between"}
           gap={"6"}
           mb={["12", "8"]}
         >
@@ -254,9 +253,8 @@ export const Start = ({}) => {
             <Flex
               direction={"column"}
               gap={"2"}
-              maxW={"xl"}
+              maxW={"2xl"}
               p={"1"}
-              rounded={"2xl"}
             >
               <Heading fontWeight={"semibold"} size={"lg"}>Details</Heading>
               <Text>
@@ -267,66 +265,68 @@ export const Start = ({}) => {
                 Parameters.
               </Text>
 
-              <Flex direction={"row"} gap={"2"} grow={"1"} wrap={"wrap"}>
-                <Flex direction={"column"} gap={"2"} wrap={"wrap"}>
-                  <FormControl>
-                    <FormLabel>Name</FormLabel>
-                    <Input
-                      name="name"
-                      value={name}
-                      onChange={(event) => setName(event.target.value)}
-                      required
-                    />
-                    <FormHelperText>
-                      A standardised name or ID for the Entity.
-                    </FormHelperText>
-                  </FormControl>
-                  <FormControl>
-                    <FormLabel>Owner</FormLabel>
-                    <Input
-                      name="owner"
-                      value={owner}
-                      onChange={(event) => setOwner(event.target.value)}
-                      required
-                    />
-                    <FormHelperText>Owner of the Entity.</FormHelperText>
-                  </FormControl>
-                  <FormControl>
-                    <FormLabel>Created</FormLabel>
-                    <SingleDatepicker
-                      id="owner"
-                      name="owner"
-                      propsConfigs={{
-                        dateNavBtnProps: {
-                          colorScheme: "gray",
-                        },
-                        dayOfMonthBtnProps: {
-                          defaultBtnProps: {
-                            borderColor: "blackAlpha.300",
-                            _hover: {
-                              background: "black",
-                              color: "white",
-                            },
-                          },
-                          selectedBtnProps: {
+              <Flex direction={"row"} gap={"2"}>
+                <FormControl>
+                  <FormLabel>Name</FormLabel>
+                  <Input
+                    name="name"
+                    value={name}
+                    onChange={(event) => setName(event.target.value)}
+                    required
+                  />
+                  <FormHelperText>
+                    A standardised name or ID for the Entity.
+                  </FormHelperText>
+                </FormControl>
+
+                <FormControl>
+                  <FormLabel>Owner</FormLabel>
+                  <Input
+                    name="owner"
+                    value={owner}
+                    onChange={(event) => setOwner(event.target.value)}
+                    required
+                  />
+                  <FormHelperText>Owner of the Entity.</FormHelperText>
+                </FormControl>
+              </Flex>
+
+              <Flex direction={"row"} gap={"2"}>
+                <FormControl>
+                  <FormLabel>Created</FormLabel>
+                  <SingleDatepicker
+                    id="owner"
+                    name="owner"
+                    propsConfigs={{
+                      dateNavBtnProps: {
+                        colorScheme: "gray",
+                      },
+                      dayOfMonthBtnProps: {
+                        defaultBtnProps: {
+                          borderColor: "blackAlpha.300",
+                          _hover: {
                             background: "black",
                             color: "white",
                           },
-                          todayBtnProps: {
-                            borderColor: "blackAlpha.300",
-                            background: "gray.50",
-                            color: "black",
-                          },
                         },
-                      }}
-                      date={created}
-                      onDateChange={setCreated}
-                    />
-                    <FormHelperText>
-                      Date the Entity was created.
-                    </FormHelperText>
-                  </FormControl>
-                </Flex>
+                        selectedBtnProps: {
+                          background: "black",
+                          color: "white",
+                        },
+                        todayBtnProps: {
+                          borderColor: "blackAlpha.300",
+                          background: "gray.50",
+                          color: "black",
+                        },
+                      },
+                    }}
+                    date={created}
+                    onDateChange={setCreated}
+                  />
+                  <FormHelperText>
+                    Date the Entity was created.
+                  </FormHelperText>
+                </FormControl>
 
                 <FormControl>
                   <FormLabel>Description</FormLabel>
