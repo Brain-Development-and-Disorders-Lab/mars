@@ -64,13 +64,13 @@ const Attributes = () => {
     <PageContainer>
       <Flex
         p={"2"}
-        pt={"8"}
-        pb={"8"}
+        pt={"4"}
+        pb={"4"}
         direction={"row"}
         justify={"space-between"}
         align={"center"}
       >
-        <Heading size={"3xl"}>Attributes</Heading>
+        <Heading fontWeight={"semibold"}>Attributes</Heading>
         <Button
           rightIcon={<AddIcon />}
           as={Link}
@@ -86,7 +86,7 @@ const Attributes = () => {
         p={"4"}
         direction={"row"}
         rounded={"2xl"}
-        background={"teal.300"}
+        background={"whitesmoke"}
         flexWrap={"wrap"}
         gap={"6"}
       >

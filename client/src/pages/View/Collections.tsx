@@ -67,13 +67,13 @@ const Collections = () => {
     <PageContainer>
       <Flex
         p={"2"}
-        pt={"8"}
-        pb={"8"}
+        pt={"4"}
+        pb={"4"}
         direction={"row"}
         justify={"space-between"}
         align={"center"}
       >
-        <Heading size={"3xl"}>Collections</Heading>
+        <Heading fontWeight={"semibold"}>Collections</Heading>
         <Button
           rightIcon={<AddIcon />}
           as={Link}
@@ -89,7 +89,7 @@ const Collections = () => {
         p={"4"}
         direction={"row"}
         rounded={"2xl"}
-        background={"gray.300"}
+        bg={"whitesmoke"}
         flexWrap={"wrap"}
         gap={"6"}
       >

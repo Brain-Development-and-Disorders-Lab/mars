@@ -86,7 +86,6 @@ const Navigation = () => {
                 rounded={"md"}
                 cursor={"pointer"}
                 minW={0}
-                leftIcon={<AddIcon />}
               >
                 Create
               </MenuButton>
@@ -123,7 +122,6 @@ const Navigation = () => {
                 rounded={"md"}
                 cursor={"pointer"}
                 minW={0}
-                leftIcon={<InfoOutlineIcon />}
               >
                 View
               </MenuButton>
