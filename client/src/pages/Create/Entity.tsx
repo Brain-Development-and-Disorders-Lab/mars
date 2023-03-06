@@ -222,9 +222,8 @@ export const Start = ({}) => {
     <Flex m={["0", "2"]} p={["2", "4"]} align={"center"} justify={"center"}>
       <Flex
         direction={"column"}
-        maxW={"7xl"}
         w={["full", "4xl", "7xl"]}
-        p={"4"}
+        maxW={"7xl"}
       >
         <Flex direction={"column"} p={"2"} pt={"4"} pb={"4"}>
           <Flex direction={"row"} align={"center"} justify={"space-between"}>
@@ -241,11 +240,11 @@ export const Start = ({}) => {
 
         {/* Main pages */}
         <Flex
+          direction={"row"}
+          justify={"center"}
+          gap={"6"}
           p={"2"}
           pb={"6"}
-          direction={"row"}
-          wrap={"wrap"}
-          gap={"6"}
           mb={["12", "8"]}
         >
           {/* "Start" page */}
@@ -265,7 +264,7 @@ export const Start = ({}) => {
                 Parameters.
               </Text>
 
-              <Flex direction={"row"} gap={"2"}>
+              <Flex direction={"row"} gap={"2"} wrap={["wrap", "nowrap"]}>
                 <FormControl>
                   <FormLabel>Name</FormLabel>
                   <Input
@@ -291,7 +290,7 @@ export const Start = ({}) => {
                 </FormControl>
               </Flex>
 
-              <Flex direction={"row"} gap={"2"}>
+              <Flex direction={"row"} gap={"2"}  wrap={["wrap", "nowrap"]}>
                 <FormControl>
                   <FormLabel>Created</FormLabel>
                   <SingleDatepicker
@@ -357,7 +356,7 @@ export const Start = ({}) => {
                 specified on this page.
               </Text>
 
-              <Flex direction={"row"} gap={"2"}>
+              <Flex direction={"row"} gap={"2"} wrap={["wrap", "nowrap"]}>
                 {/* Origin */}
                 <FormControl>
                   <FormLabel>Origin Entity</FormLabel>
@@ -543,7 +542,7 @@ export const Start = ({}) => {
                 using Attributes and corresponding Parameters.
               </Text>
 
-              <Flex direction={"row"} gap={"2"} align={"center"} justify={"space-between"} wrap={"wrap"}>
+              <Flex direction={"row"} gap={"2"} align={"center"} justify={"space-between"} wrap={["wrap", "nowrap"]}>
                 {/* Drop-down to select existing Attributes */}
                 <FormControl maxW={"sm"}>
                   <Select

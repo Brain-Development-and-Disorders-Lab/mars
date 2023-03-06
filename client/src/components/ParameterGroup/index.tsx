@@ -168,10 +168,10 @@ const ParameterGroup = (props: {
 
       {/* Card Group */}
       <Flex
-        p={"2"}
-        m={"2"}
+        p={["1", "2"]}
+        m={["1", "2"]}
         direction={"column"}
-        gap={"4"}
+        gap={"2"}
         bg={"white"}
         rounded={"lg"}
       >

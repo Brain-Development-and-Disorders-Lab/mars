@@ -72,7 +72,7 @@ const Navigation = () => {
         <HStack spacing={8} alignItems={"center"} justify={"center"}>
           <HStack as={"nav"} spacing={4} display={{ base: "none", md: "flex" }}>
             {/* Icon */}
-            <Image src="Favicon.png" boxSize={"36px"}/>
+            <Image src="/Favicon.png" boxSize={"36px"}/>
 
             <Button key={"home"} bg={"white"}>
               <Link href={"/"}>Home</Link>
