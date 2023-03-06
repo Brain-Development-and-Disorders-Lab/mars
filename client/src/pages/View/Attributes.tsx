@@ -92,16 +92,16 @@ const Attributes = () => {
       >
         {isLoaded && attributesData.length > 0 ? (
           <TableContainer w={"full"}>
-            <Table variant={"simple"} colorScheme={"teal"}>
+            <Table variant={"simple"} colorScheme={"blackAlpha"}>
               <Thead>
                 <Tr>
                   <Th pl={"0"}>
-                    <Heading color={"white"} size={"sm"}>
+                    <Heading size={"sm"}>
                       Name
                     </Heading>
                   </Th>
                   <Th>
-                    <Heading color={"white"} size={"sm"}>
+                    <Heading size={"sm"}>
                       Description
                     </Heading>
                   </Th>
@@ -112,7 +112,7 @@ const Attributes = () => {
                 {attributesData.map((attribute) => {
                   return (
                     <Tr key={attribute._id}>
-                      <Th pl={"0"} color={"white"}>
+                      <Th pl={"0"}>
                         {_.isEqual(attribute.name, "") ? (
                           <WarningLabel
                             key={`warn-${attribute._id}`}
@@ -122,7 +122,7 @@ const Attributes = () => {
                           attribute.name
                         )}
                       </Th>
-                      <Th color={"white"}>
+                      <Th>
                         {_.isEqual(attribute.description, "") ? (
                           <WarningLabel
                             key={`warn-${attribute._id}`}
@@ -136,7 +136,7 @@ const Attributes = () => {
                         <Flex justify={"right"}>
                           <Button
                             key={`view-attribute-${attribute._id}`}
-                            color="grey.400"
+                            colorScheme={"blackAlpha"}
                             rightIcon={<ChevronRightIcon />}
                             onClick={() =>
                               navigate(`/attributes/${attribute._id}`)

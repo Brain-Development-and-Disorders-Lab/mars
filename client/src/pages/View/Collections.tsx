@@ -95,21 +95,21 @@ const Collections = () => {
       >
         {isLoaded && collectionsData.length > 0 ? (
           <TableContainer w={"full"}>
-            <Table variant={"simple"} colorScheme={"gray"}>
+            <Table variant={"simple"} colorScheme={"blackAlpha"}>
               <Thead>
                 <Tr>
                   <Th pl={"0"}>
-                    <Heading color={"gray.600"} size={"sm"}>
+                    <Heading size={"sm"}>
                       Name
                     </Heading>
                   </Th>
                   <Th>
-                    <Heading color={"gray.600"} size={"sm"}>
+                    <Heading size={"sm"}>
                       Owner
                     </Heading>
                   </Th>
                   <Th>
-                    <Heading color={"gray.600"} size={"sm"}>
+                    <Heading size={"sm"}>
                       Description
                     </Heading>
                   </Th>
@@ -166,7 +166,7 @@ const Collections = () => {
                         <Flex justify={"right"}>
                           <Button
                             key={`view-collection-${collection._id}`}
-                            color="grey.400"
+                            colorScheme={"blackAlpha"}
                             rightIcon={<ChevronRightIcon />}
                             onClick={() =>
                               navigate(`/collections/${collection._id}`)

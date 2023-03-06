@@ -96,21 +96,21 @@ const Entities = () => {
       >
         {isLoaded && entityData.length > 0 ? (
           <TableContainer w={"full"}>
-            <Table variant={"simple"} colorScheme={"blue"}>
+            <Table variant={"simple"} colorScheme={"blackAlpha"}>
               <Thead>
                 <Tr>
                   <Th pl={"0"}>
-                    <Heading color={"white"} size={"sm"}>
+                    <Heading size={"sm"}>
                       Name
                     </Heading>
                   </Th>
                   <Th>
-                    <Heading color={"white"} size={"sm"}>
+                    <Heading size={"sm"}>
                       Owner
                     </Heading>
                   </Th>
                   <Th>
-                    <Heading color={"white"} size={"sm"}>
+                    <Heading size={"sm"}>
                       Description
                     </Heading>
                   </Th>
@@ -121,10 +121,10 @@ const Entities = () => {
                 {entityData.map((entity) => {
                   return (
                     <Tr key={entity._id}>
-                      <Th pl={"0"} color={"white"}>
+                      <Th pl={"0"}>
                         {entity.name}
                       </Th>
-                      <Th color={"white"}>
+                      <Th>
                         {_.isEqual(entity.owner, "") ? (
                           <Tag
                             size={"md"}
@@ -139,7 +139,7 @@ const Entities = () => {
                         )}
                       </Th>
                       <Th>
-                        <Text noOfLines={2} color={"white"}>
+                        <Text noOfLines={2}>
                           {_.isEqual(entity.description, "") ? (
                             <Tag
                               size={"md"}
@@ -158,7 +158,7 @@ const Entities = () => {
                         <Flex justify={"right"}>
                           <Button
                             key={`view-entity-${entity._id}`}
-                            color="grey.400"
+                            colorScheme={"blackAlpha"}
                             rightIcon={<ChevronRightIcon />}
                             onClick={() => navigate(`/entities/${entity._id}`)}
                           >
