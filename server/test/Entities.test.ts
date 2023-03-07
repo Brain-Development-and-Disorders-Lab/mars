@@ -39,7 +39,7 @@ afterAll(() => {
   return disconnect();
 });
 
-describe.skip("GET /entities", () => {
+describe("GET /entities", () => {
   it("should return 0 Entities with an empty database", async () => {
     return Entities.getAll().then((result) => {
       expect(result.length).toBe(0);
@@ -48,7 +48,7 @@ describe.skip("GET /entities", () => {
 });
 
 
-describe.skip("POST /entities/create", () => {
+describe("POST /entities/create", () => {
   it("should create 1 basic Entity", async () => {
     return Entities.create({
       name: "TestEntity",
@@ -311,6 +311,203 @@ describe("POST /entities/update", () => {
         // Check that the Collection stores membership of the Entity
         expect(result[1].entities.length).toBe(1);
         expect(result[1].entities[0]).toStrictEqual(result[0]._id);
+
+        return result;
+      })
+      .then((result: [EntityModel, CollectionModel]) => {
+        // Update Entity to remove Collection
+        result[0].collections = [];
+
+        return Promise.all([
+          Entities.update(result[0]),
+          result[1],
+        ]);
+      })
+      .then((result: [EntityModel, CollectionModel]) => {
+        // Retrieve both the Entity and Collection
+        return Promise.all([
+          Entities.getOne(result[0]._id),
+          Collections.getOne(result[1]._id),
+        ]);
+      })
+      .then((result: [EntityModel, CollectionModel]) => {
+        // Check that the Entity has no membership to the Collection
+        expect(result[0].collections.length).toBe(0);
+
+        // Check that the Collection has no membership of the Entity
+        expect(result[1].entities.length).toBe(0);
+      });
+  });
+
+  it("should update Origin associations", async () => {
+    return Entities.create({
+      name: "TestEntity",
+      created: new Date(Date.now()).toISOString(),
+      owner: "henry.burgess@wustl.edu",
+      description: "Test",
+      collections: [],
+      associations: {
+        origins: [],
+        products: [],
+      },
+      attributes: [],
+    })
+      .then((result: EntityModel) => {
+        // Create an Origin
+        return Promise.all([
+          result,
+          Entities.create({
+            name: "OriginEntity",
+            created: new Date(Date.now()).toISOString(),
+            owner: "henry.burgess@wustl.edu",
+            description: "Test",
+            collections: [],
+            associations: {
+              origins: [],
+              products: [],
+            },
+            attributes: [],
+          }),
+        ]);
+      })
+      .then((result: [EntityModel, EntityModel]) => {
+        // Update Entity to include Origin
+        result[0].associations.origins.push({
+          id: result[1]._id,
+          name: result[1].name,
+        });
+
+        return Promise.all([
+          Entities.update(result[0]),
+          result[1],
+        ]);
+      })
+      .then((result: [EntityModel, EntityModel]) => {
+        // Retrieve both the Entity and Origin
+        return Promise.all([
+          Entities.getOne(result[0]._id),
+          Entities.getOne(result[1]._id),
+        ]);
+      })
+      .then((result: [EntityModel, EntityModel]) => {
+        // Check that the Entity stores an Origin
+        expect(result[0].associations.origins.length).toBe(1);
+        expect(result[0].associations.origins[0].id).toStrictEqual(result[1]._id);
+
+        // Check that the Origin stores a Product
+        expect(result[1].associations.products.length).toBe(1);
+        expect(result[1].associations.products[0].id).toStrictEqual(result[0]._id);
+
+        return result;
+      })
+      .then((result: [EntityModel, EntityModel]) => {
+        // Update Entity to remove Origin
+        result[0].associations.origins = [];
+
+        return Promise.all([
+          Entities.update(result[0]),
+          result[1],
+        ]);
+      })
+      .then((result: [EntityModel, EntityModel]) => {
+        // Retrieve both the Entity and Collection
+        return Promise.all([
+          Entities.getOne(result[0]._id),
+          Entities.getOne(result[1]._id),
+        ]);
+      })
+      .then((result: [EntityModel, EntityModel]) => {
+        // Check that the Entity has no Origin
+        expect(result[0].associations.origins.length).toBe(0);
+
+        // Check that the Origin has no Product
+        expect(result[1].associations.products.length).toBe(0);
+      });
+  });
+
+  it("should update Product associations", async () => {
+    return Entities.create({
+      name: "TestEntity",
+      created: new Date(Date.now()).toISOString(),
+      owner: "henry.burgess@wustl.edu",
+      description: "Test",
+      collections: [],
+      associations: {
+        origins: [],
+        products: [],
+      },
+      attributes: [],
+    })
+      .then((result: EntityModel) => {
+        // Create a Product
+        return Promise.all([
+          result,
+          Entities.create({
+            name: "ProductEntity",
+            created: new Date(Date.now()).toISOString(),
+            owner: "henry.burgess@wustl.edu",
+            description: "Test",
+            collections: [],
+            associations: {
+              origins: [],
+              products: [],
+            },
+            attributes: [],
+          }),
+        ]);
+      })
+      .then((result: [EntityModel, EntityModel]) => {
+        // Update Entity to include a Product
+        result[0].associations.products.push({
+          id: result[1]._id,
+          name: result[1].name,
+        });
+
+        return Promise.all([
+          Entities.update(result[0]),
+          result[1],
+        ]);
+      })
+      .then((result: [EntityModel, EntityModel]) => {
+        // Retrieve both the Entity and Collection
+        return Promise.all([
+          Entities.getOne(result[0]._id),
+          Entities.getOne(result[1]._id),
+        ]);
+      })
+      .then((result: [EntityModel, EntityModel]) => {
+        // Check that the Entity stores a Product
+        expect(result[0].associations.products.length).toBe(1);
+        expect(result[0].associations.products[0].id).toStrictEqual(result[1]._id);
+
+        // Check that the Product stores an Origin
+        expect(result[1].associations.origins.length).toBe(1);
+        expect(result[1].associations.origins[0].id).toStrictEqual(result[0]._id);
+
+        return result;
+      })
+      .then((result: [EntityModel, EntityModel]) => {
+        // Update Entity to remove Product
+        result[0].associations.products = [];
+
+        return Promise.all([
+          Entities.update(result[0]),
+          result[1],
+        ]);
+      })
+      .then((result: [EntityModel, EntityModel]) => {
+        // Retrieve both the Entity and Product
+        return Promise.all([
+          Entities.getOne(result[0]._id),
+          Entities.getOne(result[1]._id),
+        ]);
+      })
+      .then((result: [EntityModel, EntityModel]) => {
+        // Check that the Entity has no Product
+        expect(result[0].associations.products.length).toBe(0);
+
+        // Check that the Product has no Origin
+        expect(result[1].associations.origins.length).toBe(0);
       });
   });
 });
