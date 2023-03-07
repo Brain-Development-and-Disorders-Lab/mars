@@ -257,9 +257,7 @@ const ParameterGroup = (props: {
           })
         ) : (
           <Flex align={"center"} justify={"center"}>
-            <Text>
-              No Parameters specified.
-            </Text>
+            <Text>No Parameters specified.</Text>
           </Flex>
         )}
       </Flex>

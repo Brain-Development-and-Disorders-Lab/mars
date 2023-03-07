@@ -47,7 +47,6 @@ describe("GET /entities", () => {
   });
 });
 
-
 describe("POST /entities/create", () => {
   it("should create 1 basic Entity", async () => {
     return Entities.create({
@@ -291,10 +290,7 @@ describe("POST /entities/update", () => {
         // Update Entity to include Collection
         result[0].collections.push(result[1]._id);
 
-        return Promise.all([
-          Entities.update(result[0]),
-          result[1],
-        ]);
+        return Promise.all([Entities.update(result[0]), result[1]]);
       })
       .then((result: [EntityModel, CollectionModel]) => {
         // Retrieve both the Entity and Collection
@@ -318,10 +314,7 @@ describe("POST /entities/update", () => {
         // Update Entity to remove Collection
         result[0].collections = [];
 
-        return Promise.all([
-          Entities.update(result[0]),
-          result[1],
-        ]);
+        return Promise.all([Entities.update(result[0]), result[1]]);
       })
       .then((result: [EntityModel, CollectionModel]) => {
         // Retrieve both the Entity and Collection
@@ -377,10 +370,7 @@ describe("POST /entities/update", () => {
           name: result[1].name,
         });
 
-        return Promise.all([
-          Entities.update(result[0]),
-          result[1],
-        ]);
+        return Promise.all([Entities.update(result[0]), result[1]]);
       })
       .then((result: [EntityModel, EntityModel]) => {
         // Retrieve both the Entity and Origin
@@ -392,11 +382,15 @@ describe("POST /entities/update", () => {
       .then((result: [EntityModel, EntityModel]) => {
         // Check that the Entity stores an Origin
         expect(result[0].associations.origins.length).toBe(1);
-        expect(result[0].associations.origins[0].id).toStrictEqual(result[1]._id);
+        expect(result[0].associations.origins[0].id).toStrictEqual(
+          result[1]._id
+        );
 
         // Check that the Origin stores a Product
         expect(result[1].associations.products.length).toBe(1);
-        expect(result[1].associations.products[0].id).toStrictEqual(result[0]._id);
+        expect(result[1].associations.products[0].id).toStrictEqual(
+          result[0]._id
+        );
 
         return result;
       })
@@ -404,10 +398,7 @@ describe("POST /entities/update", () => {
         // Update Entity to remove Origin
         result[0].associations.origins = [];
 
-        return Promise.all([
-          Entities.update(result[0]),
-          result[1],
-        ]);
+        return Promise.all([Entities.update(result[0]), result[1]]);
       })
       .then((result: [EntityModel, EntityModel]) => {
         // Retrieve both the Entity and Collection
@@ -463,10 +454,7 @@ describe("POST /entities/update", () => {
           name: result[1].name,
         });
 
-        return Promise.all([
-          Entities.update(result[0]),
-          result[1],
-        ]);
+        return Promise.all([Entities.update(result[0]), result[1]]);
       })
       .then((result: [EntityModel, EntityModel]) => {
         // Retrieve both the Entity and Collection
@@ -478,11 +466,15 @@ describe("POST /entities/update", () => {
       .then((result: [EntityModel, EntityModel]) => {
         // Check that the Entity stores a Product
         expect(result[0].associations.products.length).toBe(1);
-        expect(result[0].associations.products[0].id).toStrictEqual(result[1]._id);
+        expect(result[0].associations.products[0].id).toStrictEqual(
+          result[1]._id
+        );
 
         // Check that the Product stores an Origin
         expect(result[1].associations.origins.length).toBe(1);
-        expect(result[1].associations.origins[0].id).toStrictEqual(result[0]._id);
+        expect(result[1].associations.origins[0].id).toStrictEqual(
+          result[0]._id
+        );
 
         return result;
       })
@@ -490,10 +482,7 @@ describe("POST /entities/update", () => {
         // Update Entity to remove Product
         result[0].associations.products = [];
 
-        return Promise.all([
-          Entities.update(result[0]),
-          result[1],
-        ]);
+        return Promise.all([Entities.update(result[0]), result[1]]);
       })
       .then((result: [EntityModel, EntityModel]) => {
         // Retrieve both the Entity and Product

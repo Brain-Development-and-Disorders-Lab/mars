@@ -1,5 +1,15 @@
 import React, { useState } from "react";
-import { Button, Card, CardBody, CardFooter, Divider, Flex, Icon, Input, Textarea } from "@chakra-ui/react";
+import {
+  Button,
+  Card,
+  CardBody,
+  CardFooter,
+  Divider,
+  Flex,
+  Icon,
+  Input,
+  Textarea,
+} from "@chakra-ui/react";
 import { AttributeProps } from "@types";
 import ParameterGroup from "@components/ParameterGroup";
 import { CheckIcon, CloseIcon } from "@chakra-ui/icons";
@@ -20,7 +30,12 @@ const Attribute = (props: AttributeProps) => {
   return (
     <Card variant={"outline"} p={["1", "2"]}>
       <CardBody p={["1", "2"]}>
-        <Flex direction={"row"} gap={"2"} wrap={"wrap"} justify={["center", "space-between"]}>
+        <Flex
+          direction={"row"}
+          gap={"2"}
+          wrap={"wrap"}
+          justify={["center", "space-between"]}
+        >
           <Flex direction={"column"} gap={"2"}>
             <Input
               placeholder={"Name"}

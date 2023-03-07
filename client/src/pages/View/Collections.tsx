@@ -99,19 +99,13 @@ const Collections = () => {
               <Thead>
                 <Tr>
                   <Th pl={"0"}>
-                    <Heading size={"sm"}>
-                      Name
-                    </Heading>
+                    <Heading size={"sm"}>Name</Heading>
                   </Th>
                   <Th>
-                    <Heading size={"sm"}>
-                      Owner
-                    </Heading>
+                    <Heading size={"sm"}>Owner</Heading>
                   </Th>
                   <Th>
-                    <Heading size={"sm"}>
-                      Description
-                    </Heading>
+                    <Heading size={"sm"}>Description</Heading>
                   </Th>
                   <Th pr={"0"}></Th>
                 </Tr>

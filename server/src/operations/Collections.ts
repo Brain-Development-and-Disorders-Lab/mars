@@ -4,6 +4,7 @@ import { ObjectId } from "mongodb";
 // Utility functions
 import { getDatabase } from "../database/connection";
 import { Entities } from "./Entities";
+import { Updates } from "./Updates";
 
 // Custom types
 import { CollectionModel, CollectionStruct } from "@types";
@@ -38,6 +39,21 @@ export class Collections {
             operations.push(Collections.addEntity(result.insertedId, entity));
           }
 
+          // Add Update operation
+          operations.push(
+            Updates.create({
+              timestamp: new Date(Date.now()),
+              type: "create",
+              details: "Created new Collection",
+              target: {
+                type: "collections",
+                id: collection._id,
+                name: collection.name,
+              },
+            })
+          );
+
+          // Resolve all operations then resolve overall Promise
           Promise.all(operations).then((_result) => {
             collection["_id"] = result.insertedId;
             consola.success("Created new Collection:", collection.name);
@@ -75,13 +91,17 @@ export class Collections {
               (entity) => !currentCollection.entities.includes(entity)
             );
             entitiesToAdd.map((entity: string) => {
-              operations.push(Entities.addCollection(entity, currentCollection._id));
+              operations.push(
+                Entities.addCollection(entity, currentCollection._id)
+              );
             });
             const entitiesToRemove = currentCollection.entities.filter(
               (entity) => !entitiesToKeep.includes(entity)
             );
             entitiesToRemove.map((entity: string) => {
-              operations.push(Entities.removeCollection(entity, currentCollection._id));
+              operations.push(
+                Entities.removeCollection(entity, currentCollection._id)
+              );
             });
 
             const updates = {
@@ -89,6 +109,20 @@ export class Collections {
                 entities: [...entitiesToKeep, ...entitiesToAdd],
               },
             };
+
+            // Add Update operation
+            operations.push(
+              Updates.create({
+                timestamp: new Date(Date.now()),
+                type: "update",
+                details: "Updated Collection",
+                target: {
+                  type: "collections",
+                  id: updatedCollection._id,
+                  name: updatedCollection.name,
+                },
+              })
+            );
 
             getDatabase()
               .collection(COLLECTIONS)
@@ -100,8 +134,12 @@ export class Collections {
                     throw error;
                   }
 
+                  // Resolve all operations then resolve overall Promise
                   Promise.all(operations).then((_result) => {
-                    consola.success("Updated Collection:", updatedCollection.name);
+                    consola.success(
+                      "Updated Collection:",
+                      updatedCollection.name
+                    );
 
                     // Resolve the Promise
                     resolve(updatedCollection);
@@ -114,7 +152,12 @@ export class Collections {
   };
 
   static addEntity = (collection: string, entity: string): Promise<string> => {
-    consola.info("Adding Entity", entity.toString(), "to Collection", collection.toString());
+    consola.info(
+      "Adding Entity",
+      entity.toString(),
+      "to Collection",
+      collection.toString()
+    );
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(COLLECTIONS)
@@ -141,7 +184,12 @@ export class Collections {
                   if (error) {
                     throw error;
                   }
-                  consola.success("Added Entity", entity.toString(), "to Collection", collection.toString());
+                  consola.success(
+                    "Added Entity",
+                    entity.toString(),
+                    "to Collection",
+                    collection.toString()
+                  );
 
                   // Resolve the Promise
                   resolve(collection);
@@ -156,7 +204,12 @@ export class Collections {
     collection: string,
     entity: string
   ): Promise<string> => {
-    consola.info("Removing Entity", entity.toString(), "from Collection", collection.toString());
+    consola.info(
+      "Removing Entity",
+      entity.toString(),
+      "from Collection",
+      collection.toString()
+    );
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(COLLECTIONS)
@@ -185,7 +238,12 @@ export class Collections {
                   if (error) {
                     throw error;
                   }
-                  consola.success("Removed Entity", entity.toString(), "from Collection", collection.toString());
+                  consola.success(
+                    "Removed Entity",
+                    entity.toString(),
+                    "from Collection",
+                    collection.toString()
+                  );
 
                   // Resolve the Promise
                   resolve(collection);
@@ -239,36 +297,48 @@ export class Collections {
           if (error) {
             throw error;
           }
+          // Store the Collection data
+          const collection: CollectionModel = result;
+
+          const operations: Promise<any>[] = [];
 
           // Remove the Entities from the Collection
-          Promise.all(
-            (result as CollectionModel).entities.map((entity) => {
-              Entities.removeCollection(
-                entity,
-                (result as CollectionModel)._id
-              );
-            })
-          )
-            .then((_result) => {
-              // Remove the Entity as a product of the listed Origin
-            })
-            .then((_result) => {
-              // Delete the Entity
-              getDatabase()
-                .collection(COLLECTIONS)
-                .deleteOne(
-                  { _id: new ObjectId(id) },
-                  (error: any, _content: any) => {
-                    if (error) {
-                      throw error;
-                    }
+          collection.entities.map((entity) => {
+            operations.push(Entities.removeCollection(entity, collection._id));
+          });
 
-                    consola.success("Deleted Collection (id):", id.toString());
-                    resolve(result);
+          // Add Update operation
+          operations.push(
+            Updates.create({
+              timestamp: new Date(Date.now()),
+              type: "delete",
+              details: "Deleted Collection",
+              target: {
+                type: "collections",
+                id: collection._id,
+                name: collection.name,
+              },
+            })
+          );
+
+          // Resolve all operations then resolve overall Promise
+          Promise.all(operations).then((_result) => {
+            // Delete the Collection
+            getDatabase()
+              .collection(COLLECTIONS)
+              .deleteOne(
+                { _id: new ObjectId(id) },
+                (error: any, _content: any) => {
+                  if (error) {
+                    throw error;
                   }
-                );
-            });
-        });
+
+                  consola.success("Deleted Collection (id):", id.toString());
+                  resolve(result);
+                }
+              );
+          });
+      });
     });
   };
 }

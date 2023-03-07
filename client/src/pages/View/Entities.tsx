@@ -100,19 +100,13 @@ const Entities = () => {
               <Thead>
                 <Tr>
                   <Th pl={"0"}>
-                    <Heading size={"sm"}>
-                      Name
-                    </Heading>
+                    <Heading size={"sm"}>Name</Heading>
                   </Th>
                   <Th>
-                    <Heading size={"sm"}>
-                      Owner
-                    </Heading>
+                    <Heading size={"sm"}>Owner</Heading>
                   </Th>
                   <Th>
-                    <Heading size={"sm"}>
-                      Description
-                    </Heading>
+                    <Heading size={"sm"}>Description</Heading>
                   </Th>
                   <Th pr={"0"}></Th>
                 </Tr>
@@ -121,9 +115,7 @@ const Entities = () => {
                 {entityData.map((entity) => {
                   return (
                     <Tr key={entity._id}>
-                      <Th pl={"0"}>
-                        {entity.name}
-                      </Th>
+                      <Th pl={"0"}>{entity.name}</Th>
                       <Th>
                         {_.isEqual(entity.owner, "") ? (
                           <Tag

@@ -66,13 +66,10 @@ export const Start = ({}) => {
           pb={"6"}
           mb={["12", "8"]}
         >
-          <Flex
-            direction={"column"}
-            gap={"2"}
-            w={["full", "4xl"]}
-            maxW={"4xl"}
-          >
-            <Heading fontWeight={"semibold"} size={"lg"}>Details</Heading>
+          <Flex direction={"column"} gap={"2"} w={["full", "4xl"]} maxW={"4xl"}>
+            <Heading fontWeight={"semibold"} size={"lg"}>
+              Details
+            </Heading>
             <Text>Specify some basic details about this Collection.</Text>
             <Flex direction="row" gap={"4"} wrap={["wrap", "nowrap"]}>
               <FormControl isRequired>

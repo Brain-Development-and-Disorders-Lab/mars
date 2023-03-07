@@ -247,13 +247,10 @@ export const Start = ({}) => {
         >
           {/* "Start" page */}
           {_.isEqual("start", pageState) && (
-            <Flex
-              direction={"column"}
-              gap={"2"}
-              maxW={"4xl"}
-              p={"1"}
-            >
-              <Heading fontWeight={"semibold"} size={"lg"}>Details</Heading>
+            <Flex direction={"column"} gap={"2"} maxW={"4xl"} p={"1"}>
+              <Heading fontWeight={"semibold"} size={"lg"}>
+                Details
+              </Heading>
               <Text>
                 Specify some basic details about this Entity. Relations between
                 Entities and membership to Collections can be specified on the
@@ -288,7 +285,7 @@ export const Start = ({}) => {
                 </FormControl>
               </Flex>
 
-              <Flex direction={"row"} gap={"2"}  wrap={["wrap", "nowrap"]}>
+              <Flex direction={"row"} gap={"2"} wrap={["wrap", "nowrap"]}>
                 <FormControl>
                   <FormLabel>Created</FormLabel>
                   <SingleDatepicker
@@ -320,9 +317,7 @@ export const Start = ({}) => {
                     date={created}
                     onDateChange={setCreated}
                   />
-                  <FormHelperText>
-                    Date the Entity was created.
-                  </FormHelperText>
+                  <FormHelperText>Date the Entity was created.</FormHelperText>
                 </FormControl>
 
                 <FormControl>
@@ -342,13 +337,10 @@ export const Start = ({}) => {
 
           {/* "Associations" page */}
           {_.isEqual("associations", pageState) && (
-            <Flex
-              direction={"column"}
-              gap={"2"}
-              maxW={"4xl"}
-              p={"1"}
-            >
-              <Heading fontWeight={"semibold"} size={"lg"}>Associations</Heading>
+            <Flex direction={"column"} gap={"2"} maxW={"4xl"} p={"1"}>
+              <Heading fontWeight={"semibold"} size={"lg"}>
+                Associations
+              </Heading>
               <Text>
                 Relations between Entities and membership to Collections can be
                 specified on this page.
@@ -528,19 +520,22 @@ export const Start = ({}) => {
 
           {/* "Attributes" page */}
           {_.isEqual("attributes", pageState) && (
-            <Flex
-              direction={"column"}
-              gap={"2"}
-              maxW={"4xl"}
-              p={"1"}
-            >
-              <Heading fontWeight={"semibold"} size={"lg"}>Attributes</Heading>
+            <Flex direction={"column"} gap={"2"} maxW={"4xl"} p={"1"}>
+              <Heading fontWeight={"semibold"} size={"lg"}>
+                Attributes
+              </Heading>
               <Text>
                 The metadata associated with this Entity should be specified
                 using Attributes and corresponding Parameters.
               </Text>
 
-              <Flex direction={"row"} gap={"2"} align={"center"} justify={"space-between"} wrap={["wrap", "nowrap"]}>
+              <Flex
+                direction={"row"}
+                gap={"2"}
+                align={"center"}
+                justify={"space-between"}
+                wrap={["wrap", "nowrap"]}
+              >
                 {/* Drop-down to select existing Attributes */}
                 <FormControl maxW={"sm"}>
                   <Select

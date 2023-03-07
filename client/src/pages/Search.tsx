@@ -23,7 +23,11 @@ import {
   useDisclosure,
   useToast,
 } from "@chakra-ui/react";
-import { ChevronRightIcon, InfoOutlineIcon, SearchIcon } from "@chakra-ui/icons";
+import {
+  ChevronRightIcon,
+  InfoOutlineIcon,
+  SearchIcon,
+} from "@chakra-ui/icons";
 
 // Navigation
 import { useNavigate } from "react-router-dom";
@@ -111,45 +115,47 @@ const Search = () => {
           <Flex w={"full"} align={"center"} justify={"center"}>
             <Loading />
           </Flex>
-        ) : hasSearched && (
-          <TableContainer w={"full"}>
-            <Table>
-              <Thead>
-                <Tr>
-                  <Th>Identifier</Th>
-                  <Th>Created</Th>
-                  <Th>Owner</Th>
-                  <Th></Th>
-                </Tr>
-              </Thead>
+        ) : (
+          hasSearched && (
+            <TableContainer w={"full"}>
+              <Table>
+                <Thead>
+                  <Tr>
+                    <Th>Identifier</Th>
+                    <Th>Created</Th>
+                    <Th>Owner</Th>
+                    <Th></Th>
+                  </Tr>
+                </Thead>
 
-              <Tbody>
-                {results.length > 0 &&
-                  results.map((result) => {
-                    return (
-                      <Tr key={result._id}>
-                        <Td>{result.name}</Td>
-                        <Td>{new Date(result.created).toDateString()}</Td>
-                        <Td>{result.owner}</Td>
-                        <Td>
-                          <Flex justify={"right"}>
-                            <Button
-                              rightIcon={<ChevronRightIcon />}
-                              colorScheme={"blackAlpha"}
-                              onClick={() =>
-                                navigate(`/entities/${result._id}`)
-                              }
-                            >
-                              View
-                            </Button>
-                          </Flex>
-                        </Td>
-                      </Tr>
-                    );
-                  })}
-              </Tbody>
-            </Table>
-          </TableContainer>
+                <Tbody>
+                  {results.length > 0 &&
+                    results.map((result) => {
+                      return (
+                        <Tr key={result._id}>
+                          <Td>{result.name}</Td>
+                          <Td>{new Date(result.created).toDateString()}</Td>
+                          <Td>{result.owner}</Td>
+                          <Td>
+                            <Flex justify={"right"}>
+                              <Button
+                                rightIcon={<ChevronRightIcon />}
+                                colorScheme={"blackAlpha"}
+                                onClick={() =>
+                                  navigate(`/entities/${result._id}`)
+                                }
+                              >
+                                View
+                              </Button>
+                            </Flex>
+                          </Td>
+                        </Tr>
+                      );
+                    })}
+                </Tbody>
+              </Table>
+            </TableContainer>
+          )
         )}
       </Flex>
 

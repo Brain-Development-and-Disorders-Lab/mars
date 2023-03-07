@@ -261,9 +261,7 @@ const Home = () => {
                     {entityData.slice(0, 3).map((entity) => {
                       return (
                         <Tr key={entity._id}>
-                          <Th pl={"0"}>
-                            {entity.name}
-                          </Th>
+                          <Th pl={"0"}>{entity.name}</Th>
                           <Th pr={"0"}>
                             <Flex justify={"right"}>
                               <Button
@@ -346,14 +344,16 @@ const Home = () => {
                         <Text fontSize={"md"} as={"b"}>
                           {dayjs(update.timestamp).format("DD MMM HH:mm")}
                         </Text>
-                        <Badge colorScheme={typeBadgeColor}>
-                          {update.target.type}
-                        </Badge>
                         <Badge colorScheme={operationBadgeColor}>
                           {update.type}
                         </Badge>
+                        <Badge colorScheme={typeBadgeColor}>
+                          {update.target.type}
+                        </Badge>
                         <Spacer />
-                        <Text fontSize={"md"} as={"b"}>{update.target.name}</Text>
+                        <Text fontSize={"md"} as={"b"}>
+                          {update.target.name}
+                        </Text>
                       </Flex>
                     </ListItem>
                   );

@@ -87,7 +87,7 @@ export class Entities {
             })
           );
 
-          // Finally, resolve the Promise
+          // Resolve all operations then resolve overall Promise
           Promise.all(operations).then((_result) => {
             consola.success("Created Entity:", entity.name);
             resolve(entity);
@@ -233,6 +233,21 @@ export class Entities {
               );
             }
 
+            // Add Update operation
+            operations.push(
+              Updates.create({
+                timestamp: new Date(Date.now()),
+                type: "update",
+                details: "Updated Entity",
+                target: {
+                  type: "entities",
+                  id: currentEntity._id,
+                  name: currentEntity.name,
+                },
+              })
+            );
+
+            // Resolve all operations then resolve overall Promise
             Promise.all(operations).then((_result) => {
               const updates = {
                 $set: {
@@ -748,6 +763,21 @@ export class Entities {
             );
           });
 
+          // Add Update operation
+          operations.push(
+            Updates.create({
+              timestamp: new Date(Date.now()),
+              type: "delete",
+              details: "Deleted Entity",
+              target: {
+                type: "entities",
+                id: entity._id,
+                name: entity.name,
+              },
+            })
+          );
+
+          // Resolve all operations then resolve overall Promise
           Promise.all(operations).then((_result) => {
             // Delete the Entity
             getDatabase()
