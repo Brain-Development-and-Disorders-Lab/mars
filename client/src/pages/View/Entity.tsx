@@ -420,28 +420,36 @@ export const Entity = () => {
         align={"center"}
         wrap={"wrap"}
       >
-        <Heading size={"2xl"}>Entity: {entityData.name}</Heading>
+        <Heading fontWeight={"semibold"}>{entityData.name}</Heading>
 
         {/* Buttons */}
-        <Flex direction={"row"} gap={"2"}>
-          <Button
-            onClick={onGraphOpen}
-            rightIcon={<Icon as={SlGraph} />}
-            colorScheme={"orange"}
-          >
-            View Graph
-          </Button>
-          <Button
-            onClick={handlePrintClick}
-            rightIcon={<Icon as={BsPrinter} />}
-            colorScheme={"blue"}
-          >
-            Print Label
-          </Button>
-        </Flex>
-
-        {/* Buttons */}
-        <Flex direction={"row"} p={"2"} gap={"2"}>
+        <Flex direction={"row"} gap={"4"}>
+          {editing &&
+            <Popover>
+              <PopoverTrigger>
+                <Button colorScheme={"red"} rightIcon={<CloseIcon />}>
+                  Delete
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent>
+                <PopoverArrow />
+                <PopoverCloseButton />
+                <PopoverHeader>Confirmation</PopoverHeader>
+                <PopoverBody>
+                  Are you sure you want to delete this Entity?
+                  <Flex direction={"row"} p={"2"} justify={"center"}>
+                    <Button
+                      colorScheme={"green"}
+                      rightIcon={<CheckIcon />}
+                      onClick={handleDeleteClick}
+                    >
+                      Confirm
+                    </Button>
+                  </Flex>
+                </PopoverBody>
+              </PopoverContent>
+            </Popover>
+          }
           <Button
             onClick={handleEditClick}
             colorScheme={editing ? "green" : "gray"}
@@ -451,96 +459,95 @@ export const Entity = () => {
           >
             {editing ? "Done" : "Edit"}
           </Button>
-          <Popover>
-            <PopoverTrigger>
-              <Button colorScheme={"red"} rightIcon={<CloseIcon />}>
-                Delete
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent>
-              <PopoverArrow />
-              <PopoverCloseButton />
-              <PopoverHeader>Confirmation</PopoverHeader>
-              <PopoverBody>
-                Are you sure you want to delete this Entity?
-                <Flex direction={"row"} p={"2"} justify={"center"}>
-                  <Button
-                    colorScheme={"green"}
-                    rightIcon={<CheckIcon />}
-                    onClick={handleDeleteClick}
-                  >
-                    Confirm
-                  </Button>
-                </Flex>
-              </PopoverBody>
-            </PopoverContent>
-          </Popover>
+          <Button
+            onClick={onGraphOpen}
+            rightIcon={<Icon as={SlGraph} />}
+            colorScheme={"orange"}
+            isDisabled={editing}
+          >
+            View Graph
+          </Button>
+          <Button
+            onClick={handlePrintClick}
+            rightIcon={<Icon as={BsPrinter} />}
+            colorScheme={"blue"}
+            isDisabled={editing}
+          >
+            Export CSV
+          </Button>
         </Flex>
       </Flex>
 
-      <Flex p={"2"} direction={"row"} wrap={"wrap"}>
-        {/* Metadata table */}
-        <Flex p={"2"} gap={"2"} grow={"1"} direction={"column"}>
-          <Flex direction={"row"} justify={"space-between"} mb={"sm"}>
-            <Heading margin={"none"}>Overview</Heading>
+      <Flex direction={"row"} gap={"4"} wrap={"wrap"}>
+        <Flex
+          direction={"column"}
+          p={"4"}
+          gap={"4"}
+          grow={"1"}
+          h={"fit-content"}
+          bg={"whitesmoke"}
+          rounded={"10px"}
+        >
+          {/* Details */}
+          <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
+            <Heading size={"lg"}>Details</Heading>
+            <TableContainer>
+              <Table variant={"simple"} colorScheme={"blackAlpha"}>
+                <Thead>
+                  <Tr>
+                    <Th maxW={"xs"}>Field</Th>
+                    <Th>Value</Th>
+                  </Tr>
+                </Thead>
+                <Tbody>
+                  <Tr>
+                    <Td>Created</Td>
+                    <Td>
+                      <Text>{new Date(entityData.created).toDateString()}</Text>
+                    </Td>
+                  </Tr>
+
+                  <Tr>
+                    <Td>Owner</Td>
+                    <Td>
+                      {_.isEqual(entityData.owner, "") ? (
+                        <Tag
+                          size={"md"}
+                          key={`warn-${entityData._id}`}
+                          colorScheme={"orange"}
+                        >
+                          <TagLabel>Not specified</TagLabel>
+                          <TagRightIcon as={WarningIcon} />
+                        </Tag>
+                      ) : (
+                        <Text>
+                          <Link>{entityData.owner}</Link>
+                        </Text>
+                      )}
+                    </Td>
+                  </Tr>
+
+                  <Tr>
+                    <Td>Description</Td>
+                    <Td>
+                      <Textarea
+                        value={entityDescription}
+                        onChange={(event) => {
+                          setEntityDescription(event.target.value);
+                        }}
+                        disabled={!editing}
+                      />
+                    </Td>
+                  </Tr>
+                </Tbody>
+              </Table>
+            </TableContainer>
           </Flex>
 
-          <TableContainer>
-            <Table mt={"sm"} colorScheme={"gray"}>
-              <Thead>
-                <Tr>
-                  <Th maxW={"xs"}>Field</Th>
-                  <Th>Value</Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                <Tr>
-                  <Td>Created</Td>
-                  <Td>
-                    <Text>{new Date(entityData.created).toDateString()}</Text>
-                  </Td>
-                </Tr>
-
-                <Tr>
-                  <Td>Owner</Td>
-                  <Td>
-                    {_.isEqual(entityData.owner, "") ? (
-                      <Tag
-                        size={"md"}
-                        key={`warn-${entityData._id}`}
-                        colorScheme={"orange"}
-                      >
-                        <TagLabel>Not specified</TagLabel>
-                        <TagRightIcon as={WarningIcon} />
-                      </Tag>
-                    ) : (
-                      <Text>
-                        <Link>{entityData.owner}</Link>
-                      </Text>
-                    )}
-                  </Td>
-                </Tr>
-
-                <Tr>
-                  <Td>Description</Td>
-                  <Td>
-                    <Textarea
-                      value={entityDescription}
-                      onChange={(event) => {
-                        setEntityDescription(event.target.value);
-                      }}
-                      disabled={!editing}
-                    />
-                  </Td>
-                </Tr>
-              </Tbody>
-            </Table>
-          </TableContainer>
-
           {/* Collections */}
-          <Flex p={"2"} gap={"2"} grow={"1"} direction={"column"}>
-            <Flex direction={"row"} justify={"space-between"} mb={"sm"}>
-              <Heading margin={"none"}>Collections</Heading>
+          <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
+            <Flex direction={"row"} justify={"space-between"}>
+              <Heading size={"lg"}>Collections</Heading>
               {editing ? (
                 <Button
                   colorScheme={"green"}
@@ -553,68 +560,76 @@ export const Entity = () => {
               ) : null}
             </Flex>
 
-            <TableContainer>
-              <Table>
-                <Thead>
-                  <Tr>
-                    <Th pl={"1"}>Collection</Th>
-                    <Th></Th>
-                  </Tr>
-                </Thead>
-
-                <Tbody>
-                  {entityCollections.map((collection) => {
-                    return (
-                      <Tr key={collection}>
-                        <Td>
-                          <Linky type="collections" id={collection} />
-                        </Td>
-                        <Td>
-                          <Flex w={"full"} gap={"2"} justify={"right"}>
-                            {editing && (
-                              <Button
-                                key={`remove-${collection}`}
-                                rightIcon={<CloseIcon />}
-                                colorScheme={"red"}
-                                onClick={() => {
-                                  removeCollection(collection);
-                                }}
-                              >
-                                Remove
-                              </Button>
-                            )}
-
-                            {!editing && (
-                              <Button
-                                key={`view-${collection}`}
-                                rightIcon={<ChevronRightIcon />}
-                                as={Link}
-                                href={`/collections/${collection}`}
-                              >
-                                View
-                              </Button>
-                            )}
-                          </Flex>
-                        </Td>
-                      </Tr>
-                    );
-                  })}
-                </Tbody>
-              </Table>
-            </TableContainer>
-            {entityCollections.length === 0 && (
+            {entityCollections.length === 0 ? (
               <Text>
-                Entity {entityData.name} is not a member of any Collections.
+                {entityData.name} is not a member of any Collections.
               </Text>
+            ) : (
+              <TableContainer>
+                <Table variant={"simple"} colorScheme={"blackAlpha"}>
+                  <Thead>
+                    <Tr>
+                      <Th>Collection</Th>
+                      <Th></Th>
+                    </Tr>
+                  </Thead>
+                  <Tbody>
+                    {entityCollections.map((collection) => {
+                      return (
+                        <Tr key={collection}>
+                          <Td>
+                            <Linky type="collections" id={collection} />
+                          </Td>
+                          <Td>
+                            <Flex w={"full"} gap={"2"} justify={"right"}>
+                              {editing && (
+                                <Button
+                                  key={`remove-${collection}`}
+                                  rightIcon={<CloseIcon />}
+                                  colorScheme={"red"}
+                                  onClick={() => {
+                                    removeCollection(collection);
+                                  }}
+                                >
+                                  Remove
+                                </Button>
+                              )}
+
+                              {!editing && (
+                                <Button
+                                  key={`view-${collection}`}
+                                  rightIcon={<ChevronRightIcon />}
+                                  colorScheme={"blackAlpha"}
+                                  onClick={() => navigate(`/collections/${collection}`)}
+                                >
+                                  View
+                                </Button>
+                              )}
+                            </Flex>
+                          </Td>
+                        </Tr>
+                      );
+                    })}
+                  </Tbody>
+                </Table>
+              </TableContainer>
             )}
           </Flex>
         </Flex>
 
-        <Flex direction={"column"} grow={"2"}>
+        <Flex
+          direction={"column"}
+          p={"4"}
+          gap={"4"}
+          grow={"2"}
+          h={"fit-content"}
+          bg={"whitesmoke"}
+          rounded={"10px"}
+        >
           {/* Origins */}
-          <Flex p={"2"} gap={"2"} grow={"1"} direction={"column"}>
-            <Flex direction={"row"} justify={"space-between"} mb={"sm"}>
-              <Heading m={"none"}>Origins</Heading>
+          <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
+            <Flex direction={"row"} justify={"space-between"}>
+              <Heading size={"lg"}>Origins</Heading>
               {editing ? (
                 <Button
                   colorScheme={"green"}
@@ -627,65 +642,65 @@ export const Entity = () => {
               ) : null}
             </Flex>
 
-            <TableContainer>
-              <Table>
-                <Thead>
-                  <Tr>
-                    <Th pl={"1"}>Origin</Th>
-                    <Th></Th>
-                  </Tr>
-                </Thead>
+            {entityOrigins.length === 0 ? (
+              <Text>{entityData.name} does not have any Origins.</Text>
+            ) : (
+              <TableContainer>
+                <Table colorScheme={"blackAlpha"}>
+                  <Thead>
+                    <Tr>
+                      <Th>Origin</Th>
+                      <Th></Th>
+                    </Tr>
+                  </Thead>
 
-                <Tbody>
-                  {entityOrigins.map((origin) => {
-                    return (
-                      <Tr key={origin.id}>
-                        <Td>
-                          <Linky type="entities" id={origin.id} />
-                        </Td>
-                        <Td>
-                          <Flex w={"full"} gap={"2"} justify={"right"}>
-                            {editing && (
-                              <Button
-                                key={`remove-${origin.id}`}
-                                rightIcon={<CloseIcon />}
-                                colorScheme={"red"}
-                                onClick={() => {
-                                  removeOrigin(origin.id);
-                                }}
-                              >
-                                Remove
-                              </Button>
-                            )}
+                  <Tbody>
+                    {entityOrigins.map((origin) => {
+                      return (
+                        <Tr key={origin.id}>
+                          <Td>
+                            <Linky type="entities" id={origin.id} />
+                          </Td>
+                          <Td>
+                            <Flex w={"full"} gap={"2"} justify={"right"}>
+                              {editing && (
+                                <Button
+                                  key={`remove-${origin.id}`}
+                                  rightIcon={<CloseIcon />}
+                                  colorScheme={"red"}
+                                  onClick={() => {
+                                    removeOrigin(origin.id);
+                                  }}
+                                >
+                                  Remove
+                                </Button>
+                              )}
 
-                            {!editing && (
-                              <Button
-                                key={`view-${origin.id}`}
-                                rightIcon={<ChevronRightIcon />}
-                                as={Link}
-                                href={`/entities/${origin.id}`}
-                              >
-                                View
-                              </Button>
-                            )}
-                          </Flex>
-                        </Td>
-                      </Tr>
-                    );
-                  })}
-                </Tbody>
-              </Table>
-            </TableContainer>
-
-            {entityOrigins.length === 0 && (
-              <Text>Entity {entityData.name} does not have any Origins.</Text>
+                              {!editing && (
+                                <Button
+                                  key={`view-${origin.id}`}
+                                  rightIcon={<ChevronRightIcon />}
+                                  colorScheme={"blackAlpha"}
+                                  onClick={() => navigate(`/entities/${origin.id}`)}
+                                >
+                                  View
+                                </Button>
+                              )}
+                            </Flex>
+                          </Td>
+                        </Tr>
+                      );
+                    })}
+                  </Tbody>
+                </Table>
+              </TableContainer>
             )}
           </Flex>
 
           {/* Products */}
-          <Flex p={"2"} gap={"2"} grow={"1"} direction={"column"}>
-            <Flex direction={"row"} justify={"space-between"} mb={"sm"}>
-              <Heading m={"none"}>Products</Heading>
+          <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
+            <Flex direction={"row"} justify={"space-between"}>
+              <Heading size={"lg"}>Products</Heading>
               {editing ? (
                 <Button
                   colorScheme={"green"}
@@ -698,76 +713,76 @@ export const Entity = () => {
               ) : null}
             </Flex>
 
-            <TableContainer>
-              <Table>
-                <Thead>
-                  <Tr>
-                    <Th pl={"1"}>Product</Th>
-                    <Th></Th>
-                  </Tr>
-                </Thead>
+            {entityProducts.length === 0 ? (
+              <Text>{entityData.name} does not have any Products.</Text>
+            ) : (
+              <TableContainer>
+                <Table colorScheme={"blackAlpha"}>
+                  <Thead>
+                    <Tr>
+                      <Th>Product</Th>
+                      <Th></Th>
+                    </Tr>
+                  </Thead>
 
-                <Tbody>
-                  {entityProducts.map((product) => {
-                    return (
-                      <Tr key={product.id}>
-                        <Td>
-                          <Linky type="entities" id={product.id} />
-                        </Td>
-                        <Td>
-                          <Flex w={"full"} gap={"2"} justify={"right"}>
-                            {editing && (
-                              <Button
-                                key={`remove-${product.id}`}
-                                rightIcon={<CloseIcon />}
-                                colorScheme={"red"}
-                                onClick={() => {
-                                  removeProduct(product.id);
-                                }}
-                              >
-                                Remove
-                              </Button>
-                            )}
+                  <Tbody>
+                    {entityProducts.map((product) => {
+                      return (
+                        <Tr key={product.id}>
+                          <Td>
+                            <Linky type="entities" id={product.id} />
+                          </Td>
+                          <Td>
+                            <Flex w={"full"} gap={"2"} justify={"right"}>
+                              {editing && (
+                                <Button
+                                  key={`remove-${product.id}`}
+                                  rightIcon={<CloseIcon />}
+                                  colorScheme={"red"}
+                                  onClick={() => {
+                                    removeProduct(product.id);
+                                  }}
+                                >
+                                  Remove
+                                </Button>
+                              )}
 
-                            {!editing && (
-                              <Button
-                                key={`view-${product.id}`}
-                                rightIcon={<ChevronRightIcon />}
-                                as={Link}
-                                href={`/entities/${product.id}`}
-                              >
-                                View
-                              </Button>
-                            )}
-                          </Flex>
-                        </Td>
-                      </Tr>
-                    );
-                  })}
-                </Tbody>
-              </Table>
-            </TableContainer>
-
-            {entityProducts.length === 0 && (
-              <Text>Entity {entityData.name} does not have any Products.</Text>
+                              {!editing && (
+                                <Button
+                                  key={`view-${product.id}`}
+                                  rightIcon={<ChevronRightIcon />}
+                                  colorScheme={"blackAlpha"}
+                                  onClick={() => navigate(`/entities/${product.id}`)}
+                                >
+                                  View
+                                </Button>
+                              )}
+                            </Flex>
+                          </Td>
+                        </Tr>
+                      );
+                    })}
+                  </Tbody>
+                </Table>
+              </TableContainer>
             )}
           </Flex>
         </Flex>
       </Flex>
 
       {/* Attributes */}
-      <Flex p={"2"} gap={"2"} direction={"column"}>
-        <Flex
-          p={"2"}
-          gap={"2"}
-          direction={"row"}
-          justify={"space-between"}
-          mb={"sm"}
-        >
-          <Heading margin={"none"}>Attributes</Heading>
-        </Flex>
+      <Flex
+        p={"4"}
+        gap={"4"}
+        direction={"column"}
+        h={"fit-content"}
+        minH={"32"}
+        bg={"whitesmoke"}
+        rounded={"10px"}
+      >
+        <Heading size={"lg"}>Attributes</Heading>
 
-        <Flex p={"2"} gap={"2"} direction={"row"}>
+        <Flex  gap={"2"} direction={"row"}>
           {entityAttributes.length > 0 ? (
             entityAttributes.map((attribute) => {
               return (
@@ -778,7 +793,7 @@ export const Entity = () => {
               );
             })
           ) : (
-            <Text>No attributes specified.</Text>
+            <Text>{entityData.name} does not have any Attributes.</Text>
           )}
         </Flex>
       </Flex>

@@ -22,10 +22,11 @@ import {
   Td,
 } from "@chakra-ui/react";
 import { AddIcon, ChevronRightIcon } from "@chakra-ui/icons";
+
 import { getData } from "src/database/functions";
 import { CollectionModel, EntityModel, UpdateModel } from "@types";
-import { useNavigate } from "react-router-dom";
 import { Loading } from "@components/Loading";
+import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 
 const Home = () => {
@@ -59,7 +60,6 @@ const Home = () => {
       setEntityData(value.reverse());
       setIsLoaded(true);
     });
-    return;
   }, []);
 
   // Get all Collections
@@ -78,7 +78,6 @@ const Home = () => {
       setCollectionData(value.reverse());
       setIsLoaded(true);
     });
-    return;
   }, []);
 
   // Get all Updates
@@ -98,7 +97,6 @@ const Home = () => {
       setUpdateData(value.reverse());
       setIsLoaded(true);
     });
-    return;
   }, []);
 
   return isLoaded ? (
@@ -151,12 +149,12 @@ const Home = () => {
                 <Table variant={"simple"} colorScheme={"blackAlpha"}>
                   <Thead>
                     <Tr>
-                      <Th pl={"0"}>
+                      <Th>
                         <Heading fontWeight={"semibold"} size={"sm"}>
                           Newest Collections
                         </Heading>
                       </Th>
-                      <Th pr={"0"}>
+                      <Th>
                         <Flex justify={"right"}>
                           <Button
                             colorScheme={"green"}
@@ -173,8 +171,8 @@ const Home = () => {
                     {collectionData.slice(0, 5).map((collection) => {
                       return (
                         <Tr key={collection._id}>
-                          <Td pl={"0"}>{collection.name}</Td>
-                          <Td pr={"0"}>
+                          <Td>{collection.name}</Td>
+                          <Td>
                             <Flex justify={"right"}>
                               <Button
                                 key={`view-collection-${collection._id}`}
@@ -237,12 +235,12 @@ const Home = () => {
                 <Table variant={"simple"} colorScheme={"blackAlpha"}>
                   <Thead>
                     <Tr>
-                      <Th pl={"0"}>
+                      <Th>
                         <Heading fontWeight={"semibold"} size={"sm"}>
                           Name
                         </Heading>
                       </Th>
-                      <Th pr={"0"}>
+                      <Th>
                         <Flex justify={"right"}>
                           <Button
                             colorScheme={"green"}
@@ -260,8 +258,8 @@ const Home = () => {
                     {entityData.slice(0, 5).map((entity) => {
                       return (
                         <Tr key={entity._id}>
-                          <Td pl={"0"}>{entity.name}</Td>
-                          <Td pr={"0"}>
+                          <Td>{entity.name}</Td>
+                          <Td>
                             <Flex justify={"right"}>
                               <Button
                                 key={`view-entity-${entity._id}`}
@@ -349,7 +347,9 @@ const Home = () => {
                       <Badge colorScheme={typeBadgeColor}>
                         {update.target.type}
                       </Badge>
+
                       <Spacer />
+
                       <Text fontSize={"md"} as={"b"}>
                         {update.target.name}
                       </Text>

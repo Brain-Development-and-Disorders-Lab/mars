@@ -99,7 +99,7 @@ const Collections = () => {
             <Table variant={"simple"} colorScheme={"blackAlpha"}>
               <Thead>
                 <Tr>
-                  <Th pl={"0"}>
+                  <Th>
                     <Heading size={"sm"}>Name</Heading>
                   </Th>
                   <Th>
@@ -108,14 +108,14 @@ const Collections = () => {
                   <Th>
                     <Heading size={"sm"}>Description</Heading>
                   </Th>
-                  <Th pr={"0"}></Th>
+                  <Th></Th>
                 </Tr>
               </Thead>
               <Tbody>
                 {collectionsData.reverse().map((collection) => {
                   return (
                     <Tr key={collection._id}>
-                      <Td pl={"0"}>
+                      <Td>
                         {_.isEqual(collection.name, "") ? (
                           <Tag
                             size={"md"}
@@ -157,7 +157,7 @@ const Collections = () => {
                           <Text noOfLines={2}>{collection.description}</Text>
                         )}
                       </Td>
-                      <Td pr={"0"}>
+                      <Td>
                         <Flex justify={"right"}>
                           <Button
                             key={`view-collection-${collection._id}`}

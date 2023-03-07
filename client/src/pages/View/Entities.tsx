@@ -100,7 +100,7 @@ const Entities = () => {
             <Table variant={"simple"} colorScheme={"blackAlpha"}>
               <Thead>
                 <Tr>
-                  <Th pl={"0"}>
+                  <Th>
                     <Heading size={"sm"}>Name</Heading>
                   </Th>
                   <Th>
@@ -109,14 +109,14 @@ const Entities = () => {
                   <Th>
                     <Heading size={"sm"}>Description</Heading>
                   </Th>
-                  <Th pr={"0"}></Th>
+                  <Th></Th>
                 </Tr>
               </Thead>
               <Tbody>
                 {entityData.reverse().map((entity) => {
                   return (
                     <Tr key={entity._id}>
-                      <Td pl={"0"}>{entity.name}</Td>
+                      <Td>{entity.name}</Td>
                       <Td>
                         {_.isEqual(entity.owner, "") ? (
                           <Tag
@@ -147,7 +147,7 @@ const Entities = () => {
                           )}
                         </Text>
                       </Td>
-                      <Td pr={"0"}>
+                      <Td>
                         <Flex justify={"right"}>
                           <Button
                             key={`view-entity-${entity._id}`}

@@ -244,9 +244,36 @@ export const Collection = () => {
         align={"center"}
         wrap={"wrap"}
       >
-        <Heading size={"2xl"}>Collection: {collectionData.name}</Heading>
+        <Heading fontWeight={"semibold"}>{collectionData.name}</Heading>
+
         {/* Buttons */}
-        <Flex direction={"row"} p={"2"} gap={"2"}>
+        <Flex direction={"row"} gap={"2"}>
+          {editing &&
+            <Popover>
+              <PopoverTrigger>
+                <Button colorScheme={"red"} rightIcon={<CloseIcon />}>
+                  Delete
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent>
+                <PopoverArrow />
+                <PopoverCloseButton />
+                <PopoverHeader>Confirmation</PopoverHeader>
+                <PopoverBody>
+                  Are you sure you want to delete this Collection?
+                  <Flex direction={"row"} p={"2"} justify={"center"}>
+                    <Button
+                      colorScheme={"green"}
+                      rightIcon={<CheckIcon />}
+                      onClick={handleDeleteClick}
+                    >
+                      Confirm
+                    </Button>
+                  </Flex>
+                </PopoverBody>
+              </PopoverContent>
+            </Popover>
+          }
           <Button
             colorScheme={editing ? "green" : "gray"}
             rightIcon={
@@ -256,38 +283,13 @@ export const Collection = () => {
           >
             {editing ? "Done" : "Edit"}
           </Button>
-          <Popover>
-            <PopoverTrigger>
-              <Button colorScheme={"red"} rightIcon={<CloseIcon />}>
-                Delete
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent>
-              <PopoverArrow />
-              <PopoverCloseButton />
-              <PopoverHeader>Confirmation</PopoverHeader>
-              <PopoverBody>
-                Are you sure you want to delete this Collection?
-                <Flex direction={"row"} p={"2"} justify={"center"}>
-                  <Button
-                    colorScheme={"green"}
-                    rightIcon={<CheckIcon />}
-                    onClick={handleDeleteClick}
-                  >
-                    Confirm
-                  </Button>
-                </Flex>
-              </PopoverBody>
-            </PopoverContent>
-          </Popover>
         </Flex>
       </Flex>
 
-      <Flex direction={"row"} p={"2"} wrap={"wrap"}>
+      <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
         <Flex direction={"column"} p={"2"} gap={"2"} grow={"1"}>
-          {/* Metadata table */}
-          <Heading m={"0"}>Overview</Heading>
-
+          {/* Details */}
+          <Heading fontWeight={"semibold"} size={"lg"}>Details</Heading>
           <TableContainer>
             <Table mt={"sm"} colorScheme={"gray"}>
               <Thead>
@@ -341,7 +343,7 @@ export const Collection = () => {
         <Flex direction={"column"} p={"2"} gap={"2"} grow={"2"}>
           {/* List of Entities in the Collection */}
           <Flex direction={"row"} justify={"space-between"}>
-            <Heading m={"0"} alignSelf={"center"}>
+            <Heading fontWeight={"semibold"} size={"lg"}>
               Entities
             </Heading>
             {editing && (
@@ -360,7 +362,7 @@ export const Collection = () => {
               <Table colorScheme={"gray"}>
                 <Thead>
                   <Tr>
-                    <Th pl={"1"}>Name</Th>
+                    <Th>Name</Th>
                     <Th></Th>
                   </Tr>
                 </Thead>

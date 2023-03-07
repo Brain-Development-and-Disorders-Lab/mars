@@ -96,20 +96,20 @@ const Attributes = () => {
             <Table variant={"simple"} colorScheme={"blackAlpha"}>
               <Thead>
                 <Tr>
-                  <Th pl={"0"}>
+                  <Th>
                     <Heading size={"sm"}>Name</Heading>
                   </Th>
                   <Th>
                     <Heading size={"sm"}>Description</Heading>
                   </Th>
-                  <Th pr={"0"}></Th>
+                  <Th></Th>
                 </Tr>
               </Thead>
               <Tbody>
                 {attributesData.reverse().map((attribute) => {
                   return (
                     <Tr key={attribute._id}>
-                      <Td pl={"0"}>
+                      <Td>
                         {_.isEqual(attribute.name, "") ? (
                           <WarningLabel
                             key={`warn-${attribute._id}`}
@@ -129,7 +129,7 @@ const Attributes = () => {
                           <Text noOfLines={2}>{attribute.description}</Text>
                         )}
                       </Td>
-                      <Td pr={"0"}>
+                      <Td>
                         <Flex justify={"right"}>
                           <Button
                             key={`view-attribute-${attribute._id}`}
