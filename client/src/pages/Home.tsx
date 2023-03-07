@@ -3,6 +3,7 @@ import {
   Button,
   Flex,
   Heading,
+  Icon,
   Table,
   TableContainer,
   Text,
@@ -22,6 +23,7 @@ import {
   Td,
 } from "@chakra-ui/react";
 import { AddIcon, ChevronRightIcon } from "@chakra-ui/icons";
+import { BsBox, BsCollection } from "react-icons/bs";
 
 import { getData } from "src/database/functions";
 import { CollectionModel, EntityModel, UpdateModel } from "@types";
@@ -116,11 +118,14 @@ const Home = () => {
             p={"4"}
             background={"whitesmoke"}
             rounded={"xl"}
-            gap={"1.5"}
+            gap={"2"}
           >
             {/* Collections listing */}
             <Flex direction={"row"} justify={"space-between"} align={"center"}>
-              <Heading fontWeight={"semibold"}>Collections</Heading>
+              <Flex align={"center"} gap={"4"}>
+                <Icon as={BsCollection} w={"8"} h={"8"} />
+                <Heading fontWeight={"semibold"}>Collections</Heading>
+              </Flex>
               <Button
                 key={`view-collection-all`}
                 colorScheme={"blackAlpha"}
@@ -203,10 +208,13 @@ const Home = () => {
             p={"4"}
             background={"whitesmoke"}
             rounded={"xl"}
-            gap={"1.5"}
+            gap={"2"}
           >
             <Flex direction={"row"} justify={"space-between"} align={"center"}>
-              <Heading fontWeight={"semibold"}>Entities</Heading>
+              <Flex align={"center"} gap={"4"}>
+                <Icon as={BsBox} w={"8"} h={"8"} />
+                <Heading fontWeight={"semibold"}>Entities</Heading>
+              </Flex>
               <Button
                 key={`view-entity-all`}
                 colorScheme={"blackAlpha"}
@@ -334,25 +342,28 @@ const Home = () => {
                       mt={"2"}
                       mb={"2"}
                       align={"center"}
-                      color={"white"}
-                      background={"blackAlpha.500"}
-                      rounded={"xl"}
+                      background={"white"}
+                      rounded={"10px"}
+                      border={"2px"}
+                      borderColor={"gray.100"}
                     >
-                      <Text fontSize={"md"} as={"b"}>
-                        {dayjs(update.timestamp).format("DD MMM HH:mm")}
-                      </Text>
                       <Badge colorScheme={operationBadgeColor}>
                         {update.type}
                       </Badge>
-                      <Badge colorScheme={typeBadgeColor}>
-                        {update.target.type}
-                      </Badge>
-
-                      <Spacer />
 
                       <Text fontSize={"md"} as={"b"}>
                         {update.target.name}
                       </Text>
+
+                      <Spacer />
+
+                      <Badge colorScheme={typeBadgeColor}>
+                        {update.target.type}
+                      </Badge>
+
+                      <Badge colorScheme={"blackAlpha"}>
+                        {dayjs(update.timestamp).format("DD MMM HH:mm")}
+                      </Badge>
                     </Flex>
                   </ListItem>
                 );

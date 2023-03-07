@@ -44,6 +44,7 @@ import {
   WarningIcon,
 } from "@chakra-ui/icons";
 import { AiOutlineEdit } from "react-icons/ai";
+import { BsCollection } from "react-icons/bs";
 
 // Navigation
 import { useParams, useNavigate } from "react-router-dom";
@@ -244,7 +245,10 @@ export const Collection = () => {
         align={"center"}
         wrap={"wrap"}
       >
-        <Heading fontWeight={"semibold"}>{collectionData.name}</Heading>
+        <Flex align={"center"} gap={"4"} shadow={"lg"} p={"2"} border={"2px"} rounded={"10px"}>
+          <Icon as={BsCollection} w={"8"} h={"8"} />
+          <Heading fontWeight={"semibold"}>{collectionData.name}</Heading>
+        </Flex>
 
         {/* Buttons */}
         <Flex direction={"row"} gap={"2"}>

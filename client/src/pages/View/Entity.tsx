@@ -47,7 +47,7 @@ import {
   WarningIcon,
 } from "@chakra-ui/icons";
 import { AiOutlineEdit } from "react-icons/ai";
-import { BsPrinter } from "react-icons/bs";
+import { BsBox, BsPrinter } from "react-icons/bs";
 import { SlGraph } from "react-icons/sl";
 
 // Navigation
@@ -420,7 +420,10 @@ export const Entity = () => {
         align={"center"}
         wrap={"wrap"}
       >
-        <Heading fontWeight={"semibold"}>{entityData.name}</Heading>
+        <Flex align={"center"} gap={"4"} shadow={"lg"} p={"2"} border={"2px"} rounded={"10px"}>
+          <Icon as={BsBox} w={"8"} h={"8"} />
+          <Heading fontWeight={"semibold"}>{entityData.name}</Heading>
+        </Flex>
 
         {/* Buttons */}
         <Flex direction={"row"} gap={"4"}>
