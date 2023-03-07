@@ -79,7 +79,7 @@ const Search = () => {
   return (
     <PageContainer>
       {/* Page header */}
-      <Flex direction={"column"} p={"2"} pt={"4"} pb={"4"}>
+      <Flex direction={"column"} pt={"4"} pb={"4"}>
         <Flex direction={"row"} align={"center"} justify={"space-between"}>
           <Heading fontWeight={"semibold"}>Search</Heading>
           <Button
@@ -98,11 +98,17 @@ const Search = () => {
           value={query}
           placeholder={"Enter search query..."}
           onChange={(event) => setQuery(event.target.value)}
+          onKeyUp={(event) => {
+            // Listen for "Enter" key when entering a query
+            if (event.key === "Enter" && query !== "") {
+              runSearch();
+            }
+          }}
         />
 
         <Button
           rightIcon={<Icon as={SearchIcon} />}
-          disabled={query === ""}
+          isDisabled={query === ""}
           onClick={() => runSearch()}
         >
           Search
