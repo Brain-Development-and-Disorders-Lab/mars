@@ -59,7 +59,7 @@ import { parse } from "json2csv";
 
 // Database and models
 import { deleteData, getData, postData } from "src/database/functions";
-import { AttributeStruct, CollectionModel, EntityModel } from "@types";
+import { Attribute, CollectionModel, EntityModel } from "@types";
 
 // Custom components
 import Linky from "src/components/Linky";
@@ -121,7 +121,7 @@ export const Entity = () => {
     [] as { name: string; id: string }[]
   );
   const [entityAttributes, setEntityAttributes] = useState(
-    [] as AttributeStruct[]
+    [] as Attribute[]
   );
 
   useEffect(() => {

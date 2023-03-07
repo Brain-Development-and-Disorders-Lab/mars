@@ -21,7 +21,7 @@ import { CheckIcon, CloseIcon, InfoOutlineIcon } from "@chakra-ui/icons";
 import { PageContainer } from "@components/PageContainer";
 import { useNavigate } from "react-router-dom";
 import { postData, pseudoId } from "@database/functions";
-import { CollectionStruct } from "@types";
+import { Collection } from "@types";
 
 export const Start = ({}) => {
   const navigate = useNavigate();
@@ -32,7 +32,7 @@ export const Start = ({}) => {
   const [owner, setOwner] = useState("");
   const [description, setDescription] = useState("");
 
-  const collectionData: CollectionStruct = {
+  const collectionData: Collection = {
     name: name,
     description: description,
     owner: owner,

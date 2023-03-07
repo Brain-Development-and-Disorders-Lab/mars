@@ -25,7 +25,7 @@ import { PageContainer } from "@components/PageContainer";
 import ParameterGroup from "@components/ParameterGroup";
 import { useNavigate } from "react-router-dom";
 
-import { AttributeStruct, Parameters } from "@types";
+import { Attribute, Parameters } from "@types";
 import { postData, pseudoId } from "@database/functions";
 
 import _ from "underscore";
@@ -39,7 +39,7 @@ export const Start = ({}) => {
   const [description, setDescription] = useState("");
   const [parameters, setParameters] = useState([] as Parameters[]);
 
-  const attributeData: AttributeStruct = {
+  const attributeData: Attribute = {
     name: name,
     description: description,
     parameters: parameters,

@@ -1,9 +1,9 @@
-import { AuthenticationStruct } from "@types";
+import { Authentication } from "@types";
 import React, { createContext, useContext, useState } from "react";
 
-const authenticationContext = createContext<AuthenticationStruct | undefined>(undefined);
+const authenticationContext = createContext<Authentication | undefined>(undefined);
 
-const useAuthentication = (): AuthenticationStruct => {
+const useAuthentication = (): Authentication => {
   const [authenticated, setAuthenticated] = useState(false);
 
   return {

@@ -49,7 +49,7 @@ import {
   AttributeProps,
   CollectionModel,
   EntityModel,
-  EntityStruct,
+  Entity,
 } from "@types";
 
 // Utility functions
@@ -87,7 +87,7 @@ export const Start = ({}) => {
     [] as AttributeModel[]
   );
 
-  const entityState: EntityStruct = {
+  const entityState: Entity = {
     name: name,
     created: created.toISOString(),
     owner: owner,

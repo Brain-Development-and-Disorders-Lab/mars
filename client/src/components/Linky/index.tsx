@@ -5,16 +5,16 @@ import { Button, Link, useToast } from "@chakra-ui/react";
 import { getData } from "@database/functions";
 import {
   LinkyProps,
-  AttributeStruct,
-  CollectionStruct,
-  EntityStruct,
+  Attribute,
+  Collection,
+  Entity,
 } from "@types";
 
 const Linky = (props: LinkyProps) => {
   const toast = useToast();
 
   const [linkData, setLinkData] = useState(
-    {} as AttributeStruct | CollectionStruct | EntityStruct
+    {} as Attribute | Collection | Entity
   );
 
   useEffect(() => {

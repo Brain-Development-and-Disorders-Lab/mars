@@ -80,7 +80,7 @@ const ParameterGroup = (props: {
                     identifier: `p_date_${Math.round(performance.now())}`,
                     name: "",
                     type: "date",
-                    data: new Date(),
+                    data: new Date().toISOString(),
                   },
                 ]);
             }}

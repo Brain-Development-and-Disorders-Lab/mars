@@ -19,7 +19,7 @@ import { getData } from "src/database/functions";
 import { EntityModel, Parameter } from "@types";
 import Linky from "@components/Linky";
 
-export const DateParameter = (props: Parameter.PDate) => {
+export const DateParameter = (props: Parameter.Date) => {
   const [name, setName] = useState(props.name);
   const [value, setValue] = useState(new Date(props.data));
 
@@ -30,7 +30,7 @@ export const DateParameter = (props: Parameter.PDate) => {
         identifier: props.identifier,
         name: name,
         type: "date",
-        data: value,
+        data: value.toISOString(),
       });
     }
   }, [name, value]);
@@ -104,7 +104,7 @@ export const DateParameter = (props: Parameter.PDate) => {
   );
 };
 
-export const TextParameter = (props: Parameter.PText) => {
+export const TextParameter = (props: Parameter.Text) => {
   const [name, setName] = useState(props.name);
   const [value, setValue] = useState(props.data);
 
@@ -166,7 +166,7 @@ export const TextParameter = (props: Parameter.PText) => {
   );
 };
 
-export const NumberParameter = (props: Parameter.PNumber) => {
+export const NumberParameter = (props: Parameter.Number) => {
   const [name, setName] = useState(props.name);
   const [value, setValue] = useState(props.data);
 
@@ -228,7 +228,7 @@ export const NumberParameter = (props: Parameter.PNumber) => {
   );
 };
 
-export const URLParameter = (props: Parameter.PURL) => {
+export const URLParameter = (props: Parameter.URL) => {
   const [name, setName] = useState(props.name);
   const [value, setValue] = useState(props.data);
 
@@ -298,7 +298,7 @@ export const URLParameter = (props: Parameter.PURL) => {
   );
 };
 
-export const EntityParameter = (props: Parameter.PEntity) => {
+export const EntityParameter = (props: Parameter.Entity) => {
   const toast = useToast();
 
   // All entities
