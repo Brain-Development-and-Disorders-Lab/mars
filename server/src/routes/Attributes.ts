@@ -2,7 +2,7 @@
 import express from "express";
 
 // Custom types
-import { AttributeModel, AttributeStruct } from "@types";
+import { AttributeModel, Attribute } from "@types";
 
 // Operations
 import { Attributes } from "../operations/Attributes";
@@ -23,9 +23,9 @@ AttributesRoute.route("/attributes/:id").get((request: any, response: any) => {
   });
 });
 
-// Route: Create a new Attribute, expects AttributeStruct data
+// Route: Create a new Attribute, expects Attribute data
 AttributesRoute.route("/attributes/create").post(
-  (request: { body: AttributeStruct }, response: any) => {
+  (request: { body: Attribute }, response: any) => {
     Attributes.create(request.body).then((attribute: AttributeModel) => {
       response.json({
         id: attribute._id,

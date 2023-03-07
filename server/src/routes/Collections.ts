@@ -3,7 +3,7 @@ import express from "express";
 import _ from "underscore";
 
 // Database connection
-import { CollectionModel, CollectionStruct } from "@types";
+import { CollectionModel, Collection } from "@types";
 
 // Operations
 import { Collections } from "../operations/Collections";
@@ -28,9 +28,9 @@ CollectionsRoute.route("/collections/:id").get(
   }
 );
 
-// Create a new Collection, expects CollectionStruct data
+// Create a new Collection, expects Collection data
 CollectionsRoute.route("/collections/create").post(
-  (request: { body: CollectionStruct }, response: any) => {
+  (request: { body: Collection }, response: any) => {
     Collections.create(request.body).then((collection: CollectionModel) => {
       response.json({
         id: collection._id,

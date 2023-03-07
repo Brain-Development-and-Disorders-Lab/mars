@@ -3,7 +3,7 @@ import express from "express";
 import _ from "underscore";
 
 // Import types from the client to enforce structure
-import { EntityModel, EntityStruct } from "@types";
+import { EntityModel, Entity } from "@types";
 
 // Utility functions
 import { Entities } from "../operations/Entities";
@@ -24,9 +24,9 @@ EntitiesRoute.route("/entities/:id").get((request: any, response: any) => {
   });
 });
 
-// Create a new Entity, expects EntityStruct data
+// Create a new Entity, expects Entity data
 EntitiesRoute.route("/entities/create").post(
-  (request: { body: EntityStruct }, response: any) => {
+  (request: { body: Entity }, response: any) => {
     Entities.create(request.body).then((entity: EntityModel) => {
       response.json({
         id: entity._id,

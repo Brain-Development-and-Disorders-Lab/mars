@@ -7,7 +7,7 @@ import { Entities } from "./Entities";
 import { Updates } from "./Updates";
 
 // Custom types
-import { CollectionModel, CollectionStruct } from "@types";
+import { CollectionModel, Collection } from "@types";
 
 // Utility libraries
 import _ from "underscore";
@@ -35,7 +35,7 @@ export class Collections {
           const operations: Promise<any>[] = [];
 
           // Add any Entities to the Collection
-          for (const entity of (collection as CollectionStruct).entities) {
+          for (const entity of (collection as Collection).entities) {
             operations.push(Collections.addEntity(result.insertedId, entity));
           }
 
