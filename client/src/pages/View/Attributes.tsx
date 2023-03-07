@@ -7,6 +7,7 @@ import {
   Table,
   TableContainer,
   Tbody,
+  Td,
   Text,
   Th,
   Thead,
@@ -105,10 +106,10 @@ const Attributes = () => {
                 </Tr>
               </Thead>
               <Tbody>
-                {attributesData.map((attribute) => {
+                {attributesData.reverse().map((attribute) => {
                   return (
                     <Tr key={attribute._id}>
-                      <Th pl={"0"}>
+                      <Td pl={"0"}>
                         {_.isEqual(attribute.name, "") ? (
                           <WarningLabel
                             key={`warn-${attribute._id}`}
@@ -117,8 +118,8 @@ const Attributes = () => {
                         ) : (
                           attribute.name
                         )}
-                      </Th>
-                      <Th>
+                      </Td>
+                      <Td>
                         {_.isEqual(attribute.description, "") ? (
                           <WarningLabel
                             key={`warn-${attribute._id}`}
@@ -127,8 +128,8 @@ const Attributes = () => {
                         ) : (
                           <Text noOfLines={2}>{attribute.description}</Text>
                         )}
-                      </Th>
-                      <Th pr={"0"}>
+                      </Td>
+                      <Td pr={"0"}>
                         <Flex justify={"right"}>
                           <Button
                             key={`view-attribute-${attribute._id}`}
@@ -141,7 +142,7 @@ const Attributes = () => {
                             View
                           </Button>
                         </Flex>
-                      </Th>
+                      </Td>
                     </Tr>
                   );
                 })}

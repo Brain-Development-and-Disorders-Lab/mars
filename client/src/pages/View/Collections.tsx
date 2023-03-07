@@ -10,6 +10,7 @@ import {
   TagLabel,
   TagRightIcon,
   Tbody,
+  Td,
   Text,
   Th,
   Thead,
@@ -111,10 +112,10 @@ const Collections = () => {
                 </Tr>
               </Thead>
               <Tbody>
-                {collectionsData.map((collection) => {
+                {collectionsData.reverse().map((collection) => {
                   return (
                     <Tr key={collection._id}>
-                      <Th pl={"0"}>
+                      <Td pl={"0"}>
                         {_.isEqual(collection.name, "") ? (
                           <Tag
                             size={"md"}
@@ -127,8 +128,8 @@ const Collections = () => {
                         ) : (
                           <Text>{collection.name}</Text>
                         )}
-                      </Th>
-                      <Th>
+                      </Td>
+                      <Td>
                         {_.isEqual(collection.owner, "") ? (
                           <Tag
                             size={"md"}
@@ -141,8 +142,8 @@ const Collections = () => {
                         ) : (
                           <Text>{collection.owner}</Text>
                         )}
-                      </Th>
-                      <Th>
+                      </Td>
+                      <Td>
                         {_.isEqual(collection.description, "") ? (
                           <Tag
                             size={"md"}
@@ -155,8 +156,8 @@ const Collections = () => {
                         ) : (
                           <Text noOfLines={2}>{collection.description}</Text>
                         )}
-                      </Th>
-                      <Th pr={"0"}>
+                      </Td>
+                      <Td pr={"0"}>
                         <Flex justify={"right"}>
                           <Button
                             key={`view-collection-${collection._id}`}
@@ -169,7 +170,7 @@ const Collections = () => {
                             View
                           </Button>
                         </Flex>
-                      </Th>
+                      </Td>
                     </Tr>
                   );
                 })}

@@ -16,6 +16,7 @@ import {
   Tag,
   TagLabel,
   TagRightIcon,
+  Td,
 } from "@chakra-ui/react";
 import { ChevronRightIcon, AddIcon, WarningIcon } from "@chakra-ui/icons";
 
@@ -112,11 +113,11 @@ const Entities = () => {
                 </Tr>
               </Thead>
               <Tbody>
-                {entityData.map((entity) => {
+                {entityData.reverse().map((entity) => {
                   return (
                     <Tr key={entity._id}>
-                      <Th pl={"0"}>{entity.name}</Th>
-                      <Th>
+                      <Td pl={"0"}>{entity.name}</Td>
+                      <Td>
                         {_.isEqual(entity.owner, "") ? (
                           <Tag
                             size={"md"}
@@ -129,8 +130,8 @@ const Entities = () => {
                         ) : (
                           entity.owner
                         )}
-                      </Th>
-                      <Th>
+                      </Td>
+                      <Td>
                         <Text noOfLines={2}>
                           {_.isEqual(entity.description, "") ? (
                             <Tag
@@ -145,8 +146,8 @@ const Entities = () => {
                             entity.description
                           )}
                         </Text>
-                      </Th>
-                      <Th pr={"0"}>
+                      </Td>
+                      <Td pr={"0"}>
                         <Flex justify={"right"}>
                           <Button
                             key={`view-entity-${entity._id}`}
@@ -157,7 +158,7 @@ const Entities = () => {
                             View
                           </Button>
                         </Flex>
-                      </Th>
+                      </Td>
                     </Tr>
                   );
                 })}

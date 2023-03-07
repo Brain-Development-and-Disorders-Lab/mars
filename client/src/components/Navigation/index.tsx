@@ -18,6 +18,7 @@ import {
   StackDivider,
   Icon,
   Image,
+  Heading,
 } from "@chakra-ui/react";
 import {
   HamburgerIcon,
@@ -73,6 +74,7 @@ const Navigation = () => {
           <HStack as={"nav"} spacing={4} display={{ base: "none", md: "flex" }}>
             {/* Icon */}
             <Image src="/Favicon.png" boxSize={"36px"} />
+            <Heading fontWeight={"semibold"} size={"lg"}>MARS</Heading>
 
             <Button key={"home"} bg={"white"}>
               <Link href={"/"}>Home</Link>
@@ -127,29 +129,29 @@ const Navigation = () => {
               </MenuButton>
               <MenuList>
                 <MenuItem icon={<BsBox />} as={Link} href={"/entities"}>
-                  All Entities
+                  Entities
                 </MenuItem>
                 <MenuItem
                   icon={<BsCollection />}
                   as={Link}
                   href={"/collections"}
                 >
-                  All Collections
+                  Collections
                 </MenuItem>
                 <MenuItem icon={<BsGear />} as={Link} href={"/attributes"}>
-                  All Attributes
+                  Attributes
                 </MenuItem>
               </MenuList>
             </Menu>
-
-            <Button key={"search"} bg={"white"} leftIcon={<SearchIcon />}>
-              <Link href={"/search"}>Search</Link>
-            </Button>
           </HStack>
         </HStack>
 
-        {/* Action and avatar component */}
+        {/* Search and Avatar component */}
         <Flex alignItems={"center"}>
+          <Button key={"search"} bg={"white"} leftIcon={<SearchIcon />}>
+            <Link href={"/search"}>Search</Link>
+          </Button>
+
           <Menu>
             <MenuButton
               as={Button}

@@ -18,8 +18,8 @@ import {
   List,
   ListItem,
   Tbody,
-  Link,
   Badge,
+  Td,
 } from "@chakra-ui/react";
 import { AddIcon, ChevronRightIcon } from "@chakra-ui/icons";
 import { getData } from "src/database/functions";
@@ -56,7 +56,7 @@ const Home = () => {
           isClosable: true,
         });
       }
-      setEntityData(value);
+      setEntityData(value.reverse());
       setIsLoaded(true);
     });
     return;
@@ -75,7 +75,7 @@ const Home = () => {
           isClosable: true,
         });
       }
-      setCollectionData(value);
+      setCollectionData(value.reverse());
       setIsLoaded(true);
     });
     return;
@@ -95,7 +95,7 @@ const Home = () => {
           isClosable: true,
         });
       }
-      setUpdateData(value);
+      setUpdateData(value.reverse());
       setIsLoaded(true);
     });
     return;
@@ -124,12 +124,12 @@ const Home = () => {
             <Flex direction={"row"} justify={"space-between"} align={"center"}>
               <Heading fontWeight={"semibold"}>Collections</Heading>
               <Button
-                leftIcon={<AddIcon />}
-                as={Link}
-                href={"/create/collection/start"}
-                colorScheme={"green"}
+                key={`view-collection-all`}
+                colorScheme={"blackAlpha"}
+                rightIcon={<ChevronRightIcon />}
+                onClick={() => navigate(`/collections`)}
               >
-                Create
+                View All
               </Button>
             </Flex>
 
@@ -159,23 +159,22 @@ const Home = () => {
                       <Th pr={"0"}>
                         <Flex justify={"right"}>
                           <Button
-                            key={`view-collection-all`}
-                            colorScheme={"blackAlpha"}
-                            rightIcon={<ChevronRightIcon />}
-                            onClick={() => navigate(`/collections`)}
+                            colorScheme={"green"}
+                            leftIcon={<AddIcon />}
+                            onClick={() => navigate("/create/collection/start")}
                           >
-                            View All
+                            Create
                           </Button>
                         </Flex>
                       </Th>
                     </Tr>
                   </Thead>
                   <Tbody>
-                    {collectionData.slice(0, 3).map((collection) => {
+                    {collectionData.slice(0, 5).map((collection) => {
                       return (
                         <Tr key={collection._id}>
-                          <Th pl={"0"}>{collection.name}</Th>
-                          <Th pr={"0"}>
+                          <Td pl={"0"}>{collection.name}</Td>
+                          <Td pr={"0"}>
                             <Flex justify={"right"}>
                               <Button
                                 key={`view-collection-${collection._id}`}
@@ -188,7 +187,7 @@ const Home = () => {
                                 View
                               </Button>
                             </Flex>
-                          </Th>
+                          </Td>
                         </Tr>
                       );
                     })}
@@ -211,12 +210,12 @@ const Home = () => {
             <Flex direction={"row"} justify={"space-between"} align={"center"}>
               <Heading fontWeight={"semibold"}>Entities</Heading>
               <Button
-                leftIcon={<AddIcon />}
-                as={Link}
-                href={"/create/entity/start"}
-                colorScheme={"green"}
+                key={`view-entity-all`}
+                colorScheme={"blackAlpha"}
+                rightIcon={<ChevronRightIcon />}
+                onClick={() => navigate(`/entities`)}
               >
-                Create
+                View All
               </Button>
             </Flex>
 
@@ -240,29 +239,29 @@ const Home = () => {
                     <Tr>
                       <Th pl={"0"}>
                         <Heading fontWeight={"semibold"} size={"sm"}>
-                          Newest Entities
+                          Name
                         </Heading>
                       </Th>
                       <Th pr={"0"}>
                         <Flex justify={"right"}>
                           <Button
-                            key={`view-entity-all`}
-                            colorScheme={"blackAlpha"}
-                            rightIcon={<ChevronRightIcon />}
-                            onClick={() => navigate(`/entities`)}
+                            colorScheme={"green"}
+                            leftIcon={<AddIcon />}
+                            onClick={() => navigate("/create/entity/start")}
                           >
-                            View All
+                            Create
                           </Button>
                         </Flex>
                       </Th>
                     </Tr>
                   </Thead>
+
                   <Tbody>
-                    {entityData.slice(0, 3).map((entity) => {
+                    {entityData.slice(0, 5).map((entity) => {
                       return (
                         <Tr key={entity._id}>
-                          <Th pl={"0"}>{entity.name}</Th>
-                          <Th pr={"0"}>
+                          <Td pl={"0"}>{entity.name}</Td>
+                          <Td pr={"0"}>
                             <Flex justify={"right"}>
                               <Button
                                 key={`view-entity-${entity._id}`}
@@ -275,7 +274,7 @@ const Home = () => {
                                 View
                               </Button>
                             </Flex>
-                          </Th>
+                          </Td>
                         </Tr>
                       );
                     })}
@@ -292,73 +291,71 @@ const Home = () => {
         <Flex
           direction={"column"}
           p={"4"}
+          gap={"1.5"}
+          h={"fit-content"}
           background={"whitesmoke"}
           rounded={"xl"}
-          gap={"1.5"}
           grow={"1"}
         >
           <Heading fontWeight={"semibold"}>Activity</Heading>
           <List>
             {updateData.length > 0 ? (
-              updateData.reverse().map((update, index) => {
-                if (index < 10) {
-                  // Configure the badge
-                  let operationBadgeColor = "green";
-                  switch (update.type) {
-                    case "create":
-                      operationBadgeColor = "green";
-                      break;
-                    case "update":
-                      operationBadgeColor = "blue";
-                      break;
-                    case "delete":
-                      operationBadgeColor = "red";
-                      break;
-                  }
-
-                  let typeBadgeColor = "yellow";
-                  switch (update.target.type) {
-                    case "entities":
-                      typeBadgeColor = "yellow";
-                      break;
-                    case "collections":
-                      typeBadgeColor = "orange";
-                      break;
-                    case "attributes":
-                      typeBadgeColor = "gray";
-                      break;
-                  }
-                  return (
-                    <ListItem key={`update-${update._id}`}>
-                      <Flex
-                        direction={"row"}
-                        p={"2"}
-                        gap={"2"}
-                        mt={"2"}
-                        mb={"2"}
-                        align={"center"}
-                        color={"white"}
-                        background={"blackAlpha.500"}
-                        rounded={"xl"}
-                      >
-                        <Text fontSize={"md"} as={"b"}>
-                          {dayjs(update.timestamp).format("DD MMM HH:mm")}
-                        </Text>
-                        <Badge colorScheme={operationBadgeColor}>
-                          {update.type}
-                        </Badge>
-                        <Badge colorScheme={typeBadgeColor}>
-                          {update.target.type}
-                        </Badge>
-                        <Spacer />
-                        <Text fontSize={"md"} as={"b"}>
-                          {update.target.name}
-                        </Text>
-                      </Flex>
-                    </ListItem>
-                  );
+              updateData.slice(0, 10).map((update) => {
+                // Configure the badge
+                let operationBadgeColor = "green";
+                switch (update.type) {
+                  case "create":
+                    operationBadgeColor = "green";
+                    break;
+                  case "update":
+                    operationBadgeColor = "blue";
+                    break;
+                  case "delete":
+                    operationBadgeColor = "red";
+                    break;
                 }
-                return;
+
+                let typeBadgeColor = "yellow";
+                switch (update.target.type) {
+                  case "entities":
+                    typeBadgeColor = "yellow";
+                    break;
+                  case "collections":
+                    typeBadgeColor = "orange";
+                    break;
+                  case "attributes":
+                    typeBadgeColor = "gray";
+                    break;
+                }
+                return (
+                  <ListItem key={`update-${update._id}`}>
+                    <Flex
+                      direction={"row"}
+                      p={"2"}
+                      gap={"2"}
+                      mt={"2"}
+                      mb={"2"}
+                      align={"center"}
+                      color={"white"}
+                      background={"blackAlpha.500"}
+                      rounded={"xl"}
+                    >
+                      <Text fontSize={"md"} as={"b"}>
+                        {dayjs(update.timestamp).format("DD MMM HH:mm")}
+                      </Text>
+                      <Badge colorScheme={operationBadgeColor}>
+                        {update.type}
+                      </Badge>
+                      <Badge colorScheme={typeBadgeColor}>
+                        {update.target.type}
+                      </Badge>
+                      <Spacer />
+                      <Text fontSize={"md"} as={"b"}>
+                        {update.target.name}
+                      </Text>
+                    </Flex>
+                  </ListItem>
+                );
               })
             ) : (
               <Text fontSize={"md"}>No recent activity to show.</Text>
