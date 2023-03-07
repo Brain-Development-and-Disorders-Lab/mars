@@ -11,8 +11,11 @@ import ReactFlow, {
   Edge,
 } from "react-flow-renderer";
 import { Loading } from "@components/Loading";
+
+// Utility libraries
 import _ from "underscore";
-import consola from "consola";
+// import consola from "consola";
+import ELK, { ElkExtendedEdge, ElkNode } from "elkjs";
 
 // Database and models
 import { getData } from "@database/functions";
@@ -44,6 +47,12 @@ const Graph = (props: { id: string }) => {
     }
   };
 
+  /**
+   * Utility function to determine membership of a Node
+   * in the graph
+   * @param {string} id Node ID
+   * @return {boolean}
+   */
   const containsNode = (id: string): boolean => {
     for (let node of nodes) {
       if (_.isEqual(node.id, id)) {
@@ -51,6 +60,41 @@ const Graph = (props: { id: string }) => {
       }
     }
     return false;
+  };
+
+  const generateLayout = (layoutNodes: Node[], layoutEdges: Edge[]) => {
+    // Set the layout of the graph using ELK
+    const elk = new ELK();
+
+    const nodes: ElkNode[] = layoutNodes.map((node) => {
+      return {
+        id: node.id,
+        width: 150,
+        height: 45,
+      };
+    });
+
+    const edges: ElkExtendedEdge[] = layoutEdges.map((edge) => {
+      return {
+        id: edge.id,
+        sources: [edge.source],
+        targets: [edge.target],
+      };
+    });
+
+    const graph = {
+      id: "root",
+      layoutOptions: {
+        "elk.algorithm": "layered",
+        "elk.direction": "DOWN",
+        "nodePlacement.strategy": "SIMPLE",
+        "spacing.nodeNodeBetweenLayers": "40"
+      },
+      children: nodes,
+      edges: edges,
+    };
+
+    return elk.layout(graph);
   };
 
   const createGraph = () => {
@@ -137,18 +181,28 @@ const Graph = (props: { id: string }) => {
       position: { x: 250, y: 100 },
     });
 
-    // Set the nodes
-    setNodes([...nodes, ...initialNodes]);
+    generateLayout(initialNodes, initialEdges).then((result) => {
+      // Apply positioning information to Nodes
+      if (result.children) {
+        result.children.map((node) => {
+          initialNodes.forEach((initialNode) => {
+            if (initialNode.id === node.id && node.x && node.y) {
+              initialNode.position.x = node.x;
+              initialNode.position.y = node.y;
+            }
+          });
+        });
+      }
 
-    // Set the edges
-    setEdges([...edges, ...initialEdges]);
+      // Set the Nodes and Edges
+      setNodes([...nodes, ...initialNodes]);
+      setEdges([...edges, ...initialEdges]);
 
-    setGraphReady(true);
+      setGraphReady(true);
+    });
   };
 
-  const onNodeClick = (event: React.MouseEvent, node: Node) => {
-    consola.debug("Event:", event);
-
+  const onNodeClick = (_event: React.MouseEvent, node: Node) => {
     if (!_.isEqual(node.id.toString(), entityData._id.toString())) {
       // If the primary Entity hasn't been clicked, obtain Origin and Product nodes
       // for the selected Entity
@@ -258,9 +312,24 @@ const Graph = (props: { id: string }) => {
           }
         }
 
-        // Apply all updates to Nodes and Edges
-        setNodes(updatedNodes);
-        setEdges(updatedEdges);
+        // Re-generate a layout
+        generateLayout(updatedNodes, updatedEdges).then((result) => {
+          // Apply positioning information to Nodes
+          if (result.children) {
+            result.children.map((node) => {
+              updatedNodes.forEach((updatedNode) => {
+                if (updatedNode.id === node.id && node.x && node.y) {
+                  updatedNode.position.x = node.x;
+                  updatedNode.position.y = node.y;
+                }
+              });
+            });
+          }
+
+          // Apply updates
+          setNodes(updatedNodes);
+          setEdges(updatedEdges);
+        });
       });
     }
   };
