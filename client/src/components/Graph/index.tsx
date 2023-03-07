@@ -149,17 +149,20 @@ const Graph = (props: { id: string }) => {
   const onNodeClick = (event: React.MouseEvent, node: Node) => {
     consola.debug("Event:", event);
 
-    if (!_.isEqual(node.id, entityData._id)) {
+    if (!_.isEqual(node.id.toString(), entityData._id.toString())) {
       // If the primary Entity hasn't been clicked, obtain Origin and Product nodes
       // for the selected Entity
+      let updatedNodes = nodes;
+      let updatedEdges = edges;
+
       getEntityData(node.id).then((entity) => {
         // Origins
         if (entity.associations.origins.length > 0) {
           for (let origin of entity.associations.origins) {
             if (containsNode(origin.id) === false) {
               // Firstly, update the current node type (if required)
-              setNodes([
-                ...nodes.map((node) => {
+              updatedNodes = [
+                ...updatedNodes.map((node) => {
                   if (_.isEqual(node.id, entity._id)) {
                     if (entity.associations.products.length > 0) {
                       // If Products are specified as well, we need to set it to
@@ -173,11 +176,11 @@ const Graph = (props: { id: string }) => {
                   }
                   return node;
                 }),
-              ]);
+              ];
 
               // Add node
-              setNodes([
-                ...nodes,
+              updatedNodes = [
+                ...updatedNodes,
                 {
                   id: origin.id,
                   type: "input",
@@ -186,11 +189,11 @@ const Graph = (props: { id: string }) => {
                   },
                   position: { x: 100, y: 200 },
                 },
-              ]);
+              ];
 
               // Create edge
-              setEdges([
-                ...edges,
+              updatedEdges = [
+                ...updatedEdges,
                 {
                   id: `edge_${origin.id}_${node.id}`,
                   source: origin.id,
@@ -199,16 +202,13 @@ const Graph = (props: { id: string }) => {
                     type: MarkerType.ArrowClosed,
                   },
                 },
-              ]);
+              ];
             }
           }
         }
 
         // Products
         if (entity.associations.products.length > 0) {
-          let updatedNodes = nodes;
-          let updatedEdges = edges;
-
           for (let product of entity.associations.products) {
             if (containsNode(product.id) === false) {
               // Firstly, update the current node type (if required)
@@ -256,10 +256,11 @@ const Graph = (props: { id: string }) => {
               ];
             }
           }
-
-          setNodes(updatedNodes);
-          setEdges(updatedEdges);
         }
+
+        // Apply all updates to Nodes and Edges
+        setNodes(updatedNodes);
+        setEdges(updatedEdges);
       });
     }
   };
