@@ -160,3 +160,10 @@ export type UpdateStruct = {
 export type UpdateModel = UpdateStruct & {
   _id: string;
 };
+
+// Authentication
+export type AuthenticationStruct = {
+  authenticated: boolean;
+  login: () => Promise<void>;
+  logout: () => Promise<void>;
+};
