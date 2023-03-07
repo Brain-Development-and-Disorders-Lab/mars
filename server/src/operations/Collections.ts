@@ -10,6 +10,7 @@ import { CollectionModel, CollectionStruct } from "@types";
 
 // Utility libraries
 import _ from "underscore";
+import consola from "consola";
 
 const COLLECTIONS = "collections";
 
@@ -20,6 +21,7 @@ export class Collections {
    * @return {Promise<CollectionModel>}
    */
   static create = (collection: any): Promise<CollectionModel> => {
+    consola.info("Creating new Collection:", collection.name);
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(COLLECTIONS)
@@ -28,13 +30,19 @@ export class Collections {
             throw error;
           }
 
+          // Database operations to perform
+          const operations: Promise<any>[] = [];
+
           // Add any Entities to the Collection
           for (const entity of (collection as CollectionStruct).entities) {
-            Collections.addEntity(result.insertedId, entity);
+            operations.push(Collections.addEntity(result.insertedId, entity));
           }
 
-          collection["_id"] = result.insertedId;
-          resolve(collection as CollectionModel);
+          Promise.all(operations).then((_result) => {
+            collection["_id"] = result.insertedId;
+            consola.success("Created new Collection:", collection.name);
+            resolve(collection as CollectionModel);
+          });
         });
     });
   };
@@ -42,6 +50,7 @@ export class Collections {
   static update = (
     updatedCollection: CollectionModel
   ): Promise<CollectionModel> => {
+    consola.info("Updating Collection:", updatedCollection.name);
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(COLLECTIONS)
@@ -51,6 +60,9 @@ export class Collections {
             if (error) {
               throw error;
             }
+
+            // Database operations to perform
+            const operations: Promise<any>[] = [];
 
             // Cast and store current state of the Collection
             const currentCollection = result as CollectionModel;
@@ -63,13 +75,13 @@ export class Collections {
               (entity) => !currentCollection.entities.includes(entity)
             );
             entitiesToAdd.map((entity: string) => {
-              Entities.addCollection(entity, currentCollection._id);
+              operations.push(Entities.addCollection(entity, currentCollection._id));
             });
             const entitiesToRemove = currentCollection.entities.filter(
               (entity) => !entitiesToKeep.includes(entity)
             );
             entitiesToRemove.map((entity: string) => {
-              Entities.removeCollection(entity, currentCollection._id);
+              operations.push(Entities.removeCollection(entity, currentCollection._id));
             });
 
             const updates = {
@@ -88,8 +100,12 @@ export class Collections {
                     throw error;
                   }
 
-                  // Resolve the Promise
-                  resolve(updatedCollection);
+                  Promise.all(operations).then((_result) => {
+                    consola.success("Updated Collection:", updatedCollection.name);
+
+                    // Resolve the Promise
+                    resolve(updatedCollection);
+                  });
                 }
               );
           }
@@ -98,6 +114,7 @@ export class Collections {
   };
 
   static addEntity = (collection: string, entity: string): Promise<string> => {
+    consola.info("Adding Entity", entity.toString(), "to Collection", collection.toString());
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(COLLECTIONS)
@@ -124,6 +141,7 @@ export class Collections {
                   if (error) {
                     throw error;
                   }
+                  consola.success("Added Entity", entity.toString(), "to Collection", collection.toString());
 
                   // Resolve the Promise
                   resolve(collection);
@@ -138,6 +156,7 @@ export class Collections {
     collection: string,
     entity: string
   ): Promise<string> => {
+    consola.info("Removing Entity", entity.toString(), "from Collection", collection.toString());
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(COLLECTIONS)
@@ -152,7 +171,7 @@ export class Collections {
             const updatedValues = {
               $set: {
                 entities: (result as CollectionModel).entities.filter(
-                  (content) => !_.isEqual(content, entity.toString())
+                  (content) => !_.isEqual(content.toString(), entity.toString())
                 ),
               },
             };
@@ -166,6 +185,7 @@ export class Collections {
                   if (error) {
                     throw error;
                   }
+                  consola.success("Removed Entity", entity.toString(), "from Collection", collection.toString());
 
                   // Resolve the Promise
                   resolve(collection);
@@ -185,6 +205,7 @@ export class Collections {
           if (error) {
             throw error;
           }
+          consola.success("Retrieved all Collections");
           resolve(result as CollectionModel[]);
         });
     });
@@ -202,12 +223,15 @@ export class Collections {
           if (error) {
             throw error;
           }
+
+          consola.success("Retrieved Collection (id):", id.toString());
           resolve(result as CollectionModel);
         });
     });
   };
 
   static delete = (id: string): Promise<CollectionModel> => {
+    consola.info("Deleting Collection (id):", id.toString());
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(COLLECTIONS)
@@ -239,6 +263,7 @@ export class Collections {
                       throw error;
                     }
 
+                    consola.success("Deleted Collection (id):", id.toString());
                     resolve(result);
                   }
                 );

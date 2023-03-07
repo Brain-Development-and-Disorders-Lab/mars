@@ -395,10 +395,10 @@ export class Entities {
     collection: string
   ): Promise<string> => {
     consola.info(
-      "Adding Entity (id:)",
-      entity,
-      "to Collection (id:)",
-      collection
+      "Adding Entity (id):",
+      entity.toString(),
+      "to Collection (id):",
+      collection.toString()
     );
     return new Promise((resolve, _reject) => {
       getDatabase()
@@ -427,10 +427,10 @@ export class Entities {
 
                 // Resolve the Promise
                 consola.success(
-                  "Added Entity (id:)",
-                  entity,
-                  "to Collection (id:)",
-                  collection
+                  "Added Entity (id):",
+                  entity.toString(),
+                  "to Collection (id):",
+                  collection.toString()
                 );
                 resolve(entity);
               }
@@ -444,10 +444,10 @@ export class Entities {
     collection: string
   ): Promise<string> => {
     consola.info(
-      "Removing Entity (id:)",
-      entity,
-      "from Collection (id:)",
-      collection
+      "Removing Entity (id):",
+      entity.toString(),
+      "from Collection (id):",
+      collection.toString()
     );
     return new Promise((resolve, _reject) => {
       getDatabase()
@@ -481,10 +481,10 @@ export class Entities {
 
                 // Resolve the Promise
                 consola.success(
-                  "Removed Entity (id:)",
-                  entity,
-                  "from Collection (id:)",
-                  collection
+                  "Removed Entity (id):",
+                  entity.toString(),
+                  "from Collection (id):",
+                  collection.toString()
                 );
                 resolve(entity);
               }
@@ -694,7 +694,7 @@ export class Entities {
    * @return {Promise<EntityModel>}
    */
   static getOne = (id: string): Promise<EntityModel> => {
-    consola.info("Retrieving Entity (id:)", id);
+    consola.info("Retrieving Entity (id):", id.toString());
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES_COLLECTION)
@@ -703,14 +703,14 @@ export class Entities {
             throw error;
           }
 
-          consola.success("Retrieved Entity (id:)", id);
+          consola.success("Retrieved Entity (id):", id.toString());
           resolve(result as EntityModel);
         });
     });
   };
 
   static delete = (id: string): Promise<EntityModel> => {
-    consola.info("Deleting Entity (id:)", id);
+    consola.info("Deleting Entity (id):", id.toString());
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES_COLLECTION)
@@ -759,7 +759,7 @@ export class Entities {
                     throw error;
                   }
 
-                  consola.success("Deleted Entity (id:)", id);
+                  consola.success("Deleted Entity (id):", id.toString());
                   resolve(entity);
                 }
               );
