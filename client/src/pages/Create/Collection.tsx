@@ -4,6 +4,8 @@ import {
   Button,
   Flex,
   FormControl,
+  FormErrorMessage,
+  FormHelperText,
   FormLabel,
   Heading,
   Input,
@@ -31,6 +33,12 @@ export const Start = ({}) => {
   const [created, setCreated] = useState(new Date());
   const [owner, setOwner] = useState("");
   const [description, setDescription] = useState("");
+
+  // Form validation
+  const isNameError = name === "";
+  const isOwnerError = owner === "";
+  const isDescriptionError = description === "";
+  const isDetailsError = isNameError || isOwnerError || isDescriptionError;
 
   const collectionData: Collection = {
     name: name,
@@ -72,9 +80,9 @@ export const Start = ({}) => {
             </Heading>
             <Text>Specify some basic details about this Collection.</Text>
             <Flex direction="row" gap={"4"} wrap={["wrap", "nowrap"]}>
-              <FormControl isRequired>
+              <FormControl isRequired isInvalid={isNameError}>
                 <FormLabel htmlFor="name" fontWeight={"normal"}>
-                  Collection Name
+                  Name
                 </FormLabel>
                 <Input
                   id="name"
@@ -84,11 +92,16 @@ export const Start = ({}) => {
                   value={name}
                   onChange={(event) => setName(event.target.value)}
                 />
+                {!isNameError ? (
+                  <FormHelperText>A name or ID for the Collection.</FormHelperText>
+                ) : (
+                  <FormErrorMessage>A name or ID must be specified.</FormErrorMessage>
+                )}
               </FormControl>
 
-              <FormControl isRequired>
+              <FormControl isRequired isInvalid={isOwnerError}>
                 <FormLabel htmlFor="owner" fontWeight={"normal"}>
-                  Collection Owner
+                  Owner
                 </FormLabel>
                 <Input
                   id="owner"
@@ -98,13 +111,18 @@ export const Start = ({}) => {
                   value={owner}
                   onChange={(event) => setOwner(event.target.value)}
                 />
+                {!isOwnerError ? (
+                  <FormHelperText>Owner of the Collection.</FormHelperText>
+                ) : (
+                  <FormErrorMessage>An owner of the Collection is required.</FormErrorMessage>
+                )}
               </FormControl>
             </Flex>
 
             <Flex direction="row" gap={"4"} wrap={["wrap", "nowrap"]}>
               <FormControl>
                 <FormLabel htmlFor="date" fontWeight={"normal"}>
-                  Creation Date
+                  Created
                 </FormLabel>
 
                 <SingleDatepicker
@@ -138,7 +156,7 @@ export const Start = ({}) => {
                 />
               </FormControl>
 
-              <FormControl isRequired>
+              <FormControl isRequired isInvalid={isDescriptionError}>
                 <FormLabel htmlFor="description" fontWeight={"normal"}>
                   Description
                 </FormLabel>
@@ -148,6 +166,11 @@ export const Start = ({}) => {
                   value={description}
                   onChange={(event) => setDescription(event.target.value)}
                 />
+                {!isDescriptionError ? (
+                  <FormHelperText>A description of the Collection.</FormHelperText>
+                ) : (
+                  <FormErrorMessage>A description must be provided.</FormErrorMessage>
+                )}
               </FormControl>
             </Flex>
           </Flex>
@@ -188,6 +211,7 @@ export const Start = ({}) => {
               navigate("/collections")
             );
           }}
+          isDisabled={isDetailsError}
         >
           Finish
         </Button>

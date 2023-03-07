@@ -116,3 +116,21 @@ export const deleteData = async (path: string): Promise<any> => {
       return { status: "error", error: error };
     });
 };
+
+/**
+ * Check if an Entity, Collection, or Attribute still exists in MARS
+ * @param {string} id Identifier of the Entity, Collection, or Attribute
+ * @param {"entities" | "collections" | "attributes"} type Specify whether an Entity, Collection, or Attribute is being checked
+ * @return {Promise<boolean>}
+ */
+export const doesExist = async (id: string, type: "entities" | "collections" | "attributes"): Promise<boolean> => {
+  return new Promise((resolve, _reject) => {
+    getData(`/${type}/${id}`).then((result) => {
+      if (result.status === "error") {
+        resolve(false);
+      } else {
+        resolve(true);
+      }
+    })
+  });
+};

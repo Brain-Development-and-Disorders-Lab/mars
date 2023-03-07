@@ -6,6 +6,7 @@ import {
   CheckboxGroup,
   Flex,
   FormControl,
+  FormErrorMessage,
   FormHelperText,
   FormLabel,
   Heading,
@@ -100,6 +101,12 @@ export const Start = ({}) => {
     attributes: selectedAttributes,
   };
 
+  // Various validation error states
+  const isNameError = name === "";
+  const isOwnerError = owner === "";
+  const isDateError = created.toISOString() === "";
+  const isDetailsError = isNameError || isOwnerError || isDateError;
+
   useEffect(() => {
     // Get all Entities
     getData(`/entities`)
@@ -166,6 +173,13 @@ export const Start = ({}) => {
         });
       });
   }, []);
+
+  const isValidInput = (): boolean => {
+    if (_.isEqual("start", pageState)) {
+      return isDetailsError;
+    }
+    return false;
+  };
 
   // Handle clicking "Next"
   const onNext = () => {
@@ -260,33 +274,39 @@ export const Start = ({}) => {
               </Text>
 
               <Flex direction={"row"} gap={"2"} wrap={["wrap", "nowrap"]}>
-                <FormControl>
+                <FormControl isRequired isInvalid={isNameError}>
                   <FormLabel>Name</FormLabel>
                   <Input
                     name="name"
                     value={name}
                     onChange={(event) => setName(event.target.value)}
-                    required
                   />
-                  <FormHelperText>
-                    A standardised name or ID for the Entity.
-                  </FormHelperText>
+                  {!isNameError ? (
+                    <FormHelperText>
+                      A standardised name or ID for the Entity.
+                    </FormHelperText>
+                  ) : (
+                    <FormErrorMessage>A name or ID must be specified.</FormErrorMessage>
+                  )}
                 </FormControl>
 
-                <FormControl>
+                <FormControl isRequired isInvalid={isOwnerError}>
                   <FormLabel>Owner</FormLabel>
                   <Input
                     name="owner"
                     value={owner}
                     onChange={(event) => setOwner(event.target.value)}
-                    required
                   />
-                  <FormHelperText>Owner of the Entity.</FormHelperText>
+                  {!isOwnerError ? (
+                    <FormHelperText>Owner of the Entity.</FormHelperText>
+                  ) : (
+                    <FormErrorMessage>An owner of the Entity is required.</FormErrorMessage>
+                  )}
                 </FormControl>
               </Flex>
 
               <Flex direction={"row"} gap={"2"} wrap={["wrap", "nowrap"]}>
-                <FormControl>
+                <FormControl isRequired isInvalid={isDateError}>
                   <FormLabel>Created</FormLabel>
                   <SingleDatepicker
                     id="owner"
@@ -317,7 +337,11 @@ export const Start = ({}) => {
                     date={created}
                     onDateChange={setCreated}
                   />
-                  <FormHelperText>Date the Entity was created.</FormHelperText>
+                  {!isDateError ? (
+                    <FormHelperText>Date the Entity was created.</FormHelperText>
+                  ) : (
+                    <FormErrorMessage>A created date must be specified.</FormErrorMessage>
+                  )}
                 </FormControl>
 
                 <FormControl>
@@ -662,6 +686,7 @@ export const Start = ({}) => {
             )
           }
           onClick={onNext}
+          isDisabled={isValidInput()}
         >
           {_.isEqual("attributes", pageState) ? "Finish" : "Next"}
         </Button>
