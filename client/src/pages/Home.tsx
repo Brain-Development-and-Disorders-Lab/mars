@@ -23,7 +23,7 @@ import {
   Td,
 } from "@chakra-ui/react";
 import { AddIcon, ChevronRightIcon } from "@chakra-ui/icons";
-import { BsBox, BsCollection } from "react-icons/bs";
+import { BsBox, BsCollection, BsLightning } from "react-icons/bs";
 
 import { getData } from "src/database/functions";
 import { CollectionModel, EntityModel, UpdateModel } from "@types";
@@ -303,7 +303,10 @@ const Home = () => {
           rounded={"xl"}
           grow={"1"}
         >
-          <Heading fontWeight={"semibold"}>Activity</Heading>
+          <Flex align={"center"} gap={"4"}>
+            <Icon as={BsLightning} w={"8"} h={"8"} />
+            <Heading fontWeight={"semibold"}>Activity</Heading>
+          </Flex>
           <List>
             {updateData.length > 0 ? (
               updateData.slice(0, 10).map((update) => {

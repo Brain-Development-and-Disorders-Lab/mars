@@ -3,6 +3,7 @@ import {
   Button,
   Flex,
   Heading,
+  Icon,
   Link,
   Table,
   TableContainer,
@@ -18,6 +19,7 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { ChevronRightIcon, AddIcon, WarningIcon } from "@chakra-ui/icons";
+import { BsCollection } from "react-icons/bs";
 
 // Custom components
 import { Loading } from "@components/Loading";
@@ -74,7 +76,10 @@ const Collections = () => {
         justify={"space-between"}
         align={"center"}
       >
-        <Heading fontWeight={"semibold"}>Collections</Heading>
+        <Flex align={"center"} gap={"4"}>
+          <Icon as={BsCollection} w={"8"} h={"8"} />
+          <Heading fontWeight={"semibold"}>Collections</Heading>
+        </Flex>
         <Button
           rightIcon={<AddIcon />}
           as={Link}

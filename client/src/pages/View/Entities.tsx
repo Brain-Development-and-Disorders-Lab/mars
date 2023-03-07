@@ -17,8 +17,10 @@ import {
   TagLabel,
   TagRightIcon,
   Td,
+  Icon,
 } from "@chakra-ui/react";
 import { ChevronRightIcon, AddIcon, WarningIcon } from "@chakra-ui/icons";
+import { BsBox } from "react-icons/bs";
 
 // Navigation
 import { useNavigate } from "react-router-dom";
@@ -75,7 +77,10 @@ const Entities = () => {
         justify={"space-between"}
         align={"center"}
       >
-        <Heading fontWeight={"semibold"}>Entities</Heading>
+        <Flex align={"center"} gap={"4"}>
+          <Icon as={BsBox} w={"8"} h={"8"} />
+          <Heading fontWeight={"semibold"}>Entities</Heading>
+        </Flex>
         <Button
           rightIcon={<AddIcon />}
           as={Link}

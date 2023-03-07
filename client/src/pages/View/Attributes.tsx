@@ -3,6 +3,7 @@ import {
   Button,
   Flex,
   Heading,
+  Icon,
   Link,
   Table,
   TableContainer,
@@ -15,9 +16,10 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { ChevronRightIcon, AddIcon } from "@chakra-ui/icons";
-import { Loading } from "@components/Loading";
+import { BsGear } from "react-icons/bs";
 
 // Custom components
+import { Loading } from "@components/Loading";
 import { WarningLabel } from "@components/Label";
 import { PageContainer } from "@components/PageContainer";
 
@@ -71,7 +73,10 @@ const Attributes = () => {
         justify={"space-between"}
         align={"center"}
       >
-        <Heading fontWeight={"semibold"}>Attributes</Heading>
+        <Flex align={"center"} gap={"4"}>
+          <Icon as={BsGear} w={"8"} h={"8"} />
+          <Heading fontWeight={"semibold"}>Attributes</Heading>
+        </Flex>
         <Button
           rightIcon={<AddIcon />}
           as={Link}

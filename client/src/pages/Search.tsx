@@ -81,7 +81,10 @@ const Search = () => {
       {/* Page header */}
       <Flex direction={"column"} pt={"4"} pb={"4"}>
         <Flex direction={"row"} align={"center"} justify={"space-between"}>
-          <Heading fontWeight={"semibold"}>Search</Heading>
+          <Flex align={"center"} gap={"4"}>
+            <Icon as={SearchIcon} w={"8"} h={"8"} />
+            <Heading fontWeight={"semibold"}>Search</Heading>
+          </Flex>
           <Button
             rightIcon={<InfoOutlineIcon />}
             variant={"outline"}
@@ -107,7 +110,7 @@ const Search = () => {
         />
 
         <Button
-          rightIcon={<Icon as={SearchIcon} />}
+          leftIcon={<Icon as={SearchIcon} />}
           isDisabled={query === ""}
           onClick={() => runSearch()}
         >

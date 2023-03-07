@@ -290,12 +290,20 @@ export const Collection = () => {
         </Flex>
       </Flex>
 
-      <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
-        <Flex direction={"column"} p={"2"} gap={"2"} grow={"1"}>
+      <Flex direction={"row"} gap={"4"} wrap={"wrap"}>
+        <Flex
+          direction={"column"}
+          p={"4"}
+          gap={"2"}
+          grow={"1"}
+          h={"fit-content"}
+          bg={"whitesmoke"}
+          rounded={"10px"}
+        >
           {/* Details */}
           <Heading fontWeight={"semibold"} size={"lg"}>Details</Heading>
           <TableContainer>
-            <Table mt={"sm"} colorScheme={"gray"}>
+            <Table variant={"simple"} colorScheme={"blackAlpha"}>
               <Thead>
                 <Tr>
                   <Th>Field</Th>
@@ -344,9 +352,17 @@ export const Collection = () => {
           </TableContainer>
         </Flex>
 
-        <Flex direction={"column"} p={"2"} gap={"2"} grow={"2"}>
-          {/* List of Entities in the Collection */}
+        <Flex
+          direction={"column"}
+          p={"4"}
+          gap={"2"}
+          grow={"2"}
+          h={"fit-content"}
+          bg={"whitesmoke"}
+          rounded={"10px"}
+        >
           <Flex direction={"row"} justify={"space-between"}>
+            {/* Entities in the Collection */}
             <Heading fontWeight={"semibold"} size={"lg"}>
               Entities
             </Heading>
@@ -363,7 +379,7 @@ export const Collection = () => {
 
           {collectionEntities && collectionEntities.length > 0 ? (
             <TableContainer>
-              <Table colorScheme={"gray"}>
+              <Table variant={"simple"} colorScheme={"blackAlpha"}>
                 <Thead>
                   <Tr>
                     <Th>Name</Th>
@@ -382,7 +398,7 @@ export const Collection = () => {
                             {!editing && (
                               <Button
                                 key={`view-collection-${entity}`}
-                                color="grey.400"
+                                colorScheme={"blackAlpha"}
                                 rightIcon={<ChevronRightIcon />}
                                 onClick={() => navigate(`/entities/${entity}`)}
                               >

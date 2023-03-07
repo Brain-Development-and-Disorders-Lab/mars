@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import {
   Flex,
   Heading,
+  Icon,
   Table,
   TableContainer,
   Tbody,
@@ -12,6 +13,7 @@ import {
   Tr,
   useToast,
 } from "@chakra-ui/react";
+import { BsGear } from "react-icons/bs";
 
 // Custom components
 import ParameterGroup from "@components/ParameterGroup";
@@ -68,40 +70,61 @@ export const Attribute = () => {
         align={"center"}
         wrap={"wrap"}
       >
-        <Heading size={"2xl"}>Attribute: {attributeData.name}</Heading>
+        <Flex align={"center"} gap={"4"} shadow={"lg"} p={"2"} border={"2px"} rounded={"10px"}>
+          <Icon as={BsGear} w={"8"} h={"8"} />
+          <Heading fontWeight={"semibold"}>{attributeData.name}</Heading>
+        </Flex>
       </Flex>
 
-      <Flex direction={"column"} p={"2"} gap={"2"}>
-        {/* Metadata table */}
-        <Heading m={"0"}>Metadata</Heading>
+      <Flex direction={"row"} gap={"4"} wrap={"wrap"}>
+        <Flex
+          direction={"column"}
+          p={"4"}
+          gap={"2"}
+          grow={"1"}
+          h={"fit-content"}
+          bg={"whitesmoke"}
+          rounded={"10px"}
+        >
+          {/* Details */}
+          <Heading fontWeight={"semibold"} size={"lg"}>Details</Heading>
 
-        <TableContainer background={"gray.50"} rounded={"2xl"} p={"4"}>
-          <Table mt={"sm"} colorScheme={"gray"}>
-            <Thead>
-              <Tr>
-                <Th>Field</Th>
-                <Th>Value</Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              <Tr>
-                <Td>Description</Td>
-                <Td>
-                  <Text>{attributeData.description}</Text>
-                </Td>
-              </Tr>
-            </Tbody>
-          </Table>
-        </TableContainer>
-      </Flex>
-      <Flex direction={"column"} p={"2"} gap={"2"}>
-        <Heading m={"0"}>Parameters</Heading>
+          <TableContainer>
+            <Table variant={"simple"} colorScheme={"blackAlpha"}>
+              <Thead>
+                <Tr>
+                  <Th>Field</Th>
+                  <Th>Value</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                <Tr>
+                  <Td>Description</Td>
+                  <Td>
+                    <Text>{attributeData.description}</Text>
+                  </Td>
+                </Tr>
+              </Tbody>
+            </Table>
+          </TableContainer>
+        </Flex>
+        <Flex
+          direction={"column"}
+          p={"4"}
+          gap={"2"}
+          grow={"1"}
+          h={"fit-content"}
+          bg={"whitesmoke"}
+          rounded={"10px"}
+        >
+          <Heading fontWeight={"semibold"} size={"lg"}>Parameters</Heading>
 
-        {attributeData.parameters && attributeData.parameters.length > 0 ? (
-          <ParameterGroup parameters={attributeData.parameters} viewOnly />
-        ) : (
-          <Text>No parameters.</Text>
-        )}
+          {attributeData.parameters && attributeData.parameters.length > 0 ? (
+            <ParameterGroup parameters={attributeData.parameters} viewOnly />
+          ) : (
+            <Text>No parameters.</Text>
+          )}
+        </Flex>
       </Flex>
     </PageContainer>
   ) : (

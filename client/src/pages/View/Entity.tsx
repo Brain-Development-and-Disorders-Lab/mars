@@ -481,7 +481,7 @@ export const Entity = () => {
         </Flex>
       </Flex>
 
-      <Flex direction={"row"} gap={"4"} wrap={"wrap"}>
+      <Flex direction={"row"} gap={"4"} p={"2"} wrap={"wrap"}>
         <Flex
           direction={"column"}
           p={"4"}
