@@ -29,6 +29,9 @@ import {
 } from "@chakra-ui/icons";
 import { BsBox, BsCollection, BsGear } from "react-icons/bs";
 
+// Router navigation
+import { useNavigate } from "react-router-dom";
+
 // NavigationElement sub-component to generalize links
 const NavigationElement = ({
   href,
@@ -57,6 +60,8 @@ const NavigationElement = ({
 const Navigation = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
+  const navigate = useNavigate();
+
   return (
     <Box px={4} bg={"white"}>
       <Flex h={"8vh"} alignItems={"center"} justifyContent={"space-between"}>
@@ -76,8 +81,8 @@ const Navigation = () => {
             <Image src="/Favicon.png" boxSize={"36px"} />
             <Heading fontWeight={"semibold"} size={"lg"}>MARS</Heading>
 
-            <Button key={"home"} bg={"white"}>
-              <Link href={"/"}>Home</Link>
+            <Button key={"home"} bg={"white"} onClick={() => navigate("/")}>
+              Home
             </Button>
 
             {/* Create menu */}
@@ -92,25 +97,13 @@ const Navigation = () => {
                 Create
               </MenuButton>
               <MenuList>
-                <MenuItem
-                  icon={<BsBox />}
-                  as={Link}
-                  href={"/create/entity/start"}
-                >
+                <MenuItem icon={<BsBox />} onClick={() => navigate("/create/entity/start")}>
                   Entity
                 </MenuItem>
-                <MenuItem
-                  icon={<BsCollection />}
-                  as={Link}
-                  href={"/create/collection/start"}
-                >
+                <MenuItem icon={<BsCollection />} onClick={() => navigate("/create/collection/start")}>
                   Collection
                 </MenuItem>
-                <MenuItem
-                  icon={<BsGear />}
-                  as={Link}
-                  href={"/create/attribute/start"}
-                >
+                <MenuItem icon={<BsGear />} onClick={() => navigate("/create/attribute/start")}>
                   Attribute
                 </MenuItem>
               </MenuList>
@@ -128,17 +121,13 @@ const Navigation = () => {
                 View
               </MenuButton>
               <MenuList>
-                <MenuItem icon={<BsBox />} as={Link} href={"/entities"}>
+                <MenuItem icon={<BsBox />} onClick={() => navigate("/entities")}>
                   Entities
                 </MenuItem>
-                <MenuItem
-                  icon={<BsCollection />}
-                  as={Link}
-                  href={"/collections"}
-                >
+                <MenuItem icon={<BsCollection />} onClick={() => navigate("/collections")}>
                   Collections
                 </MenuItem>
-                <MenuItem icon={<BsGear />} as={Link} href={"/attributes"}>
+                <MenuItem icon={<BsGear />} onClick={() => navigate("/attributes")}>
                   Attributes
                 </MenuItem>
               </MenuList>
@@ -147,9 +136,14 @@ const Navigation = () => {
         </HStack>
 
         {/* Search and Avatar component */}
-        <Flex alignItems={"center"}>
-          <Button key={"search"} bg={"white"} leftIcon={<SearchIcon />}>
-            <Link href={"/search"}>Search</Link>
+        <Flex alignItems={"center"} gap={"4"}>
+          <Button
+            key={"search"}
+            bg={"white"}
+            leftIcon={<SearchIcon />}
+            onClick={() => navigate("/search")}
+          >
+            Search
           </Button>
 
           <Menu>
