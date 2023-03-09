@@ -1,4 +1,4 @@
-declare namespace State.Entity {
+export namespace State.Entity {
   type Start = {
     location: "none" | "start" | "associations" | "attributes";
     name: string;
@@ -20,7 +20,7 @@ declare namespace State.Entity {
   };
 }
 
-declare namespace State.Collection {
+export namespace State.Collection {
   type Start = {
     location: "none" | "start";
     name: string;
@@ -32,37 +32,37 @@ declare namespace State.Collection {
 
 // Attributes
 // Generic Attribute interface containing required data parameters
-declare type Attribute = {
+export type Attribute = {
   name: string;
   description: string;
   parameters: Parameters[];
 };
 
 // Database model of Attribute, including assigned ID
-declare type AttributeModel = Attribute & {
+export type AttributeModel = Attribute & {
   _id: string;
 };
 
-declare type AttributeActions = {
+export type AttributeActions = {
   showRemove?: boolean;
   onUpdate?: (data: AttributeProps) => void;
   onRemove?: (identifier: string) => void;
 };
 
-declare type AttributeProps = Attribute & AttributeActions & {
+export type AttributeProps = Attribute & AttributeActions & {
   identifier: string;
 };
 
-declare type AttributeGroupProps = AttributeActions & {
+export type AttributeGroupProps = AttributeActions & {
   attributes: AttributeModel[];
 };
 
-declare type AttributeCardProps = {
+export type AttributeCardProps = {
   data: Attribute;
 };
 
 // Parameters
-declare namespace Parameter {
+export namespace Parameter {
   interface Generic {
     identifier: string;
     name: string;
@@ -102,16 +102,16 @@ declare namespace Parameter {
   };
 }
 
-declare type Parameters = Parameter.Date | Parameter.Entity | Parameter.Number | Parameter.Text | Parameter.URL;
+export type Parameters = Parameter.Date | Parameter.Entity | Parameter.Number | Parameter.Text | Parameter.URL;
 
-declare type LinkyProps = {
+export type LinkyProps = {
   type: "entities" | "collections" | "attributes";
   id: string;
   color?: string;
 };
 
 // Collection types
-declare type Collection = {
+export type Collection = {
   name: string;
   description: string;
   owner: string;
@@ -119,12 +119,12 @@ declare type Collection = {
   entities: string[];
 };
 
-declare type CollectionModel = Collection & {
+export type CollectionModel = Collection & {
   _id: string;
 };
 
 // Entity types
-declare type Entity = {
+export type Entity = {
   name: string;
   created: string;
   owner: string;
