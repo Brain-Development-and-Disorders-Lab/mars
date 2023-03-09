@@ -27,11 +27,12 @@ const Attribute = (props: AttributeProps) => {
 
   const isNameError = name === "";
   const isDescriptionError = description === "";
-  const [attributeError, setAttributeError] = useState(false);
-  const isAttributesError = isNameError || isDescriptionError || !attributeError;
+  const [validParameters, setValidParameters] = useState(false);
+
+  const isAttributesError = isNameError || isDescriptionError || !validParameters;
 
   useEffect(() => {
-    setAttributeError(validateParameters(parameters));
+    setValidParameters(validateParameters(parameters));
   }, [parameters]);
 
   const attributeData: AttributeProps = {
@@ -105,7 +106,7 @@ const Attribute = (props: AttributeProps) => {
                 props.onUpdate(attributeData);
               }
             }}
-            isDisabled={isAttributesError}
+            isDisabled={finished || isAttributesError}
           >
             Done
           </Button>
