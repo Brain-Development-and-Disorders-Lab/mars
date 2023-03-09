@@ -79,7 +79,7 @@ const Search = () => {
   return (
     <ContentContainer>
       {/* Page header */}
-      <Flex direction={"column"} pt={"4"} pb={"4"}>
+      <Flex direction={"column"} p={"2"} pt={"4"} pb={"4"}>
         <Flex direction={"row"} align={"center"} justify={"space-between"}>
           <Flex align={"center"} gap={"4"}>
             <Icon as={SearchIcon} w={"8"} h={"8"} />
@@ -96,7 +96,7 @@ const Search = () => {
       </Flex>
 
       {/* Search component */}
-      <Flex direction={"row"} align={"center"} gap={"2"}>
+      <Flex direction={"row"} align={"center"} p={"2"} gap={"2"}>
         <Input
           value={query}
           placeholder={"Enter search query..."}
@@ -119,7 +119,7 @@ const Search = () => {
       </Flex>
 
       {/* Search Results */}
-      <Flex gap={"2"}>
+      <Flex gap={"2"} p={"2"}>
         {isSearching ? (
           <Flex w={"full"} align={"center"} justify={"center"}>
             <Loading />
@@ -131,8 +131,8 @@ const Search = () => {
                 <Thead>
                   <Tr>
                     <Th>Identifier</Th>
-                    <Th>Created</Th>
-                    <Th>Owner</Th>
+                    <Th display={{ base: "none", sm: "table-cell" }}>Created</Th>
+                    <Th display={{ base: "none", sm: "table-cell" }}>Owner</Th>
                     <Th></Th>
                   </Tr>
                 </Thead>
@@ -143,8 +143,8 @@ const Search = () => {
                       return (
                         <Tr key={result._id}>
                           <Td>{result.name}</Td>
-                          <Td>{new Date(result.created).toDateString()}</Td>
-                          <Td>{result.owner}</Td>
+                          <Td display={{ base: "none", sm: "table-cell" }}>{new Date(result.created).toDateString()}</Td>
+                          <Td display={{ base: "none", sm: "table-cell" }}>{result.owner}</Td>
                           <Td>
                             <Flex justify={"right"}>
                               <Button
