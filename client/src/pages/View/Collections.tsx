@@ -107,10 +107,10 @@ const Collections = () => {
                   <Th>
                     <Heading size={"sm"}>Name</Heading>
                   </Th>
-                  <Th>
+                  <Th display={{ base: "none", sm: "table-cell" }}>
                     <Heading size={"sm"}>Owner</Heading>
                   </Th>
-                  <Th>
+                  <Th display={{ base: "none", sm: "table-cell" }}>
                     <Heading size={"sm"}>Description</Heading>
                   </Th>
                   <Th></Th>
@@ -134,7 +134,7 @@ const Collections = () => {
                           <Text>{collection.name}</Text>
                         )}
                       </Td>
-                      <Td>
+                      <Td display={{ base: "none", sm: "table-cell" }}>
                         {_.isEqual(collection.owner, "") ? (
                           <Tag
                             size={"md"}
@@ -148,7 +148,7 @@ const Collections = () => {
                           <Text>{collection.owner}</Text>
                         )}
                       </Td>
-                      <Td>
+                      <Td display={{ base: "none", sm: "table-cell" }}>
                         {_.isEqual(collection.description, "") ? (
                           <Tag
                             size={"md"}

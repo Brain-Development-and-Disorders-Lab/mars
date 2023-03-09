@@ -104,7 +104,7 @@ const Attributes = () => {
                   <Th>
                     <Heading size={"sm"}>Name</Heading>
                   </Th>
-                  <Th>
+                  <Th display={{ base: "none", sm: "table-cell" }}>
                     <Heading size={"sm"}>Description</Heading>
                   </Th>
                   <Th></Th>
@@ -124,7 +124,7 @@ const Attributes = () => {
                           attribute.name
                         )}
                       </Td>
-                      <Td>
+                      <Td display={{ base: "none", sm: "table-cell" }}>
                         {_.isEqual(attribute.description, "") ? (
                           <WarningLabel
                             key={`warn-${attribute._id}`}
