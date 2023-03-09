@@ -117,277 +117,261 @@ const Home = () => {
         isError ? (
           <Error />
         ) : (
-          <Flex justify={"center"}>
-            <Flex
-              direction={"row"}
-              maxW={"7xl"}
-              wrap={"wrap"}
-              gap={"6"}
-            >
-              <Flex direction={"column"} gap={"6"} w={"2xl"} grow={"2"}>
-                <Flex
-                  direction={"column"}
-                  p={"4"}
-                  background={"whitesmoke"}
-                  rounded={"xl"}
-                  gap={"2"}
-                >
-                  {/* Collections listing */}
-                  <Flex direction={"row"} justify={"space-between"} align={"center"}>
-                    <Flex align={"center"} gap={"4"}>
-                      <Icon as={BsCollection} w={"8"} h={"8"} />
-                      <Heading fontWeight={"semibold"}>Collections</Heading>
-                    </Flex>
-                    <Button
-                      key={`view-collection-all`}
-                      colorScheme={"blackAlpha"}
-                      rightIcon={<ChevronRightIcon />}
-                      onClick={() => navigate(`/collections`)}
-                    >
-                      View All
-                    </Button>
-                  </Flex>
-
-                  <Stat
-                    rounded={"md"}
-                    background={"white"}
-                    p={"2"}
-                    maxW={"fit-content"}
-                  >
-                    <StatLabel>Total Collections</StatLabel>
-                    <StatNumber>{collectionData.length}</StatNumber>
-                    <StatHelpText>Updated just now.</StatHelpText>
-                  </Stat>
-
-                  <Spacer />
-
-                  {isLoaded && collectionData.length > 0 ? (
-                    <TableContainer>
-                      <Table variant={"simple"} colorScheme={"blackAlpha"}>
-                        <Thead>
-                          <Tr>
-                            <Th>
-                              <Heading fontWeight={"semibold"} size={"sm"}>
-                                Newest Collections
-                              </Heading>
-                            </Th>
-                            <Th>
-                              <Flex justify={"right"}>
-                                <Button
-                                  colorScheme={"green"}
-                                  leftIcon={<AddIcon />}
-                                  onClick={() => navigate("/create/collection/start")}
-                                >
-                                  Create
-                                </Button>
-                              </Flex>
-                            </Th>
-                          </Tr>
-                        </Thead>
-                        <Tbody>
-                          {collectionData.slice(0, 5).map((collection) => {
-                            return (
-                              <Tr key={collection._id}>
-                                <Td>{collection.name}</Td>
-                                <Td>
-                                  <Flex justify={"right"}>
-                                    <Button
-                                      key={`view-collection-${collection._id}`}
-                                      colorScheme={"blackAlpha"}
-                                      rightIcon={<ChevronRightIcon />}
-                                      onClick={() =>
-                                        navigate(`/collections/${collection._id}`)
-                                      }
-                                    >
-                                      View
-                                    </Button>
-                                  </Flex>
-                                </Td>
-                              </Tr>
-                            );
-                          })}
-                        </Tbody>
-                      </Table>
-                    </TableContainer>
-                  ) : (
-                    <Text>There are no Collections to display.</Text>
-                  )}
-                </Flex>
-
-                {/* Entities listing */}
-                <Flex
-                  direction={"column"}
-                  p={"4"}
-                  background={"whitesmoke"}
-                  rounded={"xl"}
-                  gap={"2"}
-                >
-                  <Flex direction={"row"} justify={"space-between"} align={"center"}>
-                    <Flex align={"center"} gap={"4"}>
-                      <Icon as={BsBox} w={"8"} h={"8"} />
-                      <Heading fontWeight={"semibold"}>Entities</Heading>
-                    </Flex>
-                    <Button
-                      key={`view-entity-all`}
-                      colorScheme={"blackAlpha"}
-                      rightIcon={<ChevronRightIcon />}
-                      onClick={() => navigate(`/entities`)}
-                    >
-                      View All
-                    </Button>
-                  </Flex>
-
-                  <Stat
-                    rounded={"md"}
-                    background={"white"}
-                    p={"2"}
-                    maxW={"fit-content"}
-                  >
-                    <StatLabel>Total Entities</StatLabel>
-                    <StatNumber>{entityData.length}</StatNumber>
-                    <StatHelpText>Updated just now.</StatHelpText>
-                  </Stat>
-
-                  <Spacer />
-
-                  {isLoaded && entityData.length > 0 ? (
-                    <TableContainer>
-                      <Table variant={"simple"} colorScheme={"blackAlpha"}>
-                        <Thead>
-                          <Tr>
-                            <Th>
-                              <Heading fontWeight={"semibold"} size={"sm"}>
-                                Name
-                              </Heading>
-                            </Th>
-                            <Th>
-                              <Flex justify={"right"}>
-                                <Button
-                                  colorScheme={"green"}
-                                  leftIcon={<AddIcon />}
-                                  onClick={() => navigate("/create/entity/start")}
-                                >
-                                  Create
-                                </Button>
-                              </Flex>
-                            </Th>
-                          </Tr>
-                        </Thead>
-
-                        <Tbody>
-                          {entityData.slice(0, 5).map((entity) => {
-                            return (
-                              <Tr key={entity._id}>
-                                <Td>{entity.name}</Td>
-                                <Td>
-                                  <Flex justify={"right"}>
-                                    <Button
-                                      key={`view-entity-${entity._id}`}
-                                      colorScheme={"blackAlpha"}
-                                      rightIcon={<ChevronRightIcon />}
-                                      onClick={() =>
-                                        navigate(`/entities/${entity._id}`)
-                                      }
-                                    >
-                                      View
-                                    </Button>
-                                  </Flex>
-                                </Td>
-                              </Tr>
-                            );
-                          })}
-                        </Tbody>
-                      </Table>
-                    </TableContainer>
-                  ) : (
-                    <Text>There are no Entities to display.</Text>
-                  )}
-                </Flex>
-              </Flex>
-
-              {/* Activity */}
+          <Flex
+            direction={"row"}
+            justify={"center"}
+            p={["1", "2"]}
+            gap={"6"}
+            maxW={"7xl"}
+            wrap={"wrap"}
+          >
+            <Flex direction={"column"} gap={"6"} grow={"2"}>
               <Flex
                 direction={"column"}
                 p={"4"}
-                gap={"1.5"}
-                h={"fit-content"}
                 background={"whitesmoke"}
                 rounded={"xl"}
-                grow={"1"}
+                gap={"2"}
               >
-                <Flex align={"center"} gap={"4"}>
-                  <Icon as={BsLightning} w={"8"} h={"8"} />
-                  <Heading fontWeight={"semibold"}>Activity</Heading>
+                {/* Collections listing */}
+                <Flex direction={"row"} justify={"space-between"} align={"center"}>
+                  <Flex align={"center"} gap={"4"}>
+                    <Icon as={BsCollection} w={"8"} h={"8"} />
+                    <Heading fontWeight={"semibold"}>Collections</Heading>
+                  </Flex>
+                  <Button
+                    key={`view-collection-all`}
+                    colorScheme={"blackAlpha"}
+                    rightIcon={<ChevronRightIcon />}
+                    onClick={() => navigate(`/collections`)}
+                  >
+                    View All
+                  </Button>
                 </Flex>
-                <List>
-                  {updateData.length > 0 ? (
-                    updateData.slice(0, 10).map((update) => {
-                      // Configure the badge
-                      let operationBadgeColor = "green";
-                      switch (update.type) {
-                        case "create":
-                          operationBadgeColor = "green";
-                          break;
-                        case "update":
-                          operationBadgeColor = "blue";
-                          break;
-                        case "delete":
-                          operationBadgeColor = "red";
-                          break;
-                      }
 
-                      let typeBadgeColor = "yellow";
-                      switch (update.target.type) {
-                        case "entities":
-                          typeBadgeColor = "yellow";
-                          break;
-                        case "collections":
-                          typeBadgeColor = "orange";
-                          break;
-                        case "attributes":
-                          typeBadgeColor = "gray";
-                          break;
-                      }
-                      return (
-                        <ListItem key={`update-${update._id}`}>
-                          <Flex
-                            direction={"row"}
-                            p={"2"}
-                            gap={"2"}
-                            mt={"2"}
-                            mb={"2"}
-                            align={"center"}
-                            background={"white"}
-                            rounded={"10px"}
-                            border={"2px"}
-                            borderColor={"gray.100"}
-                          >
-                            <Badge colorScheme={operationBadgeColor}>
-                              {update.type}
-                            </Badge>
+                <Stat
+                  rounded={"md"}
+                  background={"white"}
+                  p={"2"}
+                  maxW={"fit-content"}
+                >
+                  <StatLabel>Total Collections</StatLabel>
+                  <StatNumber>{collectionData.length}</StatNumber>
+                  <StatHelpText>Updated just now.</StatHelpText>
+                </Stat>
 
-                            <Text fontSize={"md"} as={"b"}>
-                              {update.target.name}
-                            </Text>
+                <Spacer />
 
-                            <Spacer />
-
-                            <Badge colorScheme={typeBadgeColor}>
-                              {update.target.type}
-                            </Badge>
-
-                            <Badge colorScheme={"blackAlpha"}>
-                              {dayjs(update.timestamp).format("DD MMM HH:mm")}
-                            </Badge>
-                          </Flex>
-                        </ListItem>
-                      );
-                    })
-                  ) : (
-                    <Text fontSize={"md"}>No recent activity to show.</Text>
-                  )}
-                </List>
+                {isLoaded && collectionData.length > 0 ? (
+                  <TableContainer>
+                    <Table variant={"simple"} colorScheme={"blackAlpha"}>
+                      <Thead>
+                        <Tr>
+                          <Th>
+                            <Heading fontWeight={"semibold"} size={"sm"}>
+                              Name
+                            </Heading>
+                          </Th>
+                          <Th>
+                            <Flex justify={"right"}>
+                              <Button
+                                colorScheme={"green"}
+                                leftIcon={<AddIcon />}
+                                onClick={() => navigate("/create/collection/start")}
+                              >
+                                Create
+                              </Button>
+                            </Flex>
+                          </Th>
+                        </Tr>
+                      </Thead>
+                      <Tbody>
+                        {collectionData.slice(0, 5).map((collection) => {
+                          return (
+                            <Tr key={collection._id}>
+                              <Td>{collection.name}</Td>
+                              <Td>
+                                <Flex justify={"right"}>
+                                  <Button
+                                    key={`view-collection-${collection._id}`}
+                                    colorScheme={"blackAlpha"}
+                                    rightIcon={<ChevronRightIcon />}
+                                    onClick={() =>
+                                      navigate(`/collections/${collection._id}`)
+                                    }
+                                  >
+                                    View
+                                  </Button>
+                                </Flex>
+                              </Td>
+                            </Tr>
+                          );
+                        })}
+                      </Tbody>
+                    </Table>
+                  </TableContainer>
+                ) : (
+                  <Text>There are no Collections to display.</Text>
+                )}
               </Flex>
+
+              {/* Entities listing */}
+              <Flex
+                direction={"column"}
+                p={"4"}
+                background={"whitesmoke"}
+                rounded={"xl"}
+                gap={"2"}
+              >
+                <Flex direction={"row"} justify={"space-between"} align={"center"}>
+                  <Flex align={"center"} gap={"4"}>
+                    <Icon as={BsBox} w={"8"} h={"8"} />
+                    <Heading fontWeight={"semibold"}>Entities</Heading>
+                  </Flex>
+                  <Button
+                    key={`view-entity-all`}
+                    colorScheme={"blackAlpha"}
+                    rightIcon={<ChevronRightIcon />}
+                    onClick={() => navigate(`/entities`)}
+                  >
+                    View All
+                  </Button>
+                </Flex>
+
+                <Stat
+                  rounded={"md"}
+                  background={"white"}
+                  p={"2"}
+                  maxW={"fit-content"}
+                >
+                  <StatLabel>Total Entities</StatLabel>
+                  <StatNumber>{entityData.length}</StatNumber>
+                  <StatHelpText>Updated just now.</StatHelpText>
+                </Stat>
+
+                <Spacer />
+
+                {isLoaded && entityData.length > 0 ? (
+                  <TableContainer>
+                    <Table variant={"simple"} colorScheme={"blackAlpha"}>
+                      <Thead>
+                        <Tr>
+                          <Th>
+                            <Heading fontWeight={"semibold"} size={"sm"}>
+                              Name
+                            </Heading>
+                          </Th>
+                          <Th>
+                            <Flex justify={"right"}>
+                              <Button
+                                colorScheme={"green"}
+                                leftIcon={<AddIcon />}
+                                onClick={() => navigate("/create/entity/start")}
+                              >
+                                Create
+                              </Button>
+                            </Flex>
+                          </Th>
+                        </Tr>
+                      </Thead>
+
+                      <Tbody>
+                        {entityData.slice(0, 5).map((entity) => {
+                          return (
+                            <Tr key={entity._id}>
+                              <Td>{entity.name}</Td>
+                              <Td>
+                                <Flex justify={"right"}>
+                                  <Button
+                                    key={`view-entity-${entity._id}`}
+                                    colorScheme={"blackAlpha"}
+                                    rightIcon={<ChevronRightIcon />}
+                                    onClick={() =>
+                                      navigate(`/entities/${entity._id}`)
+                                    }
+                                  >
+                                    View
+                                  </Button>
+                                </Flex>
+                              </Td>
+                            </Tr>
+                          );
+                        })}
+                      </Tbody>
+                    </Table>
+                  </TableContainer>
+                ) : (
+                  <Text>There are no Entities to display.</Text>
+                )}
+              </Flex>
+            </Flex>
+
+            {/* Activity */}
+            <Flex
+              direction={"column"}
+              p={"4"}
+              gap={"2"}
+              h={"fit-content"}
+              background={"whitesmoke"}
+              rounded={"xl"}
+              grow={"1"}
+            >
+              <Flex align={"center"} gap={"4"}>
+                <Icon as={BsLightning} w={"8"} h={"8"} />
+                <Heading fontWeight={"semibold"}>Activity</Heading>
+              </Flex>
+              <List>
+                {updateData.length > 0 ? (
+                  updateData.slice(0, 10).map((update) => {
+                    // Configure the badge
+                    let operationBadgeColor = "green";
+                    switch (update.type) {
+                      case "create":
+                        operationBadgeColor = "green";
+                        break;
+                      case "update":
+                        operationBadgeColor = "blue";
+                        break;
+                      case "delete":
+                        operationBadgeColor = "red";
+                        break;
+                    }
+
+                    return (
+                      <ListItem key={`update-${update._id}`}>
+                        <Flex
+                          direction={"row"}
+                          p={"2"}
+                          gap={"2"}
+                          mt={"2"}
+                          mb={"2"}
+                          align={"center"}
+                          background={"white"}
+                          rounded={"10px"}
+                          border={"2px"}
+                          borderColor={"gray.100"}
+                        >
+                          <Badge colorScheme={operationBadgeColor}>
+                            {update.type}
+                          </Badge>
+
+                          <Text fontSize={"md"} as={"b"}>
+                            {update.target.name}
+                          </Text>
+
+                          <Spacer />
+
+                          <Badge colorScheme={"blackAlpha"}>
+                            {dayjs(update.timestamp).format("DD MMM HH:mm")}
+                          </Badge>
+                        </Flex>
+                      </ListItem>
+                    );
+                  })
+                ) : (
+                  <Text fontSize={"md"}>No recent activity to show.</Text>
+                )}
+              </List>
             </Flex>
           </Flex>
         )
