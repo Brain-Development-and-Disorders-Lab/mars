@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Box, useToast } from "@chakra-ui/react";
+import { Flex, useToast } from "@chakra-ui/react";
 import ReactFlow, {
   MiniMap,
   Controls,
@@ -15,13 +15,11 @@ import { Error } from "@components/Error";
 
 // Utility libraries
 import _ from "underscore";
-// import consola from "consola";
 import ELK, { ElkExtendedEdge, ElkNode } from "elkjs";
 
 // Database and models
 import { getData } from "@database/functions";
 import { EntityModel } from "@types";
-import { ContentContainer } from "@components/ContentContainer";
 
 const Graph = (props: { id: string }) => {
   const toast = useToast();
@@ -31,7 +29,6 @@ const Graph = (props: { id: string }) => {
   const [entityData, setEntityData] = useState({} as EntityModel);
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-  const [graphReady, setGraphReady] = useState(false);
 
   const getEntityData = (id: string): Promise<EntityModel> => {
     return getData(`/entities/${id}`).then((result) => {
@@ -199,8 +196,6 @@ const Graph = (props: { id: string }) => {
       // Set the Nodes and Edges
       setNodes(nodes => [...nodes, ...initialNodes]);
       setEdges(edges => [...edges, ...initialEdges]);
-
-      setGraphReady(true);
     });
   };
 
@@ -363,48 +358,44 @@ const Graph = (props: { id: string }) => {
   }, [isLoaded]);
 
   return (
-    <ContentContainer vertical={isError || !isLoaded}>
+    <Flex h={"full"} align={"center"} justify={"center"}>
       {isLoaded ? (
         isError ? (
           <Error />
         ) : (
-          <Box h={"full"}>
-            {graphReady &&
-              <ReactFlow
-                nodes={nodes}
-                edges={edges}
-                onNodesChange={onNodesChange}
-                onEdgesChange={onEdgesChange}
-                onNodeClick={onNodeClick}
-                attributionPosition="bottom-right"
-                fitView
-              >
-                <MiniMap
-                  nodeStrokeColor={(n: any) => {
-                    if (n.style?.background) return n.style.background;
-                    if (n.type === "input") return "#0041d0";
-                    if (n.type === "output") return "#ff0072";
-                    if (n.type === "default") return "#1a192b";
+          <ReactFlow
+            nodes={nodes}
+            edges={edges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onNodeClick={onNodeClick}
+            attributionPosition="bottom-right"
+            fitView
+          >
+            <MiniMap
+              nodeStrokeColor={(n: any) => {
+                if (n.style?.background) return n.style.background;
+                if (n.type === "input") return "#0041d0";
+                if (n.type === "output") return "#ff0072";
+                if (n.type === "default") return "#1a192b";
 
-                    return "#eee";
-                  }}
-                  nodeColor={(n: any) => {
-                    if (n.style?.background) return n.style.background;
+                return "#eee";
+              }}
+              nodeColor={(n: any) => {
+                if (n.style?.background) return n.style.background;
 
-                    return "#fff";
-                  }}
-                  nodeBorderRadius={2}
-                />
-                <Controls />
-                <Background color="#aaa" gap={16} />
-              </ReactFlow>
-            }
-          </Box>
+                return "#fff";
+              }}
+              nodeBorderRadius={2}
+            />
+            <Controls />
+            <Background color="#aaa" gap={16} />
+          </ReactFlow>
         )
       ) : (
         <Loading />
       )}
-    </ContentContainer>
+    </Flex>
   );
 };
 
