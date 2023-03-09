@@ -116,11 +116,11 @@ export const Start = ({}) => {
     getData(`/entities`)
       .then((response) => {
         setEntities(response);
-      }).catch((error) => {
+      }).catch((_error) => {
         toast({
-          title: "Database Error",
+          title: "Error",
           status: "error",
-          description: error.toString(),
+          description: "Could not retrieve Entities data.",
           duration: 4000,
           position: "bottom-right",
           isClosable: true,
@@ -134,11 +134,11 @@ export const Start = ({}) => {
     getData(`/collections`)
       .then((response) => {
         setCollections(response);
-      }).catch((error) => {
+      }).catch((_error) => {
         toast({
-          title: "Database Error",
+          title: "Error",
           status: "error",
-          description: error.toString(),
+          description: "Could not retrieve Collections data.",
           duration: 4000,
           position: "bottom-right",
           isClosable: true,
@@ -152,11 +152,11 @@ export const Start = ({}) => {
     getData(`/attributes`)
       .then((response) => {
         setAttributes(response);
-      }).catch((error) => {
+      }).catch((_error) => {
         toast({
-          title: "Database Error",
+          title: "Error",
           status: "error",
-          description: error.toString(),
+          description: "Could not retrieve Attributes data.",
           duration: 4000,
           position: "bottom-right",
           isClosable: true,
@@ -183,6 +183,15 @@ export const Start = ({}) => {
     } else if (_.isEqual("attributes", pageState)) {
       postData(`/entities/create`, entityState).then(() => {
         navigate(`/entities`);
+      }).catch((_error) => {
+        toast({
+          title: "Error",
+          status: "error",
+          description: "Could not create new Entity.",
+          duration: 4000,
+          position: "bottom-right",
+          isClosable: true,
+        });
       });
     }
   };

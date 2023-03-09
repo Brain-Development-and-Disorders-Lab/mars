@@ -46,11 +46,11 @@ const Attributes = () => {
       .then((value) => {
         setAttributesData(value);
         setIsLoaded(true);
-      }).catch((error) => {
+      }).catch((_error) => {
         toast({
-          title: "Database Error",
+          title: "Error",
           status: "error",
-          description: error.toString(),
+          description: "Could not retrieve Attributes data.",
           duration: 4000,
           position: "bottom-right",
           isClosable: true,

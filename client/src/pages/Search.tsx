@@ -65,11 +65,11 @@ const Search = () => {
     getData(`/search/${query}`)
       .then((value) => {
         setResults(value);
-      }).catch((error) => {
+      }).catch((_error) => {
         toast({
-          title: "Database Error",
+          title: "Error",
           status: "error",
-          description: error.toString(),
+          description: "Could not get search results.",
           duration: 4000,
           position: "bottom-right",
           isClosable: true,

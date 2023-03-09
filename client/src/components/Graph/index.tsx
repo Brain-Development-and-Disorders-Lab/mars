@@ -36,11 +36,11 @@ const Graph = (props: { id: string }) => {
   const getEntityData = (id: string): Promise<EntityModel> => {
     return getData(`/entities/${id}`).then((result) => {
       return result;
-    }).catch((error) => {
+    }).catch((_error) => {
       toast({
-        title: "Database Error",
+        title: "Error",
         status: "error",
-        description: error.toString(),
+        description: "Could not get Entity data.",
         duration: 4000,
         position: "bottom-right",
         isClosable: true,
@@ -340,11 +340,11 @@ const Graph = (props: { id: string }) => {
   useEffect(() => {
     getEntityData(props.id).then((entity) => {
       setEntityData(entity);
-    }).catch((error) => {
+    }).catch((_error) => {
       toast({
-        title: "Database Error",
+        title: "Graph Error",
         status: "error",
-        description: error.toString(),
+        description: "Could not setup initial Entity node.",
         duration: 4000,
         position: "bottom-right",
         isClosable: true,

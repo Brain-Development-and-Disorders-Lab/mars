@@ -324,25 +324,24 @@ export const EntityParameter = (props: Parameter.Entity) => {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    const result = getData(`/entities`);
-
-    // Handle the response from the database
-    result.then((value) => {
+    getData(`/entities`).then((value) => {
       setEntities(value);
 
       // Check the contents of the response
       if (value["error"] !== undefined) {
-        toast({
-          title: "Database Error",
-          description: value["error"],
-          status: "error",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
+
       }
 
       setIsLoaded(true);
+    }).catch((_error) => {
+      toast({
+        title: "Error",
+        description: "Could not retrieve Entities.",
+        status: "error",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
     });
     return;
   }, []);

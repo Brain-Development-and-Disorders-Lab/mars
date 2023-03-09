@@ -51,11 +51,11 @@ const Entities = () => {
     getData(`/entities`)
       .then((value) => {
         setEntityData(value);
-      }).catch((error) => {
+      }).catch((_error) => {
         toast({
-          title: "Database Error",
+          title: "Error",
           status: "error",
-          description: error.toString(),
+          description: "Could not retrieve Entities data.",
           duration: 4000,
           position: "bottom-right",
           isClosable: true,
@@ -101,6 +101,7 @@ const Entities = () => {
 
             <Flex
               direction={"row"}
+              p={"4"}
               rounded={"2xl"}
               bg={"whitesmoke"}
               wrap={"wrap"}

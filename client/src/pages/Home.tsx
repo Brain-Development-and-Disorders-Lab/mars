@@ -56,11 +56,11 @@ const Home = () => {
     getData(`/entities`)
       .then((result) => {
         setEntityData(result.reverse());
-      }).catch((error) => {
+      }).catch((_error) => {
         toast({
-          title: "Database Error",
+          title: "Error",
           status: "error",
-          description: error.toString(),
+          description: "Could not retrieve Entities data.",
           duration: 4000,
           position: "bottom-right",
           isClosable: true,
@@ -76,11 +76,11 @@ const Home = () => {
     getData(`/collections`).then((value) => {
       setCollectionData(value.reverse());
       setIsLoaded(true);
-    }).catch((error) => {
+    }).catch((_error) => {
       toast({
-        title: "Database Error",
+        title: "Error",
         status: "error",
-        description: error.toString(),
+        description: "Could not retrieve Collections data.",
         duration: 4000,
         position: "bottom-right",
         isClosable: true,
@@ -96,11 +96,11 @@ const Home = () => {
     getData(`/updates`).then((value) => {
       setUpdateData(value.reverse());
       setIsLoaded(true);
-    }).catch((error) => {
+    }).catch((_error) => {
       toast({
-        title: "Database Error",
+        title: "Error",
         status: "error",
-        description: error.toString(),
+        description: "Could not retrieve Updates data.",
         duration: 4000,
         position: "bottom-right",
         isClosable: true,

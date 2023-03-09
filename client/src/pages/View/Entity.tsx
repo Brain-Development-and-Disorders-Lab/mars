@@ -144,8 +144,8 @@ export const Entity = () => {
       })
       .catch(() => {
         toast({
-          title: "Database Error",
-          description: "Error retrieving Entity data",
+          title: "Error",
+          description: "Could not retrieve Entity data.",
           status: "error",
           duration: 4000,
           position: "bottom-right",
@@ -162,8 +162,8 @@ export const Entity = () => {
         setCollectionData(response);
       }).catch(() => {
         toast({
-          title: "Database Error",
-          description: "Error retrieving Collection data",
+          title: "Error",
+          description: "Could not retrieve Collections data.",
           status: "error",
           duration: 4000,
           position: "bottom-right",
@@ -186,8 +186,8 @@ export const Entity = () => {
         );
       }).catch(() => {
         toast({
-          title: "Database Error",
-          description: "Error retrieving Collection data",
+          title: "Error",
+          description: "Could not retrieve Entities data.",
           status: "error",
           duration: 4000,
           position: "bottom-right",

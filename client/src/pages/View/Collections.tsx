@@ -49,11 +49,11 @@ const Collections = () => {
     getData(`/collections`)
       .then((value) => {
         setCollectionsData(value);
-      }).catch((error) => {
+      }).catch((_error) => {
         toast({
-          title: "Database Error",
+          title: "Error",
           status: "error",
-          description: error.toString(),
+          description: "Could not retrieve Collections data.",
           duration: 4000,
           position: "bottom-right",
           isClosable: true,
@@ -198,7 +198,7 @@ const Collections = () => {
         )
       ) : (
         <Loading />
-      )};
+      )}
     </ContentContainer>
   );
 };

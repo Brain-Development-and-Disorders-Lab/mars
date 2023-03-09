@@ -87,8 +87,8 @@ export const Collection = () => {
           setCollectionEntities(response.entities);
       }).catch(() => {
         toast({
-          title: "Database Error",
-          description: "Error retrieving Collection data",
+          title: "Error",
+          description: "Could not retrieve Collection data.",
           status: "error",
           duration: 4000,
           position: "bottom-right",
@@ -110,8 +110,8 @@ export const Collection = () => {
       })
       .catch(() => {
         toast({
-          title: "Database Error",
-          description: "Error retrieving Entity data",
+          title: "Error",
+          description: "Could not retrieve Entity data.",
           status: "error",
           duration: 4000,
           position: "bottom-right",
@@ -211,7 +211,7 @@ export const Collection = () => {
       }).catch(() => {
         toast({
           title: "Error",
-          description: `An error occurred when deleting Collection "${collectionData._id}"`,
+          description: `An error occurred when deleting Collection "${collectionData.name}".`,
           status: "error",
           duration: 2000,
           position: "bottom-right",
