@@ -238,12 +238,11 @@ export const Collection = () => {
     <ContentContainer>
       <Flex
         p={"2"}
-        pt={"8"}
-        pb={"8"}
         direction={"row"}
         justify={"space-between"}
         align={"center"}
         wrap={"wrap"}
+        gap={"4"}
       >
         <Flex align={"center"} gap={"4"} shadow={"lg"} p={"2"} border={"2px"} rounded={"10px"}>
           <Icon as={BsCollection} w={"8"} h={"8"} />
@@ -251,7 +250,7 @@ export const Collection = () => {
         </Flex>
 
         {/* Buttons */}
-        <Flex direction={"row"} gap={"2"}>
+        <Flex direction={"row"} gap={"4"} wrap={"wrap"}>
           {editing &&
             <Popover>
               <PopoverTrigger>
@@ -290,72 +289,74 @@ export const Collection = () => {
         </Flex>
       </Flex>
 
-      <Flex direction={"row"} gap={"4"} wrap={"wrap"}>
+      <Flex direction={"row"} gap={"4"} p={"2"} wrap={"wrap"}>
         <Flex
           direction={"column"}
           p={"4"}
-          gap={"2"}
+          gap={"4"}
           grow={"1"}
           h={"fit-content"}
           bg={"whitesmoke"}
           rounded={"10px"}
         >
           {/* Details */}
-          <Heading fontWeight={"semibold"} size={"lg"}>Details</Heading>
-          <TableContainer>
-            <Table variant={"simple"} colorScheme={"blackAlpha"}>
-              <Thead>
-                <Tr>
-                  <Th>Field</Th>
-                  <Th>Value</Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                <Tr>
-                  <Td>Owner</Td>
-                  <Td>
-                    {_.isEqual(collectionData.owner, "") ? (
-                      <Tag
-                        size={"md"}
-                        key={`warn-${collectionData._id}`}
-                        colorScheme={"orange"}
-                      >
-                        <TagLabel>Not specified</TagLabel>
-                        <TagRightIcon as={WarningIcon} />
-                      </Tag>
-                    ) : (
-                      <Text>
-                        <Link>{collectionData.owner}</Link>
-                      </Text>
-                    )}
-                  </Td>
-                </Tr>
-                <Tr>
-                  <Td>Description</Td>
-                  <Td>
-                    {_.isEqual(collectionData.description, "") ? (
-                      <Tag
-                        size={"md"}
-                        key={`warn-${collectionData._id}`}
-                        colorScheme={"orange"}
-                      >
-                        <TagLabel>Not specified</TagLabel>
-                        <TagRightIcon as={WarningIcon} />
-                      </Tag>
-                    ) : (
-                      <Text>{collectionData.description}</Text>
-                    )}
-                  </Td>
-                </Tr>
-              </Tbody>
-            </Table>
-          </TableContainer>
+          <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
+            <Heading fontWeight={"semibold"} size={"lg"}>Details</Heading>
+            <TableContainer>
+              <Table variant={"simple"} colorScheme={"blackAlpha"}>
+                <Thead>
+                  <Tr>
+                    <Th>Field</Th>
+                    <Th>Value</Th>
+                  </Tr>
+                </Thead>
+                <Tbody>
+                  <Tr>
+                    <Td>Owner</Td>
+                    <Td>
+                      {_.isEqual(collectionData.owner, "") ? (
+                        <Tag
+                          size={"md"}
+                          key={`warn-${collectionData._id}`}
+                          colorScheme={"orange"}
+                        >
+                          <TagLabel>Not specified</TagLabel>
+                          <TagRightIcon as={WarningIcon} />
+                        </Tag>
+                      ) : (
+                        <Text>
+                          <Link>{collectionData.owner}</Link>
+                        </Text>
+                      )}
+                    </Td>
+                  </Tr>
+                  <Tr>
+                    <Td>Description</Td>
+                    <Td>
+                      {_.isEqual(collectionData.description, "") ? (
+                        <Tag
+                          size={"md"}
+                          key={`warn-${collectionData._id}`}
+                          colorScheme={"orange"}
+                        >
+                          <TagLabel>Not specified</TagLabel>
+                          <TagRightIcon as={WarningIcon} />
+                        </Tag>
+                      ) : (
+                        <Text>{collectionData.description}</Text>
+                      )}
+                    </Td>
+                  </Tr>
+                </Tbody>
+              </Table>
+            </TableContainer>
+          </Flex>
         </Flex>
 
         <Flex
           direction={"column"}
           p={"4"}
-          gap={"2"}
+          gap={"4"}
           grow={"2"}
           h={"fit-content"}
           bg={"whitesmoke"}
@@ -376,61 +377,62 @@ export const Collection = () => {
               </Button>
             )}
           </Flex>
+          <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
+            {collectionEntities && collectionEntities.length > 0 ? (
+              <TableContainer>
+                <Table variant={"simple"} colorScheme={"blackAlpha"}>
+                  <Thead>
+                    <Tr>
+                      <Th>Name</Th>
+                      <Th></Th>
+                    </Tr>
+                  </Thead>
+                  <Tbody>
+                    {collectionEntities.map((entity) => {
+                      return (
+                        <Tr key={entity}>
+                          <Td>
+                            <Linky id={entity} type={"entities"} />
+                          </Td>
+                          <Td>
+                            <Flex justify={"right"} gap={"6"}>
+                              {!editing && (
+                                <Button
+                                  key={`view-collection-${entity}`}
+                                  colorScheme={"blackAlpha"}
+                                  rightIcon={<ChevronRightIcon />}
+                                  onClick={() => navigate(`/entities/${entity}`)}
+                                >
+                                  View
+                                </Button>
+                              )}
 
-          {collectionEntities && collectionEntities.length > 0 ? (
-            <TableContainer>
-              <Table variant={"simple"} colorScheme={"blackAlpha"}>
-                <Thead>
-                  <Tr>
-                    <Th>Name</Th>
-                    <Th></Th>
-                  </Tr>
-                </Thead>
-                <Tbody>
-                  {collectionEntities.map((entity) => {
-                    return (
-                      <Tr key={entity}>
-                        <Td>
-                          <Linky id={entity} type={"entities"} />
-                        </Td>
-                        <Td>
-                          <Flex justify={"right"} gap={"6"}>
-                            {!editing && (
-                              <Button
-                                key={`view-collection-${entity}`}
-                                colorScheme={"blackAlpha"}
-                                rightIcon={<ChevronRightIcon />}
-                                onClick={() => navigate(`/entities/${entity}`)}
-                              >
-                                View
-                              </Button>
-                            )}
-
-                            {editing && (
-                              <Button
-                                key={`remove-${entity}`}
-                                rightIcon={<CloseIcon />}
-                                colorScheme={"red"}
-                                onClick={() => {
-                                  if (id) {
-                                    removeEntity(entity);
-                                  }
-                                }}
-                              >
-                                Remove
-                              </Button>
-                            )}
-                          </Flex>
-                        </Td>
-                      </Tr>
-                    );
-                  })}
-                </Tbody>
-              </Table>
-            </TableContainer>
-          ) : (
-            <Text>This Collection is empty.</Text>
-          )}
+                              {editing && (
+                                <Button
+                                  key={`remove-${entity}`}
+                                  rightIcon={<CloseIcon />}
+                                  colorScheme={"red"}
+                                  onClick={() => {
+                                    if (id) {
+                                      removeEntity(entity);
+                                    }
+                                  }}
+                                >
+                                  Remove
+                                </Button>
+                              )}
+                            </Flex>
+                          </Td>
+                        </Tr>
+                      );
+                    })}
+                  </Tbody>
+                </Table>
+              </TableContainer>
+            ) : (
+              <Text>This Collection is empty.</Text>
+            )}
+          </Flex>
         </Flex>
       </Flex>
 

@@ -413,12 +413,11 @@ export const Entity = () => {
     <ContentContainer>
       <Flex
         p={"2"}
-        pt={"8"}
-        pb={"8"}
         direction={"row"}
         justify={"space-between"}
         align={"center"}
         wrap={"wrap"}
+        gap={"4"}
       >
         <Flex align={"center"} gap={"4"} shadow={"lg"} p={"2"} border={"2px"} rounded={"10px"}>
           <Icon as={BsBox} w={"8"} h={"8"} />
@@ -426,7 +425,7 @@ export const Entity = () => {
         </Flex>
 
         {/* Buttons */}
-        <Flex direction={"row"} gap={"4"}>
+        <Flex direction={"row"} gap={"4"} wrap={"wrap"}>
           {editing &&
             <Popover>
               <PopoverTrigger>
@@ -775,29 +774,38 @@ export const Entity = () => {
 
       {/* Attributes */}
       <Flex
-        p={"4"}
+        p={"2"}
+        direction={"row"}
+        justify={"space-between"}
+        align={"center"}
+        wrap={"wrap"}
         gap={"4"}
-        direction={"column"}
-        h={"fit-content"}
-        minH={"32"}
-        bg={"whitesmoke"}
-        rounded={"10px"}
       >
-        <Heading size={"lg"}>Attributes</Heading>
+        <Flex
+          direction={"column"}
+          p={"4"}
+          gap={"4"}
+          grow={"1"}
+          h={"fit-content"}
+          bg={"whitesmoke"}
+          rounded={"10px"}
+        >
+          <Heading size={"lg"}>Attributes</Heading>
 
-        <Flex  gap={"2"} direction={"row"}>
-          {entityAttributes.length > 0 ? (
-            entityAttributes.map((attribute) => {
-              return (
-                <AttributeCard
-                  data={attribute}
-                  key={`attribute-${attribute.name}`}
-                />
-              );
-            })
-          ) : (
-            <Text>{entityData.name} does not have any Attributes.</Text>
-          )}
+          <Flex  gap={"2"} direction={"row"}>
+            {entityAttributes.length > 0 ? (
+              entityAttributes.map((attribute) => {
+                return (
+                  <AttributeCard
+                    data={attribute}
+                    key={`attribute-${attribute.name}`}
+                  />
+                );
+              })
+            ) : (
+              <Text>{entityData.name} does not have any Attributes.</Text>
+            )}
+          </Flex>
         </Flex>
       </Flex>
 
