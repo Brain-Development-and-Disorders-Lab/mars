@@ -11,6 +11,7 @@ import ReactFlow, {
   Edge,
 } from "react-flow-renderer";
 import { Loading } from "@components/Loading";
+import { Error } from "@components/Error";
 
 // Utility libraries
 import _ from "underscore";
@@ -20,31 +21,32 @@ import ELK, { ElkExtendedEdge, ElkNode } from "elkjs";
 // Database and models
 import { getData } from "@database/functions";
 import { EntityModel } from "@types";
+import { ContentContainer } from "@components/ContentContainer";
 
 const Graph = (props: { id: string }) => {
   const toast = useToast();
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isError, setIsError] = useState(false);
 
   const [entityData, setEntityData] = useState({} as EntityModel);
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [graphReady, setGraphReady] = useState(false);
 
-  const getEntityData = async (id: string): Promise<EntityModel> => {
-    const value = await getData(`/entities/${id}`);
-    if (value["error"] !== undefined) {
+  const getEntityData = (id: string): Promise<EntityModel> => {
+    return getData(`/entities/${id}`).then((result) => {
+      return result;
+    }).catch((error) => {
       toast({
         title: "Database Error",
-        description: value["error"],
         status: "error",
+        description: error.toString(),
         duration: 4000,
         position: "bottom-right",
         isClosable: true,
       });
-      throw new Error("Database Error");
-    } else {
-      return value;
-    }
+      setIsError(true);
+    });
   };
 
   /**
@@ -338,52 +340,71 @@ const Graph = (props: { id: string }) => {
   useEffect(() => {
     getEntityData(props.id).then((entity) => {
       setEntityData(entity);
+    }).catch((error) => {
+      toast({
+        title: "Database Error",
+        status: "error",
+        description: error.toString(),
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+      setIsError(true);
+    }).finally(() => {
       setIsLoaded(true);
     });
   }, []);
 
   useEffect(() => {
-    if (isLoaded === true) {
+    if (isLoaded && !isError) {
       // Create the Graph
       createGraph();
     }
   }, [isLoaded]);
 
   return (
-    <Box h={"full"}>
-      {graphReady ? (
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          onNodeClick={onNodeClick}
-          attributionPosition="bottom-right"
-          fitView
-        >
-          <MiniMap
-            nodeStrokeColor={(n: any) => {
-              if (n.style?.background) return n.style.background;
-              if (n.type === "input") return "#0041d0";
-              if (n.type === "output") return "#ff0072";
-              if (n.type === "default") return "#1a192b";
+    <ContentContainer vertical={isError || !isLoaded}>
+      {isLoaded ? (
+        isError ? (
+          <Error />
+        ) : (
+          <Box h={"full"}>
+            {graphReady &&
+              <ReactFlow
+                nodes={nodes}
+                edges={edges}
+                onNodesChange={onNodesChange}
+                onEdgesChange={onEdgesChange}
+                onNodeClick={onNodeClick}
+                attributionPosition="bottom-right"
+                fitView
+              >
+                <MiniMap
+                  nodeStrokeColor={(n: any) => {
+                    if (n.style?.background) return n.style.background;
+                    if (n.type === "input") return "#0041d0";
+                    if (n.type === "output") return "#ff0072";
+                    if (n.type === "default") return "#1a192b";
 
-              return "#eee";
-            }}
-            nodeColor={(n: any) => {
-              if (n.style?.background) return n.style.background;
+                    return "#eee";
+                  }}
+                  nodeColor={(n: any) => {
+                    if (n.style?.background) return n.style.background;
 
-              return "#fff";
-            }}
-            nodeBorderRadius={2}
-          />
-          <Controls />
-          <Background color="#aaa" gap={16} />
-        </ReactFlow>
+                    return "#fff";
+                  }}
+                  nodeBorderRadius={2}
+                />
+                <Controls />
+                <Background color="#aaa" gap={16} />
+              </ReactFlow>
+            }
+          </Box>
+        )
       ) : (
         <Loading />
       )}
-    </Box>
+    </ContentContainer>
   );
 };
 

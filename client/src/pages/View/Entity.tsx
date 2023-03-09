@@ -66,6 +66,7 @@ import Linky from "src/components/Linky";
 import AttributeCard from "src/components/AttributeCard";
 import Graph from "src/components/Graph";
 import { Loading } from "src/components/Loading";
+import { Error } from "@components/Error";
 import { ContentContainer } from "@components/ContentContainer";
 
 export const Entity = () => {
@@ -107,6 +108,7 @@ export const Entity = () => {
   const [selectedOrigins, setSelectedOrigins] = useState([] as string[]);
 
   // Toggles
+  const [isError, setIsError] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [editing, setEditing] = useState(false);
 
@@ -127,25 +129,18 @@ export const Entity = () => {
   useEffect(() => {
     getData(`/entities/${id}`)
       .then((response) => {
-        if (_.isEqual(response.status, "error")) {
-          throw new Error(response.error);
-        } else {
-          // Check for issues with an empty array being stored haphazardly as "null"
-          if (response.associations.origins === null) {
-            response.associations.origins = [];
-          }
-
-          // Store data and signal data retrieval being completed
-          setEntityData(response);
-          setEntityDescription(response.description);
-          setEntityCollections(response.collections);
-          setEntityOrigins(response.associations.origins);
-          setEntityProducts(response.associations.products);
-          setEntityAttributes(response.attributes);
-
-          // Set the loaded state
-          setIsLoaded(true);
+        // Check for issues with an empty array being stored haphazardly as "null"
+        if (response.associations.origins === null) {
+          response.associations.origins = [];
         }
+
+        // Store data and signal data retrieval being completed
+        setEntityData(response);
+        setEntityDescription(response.description);
+        setEntityCollections(response.collections);
+        setEntityOrigins(response.associations.origins);
+        setEntityProducts(response.associations.products);
+        setEntityAttributes(response.attributes);
       })
       .catch(() => {
         toast({
@@ -156,19 +151,16 @@ export const Entity = () => {
           position: "bottom-right",
           isClosable: true,
         });
+        setIsError(true)
+      }).finally(() => {
+        setIsLoaded(true);
       });
 
     // Populate Collection data
     getData(`/collections`)
       .then((response) => {
-        if (_.isEqual(response.status, "error")) {
-          throw new Error(response.error);
-        } else {
-          setCollectionData(response);
-          setIsLoaded(true);
-        }
-      })
-      .catch(() => {
+        setCollectionData(response);
+      }).catch(() => {
         toast({
           title: "Database Error",
           description: "Error retrieving Collection data",
@@ -177,25 +169,22 @@ export const Entity = () => {
           position: "bottom-right",
           isClosable: true,
         });
+        setIsError(true);
+      }).finally(() => {
+        setIsLoaded(true);
       });
 
     // Populate Entities data
     getData(`/entities`)
       .then((response) => {
-        if (_.isEqual(response.status, "error")) {
-          throw new Error(response.error);
-        } else {
-          setAllEntities(
-            (response as EntityModel[])
-              .filter((entity) => !_.isEqual(entityData._id, entity._id))
-              .map((entity) => {
-                return { id: entity._id, name: entity.name };
-              })
-          );
-          setIsLoaded(true);
-        }
-      })
-      .catch(() => {
+        setAllEntities(
+          (response as EntityModel[])
+            .filter((entity) => !_.isEqual(entityData._id, entity._id))
+            .map((entity) => {
+              return { id: entity._id, name: entity.name };
+            })
+        );
+      }).catch(() => {
         toast({
           title: "Database Error",
           description: "Error retrieving Collection data",
@@ -204,6 +193,9 @@ export const Entity = () => {
           position: "bottom-right",
           isClosable: true,
         });
+        setIsError(true);
+      }).finally(() => {
+        setIsLoaded(true);
       });
   }, [id]);
 
@@ -227,19 +219,15 @@ export const Entity = () => {
 
       // Update data
       postData(`/entities/update`, updateData)
-        .then((response) => {
-          if (_.isEqual(response.status, "success")) {
-            setEditing(false);
-            toast({
-              title: "Saved!",
-              status: "success",
-              duration: 2000,
-              position: "bottom-right",
-              isClosable: true,
-            });
-            return;
-          }
-          throw new Error("Could not POST data");
+        .then((_response) => {
+          setEditing(false);
+          toast({
+            title: "Saved!",
+            status: "success",
+            duration: 2000,
+            position: "bottom-right",
+            isClosable: true,
+          });
         })
         .catch(() => {
           toast({
@@ -326,26 +314,22 @@ export const Entity = () => {
   const handleDeleteClick = () => {
     // Update data
     deleteData(`/entities/${id}`)
-      .then((response) => {
-        if (_.isEqual(response.status, "success")) {
-          setEditing(false);
-          navigate("/entities");
+      .then((_response) => {
+        setEditing(false);
+        navigate("/entities");
 
-          toast({
-            title: "Deleted!",
-            status: "success",
-            duration: 2000,
-            position: "bottom-right",
-            isClosable: true,
-          });
-          return;
-        }
-        throw new Error("Could not delete Entity");
+        toast({
+          title: "Deleted!",
+          status: "success",
+          duration: 2000,
+          position: "bottom-right",
+          isClosable: true,
+        });
       })
       .catch(() => {
         toast({
           title: "Error",
-          description: `An error occurred when deleting Entity "${entityData._id}"`,
+          description: `An error occurred when deleting Entity "${entityData.name}"`,
           status: "error",
           duration: 2000,
           position: "bottom-right",
@@ -409,687 +393,696 @@ export const Entity = () => {
     onAddCollectionsClose();
   };
 
-  return isLoaded ? (
-    <ContentContainer>
-      <Flex
-        p={"2"}
-        direction={"row"}
-        justify={"space-between"}
-        align={"center"}
-        wrap={"wrap"}
-        gap={"4"}
-      >
-        <Flex align={"center"} gap={"4"} shadow={"lg"} p={"2"} border={"2px"} rounded={"10px"}>
-          <Icon as={BsBox} w={"8"} h={"8"} />
-          <Heading fontWeight={"semibold"}>{entityData.name}</Heading>
-        </Flex>
+  return (
+    <ContentContainer vertical={isError || !isLoaded}>
+      {isLoaded ? (
+        isError ? (
+          <Error />
+        ) : (
+          <Flex direction={"column"}>
+            <Flex
+              p={"2"}
+              direction={"row"}
+              justify={"space-between"}
+              align={"center"}
+              wrap={"wrap"}
+              gap={"4"}
+            >
+              <Flex align={"center"} gap={"4"} shadow={"lg"} p={"2"} border={"2px"} rounded={"10px"}>
+                <Icon as={BsBox} w={"8"} h={"8"} />
+                <Heading fontWeight={"semibold"}>{entityData.name}</Heading>
+              </Flex>
 
-        {/* Buttons */}
-        <Flex direction={"row"} gap={"4"} wrap={"wrap"}>
-          {editing &&
-            <Popover>
-              <PopoverTrigger>
-                <Button colorScheme={"red"} rightIcon={<CloseIcon />}>
-                  Delete
+              {/* Buttons */}
+              <Flex direction={"row"} gap={"4"} wrap={"wrap"}>
+                {editing &&
+                  <Popover>
+                    <PopoverTrigger>
+                      <Button colorScheme={"red"} rightIcon={<CloseIcon />}>
+                        Delete
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent>
+                      <PopoverArrow />
+                      <PopoverCloseButton />
+                      <PopoverHeader>Confirmation</PopoverHeader>
+                      <PopoverBody>
+                        Are you sure you want to delete this Entity?
+                        <Flex direction={"row"} p={"2"} justify={"center"}>
+                          <Button
+                            colorScheme={"green"}
+                            rightIcon={<CheckIcon />}
+                            onClick={handleDeleteClick}
+                          >
+                            Confirm
+                          </Button>
+                        </Flex>
+                      </PopoverBody>
+                    </PopoverContent>
+                  </Popover>
+                }
+                <Button
+                  onClick={handleEditClick}
+                  colorScheme={editing ? "green" : "gray"}
+                  rightIcon={
+                    editing ? <Icon as={CheckIcon} /> : <Icon as={AiOutlineEdit} />
+                  }
+                >
+                  {editing ? "Done" : "Edit"}
                 </Button>
-              </PopoverTrigger>
-              <PopoverContent>
-                <PopoverArrow />
-                <PopoverCloseButton />
-                <PopoverHeader>Confirmation</PopoverHeader>
-                <PopoverBody>
-                  Are you sure you want to delete this Entity?
-                  <Flex direction={"row"} p={"2"} justify={"center"}>
-                    <Button
-                      colorScheme={"green"}
-                      rightIcon={<CheckIcon />}
-                      onClick={handleDeleteClick}
-                    >
-                      Confirm
-                    </Button>
-                  </Flex>
-                </PopoverBody>
-              </PopoverContent>
-            </Popover>
-          }
-          <Button
-            onClick={handleEditClick}
-            colorScheme={editing ? "green" : "gray"}
-            rightIcon={
-              editing ? <Icon as={CheckIcon} /> : <Icon as={AiOutlineEdit} />
-            }
-          >
-            {editing ? "Done" : "Edit"}
-          </Button>
-          <Button
-            onClick={onGraphOpen}
-            rightIcon={<Icon as={SlGraph} />}
-            colorScheme={"orange"}
-            isDisabled={editing}
-          >
-            View Graph
-          </Button>
-          <Button
-            onClick={handlePrintClick}
-            rightIcon={<Icon as={BsPrinter} />}
-            colorScheme={"blue"}
-            isDisabled={editing}
-          >
-            Export CSV
-          </Button>
-        </Flex>
-      </Flex>
+                <Button
+                  onClick={onGraphOpen}
+                  rightIcon={<Icon as={SlGraph} />}
+                  colorScheme={"orange"}
+                  isDisabled={editing}
+                >
+                  View Graph
+                </Button>
+                <Button
+                  onClick={handlePrintClick}
+                  rightIcon={<Icon as={BsPrinter} />}
+                  colorScheme={"blue"}
+                  isDisabled={editing}
+                >
+                  Export CSV
+                </Button>
+              </Flex>
+            </Flex>
 
-      <Flex direction={"row"} gap={"4"} p={"2"} wrap={"wrap"}>
-        <Flex
-          direction={"column"}
-          p={"4"}
-          gap={"4"}
-          grow={"1"}
-          h={"fit-content"}
-          bg={"whitesmoke"}
-          rounded={"10px"}
-        >
-          {/* Details */}
-          <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
-            <Heading size={"lg"}>Details</Heading>
-            <TableContainer>
-              <Table variant={"simple"} colorScheme={"blackAlpha"}>
-                <Thead>
-                  <Tr>
-                    <Th maxW={"xs"}>Field</Th>
-                    <Th>Value</Th>
-                  </Tr>
-                </Thead>
-                <Tbody>
-                  <Tr>
-                    <Td>Created</Td>
-                    <Td>
-                      <Text>{new Date(entityData.created).toDateString()}</Text>
-                    </Td>
-                  </Tr>
+            <Flex direction={"row"} gap={"4"} p={"2"} wrap={"wrap"}>
+              <Flex
+                direction={"column"}
+                p={"4"}
+                gap={"4"}
+                grow={"1"}
+                h={"fit-content"}
+                bg={"whitesmoke"}
+                rounded={"10px"}
+              >
+                {/* Details */}
+                <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
+                  <Heading size={"lg"}>Details</Heading>
+                  <TableContainer>
+                    <Table variant={"simple"} colorScheme={"blackAlpha"}>
+                      <Thead>
+                        <Tr>
+                          <Th maxW={"xs"}>Field</Th>
+                          <Th>Value</Th>
+                        </Tr>
+                      </Thead>
+                      <Tbody>
+                        <Tr>
+                          <Td>Created</Td>
+                          <Td>
+                            <Text>{new Date(entityData.created).toDateString()}</Text>
+                          </Td>
+                        </Tr>
 
-                  <Tr>
-                    <Td>Owner</Td>
-                    <Td>
-                      {_.isEqual(entityData.owner, "") ? (
-                        <Tag
-                          size={"md"}
-                          key={`warn-${entityData._id}`}
-                          colorScheme={"orange"}
-                        >
-                          <TagLabel>Not specified</TagLabel>
-                          <TagRightIcon as={WarningIcon} />
-                        </Tag>
-                      ) : (
-                        <Text>
-                          <Link>{entityData.owner}</Link>
-                        </Text>
-                      )}
-                    </Td>
-                  </Tr>
+                        <Tr>
+                          <Td>Owner</Td>
+                          <Td>
+                            {_.isEqual(entityData.owner, "") ? (
+                              <Tag
+                                size={"md"}
+                                key={`warn-${entityData._id}`}
+                                colorScheme={"orange"}
+                              >
+                                <TagLabel>Not specified</TagLabel>
+                                <TagRightIcon as={WarningIcon} />
+                              </Tag>
+                            ) : (
+                              <Text>
+                                <Link>{entityData.owner}</Link>
+                              </Text>
+                            )}
+                          </Td>
+                        </Tr>
 
-                  <Tr>
-                    <Td>Description</Td>
-                    <Td>
-                      <Textarea
-                        value={entityDescription}
-                        onChange={(event) => {
-                          setEntityDescription(event.target.value);
-                        }}
+                        <Tr>
+                          <Td>Description</Td>
+                          <Td>
+                            <Textarea
+                              value={entityDescription}
+                              onChange={(event) => {
+                                setEntityDescription(event.target.value);
+                              }}
+                              disabled={!editing}
+                            />
+                          </Td>
+                        </Tr>
+                      </Tbody>
+                    </Table>
+                  </TableContainer>
+                </Flex>
+
+                {/* Collections */}
+                <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
+                  <Flex direction={"row"} justify={"space-between"}>
+                    <Heading size={"lg"}>Collections</Heading>
+                    {editing ? (
+                      <Button
+                        colorScheme={"green"}
+                        rightIcon={<AddIcon />}
                         disabled={!editing}
-                      />
-                    </Td>
-                  </Tr>
-                </Tbody>
-              </Table>
-            </TableContainer>
-          </Flex>
+                        onClick={onAddCollectionsOpen}
+                      >
+                        Add
+                      </Button>
+                    ) : null}
+                  </Flex>
 
-          {/* Collections */}
-          <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
-            <Flex direction={"row"} justify={"space-between"}>
-              <Heading size={"lg"}>Collections</Heading>
-              {editing ? (
-                <Button
-                  colorScheme={"green"}
-                  rightIcon={<AddIcon />}
-                  disabled={!editing}
-                  onClick={onAddCollectionsOpen}
-                >
-                  Add
-                </Button>
-              ) : null}
-            </Flex>
+                  {entityCollections.length === 0 ? (
+                    <Text>
+                      {entityData.name} is not a member of any Collections.
+                    </Text>
+                  ) : (
+                    <TableContainer>
+                      <Table variant={"simple"} colorScheme={"blackAlpha"}>
+                        <Thead>
+                          <Tr>
+                            <Th>Collection</Th>
+                            <Th></Th>
+                          </Tr>
+                        </Thead>
+                        <Tbody>
+                          {entityCollections.map((collection) => {
+                            return (
+                              <Tr key={collection}>
+                                <Td>
+                                  <Linky type="collections" id={collection} />
+                                </Td>
+                                <Td>
+                                  <Flex w={"full"} gap={"2"} justify={"right"}>
+                                    {editing && (
+                                      <Button
+                                        key={`remove-${collection}`}
+                                        rightIcon={<CloseIcon />}
+                                        colorScheme={"red"}
+                                        onClick={() => {
+                                          removeCollection(collection);
+                                        }}
+                                      >
+                                        Remove
+                                      </Button>
+                                    )}
 
-            {entityCollections.length === 0 ? (
-              <Text>
-                {entityData.name} is not a member of any Collections.
-              </Text>
-            ) : (
-              <TableContainer>
-                <Table variant={"simple"} colorScheme={"blackAlpha"}>
-                  <Thead>
-                    <Tr>
-                      <Th>Collection</Th>
-                      <Th></Th>
-                    </Tr>
-                  </Thead>
-                  <Tbody>
-                    {entityCollections.map((collection) => {
-                      return (
-                        <Tr key={collection}>
-                          <Td>
-                            <Linky type="collections" id={collection} />
-                          </Td>
-                          <Td>
-                            <Flex w={"full"} gap={"2"} justify={"right"}>
-                              {editing && (
-                                <Button
-                                  key={`remove-${collection}`}
-                                  rightIcon={<CloseIcon />}
-                                  colorScheme={"red"}
-                                  onClick={() => {
-                                    removeCollection(collection);
-                                  }}
-                                >
-                                  Remove
-                                </Button>
-                              )}
+                                    {!editing && (
+                                      <Button
+                                        key={`view-${collection}`}
+                                        rightIcon={<ChevronRightIcon />}
+                                        colorScheme={"blackAlpha"}
+                                        onClick={() => navigate(`/collections/${collection}`)}
+                                      >
+                                        View
+                                      </Button>
+                                    )}
+                                  </Flex>
+                                </Td>
+                              </Tr>
+                            );
+                          })}
+                        </Tbody>
+                      </Table>
+                    </TableContainer>
+                  )}
+                </Flex>
+              </Flex>
 
-                              {!editing && (
-                                <Button
-                                  key={`view-${collection}`}
-                                  rightIcon={<ChevronRightIcon />}
-                                  colorScheme={"blackAlpha"}
-                                  onClick={() => navigate(`/collections/${collection}`)}
-                                >
-                                  View
-                                </Button>
-                              )}
-                            </Flex>
-                          </Td>
-                        </Tr>
-                      );
-                    })}
-                  </Tbody>
-                </Table>
-              </TableContainer>
-            )}
-          </Flex>
-        </Flex>
-
-        <Flex
-          direction={"column"}
-          p={"4"}
-          gap={"4"}
-          grow={"2"}
-          h={"fit-content"}
-          bg={"whitesmoke"}
-          rounded={"10px"}
-        >
-          {/* Origins */}
-          <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
-            <Flex direction={"row"} justify={"space-between"}>
-              <Heading size={"lg"}>Origins</Heading>
-              {editing ? (
-                <Button
-                  colorScheme={"green"}
-                  rightIcon={<AddIcon />}
-                  disabled={!editing}
-                  onClick={onAddOriginsOpen}
-                >
-                  Add
-                </Button>
-              ) : null}
-            </Flex>
-
-            {entityOrigins.length === 0 ? (
-              <Text>{entityData.name} does not have any Origins.</Text>
-            ) : (
-              <TableContainer>
-                <Table colorScheme={"blackAlpha"}>
-                  <Thead>
-                    <Tr>
-                      <Th>Origin</Th>
-                      <Th></Th>
-                    </Tr>
-                  </Thead>
-
-                  <Tbody>
-                    {entityOrigins.map((origin) => {
-                      return (
-                        <Tr key={origin.id}>
-                          <Td>
-                            <Linky type="entities" id={origin.id} />
-                          </Td>
-                          <Td>
-                            <Flex w={"full"} gap={"2"} justify={"right"}>
-                              {editing && (
-                                <Button
-                                  key={`remove-${origin.id}`}
-                                  rightIcon={<CloseIcon />}
-                                  colorScheme={"red"}
-                                  onClick={() => {
-                                    removeOrigin(origin.id);
-                                  }}
-                                >
-                                  Remove
-                                </Button>
-                              )}
-
-                              {!editing && (
-                                <Button
-                                  key={`view-${origin.id}`}
-                                  rightIcon={<ChevronRightIcon />}
-                                  colorScheme={"blackAlpha"}
-                                  onClick={() => navigate(`/entities/${origin.id}`)}
-                                >
-                                  View
-                                </Button>
-                              )}
-                            </Flex>
-                          </Td>
-                        </Tr>
-                      );
-                    })}
-                  </Tbody>
-                </Table>
-              </TableContainer>
-            )}
-          </Flex>
-
-          {/* Products */}
-          <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
-            <Flex direction={"row"} justify={"space-between"}>
-              <Heading size={"lg"}>Products</Heading>
-              {editing ? (
-                <Button
-                  colorScheme={"green"}
-                  rightIcon={<AddIcon />}
-                  disabled={!editing}
-                  onClick={onAddProductsOpen}
-                >
-                  Add
-                </Button>
-              ) : null}
-            </Flex>
-
-            {entityProducts.length === 0 ? (
-              <Text>{entityData.name} does not have any Products.</Text>
-            ) : (
-              <TableContainer>
-                <Table colorScheme={"blackAlpha"}>
-                  <Thead>
-                    <Tr>
-                      <Th>Product</Th>
-                      <Th></Th>
-                    </Tr>
-                  </Thead>
-
-                  <Tbody>
-                    {entityProducts.map((product) => {
-                      return (
-                        <Tr key={product.id}>
-                          <Td>
-                            <Linky type="entities" id={product.id} />
-                          </Td>
-                          <Td>
-                            <Flex w={"full"} gap={"2"} justify={"right"}>
-                              {editing && (
-                                <Button
-                                  key={`remove-${product.id}`}
-                                  rightIcon={<CloseIcon />}
-                                  colorScheme={"red"}
-                                  onClick={() => {
-                                    removeProduct(product.id);
-                                  }}
-                                >
-                                  Remove
-                                </Button>
-                              )}
-
-                              {!editing && (
-                                <Button
-                                  key={`view-${product.id}`}
-                                  rightIcon={<ChevronRightIcon />}
-                                  colorScheme={"blackAlpha"}
-                                  onClick={() => navigate(`/entities/${product.id}`)}
-                                >
-                                  View
-                                </Button>
-                              )}
-                            </Flex>
-                          </Td>
-                        </Tr>
-                      );
-                    })}
-                  </Tbody>
-                </Table>
-              </TableContainer>
-            )}
-          </Flex>
-        </Flex>
-      </Flex>
-
-      {/* Attributes */}
-      <Flex
-        p={"2"}
-        direction={"row"}
-        justify={"space-between"}
-        align={"center"}
-        wrap={"wrap"}
-        gap={"4"}
-      >
-        <Flex
-          direction={"column"}
-          p={"4"}
-          gap={"4"}
-          grow={"1"}
-          h={"fit-content"}
-          bg={"whitesmoke"}
-          rounded={"10px"}
-        >
-          <Heading size={"lg"}>Attributes</Heading>
-
-          <Flex  gap={"2"} direction={"row"}>
-            {entityAttributes.length > 0 ? (
-              entityAttributes.map((attribute) => {
-                return (
-                  <AttributeCard
-                    data={attribute}
-                    key={`attribute-${attribute.name}`}
-                  />
-                );
-              })
-            ) : (
-              <Text>{entityData.name} does not have any Attributes.</Text>
-            )}
-          </Flex>
-        </Flex>
-      </Flex>
-
-      <Modal isOpen={isAddCollectionsOpen} onClose={onAddCollectionsClose}>
-        <ModalOverlay />
-        <ModalContent p={"4"}>
-          {/* Heading and close button */}
-          <ModalHeader>Add to Collection</ModalHeader>
-          <ModalCloseButton />
-
-          {/* Select component for Collections */}
-          <Flex direction={"column"} p={"2"} gap={"2"}>
-            <FormControl>
-              <FormLabel>Add Entity to Collections</FormLabel>
-              <Select
-                title="Select Collection"
-                placeholder={"Select Collection"}
-                onChange={(event) => {
-                  const selectedCollection = event.target.value.toString();
-                  if (selectedCollections.includes(selectedCollection)) {
-                    toast({
-                      title: "Warning",
-                      description: "Collection has already been selected.",
-                      status: "warning",
-                      duration: 2000,
-                      position: "bottom-right",
-                      isClosable: true,
-                    });
-                  } else {
-                    setSelectedCollections([
-                      ...selectedCollections,
-                      selectedCollection,
-                    ]);
-                  }
-                }}
+              <Flex
+                direction={"column"}
+                p={"4"}
+                gap={"4"}
+                grow={"2"}
+                h={"fit-content"}
+                bg={"whitesmoke"}
+                rounded={"10px"}
               >
-                {isLoaded &&
-                  collectionData.map((collection) => {
-                    return (
-                      <option key={collection._id} value={collection._id}>
-                        {collection.name}
-                      </option>
-                    );
-                  })}
-                ;
-              </Select>
-            </FormControl>
+                {/* Origins */}
+                <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
+                  <Flex direction={"row"} justify={"space-between"}>
+                    <Heading size={"lg"}>Origins</Heading>
+                    {editing ? (
+                      <Button
+                        colorScheme={"green"}
+                        rightIcon={<AddIcon />}
+                        disabled={!editing}
+                        onClick={onAddOriginsOpen}
+                      >
+                        Add
+                      </Button>
+                    ) : null}
+                  </Flex>
 
-            <Flex direction={"row"} p={"2"} gap={"2"}>
-              {selectedCollections.map((collection) => {
-                if (!_.isEqual(collection, "")) {
-                  return (
-                    <Tag key={`tag-${collection}`}>
-                      <Linky id={collection} type={"collections"} />
-                      <TagCloseButton
-                        onClick={() => {
-                          setSelectedCollections(
-                            selectedCollections.filter((selected) => {
-                              return !_.isEqual(collection, selected);
-                            })
-                          );
-                        }}
-                      />
-                    </Tag>
-                  );
-                } else {
-                  return null;
-                }
-              })}
+                  {entityOrigins.length === 0 ? (
+                    <Text>{entityData.name} does not have any Origins.</Text>
+                  ) : (
+                    <TableContainer>
+                      <Table colorScheme={"blackAlpha"}>
+                        <Thead>
+                          <Tr>
+                            <Th>Origin</Th>
+                            <Th></Th>
+                          </Tr>
+                        </Thead>
+
+                        <Tbody>
+                          {entityOrigins.map((origin) => {
+                            return (
+                              <Tr key={origin.id}>
+                                <Td>
+                                  <Linky type="entities" id={origin.id} />
+                                </Td>
+                                <Td>
+                                  <Flex w={"full"} gap={"2"} justify={"right"}>
+                                    {editing && (
+                                      <Button
+                                        key={`remove-${origin.id}`}
+                                        rightIcon={<CloseIcon />}
+                                        colorScheme={"red"}
+                                        onClick={() => {
+                                          removeOrigin(origin.id);
+                                        }}
+                                      >
+                                        Remove
+                                      </Button>
+                                    )}
+
+                                    {!editing && (
+                                      <Button
+                                        key={`view-${origin.id}`}
+                                        rightIcon={<ChevronRightIcon />}
+                                        colorScheme={"blackAlpha"}
+                                        onClick={() => navigate(`/entities/${origin.id}`)}
+                                      >
+                                        View
+                                      </Button>
+                                    )}
+                                  </Flex>
+                                </Td>
+                              </Tr>
+                            );
+                          })}
+                        </Tbody>
+                      </Table>
+                    </TableContainer>
+                  )}
+                </Flex>
+
+                {/* Products */}
+                <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
+                  <Flex direction={"row"} justify={"space-between"}>
+                    <Heading size={"lg"}>Products</Heading>
+                    {editing ? (
+                      <Button
+                        colorScheme={"green"}
+                        rightIcon={<AddIcon />}
+                        disabled={!editing}
+                        onClick={onAddProductsOpen}
+                      >
+                        Add
+                      </Button>
+                    ) : null}
+                  </Flex>
+
+                  {entityProducts.length === 0 ? (
+                    <Text>{entityData.name} does not have any Products.</Text>
+                  ) : (
+                    <TableContainer>
+                      <Table colorScheme={"blackAlpha"}>
+                        <Thead>
+                          <Tr>
+                            <Th>Product</Th>
+                            <Th></Th>
+                          </Tr>
+                        </Thead>
+
+                        <Tbody>
+                          {entityProducts.map((product) => {
+                            return (
+                              <Tr key={product.id}>
+                                <Td>
+                                  <Linky type="entities" id={product.id} />
+                                </Td>
+                                <Td>
+                                  <Flex w={"full"} gap={"2"} justify={"right"}>
+                                    {editing && (
+                                      <Button
+                                        key={`remove-${product.id}`}
+                                        rightIcon={<CloseIcon />}
+                                        colorScheme={"red"}
+                                        onClick={() => {
+                                          removeProduct(product.id);
+                                        }}
+                                      >
+                                        Remove
+                                      </Button>
+                                    )}
+
+                                    {!editing && (
+                                      <Button
+                                        key={`view-${product.id}`}
+                                        rightIcon={<ChevronRightIcon />}
+                                        colorScheme={"blackAlpha"}
+                                        onClick={() => navigate(`/entities/${product.id}`)}
+                                      >
+                                        View
+                                      </Button>
+                                    )}
+                                  </Flex>
+                                </Td>
+                              </Tr>
+                            );
+                          })}
+                        </Tbody>
+                      </Table>
+                    </TableContainer>
+                  )}
+                </Flex>
+              </Flex>
             </Flex>
-          </Flex>
 
-          {/* "Done" button */}
-          <Flex direction={"row"} p={"md"} justify={"center"}>
-            <Button
-              colorScheme={"green"}
-              onClick={() => {
-                addCollections(selectedCollections);
-              }}
+            {/* Attributes */}
+            <Flex
+              p={"2"}
+              direction={"row"}
+              justify={"space-between"}
+              align={"center"}
+              wrap={"wrap"}
+              gap={"4"}
             >
-              Done
-            </Button>
-          </Flex>
-        </ModalContent>
-      </Modal>
-
-      <Modal isOpen={isAddProductsOpen} onClose={onAddProductsClose}>
-        <ModalOverlay />
-        <ModalContent p={"4"}>
-          {/* Heading and close button */}
-          <ModalHeader>Add Products</ModalHeader>
-          <ModalCloseButton />
-
-          {/* Select component for Entities */}
-          <Flex direction={"column"} p={"2"} gap={"2"}>
-            <FormControl>
-              <FormLabel>Add Products</FormLabel>
-              <Select
-                title="Select Products"
-                placeholder={"Select Product"}
-                onChange={(event) => {
-                  if (
-                    entityProducts
-                      .map((product) => product.id)
-                      .includes(event.target.value.toString())
-                  ) {
-                    toast({
-                      title: "Warning",
-                      description: "Product has already been selected.",
-                      status: "warning",
-                      duration: 2000,
-                      position: "bottom-right",
-                      isClosable: true,
-                    });
-                  } else {
-                    setSelectedProducts([
-                      ...selectedProducts,
-                      event.target.value.toString(),
-                    ]);
-                  }
-                }}
+              <Flex
+                direction={"column"}
+                p={"4"}
+                gap={"4"}
+                grow={"1"}
+                h={"fit-content"}
+                bg={"whitesmoke"}
+                rounded={"10px"}
               >
-                {isLoaded &&
-                  allEntities.map((entity) => {
-                    return (
-                      <option key={entity.id} value={entity.id}>
-                        {entity.name}
-                      </option>
-                    );
-                  })}
-                ;
-              </Select>
-            </FormControl>
+                <Heading size={"lg"}>Attributes</Heading>
 
-            <Flex direction={"row"} p={"2"} gap={"2"}>
-              {selectedProducts.map((entity) => {
-                if (!_.isEqual(entity, "")) {
-                  return (
-                    <Tag key={`tag-${entity}`}>
-                      <Linky id={entity} type={"entities"} />
-                      <TagCloseButton
-                        onClick={() => {
-                          setSelectedProducts(
-                            selectedProducts.filter((selected) => {
-                              return !_.isEqual(entity, selected);
-                            })
-                          );
-                        }}
-                      />
-                    </Tag>
-                  );
-                } else {
-                  return null;
-                }
-              })}
+                <Flex  gap={"2"} direction={"row"}>
+                  {entityAttributes.length > 0 ? (
+                    entityAttributes.map((attribute) => {
+                      return (
+                        <AttributeCard
+                          data={attribute}
+                          key={`attribute-${attribute.name}`}
+                        />
+                      );
+                    })
+                  ) : (
+                    <Text>{entityData.name} does not have any Attributes.</Text>
+                  )}
+                </Flex>
+              </Flex>
             </Flex>
-          </Flex>
 
-          {/* "Done" button */}
-          <Flex direction={"row"} p={"md"} justify={"center"}>
-            <Button
-              colorScheme={"green"}
-              onClick={() => {
-                if (id) {
-                  // Add the Entities to the Collection
-                  addProducts(selectedProducts);
-                }
-              }}
-            >
-              Done
-            </Button>
-          </Flex>
-        </ModalContent>
-      </Modal>
+            <Modal isOpen={isAddCollectionsOpen} onClose={onAddCollectionsClose}>
+              <ModalOverlay />
+              <ModalContent p={"4"}>
+                {/* Heading and close button */}
+                <ModalHeader>Add to Collection</ModalHeader>
+                <ModalCloseButton />
 
-      <Modal isOpen={isAddOriginsOpen} onClose={onAddOriginsClose}>
-        <ModalOverlay />
-        <ModalContent p={"4"}>
-          {/* Heading and close button */}
-          <ModalHeader>Add Origins</ModalHeader>
-          <ModalCloseButton />
-
-          {/* Select component for Entities */}
-          <Flex direction={"column"} p={"2"} gap={"2"}>
-            <FormControl>
-              <FormLabel>Add Origins</FormLabel>
-              <Select
-                title="Select Origins"
-                placeholder={"Select Origin"}
-                onChange={(event) => {
-                  if (
-                    entityOrigins
-                      .map((origin) => origin.id)
-                      .includes(event.target.value.toString())
-                  ) {
-                    toast({
-                      title: "Warning",
-                      description: "Origin has already been selected.",
-                      status: "warning",
-                      duration: 2000,
-                      position: "bottom-right",
-                      isClosable: true,
-                    });
-                  } else {
-                    setSelectedOrigins([
-                      ...selectedOrigins,
-                      event.target.value.toString(),
-                    ]);
-                  }
-                }}
-              >
-                {isLoaded &&
-                  allEntities.map((entity) => {
-                    return (
-                      <option key={entity.id} value={entity.id}>
-                        {entity.name}
-                      </option>
-                    );
-                  })}
-                ;
-              </Select>
-            </FormControl>
-
-            <Flex direction={"row"} p={"2"} gap={"2"}>
-              {selectedOrigins.map((entity) => {
-                if (!_.isEqual(entity, "")) {
-                  return (
-                    <Tag key={`tag-${entity}`}>
-                      <Linky id={entity} type={"entities"} />
-                      <TagCloseButton
-                        onClick={() => {
-                          setSelectedOrigins(
-                            selectedOrigins.filter((selected) => {
-                              return !_.isEqual(entity, selected);
-                            })
+                {/* Select component for Collections */}
+                <Flex direction={"column"} p={"2"} gap={"2"}>
+                  <FormControl>
+                    <FormLabel>Add Entity to Collections</FormLabel>
+                    <Select
+                      title="Select Collection"
+                      placeholder={"Select Collection"}
+                      onChange={(event) => {
+                        const selectedCollection = event.target.value.toString();
+                        if (selectedCollections.includes(selectedCollection)) {
+                          toast({
+                            title: "Warning",
+                            description: "Collection has already been selected.",
+                            status: "warning",
+                            duration: 2000,
+                            position: "bottom-right",
+                            isClosable: true,
+                          });
+                        } else {
+                          setSelectedCollections([
+                            ...selectedCollections,
+                            selectedCollection,
+                          ]);
+                        }
+                      }}
+                    >
+                      {isLoaded &&
+                        collectionData.map((collection) => {
+                          return (
+                            <option key={collection._id} value={collection._id}>
+                              {collection.name}
+                            </option>
                           );
-                        }}
-                      />
-                    </Tag>
-                  );
-                } else {
-                  return null;
-                }
-              })}
-            </Flex>
-          </Flex>
+                        })}
+                      ;
+                    </Select>
+                  </FormControl>
 
-          {/* "Done" button */}
-          <Flex direction={"row"} p={"md"} justify={"center"}>
-            <Button
-              colorScheme={"green"}
-              onClick={() => {
-                if (id) {
-                  // Add the Entities to the Collection
-                  addOrigins(selectedOrigins);
-                }
-              }}
+                  <Flex direction={"row"} p={"2"} gap={"2"}>
+                    {selectedCollections.map((collection) => {
+                      if (!_.isEqual(collection, "")) {
+                        return (
+                          <Tag key={`tag-${collection}`}>
+                            <Linky id={collection} type={"collections"} />
+                            <TagCloseButton
+                              onClick={() => {
+                                setSelectedCollections(
+                                  selectedCollections.filter((selected) => {
+                                    return !_.isEqual(collection, selected);
+                                  })
+                                );
+                              }}
+                            />
+                          </Tag>
+                        );
+                      } else {
+                        return null;
+                      }
+                    })}
+                  </Flex>
+                </Flex>
+
+                {/* "Done" button */}
+                <Flex direction={"row"} p={"md"} justify={"center"}>
+                  <Button
+                    colorScheme={"green"}
+                    onClick={() => {
+                      addCollections(selectedCollections);
+                    }}
+                  >
+                    Done
+                  </Button>
+                </Flex>
+              </ModalContent>
+            </Modal>
+
+            <Modal isOpen={isAddProductsOpen} onClose={onAddProductsClose}>
+              <ModalOverlay />
+              <ModalContent p={"4"}>
+                {/* Heading and close button */}
+                <ModalHeader>Add Products</ModalHeader>
+                <ModalCloseButton />
+
+                {/* Select component for Entities */}
+                <Flex direction={"column"} p={"2"} gap={"2"}>
+                  <FormControl>
+                    <FormLabel>Add Products</FormLabel>
+                    <Select
+                      title="Select Products"
+                      placeholder={"Select Product"}
+                      onChange={(event) => {
+                        if (
+                          entityProducts
+                            .map((product) => product.id)
+                            .includes(event.target.value.toString())
+                        ) {
+                          toast({
+                            title: "Warning",
+                            description: "Product has already been selected.",
+                            status: "warning",
+                            duration: 2000,
+                            position: "bottom-right",
+                            isClosable: true,
+                          });
+                        } else {
+                          setSelectedProducts([
+                            ...selectedProducts,
+                            event.target.value.toString(),
+                          ]);
+                        }
+                      }}
+                    >
+                      {isLoaded &&
+                        allEntities.map((entity) => {
+                          return (
+                            <option key={entity.id} value={entity.id}>
+                              {entity.name}
+                            </option>
+                          );
+                        })}
+                      ;
+                    </Select>
+                  </FormControl>
+
+                  <Flex direction={"row"} p={"2"} gap={"2"}>
+                    {selectedProducts.map((entity) => {
+                      if (!_.isEqual(entity, "")) {
+                        return (
+                          <Tag key={`tag-${entity}`}>
+                            <Linky id={entity} type={"entities"} />
+                            <TagCloseButton
+                              onClick={() => {
+                                setSelectedProducts(
+                                  selectedProducts.filter((selected) => {
+                                    return !_.isEqual(entity, selected);
+                                  })
+                                );
+                              }}
+                            />
+                          </Tag>
+                        );
+                      } else {
+                        return null;
+                      }
+                    })}
+                  </Flex>
+                </Flex>
+
+                {/* "Done" button */}
+                <Flex direction={"row"} p={"md"} justify={"center"}>
+                  <Button
+                    colorScheme={"green"}
+                    onClick={() => {
+                      if (id) {
+                        // Add the Entities to the Collection
+                        addProducts(selectedProducts);
+                      }
+                    }}
+                  >
+                    Done
+                  </Button>
+                </Flex>
+              </ModalContent>
+            </Modal>
+
+            <Modal isOpen={isAddOriginsOpen} onClose={onAddOriginsClose}>
+              <ModalOverlay />
+              <ModalContent p={"4"}>
+                {/* Heading and close button */}
+                <ModalHeader>Add Origins</ModalHeader>
+                <ModalCloseButton />
+
+                {/* Select component for Entities */}
+                <Flex direction={"column"} p={"2"} gap={"2"}>
+                  <FormControl>
+                    <FormLabel>Add Origins</FormLabel>
+                    <Select
+                      title="Select Origins"
+                      placeholder={"Select Origin"}
+                      onChange={(event) => {
+                        if (
+                          entityOrigins
+                            .map((origin) => origin.id)
+                            .includes(event.target.value.toString())
+                        ) {
+                          toast({
+                            title: "Warning",
+                            description: "Origin has already been selected.",
+                            status: "warning",
+                            duration: 2000,
+                            position: "bottom-right",
+                            isClosable: true,
+                          });
+                        } else {
+                          setSelectedOrigins([
+                            ...selectedOrigins,
+                            event.target.value.toString(),
+                          ]);
+                        }
+                      }}
+                    >
+                      {isLoaded &&
+                        allEntities.map((entity) => {
+                          return (
+                            <option key={entity.id} value={entity.id}>
+                              {entity.name}
+                            </option>
+                          );
+                        })}
+                      ;
+                    </Select>
+                  </FormControl>
+
+                  <Flex direction={"row"} p={"2"} gap={"2"}>
+                    {selectedOrigins.map((entity) => {
+                      if (!_.isEqual(entity, "")) {
+                        return (
+                          <Tag key={`tag-${entity}`}>
+                            <Linky id={entity} type={"entities"} />
+                            <TagCloseButton
+                              onClick={() => {
+                                setSelectedOrigins(
+                                  selectedOrigins.filter((selected) => {
+                                    return !_.isEqual(entity, selected);
+                                  })
+                                );
+                              }}
+                            />
+                          </Tag>
+                        );
+                      } else {
+                        return null;
+                      }
+                    })}
+                  </Flex>
+                </Flex>
+
+                {/* "Done" button */}
+                <Flex direction={"row"} p={"md"} justify={"center"}>
+                  <Button
+                    colorScheme={"green"}
+                    onClick={() => {
+                      if (id) {
+                        // Add the Entities to the Collection
+                        addOrigins(selectedOrigins);
+                      }
+                    }}
+                  >
+                    Done
+                  </Button>
+                </Flex>
+              </ModalContent>
+            </Modal>
+
+            <Modal
+              size={"full"}
+              onEsc={onGraphClose}
+              onClose={onGraphClose}
+              isOpen={isGraphOpen}
             >
-              Done
-            </Button>
+              <ModalOverlay />
+              <ModalContent>
+                <ModalHeader>Graph: {entityData.name}</ModalHeader>
+                <ModalCloseButton />
+                <ModalBody>
+                  <Container h={"90vh"} minW={"90vw"}>
+                    <Graph id={entityData._id} />
+                  </Container>
+                </ModalBody>
+              </ModalContent>
+            </Modal>
           </Flex>
-        </ModalContent>
-      </Modal>
-
-      <Modal
-        size={"full"}
-        onEsc={onGraphClose}
-        onClose={onGraphClose}
-        isOpen={isGraphOpen}
-      >
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Graph: {entityData.name}</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            <Container h={"90vh"} minW={"90vw"}>
-              <Graph id={entityData._id} />
-            </Container>
-          </ModalBody>
-        </ModalContent>
-      </Modal>
+        )
+      ) : (
+        <Loading />
+      )
+    }
     </ContentContainer>
-  ) : (
-    <Loading />
   );
 };
 
