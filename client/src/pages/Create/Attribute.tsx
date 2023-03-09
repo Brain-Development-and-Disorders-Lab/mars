@@ -2,6 +2,10 @@ import React, { useState } from "react";
 import {
   Button,
   Flex,
+  FormControl,
+  FormErrorMessage,
+  FormHelperText,
+  FormLabel,
   Heading,
   Input,
   List,
@@ -37,6 +41,12 @@ export const Start = ({}) => {
   const [name, setName] = useState(pseudoId("attribute"));
   const [description, setDescription] = useState("");
   const [parameters, setParameters] = useState([] as Parameters[]);
+
+  // Various validation error states
+  const isNameError = name === "";
+  const isDescriptionError = description === "";
+  const isParametersError = parameters.length === 0;
+  const isDetailsError = isNameError || isDescriptionError || isParametersError;
 
   const attributeData: Attribute = {
     name: name,
@@ -86,25 +96,50 @@ export const Start = ({}) => {
               metadata associated with this template should be specified using
               Parameters.
             </Text>
+
             <Flex direction="row" gap={"4"} wrap={["wrap", "nowrap"]}>
-              <Input
-                placeholder={"Attribute Name"}
-                value={name}
-                onChange={(event) => setName(event.target.value)}
-                required
-              />
-              <Textarea
-                value={description}
-                placeholder={"Attribute Description"}
-                onChange={(event) => setDescription(event.target.value)}
-              />
+              <FormControl isRequired>
+                <FormLabel>Name</FormLabel>
+                <Input
+                  placeholder={"Name"}
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                  required
+                />
+                {!isNameError ? (
+                  <FormHelperText>Name of the Attribute.</FormHelperText>
+                ) : (
+                  <FormErrorMessage>A name must be specified for the Attribute.</FormErrorMessage>
+                )}
+              </FormControl>
+
+              <FormControl isRequired>
+                <FormLabel>Description</FormLabel>
+                <Textarea
+                  value={description}
+                  placeholder={"Attribute Description"}
+                  onChange={(event) => setDescription(event.target.value)}
+                />
+                {!isDescriptionError ? (
+                  <FormHelperText>Description of the Attribute.</FormHelperText>
+                ) : (
+                  <FormErrorMessage>A description should be provided for the Attribute.</FormErrorMessage>
+                )}
+              </FormControl>
             </Flex>
+
+            <FormControl isRequired isInvalid={isParametersError}>
+              <FormLabel>Parameters</FormLabel>
+              {isParametersError && (
+                <FormErrorMessage>Specify at least one Parameter.</FormErrorMessage>
+              )}
+              <ParameterGroup
+                parameters={parameters}
+                viewOnly={false}
+                setParameters={setParameters}
+              />
+            </FormControl>
           </Flex>
-          <ParameterGroup
-            parameters={parameters}
-            viewOnly={false}
-            setParameters={setParameters}
-          />
         </Flex>
       </Flex>
 
@@ -136,6 +171,7 @@ export const Start = ({}) => {
           colorScheme={"green"}
           rightIcon={<CheckIcon />}
           onClick={onSubmit}
+          isDisabled={isDetailsError}
         >
           Finish
         </Button>
