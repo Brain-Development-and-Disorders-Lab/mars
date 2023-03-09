@@ -1,15 +1,27 @@
 import React, { useEffect, useState } from "react";
-import { Flex, FormControl, Icon, IconButton, Input, Link, Select, useToast } from "@chakra-ui/react";
+import {
+  Flex,
+  FormControl,
+  Icon,
+  IconButton,
+  Input,
+  Link,
+  Select,
+  Text,
+  useToast,
+} from "@chakra-ui/react";
 import { SingleDatepicker } from "chakra-dayzed-datepicker";
-import { CloseIcon } from "@chakra-ui/icons";
-import { AiOutlineBlock, AiOutlineLink } from "react-icons/ai";
+import { CloseIcon, ExternalLinkIcon } from "@chakra-ui/icons";
+import { AiOutlineLink } from "react-icons/ai";
+import { BsBox } from "react-icons/bs";
 import { MdDateRange, MdOutlineTextFields } from "react-icons/md";
 import { RiNumbersLine } from "react-icons/ri";
 import { getData } from "src/database/functions";
 import { EntityModel, Parameter } from "@types";
 import Linky from "@components/Linky";
+import dayjs from "dayjs";
 
-export const DateParameter = (props: Parameter.PDate) => {
+export const DateParameter = (props: Parameter.Date) => {
   const [name, setName] = useState(props.name);
   const [value, setValue] = useState(new Date(props.data));
 
@@ -20,82 +32,89 @@ export const DateParameter = (props: Parameter.PDate) => {
         identifier: props.identifier,
         name: name,
         type: "date",
-        data: value,
+        data: value.toISOString(),
       });
     }
   }, [name, value]);
 
   return (
-    <Flex direction={"row"} gap={"2"} align={"center"}>
-      <Icon as={MdDateRange} w={"8"} h={"8"}/>
+    <Flex direction={"row"} gap={"4"} align={"center"}>
+      <Icon as={MdDateRange} w={"4"} h={"4"} />
 
       {/* Parameter name */}
-      <FormControl>
-        <Input
-          id={"name"}
-          placeholder={"Name"}
-          value={name}
-          onChange={(event) => {
-            setName(event.target.value);
-          }}
-          disabled={props.disabled}
-        />
+      <FormControl isInvalid={name === ""}>
+        {props.disabled ? (
+          <Text as={"b"}>{name}</Text>
+        ) : (
+          <Input
+            id={"name"}
+            placeholder={"Name"}
+            value={name}
+            onChange={(event) => {
+              setName(event.target.value);
+            }}
+            disabled={props.disabled}
+          />
+        )}
       </FormControl>
 
       {/* Parameter data */}
-      <FormControl>
-        <SingleDatepicker
-          id="owner"
-          name="owner"
-          propsConfigs={{
-            dateNavBtnProps: {
-              colorScheme: "gray"
-            },
-            dayOfMonthBtnProps: {
-              defaultBtnProps: {
-                borderColor: "blackAlpha.300",
-                _hover: {
+      <FormControl isRequired>
+        {props.disabled ? (
+          <Text>{dayjs(value).format("DD MMM HH:mm")}</Text>
+        ) : (
+          <SingleDatepicker
+            id="owner"
+            name="owner"
+            propsConfigs={{
+              dateNavBtnProps: {
+                colorScheme: "gray",
+              },
+              dayOfMonthBtnProps: {
+                defaultBtnProps: {
+                  borderColor: "blackAlpha.300",
+                  _hover: {
+                    background: "black",
+                    color: "white",
+                  },
+                },
+                selectedBtnProps: {
                   background: "black",
                   color: "white",
-                }
+                },
+                todayBtnProps: {
+                  borderColor: "blackAlpha.300",
+                  background: "gray.50",
+                  color: "black",
+                },
               },
-              selectedBtnProps: {
-                background: "black",
-                color: "white",
-              },
-              todayBtnProps: {
-                borderColor: "blackAlpha.300",
-                background: "gray.50",
-                color: "black",
-              }
-            },
-          }}
-          date={value}
-          onDateChange={setValue}
-          disabled={props.disabled}
-        />
+            }}
+            date={value}
+            onDateChange={setValue}
+            disabled={props.disabled}
+          />
+        )}
       </FormControl>
 
       {/* Remove Parameter */}
-      {props.showRemove && !props.disabled &&
+      {props.showRemove && !props.disabled && (
         <IconButton
           aria-label={"Remove Parameter"}
           key={`remove-${props.identifier}`}
           icon={<CloseIcon />}
-          color={"white"}
-          background={"red"}
+          colorScheme={"red"}
           onClick={() => {
             if (props.onRemove) {
               props.onRemove(props.identifier);
             }
           }}
         />
-      }
+      )}
     </Flex>
   );
 };
 
-export const StringParameter = (props: Parameter.PString) => {
+export const TextParameter = (props: Parameter.Text) => {
   const [name, setName] = useState(props.name);
   const [value, setValue] = useState(props.data);
 
@@ -105,60 +124,67 @@ export const StringParameter = (props: Parameter.PString) => {
       props.onUpdate({
         identifier: props.identifier,
         name: name,
-        type: "string",
+        type: "text",
         data: value,
       });
     }
   }, [name, value]);
 
   return (
-    <Flex direction={"row"} gap={"2"} align={"center"}>
-      <Icon as={MdOutlineTextFields} w={"8"} h={"8"}/>
+    <Flex direction={"row"} gap={"4"} align={"center"}>
+      <Icon as={MdOutlineTextFields} w={"4"} h={"4"} />
 
       {/* Parameter name */}
-      <FormControl label="Name">
-        <Input
-          id="name"
-          placeholder="Name"
-          value={name}
-          onChange={(event) => setName(event.target.value)}
-          disabled={props.disabled}
-          required
-        />
+      <FormControl isRequired isInvalid={name === ""}>
+        {props.disabled ? (
+          <Text as={"b"}>{name}</Text>
+        ) : (
+          <Input
+            id="name"
+            placeholder="Name"
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            disabled={props.disabled}
+            required
+          />
+        )}
       </FormControl>
 
       {/* Parameter data */}
-      <FormControl label="Data">
-        <Input
-          name="data"
-          placeholder={""}
-          value={value}
-          onChange={(event) => setValue(event.target.value)}
-          disabled={props.disabled}
-          required
-        />
+      <FormControl isRequired isInvalid={value === ""}>
+        {props.disabled ? (
+          <Text>{value}</Text>
+        ) : (
+          <Input
+            name="data"
+            placeholder={"Text"}
+            value={value}
+            onChange={(event) => setValue(event.target.value)}
+            disabled={props.disabled}
+            required
+          />
+        )}
       </FormControl>
 
       {/* Remove Parameter */}
-      {props.showRemove && !props.disabled &&
+      {props.showRemove && !props.disabled && (
         <IconButton
           aria-label={"Remove Parameter"}
           key={`remove-${props.identifier}`}
           icon={<CloseIcon />}
-          color={"white"}
-          background={"red"}
+          colorScheme={"red"}
           onClick={() => {
             if (props.onRemove) {
               props.onRemove(props.identifier);
             }
           }}
         />
-      }
+      )}
     </Flex>
   );
 };
 
-export const NumberParameter = (props: Parameter.PNumber) => {
+export const NumberParameter = (props: Parameter.Number) => {
   const [name, setName] = useState(props.name);
   const [value, setValue] = useState(props.data);
 
@@ -175,53 +201,60 @@ export const NumberParameter = (props: Parameter.PNumber) => {
   }, [name, value]);
 
   return (
-    <Flex direction={"row"} gap={"2"} align={"center"}>
-      <Icon as={RiNumbersLine} w={"8"} h={"8"}/>
+    <Flex direction={"row"} gap={"4"} align={"center"}>
+      <Icon as={RiNumbersLine} w={"4"} h={"4"} />
 
       {/* Parameter name */}
-      <FormControl label="Name">
-        <Input
-          id="name"
-          placeholder="Name"
-          value={name}
-          onChange={(event) => setName(event.target.value)}
-          disabled={props.disabled}
-          required
-        />
+      <FormControl isRequired isInvalid={name === ""}>
+        {props.disabled ? (
+          <Text as={"b"}>{name}</Text>
+        ) : (
+          <Input
+            id="name"
+            placeholder="Name"
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            disabled={props.disabled}
+            required
+          />
+        )}
       </FormControl>
 
       {/* Parameter data */}
-      <FormControl label="Data">
-        <Input
-          name="data"
-          placeholder={"0"}
-          value={value}
-          onChange={(event) => setValue(Number(event.target.value))}
-          disabled={props.disabled}
-          required
-        />
-        </FormControl>
+      <FormControl isRequired>
+        {props.disabled ? (
+          <Text>{value}</Text>
+        ) : (
+          <Input
+            name="data"
+            placeholder={"0"}
+            value={value}
+            onChange={(event) => setValue(Number(event.target.value))}
+            disabled={props.disabled}
+            required
+          />
+        )}
+      </FormControl>
 
       {/* Remove Parameter */}
-      {props.showRemove && !props.disabled &&
+      {props.showRemove && !props.disabled && (
         <IconButton
           aria-label={"Remove Parameter"}
           key={`remove-${props.identifier}`}
           icon={<CloseIcon />}
-          color={"white"}
-          background={"red"}
+          colorScheme={"red"}
           onClick={() => {
             if (props.onRemove) {
               props.onRemove(props.identifier);
             }
           }}
         />
-      }
+      )}
     </Flex>
   );
 };
 
-export const URLParameter = (props: Parameter.PURL) => {
+export const URLParameter = (props: Parameter.URL) => {
   const [name, setName] = useState(props.name);
   const [value, setValue] = useState(props.data);
 
@@ -238,30 +271,35 @@ export const URLParameter = (props: Parameter.PURL) => {
   }, [name, value]);
 
   return (
-    <Flex direction={"row"} gap={"2"} align={"center"}>
-      <Icon as={AiOutlineLink} w={"8"} h={"8"}/>
+    <Flex direction={"row"} gap={"4"} align={"center"}>
+      <Icon as={AiOutlineLink} w={"4"} h={"4"} />
 
       {/* Parameter name */}
-      <FormControl label="Name">
-        <Input
-          id="name"
-          placeholder="Name"
-          value={name}
-          onChange={(event) => {
-            setName(event.target.value);
-          }}
-          disabled={props.disabled}
-          required
-        />
+      <FormControl isRequired isInvalid={name === ""}>
+        {props.disabled ? (
+          <Text as={"b"}>{name}</Text>
+        ) : (
+          <Input
+            id="name"
+            placeholder="Name"
+            value={name}
+            onChange={(event) => {
+              setName(event.target.value);
+            }}
+            disabled={props.disabled}
+            required
+          />
+        )}
       </FormControl>
 
       {/* Parameter data */}
-      <FormControl label="Data">
-        {props.disabled ?
-          <Link href={value} color="dark-1">
+      <FormControl isRequired isInvalid={value === ""}>
+        {props.disabled ? (
+          <Link as={"a"} href={value} color="dark-1" isExternal>
             {value}
+            <ExternalLinkIcon mx='2px' />
           </Link>
-        :
+        ) : (
           <Input
             name="url"
             placeholder="URL"
@@ -269,29 +307,29 @@ export const URLParameter = (props: Parameter.PURL) => {
             onChange={(event) => setValue(event.target.value.toString())}
             disabled={props.disabled}
             required
-          />}
+          />
+        )}
       </FormControl>
 
       {/* Remove button */}
-      {props.showRemove && !props.disabled &&
+      {props.showRemove && !props.disabled && (
         <IconButton
           aria-label={"Remove Parameter"}
           key={`remove-${props.identifier}`}
           icon={<CloseIcon />}
-          color={"white"}
-          background={"red"}
+          colorScheme={"red"}
           onClick={() => {
             if (props.onRemove) {
               props.onRemove(props.identifier);
             }
           }}
         />
-      }
+      )}
     </Flex>
   );
 };
 
-export const EntityParameter = (props: Parameter.PEntity) => {
+export const EntityParameter = (props: Parameter.Entity) => {
   const toast = useToast();
 
   // All entities
@@ -317,54 +355,50 @@ export const EntityParameter = (props: Parameter.PEntity) => {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    const result = getData(`/entities`);
-
-    // Handle the response from the database
-    result.then((value) => {
+    getData(`/entities`).then((value) => {
       setEntities(value);
-
-      // Check the contents of the response
-      if (value["error"] !== undefined) {
-        toast({
-          title: "Database Error",
-          description: value["error"],
-          status: "error",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-      }
-
+      setIsLoaded(true);
+    }).catch((_error) => {
+      toast({
+        title: "Error",
+        description: "Could not retrieve Entities.",
+        status: "error",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }).finally(() => {
       setIsLoaded(true);
     });
     return;
   }, []);
 
   return (
-    <Flex direction={"row"} gap={"2"} align={"center"}>
-      <Icon as={AiOutlineBlock} w={"8"} h={"8"}/>
+    <Flex direction={"row"} gap={"4"} align={"center"}>
+      <Icon as={BsBox} w={"4"} h={"4"} />
 
       {/* Parameter name */}
-      <FormControl>
-        <Input
-          id="name"
-          placeholder="Name"
-          value={name}
-          onChange={(event) => {
-            setName(event.target.value);
-          }}
-          disabled={props.disabled}
-        />
+      <FormControl isRequired isInvalid={name === ""}>
+        {props.disabled ? (
+          <Text as={"b"}>{name}</Text>
+        ) : (
+          <Input
+            id="name"
+            placeholder="Name"
+            value={name}
+            onChange={(event) => {
+              setName(event.target.value);
+            }}
+            disabled={props.disabled}
+          />
+        )}
       </FormControl>
 
       {/* Parameter data */}
-      <FormControl>
-        {props.disabled ?
-          <Linky
-            type="entities"
-            id={value}
-          />
-        :
+      <FormControl isRequired isInvalid={value === ""}>
+        {props.disabled ? (
+          <Linky type="entities" id={value} />
+        ) : (
           <Select
             title="Select Entity"
             value={value}
@@ -377,31 +411,38 @@ export const EntityParameter = (props: Parameter.PEntity) => {
             {isLoaded &&
               entities.map((entity) => {
                 return (
-                  <option key={entity._id} value={entity._id}>{entity.name}</option>
+                  <option key={entity._id} value={entity._id}>
+                    {entity.name}
+                  </option>
                 );
-              })
-            };
+              })}
+            ;
           </Select>
-        }
+        )}
       </FormControl>
 
       {/* Remove button */}
-      {props.showRemove && !props.disabled &&
+      {props.showRemove && !props.disabled && (
         <IconButton
           aria-label={"Remove Parameter"}
           key={`remove-${props.identifier}`}
           icon={<CloseIcon />}
-          color={"white"}
-          background={"red"}
+          colorScheme={"red"}
           onClick={() => {
             if (props.onRemove) {
               props.onRemove(props.identifier);
             }
           }}
         />
-      }
+      )}
     </Flex>
   );
 };
 
-export default { NumberParameter, StringParameter, URLParameter, DateParameter, EntityParameter };
+export default {
+  NumberParameter,
+  TextParameter,
+  URLParameter,
+  DateParameter,
+  EntityParameter,
+};

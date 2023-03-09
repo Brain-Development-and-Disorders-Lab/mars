@@ -3,7 +3,7 @@ import express from "express";
 import _ from "underscore";
 
 // Import types from the client to enforce structure
-import { EntityModel, EntityStruct } from "@types";
+import { EntityModel, Entity } from "@types";
 
 // Utility functions
 import { Entities } from "../operations/Entities";
@@ -24,37 +24,43 @@ EntitiesRoute.route("/entities/:id").get((request: any, response: any) => {
   });
 });
 
-// Create a new Entity, expects EntityStruct data
-EntitiesRoute.route("/entities/create").post((request: { body: EntityStruct }, response: any) => {
-  Entities.create(request.body).then((entity: EntityModel) => {
-    response.json({
-      id: entity._id,
-      name: entity.name,
-      status: "success",
+// Create a new Entity, expects Entity data
+EntitiesRoute.route("/entities/create").post(
+  (request: { body: Entity }, response: any) => {
+    Entities.create(request.body).then((entity: EntityModel) => {
+      response.json({
+        id: entity._id,
+        name: entity.name,
+        status: "success",
+      });
     });
-  });
-});
+  }
+);
 
 // Update an Entity
-EntitiesRoute.route("/entities/update").post((request: { body: EntityModel }, response: any) => {
-  Entities.update(request.body).then((updatedEntity: EntityModel) => {
-    response.json({
-      id: updatedEntity._id,
-      name: updatedEntity.name,
-      status: "success"
+EntitiesRoute.route("/entities/update").post(
+  (request: { body: EntityModel }, response: any) => {
+    Entities.update(request.body).then((updatedEntity: EntityModel) => {
+      response.json({
+        id: updatedEntity._id,
+        name: updatedEntity.name,
+        status: "success",
+      });
     });
-  });
-});
+  }
+);
 
 // Delete an Entity
-EntitiesRoute.route("/entities/:id").delete((request: { params: { id: string } }, response: any) => {
-  Entities.delete(request.params.id).then((entity) => {
-    response.json({
-      id: entity._id,
-      name: entity.name,
-      status: "success"
+EntitiesRoute.route("/entities/:id").delete(
+  (request: { params: { id: string } }, response: any) => {
+    Entities.delete(request.params.id).then((entity) => {
+      response.json({
+        id: entity._id,
+        name: entity.name,
+        status: "success",
+      });
     });
-  });
-});
+  }
+);
 
 export default EntitiesRoute;

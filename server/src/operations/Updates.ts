@@ -2,7 +2,7 @@
 import { getDatabase } from "../database/connection";
 import consola from "consola";
 
-import { UpdateModel, UpdateStruct } from "@types";
+import { UpdateModel, Update } from "@types";
 
 // Constants
 const UPDATES = "updates";
@@ -10,10 +10,10 @@ const UPDATES = "updates";
 export class Updates {
   /**
    * Create a new Update to record in the database
-   * @param {UpdateStruct} update data related to the Update
-   * @return {Promise<UpdateStruct>}
+   * @param {Update} update data related to the Update
+   * @return {Promise<Update>}
    */
-  static create = (update: UpdateStruct): Promise<UpdateStruct> => {
+  static create = (update: Update): Promise<Update> => {
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(UPDATES)
@@ -23,7 +23,7 @@ export class Updates {
           }
 
           consola.success("Created Update:", update.target.name);
-          resolve(result as UpdateStruct);
+          resolve(result as Update);
         });
     });
   };

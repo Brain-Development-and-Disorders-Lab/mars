@@ -5,36 +5,31 @@ import { Button, Link, useToast } from "@chakra-ui/react";
 import { getData } from "@database/functions";
 import {
   LinkyProps,
-  AttributeStruct,
-  CollectionStruct,
-  EntityStruct,
+  Attribute,
+  Collection,
+  Entity,
 } from "@types";
 
 const Linky = (props: LinkyProps) => {
   const toast = useToast();
 
-  const [linkData, setLinkData] = useState({} as AttributeStruct | CollectionStruct | EntityStruct);
+  const [linkData, setLinkData] = useState(
+    {} as Attribute | Collection | Entity
+  );
 
   useEffect(() => {
-    const data = getData(`/${props.type}/${props.id}`);
-
-    // Handle the response from the database
-    data.then((value) => {
+    getData(`/${props.type}/${props.id}`).then((value) => {
       setLinkData(value);
-
-      // Check the contents of the response
-      if (value["error"] !== undefined) {
-        toast({
-          title: "Database Error",
-          description: value["error"],
-          status: "error",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-      }
+    }).catch((_error) => {
+      toast({
+        title: "Link Error",
+        status: "error",
+        description: "Could not retrieve information for Link.",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
     });
-    return;
   }, []);
 
   return (

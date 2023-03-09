@@ -11,7 +11,7 @@
       "@components/*": ["./src/components/*"],
       "@database/*": ["./src/database/*"],
       "@pages/*": ["./src/pages/*"],
-      "@types": ["../types"],
+      "@types": ["../types"]
     },
     "rootDirs": ["src"],
     "strict": true,

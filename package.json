@@ -2,7 +2,7 @@
   "name": "mars",
   "version": "1.0.0",
   "main": "index.js",
-  "repository": "https://github.com/henry-burgess/metadata-manager.git",
+  "repository": "https://github.com/Brain-Development-and-Disorders-Lab/mars.git",
   "author": "Henry Burgess <henryjburg@gmail.com>",
   "license": "MIT"
 }

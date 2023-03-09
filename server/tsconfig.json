@@ -6,7 +6,7 @@
     "importHelpers": true,
     "baseUrl": "./",
     "paths": {
-      "@types": ["../types"],
+      "@types": ["../types"]
     },
     "rootDirs": ["src"],
     "outDir": "dist",

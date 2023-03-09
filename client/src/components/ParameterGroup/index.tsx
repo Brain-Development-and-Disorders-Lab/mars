@@ -1,7 +1,7 @@
 import React, { Dispatch, SetStateAction } from "react";
-import { Button, Flex, Icon, Text } from "@chakra-ui/react";
-import { SmallAddIcon } from "@chakra-ui/icons";
-import { AiOutlineBlock, AiOutlineLink } from "react-icons/ai";
+import { Button, Flex, Icon, StackDivider, Text, VStack } from "@chakra-ui/react";
+import { AiOutlineLink } from "react-icons/ai";
+import { BsBox } from "react-icons/bs";
 import { MdDateRange, MdOutlineTextFields } from "react-icons/md";
 import { RiNumbersLine } from "react-icons/ri";
 
@@ -9,7 +9,13 @@ import _ from "underscore";
 
 // Custom types and components
 import { Parameters } from "@types";
-import { DateParameter, EntityParameter, NumberParameter, StringParameter, URLParameter } from "@components/Parameter";
+import {
+  DateParameter,
+  EntityParameter,
+  NumberParameter,
+  TextParameter,
+  URLParameter,
+} from "@components/Parameter";
 
 /**
  * ParameterGroup component use to display a collection of Parameters and enable
@@ -17,7 +23,11 @@ import { DateParameter, EntityParameter, NumberParameter, StringParameter, URLPa
  * @param props collection of props to construct component
  * @return
  */
-const ParameterGroup = (props: { parameters: Parameters[], viewOnly: boolean, setParameters?: Dispatch<SetStateAction<Parameters[]>> }) => {
+const ParameterGroup = (props: {
+  parameters: Parameters[];
+  viewOnly: boolean;
+  setParameters?: Dispatch<SetStateAction<Parameters[]>>;
+}) => {
   const onUpdate = (data: Parameters) => {
     // Store the received Parameter information
     props.setParameters &&
@@ -35,25 +45,32 @@ const ParameterGroup = (props: { parameters: Parameters[], viewOnly: boolean, se
 
   const onRemove = (identifier: string) => {
     props.setParameters &&
-      props.setParameters(props.parameters.filter((parameter) => {
-        // Filter out the Parameter to be removed
-        if (!_.isEqual(parameter.identifier, identifier)) {
-          return parameter;
-        } else {
-          return;
-        }
-      }));
+      props.setParameters(
+        props.parameters.filter((parameter) => {
+          // Filter out the Parameter to be removed
+          if (!_.isEqual(parameter.identifier, identifier)) {
+            return parameter;
+          } else {
+            return;
+          }
+        })
+      );
   };
 
   return (
-    <Flex direction={"column"} gap={"4"}>
+    <Flex direction={"column"} gap={"2"} w={"100%"}>
       {/* Button Group */}
-      {!props.viewOnly &&
-        <Flex direction={"row"} gap={"2"} flexWrap={"wrap"} justify={"center"} align={"center"}>
+      {!props.viewOnly && (
+        <Flex
+          direction={"row"}
+          gap={"2"}
+          flexWrap={"wrap"}
+          justify={"center"}
+          align={"center"}
+        >
           {/* Buttons to add Parameters */}
           <Button
             leftIcon={<Icon as={MdDateRange} />}
-            rightIcon={<SmallAddIcon />}
             onClick={() => {
               // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
               props.setParameters &&
@@ -63,7 +80,7 @@ const ParameterGroup = (props: { parameters: Parameters[], viewOnly: boolean, se
                     identifier: `p_date_${Math.round(performance.now())}`,
                     name: "",
                     type: "date",
-                    data: new Date(),
+                    data: new Date().toISOString(),
                   },
                 ]);
             }}
@@ -73,27 +90,25 @@ const ParameterGroup = (props: { parameters: Parameters[], viewOnly: boolean, se
 
           <Button
             leftIcon={<Icon as={MdOutlineTextFields} />}
-            rightIcon={<SmallAddIcon />}
             onClick={() => {
               // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
               props.setParameters &&
                 props.setParameters([
                   ...props.parameters,
                   {
-                    identifier: `p_string_${Math.round(performance.now())}`,
+                    identifier: `p_text_${Math.round(performance.now())}`,
                     name: "",
-                    type: "string",
+                    type: "text",
                     data: "",
                   },
                 ]);
             }}
           >
-            String
+            Text
           </Button>
 
           <Button
             leftIcon={<Icon as={RiNumbersLine} />}
-            rightIcon={<SmallAddIcon />}
             onClick={() => {
               // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
               props.setParameters &&
@@ -113,7 +128,6 @@ const ParameterGroup = (props: { parameters: Parameters[], viewOnly: boolean, se
 
           <Button
             leftIcon={<Icon as={AiOutlineLink} />}
-            rightIcon={<SmallAddIcon />}
             onClick={() => {
               // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
               props.setParameters &&
@@ -132,8 +146,7 @@ const ParameterGroup = (props: { parameters: Parameters[], viewOnly: boolean, se
           </Button>
 
           <Button
-            leftIcon={<Icon as={AiOutlineBlock} />}
-            rightIcon={<SmallAddIcon />}
+            leftIcon={<Icon as={BsBox} />}
             onClick={() => {
               // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
               props.setParameters &&
@@ -151,98 +164,109 @@ const ParameterGroup = (props: { parameters: Parameters[], viewOnly: boolean, se
             Entity
           </Button>
         </Flex>
-      }
+      )}
 
-      {/* Card Group */}
-      <Flex p={"2"} m={"2"} direction={"column"} gap={"4"} bg={"white"} rounded={"lg"}>
-        {props.parameters.length > 0 ? 
-          props.parameters.map((parameter) => {
-            switch (parameter.type) {
-              case "date": {
-                return (
-                  <DateParameter
-                    key={parameter.identifier}
-                    identifier={parameter.identifier}
-                    name={parameter.name}
-                    type={"date"}
-                    data={parameter.data}
-                    onRemove={onRemove}
-                    onUpdate={onUpdate}
-                    disabled={props.viewOnly}
-                    showRemove
-                  />
-                );
+      {/* Parameter List */}
+      <Flex
+        p={["1", "2"]}
+        direction={"column"}
+        gap={"2"}
+        rounded={"lg"}
+      >
+        <VStack
+          divider={<StackDivider />}
+          spacing={4}
+          align={"stretch"}
+        >
+          {props.parameters.length > 0 ? (
+            props.parameters.map((parameter) => {
+              switch (parameter.type) {
+                case "date": {
+                  return (
+                    <DateParameter
+                      key={parameter.identifier}
+                      identifier={parameter.identifier}
+                      name={parameter.name}
+                      type={"date"}
+                      data={parameter.data}
+                      onRemove={onRemove}
+                      onUpdate={onUpdate}
+                      disabled={props.viewOnly}
+                      showRemove
+                    />
+                  );
+                }
+                case "entity": {
+                  return (
+                    <EntityParameter
+                      key={parameter.identifier}
+                      identifier={parameter.identifier}
+                      name={parameter.name}
+                      type={"entity"}
+                      data={parameter.data}
+                      onRemove={onRemove}
+                      onUpdate={onUpdate}
+                      disabled={props.viewOnly}
+                      showRemove
+                    />
+                  );
+                }
+                case "number": {
+                  return (
+                    <NumberParameter
+                      key={parameter.identifier}
+                      identifier={parameter.identifier}
+                      name={parameter.name}
+                      type={"number"}
+                      data={parameter.data}
+                      onRemove={onRemove}
+                      onUpdate={onUpdate}
+                      disabled={props.viewOnly}
+                      showRemove
+                    />
+                  );
+                }
+                case "url": {
+                  return (
+                    <URLParameter
+                      key={parameter.identifier}
+                      identifier={parameter.identifier}
+                      name={parameter.name}
+                      type={"url"}
+                      data={parameter.data}
+                      onRemove={onRemove}
+                      onUpdate={onUpdate}
+                      disabled={props.viewOnly}
+                      showRemove
+                    />
+                  );
+                }
+                default: {
+                  return (
+                    <TextParameter
+                      key={parameter.identifier}
+                      identifier={parameter.identifier}
+                      name={parameter.name}
+                      type={"text"}
+                      data={parameter.data}
+                      onRemove={onRemove}
+                      onUpdate={onUpdate}
+                      disabled={props.viewOnly}
+                      showRemove
+                    />
+                  );
+                }
               }
-              case "entity": {
-                return (
-                  <EntityParameter
-                    key={parameter.identifier}
-                    identifier={parameter.identifier}
-                    name={parameter.name}
-                    type={"entity"}
-                    data={parameter.data}
-                    onRemove={onRemove}
-                    onUpdate={onUpdate}
-                    disabled={props.viewOnly}
-                    showRemove
-                  />
-                );
-              }
-              case "number": {
-                return (
-                  <NumberParameter
-                    key={parameter.identifier}
-                    identifier={parameter.identifier}
-                    name={parameter.name}
-                    type={"number"}
-                    data={parameter.data}
-                    onRemove={onRemove}
-                    onUpdate={onUpdate}
-                    disabled={props.viewOnly}
-                    showRemove
-                  />
-                );
-              }
-              case "url": {
-                return (
-                  <URLParameter
-                    key={parameter.identifier}
-                    identifier={parameter.identifier}
-                    name={parameter.name}
-                    type={"url"}
-                    data={parameter.data}
-                    onRemove={onRemove}
-                    onUpdate={onUpdate}
-                    disabled={props.viewOnly}
-                    showRemove
-                  />
-                );
-              }
-              default: {
-                return (
-                  <StringParameter
-                    key={parameter.identifier}
-                    identifier={parameter.identifier}
-                    name={parameter.name}
-                    type={"string"}
-                    data={parameter.data}
-                    onRemove={onRemove}
-                    onUpdate={onUpdate}
-                    disabled={props.viewOnly}
-                    showRemove
-                  />
-                );
-              }
-            }
-          })
-        :
-          <Flex align={"center"} justify={"center"}>
-            <Text>No Parameters specified. Use the buttons above to add a new Parameter.</Text>
-          </Flex>
-        }
+            })
+          ) : (
+            <Flex align={"center"} justify={"center"}>
+              <Text>No Parameters specified.</Text>
+            </Flex>
+          )}
+        </VStack>
       </Flex>
     </Flex>
   );
-}
+};
 
 export default ParameterGroup;

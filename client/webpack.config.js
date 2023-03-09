@@ -12,9 +12,7 @@ module.exports = {
     }),
   ],
   devServer: {
-    static: {
-      directory: path.join(__dirname, "dist"),
-    },
+    static: [path.join(__dirname, "dist"), path.join(__dirname, "img")],
     hot: true,
     historyApiFallback: true,
   },

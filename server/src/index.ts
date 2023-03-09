@@ -25,7 +25,13 @@ const port = process.env.PORT || 8000;
 // Configure Express, enable CORS middleware and routes
 app.use(cors());
 app.use(express.json());
-app.use(EntitiesRoute, CollectionsRoute, AttributesRoute, SearchRoute, UpdatesRoute);
+app.use(
+  EntitiesRoute,
+  CollectionsRoute,
+  AttributesRoute,
+  SearchRoute,
+  UpdatesRoute
+);
 
 // Start the Express server
 app.listen(port, () => {

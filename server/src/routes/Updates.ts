@@ -3,7 +3,7 @@ import express from "express";
 import _ from "underscore";
 
 // Utility functions
-import { UpdateModel, UpdateStruct } from "@types";
+import { UpdateModel, Update } from "@types";
 
 import { Updates } from "../operations/Updates";
 
@@ -17,14 +17,16 @@ UpdatesRoute.route("/updates").get((_request: any, response: any) => {
 });
 
 // Route: Create a new Update
-UpdatesRoute.route("/updates/create").post((request: { body: UpdateStruct }, response: any) => {
-  Updates.create(request.body).then((update: UpdateStruct) => {
-    response.json({
-      id: update.target.id,
-      name: update.target.name,
-      status: "success",
+UpdatesRoute.route("/updates/create").post(
+  (request: { body: Update }, response: any) => {
+    Updates.create(request.body).then((update: Update) => {
+      response.json({
+        id: update.target.id,
+        name: update.target.name,
+        status: "success",
+      });
     });
-  });
-});
+  }
+);
 
 export default UpdatesRoute;
