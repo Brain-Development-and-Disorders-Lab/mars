@@ -97,7 +97,7 @@ const Entities = () => {
         direction={"row"}
         rounded={"2xl"}
         bg={"whitesmoke"}
-        flexWrap={"wrap"}
+        wrap={"wrap"}
         gap={"6"}
       >
         {isLoaded && entityData.length > 0 ? (
@@ -108,10 +108,10 @@ const Entities = () => {
                   <Th>
                     <Heading size={"sm"}>Name</Heading>
                   </Th>
-                  <Th>
+                  <Th display={{ base: "none", sm: "table-cell" }}>
                     <Heading size={"sm"}>Owner</Heading>
                   </Th>
-                  <Th>
+                  <Th display={{ base: "none", sm: "table-cell" }}>
                     <Heading size={"sm"}>Description</Heading>
                   </Th>
                   <Th></Th>
@@ -122,7 +122,7 @@ const Entities = () => {
                   return (
                     <Tr key={entity._id}>
                       <Td>{entity.name}</Td>
-                      <Td>
+                      <Td display={{ base: "none", sm: "table-cell" }}>
                         {_.isEqual(entity.owner, "") ? (
                           <Tag
                             size={"md"}
@@ -136,7 +136,7 @@ const Entities = () => {
                           entity.owner
                         )}
                       </Td>
-                      <Td>
+                      <Td display={{ base: "none", sm: "table-cell" }}>
                         <Text noOfLines={2}>
                           {_.isEqual(entity.description, "") ? (
                             <Tag
