@@ -42,7 +42,7 @@ export const DateParameter = (props: Parameter.Date) => {
       <Icon as={MdDateRange} w={"4"} h={"4"} />
 
       {/* Parameter name */}
-      <FormControl>
+      <FormControl isInvalid={name === ""}>
         {props.disabled ? (
           <Text as={"b"}>{name}</Text>
         ) : (
@@ -59,7 +59,7 @@ export const DateParameter = (props: Parameter.Date) => {
       </FormControl>
 
       {/* Parameter data */}
-      <FormControl>
+      <FormControl isRequired>
         {props.disabled ? (
           <Text>{dayjs(value).format("DD MMM HH:mm")}</Text>
         ) : (
@@ -135,7 +135,7 @@ export const TextParameter = (props: Parameter.Text) => {
       <Icon as={MdOutlineTextFields} w={"4"} h={"4"} />
 
       {/* Parameter name */}
-      <FormControl label="Name">
+      <FormControl isRequired isInvalid={name === ""}>
         {props.disabled ? (
           <Text as={"b"}>{name}</Text>
         ) : (
@@ -151,7 +151,7 @@ export const TextParameter = (props: Parameter.Text) => {
       </FormControl>
 
       {/* Parameter data */}
-      <FormControl label="Data">
+      <FormControl isRequired isInvalid={value === ""}>
         {props.disabled ? (
           <Text>{value}</Text>
         ) : (
@@ -205,7 +205,7 @@ export const NumberParameter = (props: Parameter.Number) => {
       <Icon as={RiNumbersLine} w={"4"} h={"4"} />
 
       {/* Parameter name */}
-      <FormControl label="Name">
+      <FormControl isRequired isInvalid={name === ""}>
         {props.disabled ? (
           <Text as={"b"}>{name}</Text>
         ) : (
@@ -221,7 +221,7 @@ export const NumberParameter = (props: Parameter.Number) => {
       </FormControl>
 
       {/* Parameter data */}
-      <FormControl label="Data">
+      <FormControl isRequired>
         {props.disabled ? (
           <Text>{value}</Text>
         ) : (
@@ -275,7 +275,7 @@ export const URLParameter = (props: Parameter.URL) => {
       <Icon as={AiOutlineLink} w={"4"} h={"4"} />
 
       {/* Parameter name */}
-      <FormControl label="Name">
+      <FormControl isRequired isInvalid={name === ""}>
         {props.disabled ? (
           <Text as={"b"}>{name}</Text>
         ) : (
@@ -293,7 +293,7 @@ export const URLParameter = (props: Parameter.URL) => {
       </FormControl>
 
       {/* Parameter data */}
-      <FormControl label="Data">
+      <FormControl isRequired isInvalid={value === ""}>
         {props.disabled ? (
           <Link as={"a"} href={value} color="dark-1" isExternal>
             {value}
@@ -357,12 +357,6 @@ export const EntityParameter = (props: Parameter.Entity) => {
   useEffect(() => {
     getData(`/entities`).then((value) => {
       setEntities(value);
-
-      // Check the contents of the response
-      if (value["error"] !== undefined) {
-
-      }
-
       setIsLoaded(true);
     }).catch((_error) => {
       toast({
@@ -373,6 +367,8 @@ export const EntityParameter = (props: Parameter.Entity) => {
         position: "bottom-right",
         isClosable: true,
       });
+    }).finally(() => {
+      setIsLoaded(true);
     });
     return;
   }, []);
@@ -382,7 +378,7 @@ export const EntityParameter = (props: Parameter.Entity) => {
       <Icon as={BsBox} w={"4"} h={"4"} />
 
       {/* Parameter name */}
-      <FormControl>
+      <FormControl isRequired isInvalid={name === ""}>
         {props.disabled ? (
           <Text as={"b"}>{name}</Text>
         ) : (
@@ -399,7 +395,7 @@ export const EntityParameter = (props: Parameter.Entity) => {
       </FormControl>
 
       {/* Parameter data */}
-      <FormControl>
+      <FormControl isRequired isInvalid={value === ""}>
         {props.disabled ? (
           <Linky type="entities" id={value} />
         ) : (

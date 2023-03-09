@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Button,
   Card,
@@ -6,19 +6,33 @@ import {
   CardFooter,
   Divider,
   Flex,
+  FormControl,
   Icon,
   Input,
   Textarea,
 } from "@chakra-ui/react";
-import { AttributeProps } from "@types";
-import ParameterGroup from "@components/ParameterGroup";
 import { CheckIcon, CloseIcon } from "@chakra-ui/icons";
+
+import { AttributeProps } from "@types";
+
+import ParameterGroup from "@components/ParameterGroup";
+
+import { validateParameters } from "src/functions";
 
 const Attribute = (props: AttributeProps) => {
   const [name, setName] = useState(props.name);
   const [description, setDescription] = useState(props.description);
   const [parameters, setParameters] = useState(props.parameters);
   const [finished, setFinished] = useState(false);
+
+  const isNameError = name === "";
+  const isDescriptionError = description === "";
+  const [attributeError, setAttributeError] = useState(false);
+  const isAttributesError = isNameError || isDescriptionError || !attributeError;
+
+  useEffect(() => {
+    setAttributeError(validateParameters(parameters));
+  }, [parameters]);
 
   const attributeData: AttributeProps = {
     identifier: props.identifier,
@@ -37,25 +51,32 @@ const Attribute = (props: AttributeProps) => {
           justify={["center", "space-between"]}
         >
           <Flex direction={"column"} gap={"2"}>
-            <Input
-              placeholder={"Name"}
-              value={name}
-              disabled={finished}
-              onChange={(event) => setName(event.target.value)}
-            />
-            <Textarea
-              value={description}
-              placeholder={"Description"}
-              disabled={finished}
-              onChange={(event) => setDescription(event.target.value)}
-            />
+            <FormControl isRequired isInvalid={isNameError}>
+              <Input
+                placeholder={"Name"}
+                value={name}
+                disabled={finished}
+                onChange={(event) => setName(event.target.value)}
+              />
+            </FormControl>
+
+            <FormControl isRequired isInvalid={isDescriptionError}>
+              <Textarea
+                value={description}
+                placeholder={"Description"}
+                disabled={finished}
+                onChange={(event) => setDescription(event.target.value)}
+              />
+            </FormControl>
           </Flex>
 
-          <ParameterGroup
-            parameters={parameters}
-            viewOnly={finished}
-            setParameters={setParameters}
-          />
+          <Flex grow={"1"}>
+            <ParameterGroup
+              parameters={parameters}
+              viewOnly={finished}
+              setParameters={setParameters}
+            />
+          </Flex>
         </Flex>
       </CardBody>
 
@@ -65,7 +86,6 @@ const Attribute = (props: AttributeProps) => {
         <Flex direction={"row"} gap={"2"}>
           <Button
             colorScheme={"red"}
-            variant={"outline"}
             onClick={() => {
               if (props.onRemove) {
                 props.onRemove(props.identifier);
@@ -75,6 +95,7 @@ const Attribute = (props: AttributeProps) => {
           >
             Remove
           </Button>
+
           <Button
             rightIcon={<Icon as={CheckIcon} />}
             colorScheme={"green"}
@@ -84,7 +105,7 @@ const Attribute = (props: AttributeProps) => {
                 props.onUpdate(attributeData);
               }
             }}
-            disabled={finished}
+            isDisabled={isAttributesError}
           >
             Done
           </Button>

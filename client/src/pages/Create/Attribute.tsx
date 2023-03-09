@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Button,
   Flex,
@@ -31,6 +31,7 @@ import { useNavigate } from "react-router-dom";
 
 import { Attribute, Parameters } from "@types";
 import { postData, pseudoId } from "@database/functions";
+import { validateParameters } from "src/functions";
 
 import _ from "underscore";
 
@@ -46,13 +47,18 @@ export const Start = ({}) => {
   const isNameError = name === "";
   const isDescriptionError = description === "";
   const isParametersError = parameters.length === 0;
-  const isDetailsError = isNameError || isDescriptionError || isParametersError;
+  const [parameterError, setParameterError] = useState(false);
+  const isDetailsError = isNameError || isDescriptionError || isParametersError || !parameterError;
 
   const attributeData: Attribute = {
     name: name,
     description: description,
     parameters: parameters,
   };
+
+  useEffect(() => {
+    setParameterError(validateParameters(parameters));
+  }, [parameters]);
 
   const onSubmit = () => {
     // Push the data
