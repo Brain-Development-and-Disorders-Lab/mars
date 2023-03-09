@@ -168,8 +168,6 @@ const AttributeCard = (props: AttributeCardProps) => {
           <ModalContent p={"2"} m={"2"}>
             <ModalHeader>
               <Flex
-                pt={"8"}
-                pb={"8"}
                 direction={"row"}
                 justify={"space-between"}
                 align={"center"}
@@ -177,7 +175,7 @@ const AttributeCard = (props: AttributeCardProps) => {
               >
                 <Flex align={"center"} gap={"4"} shadow={"lg"} p={"2"} border={"2px"} rounded={"10px"}>
                   <Icon as={BsGear} w={"8"} h={"8"} />
-                  <Heading fontWeight={"semibold"}>{props.data.name}</Heading>
+                  <Heading fontWeight={"semibold"} size={"md"}>{props.data.name}</Heading>
                 </Flex>
               </Flex>
               <ModalCloseButton />

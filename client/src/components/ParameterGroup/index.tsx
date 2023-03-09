@@ -1,5 +1,5 @@
 import React, { Dispatch, SetStateAction } from "react";
-import { Button, Flex, Icon, Text } from "@chakra-ui/react";
+import { Button, Flex, Icon, StackDivider, Text, VStack } from "@chakra-ui/react";
 import { AiOutlineLink } from "react-icons/ai";
 import { BsBox } from "react-icons/bs";
 import { MdDateRange, MdOutlineTextFields } from "react-icons/md";
@@ -58,7 +58,7 @@ const ParameterGroup = (props: {
   };
 
   return (
-    <Flex direction={"column"} gap={"2"}>
+    <Flex direction={"column"} gap={"2"} w={"100%"}>
       {/* Button Group */}
       {!props.viewOnly && (
         <Flex
@@ -166,98 +166,104 @@ const ParameterGroup = (props: {
         </Flex>
       )}
 
-      {/* Card Group */}
+      {/* Parameter List */}
       <Flex
         p={["1", "2"]}
         direction={"column"}
         gap={"2"}
         rounded={"lg"}
       >
-        {props.parameters.length > 0 ? (
-          props.parameters.map((parameter) => {
-            switch (parameter.type) {
-              case "date": {
-                return (
-                  <DateParameter
-                    key={parameter.identifier}
-                    identifier={parameter.identifier}
-                    name={parameter.name}
-                    type={"date"}
-                    data={parameter.data}
-                    onRemove={onRemove}
-                    onUpdate={onUpdate}
-                    disabled={props.viewOnly}
-                    showRemove
-                  />
-                );
+        <VStack
+          divider={<StackDivider />}
+          spacing={4}
+          align={"stretch"}
+        >
+          {props.parameters.length > 0 ? (
+            props.parameters.map((parameter) => {
+              switch (parameter.type) {
+                case "date": {
+                  return (
+                    <DateParameter
+                      key={parameter.identifier}
+                      identifier={parameter.identifier}
+                      name={parameter.name}
+                      type={"date"}
+                      data={parameter.data}
+                      onRemove={onRemove}
+                      onUpdate={onUpdate}
+                      disabled={props.viewOnly}
+                      showRemove
+                    />
+                  );
+                }
+                case "entity": {
+                  return (
+                    <EntityParameter
+                      key={parameter.identifier}
+                      identifier={parameter.identifier}
+                      name={parameter.name}
+                      type={"entity"}
+                      data={parameter.data}
+                      onRemove={onRemove}
+                      onUpdate={onUpdate}
+                      disabled={props.viewOnly}
+                      showRemove
+                    />
+                  );
+                }
+                case "number": {
+                  return (
+                    <NumberParameter
+                      key={parameter.identifier}
+                      identifier={parameter.identifier}
+                      name={parameter.name}
+                      type={"number"}
+                      data={parameter.data}
+                      onRemove={onRemove}
+                      onUpdate={onUpdate}
+                      disabled={props.viewOnly}
+                      showRemove
+                    />
+                  );
+                }
+                case "url": {
+                  return (
+                    <URLParameter
+                      key={parameter.identifier}
+                      identifier={parameter.identifier}
+                      name={parameter.name}
+                      type={"url"}
+                      data={parameter.data}
+                      onRemove={onRemove}
+                      onUpdate={onUpdate}
+                      disabled={props.viewOnly}
+                      showRemove
+                    />
+                  );
+                }
+                default: {
+                  return (
+                    <TextParameter
+                      key={parameter.identifier}
+                      identifier={parameter.identifier}
+                      name={parameter.name}
+                      type={"text"}
+                      data={parameter.data}
+                      onRemove={onRemove}
+                      onUpdate={onUpdate}
+                      disabled={props.viewOnly}
+                      showRemove
+                    />
+                  );
+                }
               }
-              case "entity": {
-                return (
-                  <EntityParameter
-                    key={parameter.identifier}
-                    identifier={parameter.identifier}
-                    name={parameter.name}
-                    type={"entity"}
-                    data={parameter.data}
-                    onRemove={onRemove}
-                    onUpdate={onUpdate}
-                    disabled={props.viewOnly}
-                    showRemove
-                  />
-                );
-              }
-              case "number": {
-                return (
-                  <NumberParameter
-                    key={parameter.identifier}
-                    identifier={parameter.identifier}
-                    name={parameter.name}
-                    type={"number"}
-                    data={parameter.data}
-                    onRemove={onRemove}
-                    onUpdate={onUpdate}
-                    disabled={props.viewOnly}
-                    showRemove
-                  />
-                );
-              }
-              case "url": {
-                return (
-                  <URLParameter
-                    key={parameter.identifier}
-                    identifier={parameter.identifier}
-                    name={parameter.name}
-                    type={"url"}
-                    data={parameter.data}
-                    onRemove={onRemove}
-                    onUpdate={onUpdate}
-                    disabled={props.viewOnly}
-                    showRemove
-                  />
-                );
-              }
-              default: {
-                return (
-                  <TextParameter
-                    key={parameter.identifier}
-                    identifier={parameter.identifier}
-                    name={parameter.name}
-                    type={"text"}
-                    data={parameter.data}
-                    onRemove={onRemove}
-                    onUpdate={onUpdate}
-                    disabled={props.viewOnly}
-                    showRemove
-                  />
-                );
-              }
-            }
-          })
-        ) : (
-          <Flex align={"center"} justify={"center"}>
-            <Text>No Parameters specified.</Text>
-          </Flex>
-        )}
+            })
+          ) : (
+            <Flex align={"center"} justify={"center"}>
+              <Text>No Parameters specified.</Text>
+            </Flex>
+          )}
+        </VStack>
       </Flex>
     </Flex>
   );
