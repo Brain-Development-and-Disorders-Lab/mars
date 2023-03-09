@@ -66,7 +66,7 @@ import Linky from "src/components/Linky";
 import AttributeCard from "src/components/AttributeCard";
 import Graph from "src/components/Graph";
 import { Loading } from "src/components/Loading";
-import { PageContainer } from "src/components/PageContainer";
+import { ContentContainer } from "@components/ContentContainer";
 
 export const Entity = () => {
   const { id } = useParams();
@@ -410,7 +410,7 @@ export const Entity = () => {
   };
 
   return isLoaded ? (
-    <PageContainer>
+    <ContentContainer>
       <Flex
         p={"2"}
         pt={"8"}
@@ -1079,7 +1079,7 @@ export const Entity = () => {
           </ModalBody>
         </ModalContent>
       </Modal>
-    </PageContainer>
+    </ContentContainer>
   ) : (
     <Loading />
   );

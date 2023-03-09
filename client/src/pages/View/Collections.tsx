@@ -23,7 +23,7 @@ import { BsCollection } from "react-icons/bs";
 
 // Custom components
 import { Loading } from "@components/Loading";
-import { PageContainer } from "@components/PageContainer";
+import { ContentContainer } from "@components/ContentContainer";
 
 // Navigation
 import { useNavigate } from "react-router-dom";
@@ -67,7 +67,7 @@ const Collections = () => {
   }, []);
 
   return isLoaded ? (
-    <PageContainer>
+    <ContentContainer>
       <Flex
         p={"2"}
         pt={"4"}
@@ -186,7 +186,7 @@ const Collections = () => {
           <Text>There are no Collections to display.</Text>
         )}
       </Flex>
-    </PageContainer>
+    </ContentContainer>
   ) : (
     <Loading />
   );

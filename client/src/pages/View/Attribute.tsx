@@ -18,7 +18,7 @@ import { BsGear } from "react-icons/bs";
 // Custom components
 import ParameterGroup from "@components/ParameterGroup";
 import { Loading } from "@components/Loading";
-import { PageContainer } from "@components/PageContainer";
+import { ContentContainer } from "@components/ContentContainer";
 
 // Navigation
 import { useParams } from "react-router-dom";
@@ -60,7 +60,7 @@ export const Attribute = () => {
   }, [id, isLoaded]);
 
   return isLoaded ? (
-    <PageContainer>
+    <ContentContainer>
       <Flex
         p={"2"}
         pt={"8"}
@@ -126,7 +126,7 @@ export const Attribute = () => {
           )}
         </Flex>
       </Flex>
-    </PageContainer>
+    </ContentContainer>
   ) : (
     <Loading />
   );

@@ -44,8 +44,7 @@ const NavigationElement = ({
 }) => (
   <Link
     href={href}
-    px={"2"}
-    py={"2"}
+    p={"2"}
     rounded={"md"}
     _hover={{
       textDecoration: "none",

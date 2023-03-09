@@ -21,7 +21,7 @@ import { BsGear } from "react-icons/bs";
 // Custom components
 import { Loading } from "@components/Loading";
 import { WarningLabel } from "@components/Label";
-import { PageContainer } from "@components/PageContainer";
+import { ContentContainer } from "@components/ContentContainer";
 
 // Navigation
 import { useNavigate } from "react-router-dom";
@@ -64,7 +64,7 @@ const Attributes = () => {
   }, []);
 
   return isLoaded ? (
-    <PageContainer>
+    <ContentContainer>
       <Flex
         p={"2"}
         pt={"4"}
@@ -158,7 +158,7 @@ const Attributes = () => {
           <Text>There are no Attributes to display.</Text>
         )}
       </Flex>
-    </PageContainer>
+    </ContentContainer>
   ) : (
     <Loading />
   );

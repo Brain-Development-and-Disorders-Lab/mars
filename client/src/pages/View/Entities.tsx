@@ -33,7 +33,7 @@ import { EntityModel } from "@types";
 import _ from "underscore";
 
 // Custom components
-import { PageContainer } from "@components/PageContainer";
+import { ContentContainer } from "@components/ContentContainer";
 import { Loading } from "@components/Loading";
 
 const Entities = () => {
@@ -68,7 +68,7 @@ const Entities = () => {
   }, []);
 
   return isLoaded ? (
-    <PageContainer>
+    <ContentContainer>
       <Flex
         p={"2"}
         pt={"4"}
@@ -174,7 +174,7 @@ const Entities = () => {
           <Text>There are no Entities to display.</Text>
         )}
       </Flex>
-    </PageContainer>
+    </ContentContainer>
   ) : (
     <Loading />
   );

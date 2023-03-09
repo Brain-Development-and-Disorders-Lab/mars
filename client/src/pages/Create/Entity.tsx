@@ -36,7 +36,7 @@ import {
   InfoOutlineIcon,
 } from "@chakra-ui/icons";
 import Linky from "@components/Linky";
-import { PageContainer } from "@components/PageContainer";
+import { ContentContainer } from "@components/ContentContainer";
 import Attribute from "@components/Attribute";
 
 import _ from "underscore";
@@ -234,7 +234,7 @@ export const Start = ({}) => {
   };
 
   return (
-    <PageContainer>
+    <ContentContainer>
       <Flex direction={"column"} w={["full", "4xl", "7xl"]}>
         {/* Page header */}
         <Flex direction={"column"} p={"2"} pt={"4"} pb={"4"}>
@@ -519,7 +519,7 @@ export const Start = ({}) => {
                   value={selectedCollections}
                   onChange={(event: string[]) => {
                     if (event) {
-                      setSelectedCollections([...event]);
+                      setSelectedCollections(event => [...event]);
                     }
                   }}
                 >
@@ -718,7 +718,7 @@ export const Start = ({}) => {
           </ModalBody>
         </ModalContent>
       </Modal>
-    </PageContainer>
+    </ContentContainer>
   );
 };
 

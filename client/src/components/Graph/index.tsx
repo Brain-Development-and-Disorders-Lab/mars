@@ -195,8 +195,8 @@ const Graph = (props: { id: string }) => {
       }
 
       // Set the Nodes and Edges
-      setNodes([...nodes, ...initialNodes]);
-      setEdges([...edges, ...initialEdges]);
+      setNodes(nodes => [...nodes, ...initialNodes]);
+      setEdges(edges => [...edges, ...initialEdges]);
 
       setGraphReady(true);
     });

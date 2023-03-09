@@ -56,7 +56,7 @@ import { CollectionModel, EntityModel } from "@types";
 // Custom components
 import Linky from "@components/Linky";
 import { Loading } from "@components/Loading";
-import { PageContainer } from "@components/PageContainer";
+import { ContentContainer } from "@components/ContentContainer";
 
 import _ from "underscore";
 
@@ -235,7 +235,7 @@ export const Collection = () => {
   };
 
   return isLoaded ? (
-    <PageContainer>
+    <ContentContainer>
       <Flex
         p={"2"}
         pt={"8"}
@@ -460,7 +460,7 @@ export const Collection = () => {
                       isClosable: true,
                     });
                   } else {
-                    setSelectedEntities([...selectedEntities, selectedEntity]);
+                    setSelectedEntities(selectedEntities => [...selectedEntities, selectedEntity]);
                   }
                 }}
               >
@@ -516,7 +516,7 @@ export const Collection = () => {
           </Flex>
         </ModalContent>
       </Modal>
-    </PageContainer>
+    </ContentContainer>
   ) : (
     <Loading />
   );

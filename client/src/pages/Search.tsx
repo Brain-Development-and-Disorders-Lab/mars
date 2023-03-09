@@ -36,7 +36,7 @@ import { useNavigate } from "react-router-dom";
 import { getData } from "@database/functions";
 import { EntityModel } from "@types";
 import { Loading } from "@components/Loading";
-import { PageContainer } from "@components/PageContainer";
+import { ContentContainer } from "@components/ContentContainer";
 
 const Search = () => {
   const [query, setQuery] = useState("");
@@ -77,7 +77,7 @@ const Search = () => {
   };
 
   return (
-    <PageContainer>
+    <ContentContainer>
       {/* Page header */}
       <Flex direction={"column"} pt={"4"} pb={"4"}>
         <Flex direction={"row"} align={"center"} justify={"space-between"}>
@@ -194,7 +194,7 @@ const Search = () => {
           </ModalBody>
         </ModalContent>
       </Modal>
-    </PageContainer>
+    </ContentContainer>
   );
 };
 

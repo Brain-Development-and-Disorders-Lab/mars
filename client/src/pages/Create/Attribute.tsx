@@ -21,7 +21,7 @@ import { CheckIcon, CloseIcon, InfoOutlineIcon } from "@chakra-ui/icons";
 import { AiOutlineBlock, AiOutlineLink } from "react-icons/ai";
 import { MdDateRange, MdOutlineTextFields } from "react-icons/md";
 import { RiNumbersLine } from "react-icons/ri";
-import { PageContainer } from "@components/PageContainer";
+import { ContentContainer } from "@components/ContentContainer";
 import ParameterGroup from "@components/ParameterGroup";
 import { useNavigate } from "react-router-dom";
 
@@ -54,7 +54,7 @@ export const Start = ({}) => {
   };
 
   return (
-    <PageContainer>
+    <ContentContainer>
       <Flex direction={"column"} w={["full", "4xl", "7xl"]}>
         {/* Page header */}
         <Flex direction={"column"} p={"2"} pt={"4"} pb={"4"}>
@@ -185,7 +185,7 @@ export const Start = ({}) => {
           </ModalBody>
         </ModalContent>
       </Modal>
-    </PageContainer>
+    </ContentContainer>
   );
 };
 export default Start;

@@ -20,7 +20,7 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import { CheckIcon, CloseIcon, InfoOutlineIcon } from "@chakra-ui/icons";
-import { PageContainer } from "@components/PageContainer";
+import { ContentContainer } from "@components/ContentContainer";
 import { useNavigate } from "react-router-dom";
 import { postData, pseudoId } from "@database/functions";
 import { Collection } from "@types";
@@ -49,7 +49,7 @@ export const Start = ({}) => {
   };
 
   return (
-    <PageContainer>
+    <ContentContainer>
       <Flex direction={"column"} w={["full", "4xl", "7xl"]}>
         {/* Page header */}
         <Flex direction={"column"} p={"2"} pt={"4"} pb={"4"}>
@@ -232,7 +232,7 @@ export const Start = ({}) => {
           </ModalBody>
         </ModalContent>
       </Modal>
-    </PageContainer>
+    </ContentContainer>
   );
 };
 

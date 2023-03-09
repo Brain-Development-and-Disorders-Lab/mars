@@ -1,5 +1,5 @@
 import React from "react";
-import { Flex, Spinner, Heading } from "@chakra-ui/react";
+import { Flex, Spinner } from "@chakra-ui/react";
 
 export const Loading = () => {
   return (
@@ -12,7 +12,6 @@ export const Loading = () => {
       m={"8"}
     >
       <Spinner size="xl" />
-      <Heading fontWeight={"semibold"}>Loading</Heading>
     </Flex>
   );
 };
