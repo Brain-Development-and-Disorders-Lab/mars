@@ -29,7 +29,6 @@ import { Attribute, Parameters } from "@types";
 import { postData, pseudoId } from "@database/functions";
 
 import _ from "underscore";
-import consola from "consola";
 
 export const Start = ({}) => {
   const navigate = useNavigate();
@@ -47,7 +46,6 @@ export const Start = ({}) => {
 
   const onSubmit = () => {
     // Push the data
-    consola.debug("Creating Attribute:", attributeData);
     postData(`/attributes/create`, attributeData).then(() =>
       navigate("/attributes")
     );
