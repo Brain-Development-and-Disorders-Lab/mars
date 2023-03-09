@@ -57,6 +57,7 @@ import {
 
 // Utility functions
 import { getData, postData, pseudoId } from "@database/functions";
+import { validateAttributes } from "src/functions";
 
 export const Start = ({}) => {
   // Used to manage what detail inputs are presented
@@ -110,6 +111,8 @@ export const Start = ({}) => {
   const isOwnerError = owner === "";
   const isDateError = created.toISOString() === "";
   const isDetailsError = isNameError || isOwnerError || isDateError;
+
+  const [validAttributes, setValidAttributes] = useState(false);
 
   useEffect(() => {
     // Get all Entities
@@ -167,9 +170,15 @@ export const Start = ({}) => {
       });
   }, []);
 
+  useEffect(() => {
+    setValidAttributes(validateAttributes(selectedAttributes));
+  }, [selectedAttributes]);
+
   const isValidInput = (): boolean => {
     if (_.isEqual("start", pageState)) {
       return isDetailsError;
+    } else if (_.isEqual("attributes", pageState)) {
+      return !validAttributes;
     }
     return false;
   };
