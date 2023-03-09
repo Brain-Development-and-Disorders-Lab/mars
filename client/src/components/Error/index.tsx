@@ -14,7 +14,7 @@ import _ from "underscore";
 
 // Custom components
 
-const Error = () => {
+export const Error = () => {
   const navigate = useNavigate();
 
   return (
@@ -40,5 +40,3 @@ const Error = () => {
     </Flex>
   );
 };
-
-export default Error;

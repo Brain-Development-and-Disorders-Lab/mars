@@ -27,7 +27,7 @@ import { AddIcon, ChevronRightIcon } from "@chakra-ui/icons";
 import { BsBox, BsCollection, BsLightning } from "react-icons/bs";
 
 import { Loading } from "@components/Loading";
-import Error from "@components/Error";
+import { Error } from "@components/Error";
 
 import { getData } from "src/database/functions";
 import { CollectionModel, EntityModel, UpdateModel } from "@types";
