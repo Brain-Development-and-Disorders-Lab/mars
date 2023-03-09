@@ -54,6 +54,7 @@ import { deleteData, getData, postData } from "@database/functions";
 import { CollectionModel, EntityModel } from "@types";
 
 // Custom components
+import { Error } from "@components/Error";
 import Linky from "@components/Linky";
 import { Loading } from "@components/Loading";
 import { ContentContainer } from "@components/ContentContainer";
@@ -66,7 +67,9 @@ export const Collection = () => {
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
 
+  // Page state
   const [editing, setEditing] = useState(false);
+  const [isError, setIsError] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
 
   const [collectionData, setCollectionData] = useState({} as CollectionModel);
@@ -80,15 +83,9 @@ export const Collection = () => {
     // Populate Collection data
     getData(`/collections/${id}`)
       .then((response) => {
-        if (_.isEqual(response.status, "error")) {
-          throw new Error(response.error);
-        } else {
           setCollectionData(response);
           setCollectionEntities(response.entities);
-          setIsLoaded(true);
-        }
-      })
-      .catch(() => {
+      }).catch(() => {
         toast({
           title: "Database Error",
           description: "Error retrieving Collection data",
@@ -97,21 +94,19 @@ export const Collection = () => {
           position: "bottom-right",
           isClosable: true,
         });
+        setIsError(true);
+      }).finally(() => {
+        setIsLoaded(true);
       });
 
     // Populate Entity data
     getData(`/entities`)
       .then((response) => {
-        if (_.isEqual(response.status, "error")) {
-          throw new Error(response.error);
-        } else {
           setAllEntities(
             response.map((e: EntityModel) => {
               return { name: e.name, id: e._id };
             })
           );
-          setIsLoaded(true);
-        }
       })
       .catch(() => {
         toast({
@@ -122,6 +117,9 @@ export const Collection = () => {
           position: "bottom-right",
           isClosable: true,
         });
+        setIsError(true);
+      }).finally(() => {
+        setIsLoaded(true);
       });
   }, [id, isLoaded]);
 
@@ -173,21 +171,15 @@ export const Collection = () => {
 
       // Update data
       postData(`/collections/update`, updateData)
-        .then((response) => {
-          if (_.isEqual(response.status, "success")) {
-            setEditing(false);
-            toast({
-              title: "Saved!",
-              status: "success",
-              duration: 2000,
-              position: "bottom-right",
-              isClosable: true,
-            });
-            return;
-          }
-          throw new Error("Could not POST data");
-        })
-        .catch(() => {
+        .then((_response) => {
+          toast({
+            title: "Saved!",
+            status: "success",
+            duration: 2000,
+            position: "bottom-right",
+            isClosable: true,
+          });
+        }).catch(() => {
           toast({
             title: "Error",
             description: "An error occurred when saving updates.",
@@ -196,6 +188,8 @@ export const Collection = () => {
             position: "bottom-right",
             isClosable: true,
           });
+        }).finally(() => {
+          setEditing(false);
         });
     } else {
       setEditing(true);
@@ -206,23 +200,15 @@ export const Collection = () => {
   const handleDeleteClick = () => {
     // Update data
     deleteData(`/collections/${id}`)
-      .then((response) => {
-        if (_.isEqual(response.status, "success")) {
-          setEditing(false);
-          navigate("/collections");
-
-          toast({
-            title: "Deleted!",
-            status: "success",
-            duration: 2000,
-            position: "bottom-right",
-            isClosable: true,
-          });
-          return;
-        }
-        throw new Error("Could not delete Entity");
-      })
-      .catch(() => {
+      .then((_response) => {
+        toast({
+          title: "Deleted!",
+          status: "success",
+          duration: 2000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+      }).catch(() => {
         toast({
           title: "Error",
           description: `An error occurred when deleting Collection "${collectionData._id}"`,
@@ -231,296 +217,314 @@ export const Collection = () => {
           position: "bottom-right",
           isClosable: true,
         });
+      }).finally(() => {
+        setEditing(false);
+        navigate("/collections");
       });
   };
 
-  return isLoaded ? (
-    <ContentContainer>
-      <Flex
-        p={"2"}
-        direction={"row"}
-        justify={"space-between"}
-        align={"center"}
-        wrap={"wrap"}
-        gap={"4"}
-      >
-        <Flex align={"center"} gap={"4"} shadow={"lg"} p={"2"} border={"2px"} rounded={"10px"}>
-          <Icon as={BsCollection} w={"8"} h={"8"} />
-          <Heading fontWeight={"semibold"}>{collectionData.name}</Heading>
-        </Flex>
-
-        {/* Buttons */}
-        <Flex direction={"row"} gap={"4"} wrap={"wrap"}>
-          {editing &&
-            <Popover>
-              <PopoverTrigger>
-                <Button colorScheme={"red"} rightIcon={<CloseIcon />}>
-                  Delete
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent>
-                <PopoverArrow />
-                <PopoverCloseButton />
-                <PopoverHeader>Confirmation</PopoverHeader>
-                <PopoverBody>
-                  Are you sure you want to delete this Collection?
-                  <Flex direction={"row"} p={"2"} justify={"center"}>
-                    <Button
-                      colorScheme={"green"}
-                      rightIcon={<CheckIcon />}
-                      onClick={handleDeleteClick}
-                    >
-                      Confirm
-                    </Button>
-                  </Flex>
-                </PopoverBody>
-              </PopoverContent>
-            </Popover>
-          }
-          <Button
-            colorScheme={editing ? "green" : "gray"}
-            rightIcon={
-              editing ? <Icon as={CheckIcon} /> : <Icon as={AiOutlineEdit} />
-            }
-            onClick={handleEditClick}
+  return (
+    <ContentContainer vertical={isError || !isLoaded}>
+      {isLoaded ? (
+        isError ? (
+          <Error />
+        ) : (
+          <Flex
+            direction={"column"}
+            justify={"center"}
+            p={"4"}
+            gap={"6"}
+            maxW={"7xl"}
+            wrap={"wrap"}
           >
-            {editing ? "Done" : "Edit"}
-          </Button>
-        </Flex>
-      </Flex>
+            <Flex
+              p={"2"}
+              direction={"row"}
+              justify={"space-between"}
+              align={"center"}
+              wrap={"wrap"}
+              gap={"4"}
+            >
+              <Flex align={"center"} gap={"4"} shadow={"lg"} p={"2"} border={"2px"} rounded={"10px"}>
+                <Icon as={BsCollection} w={"8"} h={"8"} />
+                <Heading fontWeight={"semibold"}>{collectionData.name}</Heading>
+              </Flex>
 
-      <Flex direction={"row"} gap={"4"} p={"2"} wrap={"wrap"}>
-        <Flex
-          direction={"column"}
-          p={"4"}
-          gap={"4"}
-          grow={"1"}
-          h={"fit-content"}
-          bg={"whitesmoke"}
-          rounded={"10px"}
-        >
-          {/* Details */}
-          <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
-            <Heading fontWeight={"semibold"} size={"lg"}>Details</Heading>
-            <TableContainer>
-              <Table variant={"simple"} colorScheme={"blackAlpha"}>
-                <Thead>
-                  <Tr>
-                    <Th>Field</Th>
-                    <Th>Value</Th>
-                  </Tr>
-                </Thead>
-                <Tbody>
-                  <Tr>
-                    <Td>Owner</Td>
-                    <Td>
-                      {_.isEqual(collectionData.owner, "") ? (
-                        <Tag
-                          size={"md"}
-                          key={`warn-${collectionData._id}`}
-                          colorScheme={"orange"}
-                        >
-                          <TagLabel>Not specified</TagLabel>
-                          <TagRightIcon as={WarningIcon} />
-                        </Tag>
-                      ) : (
-                        <Text>
-                          <Link>{collectionData.owner}</Link>
-                        </Text>
-                      )}
-                    </Td>
-                  </Tr>
-                  <Tr>
-                    <Td>Description</Td>
-                    <Td>
-                      {_.isEqual(collectionData.description, "") ? (
-                        <Tag
-                          size={"md"}
-                          key={`warn-${collectionData._id}`}
-                          colorScheme={"orange"}
-                        >
-                          <TagLabel>Not specified</TagLabel>
-                          <TagRightIcon as={WarningIcon} />
-                        </Tag>
-                      ) : (
-                        <Text>{collectionData.description}</Text>
-                      )}
-                    </Td>
-                  </Tr>
-                </Tbody>
-              </Table>
-            </TableContainer>
-          </Flex>
-        </Flex>
+              {/* Buttons */}
+              <Flex direction={"row"} gap={"4"} wrap={"wrap"}>
+                {editing &&
+                  <Popover>
+                    <PopoverTrigger>
+                      <Button colorScheme={"red"} rightIcon={<CloseIcon />}>
+                        Delete
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent>
+                      <PopoverArrow />
+                      <PopoverCloseButton />
+                      <PopoverHeader>Confirmation</PopoverHeader>
+                      <PopoverBody>
+                        Are you sure you want to delete this Collection?
+                        <Flex direction={"row"} p={"2"} justify={"center"}>
+                          <Button
+                            colorScheme={"green"}
+                            rightIcon={<CheckIcon />}
+                            onClick={handleDeleteClick}
+                          >
+                            Confirm
+                          </Button>
+                        </Flex>
+                      </PopoverBody>
+                    </PopoverContent>
+                  </Popover>
+                }
+                <Button
+                  colorScheme={editing ? "green" : "gray"}
+                  rightIcon={
+                    editing ? <Icon as={CheckIcon} /> : <Icon as={AiOutlineEdit} />
+                  }
+                  onClick={handleEditClick}
+                >
+                  {editing ? "Done" : "Edit"}
+                </Button>
+              </Flex>
+            </Flex>
 
-        <Flex
-          direction={"column"}
-          p={"4"}
-          gap={"4"}
-          grow={"2"}
-          h={"fit-content"}
-          bg={"whitesmoke"}
-          rounded={"10px"}
-        >
-          <Flex direction={"row"} justify={"space-between"}>
-            {/* Entities in the Collection */}
-            <Heading fontWeight={"semibold"} size={"lg"}>
-              Entities
-            </Heading>
-            {editing && (
-              <Button
-                leftIcon={<AddIcon />}
-                onClick={onOpen}
-                colorScheme={"green"}
+            <Flex direction={"row"} gap={"4"} p={"2"} wrap={"wrap"}>
+              <Flex
+                direction={"column"}
+                p={"4"}
+                gap={"4"}
+                grow={"1"}
+                h={"fit-content"}
+                bg={"whitesmoke"}
+                rounded={"10px"}
               >
-                Add
-              </Button>
-            )}
-          </Flex>
-          <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
-            {collectionEntities && collectionEntities.length > 0 ? (
-              <TableContainer>
-                <Table variant={"simple"} colorScheme={"blackAlpha"}>
-                  <Thead>
-                    <Tr>
-                      <Th>Name</Th>
-                      <Th></Th>
-                    </Tr>
-                  </Thead>
-                  <Tbody>
-                    {collectionEntities.map((entity) => {
-                      return (
-                        <Tr key={entity}>
+                {/* Details */}
+                <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
+                  <Heading fontWeight={"semibold"} size={"lg"}>Details</Heading>
+                  <TableContainer>
+                    <Table variant={"simple"} colorScheme={"blackAlpha"}>
+                      <Thead>
+                        <Tr>
+                          <Th>Field</Th>
+                          <Th>Value</Th>
+                        </Tr>
+                      </Thead>
+                      <Tbody>
+                        <Tr>
+                          <Td>Owner</Td>
                           <Td>
-                            <Linky id={entity} type={"entities"} />
-                          </Td>
-                          <Td>
-                            <Flex justify={"right"} gap={"6"}>
-                              {!editing && (
-                                <Button
-                                  key={`view-collection-${entity}`}
-                                  colorScheme={"blackAlpha"}
-                                  rightIcon={<ChevronRightIcon />}
-                                  onClick={() => navigate(`/entities/${entity}`)}
-                                >
-                                  View
-                                </Button>
-                              )}
-
-                              {editing && (
-                                <Button
-                                  key={`remove-${entity}`}
-                                  rightIcon={<CloseIcon />}
-                                  colorScheme={"red"}
-                                  onClick={() => {
-                                    if (id) {
-                                      removeEntity(entity);
-                                    }
-                                  }}
-                                >
-                                  Remove
-                                </Button>
-                              )}
-                            </Flex>
+                            {_.isEqual(collectionData.owner, "") ? (
+                              <Tag
+                                size={"md"}
+                                key={`warn-${collectionData._id}`}
+                                colorScheme={"orange"}
+                              >
+                                <TagLabel>Not specified</TagLabel>
+                                <TagRightIcon as={WarningIcon} />
+                              </Tag>
+                            ) : (
+                              <Text>
+                                <Link>{collectionData.owner}</Link>
+                              </Text>
+                            )}
                           </Td>
                         </Tr>
-                      );
-                    })}
-                  </Tbody>
-                </Table>
-              </TableContainer>
-            ) : (
-              <Text>This Collection is empty.</Text>
-            )}
-          </Flex>
-        </Flex>
-      </Flex>
+                        <Tr>
+                          <Td>Description</Td>
+                          <Td>
+                            {_.isEqual(collectionData.description, "") ? (
+                              <Tag
+                                size={"md"}
+                                key={`warn-${collectionData._id}`}
+                                colorScheme={"orange"}
+                              >
+                                <TagLabel>Not specified</TagLabel>
+                                <TagRightIcon as={WarningIcon} />
+                              </Tag>
+                            ) : (
+                              <Text>{collectionData.description}</Text>
+                            )}
+                          </Td>
+                        </Tr>
+                      </Tbody>
+                    </Table>
+                  </TableContainer>
+                </Flex>
+              </Flex>
 
-      <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent p={"4"}>
-          {/* Heading and close button */}
-          <ModalHeader>Add Entities</ModalHeader>
-          <ModalCloseButton />
-
-          {/* Select component for Entities */}
-          <Flex direction={"column"} p={"2"} gap={"2"}>
-            <FormControl>
-              <FormLabel>Add Entities</FormLabel>
-              <Select
-                title="Select Entity"
-                placeholder={"Select Entity"}
-                onChange={(event) => {
-                  const selectedEntity = event.target.value.toString();
-                  if (selectedEntities.includes(selectedEntity)) {
-                    toast({
-                      title: "Warning",
-                      description: "Entity has already been selected.",
-                      status: "warning",
-                      duration: 2000,
-                      position: "bottom-right",
-                      isClosable: true,
-                    });
-                  } else {
-                    setSelectedEntities(selectedEntities => [...selectedEntities, selectedEntity]);
-                  }
-                }}
+              <Flex
+                direction={"column"}
+                p={"4"}
+                gap={"4"}
+                grow={"2"}
+                h={"fit-content"}
+                bg={"whitesmoke"}
+                rounded={"10px"}
               >
-                {isLoaded &&
-                  allEntities.map((entity) => {
-                    return (
-                      <option key={entity.id} value={entity.id}>
-                        {entity.name}
-                      </option>
-                    );
-                  })}
-                ;
-              </Select>
-            </FormControl>
+                <Flex direction={"row"} justify={"space-between"}>
+                  {/* Entities in the Collection */}
+                  <Heading fontWeight={"semibold"} size={"lg"}>
+                    Entities
+                  </Heading>
+                  {editing && (
+                    <Button
+                      leftIcon={<AddIcon />}
+                      onClick={onOpen}
+                      colorScheme={"green"}
+                    >
+                      Add
+                    </Button>
+                  )}
+                </Flex>
+                <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
+                  {collectionEntities && collectionEntities.length > 0 ? (
+                    <TableContainer>
+                      <Table variant={"simple"} colorScheme={"blackAlpha"}>
+                        <Thead>
+                          <Tr>
+                            <Th>Name</Th>
+                            <Th></Th>
+                          </Tr>
+                        </Thead>
+                        <Tbody>
+                          {collectionEntities.map((entity) => {
+                            return (
+                              <Tr key={entity}>
+                                <Td>
+                                  <Linky id={entity} type={"entities"} />
+                                </Td>
+                                <Td>
+                                  <Flex justify={"right"} gap={"6"}>
+                                    {!editing && (
+                                      <Button
+                                        key={`view-collection-${entity}`}
+                                        colorScheme={"blackAlpha"}
+                                        rightIcon={<ChevronRightIcon />}
+                                        onClick={() => navigate(`/entities/${entity}`)}
+                                      >
+                                        View
+                                      </Button>
+                                    )}
 
-            <Flex direction={"row"} p={"2"} gap={"2"}>
-              {selectedEntities.map((entity) => {
-                if (!_.isEqual(entity, "")) {
-                  return (
-                    <Tag key={`tag-${entity}`}>
-                      <Linky id={entity} type={"entities"} />
-                      <TagCloseButton
-                        onClick={() => {
-                          setSelectedEntities(
-                            selectedEntities.filter((selected) => {
-                              return !_.isEqual(entity, selected);
-                            })
-                          );
-                        }}
-                      />
-                    </Tag>
-                  );
-                } else {
-                  return null;
-                }
-              })}
+                                    {editing && (
+                                      <Button
+                                        key={`remove-${entity}`}
+                                        rightIcon={<CloseIcon />}
+                                        colorScheme={"red"}
+                                        onClick={() => {
+                                          if (id) {
+                                            removeEntity(entity);
+                                          }
+                                        }}
+                                      >
+                                        Remove
+                                      </Button>
+                                    )}
+                                  </Flex>
+                                </Td>
+                              </Tr>
+                            );
+                          })}
+                        </Tbody>
+                      </Table>
+                    </TableContainer>
+                  ) : (
+                    <Text>This Collection is empty.</Text>
+                  )}
+                </Flex>
+              </Flex>
             </Flex>
-          </Flex>
 
-          {/* "Done" button */}
-          <Flex direction={"row"} p={"md"} justify={"center"}>
-            <Button
-              colorScheme={"green"}
-              onClick={() => {
-                if (id) {
-                  // Add the Entities to the Collection
-                  addEntities(selectedEntities);
-                }
-              }}
-            >
-              Done
-            </Button>
+            <Modal isOpen={isOpen} onClose={onClose}>
+              <ModalOverlay />
+              <ModalContent p={"4"}>
+                {/* Heading and close button */}
+                <ModalHeader>Add Entities</ModalHeader>
+                <ModalCloseButton />
+
+                {/* Select component for Entities */}
+                <Flex direction={"column"} p={"2"} gap={"2"}>
+                  <FormControl>
+                    <FormLabel>Add Entities</FormLabel>
+                    <Select
+                      title="Select Entity"
+                      placeholder={"Select Entity"}
+                      onChange={(event) => {
+                        const selectedEntity = event.target.value.toString();
+                        if (selectedEntities.includes(selectedEntity)) {
+                          toast({
+                            title: "Warning",
+                            description: "Entity has already been selected.",
+                            status: "warning",
+                            duration: 2000,
+                            position: "bottom-right",
+                            isClosable: true,
+                          });
+                        } else {
+                          setSelectedEntities(selectedEntities => [...selectedEntities, selectedEntity]);
+                        }
+                      }}
+                    >
+                      {isLoaded &&
+                        allEntities.map((entity) => {
+                          return (
+                            <option key={entity.id} value={entity.id}>
+                              {entity.name}
+                            </option>
+                          );
+                        })}
+                      ;
+                    </Select>
+                  </FormControl>
+
+                  <Flex direction={"row"} p={"2"} gap={"2"}>
+                    {selectedEntities.map((entity) => {
+                      if (!_.isEqual(entity, "")) {
+                        return (
+                          <Tag key={`tag-${entity}`}>
+                            <Linky id={entity} type={"entities"} />
+                            <TagCloseButton
+                              onClick={() => {
+                                setSelectedEntities(
+                                  selectedEntities.filter((selected) => {
+                                    return !_.isEqual(entity, selected);
+                                  })
+                                );
+                              }}
+                            />
+                          </Tag>
+                        );
+                      } else {
+                        return null;
+                      }
+                    })}
+                  </Flex>
+                </Flex>
+
+                {/* "Done" button */}
+                <Flex direction={"row"} p={"md"} justify={"center"}>
+                  <Button
+                    colorScheme={"green"}
+                    onClick={() => {
+                      if (id) {
+                        // Add the Entities to the Collection
+                        addEntities(selectedEntities);
+                      }
+                    }}
+                  >
+                    Done
+                  </Button>
+                </Flex>
+              </ModalContent>
+            </Modal>
           </Flex>
-        </ModalContent>
-      </Modal>
+        )
+      ) : (
+        <Loading />
+      )}
     </ContentContainer>
-  ) : (
-    <Loading />
   );
 };
 

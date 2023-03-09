@@ -220,7 +220,6 @@ export const Entity = () => {
       // Update data
       postData(`/entities/update`, updateData)
         .then((_response) => {
-          setEditing(false);
           toast({
             title: "Saved!",
             status: "success",
@@ -238,6 +237,8 @@ export const Entity = () => {
             position: "bottom-right",
             isClosable: true,
           });
+        }).finally(() => {
+          setEditing(false);
         });
     } else {
       setEditing(true);
