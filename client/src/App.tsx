@@ -5,12 +5,13 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 // Chakra UI provider component
 import { ChakraProvider } from "@chakra-ui/react";
 
-// Custom Navigation component shown as the header of each page
-import Navigation from "@components/Navigation";
-
 // Styling to be applied across the application
 import "./styles/styles.css";
 import "@fontsource/roboto";
+
+// Custom components
+import Navigation from "@components/Navigation";
+import { PageContainer } from "@components/PageContainer";
 
 // Pages
 // Page type - View
@@ -29,7 +30,6 @@ import { Start as AttributeStart } from "@pages/Create/Attribute";
 // Page type - Unique
 import Search from "@pages/Search";
 import Home from "@pages/Home";
-import { PageContainer } from "@components/PageContainer";
 
 /**
  *
@@ -43,6 +43,7 @@ export const App = (): ReactElement => {
           <Navigation />
           <Routes>
             <Route path="/" element={<Home />} />
+
             {/* Entity routes */}
             <Route path="/create/entity/start" element={<EntityStart />} />
             <Route path="/entities" element={<Entities />} />

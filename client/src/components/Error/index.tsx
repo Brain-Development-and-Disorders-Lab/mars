@@ -27,7 +27,7 @@ const Error = () => {
       pb={"4"}
       gap={"8"}
     >
-      <Icon as={BsExclamationCircle} w={"24"} h={"24"} />
+      <Icon as={BsExclamationCircle} w={"16"} h={"16"} />
       <Heading fontWeight={"semibold"}>Something's not right.</Heading>
 
       <Button

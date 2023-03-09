@@ -117,12 +117,9 @@ const Home = () => {
         isError ? (
           <Error />
         ) : (
-          <Flex m={"2"} align={"center"} justify={"center"}>
+          <Flex justify={"center"}>
             <Flex
-              p={"2"}
-              pt={"0"}
               direction={"row"}
-              w={"full"}
               maxW={"7xl"}
               wrap={"wrap"}
               gap={"6"}
