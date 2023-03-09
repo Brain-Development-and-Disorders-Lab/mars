@@ -42,29 +42,32 @@ export const pseudoId = (
  * @param {string} path exact API path to get data from
  * @return {Promise<any>} an object containing information from the database
  */
-export const getData = async (path: string): Promise<any> => {
-  return await fetch(`${DATABASE_URL}${path}`)
-    .then(async (response) => {
-      // Check response status
-      if (!response.ok) {
-        consola.error("GET:", path);
-        throw new Error("Invalid response from database");
-      }
+export const getData = (path: string): Promise<any> => {
+  return new Promise((resolve, reject) => {
+    fetch(`${DATABASE_URL}${path}`)
+      .then((response) => {
+        // Check response status
+        if (!response.ok) {
+          consola.error("GET:", path);
+          reject("Invalid response from database");
+        }
 
-      // Check the contents of the response
-      const record = await response.json();
-      if (!record) {
+        // Check the contents of the response
+        response.json().then((parsed) => {
+          if (!parsed) {
+            consola.error("GET:", path);
+            reject("Response contents were empty");
+          } else {
+            consola.success("GET:", path);
+            resolve(parsed);
+          }
+        });
+      })
+      .catch((error) => {
         consola.error("GET:", path);
-        throw new Error("Response contents were empty");
-      } else {
-        consola.success("GET:", path);
-        return record;
-      }
-    })
-    .catch((error) => {
-      consola.error("GET:", path);
-      return { status: "error", error: error };
-    });
+        reject(error);
+      });
+  });
 };
 
 /**
