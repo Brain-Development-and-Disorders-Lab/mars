@@ -38,6 +38,7 @@ import {
   FormLabel,
   Select,
   TagCloseButton,
+  SimpleGrid,
 } from "@chakra-ui/react";
 import {
   AddIcon,
@@ -782,7 +783,7 @@ export const Entity = () => {
               >
                 <Heading size={"lg"}>Attributes</Heading>
 
-                <Flex  gap={"2"} direction={"row"}>
+                <SimpleGrid spacing={"4"} templateColumns={"repeat(auto-fill, minmax(300px, 1fr))"}>
                   {entityAttributes.length > 0 ? (
                     entityAttributes.map((attribute) => {
                       return (
@@ -795,7 +796,7 @@ export const Entity = () => {
                   ) : (
                     <Text>{entityData.name} does not have any Attributes.</Text>
                   )}
-                </Flex>
+                </SimpleGrid>
               </Flex>
             </Flex>
 

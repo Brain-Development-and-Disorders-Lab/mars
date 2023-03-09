@@ -171,7 +171,6 @@ const ParameterGroup = (props: {
         p={["1", "2"]}
         direction={"column"}
         gap={"2"}
-        bg={"white"}
         rounded={"lg"}
       >
         {props.parameters.length > 0 ? (
