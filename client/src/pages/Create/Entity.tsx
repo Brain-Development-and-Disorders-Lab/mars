@@ -542,7 +542,7 @@ export const Start = ({}) => {
                         value={selectedCollections}
                         onChange={(event: string[]) => {
                           if (event) {
-                            setSelectedCollections(event => [...event]);
+                            setSelectedCollections([...event]);
                           }
                         }}
                       >
