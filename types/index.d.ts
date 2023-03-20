@@ -141,6 +141,20 @@ export type EntityModel = Entity & {
   _id: string;
 };
 
+export type EntityExport = {
+  // Specific details
+  name: string;
+  created: string;
+  owner: string;
+  description: string;
+  collections: string;
+  origins: string;
+  products: string;
+
+  // Generic details
+  [k: string]: string;
+}
+
 // Update types
 export type Update = {
   timestamp: Date;
@@ -155,11 +169,4 @@ export type Update = {
 
 export type UpdateModel = Update & {
   _id: string;
-};
-
-// Authentication types
-export type Authentication = {
-  authenticated: boolean;
-  login: () => Promise<void>;
-  logout: () => Promise<void>;
 };
