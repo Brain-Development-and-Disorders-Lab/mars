@@ -76,24 +76,31 @@ export const getData = (path: string): Promise<any> => {
  * @param {any} data the data to be posted to Lab
  */
 export const postData = async (path: string, data: any): Promise<any> => {
-  return await fetch(`${DATABASE_URL}${path}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
-  })
-    .then((response) => {
-      if (_.isEqual(response.ok, true)) {
-        consola.success("POST:", path, data);
-        return { status: "success" };
-      }
-      throw new Error("Failed to POST data");
+  return new Promise((resolve, reject) => {
+    fetch(`${DATABASE_URL}${path}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
     })
-    .catch((error) => {
-      consola.error("POST:", path, data);
-      return { status: "error", error: error };
-    });
+      .then((response) => {
+        // Check response status
+        if (!response.ok) {
+          consola.error("GET:", path);
+          reject("Invalid response from database");
+        }
+
+        response.json().then((parsed) => {
+          consola.success("POST:", { status: "success", response: parsed});
+          resolve(parsed);
+        });
+      })
+      .catch((error) => {
+        consola.error("POST:", path, data);
+        reject(error);
+      });
+  });
 };
 
 /**

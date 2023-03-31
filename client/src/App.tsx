@@ -30,47 +30,60 @@ import { Start as AttributeStart } from "@pages/Create/Attribute";
 // Page type - Unique
 import Search from "@pages/Search";
 import Home from "@pages/Home";
+import Login from "@pages/Login";
+
+// Authentication
+import { useToken } from "./authentication/useToken";
 
 /**
  *
  * @return {ReactElement}
  */
 export const App = (): ReactElement => {
+  // Authentication token
+  const [ token, setToken ] = useToken();
+
   return (
     <BrowserRouter>
       <ChakraProvider>
         <PageContainer>
-          <Navigation />
-          <Routes>
-            <Route path="/" element={<Home />} />
+          {!token ? (
+            <Login setToken={setToken} />
+          ) : (
+            <>
+              <Navigation />
+              <Routes>
+                <Route path="/" element={<Home />} />
 
-            {/* Entity routes */}
-            <Route path="/create/entity/start" element={<EntityStart />} />
-            <Route path="/entities" element={<Entities />} />
-            <Route path="entities">
-              <Route path=":id" element={<Entity />} />
-            </Route>
+                {/* Entity routes */}
+                <Route path="/create/entity/start" element={<EntityStart />} />
+                <Route path="/entities" element={<Entities />} />
+                <Route path="entities">
+                  <Route path=":id" element={<Entity />} />
+                </Route>
 
-            {/* Collections routes */}
-            <Route
-              path="/create/collection/start"
-              element={<CollectionStart />}
-            />
-            <Route path="/collections" element={<Collections />} />
-            <Route path="collections">
-              <Route path=":id" element={<Collection />} />
-            </Route>
+                {/* Collections routes */}
+                <Route
+                  path="/create/collection/start"
+                  element={<CollectionStart />}
+                />
+                <Route path="/collections" element={<Collections />} />
+                <Route path="collections">
+                  <Route path=":id" element={<Collection />} />
+                </Route>
 
-            {/* Attributes routes */}
-            <Route path="/create/attribute/start" element={<AttributeStart />} />
-            <Route path="/attributes" element={<Attributes />} />
-            <Route path="attributes">
-              <Route path=":id" element={<Attribute />} />
-            </Route>
+                {/* Attributes routes */}
+                <Route path="/create/attribute/start" element={<AttributeStart />} />
+                <Route path="/attributes" element={<Attributes />} />
+                <Route path="attributes">
+                  <Route path=":id" element={<Attribute />} />
+                </Route>
 
-            {/* Other routes */}
-            <Route path="/search" element={<Search />} />
-          </Routes>
+                {/* Other routes */}
+                <Route path="/search" element={<Search />} />
+              </Routes>
+            </>
+          )}
         </PageContainer>
       </ChakraProvider>
     </BrowserRouter>
