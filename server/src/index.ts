@@ -18,6 +18,7 @@ import CollectionsRoute from "./routes/Collections";
 import AttributesRoute from "./routes/Attributes";
 import SearchRoute from "./routes/Search";
 import UpdatesRoute from "./routes/Updates";
+import AuthenticationRoute from "./routes/Authentication";
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -26,6 +27,7 @@ const port = process.env.PORT || 8000;
 app.use(cors());
 app.use(express.json());
 app.use(
+  AuthenticationRoute,
   EntitiesRoute,
   CollectionsRoute,
   AttributesRoute,
