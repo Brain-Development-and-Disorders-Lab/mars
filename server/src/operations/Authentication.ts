@@ -12,18 +12,19 @@ export class Authentication {
   static login = (password: string): Promise<string> => {
     consola.info("Performing login...");
     return new Promise((resolve, _reject) => {
-      // const defaultPassword = process.env.DEFAULT_PASSWORD || "";
+      const encoder = new TextEncoder();
+      const defaultPassword = encoder.encode(process.env.DEFAULT_PASSWORD || "");
 
-      crypto.pbkdf2(password, "", 310000, 32, "sha256", ((error, _hashed) => {
+      crypto.pbkdf2(password, "", 310000, 32, "sha256", ((error, hashed) => {
         if (error) {
           reject("Error performing login");
         }
 
-        // if (!crypto.timingSafeEqual(defaultPassword, hashed)) {
-        //   reject("Incorrect password");
-        // } else {
-        //   resolve("Correct")
-        // }
+        if (!crypto.timingSafeEqual(defaultPassword, hashed)) {
+          reject("Incorrect password");
+        } else {
+          resolve("Correct password")
+        }
       }));
       resolve("test1234");
     });
