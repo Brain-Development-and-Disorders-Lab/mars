@@ -155,9 +155,6 @@ const Navigation = () => {
             >
               <Avatar size={"sm"} />
             </MenuButton>
-            <MenuList>
-              <MenuItem>Logout</MenuItem>
-            </MenuList>
           </Menu>
         </Flex>
       </Flex>

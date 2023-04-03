@@ -85,15 +85,17 @@ export const postData = async (path: string, data: any): Promise<any> => {
       body: JSON.stringify(data),
     })
       .then((response) => {
-        // Check response status
-        if (!response.ok) {
-          consola.error("GET:", path);
-          reject("Invalid response from database");
-        }
-
         response.json().then((parsed) => {
-          consola.success("POST:", { status: "success", response: parsed});
-          resolve(parsed);
+          // Check response status
+          if (!response.ok) {
+            consola.error("POST:", path);
+            reject("Invalid response");
+          } else if (_.isEqual(parsed?.status, "error")) {
+            reject("Invalid response");
+          } else {
+            consola.success("POST:", { status: "success", response: parsed});
+            resolve(parsed);
+          }
         });
       })
       .catch((error) => {

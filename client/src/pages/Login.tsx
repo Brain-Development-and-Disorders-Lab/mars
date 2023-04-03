@@ -8,6 +8,7 @@ import {
   Input,
   InputGroup,
   InputRightElement,
+  useToast,
 } from "@chakra-ui/react";
 
 // Utility libraries
@@ -22,20 +23,36 @@ import { postData } from "@database/functions";
 const Login = (props: { setToken: (token: string) => void }) => {
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
-  console.log(username);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [show, setShow] = useState(false);
   const handleClick = () => setShow(!show);
 
-  const performLogin = (credentials: {password: string}) => {
+  // Toast to show errors
+  const toast = useToast();
+
+  const performLogin = (credentials: {username: string, password: string}) => {
     postData(`/login`, credentials)
       .then((response) => {
         props.setToken(response.token);
+        setIsLoading(false);
+      })
+      .catch((_error) => {
+        toast({
+          title: "Error",
+          status: "error",
+          description: "Incorrect username or password. Please try again.",
+          duration: 4000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+        setIsLoading(false);
       });
   };
 
   const onLoginClick = () => {
-    performLogin({password: password});
+    setIsLoading(true);
+    performLogin({username: username, password: password});
   }
 
   return (
@@ -67,6 +84,7 @@ const Login = (props: { setToken: (token: string) => void }) => {
             type={"text"}
             placeholder={"Username"}
             onChange={(event) => setUsername(event.target.value)}
+            disabled
           />
 
           <InputGroup>
@@ -75,6 +93,11 @@ const Login = (props: { setToken: (token: string) => void }) => {
               type={show ? "text" : "password"}
               placeholder={"Password"}
               onChange={(event) => setPassword(event.target.value)}
+              onKeyUp={(event) => {
+                if (event.key === "Enter" && password.length > 0) {
+                  onLoginClick();
+                }
+              }}
             />
             <InputRightElement width="4.5rem">
               <Button h="1.75rem" size="sm" onClick={handleClick}>
@@ -85,7 +108,10 @@ const Login = (props: { setToken: (token: string) => void }) => {
 
           <Button
             onClick={onLoginClick}
+            loadingText={""}
+            isLoading={isLoading}
             colorScheme={"green"}
+            disabled={!(password.length > 0) || isLoading}
           >
             Login
           </Button>
