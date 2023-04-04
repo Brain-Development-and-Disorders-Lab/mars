@@ -33,7 +33,7 @@ import {
 import { useNavigate } from "react-router-dom";
 
 // Database and models
-import { getData } from "@database/functions";
+import { postData } from "@database/functions";
 import { EntityModel } from "@types";
 
 // Custom components
@@ -62,7 +62,7 @@ const Search = () => {
     setIsSearching(true);
     setHasSearched(true);
 
-    getData(`/search/${query}`)
+    postData(`/search`, { query: query })
       .then((value) => {
         setResults(value);
       }).catch((_error) => {
