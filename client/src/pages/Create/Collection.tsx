@@ -34,6 +34,8 @@ export const Start = ({}) => {
   const [owner, setOwner] = useState("");
   const [description, setDescription] = useState("");
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   // Form validation
   const isNameError = name === "";
   const isOwnerError = owner === "";
@@ -207,11 +209,13 @@ export const Start = ({}) => {
           rightIcon={<CheckIcon />}
           onClick={() => {
             // Push the data
-            postData(`/collections/create`, collectionData).then(() =>
-              navigate("/collections")
-            );
+            setIsSubmitting(true);
+            postData(`/collections/create`, collectionData).then(() => {
+              setIsSubmitting(false);
+              navigate("/collections");
+            });
           }}
-          isDisabled={isDetailsError}
+          isDisabled={isDetailsError && !isSubmitting}
         >
           Finish
         </Button>

@@ -43,6 +43,8 @@ export const Start = ({}) => {
   const [description, setDescription] = useState("");
   const [parameters, setParameters] = useState([] as Parameters[]);
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   // Various validation error states
   const isNameError = name === "";
   const isDescriptionError = description === "";
@@ -61,10 +63,12 @@ export const Start = ({}) => {
   }, [parameters]);
 
   const onSubmit = () => {
+    setIsSubmitting(true);
     // Push the data
-    postData(`/attributes/create`, attributeData).then(() =>
-      navigate("/attributes")
-    );
+    postData(`/attributes/create`, attributeData).then(() => {
+      setIsSubmitting(false);
+      navigate("/attributes");
+    });
   };
 
   return (
@@ -177,7 +181,7 @@ export const Start = ({}) => {
           colorScheme={"green"}
           rightIcon={<CheckIcon />}
           onClick={onSubmit}
-          isDisabled={isDetailsError}
+          isDisabled={isDetailsError && !isSubmitting}
         >
           Finish
         </Button>
