@@ -3,11 +3,11 @@ name: Deploy MARS Client
 on:
   push:
     branches:
-      - dev
+      - main
   pull_request:
     types: [opened, synchronize, reopened, closed]
     branches:
-      - dev
+      - main
 
 jobs:
   build_and_deploy_job:
