@@ -30,7 +30,7 @@ import ParameterGroup from "@components/ParameterGroup";
 import { useNavigate } from "react-router-dom";
 
 import { Attribute, Parameters } from "@types";
-import { postData, pseudoId } from "@database/functions";
+import { postData } from "@database/functions";
 import { validateParameters } from "src/functions";
 
 import _ from "underscore";
@@ -39,7 +39,7 @@ export const Start = ({}) => {
   const navigate = useNavigate();
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  const [name, setName] = useState(pseudoId("attribute"));
+  const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [parameters, setParameters] = useState([] as Parameters[]);
 

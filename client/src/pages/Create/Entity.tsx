@@ -56,7 +56,7 @@ import {
 } from "@types";
 
 // Utility functions
-import { getData, postData, pseudoId } from "@database/functions";
+import { getData, postData } from "@database/functions";
 import { validateAttributes } from "src/functions";
 
 export const Start = ({}) => {
@@ -76,7 +76,7 @@ export const Start = ({}) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isError, setIsError] = useState(false);
 
-  const [name, setName] = useState(pseudoId("entity"));
+  const [name, setName] = useState("");
   const [created, setCreated] = useState(new Date());
   const [owner, setOwner] = useState("");
   const [description, setDescription] = useState("");
@@ -599,7 +599,7 @@ export const Start = ({}) => {
                                   setSelectedAttributes([
                                     ...selectedAttributes,
                                     {
-                                      _id: pseudoId("attribute"),
+                                      _id: "",
                                       name: attribute.name,
                                       description: attribute.description,
                                       parameters: attribute.parameters,
@@ -631,7 +631,7 @@ export const Start = ({}) => {
                           setSelectedAttributes([
                             ...selectedAttributes,
                             {
-                              _id: pseudoId("attribute"),
+                              _id: "",
                               name: "",
                               description: "",
                               parameters: [],

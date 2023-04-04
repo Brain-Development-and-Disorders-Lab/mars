@@ -1,8 +1,5 @@
-// MongoDB
-import { ObjectId } from "mongodb";
-
 // Utility functions
-import { getDatabase } from "../database/connection";
+import { getDatabase, getIdentifier } from "../database/connection";
 import { Entities } from "./Entities";
 import { Updates } from "./Updates";
 
@@ -23,6 +20,11 @@ export class Collections {
    */
   static create = (collection: any): Promise<CollectionModel> => {
     consola.info("Creating new Collection:", collection.name);
+
+    // Allocate a new identifier and join with Collection data
+    collection["_id"] = getIdentifier("collection");
+
+    // Push data to database
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(COLLECTIONS)
@@ -55,8 +57,7 @@ export class Collections {
 
           // Resolve all operations then resolve overall Promise
           Promise.all(operations).then((_result) => {
-            collection["_id"] = result.insertedId;
-            consola.success("Created new Collection:", collection.name);
+            consola.success("Created new Collection:", collection._id, collection.name);
             resolve(collection as CollectionModel);
           });
         });
@@ -71,7 +72,7 @@ export class Collections {
       getDatabase()
         .collection(COLLECTIONS)
         .findOne(
-          { _id: new ObjectId(updatedCollection._id) },
+          { _id: updatedCollection._id },
           (error: any, result: any) => {
             if (error) {
               throw error;
@@ -127,7 +128,7 @@ export class Collections {
             getDatabase()
               .collection(COLLECTIONS)
               .updateOne(
-                { _id: new ObjectId(updatedCollection._id) },
+                { _id: updatedCollection._id },
                 updates,
                 (error: any, _response: any) => {
                   if (error) {
@@ -162,7 +163,7 @@ export class Collections {
       getDatabase()
         .collection(COLLECTIONS)
         .findOne(
-          { _id: new ObjectId(collection) },
+          { _id: collection },
           (error: any, result: any) => {
             if (error) {
               throw error;
@@ -178,7 +179,7 @@ export class Collections {
             getDatabase()
               .collection(COLLECTIONS)
               .updateOne(
-                { _id: new ObjectId(collection) },
+                { _id: collection },
                 updatedValues,
                 (error: any, _response: any) => {
                   if (error) {
@@ -214,7 +215,7 @@ export class Collections {
       getDatabase()
         .collection(COLLECTIONS)
         .findOne(
-          { _id: new ObjectId(collection) },
+          { _id: collection },
           (error: any, result: any) => {
             if (error) {
               throw error;
@@ -232,7 +233,7 @@ export class Collections {
             getDatabase()
               .collection(COLLECTIONS)
               .updateOne(
-                { _id: new ObjectId(collection) },
+                { _id: collection },
                 updatedValues,
                 (error: any, _response: any) => {
                   if (error) {
@@ -277,7 +278,7 @@ export class Collections {
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(COLLECTIONS)
-        .findOne({ _id: new ObjectId(id) }, (error: any, result: any) => {
+        .findOne({ _id: id }, (error: any, result: any) => {
           if (error) {
             throw error;
           }
@@ -293,7 +294,7 @@ export class Collections {
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(COLLECTIONS)
-        .findOne({ _id: new ObjectId(id) }, (error: any, result: any) => {
+        .findOne({ _id: id }, (error: any, result: any) => {
           if (error) {
             throw error;
           }
@@ -327,7 +328,7 @@ export class Collections {
             getDatabase()
               .collection(COLLECTIONS)
               .deleteOne(
-                { _id: new ObjectId(id) },
+                { _id: id },
                 (error: any, _content: any) => {
                   if (error) {
                     throw error;

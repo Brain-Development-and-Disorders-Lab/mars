@@ -1,12 +1,9 @@
-// MongoDB
-import { ObjectId } from "mongodb";
-
 // Utility libraries
 import _ from "underscore";
 import consola from "consola";
 
 // Utility functions
-import { getDatabase } from "../database/connection";
+import { getDatabase, getIdentifier } from "../database/connection";
 import { Updates } from "./Updates";
 
 // Custom types
@@ -24,19 +21,21 @@ export class Entities {
    */
   static create = (entity: any): Promise<EntityModel> => {
     consola.info("Creating new Entity:", entity.name);
+
+    // Allocate a new identifier and join with Entity data
+    entity["_id"] = getIdentifier("entity");
+
+    // Push data to database
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES_COLLECTION)
-        .insertOne(entity, (error: any, content: any) => {
+        .insertOne(entity, (error: any, _result: any) => {
           if (error) {
             throw error;
           }
 
           // Database operations to perform outside of creating a new Entity
           const operations: Promise<any>[] = [];
-
-          // Add the ID to the Entity
-          entity["_id"] = content.insertedId;
 
           if (entity.associations.origins.length > 0) {
             // If this Entity has an origin, add this Entity as a product of that origin Entity
@@ -89,7 +88,7 @@ export class Entities {
 
           // Resolve all operations then resolve overall Promise
           Promise.all(operations).then((_result) => {
-            consola.success("Created Entity:", entity.name);
+            consola.success("Created Entity:", entity._id, entity.name);
             resolve(entity);
           });
         });
@@ -107,7 +106,7 @@ export class Entities {
       getDatabase()
         .collection(ENTITIES_COLLECTION)
         .findOne(
-          { _id: new ObjectId(updatedEntity._id) },
+          { _id: updatedEntity._id },
           (error: any, result: any) => {
             if (error) {
               throw error;
@@ -273,7 +272,7 @@ export class Entities {
               getDatabase()
                 .collection(ENTITIES_COLLECTION)
                 .updateOne(
-                  { _id: new ObjectId(updatedEntity._id) },
+                  { _id: updatedEntity._id },
                   updates,
                   (error: any, _response: any) => {
                     if (error) {
@@ -306,7 +305,7 @@ export class Entities {
       getDatabase()
         .collection(ENTITIES_COLLECTION)
         .findOne(
-          { _id: new ObjectId(entity.id) },
+          { _id: entity.id },
           (error: any, result: any) => {
             if (error) {
               throw error;
@@ -325,7 +324,7 @@ export class Entities {
             getDatabase()
               .collection(ENTITIES_COLLECTION)
               .updateOne(
-                { _id: new ObjectId(entity.id) },
+                { _id: entity.id },
                 updates,
                 (error: any, _response: any) => {
                   if (error) {
@@ -356,7 +355,7 @@ export class Entities {
       getDatabase()
         .collection(ENTITIES_COLLECTION)
         .findOne(
-          { _id: new ObjectId(entity.id) },
+          { _id: entity.id },
           (error: any, result: any) => {
             if (error) {
               throw error;
@@ -371,10 +370,7 @@ export class Entities {
                     result as EntityModel
                   ).associations.products.filter(
                     (content) =>
-                      !_.isEqual(
-                        new ObjectId(product.id),
-                        new ObjectId(content.id)
-                      )
+                      !_.isEqual(product.id, content.id)
                   ),
                 },
               },
@@ -383,7 +379,7 @@ export class Entities {
             getDatabase()
               .collection(ENTITIES_COLLECTION)
               .updateOne(
-                { _id: new ObjectId(entity.id) },
+                { _id: entity.id },
                 updates,
                 (error: any, _response: any) => {
                   if (error) {
@@ -418,7 +414,7 @@ export class Entities {
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES_COLLECTION)
-        .findOne({ _id: new ObjectId(entity) }, (error: any, result: any) => {
+        .findOne({ _id: entity }, (error: any, result: any) => {
           if (error) {
             throw error;
           }
@@ -433,7 +429,7 @@ export class Entities {
           getDatabase()
             .collection(ENTITIES_COLLECTION)
             .updateOne(
-              { _id: new ObjectId(entity) },
+              { _id: entity },
               updates,
               (error: any, _response: any) => {
                 if (error) {
@@ -467,7 +463,7 @@ export class Entities {
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES_COLLECTION)
-        .findOne({ _id: new ObjectId(entity) }, (error: any, result: any) => {
+        .findOne({ _id: entity }, (error: any, result: any) => {
           if (error) {
             throw error;
           }
@@ -478,7 +474,7 @@ export class Entities {
               collections: [
                 ...(result as EntityModel).collections.filter(
                   (content) =>
-                    !_.isEqual(new ObjectId(content), new ObjectId(collection))
+                    !_.isEqual(content, collection)
                 ),
               ],
             },
@@ -487,7 +483,7 @@ export class Entities {
           getDatabase()
             .collection(ENTITIES_COLLECTION)
             .updateOne(
-              { _id: new ObjectId(entity) },
+              { _id: entity },
               updates,
               (error: any, _response: any) => {
                 if (error) {
@@ -523,7 +519,7 @@ export class Entities {
       getDatabase()
         .collection(ENTITIES_COLLECTION)
         .findOne(
-          { _id: new ObjectId(entity.id) },
+          { _id: entity.id },
           (error: any, result: any) => {
             if (error) {
               throw error;
@@ -548,7 +544,7 @@ export class Entities {
             getDatabase()
               .collection(ENTITIES_COLLECTION)
               .updateOne(
-                { _id: new ObjectId(entity.id) },
+                { _id: entity.id },
                 updates,
                 (error: any, _response: any) => {
                   if (error) {
@@ -579,7 +575,7 @@ export class Entities {
       getDatabase()
         .collection(ENTITIES_COLLECTION)
         .findOne(
-          { _id: new ObjectId(entity.id) },
+          { _id: entity.id },
           (error: any, result: any) => {
             if (error) {
               throw error;
@@ -591,10 +587,7 @@ export class Entities {
                 associations: {
                   origins: (result as EntityModel).associations.origins.filter(
                     (content) =>
-                      !_.isEqual(
-                        new ObjectId(origin.id),
-                        new ObjectId(content.id)
-                      )
+                      !_.isEqual(origin.id, content.id)
                   ),
                   products: (result as EntityModel).associations.products,
                 },
@@ -604,7 +597,7 @@ export class Entities {
             getDatabase()
               .collection(ENTITIES_COLLECTION)
               .updateOne(
-                { _id: new ObjectId(entity.id) },
+                { _id: entity.id },
                 updates,
                 (error: any, _response: any) => {
                   if (error) {
@@ -646,7 +639,7 @@ export class Entities {
       getDatabase()
         .collection(ENTITIES_COLLECTION)
         .findOne(
-          { _id: new ObjectId(entity.id) },
+          { _id: entity.id },
           (error: any, _result: any) => {
             if (error) {
               throw error;
@@ -662,7 +655,7 @@ export class Entities {
             getDatabase()
               .collection(ENTITIES_COLLECTION)
               .updateOne(
-                { _id: new ObjectId(entity.id) },
+                { _id: entity.id },
                 updates,
                 (error: any, _response: any) => {
                   if (error) {
@@ -713,7 +706,7 @@ export class Entities {
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES_COLLECTION)
-        .findOne({ _id: new ObjectId(id) }, (error: any, result: any) => {
+        .findOne({ _id: id }, (error: any, result: any) => {
           if (error) {
             throw error;
           }
@@ -729,7 +722,7 @@ export class Entities {
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES_COLLECTION)
-        .findOne({ _id: new ObjectId(id) }, (error: any, result: any) => {
+        .findOne({ _id: id }, (error: any, result: any) => {
           if (error) {
             throw error;
           }
@@ -783,7 +776,7 @@ export class Entities {
             getDatabase()
               .collection(ENTITIES_COLLECTION)
               .deleteOne(
-                { _id: new ObjectId(id) },
+                { _id: id },
                 (error: any, _content: any) => {
                   if (error) {
                     throw error;

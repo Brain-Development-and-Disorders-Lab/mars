@@ -1,8 +1,5 @@
-// MongoDB
-import { ObjectId } from "mongodb";
-
 // Utility functions
-import { getDatabase } from "../database/connection";
+import { getDatabase, getIdentifier } from "../database/connection";
 import { Updates } from "./Updates";
 
 // Utility libraries
@@ -24,9 +21,13 @@ export class Attributes {
   static create = (attribute: any): Promise<AttributeModel> => {
     consola.info("Creating new Attribute:", attribute.name);
     return new Promise((resolve, _reject) => {
+      // Allocate a new identifier and join with Attribute data
+      attribute["_id"] = getIdentifier("attribute");
+
+      // Push data to database
       getDatabase()
         .collection(ATTRIBUTES)
-        .insertOne(attribute, (error: any, result: any) => {
+        .insertOne(attribute, (error: any, _result: any) => {
           if (error) {
             throw error;
           }
@@ -50,8 +51,7 @@ export class Attributes {
 
           // Resolve all operations then resolve overall Promise
           Promise.all(operations).then((_result) => {
-            attribute["_id"] = result.insertedId;
-            consola.success("Created new Attribute:", attribute.name);
+            consola.success("Created new Attribute:", attribute._id, attribute.name);
             resolve(attribute as AttributeModel);
           });
         });
@@ -66,7 +66,7 @@ export class Attributes {
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ATTRIBUTES)
-        .findOne({ _id: new ObjectId(id) }, (error: any, result: any) => {
+        .findOne({ _id: id }, (error: any, result: any) => {
           if (error) {
             throw error;
           }
@@ -97,7 +97,7 @@ export class Attributes {
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ATTRIBUTES)
-        .findOne({ _id: new ObjectId(id) }, (error: any, result: any) => {
+        .findOne({ _id: id }, (error: any, result: any) => {
           if (error) {
             throw error;
           }
@@ -126,7 +126,7 @@ export class Attributes {
             getDatabase()
               .collection(ATTRIBUTES)
               .deleteOne(
-                { _id: new ObjectId(id) },
+                { _id: id },
                 (error: any, _content: any) => {
                   if (error) {
                     throw error;
