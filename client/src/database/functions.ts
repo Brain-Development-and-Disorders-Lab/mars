@@ -60,7 +60,7 @@ export const postData = async (path: string, data: any): Promise<any> => {
           } else if (_.isEqual(parsed?.status, "error")) {
             reject("Invalid response");
           } else {
-            consola.success("POST:", { status: "success", response: parsed});
+            consola.success("POST:", path);
             resolve(parsed);
           }
         });
