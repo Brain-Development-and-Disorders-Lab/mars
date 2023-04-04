@@ -66,7 +66,7 @@ export const postData = async (path: string, data: any): Promise<any> => {
         });
       })
       .catch((error) => {
-        consola.error("POST:", path, data);
+        consola.error("POST:", path);
         reject(error);
       });
   });
