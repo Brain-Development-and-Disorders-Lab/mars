@@ -6,11 +6,11 @@ import _ from "underscore";
 const ENTITIES_COLLECTION = "entities";
 
 export class Search {
-  static get = (query: string): Promise<any[]> => {
-    consola.info("Search:", query);
+  static get = (data: { query: string }): Promise<any[]> => {
+    consola.info("Search:", data.query);
     return new Promise((resolve, reject) => {
       // Configure database query
-      const find = { $text: { $search: query } };
+      const find = { $text: { $search: data.query } };
       const sort = { score: { $meta: "textScore" } };
 
       getDatabase()
@@ -28,7 +28,7 @@ export class Search {
             content = [];
           }
 
-          consola.success("Searched:", query);
+          consola.success("Searched:", data.query);
           resolve(content);
         });
     });
