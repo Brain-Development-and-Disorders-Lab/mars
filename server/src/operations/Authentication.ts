@@ -2,6 +2,7 @@
 import _ from "underscore";
 import consola from "consola";
 import crypto from "node:crypto";
+import { nanoid } from "nanoid";
 
 export class Authentication {
   /**
@@ -41,7 +42,7 @@ export class Authentication {
           reject("");
         } else {
           consola.success("Successful login attempt");
-          resolve("testToken")
+          resolve(`auth_${nanoid(10)}_${Date.now().toFixed()}`);
         }
       });
     });
