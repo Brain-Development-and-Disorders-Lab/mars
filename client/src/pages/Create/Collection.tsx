@@ -22,14 +22,14 @@ import {
 import { CheckIcon, CloseIcon, InfoOutlineIcon } from "@chakra-ui/icons";
 import { ContentContainer } from "@components/ContentContainer";
 import { useNavigate } from "react-router-dom";
-import { postData, pseudoId } from "@database/functions";
+import { postData } from "@database/functions";
 import { Collection } from "@types";
 
 export const Start = ({}) => {
   const navigate = useNavigate();
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  const [name, setName] = useState(pseudoId("collection"));
+  const [name, setName] = useState("");
   const [created, setCreated] = useState(new Date());
   const [owner, setOwner] = useState("");
   const [description, setDescription] = useState("");

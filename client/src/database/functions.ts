@@ -5,39 +5,6 @@ import _ from "underscore";
 import { SERVER_URL } from "src/variables";
 
 /**
- * Generate a mixed-format ID: `id_ABCDE_123`
- * @return {string}
- */
-export const pseudoId = (
-  type?: "entity" | "collection" | "attribute"
-): string => {
-  let prefix = "id_";
-  if (type) {
-    switch (type) {
-      case "collection":
-        prefix = "col_";
-        break;
-      case "attribute":
-        prefix = "att_";
-        break;
-      default:
-        prefix = "id_";
-        break;
-    }
-  }
-
-  return (
-    prefix +
-    Math.random()
-      .toString(36)
-      .replace(/[^a-z]+/g, "")
-      .slice(0, 3) +
-    "_" +
-    Math.round(performance.now() * Math.random())
-  );
-};
-
-/**
  * Get data from the Lab API using the JavaScript `fetch` API
  * @param {string} path exact API path to get data from
  * @return {Promise<any>} an object containing information from the database
