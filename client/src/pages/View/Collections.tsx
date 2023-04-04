@@ -92,7 +92,7 @@ const Collections = () => {
               <Button
                 rightIcon={<AddIcon />}
                 as={Link}
-                href={"/create/collection/start"}
+                onClick={() => navigate("/create/collection/start")}
                 colorScheme={"green"}
               >
                 Create

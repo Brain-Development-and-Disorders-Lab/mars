@@ -92,7 +92,7 @@ const Entities = () => {
               <Button
                 rightIcon={<AddIcon />}
                 as={Link}
-                href={"/create/entity/start"}
+                onClick={() => navigate("/create/entity/start")}
                 colorScheme={"green"}
               >
                 Create
