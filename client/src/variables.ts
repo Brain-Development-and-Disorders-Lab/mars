@@ -1,1 +1,1 @@
-export const DATABASE_URL = "http://localhost:8000";
+export const SERVER_URL = "https://mars-server.azurewebsites.net";

@@ -2,7 +2,7 @@ import consola from "consola";
 import _ from "underscore";
 
 // Get the URL of the database
-import { DATABASE_URL } from "src/variables";
+import { SERVER_URL } from "src/variables";
 
 /**
  * Generate a mixed-format ID: `id_ABCDE_123`
@@ -44,7 +44,7 @@ export const pseudoId = (
  */
 export const getData = (path: string): Promise<any> => {
   return new Promise((resolve, reject) => {
-    fetch(`${DATABASE_URL}${path}`)
+    fetch(`${SERVER_URL}${path}`)
       .then((response) => {
         // Check response status
         if (!response.ok) {
@@ -77,7 +77,7 @@ export const getData = (path: string): Promise<any> => {
  */
 export const postData = async (path: string, data: any): Promise<any> => {
   return new Promise((resolve, reject) => {
-    fetch(`${DATABASE_URL}${path}`, {
+    fetch(`${SERVER_URL}${path}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -110,7 +110,7 @@ export const postData = async (path: string, data: any): Promise<any> => {
  * @param {string} path the path of the database objected to be deleted
  */
 export const deleteData = async (path: string): Promise<any> => {
-  return await fetch(`${DATABASE_URL}${path}`, {
+  return await fetch(`${SERVER_URL}${path}`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",

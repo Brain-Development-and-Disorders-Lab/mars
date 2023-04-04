@@ -1,4 +1,4 @@
-name: Build client and server
+name: Build MARS Client and Server
 
 on:
   push:
