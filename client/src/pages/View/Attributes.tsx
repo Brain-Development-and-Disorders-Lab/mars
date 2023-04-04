@@ -89,7 +89,7 @@ const Attributes = () => {
               <Button
                 rightIcon={<AddIcon />}
                 as={Link}
-                href={"/create/attribute/start"}
+                onClick={() => navigate("/create/attribute/start")}
                 colorScheme={"green"}
               >
                 Create
