@@ -2,6 +2,7 @@
 import { Db, MongoClient } from "mongodb";
 import consola from "consola";
 import _ from "underscore";
+import { nanoid } from "nanoid";
 
 // Get the connection string from the environment variables
 const CONNECTION_STRING = process.env.CONNECTION_STRING as string;
@@ -43,4 +44,15 @@ export const disconnect = (): Promise<void> => {
  */
 export const getDatabase = (): Db => {
   return database;
+};
+
+/**
+ * Generate safe pseudo-random identifiers for allocation when creating
+ * new items for storage in the MongoDB database, in place of default
+ * identifier
+ * @param type identifier to be assigned an Entity, Attribute, or Collection
+ * @return {string}
+ */
+export const getIdentifier = (type: "entity" | "attribute" | "collection"): string => {
+  return `${type.slice(0, 1)}${nanoid(7)}`;
 };
