@@ -76,6 +76,8 @@ export const Start = ({}) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isError, setIsError] = useState(false);
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const [name, setName] = useState("");
   const [created, setCreated] = useState(new Date());
   const [owner, setOwner] = useState("");
@@ -190,7 +192,9 @@ export const Start = ({}) => {
     } else if (_.isEqual("associations", pageState)) {
       setPageState("attributes");
     } else if (_.isEqual("attributes", pageState)) {
+      setIsSubmitting(true);
       postData(`/entities/create`, entityState).then(() => {
+        setIsSubmitting(false);
         navigate(`/entities`);
       }).catch((_error) => {
         toast({
@@ -709,7 +713,8 @@ export const Start = ({}) => {
                   )
                 }
                 onClick={onNext}
-                isDisabled={isValidInput()}
+                isDisabled={isValidInput() && !isSubmitting}
+                isLoading={isSubmitting}
               >
                 {_.isEqual("attributes", pageState) ? "Finish" : "Next"}
               </Button>
