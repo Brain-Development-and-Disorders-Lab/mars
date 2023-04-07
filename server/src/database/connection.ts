@@ -23,8 +23,7 @@ let database: Db;
 export const connect = (): Promise<Db> => {
   return new Promise((resolve, _reject) => {
     client.connect().then((result) => {
-      consola.success("Successfully connected to MongoDB.");
-
+      consola.success("Connected to MongoDB");
       database = result.db("metadata");
       resolve(database);
     });
