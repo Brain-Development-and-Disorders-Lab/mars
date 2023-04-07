@@ -1,7 +1,7 @@
 // Libraries
-import { Collection, Db, MongoClient } from "mongodb";
+import { Db, MongoClient } from "mongodb";
 import consola from "consola";
-import _, { reject } from "underscore";
+import _ from "underscore";
 import { nanoid } from "nanoid";
 
 // Get the connection string from the environment variables
@@ -20,48 +20,12 @@ let database: Db;
 /**
  * Connect to the database
  */
-export const connect = (configure?: boolean): Promise<Db> => {
+export const connect = (): Promise<Db> => {
   return new Promise((resolve, _reject) => {
     client.connect().then((result) => {
       consola.success("Connected to MongoDB");
-
       database = result.db("metadata");
-
-      if (configure) {
-        consola.info("Configuring database...");
-
-        const collectionNames = ["entities", "collections", "attributes", "updates"];
-        // Check and create collections as required
-        const createCollections = database.collections().then((collections: Collection[]) => {
-          if (!_.isEqual(collections.length, 4)) {
-            // Create the required Collections
-            for (let collectionName of collectionNames) {
-              database.createCollection(collectionName);
-              consola.success("Created Collection:", collectionName);
-            }
-          }
-        });
-
-        const createIndices = [];
-        for (let collectionName of collectionNames) {
-          createIndices.push( database.collection(collectionName).indexes((_error, result) => {
-            if (!_.isUndefined(result) && !_.isEqual(result.length, 2)) {
-              database.collection(collectionName).createIndex({ "$**": "text" });
-              consola.success("Created index for Collection:", collectionName);
-            }
-          }));
-        }
-
-        Promise.all([
-          createCollections,
-          ...createIndices,
-        ]).then(() => {
-          consola.success("Completed configuration");
-          resolve(database);
-        });
-      } else {
-        resolve(database);
-      }
+      resolve(database);
     });
   });
 };

@@ -38,7 +38,7 @@ app.use(
 // Start the Express server
 app.listen(port, () => {
   // Connect to the database when the server starts
-  connect(true).then(() => {
+  connect().then(() => {
     consola.info(`Server is running on port: ${port}`);
   });
 });

@@ -9,14 +9,17 @@ export class Search {
   static get = (data: { query: string }): Promise<any[]> => {
     consola.info("Search:", data.query);
     return new Promise((resolve, reject) => {
-      // Configure database query
-      const find = { $text: { $search: data.query } };
-      const sort = { score: { $meta: "textScore" } };
+      // Sanitize database query
+      data.query = data.query.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
 
       getDatabase()
         .collection(ENTITIES_COLLECTION)
-        .find(find)
-        .sort(sort)
+        .find({
+          $or: [
+            { name: { $regex: new RegExp(data.query, "gi") }, },
+            { description: { $regex: new RegExp(data.query, "gi") }, },
+          ],
+        })
         .toArray((error, content) => {
           // Check for errors
           if (error) {
