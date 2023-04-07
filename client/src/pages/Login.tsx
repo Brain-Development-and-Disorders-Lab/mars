@@ -62,9 +62,8 @@ const Login = (props: { setToken: (token: string) => void }) => {
         justify={"center"}
         align={"center"}
         alignSelf={"center"}
-        p={"8"}
         gap={"8"}
-        w={["lg", "2xl"]}
+        w={["xs", "sm", "2xl"]}
         h={["sm", "md"]}
         wrap={"wrap"}
       >
@@ -80,7 +79,6 @@ const Login = (props: { setToken: (token: string) => void }) => {
           gap={"4"}
         >
           <Input
-            pr="4.5rem"
             type={"text"}
             placeholder={"Username"}
             onChange={(event) => setUsername(event.target.value)}
@@ -89,7 +87,6 @@ const Login = (props: { setToken: (token: string) => void }) => {
 
           <InputGroup>
             <Input
-              pr="4.5rem"
               type={show ? "text" : "password"}
               placeholder={"Password"}
               onChange={(event) => setPassword(event.target.value)}
@@ -100,7 +97,7 @@ const Login = (props: { setToken: (token: string) => void }) => {
               }}
             />
             <InputRightElement width="4.5rem">
-              <Button h="1.75rem" size="sm" onClick={handleClick}>
+              <Button h={"1.75rem"} size={"sm"} onClick={handleClick}>
                 {show ? "Hide" : "Show"}
               </Button>
             </InputRightElement>
