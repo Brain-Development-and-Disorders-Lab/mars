@@ -8,7 +8,6 @@
   "scripts": {
     "start": "webpack serve",
     "build": "webpack",
-    "build:container": "docker build --file=client/client.dockerfile -t client .",
     "clean": "rm -rf dist",
     "lint": "prettier --write ."
   },
