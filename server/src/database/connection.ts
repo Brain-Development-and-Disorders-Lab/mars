@@ -45,7 +45,7 @@ export const connect = (configure?: boolean): Promise<Db> => {
         const createIndices = [];
         for (let collectionName of collectionNames) {
           createIndices.push( database.collection(collectionName).indexes((_error, result) => {
-            if (!_.isUndefined(result) && _.isEqual(result.length, 0)) {
+            if (!_.isUndefined(result) && !_.isEqual(result.length, 2)) {
               database.collection(collectionName).createIndex({ "$**": "text" });
               consola.success("Created index for Collection:", collectionName);
             }
