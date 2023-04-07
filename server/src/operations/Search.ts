@@ -11,13 +11,23 @@ export class Search {
     return new Promise((resolve, reject) => {
       // Sanitize database query
       data.query = data.query.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+      const expression = new RegExp(data.query, "gi");
 
       getDatabase()
         .collection(ENTITIES_COLLECTION)
         .find({
           $or: [
-            { name: { $regex: new RegExp(data.query, "gi") }, },
-            { description: { $regex: new RegExp(data.query, "gi") }, },
+            { "_id": { $regex: expression }, },
+            { "name": { $regex: expression }, },
+            { "owner": { $regex: expression }, },
+            { "description": { $regex: expression }, },
+            { "associations.origins.name": { $regex: expression }, },
+            { "attributes.description": { $regex: expression }, },
+            { "attributes.description": { $regex: expression }, },
+            { "attributes.parameters": { $regex: expression }, },
+            { "attributes.parameters.name": { $regex: expression }, },
+            { "attributes.parameters.identifier": { $regex: expression }, },
+            { "attributes.parameters.data": { $regex: expression }, },
           ],
         })
         .toArray((error, content) => {
