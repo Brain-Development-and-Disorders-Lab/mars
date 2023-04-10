@@ -5,10 +5,11 @@ import consola from "consola";
 // Utility functions
 import { getDatabase, getIdentifier } from "../database/connection";
 import { Updates } from "./Updates";
+import { Collections } from "./Collections";
+import Papa from "papaparse";
 
 // Custom types
 import { EntityModel } from "@types";
-import { Collections } from "./Collections";
 
 // Constants
 const ENTITIES_COLLECTION = "entities";
@@ -699,15 +700,17 @@ export class Entities {
 
   /**
    * Get a single Entity
+   * @param {string} id the Entity identifier
    * @return {Promise<EntityModel>}
    */
   static getOne = (id: string): Promise<EntityModel> => {
     consola.info("Retrieving Entity (id):", id.toString());
-    return new Promise((resolve, _reject) => {
+    return new Promise((resolve, reject) => {
       getDatabase()
         .collection(ENTITIES_COLLECTION)
         .findOne({ _id: id }, (error: any, result: any) => {
           if (error) {
+            reject(error);
             throw error;
           }
 
@@ -716,6 +719,31 @@ export class Entities {
         });
     });
   };
+
+  /**
+   * Collage and generate a CSV string containing all data pertaining to
+   * an Entity
+   * @param {string} id the Entity identifier
+   * @return {Promise<EntityModel>}
+   */
+  static getData = (id: string): Promise<string> => {
+    consola.info("Generating data for Entity (id):", id.toString());
+    return new Promise((resolve, reject) => {
+      getDatabase()
+        .collection(ENTITIES_COLLECTION)
+        .findOne({ _id: id }, (error: any, result: any) => {
+          if (error) {
+            reject(error);
+            throw error;
+          }
+
+          const formatted = Papa.unparse([result]);
+
+          consola.success("Generated data for  Entity (id):", id.toString());
+          resolve(formatted);
+        });
+    });
+  }
 
   static delete = (id: string): Promise<EntityModel> => {
     consola.info("Deleting Entity (id):", id.toString());

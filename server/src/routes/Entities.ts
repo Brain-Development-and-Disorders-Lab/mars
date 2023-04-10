@@ -24,6 +24,13 @@ EntitiesRoute.route("/entities/:id").get((request: any, response: any) => {
   });
 });
 
+// Get JSON-formatted data of the Entity
+EntitiesRoute.route("/entities/:id").post((request: any, response: any) => {
+  Entities.getData(request.params.id).then((output: string) => {
+    response.json(output);
+  });
+});
+
 // Create a new Entity, expects Entity data
 EntitiesRoute.route("/entities/create").post(
   (request: { body: Entity }, response: any) => {
