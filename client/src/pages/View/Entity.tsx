@@ -39,6 +39,9 @@ import {
   Select,
   TagCloseButton,
   SimpleGrid,
+  CheckboxGroup,
+  Checkbox,
+  Stack,
 } from "@chakra-ui/react";
 import {
   AddIcon,
@@ -48,7 +51,7 @@ import {
   WarningIcon,
 } from "@chakra-ui/icons";
 import { AiOutlineEdit } from "react-icons/ai";
-import { BsBox, BsPrinter } from "react-icons/bs";
+import { BsBox, BsDownload, BsPrinter } from "react-icons/bs";
 import { SlGraph } from "react-icons/sl";
 
 // Navigation
@@ -57,6 +60,7 @@ import { useParams, useNavigate } from "react-router-dom";
 // Utility libraries
 import _ from "underscore";
 import { parse } from "json2csv";
+import dayjs from "dayjs";
 
 // Database and models
 import { deleteData, getData, postData } from "src/database/functions";
@@ -126,6 +130,12 @@ export const Entity = () => {
   const [entityAttributes, setEntityAttributes] = useState(
     [] as Attribute[]
   );
+
+  const {
+    isOpen: isExportOpen,
+    onOpen: onExportOpen,
+    onClose: onExportClose,
+  } = useDisclosure();
 
   useEffect(() => {
     getData(`/entities/${id}`)
@@ -461,7 +471,7 @@ export const Entity = () => {
                   View Graph
                 </Button>
                 <Button
-                  onClick={handlePrintClick}
+                  onClick={onExportOpen}
                   rightIcon={<Icon as={BsPrinter} />}
                   colorScheme={"blue"}
                   isDisabled={editing}
@@ -496,7 +506,7 @@ export const Entity = () => {
                         <Tr>
                           <Td>Created</Td>
                           <Td>
-                            <Text>{new Date(entityData.created).toDateString()}</Text>
+                            <Text>{dayjs(entityData.created).format("DD MMM YYYY")}</Text>
                           </Td>
                         </Tr>
 
@@ -1056,6 +1066,83 @@ export const Entity = () => {
                     }}
                   >
                     Done
+                  </Button>
+                </Flex>
+              </ModalContent>
+            </Modal>
+
+            <Modal isOpen={isExportOpen} onClose={onExportClose}>
+              <ModalOverlay />
+              <ModalContent p={"4"} w={["sm", "lg", "2xl"]}>
+                {/* Heading and close button */}
+                <ModalHeader p={"2"}>Export Entity</ModalHeader>
+                <ModalCloseButton />
+
+                {/* Selection content */}
+                <Flex direction={"row"}>
+                  <Flex direction={"column"} p={"2"} gap={"2"}>
+                    <FormControl>
+                      <FormLabel>Details</FormLabel>
+                      <CheckboxGroup>
+                        <Stack spacing={2} direction={"column"}>
+                          <Checkbox disabled defaultChecked>Name: {entityData.name}</Checkbox>
+                          <Checkbox>Created: {dayjs(entityData.created).format("DD MMM YYYY")}</Checkbox>
+                          <Checkbox>Owner: {entityData.owner}</Checkbox>
+                          <Checkbox>Description: {entityData.description}</Checkbox>
+                        </Stack>
+                      </CheckboxGroup>
+                    </FormControl>
+
+                    <FormControl>
+                      <FormLabel>Associations: Origins</FormLabel>
+                      {entityData.associations.origins.length > 0 ?
+                        <Stack spacing={2} direction={"column"}>
+                          {entityData.associations.origins.map((origin) => {
+                            return <Checkbox key={origin.id}>Origin: {origin.name}</Checkbox>
+                          })}
+                        </Stack>
+                      :
+                        <Text>No Origins</Text>
+                      }
+                    </FormControl>
+                    <FormControl>
+                      <FormLabel>Associations: Products</FormLabel>
+                      {entityData.associations.products.length > 0 ?
+                        <Stack spacing={2} direction={"column"}>
+                          {entityData.associations.products.map((product) => {
+                            return <Checkbox key={product.id}>Product: {product.name}</Checkbox>
+                          })}
+                        </Stack>
+                      :
+                        <Text>No Products</Text>
+                      }
+                    </FormControl>
+                  </Flex>
+
+                  <Flex direction={"column"} p={"2"} gap={"2"}>
+                    <FormControl>
+                      <FormLabel>Attributes</FormLabel>
+                      {entityData.attributes.length > 0 ?
+                        <Stack spacing={2} direction={"column"}>
+                          {entityData.attributes.map((attribute) => {
+                            return <Checkbox key={attribute.name}>{attribute.name}</Checkbox>
+                          })}
+                        </Stack>
+                      :
+                        <Text>No Attributes</Text>
+                      }
+                    </FormControl>
+                  </Flex>
+                </Flex>
+
+                {/* "Download" button */}
+                <Flex direction={"row"} p={"md"} justify={"center"}>
+                  <Button
+                    colorScheme={"green"}
+                    onClick={() => handlePrintClick()}
+                    rightIcon={<Icon as={BsDownload} />}
+                  >
+                    Download
                   </Button>
                 </Flex>
               </ModalContent>
