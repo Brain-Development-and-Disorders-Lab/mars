@@ -1,5 +1,6 @@
 import consola from "consola";
 import _ from "lodash";
+import axios from "axios";
 
 // Get the URL of the database
 import { SERVER_URL } from "src/variables";
@@ -44,26 +45,23 @@ export const getData = (path: string): Promise<any> => {
  */
 export const postData = async (path: string, data: any): Promise<any> => {
   return new Promise((resolve, reject) => {
-    fetch(`${SERVER_URL}${path}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    })
+    axios.post(`${SERVER_URL}${path}`, data)
       .then((response) => {
-        response.json().then((parsed) => {
-          // Check response status
-          if (!response.ok) {
-            consola.error("POST:", path);
-            reject("Invalid response");
-          } else if (_.isEqual(parsed?.status, "error")) {
+        const contentType = response.headers["content-type"];
+        if (_.isNull(contentType)) {
+          reject("Invalid response");
+        } else if (_.startsWith(contentType, "application/json")) {
+          if (!_.isEqual(response.statusText, "OK")) {
             reject("Invalid response");
           } else {
             consola.success("POST:", path);
-            resolve(parsed);
+            resolve(response.data);
           }
-        });
+        } else if (_.startsWith(contentType, "application/download")) {
+          resolve(new Blob([response.data]));
+        } else {
+          resolve(response.data);
+        }
       })
       .catch((error) => {
         consola.error("POST:", path);
