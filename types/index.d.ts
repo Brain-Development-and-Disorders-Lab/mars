@@ -134,7 +134,7 @@ export type Entity = {
     origins: { name: string; id: string }[];
     products: { name: string; id: string }[];
   };
-  attributes: Attribute[];
+  attributes: AttributeModel[];
 };
 
 export type EntityModel = Entity & {

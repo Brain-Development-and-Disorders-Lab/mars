@@ -25,7 +25,7 @@ EntitiesRoute.route("/entities/:id").get((request: any, response: any) => {
 });
 
 // Get JSON-formatted data of the Entity
-EntitiesRoute.route("/entities/:id").post((request: any, response: any) => {
+EntitiesRoute.route("/entities/export/:id").post((request: any, response: any) => {
   Entities.getData(request.params.id).then((output: string) => {
     response.json(output);
   });
