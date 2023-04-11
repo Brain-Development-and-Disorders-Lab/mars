@@ -740,45 +740,45 @@ export class Entities {
             reject(error);
             throw error;
           }
-
           const entity = result as EntityModel;
+
           const headers = ["name"];
           const row: Promise<string>[] = [Promise.resolve(entity.name)];
 
-          // Add core data
-          if (entityExportData.fields.includes("created")) {
-            headers.push("created");
-            row.push(Promise.resolve(entity.created));
-          }
-
-          if (entityExportData.fields.includes("owner")) {
-            headers.push("owner");
-            row.push(Promise.resolve(entity.owner));
-          }
-
-          if (entityExportData.fields.includes("description")) {
-            headers.push("description");
-            row.push(Promise.resolve(entity.description));
-          }
-
-          // Add Origins
-          entityExportData.fields.map((field: string) => {
-            if (_.startsWith(field, "origin_")) {
+          // Iterate over fields and generate a CSV export file
+          entityExportData.fields.map((field) => {
+            if (_.isEqual(field, "created")) {
+              // "created" data field
+              headers.push("created");
+              row.push(Promise.resolve(entity.created));
+            } else if (_.isEqual(field, "owner")) {
+              // "owner" data field
+              headers.push("owner");
+              row.push(Promise.resolve(entity.owner));
+            } else if (_.isEqual(field, "description")) {
+              // "description" data field
+              headers.push("description");
+              row.push(Promise.resolve(entity.description));
+            } else if (_.startsWith(field, "origin_")) {
+              // "origins" data field
               headers.push(field);
-
-              // Retrieve the Origin Entity data
               row.push(Entities.getOne(_.split(field, "_")[1]).then((entity) => {
                 return entity.name;
               }));
+            } else if (_.startsWith(field, "product_")) {
+              // "products" data field
+              headers.push(field);
+              row.push(Entities.getOne(_.split(field, "_")[1]).then((entity) => {
+                return entity.name;
+              }));
+            } else if (_.startsWith(field, "attribute_")) {
+              // "attributes" data field
+              // Pass
             }
           });
 
-          // Add Products
-
-          // Add Attributes
-
+          // Collate and format data as a CSV string
           Promise.all(row).then((rowData) => {
-            // Collate and format data as a CSV string
             const collated = [headers, rowData];
             const formatted = Papa.unparse(collated);
 

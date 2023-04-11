@@ -269,6 +269,27 @@ export const Entity = () => {
       fields: exportFields,
     }).then((response) => {
       FileSaver.saveAs(new Blob([response]), slugify(`${entityData.name.replace(" ", "")}_export.csv`));
+
+      // Close the "Export" modal
+      onExportClose();
+
+      toast({
+        title: "Info",
+        description: "Generated CSV file.",
+        status: "info",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }).catch((_error) => {
+      toast({
+        title: "Error",
+        description: "An error occurred when exporting this Entity.",
+        status: "error",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
     });
   };
 
