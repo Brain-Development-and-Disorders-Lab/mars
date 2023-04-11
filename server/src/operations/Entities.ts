@@ -6,7 +6,11 @@ import consola from "consola";
 import { getDatabase, getIdentifier } from "../database/connection";
 import { Updates } from "./Updates";
 import { Collections } from "./Collections";
+
+// File generation
+import fs from "fs";
 import Papa from "papaparse";
+import tmp from "tmp";
 
 // Custom types
 import { EntityModel } from "@types";
@@ -723,24 +727,62 @@ export class Entities {
   /**
    * Collage and generate a CSV string containing all data pertaining to
    * an Entity
-   * @param {string} id the Entity identifier
-   * @return {Promise<EntityModel>}
+   * @param {{ id: string, fields: string[] }} entityExportData the export data of the Entity
+   * @return {Promise<string>}
    */
-  static getData = (id: string): Promise<string> => {
-    consola.info("Generating data for Entity (id):", id.toString());
+  static getData = (entityExportData: { id: string, fields: string[] }): Promise<string> => {
+    consola.info("Generating data for Entity (id):", entityExportData.id.toString());
     return new Promise((resolve, reject) => {
       getDatabase()
         .collection(ENTITIES_COLLECTION)
-        .findOne({ _id: id }, (error: any, result: any) => {
+        .findOne({ _id: entityExportData.id }, (error: any, result: any) => {
           if (error) {
             reject(error);
             throw error;
           }
 
-          const formatted = Papa.unparse([result]);
+          const entity = result as EntityModel;
+          const headers = ["name"];
+          const row = [entity.name];
 
-          consola.success("Generated data for  Entity (id):", id.toString());
-          resolve(formatted);
+          // Add core data
+          if (entityExportData.fields.includes("created")) {
+            headers.push("created");
+            row.push(entity.created);
+          }
+
+          if (entityExportData.fields.includes("owner")) {
+            headers.push("owner");
+            row.push(entity.owner);
+          }
+
+          if (entityExportData.fields.includes("description")) {
+            headers.push("description");
+            row.push(entity.description);
+          }
+
+          // Add origins
+
+          // Add products
+
+          // Add attributes
+
+
+          // Collate and format data as a CSV string
+          const collated = [headers, row];
+          const formatted = Papa.unparse(collated);
+
+          // Create a temporary file, passing the filename as a response
+          tmp.file((error, path: string, _fd: number) => {
+            if (error) {
+              reject(error);
+              throw error;
+            }
+
+            fs.writeFileSync(path, formatted);
+            consola.success("Generated data for  Entity (id):", entityExportData.id.toString());
+            resolve(path);
+          });
         });
     });
   }

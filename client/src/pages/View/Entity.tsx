@@ -61,6 +61,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import _ from "lodash";
 import dayjs from "dayjs";
 import consola from "consola";
+import FileSaver from "file-saver";
+import slugify from "slugify";
 
 // Database and models
 import { deleteData, getData, postData } from "src/database/functions";
@@ -259,68 +261,15 @@ export const Entity = () => {
 
   // Handle clicking the "Download" button
   const handleDownloadClick = () => {
-    consola.info("Exporting:", exportFields);
-    // Generate string representations of all data
-    // const labelData: { [k: string]: any } = {
-    //   id: entityData._id,
-    //   name: entityData.name,
-    //   created: entityData.created,
-    //   owner: entityData.owner,
-    //   description: entityData.description,
-    //   collections: entityData.collections.join(),
-    //   origins: entityData.associations.origins
-    //     .map((origin) => {
-    //       return origin.name;
-    //     })
-    //     .join(),
-    //   products: entityData.associations.products
-    //     .map((product) => {
-    //       return product.name;
-    //     })
-    //     .join(),
-    // };
+    consola.info("Exporting additional fields:", exportFields);
 
-    // let fields = [
-    //   "id",
-    //   "name",
-    //   "created",
-    //   "owner",
-    //   "description",
-    //   "collections",
-    //   "origins",
-    //   "products",
-    // ];
-
-    // // Create columns for each Attribute and corresponding Parameter
-    // entityData.attributes.forEach((attribute) => {
-    //   attribute.parameters.forEach((parameter) => {
-    //     labelData[`${attribute.name}_${parameter.name}`] = parameter.data;
-    //     fields = [...fields, `${attribute.name}_${parameter.name}`];
-    //   });
-    // });
-
-    // // Convert to CSV format
-    // const parsedData = parse(labelData, { fields: fields });
-    // const downloadURL = window.URL.createObjectURL(
-    //   new Blob([parsedData], {
-    //     type: "text/csv",
-    //   })
-    // );
-
-    // // Create hidden link to click, triggering download automatically
-    // const link = document.createElement("a");
-    // link.style.display = "none";
-    // link.download = `${entityData.name}.csv`;
-    // link.href = downloadURL;
-
-    // link.click();
-
-    toast({
-      title: "Created CSV file.",
-      status: "info",
-      duration: 2000,
-      position: "bottom-right",
-      isClosable: true,
+    // Send POST data to generate file
+    postData(`/entities/export`, {
+      id: id,
+      fields: exportFields,
+    }).then((response) => {
+      const filename = slugify(`${entityData.name.replace(" ", "")}_export.csv`);
+      FileSaver.saveAs(response, filename);
     });
   };
 
