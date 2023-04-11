@@ -11,6 +11,7 @@ import { Collections } from "./Collections";
 import fs from "fs";
 import Papa from "papaparse";
 import tmp from "tmp";
+import dayjs from "dayjs";
 
 // Custom types
 import { EntityModel } from "@types";
@@ -740,6 +741,7 @@ export class Entities {
             reject(error);
             throw error;
           }
+
           const entity = result as EntityModel;
 
           const headers = ["name"];
@@ -749,26 +751,26 @@ export class Entities {
           entityExportData.fields.map((field) => {
             if (_.isEqual(field, "created")) {
               // "created" data field
-              headers.push("created");
-              row.push(Promise.resolve(entity.created));
+              headers.push("Created");
+              row.push(Promise.resolve(dayjs(entity.created).format("DD MMM YYYY").toString()));
             } else if (_.isEqual(field, "owner")) {
               // "owner" data field
-              headers.push("owner");
+              headers.push("Owner");
               row.push(Promise.resolve(entity.owner));
             } else if (_.isEqual(field, "description")) {
               // "description" data field
-              headers.push("description");
+              headers.push("Description");
               row.push(Promise.resolve(entity.description));
             } else if (_.startsWith(field, "origin_")) {
               // "origins" data field
-              headers.push(field);
               row.push(Entities.getOne(_.split(field, "_")[1]).then((entity) => {
+                headers.push(`Origin (${entity.name})`);
                 return entity.name;
               }));
             } else if (_.startsWith(field, "product_")) {
               // "products" data field
-              headers.push(field);
               row.push(Entities.getOne(_.split(field, "_")[1]).then((entity) => {
+                headers.push(`Product (${entity.name})`);
                 return entity.name;
               }));
             } else if (_.startsWith(field, "attribute_")) {
