@@ -25,9 +25,10 @@ EntitiesRoute.route("/entities/:id").get((request: any, response: any) => {
 });
 
 // Get JSON-formatted data of the Entity
-EntitiesRoute.route("/entities/export/:id").post((request: any, response: any) => {
-  Entities.getData(request.params.id).then((output: string) => {
-    response.json(output);
+EntitiesRoute.route("/entities/export").post((request: { body: { id: string, fields: string[] } }, response: any) => {
+  Entities.getData(request.body).then((path: string) => {
+    response.setHeader("Content-Type", "application/csv");
+    response.download(path, `export_${request.body.id}.csv`);
   });
 });
 
