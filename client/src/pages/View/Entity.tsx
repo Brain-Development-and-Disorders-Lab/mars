@@ -268,7 +268,7 @@ export const Entity = () => {
       id: id,
       fields: exportFields,
     }).then((response) => {
-      FileSaver.saveAs(new Blob([response.data]), slugify(`${entityData.name.replace(" ", "")}_export.csv`));
+      FileSaver.saveAs(new Blob([response]), slugify(`${entityData.name.replace(" ", "")}_export.csv`));
     });
   };
 
