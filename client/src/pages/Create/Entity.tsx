@@ -41,8 +41,6 @@ import Attribute from "@components/Attribute";
 import { Loading } from "@components/Loading";
 import { Error } from "@components/Error";
 
-import _ from "underscore";
-
 // Navigation
 import { useNavigate } from "react-router-dom";
 
@@ -58,6 +56,8 @@ import {
 // Utility functions
 import { getData, postData } from "@database/functions";
 import { validateAttributes } from "src/functions";
+import _ from "underscore";
+import { nanoid } from "nanoid";
 
 export const Start = ({}) => {
   // Used to manage what detail inputs are presented
@@ -635,7 +635,7 @@ export const Start = ({}) => {
                           setSelectedAttributes([
                             ...selectedAttributes,
                             {
-                              _id: "",
+                              _id: `al${nanoid(6)}`,
                               name: "",
                               description: "",
                               parameters: [],

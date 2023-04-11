@@ -59,12 +59,12 @@ import { useParams, useNavigate } from "react-router-dom";
 
 // Utility libraries
 import _ from "underscore";
-import { parse } from "json2csv";
 import dayjs from "dayjs";
+import consola from "consola";
 
 // Database and models
 import { deleteData, getData, postData } from "src/database/functions";
-import { Attribute, CollectionModel, EntityModel } from "@types";
+import { AttributeModel, CollectionModel, EntityModel } from "@types";
 
 // Custom components
 import Linky from "src/components/Linky";
@@ -128,7 +128,7 @@ export const Entity = () => {
     [] as { name: string; id: string }[]
   );
   const [entityAttributes, setEntityAttributes] = useState(
-    [] as Attribute[]
+    [] as AttributeModel[]
   );
 
   const {
@@ -136,6 +136,7 @@ export const Entity = () => {
     onOpen: onExportOpen,
     onClose: onExportClose,
   } = useDisclosure();
+  const [exportFields, setExportFields] = useState([] as string[]);
 
   useEffect(() => {
     getData(`/entities/${id}`)
@@ -256,62 +257,63 @@ export const Entity = () => {
     }
   };
 
-  // Toggle showing printer details
-  const handlePrintClick = () => {
+  // Handle clicking the "Download" button
+  const handleDownloadClick = () => {
+    consola.info("Exporting:", exportFields);
     // Generate string representations of all data
-    const labelData: { [k: string]: any } = {
-      id: entityData._id,
-      name: entityData.name,
-      created: entityData.created,
-      owner: entityData.owner,
-      description: entityData.description,
-      collections: entityData.collections.join(),
-      origins: entityData.associations.origins
-        .map((origin) => {
-          return origin.name;
-        })
-        .join(),
-      products: entityData.associations.products
-        .map((product) => {
-          return product.name;
-        })
-        .join(),
-    };
+    // const labelData: { [k: string]: any } = {
+    //   id: entityData._id,
+    //   name: entityData.name,
+    //   created: entityData.created,
+    //   owner: entityData.owner,
+    //   description: entityData.description,
+    //   collections: entityData.collections.join(),
+    //   origins: entityData.associations.origins
+    //     .map((origin) => {
+    //       return origin.name;
+    //     })
+    //     .join(),
+    //   products: entityData.associations.products
+    //     .map((product) => {
+    //       return product.name;
+    //     })
+    //     .join(),
+    // };
 
-    let fields = [
-      "id",
-      "name",
-      "created",
-      "owner",
-      "description",
-      "collections",
-      "origins",
-      "products",
-    ];
+    // let fields = [
+    //   "id",
+    //   "name",
+    //   "created",
+    //   "owner",
+    //   "description",
+    //   "collections",
+    //   "origins",
+    //   "products",
+    // ];
 
-    // Create columns for each Attribute and corresponding Parameter
-    entityData.attributes.forEach((attribute) => {
-      attribute.parameters.forEach((parameter) => {
-        labelData[`${attribute.name}_${parameter.name}`] = parameter.data;
-        fields = [...fields, `${attribute.name}_${parameter.name}`];
-      });
-    });
+    // // Create columns for each Attribute and corresponding Parameter
+    // entityData.attributes.forEach((attribute) => {
+    //   attribute.parameters.forEach((parameter) => {
+    //     labelData[`${attribute.name}_${parameter.name}`] = parameter.data;
+    //     fields = [...fields, `${attribute.name}_${parameter.name}`];
+    //   });
+    // });
 
-    // Convert to CSV format
-    const parsedData = parse(labelData, { fields: fields });
-    const downloadURL = window.URL.createObjectURL(
-      new Blob([parsedData], {
-        type: "text/csv",
-      })
-    );
+    // // Convert to CSV format
+    // const parsedData = parse(labelData, { fields: fields });
+    // const downloadURL = window.URL.createObjectURL(
+    //   new Blob([parsedData], {
+    //     type: "text/csv",
+    //   })
+    // );
 
-    // Create hidden link to click, triggering download automatically
-    const link = document.createElement("a");
-    link.style.display = "none";
-    link.download = `${entityData.name}.csv`;
-    link.href = downloadURL;
+    // // Create hidden link to click, triggering download automatically
+    // const link = document.createElement("a");
+    // link.style.display = "none";
+    // link.download = `${entityData.name}.csv`;
+    // link.href = downloadURL;
 
-    link.click();
+    // link.click();
 
     toast({
       title: "Created CSV file.",
@@ -321,6 +323,28 @@ export const Entity = () => {
       isClosable: true,
     });
   };
+
+  // Handle checkbox selection on the export modal
+  const handleExportCheck = (field: string, checkState: boolean) => {
+    if (_.isEqual(checkState, true)) {
+      // If checked after click, add field to exportFields
+      if (!exportFields.includes(field)) {
+        const updatedFields = [...exportFields, field];
+        setExportFields(updatedFields);
+      }
+    } else {
+      // If unchecked after click, remove the field from exportFields
+      if (exportFields.includes(field)) {
+        const updatedFields = exportFields.filter((existingField) => {
+          if (!_.isEqual(existingField, field)) {
+            return existingField;
+          }
+          return;
+        });
+        setExportFields(updatedFields);
+      }
+    }
+  }
 
   // Delete the Entity when confirmed
   const handleDeleteClick = () => {
@@ -1086,9 +1110,15 @@ export const Entity = () => {
                       <CheckboxGroup>
                         <Stack spacing={2} direction={"column"}>
                           <Checkbox disabled defaultChecked>Name: {entityData.name}</Checkbox>
-                          <Checkbox>Created: {dayjs(entityData.created).format("DD MMM YYYY")}</Checkbox>
-                          <Checkbox>Owner: {entityData.owner}</Checkbox>
-                          <Checkbox>Description: {entityData.description}</Checkbox>
+                          <Checkbox onChange={(event) => handleExportCheck("created", event.target.checked)}>
+                            Created: {dayjs(entityData.created).format("DD MMM YYYY")}
+                          </Checkbox>
+                          <Checkbox onChange={(event) => handleExportCheck("owner", event.target.checked)}>
+                            Owner: {entityData.owner}
+                          </Checkbox>
+                          <Checkbox onChange={(event) => handleExportCheck("description", event.target.checked)}>
+                            Description: {entityData.description}
+                          </Checkbox>
                         </Stack>
                       </CheckboxGroup>
                     </FormControl>
@@ -1098,7 +1128,11 @@ export const Entity = () => {
                       {entityData.associations.origins.length > 0 ?
                         <Stack spacing={2} direction={"column"}>
                           {entityData.associations.origins.map((origin) => {
-                            return <Checkbox key={origin.id}>Origin: {origin.name}</Checkbox>
+                            return (
+                              <Checkbox key={origin.id} onChange={(event) => handleExportCheck(`origin_${origin.id}`, event.target.checked)}>
+                                Origin: {origin.name}
+                              </Checkbox>
+                            );
                           })}
                         </Stack>
                       :
@@ -1110,7 +1144,11 @@ export const Entity = () => {
                       {entityData.associations.products.length > 0 ?
                         <Stack spacing={2} direction={"column"}>
                           {entityData.associations.products.map((product) => {
-                            return <Checkbox key={product.id}>Product: {product.name}</Checkbox>
+                            return (
+                              <Checkbox key={product.id} onChange={(event) => handleExportCheck(`product_${product.id}`, event.target.checked)}>
+                                Product: {product.name}
+                              </Checkbox>
+                            );
                           })}
                         </Stack>
                       :
@@ -1125,7 +1163,11 @@ export const Entity = () => {
                       {entityData.attributes.length > 0 ?
                         <Stack spacing={2} direction={"column"}>
                           {entityData.attributes.map((attribute) => {
-                            return <Checkbox key={attribute.name}>{attribute.name}</Checkbox>
+                            return (
+                              <Checkbox key={attribute.name} onChange={(event) => handleExportCheck(`attribute_${attribute.name}`, event.target.checked)}>
+                                {attribute.name}
+                              </Checkbox>
+                            );
                           })}
                         </Stack>
                       :
@@ -1139,7 +1181,7 @@ export const Entity = () => {
                 <Flex direction={"row"} p={"md"} justify={"center"}>
                   <Button
                     colorScheme={"green"}
-                    onClick={() => handlePrintClick()}
+                    onClick={() => handleDownloadClick()}
                     rightIcon={<Icon as={BsDownload} />}
                   >
                     Download
