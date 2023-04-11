@@ -743,45 +743,56 @@ export class Entities {
 
           const entity = result as EntityModel;
           const headers = ["name"];
-          const row = [entity.name];
+          const row: Promise<string>[] = [Promise.resolve(entity.name)];
 
           // Add core data
           if (entityExportData.fields.includes("created")) {
             headers.push("created");
-            row.push(entity.created);
+            row.push(Promise.resolve(entity.created));
           }
 
           if (entityExportData.fields.includes("owner")) {
             headers.push("owner");
-            row.push(entity.owner);
+            row.push(Promise.resolve(entity.owner));
           }
 
           if (entityExportData.fields.includes("description")) {
             headers.push("description");
-            row.push(entity.description);
+            row.push(Promise.resolve(entity.description));
           }
 
-          // Add origins
+          // Add Origins
+          entityExportData.fields.map((field: string) => {
+            if (_.startsWith(field, "origin_")) {
+              headers.push(field);
 
-          // Add products
-
-          // Add attributes
-
-
-          // Collate and format data as a CSV string
-          const collated = [headers, row];
-          const formatted = Papa.unparse(collated);
-
-          // Create a temporary file, passing the filename as a response
-          tmp.file((error, path: string, _fd: number) => {
-            if (error) {
-              reject(error);
-              throw error;
+              // Retrieve the Origin Entity data
+              row.push(Entities.getOne(_.split(field, "_")[1]).then((entity) => {
+                return entity.name;
+              }));
             }
+          });
 
-            fs.writeFileSync(path, formatted);
-            consola.success("Generated data for  Entity (id):", entityExportData.id.toString());
-            resolve(path);
+          // Add Products
+
+          // Add Attributes
+
+          Promise.all(row).then((rowData) => {
+            // Collate and format data as a CSV string
+            const collated = [headers, rowData];
+            const formatted = Papa.unparse(collated);
+
+            // Create a temporary file, passing the filename as a response
+            tmp.file((error, path: string, _fd: number) => {
+              if (error) {
+                reject(error);
+                throw error;
+              }
+
+              fs.writeFileSync(path, formatted);
+              consola.success("Generated data for  Entity (id):", entityExportData.id.toString());
+              resolve(path);
+            });
           });
         });
     });

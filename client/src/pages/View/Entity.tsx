@@ -268,8 +268,7 @@ export const Entity = () => {
       id: id,
       fields: exportFields,
     }).then((response) => {
-      const filename = slugify(`${entityData.name.replace(" ", "")}_export.csv`);
-      FileSaver.saveAs(response, filename);
+      FileSaver.saveAs(new Blob([response.data]), slugify(`${entityData.name.replace(" ", "")}_export.csv`));
     });
   };
 
@@ -783,7 +782,7 @@ export const Entity = () => {
               </Flex>
             </Flex>
 
-            <Modal isOpen={isAddCollectionsOpen} onClose={onAddCollectionsClose}>
+            <Modal isOpen={isAddCollectionsOpen} onClose={onAddCollectionsClose} isCentered>
               <ModalOverlay />
               <ModalContent p={"4"}>
                 {/* Heading and close button */}
@@ -866,7 +865,7 @@ export const Entity = () => {
               </ModalContent>
             </Modal>
 
-            <Modal isOpen={isAddProductsOpen} onClose={onAddProductsClose}>
+            <Modal isOpen={isAddProductsOpen} onClose={onAddProductsClose} isCentered>
               <ModalOverlay />
               <ModalContent p={"4"}>
                 {/* Heading and close button */}
@@ -955,7 +954,7 @@ export const Entity = () => {
               </ModalContent>
             </Modal>
 
-            <Modal isOpen={isAddOriginsOpen} onClose={onAddOriginsClose}>
+            <Modal isOpen={isAddOriginsOpen} onClose={onAddOriginsClose} isCentered>
               <ModalOverlay />
               <ModalContent p={"4"}>
                 {/* Heading and close button */}
@@ -1044,7 +1043,7 @@ export const Entity = () => {
               </ModalContent>
             </Modal>
 
-            <Modal isOpen={isExportOpen} onClose={onExportClose}>
+            <Modal isOpen={isExportOpen} onClose={onExportClose} isCentered>
               <ModalOverlay />
               <ModalContent p={"4"} w={["sm", "lg", "2xl"]}>
                 {/* Heading and close button */}

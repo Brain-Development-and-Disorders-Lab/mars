@@ -57,8 +57,6 @@ export const postData = async (path: string, data: any): Promise<any> => {
             consola.success("POST:", path);
             resolve(response.data);
           }
-        } else if (_.startsWith(contentType, "application/download")) {
-          resolve(new Blob([response.data]));
         } else {
           resolve(response.data);
         }
