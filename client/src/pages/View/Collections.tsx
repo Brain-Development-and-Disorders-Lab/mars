@@ -31,7 +31,7 @@ import { ContentContainer } from "@components/ContentContainer";
 import { getData } from "@database/functions";
 import { CollectionModel } from "@types";
 
-import _ from "underscore";
+import _ from "lodash";
 
 const Collections = () => {
   const toast = useToast();

@@ -30,7 +30,7 @@ import { getData } from "@database/functions";
 import { EntityModel } from "@types";
 
 // Utility libraries
-import _ from "underscore";
+import _ from "lodash";
 
 // Custom components
 import { ContentContainer } from "@components/ContentContainer";

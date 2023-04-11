@@ -29,7 +29,7 @@ import { ContentContainer } from "@components/ContentContainer";
 import { getData } from "@database/functions";
 import { AttributeModel } from "@types";
 
-import _ from "underscore";
+import _ from "lodash";
 
 const Attributes = () => {
   const navigate = useNavigate();

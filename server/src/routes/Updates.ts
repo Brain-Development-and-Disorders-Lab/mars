@@ -1,6 +1,6 @@
 // Libraries
 import express from "express";
-import _ from "underscore";
+import _ from "lodash";
 
 // Utility functions
 import { UpdateModel, Update } from "@types";

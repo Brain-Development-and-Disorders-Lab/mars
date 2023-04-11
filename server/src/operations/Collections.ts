@@ -7,7 +7,7 @@ import { Updates } from "./Updates";
 import { CollectionModel, Collection } from "@types";
 
 // Utility libraries
-import _ from "underscore";
+import _ from "lodash";
 import consola from "consola";
 
 const COLLECTIONS = "collections";

@@ -56,7 +56,7 @@ import {
 // Utility functions
 import { getData, postData } from "@database/functions";
 import { validateAttributes } from "src/functions";
-import _ from "underscore";
+import _ from "lodash";
 import { nanoid } from "nanoid";
 
 export const Start = ({}) => {

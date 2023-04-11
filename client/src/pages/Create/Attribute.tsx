@@ -33,7 +33,7 @@ import { Attribute, Parameters } from "@types";
 import { postData } from "@database/functions";
 import { validateParameters } from "src/functions";
 
-import _ from "underscore";
+import _ from "lodash";
 
 export const Start = ({}) => {
   const navigate = useNavigate();

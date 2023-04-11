@@ -1,5 +1,5 @@
 import consola from "consola";
-import _ from "underscore";
+import _ from "lodash";
 
 // Get the URL of the database
 import { SERVER_URL } from "src/variables";

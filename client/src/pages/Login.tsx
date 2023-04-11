@@ -12,7 +12,7 @@ import {
 } from "@chakra-ui/react";
 
 // Utility libraries
-import _ from "underscore";
+import _ from "lodash";
 
 // Custom components
 import { ContentContainer } from "@components/ContentContainer";

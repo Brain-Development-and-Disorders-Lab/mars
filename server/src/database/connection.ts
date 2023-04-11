@@ -1,7 +1,7 @@
 // Libraries
 import { Db, MongoClient } from "mongodb";
 import consola from "consola";
-import _ from "underscore";
+import _ from "lodash";
 import { nanoid } from "nanoid";
 
 // Get the connection string from the environment variables

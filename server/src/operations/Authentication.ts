@@ -1,5 +1,5 @@
 // Utility libraries
-import _ from "underscore";
+import _ from "lodash";
 import consola from "consola";
 import crypto from "node:crypto";
 import { nanoid } from "nanoid";

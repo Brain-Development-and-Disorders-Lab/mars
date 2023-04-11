@@ -25,13 +25,13 @@
     "dayzed": "^3.2.3",
     "elkjs": "^0.8.2",
     "framer-motion": "^7.6.9",
+    "lodash": "^4.17.21",
     "nanoid": "^4.0.2",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-flow-renderer": "^10.3.17",
     "react-icons": "^4.8.0",
-    "react-router-dom": "^6.3.0",
-    "underscore": "^1.13.6"
+    "react-router-dom": "^6.3.0"
   },
   "devDependencies": {
     "@types/json2csv": "^5.0.3",

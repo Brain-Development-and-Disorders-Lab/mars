@@ -3,7 +3,7 @@ import { getDatabase, getIdentifier } from "../database/connection";
 import { Updates } from "./Updates";
 
 // Utility libraries
-import _ from "underscore";
+import _ from "lodash";
 import consola from "consola";
 
 // Custom types

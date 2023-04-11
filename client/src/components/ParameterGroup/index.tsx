@@ -5,7 +5,7 @@ import { BsBox } from "react-icons/bs";
 import { MdDateRange, MdOutlineTextFields } from "react-icons/md";
 import { RiNumbersLine } from "react-icons/ri";
 
-import _ from "underscore";
+import _ from "lodash";
 
 // Custom types and components
 import { Parameters } from "@types";

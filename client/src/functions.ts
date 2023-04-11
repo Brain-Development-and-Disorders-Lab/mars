@@ -1,5 +1,5 @@
 // Utility functions
-import _ from "underscore";
+import _ from "lodash";
 
 // Custom types
 import { Attribute, Parameters } from "@types";

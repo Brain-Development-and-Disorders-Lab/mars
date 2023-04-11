@@ -14,7 +14,7 @@ import { Loading } from "@components/Loading";
 import { Error } from "@components/Error";
 
 // Utility libraries
-import _ from "underscore";
+import _ from "lodash";
 import ELK, { ElkExtendedEdge, ElkNode } from "elkjs";
 
 // Database and models

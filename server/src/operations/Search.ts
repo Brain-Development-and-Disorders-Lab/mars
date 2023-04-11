@@ -1,7 +1,7 @@
 import consola from "consola";
 
 import { getDatabase } from "src/database/connection";
-import _ from "underscore";
+import _ from "lodash";
 
 const ENTITIES_COLLECTION = "entities";
 

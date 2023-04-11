@@ -29,7 +29,7 @@ import { MdDateRange, MdOutlineTextFields } from "react-icons/md";
 import { RiNumbersLine } from "react-icons/ri";
 import { BsGear } from "react-icons/bs";
 
-import _ from "underscore";
+import _ from "lodash";
 
 // Types
 import { AttributeCardProps } from "@types";

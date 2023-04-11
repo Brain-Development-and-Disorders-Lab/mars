@@ -59,7 +59,7 @@ import Linky from "@components/Linky";
 import { Loading } from "@components/Loading";
 import { ContentContainer } from "@components/ContentContainer";
 
-import _ from "underscore";
+import _ from "lodash";
 
 export const Collection = () => {
   const { id } = useParams();

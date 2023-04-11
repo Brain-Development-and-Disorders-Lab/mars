@@ -1,6 +1,6 @@
 // Libraries
 import express from "express";
-import _ from "underscore";
+import _ from "lodash";
 
 // Import types from the client to enforce structure
 import { EntityModel, Entity } from "@types";

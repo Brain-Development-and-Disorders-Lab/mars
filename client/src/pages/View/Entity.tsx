@@ -58,7 +58,7 @@ import { SlGraph } from "react-icons/sl";
 import { useParams, useNavigate } from "react-router-dom";
 
 // Utility libraries
-import _ from "underscore";
+import _ from "lodash";
 import dayjs from "dayjs";
 import consola from "consola";
 
@@ -1164,7 +1164,7 @@ export const Entity = () => {
                         <Stack spacing={2} direction={"column"}>
                           {entityData.attributes.map((attribute) => {
                             return (
-                              <Checkbox key={attribute.name} onChange={(event) => handleExportCheck(`attribute_${attribute.name}`, event.target.checked)}>
+                              <Checkbox key={attribute.name} onChange={(event) => handleExportCheck(`attribute_${attribute._id}`, event.target.checked)}>
                                 {attribute.name}
                               </Checkbox>
                             );
