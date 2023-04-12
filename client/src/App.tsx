@@ -1,6 +1,6 @@
 // React and React Router
 import React, { ReactElement } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 // Chakra UI provider component
 import { ChakraProvider } from "@chakra-ui/react";
@@ -31,6 +31,7 @@ import { Start as AttributeStart } from "@pages/Create/Attribute";
 import Search from "@pages/Search";
 import Home from "@pages/Home";
 import Login from "@pages/Login";
+import Invalid from "@pages/Invalid";
 
 // Authentication
 import { useToken } from "./authentication/useToken";
@@ -81,6 +82,8 @@ export const App = (): ReactElement => {
 
                 {/* Other routes */}
                 <Route path="/search" element={<Search />} />
+                <Route path="/invalid" element={<Invalid />} />
+                <Route path="*" element={<Navigate to="/invalid" replace />} />
               </Routes>
             </>
           )}

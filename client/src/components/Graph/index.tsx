@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Flex, useToast } from "@chakra-ui/react";
+import { useNavigate } from "react-router-dom";
+import { Button, Flex, Heading, Link, useToast } from "@chakra-ui/react";
 import ReactFlow, {
   MiniMap,
   Controls,
@@ -20,8 +21,10 @@ import ELK, { ElkExtendedEdge, ElkNode } from "elkjs";
 // Database and models
 import { getData } from "@database/functions";
 import { EntityModel } from "@types";
+import { ChevronRightIcon } from "@chakra-ui/icons";
 
 const Graph = (props: { id: string }) => {
+  const navigate = useNavigate();
   const toast = useToast();
   const [isLoaded, setIsLoaded] = useState(false);
   const [isError, setIsError] = useState(false);
@@ -109,7 +112,11 @@ const Graph = (props: { id: string }) => {
           id: origin.id,
           type: "input",
           data: {
-            label: <>{origin.name}</>,
+            label:
+              <Flex align={"center"} justify={"center"} gap={4}>
+                <Heading size={"sm"}>{origin.name}</Heading>
+                <Button as={Link} size={"sm"} rightIcon={<ChevronRightIcon />} onClick={() => navigate(`/entities/${origin.id}`)}>View</Button>
+              </Flex>,
           },
           position: { x: 250, y: 0 },
         });
