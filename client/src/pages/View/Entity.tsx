@@ -259,6 +259,12 @@ export const Entity = () => {
     }
   };
 
+  // Handle clicking the "Export" button
+  const handleExportClick = () => {
+    setEntityData(entityData);
+    onExportOpen();
+  };
+
   // Handle clicking the "Download" button
   const handleDownloadClick = () => {
     consola.info("Exporting additional fields:", exportFields);
@@ -343,6 +349,7 @@ export const Entity = () => {
       });
   };
 
+  // Add Products to the Entity state
   const addProducts = (products: string[]): void => {
     setEntityProducts([
       ...entityProducts,
@@ -352,6 +359,7 @@ export const Entity = () => {
     onAddProductsClose();
   };
 
+  // Remove Products from the Entity state
   const removeProduct = (id: string) => {
     setEntityProducts(
       entityProducts.filter((product) => {
@@ -360,6 +368,7 @@ export const Entity = () => {
     );
   };
 
+  // Add Origins to the Entity state
   const addOrigins = (origins: string[]): void => {
     setEntityOrigins([
       ...entityOrigins,
@@ -369,6 +378,7 @@ export const Entity = () => {
     onAddOriginsClose();
   };
 
+  // Remove Origins from the Entity state
   const removeOrigin = (id: string) => {
     setEntityOrigins(
       entityOrigins.filter((origin) => {
@@ -464,7 +474,7 @@ export const Entity = () => {
                   View Graph
                 </Button>
                 <Button
-                  onClick={onExportOpen}
+                  onClick={handleExportClick}
                   rightIcon={<Icon as={BsPrinter} />}
                   colorScheme={"blue"}
                   isDisabled={editing}
@@ -1087,7 +1097,7 @@ export const Entity = () => {
                               Owner: {entityData.owner}
                             </Checkbox>
                             <Checkbox onChange={(event) => handleExportCheck("description", event.target.checked)}>
-                              Description: {entityData.description}
+                              Description: <Text noOfLines={1}>{entityDescription}</Text>
                             </Checkbox>
                           </Stack>
                         </CheckboxGroup>
@@ -1099,9 +1109,9 @@ export const Entity = () => {
                     <FormControl>
                       <FormLabel>Associations: Origins</FormLabel>
                       {isLoaded ? (
-                        entityData.associations.origins.length > 0 &&
+                        entityOrigins.length > 0 &&
                           <Stack spacing={2} direction={"column"}>
-                            {entityData.associations.origins.map((origin) => {
+                            {entityOrigins.map((origin) => {
                               return (
                                 <Checkbox key={origin.id} onChange={(event) => handleExportCheck(`origin_${origin.id}`, event.target.checked)}>
                                   Origin: {origin.name}
@@ -1116,9 +1126,9 @@ export const Entity = () => {
                     <FormControl>
                       <FormLabel>Associations: Products</FormLabel>
                       {isLoaded ? (
-                        entityData.associations.products.length > 0 &&
+                        entityProducts.length > 0 &&
                           <Stack spacing={2} direction={"column"}>
-                            {entityData.associations.products.map((product) => {
+                            {entityProducts.map((product) => {
                               return (
                                 <Checkbox key={product.id} onChange={(event) => handleExportCheck(`product_${product.id}`, event.target.checked)}>
                                   Product: {product.name}
@@ -1136,9 +1146,9 @@ export const Entity = () => {
                     <FormControl>
                       <FormLabel>Attributes</FormLabel>
                       {isLoaded ? (
-                        entityData.attributes.length > 0 &&
+                        entityAttributes.length > 0 &&
                           <Stack spacing={2} direction={"column"}>
-                            {entityData.attributes.map((attribute) => {
+                            {entityAttributes.map((attribute) => {
                               return (
                                 <Checkbox key={attribute.name} onChange={(event) => handleExportCheck(`attribute_${attribute._id}`, event.target.checked)}>
                                   {attribute.name}
