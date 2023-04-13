@@ -44,14 +44,10 @@ import {
   Stack,
 } from "@chakra-ui/react";
 import {
-  AddIcon,
-  CheckIcon,
-  ChevronRightIcon,
-  CloseIcon,
   WarningIcon,
 } from "@chakra-ui/icons";
 import { AiOutlineEdit } from "react-icons/ai";
-import { BsBox, BsDiagram2, BsDownload } from "react-icons/bs";
+import { BsBox, BsChevronRight, BsCheckLg, BsDashLg, BsDiagram2, BsDownload, BsPlusLg, BsTrash } from "react-icons/bs";
 
 // Navigation
 import { useParams, useNavigate } from "react-router-dom";
@@ -437,7 +433,7 @@ export const Entity = () => {
                 {editing &&
                   <Popover>
                     <PopoverTrigger>
-                      <Button colorScheme={"red"} rightIcon={<CloseIcon />}>
+                      <Button colorScheme={"red"} rightIcon={<Icon as={BsTrash} />}>
                         Delete
                       </Button>
                     </PopoverTrigger>
@@ -450,7 +446,7 @@ export const Entity = () => {
                         <Flex direction={"row"} p={"2"} justify={"center"}>
                           <Button
                             colorScheme={"green"}
-                            rightIcon={<CheckIcon />}
+                            rightIcon={<Icon as={BsCheckLg} />}
                             onClick={handleDeleteClick}
                           >
                             Confirm
@@ -464,7 +460,7 @@ export const Entity = () => {
                   onClick={handleEditClick}
                   colorScheme={editing ? "green" : "gray"}
                   rightIcon={
-                    editing ? <Icon as={CheckIcon} /> : <Icon as={AiOutlineEdit} />
+                    editing ? <Icon as={BsCheckLg} /> : <Icon as={AiOutlineEdit} />
                   }
                 >
                   {editing ? "Done" : "Edit"}
@@ -561,7 +557,7 @@ export const Entity = () => {
                     {editing ? (
                       <Button
                         colorScheme={"green"}
-                        rightIcon={<AddIcon />}
+                        rightIcon={<Icon as={BsPlusLg} />}
                         disabled={!editing}
                         onClick={onAddCollectionsOpen}
                       >
@@ -595,7 +591,7 @@ export const Entity = () => {
                                     {editing && (
                                       <Button
                                         key={`remove-${collection}`}
-                                        rightIcon={<CloseIcon />}
+                                        rightIcon={<Icon as={BsDashLg} />}
                                         colorScheme={"red"}
                                         onClick={() => {
                                           removeCollection(collection);
@@ -608,7 +604,7 @@ export const Entity = () => {
                                     {!editing && (
                                       <Button
                                         key={`view-${collection}`}
-                                        rightIcon={<ChevronRightIcon />}
+                                        rightIcon={<Icon as={BsChevronRight} />}
                                         colorScheme={"blackAlpha"}
                                         onClick={() => navigate(`/collections/${collection}`)}
                                       >
@@ -643,7 +639,7 @@ export const Entity = () => {
                     {editing ? (
                       <Button
                         colorScheme={"green"}
-                        rightIcon={<AddIcon />}
+                        rightIcon={<Icon as={BsPlusLg} />}
                         disabled={!editing}
                         onClick={onAddOriginsOpen}
                       >
@@ -676,7 +672,7 @@ export const Entity = () => {
                                     {editing && (
                                       <Button
                                         key={`remove-${origin.id}`}
-                                        rightIcon={<CloseIcon />}
+                                        rightIcon={<Icon as={BsDashLg} />}
                                         colorScheme={"red"}
                                         onClick={() => {
                                           removeOrigin(origin.id);
@@ -689,7 +685,7 @@ export const Entity = () => {
                                     {!editing && (
                                       <Button
                                         key={`view-${origin.id}`}
-                                        rightIcon={<ChevronRightIcon />}
+                                        rightIcon={<Icon as={BsChevronRight} />}
                                         colorScheme={"blackAlpha"}
                                         onClick={() => navigate(`/entities/${origin.id}`)}
                                       >
@@ -714,7 +710,7 @@ export const Entity = () => {
                     {editing ? (
                       <Button
                         colorScheme={"green"}
-                        rightIcon={<AddIcon />}
+                        rightIcon={<Icon as={BsPlusLg} />}
                         disabled={!editing}
                         onClick={onAddProductsOpen}
                       >
@@ -747,7 +743,7 @@ export const Entity = () => {
                                     {editing && (
                                       <Button
                                         key={`remove-${product.id}`}
-                                        rightIcon={<CloseIcon />}
+                                        rightIcon={<Icon as={BsDashLg} />}
                                         colorScheme={"red"}
                                         onClick={() => {
                                           removeProduct(product.id);
@@ -760,7 +756,7 @@ export const Entity = () => {
                                     {!editing && (
                                       <Button
                                         key={`view-${product.id}`}
-                                        rightIcon={<ChevronRightIcon />}
+                                        rightIcon={<Icon as={BsChevronRight} />}
                                         colorScheme={"blackAlpha"}
                                         onClick={() => navigate(`/entities/${product.id}`)}
                                       >
@@ -890,6 +886,7 @@ export const Entity = () => {
                 <Flex direction={"row"} p={"md"} justify={"center"}>
                   <Button
                     colorScheme={"green"}
+                    rightIcon={<Icon as={BsCheckLg} />}
                     onClick={() => {
                       addCollections(selectedCollections);
                     }}
@@ -976,6 +973,7 @@ export const Entity = () => {
                 <Flex direction={"row"} p={"md"} justify={"center"}>
                   <Button
                     colorScheme={"green"}
+                    rightIcon={<Icon as={BsCheckLg} />}
                     onClick={() => {
                       if (id) {
                         // Add the Entities to the Collection
@@ -1065,6 +1063,7 @@ export const Entity = () => {
                 <Flex direction={"row"} p={"md"} justify={"center"}>
                   <Button
                     colorScheme={"green"}
+                    rightIcon={<Icon as={BsCheckLg} />}
                     onClick={() => {
                       if (id) {
                         // Add the Entities to the Collection
