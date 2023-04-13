@@ -107,6 +107,7 @@ export type Parameters = Parameter.Date | Parameter.Entity | Parameter.Number | 
 export type LinkyProps = {
   type: "entities" | "collections" | "attributes";
   id: string;
+  fallback?: string;
   color?: string;
 };
 
