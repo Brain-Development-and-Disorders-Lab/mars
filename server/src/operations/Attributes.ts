@@ -58,6 +58,73 @@ export class Attributes {
     });
   };
 
+  static update = (
+    updatedAttribute: AttributeModel
+  ): Promise<AttributeModel> => {
+    consola.start("Updating Attribute:", updatedAttribute.name);
+    return new Promise((resolve, _reject) => {
+      getDatabase()
+        .collection(ATTRIBUTES)
+        .findOne(
+          { _id: updatedAttribute._id },
+          (error: any, result: any) => {
+            if (error) {
+              throw error;
+            }
+
+            // Database operations to perform
+            const operations: Promise<any>[] = [];
+
+            // Cast and store current state of the Collection
+            result as AttributeModel;
+
+            const updates = {
+              $set: {
+                description: updatedAttribute.description,
+              },
+            };
+
+            // Add Update operation
+            operations.push(
+              Updates.create({
+                timestamp: new Date(Date.now()),
+                type: "update",
+                details: "Updated Collection",
+                target: {
+                  type: "collections",
+                  id: updatedAttribute._id,
+                  name: updatedAttribute.name,
+                },
+              })
+            );
+
+            getDatabase()
+              .collection(ATTRIBUTES)
+              .updateOne(
+                { _id: updatedAttribute._id },
+                updates,
+                (error: any, _response: any) => {
+                  if (error) {
+                    throw error;
+                  }
+
+                  // Resolve all operations then resolve overall Promise
+                  Promise.all(operations).then((_result) => {
+                    consola.success(
+                      "Updated Attribute:",
+                      updatedAttribute.name
+                    );
+
+                    // Resolve the Promise
+                    resolve(updatedAttribute);
+                  });
+                }
+              );
+          }
+        );
+    });
+  };
+
   /**
    * Get a single Attribute
    * @return {Promise<AttributeModel>}
