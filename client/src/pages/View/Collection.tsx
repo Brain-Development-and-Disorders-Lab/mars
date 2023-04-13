@@ -30,6 +30,7 @@ import {
   Tbody,
   Td,
   Text,
+  Textarea,
   Th,
   Thead,
   Tr,
@@ -42,7 +43,7 @@ import {
   WarningIcon,
 } from "@chakra-ui/icons";
 import { AiOutlineEdit } from "react-icons/ai";
-import { BsCheckLg, BsFolder, BsXLg } from "react-icons/bs";
+import { BsCheckLg, BsFolder, BsTrash, BsXLg } from "react-icons/bs";
 
 // Navigation
 import { useParams, useNavigate } from "react-router-dom";
@@ -72,6 +73,7 @@ export const Collection = () => {
 
   const [collectionData, setCollectionData] = useState({} as CollectionModel);
   const [collectionEntities, setCollectionEntities] = useState([] as string[]);
+  const [collectionDescription, setCollectionDescription] = useState("");
   const [allEntities, setAllEntities] = useState(
     [] as { name: string; id: string }[]
   );
@@ -83,6 +85,7 @@ export const Collection = () => {
       .then((response) => {
           setCollectionData(response);
           setCollectionEntities(response.entities);
+          setCollectionDescription(response.description);
       }).catch(() => {
         toast({
           title: "Error",
@@ -161,7 +164,7 @@ export const Collection = () => {
       const updateData: CollectionModel = {
         _id: collectionData._id,
         name: collectionData.name,
-        description: collectionData.description,
+        description: collectionDescription,
         owner: collectionData.owner,
         created: collectionData.created,
         entities: collectionEntities,
@@ -253,7 +256,7 @@ export const Collection = () => {
                 {editing &&
                   <Popover>
                     <PopoverTrigger>
-                      <Button colorScheme={"red"} rightIcon={<BsXLg />}>
+                      <Button colorScheme={"red"} rightIcon={<Icon as={BsTrash} />}>
                         Delete
                       </Button>
                     </PopoverTrigger>
@@ -342,7 +345,13 @@ export const Collection = () => {
                                 <TagRightIcon as={WarningIcon} />
                               </Tag>
                             ) : (
-                              <Text>{collectionData.description}</Text>
+                              <Textarea
+                                value={collectionDescription}
+                                onChange={(event) => {
+                                  setCollectionDescription(event.target.value);
+                                }}
+                                disabled={!editing}
+                              />
                             )}
                           </Td>
                         </Tr>

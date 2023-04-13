@@ -84,7 +84,7 @@ export class Collections {
             // Cast and store current state of the Collection
             const currentCollection = result as CollectionModel;
 
-            // Collections
+            // Entities
             const entitiesToKeep = currentCollection.entities.filter((entity) =>
               updatedCollection.entities.includes(entity)
             );
@@ -107,6 +107,7 @@ export class Collections {
 
             const updates = {
               $set: {
+                description: updatedCollection.description,
                 entities: [...entitiesToKeep, ...entitiesToAdd],
               },
             };
