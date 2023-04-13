@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Flex, Icon, Link, useToast } from "@chakra-ui/react";
+import { Flex, Icon, Link, Text, useToast } from "@chakra-ui/react";
 import ReactFlow, {
   MiniMap,
   Controls,
@@ -102,8 +102,9 @@ const Graph = (props: { id: string, entityNavigateHook: (id: string) => void }) 
     return (
       <Flex direction={"row"} align={"center"} gap={4}>
         <Icon as={BsBox} w={"4"} h={"4"} />
-        <Flex direction={"row"} w={"full"} align={"baseline"} gap={"2"}>
-          <Link as={"b"} onClick={() => props.entityNavigateHook(node.id)}>{node.name}</Link>
+        <Flex direction={"column"} align={"baseline"}>
+          <Text as={"b"}>Entity</Text>
+          <Link onClick={() => props.entityNavigateHook(node.id)}>{node.name}</Link>
         </Flex>
       </Flex>
     );
