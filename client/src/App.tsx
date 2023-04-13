@@ -10,7 +10,6 @@ import "./styles/styles.css";
 import "@fontsource/roboto";
 
 // Custom components
-import Navigation from "@components/Navigation";
 import { PageContainer } from "@components/PageContainer";
 
 // Pages
@@ -55,7 +54,6 @@ export const App = (): ReactElement => {
             <Login setToken={setToken} />
           ) : (
             <>
-              <Navigation />
               <Routes>
                 <Route path="/" element={<Dashboard />} />
 
