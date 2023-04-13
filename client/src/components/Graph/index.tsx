@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Flex, Icon, Link, Text, useToast } from "@chakra-ui/react";
+import { Flex, Icon, Link, useToast } from "@chakra-ui/react";
 import ReactFlow, {
   MiniMap,
   Controls,
@@ -70,8 +70,8 @@ const Graph = (props: { id: string, entityNavigateHook: (id: string) => void }) 
     const nodes: ElkNode[] = layoutNodes.map((node) => {
       return {
         id: node.id,
-        width: 400,
-        height: 90,
+        width: 120,
+        height: 80,
       };
     });
 
@@ -101,10 +101,9 @@ const Graph = (props: { id: string, entityNavigateHook: (id: string) => void }) 
   const generateLabel = (node: { id: string, name: string }) => {
     return (
       <Flex direction={"row"} align={"center"} gap={4}>
-        <Icon as={BsBox} w={"5"} h={"5"} />
+        <Icon as={BsBox} w={"4"} h={"4"} />
         <Flex direction={"column"} w={"full"} align={"baseline"}>
           <Link as={"b"} onClick={() => props.entityNavigateHook(node.id)}>{node.name}</Link>
-          <Text>Entity text</Text>
         </Flex>
       </Flex>
     );
@@ -250,7 +249,7 @@ const Graph = (props: { id: string, entityNavigateHook: (id: string) => void }) 
                   id: origin.id,
                   type: "input",
                   data: {
-                    label: <>{origin.name}</>,
+                    label: generateLabel({ id: origin.id, name: origin.name }),
                   },
                   position: { x: 100, y: 200 },
                 },
@@ -301,7 +300,7 @@ const Graph = (props: { id: string, entityNavigateHook: (id: string) => void }) 
                   id: product.id,
                   type: "output",
                   data: {
-                    label: <>{product.name}</>,
+                    label: generateLabel({ id: product.id, name: product.name }),
                   },
                   position: { x: 100, y: 200 },
                 },
