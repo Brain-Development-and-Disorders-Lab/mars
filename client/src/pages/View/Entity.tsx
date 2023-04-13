@@ -536,13 +536,16 @@ export const Entity = () => {
                         <Tr>
                           <Td>Description</Td>
                           <Td>
-                            <Textarea
-                              value={entityDescription}
-                              onChange={(event) => {
-                                setEntityDescription(event.target.value);
-                              }}
-                              disabled={!editing}
-                            />
+                            {editing ? (
+                              <Textarea
+                                value={entityDescription}
+                                onChange={(event) => {
+                                  setEntityDescription(event.target.value);
+                                }}
+                              />
+                            ) : (
+                              <Text>{entityDescription}</Text>
+                            )}
                           </Td>
                         </Tr>
                       </Tbody>

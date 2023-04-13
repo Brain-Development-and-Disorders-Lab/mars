@@ -197,7 +197,7 @@ export const Collection = () => {
     }
   };
 
-  // Delete the Entity when confirmed
+  // Delete the Collection when confirmed
   const handleDeleteClick = () => {
     // Update data
     deleteData(`/collections/${id}`)
@@ -345,13 +345,16 @@ export const Collection = () => {
                                 <TagRightIcon as={WarningIcon} />
                               </Tag>
                             ) : (
-                              <Textarea
-                                value={collectionDescription}
-                                onChange={(event) => {
-                                  setCollectionDescription(event.target.value);
-                                }}
-                                disabled={!editing}
-                              />
+                              editing ? (
+                                <Textarea
+                                  value={collectionDescription}
+                                  onChange={(event) => {
+                                    setCollectionDescription(event.target.value);
+                                  }}
+                                />
+                              ) : (
+                                <Text>{collectionDescription}</Text>
+                              )
                             )}
                           </Td>
                         </Tr>
