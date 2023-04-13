@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { SingleDatepicker } from "chakra-dayzed-datepicker";
 import {
   Button,
@@ -19,9 +20,9 @@ import {
   Textarea,
   useDisclosure,
 } from "@chakra-ui/react";
-import { CheckIcon, CloseIcon, InfoOutlineIcon } from "@chakra-ui/icons";
+import { CheckIcon, InfoOutlineIcon } from "@chakra-ui/icons";
+import { BsXLg } from "react-icons/bs";
 import { ContentContainer } from "@components/ContentContainer";
-import { useNavigate } from "react-router-dom";
 import { postData } from "@database/functions";
 import { Collection } from "@types";
 
@@ -197,7 +198,7 @@ export const Start = ({}) => {
       >
         <Button
           colorScheme={"red"}
-          rightIcon={<CloseIcon />}
+          rightIcon={<BsXLg />}
           variant={"outline"}
           onClick={() => navigate("/")}
         >

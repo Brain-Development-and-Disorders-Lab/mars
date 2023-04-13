@@ -21,10 +21,11 @@ import {
   Textarea,
   useDisclosure,
 } from "@chakra-ui/react";
-import { CheckIcon, CloseIcon, InfoOutlineIcon } from "@chakra-ui/icons";
+import { CheckIcon, InfoOutlineIcon } from "@chakra-ui/icons";
 import { AiOutlineBlock, AiOutlineLink } from "react-icons/ai";
 import { MdDateRange, MdOutlineTextFields } from "react-icons/md";
 import { RiNumbersLine } from "react-icons/ri";
+import { BsXLg } from "react-icons/bs";
 import { ContentContainer } from "@components/ContentContainer";
 import ParameterGroup from "@components/ParameterGroup";
 import { useNavigate } from "react-router-dom";
@@ -172,7 +173,7 @@ export const Start = ({}) => {
         <Button
           colorScheme={"red"}
           variant={"outline"}
-          rightIcon={<CloseIcon />}
+          rightIcon={<BsXLg />}
           onClick={() => navigate("/attributes")}
         >
           Cancel

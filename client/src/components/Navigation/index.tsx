@@ -22,12 +22,11 @@ import {
 } from "@chakra-ui/react";
 import {
   HamburgerIcon,
-  CloseIcon,
   InfoOutlineIcon,
   SearchIcon,
   AddIcon,
 } from "@chakra-ui/icons";
-import { BsBox, BsFolder, BsPuzzle } from "react-icons/bs";
+import { BsBox, BsFolder, BsPuzzle, BsXLg } from "react-icons/bs";
 
 // Router navigation
 import { useNavigate } from "react-router-dom";
@@ -67,7 +66,7 @@ const Navigation = () => {
         {/* Icon to show menu in responsive context */}
         <IconButton
           size={"md"}
-          icon={isOpen ? <CloseIcon /> : <HamburgerIcon />}
+          icon={isOpen ? <BsXLg /> : <HamburgerIcon />}
           aria-label={"Open Menu"}
           display={{ md: "none" }}
           onClick={isOpen ? onClose : onOpen}
@@ -80,8 +79,8 @@ const Navigation = () => {
             <Image src="/Favicon.png" boxSize={"36px"} />
             <Heading fontWeight={"semibold"} size={"lg"}>MARS</Heading>
 
-            <Button key={"home"} bg={"white"} onClick={() => navigate("/")}>
-              Home
+            <Button key={"dashboard"} bg={"white"} onClick={() => navigate("/")}>
+              Dashboard
             </Button>
 
             {/* Create menu */}

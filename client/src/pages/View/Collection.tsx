@@ -38,13 +38,11 @@ import {
 } from "@chakra-ui/react";
 import {
   AddIcon,
-  CheckIcon,
   ChevronRightIcon,
-  CloseIcon,
   WarningIcon,
 } from "@chakra-ui/icons";
 import { AiOutlineEdit } from "react-icons/ai";
-import { BsFolder } from "react-icons/bs";
+import { BsCheckLg, BsFolder, BsXLg } from "react-icons/bs";
 
 // Navigation
 import { useParams, useNavigate } from "react-router-dom";
@@ -255,7 +253,7 @@ export const Collection = () => {
                 {editing &&
                   <Popover>
                     <PopoverTrigger>
-                      <Button colorScheme={"red"} rightIcon={<CloseIcon />}>
+                      <Button colorScheme={"red"} rightIcon={<BsXLg />}>
                         Delete
                       </Button>
                     </PopoverTrigger>
@@ -268,7 +266,7 @@ export const Collection = () => {
                         <Flex direction={"row"} p={"2"} justify={"center"}>
                           <Button
                             colorScheme={"green"}
-                            rightIcon={<CheckIcon />}
+                            rightIcon={<Icon as={BsCheckLg} />}
                             onClick={handleDeleteClick}
                           >
                             Confirm
@@ -281,7 +279,7 @@ export const Collection = () => {
                 <Button
                   colorScheme={editing ? "green" : "gray"}
                   rightIcon={
-                    editing ? <Icon as={CheckIcon} /> : <Icon as={AiOutlineEdit} />
+                    editing ? <Icon as={BsCheckLg} /> : <Icon as={AiOutlineEdit} />
                   }
                   onClick={handleEditClick}
                 >
@@ -411,7 +409,7 @@ export const Collection = () => {
                                     {editing && (
                                       <Button
                                         key={`remove-${entity}`}
-                                        rightIcon={<CloseIcon />}
+                                        rightIcon={<BsXLg />}
                                         colorScheme={"red"}
                                         onClick={() => {
                                           if (id) {

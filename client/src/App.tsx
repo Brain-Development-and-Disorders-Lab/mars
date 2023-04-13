@@ -29,7 +29,7 @@ import { Start as AttributeStart } from "@pages/Create/Attribute";
 
 // Page type - Unique
 import Search from "@pages/Search";
-import Home from "@pages/Home";
+import Dashboard from "@pages/Dashboard";
 import Login from "@pages/Login";
 import Invalid from "@pages/Invalid";
 
@@ -54,7 +54,7 @@ export const App = (): ReactElement => {
             <>
               <Navigation />
               <Routes>
-                <Route path="/" element={<Home />} />
+                <Route path="/" element={<Dashboard />} />
 
                 {/* Entity routes */}
                 <Route path="/create/entity/start" element={<EntityStart />} />

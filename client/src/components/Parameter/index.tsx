@@ -11,9 +11,9 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { SingleDatepicker } from "chakra-dayzed-datepicker";
-import { CloseIcon, ExternalLinkIcon } from "@chakra-ui/icons";
+import { ExternalLinkIcon } from "@chakra-ui/icons";
 import { AiOutlineLink } from "react-icons/ai";
-import { BsBox } from "react-icons/bs";
+import { BsBox, BsXLg } from "react-icons/bs";
 import { MdDateRange, MdOutlineTextFields } from "react-icons/md";
 import { RiNumbersLine } from "react-icons/ri";
 import { getData } from "src/database/functions";
@@ -101,7 +101,7 @@ export const DateParameter = (props: Parameter.Date) => {
         <IconButton
           aria-label={"Remove Parameter"}
           key={`remove-${props.identifier}`}
-          icon={<CloseIcon />}
+          icon={<BsXLg />}
           colorScheme={"red"}
           onClick={() => {
             if (props.onRemove) {
@@ -171,7 +171,7 @@ export const TextParameter = (props: Parameter.Text) => {
         <IconButton
           aria-label={"Remove Parameter"}
           key={`remove-${props.identifier}`}
-          icon={<CloseIcon />}
+          icon={<BsXLg />}
           colorScheme={"red"}
           onClick={() => {
             if (props.onRemove) {
@@ -241,7 +241,7 @@ export const NumberParameter = (props: Parameter.Number) => {
         <IconButton
           aria-label={"Remove Parameter"}
           key={`remove-${props.identifier}`}
-          icon={<CloseIcon />}
+          icon={<BsXLg />}
           colorScheme={"red"}
           onClick={() => {
             if (props.onRemove) {
@@ -316,7 +316,7 @@ export const URLParameter = (props: Parameter.URL) => {
         <IconButton
           aria-label={"Remove Parameter"}
           key={`remove-${props.identifier}`}
-          icon={<CloseIcon />}
+          icon={<BsXLg />}
           colorScheme={"red"}
           onClick={() => {
             if (props.onRemove) {
@@ -426,7 +426,7 @@ export const EntityParameter = (props: Parameter.Entity) => {
         <IconButton
           aria-label={"Remove Parameter"}
           key={`remove-${props.identifier}`}
-          icon={<CloseIcon />}
+          icon={<BsXLg />}
           colorScheme={"red"}
           onClick={() => {
             if (props.onRemove) {

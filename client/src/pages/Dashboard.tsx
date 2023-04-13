@@ -37,7 +37,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import Linky from "@components/Linky";
 dayjs.extend(relativeTime);
 
-const Home = () => {
+const Dashboard = () => {
   // Enable navigation
   const navigate = useNavigate();
 
@@ -390,4 +390,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default Dashboard;

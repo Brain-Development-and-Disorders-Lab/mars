@@ -32,9 +32,9 @@ import {
   CheckIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-  CloseIcon,
   InfoOutlineIcon,
 } from "@chakra-ui/icons";
+import { BsXLg } from "react-icons/bs";
 import Linky from "@components/Linky";
 import { ContentContainer } from "@components/ContentContainer";
 import Attribute from "@components/Attribute";
@@ -686,7 +686,7 @@ export const Start = ({}) => {
                 <Button
                   colorScheme={"red"}
                   variant={"outline"}
-                  rightIcon={<CloseIcon />}
+                  rightIcon={<BsXLg />}
                   onClick={onCancel}
                 >
                   Cancel
