@@ -99,8 +99,8 @@ const Attributes = () => {
             <Flex
               p={"4"}
               direction={"row"}
-              rounded={"2xl"}
-              background={"whitesmoke"}
+              rounded={"md"}
+              background={"white"}
               flexWrap={"wrap"}
               gap={"6"}
             >

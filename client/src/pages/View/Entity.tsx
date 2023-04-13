@@ -423,7 +423,7 @@ export const Entity = () => {
               wrap={"wrap"}
               gap={"4"}
             >
-              <Flex align={"center"} gap={"4"} shadow={"lg"} p={"2"} border={"2px"} rounded={"10px"}>
+              <Flex align={"center"} gap={"4"} shadow={"lg"} p={"2"} border={"2px"} rounded={"md"}>
                 <Icon as={BsBox} w={"8"} h={"8"} />
                 <Heading fontWeight={"semibold"}>{entityData.name}</Heading>
               </Flex>
@@ -491,8 +491,8 @@ export const Entity = () => {
                 gap={"4"}
                 grow={"1"}
                 h={"fit-content"}
-                bg={"whitesmoke"}
-                rounded={"10px"}
+                bg={"white"}
+                rounded={"md"}
               >
                 {/* Details */}
                 <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
@@ -632,8 +632,8 @@ export const Entity = () => {
                 gap={"4"}
                 grow={"2"}
                 h={"fit-content"}
-                bg={"whitesmoke"}
-                rounded={"10px"}
+                bg={"white"}
+                rounded={"md"}
               >
                 {/* Origins */}
                 <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
@@ -794,8 +794,8 @@ export const Entity = () => {
                 gap={"4"}
                 grow={"1"}
                 h={"fit-content"}
-                bg={"whitesmoke"}
-                rounded={"10px"}
+                bg={"white"}
+                rounded={"md"}
               >
                 <Heading size={"lg"}>Attributes</Heading>
 

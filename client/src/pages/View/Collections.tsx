@@ -102,8 +102,8 @@ const Collections = () => {
             <Flex
               p={"4"}
               direction={"row"}
-              rounded={"2xl"}
-              bg={"whitesmoke"}
+              rounded={"md"}
+              bg={"white"}
               flexWrap={"wrap"}
               gap={"6"}
             >

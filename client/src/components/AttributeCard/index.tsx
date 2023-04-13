@@ -173,7 +173,7 @@ const AttributeCard = (props: AttributeCardProps) => {
                 align={"center"}
                 wrap={"wrap"}
               >
-                <Flex align={"center"} gap={"4"} shadow={"lg"} p={"2"} border={"2px"} rounded={"10px"}>
+                <Flex align={"center"} gap={"4"} shadow={"lg"} p={"2"} border={"2px"} rounded={"md"}>
                   <Icon as={BsPuzzle} w={"8"} h={"8"} />
                   <Heading fontWeight={"semibold"} size={"md"}>{props.data.name}</Heading>
                 </Flex>
@@ -198,8 +198,8 @@ const AttributeCard = (props: AttributeCardProps) => {
                 gap={"4"}
                 grow={"1"}
                 h={"fit-content"}
-                bg={"whitesmoke"}
-                rounded={"10px"}
+                bg={"white"}
+                rounded={"md"}
               >
                 <Heading size={"md"}>Parameters</Heading>
                 <Flex

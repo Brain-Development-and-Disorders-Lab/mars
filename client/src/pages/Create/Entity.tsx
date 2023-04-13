@@ -257,12 +257,12 @@ export const Start = ({}) => {
           <Flex
             direction={"column"}
             justify={"center"}
-            p={"4"}
+            p={"2"}
             gap={"6"}
             maxW={"7xl"}
             wrap={"wrap"}
           >
-            <Flex direction={"column"} w={["full", "4xl", "7xl"]}>
+            <Flex direction={"column"} w={["full", "4xl", "7xl"]} bg={"white"} p={"2"} rounded={"md"}>
               {/* Page header */}
               <Flex direction={"column"} p={"2"} pt={"4"} pb={"4"}>
                 <Flex direction={"row"} align={"center"} justify={"space-between"}>
@@ -673,14 +673,15 @@ export const Start = ({}) => {
               gap={"6"}
               justify={"space-between"}
               alignSelf={"center"}
+              align={"center"}
               w={["sm", "xl", "3xl"]}
               maxW={"7xl"}
               p={"4"}
               m={"4"}
               position={"fixed"}
               bottom={"0%"}
-              bg={"gray.50"}
-              rounded={"20px"}
+              bg={"white"}
+              rounded={"md"}
             >
               <Flex gap={"4"}>
                 <Button

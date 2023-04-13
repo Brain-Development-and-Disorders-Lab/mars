@@ -124,30 +124,28 @@ const Dashboard = () => {
             wrap={"wrap"}
           >
             <Flex direction={"column"} gap={"6"} grow={"2"}>
+              <Flex direction={"row"} justify={"space-between"} align={"center"}>
+                <Flex align={"center"} gap={"4"} p={"2"}>
+                  <Icon as={BsFolder} w={"8"} h={"8"} />
+                  <Heading fontWeight={"semibold"}>Collections</Heading>
+                </Flex>
+                <Button
+                  colorScheme={"green"}
+                  leftIcon={<AddIcon />}
+                  onClick={() => navigate("/create/collection/start")}
+                >
+                  Create
+                </Button>
+              </Flex>
+
               <Flex
                 direction={"column"}
                 p={"4"}
-                background={"whitesmoke"}
-                rounded={"xl"}
+                background={"white"}
+                rounded={"md"}
                 gap={"2"}
               >
                 {/* Collections listing */}
-                <Flex direction={"row"} justify={"space-between"} align={"center"}>
-                  <Flex align={"center"} gap={"4"}>
-                    <Icon as={BsFolder} w={"8"} h={"8"} />
-                    <Heading fontWeight={"semibold"}>Collections</Heading>
-                  </Flex>
-                  <Button
-                    colorScheme={"green"}
-                    leftIcon={<AddIcon />}
-                    onClick={() => navigate("/create/collection/start")}
-                  >
-                    Create
-                  </Button>
-                </Flex>
-
-                <Spacer />
-
                 {isLoaded && collectionData.length > 0 ? (
                   <TableContainer>
                     <Table variant={"simple"} colorScheme={"blackAlpha"}>
@@ -210,30 +208,30 @@ const Dashboard = () => {
                 </Flex>
               </Flex>
 
-              {/* Entities listing */}
+              <Spacer />
+
+              <Flex direction={"row"} justify={"space-between"} align={"center"}>
+                <Flex align={"center"} gap={"4"} p={"2"}>
+                  <Icon as={BsBox} w={"8"} h={"8"} />
+                  <Heading fontWeight={"semibold"}>Entities</Heading>
+                </Flex>
+                <Button
+                  colorScheme={"green"}
+                  leftIcon={<AddIcon />}
+                  onClick={() => navigate("/create/entity/start")}
+                >
+                  Create
+                </Button>
+              </Flex>
+
               <Flex
                 direction={"column"}
                 p={"4"}
-                background={"whitesmoke"}
-                rounded={"xl"}
+                background={"white"}
+                rounded={"md"}
                 gap={"2"}
               >
-                <Flex direction={"row"} justify={"space-between"} align={"center"}>
-                  <Flex align={"center"} gap={"4"}>
-                    <Icon as={BsBox} w={"8"} h={"8"} />
-                    <Heading fontWeight={"semibold"}>Entities</Heading>
-                  </Flex>
-                  <Button
-                    colorScheme={"green"}
-                    leftIcon={<AddIcon />}
-                    onClick={() => navigate("/create/entity/start")}
-                  >
-                    Create
-                  </Button>
-                </Flex>
-
-                <Spacer />
-
+                {/* Entities listing */}
                 {isLoaded && entityData.length > 0 ? (
                   <TableContainer>
                     <Table variant={"simple"} colorScheme={"blackAlpha"}>
@@ -298,78 +296,79 @@ const Dashboard = () => {
               </Flex>
             </Flex>
 
-            {/* Activity */}
-            <Flex
-              direction={"column"}
-              p={"4"}
-              gap={"2"}
-              h={"fit-content"}
-              maxW={"lg"}
-              background={"whitesmoke"}
-              rounded={"xl"}
-              grow={"1"}
-            >
-              <Flex align={"center"} gap={"4"}>
+            {/* Activity Feed */}
+            <Flex maxW={"lg"} direction={"column"} gap={"6"} >
+              <Flex align={"center"} gap={"4"} p={"2"}>
                 <Icon as={BsClockHistory} w={"8"} h={"8"} />
                 <Heading fontWeight={"semibold"}>Activity Feed</Heading>
               </Flex>
-              <List>
-                {updateData.length > 0 ? (
-                  updateData.slice(0, 10).map((update) => {
-                    // Configure the badge
-                    const iconSize = "3";
-                    const iconColor = "white";
-                    let operationBadgeColor = "green.400";
-                    let operationIcon = <Icon as={BsBox} w={iconSize} h={iconSize} color={iconColor} />;
 
-                    switch (update.type) {
-                      case "create":
-                        operationBadgeColor = "green.400";
-                        operationIcon = <Icon as={BsPlusLg} w={iconSize} h={iconSize} color={iconColor} />;
-                        break;
-                      case "update":
-                        operationBadgeColor = "blue.400";
-                        operationIcon = <Icon as={BsPencil} w={iconSize} h={iconSize} color={iconColor} />;
-                        break;
-                      case "delete":
-                        operationBadgeColor = "red.400";
-                        operationIcon = <Icon as={BsTrash} w={iconSize} h={iconSize} color={iconColor} />;
-                        break;
-                    }
+              <Flex
+                background={"white"}
+                direction={"column"}
+                rounded={"md"}
+                h={"fit-content"}
+                p={"4"}
+                gap={"2"}
+              >
+                <List>
+                  {updateData.length > 0 ? (
+                    updateData.slice(0, 10).map((update) => {
+                      // Configure the badge
+                      const iconSize = "3";
+                      const iconColor = "white";
+                      let operationBadgeColor = "green.400";
+                      let operationIcon = <Icon as={BsBox} w={iconSize} h={iconSize} color={iconColor} />;
 
-                    return (
-                      <ListItem key={`update-${update._id}`}>
-                        <Flex
-                          direction={"row"}
-                          p={"2"}
-                          gap={"2"}
-                          mt={"2"}
-                          mb={"2"}
-                          align={"center"}
-                          background={"white"}
-                          rounded={"10px"}
-                          border={"2px"}
-                          borderColor={"gray.100"}
-                        >
-                          <Flex rounded={"full"} bg={operationBadgeColor} p={"1.5"}>
-                            {operationIcon}
+                      switch (update.type) {
+                        case "create":
+                          operationBadgeColor = "green.400";
+                          operationIcon = <Icon as={BsPlusLg} w={iconSize} h={iconSize} color={iconColor} />;
+                          break;
+                        case "update":
+                          operationBadgeColor = "blue.400";
+                          operationIcon = <Icon as={BsPencil} w={iconSize} h={iconSize} color={iconColor} />;
+                          break;
+                        case "delete":
+                          operationBadgeColor = "red.400";
+                          operationIcon = <Icon as={BsTrash} w={iconSize} h={iconSize} color={iconColor} />;
+                          break;
+                      }
+
+                      return (
+                        <ListItem key={`update-${update._id}`}>
+                          <Flex
+                            direction={"row"}
+                            p={"2"}
+                            gap={"2"}
+                            mt={"2"}
+                            mb={"2"}
+                            align={"center"}
+                            background={"white"}
+                            rounded={"md"}
+                            border={"2px"}
+                            borderColor={"gray.100"}
+                          >
+                            <Flex rounded={"full"} bg={operationBadgeColor} p={"1.5"}>
+                              {operationIcon}
+                            </Flex>
+
+                            <Text>{update.details}</Text>
+
+                            <Linky id={update.target.id} type={update.target.type} fallback={update.target.name} />
+
+                            <Spacer />
+
+                            <Text color={"gray.400"}>{dayjs(update.timestamp).fromNow()}</Text>
                           </Flex>
-
-                          <Text>{update.details}</Text>
-
-                          <Linky id={update.target.id} type={update.target.type} fallback={update.target.name} />
-
-                          <Spacer />
-
-                          <Text color={"gray.400"}>{dayjs(update.timestamp).fromNow()}</Text>
-                        </Flex>
-                      </ListItem>
-                    );
-                  })
-                ) : (
-                  <Text fontSize={"md"}>No recent activity to show.</Text>
-                )}
-              </List>
+                        </ListItem>
+                      );
+                    })
+                  ) : (
+                    <Text fontSize={"md"}>No recent activity to show.</Text>
+                  )}
+                </List>
+              </Flex>
             </Flex>
           </Flex>
         )

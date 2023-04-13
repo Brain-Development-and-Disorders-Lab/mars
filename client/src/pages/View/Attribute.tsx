@@ -164,7 +164,7 @@ export const Attribute = () => {
             align={"center"}
             wrap={"wrap"}
           >
-            <Flex align={"center"} gap={"4"} shadow={"lg"} p={"2"} border={"2px"} rounded={"10px"}>
+            <Flex align={"center"} gap={"4"} shadow={"lg"} p={"2"} border={"2px"} rounded={"md"}>
               <Icon as={BsPuzzle} w={"8"} h={"8"} />
               <Heading fontWeight={"semibold"}>{attributeData.name}</Heading>
             </Flex>
@@ -216,8 +216,8 @@ export const Attribute = () => {
               gap={"2"}
               grow={"1"}
               h={"fit-content"}
-              bg={"whitesmoke"}
-              rounded={"10px"}
+              bg={"white"}
+              rounded={"md"}
             >
               {/* Details */}
               <Heading fontWeight={"semibold"} size={"lg"}>Details</Heading>
@@ -268,8 +268,8 @@ export const Attribute = () => {
               gap={"2"}
               grow={"1"}
               h={"fit-content"}
-              bg={"whitesmoke"}
-              rounded={"10px"}
+              bg={"white"}
+              rounded={"md"}
             >
               <Heading fontWeight={"semibold"} size={"lg"}>Parameters</Heading>
 

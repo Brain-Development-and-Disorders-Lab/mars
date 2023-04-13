@@ -105,8 +105,8 @@ const Entities = () => {
             <Flex
               direction={"row"}
               p={"4"}
-              rounded={"2xl"}
-              bg={"whitesmoke"}
+              rounded={"md"}
+              bg={"white"}
               wrap={"wrap"}
               gap={"6"}
             >

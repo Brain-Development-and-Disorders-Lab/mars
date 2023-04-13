@@ -74,82 +74,91 @@ export const Start = ({}) => {
 
   return (
     <ContentContainer>
-      <Flex direction={"column"} w={["full", "4xl", "7xl"]}>
-        {/* Page header */}
-        <Flex direction={"column"} p={"2"} pt={"4"} pb={"4"}>
-          <Flex direction={"row"} align={"center"} justify={"space-between"}>
-            <Heading fontWeight={"semibold"}>Create Attribute</Heading>
-            <Button
-              rightIcon={<InfoOutlineIcon />}
-              variant={"outline"}
-              onClick={onOpen}
-            >
-              Info
-            </Button>
+      <Flex
+        direction={"column"}
+        justify={"center"}
+        p={"2"}
+        gap={"6"}
+        maxW={"7xl"}
+        wrap={"wrap"}
+      >
+        <Flex direction={"column"} w={["full", "4xl", "7xl"]} p={"2"} bg={"white"} rounded={"md"}>
+          {/* Page header */}
+          <Flex direction={"column"} p={"2"} pt={"4"} pb={"4"}>
+            <Flex direction={"row"} align={"center"} justify={"space-between"}>
+              <Heading fontWeight={"semibold"}>Create Attribute</Heading>
+              <Button
+                rightIcon={<InfoOutlineIcon />}
+                variant={"outline"}
+                onClick={onOpen}
+              >
+                Info
+              </Button>
+            </Flex>
           </Flex>
-        </Flex>
 
-        <Flex
-          direction={"column"}
-          justify={"center"}
-          align={"center"}
-          gap={"6"}
-          p={"2"}
-          pb={"6"}
-          mb={["12", "8"]}
-        >
-          <Flex direction={"column"} gap={"2"} w={["full", "4xl"]} maxW={"4xl"}>
-            <Heading fontWeight={"semibold"} size={"lg"}>
-              Details
-            </Heading>
-            <Text>
-              Specify some basic details about this template Attribute. The
-              metadata associated with this template should be specified using
-              Parameters.
-            </Text>
+          <Flex
+            direction={"column"}
+            justify={"center"}
+            align={"center"}
+            gap={"6"}
+            p={"2"}
+            pb={"6"}
+            mb={["12", "8"]}
+          >
+            <Flex direction={"column"} gap={"2"} w={["full", "4xl"]} maxW={"4xl"}>
+              <Heading fontWeight={"semibold"} size={"lg"}>
+                Details
+              </Heading>
+              <Text>
+                Specify some basic details about this template Attribute. The
+                metadata associated with this template should be specified using
+                Parameters.
+              </Text>
 
-            <Flex direction="row" gap={"4"} wrap={["wrap", "nowrap"]}>
-              <FormControl isRequired>
-                <FormLabel>Name</FormLabel>
-                <Input
-                  placeholder={"Name"}
-                  value={name}
-                  onChange={(event) => setName(event.target.value)}
-                  required
-                />
-                {!isNameError ? (
-                  <FormHelperText>Name of the Attribute.</FormHelperText>
-                ) : (
-                  <FormErrorMessage>A name must be specified for the Attribute.</FormErrorMessage>
+              <Flex direction="row" gap={"4"} wrap={["wrap", "nowrap"]}>
+                <FormControl isRequired>
+                  <FormLabel>Name</FormLabel>
+                  <Input
+                    placeholder={"Name"}
+                    value={name}
+                    onChange={(event) => setName(event.target.value)}
+                    required
+                  />
+                  {!isNameError ? (
+                    <FormHelperText>Name of the Attribute.</FormHelperText>
+                  ) : (
+                    <FormErrorMessage>A name must be specified for the Attribute.</FormErrorMessage>
+                  )}
+                </FormControl>
+
+                <FormControl isRequired>
+                  <FormLabel>Description</FormLabel>
+                  <Textarea
+                    value={description}
+                    placeholder={"Attribute Description"}
+                    onChange={(event) => setDescription(event.target.value)}
+                  />
+                  {!isDescriptionError ? (
+                    <FormHelperText>Description of the Attribute.</FormHelperText>
+                  ) : (
+                    <FormErrorMessage>A description should be provided for the Attribute.</FormErrorMessage>
+                  )}
+                </FormControl>
+              </Flex>
+
+              <FormControl isRequired isInvalid={isParametersError}>
+                <FormLabel>Parameters</FormLabel>
+                {isParametersError && (
+                  <FormErrorMessage>Specify at least one Parameter.</FormErrorMessage>
                 )}
-              </FormControl>
-
-              <FormControl isRequired>
-                <FormLabel>Description</FormLabel>
-                <Textarea
-                  value={description}
-                  placeholder={"Attribute Description"}
-                  onChange={(event) => setDescription(event.target.value)}
+                <ParameterGroup
+                  parameters={parameters}
+                  viewOnly={false}
+                  setParameters={setParameters}
                 />
-                {!isDescriptionError ? (
-                  <FormHelperText>Description of the Attribute.</FormHelperText>
-                ) : (
-                  <FormErrorMessage>A description should be provided for the Attribute.</FormErrorMessage>
-                )}
               </FormControl>
             </Flex>
-
-            <FormControl isRequired isInvalid={isParametersError}>
-              <FormLabel>Parameters</FormLabel>
-              {isParametersError && (
-                <FormErrorMessage>Specify at least one Parameter.</FormErrorMessage>
-              )}
-              <ParameterGroup
-                parameters={parameters}
-                viewOnly={false}
-                setParameters={setParameters}
-              />
-            </FormControl>
           </Flex>
         </Flex>
       </Flex>
@@ -167,8 +176,8 @@ export const Start = ({}) => {
         m={"4"}
         position={"fixed"}
         bottom={"0%"}
-        bg={"gray.50"}
-        rounded={"20px"}
+        bg={"white"}
+        rounded={"md"}
       >
         <Button
           colorScheme={"red"}

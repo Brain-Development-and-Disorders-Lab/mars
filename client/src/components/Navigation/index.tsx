@@ -4,7 +4,6 @@ import {
   Box,
   Flex,
   Avatar,
-  HStack,
   Link,
   IconButton,
   Button,
@@ -19,14 +18,16 @@ import {
   Icon,
   Image,
   Heading,
+  VStack,
+  Spacer,
+  Text,
 } from "@chakra-ui/react";
 import {
   HamburgerIcon,
   InfoOutlineIcon,
-  SearchIcon,
   AddIcon,
 } from "@chakra-ui/icons";
-import { BsBox, BsFolder, BsPuzzle, BsXLg } from "react-icons/bs";
+import { BsBinoculars, BsBox, BsClipboardData, BsFolder, BsPlusLg, BsPuzzle, BsSearch, BsXLg } from "react-icons/bs";
 
 // Router navigation
 import { useNavigate } from "react-router-dom";
@@ -62,7 +63,7 @@ const Navigation = () => {
 
   return (
     <Box px={4} bg={"white"}>
-      <Flex h={"8vh"} alignItems={"center"} justifyContent={"space-between"}>
+      <Flex justifyContent={"space-between"} direction={"column"} h={"100%"}>
         {/* Icon to show menu in responsive context */}
         <IconButton
           size={"md"}
@@ -73,77 +74,85 @@ const Navigation = () => {
         />
 
         {/* Main navigation group */}
-        <HStack spacing={8} alignItems={"center"} justify={"center"}>
-          <HStack as={"nav"} spacing={4} display={{ base: "none", md: "flex" }}>
+        <VStack spacing={8} align={"center"}>
+          <VStack as={"nav"} spacing={4} display={{ base: "none", md: "flex" }}>
             {/* Icon */}
-            <Image src="/Favicon.png" boxSize={"36px"} />
-            <Heading fontWeight={"semibold"} size={"lg"}>MARS</Heading>
+            <Flex direction={"row"} m={"2"} p={"2"} gap={"2"}>
+              <Image src="/Favicon.png" boxSize={"36px"} />
+              <Heading fontWeight={"semibold"} size={"lg"}>MARS</Heading>
+            </Flex>
 
-            <Button key={"dashboard"} bg={"white"} onClick={() => navigate("/")}>
-              Dashboard
-            </Button>
+            <Flex direction={"column"} align={"baseline"}>
+              <Button key={"dashboard"} bg={"white"} leftIcon={<Icon as={BsClipboardData} />} onClick={() => navigate("/")}>
+                Dashboard
+              </Button>
 
-            {/* Create menu */}
-            <Menu>
-              <MenuButton
-                as={Button}
+              {/* Create menu */}
+              <Menu>
+                <MenuButton
+                  as={Button}
+                  bg={"white"}
+                  rounded={"md"}
+                  cursor={"pointer"}
+                  minW={0}
+                  leftIcon={<Icon as={BsPlusLg} />}
+                >
+                  Create
+                </MenuButton>
+                <MenuList>
+                  <MenuItem icon={<Icon as={BsBox} />} onClick={() => navigate("/create/entity/start")}>
+                    Entity
+                  </MenuItem>
+                  <MenuItem icon={<Icon as={BsFolder} />} onClick={() => navigate("/create/collection/start")}>
+                    Collection
+                  </MenuItem>
+                  <MenuItem icon={<Icon as={BsPuzzle} />} onClick={() => navigate("/create/attribute/start")}>
+                    Attribute
+                  </MenuItem>
+                </MenuList>
+              </Menu>
+
+              {/* View menu */}
+              <Menu>
+                <MenuButton
+                  as={Button}
+                  bg={"white"}
+                  rounded={"md"}
+                  cursor={"pointer"}
+                  minW={0}
+                  leftIcon={<Icon as={BsBinoculars} />}
+                >
+                  View
+                </MenuButton>
+                <MenuList>
+                  <MenuItem icon={<Icon as={BsBox} />} onClick={() => navigate("/entities")}>
+                    Entities
+                  </MenuItem>
+                  <MenuItem icon={<Icon as={BsFolder} />} onClick={() => navigate("/collections")}>
+                    Collections
+                  </MenuItem>
+                  <MenuItem icon={<Icon as={BsPuzzle} />} onClick={() => navigate("/attributes")}>
+                    Attributes
+                  </MenuItem>
+                </MenuList>
+              </Menu>
+
+              <Button
+                key={"search"}
                 bg={"white"}
-                rounded={"md"}
-                cursor={"pointer"}
-                minW={0}
+                leftIcon={<Icon as={BsSearch} />}
+                onClick={() => navigate("/search")}
               >
-                Create
-              </MenuButton>
-              <MenuList>
-                <MenuItem icon={<BsBox />} onClick={() => navigate("/create/entity/start")}>
-                  Entity
-                </MenuItem>
-                <MenuItem icon={<BsFolder />} onClick={() => navigate("/create/collection/start")}>
-                  Collection
-                </MenuItem>
-                <MenuItem icon={<BsPuzzle />} onClick={() => navigate("/create/attribute/start")}>
-                  Attribute
-                </MenuItem>
-              </MenuList>
-            </Menu>
+                Search
+              </Button>
+            </Flex>
+          </VStack>
+        </VStack>
 
-            {/* View menu */}
-            <Menu>
-              <MenuButton
-                as={Button}
-                bg={"white"}
-                rounded={"md"}
-                cursor={"pointer"}
-                minW={0}
-              >
-                View
-              </MenuButton>
-              <MenuList>
-                <MenuItem icon={<BsBox />} onClick={() => navigate("/entities")}>
-                  Entities
-                </MenuItem>
-                <MenuItem icon={<BsFolder />} onClick={() => navigate("/collections")}>
-                  Collections
-                </MenuItem>
-                <MenuItem icon={<BsPuzzle />} onClick={() => navigate("/attributes")}>
-                  Attributes
-                </MenuItem>
-              </MenuList>
-            </Menu>
-          </HStack>
-        </HStack>
+        <Spacer />
 
         {/* Search and Avatar component */}
-        <Flex alignItems={"center"} gap={"4"}>
-          <Button
-            key={"search"}
-            bg={"white"}
-            leftIcon={<SearchIcon />}
-            onClick={() => navigate("/search")}
-          >
-            Search
-          </Button>
-
+        <Flex alignItems={"center"} gap={"4"} p={"2"}>
           <Menu>
             <MenuButton
               as={Button}
@@ -155,6 +164,7 @@ const Navigation = () => {
               <Avatar size={"sm"} />
             </MenuButton>
           </Menu>
+          <Text as={"b"}>User</Text>
         </Flex>
       </Flex>
 
