@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { SingleDatepicker } from "chakra-dayzed-datepicker";
 import {
   Button,
   Flex,
@@ -31,7 +30,7 @@ export const Start = ({}) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const [name, setName] = useState("");
-  const [created, setCreated] = useState(new Date());
+  const [created, setCreated] = useState("");
   const [owner, setOwner] = useState("");
   const [description, setDescription] = useState("");
 
@@ -136,34 +135,12 @@ export const Start = ({}) => {
                     Created
                   </FormLabel>
 
-                  <SingleDatepicker
-                    id="owner"
-                    name="owner"
-                    propsConfigs={{
-                      dateNavBtnProps: {
-                        colorScheme: "gray",
-                      },
-                      dayOfMonthBtnProps: {
-                        defaultBtnProps: {
-                          borderColor: "blackAlpha.300",
-                          _hover: {
-                            background: "black",
-                            color: "white",
-                          },
-                        },
-                        selectedBtnProps: {
-                          background: "black",
-                          color: "white",
-                        },
-                        todayBtnProps: {
-                          borderColor: "blackAlpha.300",
-                          background: "gray.50",
-                          color: "black",
-                        },
-                      },
-                    }}
-                    date={created}
-                    onDateChange={setCreated}
+                  <Input
+                    placeholder="Select Date and Time"
+                    size="md"
+                    type="datetime-local"
+                    value={created}
+                    onChange={(event) => setCreated(event.target.value)}
                   />
                 </FormControl>
 

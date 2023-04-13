@@ -26,7 +26,6 @@ import {
   useDisclosure,
   useToast,
 } from "@chakra-ui/react";
-import { SingleDatepicker } from "chakra-dayzed-datepicker";
 import {
   AddIcon,
   CheckIcon,
@@ -79,7 +78,7 @@ export const Start = ({}) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [name, setName] = useState("");
-  const [created, setCreated] = useState(new Date());
+  const [created, setCreated] = useState("");
   const [owner, setOwner] = useState("");
   const [description, setDescription] = useState("");
   const [selectedCollections, setSelectedCollections] = useState(
@@ -97,7 +96,7 @@ export const Start = ({}) => {
 
   const entityState: Entity = {
     name: name,
-    created: created.toISOString(),
+    created: created,
     owner: owner,
     description: description,
     associations: {
@@ -111,7 +110,7 @@ export const Start = ({}) => {
   // Various validation error states
   const isNameError = name === "";
   const isOwnerError = owner === "";
-  const isDateError = created.toISOString() === "";
+  const isDateError = created === "";
   const isDetailsError = isNameError || isOwnerError || isDateError;
 
   const [validAttributes, setValidAttributes] = useState(false);
@@ -335,34 +334,12 @@ export const Start = ({}) => {
                     <Flex direction={"row"} gap={"2"} wrap={["wrap", "nowrap"]}>
                       <FormControl isRequired isInvalid={isDateError}>
                         <FormLabel>Created</FormLabel>
-                        <SingleDatepicker
-                          id="owner"
-                          name="owner"
-                          propsConfigs={{
-                            dateNavBtnProps: {
-                              colorScheme: "gray",
-                            },
-                            dayOfMonthBtnProps: {
-                              defaultBtnProps: {
-                                borderColor: "blackAlpha.300",
-                                _hover: {
-                                  background: "black",
-                                  color: "white",
-                                },
-                              },
-                              selectedBtnProps: {
-                                background: "black",
-                                color: "white",
-                              },
-                              todayBtnProps: {
-                                borderColor: "blackAlpha.300",
-                                background: "gray.50",
-                                color: "black",
-                              },
-                            },
-                          }}
-                          date={created}
-                          onDateChange={setCreated}
+                        <Input
+                          placeholder="Select Date and Time"
+                          size="md"
+                          type="datetime-local"
+                          value={created}
+                          onChange={(event) => setCreated(event.target.value)}
                         />
                         {!isDateError ? (
                           <FormHelperText>Date the Entity was created.</FormHelperText>

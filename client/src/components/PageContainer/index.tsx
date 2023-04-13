@@ -7,10 +7,10 @@ import SearchBox from "@components/SearchBox";
 
 export const PageContainer: React.FC<any> = ({ children }) => {
   return (
-    <Flex direction={"row"} h={"100vh"} w={"100vw"} p={"0"} m={"0"} bg={"gray.50"}>
+    <Flex direction={{base: "column", sm: "row"}} h={"100vh"} w={"100vw"} p={"0"} m={"0"}>
       <Navigation />
       <Flex direction={"column"} w={"100%"}>
-        <Flex h={"6vh"} bg={"white"} align={"center"} justify={"center"}>
+        <Flex h={"6vh"} bg={"white"} align={"center"} justify={"center"} display={{ base: "none", sm: "flex" }}>
           <SearchBox />
         </Flex>
         <Flex p={"2"}>

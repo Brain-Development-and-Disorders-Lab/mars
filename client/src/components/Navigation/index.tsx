@@ -3,7 +3,6 @@ import React, { ReactNode } from "react";
 import {
   Box,
   Flex,
-  Avatar,
   Link,
   IconButton,
   Button,
@@ -19,8 +18,6 @@ import {
   Image,
   Heading,
   VStack,
-  Spacer,
-  Text,
 } from "@chakra-ui/react";
 import {
   HamburgerIcon,
@@ -63,18 +60,20 @@ const Navigation = () => {
 
   return (
     <Box px={4} bg={"white"}>
-      <Flex justifyContent={"space-between"} direction={"column"} h={"100%"}>
-        {/* Icon to show menu in responsive context */}
-        <IconButton
-          size={"md"}
-          icon={isOpen ? <BsXLg /> : <HamburgerIcon />}
-          aria-label={"Open Menu"}
-          display={{ md: "none" }}
-          onClick={isOpen ? onClose : onOpen}
-        />
+      <Flex justifyContent={"space-between"} direction={"column"}>
+        <Flex pt={"2"} pb={"2"}>
+          {/* Icon to show menu in responsive context */}
+          <IconButton
+            size={"md"}
+            icon={isOpen ? <BsXLg /> : <HamburgerIcon />}
+            aria-label={"Open Menu"}
+            display={{ md: "none" }}
+            onClick={isOpen ? onClose : onOpen}
+          />
+        </Flex>
 
         {/* Main navigation group */}
-        <VStack spacing={8} align={"center"}>
+        <VStack spacing={8} align={"center"} h={"100%"}>
           <VStack as={"nav"} spacing={4} display={{ base: "none", md: "flex" }}>
             {/* Icon */}
             <Flex direction={"row"} m={"2"} p={"2"} gap={"2"}>
@@ -148,24 +147,6 @@ const Navigation = () => {
             </Flex>
           </VStack>
         </VStack>
-
-        <Spacer />
-
-        {/* Search and Avatar component */}
-        <Flex alignItems={"center"} gap={"4"} p={"2"}>
-          <Menu>
-            <MenuButton
-              as={Button}
-              rounded={"full"}
-              variant={"link"}
-              cursor={"pointer"}
-              minW={0}
-            >
-              <Avatar size={"sm"} />
-            </MenuButton>
-          </Menu>
-          <Text as={"b"}>User</Text>
-        </Flex>
       </Flex>
 
       {/* Responsive display */}

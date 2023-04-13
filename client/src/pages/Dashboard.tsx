@@ -156,7 +156,7 @@ const Dashboard = () => {
                               Name
                             </Heading>
                           </Th>
-                          <Th>
+                          <Th display={{ base: "none", sm: "table-cell" }}>
                             <Heading fontWeight={"semibold"} size={"sm"}>
                               Description
                             </Heading>
@@ -169,7 +169,9 @@ const Dashboard = () => {
                           return (
                             <Tr key={collection._id}>
                               <Td>{collection.name}</Td>
-                              <Td><Text noOfLines={1}>{collection.description}</Text></Td>
+                              <Td display={{ base: "none", sm: "table-cell" }}>
+                                <Text noOfLines={1}>{collection.description}</Text>
+                              </Td>
                               <Td>
                                 <Flex justify={"right"}>
                                   <Button
@@ -242,7 +244,7 @@ const Dashboard = () => {
                               Name
                             </Heading>
                           </Th>
-                          <Th>
+                          <Th display={{ base: "none", sm: "table-cell" }}>
                             <Heading fontWeight={"semibold"} size={"sm"}>
                               Description
                             </Heading>
@@ -256,7 +258,9 @@ const Dashboard = () => {
                           return (
                             <Tr key={entity._id}>
                               <Td>{entity.name}</Td>
-                              <Td><Text noOfLines={1}>{entity.description}</Text></Td>
+                              <Td display={{ base: "none", sm: "table-cell" }}>
+                                <Text noOfLines={1}>{entity.description}</Text>
+                              </Td>
                               <Td>
                                 <Flex justify={"right"}>
                                   <Button
@@ -353,7 +357,7 @@ const Dashboard = () => {
                               {operationIcon}
                             </Flex>
 
-                            <Text>{update.details}</Text>
+                            <Text display={{ base: "none", sm: "block" }}>{update.details}</Text>
 
                             <Linky id={update.target.id} type={update.target.type} fallback={update.target.name} />
 

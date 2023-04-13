@@ -1,5 +1,5 @@
 import React, { Dispatch, SetStateAction } from "react";
-import { Button, Flex, Icon, StackDivider, Text, VStack } from "@chakra-ui/react";
+import { Button, Flex, Icon, Text, VStack } from "@chakra-ui/react";
 import { AiOutlineLink } from "react-icons/ai";
 import { BsBox } from "react-icons/bs";
 import { MdDateRange, MdOutlineTextFields } from "react-icons/md";
@@ -58,7 +58,7 @@ const ParameterGroup = (props: {
   };
 
   return (
-    <Flex direction={"column"} gap={"2"} w={"100%"}>
+    <Flex direction={"column"} gap={"2"} w={"100%"} align={"center"}>
       {/* Button Group */}
       {!props.viewOnly && (
         <Flex
@@ -170,14 +170,11 @@ const ParameterGroup = (props: {
       <Flex
         p={["1", "2"]}
         direction={"column"}
-        gap={"2"}
+        gap={"1"}
         rounded={"lg"}
+        maxW={"lg"}
       >
-        <VStack
-          divider={<StackDivider />}
-          spacing={4}
-          align={"stretch"}
-        >
+        <VStack spacing={4}>
           {props.parameters.length > 0 ? (
             props.parameters.map((parameter) => {
               switch (parameter.type) {

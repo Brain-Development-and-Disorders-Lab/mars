@@ -116,7 +116,7 @@ export type Collection = {
   name: string;
   description: string;
   owner: string;
-  created: Date;
+  created: string;
   entities: string[];
 };
 

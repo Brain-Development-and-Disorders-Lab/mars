@@ -38,6 +38,9 @@ import { useToken } from "./authentication/useToken";
 // Variables
 import { DEVELOPER_MODE } from "./variables";
 
+// Theme extension
+import { theme } from "./styles/theme";
+
 /**
  *
  * @return {ReactElement}
@@ -48,7 +51,7 @@ export const App = (): ReactElement => {
 
   return (
     <BrowserRouter>
-      <ChakraProvider>
+      <ChakraProvider theme={theme}>
         <PageContainer>
           {!token && !DEVELOPER_MODE ? (
             <Login setToken={setToken} />

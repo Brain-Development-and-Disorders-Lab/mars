@@ -82,7 +82,7 @@ export const Start = ({}) => {
         maxW={"7xl"}
         wrap={"wrap"}
       >
-        <Flex direction={"column"} w={["full", "4xl", "7xl"]} p={"2"} bg={"white"} rounded={"md"}>
+        <Flex direction={"column"} w={"100%"} p={"2"} bg={"white"} rounded={"md"}>
           {/* Page header */}
           <Flex direction={"column"} p={"2"} pt={"4"} pb={"4"}>
             <Flex direction={"row"} align={"center"} justify={"space-between"}>
@@ -106,7 +106,7 @@ export const Start = ({}) => {
             pb={"6"}
             mb={["12", "8"]}
           >
-            <Flex direction={"column"} gap={"2"} w={["full", "4xl"]} maxW={"4xl"}>
+            <Flex direction={"column"} w={"100%"}>
               <Heading fontWeight={"semibold"} size={"lg"}>
                 Details
               </Heading>
@@ -115,8 +115,10 @@ export const Start = ({}) => {
                 metadata associated with this template should be specified using
                 Parameters.
               </Text>
+            </Flex>
 
-              <Flex direction="row" gap={"4"} wrap={["wrap", "nowrap"]}>
+            <Flex direction={"row"} gap={"2"} w={"100%"} maxW={"4xl"}>
+              <Flex direction={"column"} gap={"4"} wrap={["wrap", "nowrap"]}>
                 <FormControl isRequired>
                   <FormLabel>Name</FormLabel>
                   <Input
@@ -147,54 +149,42 @@ export const Start = ({}) => {
                 </FormControl>
               </Flex>
 
-              <FormControl isRequired isInvalid={isParametersError}>
-                <FormLabel>Parameters</FormLabel>
-                {isParametersError && (
-                  <FormErrorMessage>Specify at least one Parameter.</FormErrorMessage>
-                )}
-                <ParameterGroup
-                  parameters={parameters}
-                  viewOnly={false}
-                  setParameters={setParameters}
-                />
-              </FormControl>
+              <Flex>
+                <FormControl isRequired isInvalid={isParametersError}>
+                  <FormLabel>Parameters</FormLabel>
+                  {isParametersError && (
+                    <FormErrorMessage>Specify at least one Parameter.</FormErrorMessage>
+                  )}
+                  <ParameterGroup
+                    parameters={parameters}
+                    viewOnly={false}
+                    setParameters={setParameters}
+                  />
+                </FormControl>
+              </Flex>
             </Flex>
           </Flex>
-        </Flex>
-      </Flex>
 
-      {/* Action buttons */}
-      <Flex
-        direction={"row"}
-        flexWrap={"wrap"}
-        gap={"6"}
-        justify={"space-between"}
-        alignSelf={"center"}
-        w={["sm", "xl", "3xl"]}
-        maxW={"7xl"}
-        p={"4"}
-        m={"4"}
-        position={"fixed"}
-        bottom={"0%"}
-        bg={"white"}
-        rounded={"md"}
-      >
-        <Button
-          colorScheme={"red"}
-          variant={"outline"}
-          rightIcon={<BsXLg />}
-          onClick={() => navigate("/attributes")}
-        >
-          Cancel
-        </Button>
-        <Button
-          colorScheme={"green"}
-          rightIcon={<CheckIcon />}
-          onClick={onSubmit}
-          isDisabled={isDetailsError && !isSubmitting}
-        >
-          Finish
-        </Button>
+          {/* Action buttons */}
+          <Flex p={"2"} alignSelf={"center"} gap={"8"}>
+            <Button
+              colorScheme={"red"}
+              variant={"outline"}
+              rightIcon={<BsXLg />}
+              onClick={() => navigate("/attributes")}
+            >
+              Cancel
+            </Button>
+            <Button
+              colorScheme={"green"}
+              rightIcon={<CheckIcon />}
+              onClick={onSubmit}
+              isDisabled={isDetailsError && !isSubmitting}
+            >
+              Finish
+            </Button>
+          </Flex>
+        </Flex>
       </Flex>
 
       {/* Information modal */}
