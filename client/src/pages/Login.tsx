@@ -34,14 +34,23 @@ const Login = (props: { setToken: (token: string) => void }) => {
   const performLogin = (credentials: {username: string, password: string}) => {
     postData(`/login`, credentials)
       .then((response) => {
+        if (_.isEqual(response.status, "error")) {
+          toast({
+            title: "Error",
+            status: "error",
+            description: "Incorrect username or password. Please try again.",
+            duration: 4000,
+            position: "bottom-right",
+            isClosable: true,
+          });
+        }
         props.setToken(response.token);
         setIsLoading(false);
-      })
-      .catch((_error) => {
+      }).catch((_error) => {
         toast({
           title: "Error",
           status: "error",
-          description: "Incorrect username or password. Please try again.",
+          description: "Could not perform login right now.",
           duration: 4000,
           position: "bottom-right",
           isClosable: true,
