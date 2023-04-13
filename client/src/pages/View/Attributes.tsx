@@ -17,7 +17,7 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { ChevronRightIcon, AddIcon } from "@chakra-ui/icons";
-import { BsGear } from "react-icons/bs";
+import { BsPuzzle } from "react-icons/bs";
 
 // Custom components
 import { Error } from "@components/Error";
@@ -83,7 +83,7 @@ const Attributes = () => {
               align={"center"}
             >
               <Flex align={"center"} gap={"4"}>
-                <Icon as={BsGear} w={"8"} h={"8"} />
+                <Icon as={BsPuzzle} w={"8"} h={"8"} />
                 <Heading fontWeight={"semibold"}>Attributes</Heading>
               </Flex>
               <Button

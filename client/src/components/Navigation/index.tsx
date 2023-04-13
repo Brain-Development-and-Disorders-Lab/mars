@@ -27,7 +27,7 @@ import {
   SearchIcon,
   AddIcon,
 } from "@chakra-ui/icons";
-import { BsBox, BsCollection, BsGear } from "react-icons/bs";
+import { BsBox, BsFolder, BsPuzzle } from "react-icons/bs";
 
 // Router navigation
 import { useNavigate } from "react-router-dom";
@@ -99,10 +99,10 @@ const Navigation = () => {
                 <MenuItem icon={<BsBox />} onClick={() => navigate("/create/entity/start")}>
                   Entity
                 </MenuItem>
-                <MenuItem icon={<BsCollection />} onClick={() => navigate("/create/collection/start")}>
+                <MenuItem icon={<BsFolder />} onClick={() => navigate("/create/collection/start")}>
                   Collection
                 </MenuItem>
-                <MenuItem icon={<BsGear />} onClick={() => navigate("/create/attribute/start")}>
+                <MenuItem icon={<BsPuzzle />} onClick={() => navigate("/create/attribute/start")}>
                   Attribute
                 </MenuItem>
               </MenuList>
@@ -123,10 +123,10 @@ const Navigation = () => {
                 <MenuItem icon={<BsBox />} onClick={() => navigate("/entities")}>
                   Entities
                 </MenuItem>
-                <MenuItem icon={<BsCollection />} onClick={() => navigate("/collections")}>
+                <MenuItem icon={<BsFolder />} onClick={() => navigate("/collections")}>
                   Collections
                 </MenuItem>
-                <MenuItem icon={<BsGear />} onClick={() => navigate("/attributes")}>
+                <MenuItem icon={<BsPuzzle />} onClick={() => navigate("/attributes")}>
                   Attributes
                 </MenuItem>
               </MenuList>
@@ -187,7 +187,7 @@ const Navigation = () => {
                   </NavigationElement>
                 </Flex>
                 <Flex direction={"row"} align={"center"}>
-                  <Icon as={BsCollection} />
+                  <Icon as={BsFolder} />
                   <NavigationElement
                     href={"/create/collection/start"}
                     onClick={isOpen ? onClose : onOpen}
@@ -196,7 +196,7 @@ const Navigation = () => {
                   </NavigationElement>
                 </Flex>
                 <Flex direction={"row"} align={"center"}>
-                  <Icon as={BsGear} />
+                  <Icon as={BsPuzzle} />
                   <NavigationElement
                     href={"/create/attribute/start"}
                     onClick={isOpen ? onClose : onOpen}
@@ -224,7 +224,7 @@ const Navigation = () => {
                   </NavigationElement>
                 </Flex>
                 <Flex direction={"row"} align={"center"}>
-                  <Icon as={BsCollection} />
+                  <Icon as={BsFolder} />
                   <NavigationElement
                     href={"/collections"}
                     onClick={isOpen ? onClose : onOpen}
@@ -233,7 +233,7 @@ const Navigation = () => {
                   </NavigationElement>
                 </Flex>
                 <Flex direction={"row"} align={"center"}>
-                  <Icon as={BsGear} />
+                  <Icon as={BsPuzzle} />
                   <NavigationElement
                     href={"/attributes"}
                     onClick={isOpen ? onClose : onOpen}

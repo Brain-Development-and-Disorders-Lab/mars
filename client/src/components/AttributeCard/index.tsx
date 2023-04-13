@@ -27,7 +27,7 @@ import { InfoOutlineIcon } from "@chakra-ui/icons";
 import { AiOutlineBlock, AiOutlineLink } from "react-icons/ai";
 import { MdDateRange, MdOutlineTextFields } from "react-icons/md";
 import { RiNumbersLine } from "react-icons/ri";
-import { BsGear } from "react-icons/bs";
+import { BsPuzzle } from "react-icons/bs";
 
 import _ from "lodash";
 
@@ -46,7 +46,7 @@ const AttributeCard = (props: AttributeCardProps) => {
       <CardHeader p={"2"}>
         <Flex p={"2"} align={"center"} m={"none"} justify={"space-between"} gap={"4"}>
           <Flex align={"center"} gap={"2"}>
-            <Icon as={BsGear} w={"4"} h={"4"} />
+            <Icon as={BsPuzzle} w={"4"} h={"4"} />
             <Heading size={"md"} noOfLines={1}>{props.data.name}</Heading>
           </Flex>
 
@@ -174,7 +174,7 @@ const AttributeCard = (props: AttributeCardProps) => {
                 wrap={"wrap"}
               >
                 <Flex align={"center"} gap={"4"} shadow={"lg"} p={"2"} border={"2px"} rounded={"10px"}>
-                  <Icon as={BsGear} w={"8"} h={"8"} />
+                  <Icon as={BsPuzzle} w={"8"} h={"8"} />
                   <Heading fontWeight={"semibold"} size={"md"}>{props.data.name}</Heading>
                 </Flex>
               </Flex>
