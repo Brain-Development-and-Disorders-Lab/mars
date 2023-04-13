@@ -33,7 +33,7 @@ import {
 import { useNavigate } from "react-router-dom";
 
 // Database and models
-import { postData } from "@database/functions";
+import { getData, postData } from "@database/functions";
 import { EntityModel } from "@types";
 
 // Custom components
@@ -58,26 +58,35 @@ const Search = () => {
   const [results, setResults] = useState([] as EntityModel[]);
 
   const runSearch = () => {
-    // Update state
-    setIsSearching(true);
-    setHasSearched(true);
+    // Check if an ID has been entered
+    let isEntity = false;
+    getData(`/entities/${query}`).then((entity) => {
+      isEntity = true;
+      navigate(`/entities/${entity._id}`);
+    }).finally(() => {
+      if (!isEntity) {
+        // Update state
+        setIsSearching(true);
+        setHasSearched(true);
 
-    postData(`/search`, { query: query })
-      .then((value) => {
-        setResults(value);
-      }).catch((_error) => {
-        toast({
-          title: "Error",
-          status: "error",
-          description: "Could not get search results.",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-        setIsError(true);
-      }).finally(() => {
-        setIsSearching(false);
-      });
+        postData(`/search`, { query: query })
+          .then((value) => {
+            setResults(value);
+          }).catch((_error) => {
+            toast({
+              title: "Error",
+              status: "error",
+              description: "Could not get search results.",
+              duration: 4000,
+              position: "bottom-right",
+              isClosable: true,
+            });
+            setIsError(true);
+          }).finally(() => {
+            setIsSearching(false);
+          });
+      }
+    });
   };
 
   return (
