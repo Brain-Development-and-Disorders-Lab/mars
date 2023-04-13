@@ -12,7 +12,7 @@
     "lint": "prettier --write ."
   },
   "dependencies": {
-    "consola": "^2.15.3",
+    "consola": "^3.0.2",
     "cors": "^2.8.5",
     "dayjs": "^1.11.7",
     "dotenv": "^16.0.1",

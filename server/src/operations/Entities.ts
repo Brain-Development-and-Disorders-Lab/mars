@@ -26,7 +26,7 @@ export class Entities {
    * @return {Promise<EntityModel>}
    */
   static create = (entity: any): Promise<EntityModel> => {
-    consola.info("Creating new Entity:", entity.name);
+    consola.start("Creating new Entity:", entity.name);
 
     // Allocate a new identifier and join with Entity data
     entity["_id"] = getIdentifier("entity");
@@ -107,7 +107,7 @@ export class Entities {
    * @return {Promise<EntityModel>}
    */
   static update = (updatedEntity: EntityModel): Promise<EntityModel> => {
-    consola.info("Updating Entity:", updatedEntity.name);
+    consola.start("Updating Entity:", updatedEntity.name);
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES_COLLECTION)
@@ -306,7 +306,7 @@ export class Entities {
     entity: { name: string; id: string },
     product: { name: string; id: string }
   ): Promise<{ name: string; id: string }> => {
-    consola.info("Adding Product", product.name, "to Entity", entity.name);
+    consola.start("Adding Product", product.name, "to Entity", entity.name);
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES_COLLECTION)
@@ -356,7 +356,7 @@ export class Entities {
     entity: { name: string; id: string },
     product: { name: string; id: string }
   ): Promise<{ name: string; id: string }> => {
-    consola.info("Removing Product", product.name, "from Entity", entity.name);
+    consola.start("Removing Product", product.name, "from Entity", entity.name);
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES_COLLECTION)
@@ -411,7 +411,7 @@ export class Entities {
     entity: string,
     collection: string
   ): Promise<string> => {
-    consola.info(
+    consola.start(
       "Adding Entity (id):",
       entity.toString(),
       "to Collection (id):",
@@ -460,7 +460,7 @@ export class Entities {
     entity: string,
     collection: string
   ): Promise<string> => {
-    consola.info(
+    consola.start(
       "Removing Entity (id):",
       entity.toString(),
       "from Collection (id):",
@@ -520,7 +520,7 @@ export class Entities {
     entity: { name: string; id: string },
     origin: { name: string; id: string }
   ): Promise<{ name: string; id: string }> => {
-    consola.info("Adding Origin", origin.name, "to Entity", entity.name);
+    consola.start("Adding Origin", origin.name, "to Entity", entity.name);
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES_COLLECTION)
@@ -576,7 +576,7 @@ export class Entities {
     entity: { name: string; id: string },
     origin: { name: string; id: string }
   ): Promise<{ name: string; id: string }> => {
-    consola.info("Removing Origin", origin.name, "from Entity", entity.name);
+    consola.start("Removing Origin", origin.name, "from Entity", entity.name);
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES_COLLECTION)
@@ -635,7 +635,7 @@ export class Entities {
     entity: { name: string; id: string },
     description: string
   ): Promise<{ name: string; id: string }> => {
-    consola.info(
+    consola.start(
       "Setting description of Entity",
       entity.name,
       "to",
@@ -709,7 +709,7 @@ export class Entities {
    * @return {Promise<EntityModel>}
    */
   static getOne = (id: string): Promise<EntityModel> => {
-    consola.info("Retrieving Entity (id):", id.toString());
+    consola.start("Retrieving Entity (id):", id.toString());
     return new Promise((resolve, reject) => {
       getDatabase()
         .collection(ENTITIES_COLLECTION)
@@ -732,7 +732,7 @@ export class Entities {
    * @return {Promise<string>}
    */
   static getData = (entityExportData: { id: string, fields: string[] }): Promise<string> => {
-    consola.info("Generating data for Entity (id):", entityExportData.id.toString());
+    consola.start("Generating data for Entity (id):", entityExportData.id.toString());
     return new Promise((resolve, reject) => {
       getDatabase()
         .collection(ENTITIES_COLLECTION)
@@ -801,7 +801,7 @@ export class Entities {
   }
 
   static delete = (id: string): Promise<EntityModel> => {
-    consola.info("Deleting Entity (id):", id.toString());
+    consola.start("Deleting Entity (id):", id.toString());
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES_COLLECTION)

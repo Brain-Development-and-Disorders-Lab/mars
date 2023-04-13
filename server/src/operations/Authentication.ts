@@ -11,7 +11,7 @@ export class Authentication {
    * @return {Promise<string>}
    */
   static login = (password: string): Promise<string> => {
-    consola.info("Performing login...");
+    consola.start("Performing login...");
     return new Promise((resolve, reject) => {
       const encoder = new TextEncoder();
       const defaultPassword = encoder.encode(process.env.DEFAULT_PASSWORD || "");

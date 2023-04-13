@@ -19,7 +19,7 @@ export class Attributes {
    * @return {Promise<AttributeModel>}
    */
   static create = (attribute: any): Promise<AttributeModel> => {
-    consola.info("Creating new Attribute:", attribute.name);
+    consola.start("Creating new Attribute:", attribute.name);
     return new Promise((resolve, _reject) => {
       // Allocate a new identifier and join with Attribute data
       attribute["_id"] = getIdentifier("attribute");
@@ -93,7 +93,7 @@ export class Attributes {
   };
 
   static delete = (id: string): Promise<AttributeModel> => {
-    consola.info("Deleting Attribute (id):", id.toString());
+    consola.start("Deleting Attribute (id):", id.toString());
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ATTRIBUTES)
