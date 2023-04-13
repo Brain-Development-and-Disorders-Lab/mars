@@ -31,9 +31,9 @@
     "nanoid": "^4.0.2",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
-    "react-flow-renderer": "^10.3.17",
     "react-icons": "^4.8.0",
     "react-router-dom": "^6.3.0",
+    "reactflow": "^11.7.0",
     "slugify": "^1.6.6",
     "table": "^6.8.1"
   },

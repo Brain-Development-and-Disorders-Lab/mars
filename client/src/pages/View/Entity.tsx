@@ -51,8 +51,7 @@ import {
   WarningIcon,
 } from "@chakra-ui/icons";
 import { AiOutlineEdit } from "react-icons/ai";
-import { BsBox, BsDownload, BsPrinter } from "react-icons/bs";
-import { SlGraph } from "react-icons/sl";
+import { BsBox, BsDiagram2, BsDownload } from "react-icons/bs";
 
 // Navigation
 import { useParams, useNavigate } from "react-router-dom";
@@ -349,6 +348,11 @@ export const Entity = () => {
       });
   };
 
+  const handleEntityNodeClick = (id: string) => {
+    onGraphClose();
+    navigate(`/entities/${id}`);
+  };
+
   // Add Products to the Entity state
   const addProducts = (products: string[]): void => {
     setEntityProducts([
@@ -467,19 +471,19 @@ export const Entity = () => {
                 </Button>
                 <Button
                   onClick={onGraphOpen}
-                  rightIcon={<Icon as={SlGraph} />}
+                  rightIcon={<Icon as={BsDiagram2} />}
                   colorScheme={"orange"}
                   isDisabled={editing}
                 >
-                  View Graph
+                  Links
                 </Button>
                 <Button
                   onClick={handleExportClick}
-                  rightIcon={<Icon as={BsPrinter} />}
+                  rightIcon={<Icon as={BsDownload} />}
                   colorScheme={"blue"}
                   isDisabled={editing}
                 >
-                  Export CSV
+                  Export
                 </Button>
               </Flex>
             </Flex>
@@ -1184,11 +1188,11 @@ export const Entity = () => {
             >
               <ModalOverlay />
               <ModalContent>
-                <ModalHeader>Graph: {entityData.name}</ModalHeader>
+                <ModalHeader>Relations: {entityData.name}</ModalHeader>
                 <ModalCloseButton />
                 <ModalBody>
                   <Container h={"90vh"} minW={"90vw"}>
-                    <Graph id={entityData._id} />
+                    <Graph id={entityData._id} entityNavigateHook={handleEntityNodeClick} />
                   </Container>
                 </ModalBody>
               </ModalContent>
