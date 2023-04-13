@@ -116,10 +116,13 @@ const Collections = () => {
                           <Heading size={"sm"}>Name</Heading>
                         </Th>
                         <Th display={{ base: "none", sm: "table-cell" }}>
+                          <Heading size={"sm"}>Description</Heading>
+                        </Th>
+                        <Th display={{ base: "none", sm: "table-cell" }}>
                           <Heading size={"sm"}>Owner</Heading>
                         </Th>
                         <Th display={{ base: "none", sm: "table-cell" }}>
-                          <Heading size={"sm"}>Description</Heading>
+                          <Heading size={"sm"}>Count</Heading>
                         </Th>
                         <Th></Th>
                       </Tr>
@@ -143,6 +146,20 @@ const Collections = () => {
                               )}
                             </Td>
                             <Td display={{ base: "none", sm: "table-cell" }}>
+                              {_.isEqual(collection.description, "") ? (
+                                <Tag
+                                  size={"md"}
+                                  key={`warn-${collection._id}`}
+                                  colorScheme={"orange"}
+                                >
+                                  <TagLabel>Not specified</TagLabel>
+                                  <TagRightIcon as={WarningIcon} />
+                                </Tag>
+                              ) : (
+                                <Text noOfLines={2}>{collection.description}</Text>
+                              )}
+                            </Td>
+                            <Td display={{ base: "none", sm: "table-cell" }}>
                               {_.isEqual(collection.owner, "") ? (
                                 <Tag
                                   size={"md"}
@@ -157,17 +174,17 @@ const Collections = () => {
                               )}
                             </Td>
                             <Td display={{ base: "none", sm: "table-cell" }}>
-                              {_.isEqual(collection.description, "") ? (
+                              {_.isEqual(collection.entities.length, 0) ? (
                                 <Tag
                                   size={"md"}
                                   key={`warn-${collection._id}`}
                                   colorScheme={"orange"}
                                 >
-                                  <TagLabel>Not specified</TagLabel>
+                                  <TagLabel>Empty</TagLabel>
                                   <TagRightIcon as={WarningIcon} />
                                 </Tag>
                               ) : (
-                                <Text noOfLines={2}>{collection.description}</Text>
+                                <Text noOfLines={1}>{collection.entities.length}</Text>
                               )}
                             </Td>
                             <Td>

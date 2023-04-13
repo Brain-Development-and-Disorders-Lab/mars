@@ -1100,7 +1100,7 @@ export const Entity = () => {
                               Owner: {entityData.owner}
                             </Checkbox>
                             <Checkbox onChange={(event) => handleExportCheck("description", event.target.checked)}>
-                              Description: <Text noOfLines={1}>{entityDescription}</Text>
+                              <Text noOfLines={1}>Description: {entityDescription}</Text>
                             </Checkbox>
                           </Stack>
                         </CheckboxGroup>
@@ -1108,37 +1108,34 @@ export const Entity = () => {
                         <Text>Loading details</Text>
                       )}
                     </FormControl>
-
                     <FormControl>
                       <FormLabel>Associations: Origins</FormLabel>
-                      {isLoaded ? (
-                        entityOrigins.length > 0 &&
-                          <Stack spacing={2} direction={"column"}>
-                            {entityOrigins.map((origin) => {
-                              return (
-                                <Checkbox key={origin.id} onChange={(event) => handleExportCheck(`origin_${origin.id}`, event.target.checked)}>
-                                  Origin: {origin.name}
-                                </Checkbox>
-                              );
-                            })}
-                          </Stack>
+                      {isLoaded && entityOrigins.length > 0 ? (
+                        <Stack spacing={2} direction={"column"}>
+                          {entityOrigins.map((origin) => {
+                            return (
+                              <Checkbox key={origin.id} onChange={(event) => handleExportCheck(`origin_${origin.id}`, event.target.checked)}>
+                                Origin: {origin.name}
+                              </Checkbox>
+                            );
+                          })}
+                        </Stack>
                       ) : (
                         <Text>No Origins</Text>
                       )}
                     </FormControl>
                     <FormControl>
                       <FormLabel>Associations: Products</FormLabel>
-                      {isLoaded ? (
-                        entityProducts.length > 0 &&
-                          <Stack spacing={2} direction={"column"}>
-                            {entityProducts.map((product) => {
-                              return (
-                                <Checkbox key={product.id} onChange={(event) => handleExportCheck(`product_${product.id}`, event.target.checked)}>
-                                  Product: {product.name}
-                                </Checkbox>
-                              );
-                            })}
-                          </Stack>
+                      {isLoaded  && entityProducts.length > 0 ? (
+                        <Stack spacing={2} direction={"column"}>
+                          {entityProducts.map((product) => {
+                            return (
+                              <Checkbox key={product.id} onChange={(event) => handleExportCheck(`product_${product.id}`, event.target.checked)}>
+                                Product: {product.name}
+                              </Checkbox>
+                            );
+                          })}
+                        </Stack>
                       ) : (
                         <Text>No Products</Text>
                       )}
@@ -1148,17 +1145,16 @@ export const Entity = () => {
                   <Flex direction={"column"} p={"2"} gap={"2"}>
                     <FormControl>
                       <FormLabel>Attributes</FormLabel>
-                      {isLoaded ? (
-                        entityAttributes.length > 0 &&
-                          <Stack spacing={2} direction={"column"}>
-                            {entityAttributes.map((attribute) => {
-                              return (
-                                <Checkbox key={attribute.name} onChange={(event) => handleExportCheck(`attribute_${attribute._id}`, event.target.checked)}>
-                                  {attribute.name}
-                                </Checkbox>
-                              );
-                            })}
-                          </Stack>
+                      {isLoaded  && entityAttributes.length > 0 ? (
+                        <Stack spacing={2} direction={"column"}>
+                          {entityAttributes.map((attribute) => {
+                            return (
+                              <Checkbox key={attribute.name} onChange={(event) => handleExportCheck(`attribute_${attribute._id}`, event.target.checked)}>
+                                {attribute.name}
+                              </Checkbox>
+                            );
+                          })}
+                        </Stack>
                       ) : (
                         <Text>No Attributes</Text>
                       )}

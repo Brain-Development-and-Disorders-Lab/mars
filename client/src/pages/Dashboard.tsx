@@ -12,10 +12,6 @@ import {
   Tr,
   Th,
   useToast,
-  Stat,
-  StatLabel,
-  StatNumber,
-  StatHelpText,
   Spacer,
   List,
   ListItem,
@@ -142,25 +138,13 @@ const Dashboard = () => {
                     <Heading fontWeight={"semibold"}>Collections</Heading>
                   </Flex>
                   <Button
-                    key={`view-collection-all`}
-                    colorScheme={"blackAlpha"}
-                    rightIcon={<ChevronRightIcon />}
-                    onClick={() => navigate(`/collections`)}
+                    colorScheme={"green"}
+                    leftIcon={<AddIcon />}
+                    onClick={() => navigate("/create/collection/start")}
                   >
-                    View All
+                    Create
                   </Button>
                 </Flex>
-
-                <Stat
-                  rounded={"md"}
-                  background={"white"}
-                  p={"2"}
-                  maxW={"fit-content"}
-                >
-                  <StatLabel>Total Collections</StatLabel>
-                  <StatNumber>{collectionData.length}</StatNumber>
-                  <StatHelpText>Updated just now.</StatHelpText>
-                </Stat>
 
                 <Spacer />
 
@@ -175,16 +159,11 @@ const Dashboard = () => {
                             </Heading>
                           </Th>
                           <Th>
-                            <Flex justify={"right"}>
-                              <Button
-                                colorScheme={"green"}
-                                leftIcon={<AddIcon />}
-                                onClick={() => navigate("/create/collection/start")}
-                              >
-                                Create
-                              </Button>
-                            </Flex>
+                            <Heading fontWeight={"semibold"} size={"sm"}>
+                              Description
+                            </Heading>
                           </Th>
+                          <Th></Th>
                         </Tr>
                       </Thead>
                       <Tbody>
@@ -192,6 +171,7 @@ const Dashboard = () => {
                           return (
                             <Tr key={collection._id}>
                               <Td>{collection.name}</Td>
+                              <Td><Text noOfLines={1}>{collection.description}</Text></Td>
                               <Td>
                                 <Flex justify={"right"}>
                                   <Button
@@ -215,6 +195,19 @@ const Dashboard = () => {
                 ) : (
                   <Text>There are no Collections to display.</Text>
                 )}
+
+                <Spacer />
+
+                <Flex justify={"right"}>
+                  <Button
+                    key={`view-collection-all`}
+                    colorScheme={"blackAlpha"}
+                    rightIcon={<ChevronRightIcon />}
+                    onClick={() => navigate(`/collections`)}
+                  >
+                    View All
+                  </Button>
+                </Flex>
               </Flex>
 
               {/* Entities listing */}
@@ -231,25 +224,13 @@ const Dashboard = () => {
                     <Heading fontWeight={"semibold"}>Entities</Heading>
                   </Flex>
                   <Button
-                    key={`view-entity-all`}
-                    colorScheme={"blackAlpha"}
-                    rightIcon={<ChevronRightIcon />}
-                    onClick={() => navigate(`/entities`)}
+                    colorScheme={"green"}
+                    leftIcon={<AddIcon />}
+                    onClick={() => navigate("/create/entity/start")}
                   >
-                    View All
+                    Create
                   </Button>
                 </Flex>
-
-                <Stat
-                  rounded={"md"}
-                  background={"white"}
-                  p={"2"}
-                  maxW={"fit-content"}
-                >
-                  <StatLabel>Total Entities</StatLabel>
-                  <StatNumber>{entityData.length}</StatNumber>
-                  <StatHelpText>Updated just now.</StatHelpText>
-                </Stat>
 
                 <Spacer />
 
@@ -264,16 +245,11 @@ const Dashboard = () => {
                             </Heading>
                           </Th>
                           <Th>
-                            <Flex justify={"right"}>
-                              <Button
-                                colorScheme={"green"}
-                                leftIcon={<AddIcon />}
-                                onClick={() => navigate("/create/entity/start")}
-                              >
-                                Create
-                              </Button>
-                            </Flex>
+                            <Heading fontWeight={"semibold"} size={"sm"}>
+                              Description
+                            </Heading>
                           </Th>
+                          <Th></Th>
                         </Tr>
                       </Thead>
 
@@ -282,6 +258,7 @@ const Dashboard = () => {
                           return (
                             <Tr key={entity._id}>
                               <Td>{entity.name}</Td>
+                              <Td><Text noOfLines={1}>{entity.description}</Text></Td>
                               <Td>
                                 <Flex justify={"right"}>
                                   <Button
@@ -305,6 +282,19 @@ const Dashboard = () => {
                 ) : (
                   <Text>There are no Entities to display.</Text>
                 )}
+
+                <Spacer />
+
+                <Flex justify={"right"}>
+                  <Button
+                    key={`view-entity-all`}
+                    colorScheme={"blackAlpha"}
+                    rightIcon={<ChevronRightIcon />}
+                    onClick={() => navigate(`/entities`)}
+                  >
+                    View All
+                  </Button>
+                </Flex>
               </Flex>
             </Flex>
 

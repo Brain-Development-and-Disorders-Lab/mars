@@ -31,6 +31,7 @@ import { EntityModel } from "@types";
 
 // Utility libraries
 import _ from "lodash";
+import dayjs from "dayjs";
 
 // Custom components
 import { ContentContainer } from "@components/ContentContainer";
@@ -81,6 +82,8 @@ const Entities = () => {
             wrap={"wrap"}
           >
             <Flex
+              pt={"4"}
+              pb={"4"}
               direction={"row"}
               justify={"space-between"}
               align={"center"}
@@ -116,10 +119,13 @@ const Entities = () => {
                           <Heading size={"sm"}>Name</Heading>
                         </Th>
                         <Th display={{ base: "none", sm: "table-cell" }}>
+                          <Heading size={"sm"}>Description</Heading>
+                        </Th>
+                        <Th display={{ base: "none", sm: "table-cell" }}>
                           <Heading size={"sm"}>Owner</Heading>
                         </Th>
                         <Th display={{ base: "none", sm: "table-cell" }}>
-                          <Heading size={"sm"}>Description</Heading>
+                          <Heading size={"sm"}>Created</Heading>
                         </Th>
                         <Th></Th>
                       </Tr>
@@ -129,20 +135,6 @@ const Entities = () => {
                         return (
                           <Tr key={entity._id}>
                             <Td>{entity.name}</Td>
-                            <Td display={{ base: "none", sm: "table-cell" }}>
-                              {_.isEqual(entity.owner, "") ? (
-                                <Tag
-                                  size={"md"}
-                                  key={`warn-${entity._id}`}
-                                  colorScheme={"orange"}
-                                >
-                                  <TagLabel>Not specified</TagLabel>
-                                  <TagRightIcon as={WarningIcon} />
-                                </Tag>
-                              ) : (
-                                entity.owner
-                              )}
-                            </Td>
                             <Td display={{ base: "none", sm: "table-cell" }}>
                               <Text noOfLines={2}>
                                 {_.isEqual(entity.description, "") ? (
@@ -158,6 +150,34 @@ const Entities = () => {
                                   entity.description
                                 )}
                               </Text>
+                            </Td>
+                            <Td display={{ base: "none", sm: "table-cell" }}>
+                              {_.isEqual(entity.owner, "") ? (
+                                <Tag
+                                  size={"md"}
+                                  key={`warn-${entity._id}`}
+                                  colorScheme={"orange"}
+                                >
+                                  <TagLabel>Not specified</TagLabel>
+                                  <TagRightIcon as={WarningIcon} />
+                                </Tag>
+                              ) : (
+                                entity.owner
+                              )}
+                            </Td>
+                            <Td display={{ base: "none", sm: "table-cell" }}>
+                              {_.isEqual(entity.created, "") ? (
+                                <Tag
+                                  size={"md"}
+                                  key={`warn-${entity._id}`}
+                                  colorScheme={"orange"}
+                                >
+                                  <TagLabel>Not specified</TagLabel>
+                                  <TagRightIcon as={WarningIcon} />
+                                </Tag>
+                              ) : (
+                                dayjs(entity.created).fromNow()
+                              )}
                             </Td>
                             <Td>
                               <Flex justify={"right"}>
