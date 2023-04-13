@@ -20,12 +20,12 @@ import {
   List,
   ListItem,
   Tbody,
-  Badge,
   Td,
 } from "@chakra-ui/react";
 import { AddIcon, ChevronRightIcon } from "@chakra-ui/icons";
-import { BsBox, BsCollection, BsLightning } from "react-icons/bs";
+import { BsBox, BsClockHistory, BsFolder, BsPencil, BsPlusLg, BsTrash } from "react-icons/bs";
 
+import { ContentContainer } from "@components/ContentContainer";
 import { Loading } from "@components/Loading";
 import { Error } from "@components/Error";
 
@@ -33,7 +33,9 @@ import { getData } from "src/database/functions";
 import { CollectionModel, EntityModel, UpdateModel } from "@types";
 
 import dayjs from "dayjs";
-import { ContentContainer } from "@components/ContentContainer";
+import relativeTime from "dayjs/plugin/relativeTime";
+import Linky from "@components/Linky";
+dayjs.extend(relativeTime);
 
 const Home = () => {
   // Enable navigation
@@ -136,7 +138,7 @@ const Home = () => {
                 {/* Collections listing */}
                 <Flex direction={"row"} justify={"space-between"} align={"center"}>
                   <Flex align={"center"} gap={"4"}>
-                    <Icon as={BsCollection} w={"8"} h={"8"} />
+                    <Icon as={BsFolder} w={"8"} h={"8"} />
                     <Heading fontWeight={"semibold"}>Collections</Heading>
                   </Flex>
                   <Button
@@ -312,28 +314,36 @@ const Home = () => {
               p={"4"}
               gap={"2"}
               h={"fit-content"}
+              maxW={"lg"}
               background={"whitesmoke"}
               rounded={"xl"}
               grow={"1"}
             >
               <Flex align={"center"} gap={"4"}>
-                <Icon as={BsLightning} w={"8"} h={"8"} />
-                <Heading fontWeight={"semibold"}>Activity</Heading>
+                <Icon as={BsClockHistory} w={"8"} h={"8"} />
+                <Heading fontWeight={"semibold"}>Activity Feed</Heading>
               </Flex>
               <List>
                 {updateData.length > 0 ? (
                   updateData.slice(0, 10).map((update) => {
                     // Configure the badge
-                    let operationBadgeColor = "green";
+                    const iconSize = "3";
+                    const iconColor = "white";
+                    let operationBadgeColor = "green.400";
+                    let operationIcon = <Icon as={BsBox} w={iconSize} h={iconSize} color={iconColor} />;
+
                     switch (update.type) {
                       case "create":
-                        operationBadgeColor = "green";
+                        operationBadgeColor = "green.400";
+                        operationIcon = <Icon as={BsPlusLg} w={iconSize} h={iconSize} color={iconColor} />;
                         break;
                       case "update":
-                        operationBadgeColor = "blue";
+                        operationBadgeColor = "blue.400";
+                        operationIcon = <Icon as={BsPencil} w={iconSize} h={iconSize} color={iconColor} />;
                         break;
                       case "delete":
-                        operationBadgeColor = "red";
+                        operationBadgeColor = "red.400";
+                        operationIcon = <Icon as={BsTrash} w={iconSize} h={iconSize} color={iconColor} />;
                         break;
                     }
 
@@ -351,19 +361,17 @@ const Home = () => {
                           border={"2px"}
                           borderColor={"gray.100"}
                         >
-                          <Badge colorScheme={operationBadgeColor}>
-                            {update.type}
-                          </Badge>
+                          <Flex rounded={"full"} bg={operationBadgeColor} p={"1.5"}>
+                            {operationIcon}
+                          </Flex>
 
-                          <Text fontSize={"md"} as={"b"}>
-                            {update.target.name}
-                          </Text>
+                          <Text>{update.details}</Text>
+
+                          <Linky id={update.target.id} type={update.target.type} fallback={update.target.name} />
 
                           <Spacer />
 
-                          <Badge colorScheme={"blackAlpha"}>
-                            {dayjs(update.timestamp).format("DD MMM HH:mm")}
-                          </Badge>
+                          <Text color={"gray.400"}>{dayjs(update.timestamp).fromNow()}</Text>
                         </Flex>
                       </ListItem>
                     );
