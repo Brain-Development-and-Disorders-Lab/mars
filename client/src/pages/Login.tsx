@@ -72,55 +72,57 @@ const Login = (props: { setToken: (token: string) => void }) => {
         align={"center"}
         alignSelf={"center"}
         gap={"8"}
-        w={["xs", "sm", "2xl"]}
-        h={["sm", "md"]}
+        w={["sm", "md", "lg"]}
+        h={"100vh"}
         wrap={"wrap"}
       >
-        <Flex align={"center"} gap={"4"}>
-          <Image src="/Favicon.png" boxSize={"72px"} />
-          <Heading fontWeight={"semibold"}>Login</Heading>
-        </Flex>
+        <Flex direction={"column"} p={"8"} gap={"8"} bg={"white"} rounded={"md"}>
+          <Flex align={"center"} gap={"4"}>
+            <Image src="/Favicon.png" boxSize={"72px"} />
+            <Heading fontWeight={"semibold"}>Login</Heading>
+          </Flex>
 
-        <Flex
-          direction={"column"}
-          justify={"center"}
-          align={"center"}
-          gap={"4"}
-        >
-          <Input
-            type={"text"}
-            placeholder={"Username"}
-            onChange={(event) => setUsername(event.target.value)}
-            disabled
-          />
-
-          <InputGroup>
-            <Input
-              type={show ? "text" : "password"}
-              placeholder={"Password"}
-              onChange={(event) => setPassword(event.target.value)}
-              onKeyUp={(event) => {
-                if (event.key === "Enter" && password.length > 0) {
-                  onLoginClick();
-                }
-              }}
-            />
-            <InputRightElement width="4.5rem">
-              <Button h={"1.75rem"} size={"sm"} onClick={handleClick}>
-                {show ? "Hide" : "Show"}
-              </Button>
-            </InputRightElement>
-          </InputGroup>
-
-          <Button
-            onClick={onLoginClick}
-            loadingText={""}
-            isLoading={isLoading}
-            colorScheme={"green"}
-            disabled={!(password.length > 0) || isLoading}
+          <Flex
+            direction={"column"}
+            justify={"center"}
+            align={"center"}
+            gap={"4"}
           >
-            Login
-          </Button>
+            <Input
+              type={"text"}
+              placeholder={"Username"}
+              onChange={(event) => setUsername(event.target.value)}
+              disabled
+            />
+
+            <InputGroup>
+              <Input
+                type={show ? "text" : "password"}
+                placeholder={"Password"}
+                onChange={(event) => setPassword(event.target.value)}
+                onKeyUp={(event) => {
+                  if (event.key === "Enter" && password.length > 0) {
+                    onLoginClick();
+                  }
+                }}
+              />
+              <InputRightElement width="4.5rem">
+                <Button h={"1.75rem"} size={"sm"} onClick={handleClick}>
+                  {show ? "Hide" : "Show"}
+                </Button>
+              </InputRightElement>
+            </InputGroup>
+
+            <Button
+              onClick={onLoginClick}
+              loadingText={""}
+              isLoading={isLoading}
+              colorScheme={"green"}
+              disabled={!(password.length > 0) || isLoading}
+            >
+              Login
+            </Button>
+          </Flex>
         </Flex>
       </Flex>
     </ContentContainer>

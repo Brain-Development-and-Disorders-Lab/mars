@@ -52,46 +52,44 @@ export const App = (): ReactElement => {
   return (
     <BrowserRouter>
       <ChakraProvider theme={theme}>
-        <PageContainer>
-          {!token && !DEVELOPER_MODE ? (
-            <Login setToken={setToken} />
-          ) : (
-            <>
-              <Routes>
-                <Route path="/" element={<Dashboard />} />
+        {!token && !DEVELOPER_MODE ? (
+          <Login setToken={setToken} />
+        ) : (
+          <PageContainer>
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
 
-                {/* Entity routes */}
-                <Route path="/create/entity/start" element={<EntityStart />} />
-                <Route path="/entities" element={<Entities />} />
-                <Route path="entities">
-                  <Route path=":id" element={<Entity />} />
-                </Route>
+              {/* Entity routes */}
+              <Route path="/create/entity/start" element={<EntityStart />} />
+              <Route path="/entities" element={<Entities />} />
+              <Route path="entities">
+                <Route path=":id" element={<Entity />} />
+              </Route>
 
-                {/* Collections routes */}
-                <Route
-                  path="/create/collection/start"
-                  element={<CollectionStart />}
-                />
-                <Route path="/collections" element={<Collections />} />
-                <Route path="collections">
-                  <Route path=":id" element={<Collection />} />
-                </Route>
+              {/* Collections routes */}
+              <Route
+                path="/create/collection/start"
+                element={<CollectionStart />}
+              />
+              <Route path="/collections" element={<Collections />} />
+              <Route path="collections">
+                <Route path=":id" element={<Collection />} />
+              </Route>
 
-                {/* Attributes routes */}
-                <Route path="/create/attribute/start" element={<AttributeStart />} />
-                <Route path="/attributes" element={<Attributes />} />
-                <Route path="attributes">
-                  <Route path=":id" element={<Attribute />} />
-                </Route>
+              {/* Attributes routes */}
+              <Route path="/create/attribute/start" element={<AttributeStart />} />
+              <Route path="/attributes" element={<Attributes />} />
+              <Route path="attributes">
+                <Route path=":id" element={<Attribute />} />
+              </Route>
 
-                {/* Other routes */}
-                <Route path="/search" element={<Search />} />
-                <Route path="/invalid" element={<Invalid />} />
-                <Route path="*" element={<Navigate to="/invalid" replace />} />
-              </Routes>
-            </>
-          )}
-        </PageContainer>
+              {/* Other routes */}
+              <Route path="/search" element={<Search />} />
+              <Route path="/invalid" element={<Invalid />} />
+              <Route path="*" element={<Navigate to="/invalid" replace />} />
+            </Routes>
+          </PageContainer>
+        )}
       </ChakraProvider>
     </BrowserRouter>
   );
