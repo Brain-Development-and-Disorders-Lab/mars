@@ -775,7 +775,15 @@ export class Entities {
               }));
             } else if (_.startsWith(field, "attribute_")) {
               // "attributes" data field
-              // Pass
+              const attributeId = field.split("_")[1];
+              entity.attributes.map((attribute) => {
+                if (_.isEqual(attribute._id, attributeId)) {
+                  for (let parameter of attribute.parameters) {
+                    headers.push(`${parameter.name} (${attribute.name})`)
+                    row.push(Promise.resolve(`${parameter.data}`));
+                  }
+                }
+              });
             }
           });
 
