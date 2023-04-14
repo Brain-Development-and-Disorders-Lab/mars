@@ -98,7 +98,7 @@ export const Attribute = () => {
         });
       }).finally(() => {
         setEditing(false);
-        navigate("/collections");
+        navigate("/attributes");
       });
   };
 

@@ -89,9 +89,9 @@ export class Attributes {
               Updates.create({
                 timestamp: new Date(Date.now()),
                 type: "update",
-                details: "Updated Collection",
+                details: "Updated Attribute",
                 target: {
-                  type: "collections",
+                  type: "attributes",
                   id: updatedAttribute._id,
                   name: updatedAttribute.name,
                 },
