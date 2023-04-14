@@ -3,6 +3,10 @@ import consola from "consola";
 import { getDatabase } from "src/database/connection";
 import _ from "lodash";
 
+// QueryEngine
+import { QueryEngine } from "src/queries/engine";
+import { Query } from "@types";
+
 const ENTITIES_COLLECTION = "entities";
 
 export class Search {
@@ -12,6 +16,14 @@ export class Search {
       // Sanitize database query
       data.query = data.query.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
       const expression = new RegExp(data.query, "gi");
+
+      // For testing purposes, will be passed to QueryEngine
+      const QueryStruct: Query = {
+        raw: data.query,
+        tokens: [],
+      };
+      const updatedQuery = QueryEngine.tokenize(QueryStruct);
+      consola.info("Tokenized query:", updatedQuery.tokens);
 
       getDatabase()
         .collection(ENTITIES_COLLECTION)
