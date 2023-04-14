@@ -1,9 +1,6 @@
 import React, { Dispatch, SetStateAction } from "react";
 import { Button, Flex, Icon, Text, VStack } from "@chakra-ui/react";
-import { AiOutlineLink } from "react-icons/ai";
-import { BsBox } from "react-icons/bs";
-import { MdDateRange, MdOutlineTextFields } from "react-icons/md";
-import { RiNumbersLine } from "react-icons/ri";
+import { BsBox, BsCalendarWeek, BsGraphUp, BsLink45Deg, BsTextareaT } from "react-icons/bs";
 
 import _ from "lodash";
 
@@ -70,7 +67,7 @@ const ParameterGroup = (props: {
         >
           {/* Buttons to add Parameters */}
           <Button
-            leftIcon={<Icon as={MdDateRange} />}
+            leftIcon={<Icon as={BsCalendarWeek} />}
             onClick={() => {
               // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
               props.setParameters &&
@@ -89,7 +86,7 @@ const ParameterGroup = (props: {
           </Button>
 
           <Button
-            leftIcon={<Icon as={MdOutlineTextFields} />}
+            leftIcon={<Icon as={BsTextareaT} />}
             onClick={() => {
               // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
               props.setParameters &&
@@ -108,7 +105,7 @@ const ParameterGroup = (props: {
           </Button>
 
           <Button
-            leftIcon={<Icon as={RiNumbersLine} />}
+            leftIcon={<Icon as={BsGraphUp} />}
             onClick={() => {
               // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
               props.setParameters &&
@@ -127,7 +124,7 @@ const ParameterGroup = (props: {
           </Button>
 
           <Button
-            leftIcon={<Icon as={AiOutlineLink} />}
+            leftIcon={<Icon as={BsLink45Deg} />}
             onClick={() => {
               // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
               props.setParameters &&
@@ -171,8 +168,7 @@ const ParameterGroup = (props: {
         p={["1", "2"]}
         direction={"column"}
         gap={"1"}
-        rounded={"lg"}
-        maxW={"lg"}
+        w={"100%"}
       >
         <VStack spacing={4}>
           {props.parameters.length > 0 ? (
