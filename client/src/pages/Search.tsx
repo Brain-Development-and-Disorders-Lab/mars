@@ -101,6 +101,8 @@ const Search = () => {
           gap={"6"}
           maxW={"7xl"}
           wrap={"wrap"}
+          bg={"white"}
+          rounded={"md"}
         >
           {/* Page header */}
           <Flex direction={"column"} p={"2"} pt={"4"} pb={"4"}>
