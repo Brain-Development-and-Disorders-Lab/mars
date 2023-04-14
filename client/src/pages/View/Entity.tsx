@@ -39,28 +39,29 @@ import {
   Select,
   TagCloseButton,
   SimpleGrid,
+  CheckboxGroup,
+  Checkbox,
+  Stack,
 } from "@chakra-ui/react";
 import {
-  AddIcon,
-  CheckIcon,
-  ChevronRightIcon,
-  CloseIcon,
   WarningIcon,
 } from "@chakra-ui/icons";
 import { AiOutlineEdit } from "react-icons/ai";
-import { BsBox, BsPrinter } from "react-icons/bs";
-import { SlGraph } from "react-icons/sl";
+import { BsBox, BsChevronRight, BsCheckLg, BsDashLg, BsDiagram2, BsDownload, BsPlusLg, BsTrash } from "react-icons/bs";
 
 // Navigation
 import { useParams, useNavigate } from "react-router-dom";
 
 // Utility libraries
-import _ from "underscore";
-import { parse } from "json2csv";
+import _ from "lodash";
+import dayjs from "dayjs";
+import consola from "consola";
+import FileSaver from "file-saver";
+import slugify from "slugify";
 
 // Database and models
 import { deleteData, getData, postData } from "src/database/functions";
-import { Attribute, CollectionModel, EntityModel } from "@types";
+import { AttributeModel, CollectionModel, EntityModel } from "@types";
 
 // Custom components
 import Linky from "src/components/Linky";
@@ -124,8 +125,15 @@ export const Entity = () => {
     [] as { name: string; id: string }[]
   );
   const [entityAttributes, setEntityAttributes] = useState(
-    [] as Attribute[]
+    [] as AttributeModel[]
   );
+
+  const {
+    isOpen: isExportOpen,
+    onOpen: onExportOpen,
+    onClose: onExportClose,
+  } = useDisclosure();
+  const [exportFields, setExportFields] = useState([] as string[]);
 
   useEffect(() => {
     getData(`/entities/${id}`)
@@ -246,71 +254,67 @@ export const Entity = () => {
     }
   };
 
-  // Toggle showing printer details
-  const handlePrintClick = () => {
-    // Generate string representations of all data
-    const labelData: { [k: string]: any } = {
-      id: entityData._id,
-      name: entityData.name,
-      created: entityData.created,
-      owner: entityData.owner,
-      description: entityData.description,
-      collections: entityData.collections.join(),
-      origins: entityData.associations.origins
-        .map((origin) => {
-          return origin.name;
-        })
-        .join(),
-      products: entityData.associations.products
-        .map((product) => {
-          return product.name;
-        })
-        .join(),
-    };
+  // Handle clicking the "Export" button
+  const handleExportClick = () => {
+    setEntityData(entityData);
+    onExportOpen();
+  };
 
-    let fields = [
-      "id",
-      "name",
-      "created",
-      "owner",
-      "description",
-      "collections",
-      "origins",
-      "products",
-    ];
+  // Handle clicking the "Download" button
+  const handleDownloadClick = () => {
+    consola.info("Exporting additional fields:", exportFields);
 
-    // Create columns for each Attribute and corresponding Parameter
-    entityData.attributes.forEach((attribute) => {
-      attribute.parameters.forEach((parameter) => {
-        labelData[`${attribute.name}_${parameter.name}`] = parameter.data;
-        fields = [...fields, `${attribute.name}_${parameter.name}`];
+    // Send POST data to generate file
+    postData(`/entities/export`, {
+      id: id,
+      fields: exportFields,
+    }).then((response) => {
+      FileSaver.saveAs(new Blob([response]), slugify(`${entityData.name.replace(" ", "")}_export.csv`));
+
+      // Close the "Export" modal
+      onExportClose();
+
+      toast({
+        title: "Info",
+        description: "Generated CSV file.",
+        status: "info",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }).catch((_error) => {
+      toast({
+        title: "Error",
+        description: "An error occurred when exporting this Entity.",
+        status: "error",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
       });
     });
-
-    // Convert to CSV format
-    const parsedData = parse(labelData, { fields: fields });
-    const downloadURL = window.URL.createObjectURL(
-      new Blob([parsedData], {
-        type: "text/csv",
-      })
-    );
-
-    // Create hidden link to click, triggering download automatically
-    const link = document.createElement("a");
-    link.style.display = "none";
-    link.download = `${entityData.name}.csv`;
-    link.href = downloadURL;
-
-    link.click();
-
-    toast({
-      title: "Created CSV file.",
-      status: "info",
-      duration: 2000,
-      position: "bottom-right",
-      isClosable: true,
-    });
   };
+
+  // Handle checkbox selection on the export modal
+  const handleExportCheck = (field: string, checkState: boolean) => {
+    if (_.isEqual(checkState, true)) {
+      // If checked after click, add field to exportFields
+      if (!exportFields.includes(field)) {
+        const updatedFields = [...exportFields, field];
+        setExportFields(updatedFields);
+      }
+    } else {
+      // If unchecked after click, remove the field from exportFields
+      if (exportFields.includes(field)) {
+        const updatedFields = exportFields.filter((existingField) => {
+          if (!_.isEqual(existingField, field)) {
+            return existingField;
+          }
+          return;
+        });
+        setExportFields(updatedFields);
+      }
+    }
+  }
 
   // Delete the Entity when confirmed
   const handleDeleteClick = () => {
@@ -340,6 +344,12 @@ export const Entity = () => {
       });
   };
 
+  const handleEntityNodeClick = (id: string) => {
+    onGraphClose();
+    navigate(`/entities/${id}`);
+  };
+
+  // Add Products to the Entity state
   const addProducts = (products: string[]): void => {
     setEntityProducts([
       ...entityProducts,
@@ -349,6 +359,7 @@ export const Entity = () => {
     onAddProductsClose();
   };
 
+  // Remove Products from the Entity state
   const removeProduct = (id: string) => {
     setEntityProducts(
       entityProducts.filter((product) => {
@@ -357,6 +368,7 @@ export const Entity = () => {
     );
   };
 
+  // Add Origins to the Entity state
   const addOrigins = (origins: string[]): void => {
     setEntityOrigins([
       ...entityOrigins,
@@ -366,6 +378,7 @@ export const Entity = () => {
     onAddOriginsClose();
   };
 
+  // Remove Origins from the Entity state
   const removeOrigin = (id: string) => {
     setEntityOrigins(
       entityOrigins.filter((origin) => {
@@ -410,7 +423,7 @@ export const Entity = () => {
               wrap={"wrap"}
               gap={"4"}
             >
-              <Flex align={"center"} gap={"4"} shadow={"lg"} p={"2"} border={"2px"} rounded={"10px"}>
+              <Flex align={"center"} gap={"4"} shadow={"lg"} p={"2"} border={"2px"} rounded={"md"}>
                 <Icon as={BsBox} w={"8"} h={"8"} />
                 <Heading fontWeight={"semibold"}>{entityData.name}</Heading>
               </Flex>
@@ -420,7 +433,7 @@ export const Entity = () => {
                 {editing &&
                   <Popover>
                     <PopoverTrigger>
-                      <Button colorScheme={"red"} rightIcon={<CloseIcon />}>
+                      <Button colorScheme={"red"} rightIcon={<Icon as={BsTrash} />}>
                         Delete
                       </Button>
                     </PopoverTrigger>
@@ -433,7 +446,7 @@ export const Entity = () => {
                         <Flex direction={"row"} p={"2"} justify={"center"}>
                           <Button
                             colorScheme={"green"}
-                            rightIcon={<CheckIcon />}
+                            rightIcon={<Icon as={BsCheckLg} />}
                             onClick={handleDeleteClick}
                           >
                             Confirm
@@ -447,26 +460,26 @@ export const Entity = () => {
                   onClick={handleEditClick}
                   colorScheme={editing ? "green" : "gray"}
                   rightIcon={
-                    editing ? <Icon as={CheckIcon} /> : <Icon as={AiOutlineEdit} />
+                    editing ? <Icon as={BsCheckLg} /> : <Icon as={AiOutlineEdit} />
                   }
                 >
                   {editing ? "Done" : "Edit"}
                 </Button>
                 <Button
                   onClick={onGraphOpen}
-                  rightIcon={<Icon as={SlGraph} />}
+                  rightIcon={<Icon as={BsDiagram2} />}
                   colorScheme={"orange"}
                   isDisabled={editing}
                 >
-                  View Graph
+                  Links
                 </Button>
                 <Button
-                  onClick={handlePrintClick}
-                  rightIcon={<Icon as={BsPrinter} />}
+                  onClick={handleExportClick}
+                  rightIcon={<Icon as={BsDownload} />}
                   colorScheme={"blue"}
                   isDisabled={editing}
                 >
-                  Export CSV
+                  Export
                 </Button>
               </Flex>
             </Flex>
@@ -478,8 +491,8 @@ export const Entity = () => {
                 gap={"4"}
                 grow={"1"}
                 h={"fit-content"}
-                bg={"whitesmoke"}
-                rounded={"10px"}
+                bg={"white"}
+                rounded={"md"}
               >
                 {/* Details */}
                 <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
@@ -496,7 +509,7 @@ export const Entity = () => {
                         <Tr>
                           <Td>Created</Td>
                           <Td>
-                            <Text>{new Date(entityData.created).toDateString()}</Text>
+                            <Text>{dayjs(entityData.created).format("DD MMM YYYY")}</Text>
                           </Td>
                         </Tr>
 
@@ -523,13 +536,16 @@ export const Entity = () => {
                         <Tr>
                           <Td>Description</Td>
                           <Td>
-                            <Textarea
-                              value={entityDescription}
-                              onChange={(event) => {
-                                setEntityDescription(event.target.value);
-                              }}
-                              disabled={!editing}
-                            />
+                            {editing ? (
+                              <Textarea
+                                value={entityDescription}
+                                onChange={(event) => {
+                                  setEntityDescription(event.target.value);
+                                }}
+                              />
+                            ) : (
+                              <Text>{entityDescription}</Text>
+                            )}
                           </Td>
                         </Tr>
                       </Tbody>
@@ -544,7 +560,7 @@ export const Entity = () => {
                     {editing ? (
                       <Button
                         colorScheme={"green"}
-                        rightIcon={<AddIcon />}
+                        rightIcon={<Icon as={BsPlusLg} />}
                         disabled={!editing}
                         onClick={onAddCollectionsOpen}
                       >
@@ -578,7 +594,7 @@ export const Entity = () => {
                                     {editing && (
                                       <Button
                                         key={`remove-${collection}`}
-                                        rightIcon={<CloseIcon />}
+                                        rightIcon={<Icon as={BsDashLg} />}
                                         colorScheme={"red"}
                                         onClick={() => {
                                           removeCollection(collection);
@@ -591,7 +607,7 @@ export const Entity = () => {
                                     {!editing && (
                                       <Button
                                         key={`view-${collection}`}
-                                        rightIcon={<ChevronRightIcon />}
+                                        rightIcon={<Icon as={BsChevronRight} />}
                                         colorScheme={"blackAlpha"}
                                         onClick={() => navigate(`/collections/${collection}`)}
                                       >
@@ -616,8 +632,8 @@ export const Entity = () => {
                 gap={"4"}
                 grow={"2"}
                 h={"fit-content"}
-                bg={"whitesmoke"}
-                rounded={"10px"}
+                bg={"white"}
+                rounded={"md"}
               >
                 {/* Origins */}
                 <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
@@ -626,7 +642,7 @@ export const Entity = () => {
                     {editing ? (
                       <Button
                         colorScheme={"green"}
-                        rightIcon={<AddIcon />}
+                        rightIcon={<Icon as={BsPlusLg} />}
                         disabled={!editing}
                         onClick={onAddOriginsOpen}
                       >
@@ -659,7 +675,7 @@ export const Entity = () => {
                                     {editing && (
                                       <Button
                                         key={`remove-${origin.id}`}
-                                        rightIcon={<CloseIcon />}
+                                        rightIcon={<Icon as={BsDashLg} />}
                                         colorScheme={"red"}
                                         onClick={() => {
                                           removeOrigin(origin.id);
@@ -672,7 +688,7 @@ export const Entity = () => {
                                     {!editing && (
                                       <Button
                                         key={`view-${origin.id}`}
-                                        rightIcon={<ChevronRightIcon />}
+                                        rightIcon={<Icon as={BsChevronRight} />}
                                         colorScheme={"blackAlpha"}
                                         onClick={() => navigate(`/entities/${origin.id}`)}
                                       >
@@ -697,7 +713,7 @@ export const Entity = () => {
                     {editing ? (
                       <Button
                         colorScheme={"green"}
-                        rightIcon={<AddIcon />}
+                        rightIcon={<Icon as={BsPlusLg} />}
                         disabled={!editing}
                         onClick={onAddProductsOpen}
                       >
@@ -730,7 +746,7 @@ export const Entity = () => {
                                     {editing && (
                                       <Button
                                         key={`remove-${product.id}`}
-                                        rightIcon={<CloseIcon />}
+                                        rightIcon={<Icon as={BsDashLg} />}
                                         colorScheme={"red"}
                                         onClick={() => {
                                           removeProduct(product.id);
@@ -743,7 +759,7 @@ export const Entity = () => {
                                     {!editing && (
                                       <Button
                                         key={`view-${product.id}`}
-                                        rightIcon={<ChevronRightIcon />}
+                                        rightIcon={<Icon as={BsChevronRight} />}
                                         colorScheme={"blackAlpha"}
                                         onClick={() => navigate(`/entities/${product.id}`)}
                                       >
@@ -778,8 +794,8 @@ export const Entity = () => {
                 gap={"4"}
                 grow={"1"}
                 h={"fit-content"}
-                bg={"whitesmoke"}
-                rounded={"10px"}
+                bg={"white"}
+                rounded={"md"}
               >
                 <Heading size={"lg"}>Attributes</Heading>
 
@@ -800,7 +816,7 @@ export const Entity = () => {
               </Flex>
             </Flex>
 
-            <Modal isOpen={isAddCollectionsOpen} onClose={onAddCollectionsClose}>
+            <Modal isOpen={isAddCollectionsOpen} onClose={onAddCollectionsClose} isCentered>
               <ModalOverlay />
               <ModalContent p={"4"}>
                 {/* Heading and close button */}
@@ -873,6 +889,7 @@ export const Entity = () => {
                 <Flex direction={"row"} p={"md"} justify={"center"}>
                   <Button
                     colorScheme={"green"}
+                    rightIcon={<Icon as={BsCheckLg} />}
                     onClick={() => {
                       addCollections(selectedCollections);
                     }}
@@ -883,7 +900,7 @@ export const Entity = () => {
               </ModalContent>
             </Modal>
 
-            <Modal isOpen={isAddProductsOpen} onClose={onAddProductsClose}>
+            <Modal isOpen={isAddProductsOpen} onClose={onAddProductsClose} isCentered>
               <ModalOverlay />
               <ModalContent p={"4"}>
                 {/* Heading and close button */}
@@ -959,6 +976,7 @@ export const Entity = () => {
                 <Flex direction={"row"} p={"md"} justify={"center"}>
                   <Button
                     colorScheme={"green"}
+                    rightIcon={<Icon as={BsCheckLg} />}
                     onClick={() => {
                       if (id) {
                         // Add the Entities to the Collection
@@ -972,7 +990,7 @@ export const Entity = () => {
               </ModalContent>
             </Modal>
 
-            <Modal isOpen={isAddOriginsOpen} onClose={onAddOriginsClose}>
+            <Modal isOpen={isAddOriginsOpen} onClose={onAddOriginsClose} isCentered>
               <ModalOverlay />
               <ModalContent p={"4"}>
                 {/* Heading and close button */}
@@ -1048,6 +1066,7 @@ export const Entity = () => {
                 <Flex direction={"row"} p={"md"} justify={"center"}>
                   <Button
                     colorScheme={"green"}
+                    rightIcon={<Icon as={BsCheckLg} />}
                     onClick={() => {
                       if (id) {
                         // Add the Entities to the Collection
@@ -1061,6 +1080,104 @@ export const Entity = () => {
               </ModalContent>
             </Modal>
 
+            <Modal isOpen={isExportOpen} onClose={onExportClose} isCentered>
+              <ModalOverlay />
+              <ModalContent p={"4"} w={["sm", "lg", "2xl"]}>
+                {/* Heading and close button */}
+                <ModalHeader p={"2"}>Export Entity</ModalHeader>
+                <ModalCloseButton />
+
+                {/* Selection content */}
+                <Flex direction={"row"}>
+                  <Flex direction={"column"} p={"2"} gap={"2"}>
+                    <FormControl>
+                      <FormLabel>Details</FormLabel>
+                      {isLoaded ? (
+                        <CheckboxGroup>
+                          <Stack spacing={2} direction={"column"}>
+                            <Checkbox disabled defaultChecked>Name: {entityData.name}</Checkbox>
+                            <Checkbox onChange={(event) => handleExportCheck("created", event.target.checked)}>
+                              Created: {dayjs(entityData.created).format("DD MMM YYYY")}
+                            </Checkbox>
+                            <Checkbox onChange={(event) => handleExportCheck("owner", event.target.checked)}>
+                              Owner: {entityData.owner}
+                            </Checkbox>
+                            <Checkbox onChange={(event) => handleExportCheck("description", event.target.checked)}>
+                              <Text noOfLines={1}>Description: {entityDescription}</Text>
+                            </Checkbox>
+                          </Stack>
+                        </CheckboxGroup>
+                      ) : (
+                        <Text>Loading details</Text>
+                      )}
+                    </FormControl>
+                    <FormControl>
+                      <FormLabel>Associations: Origins</FormLabel>
+                      {isLoaded && entityOrigins.length > 0 ? (
+                        <Stack spacing={2} direction={"column"}>
+                          {entityOrigins.map((origin) => {
+                            return (
+                              <Checkbox key={origin.id} onChange={(event) => handleExportCheck(`origin_${origin.id}`, event.target.checked)}>
+                                Origin: {origin.name}
+                              </Checkbox>
+                            );
+                          })}
+                        </Stack>
+                      ) : (
+                        <Text>No Origins</Text>
+                      )}
+                    </FormControl>
+                    <FormControl>
+                      <FormLabel>Associations: Products</FormLabel>
+                      {isLoaded  && entityProducts.length > 0 ? (
+                        <Stack spacing={2} direction={"column"}>
+                          {entityProducts.map((product) => {
+                            return (
+                              <Checkbox key={product.id} onChange={(event) => handleExportCheck(`product_${product.id}`, event.target.checked)}>
+                                Product: {product.name}
+                              </Checkbox>
+                            );
+                          })}
+                        </Stack>
+                      ) : (
+                        <Text>No Products</Text>
+                      )}
+                    </FormControl>
+                  </Flex>
+
+                  <Flex direction={"column"} p={"2"} gap={"2"}>
+                    <FormControl>
+                      <FormLabel>Attributes</FormLabel>
+                      {isLoaded  && entityAttributes.length > 0 ? (
+                        <Stack spacing={2} direction={"column"}>
+                          {entityAttributes.map((attribute) => {
+                            return (
+                              <Checkbox key={attribute.name} onChange={(event) => handleExportCheck(`attribute_${attribute._id}`, event.target.checked)}>
+                                {attribute.name}
+                              </Checkbox>
+                            );
+                          })}
+                        </Stack>
+                      ) : (
+                        <Text>No Attributes</Text>
+                      )}
+                    </FormControl>
+                  </Flex>
+                </Flex>
+
+                {/* "Download" button */}
+                <Flex direction={"row"} p={"md"} justify={"center"}>
+                  <Button
+                    colorScheme={"green"}
+                    onClick={() => handleDownloadClick()}
+                    rightIcon={<Icon as={BsDownload} />}
+                  >
+                    Download
+                  </Button>
+                </Flex>
+              </ModalContent>
+            </Modal>
+
             <Modal
               size={"full"}
               onEsc={onGraphClose}
@@ -1069,11 +1186,11 @@ export const Entity = () => {
             >
               <ModalOverlay />
               <ModalContent>
-                <ModalHeader>Graph: {entityData.name}</ModalHeader>
+                <ModalHeader>Relations: {entityData.name}</ModalHeader>
                 <ModalCloseButton />
                 <ModalBody>
                   <Container h={"90vh"} minW={"90vw"}>
-                    <Graph id={entityData._id} />
+                    <Graph id={entityData._id} entityNavigateHook={handleEntityNodeClick} />
                   </Container>
                 </ModalBody>
               </ModalContent>

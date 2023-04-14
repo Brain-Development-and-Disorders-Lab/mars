@@ -4,10 +4,7 @@ import "dotenv/config";
 // Libraries
 import express from "express";
 import cors from "cors";
-import consola, { LogLevel } from "consola";
-
-// Console logging configuration
-consola.level = LogLevel.Debug;
+import consola from "consola";
 
 // Get the connection functions
 import { connect } from "./database/connection";

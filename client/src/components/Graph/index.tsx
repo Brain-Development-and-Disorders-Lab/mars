@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Flex, useToast } from "@chakra-ui/react";
+import { Flex, Icon, Link, Text, useToast } from "@chakra-ui/react";
 import ReactFlow, {
   MiniMap,
   Controls,
@@ -9,19 +9,21 @@ import ReactFlow, {
   useEdgesState,
   Node,
   Edge,
-} from "react-flow-renderer";
+} from "reactflow";
+import "reactflow/dist/style.css";
 import { Loading } from "@components/Loading";
 import { Error } from "@components/Error";
+import { BsBox } from "react-icons/bs";
 
 // Utility libraries
-import _ from "underscore";
+import _ from "lodash";
 import ELK, { ElkExtendedEdge, ElkNode } from "elkjs";
 
 // Database and models
 import { getData } from "@database/functions";
 import { EntityModel } from "@types";
 
-const Graph = (props: { id: string }) => {
+const Graph = (props: { id: string, entityNavigateHook: (id: string) => void }) => {
   const toast = useToast();
   const [isLoaded, setIsLoaded] = useState(false);
   const [isError, setIsError] = useState(false);
@@ -68,8 +70,8 @@ const Graph = (props: { id: string }) => {
     const nodes: ElkNode[] = layoutNodes.map((node) => {
       return {
         id: node.id,
-        width: 150,
-        height: 45,
+        width: 120,
+        height: 80,
       };
     });
 
@@ -96,6 +98,18 @@ const Graph = (props: { id: string }) => {
     return elk.layout(graph);
   };
 
+  const generateLabel = (node: { id: string, name: string }) => {
+    return (
+      <Flex direction={"row"} align={"center"} gap={4}>
+        <Icon as={BsBox} w={"4"} h={"4"} />
+        <Flex direction={"column"} align={"baseline"}>
+          <Text as={"b"}>Entity</Text>
+          <Link onClick={() => props.entityNavigateHook(node.id)}>{node.name}</Link>
+        </Flex>
+      </Flex>
+    );
+  };
+
   const createGraph = () => {
     const initialNodes = [] as Node[];
     const initialEdges = [] as Edge[];
@@ -109,7 +123,7 @@ const Graph = (props: { id: string }) => {
           id: origin.id,
           type: "input",
           data: {
-            label: <>{origin.name}</>,
+            label: generateLabel({ id: origin.id, name: origin.name }),
           },
           position: { x: 250, y: 0 },
         });
@@ -135,7 +149,7 @@ const Graph = (props: { id: string }) => {
           id: product.id,
           type: "output",
           data: {
-            label: <>{product.name}</>,
+            label: generateLabel({ id: product.id, name: product.name }),
           },
           position: { x: 100, y: 200 },
         });
@@ -171,7 +185,7 @@ const Graph = (props: { id: string }) => {
       id: entityData._id,
       type: currentType,
       data: {
-        label: <>{entityData.name}</>,
+        label: generateLabel({ id: entityData._id, name: entityData.name }),
       },
       style: {
         color: "#333",
@@ -236,7 +250,7 @@ const Graph = (props: { id: string }) => {
                   id: origin.id,
                   type: "input",
                   data: {
-                    label: <>{origin.name}</>,
+                    label: generateLabel({ id: origin.id, name: origin.name }),
                   },
                   position: { x: 100, y: 200 },
                 },
@@ -287,7 +301,7 @@ const Graph = (props: { id: string }) => {
                   id: product.id,
                   type: "output",
                   data: {
-                    label: <>{product.name}</>,
+                    label: generateLabel({ id: product.id, name: product.name }),
                   },
                   position: { x: 100, y: 200 },
                 },
@@ -369,7 +383,7 @@ const Graph = (props: { id: string }) => {
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
             onNodeClick={onNodeClick}
-            attributionPosition="bottom-right"
+            attributionPosition={"bottom-right"}
             fitView
           >
             <MiniMap

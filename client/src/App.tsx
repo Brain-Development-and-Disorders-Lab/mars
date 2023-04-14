@@ -1,6 +1,6 @@
 // React and React Router
 import React, { ReactElement } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 // Chakra UI provider component
 import { ChakraProvider } from "@chakra-ui/react";
@@ -10,7 +10,6 @@ import "./styles/styles.css";
 import "@fontsource/roboto";
 
 // Custom components
-import Navigation from "@components/Navigation";
 import { PageContainer } from "@components/PageContainer";
 
 // Pages
@@ -29,11 +28,18 @@ import { Start as AttributeStart } from "@pages/Create/Attribute";
 
 // Page type - Unique
 import Search from "@pages/Search";
-import Home from "@pages/Home";
+import Dashboard from "@pages/Dashboard";
 import Login from "@pages/Login";
+import Invalid from "@pages/Invalid";
 
 // Authentication
 import { useToken } from "./authentication/useToken";
+
+// Variables
+import { DEVELOPER_MODE } from "./variables";
+
+// Theme extension
+import { theme } from "./styles/theme";
 
 /**
  *
@@ -45,46 +51,45 @@ export const App = (): ReactElement => {
 
   return (
     <BrowserRouter>
-      <ChakraProvider>
-        <PageContainer>
-          {!token ? (
-            <Login setToken={setToken} />
-          ) : (
-            <>
-              <Navigation />
-              <Routes>
-                <Route path="/" element={<Home />} />
+      <ChakraProvider theme={theme}>
+        {!token && !DEVELOPER_MODE ? (
+          <Login setToken={setToken} />
+        ) : (
+          <PageContainer>
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
 
-                {/* Entity routes */}
-                <Route path="/create/entity/start" element={<EntityStart />} />
-                <Route path="/entities" element={<Entities />} />
-                <Route path="entities">
-                  <Route path=":id" element={<Entity />} />
-                </Route>
+              {/* Entity routes */}
+              <Route path="/create/entity/start" element={<EntityStart />} />
+              <Route path="/entities" element={<Entities />} />
+              <Route path="entities">
+                <Route path=":id" element={<Entity />} />
+              </Route>
 
-                {/* Collections routes */}
-                <Route
-                  path="/create/collection/start"
-                  element={<CollectionStart />}
-                />
-                <Route path="/collections" element={<Collections />} />
-                <Route path="collections">
-                  <Route path=":id" element={<Collection />} />
-                </Route>
+              {/* Collections routes */}
+              <Route
+                path="/create/collection/start"
+                element={<CollectionStart />}
+              />
+              <Route path="/collections" element={<Collections />} />
+              <Route path="collections">
+                <Route path=":id" element={<Collection />} />
+              </Route>
 
-                {/* Attributes routes */}
-                <Route path="/create/attribute/start" element={<AttributeStart />} />
-                <Route path="/attributes" element={<Attributes />} />
-                <Route path="attributes">
-                  <Route path=":id" element={<Attribute />} />
-                </Route>
+              {/* Attributes routes */}
+              <Route path="/create/attribute/start" element={<AttributeStart />} />
+              <Route path="/attributes" element={<Attributes />} />
+              <Route path="attributes">
+                <Route path=":id" element={<Attribute />} />
+              </Route>
 
-                {/* Other routes */}
-                <Route path="/search" element={<Search />} />
-              </Routes>
-            </>
-          )}
-        </PageContainer>
+              {/* Other routes */}
+              <Route path="/search" element={<Search />} />
+              <Route path="/invalid" element={<Invalid />} />
+              <Route path="*" element={<Navigate to="/invalid" replace />} />
+            </Routes>
+          </PageContainer>
+        )}
       </ChakraProvider>
     </BrowserRouter>
   );

@@ -12,20 +12,16 @@ import {
   Tr,
   Th,
   useToast,
-  Stat,
-  StatLabel,
-  StatNumber,
-  StatHelpText,
   Spacer,
   List,
   ListItem,
   Tbody,
-  Badge,
   Td,
 } from "@chakra-ui/react";
 import { AddIcon, ChevronRightIcon } from "@chakra-ui/icons";
-import { BsBox, BsCollection, BsLightning } from "react-icons/bs";
+import { BsBox, BsClockHistory, BsFolder, BsPencil, BsPlusLg, BsTrash } from "react-icons/bs";
 
+import { ContentContainer } from "@components/ContentContainer";
 import { Loading } from "@components/Loading";
 import { Error } from "@components/Error";
 
@@ -33,9 +29,11 @@ import { getData } from "src/database/functions";
 import { CollectionModel, EntityModel, UpdateModel } from "@types";
 
 import dayjs from "dayjs";
-import { ContentContainer } from "@components/ContentContainer";
+import relativeTime from "dayjs/plugin/relativeTime";
+import Linky from "@components/Linky";
+dayjs.extend(relativeTime);
 
-const Home = () => {
+const Dashboard = () => {
   // Enable navigation
   const navigate = useNavigate();
 
@@ -126,42 +124,28 @@ const Home = () => {
             wrap={"wrap"}
           >
             <Flex direction={"column"} gap={"6"} grow={"2"}>
+              <Flex direction={"row"} justify={"space-between"} align={"center"}>
+                <Flex align={"center"} gap={"4"} p={"2"}>
+                  <Icon as={BsFolder} w={"8"} h={"8"} />
+                  <Heading fontWeight={"semibold"}>Collections</Heading>
+                </Flex>
+                <Button
+                  colorScheme={"green"}
+                  leftIcon={<AddIcon />}
+                  onClick={() => navigate("/create/collection/start")}
+                >
+                  Create
+                </Button>
+              </Flex>
+
               <Flex
                 direction={"column"}
                 p={"4"}
-                background={"whitesmoke"}
-                rounded={"xl"}
+                background={"white"}
+                rounded={"md"}
                 gap={"2"}
               >
                 {/* Collections listing */}
-                <Flex direction={"row"} justify={"space-between"} align={"center"}>
-                  <Flex align={"center"} gap={"4"}>
-                    <Icon as={BsCollection} w={"8"} h={"8"} />
-                    <Heading fontWeight={"semibold"}>Collections</Heading>
-                  </Flex>
-                  <Button
-                    key={`view-collection-all`}
-                    colorScheme={"blackAlpha"}
-                    rightIcon={<ChevronRightIcon />}
-                    onClick={() => navigate(`/collections`)}
-                  >
-                    View All
-                  </Button>
-                </Flex>
-
-                <Stat
-                  rounded={"md"}
-                  background={"white"}
-                  p={"2"}
-                  maxW={"fit-content"}
-                >
-                  <StatLabel>Total Collections</StatLabel>
-                  <StatNumber>{collectionData.length}</StatNumber>
-                  <StatHelpText>Updated just now.</StatHelpText>
-                </Stat>
-
-                <Spacer />
-
                 {isLoaded && collectionData.length > 0 ? (
                   <TableContainer>
                     <Table variant={"simple"} colorScheme={"blackAlpha"}>
@@ -172,17 +156,12 @@ const Home = () => {
                               Name
                             </Heading>
                           </Th>
-                          <Th>
-                            <Flex justify={"right"}>
-                              <Button
-                                colorScheme={"green"}
-                                leftIcon={<AddIcon />}
-                                onClick={() => navigate("/create/collection/start")}
-                              >
-                                Create
-                              </Button>
-                            </Flex>
+                          <Th display={{ base: "none", sm: "table-cell" }}>
+                            <Heading fontWeight={"semibold"} size={"sm"}>
+                              Description
+                            </Heading>
                           </Th>
+                          <Th></Th>
                         </Tr>
                       </Thead>
                       <Tbody>
@@ -190,6 +169,9 @@ const Home = () => {
                           return (
                             <Tr key={collection._id}>
                               <Td>{collection.name}</Td>
+                              <Td display={{ base: "none", sm: "table-cell" }}>
+                                <Text noOfLines={1}>{collection.description}</Text>
+                              </Td>
                               <Td>
                                 <Flex justify={"right"}>
                                   <Button
@@ -213,44 +195,45 @@ const Home = () => {
                 ) : (
                   <Text>There are no Collections to display.</Text>
                 )}
-              </Flex>
 
-              {/* Entities listing */}
-              <Flex
-                direction={"column"}
-                p={"4"}
-                background={"whitesmoke"}
-                rounded={"xl"}
-                gap={"2"}
-              >
-                <Flex direction={"row"} justify={"space-between"} align={"center"}>
-                  <Flex align={"center"} gap={"4"}>
-                    <Icon as={BsBox} w={"8"} h={"8"} />
-                    <Heading fontWeight={"semibold"}>Entities</Heading>
-                  </Flex>
+                <Spacer />
+
+                <Flex justify={"right"}>
                   <Button
-                    key={`view-entity-all`}
+                    key={`view-collection-all`}
                     colorScheme={"blackAlpha"}
                     rightIcon={<ChevronRightIcon />}
-                    onClick={() => navigate(`/entities`)}
+                    onClick={() => navigate(`/collections`)}
                   >
                     View All
                   </Button>
                 </Flex>
+              </Flex>
 
-                <Stat
-                  rounded={"md"}
-                  background={"white"}
-                  p={"2"}
-                  maxW={"fit-content"}
+              <Spacer />
+
+              <Flex direction={"row"} justify={"space-between"} align={"center"}>
+                <Flex align={"center"} gap={"4"} p={"2"}>
+                  <Icon as={BsBox} w={"8"} h={"8"} />
+                  <Heading fontWeight={"semibold"}>Entities</Heading>
+                </Flex>
+                <Button
+                  colorScheme={"green"}
+                  leftIcon={<AddIcon />}
+                  onClick={() => navigate("/create/entity/start")}
                 >
-                  <StatLabel>Total Entities</StatLabel>
-                  <StatNumber>{entityData.length}</StatNumber>
-                  <StatHelpText>Updated just now.</StatHelpText>
-                </Stat>
+                  Create
+                </Button>
+              </Flex>
 
-                <Spacer />
-
+              <Flex
+                direction={"column"}
+                p={"4"}
+                background={"white"}
+                rounded={"md"}
+                gap={"2"}
+              >
+                {/* Entities listing */}
                 {isLoaded && entityData.length > 0 ? (
                   <TableContainer>
                     <Table variant={"simple"} colorScheme={"blackAlpha"}>
@@ -261,17 +244,12 @@ const Home = () => {
                               Name
                             </Heading>
                           </Th>
-                          <Th>
-                            <Flex justify={"right"}>
-                              <Button
-                                colorScheme={"green"}
-                                leftIcon={<AddIcon />}
-                                onClick={() => navigate("/create/entity/start")}
-                              >
-                                Create
-                              </Button>
-                            </Flex>
+                          <Th display={{ base: "none", sm: "table-cell" }}>
+                            <Heading fontWeight={"semibold"} size={"sm"}>
+                              Description
+                            </Heading>
                           </Th>
+                          <Th></Th>
                         </Tr>
                       </Thead>
 
@@ -280,6 +258,9 @@ const Home = () => {
                           return (
                             <Tr key={entity._id}>
                               <Td>{entity.name}</Td>
+                              <Td display={{ base: "none", sm: "table-cell" }}>
+                                <Text noOfLines={1}>{entity.description}</Text>
+                              </Td>
                               <Td>
                                 <Flex justify={"right"}>
                                   <Button
@@ -303,75 +284,95 @@ const Home = () => {
                 ) : (
                   <Text>There are no Entities to display.</Text>
                 )}
+
+                <Spacer />
+
+                <Flex justify={"right"}>
+                  <Button
+                    key={`view-entity-all`}
+                    colorScheme={"blackAlpha"}
+                    rightIcon={<ChevronRightIcon />}
+                    onClick={() => navigate(`/entities`)}
+                  >
+                    View All
+                  </Button>
+                </Flex>
               </Flex>
             </Flex>
 
-            {/* Activity */}
-            <Flex
-              direction={"column"}
-              p={"4"}
-              gap={"2"}
-              h={"fit-content"}
-              background={"whitesmoke"}
-              rounded={"xl"}
-              grow={"1"}
-            >
-              <Flex align={"center"} gap={"4"}>
-                <Icon as={BsLightning} w={"8"} h={"8"} />
-                <Heading fontWeight={"semibold"}>Activity</Heading>
+            {/* Activity Feed */}
+            <Flex maxW={"lg"} direction={"column"} gap={"6"} >
+              <Flex align={"center"} gap={"4"} p={"2"}>
+                <Icon as={BsClockHistory} w={"8"} h={"8"} />
+                <Heading fontWeight={"semibold"}>Activity Feed</Heading>
               </Flex>
-              <List>
-                {updateData.length > 0 ? (
-                  updateData.slice(0, 10).map((update) => {
-                    // Configure the badge
-                    let operationBadgeColor = "green";
-                    switch (update.type) {
-                      case "create":
-                        operationBadgeColor = "green";
-                        break;
-                      case "update":
-                        operationBadgeColor = "blue";
-                        break;
-                      case "delete":
-                        operationBadgeColor = "red";
-                        break;
-                    }
 
-                    return (
-                      <ListItem key={`update-${update._id}`}>
-                        <Flex
-                          direction={"row"}
-                          p={"2"}
-                          gap={"2"}
-                          mt={"2"}
-                          mb={"2"}
-                          align={"center"}
-                          background={"white"}
-                          rounded={"10px"}
-                          border={"2px"}
-                          borderColor={"gray.100"}
-                        >
-                          <Badge colorScheme={operationBadgeColor}>
-                            {update.type}
-                          </Badge>
+              <Flex
+                background={"white"}
+                direction={"column"}
+                rounded={"md"}
+                h={"fit-content"}
+                p={"4"}
+                gap={"2"}
+              >
+                <List>
+                  {updateData.length > 0 ? (
+                    updateData.slice(0, 10).map((update) => {
+                      // Configure the badge
+                      const iconSize = "3";
+                      const iconColor = "white";
+                      let operationBadgeColor = "green.400";
+                      let operationIcon = <Icon as={BsBox} w={iconSize} h={iconSize} color={iconColor} />;
 
-                          <Text fontSize={"md"} as={"b"}>
-                            {update.target.name}
-                          </Text>
+                      switch (update.type) {
+                        case "create":
+                          operationBadgeColor = "green.400";
+                          operationIcon = <Icon as={BsPlusLg} w={iconSize} h={iconSize} color={iconColor} />;
+                          break;
+                        case "update":
+                          operationBadgeColor = "blue.400";
+                          operationIcon = <Icon as={BsPencil} w={iconSize} h={iconSize} color={iconColor} />;
+                          break;
+                        case "delete":
+                          operationBadgeColor = "red.400";
+                          operationIcon = <Icon as={BsTrash} w={iconSize} h={iconSize} color={iconColor} />;
+                          break;
+                      }
 
-                          <Spacer />
+                      return (
+                        <ListItem key={`update-${update._id}`}>
+                          <Flex
+                            direction={"row"}
+                            p={"2"}
+                            gap={"2"}
+                            mt={"2"}
+                            mb={"2"}
+                            align={"center"}
+                            background={"white"}
+                            rounded={"md"}
+                            border={"2px"}
+                            borderColor={"gray.100"}
+                          >
+                            <Flex rounded={"full"} bg={operationBadgeColor} p={"1.5"}>
+                              {operationIcon}
+                            </Flex>
 
-                          <Badge colorScheme={"blackAlpha"}>
-                            {dayjs(update.timestamp).format("DD MMM HH:mm")}
-                          </Badge>
-                        </Flex>
-                      </ListItem>
-                    );
-                  })
-                ) : (
-                  <Text fontSize={"md"}>No recent activity to show.</Text>
-                )}
-              </List>
+                            <Text display={{ base: "none", sm: "block" }}>{update.details}</Text>
+
+                            <Linky id={update.target.id} type={update.target.type} fallback={update.target.name} />
+
+                            <Spacer />
+
+                            <Text color={"gray.400"}>{dayjs(update.timestamp).fromNow()}</Text>
+                          </Flex>
+                        </ListItem>
+                      );
+                    })
+                  ) : (
+                    <Text fontSize={"md"}>No recent activity to show.</Text>
+                  )}
+                </List>
+              </Flex>
             </Flex>
           </Flex>
         )
@@ -382,4 +383,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default Dashboard;

@@ -10,7 +10,7 @@ import {
 import { BsArrowClockwise, BsExclamationCircle } from "react-icons/bs";
 
 // Utility libraries
-import _ from "underscore";
+import _ from "lodash";
 
 // Custom components
 

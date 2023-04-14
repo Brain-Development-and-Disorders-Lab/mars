@@ -1,6 +1,6 @@
 // Libraries
 import express from "express";
-import _ from "underscore";
+import _ from "lodash";
 
 // Import types from the client to enforce structure
 import { EntityModel, Entity } from "@types";
@@ -21,6 +21,14 @@ EntitiesRoute.route("/entities").get((_request: any, response: any) => {
 EntitiesRoute.route("/entities/:id").get((request: any, response: any) => {
   Entities.getOne(request.params.id).then((entity: EntityModel) => {
     response.json(entity);
+  });
+});
+
+// Get JSON-formatted data of the Entity
+EntitiesRoute.route("/entities/export").post((request: { body: { id: string, fields: string[] } }, response: any) => {
+  Entities.getData(request.body).then((path: string) => {
+    response.setHeader("Content-Type", "application/csv");
+    response.download(path, `export_${request.body.id}.csv`);
   });
 });
 

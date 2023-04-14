@@ -1,14 +1,20 @@
 // Utility libraries
-import _ from "underscore";
+import _ from "lodash";
 import consola from "consola";
 
 // Utility functions
 import { getDatabase, getIdentifier } from "../database/connection";
 import { Updates } from "./Updates";
+import { Collections } from "./Collections";
+
+// File generation
+import fs from "fs";
+import Papa from "papaparse";
+import tmp from "tmp";
+import dayjs from "dayjs";
 
 // Custom types
 import { EntityModel } from "@types";
-import { Collections } from "./Collections";
 
 // Constants
 const ENTITIES_COLLECTION = "entities";
@@ -20,7 +26,7 @@ export class Entities {
    * @return {Promise<EntityModel>}
    */
   static create = (entity: any): Promise<EntityModel> => {
-    consola.info("Creating new Entity:", entity.name);
+    consola.start("Creating new Entity:", entity.name);
 
     // Allocate a new identifier and join with Entity data
     entity["_id"] = getIdentifier("entity");
@@ -101,7 +107,7 @@ export class Entities {
    * @return {Promise<EntityModel>}
    */
   static update = (updatedEntity: EntityModel): Promise<EntityModel> => {
-    consola.info("Updating Entity:", updatedEntity.name);
+    consola.start("Updating Entity:", updatedEntity.name);
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES_COLLECTION)
@@ -300,7 +306,7 @@ export class Entities {
     entity: { name: string; id: string },
     product: { name: string; id: string }
   ): Promise<{ name: string; id: string }> => {
-    consola.info("Adding Product", product.name, "to Entity", entity.name);
+    consola.start("Adding Product", product.name, "to Entity", entity.name);
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES_COLLECTION)
@@ -350,7 +356,7 @@ export class Entities {
     entity: { name: string; id: string },
     product: { name: string; id: string }
   ): Promise<{ name: string; id: string }> => {
-    consola.info("Removing Product", product.name, "from Entity", entity.name);
+    consola.start("Removing Product", product.name, "from Entity", entity.name);
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES_COLLECTION)
@@ -405,7 +411,7 @@ export class Entities {
     entity: string,
     collection: string
   ): Promise<string> => {
-    consola.info(
+    consola.start(
       "Adding Entity (id):",
       entity.toString(),
       "to Collection (id):",
@@ -454,7 +460,7 @@ export class Entities {
     entity: string,
     collection: string
   ): Promise<string> => {
-    consola.info(
+    consola.start(
       "Removing Entity (id):",
       entity.toString(),
       "from Collection (id):",
@@ -514,7 +520,7 @@ export class Entities {
     entity: { name: string; id: string },
     origin: { name: string; id: string }
   ): Promise<{ name: string; id: string }> => {
-    consola.info("Adding Origin", origin.name, "to Entity", entity.name);
+    consola.start("Adding Origin", origin.name, "to Entity", entity.name);
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES_COLLECTION)
@@ -570,7 +576,7 @@ export class Entities {
     entity: { name: string; id: string },
     origin: { name: string; id: string }
   ): Promise<{ name: string; id: string }> => {
-    consola.info("Removing Origin", origin.name, "from Entity", entity.name);
+    consola.start("Removing Origin", origin.name, "from Entity", entity.name);
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES_COLLECTION)
@@ -629,7 +635,7 @@ export class Entities {
     entity: { name: string; id: string },
     description: string
   ): Promise<{ name: string; id: string }> => {
-    consola.info(
+    consola.start(
       "Setting description of Entity",
       entity.name,
       "to",
@@ -699,15 +705,17 @@ export class Entities {
 
   /**
    * Get a single Entity
+   * @param {string} id the Entity identifier
    * @return {Promise<EntityModel>}
    */
   static getOne = (id: string): Promise<EntityModel> => {
-    consola.info("Retrieving Entity (id):", id.toString());
-    return new Promise((resolve, _reject) => {
+    consola.start("Retrieving Entity (id):", id.toString());
+    return new Promise((resolve, reject) => {
       getDatabase()
         .collection(ENTITIES_COLLECTION)
         .findOne({ _id: id }, (error: any, result: any) => {
           if (error) {
+            reject(error);
             throw error;
           }
 
@@ -717,8 +725,91 @@ export class Entities {
     });
   };
 
+  /**
+   * Collage and generate a CSV string containing all data pertaining to
+   * an Entity
+   * @param {{ id: string, fields: string[] }} entityExportData the export data of the Entity
+   * @return {Promise<string>}
+   */
+  static getData = (entityExportData: { id: string, fields: string[] }): Promise<string> => {
+    consola.start("Generating data for Entity (id):", entityExportData.id.toString());
+    return new Promise((resolve, reject) => {
+      getDatabase()
+        .collection(ENTITIES_COLLECTION)
+        .findOne({ _id: entityExportData.id }, (error: any, result: any) => {
+          if (error) {
+            reject(error);
+            throw error;
+          }
+
+          const entity = result as EntityModel;
+
+          const headers = ["name"];
+          const row: Promise<string>[] = [Promise.resolve(entity.name)];
+
+          // Iterate over fields and generate a CSV export file
+          entityExportData.fields.map((field) => {
+            if (_.isEqual(field, "created")) {
+              // "created" data field
+              headers.push("Created");
+              row.push(Promise.resolve(dayjs(entity.created).format("DD MMM YYYY").toString()));
+            } else if (_.isEqual(field, "owner")) {
+              // "owner" data field
+              headers.push("Owner");
+              row.push(Promise.resolve(entity.owner));
+            } else if (_.isEqual(field, "description")) {
+              // "description" data field
+              headers.push("Description");
+              row.push(Promise.resolve(entity.description));
+            } else if (_.startsWith(field, "origin_")) {
+              // "origins" data field
+              row.push(Entities.getOne(_.split(field, "_")[1]).then((entity) => {
+                headers.push(`Origin (${entity.name})`);
+                return entity.name;
+              }));
+            } else if (_.startsWith(field, "product_")) {
+              // "products" data field
+              row.push(Entities.getOne(_.split(field, "_")[1]).then((entity) => {
+                headers.push(`Product (${entity.name})`);
+                return entity.name;
+              }));
+            } else if (_.startsWith(field, "attribute_")) {
+              // "attributes" data field
+              const attributeId = field.split("_")[1];
+              entity.attributes.map((attribute) => {
+                if (_.isEqual(attribute._id, attributeId)) {
+                  for (let parameter of attribute.parameters) {
+                    headers.push(`${parameter.name} (${attribute.name})`)
+                    row.push(Promise.resolve(`${parameter.data}`));
+                  }
+                }
+              });
+            }
+          });
+
+          // Collate and format data as a CSV string
+          Promise.all(row).then((rowData) => {
+            const collated = [headers, rowData];
+            const formatted = Papa.unparse(collated);
+
+            // Create a temporary file, passing the filename as a response
+            tmp.file((error, path: string, _fd: number) => {
+              if (error) {
+                reject(error);
+                throw error;
+              }
+
+              fs.writeFileSync(path, formatted);
+              consola.success("Generated data for  Entity (id):", entityExportData.id.toString());
+              resolve(path);
+            });
+          });
+        });
+    });
+  }
+
   static delete = (id: string): Promise<EntityModel> => {
-    consola.info("Deleting Entity (id):", id.toString());
+    consola.start("Deleting Entity (id):", id.toString());
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES_COLLECTION)

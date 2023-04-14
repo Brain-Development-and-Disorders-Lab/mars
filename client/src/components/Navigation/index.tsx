@@ -3,8 +3,6 @@ import React, { ReactNode } from "react";
 import {
   Box,
   Flex,
-  Avatar,
-  HStack,
   Link,
   IconButton,
   Button,
@@ -19,31 +17,27 @@ import {
   Icon,
   Image,
   Heading,
+  VStack,
 } from "@chakra-ui/react";
 import {
   HamburgerIcon,
-  CloseIcon,
   InfoOutlineIcon,
-  SearchIcon,
   AddIcon,
 } from "@chakra-ui/icons";
-import { BsBox, BsCollection, BsGear } from "react-icons/bs";
+import { BsBinoculars, BsBox, BsClipboardData, BsFolder, BsPlusLg, BsPuzzle, BsSearch, BsXLg } from "react-icons/bs";
 
 // Router navigation
 import { useNavigate } from "react-router-dom";
 
 // NavigationElement sub-component to generalize links
 const NavigationElement = ({
-  href,
   children,
   onClick,
 }: {
-  href: string;
   children: ReactNode;
   onClick?: () => void;
 }) => (
   <Link
-    href={href}
     p={"2"}
     rounded={"md"}
     _hover={{
@@ -58,114 +52,113 @@ const NavigationElement = ({
 
 const Navigation = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
-
   const navigate = useNavigate();
 
+  const responsiveNavigate = (location: string) => {
+    isOpen ? onClose() : onOpen();
+    navigate(location);
+  };
+
   return (
-    <Box px={4} bg={"white"}>
-      <Flex h={"8vh"} alignItems={"center"} justifyContent={"space-between"}>
+    <>
+      <Box px={4} bg={"white"} position={"fixed"} h={"100%"} zIndex={20} display={{ base: "none", sm: "flex" }}>
+        <Flex justifyContent={"space-between"} direction={"column"}>
+          {/* Main navigation group */}
+          <VStack spacing={8} align={"center"} h={"100%"} position={"sticky"}>
+            <VStack as={"nav"} spacing={4} display={{ base: "none", md: "flex" }}>
+              {/* Icon */}
+              <Flex direction={"row"} m={"2"} p={"2"} gap={"2"}>
+                <Image src="/Favicon.png" boxSize={"36px"} />
+                <Heading fontWeight={"semibold"} size={"lg"}>MARS</Heading>
+              </Flex>
+
+              <Flex direction={"column"} align={"baseline"}>
+                <Button key={"dashboard"} bg={"white"} leftIcon={<Icon as={BsClipboardData} />} onClick={() => navigate("/")}>
+                  Dashboard
+                </Button>
+
+                {/* Create menu */}
+                <Menu>
+                  <MenuButton
+                    as={Button}
+                    bg={"white"}
+                    rounded={"md"}
+                    cursor={"pointer"}
+                    minW={0}
+                    leftIcon={<Icon as={BsPlusLg} />}
+                  >
+                    Create
+                  </MenuButton>
+                  <MenuList>
+                    <MenuItem icon={<Icon as={BsBox} />} onClick={() => navigate("/create/entity/start")}>
+                      Entity
+                    </MenuItem>
+                    <MenuItem icon={<Icon as={BsFolder} />} onClick={() => navigate("/create/collection/start")}>
+                      Collection
+                    </MenuItem>
+                    <MenuItem icon={<Icon as={BsPuzzle} />} onClick={() => navigate("/create/attribute/start")}>
+                      Attribute
+                    </MenuItem>
+                  </MenuList>
+                </Menu>
+
+                {/* View menu */}
+                <Menu>
+                  <MenuButton
+                    as={Button}
+                    bg={"white"}
+                    rounded={"md"}
+                    cursor={"pointer"}
+                    minW={0}
+                    leftIcon={<Icon as={BsBinoculars} />}
+                  >
+                    View
+                  </MenuButton>
+                  <MenuList>
+                    <MenuItem icon={<Icon as={BsBox} />} onClick={() => navigate("/entities")}>
+                      Entities
+                    </MenuItem>
+                    <MenuItem icon={<Icon as={BsFolder} />} onClick={() => navigate("/collections")}>
+                      Collections
+                    </MenuItem>
+                    <MenuItem icon={<Icon as={BsPuzzle} />} onClick={() => navigate("/attributes")}>
+                      Attributes
+                    </MenuItem>
+                  </MenuList>
+                </Menu>
+
+                <Button
+                  key={"search"}
+                  bg={"white"}
+                  leftIcon={<Icon as={BsSearch} />}
+                  onClick={() => navigate("/search")}
+                >
+                  Search
+                </Button>
+              </Flex>
+            </VStack>
+          </VStack>
+        </Flex>
+      </Box>
+
+      <Flex p={"2"} bg={"white"}>
         {/* Icon to show menu in responsive context */}
         <IconButton
           size={"md"}
-          icon={isOpen ? <CloseIcon /> : <HamburgerIcon />}
+          icon={<Icon as={isOpen ? BsXLg : HamburgerIcon} />}
           aria-label={"Open Menu"}
           display={{ md: "none" }}
           onClick={isOpen ? onClose : onOpen}
         />
-
-        {/* Main navigation group */}
-        <HStack spacing={8} alignItems={"center"} justify={"center"}>
-          <HStack as={"nav"} spacing={4} display={{ base: "none", md: "flex" }}>
-            {/* Icon */}
-            <Image src="/Favicon.png" boxSize={"36px"} />
-            <Heading fontWeight={"semibold"} size={"lg"}>MARS</Heading>
-
-            <Button key={"home"} bg={"white"} onClick={() => navigate("/")}>
-              Home
-            </Button>
-
-            {/* Create menu */}
-            <Menu>
-              <MenuButton
-                as={Button}
-                bg={"white"}
-                rounded={"md"}
-                cursor={"pointer"}
-                minW={0}
-              >
-                Create
-              </MenuButton>
-              <MenuList>
-                <MenuItem icon={<BsBox />} onClick={() => navigate("/create/entity/start")}>
-                  Entity
-                </MenuItem>
-                <MenuItem icon={<BsCollection />} onClick={() => navigate("/create/collection/start")}>
-                  Collection
-                </MenuItem>
-                <MenuItem icon={<BsGear />} onClick={() => navigate("/create/attribute/start")}>
-                  Attribute
-                </MenuItem>
-              </MenuList>
-            </Menu>
-
-            {/* View menu */}
-            <Menu>
-              <MenuButton
-                as={Button}
-                bg={"white"}
-                rounded={"md"}
-                cursor={"pointer"}
-                minW={0}
-              >
-                View
-              </MenuButton>
-              <MenuList>
-                <MenuItem icon={<BsBox />} onClick={() => navigate("/entities")}>
-                  Entities
-                </MenuItem>
-                <MenuItem icon={<BsCollection />} onClick={() => navigate("/collections")}>
-                  Collections
-                </MenuItem>
-                <MenuItem icon={<BsGear />} onClick={() => navigate("/attributes")}>
-                  Attributes
-                </MenuItem>
-              </MenuList>
-            </Menu>
-          </HStack>
-        </HStack>
-
-        {/* Search and Avatar component */}
-        <Flex alignItems={"center"} gap={"4"}>
-          <Button
-            key={"search"}
-            bg={"white"}
-            leftIcon={<SearchIcon />}
-            onClick={() => navigate("/search")}
-          >
-            Search
-          </Button>
-
-          <Menu>
-            <MenuButton
-              as={Button}
-              rounded={"full"}
-              variant={"link"}
-              cursor={"pointer"}
-              minW={0}
-            >
-              <Avatar size={"sm"} />
-            </MenuButton>
-          </Menu>
-        </Flex>
       </Flex>
 
       {/* Responsive display */}
       {isOpen ? (
-        <Box pb={4} display={{ md: "none" }}>
+        <Flex p={4} display={{ md: "none" }}>
           <Stack as={"nav"} spacing={4} divider={<StackDivider />}>
             {/* Dashboard */}
             <Flex direction={"row"} align={"center"} gap={"2"}>
-              <NavigationElement href={"/"} onClick={isOpen ? onClose : onOpen}>
+              <NavigationElement onClick={() => responsiveNavigate("/")}>
                 Dashboard
               </NavigationElement>
             </Flex>
@@ -180,26 +173,23 @@ const Navigation = () => {
                 <Flex direction={"row"} align={"center"}>
                   <Icon as={BsBox} />
                   <NavigationElement
-                    href={"/create/entity/start"}
-                    onClick={isOpen ? onClose : onOpen}
+                    onClick={() => responsiveNavigate("/create/entity/start")}
                   >
                     Entity
                   </NavigationElement>
                 </Flex>
                 <Flex direction={"row"} align={"center"}>
-                  <Icon as={BsCollection} />
+                  <Icon as={BsFolder} />
                   <NavigationElement
-                    href={"/create/collection/start"}
-                    onClick={isOpen ? onClose : onOpen}
+                    onClick={() => responsiveNavigate("/create/collection/start")}
                   >
                     Collection
                   </NavigationElement>
                 </Flex>
                 <Flex direction={"row"} align={"center"}>
-                  <Icon as={BsGear} />
+                  <Icon as={BsPuzzle} />
                   <NavigationElement
-                    href={"/create/attribute/start"}
-                    onClick={isOpen ? onClose : onOpen}
+                    onClick={() => responsiveNavigate("/create/attribute/start")}
                   >
                     Attribute
                   </NavigationElement>
@@ -217,26 +207,23 @@ const Navigation = () => {
                 <Flex direction={"row"} align={"center"}>
                   <Icon as={BsBox} />
                   <NavigationElement
-                    href={"/entities"}
-                    onClick={isOpen ? onClose : onOpen}
+                    onClick={() => responsiveNavigate("/entities")}
                   >
                     Entities
                   </NavigationElement>
                 </Flex>
                 <Flex direction={"row"} align={"center"}>
-                  <Icon as={BsCollection} />
+                  <Icon as={BsFolder} />
                   <NavigationElement
-                    href={"/collections"}
-                    onClick={isOpen ? onClose : onOpen}
+                    onClick={() => responsiveNavigate("/collections")}
                   >
                     Collections
                   </NavigationElement>
                 </Flex>
                 <Flex direction={"row"} align={"center"}>
-                  <Icon as={BsGear} />
+                  <Icon as={BsPuzzle} />
                   <NavigationElement
-                    href={"/attributes"}
-                    onClick={isOpen ? onClose : onOpen}
+                    onClick={() => responsiveNavigate("/attributes")}
                   >
                     Attributes
                   </NavigationElement>
@@ -244,9 +231,9 @@ const Navigation = () => {
               </Flex>
             </Flex>
           </Stack>
-        </Box>
+        </Flex>
       ) : null}
-    </Box>
+    </>
   );
 };
 

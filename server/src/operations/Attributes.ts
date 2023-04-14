@@ -3,7 +3,7 @@ import { getDatabase, getIdentifier } from "../database/connection";
 import { Updates } from "./Updates";
 
 // Utility libraries
-import _ from "underscore";
+import _ from "lodash";
 import consola from "consola";
 
 // Custom types
@@ -19,7 +19,7 @@ export class Attributes {
    * @return {Promise<AttributeModel>}
    */
   static create = (attribute: any): Promise<AttributeModel> => {
-    consola.info("Creating new Attribute:", attribute.name);
+    consola.start("Creating new Attribute:", attribute.name);
     return new Promise((resolve, _reject) => {
       // Allocate a new identifier and join with Attribute data
       attribute["_id"] = getIdentifier("attribute");
@@ -58,6 +58,73 @@ export class Attributes {
     });
   };
 
+  static update = (
+    updatedAttribute: AttributeModel
+  ): Promise<AttributeModel> => {
+    consola.start("Updating Attribute:", updatedAttribute.name);
+    return new Promise((resolve, _reject) => {
+      getDatabase()
+        .collection(ATTRIBUTES)
+        .findOne(
+          { _id: updatedAttribute._id },
+          (error: any, result: any) => {
+            if (error) {
+              throw error;
+            }
+
+            // Database operations to perform
+            const operations: Promise<any>[] = [];
+
+            // Cast and store current state of the Collection
+            result as AttributeModel;
+
+            const updates = {
+              $set: {
+                description: updatedAttribute.description,
+              },
+            };
+
+            // Add Update operation
+            operations.push(
+              Updates.create({
+                timestamp: new Date(Date.now()),
+                type: "update",
+                details: "Updated Collection",
+                target: {
+                  type: "collections",
+                  id: updatedAttribute._id,
+                  name: updatedAttribute.name,
+                },
+              })
+            );
+
+            getDatabase()
+              .collection(ATTRIBUTES)
+              .updateOne(
+                { _id: updatedAttribute._id },
+                updates,
+                (error: any, _response: any) => {
+                  if (error) {
+                    throw error;
+                  }
+
+                  // Resolve all operations then resolve overall Promise
+                  Promise.all(operations).then((_result) => {
+                    consola.success(
+                      "Updated Attribute:",
+                      updatedAttribute.name
+                    );
+
+                    // Resolve the Promise
+                    resolve(updatedAttribute);
+                  });
+                }
+              );
+          }
+        );
+    });
+  };
+
   /**
    * Get a single Attribute
    * @return {Promise<AttributeModel>}
@@ -93,7 +160,7 @@ export class Attributes {
   };
 
   static delete = (id: string): Promise<AttributeModel> => {
-    consola.info("Deleting Attribute (id):", id.toString());
+    consola.start("Deleting Attribute (id):", id.toString());
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ATTRIBUTES)

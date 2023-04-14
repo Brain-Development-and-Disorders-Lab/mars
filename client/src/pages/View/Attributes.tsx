@@ -17,7 +17,7 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { ChevronRightIcon, AddIcon } from "@chakra-ui/icons";
-import { BsGear } from "react-icons/bs";
+import { BsPuzzle } from "react-icons/bs";
 
 // Custom components
 import { Error } from "@components/Error";
@@ -29,7 +29,7 @@ import { ContentContainer } from "@components/ContentContainer";
 import { getData } from "@database/functions";
 import { AttributeModel } from "@types";
 
-import _ from "underscore";
+import _ from "lodash";
 
 const Attributes = () => {
   const navigate = useNavigate();
@@ -83,7 +83,7 @@ const Attributes = () => {
               align={"center"}
             >
               <Flex align={"center"} gap={"4"}>
-                <Icon as={BsGear} w={"8"} h={"8"} />
+                <Icon as={BsPuzzle} w={"8"} h={"8"} />
                 <Heading fontWeight={"semibold"}>Attributes</Heading>
               </Flex>
               <Button
@@ -99,8 +99,8 @@ const Attributes = () => {
             <Flex
               p={"4"}
               direction={"row"}
-              rounded={"2xl"}
-              background={"whitesmoke"}
+              rounded={"md"}
+              background={"white"}
               flexWrap={"wrap"}
               gap={"6"}
             >

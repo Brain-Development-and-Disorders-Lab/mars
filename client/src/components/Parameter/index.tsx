@@ -10,10 +10,9 @@ import {
   Text,
   useToast,
 } from "@chakra-ui/react";
-import { SingleDatepicker } from "chakra-dayzed-datepicker";
-import { CloseIcon, ExternalLinkIcon } from "@chakra-ui/icons";
+import { ExternalLinkIcon } from "@chakra-ui/icons";
 import { AiOutlineLink } from "react-icons/ai";
-import { BsBox } from "react-icons/bs";
+import { BsBox, BsTrash } from "react-icons/bs";
 import { MdDateRange, MdOutlineTextFields } from "react-icons/md";
 import { RiNumbersLine } from "react-icons/ri";
 import { getData } from "src/database/functions";
@@ -23,7 +22,7 @@ import dayjs from "dayjs";
 
 export const DateParameter = (props: Parameter.Date) => {
   const [name, setName] = useState(props.name);
-  const [value, setValue] = useState(new Date(props.data));
+  const [value, setValue] = useState(props.data);
 
   // Propagate data updates
   useEffect(() => {
@@ -32,13 +31,13 @@ export const DateParameter = (props: Parameter.Date) => {
         identifier: props.identifier,
         name: name,
         type: "date",
-        data: value.toISOString(),
+        data: value,
       });
     }
   }, [name, value]);
 
   return (
-    <Flex direction={"row"} gap={"4"} align={"center"}>
+    <Flex direction={"row"} gap={"4"} w={"100%"} align={"center"}>
       <Icon as={MdDateRange} w={"4"} h={"4"} />
 
       {/* Parameter name */}
@@ -63,34 +62,12 @@ export const DateParameter = (props: Parameter.Date) => {
         {props.disabled ? (
           <Text>{dayjs(value).format("DD MMM HH:mm")}</Text>
         ) : (
-          <SingleDatepicker
-            id="owner"
-            name="owner"
-            propsConfigs={{
-              dateNavBtnProps: {
-                colorScheme: "gray",
-              },
-              dayOfMonthBtnProps: {
-                defaultBtnProps: {
-                  borderColor: "blackAlpha.300",
-                  _hover: {
-                    background: "black",
-                    color: "white",
-                  },
-                },
-                selectedBtnProps: {
-                  background: "black",
-                  color: "white",
-                },
-                todayBtnProps: {
-                  borderColor: "blackAlpha.300",
-                  background: "gray.50",
-                  color: "black",
-                },
-              },
-            }}
-            date={value}
-            onDateChange={setValue}
+          <Input
+            placeholder="Select Date and Time"
+            size="md"
+            type="datetime-local"
+            value={value}
+            onChange={(event) => setValue(event.target.value)}
             disabled={props.disabled}
           />
         )}
@@ -101,7 +78,7 @@ export const DateParameter = (props: Parameter.Date) => {
         <IconButton
           aria-label={"Remove Parameter"}
           key={`remove-${props.identifier}`}
-          icon={<CloseIcon />}
+          icon={<Icon as={BsTrash} />}
           colorScheme={"red"}
           onClick={() => {
             if (props.onRemove) {
@@ -131,7 +108,7 @@ export const TextParameter = (props: Parameter.Text) => {
   }, [name, value]);
 
   return (
-    <Flex direction={"row"} gap={"4"} align={"center"}>
+    <Flex direction={"row"} gap={"4"} w={"100%"} align={"center"}>
       <Icon as={MdOutlineTextFields} w={"4"} h={"4"} />
 
       {/* Parameter name */}
@@ -171,7 +148,7 @@ export const TextParameter = (props: Parameter.Text) => {
         <IconButton
           aria-label={"Remove Parameter"}
           key={`remove-${props.identifier}`}
-          icon={<CloseIcon />}
+          icon={<Icon as={BsTrash} />}
           colorScheme={"red"}
           onClick={() => {
             if (props.onRemove) {
@@ -201,7 +178,7 @@ export const NumberParameter = (props: Parameter.Number) => {
   }, [name, value]);
 
   return (
-    <Flex direction={"row"} gap={"4"} align={"center"}>
+    <Flex direction={"row"} gap={"4"} w={"100%"} align={"center"}>
       <Icon as={RiNumbersLine} w={"4"} h={"4"} />
 
       {/* Parameter name */}
@@ -241,7 +218,7 @@ export const NumberParameter = (props: Parameter.Number) => {
         <IconButton
           aria-label={"Remove Parameter"}
           key={`remove-${props.identifier}`}
-          icon={<CloseIcon />}
+          icon={<Icon as={BsTrash} />}
           colorScheme={"red"}
           onClick={() => {
             if (props.onRemove) {
@@ -271,7 +248,7 @@ export const URLParameter = (props: Parameter.URL) => {
   }, [name, value]);
 
   return (
-    <Flex direction={"row"} gap={"4"} align={"center"}>
+    <Flex direction={"row"} gap={"4"} w={"100%"} align={"center"}>
       <Icon as={AiOutlineLink} w={"4"} h={"4"} />
 
       {/* Parameter name */}
@@ -316,7 +293,7 @@ export const URLParameter = (props: Parameter.URL) => {
         <IconButton
           aria-label={"Remove Parameter"}
           key={`remove-${props.identifier}`}
-          icon={<CloseIcon />}
+          icon={<Icon as={BsTrash} />}
           colorScheme={"red"}
           onClick={() => {
             if (props.onRemove) {
@@ -374,7 +351,7 @@ export const EntityParameter = (props: Parameter.Entity) => {
   }, []);
 
   return (
-    <Flex direction={"row"} gap={"4"} align={"center"}>
+    <Flex direction={"row"} gap={"4"} w={"100%"} align={"center"}>
       <Icon as={BsBox} w={"4"} h={"4"} />
 
       {/* Parameter name */}
@@ -426,7 +403,7 @@ export const EntityParameter = (props: Parameter.Entity) => {
         <IconButton
           aria-label={"Remove Parameter"}
           key={`remove-${props.identifier}`}
-          icon={<CloseIcon />}
+          icon={<Icon as={BsTrash} />}
           colorScheme={"red"}
           onClick={() => {
             if (props.onRemove) {

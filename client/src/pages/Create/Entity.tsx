@@ -26,22 +26,19 @@ import {
   useDisclosure,
   useToast,
 } from "@chakra-ui/react";
-import { SingleDatepicker } from "chakra-dayzed-datepicker";
 import {
   AddIcon,
   CheckIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-  CloseIcon,
   InfoOutlineIcon,
 } from "@chakra-ui/icons";
+import { BsXLg } from "react-icons/bs";
 import Linky from "@components/Linky";
 import { ContentContainer } from "@components/ContentContainer";
 import Attribute from "@components/Attribute";
 import { Loading } from "@components/Loading";
 import { Error } from "@components/Error";
-
-import _ from "underscore";
 
 // Navigation
 import { useNavigate } from "react-router-dom";
@@ -58,6 +55,8 @@ import {
 // Utility functions
 import { getData, postData } from "@database/functions";
 import { validateAttributes } from "src/functions";
+import _ from "lodash";
+import { nanoid } from "nanoid";
 
 export const Start = ({}) => {
   // Used to manage what detail inputs are presented
@@ -79,7 +78,7 @@ export const Start = ({}) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [name, setName] = useState("");
-  const [created, setCreated] = useState(new Date());
+  const [created, setCreated] = useState("");
   const [owner, setOwner] = useState("");
   const [description, setDescription] = useState("");
   const [selectedCollections, setSelectedCollections] = useState(
@@ -97,7 +96,7 @@ export const Start = ({}) => {
 
   const entityState: Entity = {
     name: name,
-    created: created.toISOString(),
+    created: created,
     owner: owner,
     description: description,
     associations: {
@@ -111,7 +110,7 @@ export const Start = ({}) => {
   // Various validation error states
   const isNameError = name === "";
   const isOwnerError = owner === "";
-  const isDateError = created.toISOString() === "";
+  const isDateError = created === "";
   const isDetailsError = isNameError || isOwnerError || isDateError;
 
   const [validAttributes, setValidAttributes] = useState(false);
@@ -257,12 +256,12 @@ export const Start = ({}) => {
           <Flex
             direction={"column"}
             justify={"center"}
-            p={"4"}
+            p={"2"}
             gap={"6"}
             maxW={"7xl"}
             wrap={"wrap"}
           >
-            <Flex direction={"column"} w={["full", "4xl", "7xl"]}>
+            <Flex direction={"column"} w={["full", "4xl", "7xl"]} bg={"white"} p={"2"} rounded={"md"}>
               {/* Page header */}
               <Flex direction={"column"} p={"2"} pt={"4"} pb={"4"}>
                 <Flex direction={"row"} align={"center"} justify={"space-between"}>
@@ -335,34 +334,12 @@ export const Start = ({}) => {
                     <Flex direction={"row"} gap={"2"} wrap={["wrap", "nowrap"]}>
                       <FormControl isRequired isInvalid={isDateError}>
                         <FormLabel>Created</FormLabel>
-                        <SingleDatepicker
-                          id="owner"
-                          name="owner"
-                          propsConfigs={{
-                            dateNavBtnProps: {
-                              colorScheme: "gray",
-                            },
-                            dayOfMonthBtnProps: {
-                              defaultBtnProps: {
-                                borderColor: "blackAlpha.300",
-                                _hover: {
-                                  background: "black",
-                                  color: "white",
-                                },
-                              },
-                              selectedBtnProps: {
-                                background: "black",
-                                color: "white",
-                              },
-                              todayBtnProps: {
-                                borderColor: "blackAlpha.300",
-                                background: "gray.50",
-                                color: "black",
-                              },
-                            },
-                          }}
-                          date={created}
-                          onDateChange={setCreated}
+                        <Input
+                          placeholder="Select Date and Time"
+                          size="md"
+                          type="datetime-local"
+                          value={created}
+                          onChange={(event) => setCreated(event.target.value)}
                         />
                         {!isDateError ? (
                           <FormHelperText>Date the Entity was created.</FormHelperText>
@@ -635,7 +612,7 @@ export const Start = ({}) => {
                           setSelectedAttributes([
                             ...selectedAttributes,
                             {
-                              _id: "",
+                              _id: `al${nanoid(6)}`,
                               name: "",
                               description: "",
                               parameters: [],
@@ -673,20 +650,21 @@ export const Start = ({}) => {
               gap={"6"}
               justify={"space-between"}
               alignSelf={"center"}
+              align={"center"}
               w={["sm", "xl", "3xl"]}
               maxW={"7xl"}
               p={"4"}
               m={"4"}
               position={"fixed"}
               bottom={"0%"}
-              bg={"gray.50"}
-              rounded={"20px"}
+              bg={"white"}
+              rounded={"md"}
             >
               <Flex gap={"4"}>
                 <Button
                   colorScheme={"red"}
                   variant={"outline"}
-                  rightIcon={<CloseIcon />}
+                  rightIcon={<BsXLg />}
                   onClick={onCancel}
                 >
                   Cancel

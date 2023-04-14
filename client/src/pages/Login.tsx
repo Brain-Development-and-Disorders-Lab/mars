@@ -12,7 +12,7 @@ import {
 } from "@chakra-ui/react";
 
 // Utility libraries
-import _ from "underscore";
+import _ from "lodash";
 
 // Custom components
 import { ContentContainer } from "@components/ContentContainer";
@@ -34,14 +34,23 @@ const Login = (props: { setToken: (token: string) => void }) => {
   const performLogin = (credentials: {username: string, password: string}) => {
     postData(`/login`, credentials)
       .then((response) => {
+        if (_.isEqual(response.status, "error")) {
+          toast({
+            title: "Error",
+            status: "error",
+            description: "Incorrect username or password. Please try again.",
+            duration: 4000,
+            position: "bottom-right",
+            isClosable: true,
+          });
+        }
         props.setToken(response.token);
         setIsLoading(false);
-      })
-      .catch((_error) => {
+      }).catch((_error) => {
         toast({
           title: "Error",
           status: "error",
-          description: "Incorrect username or password. Please try again.",
+          description: "Could not perform login right now.",
           duration: 4000,
           position: "bottom-right",
           isClosable: true,
@@ -62,59 +71,58 @@ const Login = (props: { setToken: (token: string) => void }) => {
         justify={"center"}
         align={"center"}
         alignSelf={"center"}
-        p={"8"}
         gap={"8"}
-        w={["lg", "2xl"]}
-        h={["sm", "md"]}
+        w={["sm", "md", "lg"]}
+        h={"100vh"}
         wrap={"wrap"}
       >
-        <Flex align={"center"} gap={"4"}>
-          <Image src="/Favicon.png" boxSize={"72px"} />
-          <Heading fontWeight={"semibold"}>Login</Heading>
-        </Flex>
+        <Flex direction={"column"} p={"8"} gap={"8"} bg={"white"} rounded={"md"}>
+          <Flex align={"center"} gap={"4"}>
+            <Image src="/Favicon.png" boxSize={"72px"} />
+            <Heading fontWeight={"semibold"}>Login</Heading>
+          </Flex>
 
-        <Flex
-          direction={"column"}
-          justify={"center"}
-          align={"center"}
-          gap={"4"}
-        >
-          <Input
-            pr="4.5rem"
-            type={"text"}
-            placeholder={"Username"}
-            onChange={(event) => setUsername(event.target.value)}
-            disabled
-          />
-
-          <InputGroup>
-            <Input
-              pr="4.5rem"
-              type={show ? "text" : "password"}
-              placeholder={"Password"}
-              onChange={(event) => setPassword(event.target.value)}
-              onKeyUp={(event) => {
-                if (event.key === "Enter" && password.length > 0) {
-                  onLoginClick();
-                }
-              }}
-            />
-            <InputRightElement width="4.5rem">
-              <Button h="1.75rem" size="sm" onClick={handleClick}>
-                {show ? "Hide" : "Show"}
-              </Button>
-            </InputRightElement>
-          </InputGroup>
-
-          <Button
-            onClick={onLoginClick}
-            loadingText={""}
-            isLoading={isLoading}
-            colorScheme={"green"}
-            disabled={!(password.length > 0) || isLoading}
+          <Flex
+            direction={"column"}
+            justify={"center"}
+            align={"center"}
+            gap={"4"}
           >
-            Login
-          </Button>
+            <Input
+              type={"text"}
+              placeholder={"Username"}
+              onChange={(event) => setUsername(event.target.value)}
+              disabled
+            />
+
+            <InputGroup>
+              <Input
+                type={show ? "text" : "password"}
+                placeholder={"Password"}
+                onChange={(event) => setPassword(event.target.value)}
+                onKeyUp={(event) => {
+                  if (event.key === "Enter" && password.length > 0) {
+                    onLoginClick();
+                  }
+                }}
+              />
+              <InputRightElement width="4.5rem">
+                <Button h={"1.75rem"} size={"sm"} onClick={handleClick}>
+                  {show ? "Hide" : "Show"}
+                </Button>
+              </InputRightElement>
+            </InputGroup>
+
+            <Button
+              onClick={onLoginClick}
+              loadingText={""}
+              isLoading={isLoading}
+              colorScheme={"green"}
+              disabled={!(password.length > 0) || isLoading}
+            >
+              Login
+            </Button>
+          </Flex>
         </Flex>
       </Flex>
     </ContentContainer>

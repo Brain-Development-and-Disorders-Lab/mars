@@ -7,7 +7,7 @@ import { Updates } from "./Updates";
 import { CollectionModel, Collection } from "@types";
 
 // Utility libraries
-import _ from "underscore";
+import _ from "lodash";
 import consola from "consola";
 
 const COLLECTIONS = "collections";
@@ -19,7 +19,7 @@ export class Collections {
    * @return {Promise<CollectionModel>}
    */
   static create = (collection: any): Promise<CollectionModel> => {
-    consola.info("Creating new Collection:", collection.name);
+    consola.start("Creating new Collection:", collection.name);
 
     // Allocate a new identifier and join with Collection data
     collection["_id"] = getIdentifier("collection");
@@ -67,7 +67,7 @@ export class Collections {
   static update = (
     updatedCollection: CollectionModel
   ): Promise<CollectionModel> => {
-    consola.info("Updating Collection:", updatedCollection.name);
+    consola.start("Updating Collection:", updatedCollection.name);
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(COLLECTIONS)
@@ -84,7 +84,7 @@ export class Collections {
             // Cast and store current state of the Collection
             const currentCollection = result as CollectionModel;
 
-            // Collections
+            // Entities
             const entitiesToKeep = currentCollection.entities.filter((entity) =>
               updatedCollection.entities.includes(entity)
             );
@@ -107,6 +107,7 @@ export class Collections {
 
             const updates = {
               $set: {
+                description: updatedCollection.description,
                 entities: [...entitiesToKeep, ...entitiesToAdd],
               },
             };
@@ -153,7 +154,7 @@ export class Collections {
   };
 
   static addEntity = (collection: string, entity: string): Promise<string> => {
-    consola.info(
+    consola.start(
       "Adding Entity",
       entity.toString(),
       "to Collection",
@@ -205,7 +206,7 @@ export class Collections {
     collection: string,
     entity: string
   ): Promise<string> => {
-    consola.info(
+    consola.start(
       "Removing Entity",
       entity.toString(),
       "from Collection",
@@ -290,7 +291,7 @@ export class Collections {
   };
 
   static delete = (id: string): Promise<CollectionModel> => {
-    consola.info("Deleting Collection (id):", id.toString());
+    consola.start("Deleting Collection (id):", id.toString());
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(COLLECTIONS)

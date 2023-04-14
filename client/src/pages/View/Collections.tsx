@@ -20,7 +20,7 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { ChevronRightIcon, AddIcon, WarningIcon } from "@chakra-ui/icons";
-import { BsCollection } from "react-icons/bs";
+import { BsFolder } from "react-icons/bs";
 
 // Custom components
 import { Error } from "@components/Error";
@@ -31,7 +31,7 @@ import { ContentContainer } from "@components/ContentContainer";
 import { getData } from "@database/functions";
 import { CollectionModel } from "@types";
 
-import _ from "underscore";
+import _ from "lodash";
 
 const Collections = () => {
   const toast = useToast();
@@ -86,7 +86,7 @@ const Collections = () => {
               align={"center"}
             >
               <Flex align={"center"} gap={"4"}>
-                <Icon as={BsCollection} w={"8"} h={"8"} />
+                <Icon as={BsFolder} w={"8"} h={"8"} />
                 <Heading fontWeight={"semibold"}>Collections</Heading>
               </Flex>
               <Button
@@ -102,8 +102,8 @@ const Collections = () => {
             <Flex
               p={"4"}
               direction={"row"}
-              rounded={"2xl"}
-              bg={"whitesmoke"}
+              rounded={"md"}
+              bg={"white"}
               flexWrap={"wrap"}
               gap={"6"}
             >
@@ -116,10 +116,13 @@ const Collections = () => {
                           <Heading size={"sm"}>Name</Heading>
                         </Th>
                         <Th display={{ base: "none", sm: "table-cell" }}>
+                          <Heading size={"sm"}>Description</Heading>
+                        </Th>
+                        <Th display={{ base: "none", sm: "table-cell" }}>
                           <Heading size={"sm"}>Owner</Heading>
                         </Th>
                         <Th display={{ base: "none", sm: "table-cell" }}>
-                          <Heading size={"sm"}>Description</Heading>
+                          <Heading size={"sm"}>Count</Heading>
                         </Th>
                         <Th></Th>
                       </Tr>
@@ -143,6 +146,20 @@ const Collections = () => {
                               )}
                             </Td>
                             <Td display={{ base: "none", sm: "table-cell" }}>
+                              {_.isEqual(collection.description, "") ? (
+                                <Tag
+                                  size={"md"}
+                                  key={`warn-${collection._id}`}
+                                  colorScheme={"orange"}
+                                >
+                                  <TagLabel>Not specified</TagLabel>
+                                  <TagRightIcon as={WarningIcon} />
+                                </Tag>
+                              ) : (
+                                <Text noOfLines={2}>{collection.description}</Text>
+                              )}
+                            </Td>
+                            <Td display={{ base: "none", sm: "table-cell" }}>
                               {_.isEqual(collection.owner, "") ? (
                                 <Tag
                                   size={"md"}
@@ -157,17 +174,17 @@ const Collections = () => {
                               )}
                             </Td>
                             <Td display={{ base: "none", sm: "table-cell" }}>
-                              {_.isEqual(collection.description, "") ? (
+                              {_.isEqual(collection.entities.length, 0) ? (
                                 <Tag
                                   size={"md"}
                                   key={`warn-${collection._id}`}
                                   colorScheme={"orange"}
                                 >
-                                  <TagLabel>Not specified</TagLabel>
+                                  <TagLabel>Empty</TagLabel>
                                   <TagRightIcon as={WarningIcon} />
                                 </Tag>
                               ) : (
-                                <Text noOfLines={2}>{collection.description}</Text>
+                                <Text noOfLines={1}>{collection.entities.length}</Text>
                               )}
                             </Td>
                             <Td>

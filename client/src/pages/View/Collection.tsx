@@ -30,6 +30,7 @@ import {
   Tbody,
   Td,
   Text,
+  Textarea,
   Th,
   Thead,
   Tr,
@@ -38,13 +39,11 @@ import {
 } from "@chakra-ui/react";
 import {
   AddIcon,
-  CheckIcon,
   ChevronRightIcon,
-  CloseIcon,
   WarningIcon,
 } from "@chakra-ui/icons";
 import { AiOutlineEdit } from "react-icons/ai";
-import { BsCollection } from "react-icons/bs";
+import { BsCheckLg, BsFolder, BsTrash, BsXLg } from "react-icons/bs";
 
 // Navigation
 import { useParams, useNavigate } from "react-router-dom";
@@ -59,7 +58,7 @@ import Linky from "@components/Linky";
 import { Loading } from "@components/Loading";
 import { ContentContainer } from "@components/ContentContainer";
 
-import _ from "underscore";
+import _ from "lodash";
 
 export const Collection = () => {
   const { id } = useParams();
@@ -74,6 +73,7 @@ export const Collection = () => {
 
   const [collectionData, setCollectionData] = useState({} as CollectionModel);
   const [collectionEntities, setCollectionEntities] = useState([] as string[]);
+  const [collectionDescription, setCollectionDescription] = useState("");
   const [allEntities, setAllEntities] = useState(
     [] as { name: string; id: string }[]
   );
@@ -85,6 +85,7 @@ export const Collection = () => {
       .then((response) => {
           setCollectionData(response);
           setCollectionEntities(response.entities);
+          setCollectionDescription(response.description);
       }).catch(() => {
         toast({
           title: "Error",
@@ -163,7 +164,7 @@ export const Collection = () => {
       const updateData: CollectionModel = {
         _id: collectionData._id,
         name: collectionData.name,
-        description: collectionData.description,
+        description: collectionDescription,
         owner: collectionData.owner,
         created: collectionData.created,
         entities: collectionEntities,
@@ -196,7 +197,7 @@ export const Collection = () => {
     }
   };
 
-  // Delete the Entity when confirmed
+  // Delete the Collection when confirmed
   const handleDeleteClick = () => {
     // Update data
     deleteData(`/collections/${id}`)
@@ -245,8 +246,8 @@ export const Collection = () => {
               wrap={"wrap"}
               gap={"4"}
             >
-              <Flex align={"center"} gap={"4"} shadow={"lg"} p={"2"} border={"2px"} rounded={"10px"}>
-                <Icon as={BsCollection} w={"8"} h={"8"} />
+              <Flex align={"center"} gap={"4"} shadow={"lg"} p={"2"} border={"2px"} rounded={"md"}>
+                <Icon as={BsFolder} w={"8"} h={"8"} />
                 <Heading fontWeight={"semibold"}>{collectionData.name}</Heading>
               </Flex>
 
@@ -255,7 +256,7 @@ export const Collection = () => {
                 {editing &&
                   <Popover>
                     <PopoverTrigger>
-                      <Button colorScheme={"red"} rightIcon={<CloseIcon />}>
+                      <Button colorScheme={"red"} rightIcon={<Icon as={BsTrash} />}>
                         Delete
                       </Button>
                     </PopoverTrigger>
@@ -268,7 +269,7 @@ export const Collection = () => {
                         <Flex direction={"row"} p={"2"} justify={"center"}>
                           <Button
                             colorScheme={"green"}
-                            rightIcon={<CheckIcon />}
+                            rightIcon={<Icon as={BsCheckLg} />}
                             onClick={handleDeleteClick}
                           >
                             Confirm
@@ -281,7 +282,7 @@ export const Collection = () => {
                 <Button
                   colorScheme={editing ? "green" : "gray"}
                   rightIcon={
-                    editing ? <Icon as={CheckIcon} /> : <Icon as={AiOutlineEdit} />
+                    editing ? <Icon as={BsCheckLg} /> : <Icon as={AiOutlineEdit} />
                   }
                   onClick={handleEditClick}
                 >
@@ -297,8 +298,8 @@ export const Collection = () => {
                 gap={"4"}
                 grow={"1"}
                 h={"fit-content"}
-                bg={"whitesmoke"}
-                rounded={"10px"}
+                bg={"white"}
+                rounded={"md"}
               >
                 {/* Details */}
                 <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
@@ -344,7 +345,16 @@ export const Collection = () => {
                                 <TagRightIcon as={WarningIcon} />
                               </Tag>
                             ) : (
-                              <Text>{collectionData.description}</Text>
+                              editing ? (
+                                <Textarea
+                                  value={collectionDescription}
+                                  onChange={(event) => {
+                                    setCollectionDescription(event.target.value);
+                                  }}
+                                />
+                              ) : (
+                                <Text>{collectionDescription}</Text>
+                              )
                             )}
                           </Td>
                         </Tr>
@@ -360,8 +370,8 @@ export const Collection = () => {
                 gap={"4"}
                 grow={"2"}
                 h={"fit-content"}
-                bg={"whitesmoke"}
-                rounded={"10px"}
+                bg={"white"}
+                rounded={"md"}
               >
                 <Flex direction={"row"} justify={"space-between"}>
                   {/* Entities in the Collection */}
@@ -411,7 +421,7 @@ export const Collection = () => {
                                     {editing && (
                                       <Button
                                         key={`remove-${entity}`}
-                                        rightIcon={<CloseIcon />}
+                                        rightIcon={<BsXLg />}
                                         colorScheme={"red"}
                                         onClick={() => {
                                           if (id) {

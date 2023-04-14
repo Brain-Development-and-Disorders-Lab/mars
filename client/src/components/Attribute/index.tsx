@@ -11,11 +11,11 @@ import {
   Input,
   Textarea,
 } from "@chakra-ui/react";
-import { CheckIcon, CloseIcon } from "@chakra-ui/icons";
+import { CheckIcon } from "@chakra-ui/icons";
+import { BsTrash } from "react-icons/bs";
+import ParameterGroup from "@components/ParameterGroup";
 
 import { AttributeProps } from "@types";
-
-import ParameterGroup from "@components/ParameterGroup";
 
 import { validateParameters } from "src/functions";
 
@@ -92,7 +92,7 @@ const Attribute = (props: AttributeProps) => {
                 props.onRemove(props.identifier);
               }
             }}
-            rightIcon={<CloseIcon />}
+            rightIcon={<Icon as={BsTrash} />}
           >
             Remove
           </Button>

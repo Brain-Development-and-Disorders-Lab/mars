@@ -1,13 +1,13 @@
 import consola from "consola";
 
 import { getDatabase } from "src/database/connection";
-import _ from "underscore";
+import _ from "lodash";
 
 const ENTITIES_COLLECTION = "entities";
 
 export class Search {
   static get = (data: { query: string }): Promise<any[]> => {
-    consola.info("Search:", data.query);
+    consola.start("Search:", data.query);
     return new Promise((resolve, reject) => {
       // Sanitize database query
       data.query = data.query.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
