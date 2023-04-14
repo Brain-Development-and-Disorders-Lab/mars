@@ -3,25 +3,15 @@ import React, { useEffect, useState } from "react";
 import {
   Flex,
   Heading,
-  Table,
-  TableContainer,
-  Th,
-  Thead,
-  Tr,
   Text,
   useToast,
   Button,
-  Tbody,
   Link,
-  Tag,
-  TagLabel,
-  TagRightIcon,
-  Td,
   Icon,
 } from "@chakra-ui/react";
-import { ChevronRightIcon, AddIcon, WarningIcon } from "@chakra-ui/icons";
-import { BsBox } from "react-icons/bs";
+import { BsBox, BsChevronRight, BsPlusLg } from "react-icons/bs";
 
+import { createColumnHelper } from "@tanstack/react-table";
 // Navigation
 import { useNavigate } from "react-router-dom";
 
@@ -37,6 +27,7 @@ import dayjs from "dayjs";
 import { ContentContainer } from "@components/ContentContainer";
 import { Loading } from "@components/Loading";
 import { Error } from "@components/Error";
+import { DataTable } from "@components/DataTable";
 
 const Entities = () => {
   const navigate = useNavigate();
@@ -67,6 +58,44 @@ const Entities = () => {
       });
   }, []);
 
+  // Configure table columns and data
+  const data: EntityModel[] = entityData;
+  const columnHelper = createColumnHelper<EntityModel>();
+  const columns = [
+    columnHelper.accessor("name", {
+      cell: (info) => info.getValue(),
+      header: "Name",
+    }),
+    columnHelper.accessor("description", {
+      cell: (info) => info.getValue(),
+      header: "Description",
+      enableHiding: true,
+    }),
+    columnHelper.accessor("owner", {
+      cell: (info) => info.getValue(),
+      header: "Owner",
+    }),
+    columnHelper.accessor("created", {
+      cell: (info) => dayjs(info.getValue()).fromNow(),
+      header: "Created",
+    }),
+    columnHelper.accessor("_id", {
+      cell: (info) => {
+        return (
+          <Button
+            key={`view-entity-${info.getValue()}`}
+            colorScheme={"blackAlpha"}
+            rightIcon={<Icon as={BsChevronRight} />}
+            onClick={() => navigate(`/entities/${info.getValue()}`)}
+          >
+            View
+          </Button>
+        );
+      },
+      header: "",
+    }),
+  ];
+
   return (
     <ContentContainer vertical={isError || !isLoaded}>
       {isLoaded ? (
@@ -93,7 +122,7 @@ const Entities = () => {
                 <Heading fontWeight={"semibold"}>Entities</Heading>
               </Flex>
               <Button
-                rightIcon={<AddIcon />}
+                rightIcon={<Icon as={BsPlusLg} />}
                 as={Link}
                 onClick={() => navigate("/create/entity/start")}
                 colorScheme={"green"}
@@ -109,94 +138,12 @@ const Entities = () => {
               bg={"white"}
               wrap={"wrap"}
               gap={"6"}
+              justify={"center"}
             >
               {isLoaded && entityData.length > 0 ? (
-                <TableContainer w={"full"}>
-                  <Table variant={"simple"} colorScheme={"blackAlpha"}>
-                    <Thead>
-                      <Tr>
-                        <Th>
-                          <Heading size={"sm"}>Name</Heading>
-                        </Th>
-                        <Th display={{ base: "none", sm: "table-cell" }}>
-                          <Heading size={"sm"}>Description</Heading>
-                        </Th>
-                        <Th display={{ base: "none", sm: "table-cell" }}>
-                          <Heading size={"sm"}>Owner</Heading>
-                        </Th>
-                        <Th display={{ base: "none", sm: "table-cell" }}>
-                          <Heading size={"sm"}>Created</Heading>
-                        </Th>
-                        <Th></Th>
-                      </Tr>
-                    </Thead>
-                    <Tbody>
-                      {entityData.reverse().map((entity) => {
-                        return (
-                          <Tr key={entity._id}>
-                            <Td>{entity.name}</Td>
-                            <Td display={{ base: "none", sm: "table-cell" }}>
-                              <Text noOfLines={2}>
-                                {_.isEqual(entity.description, "") ? (
-                                  <Tag
-                                    size={"md"}
-                                    key={`warn-${entity._id}`}
-                                    colorScheme={"orange"}
-                                  >
-                                    <TagLabel>Not specified</TagLabel>
-                                    <TagRightIcon as={WarningIcon} />
-                                  </Tag>
-                                ) : (
-                                  entity.description
-                                )}
-                              </Text>
-                            </Td>
-                            <Td display={{ base: "none", sm: "table-cell" }}>
-                              {_.isEqual(entity.owner, "") ? (
-                                <Tag
-                                  size={"md"}
-                                  key={`warn-${entity._id}`}
-                                  colorScheme={"orange"}
-                                >
-                                  <TagLabel>Not specified</TagLabel>
-                                  <TagRightIcon as={WarningIcon} />
-                                </Tag>
-                              ) : (
-                                entity.owner
-                              )}
-                            </Td>
-                            <Td display={{ base: "none", sm: "table-cell" }}>
-                              {_.isEqual(entity.created, "") ? (
-                                <Tag
-                                  size={"md"}
-                                  key={`warn-${entity._id}`}
-                                  colorScheme={"orange"}
-                                >
-                                  <TagLabel>Not specified</TagLabel>
-                                  <TagRightIcon as={WarningIcon} />
-                                </Tag>
-                              ) : (
-                                dayjs(entity.created).fromNow()
-                              )}
-                            </Td>
-                            <Td>
-                              <Flex justify={"right"}>
-                                <Button
-                                  key={`view-entity-${entity._id}`}
-                                  colorScheme={"blackAlpha"}
-                                  rightIcon={<ChevronRightIcon />}
-                                  onClick={() => navigate(`/entities/${entity._id}`)}
-                                >
-                                  View
-                                </Button>
-                              </Flex>
-                            </Td>
-                          </Tr>
-                        );
-                      })}
-                    </Tbody>
-                  </Table>
-                </TableContainer>
+                <Flex direction={"column"} gap={"4"} w={"100%"}>
+                  <DataTable columns={columns} data={data} />
+                </Flex>
               ) : (
                 <Text>There are no Entities to display.</Text>
               )}
