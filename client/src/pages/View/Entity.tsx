@@ -423,13 +423,13 @@ export const Entity = () => {
               wrap={"wrap"}
               gap={"4"}
             >
-              <Flex align={"center"} gap={"4"} shadow={"lg"} p={"2"} border={"2px"} rounded={"md"}>
+              <Flex align={"center"} gap={"4"} shadow={"lg"} p={"2"} border={"2px"} rounded={"md"} bg={"white"}>
                 <Icon as={BsBox} w={"8"} h={"8"} />
                 <Heading fontWeight={"semibold"}>{entityData.name}</Heading>
               </Flex>
 
               {/* Buttons */}
-              <Flex direction={"row"} gap={"4"} wrap={"wrap"}>
+              <Flex direction={"row"} align={"center"} gap={"4"} wrap={"wrap"} bg={"white"} p={"4"} rounded={"md"}>
                 {editing &&
                   <Popover>
                     <PopoverTrigger>

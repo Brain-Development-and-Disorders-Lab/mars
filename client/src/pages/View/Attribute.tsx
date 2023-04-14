@@ -147,30 +147,22 @@ export const Attribute = () => {
       isError ? (
         <Error />
       ) : (
-        <Flex
-          direction={"column"}
-          justify={"center"}
-          p={"4"}
-          gap={"6"}
-          maxW={"7xl"}
-          wrap={"wrap"}
-        >
+        <Flex direction={"column"}>
           <Flex
             p={"2"}
-            pt={"8"}
-            pb={"8"}
+            gap={"4"}
             direction={"row"}
             justify={"space-between"}
             align={"center"}
             wrap={"wrap"}
           >
-            <Flex align={"center"} gap={"4"} shadow={"lg"} p={"2"} border={"2px"} rounded={"md"}>
+            <Flex align={"center"} gap={"4"} shadow={"lg"} p={"2"} border={"2px"} rounded={"md"} bg={"white"}>
               <Icon as={BsPuzzle} w={"8"} h={"8"} />
               <Heading fontWeight={"semibold"}>{attributeData.name}</Heading>
             </Flex>
 
             {/* Buttons */}
-            <Flex direction={"row"} gap={"4"} wrap={"wrap"}>
+            <Flex direction={"row"} gap={"4"} wrap={"wrap"} bg={"white"} p={"4"} rounded={"md"}>
               {editing &&
                 <Popover>
                   <PopoverTrigger>
@@ -209,7 +201,7 @@ export const Attribute = () => {
             </Flex>
           </Flex>
 
-          <Flex direction={"row"} gap={"4"} wrap={"wrap"}>
+          <Flex direction={"row"} gap={"4"} p={"2"} wrap={"wrap"}>
             <Flex
               direction={"column"}
               p={"4"}
