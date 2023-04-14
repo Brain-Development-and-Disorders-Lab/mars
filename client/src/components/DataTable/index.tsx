@@ -9,7 +9,7 @@ import {
   getSortedRowModel
 } from "@tanstack/react-table";
 
-export const DataTable: React.FC<any> = (props: { columns: any[], data: any[] }) => {
+export const DataTable: React.FC<any> = (props: { columns: any[], data: any[], hideControls?: false, editable?: false }) => {
   // Create ReactTable instance
   const table = useReactTable({
     columns: props.columns,
@@ -17,7 +17,13 @@ export const DataTable: React.FC<any> = (props: { columns: any[], data: any[] })
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    initialState: {
+      pagination: {
+        pageSize: 5,
+      },
+    }
   });
+
   return (
     <>
       <TableContainer>
@@ -68,7 +74,7 @@ export const DataTable: React.FC<any> = (props: { columns: any[], data: any[] })
           </Tbody>
         </Table>
       </TableContainer>
-      <Flex direction={"row"} gap={"4"} justify={"space-between"} w={"100%"}>
+      {!props.hideControls && <Flex direction={"row"} gap={"4"} justify={"space-between"} w={"100%"}>
         <Flex direction={"row"} gap={"4"} align={"center"}>
           <IconButton icon={<Icon as={BsChevronDoubleLeft} />} aria-label="first page" onClick={() => table.setPageIndex(0)} disabled={!table.getCanPreviousPage()}/>
           <IconButton icon={<Icon as={BsChevronLeft} />} aria-label="previous page" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}/>
@@ -92,7 +98,7 @@ export const DataTable: React.FC<any> = (props: { columns: any[], data: any[] })
             })}
           </Select>
         </Flex>
-      </Flex>
+      </Flex>}
     </>
   );
 };
