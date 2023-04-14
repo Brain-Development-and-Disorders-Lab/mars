@@ -31,16 +31,13 @@ import { useNavigate } from "react-router-dom";
 
 // NavigationElement sub-component to generalize links
 const NavigationElement = ({
-  href,
   children,
   onClick,
 }: {
-  href: string;
   children: ReactNode;
   onClick?: () => void;
 }) => (
   <Link
-    href={href}
     p={"2"}
     rounded={"md"}
     _hover={{
@@ -56,6 +53,11 @@ const NavigationElement = ({
 const Navigation = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const navigate = useNavigate();
+
+  const responsiveNavigate = (location: string) => {
+    isOpen ? onClose() : onOpen();
+    navigate(location);
+  };
 
   return (
     <>
@@ -156,7 +158,7 @@ const Navigation = () => {
           <Stack as={"nav"} spacing={4} divider={<StackDivider />}>
             {/* Dashboard */}
             <Flex direction={"row"} align={"center"} gap={"2"}>
-              <NavigationElement href={"/"} onClick={isOpen ? onClose : onOpen}>
+              <NavigationElement onClick={() => responsiveNavigate("/")}>
                 Dashboard
               </NavigationElement>
             </Flex>
@@ -171,8 +173,7 @@ const Navigation = () => {
                 <Flex direction={"row"} align={"center"}>
                   <Icon as={BsBox} />
                   <NavigationElement
-                    href={"/create/entity/start"}
-                    onClick={isOpen ? onClose : onOpen}
+                    onClick={() => responsiveNavigate("/create/entity/start")}
                   >
                     Entity
                   </NavigationElement>
@@ -180,8 +181,7 @@ const Navigation = () => {
                 <Flex direction={"row"} align={"center"}>
                   <Icon as={BsFolder} />
                   <NavigationElement
-                    href={"/create/collection/start"}
-                    onClick={isOpen ? onClose : onOpen}
+                    onClick={() => responsiveNavigate("/create/collection/start")}
                   >
                     Collection
                   </NavigationElement>
@@ -189,8 +189,7 @@ const Navigation = () => {
                 <Flex direction={"row"} align={"center"}>
                   <Icon as={BsPuzzle} />
                   <NavigationElement
-                    href={"/create/attribute/start"}
-                    onClick={isOpen ? onClose : onOpen}
+                    onClick={() => responsiveNavigate("/create/attribute/start")}
                   >
                     Attribute
                   </NavigationElement>
@@ -208,8 +207,7 @@ const Navigation = () => {
                 <Flex direction={"row"} align={"center"}>
                   <Icon as={BsBox} />
                   <NavigationElement
-                    href={"/entities"}
-                    onClick={isOpen ? onClose : onOpen}
+                    onClick={() => responsiveNavigate("/entities")}
                   >
                     Entities
                   </NavigationElement>
@@ -217,8 +215,7 @@ const Navigation = () => {
                 <Flex direction={"row"} align={"center"}>
                   <Icon as={BsFolder} />
                   <NavigationElement
-                    href={"/collections"}
-                    onClick={isOpen ? onClose : onOpen}
+                    onClick={() => responsiveNavigate("/collections")}
                   >
                     Collections
                   </NavigationElement>
@@ -226,8 +223,7 @@ const Navigation = () => {
                 <Flex direction={"row"} align={"center"}>
                   <Icon as={BsPuzzle} />
                   <NavigationElement
-                    href={"/attributes"}
-                    onClick={isOpen ? onClose : onOpen}
+                    onClick={() => responsiveNavigate("/attributes")}
                   >
                     Attributes
                   </NavigationElement>
