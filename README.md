@@ -1,8 +1,8 @@
-# Metadata Aggregator for Reproducible Science (MARS) 🚀
+# Metadata Aggregator for Reproducible Science (MARS) 🧪
 
 An open-source and customizable workflow tool for tracking and managing metadata generated from scientific experiments.
 
-<img src="metadata-manager.png">
+<img src="mars.png">
 
 **⚠️ WARNING: MARS is still in early development. It should not be used to manage real scientific data at this stage. There are known issues updating and deleting Entities and Collections.**
 
