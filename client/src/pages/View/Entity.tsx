@@ -387,12 +387,22 @@ export const Entity = () => {
     );
   };
 
+  // Remove Collections from the Entity state
   const removeCollection = (id: string) => {
     setEntityCollections(
       entityCollections.filter((collection) => {
         return collection !== id;
       })
     );
+  };
+
+  // Remove Attributes from the Entity state
+  const removeAttribute = (id: string) => {
+    setEntityAttributes(
+      entityAttributes.filter((attribute) => {
+        return attribute._id !== id;
+      })
+    )
   };
 
   /**
@@ -803,10 +813,26 @@ export const Entity = () => {
                   {entityAttributes.length > 0 ? (
                     entityAttributes.map((attribute) => {
                       return (
-                        <AttributeCard
-                          data={attribute}
-                          key={`attribute-${attribute.name}`}
-                        />
+                        <Flex direction={"column"} gap={"2"} width={"100%"}>
+                          {editing &&
+                            <Flex justify={"right"}>
+                              <Button
+                                key={`remove-${attribute.name}`}
+                                rightIcon={<Icon as={BsDashLg} />}
+                                colorScheme={"red"}
+                                onClick={() => {
+                                  removeAttribute(attribute._id);
+                                }}
+                              >
+                                Remove
+                              </Button>
+                            </Flex>
+                          }
+                          <AttributeCard
+                            data={attribute}
+                            key={`attribute-${attribute.name}`}
+                          />
+                        </Flex>
                       );
                     })
                   ) : (

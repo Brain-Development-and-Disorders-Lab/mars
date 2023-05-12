@@ -238,6 +238,45 @@ export class Entities {
               );
             }
 
+            // Attributes
+            const attributesToKeep = currentEntity.attributes
+              .map((attribute) => attribute._id)
+              .filter((attribute) =>
+                updatedEntity.attributes
+                  .map((attribute) => attribute._id)
+                  .includes(attribute)
+              );
+            const attributesToAdd = updatedEntity.attributes.filter(
+              (attribute) => !attributesToKeep.includes(attribute._id)
+            );
+            // if (attributesToAdd.length > 0) {
+            //   operations.push(
+            //     attributesToAdd.map((origin: { id: string; name: string }) => {
+            //       Entities.addOrigin(
+            //         { name: updatedEntity.name, id: updatedEntity._id },
+            //         origin
+            //       );
+            //       Entities.addProduct(origin, {
+            //         name: updatedEntity.name,
+            //         id: updatedEntity._id,
+            //       });
+            //     })
+            //   );
+            // }
+            const attributesToRemove = currentEntity.attributes.filter(
+              (attribute) => !attributesToKeep.includes(attribute._id)
+            );
+            if (attributesToRemove.length > 0) {
+              operations.push(
+                attributesToRemove.map((attribute) => {
+                  Entities.removeAttribute(
+                    updatedEntity._id,
+                    attribute._id,
+                  );
+                })
+              );
+            }
+
             // Add Update operation
             operations.push(
               Updates.create({
@@ -622,6 +661,60 @@ export class Entities {
               );
           }
         );
+    });
+  };
+
+  static removeAttribute = (
+    entity: string,
+    attribute: string
+  ): Promise<string> => {
+    consola.start(
+      "Removing Attribute (id):",
+      attribute.toString(),
+      "from Entity (id):",
+      entity.toString()
+    );
+    return new Promise((resolve, _reject) => {
+      getDatabase()
+        .collection(ENTITIES_COLLECTION)
+        .findOne({ _id: entity }, (error: any, result: any) => {
+          if (error) {
+            throw error;
+          }
+
+          // Update the collection of Attributes associated with the Entity to remove this Attribute
+          const updates = {
+            $set: {
+              attributes: [
+                ...(result as EntityModel).attributes.filter(
+                  (content) =>
+                    !_.isEqual(content._id, attribute)
+                ),
+              ],
+            },
+          };
+
+          getDatabase()
+            .collection(ENTITIES_COLLECTION)
+            .updateOne(
+              { _id: entity },
+              updates,
+              (error: any, _response: any) => {
+                if (error) {
+                  throw error;
+                }
+
+                // Resolve the Promise
+                consola.success(
+                  "Removed Attribute (id):",
+                  attribute.toString(),
+                  "from Entity (id):",
+                  entity.toString()
+                );
+                resolve(entity);
+              }
+            );
+        });
     });
   };
 

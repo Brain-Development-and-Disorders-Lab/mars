@@ -266,7 +266,7 @@ export const Attribute = () => {
               <Heading fontWeight={"semibold"} size={"lg"}>Parameters</Heading>
 
               {attributeData.parameters && attributeData.parameters.length > 0 ? (
-                <ParameterGroup parameters={attributeData.parameters} viewOnly />
+                <ParameterGroup parameters={attributeParameters} viewOnly={!editing} setParameters={setAttributeParameters} />
               ) : (
                 <Text>No parameters.</Text>
               )}
