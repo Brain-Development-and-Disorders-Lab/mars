@@ -14,7 +14,7 @@ import tmp from "tmp";
 import dayjs from "dayjs";
 
 // Custom types
-import { EntityModel } from "@types";
+import { AttributeModel, EntityModel } from "@types";
 
 // Constants
 const ENTITIES_COLLECTION = "entities";
@@ -246,23 +246,19 @@ export class Entities {
                   .map((attribute) => attribute._id)
                   .includes(attribute)
               );
-            // const attributesToAdd = updatedEntity.attributes.filter(
-            //   (attribute) => !attributesToKeep.includes(attribute._id)
-            // );
-            // if (attributesToAdd.length > 0) {
-            //   operations.push(
-            //     attributesToAdd.map((origin: { id: string; name: string }) => {
-            //       Entities.addOrigin(
-            //         { name: updatedEntity.name, id: updatedEntity._id },
-            //         origin
-            //       );
-            //       Entities.addProduct(origin, {
-            //         name: updatedEntity.name,
-            //         id: updatedEntity._id,
-            //       });
-            //     })
-            //   );
-            // }
+            const attributesToAdd = updatedEntity.attributes.filter(
+              (attribute) => !attributesToKeep.includes(attribute._id)
+            );
+            if (attributesToAdd.length > 0) {
+              operations.push(
+                attributesToAdd.map((attribute: AttributeModel) => {
+                  Entities.addAttribute(
+                    updatedEntity._id,
+                    attribute,
+                  );
+                })
+              );
+            }
             const attributesToRemove = currentEntity.attributes.filter(
               (attribute) => !attributesToKeep.includes(attribute._id)
             );
@@ -661,6 +657,58 @@ export class Entities {
               );
           }
         );
+    });
+  };
+
+  static addAttribute = (
+    entity: string,
+    attribute: AttributeModel
+  ): Promise<string> => {
+    consola.start(
+      "Adding Attribute:",
+      attribute.name.toString(),
+      "to Entity (id):",
+      entity.toString()
+    );
+    return new Promise((resolve, _reject) => {
+      getDatabase()
+        .collection(ENTITIES_COLLECTION)
+        .findOne({ _id: entity }, (error: any, result: any) => {
+          if (error) {
+            throw error;
+          }
+
+          // Update the collection of Attributes associated with the Entity to remove this Attribute
+          const updates = {
+            $set: {
+              attributes: [
+                ...(result as EntityModel).attributes,
+                attribute,
+              ],
+            },
+          };
+
+          getDatabase()
+            .collection(ENTITIES_COLLECTION)
+            .updateOne(
+              { _id: entity },
+              updates,
+              (error: any, _response: any) => {
+                if (error) {
+                  throw error;
+                }
+
+                // Resolve the Promise
+                consola.success(
+                  "Added Attribute:",
+                  attribute.name.toString(),
+                  "to Entity (id):",
+                  entity.toString()
+                );
+                resolve(entity);
+              }
+            );
+        });
     });
   };
 

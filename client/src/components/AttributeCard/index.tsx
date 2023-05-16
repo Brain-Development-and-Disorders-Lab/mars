@@ -162,7 +162,7 @@ const AttributeCard = (props: AttributeCardProps) => {
       </CardBody>
 
       <ScaleFade initialScale={0.9} in={isOpen}>
-        <Modal onEsc={onClose} onClose={onClose} isOpen={isOpen} isCentered>
+        <Modal onEsc={onClose} onClose={onClose} isOpen={isOpen} size={"3xl"} isCentered>
           <ModalOverlay />
 
           <ModalContent p={"2"} m={"2"}>
