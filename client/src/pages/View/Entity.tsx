@@ -435,6 +435,11 @@ export const Entity = () => {
       parameters: attributeParameters,
     }]);
     onAddAttributesClose();
+
+    // Reset state of creating an Attribute
+    setAttributeName("");
+    setAttributeDescription("");
+    setAttributeParameters([]);
   };
 
   /**
