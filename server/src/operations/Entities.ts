@@ -246,9 +246,9 @@ export class Entities {
                   .map((attribute) => attribute._id)
                   .includes(attribute)
               );
-            const attributesToAdd = updatedEntity.attributes.filter(
-              (attribute) => !attributesToKeep.includes(attribute._id)
-            );
+            // const attributesToAdd = updatedEntity.attributes.filter(
+            //   (attribute) => !attributesToKeep.includes(attribute._id)
+            // );
             // if (attributesToAdd.length > 0) {
             //   operations.push(
             //     attributesToAdd.map((origin: { id: string; name: string }) => {
