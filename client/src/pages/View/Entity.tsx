@@ -387,12 +387,22 @@ export const Entity = () => {
     );
   };
 
+  // Remove Collections from the Entity state
   const removeCollection = (id: string) => {
     setEntityCollections(
       entityCollections.filter((collection) => {
         return collection !== id;
       })
     );
+  };
+
+  // Remove Attributes from the Entity state
+  const removeAttribute = (id: string) => {
+    setEntityAttributes(
+      entityAttributes.filter((attribute) => {
+        return attribute._id !== id;
+      })
+    )
   };
 
   /**
@@ -423,13 +433,13 @@ export const Entity = () => {
               wrap={"wrap"}
               gap={"4"}
             >
-              <Flex align={"center"} gap={"4"} shadow={"lg"} p={"2"} border={"2px"} rounded={"md"}>
+              <Flex align={"center"} gap={"4"} shadow={"lg"} p={"2"} border={"2px"} rounded={"md"} bg={"white"}>
                 <Icon as={BsBox} w={"8"} h={"8"} />
                 <Heading fontWeight={"semibold"}>{entityData.name}</Heading>
               </Flex>
 
               {/* Buttons */}
-              <Flex direction={"row"} gap={"4"} wrap={"wrap"}>
+              <Flex direction={"row"} align={"center"} gap={"4"} wrap={"wrap"} bg={"white"} p={"4"} rounded={"md"}>
                 {editing &&
                   <Popover>
                     <PopoverTrigger>
@@ -803,10 +813,26 @@ export const Entity = () => {
                   {entityAttributes.length > 0 ? (
                     entityAttributes.map((attribute) => {
                       return (
-                        <AttributeCard
-                          data={attribute}
-                          key={`attribute-${attribute.name}`}
-                        />
+                        <Flex direction={"column"} gap={"2"} width={"100%"}>
+                          {editing &&
+                            <Flex justify={"right"}>
+                              <Button
+                                key={`remove-${attribute.name}`}
+                                rightIcon={<Icon as={BsDashLg} />}
+                                colorScheme={"red"}
+                                onClick={() => {
+                                  removeAttribute(attribute._id);
+                                }}
+                              >
+                                Remove
+                              </Button>
+                            </Flex>
+                          }
+                          <AttributeCard
+                            data={attribute}
+                            key={`attribute-${attribute.name}`}
+                          />
+                        </Flex>
                       );
                     })
                   ) : (

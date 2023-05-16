@@ -171,3 +171,14 @@ export type Update = {
 export type UpdateModel = Update & {
   _id: string;
 };
+
+// Query types
+export type QueryToken = "&" | "|" | "!" | "=";
+export type QueryOperator = "AND" | "OR" | "NOT" | "INCLUDES";
+export type QueryParameters = "NAME" | "CREATED" | "OWNER";
+export type QueryFocusType = "ENTITY" | "COLLECTION" | "ATTRIBUTE";
+
+export type Query = {
+  raw: string;
+  tokens: string[];
+};

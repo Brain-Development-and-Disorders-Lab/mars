@@ -152,9 +152,6 @@ export const Start = ({}) => {
               <Flex>
                 <FormControl isRequired isInvalid={isParametersError}>
                   <FormLabel>Parameters</FormLabel>
-                  {isParametersError && (
-                    <FormErrorMessage>Specify at least one Parameter.</FormErrorMessage>
-                  )}
                   <ParameterGroup
                     parameters={parameters}
                     viewOnly={false}

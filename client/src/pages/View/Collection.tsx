@@ -230,14 +230,7 @@ export const Collection = () => {
         isError ? (
           <Error />
         ) : (
-          <Flex
-            direction={"column"}
-            justify={"center"}
-            p={"4"}
-            gap={"6"}
-            maxW={"7xl"}
-            wrap={"wrap"}
-          >
+          <Flex direction={"column"}>
             <Flex
               p={"2"}
               direction={"row"}
@@ -246,13 +239,13 @@ export const Collection = () => {
               wrap={"wrap"}
               gap={"4"}
             >
-              <Flex align={"center"} gap={"4"} shadow={"lg"} p={"2"} border={"2px"} rounded={"md"}>
+              <Flex align={"center"} gap={"4"} shadow={"lg"} p={"2"} border={"2px"} rounded={"md"} bg={"white"}>
                 <Icon as={BsFolder} w={"8"} h={"8"} />
                 <Heading fontWeight={"semibold"}>{collectionData.name}</Heading>
               </Flex>
 
               {/* Buttons */}
-              <Flex direction={"row"} gap={"4"} wrap={"wrap"}>
+              <Flex direction={"row"} gap={"4"} wrap={"wrap"} bg={"white"} p={"4"} rounded={"md"}>
                 {editing &&
                   <Popover>
                     <PopoverTrigger>

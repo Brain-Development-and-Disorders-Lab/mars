@@ -5,16 +5,14 @@ import {
   Icon,
   IconButton,
   Input,
+  InputGroup,
+  InputLeftAddon,
   Link,
   Select,
   Text,
   useToast,
 } from "@chakra-ui/react";
-import { ExternalLinkIcon } from "@chakra-ui/icons";
-import { AiOutlineLink } from "react-icons/ai";
-import { BsBox, BsTrash } from "react-icons/bs";
-import { MdDateRange, MdOutlineTextFields } from "react-icons/md";
-import { RiNumbersLine } from "react-icons/ri";
+import { BsArrowUpRight, BsBox, BsCalendarWeek, BsGraphUp, BsLink45Deg, BsTextareaT, BsTrash } from "react-icons/bs";
 import { getData } from "src/database/functions";
 import { EntityModel, Parameter } from "@types";
 import Linky from "@components/Linky";
@@ -38,40 +36,44 @@ export const DateParameter = (props: Parameter.Date) => {
 
   return (
     <Flex direction={"row"} gap={"4"} w={"100%"} align={"center"}>
-      <Icon as={MdDateRange} w={"4"} h={"4"} />
-
       {/* Parameter name */}
-      <FormControl isInvalid={name === ""}>
-        {props.disabled ? (
-          <Text as={"b"}>{name}</Text>
-        ) : (
-          <Input
-            id={"name"}
-            placeholder={"Name"}
-            value={name}
-            onChange={(event) => {
-              setName(event.target.value);
-            }}
-            disabled={props.disabled}
-          />
-        )}
-      </FormControl>
+      {props.disabled ? (
+        <Text as={"b"}>{name}</Text>
+      ) : (
+        <FormControl isInvalid={name === ""}>
+          <InputGroup>
+            <InputLeftAddon children={<Icon as={BsCalendarWeek} />} />
+            <Input
+              id={"name"}
+              placeholder={"Name"}
+              value={name}
+              onChange={(event) => {
+                setName(event.target.value);
+              }}
+              disabled={props.disabled}
+            />
+          </InputGroup>
+        </FormControl>
+      )}
 
       {/* Parameter data */}
-      <FormControl isRequired>
-        {props.disabled ? (
-          <Text>{dayjs(value).format("DD MMM HH:mm")}</Text>
-        ) : (
-          <Input
-            placeholder="Select Date and Time"
-            size="md"
-            type="datetime-local"
-            value={value}
-            onChange={(event) => setValue(event.target.value)}
-            disabled={props.disabled}
-          />
-        )}
-      </FormControl>
+      {props.disabled ? (
+        <Text>{dayjs(value).format("DD MMM HH:mm")}</Text>
+      ) : (
+        <FormControl isRequired>
+          <InputGroup>
+            <InputLeftAddon children={<Icon as={BsCalendarWeek} />} />
+            <Input
+              placeholder="Select Date and Time"
+              size="md"
+              type="datetime-local"
+              value={value}
+              onChange={(event) => setValue(event.target.value)}
+              disabled={props.disabled}
+            />
+          </InputGroup>
+        </FormControl>
+      )}
 
       {/* Remove Parameter */}
       {props.showRemove && !props.disabled && (
@@ -109,13 +111,12 @@ export const TextParameter = (props: Parameter.Text) => {
 
   return (
     <Flex direction={"row"} gap={"4"} w={"100%"} align={"center"}>
-      <Icon as={MdOutlineTextFields} w={"4"} h={"4"} />
 
       {/* Parameter name */}
-      <FormControl isRequired isInvalid={name === ""}>
-        {props.disabled ? (
-          <Text as={"b"}>{name}</Text>
-        ) : (
+      {props.disabled ? (
+        <Text as={"b"}>{name}</Text>
+      ) : (
+        <FormControl isRequired isInvalid={name === ""}>
           <Input
             id="name"
             placeholder="Name"
@@ -124,24 +125,27 @@ export const TextParameter = (props: Parameter.Text) => {
             disabled={props.disabled}
             required
           />
-        )}
-      </FormControl>
+        </FormControl>
+      )}
 
       {/* Parameter data */}
-      <FormControl isRequired isInvalid={value === ""}>
-        {props.disabled ? (
-          <Text>{value}</Text>
-        ) : (
-          <Input
-            name="data"
-            placeholder={"Text"}
-            value={value}
-            onChange={(event) => setValue(event.target.value)}
-            disabled={props.disabled}
-            required
-          />
-        )}
-      </FormControl>
+      {props.disabled ? (
+        <Text>{value}</Text>
+      ) : (
+        <FormControl isRequired isInvalid={value === ""}>
+          <InputGroup>
+            <InputLeftAddon children={<Icon as={BsTextareaT} />} />
+            <Input
+              name="data"
+              placeholder={"Text"}
+              value={value}
+              onChange={(event) => setValue(event.target.value)}
+              disabled={props.disabled}
+              required
+            />
+          </InputGroup>
+        </FormControl>
+      )}
 
       {/* Remove Parameter */}
       {props.showRemove && !props.disabled && (
@@ -179,13 +183,13 @@ export const NumberParameter = (props: Parameter.Number) => {
 
   return (
     <Flex direction={"row"} gap={"4"} w={"100%"} align={"center"}>
-      <Icon as={RiNumbersLine} w={"4"} h={"4"} />
+      <Icon as={BsGraphUp} w={"4"} h={"4"} />
 
       {/* Parameter name */}
-      <FormControl isRequired isInvalid={name === ""}>
-        {props.disabled ? (
-          <Text as={"b"}>{name}</Text>
-        ) : (
+      {props.disabled ? (
+        <Text as={"b"}>{name}</Text>
+      ) : (
+        <FormControl isRequired isInvalid={name === ""}>
           <Input
             id="name"
             placeholder="Name"
@@ -194,14 +198,14 @@ export const NumberParameter = (props: Parameter.Number) => {
             disabled={props.disabled}
             required
           />
-        )}
-      </FormControl>
+        </FormControl>
+      )}
 
       {/* Parameter data */}
-      <FormControl isRequired>
-        {props.disabled ? (
-          <Text>{value}</Text>
-        ) : (
+      {props.disabled ? (
+        <Text>{value}</Text>
+      ) : (
+        <FormControl isRequired>
           <Input
             name="data"
             placeholder={"0"}
@@ -210,8 +214,8 @@ export const NumberParameter = (props: Parameter.Number) => {
             disabled={props.disabled}
             required
           />
-        )}
-      </FormControl>
+        </FormControl>
+      )}
 
       {/* Remove Parameter */}
       {props.showRemove && !props.disabled && (
@@ -249,13 +253,13 @@ export const URLParameter = (props: Parameter.URL) => {
 
   return (
     <Flex direction={"row"} gap={"4"} w={"100%"} align={"center"}>
-      <Icon as={AiOutlineLink} w={"4"} h={"4"} />
+      <Icon as={BsLink45Deg} w={"4"} h={"4"} />
 
       {/* Parameter name */}
-      <FormControl isRequired isInvalid={name === ""}>
-        {props.disabled ? (
-          <Text as={"b"}>{name}</Text>
-        ) : (
+      {props.disabled ? (
+        <Text as={"b"}>{name}</Text>
+      ) : (
+        <FormControl isRequired isInvalid={name === ""}>
           <Input
             id="name"
             placeholder="Name"
@@ -266,17 +270,17 @@ export const URLParameter = (props: Parameter.URL) => {
             disabled={props.disabled}
             required
           />
-        )}
-      </FormControl>
+        </FormControl>
+      )}
 
       {/* Parameter data */}
-      <FormControl isRequired isInvalid={value === ""}>
-        {props.disabled ? (
-          <Link as={"a"} href={value} color="dark-1" isExternal>
-            {value}
-            <ExternalLinkIcon mx='2px' />
-          </Link>
-        ) : (
+      {props.disabled ? (
+        <Link href={value} color="dark-1" isExternal>
+          {value}
+          <Icon as={BsArrowUpRight} mx='2px' />
+        </Link>
+      ) : (
+        <FormControl isRequired isInvalid={value === ""}>
           <Input
             name="url"
             placeholder="URL"
@@ -285,8 +289,8 @@ export const URLParameter = (props: Parameter.URL) => {
             disabled={props.disabled}
             required
           />
-        )}
-      </FormControl>
+        </FormControl>
+      )}
 
       {/* Remove button */}
       {props.showRemove && !props.disabled && (

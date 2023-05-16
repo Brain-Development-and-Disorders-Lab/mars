@@ -5,32 +5,27 @@ import {
   Flex,
   Heading,
   Icon,
-  Table,
-  TableContainer,
   Text,
-  Thead,
-  Tr,
-  Th,
   useToast,
   Spacer,
   List,
   ListItem,
-  Tbody,
-  Td,
 } from "@chakra-ui/react";
 import { AddIcon, ChevronRightIcon } from "@chakra-ui/icons";
-import { BsBox, BsClockHistory, BsFolder, BsPencil, BsPlusLg, BsTrash } from "react-icons/bs";
+import { BsBox, BsChevronRight, BsClockHistory, BsFolder, BsPencil, BsPlusLg, BsTrash } from "react-icons/bs";
+import { createColumnHelper } from "@tanstack/react-table";
 
 import { ContentContainer } from "@components/ContentContainer";
+import { DataTable } from "@components/DataTable";
 import { Loading } from "@components/Loading";
 import { Error } from "@components/Error";
+import Linky from "@components/Linky";
 
 import { getData } from "src/database/functions";
 import { CollectionModel, EntityModel, UpdateModel } from "@types";
 
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import Linky from "@components/Linky";
 dayjs.extend(relativeTime);
 
 const Dashboard = () => {
@@ -109,6 +104,66 @@ const Dashboard = () => {
     });
   }, []);
 
+  // Configure Entity table
+  const entityTableData: EntityModel[] = entityData;
+  const entityTableColumnHelper = createColumnHelper<EntityModel>();
+  const entityTableColumns = [
+    entityTableColumnHelper.accessor("name", {
+      cell: (info) => info.getValue(),
+      header: "Name",
+    }),
+    entityTableColumnHelper.accessor("description", {
+      cell: (info) => info.getValue(),
+      header: "Description",
+      enableHiding: true,
+    }),
+    entityTableColumnHelper.accessor("_id", {
+      cell: (info) => {
+        return (
+          <Button
+            key={`view-entity-${info.getValue()}`}
+            colorScheme={"blackAlpha"}
+            rightIcon={<Icon as={BsChevronRight} />}
+            onClick={() => navigate(`/entities/${info.getValue()}`)}
+          >
+            View
+          </Button>
+        );
+      },
+      header: "",
+    }),
+  ];
+
+  // Configure Collections table
+  const collectionTableData: CollectionModel[] = collectionData;
+  const collectionTableColumnHelper = createColumnHelper<CollectionModel>();
+  const collectionTableColumns = [
+    collectionTableColumnHelper.accessor("name", {
+      cell: (info) => info.getValue(),
+      header: "Name",
+    }),
+    collectionTableColumnHelper.accessor("description", {
+      cell: (info) => info.getValue(),
+      header: "Description",
+      enableHiding: true,
+    }),
+    collectionTableColumnHelper.accessor("_id", {
+      cell: (info) => {
+        return (
+          <Button
+            key={`view-entity-${info.getValue()}`}
+            colorScheme={"blackAlpha"}
+            rightIcon={<Icon as={BsChevronRight} />}
+            onClick={() => navigate(`/collections/${info.getValue()}`)}
+          >
+            View
+          </Button>
+        );
+      },
+      header: "",
+    }),
+  ];
+
   return (
     <ContentContainer vertical={isError || !isLoaded}>
       {isLoaded ? (
@@ -147,51 +202,7 @@ const Dashboard = () => {
               >
                 {/* Collections listing */}
                 {isLoaded && collectionData.length > 0 ? (
-                  <TableContainer>
-                    <Table variant={"simple"} colorScheme={"blackAlpha"}>
-                      <Thead>
-                        <Tr>
-                          <Th>
-                            <Heading fontWeight={"semibold"} size={"sm"}>
-                              Name
-                            </Heading>
-                          </Th>
-                          <Th display={{ base: "none", sm: "table-cell" }}>
-                            <Heading fontWeight={"semibold"} size={"sm"}>
-                              Description
-                            </Heading>
-                          </Th>
-                          <Th></Th>
-                        </Tr>
-                      </Thead>
-                      <Tbody>
-                        {collectionData.slice(0, 5).map((collection) => {
-                          return (
-                            <Tr key={collection._id}>
-                              <Td>{collection.name}</Td>
-                              <Td display={{ base: "none", sm: "table-cell" }}>
-                                <Text noOfLines={1}>{collection.description}</Text>
-                              </Td>
-                              <Td>
-                                <Flex justify={"right"}>
-                                  <Button
-                                    key={`view-collection-${collection._id}`}
-                                    colorScheme={"blackAlpha"}
-                                    rightIcon={<ChevronRightIcon />}
-                                    onClick={() =>
-                                      navigate(`/collections/${collection._id}`)
-                                    }
-                                  >
-                                    View
-                                  </Button>
-                                </Flex>
-                              </Td>
-                            </Tr>
-                          );
-                        })}
-                      </Tbody>
-                    </Table>
-                  </TableContainer>
+                  <DataTable columns={collectionTableColumns} data={collectionTableData} hideControls />
                 ) : (
                   <Text>There are no Collections to display.</Text>
                 )}
@@ -235,52 +246,7 @@ const Dashboard = () => {
               >
                 {/* Entities listing */}
                 {isLoaded && entityData.length > 0 ? (
-                  <TableContainer>
-                    <Table variant={"simple"} colorScheme={"blackAlpha"}>
-                      <Thead>
-                        <Tr>
-                          <Th>
-                            <Heading fontWeight={"semibold"} size={"sm"}>
-                              Name
-                            </Heading>
-                          </Th>
-                          <Th display={{ base: "none", sm: "table-cell" }}>
-                            <Heading fontWeight={"semibold"} size={"sm"}>
-                              Description
-                            </Heading>
-                          </Th>
-                          <Th></Th>
-                        </Tr>
-                      </Thead>
-
-                      <Tbody>
-                        {entityData.slice(0, 5).map((entity) => {
-                          return (
-                            <Tr key={entity._id}>
-                              <Td>{entity.name}</Td>
-                              <Td display={{ base: "none", sm: "table-cell" }}>
-                                <Text noOfLines={1}>{entity.description}</Text>
-                              </Td>
-                              <Td>
-                                <Flex justify={"right"}>
-                                  <Button
-                                    key={`view-entity-${entity._id}`}
-                                    colorScheme={"blackAlpha"}
-                                    rightIcon={<ChevronRightIcon />}
-                                    onClick={() =>
-                                      navigate(`/entities/${entity._id}`)
-                                    }
-                                  >
-                                    View
-                                  </Button>
-                                </Flex>
-                              </Td>
-                            </Tr>
-                          );
-                        })}
-                      </Tbody>
-                    </Table>
-                  </TableContainer>
+                  <DataTable columns={entityTableColumns} data={entityTableData} hideControls />
                 ) : (
                   <Text>There are no Entities to display.</Text>
                 )}
