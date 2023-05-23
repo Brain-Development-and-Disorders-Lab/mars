@@ -205,7 +205,7 @@ const AttributeCard = (props: AttributeCardProps) => {
             </ModalHeader>
 
             <ModalBody gap={"4"}>
-              <Flex mb={"4"} gap={"2"} align={"center"}>
+              <Flex mb={"4"} gap={"2"} direction={"column"}>
                 <Heading size={"md"}>Description</Heading>
                 {!isEditing ? (
                   description.length > 0 ? (
@@ -219,7 +219,6 @@ const AttributeCard = (props: AttributeCardProps) => {
                 ) : (
                   <Input value={description} onChange={(event) => setDescription(event.target.value)} />
                 )}
-
               </Flex>
 
               <Flex
