@@ -879,26 +879,15 @@ export const Entity = () => {
                     entityAttributes.map((attribute) => {
                       return (
                         <Flex direction={"column"} gap={"2"} width={"100%"}>
-                          {editing &&
-                            <Flex justify={"right"}>
-                              <Button
-                                key={`remove-${attribute.name}`}
-                                rightIcon={<Icon as={BsDashLg} />}
-                                colorScheme={"red"}
-                                onClick={() => {
-                                  removeAttribute(attribute._id);
-                                }}
-                              >
-                                Remove
-                              </Button>
-                            </Flex>
-                          }
                           <AttributeCard
                             attribute={attribute}
                             key={`${attribute._id}`}
                             editing={editing}
                             doneCallback={handleUpdateAttribute}
                             cancelCallback={handleCancelAttribute}
+                            removeCallback={() => {
+                              removeAttribute(attribute._id);
+                            }}
                           />
                         </Flex>
                       );
@@ -933,8 +922,8 @@ export const Entity = () => {
                         Details
                       </Heading>
                       <Text>
-                        Specify some basic details about this template Attribute. The
-                        metadata associated with this template should be specified using
+                        Specify some basic details about this Attribute. The
+                        metadata associated with this Entity should be specified using
                         Parameters.
                       </Text>
                     </Flex>

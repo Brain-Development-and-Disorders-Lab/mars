@@ -25,10 +25,10 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import { InfoOutlineIcon } from "@chakra-ui/icons";
-import { AiOutlineBlock, AiOutlineLink } from "react-icons/ai";
+import { AiOutlineBlock, AiOutlineEdit, AiOutlineLink } from "react-icons/ai";
 import { MdDateRange, MdOutlineTextFields } from "react-icons/md";
 import { RiNumbersLine } from "react-icons/ri";
-import { BsCheckLg, BsPuzzle, BsXLg } from "react-icons/bs";
+import { BsCheckLg, BsDashLg, BsPuzzle, BsXLg } from "react-icons/bs";
 
 import _ from "lodash";
 
@@ -60,9 +60,22 @@ const AttributeCard = (props: AttributeCardProps) => {
             <Heading size={"md"} noOfLines={1}>{props.attribute.name}</Heading>
           </Flex>
 
-          <Button onClick={onOpen} leftIcon={<InfoOutlineIcon />}>
-            View
-          </Button>
+          <Flex align={"center"} gap={"2"}>
+            {(isEditing && props.removeCallback) &&
+              <Button
+                key={`remove-${props.attribute._id}`}
+                rightIcon={<Icon as={BsDashLg} />}
+                colorScheme={"red"}
+                onClick={props.removeCallback}
+              >
+                Remove
+              </Button>
+            }
+
+            <Button onClick={onOpen} rightIcon={<Icon as={isEditing ? AiOutlineEdit : InfoOutlineIcon} />}>
+              {isEditing ? "Edit" : "View"}
+            </Button>
+          </Flex>
         </Flex>
       </CardHeader>
 
@@ -190,8 +203,10 @@ const AttributeCard = (props: AttributeCardProps) => {
               </Flex>
               <ModalCloseButton />
             </ModalHeader>
+
             <ModalBody gap={"4"}>
-              <Flex mb={"4"}>
+              <Flex mb={"4"} gap={"2"} align={"center"}>
+                <Heading size={"md"}>Description</Heading>
                 {!isEditing ? (
                   description.length > 0 ? (
                     <Text>{description}</Text>
@@ -209,7 +224,6 @@ const AttributeCard = (props: AttributeCardProps) => {
 
               <Flex
                 direction={"column"}
-                p={"4"}
                 gap={"4"}
                 grow={"1"}
                 h={"fit-content"}
@@ -219,7 +233,6 @@ const AttributeCard = (props: AttributeCardProps) => {
                 <Heading size={"md"}>Parameters</Heading>
                 <Flex
                   direction={"column"}
-                  p={"2"}
                   gap={"2"}
                   align={"center"}
                   justify={"center"}
