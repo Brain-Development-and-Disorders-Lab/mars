@@ -107,7 +107,7 @@ const SearchBox = () => {
                   <VStack gap={"4"} divider={<StackDivider borderColor={"gray.200"} />} w={"100%"}>
                     {results.slice(0, 5).map((result) => {
                       return (
-                        <Flex direction={"row"} gap={"4"} w={"100%"}>
+                        <Flex key={result._id} direction={"row"} gap={"4"} w={"100%"}>
                           <Text as={"b"}>{result.name}</Text>
                           <Spacer />
                           <Link onClick={() => handleResultClick(result._id)}>
