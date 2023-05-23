@@ -14,7 +14,7 @@ import tmp from "tmp";
 import dayjs from "dayjs";
 
 // Custom types
-import { AttributeModel, EntityModel } from "@types";
+import { Attribute, AttributeModel, EntityModel } from "@types";
 
 // Constants
 const ENTITIES_COLLECTION = "entities";
@@ -246,6 +246,16 @@ export class Entities {
                   .map((attribute) => attribute._id)
                   .includes(attribute)
               );
+            operations.push(
+              attributesToKeep.map((attribute: string) => {
+                const updatedAttribute = updatedEntity.attributes.filter((updatedAttribute) => _.isEqual(attribute, updatedAttribute._id))[0];
+                consola.info("Updated:", updatedAttribute)
+                Entities.updateAttribute(
+                  updatedEntity._id,
+                  updatedAttribute,
+                );
+              })
+            );
             const attributesToAdd = updatedEntity.attributes.filter(
               (attribute) => !attributesToKeep.includes(attribute._id)
             );
@@ -756,6 +766,63 @@ export class Entities {
                 consola.success(
                   "Removed Attribute (id):",
                   attribute.toString(),
+                  "from Entity (id):",
+                  entity.toString()
+                );
+                resolve(entity);
+              }
+            );
+        });
+    });
+  };
+
+  static updateAttribute = (entity: string, updatedAttribute: AttributeModel): Promise<string> => {
+    consola.start(
+      "Update Attribute (id):",
+      updatedAttribute._id.toString(),
+      "from Entity (id):",
+      entity.toString()
+    );
+    return new Promise((resolve, _reject) => {
+      getDatabase()
+        .collection(ENTITIES_COLLECTION)
+        .findOne({ _id: entity }, (error: any, result: any) => {
+          if (error) {
+            throw error;
+          }
+
+          (result as EntityModel).attributes.forEach((attribute) => {
+            if (_.isEqual(updatedAttribute._id, attribute._id)) {
+              consola.info("Updating an Attribute");
+              attribute.name = updatedAttribute.name;
+              attribute.description = updatedAttribute.description;
+              attribute.parameters = updatedAttribute.parameters;
+            }
+          });
+
+          // Update the collection of Attributes associated with the Entity to remove this Attribute
+          const updates = {
+            $set: {
+              attributes: [
+                ...(result as EntityModel).attributes,
+              ],
+            },
+          };
+
+          getDatabase()
+            .collection(ENTITIES_COLLECTION)
+            .updateOne(
+              { _id: entity },
+              updates,
+              (error: any, _response: any) => {
+                if (error) {
+                  throw error;
+                }
+
+                // Resolve the Promise
+                consola.success(
+                  "Updated Attribute (id):",
+                  updatedAttribute._id.toString(),
                   "from Entity (id):",
                   entity.toString()
                 );

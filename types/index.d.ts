@@ -58,7 +58,10 @@ export type AttributeGroupProps = AttributeActions & {
 };
 
 export type AttributeCardProps = {
-  data: Attribute;
+  attribute: AttributeModel;
+  editing?: boolean;
+  doneCallback?: (updated: AttributeModel) => void;
+  cancelCallback?: () => void;
 };
 
 // Parameters

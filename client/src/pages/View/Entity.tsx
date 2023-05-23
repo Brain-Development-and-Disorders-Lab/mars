@@ -427,6 +427,7 @@ export const Entity = () => {
     )
   };
 
+  // Add Attributes to the Entity state
   const addAttribute = () => {
     setEntityAttributes(() => [...entityAttributes, {
       _id: `a-${entityData._id}-${nanoid(6)}`,
@@ -441,6 +442,21 @@ export const Entity = () => {
     setAttributeDescription("");
     setAttributeParameters([]);
   };
+
+  // Handle updates to Attributes
+  const handleUpdateAttribute = (updated: AttributeModel) => {
+    // Find the Attribute and update the state
+    consola.info("Updating:", updated._id);
+    setEntityAttributes([...entityAttributes.map((attribute) => {
+      if (_.isEqual(attribute._id, updated._id)) {
+        attribute.description = updated.description;
+        attribute.parameters = _.cloneDeep(updated.parameters);
+      }
+      return attribute;
+    })]);
+  };
+
+  const handleCancelAttribute = () => {};
 
   /**
    * Callback function to the Entity to Collections
@@ -878,8 +894,11 @@ export const Entity = () => {
                             </Flex>
                           }
                           <AttributeCard
-                            data={attribute}
-                            key={`attribute-${attribute.name}`}
+                            attribute={attribute}
+                            key={`${attribute._id}`}
+                            editing={editing}
+                            doneCallback={handleUpdateAttribute}
+                            cancelCallback={handleCancelAttribute}
                           />
                         </Flex>
                       );
