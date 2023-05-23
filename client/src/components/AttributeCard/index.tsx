@@ -1,5 +1,5 @@
 // React
-import React from "react";
+import React, { useState } from "react";
 import {
   Button,
   Card,
@@ -8,6 +8,7 @@ import {
   Flex,
   Heading,
   Icon,
+  Input,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -24,10 +25,10 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import { InfoOutlineIcon } from "@chakra-ui/icons";
-import { AiOutlineBlock, AiOutlineLink } from "react-icons/ai";
+import { AiOutlineBlock, AiOutlineEdit, AiOutlineLink } from "react-icons/ai";
 import { MdDateRange, MdOutlineTextFields } from "react-icons/md";
 import { RiNumbersLine } from "react-icons/ri";
-import { BsPuzzle } from "react-icons/bs";
+import { BsCheckLg, BsDashLg, BsPuzzle, BsXLg } from "react-icons/bs";
 
 import _ from "lodash";
 
@@ -40,6 +41,15 @@ import { WarningLabel } from "@components/Label";
 
 const AttributeCard = (props: AttributeCardProps) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const isEditing = _.isBoolean(props.editing) ? props.editing : false;
+
+  // State to be updated
+  const [description, setDescription] = useState(props.attribute.description);
+  const [parameters, setParameters] = useState(props.attribute.parameters);
+
+  // State to store original values
+  const [defaultDescription, _setDefaultDescription] = useState(props.attribute.description);
+  const [defaultParameters, _setDefaultParameters] = useState(props.attribute.parameters);
 
   return (
     <Card maxW={"md"} background={"white"}>
@@ -47,12 +57,25 @@ const AttributeCard = (props: AttributeCardProps) => {
         <Flex p={"2"} align={"center"} m={"none"} justify={"space-between"} gap={"4"}>
           <Flex align={"center"} gap={"2"}>
             <Icon as={BsPuzzle} w={"4"} h={"4"} />
-            <Heading size={"md"} noOfLines={1}>{props.data.name}</Heading>
+            <Heading size={"md"} noOfLines={1}>{props.attribute.name}</Heading>
           </Flex>
 
-          <Button onClick={onOpen} leftIcon={<InfoOutlineIcon />}>
-            View
-          </Button>
+          <Flex align={"center"} gap={"2"}>
+            {(isEditing && props.removeCallback) &&
+              <Button
+                key={`remove-${props.attribute._id}`}
+                rightIcon={<Icon as={BsDashLg} />}
+                colorScheme={"red"}
+                onClick={props.removeCallback}
+              >
+                Remove
+              </Button>
+            }
+
+            <Button onClick={onOpen} rightIcon={<Icon as={isEditing ? AiOutlineEdit : InfoOutlineIcon} />}>
+              {isEditing ? "Edit" : "View"}
+            </Button>
+          </Flex>
         </Flex>
       </CardHeader>
 
@@ -60,13 +83,13 @@ const AttributeCard = (props: AttributeCardProps) => {
         <Flex direction={"column"} p={"sm"} gap={"6"} maxW={"md"}>
           <Stack divider={<StackDivider />}>
             <Text>
-              {props.data.description.length > 0
-                ? props.data.description
+              {description.length > 0
+                ? description
                 : "No description provided."}
             </Text>
 
             <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
-              {props.data.parameters.map((parameter) => {
+              {parameters.map((parameter) => {
                 switch (parameter.type) {
                   case "date": {
                     return (
@@ -162,7 +185,7 @@ const AttributeCard = (props: AttributeCardProps) => {
       </CardBody>
 
       <ScaleFade initialScale={0.9} in={isOpen}>
-        <Modal onEsc={onClose} onClose={onClose} isOpen={isOpen} isCentered>
+        <Modal onEsc={onClose} onClose={onClose} isOpen={isOpen} size={"3xl"} isCentered>
           <ModalOverlay />
 
           <ModalContent p={"2"} m={"2"}>
@@ -175,26 +198,31 @@ const AttributeCard = (props: AttributeCardProps) => {
               >
                 <Flex align={"center"} gap={"4"} shadow={"lg"} p={"2"} border={"2px"} rounded={"md"}>
                   <Icon as={BsPuzzle} w={"8"} h={"8"} />
-                  <Heading fontWeight={"semibold"} size={"md"}>{props.data.name}</Heading>
+                  <Heading fontWeight={"semibold"} size={"md"}>{props.attribute.name}</Heading>
                 </Flex>
               </Flex>
               <ModalCloseButton />
             </ModalHeader>
+
             <ModalBody gap={"4"}>
-              <Flex mb={"4"}>
-                {props.data.description.length > 0 ? (
-                  <Text>{props.data.description}</Text>
+              <Flex mb={"4"} gap={"2"} direction={"column"}>
+                <Heading size={"md"}>Description</Heading>
+                {!isEditing ? (
+                  description.length > 0 ? (
+                    <Text>{description}</Text>
+                  ) : (
+                    <WarningLabel
+                      key={props.attribute.name}
+                      text={"No description provided"}
+                    />
+                  )
                 ) : (
-                  <WarningLabel
-                    key={props.data.name}
-                    text={"No description provided"}
-                  />
+                  <Input value={description} onChange={(event) => setDescription(event.target.value)} />
                 )}
               </Flex>
 
               <Flex
                 direction={"column"}
-                p={"4"}
                 gap={"4"}
                 grow={"1"}
                 h={"fit-content"}
@@ -204,18 +232,55 @@ const AttributeCard = (props: AttributeCardProps) => {
                 <Heading size={"md"}>Parameters</Heading>
                 <Flex
                   direction={"column"}
-                  p={"2"}
                   gap={"2"}
                   align={"center"}
                   justify={"center"}
                 >
-                  {props.data.parameters && props.data.parameters.length > 0 ? (
-                    <ParameterGroup parameters={props.data.parameters} viewOnly />
+                  {parameters && parameters.length > 0 ? (
+                    <ParameterGroup parameters={parameters} viewOnly={!isEditing} setParameters={setParameters} />
                   ) : (
                     <Text>No parameters.</Text>
                   )}
                 </Flex>
               </Flex>
+
+              {isEditing &&
+                <Flex direction={"row"} justify={"center"} gap={"4"}>
+                  <Button
+                    colorScheme={"red"}
+                    variant={"outline"}
+                    rightIcon={<Icon as={BsXLg} />}
+                    onClick={() => {
+                      // Reset the changes made to the Attribute
+                      setDescription(defaultDescription);
+                      setParameters(defaultParameters);
+
+                      // Close the modal
+                      onClose();
+
+                      // Run the 'cancel' action (if specified)
+                      props.cancelCallback ? props.cancelCallback() : {};
+                    }}
+                  >
+                    Cancel
+                  </Button>
+
+                  <Button
+                    colorScheme={"green"}
+                    rightIcon={<Icon as={BsCheckLg} />}
+                    // disabled={isAttributeError}
+                    onClick={() => {
+                      // Close the modal
+                      onClose();
+
+                      // Run the 'done' action (if specified)
+                      props.doneCallback ? props.doneCallback({ _id: props.attribute._id, name: props.attribute.name, description: description, parameters: parameters}) : {};
+                    }}
+                  >
+                    Done
+                  </Button>
+                </Flex>
+              }
             </ModalBody>
           </ModalContent>
         </Modal>

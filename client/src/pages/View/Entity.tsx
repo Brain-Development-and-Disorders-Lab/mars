@@ -4,6 +4,7 @@ import {
   Button,
   Flex,
   Heading,
+  Input,
   Table,
   TableContainer,
   Tbody,
@@ -42,12 +43,14 @@ import {
   CheckboxGroup,
   Checkbox,
   Stack,
+  FormHelperText,
+  FormErrorMessage,
 } from "@chakra-ui/react";
 import {
   WarningIcon,
 } from "@chakra-ui/icons";
 import { AiOutlineEdit } from "react-icons/ai";
-import { BsBox, BsChevronRight, BsCheckLg, BsDashLg, BsDiagram2, BsDownload, BsPlusLg, BsTrash } from "react-icons/bs";
+import { BsBox, BsChevronRight, BsCheckLg, BsDashLg, BsDiagram2, BsDownload, BsPlusLg, BsTrash, BsXLg } from "react-icons/bs";
 
 // Navigation
 import { useParams, useNavigate } from "react-router-dom";
@@ -58,10 +61,12 @@ import dayjs from "dayjs";
 import consola from "consola";
 import FileSaver from "file-saver";
 import slugify from "slugify";
+import { nanoid } from "nanoid";
 
 // Database and models
 import { deleteData, getData, postData } from "src/database/functions";
-import { AttributeModel, CollectionModel, EntityModel } from "@types";
+import { AttributeModel, CollectionModel, EntityModel, Parameters } from "@types";
+import { validateParameters } from "src/functions";
 
 // Custom components
 import Linky from "src/components/Linky";
@@ -70,6 +75,7 @@ import Graph from "src/components/Graph";
 import { Loading } from "src/components/Loading";
 import { Error } from "@components/Error";
 import { ContentContainer } from "@components/ContentContainer";
+import ParameterGroup from "@components/ParameterGroup";
 
 export const Entity = () => {
   const { id } = useParams();
@@ -108,6 +114,22 @@ export const Entity = () => {
   } = useDisclosure();
   const [selectedProducts, setSelectedProducts] = useState([] as string[]);
   const [selectedOrigins, setSelectedOrigins] = useState([] as string[]);
+
+  // Adding Attributes to existing Entity
+  const { isOpen: isAddAttributesOpen, onOpen: onAddAttributesOpen, onClose: onAddAttributesClose } = useDisclosure();
+  const [attributeName, setAttributeName] = useState("");
+  const [attributeDescription, setAttributeDescription] = useState("");
+  const [attributeParameters, setAttributeParameters] = useState([] as Parameters[]);
+
+  const isAttributeNameError = attributeName === "";
+  const isAttributeDescriptionError = attributeDescription === "";
+  const isAttributeParametersError = attributeParameters.length === 0;
+  const [attributeParameterError, setAttributeParameterError] = useState(false);
+  const isAttributeError = isAttributeNameError || isAttributeDescriptionError || isAttributeParametersError || !attributeParameterError;
+
+  useEffect(() => {
+    setAttributeParameterError(validateParameters(attributeParameters));
+  }, [attributeParameters]);
 
   // Toggles
   const [isError, setIsError] = useState(false);
@@ -404,6 +426,37 @@ export const Entity = () => {
       })
     )
   };
+
+  // Add Attributes to the Entity state
+  const addAttribute = () => {
+    setEntityAttributes(() => [...entityAttributes, {
+      _id: `a-${entityData._id}-${nanoid(6)}`,
+      name: attributeName,
+      description: attributeDescription,
+      parameters: attributeParameters,
+    }]);
+    onAddAttributesClose();
+
+    // Reset state of creating an Attribute
+    setAttributeName("");
+    setAttributeDescription("");
+    setAttributeParameters([]);
+  };
+
+  // Handle updates to Attributes
+  const handleUpdateAttribute = (updated: AttributeModel) => {
+    // Find the Attribute and update the state
+    consola.info("Updating:", updated._id);
+    setEntityAttributes([...entityAttributes.map((attribute) => {
+      if (_.isEqual(attribute._id, updated._id)) {
+        attribute.description = updated.description;
+        attribute.parameters = _.cloneDeep(updated.parameters);
+      }
+      return attribute;
+    })]);
+  };
+
+  const handleCancelAttribute = () => {};
 
   /**
    * Callback function to the Entity to Collections
@@ -807,30 +860,33 @@ export const Entity = () => {
                 bg={"white"}
                 rounded={"md"}
               >
-                <Heading size={"lg"}>Attributes</Heading>
+                <Flex direction={"row"} justify={"space-between"}>
+                  <Heading size={"lg"}>Attributes</Heading>
+                  {editing ? (
+                    <Button
+                      colorScheme={"green"}
+                      rightIcon={<Icon as={BsPlusLg} />}
+                      disabled={!editing}
+                      onClick={onAddAttributesOpen}
+                    >
+                      Add
+                    </Button>
+                  ) : null}
+                </Flex>
 
                 <SimpleGrid spacing={"4"} templateColumns={"repeat(auto-fill, minmax(300px, 1fr))"}>
                   {entityAttributes.length > 0 ? (
                     entityAttributes.map((attribute) => {
                       return (
-                        <Flex direction={"column"} gap={"2"} width={"100%"}>
-                          {editing &&
-                            <Flex justify={"right"}>
-                              <Button
-                                key={`remove-${attribute.name}`}
-                                rightIcon={<Icon as={BsDashLg} />}
-                                colorScheme={"red"}
-                                onClick={() => {
-                                  removeAttribute(attribute._id);
-                                }}
-                              >
-                                Remove
-                              </Button>
-                            </Flex>
-                          }
+                        <Flex key={`${attribute._id}`} direction={"column"} gap={"2"} width={"100%"}>
                           <AttributeCard
-                            data={attribute}
-                            key={`attribute-${attribute.name}`}
+                            attribute={attribute}
+                            editing={editing}
+                            doneCallback={handleUpdateAttribute}
+                            cancelCallback={handleCancelAttribute}
+                            removeCallback={() => {
+                              removeAttribute(attribute._id);
+                            }}
                           />
                         </Flex>
                       );
@@ -841,6 +897,106 @@ export const Entity = () => {
                 </SimpleGrid>
               </Flex>
             </Flex>
+
+            <Modal isOpen={isAddAttributesOpen} onClose={onAddAttributesClose} size={"4xl"} isCentered>
+              <ModalOverlay />
+              <ModalContent>
+                <ModalHeader>Add Attribute</ModalHeader>
+                {/* Heading and close button */}
+                <ModalCloseButton />
+
+                {/* Attribute creation */}
+                <Flex justify={"center"}>
+                  <Flex
+                    direction={"column"}
+                    gap={"6"}
+                    p={"4"}
+                    pb={"6"}
+                    mb={["12", "8"]}
+                    maxW={"7xl"}
+                    justify={"center"}
+                  >
+                    <Flex direction={"column"}>
+                      <Heading fontWeight={"semibold"} size={"lg"}>
+                        Details
+                      </Heading>
+                      <Text>
+                        Specify some basic details about this Attribute. The
+                        metadata associated with this Entity should be specified using
+                        Parameters.
+                      </Text>
+                    </Flex>
+
+                    <Flex direction={"row"} gap={"2"} w={"100%"} justify={"center"}>
+                      <Flex direction={"column"} gap={"4"} wrap={["wrap", "nowrap"]}>
+                        <FormControl isRequired>
+                          <FormLabel>Name</FormLabel>
+                          <Input
+                            placeholder={"Name"}
+                            value={attributeName}
+                            onChange={(event) => setAttributeName(event.target.value)}
+                            required
+                          />
+                          {!isAttributeNameError ? (
+                            <FormHelperText>Name of the Attribute.</FormHelperText>
+                          ) : (
+                            <FormErrorMessage>A name must be specified for the Attribute.</FormErrorMessage>
+                          )}
+                        </FormControl>
+
+                        <FormControl isRequired>
+                          <FormLabel>Description</FormLabel>
+                          <Textarea
+                            value={attributeDescription}
+                            placeholder={"Attribute Description"}
+                            onChange={(event) => setAttributeDescription(event.target.value)}
+                          />
+                          {!isAttributeDescriptionError ? (
+                            <FormHelperText>Description of the Attribute.</FormHelperText>
+                          ) : (
+                            <FormErrorMessage>A description should be provided for the Attribute.</FormErrorMessage>
+                          )}
+                        </FormControl>
+                      </Flex>
+
+                      <Flex>
+                        <FormControl isRequired isInvalid={isAttributeParametersError}>
+                          <FormLabel>Parameters</FormLabel>
+                          <ParameterGroup
+                            parameters={attributeParameters}
+                            viewOnly={false}
+                            setParameters={setAttributeParameters}
+                          />
+                        </FormControl>
+                      </Flex>
+                    </Flex>
+
+                    {/* "Done" button */}
+                    <Flex direction={"row"} p={"md"} justify={"center"} gap={"8"}>
+                      <Button
+                        colorScheme={"red"}
+                        variant={"outline"}
+                        rightIcon={<BsXLg />}
+                        onClick={onAddAttributesClose}
+                      >
+                        Cancel
+                      </Button>
+
+                      <Button
+                        colorScheme={"green"}
+                        rightIcon={<Icon as={BsCheckLg} />}
+                        disabled={isAttributeError}
+                        onClick={() => {
+                          addAttribute();
+                        }}
+                      >
+                        Done
+                      </Button>
+                    </Flex>
+                  </Flex>
+                </Flex>
+              </ModalContent>
+            </Modal>
 
             <Modal isOpen={isAddCollectionsOpen} onClose={onAddCollectionsClose} isCentered>
               <ModalOverlay />
@@ -912,7 +1068,16 @@ export const Entity = () => {
                 </Flex>
 
                 {/* "Done" button */}
-                <Flex direction={"row"} p={"md"} justify={"center"}>
+                <Flex direction={"row"} p={"md"} gap={"8"} justify={"center"}>
+                  <Button
+                    colorScheme={"red"}
+                    variant={"outline"}
+                    rightIcon={<BsXLg />}
+                    onClick={onAddCollectionsClose}
+                  >
+                    Cancel
+                  </Button>
+
                   <Button
                     colorScheme={"green"}
                     rightIcon={<Icon as={BsCheckLg} />}
@@ -999,7 +1164,16 @@ export const Entity = () => {
                 </Flex>
 
                 {/* "Done" button */}
-                <Flex direction={"row"} p={"md"} justify={"center"}>
+                <Flex direction={"row"} p={"md"} gap={"8"} justify={"center"}>
+                  <Button
+                    colorScheme={"red"}
+                    variant={"outline"}
+                    rightIcon={<BsXLg />}
+                    onClick={onAddProductsClose}
+                  >
+                    Cancel
+                  </Button>
+
                   <Button
                     colorScheme={"green"}
                     rightIcon={<Icon as={BsCheckLg} />}
@@ -1089,7 +1263,16 @@ export const Entity = () => {
                 </Flex>
 
                 {/* "Done" button */}
-                <Flex direction={"row"} p={"md"} justify={"center"}>
+                <Flex direction={"row"} p={"md"} gap={"8"} justify={"center"}>
+                  <Button
+                    colorScheme={"red"}
+                    variant={"outline"}
+                    rightIcon={<BsXLg />}
+                    onClick={onAddOriginsClose}
+                  >
+                    Cancel
+                  </Button>
+
                   <Button
                     colorScheme={"green"}
                     rightIcon={<Icon as={BsCheckLg} />}

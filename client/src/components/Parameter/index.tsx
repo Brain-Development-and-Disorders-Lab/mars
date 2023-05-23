@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import {
   Flex,
   FormControl,
+  Heading,
   Icon,
   IconButton,
   Input,
@@ -9,6 +10,7 @@ import {
   InputLeftAddon,
   Link,
   Select,
+  Spacer,
   Text,
   useToast,
 } from "@chakra-ui/react";
@@ -20,7 +22,7 @@ import dayjs from "dayjs";
 
 export const DateParameter = (props: Parameter.Date) => {
   const [name, setName] = useState(props.name);
-  const [value, setValue] = useState(props.data);
+  const [value, setValue] = useState(dayjs(props.data).toISOString());
 
   // Propagate data updates
   useEffect(() => {
@@ -36,33 +38,30 @@ export const DateParameter = (props: Parameter.Date) => {
 
   return (
     <Flex direction={"row"} gap={"4"} w={"100%"} align={"center"}>
-      {/* Parameter name */}
       {props.disabled ? (
-        <Text as={"b"}>{name}</Text>
+        <Flex w={"100%"} gap={"4"} align={"center"}>
+          <Icon as={BsCalendarWeek} />
+          <Heading size={"sm"}>{name}</Heading>
+          <Spacer />
+          <Text>{dayjs(value).format("DD MMM HH:mm")}</Text>
+        </Flex>
       ) : (
-        <FormControl isInvalid={name === ""}>
-          <InputGroup>
-            <InputLeftAddon children={<Icon as={BsCalendarWeek} />} />
-            <Input
-              id={"name"}
-              placeholder={"Name"}
-              value={name}
-              onChange={(event) => {
-                setName(event.target.value);
-              }}
-              disabled={props.disabled}
-            />
-          </InputGroup>
-        </FormControl>
-      )}
-
-      {/* Parameter data */}
-      {props.disabled ? (
-        <Text>{dayjs(value).format("DD MMM HH:mm")}</Text>
-      ) : (
-        <FormControl isRequired>
-          <InputGroup>
-            <InputLeftAddon children={<Icon as={BsCalendarWeek} />} />
+        <Flex w={"100%"} gap={"4"} align={"center"}>
+          <FormControl isInvalid={name === ""}>
+            <InputGroup>
+              <InputLeftAddon children={<Icon as={BsCalendarWeek} />} />
+              <Input
+                id={"name"}
+                placeholder={"Name"}
+                value={name}
+                onChange={(event) => {
+                  setName(event.target.value);
+                }}
+                disabled={props.disabled}
+              />
+            </InputGroup>
+          </FormControl>
+          <FormControl isRequired>
             <Input
               placeholder="Select Date and Time"
               size="md"
@@ -71,23 +70,19 @@ export const DateParameter = (props: Parameter.Date) => {
               onChange={(event) => setValue(event.target.value)}
               disabled={props.disabled}
             />
-          </InputGroup>
-        </FormControl>
-      )}
-
-      {/* Remove Parameter */}
-      {props.showRemove && !props.disabled && (
-        <IconButton
-          aria-label={"Remove Parameter"}
-          key={`remove-${props.identifier}`}
-          icon={<Icon as={BsTrash} />}
-          colorScheme={"red"}
-          onClick={() => {
-            if (props.onRemove) {
-              props.onRemove(props.identifier);
-            }
-          }}
-        />
+          </FormControl>
+          <IconButton
+            aria-label={"Remove Parameter"}
+            key={`remove-${props.identifier}`}
+            icon={<Icon as={BsTrash} />}
+            colorScheme={"red"}
+            onClick={() => {
+              if (props.onRemove) {
+                props.onRemove(props.identifier);
+              }
+            }}
+          />
+        </Flex>
       )}
     </Flex>
   );
@@ -111,30 +106,29 @@ export const TextParameter = (props: Parameter.Text) => {
 
   return (
     <Flex direction={"row"} gap={"4"} w={"100%"} align={"center"}>
-
-      {/* Parameter name */}
       {props.disabled ? (
-        <Text as={"b"}>{name}</Text>
+        <Flex w={"100%"} gap={"4"} align={"center"}>
+          <Icon as={BsTextareaT} />
+          <Heading size={"sm"}>{name}</Heading>
+          <Spacer />
+          <Text>{value}</Text>
+        </Flex>
       ) : (
-        <FormControl isRequired isInvalid={name === ""}>
-          <Input
-            id="name"
-            placeholder="Name"
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            disabled={props.disabled}
-            required
-          />
-        </FormControl>
-      )}
-
-      {/* Parameter data */}
-      {props.disabled ? (
-        <Text>{value}</Text>
-      ) : (
-        <FormControl isRequired isInvalid={value === ""}>
-          <InputGroup>
+        <Flex w={"100%"} gap={"4"} align={"center"}>
+          <FormControl isRequired isInvalid={name === ""}>
+            <InputGroup>
             <InputLeftAddon children={<Icon as={BsTextareaT} />} />
+              <Input
+                id="name"
+                placeholder="Name"
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+                disabled={props.disabled}
+                required
+              />
+            </InputGroup>
+          </FormControl>
+          <FormControl isRequired isInvalid={value === ""}>
             <Input
               name="data"
               placeholder={"Text"}
@@ -143,23 +137,19 @@ export const TextParameter = (props: Parameter.Text) => {
               disabled={props.disabled}
               required
             />
-          </InputGroup>
-        </FormControl>
-      )}
-
-      {/* Remove Parameter */}
-      {props.showRemove && !props.disabled && (
-        <IconButton
-          aria-label={"Remove Parameter"}
-          key={`remove-${props.identifier}`}
-          icon={<Icon as={BsTrash} />}
-          colorScheme={"red"}
-          onClick={() => {
-            if (props.onRemove) {
-              props.onRemove(props.identifier);
-            }
-          }}
-        />
+          </FormControl>
+          <IconButton
+            aria-label={"Remove Parameter"}
+            key={`remove-${props.identifier}`}
+            icon={<Icon as={BsTrash} />}
+            colorScheme={"red"}
+            onClick={() => {
+              if (props.onRemove) {
+                props.onRemove(props.identifier);
+              }
+            }}
+          />
+        </Flex>
       )}
     </Flex>
   );
@@ -183,53 +173,51 @@ export const NumberParameter = (props: Parameter.Number) => {
 
   return (
     <Flex direction={"row"} gap={"4"} w={"100%"} align={"center"}>
-      <Icon as={BsGraphUp} w={"4"} h={"4"} />
-
       {/* Parameter name */}
       {props.disabled ? (
-        <Text as={"b"}>{name}</Text>
+        <Flex w={"100%"} gap={"4"} align={"center"}>
+          <Icon as={BsGraphUp} w={"4"} h={"4"} />
+          <Heading size={"sm"}>{name}</Heading>
+          <Spacer />
+          <Text>{value}</Text>
+        </Flex>
       ) : (
-        <FormControl isRequired isInvalid={name === ""}>
-          <Input
-            id="name"
-            placeholder="Name"
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            disabled={props.disabled}
-            required
+        <Flex w={"100%"} gap={"4"} align={"center"}>
+          <FormControl isRequired isInvalid={name === ""}>
+            <InputGroup>
+              <InputLeftAddon children={<Icon as={BsGraphUp} w={"4"} h={"4"} />} />
+              <Input
+                id="name"
+                placeholder="Name"
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+                disabled={props.disabled}
+                required
+              />
+            </InputGroup>
+          </FormControl>
+          <FormControl isRequired>
+            <Input
+              name="data"
+              placeholder={"0"}
+              value={value}
+              onChange={(event) => setValue(Number(event.target.value))}
+              disabled={props.disabled}
+              required
+            />
+          </FormControl>
+          <IconButton
+            aria-label={"Remove Parameter"}
+            key={`remove-${props.identifier}`}
+            icon={<Icon as={BsTrash} />}
+            colorScheme={"red"}
+            onClick={() => {
+              if (props.onRemove) {
+                props.onRemove(props.identifier);
+              }
+            }}
           />
-        </FormControl>
-      )}
-
-      {/* Parameter data */}
-      {props.disabled ? (
-        <Text>{value}</Text>
-      ) : (
-        <FormControl isRequired>
-          <Input
-            name="data"
-            placeholder={"0"}
-            value={value}
-            onChange={(event) => setValue(Number(event.target.value))}
-            disabled={props.disabled}
-            required
-          />
-        </FormControl>
-      )}
-
-      {/* Remove Parameter */}
-      {props.showRemove && !props.disabled && (
-        <IconButton
-          aria-label={"Remove Parameter"}
-          key={`remove-${props.identifier}`}
-          icon={<Icon as={BsTrash} />}
-          colorScheme={"red"}
-          onClick={() => {
-            if (props.onRemove) {
-              props.onRemove(props.identifier);
-            }
-          }}
-        />
+        </Flex>
       )}
     </Flex>
   );
@@ -253,58 +241,56 @@ export const URLParameter = (props: Parameter.URL) => {
 
   return (
     <Flex direction={"row"} gap={"4"} w={"100%"} align={"center"}>
-      <Icon as={BsLink45Deg} w={"4"} h={"4"} />
-
       {/* Parameter name */}
       {props.disabled ? (
-        <Text as={"b"}>{name}</Text>
+        <Flex w={"100%"} gap={"4"} align={"center"}>
+          <Icon as={BsLink45Deg} w={"4"} h={"4"} />
+          <Heading size={"sm"}>{name}</Heading>
+          <Spacer />
+          <Link href={value} color="dark-1" isExternal>
+            {value}
+            <Icon as={BsArrowUpRight} mx='2px' />
+          </Link>
+        </Flex>
       ) : (
-        <FormControl isRequired isInvalid={name === ""}>
-          <Input
-            id="name"
-            placeholder="Name"
-            value={name}
-            onChange={(event) => {
-              setName(event.target.value);
+        <Flex w={"100%"} gap={"4"} align={"center"}>
+          <FormControl isRequired isInvalid={name === ""}>
+            <InputGroup>
+              <InputLeftAddon children={<Icon as={BsLink45Deg} w={"4"} h={"4"} />} />
+              <Input
+                id="name"
+                placeholder="Name"
+                value={name}
+                onChange={(event) => {
+                  setName(event.target.value);
+                }}
+                disabled={props.disabled}
+                required
+              />
+            </InputGroup>
+          </FormControl>
+          <FormControl isRequired isInvalid={value === ""}>
+            <Input
+              name="url"
+              placeholder="URL"
+              value={value}
+              onChange={(event) => setValue(event.target.value.toString())}
+              disabled={props.disabled}
+              required
+            />
+          </FormControl>
+          <IconButton
+            aria-label={"Remove Parameter"}
+            key={`remove-${props.identifier}`}
+            icon={<Icon as={BsTrash} />}
+            colorScheme={"red"}
+            onClick={() => {
+              if (props.onRemove) {
+                props.onRemove(props.identifier);
+              }
             }}
-            disabled={props.disabled}
-            required
           />
-        </FormControl>
-      )}
-
-      {/* Parameter data */}
-      {props.disabled ? (
-        <Link href={value} color="dark-1" isExternal>
-          {value}
-          <Icon as={BsArrowUpRight} mx='2px' />
-        </Link>
-      ) : (
-        <FormControl isRequired isInvalid={value === ""}>
-          <Input
-            name="url"
-            placeholder="URL"
-            value={value}
-            onChange={(event) => setValue(event.target.value.toString())}
-            disabled={props.disabled}
-            required
-          />
-        </FormControl>
-      )}
-
-      {/* Remove button */}
-      {props.showRemove && !props.disabled && (
-        <IconButton
-          aria-label={"Remove Parameter"}
-          key={`remove-${props.identifier}`}
-          icon={<Icon as={BsTrash} />}
-          colorScheme={"red"}
-          onClick={() => {
-            if (props.onRemove) {
-              props.onRemove(props.identifier);
-            }
-          }}
-        />
+        </Flex>
       )}
     </Flex>
   );
@@ -356,65 +342,63 @@ export const EntityParameter = (props: Parameter.Entity) => {
 
   return (
     <Flex direction={"row"} gap={"4"} w={"100%"} align={"center"}>
-      <Icon as={BsBox} w={"4"} h={"4"} />
-
       {/* Parameter name */}
-      <FormControl isRequired isInvalid={name === ""}>
-        {props.disabled ? (
-          <Text as={"b"}>{name}</Text>
-        ) : (
-          <Input
-            id="name"
-            placeholder="Name"
-            value={name}
-            onChange={(event) => {
-              setName(event.target.value);
-            }}
-            disabled={props.disabled}
-          />
-        )}
-      </FormControl>
-
-      {/* Parameter data */}
-      <FormControl isRequired isInvalid={value === ""}>
-        {props.disabled ? (
+      {props.disabled ? (
+        <Flex w={"100%"} gap={"4"} align={"center"}>
+          <Icon as={BsBox} w={"4"} h={"4"} />
+          <Heading size={"sm"}>{name}</Heading>
+          <Spacer />
           <Linky type="entities" id={value} />
-        ) : (
-          <Select
-            title="Select Entity"
-            value={value}
-            placeholder={"Select Entity"}
-            disabled={props.disabled}
-            onChange={(event) => {
-              setValue(event.target.value.toString());
+        </Flex>
+      ) : (
+        <Flex w={"100%"} gap={"4"} align={"center"}>
+          <FormControl isRequired isInvalid={name === ""}>
+            <InputGroup>
+              <InputLeftAddon children={<Icon as={BsBox} w={"4"} h={"4"} />} />
+              <Input
+                id="name"
+                placeholder="Name"
+                value={name}
+                onChange={(event) => {
+                  setName(event.target.value);
+                }}
+                disabled={props.disabled}
+              />
+            </InputGroup>
+          </FormControl>
+          <FormControl isRequired isInvalid={value === ""}>
+            <Select
+              title="Select Entity"
+              value={value}
+              placeholder={"Select Entity"}
+              disabled={props.disabled}
+              onChange={(event) => {
+                setValue(event.target.value.toString());
+              }}
+            >
+              {isLoaded &&
+                entities.map((entity) => {
+                  return (
+                    <option key={entity._id} value={entity._id}>
+                      {entity.name}
+                    </option>
+                  );
+                })}
+              ;
+            </Select>
+          </FormControl>
+          <IconButton
+            aria-label={"Remove Parameter"}
+            key={`remove-${props.identifier}`}
+            icon={<Icon as={BsTrash} />}
+            colorScheme={"red"}
+            onClick={() => {
+              if (props.onRemove) {
+                props.onRemove(props.identifier);
+              }
             }}
-          >
-            {isLoaded &&
-              entities.map((entity) => {
-                return (
-                  <option key={entity._id} value={entity._id}>
-                    {entity.name}
-                  </option>
-                );
-              })}
-            ;
-          </Select>
-        )}
-      </FormControl>
-
-      {/* Remove button */}
-      {props.showRemove && !props.disabled && (
-        <IconButton
-          aria-label={"Remove Parameter"}
-          key={`remove-${props.identifier}`}
-          icon={<Icon as={BsTrash} />}
-          colorScheme={"red"}
-          onClick={() => {
-            if (props.onRemove) {
-              props.onRemove(props.identifier);
-            }
-          }}
-        />
+          />
+        </Flex>
       )}
     </Flex>
   );
