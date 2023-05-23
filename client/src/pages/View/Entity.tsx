@@ -127,6 +127,28 @@ export const Entity = () => {
   const [attributeParameterError, setAttributeParameterError] = useState(false);
   const isAttributeError = isAttributeNameError || isAttributeDescriptionError || isAttributeParametersError || !attributeParameterError;
 
+  const [attributes, setAttributes] = useState([] as AttributeModel[]);
+
+  useEffect(() => {
+    // Get all Attributes
+    getData(`/attributes`)
+      .then((response) => {
+        setAttributes(response);
+      }).catch((_error) => {
+        toast({
+          title: "Error",
+          status: "error",
+          description: "Could not retrieve Attributes data.",
+          duration: 4000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+        setIsError(true);
+      }).finally(() => {
+        setIsLoaded(true);
+      });
+  }, []);
+
   useEffect(() => {
     setAttributeParameterError(validateParameters(attributeParameters));
   }, [attributeParameters]);
@@ -456,7 +478,14 @@ export const Entity = () => {
     })]);
   };
 
-  const handleCancelAttribute = () => {};
+  const handleCancelAttribute = () => {
+    onAddAttributesClose();
+
+    // Reset state of creating an Attribute
+    setAttributeName("");
+    setAttributeDescription("");
+    setAttributeParameters([]);
+  };
 
   /**
    * Callback function to the Entity to Collections
@@ -925,6 +954,39 @@ export const Entity = () => {
                         metadata associated with this Entity should be specified using
                         Parameters.
                       </Text>
+                    </Flex>
+
+                    <Flex>
+                      <Select
+                        placeholder={"Add existing Attribute"}
+                        onChange={(event) => {
+                          if (!_.isEqual(event.target.value.toString(), "")) {
+                            for (let attribute of attributes) {
+                              if (
+                                _.isEqual(
+                                  event.target.value.toString(),
+                                  attribute._id
+                                )
+                              ) {
+                                setAttributeName(attribute.name);
+                                setAttributeDescription(attribute.description);
+                                setAttributeParameters(attribute.parameters);
+                                break;
+                              }
+                            }
+                          }
+                        }}
+                      >
+                        {isLoaded &&
+                          attributes.map((attribute) => {
+                            return (
+                              <option key={attribute._id} value={attribute._id}>
+                                {attribute.name}
+                              </option>
+                            );
+                          })}
+                        ;
+                      </Select>
                     </Flex>
 
                     <Flex direction={"row"} gap={"2"} w={"100%"} justify={"center"}>

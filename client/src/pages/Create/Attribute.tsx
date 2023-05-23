@@ -60,7 +60,7 @@ export const Start = ({}) => {
   };
 
   useEffect(() => {
-    setParameterError(validateParameters(parameters));
+    setParameterError(validateParameters(parameters, true));
   }, [parameters]);
 
   const onSubmit = () => {

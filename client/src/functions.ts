@@ -4,16 +4,18 @@ import _ from "lodash";
 // Custom types
 import { Attribute, Parameters } from "@types";
 
-export const validateParameters = (parameters: Parameters[]) => {
+export const validateParameters = (parameters: Parameters[], allowEmptyValues=false) => {
   for (let parameter of parameters) {
     // Check the name of the parameter
     if (_.isEqual(parameter.name, "")) {
       return false;
     }
 
-    // Check data
-    if (_.isUndefined(parameter.data) || _.isEqual(parameter.data, "")) {
-      return false;
+    // Check data if empty values are not allowed
+    if (!allowEmptyValues) {
+      if (_.isUndefined(parameter.data) || _.isEqual(parameter.data, "")) {
+        return false;
+      }
     }
   }
   return true;

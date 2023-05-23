@@ -580,7 +580,7 @@ export const Start = ({}) => {
                                   setSelectedAttributes([
                                     ...selectedAttributes,
                                     {
-                                      _id: "",
+                                      _id: `a-${nanoid(6)}`,
                                       name: attribute.name,
                                       description: attribute.description,
                                       parameters: attribute.parameters,
@@ -612,7 +612,7 @@ export const Start = ({}) => {
                           setSelectedAttributes([
                             ...selectedAttributes,
                             {
-                              _id: `al${nanoid(6)}`,
+                              _id: `a-${nanoid(6)}`,
                               name: "",
                               description: "",
                               parameters: [],
