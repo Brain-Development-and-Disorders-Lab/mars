@@ -1,7 +1,6 @@
 // React and interface library
 import React, { ReactNode } from "react";
 import {
-  Box,
   Flex,
   Link,
   IconButton,
@@ -61,7 +60,7 @@ const Navigation = () => {
 
   return (
     <>
-      <Box px={4} bg={"white"} position={"fixed"} h={"100%"} zIndex={20} display={{ base: "none", sm: "flex" }}>
+      <Flex w={"2xs"} h={"100%"} background={"white"} display={{ base: "none", md: "flex" }} justify={"center"}>
         <Flex justifyContent={"space-between"} direction={"column"}>
           {/* Main navigation group */}
           <VStack spacing={8} align={"center"} h={"100%"} position={"sticky"}>
@@ -139,7 +138,7 @@ const Navigation = () => {
             </VStack>
           </VStack>
         </Flex>
-      </Box>
+      </Flex>
 
       <Flex p={"2"} bg={"white"}>
         {/* Icon to show menu in responsive context */}
