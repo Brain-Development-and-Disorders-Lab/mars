@@ -878,10 +878,9 @@ export const Entity = () => {
                   {entityAttributes.length > 0 ? (
                     entityAttributes.map((attribute) => {
                       return (
-                        <Flex direction={"column"} gap={"2"} width={"100%"}>
+                        <Flex key={`${attribute._id}`} direction={"column"} gap={"2"} width={"100%"}>
                           <AttributeCard
                             attribute={attribute}
-                            key={`${attribute._id}`}
                             editing={editing}
                             doneCallback={handleUpdateAttribute}
                             cancelCallback={handleCancelAttribute}
