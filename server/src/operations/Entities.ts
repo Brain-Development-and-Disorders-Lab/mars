@@ -14,7 +14,7 @@ import tmp from "tmp";
 import dayjs from "dayjs";
 
 // Custom types
-import { Attribute, AttributeModel, EntityModel } from "@types";
+import { AttributeModel, EntityModel } from "@types";
 
 // Constants
 const ENTITIES_COLLECTION = "entities";
@@ -249,7 +249,6 @@ export class Entities {
             operations.push(
               attributesToKeep.map((attribute: string) => {
                 const updatedAttribute = updatedEntity.attributes.filter((updatedAttribute) => _.isEqual(attribute, updatedAttribute._id))[0];
-                consola.info("Updated:", updatedAttribute)
                 Entities.updateAttribute(
                   updatedEntity._id,
                   updatedAttribute,

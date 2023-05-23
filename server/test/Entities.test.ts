@@ -233,6 +233,31 @@ describe("POST /entities/create", () => {
         expect(collection.entities[0]).toStrictEqual(entity._id);
       });
   });
+
+  it("should create an Attribute", async () => {
+    // Start by creating an Entities
+    return Entities.create({
+      name: "TestEntity",
+      created: new Date(Date.now()),
+      owner: "henry.burgess@wustl.edu",
+      description: "Test",
+      collections: [],
+      associations: {
+        origins: [],
+        products: [],
+      },
+      attributes: [{
+        _id: "TestAttribute",
+        name: "Attribute_1",
+        description: "Test Attribute description",
+        parameters: [],
+      }],
+    }).then((result: EntityModel) => {
+      // Check that an Attribute exists and it has the correct ID
+      expect(result.attributes.length).toBe(1);
+      expect(result.attributes[0]._id).toBe("TestAttribute");
+    });
+  });
 });
 
 describe("POST /entities/update", () => {
@@ -498,5 +523,105 @@ describe("POST /entities/update", () => {
         // Check that the Product has no Origin
         expect(result[1].associations.origins.length).toBe(0);
       });
+  });
+
+  it("should add an Attribute", async () => {
+    // Start by creating an Entities
+    return Entities.create({
+      name: "TestEntity",
+      created: new Date(Date.now()),
+      owner: "henry.burgess@wustl.edu",
+      description: "Test",
+      collections: [],
+      associations: {
+        origins: [],
+        products: [],
+      },
+      attributes: [],
+    }).then((result: EntityModel) => {
+      // Update Entity to add an Attribute
+      return Entities.addAttribute(result._id, {
+        _id: "TestAttribute",
+        name: "Attribute_1",
+        description: "Test Attribute description",
+        parameters: [],
+      });
+    }).then((result: string) => {
+      // Get the updated Entity
+      return Entities.getOne(result);
+    }).then((result: EntityModel) => {
+      // Check that an Attribute exists and it has the correct ID
+      expect(result.attributes.length).toBe(1);
+      expect(result.attributes[0]._id).toBe("TestAttribute");
+    });
+  });
+
+  it("should remove an Attribute", async () => {
+    // Start by creating an Entities
+    return Entities.create({
+      name: "TestEntity",
+      created: new Date(Date.now()),
+      owner: "henry.burgess@wustl.edu",
+      description: "Test",
+      collections: [],
+      associations: {
+        origins: [],
+        products: [],
+      },
+      attributes: [{
+        _id: "TestAttribute",
+        name: "Attribute_1",
+        description: "Test Attribute description",
+        parameters: [],
+      }],
+    }).then((result: EntityModel) => {
+      // Update Entity to remove an Attribute
+      return Entities.removeAttribute(result._id, "TestAttribute");
+    }).then((result: string) => {
+      // Get the updated Entity
+      return Entities.getOne(result);
+    }).then((result: EntityModel) => {
+      // Check that an Attribute has been removed
+      expect(result.attributes.length).toBe(0);
+    });
+  });
+
+  it("should update an Attribute", async () => {
+    // Start by creating an Entities
+    return Entities.create({
+      name: "TestEntity",
+      created: new Date(Date.now()),
+      owner: "henry.burgess@wustl.edu",
+      description: "Test",
+      collections: [],
+      associations: {
+        origins: [],
+        products: [],
+      },
+      attributes: [{
+        _id: "TestAttribute",
+        name: "Attribute_1",
+        description: "Test Attribute description",
+        parameters: [],
+      }],
+    }).then((result: EntityModel) => {
+      // Update Entity to remove an Attribute
+      return Entities.updateAttribute(result._id, {
+        _id: "TestAttribute",
+        name: "Attribute_2",
+        description: "Test Attribute updated",
+        parameters: [],
+      });
+    }).then((result: string) => {
+      // Get the updated Entity
+      return Entities.getOne(result);
+    }).then((result: EntityModel) => {
+      // Check that an Attribute has been preserved
+      expect(result.attributes.length).toBe(1);
+
+      // Check that the Attribute has been updated
+      expect(result.attributes[0].name).toBe("Attribute_2");
+      expect(result.attributes[0].description).toBe("Test Attribute updated");
+    });
   });
 });
