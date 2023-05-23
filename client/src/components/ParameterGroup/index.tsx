@@ -13,6 +13,7 @@ import {
   TextParameter,
   URLParameter,
 } from "@components/Parameter";
+import dayjs from "dayjs";
 
 /**
  * ParameterGroup component use to display a collection of Parameters and enable
@@ -77,7 +78,7 @@ const ParameterGroup = (props: {
                     identifier: `p_date_${Math.round(performance.now())}`,
                     name: "",
                     type: "date",
-                    data: new Date().toISOString(),
+                    data: dayjs(new Date()).toISOString(),
                   },
                 ]);
             }}

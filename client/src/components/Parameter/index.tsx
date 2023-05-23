@@ -22,7 +22,7 @@ import dayjs from "dayjs";
 
 export const DateParameter = (props: Parameter.Date) => {
   const [name, setName] = useState(props.name);
-  const [value, setValue] = useState(props.data);
+  const [value, setValue] = useState(dayjs(props.data).toISOString());
 
   // Propagate data updates
   useEffect(() => {
