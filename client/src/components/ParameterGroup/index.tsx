@@ -171,7 +171,7 @@ const ParameterGroup = (props: {
         gap={"1"}
         w={"100%"}
       >
-        <VStack spacing={4}>
+        <VStack spacing={4} maxH={"60vh"} overflowY={"scroll"} p={"1"}>
           {props.parameters.length > 0 ? (
             props.parameters.map((parameter) => {
               switch (parameter.type) {
