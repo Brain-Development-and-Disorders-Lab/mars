@@ -178,6 +178,7 @@ const Dashboard = () => {
             maxW={"7xl"}
             wrap={"wrap"}
           >
+            {/* Entities and Collections */}
             <Flex direction={"column"} gap={"6"} grow={"2"}>
               <Flex direction={"row"} justify={"space-between"} align={"center"}>
                 <Flex align={"center"} gap={"4"} p={"2"}>
@@ -267,7 +268,7 @@ const Dashboard = () => {
             </Flex>
 
             {/* Activity Feed */}
-            <Flex maxW={"lg"} direction={"column"} gap={"6"} >
+            <Flex direction={"column"} gap={"6"} grow={"1"}>
               <Flex align={"center"} gap={"4"} p={"2"}>
                 <Icon as={BsClockHistory} w={"8"} h={"8"} />
                 <Heading fontWeight={"semibold"}>Activity Feed</Heading>

@@ -2,12 +2,7 @@ import React from "react";
 import { Flex, Icon, IconButton, Select, Table, TableContainer, Tbody, Td, Th, Thead, Tr, Text } from "@chakra-ui/react";
 import { BsChevronDoubleLeft, BsChevronDoubleRight, BsChevronDown, BsChevronLeft, BsChevronRight, BsChevronUp } from "react-icons/bs";
 
-import { flexRender, getPaginationRowModel } from "@tanstack/react-table";
-import {
-  useReactTable,
-  getCoreRowModel,
-  getSortedRowModel
-} from "@tanstack/react-table";
+import { flexRender, getPaginationRowModel, useReactTable, getCoreRowModel, getSortedRowModel } from "@tanstack/react-table";
 
 export const DataTable: React.FC<any> = (props: { columns: any[], data: any[], hideControls?: false, editable?: false }) => {
   // Create ReactTable instance
