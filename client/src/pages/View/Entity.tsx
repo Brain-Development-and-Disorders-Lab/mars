@@ -619,7 +619,7 @@ export const Entity = () => {
                               </Tag>
                             ) : (
                               <Text>
-                                <Link>{entityData.owner}</Link>
+                                <Link>{entityData.owner && entityData.owner.split("@")[0].trim()}</Link>
                               </Text>
                             )}
                           </Td>
