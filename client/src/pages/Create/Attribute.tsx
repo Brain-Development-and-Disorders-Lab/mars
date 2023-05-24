@@ -117,7 +117,7 @@ export const Start = ({}) => {
               </Text>
             </Flex>
 
-            <Flex direction={"row"} gap={"2"} w={"100%"} maxW={"4xl"}>
+            <Flex direction={"row"} gap={"2"} w={"100%"} maxW={"4xl"} wrap={["wrap", "nowrap"]}>
               <Flex direction={"column"} gap={"4"} wrap={["wrap", "nowrap"]}>
                 <FormControl isRequired>
                   <FormLabel>Name</FormLabel>
