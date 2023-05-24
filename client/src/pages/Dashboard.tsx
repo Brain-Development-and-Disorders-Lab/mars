@@ -10,6 +10,7 @@ import {
   Spacer,
   List,
   ListItem,
+  useBreakpoint,
 } from "@chakra-ui/react";
 import { AddIcon, ChevronRightIcon } from "@chakra-ui/icons";
 import { BsBox, BsChevronRight, BsClockHistory, BsFolder, BsPencil, BsPlusLg, BsTrash } from "react-icons/bs";
@@ -28,6 +29,8 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 dayjs.extend(relativeTime);
 
+import _ from "lodash";
+
 const Dashboard = () => {
   // Enable navigation
   const navigate = useNavigate();
@@ -38,11 +41,23 @@ const Dashboard = () => {
   // Page state
   const [isLoaded, setIsLoaded] = useState(false);
   const [isError, setIsError] = useState(false);
+  const breakpoint = useBreakpoint({ ssr: false });
 
   // Page data
   const [entityData, setEntityData] = useState([] as EntityModel[]);
   const [collectionData, setCollectionData] = useState([] as CollectionModel[]);
   const [updateData, setUpdateData] = useState([] as UpdateModel[]);
+
+  const [visibleColumns, setVisibleColumns] = useState({});
+
+  // Effect to adjust column visibility
+  useEffect(() => {
+    if (_.isEqual(breakpoint, "sm") || _.isEqual(breakpoint, "base") || _.isUndefined(breakpoint)) {
+      setVisibleColumns({ description: false });
+    } else {
+      setVisibleColumns({});
+    }
+  }, [breakpoint]);
 
   // Get all Entities
   useEffect(() => {
@@ -113,21 +128,27 @@ const Dashboard = () => {
       header: "Name",
     }),
     entityTableColumnHelper.accessor("description", {
-      cell: (info) => info.getValue(),
+      cell: (info) => {
+        return (
+          <Text noOfLines={1}>{info.getValue()}</Text>
+        );
+      },
       header: "Description",
       enableHiding: true,
     }),
     entityTableColumnHelper.accessor("_id", {
       cell: (info) => {
         return (
-          <Button
-            key={`view-entity-${info.getValue()}`}
-            colorScheme={"blackAlpha"}
-            rightIcon={<Icon as={BsChevronRight} />}
-            onClick={() => navigate(`/entities/${info.getValue()}`)}
-          >
-            View
-          </Button>
+          <Flex justifyContent={"right"}>
+            <Button
+              key={`view-entity-${info.getValue()}`}
+              colorScheme={"blackAlpha"}
+              rightIcon={<Icon as={BsChevronRight} />}
+              onClick={() => navigate(`/entities/${info.getValue()}`)}
+            >
+              View
+            </Button>
+          </Flex>
         );
       },
       header: "",
@@ -150,14 +171,16 @@ const Dashboard = () => {
     collectionTableColumnHelper.accessor("_id", {
       cell: (info) => {
         return (
-          <Button
-            key={`view-entity-${info.getValue()}`}
-            colorScheme={"blackAlpha"}
-            rightIcon={<Icon as={BsChevronRight} />}
-            onClick={() => navigate(`/collections/${info.getValue()}`)}
-          >
-            View
-          </Button>
+          <Flex justifyContent={"right"}>
+            <Button
+              key={`view-entity-${info.getValue()}`}
+              colorScheme={"blackAlpha"}
+              rightIcon={<Icon as={BsChevronRight} />}
+              onClick={() => navigate(`/collections/${info.getValue()}`)}
+            >
+              View
+            </Button>
+          </Flex>
         );
       },
       header: "",
@@ -203,7 +226,7 @@ const Dashboard = () => {
               >
                 {/* Collections listing */}
                 {isLoaded && collectionData.length > 0 ? (
-                  <DataTable columns={collectionTableColumns} data={collectionTableData} hideControls />
+                  <DataTable columns={collectionTableColumns} data={collectionTableData} visibleColumns={visibleColumns} hideControls />
                 ) : (
                   <Text>There are no Collections to display.</Text>
                 )}
@@ -247,7 +270,7 @@ const Dashboard = () => {
               >
                 {/* Entities listing */}
                 {isLoaded && entityData.length > 0 ? (
-                  <DataTable columns={entityTableColumns} data={entityTableData} hideControls />
+                  <DataTable columns={entityTableColumns} data={entityTableData} visibleColumns={visibleColumns} hideControls />
                 ) : (
                   <Text>There are no Entities to display.</Text>
                 )}

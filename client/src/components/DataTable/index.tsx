@@ -1,10 +1,15 @@
-import React from "react";
+import React, { FC, useEffect, useState } from "react";
 import { Flex, Icon, IconButton, Select, Table, TableContainer, Tbody, Td, Th, Thead, Tr, Text } from "@chakra-ui/react";
 import { BsChevronDoubleLeft, BsChevronDoubleRight, BsChevronDown, BsChevronLeft, BsChevronRight, BsChevronUp } from "react-icons/bs";
-
 import { flexRender, getPaginationRowModel, useReactTable, getCoreRowModel, getSortedRowModel } from "@tanstack/react-table";
 
-export const DataTable: React.FC<any> = (props: { columns: any[], data: any[], hideControls?: false, editable?: false }) => {
+// Custom types
+import { DataTableProps } from "@types";
+
+export const DataTable: FC<any> = (props: DataTableProps) => {
+  // Table visibility state
+  const [columnVisibility, setColumnVisibility] = useState(props.visibleColumns);
+
   // Create ReactTable instance
   const table = useReactTable({
     columns: props.columns,
@@ -16,8 +21,17 @@ export const DataTable: React.FC<any> = (props: { columns: any[], data: any[], h
       pagination: {
         pageSize: 5,
       },
-    }
+    },
+    state: {
+      columnVisibility: columnVisibility,
+    },
+    onColumnVisibilityChange: setColumnVisibility,
   });
+
+  // Effect to update the column visibility
+  useEffect(() => {
+    setColumnVisibility(props.visibleColumns);
+  }, [props.visibleColumns])
 
   return (
     <>

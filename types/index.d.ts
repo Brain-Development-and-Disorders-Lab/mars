@@ -176,6 +176,15 @@ export type UpdateModel = Update & {
   _id: string;
 };
 
+// DataTable component
+export type DataTableProps = {
+  columns: any[];
+  data: any[];
+  visibleColumns: VisibilityState;
+  hideControls?: boolean;
+  editable?: boolean;
+};
+
 // Query types
 export type QueryToken = "&" | "|" | "!" | "=";
 export type QueryOperator = "AND" | "OR" | "NOT" | "INCLUDES";
