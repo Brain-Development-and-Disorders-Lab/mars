@@ -8,6 +8,7 @@ import {
   Button,
   Link,
   Icon,
+  useBreakpoint,
 } from "@chakra-ui/react";
 import { BsBox, BsChevronRight, BsPlusLg } from "react-icons/bs";
 
@@ -38,6 +39,18 @@ const Entities = () => {
   const [isError, setIsError] = useState(false);
 
   const [entityData, setEntityData] = useState([] as EntityModel[]);
+
+  const breakpoint = useBreakpoint();
+  const [visibleColumns, setVisibleColumns] = useState({});
+
+  // Effect to adjust column visibility
+  useEffect(() => {
+    if (_.isEqual(breakpoint, "sm") || _.isEqual(breakpoint, "base") || _.isUndefined(breakpoint)) {
+      setVisibleColumns({ description: false, owner: false, created: false });
+    } else {
+      setVisibleColumns({});
+    }
+  }, [breakpoint]);
 
   useEffect(() => {
     getData(`/entities`)
@@ -142,7 +155,7 @@ const Entities = () => {
             >
               {isLoaded && entityData.length > 0 ? (
                 <Flex direction={"column"} gap={"4"} w={"100%"}>
-                  <DataTable columns={columns} data={data} />
+                  <DataTable columns={columns} data={data} visibleColumns={visibleColumns} />
                 </Flex>
               ) : (
                 <Text>There are no Entities to display.</Text>
