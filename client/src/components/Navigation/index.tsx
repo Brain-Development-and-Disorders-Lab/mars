@@ -1,5 +1,5 @@
 // React and interface library
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Flex,
   IconButton,
@@ -15,8 +15,14 @@ import {
   VStack,
   Text,
   Divider,
+  useToast,
+  Tag,
+  Spinner,
 } from "@chakra-ui/react";
 import { BsBarChart, BsBinoculars, BsBox, BsGrid, BsList, BsPlusLg, BsGear, BsSearch, BsXLg } from "react-icons/bs";
+
+// Functions to retrieve database information
+import { getData } from "@database/functions";
 
 // Router navigation
 import { useNavigate } from "react-router-dom";
@@ -25,6 +31,7 @@ import dayjs from "dayjs";
 const Navigation = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const navigate = useNavigate();
+  const toast = useToast();
 
   /**
    * Helper function to close menu on responsive screen sizes
@@ -36,6 +43,47 @@ const Navigation = () => {
     navigate(destination);
   };
 
+  // Loading state
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  // Entity and Collection status counts
+  const [entityCount, setEntityCount] = useState("0");
+  const [collectionCount, setCollectionCount] = useState("0");
+
+  useEffect(() => {
+    getData(`/entities`)
+      .then((value) => {
+        setEntityCount(value.length > 100 ? "100+" : value.length.toString());
+      }).catch((_error) => {
+        toast({
+          title: "Error",
+          status: "error",
+          description: "Could not retrieve Entities data.",
+          duration: 4000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+      }).finally(() => {
+        setIsLoaded(true);
+      });
+
+    getData(`/collections`)
+      .then((value) => {
+        setCollectionCount(value.length > 100 ? "100+" : value.length.toString());
+      }).catch((_error) => {
+        toast({
+          title: "Error",
+          status: "error",
+          description: "Could not retrieve Collections data.",
+          duration: 4000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+      }).finally(() => {
+        setIsLoaded(true);
+      });
+  });
+
   return (
     <Flex w={"100%"}>
       {/* Main navigation group */}
@@ -45,7 +93,7 @@ const Navigation = () => {
           <Image src="/Favicon.png" boxSize={"36px"} />
           <Flex direction={"column"}>
             <Heading fontWeight={"semibold"} color={"white"} size={"md"}>MARS</Heading>
-            <Text color={"gray.200"}>{dayjs(Date.now()).format("DD MMM").toString()}</Text>
+            <Text color={"gray.200"}>{dayjs(Date.now()).format("ddd, DD MMM").toString()}</Text>
           </Flex>
         </Flex>
 
@@ -61,10 +109,16 @@ const Navigation = () => {
           <Divider />
 
           <Button leftIcon={<Icon as={BsBox} />} variant={"link"} color={"white"} onClick={() => navigate("/entities")}>
-            Entities
+            <Flex align={"center"} gap={"2"}>
+              <Text>Entities</Text>
+              <Tag colorScheme={"whiteAlpha"}>{isLoaded ? entityCount : <Spinner size={"xs"} />}</Tag>
+            </Flex>
           </Button>
           <Button leftIcon={<Icon as={BsGrid} />} variant={"link"} color={"white"} onClick={() => navigate("/collections")}>
-            Collections
+            <Flex align={"center"} gap={"2"}>
+              <Text>Collections</Text>
+              <Tag colorScheme={"whiteAlpha"}>{isLoaded ? collectionCount : <Spinner size={"xs"} />}</Tag>
+            </Flex>
           </Button>
           <Button leftIcon={<Icon as={BsGear} />} variant={"link"} color={"white"} onClick={() => navigate("/attributes")}>
             Attributes
