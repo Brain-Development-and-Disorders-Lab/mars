@@ -125,7 +125,7 @@ const Search = () => {
           <Flex direction={"row"} align={"center"} p={"2"} gap={"2"}>
             <Input
               value={query}
-              placeholder={"Enter search query..."}
+              placeholder={"Search..."}
               onChange={(event) => setQuery(event.target.value)}
               onKeyUp={(event) => {
                 // Listen for "Enter" key when entering a query
