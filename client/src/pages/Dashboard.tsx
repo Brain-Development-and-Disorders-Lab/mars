@@ -12,8 +12,7 @@ import {
   ListItem,
   useBreakpoint,
 } from "@chakra-ui/react";
-import { AddIcon, ChevronRightIcon } from "@chakra-ui/icons";
-import { BsBox, BsChevronRight, BsClockHistory, BsFolder, BsPencil, BsPlusLg, BsTrash } from "react-icons/bs";
+import { BsBox, BsChevronRight, BsGrid, BsLightning, BsPencil, BsPlusLg, BsTrash } from "react-icons/bs";
 import { createColumnHelper } from "@tanstack/react-table";
 
 import { ContentContainer } from "@components/ContentContainer";
@@ -203,20 +202,6 @@ const Dashboard = () => {
           >
             {/* Entities and Collections */}
             <Flex direction={"column"} gap={"6"} grow={"2"}>
-              <Flex direction={"row"} justify={"space-between"} align={"center"}>
-                <Flex align={"center"} gap={"4"} p={"2"}>
-                  <Icon as={BsFolder} w={"8"} h={"8"} />
-                  <Heading fontWeight={"semibold"}>Collections</Heading>
-                </Flex>
-                <Button
-                  colorScheme={"green"}
-                  leftIcon={<AddIcon />}
-                  onClick={() => navigate("/create/collection/start")}
-                >
-                  Create
-                </Button>
-              </Flex>
-
               <Flex
                 direction={"column"}
                 p={"4"}
@@ -224,7 +209,22 @@ const Dashboard = () => {
                 rounded={"md"}
                 gap={"2"}
               >
-                {/* Collections listing */}
+                {/* Collections heading */}
+                <Flex direction={"row"} justify={"space-between"} align={"center"}>
+                  <Flex align={"center"} gap={"4"} p={"2"}>
+                    <Icon as={BsGrid} w={"8"} h={"8"} />
+                    <Heading fontWeight={"semibold"}>Collections</Heading>
+                  </Flex>
+                  <Button
+                    colorScheme={"green"}
+                    leftIcon={<Icon as={BsPlusLg} />}
+                    onClick={() => navigate("/create/collection/start")}
+                  >
+                    Create
+                  </Button>
+                </Flex>
+
+                {/* Collections table */}
                 {isLoaded && collectionData.length > 0 ? (
                   <DataTable columns={collectionTableColumns} data={collectionTableData} visibleColumns={visibleColumns} hideControls />
                 ) : (
@@ -237,7 +237,7 @@ const Dashboard = () => {
                   <Button
                     key={`view-collection-all`}
                     colorScheme={"blackAlpha"}
-                    rightIcon={<ChevronRightIcon />}
+                    rightIcon={<BsChevronRight />}
                     onClick={() => navigate(`/collections`)}
                   >
                     View All
@@ -247,20 +247,6 @@ const Dashboard = () => {
 
               <Spacer />
 
-              <Flex direction={"row"} justify={"space-between"} align={"center"}>
-                <Flex align={"center"} gap={"4"} p={"2"}>
-                  <Icon as={BsBox} w={"8"} h={"8"} />
-                  <Heading fontWeight={"semibold"}>Entities</Heading>
-                </Flex>
-                <Button
-                  colorScheme={"green"}
-                  leftIcon={<AddIcon />}
-                  onClick={() => navigate("/create/entity/start")}
-                >
-                  Create
-                </Button>
-              </Flex>
-
               <Flex
                 direction={"column"}
                 p={"4"}
@@ -268,7 +254,22 @@ const Dashboard = () => {
                 rounded={"md"}
                 gap={"2"}
               >
-                {/* Entities listing */}
+                {/* Entities heading */}
+                <Flex direction={"row"} justify={"space-between"} align={"center"}>
+                  <Flex align={"center"} gap={"4"} p={"2"}>
+                    <Icon as={BsBox} w={"8"} h={"8"} />
+                    <Heading fontWeight={"semibold"}>Entities</Heading>
+                  </Flex>
+                  <Button
+                    colorScheme={"green"}
+                    leftIcon={<Icon as={BsPlusLg} />}
+                    onClick={() => navigate("/create/entity/start")}
+                  >
+                    Create
+                  </Button>
+                </Flex>
+
+                {/* Entities table */}
                 {isLoaded && entityData.length > 0 ? (
                   <DataTable columns={entityTableColumns} data={entityTableData} visibleColumns={visibleColumns} hideControls />
                 ) : (
@@ -281,7 +282,7 @@ const Dashboard = () => {
                   <Button
                     key={`view-entity-all`}
                     colorScheme={"blackAlpha"}
-                    rightIcon={<ChevronRightIcon />}
+                    rightIcon={<BsChevronRight />}
                     onClick={() => navigate(`/entities`)}
                   >
                     View All
@@ -290,13 +291,8 @@ const Dashboard = () => {
               </Flex>
             </Flex>
 
-            {/* Activity Feed */}
+            {/* Activity */}
             <Flex direction={"column"} gap={"6"} grow={"1"}>
-              <Flex align={"center"} gap={"4"} p={"2"}>
-                <Icon as={BsClockHistory} w={"8"} h={"8"} />
-                <Heading fontWeight={"semibold"}>Activity Feed</Heading>
-              </Flex>
-
               <Flex
                 background={"white"}
                 direction={"column"}
@@ -305,6 +301,13 @@ const Dashboard = () => {
                 p={"4"}
                 gap={"2"}
               >
+                {/* Activity heading */}
+                <Flex align={"center"} gap={"4"} p={"2"}>
+                  <Icon as={BsLightning} w={"8"} h={"8"} />
+                  <Heading fontWeight={"semibold"}>Activity</Heading>
+                </Flex>
+
+                {/* Activity list */}
                 <List>
                   {updateData.length > 0 ? (
                     updateData.slice(0, 10).map((update) => {

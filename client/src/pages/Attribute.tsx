@@ -26,7 +26,7 @@ import {
   Tr,
   useToast,
 } from "@chakra-ui/react";
-import { BsCheckLg, BsExclamationTriangle, BsPencil, BsPuzzle, BsTrash } from "react-icons/bs";
+import { BsCheckLg, BsExclamationTriangle, BsPencil, BsGear, BsTrash } from "react-icons/bs";
 
 // Custom components
 import { Error } from "@components/Error";
@@ -157,7 +157,7 @@ export const Attribute = () => {
             wrap={"wrap"}
           >
             <Flex align={"center"} gap={"4"} shadow={"lg"} p={"2"} border={"2px"} rounded={"md"} bg={"white"}>
-              <Icon as={BsPuzzle} w={"8"} h={"8"} />
+              <Icon as={BsGear} w={"8"} h={"8"} />
               <Heading fontWeight={"semibold"}>{attributeData.name}</Heading>
             </Flex>
 

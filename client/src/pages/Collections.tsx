@@ -20,7 +20,7 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { ChevronRightIcon, AddIcon, WarningIcon } from "@chakra-ui/icons";
-import { BsFolder } from "react-icons/bs";
+import { BsGrid } from "react-icons/bs";
 
 // Custom components
 import { Error } from "@components/Error";
@@ -86,7 +86,7 @@ const Collections = () => {
               align={"center"}
             >
               <Flex align={"center"} gap={"4"}>
-                <Icon as={BsFolder} w={"8"} h={"8"} />
+                <Icon as={BsGrid} w={"8"} h={"8"} />
                 <Heading fontWeight={"semibold"}>Collections</Heading>
               </Flex>
               <Button

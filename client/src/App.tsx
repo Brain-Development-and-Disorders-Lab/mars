@@ -14,14 +14,15 @@ import { PageContainer } from "@components/PageContainer";
 
 // Pages
 // Page type - View
-import Attribute from "@pages/View/Attribute";
-import Attributes from "@pages/View/Attributes";
-import Collection from "@pages/View/Collection";
-import Collections from "@pages/View/Collections";
-import Entity from "@pages/View/Entity";
-import Entities from "@pages/View/Entities";
+import Attribute from "@pages/Attribute";
+import Attributes from "@pages/Attributes";
+import Collection from "@pages/Collection";
+import Collections from "@pages/Collections";
+import Entity from "@pages/Entity";
+import Entities from "@pages/Entities";
 
 // Page type - Create
+import { Create } from "@pages/Create";
 import { Start as EntityStart } from "@pages/Create/Entity";
 import { Start as CollectionStart } from "@pages/Create/Collection";
 import { Start as AttributeStart } from "@pages/Create/Attribute";
@@ -58,6 +59,7 @@ export const App = (): ReactElement => {
           <PageContainer>
             <Routes>
               <Route path="/" element={<Dashboard />} />
+              <Route path="/create" element={<Create />} />
 
               {/* Entity routes */}
               <Route path="/create/entity/start" element={<EntityStart />} />
@@ -75,6 +77,7 @@ export const App = (): ReactElement => {
               <Route path="collections">
                 <Route path=":id" element={<Collection />} />
               </Route>
+
 
               {/* Attributes routes */}
               <Route path="/create/attribute/start" element={<AttributeStart />} />
