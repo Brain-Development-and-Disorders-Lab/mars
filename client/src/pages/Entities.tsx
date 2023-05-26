@@ -11,8 +11,8 @@ import {
   useBreakpoint,
 } from "@chakra-ui/react";
 import { BsBox, BsChevronRight, BsPlusLg } from "react-icons/bs";
-
 import { createColumnHelper } from "@tanstack/react-table";
+
 // Navigation
 import { useNavigate } from "react-router-dom";
 

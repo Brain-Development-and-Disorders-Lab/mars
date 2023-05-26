@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button, Link } from "@chakra-ui/react";
+import { Button, Link, Spinner } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 
 // Database and models
@@ -37,7 +37,7 @@ const Linky = (props: LinkyProps) => {
       as={Link}
       onClick={onClickHandler}
     >
-      {linkLabel}
+      {linkIsValid ? linkLabel : <Spinner size={"sm"}/>}
     </Button>
   );
 };
