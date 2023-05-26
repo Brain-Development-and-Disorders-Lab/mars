@@ -1,8 +1,7 @@
 // React and interface library
-import React, { ReactNode } from "react";
+import React from "react";
 import {
   Flex,
-  Link,
   IconButton,
   Button,
   Menu,
@@ -10,229 +9,164 @@ import {
   MenuList,
   MenuItem,
   useDisclosure,
-  useColorModeValue,
-  Stack,
-  StackDivider,
   Icon,
   Image,
   Heading,
   VStack,
+  Text,
+  Divider,
 } from "@chakra-ui/react";
-import {
-  HamburgerIcon,
-  InfoOutlineIcon,
-  AddIcon,
-} from "@chakra-ui/icons";
-import { BsBinoculars, BsBox, BsClipboardData, BsFolder, BsPlusLg, BsPuzzle, BsSearch, BsXLg } from "react-icons/bs";
+import { BsBarChart, BsBinoculars, BsBox, BsGrid, BsList, BsPlusLg, BsGear, BsSearch, BsXLg } from "react-icons/bs";
 
 // Router navigation
 import { useNavigate } from "react-router-dom";
-
-// NavigationElement sub-component to generalize links
-const NavigationElement = ({
-  children,
-  onClick,
-}: {
-  children: ReactNode;
-  onClick?: () => void;
-}) => (
-  <Link
-    p={"2"}
-    rounded={"md"}
-    _hover={{
-      textDecoration: "none",
-      bg: useColorModeValue("gray.200", "gray.700"),
-    }}
-    onClick={onClick}
-  >
-    {children}
-  </Link>
-);
+import dayjs from "dayjs";
 
 const Navigation = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const navigate = useNavigate();
 
-  const responsiveNavigate = (location: string) => {
-    isOpen ? onClose() : onOpen();
-    navigate(location);
+  /**
+   * Helper function to close menu on responsive screen sizes
+   * when a menu item is clicked
+   * @param {string} destination URL to navigate to
+   */
+  const responsiveNavigate = (destination: string) => {
+    onClose();
+    navigate(destination);
   };
 
   return (
-    <>
-      <Flex w={"2xs"} h={"100%"} background={"white"} display={{ base: "none", md: "flex" }} justify={"center"}>
-        <Flex justifyContent={"space-between"} direction={"column"}>
-          {/* Main navigation group */}
-          <VStack spacing={8} align={"center"} h={"100%"} position={"sticky"}>
-            <VStack as={"nav"} spacing={4} display={{ base: "none", md: "flex" }}>
-              {/* Icon */}
-              <Flex direction={"row"} m={"2"} p={"2"} gap={"2"}>
-                <Image src="/Favicon.png" boxSize={"36px"} />
-                <Heading fontWeight={"semibold"} size={"lg"}>MARS</Heading>
-              </Flex>
+    <Flex w={"100%"}>
+      {/* Main navigation group */}
+      <Flex direction={"column"} display={{ base: "none", lg: "flex" }} gap={"6"}>
+        {/* Icon */}
+        <Flex direction={"row"} align={"center"} gap={"2"}>
+          <Image src="/Favicon.png" boxSize={"36px"} />
+          <Flex direction={"column"}>
+            <Heading fontWeight={"semibold"} color={"white"} size={"md"}>MARS</Heading>
+            <Text color={"gray.200"}>{dayjs(Date.now()).format("DD MMM").toString()}</Text>
+          </Flex>
+        </Flex>
 
-              <Flex direction={"column"} align={"baseline"}>
-                <Button key={"dashboard"} bg={"white"} leftIcon={<Icon as={BsClipboardData} />} onClick={() => navigate("/")}>
-                  Dashboard
-                </Button>
+        {/* Menu items */}
+        <Flex direction={"column"} align={"self-start"} gap={"6"}>
+          <Button key={"dashboard"} variant={"link"} color={"white"} leftIcon={<Icon as={BsBarChart} />} onClick={() => navigate("/")}>
+            Dashboard
+          </Button>
+          <Button leftIcon={<Icon as={BsPlusLg} />} variant={"link"} color={"white"} onClick={() => navigate("/create")}>
+            Create
+          </Button>
 
-                {/* Create menu */}
-                <Menu>
-                  <MenuButton
-                    as={Button}
-                    bg={"white"}
-                    rounded={"md"}
-                    cursor={"pointer"}
-                    minW={0}
-                    leftIcon={<Icon as={BsPlusLg} />}
-                  >
-                    Create
-                  </MenuButton>
-                  <MenuList>
-                    <MenuItem icon={<Icon as={BsBox} />} onClick={() => navigate("/create/entity/start")}>
-                      Entity
-                    </MenuItem>
-                    <MenuItem icon={<Icon as={BsFolder} />} onClick={() => navigate("/create/collection/start")}>
-                      Collection
-                    </MenuItem>
-                    <MenuItem icon={<Icon as={BsPuzzle} />} onClick={() => navigate("/create/attribute/start")}>
-                      Attribute
-                    </MenuItem>
-                  </MenuList>
-                </Menu>
+          <Divider />
 
-                {/* View menu */}
-                <Menu>
-                  <MenuButton
-                    as={Button}
-                    bg={"white"}
-                    rounded={"md"}
-                    cursor={"pointer"}
-                    minW={0}
-                    leftIcon={<Icon as={BsBinoculars} />}
-                  >
-                    View
-                  </MenuButton>
-                  <MenuList>
-                    <MenuItem icon={<Icon as={BsBox} />} onClick={() => navigate("/entities")}>
-                      Entities
-                    </MenuItem>
-                    <MenuItem icon={<Icon as={BsFolder} />} onClick={() => navigate("/collections")}>
-                      Collections
-                    </MenuItem>
-                    <MenuItem icon={<Icon as={BsPuzzle} />} onClick={() => navigate("/attributes")}>
-                      Attributes
-                    </MenuItem>
-                  </MenuList>
-                </Menu>
+          <Button leftIcon={<Icon as={BsBox} />} variant={"link"} color={"white"} onClick={() => navigate("/entities")}>
+            Entities
+          </Button>
+          <Button leftIcon={<Icon as={BsGrid} />} variant={"link"} color={"white"} onClick={() => navigate("/collections")}>
+            Collections
+          </Button>
+          <Button leftIcon={<Icon as={BsGear} />} variant={"link"} color={"white"} onClick={() => navigate("/attributes")}>
+            Attributes
+          </Button>
 
-                <Button
-                  key={"search"}
-                  bg={"white"}
-                  leftIcon={<Icon as={BsSearch} />}
-                  onClick={() => navigate("/search")}
-                >
-                  Search
-                </Button>
-              </Flex>
-            </VStack>
-          </VStack>
+          <Divider />
+
+          <Button
+            key={"search"}
+            variant={"link"}
+            color={"white"}
+            leftIcon={<Icon as={BsSearch} />}
+            onClick={() => navigate("/search")}
+          >
+            Search
+          </Button>
         </Flex>
       </Flex>
 
-      <Flex p={"2"} bg={"white"}>
-        {/* Icon to show menu in responsive context */}
+      {/* Icon to show menu in responsive context */}
+      <Flex p={"2"} bg={"white"} display={{ lg: "none" }}>
         <IconButton
           size={"md"}
-          icon={<Icon as={isOpen ? BsXLg : HamburgerIcon} />}
+          icon={<Icon as={isOpen ? BsXLg : BsList} alignContent={"center"} />}
           aria-label={"Open Menu"}
-          display={{ md: "none" }}
+          display={{ lg: "none" }}
           onClick={isOpen ? onClose : onOpen}
         />
       </Flex>
 
       {/* Responsive display */}
-      {isOpen ? (
-        <Flex p={4} display={{ md: "none" }}>
-          <Stack as={"nav"} spacing={4} divider={<StackDivider />}>
-            {/* Dashboard */}
-            <Flex direction={"row"} align={"center"} gap={"2"}>
-              <NavigationElement onClick={() => responsiveNavigate("/")}>
+      {isOpen && (
+        <Flex p={"4"} direction={"column"} display={{ lg: "none" }}>
+          <VStack as={"nav"} spacing={4}>
+            <Flex direction={"column"} align={"baseline"}>
+              <Button key={"dashboard"} bg={"white"} leftIcon={<Icon as={BsBarChart} />} onClick={() => responsiveNavigate("/")}>
                 Dashboard
-              </NavigationElement>
-            </Flex>
+              </Button>
 
-            {/* Create */}
-            <Flex direction={"column"}>
-              <Flex direction={"row"} align={"center"} gap={"2"}>
-                <Icon as={AddIcon} />
-                Create
-              </Flex>
-              <Flex direction={"column"} px={"6"}>
-                <Flex direction={"row"} align={"center"}>
-                  <Icon as={BsBox} />
-                  <NavigationElement
-                    onClick={() => responsiveNavigate("/create/entity/start")}
-                  >
+              {/* Create menu */}
+              <Menu>
+                <MenuButton
+                  as={Button}
+                  bg={"white"}
+                  rounded={"md"}
+                  cursor={"pointer"}
+                  minW={0}
+                  leftIcon={<Icon as={BsPlusLg} />}
+                >
+                  Create
+                </MenuButton>
+                <MenuList>
+                  <MenuItem icon={<Icon as={BsBox} />} onClick={() => responsiveNavigate("/create/entity/start")}>
                     Entity
-                  </NavigationElement>
-                </Flex>
-                <Flex direction={"row"} align={"center"}>
-                  <Icon as={BsFolder} />
-                  <NavigationElement
-                    onClick={() => responsiveNavigate("/create/collection/start")}
-                  >
+                  </MenuItem>
+                  <MenuItem icon={<Icon as={BsGrid} />} onClick={() => responsiveNavigate("/create/collection/start")}>
                     Collection
-                  </NavigationElement>
-                </Flex>
-                <Flex direction={"row"} align={"center"}>
-                  <Icon as={BsPuzzle} />
-                  <NavigationElement
-                    onClick={() => responsiveNavigate("/create/attribute/start")}
-                  >
+                  </MenuItem>
+                  <MenuItem icon={<Icon as={BsGear} />} onClick={() => responsiveNavigate("/create/attribute/start")}>
                     Attribute
-                  </NavigationElement>
-                </Flex>
-              </Flex>
-            </Flex>
+                  </MenuItem>
+                </MenuList>
+              </Menu>
 
-            {/* View */}
-            <Flex direction={"column"}>
-              <Flex direction={"row"} align={"center"} gap={"2"}>
-                <Icon as={InfoOutlineIcon} />
-                View
-              </Flex>
-              <Flex direction={"column"} px={"6"}>
-                <Flex direction={"row"} align={"center"}>
-                  <Icon as={BsBox} />
-                  <NavigationElement
-                    onClick={() => responsiveNavigate("/entities")}
-                  >
+              {/* View menu */}
+              <Menu>
+                <MenuButton
+                  as={Button}
+                  bg={"white"}
+                  rounded={"md"}
+                  cursor={"pointer"}
+                  minW={0}
+                  leftIcon={<Icon as={BsBinoculars} />}
+                >
+                  View
+                </MenuButton>
+                <MenuList>
+                  <MenuItem icon={<Icon as={BsBox} />} onClick={() => responsiveNavigate("/entities")}>
                     Entities
-                  </NavigationElement>
-                </Flex>
-                <Flex direction={"row"} align={"center"}>
-                  <Icon as={BsFolder} />
-                  <NavigationElement
-                    onClick={() => responsiveNavigate("/collections")}
-                  >
+                  </MenuItem>
+                  <MenuItem icon={<Icon as={BsGrid} />} onClick={() => responsiveNavigate("/collections")}>
                     Collections
-                  </NavigationElement>
-                </Flex>
-                <Flex direction={"row"} align={"center"}>
-                  <Icon as={BsPuzzle} />
-                  <NavigationElement
-                    onClick={() => responsiveNavigate("/attributes")}
-                  >
+                  </MenuItem>
+                  <MenuItem icon={<Icon as={BsGear} />} onClick={() => responsiveNavigate("/attributes")}>
                     Attributes
-                  </NavigationElement>
-                </Flex>
-              </Flex>
+                  </MenuItem>
+                </MenuList>
+              </Menu>
+
+              <Button
+                key={"search"}
+                bg={"white"}
+                leftIcon={<Icon as={BsSearch} />}
+                onClick={() => responsiveNavigate("/search")}
+              >
+                Search
+              </Button>
             </Flex>
-          </Stack>
+          </VStack>
         </Flex>
-      ) : null}
-    </>
+      )}
+    </Flex>
   );
 };
 

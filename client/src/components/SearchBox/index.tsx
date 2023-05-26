@@ -66,7 +66,7 @@ const SearchBox = () => {
   };
 
   return (
-    <Flex w={"xl"} p={"1"}>
+    <Flex w={"100%"} maxW={"xl"} p={"1"}>
       <Popover isOpen={isOpen} onClose={onClose} placement={"bottom"} matchWidth>
         <PopoverTrigger>
           <Flex w={"100%"} gap={"4"}>
