@@ -23,9 +23,6 @@ import Entities from "@pages/Entities";
 
 // Page type - Create
 import { Create } from "@pages/Create";
-import { Start as EntityStart } from "@pages/Create/Entity";
-import { Start as CollectionStart } from "@pages/Create/Collection";
-import { Start as AttributeStart } from "@pages/Create/Attribute";
 
 // Page type - Unique
 import Search from "@pages/Search";
@@ -62,17 +59,12 @@ export const App = (): ReactElement => {
               <Route path="/create" element={<Create />} />
 
               {/* Entity routes */}
-              <Route path="/create/entity/start" element={<EntityStart />} />
               <Route path="/entities" element={<Entities />} />
               <Route path="entities">
                 <Route path=":id" element={<Entity />} />
               </Route>
 
               {/* Collections routes */}
-              <Route
-                path="/create/collection/start"
-                element={<CollectionStart />}
-              />
               <Route path="/collections" element={<Collections />} />
               <Route path="collections">
                 <Route path=":id" element={<Collection />} />
@@ -80,7 +72,6 @@ export const App = (): ReactElement => {
 
 
               {/* Attributes routes */}
-              <Route path="/create/attribute/start" element={<AttributeStart />} />
               <Route path="/attributes" element={<Attributes />} />
               <Route path="attributes">
                 <Route path=":id" element={<Attribute />} />

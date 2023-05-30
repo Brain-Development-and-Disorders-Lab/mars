@@ -5,7 +5,6 @@ import {
   Flex,
   Heading,
   Icon,
-  Link,
   Table,
   TableContainer,
   Tbody,
@@ -16,7 +15,7 @@ import {
   Tr,
   useToast,
 } from "@chakra-ui/react";
-import { ChevronRightIcon, AddIcon } from "@chakra-ui/icons";
+import { ChevronRightIcon } from "@chakra-ui/icons";
 import { BsGear } from "react-icons/bs";
 
 // Custom components
@@ -94,14 +93,6 @@ const Attributes = () => {
                   <Icon as={BsGear} w={"8"} h={"8"} />
                   <Heading fontWeight={"semibold"}>Attributes</Heading>
                 </Flex>
-                <Button
-                  rightIcon={<AddIcon />}
-                  as={Link}
-                  onClick={() => navigate("/create/attribute/start")}
-                  colorScheme={"green"}
-                >
-                  Create
-                </Button>
               </Flex>
               {isLoaded && attributesData.length > 0 ? (
                 <TableContainer w={"full"}>

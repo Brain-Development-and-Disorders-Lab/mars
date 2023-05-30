@@ -6,11 +6,10 @@ import {
   Text,
   useToast,
   Button,
-  Link,
   Icon,
   useBreakpoint,
 } from "@chakra-ui/react";
-import { BsBox, BsChevronRight, BsPlusLg } from "react-icons/bs";
+import { BsBox, BsChevronRight } from "react-icons/bs";
 import { createColumnHelper } from "@tanstack/react-table";
 
 // Navigation
@@ -143,14 +142,6 @@ const Entities = () => {
                   <Icon as={BsBox} w={"8"} h={"8"} />
                   <Heading fontWeight={"semibold"}>Entities</Heading>
                 </Flex>
-                <Button
-                  rightIcon={<Icon as={BsPlusLg} />}
-                  as={Link}
-                  onClick={() => navigate("/create/entity/start")}
-                  colorScheme={"green"}
-                >
-                  Create
-                </Button>
               </Flex>
               {isLoaded && entityData.length > 0 ? (
                 <Flex direction={"column"} gap={"4"} w={"100%"}>

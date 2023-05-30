@@ -13,6 +13,7 @@ import {
   useToast,
   Tag,
   Spinner,
+  Spacer,
 } from "@chakra-ui/react";
 import { BsBarChart, BsBox, BsGrid, BsList, BsPlusLg, BsGear, BsSearch, BsXLg } from "react-icons/bs";
 
@@ -20,12 +21,15 @@ import { BsBarChart, BsBox, BsGrid, BsList, BsPlusLg, BsGear, BsSearch, BsXLg } 
 import { getData } from "@database/functions";
 
 // Router navigation
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+
 import dayjs from "dayjs";
+import _ from "lodash";
 
 const Navigation = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const navigate = useNavigate();
+  const location = useLocation();
   const toast = useToast();
 
   /**
@@ -94,39 +98,39 @@ const Navigation = () => {
 
         {/* Menu items */}
         <Flex direction={"column"} align={"self-start"} gap={"6"}>
-          <Button key={"dashboard"} variant={"link"} leftIcon={<Icon as={BsBarChart} />} onClick={() => navigate("/")}>
-            Dashboard
-          </Button>
-          <Button leftIcon={<Icon as={BsPlusLg} />} variant={"link"} onClick={() => navigate("/create")}>
-            Create
+          <Button key={"create"} w={"100%"} colorScheme={"green"} variant={"solid"} leftIcon={<Icon as={BsPlusLg} />} onClick={() => navigate("/create")}>
+            <Flex pr={"4"}>Create</Flex>
           </Button>
 
           <Divider />
 
-          <Button leftIcon={<Icon as={BsBox} />} variant={"link"} onClick={() => navigate("/entities")}>
-            <Flex align={"center"} gap={"2"}>
+          <Button key={"dashboard"} w={"100%"} justifyContent={"left"} variant={_.isEqual(location.pathname, "/") ? "solid" : "ghost"} leftIcon={<Icon as={BsBarChart} />} onClick={() => navigate("/")}>
+            Dashboard
+          </Button>
+
+          <Divider />
+
+          <Button leftIcon={<Icon as={BsBox} />} w={"100%"} justifyContent={"left"} variant={_.isEqual(location.pathname, "/entities") ? "solid" : "ghost"} onClick={() => navigate("/entities")}>
+            <Flex w={"100%"} align={"center"} gap={"2"}>
               <Text>Entities</Text>
+              <Spacer />
               <Tag>{isLoaded ? entityCount : <Spinner size={"xs"} />}</Tag>
             </Flex>
           </Button>
-          <Button leftIcon={<Icon as={BsGrid} />} variant={"link"} onClick={() => navigate("/collections")}>
-            <Flex align={"center"} gap={"2"}>
+          <Button leftIcon={<Icon as={BsGrid} />} w={"100%"} justifyContent={"left"} variant={_.isEqual(location.pathname, "/collections") ? "solid" : "ghost"} onClick={() => navigate("/collections")}>
+            <Flex w={"100%"} align={"center"} gap={"2"}>
               <Text>Collections</Text>
+              <Spacer />
               <Tag>{isLoaded ? collectionCount : <Spinner size={"xs"} />}</Tag>
             </Flex>
           </Button>
-          <Button leftIcon={<Icon as={BsGear} />} variant={"link"} onClick={() => navigate("/attributes")}>
+          <Button leftIcon={<Icon as={BsGear} />} w={"100%"} justifyContent={"left"} variant={_.isEqual(location.pathname, "/attributes") ? "solid" : "ghost"} onClick={() => navigate("/attributes")}>
             Attributes
           </Button>
 
           <Divider />
 
-          <Button
-            key={"search"}
-            variant={"link"}
-            leftIcon={<Icon as={BsSearch} />}
-            onClick={() => navigate("/search")}
-          >
+          <Button key={"search"} w={"100%"} justifyContent={"left"} variant={_.isEqual(location.pathname, "/search") ? "solid" : "ghost"} leftIcon={<Icon as={BsSearch} />} onClick={() => navigate("/search")}>
             Search
           </Button>
         </Flex>

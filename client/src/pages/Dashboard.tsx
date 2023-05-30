@@ -215,13 +215,6 @@ const Dashboard = () => {
                     <Icon as={BsGrid} w={"8"} h={"8"} />
                     <Heading fontWeight={"semibold"}>Collections</Heading>
                   </Flex>
-                  <Button
-                    colorScheme={"green"}
-                    leftIcon={<Icon as={BsPlusLg} />}
-                    onClick={() => navigate("/create/collection/start")}
-                  >
-                    Create
-                  </Button>
                 </Flex>
 
                 {/* Collections table */}
@@ -260,13 +253,6 @@ const Dashboard = () => {
                     <Icon as={BsBox} w={"8"} h={"8"} />
                     <Heading fontWeight={"semibold"}>Entities</Heading>
                   </Flex>
-                  <Button
-                    colorScheme={"green"}
-                    leftIcon={<Icon as={BsPlusLg} />}
-                    onClick={() => navigate("/create/entity/start")}
-                  >
-                    Create
-                  </Button>
                 </Flex>
 
                 {/* Entities table */}

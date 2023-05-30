@@ -5,7 +5,6 @@ import {
   Flex,
   Heading,
   Icon,
-  Link,
   Table,
   TableContainer,
   Tag,
@@ -19,7 +18,7 @@ import {
   Tr,
   useToast,
 } from "@chakra-ui/react";
-import { ChevronRightIcon, AddIcon, WarningIcon } from "@chakra-ui/icons";
+import { ChevronRightIcon, WarningIcon } from "@chakra-ui/icons";
 import { BsGrid } from "react-icons/bs";
 
 // Custom components
@@ -97,14 +96,6 @@ const Collections = () => {
                   <Icon as={BsGrid} w={"8"} h={"8"} />
                   <Heading fontWeight={"semibold"}>Collections</Heading>
                 </Flex>
-                <Button
-                  rightIcon={<AddIcon />}
-                  as={Link}
-                  onClick={() => navigate("/create/collection/start")}
-                  colorScheme={"green"}
-                >
-                  Create
-                </Button>
               </Flex>
               {isLoaded && collectionsData.length > 0 ? (
                 <TableContainer w={"full"}>
