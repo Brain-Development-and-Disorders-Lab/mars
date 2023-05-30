@@ -1,5 +1,7 @@
 // React
 import React, { useState } from "react";
+
+// Existing components
 import {
   Button,
   Card,
@@ -7,7 +9,6 @@ import {
   CardHeader,
   Flex,
   Heading,
-  Icon,
   Input,
   Modal,
   ModalBody,
@@ -20,24 +21,20 @@ import {
   StackDivider,
   Tag,
   TagLabel,
-  TagLeftIcon,
   Text,
   useDisclosure,
 } from "@chakra-ui/react";
-import { InfoOutlineIcon } from "@chakra-ui/icons";
-import { AiOutlineBlock, AiOutlineEdit, AiOutlineLink } from "react-icons/ai";
-import { MdDateRange, MdOutlineTextFields } from "react-icons/md";
-import { RiNumbersLine } from "react-icons/ri";
-import { BsCheckLg, BsDashLg, BsGear, BsXLg } from "react-icons/bs";
-
-import _ from "lodash";
-
-// Types
-import { AttributeCardProps } from "@types";
 
 // Custom components
+import Icon from "@components/Icon";
 import ParameterGroup from "@components/ParameterGroup";
 import { WarningLabel } from "@components/Label";
+
+// Custom types
+import { AttributeCardProps } from "@types";
+
+// Utility functions and libraries
+import _ from "lodash";
 
 const AttributeCard = (props: AttributeCardProps) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -56,7 +53,7 @@ const AttributeCard = (props: AttributeCardProps) => {
       <CardHeader p={"2"}>
         <Flex p={"2"} align={"center"} m={"none"} justify={"space-between"} gap={"4"}>
           <Flex align={"center"} gap={"2"}>
-            <Icon as={BsGear} w={"4"} h={"4"} />
+            <Icon name={"attribute"} size={"md"} />
             <Heading size={"md"} noOfLines={1}>{props.attribute.name}</Heading>
           </Flex>
 
@@ -64,7 +61,7 @@ const AttributeCard = (props: AttributeCardProps) => {
             {(isEditing && props.removeCallback) &&
               <Button
                 key={`remove-${props.attribute._id}`}
-                rightIcon={<Icon as={BsDashLg} />}
+                rightIcon={<Icon name={"delete"} />}
                 colorScheme={"red"}
                 onClick={props.removeCallback}
               >
@@ -72,7 +69,7 @@ const AttributeCard = (props: AttributeCardProps) => {
               </Button>
             }
 
-            <Button onClick={onOpen} rightIcon={<Icon as={isEditing ? AiOutlineEdit : InfoOutlineIcon} />}>
+            <Button onClick={onOpen} rightIcon={<Icon name={isEditing ? "edit" : "info"} />}>
               {isEditing ? "Edit" : "View"}
             </Button>
           </Flex>
@@ -94,7 +91,7 @@ const AttributeCard = (props: AttributeCardProps) => {
                   case "date": {
                     return (
                       <Tag key={parameter.identifier}>
-                        <TagLeftIcon as={MdDateRange} />
+                        <Icon name={"p_date"} />
                         <TagLabel>
                           <Flex align={"center"} gap={"1"}>
                             <Flex
@@ -111,7 +108,7 @@ const AttributeCard = (props: AttributeCardProps) => {
                   case "entity": {
                     return (
                       <Tag key={parameter.identifier}>
-                        <TagLeftIcon as={AiOutlineBlock} />
+                        <Icon name={"entity"} />
                         <TagLabel>
                           <Flex align={"center"} gap={"1"}>
                             <Flex
@@ -128,7 +125,7 @@ const AttributeCard = (props: AttributeCardProps) => {
                   case "number": {
                     return (
                       <Tag key={parameter.identifier}>
-                        <TagLeftIcon as={RiNumbersLine} />
+                        <Icon name={"p_number"} />
                         <TagLabel>
                           <Flex align={"center"} gap={"1"}>
                             <Flex
@@ -146,7 +143,7 @@ const AttributeCard = (props: AttributeCardProps) => {
                   case "url": {
                     return (
                       <Tag key={parameter.identifier}>
-                        <TagLeftIcon as={AiOutlineLink} />
+                        <Icon name={"p_url"} />
                         <TagLabel>
                           <Flex align={"center"} gap={"1"}>
                             <Flex
@@ -163,7 +160,7 @@ const AttributeCard = (props: AttributeCardProps) => {
                   default: {
                     return (
                       <Tag key={parameter.identifier}>
-                        <TagLeftIcon as={MdOutlineTextFields} />
+                        <Icon name={"p_text"} />
                         <TagLabel>
                           <Flex align={"center"} gap={"1"}>
                             <Flex
@@ -197,7 +194,7 @@ const AttributeCard = (props: AttributeCardProps) => {
                 wrap={"wrap"}
               >
                 <Flex align={"center"} gap={"4"} shadow={"lg"} p={"2"} border={"2px"} rounded={"md"}>
-                  <Icon as={BsGear} w={"8"} h={"8"} />
+                  <Icon name={"attribute"} size={"lg"} />
                   <Heading fontWeight={"semibold"} size={"md"}>{props.attribute.name}</Heading>
                 </Flex>
               </Flex>
@@ -249,7 +246,7 @@ const AttributeCard = (props: AttributeCardProps) => {
                   <Button
                     colorScheme={"red"}
                     variant={"outline"}
-                    rightIcon={<Icon as={BsXLg} />}
+                    rightIcon={<Icon name={"close"} />}
                     onClick={() => {
                       // Reset the changes made to the Attribute
                       setDescription(defaultDescription);
@@ -267,8 +264,7 @@ const AttributeCard = (props: AttributeCardProps) => {
 
                   <Button
                     colorScheme={"green"}
-                    rightIcon={<Icon as={BsCheckLg} />}
-                    // disabled={isAttributeError}
+                    rightIcon={<Icon name={"check"} />}
                     onClick={() => {
                       // Close the modal
                       onClose();

@@ -1,4 +1,7 @@
+// React
 import React, { useEffect, useState } from "react";
+
+// Existing components
 import {
   Button,
   Card,
@@ -7,16 +10,18 @@ import {
   Divider,
   Flex,
   FormControl,
-  Icon,
   Input,
   Textarea,
 } from "@chakra-ui/react";
-import { CheckIcon } from "@chakra-ui/icons";
-import { BsTrash } from "react-icons/bs";
+
+// Custom components
+import Icon from "@components/Icon";
 import ParameterGroup from "@components/ParameterGroup";
 
+// Custom types
 import { AttributeProps } from "@types";
 
+// Utility functions and libraries
 import { validateParameters } from "src/functions";
 
 const Attribute = (props: AttributeProps) => {
@@ -92,13 +97,13 @@ const Attribute = (props: AttributeProps) => {
                 props.onRemove(props.identifier);
               }
             }}
-            rightIcon={<Icon as={BsTrash} />}
+            rightIcon={<Icon name={"delete"} />}
           >
             Remove
           </Button>
 
           <Button
-            rightIcon={<Icon as={CheckIcon} />}
+            rightIcon={<Icon name={"check"} />}
             colorScheme={"green"}
             onClick={() => {
               setFinished(true);
