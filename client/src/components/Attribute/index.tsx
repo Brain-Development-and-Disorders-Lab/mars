@@ -1,7 +1,7 @@
 // React
 import React, { useEffect, useState } from "react";
 
-// Existing components
+// Existing and custom components
 import {
   Button,
   Card,
@@ -13,12 +13,10 @@ import {
   Input,
   Textarea,
 } from "@chakra-ui/react";
-
-// Custom components
 import Icon from "@components/Icon";
 import ParameterGroup from "@components/ParameterGroup";
 
-// Custom types
+// Existing and custom types
 import { AttributeProps } from "@types";
 
 // Utility functions and libraries

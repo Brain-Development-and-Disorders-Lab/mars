@@ -1,7 +1,7 @@
 // React
 import React, { useState } from "react";
 
-// Existing components
+// Existing and custom components
 import {
   Button,
   Card,
@@ -24,13 +24,11 @@ import {
   Text,
   useDisclosure,
 } from "@chakra-ui/react";
-
-// Custom components
 import Icon from "@components/Icon";
 import ParameterGroup from "@components/ParameterGroup";
-import { WarningLabel } from "@components/Label";
+import { Warning } from "@components/Label";
 
-// Custom types
+// Existing and custom types
 import { AttributeCardProps } from "@types";
 
 // Utility functions and libraries
@@ -208,7 +206,7 @@ const AttributeCard = (props: AttributeCardProps) => {
                   description.length > 0 ? (
                     <Text>{description}</Text>
                   ) : (
-                    <WarningLabel
+                    <Warning
                       key={props.attribute.name}
                       text={"No description provided"}
                     />

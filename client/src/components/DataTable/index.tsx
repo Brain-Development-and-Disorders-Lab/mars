@@ -1,9 +1,12 @@
+// React
 import React, { FC, useEffect, useState } from "react";
-import { Flex, Icon, IconButton, Select, Table, TableContainer, Tbody, Td, Th, Thead, Tr, Text } from "@chakra-ui/react";
-import { BsChevronDoubleLeft, BsChevronDoubleRight, BsChevronDown, BsChevronLeft, BsChevronRight, BsChevronUp } from "react-icons/bs";
-import { flexRender, getPaginationRowModel, useReactTable, getCoreRowModel, getSortedRowModel } from "@tanstack/react-table";
 
-// Custom types
+// Existing and custom components
+import { Flex, IconButton, Select, Table, TableContainer, Tbody, Td, Th, Thead, Tr, Text } from "@chakra-ui/react";
+import { flexRender, getPaginationRowModel, useReactTable, getCoreRowModel, getSortedRowModel } from "@tanstack/react-table";
+import Icon from "@components/Icon";
+
+// Existing and custom types
 import { DataTableProps } from "@types";
 
 export const DataTable: FC<any> = (props: DataTableProps) => {
@@ -55,9 +58,9 @@ export const DataTable: FC<any> = (props: DataTableProps) => {
                         )}
                         {header.column.getIsSorted() ? (
                           header.column.getIsSorted() === "desc" ? (
-                            <Icon as={BsChevronDown} aria-label="sorted descending" />
+                            <Icon name={"c_down"} />
                           ) : (
-                            <Icon as={BsChevronUp} aria-label="sorted ascending" />
+                            <Icon name={"c_up"} />
                           )
                         ) : null}
                       </Flex>
@@ -85,11 +88,11 @@ export const DataTable: FC<any> = (props: DataTableProps) => {
       </TableContainer>
       {!props.hideControls && <Flex direction={"row"} gap={"4"} justify={"space-between"} w={"100%"}>
         <Flex direction={"row"} gap={"4"} align={"center"}>
-          <IconButton icon={<Icon as={BsChevronDoubleLeft} />} aria-label="first page" onClick={() => table.setPageIndex(0)} disabled={!table.getCanPreviousPage()}/>
-          <IconButton icon={<Icon as={BsChevronLeft} />} aria-label="previous page" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}/>
+          <IconButton icon={<Icon name={"c_double_left"} />} aria-label="first page" onClick={() => table.setPageIndex(0)} disabled={!table.getCanPreviousPage()}/>
+          <IconButton icon={<Icon name={"c_left"} />} aria-label="previous page" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}/>
           <Text as={"b"}>{table.getState().pagination.pageIndex + 1} of{' '}{table.getPageCount()}</Text>
-          <IconButton icon={<Icon as={BsChevronRight} />} aria-label="next page" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}/>
-          <IconButton icon={<Icon as={BsChevronDoubleRight} />} aria-label="last page" onClick={() => table.setPageIndex(table.getPageCount() - 1)} disabled={!table.getCanNextPage()}/>
+          <IconButton icon={<Icon name={"c_right"} />} aria-label="next page" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}/>
+          <IconButton icon={<Icon name={"c_double_right"} />} aria-label="last page" onClick={() => table.setPageIndex(table.getPageCount() - 1)} disabled={!table.getCanNextPage()}/>
         </Flex>
         <Flex>
           <Select

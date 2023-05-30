@@ -1,7 +1,10 @@
-import React from "react";
+// React
+import React, { FC } from "react";
+
+// Existing and custom components
 import { Flex } from "@chakra-ui/react";
 
-export const ContentContainer: React.FC<any> = (props: { children: any, vertical?: boolean }) => {
+const ContentContainer: FC<any> = (props: { children: any, vertical?: boolean }) => {
   return (
     <Flex
       flex={"1"}
@@ -21,3 +24,5 @@ export const ContentContainer: React.FC<any> = (props: { children: any, vertical
     </Flex>
   );
 };
+
+export default ContentContainer;

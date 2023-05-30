@@ -3,7 +3,7 @@ import React from "react";
 
 // Existing components and icons
 import { Icon as ChakraIcon } from "@chakra-ui/react";
-import { BsBarChart, BsBox, BsCalendarWeek, BsCheck, BsGraphUp, BsGrid, BsInfoCircle, BsLink45Deg, BsPencilSquare, BsPlus, BsQuestionOctagon, BsTag, BsTextareaT, BsTrash, BsX } from "react-icons/bs";
+import { BsArrowClockwise, BsBarChart, BsBox, BsCalendarWeek, BsCheck, BsChevronDoubleLeft, BsChevronDoubleRight, BsChevronDown, BsChevronLeft, BsChevronRight, BsChevronUp, BsExclamationOctagon, BsFillExclamationTriangleFill, BsGraphUp, BsGrid, BsInfoCircle, BsLink45Deg, BsPencilSquare, BsPlus, BsQuestionOctagon, BsTag, BsTextareaT, BsTrash, BsX } from "react-icons/bs";
 
 // Custom types
 import { IconType } from "react-icons";
@@ -24,13 +24,22 @@ const SYSTEM_ICONS: {[k: string]: IconType} = {
   "edit": BsPencilSquare,
   "delete": BsTrash,
   "close": BsX,
+  "warning": BsFillExclamationTriangleFill,
+  "exclamation": BsExclamationOctagon,
+  "reload": BsArrowClockwise,
   "p_date": BsCalendarWeek,
   "p_text": BsTextareaT,
   "p_number": BsGraphUp,
   "p_url": BsLink45Deg,
+  "c_left": BsChevronLeft,
+  "c_double_left": BsChevronDoubleLeft,
+  "c_right": BsChevronRight,
+  "c_double_right": BsChevronDoubleRight,
+  "c_up": BsChevronUp,
+  "c_down": BsChevronDown,
 };
 
-const Icon = (props: { name: string, size?: "sm" | "md" | "lg" }) => {
+const Icon = (props: { name: string, size?: "sm" | "md" | "lg" | "xl" }) => {
   // Default to unknown icon type
   let iconComponent = SYSTEM_ICONS["unknown"];
 
@@ -53,6 +62,10 @@ const Icon = (props: { name: string, size?: "sm" | "md" | "lg" }) => {
       case "lg":
         return (
           <ChakraIcon as={iconComponent} w={"8"} h={"8"} />
+        );
+      case "xl":
+        return (
+          <ChakraIcon as={iconComponent} w={"16"} h={"16"} />
         );
       default:
         return (
