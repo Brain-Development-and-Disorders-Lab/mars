@@ -73,6 +73,7 @@ const SearchBox = () => {
             <Input
               value={query}
               placeholder={"Search"}
+              background={"white"}
               onChange={(event) => setQuery(event.target.value)}
               onKeyUp={(event) => {
                 // Listen for "Enter" key when entering a query

@@ -52,7 +52,7 @@ const AttributeCard = (props: AttributeCardProps) => {
   const [defaultParameters, _setDefaultParameters] = useState(props.attribute.parameters);
 
   return (
-    <Card maxW={"md"} background={"white"}>
+    <Card maxW={"md"} background={"white"} variant={"outline"}>
       <CardHeader p={"2"}>
         <Flex p={"2"} align={"center"} m={"none"} justify={"space-between"} gap={"4"}>
           <Flex align={"center"} gap={"2"}>

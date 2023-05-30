@@ -219,7 +219,7 @@ export const Start = ({}) => {
 
   // Handle clicking "Cancel"
   const onCancel = () => {
-    navigate("/entities");
+    navigate("/");
   };
 
   // Removal callback

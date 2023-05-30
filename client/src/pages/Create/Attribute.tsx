@@ -168,7 +168,7 @@ export const Start = ({}) => {
               colorScheme={"red"}
               variant={"outline"}
               rightIcon={<BsXLg />}
-              onClick={() => navigate("/attributes")}
+              onClick={() => navigate("/")}
             >
               Cancel
             </Button>

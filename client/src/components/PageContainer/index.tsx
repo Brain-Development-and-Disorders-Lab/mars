@@ -18,7 +18,7 @@ export const PageContainer: React.FC<any> = ({ children }) => {
           align={"center"}
           justify={"center"}
           display={{ base: "none", lg: "flex" }}
-          background={"white"}
+          background={"#5AB2F7"}
         >
           <SearchBox />
         </Flex>
