@@ -124,27 +124,6 @@ const Entities = () => {
             wrap={"wrap"}
           >
             <Flex
-              pt={"4"}
-              pb={"4"}
-              direction={"row"}
-              justify={"space-between"}
-              align={"center"}
-            >
-              <Flex align={"center"} gap={"4"}>
-                <Icon as={BsBox} w={"8"} h={"8"} />
-                <Heading fontWeight={"semibold"}>Entities</Heading>
-              </Flex>
-              <Button
-                rightIcon={<Icon as={BsPlusLg} />}
-                as={Link}
-                onClick={() => navigate("/create/entity/start")}
-                colorScheme={"green"}
-              >
-                Create
-              </Button>
-            </Flex>
-
-            <Flex
               direction={"row"}
               p={"4"}
               rounded={"md"}
@@ -153,6 +132,26 @@ const Entities = () => {
               gap={"6"}
               justify={"center"}
             >
+              <Flex
+                w={"100%"}
+                p={"4"}
+                direction={"row"}
+                justify={"space-between"}
+                align={"center"}
+              >
+                <Flex align={"center"} gap={"4"}>
+                  <Icon as={BsBox} w={"8"} h={"8"} />
+                  <Heading fontWeight={"semibold"}>Entities</Heading>
+                </Flex>
+                <Button
+                  rightIcon={<Icon as={BsPlusLg} />}
+                  as={Link}
+                  onClick={() => navigate("/create/entity/start")}
+                  colorScheme={"green"}
+                >
+                  Create
+                </Button>
+              </Flex>
               {isLoaded && entityData.length > 0 ? (
                 <Flex direction={"column"} gap={"4"} w={"100%"}>
                   <DataTable columns={columns} data={data} visibleColumns={visibleColumns} />

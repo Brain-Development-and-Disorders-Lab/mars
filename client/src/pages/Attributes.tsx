@@ -76,27 +76,6 @@ const Attributes = () => {
             wrap={"wrap"}
           >
             <Flex
-              pt={"4"}
-              pb={"4"}
-              direction={"row"}
-              justify={"space-between"}
-              align={"center"}
-            >
-              <Flex align={"center"} gap={"4"}>
-                <Icon as={BsGear} w={"8"} h={"8"} />
-                <Heading fontWeight={"semibold"}>Attributes</Heading>
-              </Flex>
-              <Button
-                rightIcon={<AddIcon />}
-                as={Link}
-                onClick={() => navigate("/create/attribute/start")}
-                colorScheme={"green"}
-              >
-                Create
-              </Button>
-            </Flex>
-
-            <Flex
               p={"4"}
               direction={"row"}
               rounded={"md"}
@@ -104,6 +83,26 @@ const Attributes = () => {
               flexWrap={"wrap"}
               gap={"6"}
             >
+              <Flex
+                w={"100%"}
+                p={"4"}
+                direction={"row"}
+                justify={"space-between"}
+                align={"center"}
+              >
+                <Flex align={"center"} gap={"4"}>
+                  <Icon as={BsGear} w={"8"} h={"8"} />
+                  <Heading fontWeight={"semibold"}>Attributes</Heading>
+                </Flex>
+                <Button
+                  rightIcon={<AddIcon />}
+                  as={Link}
+                  onClick={() => navigate("/create/attribute/start")}
+                  colorScheme={"green"}
+                >
+                  Create
+                </Button>
+              </Flex>
               {isLoaded && attributesData.length > 0 ? (
                 <TableContainer w={"full"}>
                   <Table variant={"simple"} colorScheme={"blackAlpha"}>

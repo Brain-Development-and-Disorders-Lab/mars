@@ -4,22 +4,17 @@ import {
   Flex,
   IconButton,
   Button,
-  Menu,
-  MenuButton,
-  MenuList,
-  MenuItem,
   useDisclosure,
   Icon,
   Image,
   Heading,
-  VStack,
   Text,
   Divider,
   useToast,
   Tag,
   Spinner,
 } from "@chakra-ui/react";
-import { BsBarChart, BsBinoculars, BsBox, BsGrid, BsList, BsPlusLg, BsGear, BsSearch, BsXLg } from "react-icons/bs";
+import { BsBarChart, BsBox, BsGrid, BsList, BsPlusLg, BsGear, BsSearch, BsXLg } from "react-icons/bs";
 
 // Functions to retrieve database information
 import { getData } from "@database/functions";
@@ -92,35 +87,35 @@ const Navigation = () => {
         <Flex direction={"row"} align={"center"} gap={"2"}>
           <Image src="/Favicon.png" boxSize={"36px"} />
           <Flex direction={"column"}>
-            <Heading fontWeight={"semibold"} color={"white"} size={"md"}>MARS</Heading>
-            <Text color={"gray.200"}>{dayjs(Date.now()).format("ddd, DD MMM").toString()}</Text>
+            <Heading fontWeight={"semibold"} size={"md"}>MARS</Heading>
+            <Text color={"gray.400"}>{dayjs(Date.now()).format("ddd, DD MMM").toString()}</Text>
           </Flex>
         </Flex>
 
         {/* Menu items */}
         <Flex direction={"column"} align={"self-start"} gap={"6"}>
-          <Button key={"dashboard"} variant={"link"} color={"white"} leftIcon={<Icon as={BsBarChart} />} onClick={() => navigate("/")}>
+          <Button key={"dashboard"} variant={"link"} leftIcon={<Icon as={BsBarChart} />} onClick={() => navigate("/")}>
             Dashboard
           </Button>
-          <Button leftIcon={<Icon as={BsPlusLg} />} variant={"link"} color={"white"} onClick={() => navigate("/create")}>
+          <Button leftIcon={<Icon as={BsPlusLg} />} variant={"link"} onClick={() => navigate("/create")}>
             Create
           </Button>
 
           <Divider />
 
-          <Button leftIcon={<Icon as={BsBox} />} variant={"link"} color={"white"} onClick={() => navigate("/entities")}>
+          <Button leftIcon={<Icon as={BsBox} />} variant={"link"} onClick={() => navigate("/entities")}>
             <Flex align={"center"} gap={"2"}>
               <Text>Entities</Text>
-              <Tag colorScheme={"whiteAlpha"}>{isLoaded ? entityCount : <Spinner size={"xs"} />}</Tag>
+              <Tag>{isLoaded ? entityCount : <Spinner size={"xs"} />}</Tag>
             </Flex>
           </Button>
-          <Button leftIcon={<Icon as={BsGrid} />} variant={"link"} color={"white"} onClick={() => navigate("/collections")}>
+          <Button leftIcon={<Icon as={BsGrid} />} variant={"link"} onClick={() => navigate("/collections")}>
             <Flex align={"center"} gap={"2"}>
               <Text>Collections</Text>
-              <Tag colorScheme={"whiteAlpha"}>{isLoaded ? collectionCount : <Spinner size={"xs"} />}</Tag>
+              <Tag>{isLoaded ? collectionCount : <Spinner size={"xs"} />}</Tag>
             </Flex>
           </Button>
-          <Button leftIcon={<Icon as={BsGear} />} variant={"link"} color={"white"} onClick={() => navigate("/attributes")}>
+          <Button leftIcon={<Icon as={BsGear} />} variant={"link"} onClick={() => navigate("/attributes")}>
             Attributes
           </Button>
 
@@ -129,7 +124,6 @@ const Navigation = () => {
           <Button
             key={"search"}
             variant={"link"}
-            color={"white"}
             leftIcon={<Icon as={BsSearch} />}
             onClick={() => navigate("/search")}
           >
@@ -139,12 +133,13 @@ const Navigation = () => {
       </Flex>
 
       {/* Icon to show menu in responsive context */}
-      <Flex p={"2"} bg={"white"} display={{ lg: "none" }}>
+      <Flex p={"2"} display={{ lg: "none" }}>
         <IconButton
           size={"md"}
+          display={{ base: "flex", lg: "none" }}
+          justifyContent={"center"}
           icon={<Icon as={isOpen ? BsXLg : BsList} alignContent={"center"} />}
           aria-label={"Open Menu"}
-          display={{ lg: "none" }}
           onClick={isOpen ? onClose : onOpen}
         />
       </Flex>
@@ -152,72 +147,43 @@ const Navigation = () => {
       {/* Responsive display */}
       {isOpen && (
         <Flex p={"4"} direction={"column"} display={{ lg: "none" }}>
-          <VStack as={"nav"} spacing={4}>
-            <Flex direction={"column"} align={"baseline"}>
-              <Button key={"dashboard"} bg={"white"} leftIcon={<Icon as={BsBarChart} />} onClick={() => responsiveNavigate("/")}>
-                Dashboard
-              </Button>
+          <Flex direction={"column"} align={"self-start"} gap={"6"}>
+            <Button key={"dashboard"} variant={"link"} leftIcon={<Icon as={BsBarChart} />} onClick={() => responsiveNavigate("/")}>
+              Dashboard
+            </Button>
+            <Button leftIcon={<Icon as={BsPlusLg} />} variant={"link"} onClick={() => responsiveNavigate("/create")}>
+              Create
+            </Button>
 
-              {/* Create menu */}
-              <Menu>
-                <MenuButton
-                  as={Button}
-                  bg={"white"}
-                  rounded={"md"}
-                  cursor={"pointer"}
-                  minW={0}
-                  leftIcon={<Icon as={BsPlusLg} />}
-                >
-                  Create
-                </MenuButton>
-                <MenuList>
-                  <MenuItem icon={<Icon as={BsBox} />} onClick={() => responsiveNavigate("/create/entity/start")}>
-                    Entity
-                  </MenuItem>
-                  <MenuItem icon={<Icon as={BsGrid} />} onClick={() => responsiveNavigate("/create/collection/start")}>
-                    Collection
-                  </MenuItem>
-                  <MenuItem icon={<Icon as={BsGear} />} onClick={() => responsiveNavigate("/create/attribute/start")}>
-                    Attribute
-                  </MenuItem>
-                </MenuList>
-              </Menu>
+            <Divider />
 
-              {/* View menu */}
-              <Menu>
-                <MenuButton
-                  as={Button}
-                  bg={"white"}
-                  rounded={"md"}
-                  cursor={"pointer"}
-                  minW={0}
-                  leftIcon={<Icon as={BsBinoculars} />}
-                >
-                  View
-                </MenuButton>
-                <MenuList>
-                  <MenuItem icon={<Icon as={BsBox} />} onClick={() => responsiveNavigate("/entities")}>
-                    Entities
-                  </MenuItem>
-                  <MenuItem icon={<Icon as={BsGrid} />} onClick={() => responsiveNavigate("/collections")}>
-                    Collections
-                  </MenuItem>
-                  <MenuItem icon={<Icon as={BsGear} />} onClick={() => responsiveNavigate("/attributes")}>
-                    Attributes
-                  </MenuItem>
-                </MenuList>
-              </Menu>
+            <Button leftIcon={<Icon as={BsBox} />} variant={"link"} onClick={() => responsiveNavigate("/entities")}>
+              <Flex align={"center"} gap={"2"}>
+                <Text>Entities</Text>
+                <Tag>{isLoaded ? entityCount : <Spinner size={"xs"} />}</Tag>
+              </Flex>
+            </Button>
+            <Button leftIcon={<Icon as={BsGrid} />} variant={"link"} onClick={() => responsiveNavigate("/collections")}>
+              <Flex align={"center"} gap={"2"}>
+                <Text>Collections</Text>
+                <Tag>{isLoaded ? collectionCount : <Spinner size={"xs"} />}</Tag>
+              </Flex>
+            </Button>
+            <Button leftIcon={<Icon as={BsGear} />} variant={"link"} onClick={() => responsiveNavigate("/attributes")}>
+              Attributes
+            </Button>
 
-              <Button
-                key={"search"}
-                bg={"white"}
-                leftIcon={<Icon as={BsSearch} />}
-                onClick={() => responsiveNavigate("/search")}
-              >
-                Search
-              </Button>
-            </Flex>
-          </VStack>
+            <Divider />
+
+            <Button
+              key={"search"}
+              variant={"link"}
+              leftIcon={<Icon as={BsSearch} />}
+              onClick={() => responsiveNavigate("/search")}
+            >
+              Search
+            </Button>
+          </Flex>
         </Flex>
       )}
     </Flex>

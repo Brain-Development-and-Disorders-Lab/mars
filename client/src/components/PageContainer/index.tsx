@@ -8,7 +8,7 @@ import SearchBox from "@components/SearchBox";
 export const PageContainer: React.FC<any> = ({ children }) => {
   return (
     <Flex direction={{base: "column", lg: "row"}} minH={"100vh"} w={"100%"} p={"0"} m={"0"}>
-      <Flex p={"4"} justify={"center"} background={"#5AB2F7"}>
+      <Flex p={"4"} justify={"center"} background={"white"}>
         <Navigation />
       </Flex>
       <Flex direction={"column"} w={"100%"}>
@@ -18,7 +18,7 @@ export const PageContainer: React.FC<any> = ({ children }) => {
           align={"center"}
           justify={"center"}
           display={{ base: "none", lg: "flex" }}
-          background={"#5AB2F7"}
+          background={"white"}
         >
           <SearchBox />
         </Flex>
