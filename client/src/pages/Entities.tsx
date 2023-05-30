@@ -24,10 +24,10 @@ import _ from "lodash";
 import dayjs from "dayjs";
 
 // Custom components
-import { ContentContainer } from "@components/ContentContainer";
-import { Loading } from "@components/Loading";
-import { Error } from "@components/Error";
-import { DataTable } from "@components/DataTable";
+import { Content } from "@components/Container";
+import Loading from "@components/Loading";
+import Error from "@components/Error";
+import DataTable from "@components/DataTable";
 
 const Entities = () => {
   const navigate = useNavigate();
@@ -109,7 +109,7 @@ const Entities = () => {
   ];
 
   return (
-    <ContentContainer vertical={isError || !isLoaded}>
+    <Content vertical={isError || !isLoaded}>
       {isLoaded ? (
         isError ? (
           <Error />
@@ -156,7 +156,7 @@ const Entities = () => {
       ) : (
         <Loading />
       )}
-    </ContentContainer>
+    </Content>
   );
 };
 

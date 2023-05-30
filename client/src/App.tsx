@@ -22,7 +22,7 @@ import Entity from "@pages/Entity";
 import Entities from "@pages/Entities";
 
 // Page type - Create
-import { Create } from "@pages/Create";
+import Create from "@pages/Create";
 
 // Page type - Unique
 import Search from "@pages/Search";

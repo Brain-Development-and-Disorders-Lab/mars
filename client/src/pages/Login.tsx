@@ -15,7 +15,7 @@ import {
 import _ from "lodash";
 
 // Custom components
-import { ContentContainer } from "@components/ContentContainer";
+import { Content } from "@components/Container";
 
 // Database
 import { postData } from "@database/functions";
@@ -65,7 +65,7 @@ const Login = (props: { setToken: (token: string) => void }) => {
   }
 
   return (
-    <ContentContainer vertical>
+    <Content vertical>
       <Flex
         direction={"column"}
         justify={"center"}
@@ -125,7 +125,7 @@ const Login = (props: { setToken: (token: string) => void }) => {
           </Flex>
         </Flex>
       </Flex>
-    </ContentContainer>
+    </Content>
   );
 };
 

@@ -142,7 +142,7 @@ const Navigation = () => {
           size={"md"}
           display={{ base: "flex", lg: "none" }}
           justifyContent={"center"}
-          icon={<Icon name={isOpen ? "close" : "list"} />}
+          icon={<Icon name={isOpen ? "check" : "list"} />}
           aria-label={"Open Menu"}
           onClick={isOpen ? onClose : onOpen}
         />

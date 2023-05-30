@@ -37,9 +37,9 @@ import { getData, postData } from "@database/functions";
 import { EntityModel } from "@types";
 
 // Custom components
-import { Loading } from "@components/Loading";
-import { Error } from "@components/Error";
-import { ContentContainer } from "@components/ContentContainer";
+import Loading from "@components/Loading";
+import Error from "@components/Error";
+import { Content } from "@components/Container";
 
 const Search = () => {
   const [query, setQuery] = useState("");
@@ -63,7 +63,7 @@ const Search = () => {
     getData(`/entities/${query}`).then((entity) => {
       isEntity = true;
       navigate(`/entities/${entity._id}`);
-    }).finally(() => {
+    }).catch(() => {
       if (!isEntity) {
         // Update state
         setIsSearching(true);
@@ -90,7 +90,7 @@ const Search = () => {
   };
 
   return (
-    <ContentContainer vertical={isError}>
+    <Content vertical={isError}>
       {isError ? (
         <Error />
       ) : (
@@ -222,7 +222,7 @@ const Search = () => {
           </Modal>
         </Flex>
       )}
-    </ContentContainer>
+    </Content>
   );
 };
 

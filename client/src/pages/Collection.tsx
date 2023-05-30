@@ -53,10 +53,10 @@ import { deleteData, getData, postData } from "@database/functions";
 import { CollectionModel, EntityModel } from "@types";
 
 // Custom components
-import { Error } from "@components/Error";
+import Error from "@components/Error";
 import Linky from "@components/Linky";
-import { Loading } from "@components/Loading";
-import { ContentContainer } from "@components/ContentContainer";
+import Loading from "@components/Loading";
+import { Content } from "@components/Container";
 
 import _ from "lodash";
 
@@ -225,7 +225,7 @@ export const Collection = () => {
   };
 
   return (
-    <ContentContainer vertical={isError || !isLoaded}>
+    <Content vertical={isError || !isLoaded}>
       {isLoaded ? (
         isError ? (
           <Error />
@@ -527,7 +527,7 @@ export const Collection = () => {
       ) : (
         <Loading />
       )}
-    </ContentContainer>
+    </Content>
   );
 };
 

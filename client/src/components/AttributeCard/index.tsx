@@ -244,7 +244,7 @@ const AttributeCard = (props: AttributeCardProps) => {
                   <Button
                     colorScheme={"red"}
                     variant={"outline"}
-                    rightIcon={<Icon name={"close"} />}
+                    rightIcon={<Icon name={"check"} />}
                     onClick={() => {
                       // Reset the changes made to the Attribute
                       setDescription(defaultDescription);

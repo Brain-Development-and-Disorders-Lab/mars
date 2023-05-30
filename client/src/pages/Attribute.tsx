@@ -29,10 +29,10 @@ import {
 import { BsCheckLg, BsExclamationTriangle, BsPencil, BsGear, BsTrash } from "react-icons/bs";
 
 // Custom components
-import { Error } from "@components/Error";
+import Error from "@components/Error";
 import ParameterGroup from "@components/ParameterGroup";
-import { Loading } from "@components/Loading";
-import { ContentContainer } from "@components/ContentContainer";
+import Loading from "@components/Loading";
+import { Content } from "@components/Container";
 
 // Database and models
 import { deleteData, getData, postData } from "@database/functions";
@@ -142,7 +142,7 @@ export const Attribute = () => {
   };
 
   return (
-  <ContentContainer vertical={isError || !isLoaded}>
+  <Content vertical={isError || !isLoaded}>
     {isLoaded ? (
       isError ? (
         <Error />
@@ -277,7 +277,7 @@ export const Attribute = () => {
     ) : (
       <Loading />
     )}
-  </ContentContainer>
+  </Content>
   );
 };
 

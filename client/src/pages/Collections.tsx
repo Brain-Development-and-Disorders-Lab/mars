@@ -22,9 +22,9 @@ import { ChevronRightIcon, WarningIcon } from "@chakra-ui/icons";
 import { BsGrid } from "react-icons/bs";
 
 // Custom components
-import { Error } from "@components/Error";
-import { Loading } from "@components/Loading";
-import { ContentContainer } from "@components/ContentContainer";
+import Error from "@components/Error";
+import Loading from "@components/Loading";
+import { Content } from "@components/Container";
 
 // Database and models
 import { getData } from "@database/functions";
@@ -64,7 +64,7 @@ const Collections = () => {
   }, []);
 
   return (
-    <ContentContainer vertical={isError || !isLoaded}>
+    <Content vertical={isError || !isLoaded}>
       {isLoaded ? (
         isError ? (
           <Error />
@@ -206,7 +206,7 @@ const Collections = () => {
       ) : (
         <Loading />
       )}
-    </ContentContainer>
+    </Content>
   );
 };
 

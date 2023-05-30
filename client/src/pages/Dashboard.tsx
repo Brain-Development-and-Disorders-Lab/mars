@@ -15,10 +15,10 @@ import {
 import { BsBox, BsChevronRight, BsGrid, BsLightning, BsPencil, BsPlusLg, BsTrash } from "react-icons/bs";
 import { createColumnHelper } from "@tanstack/react-table";
 
-import { ContentContainer } from "@components/ContentContainer";
-import { DataTable } from "@components/DataTable";
-import { Loading } from "@components/Loading";
-import { Error } from "@components/Error";
+import { Content } from "@components/Container";
+import DataTable from "@components/DataTable";
+import Loading from "@components/Loading";
+import Error from "@components/Error";
 import Linky from "@components/Linky";
 
 import { getData } from "src/database/functions";
@@ -187,7 +187,7 @@ const Dashboard = () => {
   ];
 
   return (
-    <ContentContainer vertical={isError || !isLoaded}>
+    <Content vertical={isError || !isLoaded}>
       {isLoaded ? (
         isError ? (
           <Error />
@@ -358,7 +358,7 @@ const Dashboard = () => {
       ) : (
         <Loading />
       )}
-    </ContentContainer>
+    </Content>
   );
 };
 

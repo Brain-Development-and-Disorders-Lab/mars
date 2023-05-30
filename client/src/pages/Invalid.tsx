@@ -14,13 +14,13 @@ import {
 import _ from "lodash";
 
 // Custom components
-import { ContentContainer } from "@components/ContentContainer";
+import { Content } from "@components/Container";
 
 const Invalid = () => {
   const navigate = useNavigate();
 
   return (
-    <ContentContainer vertical>
+    <Content vertical>
       <Flex
         direction={"column"}
         justify={"center"}
@@ -38,7 +38,7 @@ const Invalid = () => {
         </Flex>
         <Button as={Link} onClick={() => navigate("/")}>Home</Button>
       </Flex>
-    </ContentContainer>
+    </Content>
   );
 };
 

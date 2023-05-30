@@ -19,10 +19,10 @@ import { ChevronRightIcon } from "@chakra-ui/icons";
 import { BsGear } from "react-icons/bs";
 
 // Custom components
-import { Error } from "@components/Error";
-import { Loading } from "@components/Loading";
-import { WarningLabel } from "@components/Label";
-import { ContentContainer } from "@components/ContentContainer";
+import Error from "@components/Error";
+import Loading from "@components/Loading";
+import { Warning } from "@components/Label";
+import { Content } from "@components/Container";
 
 // Database and models
 import { getData } from "@database/functions";
@@ -61,7 +61,7 @@ const Attributes = () => {
   }, []);
 
   return (
-    <ContentContainer vertical={isError || !isLoaded}>
+    <Content vertical={isError || !isLoaded}>
       {isLoaded ? (
         isError ? (
           <Error />
@@ -114,7 +114,7 @@ const Attributes = () => {
                           <Tr key={attribute._id}>
                             <Td>
                               {_.isEqual(attribute.name, "") ? (
-                                <WarningLabel
+                                <Warning
                                   key={`warn-${attribute._id}`}
                                   text={"Not specified"}
                                 />
@@ -124,7 +124,7 @@ const Attributes = () => {
                             </Td>
                             <Td display={{ base: "none", sm: "table-cell" }}>
                               {_.isEqual(attribute.description, "") ? (
-                                <WarningLabel
+                                <Warning
                                   key={`warn-${attribute._id}`}
                                   text={"Not specified"}
                                 />
@@ -161,7 +161,7 @@ const Attributes = () => {
       ) : (
         <Loading />
       )}
-    </ContentContainer>
+    </Content>
   );
 };
 

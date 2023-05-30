@@ -72,9 +72,9 @@ import { validateParameters } from "src/functions";
 import Linky from "src/components/Linky";
 import AttributeCard from "src/components/AttributeCard";
 import Graph from "src/components/Graph";
-import { Loading } from "src/components/Loading";
-import { Error } from "@components/Error";
-import { ContentContainer } from "@components/ContentContainer";
+import Loading from "src/components/Loading";
+import Error from "@components/Error";
+import { Content } from "@components/Container";
 import ParameterGroup from "@components/ParameterGroup";
 
 export const Entity = () => {
@@ -501,7 +501,7 @@ export const Entity = () => {
   };
 
   return (
-    <ContentContainer vertical={isError || !isLoaded}>
+    <Content vertical={isError || !isLoaded}>
       {isLoaded ? (
         isError ? (
           <Error />
@@ -1472,7 +1472,7 @@ export const Entity = () => {
         <Loading />
       )
     }
-    </ContentContainer>
+    </Content>
   );
 };
 

@@ -2,7 +2,7 @@
 import _ from "lodash";
 
 // Custom types
-import { Attribute, Parameters } from "@types";
+import { IAttribute, Parameters } from "@types";
 
 export const validateParameters = (parameters: Parameters[], allowEmptyValues=false) => {
   for (let parameter of parameters) {
@@ -21,7 +21,7 @@ export const validateParameters = (parameters: Parameters[], allowEmptyValues=fa
   return true;
 };
 
-export const validateAttributes = (attributes: Attribute[]) => {
+export const validateAttributes = (attributes: IAttribute[]) => {
   if (attributes.length === 0) return true;
 
   for (let attribute of attributes) {

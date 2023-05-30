@@ -32,14 +32,14 @@ export namespace State.Collection {
 
 // Attributes
 // Generic Attribute interface containing required data parameters
-export type Attribute = {
+export type IAttribute = {
   name: string;
   description: string;
   parameters: Parameters[];
 };
 
 // Database model of Attribute, including assigned ID
-export type AttributeModel = Attribute & {
+export type AttributeModel = IAttribute & {
   _id: string;
 };
 
@@ -49,7 +49,7 @@ export type AttributeActions = {
   onRemove?: (identifier: string) => void;
 };
 
-export type AttributeProps = Attribute & AttributeActions & {
+export type AttributeProps = IAttribute & AttributeActions & {
   identifier: string;
 };
 
@@ -67,7 +67,7 @@ export type AttributeCardProps = {
 
 // Parameters
 export namespace Parameter {
-  interface Generic {
+  interface IParameter {
     identifier: string;
     name: string;
     disabled?: boolean;
@@ -75,31 +75,31 @@ export namespace Parameter {
     onRemove?: (identifier: string) => void;
   }
 
-  type Number = Generic & {
+  type Number = IParameter & {
     type: "number";
     data: number;
     onUpdate?: (data: Number) => void;
   };
 
-  type Text = Generic & {
+  type Text = IParameter & {
     type: "text";
     data: string;
     onUpdate?: (data: Text) => void;
   };
 
-  type URL = Generic & {
+  type URL = IParameter & {
     type: "url";
     data: string;
     onUpdate?: (data: URL) => void;
   };
 
-  type Date = Generic & {
+  type Date = IParameter & {
     type: "date";
     data: string;
     onUpdate?: (data: Date) => void;
   };
 
-  type Entity = Generic & {
+  type Entity = IParameter & {
     type: "entity";
     data: string;
     onUpdate?: (data: Entity) => void;
@@ -116,7 +116,7 @@ export type LinkyProps = {
 };
 
 // Collection types
-export type Collection = {
+export type ICollection = {
   name: string;
   description: string;
   owner: string;
@@ -124,12 +124,12 @@ export type Collection = {
   entities: string[];
 };
 
-export type CollectionModel = Collection & {
+export type CollectionModel = ICollection & {
   _id: string;
 };
 
 // Entity types
-export type Entity = {
+export type IEntity = {
   name: string;
   created: string;
   owner: string;
@@ -142,7 +142,7 @@ export type Entity = {
   attributes: AttributeModel[];
 };
 
-export type EntityModel = Entity & {
+export type EntityModel = IEntity & {
   _id: string;
 };
 
@@ -157,11 +157,11 @@ export type EntityExport = {
   products: string;
 
   // Generic details
-  [k: string]: string;
+  [key: string]: string;
 }
 
 // Update types
-export type Update = {
+export type IUpdate = {
   timestamp: Date;
   type: "create" | "update" | "delete";
   details: string;
@@ -172,7 +172,7 @@ export type Update = {
   };
 };
 
-export type UpdateModel = Update & {
+export type UpdateModel = IUpdate & {
   _id: string;
 };
 
