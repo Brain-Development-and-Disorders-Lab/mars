@@ -25,9 +25,10 @@ const SearchBox = () => {
     let isEntity = false;
     getData(`/entities/${query}`).then((entity) => {
       isEntity = true;
+      setQuery("");
       onClose();
       navigate(`/entities/${entity._id}`);
-    }).finally(() => {
+    }).catch(() => {
       if (!isEntity) {
         // Update state
         setIsSearching(true);
@@ -61,6 +62,7 @@ const SearchBox = () => {
 
   // Basic handler to navigate to a result
   const handleResultClick = (id: string) => {
+    setQuery("");
     onClose();
     navigate(`/entities/${id}`);
   };
