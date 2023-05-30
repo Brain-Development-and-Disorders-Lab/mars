@@ -10,7 +10,7 @@ import "./styles/styles.css";
 import "@fontsource/roboto";
 
 // Custom components
-import { PageContainer } from "@components/PageContainer";
+import { Page } from "@components/Container";
 
 // Pages
 // Page type - View
@@ -53,7 +53,7 @@ export const App = (): ReactElement => {
         {!token && !DEVELOPER_MODE ? (
           <Login setToken={setToken} />
         ) : (
-          <PageContainer>
+          <Page>
             <Routes>
               <Route path="/" element={<Dashboard />} />
               <Route path="/create" element={<Create />} />
@@ -82,7 +82,7 @@ export const App = (): ReactElement => {
               <Route path="/invalid" element={<Invalid />} />
               <Route path="*" element={<Navigate to="/invalid" replace />} />
             </Routes>
-          </PageContainer>
+          </Page>
         )}
       </ChakraProvider>
     </BrowserRouter>

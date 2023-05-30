@@ -1,18 +1,20 @@
+// React
 import React, { ChangeEvent, Dispatch, SetStateAction, useEffect, useState } from "react";
-import { Button, Checkbox, Flex, Icon, Input, Link, Select, Spinner, Text, useToast } from "@chakra-ui/react";
-import { BsArrowUpRight, BsBox, BsCalendarWeek, BsGraphUp, BsLink45Deg, BsTextareaT } from "react-icons/bs";
+
+// Existing and custom components
+import { Button, Checkbox, Flex, Input, Link, Select, Spinner, Text, useToast } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
-
-import _ from "lodash";
-import dayjs from "dayjs";
-
-// Custom types and components
-import { EntityModel, Parameters } from "@types";
-import { DataTable } from "@components/DataTable";
+import DataTable from "@components/DataTable";
+import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 
-// Utility functions
+// Existing and custom types
+import { EntityModel, Parameters } from "@types";
+
+// Utility functions and libraries
 import { getData } from "@database/functions";
+import _ from "lodash";
+import dayjs from "dayjs";
 
 /**
  * Parameters component use to display a collection of Parameters and enable
@@ -183,7 +185,6 @@ const Parameters = (props: {
           return props.viewOnly ? (
             <Link href={value.toString()} color="dark-1" isExternal>
               {value}
-              <Icon as={BsArrowUpRight} mx='2px' />
             </Link>
           ) : (
             <Input
@@ -246,7 +247,7 @@ const Parameters = (props: {
         >
           {/* Buttons to add Parameters */}
           <Button
-            leftIcon={<Icon as={BsCalendarWeek} />}
+            leftIcon={<Icon name={"p_date"} />}
             onClick={() => {
               // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
               props.setParameters &&
@@ -265,7 +266,7 @@ const Parameters = (props: {
           </Button>
 
           <Button
-            leftIcon={<Icon as={BsTextareaT} />}
+            leftIcon={<Icon name={"p_text"} />}
             onClick={() => {
               // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
               props.setParameters &&
@@ -284,7 +285,7 @@ const Parameters = (props: {
           </Button>
 
           <Button
-            leftIcon={<Icon as={BsGraphUp} />}
+            leftIcon={<Icon name={"p_number"} />}
             onClick={() => {
               // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
               props.setParameters &&
@@ -303,7 +304,7 @@ const Parameters = (props: {
           </Button>
 
           <Button
-            leftIcon={<Icon as={BsLink45Deg} />}
+            leftIcon={<Icon name={"p_url"} />}
             onClick={() => {
               // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
               props.setParameters &&
@@ -322,7 +323,7 @@ const Parameters = (props: {
           </Button>
 
           <Button
-            leftIcon={<Icon as={BsBox} />}
+            leftIcon={<Icon name={"entity"} />}
             onClick={() => {
               // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
               props.setParameters &&

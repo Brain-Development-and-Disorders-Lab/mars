@@ -1,10 +1,18 @@
+// React
 import React, { useState } from "react";
-import { Button, Flex, Icon, Input, useToast, Text, Popover, PopoverTrigger, PopoverContent, PopoverArrow, PopoverCloseButton, PopoverHeader, PopoverBody, useDisclosure, Link, Spacer, VStack, StackDivider, PopoverFooter } from "@chakra-ui/react";
-import { SearchIcon } from "@chakra-ui/icons";
-import { getData, postData } from "@database/functions";
-import { useNavigate } from "react-router-dom";
+
+// Existing and custom components
+import { Button, Flex, Input, useToast, Text, Popover, PopoverTrigger, PopoverContent, PopoverArrow, PopoverCloseButton, PopoverHeader, PopoverBody, useDisclosure, Link, Spacer, VStack, StackDivider, PopoverFooter } from "@chakra-ui/react";
+import Icon from "@components/Icon";
+
+// Existing and custom types
 import { EntityModel } from "@types";
-import { BsArrowRight } from "react-icons/bs";
+
+// Routing and navigation
+import { useNavigate } from "react-router-dom";
+
+// Utility functions and libraries
+import { getData, postData } from "@database/functions";
 
 const SearchBox = () => {
   const [query, setQuery] = useState("");
@@ -86,7 +94,7 @@ const SearchBox = () => {
             />
 
             <Button
-              leftIcon={<Icon as={SearchIcon} />}
+              leftIcon={<Icon name={"search"} />}
               isDisabled={query === ""}
               onClick={handleClick}
             >
@@ -116,7 +124,7 @@ const SearchBox = () => {
                           <Link onClick={() => handleResultClick(result._id)}>
                             <Flex gap={"1"} direction={"row"} align={"center"}>
                               <Text>View</Text>
-                              <Icon as={BsArrowRight} />
+                              <Icon name={"a_right"} />
                             </Flex>
                           </Link>
                         </Flex>

@@ -9,7 +9,7 @@ import Icon from "@components/Icon";
 // Existing and custom types
 import { DataTableProps } from "@types";
 
-export const DataTable: FC<any> = (props: DataTableProps) => {
+const DataTable: FC<any> = (props: DataTableProps) => {
   // Table visibility state
   const [columnVisibility, setColumnVisibility] = useState(props.visibleColumns);
 
@@ -114,3 +114,5 @@ export const DataTable: FC<any> = (props: DataTableProps) => {
     </>
   );
 };
+
+export default DataTable;

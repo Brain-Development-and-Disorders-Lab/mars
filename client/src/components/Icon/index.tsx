@@ -3,7 +3,7 @@ import React from "react";
 
 // Existing components and icons
 import { Icon as ChakraIcon } from "@chakra-ui/react";
-import { BsArrowClockwise, BsBarChart, BsBox, BsCalendarWeek, BsCheck, BsChevronDoubleLeft, BsChevronDoubleRight, BsChevronDown, BsChevronLeft, BsChevronRight, BsChevronUp, BsExclamationOctagon, BsFillExclamationTriangleFill, BsGraphUp, BsGrid, BsInfoCircle, BsLink45Deg, BsList, BsPencilSquare, BsPlus, BsQuestionOctagon, BsSearch, BsTag, BsTextareaT, BsTrash, BsX } from "react-icons/bs";
+import { BsArrowClockwise, BsArrowRight, BsBarChart, BsBox, BsCalendarWeek, BsCheck, BsChevronDoubleLeft, BsChevronDoubleRight, BsChevronDown, BsChevronLeft, BsChevronRight, BsChevronUp, BsExclamationOctagon, BsFillExclamationTriangleFill, BsGraphUp, BsGrid, BsInfoCircle, BsLink45Deg, BsList, BsPencilSquare, BsPlus, BsQuestionOctagon, BsSearch, BsTag, BsTextareaT, BsTrash, BsX } from "react-icons/bs";
 
 // Custom types
 import { IconType } from "react-icons";
@@ -13,11 +13,16 @@ import _ from "lodash";
 
 // Define the icon set
 const SYSTEM_ICONS: {[k: string]: IconType} = {
+  // Default
   "unknown": BsQuestionOctagon,
+
+  // Locations
   "dashboard": BsBarChart,
   "entity": BsBox,
   "collection": BsGrid,
   "attribute": BsTag,
+
+  // Signal and action icons
   "check": BsCheck,
   "info": BsInfoCircle,
   "search": BsSearch,
@@ -29,10 +34,17 @@ const SYSTEM_ICONS: {[k: string]: IconType} = {
   "warning": BsFillExclamationTriangleFill,
   "exclamation": BsExclamationOctagon,
   "reload": BsArrowClockwise,
+
+  // Parameters
   "p_date": BsCalendarWeek,
   "p_text": BsTextareaT,
   "p_number": BsGraphUp,
   "p_url": BsLink45Deg,
+
+  // Arrows
+  "a_right": BsArrowRight,
+
+  // Chevrons
   "c_left": BsChevronLeft,
   "c_double_left": BsChevronDoubleLeft,
   "c_right": BsChevronRight,
