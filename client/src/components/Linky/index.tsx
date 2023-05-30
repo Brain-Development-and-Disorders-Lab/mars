@@ -1,12 +1,17 @@
+// React
 import React, { useEffect, useState } from "react";
+
+// Existing and custom components
 import { Button, Link, Spinner } from "@chakra-ui/react";
+
+// Existing and custom types
+import { LinkyProps } from "@types";
+
+// Routing and navigation
 import { useNavigate } from "react-router-dom";
 
-// Database and models
+// Utility functions and libraries
 import { getData } from "@database/functions";
-import {
-  LinkyProps
-} from "@types";
 
 const Linky = (props: LinkyProps) => {
   const navigate = useNavigate();

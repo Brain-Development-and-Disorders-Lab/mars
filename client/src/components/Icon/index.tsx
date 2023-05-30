@@ -3,7 +3,7 @@ import React from "react";
 
 // Existing components and icons
 import { Icon as ChakraIcon } from "@chakra-ui/react";
-import { BsArrowClockwise, BsBarChart, BsBox, BsCalendarWeek, BsCheck, BsChevronDoubleLeft, BsChevronDoubleRight, BsChevronDown, BsChevronLeft, BsChevronRight, BsChevronUp, BsExclamationOctagon, BsFillExclamationTriangleFill, BsGraphUp, BsGrid, BsInfoCircle, BsLink45Deg, BsPencilSquare, BsPlus, BsQuestionOctagon, BsTag, BsTextareaT, BsTrash, BsX } from "react-icons/bs";
+import { BsArrowClockwise, BsBarChart, BsBox, BsCalendarWeek, BsCheck, BsChevronDoubleLeft, BsChevronDoubleRight, BsChevronDown, BsChevronLeft, BsChevronRight, BsChevronUp, BsExclamationOctagon, BsFillExclamationTriangleFill, BsGraphUp, BsGrid, BsInfoCircle, BsLink45Deg, BsList, BsPencilSquare, BsPlus, BsQuestionOctagon, BsSearch, BsTag, BsTextareaT, BsTrash, BsX } from "react-icons/bs";
 
 // Custom types
 import { IconType } from "react-icons";
@@ -20,10 +20,12 @@ const SYSTEM_ICONS: {[k: string]: IconType} = {
   "attribute": BsTag,
   "check": BsCheck,
   "info": BsInfoCircle,
+  "search": BsSearch,
   "add": BsPlus,
   "edit": BsPencilSquare,
   "delete": BsTrash,
   "close": BsX,
+  "list": BsList,
   "warning": BsFillExclamationTriangleFill,
   "exclamation": BsExclamationOctagon,
   "reload": BsArrowClockwise,

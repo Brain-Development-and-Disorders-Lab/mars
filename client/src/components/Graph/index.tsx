@@ -14,7 +14,7 @@ import ReactFlow, {
   Edge,
 } from "reactflow";
 import "reactflow/dist/style.css";
-import { Loading } from "@components/Loading";
+import Loading from "@components/Loading";
 import Error from "@components/Error";
 import Icon from "@components/Icon";
 

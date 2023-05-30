@@ -12,7 +12,7 @@ import Icon from "@components/Icon";
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
 
-// Utility libraries
+// Utility functions and libraries
 import _ from "lodash";
 
 const Error = () => {
