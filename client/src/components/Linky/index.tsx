@@ -16,25 +16,28 @@ import { getData } from "@database/functions";
 const Linky = (props: LinkyProps) => {
   const navigate = useNavigate();
 
-  const [linkIsValid, setLinkIsValid] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [useFallback, setUseFallback] = useState(false);
   const [linkLabel, setLinkLabel] = useState("Invalid");
 
   useEffect(() => {
     getData(`/${props.type}/${props.id}`)
       .then((value) => {
-        setLinkIsValid(true);
         setLinkLabel(value.name);
       })
       .catch((_error) => {
-        setLinkIsValid(false);
         if (props.fallback) {
+          setUseFallback(true);
           setLinkLabel(props.fallback);
         }
-      });
+      })
+      .finally(() => {
+        setIsLoaded(true);
+      })
   }, []);
 
   const onClickHandler = () => {
-    if (linkIsValid) navigate(`/${props.type}/${props.id}`);
+    if (isLoaded && !useFallback) navigate(`/${props.type}/${props.id}`);
   };
 
   return (
@@ -44,7 +47,7 @@ const Linky = (props: LinkyProps) => {
       as={Link}
       onClick={onClickHandler}
     >
-      {linkIsValid ? linkLabel : <Spinner size={"sm"} />}
+      {isLoaded ? linkLabel : <Spinner size={"sm"} />}
     </Button>
   );
 };
