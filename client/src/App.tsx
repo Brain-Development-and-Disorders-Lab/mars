@@ -47,7 +47,7 @@ import { theme } from "./styles/theme";
  */
 const App = (): ReactElement => {
   // Authentication token
-  const [ token, setToken ] = useToken();
+  const [token, setToken] = useToken();
 
   return (
     <BrowserRouter>
@@ -71,7 +71,6 @@ const App = (): ReactElement => {
               <Route path="collections">
                 <Route path=":id" element={<Collection />} />
               </Route>
-
 
               {/* Attributes routes */}
               <Route path="/attributes" element={<Attributes />} />

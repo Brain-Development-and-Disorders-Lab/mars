@@ -53,7 +53,9 @@ const Attribute = () => {
 
   const [attributeData, setAttributeData] = useState({} as AttributeModel);
   const [attributeDescription, setAttributeDescription] = useState("");
-  const [attributeParameters, setAttributeParameters] = useState([] as Parameters[]);
+  const [attributeParameters, setAttributeParameters] = useState(
+    [] as Parameters[]
+  );
 
   useEffect(() => {
     // Populate Attribute data
@@ -62,7 +64,8 @@ const Attribute = () => {
         setAttributeData(response);
         setAttributeDescription(response.description);
         setAttributeParameters(response.parameters);
-      }).catch((_error) => {
+      })
+      .catch((_error) => {
         toast({
           title: "Error",
           status: "error",
@@ -72,7 +75,8 @@ const Attribute = () => {
           isClosable: true,
         });
         setIsError(true);
-      }).finally(() => {
+      })
+      .finally(() => {
         setIsLoaded(true);
       });
   }, [id, isLoaded]);
@@ -89,7 +93,8 @@ const Attribute = () => {
           position: "bottom-right",
           isClosable: true,
         });
-      }).catch(() => {
+      })
+      .catch(() => {
         toast({
           title: "Error",
           description: `An error occurred when deleting Attribute "${attributeData.name}".`,
@@ -98,7 +103,8 @@ const Attribute = () => {
           position: "bottom-right",
           isClosable: true,
         });
-      }).finally(() => {
+      })
+      .finally(() => {
         setEditing(false);
         navigate("/attributes");
       });
@@ -126,7 +132,8 @@ const Attribute = () => {
             position: "bottom-right",
             isClosable: true,
           });
-        }).catch(() => {
+        })
+        .catch(() => {
           toast({
             title: "Error",
             description: "An error occurred when saving updates.",
@@ -135,7 +142,8 @@ const Attribute = () => {
             position: "bottom-right",
             isClosable: true,
           });
-        }).finally(() => {
+        })
+        .finally(() => {
           setEditing(false);
         });
     } else {
@@ -144,101 +152,121 @@ const Attribute = () => {
   };
 
   return (
-  <Content vertical={isError || !isLoaded}>
-    {isLoaded ? (
-      isError ? (
-        <Error />
-      ) : (
-        <Flex direction={"column"}>
-          <Flex
-            p={"2"}
-            gap={"4"}
-            direction={"row"}
-            justify={"space-between"}
-            align={"center"}
-            wrap={"wrap"}
-          >
-            <Flex align={"center"} gap={"4"} shadow={"lg"} p={"2"} border={"2px"} rounded={"md"} bg={"white"}>
-              <Icon name={"attribute"} size={"lg"} />
-              <Heading fontWeight={"semibold"}>{attributeData.name}</Heading>
-            </Flex>
-
-            {/* Buttons */}
-            <Flex direction={"row"} gap={"4"} wrap={"wrap"} bg={"white"} p={"4"} rounded={"md"}>
-              {editing &&
-                <Popover>
-                  <PopoverTrigger>
-                    <Button colorScheme={"red"} rightIcon={<Icon name={"delete"} />}>
-                      Delete
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent>
-                    <PopoverArrow />
-                    <PopoverCloseButton />
-                    <PopoverHeader>Confirmation</PopoverHeader>
-                    <PopoverBody>
-                      Are you sure you want to delete this Attribute? It will not be removed from any existing Entities.
-                      <Flex direction={"row"} p={"2"} justify={"center"}>
-                        <Button
-                          colorScheme={"green"}
-                          rightIcon={<Icon name={"check"} />}
-                          onClick={handleDeleteClick}
-                        >
-                          Confirm
-                        </Button>
-                      </Flex>
-                    </PopoverBody>
-                  </PopoverContent>
-                </Popover>
-              }
-              <Button
-                colorScheme={editing ? "green" : "gray"}
-                rightIcon={
-                  editing ? <Icon name={"check"} /> : <Icon name={"edit"} />
-                }
-                onClick={handleEditClick}
-              >
-                {editing ? "Done" : "Edit"}
-              </Button>
-            </Flex>
-          </Flex>
-
-          <Flex direction={"row"} gap={"4"} p={"2"} wrap={"wrap"}>
+    <Content vertical={isError || !isLoaded}>
+      {isLoaded ? (
+        isError ? (
+          <Error />
+        ) : (
+          <Flex direction={"column"}>
             <Flex
-              direction={"column"}
-              p={"4"}
-              gap={"2"}
-              grow={"1"}
-              h={"fit-content"}
-              bg={"white"}
-              rounded={"md"}
+              p={"2"}
+              gap={"4"}
+              direction={"row"}
+              justify={"space-between"}
+              align={"center"}
+              wrap={"wrap"}
             >
-              {/* Details */}
-              <Heading fontWeight={"semibold"} size={"lg"}>Details</Heading>
+              <Flex
+                align={"center"}
+                gap={"4"}
+                shadow={"lg"}
+                p={"2"}
+                border={"2px"}
+                rounded={"md"}
+                bg={"white"}
+              >
+                <Icon name={"attribute"} size={"lg"} />
+                <Heading fontWeight={"semibold"}>{attributeData.name}</Heading>
+              </Flex>
 
-              <TableContainer>
-                <Table variant={"simple"} colorScheme={"blackAlpha"}>
-                  <Thead>
-                    <Tr>
-                      <Th>Field</Th>
-                      <Th>Value</Th>
-                    </Tr>
-                  </Thead>
-                  <Tbody>
-                    <Tr>
-                      <Td>Description</Td>
-                      <Td>
-                        {_.isEqual(attributeData.description, "") ? (
-                          <Tag
-                            size={"md"}
-                            key={`warn-${attributeData._id}`}
-                            colorScheme={"orange"}
+              {/* Buttons */}
+              <Flex
+                direction={"row"}
+                gap={"4"}
+                wrap={"wrap"}
+                bg={"white"}
+                p={"4"}
+                rounded={"md"}
+              >
+                {editing && (
+                  <Popover>
+                    <PopoverTrigger>
+                      <Button
+                        colorScheme={"red"}
+                        rightIcon={<Icon name={"delete"} />}
+                      >
+                        Delete
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent>
+                      <PopoverArrow />
+                      <PopoverCloseButton />
+                      <PopoverHeader>Confirmation</PopoverHeader>
+                      <PopoverBody>
+                        Are you sure you want to delete this Attribute? It will
+                        not be removed from any existing Entities.
+                        <Flex direction={"row"} p={"2"} justify={"center"}>
+                          <Button
+                            colorScheme={"green"}
+                            rightIcon={<Icon name={"check"} />}
+                            onClick={handleDeleteClick}
                           >
-                            <TagLabel>Not specified</TagLabel>
-                            <Icon name={"warning"} />
-                          </Tag>
-                        ) : (
-                          editing ? (
+                            Confirm
+                          </Button>
+                        </Flex>
+                      </PopoverBody>
+                    </PopoverContent>
+                  </Popover>
+                )}
+                <Button
+                  colorScheme={editing ? "green" : "gray"}
+                  rightIcon={
+                    editing ? <Icon name={"check"} /> : <Icon name={"edit"} />
+                  }
+                  onClick={handleEditClick}
+                >
+                  {editing ? "Done" : "Edit"}
+                </Button>
+              </Flex>
+            </Flex>
+
+            <Flex direction={"row"} gap={"4"} p={"2"} wrap={"wrap"}>
+              <Flex
+                direction={"column"}
+                p={"4"}
+                gap={"2"}
+                grow={"1"}
+                h={"fit-content"}
+                bg={"white"}
+                rounded={"md"}
+              >
+                {/* Details */}
+                <Heading fontWeight={"semibold"} size={"lg"}>
+                  Details
+                </Heading>
+
+                <TableContainer>
+                  <Table variant={"simple"} colorScheme={"blackAlpha"}>
+                    <Thead>
+                      <Tr>
+                        <Th>Field</Th>
+                        <Th>Value</Th>
+                      </Tr>
+                    </Thead>
+                    <Tbody>
+                      <Tr>
+                        <Td>Description</Td>
+                        <Td>
+                          {_.isEqual(attributeData.description, "") ? (
+                            <Tag
+                              size={"md"}
+                              key={`warn-${attributeData._id}`}
+                              colorScheme={"orange"}
+                            >
+                              <TagLabel>Not specified</TagLabel>
+                              <Icon name={"warning"} />
+                            </Tag>
+                          ) : editing ? (
                             <Textarea
                               value={attributeDescription}
                               onChange={(event) => {
@@ -248,38 +276,44 @@ const Attribute = () => {
                             />
                           ) : (
                             <Text>{attributeDescription}</Text>
-                          )
-                        )}
-                      </Td>
-                    </Tr>
-                  </Tbody>
-                </Table>
-              </TableContainer>
-            </Flex>
-            <Flex
-              direction={"column"}
-              p={"4"}
-              gap={"2"}
-              grow={"1"}
-              h={"fit-content"}
-              bg={"white"}
-              rounded={"md"}
-            >
-              <Heading fontWeight={"semibold"} size={"lg"}>Parameters</Heading>
+                          )}
+                        </Td>
+                      </Tr>
+                    </Tbody>
+                  </Table>
+                </TableContainer>
+              </Flex>
+              <Flex
+                direction={"column"}
+                p={"4"}
+                gap={"2"}
+                grow={"1"}
+                h={"fit-content"}
+                bg={"white"}
+                rounded={"md"}
+              >
+                <Heading fontWeight={"semibold"} size={"lg"}>
+                  Parameters
+                </Heading>
 
-              {attributeData.parameters && attributeData.parameters.length > 0 ? (
-                <ParameterGroup parameters={attributeParameters} viewOnly={!editing} setParameters={setAttributeParameters} />
-              ) : (
-                <Text>No parameters.</Text>
-              )}
+                {attributeData.parameters &&
+                attributeData.parameters.length > 0 ? (
+                  <ParameterGroup
+                    parameters={attributeParameters}
+                    viewOnly={!editing}
+                    setParameters={setAttributeParameters}
+                  />
+                ) : (
+                  <Text>No parameters.</Text>
+                )}
+              </Flex>
             </Flex>
           </Flex>
-        </Flex>
-      )
-    ) : (
-      <Loading />
-    )}
-  </Content>
+        )
+      ) : (
+        <Loading />
+      )}
+    </Content>
   );
 };
 

@@ -1,8 +1,24 @@
 // React
-import React, { ChangeEvent, Dispatch, SetStateAction, useEffect, useState } from "react";
+import React, {
+  ChangeEvent,
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useState,
+} from "react";
 
 // Existing and custom components
-import { Button, Checkbox, Flex, Input, Link, Select, Spinner, Text, useToast } from "@chakra-ui/react";
+import {
+  Button,
+  Checkbox,
+  Flex,
+  Input,
+  Link,
+  Select,
+  Spinner,
+  Text,
+  useToast,
+} from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
 import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
@@ -32,21 +48,24 @@ const Parameters = (props: {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    getData(`/entities`).then((value) => {
-      setEntities(value);
-      setIsLoaded(true);
-    }).catch((_error) => {
-      toast({
-        title: "Error",
-        description: "Could not retrieve Entities.",
-        status: "error",
-        duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
+    getData(`/entities`)
+      .then((value) => {
+        setEntities(value);
+        setIsLoaded(true);
+      })
+      .catch((_error) => {
+        toast({
+          title: "Error",
+          description: "Could not retrieve Entities.",
+          status: "error",
+          duration: 4000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+      })
+      .finally(() => {
+        setIsLoaded(true);
       });
-    }).finally(() => {
-      setIsLoaded(true);
-    });
     return;
   }, []);
 
@@ -108,9 +127,7 @@ const Parameters = (props: {
     },
     columnHelper.accessor("type", {
       cell: ({ getValue }) => {
-        return (
-          <Text>{getValue()}</Text>
-        );
+        return <Text>{getValue()}</Text>;
       },
     }),
     columnHelper.accessor("name", {
@@ -137,13 +154,7 @@ const Parameters = (props: {
           }
         };
 
-        return (
-          <Input
-            value={value}
-            onChange={onChange}
-            onBlur={onBlur}
-          />
-        );
+        return <Input value={value} onChange={onChange} onBlur={onBlur} />;
       },
       header: "Name",
     }),
@@ -187,47 +198,36 @@ const Parameters = (props: {
               {value}
             </Link>
           ) : (
-            <Input
-              value={value}
-              onChange={onChange}
-              onBlur={onBlur}
-            />
+            <Input value={value} onChange={onChange} onBlur={onBlur} />
           );
         } else if (_.isEqual(type, "entity")) {
           return props.viewOnly ? (
             <Linky type="entities" id={value.toString()} />
-          ) : (
-            // Show a spinner in place while loading Entity data
-            isLoaded ? (
-              <Select
-                title="Select Entity"
-                value={value}
-                placeholder={"Select Entity"}
-                disabled={props.viewOnly}
-                onChange={(event) => {
-                  setValue(event.target.value.toString());
-                }}
-              >
-                {isLoaded &&
-                  entities.map((entity) => {
-                    return (
-                      <option key={entity._id} value={entity._id}>
-                        {entity.name}
-                      </option>
-                    );
-                  })}
-              </Select>
-            ) : (
-              <Spinner size={"sm"} />
-            ));
-        } else {
-          return (
-            <Input
+          ) : // Show a spinner in place while loading Entity data
+          isLoaded ? (
+            <Select
+              title="Select Entity"
               value={value}
-              onChange={onChange}
-              onBlur={onBlur}
-            />
+              placeholder={"Select Entity"}
+              disabled={props.viewOnly}
+              onChange={(event) => {
+                setValue(event.target.value.toString());
+              }}
+            >
+              {isLoaded &&
+                entities.map((entity) => {
+                  return (
+                    <option key={entity._id} value={entity._id}>
+                      {entity.name}
+                    </option>
+                  );
+                })}
+            </Select>
+          ) : (
+            <Spinner size={"sm"} />
           );
+        } else {
+          return <Input value={value} onChange={onChange} onBlur={onBlur} />;
         }
       },
       header: "Data",
@@ -344,12 +344,7 @@ const Parameters = (props: {
       )}
 
       {/* Parameter List */}
-      <Flex
-        p={["1", "2"]}
-        direction={"column"}
-        gap={"1"}
-        w={"100%"}
-      >
+      <Flex p={["1", "2"]} direction={"column"} gap={"1"} w={"100%"}>
         <DataTable columns={columns} data={data} />
       </Flex>
     </Flex>

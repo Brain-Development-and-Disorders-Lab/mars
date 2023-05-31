@@ -20,15 +20,17 @@ const Linky = (props: LinkyProps) => {
   const [linkLabel, setLinkLabel] = useState("Invalid");
 
   useEffect(() => {
-    getData(`/${props.type}/${props.id}`).then((value) => {
-      setLinkIsValid(true);
-      setLinkLabel(value.name);
-    }).catch((_error) => {
-      setLinkIsValid(false);
-      if (props.fallback) {
-        setLinkLabel(props.fallback);
-      }
-    });
+    getData(`/${props.type}/${props.id}`)
+      .then((value) => {
+        setLinkIsValid(true);
+        setLinkLabel(value.name);
+      })
+      .catch((_error) => {
+        setLinkIsValid(false);
+        if (props.fallback) {
+          setLinkLabel(props.fallback);
+        }
+      });
   }, []);
 
   const onClickHandler = () => {
@@ -42,7 +44,7 @@ const Linky = (props: LinkyProps) => {
       as={Link}
       onClick={onClickHandler}
     >
-      {linkIsValid ? linkLabel : <Spinner size={"sm"}/>}
+      {linkIsValid ? linkLabel : <Spinner size={"sm"} />}
     </Button>
   );
 };

@@ -2,11 +2,7 @@
 import React from "react";
 
 // Existing and custom components
-import {
-  Button,
-  Flex,
-  Heading,
-} from "@chakra-ui/react";
+import { Button, Flex, Heading } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 
 // Routing and navigation

@@ -4,7 +4,10 @@ import _ from "lodash";
 // Custom types
 import { IAttribute, Parameters } from "@types";
 
-export const validateParameters = (parameters: Parameters[], allowEmptyValues=false) => {
+export const validateParameters = (
+  parameters: Parameters[],
+  allowEmptyValues = false
+) => {
   for (let parameter of parameters) {
     // Check the name of the parameter
     if (_.isEqual(parameter.name, "")) {

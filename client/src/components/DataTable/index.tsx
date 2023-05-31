@@ -2,8 +2,26 @@
 import React, { FC, useEffect, useState } from "react";
 
 // Existing and custom components
-import { Flex, IconButton, Select, Table, TableContainer, Tbody, Td, Th, Thead, Tr, Text } from "@chakra-ui/react";
-import { flexRender, getPaginationRowModel, useReactTable, getCoreRowModel, getSortedRowModel } from "@tanstack/react-table";
+import {
+  Flex,
+  IconButton,
+  Select,
+  Table,
+  TableContainer,
+  Tbody,
+  Td,
+  Th,
+  Thead,
+  Tr,
+  Text,
+} from "@chakra-ui/react";
+import {
+  flexRender,
+  getPaginationRowModel,
+  useReactTable,
+  getCoreRowModel,
+  getSortedRowModel,
+} from "@tanstack/react-table";
 import Icon from "@components/Icon";
 
 // Existing and custom types
@@ -11,7 +29,9 @@ import { DataTableProps } from "@types";
 
 const DataTable: FC<any> = (props: DataTableProps) => {
   // Table visibility state
-  const [columnVisibility, setColumnVisibility] = useState(props.visibleColumns);
+  const [columnVisibility, setColumnVisibility] = useState(
+    props.visibleColumns
+  );
 
   // Create ReactTable instance
   const table = useReactTable({
@@ -34,7 +54,7 @@ const DataTable: FC<any> = (props: DataTableProps) => {
   // Effect to update the column visibility
   useEffect(() => {
     setColumnVisibility(props.visibleColumns);
-  }, [props.visibleColumns])
+  }, [props.visibleColumns]);
 
   return (
     <>
@@ -77,7 +97,10 @@ const DataTable: FC<any> = (props: DataTableProps) => {
                   const meta: any = cell.column.columnDef.meta;
                   return (
                     <Td key={cell.id} isNumeric={meta?.isNumeric}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
                     </Td>
                   );
                 })}
@@ -86,31 +109,56 @@ const DataTable: FC<any> = (props: DataTableProps) => {
           </Tbody>
         </Table>
       </TableContainer>
-      {!props.hideControls && <Flex direction={"row"} gap={"4"} justify={"space-between"} w={"100%"}>
-        <Flex direction={"row"} gap={"4"} align={"center"}>
-          <IconButton icon={<Icon name={"c_double_left"} />} aria-label="first page" onClick={() => table.setPageIndex(0)} disabled={!table.getCanPreviousPage()}/>
-          <IconButton icon={<Icon name={"c_left"} />} aria-label="previous page" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}/>
-          <Text as={"b"}>{table.getState().pagination.pageIndex + 1} of{' '}{table.getPageCount()}</Text>
-          <IconButton icon={<Icon name={"c_right"} />} aria-label="next page" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}/>
-          <IconButton icon={<Icon name={"c_double_right"} />} aria-label="last page" onClick={() => table.setPageIndex(table.getPageCount() - 1)} disabled={!table.getCanNextPage()}/>
-        </Flex>
-        <Flex>
-          <Select
-            value={table.getState().pagination.pageSize}
-            onChange={(event) => {
+      {!props.hideControls && (
+        <Flex direction={"row"} gap={"4"} justify={"space-between"} w={"100%"}>
+          <Flex direction={"row"} gap={"4"} align={"center"}>
+            <IconButton
+              icon={<Icon name={"c_double_left"} />}
+              aria-label="first page"
+              onClick={() => table.setPageIndex(0)}
+              disabled={!table.getCanPreviousPage()}
+            />
+            <IconButton
+              icon={<Icon name={"c_left"} />}
+              aria-label="previous page"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+            />
+            <Text as={"b"}>
+              {table.getState().pagination.pageIndex + 1} of{" "}
+              {table.getPageCount()}
+            </Text>
+            <IconButton
+              icon={<Icon name={"c_right"} />}
+              aria-label="next page"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            />
+            <IconButton
+              icon={<Icon name={"c_double_right"} />}
+              aria-label="last page"
+              onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+              disabled={!table.getCanNextPage()}
+            />
+          </Flex>
+          <Flex>
+            <Select
+              value={table.getState().pagination.pageSize}
+              onChange={(event) => {
                 table.setPageSize(Number(event.target.value));
-            }}
-          >
-            {[5, 10, 20].map((size) => {
-              return (
-                <option key={size} value={size}>
-                  Show {size}
-                </option>
-              );
-            })}
-          </Select>
+              }}
+            >
+              {[5, 10, 20].map((size) => {
+                return (
+                  <option key={size} value={size}>
+                    Show {size}
+                  </option>
+                );
+              })}
+            </Select>
+          </Flex>
         </Flex>
-      </Flex>}
+      )}
     </>
   );
 };

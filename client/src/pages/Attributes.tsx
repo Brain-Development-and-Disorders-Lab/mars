@@ -47,7 +47,8 @@ const Attributes = () => {
       .then((value) => {
         setAttributesData(value);
         setIsLoaded(true);
-      }).catch((_error) => {
+      })
+      .catch((_error) => {
         toast({
           title: "Error",
           status: "error",
@@ -57,7 +58,8 @@ const Attributes = () => {
           isClosable: true,
         });
         setIsError(true);
-      }).finally(() => {
+      })
+      .finally(() => {
         setIsLoaded(true);
       });
   }, []);
@@ -131,7 +133,9 @@ const Attributes = () => {
                                   text={"Not specified"}
                                 />
                               ) : (
-                                <Text noOfLines={2}>{attribute.description}</Text>
+                                <Text noOfLines={2}>
+                                  {attribute.description}
+                                </Text>
                               )}
                             </Td>
                             <Td>

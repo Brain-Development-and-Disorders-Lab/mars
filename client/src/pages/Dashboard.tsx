@@ -54,7 +54,11 @@ const Dashboard = () => {
 
   // Effect to adjust column visibility
   useEffect(() => {
-    if (_.isEqual(breakpoint, "sm") || _.isEqual(breakpoint, "base") || _.isUndefined(breakpoint)) {
+    if (
+      _.isEqual(breakpoint, "sm") ||
+      _.isEqual(breakpoint, "base") ||
+      _.isUndefined(breakpoint)
+    ) {
       setVisibleColumns({ description: false });
     } else {
       setVisibleColumns({});
@@ -66,7 +70,8 @@ const Dashboard = () => {
     getData(`/entities`)
       .then((result) => {
         setEntityData(result.reverse());
-      }).catch((_error) => {
+      })
+      .catch((_error) => {
         toast({
           title: "Error",
           status: "error",
@@ -76,49 +81,56 @@ const Dashboard = () => {
           isClosable: true,
         });
         setIsError(true);
-      }).finally(() => {
+      })
+      .finally(() => {
         setIsLoaded(true);
       });
   }, []);
 
   // Get all Collections
   useEffect(() => {
-    getData(`/collections`).then((value) => {
-      setCollectionData(value.reverse());
-      setIsLoaded(true);
-    }).catch((_error) => {
-      toast({
-        title: "Error",
-        status: "error",
-        description: "Could not retrieve Collections data.",
-        duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
+    getData(`/collections`)
+      .then((value) => {
+        setCollectionData(value.reverse());
+        setIsLoaded(true);
+      })
+      .catch((_error) => {
+        toast({
+          title: "Error",
+          status: "error",
+          description: "Could not retrieve Collections data.",
+          duration: 4000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+        setIsError(true);
+      })
+      .finally(() => {
+        setIsLoaded(true);
       });
-      setIsError(true);
-    }).finally(() => {
-      setIsLoaded(true);
-    });
   }, []);
 
   // Get all Updates
   useEffect(() => {
-    getData(`/updates`).then((value) => {
-      setUpdateData(value.reverse());
-      setIsLoaded(true);
-    }).catch((_error) => {
-      toast({
-        title: "Error",
-        status: "error",
-        description: "Could not retrieve Updates data.",
-        duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
+    getData(`/updates`)
+      .then((value) => {
+        setUpdateData(value.reverse());
+        setIsLoaded(true);
+      })
+      .catch((_error) => {
+        toast({
+          title: "Error",
+          status: "error",
+          description: "Could not retrieve Updates data.",
+          duration: 4000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+        setIsError(true);
+      })
+      .finally(() => {
+        setIsLoaded(true);
       });
-      setIsError(true);
-    }).finally(() => {
-      setIsLoaded(true);
-    });
   }, []);
 
   // Configure Entity table
@@ -131,9 +143,7 @@ const Dashboard = () => {
     }),
     entityTableColumnHelper.accessor("description", {
       cell: (info) => {
-        return (
-          <Text noOfLines={1}>{info.getValue()}</Text>
-        );
+        return <Text noOfLines={1}>{info.getValue()}</Text>;
       },
       header: "Description",
       enableHiding: true,
@@ -213,7 +223,11 @@ const Dashboard = () => {
                 gap={"2"}
               >
                 {/* Collections heading */}
-                <Flex direction={"row"} justify={"space-between"} align={"center"}>
+                <Flex
+                  direction={"row"}
+                  justify={"space-between"}
+                  align={"center"}
+                >
                   <Flex align={"center"} gap={"4"} p={"2"}>
                     <Icon name={"collection"} size={"lg"} />
                     <Heading fontWeight={"semibold"}>Collections</Heading>
@@ -222,7 +236,12 @@ const Dashboard = () => {
 
                 {/* Collections table */}
                 {isLoaded && collectionData.length > 0 ? (
-                  <DataTable columns={collectionTableColumns} data={collectionTableData} visibleColumns={visibleColumns} hideControls />
+                  <DataTable
+                    columns={collectionTableColumns}
+                    data={collectionTableData}
+                    visibleColumns={visibleColumns}
+                    hideControls
+                  />
                 ) : (
                   <Text>There are no Collections to display.</Text>
                 )}
@@ -251,7 +270,11 @@ const Dashboard = () => {
                 gap={"2"}
               >
                 {/* Entities heading */}
-                <Flex direction={"row"} justify={"space-between"} align={"center"}>
+                <Flex
+                  direction={"row"}
+                  justify={"space-between"}
+                  align={"center"}
+                >
                   <Flex align={"center"} gap={"4"} p={"2"}>
                     <Icon name={"entity"} size={"lg"} />
                     <Heading fontWeight={"semibold"}>Entities</Heading>
@@ -260,7 +283,12 @@ const Dashboard = () => {
 
                 {/* Entities table */}
                 {isLoaded && entityData.length > 0 ? (
-                  <DataTable columns={entityTableColumns} data={entityTableData} visibleColumns={visibleColumns} hideControls />
+                  <DataTable
+                    columns={entityTableColumns}
+                    data={entityTableData}
+                    visibleColumns={visibleColumns}
+                    hideControls
+                  />
                 ) : (
                   <Text>There are no Entities to display.</Text>
                 )}
@@ -302,7 +330,9 @@ const Dashboard = () => {
                     updateData.slice(0, 10).map((update) => {
                       // Configure the badge
                       let operationBadgeColor = "green.400";
-                      let operationIcon = <Icon name={"entity"} color={"white"} />;
+                      let operationIcon = (
+                        <Icon name={"entity"} color={"white"} />
+                      );
 
                       switch (update.type) {
                         case "create":
@@ -311,11 +341,15 @@ const Dashboard = () => {
                           break;
                         case "update":
                           operationBadgeColor = "blue.400";
-                          operationIcon = <Icon name={"edit"} color={"white"} />;
+                          operationIcon = (
+                            <Icon name={"edit"} color={"white"} />
+                          );
                           break;
                         case "delete":
                           operationBadgeColor = "red.400";
-                          operationIcon = <Icon name={"delete"} color={"white"} />;
+                          operationIcon = (
+                            <Icon name={"delete"} color={"white"} />
+                          );
                           break;
                       }
 
@@ -333,17 +367,29 @@ const Dashboard = () => {
                             border={"2px"}
                             borderColor={"gray.100"}
                           >
-                            <Flex rounded={"full"} bg={operationBadgeColor} p={"1.5"}>
+                            <Flex
+                              rounded={"full"}
+                              bg={operationBadgeColor}
+                              p={"1.5"}
+                            >
                               {operationIcon}
                             </Flex>
 
-                            <Text display={{ base: "none", sm: "block" }}>{update.details}</Text>
+                            <Text display={{ base: "none", sm: "block" }}>
+                              {update.details}
+                            </Text>
 
-                            <Linky id={update.target.id} type={update.target.type} fallback={update.target.name} />
+                            <Linky
+                              id={update.target.id}
+                              type={update.target.type}
+                              fallback={update.target.name}
+                            />
 
                             <Spacer />
 
-                            <Text color={"gray.400"}>{dayjs(update.timestamp).fromNow()}</Text>
+                            <Text color={"gray.400"}>
+                              {dayjs(update.timestamp).fromNow()}
+                            </Text>
                           </Flex>
                         </ListItem>
                       );

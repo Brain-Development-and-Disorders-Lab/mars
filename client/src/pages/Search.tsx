@@ -1,5 +1,7 @@
 // React
 import React, { useState } from "react";
+
+// Existing and custom components
 import {
   Button,
   Flex,
@@ -55,33 +57,37 @@ const Search = () => {
   const runSearch = () => {
     // Check if an ID has been entered
     let isEntity = false;
-    getData(`/entities/${query}`).then((entity) => {
-      isEntity = true;
-      navigate(`/entities/${entity._id}`);
-    }).catch(() => {
-      if (!isEntity) {
-        // Update state
-        setIsSearching(true);
-        setHasSearched(true);
+    getData(`/entities/${query}`)
+      .then((entity) => {
+        isEntity = true;
+        navigate(`/entities/${entity._id}`);
+      })
+      .catch(() => {
+        if (!isEntity) {
+          // Update state
+          setIsSearching(true);
+          setHasSearched(true);
 
-        postData(`/search`, { query: query })
-          .then((value) => {
-            setResults(value);
-          }).catch((_error) => {
-            toast({
-              title: "Error",
-              status: "error",
-              description: "Could not get search results.",
-              duration: 4000,
-              position: "bottom-right",
-              isClosable: true,
+          postData(`/search`, { query: query })
+            .then((value) => {
+              setResults(value);
+            })
+            .catch((_error) => {
+              toast({
+                title: "Error",
+                status: "error",
+                description: "Could not get search results.",
+                duration: 4000,
+                position: "bottom-right",
+                isClosable: true,
+              });
+              setIsError(true);
+            })
+            .finally(() => {
+              setIsSearching(false);
             });
-            setIsError(true);
-          }).finally(() => {
-            setIsSearching(false);
-          });
-      }
-    });
+        }
+      });
   };
 
   return (
@@ -152,8 +158,12 @@ const Search = () => {
                     <Thead>
                       <Tr>
                         <Th>Identifier</Th>
-                        <Th display={{ base: "none", sm: "table-cell" }}>Created</Th>
-                        <Th display={{ base: "none", sm: "table-cell" }}>Owner</Th>
+                        <Th display={{ base: "none", sm: "table-cell" }}>
+                          Created
+                        </Th>
+                        <Th display={{ base: "none", sm: "table-cell" }}>
+                          Owner
+                        </Th>
                         <Th></Th>
                       </Tr>
                     </Thead>
@@ -164,8 +174,12 @@ const Search = () => {
                           return (
                             <Tr key={result._id}>
                               <Td>{result.name}</Td>
-                              <Td display={{ base: "none", sm: "table-cell" }}>{new Date(result.created).toDateString()}</Td>
-                              <Td display={{ base: "none", sm: "table-cell" }}>{result.owner}</Td>
+                              <Td display={{ base: "none", sm: "table-cell" }}>
+                                {new Date(result.created).toDateString()}
+                              </Td>
+                              <Td display={{ base: "none", sm: "table-cell" }}>
+                                {result.owner}
+                              </Td>
                               <Td>
                                 <Flex justify={"right"}>
                                   <Button
@@ -197,20 +211,20 @@ const Search = () => {
               <ModalCloseButton />
               <ModalBody>
                 <Text>
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-                  eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
+                  do eiusmod tempor incididunt ut labore et dolore magna aliqua.
                 </Text>
                 <Text>
-                  Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris
-                  nisi ut aliquip ex ea commodo consequat.
+                  Ut enim ad minim veniam, quis nostrud exercitation ullamco
+                  laboris nisi ut aliquip ex ea commodo consequat.
                 </Text>
                 <Text>
                   Duis aute irure dolor in reprehenderit in voluptate velit esse
                   cillum dolore eu fugiat nulla pariatur.
                 </Text>
                 <Text>
-                  Excepteur sint occaecat cupidatat non proident, sunt in culpa qui
-                  officia deserunt mollit anim id est laborum.
+                  Excepteur sint occaecat cupidatat non proident, sunt in culpa
+                  qui officia deserunt mollit anim id est laborum.
                 </Text>
               </ModalBody>
             </ModalContent>

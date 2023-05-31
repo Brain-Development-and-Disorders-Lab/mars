@@ -56,7 +56,12 @@ import Loading from "@components/Loading";
 import ParameterGroup from "@components/ParameterGroup";
 
 // Existing and custom types
-import { AttributeModel, CollectionModel, EntityModel, Parameters } from "@types";
+import {
+  AttributeModel,
+  CollectionModel,
+  EntityModel,
+  Parameters,
+} from "@types";
 
 // Utility functions and libraries
 import { deleteData, getData, postData } from "src/database/functions";
@@ -110,16 +115,26 @@ const Entity = () => {
   const [selectedOrigins, setSelectedOrigins] = useState([] as string[]);
 
   // Adding Attributes to existing Entity
-  const { isOpen: isAddAttributesOpen, onOpen: onAddAttributesOpen, onClose: onAddAttributesClose } = useDisclosure();
+  const {
+    isOpen: isAddAttributesOpen,
+    onOpen: onAddAttributesOpen,
+    onClose: onAddAttributesClose,
+  } = useDisclosure();
   const [attributeName, setAttributeName] = useState("");
   const [attributeDescription, setAttributeDescription] = useState("");
-  const [attributeParameters, setAttributeParameters] = useState([] as Parameters[]);
+  const [attributeParameters, setAttributeParameters] = useState(
+    [] as Parameters[]
+  );
 
   const isAttributeNameError = attributeName === "";
   const isAttributeDescriptionError = attributeDescription === "";
   const isAttributeParametersError = attributeParameters.length === 0;
   const [attributeParameterError, setAttributeParameterError] = useState(false);
-  const isAttributeError = isAttributeNameError || isAttributeDescriptionError || isAttributeParametersError || !attributeParameterError;
+  const isAttributeError =
+    isAttributeNameError ||
+    isAttributeDescriptionError ||
+    isAttributeParametersError ||
+    !attributeParameterError;
 
   const [attributes, setAttributes] = useState([] as AttributeModel[]);
 
@@ -128,7 +143,8 @@ const Entity = () => {
     getData(`/attributes`)
       .then((response) => {
         setAttributes(response);
-      }).catch((_error) => {
+      })
+      .catch((_error) => {
         toast({
           title: "Error",
           status: "error",
@@ -138,7 +154,8 @@ const Entity = () => {
           isClosable: true,
         });
         setIsError(true);
-      }).finally(() => {
+      })
+      .finally(() => {
         setIsLoaded(true);
       });
   }, []);
@@ -198,8 +215,9 @@ const Entity = () => {
           position: "bottom-right",
           isClosable: true,
         });
-        setIsError(true)
-      }).finally(() => {
+        setIsError(true);
+      })
+      .finally(() => {
         setIsLoaded(true);
       });
 
@@ -207,7 +225,8 @@ const Entity = () => {
     getData(`/collections`)
       .then((response) => {
         setCollectionData(response);
-      }).catch(() => {
+      })
+      .catch(() => {
         toast({
           title: "Error",
           description: "Could not retrieve Collections data.",
@@ -217,7 +236,8 @@ const Entity = () => {
           isClosable: true,
         });
         setIsError(true);
-      }).finally(() => {
+      })
+      .finally(() => {
         setIsLoaded(true);
       });
 
@@ -231,7 +251,8 @@ const Entity = () => {
               return { id: entity._id, name: entity.name };
             })
         );
-      }).catch(() => {
+      })
+      .catch(() => {
         toast({
           title: "Error",
           description: "Could not retrieve Entities data.",
@@ -241,7 +262,8 @@ const Entity = () => {
           isClosable: true,
         });
         setIsError(true);
-      }).finally(() => {
+      })
+      .finally(() => {
         setIsLoaded(true);
       });
   }, [id]);
@@ -284,7 +306,8 @@ const Entity = () => {
             position: "bottom-right",
             isClosable: true,
           });
-        }).finally(() => {
+        })
+        .finally(() => {
           setEditing(false);
         });
     } else {
@@ -306,30 +329,35 @@ const Entity = () => {
     postData(`/entities/export`, {
       id: id,
       fields: exportFields,
-    }).then((response) => {
-      FileSaver.saveAs(new Blob([response]), slugify(`${entityData.name.replace(" ", "")}_export.csv`));
+    })
+      .then((response) => {
+        FileSaver.saveAs(
+          new Blob([response]),
+          slugify(`${entityData.name.replace(" ", "")}_export.csv`)
+        );
 
-      // Close the "Export" modal
-      onExportClose();
+        // Close the "Export" modal
+        onExportClose();
 
-      toast({
-        title: "Info",
-        description: "Generated CSV file.",
-        status: "info",
-        duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
+        toast({
+          title: "Info",
+          description: "Generated CSV file.",
+          status: "info",
+          duration: 2000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+      })
+      .catch((_error) => {
+        toast({
+          title: "Error",
+          description: "An error occurred when exporting this Entity.",
+          status: "error",
+          duration: 2000,
+          position: "bottom-right",
+          isClosable: true,
+        });
       });
-    }).catch((_error) => {
-      toast({
-        title: "Error",
-        description: "An error occurred when exporting this Entity.",
-        status: "error",
-        duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
-      });
-    });
   };
 
   // Handle checkbox selection on the export modal
@@ -352,7 +380,7 @@ const Entity = () => {
         setExportFields(updatedFields);
       }
     }
-  }
+  };
 
   // Delete the Entity when confirmed
   const handleDeleteClick = () => {
@@ -440,17 +468,20 @@ const Entity = () => {
       entityAttributes.filter((attribute) => {
         return attribute._id !== id;
       })
-    )
+    );
   };
 
   // Add Attributes to the Entity state
   const addAttribute = () => {
-    setEntityAttributes(() => [...entityAttributes, {
-      _id: `a-${entityData._id}-${nanoid(6)}`,
-      name: attributeName,
-      description: attributeDescription,
-      parameters: attributeParameters,
-    }]);
+    setEntityAttributes(() => [
+      ...entityAttributes,
+      {
+        _id: `a-${entityData._id}-${nanoid(6)}`,
+        name: attributeName,
+        description: attributeDescription,
+        parameters: attributeParameters,
+      },
+    ]);
     onAddAttributesClose();
 
     // Reset state of creating an Attribute
@@ -463,13 +494,15 @@ const Entity = () => {
   const handleUpdateAttribute = (updated: AttributeModel) => {
     // Find the Attribute and update the state
     consola.info("Updating:", updated._id);
-    setEntityAttributes([...entityAttributes.map((attribute) => {
-      if (_.isEqual(attribute._id, updated._id)) {
-        attribute.description = updated.description;
-        attribute.parameters = _.cloneDeep(updated.parameters);
-      }
-      return attribute;
-    })]);
+    setEntityAttributes([
+      ...entityAttributes.map((attribute) => {
+        if (_.isEqual(attribute._id, updated._id)) {
+          attribute.description = updated.description;
+          attribute.parameters = _.cloneDeep(updated.parameters);
+        }
+        return attribute;
+      }),
+    ]);
   };
 
   const handleCancelAttribute = () => {
@@ -509,17 +542,36 @@ const Entity = () => {
               wrap={"wrap"}
               gap={"4"}
             >
-              <Flex align={"center"} gap={"4"} shadow={"lg"} p={"2"} border={"2px"} rounded={"md"} bg={"white"}>
+              <Flex
+                align={"center"}
+                gap={"4"}
+                shadow={"lg"}
+                p={"2"}
+                border={"2px"}
+                rounded={"md"}
+                bg={"white"}
+              >
                 <Icon name={"entity"} size={"lg"} />
                 <Heading fontWeight={"semibold"}>{entityData.name}</Heading>
               </Flex>
 
               {/* Buttons */}
-              <Flex direction={"row"} align={"center"} gap={"4"} wrap={"wrap"} bg={"white"} p={"4"} rounded={"md"}>
-                {editing &&
+              <Flex
+                direction={"row"}
+                align={"center"}
+                gap={"4"}
+                wrap={"wrap"}
+                bg={"white"}
+                p={"4"}
+                rounded={"md"}
+              >
+                {editing && (
                   <Popover>
                     <PopoverTrigger>
-                      <Button colorScheme={"red"} rightIcon={<Icon name={"delete"} />}>
+                      <Button
+                        colorScheme={"red"}
+                        rightIcon={<Icon name={"delete"} />}
+                      >
                         Delete
                       </Button>
                     </PopoverTrigger>
@@ -541,7 +593,7 @@ const Entity = () => {
                       </PopoverBody>
                     </PopoverContent>
                   </Popover>
-                }
+                )}
                 <Button
                   onClick={handleEditClick}
                   colorScheme={editing ? "green" : "gray"}
@@ -595,7 +647,9 @@ const Entity = () => {
                         <Tr>
                           <Td>Created</Td>
                           <Td>
-                            <Text>{dayjs(entityData.created).format("DD MMM YYYY")}</Text>
+                            <Text>
+                              {dayjs(entityData.created).format("DD MMM YYYY")}
+                            </Text>
                           </Td>
                         </Tr>
 
@@ -614,7 +668,10 @@ const Entity = () => {
                               </Tag>
                             ) : (
                               <Text>
-                                <Link>{entityData.owner && entityData.owner.split("@")[0].trim()}</Link>
+                                <Link>
+                                  {entityData.owner &&
+                                    entityData.owner.split("@")[0].trim()}
+                                </Link>
                               </Text>
                             )}
                           </Td>
@@ -696,7 +753,9 @@ const Entity = () => {
                                         key={`view-${collection}`}
                                         rightIcon={<Icon name={"c_right"} />}
                                         colorScheme={"blackAlpha"}
-                                        onClick={() => navigate(`/collections/${collection}`)}
+                                        onClick={() =>
+                                          navigate(`/collections/${collection}`)
+                                        }
                                       >
                                         View
                                       </Button>
@@ -777,7 +836,9 @@ const Entity = () => {
                                         key={`view-${origin.id}`}
                                         rightIcon={<Icon name={"c_right"} />}
                                         colorScheme={"blackAlpha"}
-                                        onClick={() => navigate(`/entities/${origin.id}`)}
+                                        onClick={() =>
+                                          navigate(`/entities/${origin.id}`)
+                                        }
                                       >
                                         View
                                       </Button>
@@ -848,7 +909,9 @@ const Entity = () => {
                                         key={`view-${product.id}`}
                                         rightIcon={<Icon name={"c_right"} />}
                                         colorScheme={"blackAlpha"}
-                                        onClick={() => navigate(`/entities/${product.id}`)}
+                                        onClick={() =>
+                                          navigate(`/entities/${product.id}`)
+                                        }
                                       >
                                         View
                                       </Button>
@@ -898,11 +961,19 @@ const Entity = () => {
                   ) : null}
                 </Flex>
 
-                <SimpleGrid spacing={"4"} templateColumns={"repeat(auto-fill, minmax(300px, 1fr))"}>
+                <SimpleGrid
+                  spacing={"4"}
+                  templateColumns={"repeat(auto-fill, minmax(300px, 1fr))"}
+                >
                   {entityAttributes.length > 0 ? (
                     entityAttributes.map((attribute) => {
                       return (
-                        <Flex key={`${attribute._id}`} direction={"column"} gap={"2"} width={"100%"}>
+                        <Flex
+                          key={`${attribute._id}`}
+                          direction={"column"}
+                          gap={"2"}
+                          width={"100%"}
+                        >
                           <AttributeCard
                             attribute={attribute}
                             editing={editing}
@@ -922,7 +993,12 @@ const Entity = () => {
               </Flex>
             </Flex>
 
-            <Modal isOpen={isAddAttributesOpen} onClose={onAddAttributesClose} size={"4xl"} isCentered>
+            <Modal
+              isOpen={isAddAttributesOpen}
+              onClose={onAddAttributesClose}
+              size={"4xl"}
+              isCentered
+            >
               <ModalOverlay />
               <ModalContent>
                 <ModalHeader>Add Attribute</ModalHeader>
@@ -946,8 +1022,8 @@ const Entity = () => {
                       </Heading>
                       <Text>
                         Specify some basic details about this Attribute. The
-                        metadata associated with this Entity should be specified using
-                        Parameters.
+                        metadata associated with this Entity should be specified
+                        using Parameters.
                       </Text>
                     </Flex>
 
@@ -984,20 +1060,35 @@ const Entity = () => {
                       </Select>
                     </Flex>
 
-                    <Flex direction={"row"} gap={"2"} w={"100%"} justify={"center"}>
-                      <Flex direction={"column"} gap={"4"} wrap={["wrap", "nowrap"]}>
+                    <Flex
+                      direction={"row"}
+                      gap={"2"}
+                      w={"100%"}
+                      justify={"center"}
+                    >
+                      <Flex
+                        direction={"column"}
+                        gap={"4"}
+                        wrap={["wrap", "nowrap"]}
+                      >
                         <FormControl isRequired>
                           <FormLabel>Name</FormLabel>
                           <Input
                             placeholder={"Name"}
                             value={attributeName}
-                            onChange={(event) => setAttributeName(event.target.value)}
+                            onChange={(event) =>
+                              setAttributeName(event.target.value)
+                            }
                             required
                           />
                           {!isAttributeNameError ? (
-                            <FormHelperText>Name of the Attribute.</FormHelperText>
+                            <FormHelperText>
+                              Name of the Attribute.
+                            </FormHelperText>
                           ) : (
-                            <FormErrorMessage>A name must be specified for the Attribute.</FormErrorMessage>
+                            <FormErrorMessage>
+                              A name must be specified for the Attribute.
+                            </FormErrorMessage>
                           )}
                         </FormControl>
 
@@ -1006,18 +1097,28 @@ const Entity = () => {
                           <Textarea
                             value={attributeDescription}
                             placeholder={"Attribute Description"}
-                            onChange={(event) => setAttributeDescription(event.target.value)}
+                            onChange={(event) =>
+                              setAttributeDescription(event.target.value)
+                            }
                           />
                           {!isAttributeDescriptionError ? (
-                            <FormHelperText>Description of the Attribute.</FormHelperText>
+                            <FormHelperText>
+                              Description of the Attribute.
+                            </FormHelperText>
                           ) : (
-                            <FormErrorMessage>A description should be provided for the Attribute.</FormErrorMessage>
+                            <FormErrorMessage>
+                              A description should be provided for the
+                              Attribute.
+                            </FormErrorMessage>
                           )}
                         </FormControl>
                       </Flex>
 
                       <Flex>
-                        <FormControl isRequired isInvalid={isAttributeParametersError}>
+                        <FormControl
+                          isRequired
+                          isInvalid={isAttributeParametersError}
+                        >
                           <FormLabel>Parameters</FormLabel>
                           <ParameterGroup
                             parameters={attributeParameters}
@@ -1029,7 +1130,12 @@ const Entity = () => {
                     </Flex>
 
                     {/* "Done" button */}
-                    <Flex direction={"row"} p={"md"} justify={"center"} gap={"8"}>
+                    <Flex
+                      direction={"row"}
+                      p={"md"}
+                      justify={"center"}
+                      gap={"8"}
+                    >
                       <Button
                         colorScheme={"red"}
                         variant={"outline"}
@@ -1055,7 +1161,11 @@ const Entity = () => {
               </ModalContent>
             </Modal>
 
-            <Modal isOpen={isAddCollectionsOpen} onClose={onAddCollectionsClose} isCentered>
+            <Modal
+              isOpen={isAddCollectionsOpen}
+              onClose={onAddCollectionsClose}
+              isCentered
+            >
               <ModalOverlay />
               <ModalContent p={"4"}>
                 {/* Heading and close button */}
@@ -1070,11 +1180,13 @@ const Entity = () => {
                       title="Select Collection"
                       placeholder={"Select Collection"}
                       onChange={(event) => {
-                        const selectedCollection = event.target.value.toString();
+                        const selectedCollection =
+                          event.target.value.toString();
                         if (selectedCollections.includes(selectedCollection)) {
                           toast({
                             title: "Warning",
-                            description: "Collection has already been selected.",
+                            description:
+                              "Collection has already been selected.",
                             status: "warning",
                             duration: 2000,
                             position: "bottom-right",
@@ -1148,7 +1260,11 @@ const Entity = () => {
               </ModalContent>
             </Modal>
 
-            <Modal isOpen={isAddProductsOpen} onClose={onAddProductsClose} isCentered>
+            <Modal
+              isOpen={isAddProductsOpen}
+              onClose={onAddProductsClose}
+              isCentered
+            >
               <ModalOverlay />
               <ModalContent p={"4"}>
                 {/* Heading and close button */}
@@ -1247,7 +1363,11 @@ const Entity = () => {
               </ModalContent>
             </Modal>
 
-            <Modal isOpen={isAddOriginsOpen} onClose={onAddOriginsClose} isCentered>
+            <Modal
+              isOpen={isAddOriginsOpen}
+              onClose={onAddOriginsClose}
+              isCentered
+            >
               <ModalOverlay />
               <ModalContent p={"4"}>
                 {/* Heading and close button */}
@@ -1361,15 +1481,38 @@ const Entity = () => {
                       {isLoaded ? (
                         <CheckboxGroup>
                           <Stack spacing={2} direction={"column"}>
-                            <Checkbox disabled defaultChecked>Name: {entityData.name}</Checkbox>
-                            <Checkbox onChange={(event) => handleExportCheck("created", event.target.checked)}>
-                              Created: {dayjs(entityData.created).format("DD MMM YYYY")}
+                            <Checkbox disabled defaultChecked>
+                              Name: {entityData.name}
                             </Checkbox>
-                            <Checkbox onChange={(event) => handleExportCheck("owner", event.target.checked)}>
+                            <Checkbox
+                              onChange={(event) =>
+                                handleExportCheck(
+                                  "created",
+                                  event.target.checked
+                                )
+                              }
+                            >
+                              Created:{" "}
+                              {dayjs(entityData.created).format("DD MMM YYYY")}
+                            </Checkbox>
+                            <Checkbox
+                              onChange={(event) =>
+                                handleExportCheck("owner", event.target.checked)
+                              }
+                            >
                               Owner: {entityData.owner}
                             </Checkbox>
-                            <Checkbox onChange={(event) => handleExportCheck("description", event.target.checked)}>
-                              <Text noOfLines={1}>Description: {entityDescription}</Text>
+                            <Checkbox
+                              onChange={(event) =>
+                                handleExportCheck(
+                                  "description",
+                                  event.target.checked
+                                )
+                              }
+                            >
+                              <Text noOfLines={1}>
+                                Description: {entityDescription}
+                              </Text>
                             </Checkbox>
                           </Stack>
                         </CheckboxGroup>
@@ -1383,7 +1526,15 @@ const Entity = () => {
                         <Stack spacing={2} direction={"column"}>
                           {entityOrigins.map((origin) => {
                             return (
-                              <Checkbox key={origin.id} onChange={(event) => handleExportCheck(`origin_${origin.id}`, event.target.checked)}>
+                              <Checkbox
+                                key={origin.id}
+                                onChange={(event) =>
+                                  handleExportCheck(
+                                    `origin_${origin.id}`,
+                                    event.target.checked
+                                  )
+                                }
+                              >
                                 Origin: {origin.name}
                               </Checkbox>
                             );
@@ -1395,11 +1546,19 @@ const Entity = () => {
                     </FormControl>
                     <FormControl>
                       <FormLabel>Associations: Products</FormLabel>
-                      {isLoaded  && entityProducts.length > 0 ? (
+                      {isLoaded && entityProducts.length > 0 ? (
                         <Stack spacing={2} direction={"column"}>
                           {entityProducts.map((product) => {
                             return (
-                              <Checkbox key={product.id} onChange={(event) => handleExportCheck(`product_${product.id}`, event.target.checked)}>
+                              <Checkbox
+                                key={product.id}
+                                onChange={(event) =>
+                                  handleExportCheck(
+                                    `product_${product.id}`,
+                                    event.target.checked
+                                  )
+                                }
+                              >
                                 Product: {product.name}
                               </Checkbox>
                             );
@@ -1414,11 +1573,19 @@ const Entity = () => {
                   <Flex direction={"column"} p={"2"} gap={"2"}>
                     <FormControl>
                       <FormLabel>Attributes</FormLabel>
-                      {isLoaded  && entityAttributes.length > 0 ? (
+                      {isLoaded && entityAttributes.length > 0 ? (
                         <Stack spacing={2} direction={"column"}>
                           {entityAttributes.map((attribute) => {
                             return (
-                              <Checkbox key={attribute.name} onChange={(event) => handleExportCheck(`attribute_${attribute._id}`, event.target.checked)}>
+                              <Checkbox
+                                key={attribute.name}
+                                onChange={(event) =>
+                                  handleExportCheck(
+                                    `attribute_${attribute._id}`,
+                                    event.target.checked
+                                  )
+                                }
+                              >
                                 {attribute.name}
                               </Checkbox>
                             );
@@ -1456,7 +1623,10 @@ const Entity = () => {
                 <ModalCloseButton />
                 <ModalBody>
                   <Container h={"90vh"} minW={"90vw"}>
-                    <Graph id={entityData._id} entityNavigateHook={handleEntityNodeClick} />
+                    <Graph
+                      id={entityData._id}
+                      entityNavigateHook={handleEntityNodeClick}
+                    />
                   </Container>
                 </ModalBody>
               </ModalContent>
@@ -1465,8 +1635,7 @@ const Entity = () => {
         )
       ) : (
         <Loading />
-      )
-    }
+      )}
     </Content>
   );
 };

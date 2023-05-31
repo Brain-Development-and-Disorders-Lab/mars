@@ -29,7 +29,10 @@ const Login = (props: { setToken: (token: string) => void }) => {
   // Toast to show errors
   const toast = useToast();
 
-  const performLogin = (credentials: {username: string, password: string}) => {
+  const performLogin = (credentials: {
+    username: string;
+    password: string;
+  }) => {
     postData(`/login`, credentials)
       .then((response) => {
         if (_.isEqual(response.status, "error")) {
@@ -44,7 +47,8 @@ const Login = (props: { setToken: (token: string) => void }) => {
         }
         props.setToken(response.token);
         setIsLoading(false);
-      }).catch((_error) => {
+      })
+      .catch((_error) => {
         toast({
           title: "Error",
           status: "error",
@@ -59,8 +63,8 @@ const Login = (props: { setToken: (token: string) => void }) => {
 
   const onLoginClick = () => {
     setIsLoading(true);
-    performLogin({username: username, password: password});
-  }
+    performLogin({ username: username, password: password });
+  };
 
   return (
     <Content vertical>
@@ -74,7 +78,13 @@ const Login = (props: { setToken: (token: string) => void }) => {
         h={"100vh"}
         wrap={"wrap"}
       >
-        <Flex direction={"column"} p={"8"} gap={"8"} bg={"white"} rounded={"md"}>
+        <Flex
+          direction={"column"}
+          p={"8"}
+          gap={"8"}
+          bg={"white"}
+          rounded={"md"}
+        >
           <Flex align={"center"} gap={"4"}>
             <Image src="/Favicon.png" boxSize={"72px"} />
             <Heading fontWeight={"semibold"}>Login</Heading>

@@ -7,7 +7,7 @@ import SearchBox from "@components/SearchBox";
 import Navigation from "@components/Navigation";
 
 // Content container
-const Content: FC<any> = (props: { children: any, vertical?: boolean }) => {
+const Content: FC<any> = (props: { children: any; vertical?: boolean }) => {
   return (
     <Flex
       flex={"1"}
@@ -31,7 +31,13 @@ const Content: FC<any> = (props: { children: any, vertical?: boolean }) => {
 // Page container
 const Page: FC<any> = ({ children }) => {
   return (
-    <Flex direction={{base: "column", lg: "row"}} minH={"100vh"} w={"100%"} p={"0"} m={"0"}>
+    <Flex
+      direction={{ base: "column", lg: "row" }}
+      minH={"100vh"}
+      w={"100%"}
+      p={"0"}
+      m={"0"}
+    >
       <Flex p={"4"} justify={"center"} background={"white"}>
         <Navigation />
       </Flex>
@@ -46,7 +52,9 @@ const Page: FC<any> = ({ children }) => {
         >
           <SearchBox />
         </Flex>
-        <Flex p={"2"} h={"100%"} background={"gray.50"}>{ children }</Flex>
+        <Flex p={"2"} h={"100%"} background={"gray.50"}>
+          {children}
+        </Flex>
       </Flex>
     </Flex>
   );

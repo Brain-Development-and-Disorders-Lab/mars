@@ -76,10 +76,11 @@ const Collection = () => {
     // Populate Collection data
     getData(`/collections/${id}`)
       .then((response) => {
-          setCollectionData(response);
-          setCollectionEntities(response.entities);
-          setCollectionDescription(response.description);
-      }).catch(() => {
+        setCollectionData(response);
+        setCollectionEntities(response.entities);
+        setCollectionDescription(response.description);
+      })
+      .catch(() => {
         toast({
           title: "Error",
           description: "Could not retrieve Collection data.",
@@ -89,18 +90,19 @@ const Collection = () => {
           isClosable: true,
         });
         setIsError(true);
-      }).finally(() => {
+      })
+      .finally(() => {
         setIsLoaded(true);
       });
 
     // Populate Entity data
     getData(`/entities`)
       .then((response) => {
-          setAllEntities(
-            response.map((e: EntityModel) => {
-              return { name: e.name, id: e._id };
-            })
-          );
+        setAllEntities(
+          response.map((e: EntityModel) => {
+            return { name: e.name, id: e._id };
+          })
+        );
       })
       .catch(() => {
         toast({
@@ -112,7 +114,8 @@ const Collection = () => {
           isClosable: true,
         });
         setIsError(true);
-      }).finally(() => {
+      })
+      .finally(() => {
         setIsLoaded(true);
       });
   }, [id, isLoaded]);
@@ -173,7 +176,8 @@ const Collection = () => {
             position: "bottom-right",
             isClosable: true,
           });
-        }).catch(() => {
+        })
+        .catch(() => {
           toast({
             title: "Error",
             description: "An error occurred when saving updates.",
@@ -182,7 +186,8 @@ const Collection = () => {
             position: "bottom-right",
             isClosable: true,
           });
-        }).finally(() => {
+        })
+        .finally(() => {
           setEditing(false);
         });
     } else {
@@ -202,7 +207,8 @@ const Collection = () => {
           position: "bottom-right",
           isClosable: true,
         });
-      }).catch(() => {
+      })
+      .catch(() => {
         toast({
           title: "Error",
           description: `An error occurred when deleting Collection "${collectionData.name}".`,
@@ -211,7 +217,8 @@ const Collection = () => {
           position: "bottom-right",
           isClosable: true,
         });
-      }).finally(() => {
+      })
+      .finally(() => {
         setEditing(false);
         navigate("/collections");
       });
@@ -232,17 +239,35 @@ const Collection = () => {
               wrap={"wrap"}
               gap={"4"}
             >
-              <Flex align={"center"} gap={"4"} shadow={"lg"} p={"2"} border={"2px"} rounded={"md"} bg={"white"}>
+              <Flex
+                align={"center"}
+                gap={"4"}
+                shadow={"lg"}
+                p={"2"}
+                border={"2px"}
+                rounded={"md"}
+                bg={"white"}
+              >
                 <Icon name={"collection"} size={"lg"} />
                 <Heading fontWeight={"semibold"}>{collectionData.name}</Heading>
               </Flex>
 
               {/* Buttons */}
-              <Flex direction={"row"} gap={"4"} wrap={"wrap"} bg={"white"} p={"4"} rounded={"md"}>
-                {editing &&
+              <Flex
+                direction={"row"}
+                gap={"4"}
+                wrap={"wrap"}
+                bg={"white"}
+                p={"4"}
+                rounded={"md"}
+              >
+                {editing && (
                   <Popover>
                     <PopoverTrigger>
-                      <Button colorScheme={"red"} rightIcon={<Icon name={"delete"} />}>
+                      <Button
+                        colorScheme={"red"}
+                        rightIcon={<Icon name={"delete"} />}
+                      >
                         Delete
                       </Button>
                     </PopoverTrigger>
@@ -264,7 +289,7 @@ const Collection = () => {
                       </PopoverBody>
                     </PopoverContent>
                   </Popover>
-                }
+                )}
                 <Button
                   colorScheme={editing ? "green" : "gray"}
                   rightIcon={
@@ -289,7 +314,9 @@ const Collection = () => {
               >
                 {/* Details */}
                 <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
-                  <Heading fontWeight={"semibold"} size={"lg"}>Details</Heading>
+                  <Heading fontWeight={"semibold"} size={"lg"}>
+                    Details
+                  </Heading>
                   <TableContainer>
                     <Table variant={"simple"} colorScheme={"blackAlpha"}>
                       <Thead>
@@ -330,17 +357,15 @@ const Collection = () => {
                                 <TagLabel>Not specified</TagLabel>
                                 <Icon name={"warning"} />
                               </Tag>
+                            ) : editing ? (
+                              <Textarea
+                                value={collectionDescription}
+                                onChange={(event) => {
+                                  setCollectionDescription(event.target.value);
+                                }}
+                              />
                             ) : (
-                              editing ? (
-                                <Textarea
-                                  value={collectionDescription}
-                                  onChange={(event) => {
-                                    setCollectionDescription(event.target.value);
-                                  }}
-                                />
-                              ) : (
-                                <Text>{collectionDescription}</Text>
-                              )
+                              <Text>{collectionDescription}</Text>
                             )}
                           </Td>
                         </Tr>
@@ -398,7 +423,9 @@ const Collection = () => {
                                         key={`view-collection-${entity}`}
                                         colorScheme={"blackAlpha"}
                                         rightIcon={<Icon name={"c_right"} />}
-                                        onClick={() => navigate(`/entities/${entity}`)}
+                                        onClick={() =>
+                                          navigate(`/entities/${entity}`)
+                                        }
                                       >
                                         View
                                       </Button>
@@ -459,7 +486,10 @@ const Collection = () => {
                             isClosable: true,
                           });
                         } else {
-                          setSelectedEntities(selectedEntities => [...selectedEntities, selectedEntity]);
+                          setSelectedEntities((selectedEntities) => [
+                            ...selectedEntities,
+                            selectedEntity,
+                          ]);
                         }
                       }}
                     >

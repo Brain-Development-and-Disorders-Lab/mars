@@ -47,7 +47,8 @@ const Collections = () => {
     getData(`/collections`)
       .then((value) => {
         setCollectionsData(value);
-      }).catch((_error) => {
+      })
+      .catch((_error) => {
         toast({
           title: "Error",
           status: "error",
@@ -57,9 +58,10 @@ const Collections = () => {
           isClosable: true,
         });
         setIsError(true);
-      }).finally(() => {
+      })
+      .finally(() => {
         setIsLoaded(true);
-      });;
+      });
   }, []);
 
   return (
@@ -145,7 +147,9 @@ const Collections = () => {
                                   <Icon name={"warning"} />
                                 </Tag>
                               ) : (
-                                <Text noOfLines={2}>{collection.description}</Text>
+                                <Text noOfLines={2}>
+                                  {collection.description}
+                                </Text>
                               )}
                             </Td>
                             <Td display={{ base: "none", sm: "table-cell" }}>
@@ -174,7 +178,9 @@ const Collections = () => {
                                   <Icon name={"warning"} />
                                 </Tag>
                               ) : (
-                                <Text noOfLines={1}>{collection.entities.length}</Text>
+                                <Text noOfLines={1}>
+                                  {collection.entities.length}
+                                </Text>
                               )}
                             </Td>
                             <Td>

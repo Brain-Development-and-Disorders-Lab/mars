@@ -46,7 +46,8 @@ export const getData = (path: string): Promise<any> => {
  */
 export const postData = async (path: string, data: any): Promise<any> => {
   return new Promise((resolve, reject) => {
-    axios.post(`${SERVER_URL}${path}`, data)
+    axios
+      .post(`${SERVER_URL}${path}`, data)
       .then((response) => {
         const contentType = response.headers["content-type"];
         if (_.isNull(contentType)) {
@@ -99,7 +100,10 @@ export const deleteData = async (path: string): Promise<any> => {
  * @param {"entities" | "collections" | "attributes"} type Specify whether an Entity, Collection, or Attribute is being checked
  * @return {Promise<boolean>}
  */
-export const doesExist = async (id: string, type: "entities" | "collections" | "attributes"): Promise<boolean> => {
+export const doesExist = async (
+  id: string,
+  type: "entities" | "collections" | "attributes"
+): Promise<boolean> => {
   return new Promise((resolve, _reject) => {
     getData(`/${type}/${id}`).then((result) => {
       if (result.status === "error") {
@@ -107,6 +111,6 @@ export const doesExist = async (id: string, type: "entities" | "collections" | "
       } else {
         resolve(true);
       }
-    })
+    });
   });
 };

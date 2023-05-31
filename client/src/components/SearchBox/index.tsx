@@ -2,7 +2,26 @@
 import React, { useState } from "react";
 
 // Existing and custom components
-import { Button, Flex, Input, useToast, Text, Popover, PopoverTrigger, PopoverContent, PopoverArrow, PopoverCloseButton, PopoverHeader, PopoverBody, useDisclosure, Link, Spacer, VStack, StackDivider, PopoverFooter } from "@chakra-ui/react";
+import {
+  Button,
+  Flex,
+  Input,
+  useToast,
+  Text,
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+  PopoverArrow,
+  PopoverCloseButton,
+  PopoverHeader,
+  PopoverBody,
+  useDisclosure,
+  Link,
+  Spacer,
+  VStack,
+  StackDivider,
+  PopoverFooter,
+} from "@chakra-ui/react";
 import Icon from "@components/Icon";
 
 // Existing and custom types
@@ -31,35 +50,39 @@ const SearchBox = () => {
   const runSearch = () => {
     // Check if an ID has been entered
     let isEntity = false;
-    getData(`/entities/${query}`).then((entity) => {
-      isEntity = true;
-      setQuery("");
-      onClose();
-      navigate(`/entities/${entity._id}`);
-    }).catch(() => {
-      if (!isEntity) {
-        // Update state
-        setIsSearching(true);
-        setHasSearched(true);
+    getData(`/entities/${query}`)
+      .then((entity) => {
+        isEntity = true;
+        setQuery("");
+        onClose();
+        navigate(`/entities/${entity._id}`);
+      })
+      .catch(() => {
+        if (!isEntity) {
+          // Update state
+          setIsSearching(true);
+          setHasSearched(true);
 
-        postData(`/search`, { query: query })
-          .then((value) => {
-            setResults(value);
-          }).catch((_error) => {
-            toast({
-              title: "Error",
-              status: "error",
-              description: "Could not get search results.",
-              duration: 4000,
-              position: "bottom-right",
-              isClosable: true,
+          postData(`/search`, { query: query })
+            .then((value) => {
+              setResults(value);
+            })
+            .catch((_error) => {
+              toast({
+                title: "Error",
+                status: "error",
+                description: "Could not get search results.",
+                duration: 4000,
+                position: "bottom-right",
+                isClosable: true,
+              });
+              setIsError(true);
+            })
+            .finally(() => {
+              setIsSearching(false);
             });
-            setIsError(true);
-          }).finally(() => {
-            setIsSearching(false);
-          });
-      }
-    });
+        }
+      });
   };
 
   // Basic handler to display results
@@ -77,7 +100,12 @@ const SearchBox = () => {
 
   return (
     <Flex w={"100%"} maxW={"xl"} p={"1"}>
-      <Popover isOpen={isOpen} onClose={onClose} placement={"bottom"} matchWidth>
+      <Popover
+        isOpen={isOpen}
+        onClose={onClose}
+        placement={"bottom"}
+        matchWidth
+      >
         <PopoverTrigger>
           <Flex w={"100%"} gap={"4"}>
             <Input
@@ -106,19 +134,29 @@ const SearchBox = () => {
         <PopoverContent w={"100%"}>
           <PopoverArrow />
           <PopoverCloseButton />
-          <PopoverHeader>{results.length} results for "{query}"</PopoverHeader>
+          <PopoverHeader>
+            {results.length} results for "{query}"
+          </PopoverHeader>
           <PopoverBody>
             <Flex gap={"2"} p={"2"}>
               {isSearching ? (
-                <Flex>
-                  Searching
-                </Flex>
+                <Flex>Searching</Flex>
               ) : (
-                hasSearched && !isError && (
-                  <VStack gap={"4"} divider={<StackDivider borderColor={"gray.200"} />} w={"100%"}>
+                hasSearched &&
+                !isError && (
+                  <VStack
+                    gap={"4"}
+                    divider={<StackDivider borderColor={"gray.200"} />}
+                    w={"100%"}
+                  >
                     {results.slice(0, 5).map((result) => {
                       return (
-                        <Flex key={result._id} direction={"row"} gap={"4"} w={"100%"}>
+                        <Flex
+                          key={result._id}
+                          direction={"row"}
+                          gap={"4"}
+                          w={"100%"}
+                        >
                           <Text as={"b"}>{result.name}</Text>
                           <Spacer />
                           <Link onClick={() => handleResultClick(result._id)}>
@@ -136,12 +174,14 @@ const SearchBox = () => {
             </Flex>
           </PopoverBody>
           <PopoverFooter>
-            <Text>For more complete results, use the dedicated Search page.</Text>
+            <Text>
+              For more complete results, use the dedicated Search page.
+            </Text>
           </PopoverFooter>
         </PopoverContent>
       </Popover>
     </Flex>
   );
-}
+};
 
 export default SearchBox;

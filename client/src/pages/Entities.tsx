@@ -43,7 +43,11 @@ const Entities = () => {
 
   // Effect to adjust column visibility
   useEffect(() => {
-    if (_.isEqual(breakpoint, "sm") || _.isEqual(breakpoint, "base") || _.isUndefined(breakpoint)) {
+    if (
+      _.isEqual(breakpoint, "sm") ||
+      _.isEqual(breakpoint, "base") ||
+      _.isUndefined(breakpoint)
+    ) {
       setVisibleColumns({ description: false, owner: false, created: false });
     } else {
       setVisibleColumns({});
@@ -54,7 +58,8 @@ const Entities = () => {
     getData(`/entities`)
       .then((value) => {
         setEntityData(value);
-      }).catch((_error) => {
+      })
+      .catch((_error) => {
         toast({
           title: "Error",
           status: "error",
@@ -64,7 +69,8 @@ const Entities = () => {
           isClosable: true,
         });
         setIsError(true);
-      }).finally(() => {
+      })
+      .finally(() => {
         setIsLoaded(true);
       });
   }, []);
@@ -144,7 +150,11 @@ const Entities = () => {
               </Flex>
               {isLoaded && entityData.length > 0 ? (
                 <Flex direction={"column"} gap={"4"} w={"100%"}>
-                  <DataTable columns={columns} data={data} visibleColumns={visibleColumns} />
+                  <DataTable
+                    columns={columns}
+                    data={data}
+                    visibleColumns={visibleColumns}
+                  />
                 </Flex>
               ) : (
                 <Text>There are no Entities to display.</Text>

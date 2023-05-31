@@ -44,7 +44,16 @@ import Loading from "@components/Loading";
 import ParameterGroup from "@components/ParameterGroup";
 
 // Existing and custom types
-import { IAttribute, AttributeModel, AttributeProps, CollectionModel, IEntity, EntityModel, Parameters, ICollection } from "@types";
+import {
+  IAttribute,
+  AttributeModel,
+  AttributeProps,
+  CollectionModel,
+  IEntity,
+  EntityModel,
+  Parameters,
+  ICollection,
+} from "@types";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
@@ -117,7 +126,8 @@ const EntityPage = () => {
     getData(`/entities`)
       .then((response) => {
         setEntities(response);
-      }).catch((_error) => {
+      })
+      .catch((_error) => {
         toast({
           title: "Error",
           status: "error",
@@ -127,7 +137,8 @@ const EntityPage = () => {
           isClosable: true,
         });
         setIsError(true);
-      }).finally(() => {
+      })
+      .finally(() => {
         setIsLoaded(true);
       });
 
@@ -135,7 +146,8 @@ const EntityPage = () => {
     getData(`/collections`)
       .then((response) => {
         setCollections(response);
-      }).catch((_error) => {
+      })
+      .catch((_error) => {
         toast({
           title: "Error",
           status: "error",
@@ -145,7 +157,8 @@ const EntityPage = () => {
           isClosable: true,
         });
         setIsError(true);
-      }).finally(() => {
+      })
+      .finally(() => {
         setIsLoaded(true);
       });
 
@@ -153,7 +166,8 @@ const EntityPage = () => {
     getData(`/attributes`)
       .then((response) => {
         setAttributes(response);
-      }).catch((_error) => {
+      })
+      .catch((_error) => {
         toast({
           title: "Error",
           status: "error",
@@ -163,7 +177,8 @@ const EntityPage = () => {
           isClosable: true,
         });
         setIsError(true);
-      }).finally(() => {
+      })
+      .finally(() => {
         setIsLoaded(true);
       });
   }, []);
@@ -189,19 +204,21 @@ const EntityPage = () => {
       setPageState("attributes");
     } else if (_.isEqual("attributes", pageState)) {
       setIsSubmitting(true);
-      postData(`/entities/create`, entityState).then(() => {
-        setIsSubmitting(false);
-        navigate(`/entities`);
-      }).catch((_error) => {
-        toast({
-          title: "Error",
-          status: "error",
-          description: "Could not create new Entity.",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
+      postData(`/entities/create`, entityState)
+        .then(() => {
+          setIsSubmitting(false);
+          navigate(`/entities`);
+        })
+        .catch((_error) => {
+          toast({
+            title: "Error",
+            status: "error",
+            description: "Could not create new Entity.",
+            duration: 4000,
+            position: "bottom-right",
+            isClosable: true,
+          });
         });
-      });
     }
   };
 
@@ -258,10 +275,20 @@ const EntityPage = () => {
             maxW={"7xl"}
             wrap={"wrap"}
           >
-            <Flex direction={"column"} w={["full", "4xl", "7xl"]} bg={"white"} p={"2"} rounded={"md"}>
+            <Flex
+              direction={"column"}
+              w={["full", "4xl", "7xl"]}
+              bg={"white"}
+              p={"2"}
+              rounded={"md"}
+            >
               {/* Page header */}
               <Flex direction={"column"} p={"2"} pt={"4"} pb={"4"}>
-                <Flex direction={"row"} align={"center"} justify={"space-between"}>
+                <Flex
+                  direction={"row"}
+                  align={"center"}
+                  justify={"space-between"}
+                >
                   <Heading fontWeight={"semibold"}>Create Entity</Heading>
                   <Button
                     rightIcon={<Icon name={"info"} />}
@@ -289,11 +316,11 @@ const EntityPage = () => {
                       Details
                     </Heading>
                     <Text>
-                      Specify some basic details about this Entity. Relations between
-                      Entities and membership to Collections can be specified on the
-                      following page. Finally, the metadata associated with this
-                      Entity should be specified using Attributes and corresponding
-                      Parameters.
+                      Specify some basic details about this Entity. Relations
+                      between Entities and membership to Collections can be
+                      specified on the following page. Finally, the metadata
+                      associated with this Entity should be specified using
+                      Attributes and corresponding Parameters.
                     </Text>
 
                     <Flex direction={"row"} gap={"2"} wrap={["wrap", "nowrap"]}>
@@ -309,7 +336,9 @@ const EntityPage = () => {
                             A standardised name or ID for the Entity.
                           </FormHelperText>
                         ) : (
-                          <FormErrorMessage>A name or ID must be specified.</FormErrorMessage>
+                          <FormErrorMessage>
+                            A name or ID must be specified.
+                          </FormErrorMessage>
                         )}
                       </FormControl>
 
@@ -323,7 +352,9 @@ const EntityPage = () => {
                         {!isOwnerError ? (
                           <FormHelperText>Owner of the Entity.</FormHelperText>
                         ) : (
-                          <FormErrorMessage>An owner of the Entity is required.</FormErrorMessage>
+                          <FormErrorMessage>
+                            An owner of the Entity is required.
+                          </FormErrorMessage>
                         )}
                       </FormControl>
                     </Flex>
@@ -339,9 +370,13 @@ const EntityPage = () => {
                           onChange={(event) => setCreated(event.target.value)}
                         />
                         {!isDateError ? (
-                          <FormHelperText>Date the Entity was created.</FormHelperText>
+                          <FormHelperText>
+                            Date the Entity was created.
+                          </FormHelperText>
                         ) : (
-                          <FormErrorMessage>A created date must be specified.</FormErrorMessage>
+                          <FormErrorMessage>
+                            A created date must be specified.
+                          </FormErrorMessage>
                         )}
                       </FormControl>
 
@@ -349,11 +384,13 @@ const EntityPage = () => {
                         <FormLabel>Description</FormLabel>
                         <Textarea
                           value={description}
-                          onChange={(event) => setDescription(event.target.value)}
+                          onChange={(event) =>
+                            setDescription(event.target.value)
+                          }
                         />
                         <FormHelperText>
-                          A brief description of the new Entity. Most details should
-                          be inputted as Attributes with Parameters.
+                          A brief description of the new Entity. Most details
+                          should be inputted as Attributes with Parameters.
                         </FormHelperText>
                       </FormControl>
                     </Flex>
@@ -367,8 +404,8 @@ const EntityPage = () => {
                       Associations
                     </Heading>
                     <Text>
-                      Relations between Entities and membership to Collections can be
-                      specified on this page.
+                      Relations between Entities and membership to Collections
+                      can be specified on this page.
                     </Text>
 
                     <Flex direction={"row"} gap={"2"} wrap={["wrap", "nowrap"]}>
@@ -381,12 +418,16 @@ const EntityPage = () => {
                           onChange={(event) => {
                             if (
                               _.find(selectedOrigins, (product) => {
-                                return _.isEqual(product.id, event.target.value);
+                                return _.isEqual(
+                                  product.id,
+                                  event.target.value
+                                );
                               })
                             ) {
                               toast({
                                 title: "Warning",
-                                description: "Origin has already been selected.",
+                                description:
+                                  "Origin has already been selected.",
                                 status: "warning",
                                 duration: 2000,
                                 position: "bottom-right",
@@ -417,9 +458,9 @@ const EntityPage = () => {
                             })}
                         </Select>
                         <FormHelperText>
-                          If the source of this Entity currently exists or did exist
-                          in this system, specify that association here by searching
-                          for the origin Entity.
+                          If the source of this Entity currently exists or did
+                          exist in this system, specify that association here by
+                          searching for the origin Entity.
                         </FormHelperText>
                         <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
                           {selectedOrigins.map((product) => {
@@ -430,7 +471,10 @@ const EntityPage = () => {
                                   onClick={() => {
                                     setSelectedOrigins(
                                       selectedOrigins.filter((selected) => {
-                                        return !_.isEqual(product.id, selected.id);
+                                        return !_.isEqual(
+                                          product.id,
+                                          selected.id
+                                        );
                                       })
                                     );
                                   }}
@@ -450,12 +494,16 @@ const EntityPage = () => {
                           onChange={(event) => {
                             if (
                               _.find(selectedProducts, (product) => {
-                                return _.isEqual(product.id, event.target.value);
+                                return _.isEqual(
+                                  product.id,
+                                  event.target.value
+                                );
                               })
                             ) {
                               toast({
                                 title: "Warning",
-                                description: "Entity has already been selected.",
+                                description:
+                                  "Entity has already been selected.",
                                 status: "warning",
                                 duration: 2000,
                                 position: "bottom-right",
@@ -487,9 +535,9 @@ const EntityPage = () => {
                           ;
                         </Select>
                         <FormHelperText>
-                          If this Entity has any derivatives or Entities that have
-                          been created from it, specify those associations here by
-                          searching for the corresponding Entity.
+                          If this Entity has any derivatives or Entities that
+                          have been created from it, specify those associations
+                          here by searching for the corresponding Entity.
                         </FormHelperText>
                         <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
                           {selectedProducts.map((product) => {
@@ -500,7 +548,10 @@ const EntityPage = () => {
                                   onClick={() => {
                                     setSelectedProducts(
                                       selectedProducts.filter((selected) => {
-                                        return !_.isEqual(product.id, selected.id);
+                                        return !_.isEqual(
+                                          product.id,
+                                          selected.id
+                                        );
                                       })
                                     );
                                   }}
@@ -526,7 +577,10 @@ const EntityPage = () => {
                         <Stack spacing={[1, 5]} direction={"column"}>
                           {collections.map((collection) => {
                             return (
-                              <Checkbox key={collection._id} value={collection._id}>
+                              <Checkbox
+                                key={collection._id}
+                                value={collection._id}
+                              >
                                 {collection.name}
                               </Checkbox>
                             );
@@ -535,8 +589,8 @@ const EntityPage = () => {
                       </CheckboxGroup>
                       <FormHelperText>
                         Specify the collections that this new Entity should be
-                        included with. The Entity will then show up underneath the
-                        specified collections.
+                        included with. The Entity will then show up underneath
+                        the specified collections.
                       </FormHelperText>
                     </FormControl>
                   </Flex>
@@ -549,8 +603,8 @@ const EntityPage = () => {
                       Attributes
                     </Heading>
                     <Text>
-                      The metadata associated with this Entity should be specified
-                      using Attributes and corresponding Parameters.
+                      The metadata associated with this Entity should be
+                      specified using Attributes and corresponding Parameters.
                     </Text>
 
                     <Flex
@@ -591,7 +645,10 @@ const EntityPage = () => {
                           {isLoaded &&
                             attributes.map((attribute) => {
                               return (
-                                <option key={attribute._id} value={attribute._id}>
+                                <option
+                                  key={attribute._id}
+                                  value={attribute._id}
+                                >
                                   {attribute.name}
                                 </option>
                               );
@@ -702,20 +759,21 @@ const EntityPage = () => {
                 <ModalCloseButton />
                 <ModalBody>
                   <Text>
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-                    eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
+                    do eiusmod tempor incididunt ut labore et dolore magna
+                    aliqua.
                   </Text>
                   <Text>
-                    Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris
-                    nisi ut aliquip ex ea commodo consequat.
+                    Ut enim ad minim veniam, quis nostrud exercitation ullamco
+                    laboris nisi ut aliquip ex ea commodo consequat.
                   </Text>
                   <Text>
-                    Duis aute irure dolor in reprehenderit in voluptate velit esse
-                    cillum dolore eu fugiat nulla pariatur.
+                    Duis aute irure dolor in reprehenderit in voluptate velit
+                    esse cillum dolore eu fugiat nulla pariatur.
                   </Text>
                   <Text>
-                    Excepteur sint occaecat cupidatat non proident, sunt in culpa qui
-                    officia deserunt mollit anim id est laborum.
+                    Excepteur sint occaecat cupidatat non proident, sunt in
+                    culpa qui officia deserunt mollit anim id est laborum.
                   </Text>
                 </ModalBody>
               </ModalContent>
@@ -764,7 +822,13 @@ const CollectionPage = () => {
         maxW={"7xl"}
         wrap={"wrap"}
       >
-        <Flex direction={"column"} w={["full", "4xl", "7xl"]} p={"2"} bg={"white"} rounded={"md"}>
+        <Flex
+          direction={"column"}
+          w={["full", "4xl", "7xl"]}
+          p={"2"}
+          bg={"white"}
+          rounded={"md"}
+        >
           {/* Page header */}
           <Flex direction={"column"} p={"2"} pt={"4"} pb={"4"}>
             <Flex direction={"row"} align={"center"} justify={"space-between"}>
@@ -788,7 +852,12 @@ const CollectionPage = () => {
             pb={"6"}
             mb={["12", "8"]}
           >
-            <Flex direction={"column"} gap={"2"} w={["full", "4xl"]} maxW={"4xl"}>
+            <Flex
+              direction={"column"}
+              gap={"2"}
+              w={["full", "4xl"]}
+              maxW={"4xl"}
+            >
               <Heading fontWeight={"semibold"} size={"lg"}>
                 Details
               </Heading>
@@ -807,9 +876,13 @@ const CollectionPage = () => {
                     onChange={(event) => setName(event.target.value)}
                   />
                   {!isNameError ? (
-                    <FormHelperText>A name or ID for the Collection.</FormHelperText>
+                    <FormHelperText>
+                      A name or ID for the Collection.
+                    </FormHelperText>
                   ) : (
-                    <FormErrorMessage>A name or ID must be specified.</FormErrorMessage>
+                    <FormErrorMessage>
+                      A name or ID must be specified.
+                    </FormErrorMessage>
                   )}
                 </FormControl>
 
@@ -828,7 +901,9 @@ const CollectionPage = () => {
                   {!isOwnerError ? (
                     <FormHelperText>Owner of the Collection.</FormHelperText>
                   ) : (
-                    <FormErrorMessage>An owner of the Collection is required.</FormErrorMessage>
+                    <FormErrorMessage>
+                      An owner of the Collection is required.
+                    </FormErrorMessage>
                   )}
                 </FormControl>
               </Flex>
@@ -859,9 +934,13 @@ const CollectionPage = () => {
                     onChange={(event) => setDescription(event.target.value)}
                   />
                   {!isDescriptionError ? (
-                    <FormHelperText>A description of the Collection.</FormHelperText>
+                    <FormHelperText>
+                      A description of the Collection.
+                    </FormHelperText>
                   ) : (
-                    <FormErrorMessage>A description must be provided.</FormErrorMessage>
+                    <FormErrorMessage>
+                      A description must be provided.
+                    </FormErrorMessage>
                   )}
                 </FormControl>
               </Flex>
@@ -946,7 +1025,8 @@ const AttributePage = () => {
   const isDescriptionError = description === "";
   const isParametersError = parameters.length === 0;
   const [parameterError, setParameterError] = useState(false);
-  const isDetailsError = isNameError || isDescriptionError || isParametersError || !parameterError;
+  const isDetailsError =
+    isNameError || isDescriptionError || isParametersError || !parameterError;
 
   const attributeData: IAttribute = {
     name: name,
@@ -978,7 +1058,13 @@ const AttributePage = () => {
         maxW={"7xl"}
         wrap={"wrap"}
       >
-        <Flex direction={"column"} w={"100%"} p={"2"} bg={"white"} rounded={"md"}>
+        <Flex
+          direction={"column"}
+          w={"100%"}
+          p={"2"}
+          bg={"white"}
+          rounded={"md"}
+        >
           {/* Page header */}
           <Flex direction={"column"} p={"2"} pt={"4"} pb={"4"}>
             <Flex direction={"row"} align={"center"} justify={"space-between"}>
@@ -1013,7 +1099,13 @@ const AttributePage = () => {
               </Text>
             </Flex>
 
-            <Flex direction={"row"} gap={"2"} w={"100%"} maxW={"4xl"} wrap={["wrap", "nowrap"]}>
+            <Flex
+              direction={"row"}
+              gap={"2"}
+              w={"100%"}
+              maxW={"4xl"}
+              wrap={["wrap", "nowrap"]}
+            >
               <Flex direction={"column"} gap={"4"} wrap={["wrap", "nowrap"]}>
                 <FormControl isRequired>
                   <FormLabel>Name</FormLabel>
@@ -1026,7 +1118,9 @@ const AttributePage = () => {
                   {!isNameError ? (
                     <FormHelperText>Name of the Attribute.</FormHelperText>
                   ) : (
-                    <FormErrorMessage>A name must be specified for the Attribute.</FormErrorMessage>
+                    <FormErrorMessage>
+                      A name must be specified for the Attribute.
+                    </FormErrorMessage>
                   )}
                 </FormControl>
 
@@ -1038,9 +1132,13 @@ const AttributePage = () => {
                     onChange={(event) => setDescription(event.target.value)}
                   />
                   {!isDescriptionError ? (
-                    <FormHelperText>Description of the Attribute.</FormHelperText>
+                    <FormHelperText>
+                      Description of the Attribute.
+                    </FormHelperText>
                   ) : (
-                    <FormErrorMessage>A description should be provided for the Attribute.</FormErrorMessage>
+                    <FormErrorMessage>
+                      A description should be provided for the Attribute.
+                    </FormErrorMessage>
                   )}
                 </FormControl>
               </Flex>
@@ -1119,7 +1217,9 @@ const AttributePage = () => {
               <ListItem>
                 <Flex gap={"2"} align={"center"}>
                   <Icon name={"entity"} />
-                  <Text>Entity: Used to specify a relation to another Entity.</Text>
+                  <Text>
+                    Entity: Used to specify a relation to another Entity.
+                  </Text>
                 </Flex>
               </ListItem>
             </List>
@@ -1132,12 +1232,14 @@ const AttributePage = () => {
 };
 
 const Create = () => {
-  const [createPage, setCreatePage] = useState("default" as "default" | "entity" | "collection" | "attribute");
+  const [createPage, setCreatePage] = useState(
+    "default" as "default" | "entity" | "collection" | "attribute"
+  );
 
   return (
     <>
       {/* Default landing page for creating metadata */}
-      {_.isEqual(createPage, "default") &&
+      {_.isEqual(createPage, "default") && (
         <Content>
           <Flex
             direction={"column"}
@@ -1147,10 +1249,20 @@ const Create = () => {
             maxW={"7xl"}
             wrap={"wrap"}
           >
-            <Flex direction={"column"} w={"100%"} p={"2"} bg={"white"} rounded={"md"}>
+            <Flex
+              direction={"column"}
+              w={"100%"}
+              p={"2"}
+              bg={"white"}
+              rounded={"md"}
+            >
               {/* Page header */}
               <Flex direction={"column"} p={"4"} pt={"4"} pb={"4"}>
-                <Flex direction={"row"} align={"center"} justify={"space-between"}>
+                <Flex
+                  direction={"row"}
+                  align={"center"}
+                  justify={"space-between"}
+                >
                   <Heading fontWeight={"semibold"}>Create</Heading>
                 </Flex>
               </Flex>
@@ -1167,19 +1279,41 @@ const Create = () => {
                 {/* Entity card */}
                 <Card maxW={"sm"} h={"lg"} variant={"outline"}>
                   <CardHeader>
-                    <Flex gap={"4"} w={"100%"} justify={"center"} align={"center"}>
+                    <Flex
+                      gap={"4"}
+                      w={"100%"}
+                      justify={"center"}
+                      align={"center"}
+                    >
                       <Icon name={"entity"} size={"lg"} />
                       <Heading>Entity</Heading>
                     </Flex>
                   </CardHeader>
                   <CardBody>
                     <Stack divider={<StackDivider />} spacing={"2"}>
-                      <Flex p={"2"} gap={"4"} align={"center"} direction={"column"}>
-                        <Heading size={"xs"} textTransform={"uppercase"}>Description</Heading>
-                        <Text>Create an Entity to group metadata about a physical or digital resource.</Text>
+                      <Flex
+                        p={"2"}
+                        gap={"4"}
+                        align={"center"}
+                        direction={"column"}
+                      >
+                        <Heading size={"xs"} textTransform={"uppercase"}>
+                          Description
+                        </Heading>
+                        <Text>
+                          Create an Entity to group metadata about a physical or
+                          digital resource.
+                        </Text>
                       </Flex>
-                      <Flex p={"2"} gap={"4"} align={"center"} direction={"column"}>
-                        <Heading size={"xs"} textTransform={"uppercase"}>Details</Heading>
+                      <Flex
+                        p={"2"}
+                        gap={"4"}
+                        align={"center"}
+                        direction={"column"}
+                      >
+                        <Heading size={"xs"} textTransform={"uppercase"}>
+                          Details
+                        </Heading>
                         <Flex gap={"2"} wrap={"wrap"}>
                           <Tag colorScheme={"red"}>Name</Tag>
                           <Tag colorScheme={"red"}>Owner</Tag>
@@ -1195,7 +1329,13 @@ const Create = () => {
                   </CardBody>
                   <CardFooter>
                     <Flex w={"100%"} justify={"center"}>
-                      <Button colorScheme={"green"} rightIcon={<Icon name={"add"} />} onClick={() => setCreatePage("entity")}>Create</Button>
+                      <Button
+                        colorScheme={"green"}
+                        rightIcon={<Icon name={"add"} />}
+                        onClick={() => setCreatePage("entity")}
+                      >
+                        Create
+                      </Button>
                     </Flex>
                   </CardFooter>
                 </Card>
@@ -1203,19 +1343,40 @@ const Create = () => {
                 {/* Collection card */}
                 <Card maxW={"sm"} h={"lg"} variant={"outline"}>
                   <CardHeader>
-                    <Flex gap={"4"} w={"100%"} justify={"center"} align={"center"}>
+                    <Flex
+                      gap={"4"}
+                      w={"100%"}
+                      justify={"center"}
+                      align={"center"}
+                    >
                       <Icon name={"collection"} size={"lg"} />
                       <Heading>Collection</Heading>
                     </Flex>
                   </CardHeader>
                   <CardBody>
                     <Stack divider={<StackDivider />} spacing={"2"}>
-                      <Flex p={"2"} gap={"4"} align={"center"} direction={"column"}>
-                        <Heading size={"xs"} textTransform={"uppercase"}>Description</Heading>
-                        <Text>Create a Collection to group and organize Entities.</Text>
+                      <Flex
+                        p={"2"}
+                        gap={"4"}
+                        align={"center"}
+                        direction={"column"}
+                      >
+                        <Heading size={"xs"} textTransform={"uppercase"}>
+                          Description
+                        </Heading>
+                        <Text>
+                          Create a Collection to group and organize Entities.
+                        </Text>
                       </Flex>
-                      <Flex p={"2"} gap={"4"} align={"center"} direction={"column"}>
-                        <Heading size={"xs"} textTransform={"uppercase"}>Details</Heading>
+                      <Flex
+                        p={"2"}
+                        gap={"4"}
+                        align={"center"}
+                        direction={"column"}
+                      >
+                        <Heading size={"xs"} textTransform={"uppercase"}>
+                          Details
+                        </Heading>
                         <Flex gap={"2"}>
                           <Tag colorScheme={"red"}>Name</Tag>
                           <Tag colorScheme={"red"}>Description</Tag>
@@ -1226,7 +1387,13 @@ const Create = () => {
                   </CardBody>
                   <CardFooter>
                     <Flex w={"100%"} justify={"center"}>
-                      <Button colorScheme={"green"} rightIcon={<Icon name={"add"} />} onClick={() => setCreatePage("collection")}>Create</Button>
+                      <Button
+                        colorScheme={"green"}
+                        rightIcon={<Icon name={"add"} />}
+                        onClick={() => setCreatePage("collection")}
+                      >
+                        Create
+                      </Button>
                     </Flex>
                   </CardFooter>
                 </Card>
@@ -1234,19 +1401,41 @@ const Create = () => {
                 {/* Attribute card */}
                 <Card maxW={"sm"} h={"lg"} variant={"outline"}>
                   <CardHeader>
-                    <Flex gap={"4"} w={"100%"} justify={"center"} align={"center"}>
+                    <Flex
+                      gap={"4"}
+                      w={"100%"}
+                      justify={"center"}
+                      align={"center"}
+                    >
                       <Icon name={"attribute"} size={"lg"} />
                       <Heading>Attribute</Heading>
                     </Flex>
                   </CardHeader>
                   <CardBody>
                     <Stack divider={<StackDivider />} spacing={"2"}>
-                      <Flex p={"2"} gap={"4"} align={"center"} direction={"column"}>
-                        <Heading size={"xs"} textTransform={"uppercase"}>Description</Heading>
-                        <Text>Create a template Attribute to standardize reusable components of metadata to be associated with Entities.</Text>
+                      <Flex
+                        p={"2"}
+                        gap={"4"}
+                        align={"center"}
+                        direction={"column"}
+                      >
+                        <Heading size={"xs"} textTransform={"uppercase"}>
+                          Description
+                        </Heading>
+                        <Text>
+                          Create a template Attribute to standardize reusable
+                          components of metadata to be associated with Entities.
+                        </Text>
                       </Flex>
-                      <Flex p={"2"} gap={"4"} align={"center"} direction={"column"}>
-                        <Heading size={"xs"} textTransform={"uppercase"}>Details</Heading>
+                      <Flex
+                        p={"2"}
+                        gap={"4"}
+                        align={"center"}
+                        direction={"column"}
+                      >
+                        <Heading size={"xs"} textTransform={"uppercase"}>
+                          Details
+                        </Heading>
                         <Flex gap={"2"} wrap={"wrap"}>
                           <Tag colorScheme={"red"}>Name</Tag>
                           <Tag colorScheme={"red"}>Description</Tag>
@@ -1257,7 +1446,13 @@ const Create = () => {
                   </CardBody>
                   <CardFooter>
                     <Flex w={"100%"} justify={"center"}>
-                      <Button colorScheme={"green"} rightIcon={<Icon name={"add"} />} onClick={() => setCreatePage("attribute")}>Create</Button>
+                      <Button
+                        colorScheme={"green"}
+                        rightIcon={<Icon name={"add"} />}
+                        onClick={() => setCreatePage("attribute")}
+                      >
+                        Create
+                      </Button>
                     </Flex>
                   </CardFooter>
                 </Card>
@@ -1265,22 +1460,16 @@ const Create = () => {
             </Flex>
           </Flex>
         </Content>
-      }
+      )}
 
       {/* Create an Entity */}
-      {_.isEqual(createPage, "entity") &&
-        <EntityPage />
-      }
+      {_.isEqual(createPage, "entity") && <EntityPage />}
 
       {/* Create a Collection */}
-      {_.isEqual(createPage, "collection") &&
-        <CollectionPage />
-      }
+      {_.isEqual(createPage, "collection") && <CollectionPage />}
 
       {/* Create an Attribute */}
-      {_.isEqual(createPage, "attribute") &&
-        <AttributePage />
-      }
+      {_.isEqual(createPage, "attribute") && <AttributePage />}
     </>
   );
 };

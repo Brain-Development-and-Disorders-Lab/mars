@@ -43,20 +43,32 @@ const AttributeCard = (props: AttributeCardProps) => {
   const [parameters, setParameters] = useState(props.attribute.parameters);
 
   // State to store original values
-  const [defaultDescription, _setDefaultDescription] = useState(props.attribute.description);
-  const [defaultParameters, _setDefaultParameters] = useState(props.attribute.parameters);
+  const [defaultDescription, _setDefaultDescription] = useState(
+    props.attribute.description
+  );
+  const [defaultParameters, _setDefaultParameters] = useState(
+    props.attribute.parameters
+  );
 
   return (
     <Card maxW={"md"} background={"white"} variant={"outline"}>
       <CardHeader p={"2"}>
-        <Flex p={"2"} align={"center"} m={"none"} justify={"space-between"} gap={"4"}>
+        <Flex
+          p={"2"}
+          align={"center"}
+          m={"none"}
+          justify={"space-between"}
+          gap={"4"}
+        >
           <Flex align={"center"} gap={"2"}>
             <Icon name={"attribute"} size={"md"} />
-            <Heading size={"md"} noOfLines={1}>{props.attribute.name}</Heading>
+            <Heading size={"md"} noOfLines={1}>
+              {props.attribute.name}
+            </Heading>
           </Flex>
 
           <Flex align={"center"} gap={"2"}>
-            {(isEditing && props.removeCallback) &&
+            {isEditing && props.removeCallback && (
               <Button
                 key={`remove-${props.attribute._id}`}
                 rightIcon={<Icon name={"delete"} />}
@@ -65,9 +77,12 @@ const AttributeCard = (props: AttributeCardProps) => {
               >
                 Remove
               </Button>
-            }
+            )}
 
-            <Button onClick={onOpen} rightIcon={<Icon name={isEditing ? "edit" : "info"} />}>
+            <Button
+              onClick={onOpen}
+              rightIcon={<Icon name={isEditing ? "edit" : "info"} />}
+            >
               {isEditing ? "Edit" : "View"}
             </Button>
           </Flex>
@@ -92,10 +107,7 @@ const AttributeCard = (props: AttributeCardProps) => {
                         <Icon name={"p_date"} />
                         <TagLabel>
                           <Flex align={"center"} gap={"1"}>
-                            <Flex
-                              p={"1"}
-                              m={"1"}
-                            >
+                            <Flex p={"1"} m={"1"}>
                               {parameter.name}
                             </Flex>
                           </Flex>
@@ -109,10 +121,7 @@ const AttributeCard = (props: AttributeCardProps) => {
                         <Icon name={"entity"} />
                         <TagLabel>
                           <Flex align={"center"} gap={"1"}>
-                            <Flex
-                              p={"1"}
-                              m={"1"}
-                            >
+                            <Flex p={"1"} m={"1"}>
                               {parameter.name}
                             </Flex>
                           </Flex>
@@ -126,10 +135,7 @@ const AttributeCard = (props: AttributeCardProps) => {
                         <Icon name={"p_number"} />
                         <TagLabel>
                           <Flex align={"center"} gap={"1"}>
-                            <Flex
-                              p={"1"}
-                              m={"1"}
-                            >
+                            <Flex p={"1"} m={"1"}>
                               {parameter.name}
                             </Flex>
                           </Flex>
@@ -144,10 +150,7 @@ const AttributeCard = (props: AttributeCardProps) => {
                         <Icon name={"p_url"} />
                         <TagLabel>
                           <Flex align={"center"} gap={"1"}>
-                            <Flex
-                              p={"1"}
-                              m={"1"}
-                            >
+                            <Flex p={"1"} m={"1"}>
                               {parameter.name}
                             </Flex>
                           </Flex>
@@ -161,10 +164,7 @@ const AttributeCard = (props: AttributeCardProps) => {
                         <Icon name={"p_text"} />
                         <TagLabel>
                           <Flex align={"center"} gap={"1"}>
-                            <Flex
-                              p={"1"}
-                              m={"1"}
-                            >
+                            <Flex p={"1"} m={"1"}>
                               {parameter.name}
                             </Flex>
                           </Flex>
@@ -180,7 +180,13 @@ const AttributeCard = (props: AttributeCardProps) => {
       </CardBody>
 
       <ScaleFade initialScale={0.9} in={isOpen}>
-        <Modal onEsc={onClose} onClose={onClose} isOpen={isOpen} size={"3xl"} isCentered>
+        <Modal
+          onEsc={onClose}
+          onClose={onClose}
+          isOpen={isOpen}
+          size={"3xl"}
+          isCentered
+        >
           <ModalOverlay />
 
           <ModalContent p={"2"} m={"2"}>
@@ -191,9 +197,18 @@ const AttributeCard = (props: AttributeCardProps) => {
                 align={"center"}
                 wrap={"wrap"}
               >
-                <Flex align={"center"} gap={"4"} shadow={"lg"} p={"2"} border={"2px"} rounded={"md"}>
+                <Flex
+                  align={"center"}
+                  gap={"4"}
+                  shadow={"lg"}
+                  p={"2"}
+                  border={"2px"}
+                  rounded={"md"}
+                >
                   <Icon name={"attribute"} size={"lg"} />
-                  <Heading fontWeight={"semibold"} size={"md"}>{props.attribute.name}</Heading>
+                  <Heading fontWeight={"semibold"} size={"md"}>
+                    {props.attribute.name}
+                  </Heading>
                 </Flex>
               </Flex>
               <ModalCloseButton />
@@ -212,7 +227,10 @@ const AttributeCard = (props: AttributeCardProps) => {
                     />
                   )
                 ) : (
-                  <Input value={description} onChange={(event) => setDescription(event.target.value)} />
+                  <Input
+                    value={description}
+                    onChange={(event) => setDescription(event.target.value)}
+                  />
                 )}
               </Flex>
 
@@ -232,14 +250,18 @@ const AttributeCard = (props: AttributeCardProps) => {
                   justify={"center"}
                 >
                   {parameters && parameters.length > 0 ? (
-                    <ParameterGroup parameters={parameters} viewOnly={!isEditing} setParameters={setParameters} />
+                    <ParameterGroup
+                      parameters={parameters}
+                      viewOnly={!isEditing}
+                      setParameters={setParameters}
+                    />
                   ) : (
                     <Text>No parameters.</Text>
                   )}
                 </Flex>
               </Flex>
 
-              {isEditing &&
+              {isEditing && (
                 <Flex direction={"row"} justify={"center"} gap={"4"}>
                   <Button
                     colorScheme={"red"}
@@ -268,13 +290,20 @@ const AttributeCard = (props: AttributeCardProps) => {
                       onClose();
 
                       // Run the 'done' action (if specified)
-                      props.doneCallback ? props.doneCallback({ _id: props.attribute._id, name: props.attribute.name, description: description, parameters: parameters}) : {};
+                      props.doneCallback
+                        ? props.doneCallback({
+                            _id: props.attribute._id,
+                            name: props.attribute.name,
+                            description: description,
+                            parameters: parameters,
+                          })
+                        : {};
                     }}
                   >
                     Done
                   </Button>
                 </Flex>
-              }
+              )}
             </ModalBody>
           </ModalContent>
         </Modal>

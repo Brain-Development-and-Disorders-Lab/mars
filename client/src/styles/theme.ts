@@ -4,8 +4,8 @@ export const theme = extendTheme({
   styles: {
     global: () => ({
       body: {
-        minH: "100vh"
-      }
-    })
+        minH: "100vh",
+      },
+    }),
   },
 });
