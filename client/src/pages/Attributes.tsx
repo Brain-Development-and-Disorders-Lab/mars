@@ -1,10 +1,11 @@
+// React
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+
+// Existing and custom components
 import {
   Button,
   Flex,
   Heading,
-  Icon,
   Table,
   TableContainer,
   Tbody,
@@ -15,20 +16,21 @@ import {
   Tr,
   useToast,
 } from "@chakra-ui/react";
-import { ChevronRightIcon } from "@chakra-ui/icons";
-import { BsGear } from "react-icons/bs";
-
-// Custom components
 import Error from "@components/Error";
+import Icon from "@components/Icon";
 import Loading from "@components/Loading";
 import { Warning } from "@components/Label";
 import { Content } from "@components/Container";
 
-// Database and models
-import { getData } from "@database/functions";
+// Existing and custom types
 import { AttributeModel } from "@types";
 
+// Utility functions and libraries
+import { getData } from "@database/functions";
 import _ from "lodash";
+
+// Routing and navigation
+import { useNavigate } from "react-router-dom";
 
 const Attributes = () => {
   const navigate = useNavigate();
@@ -90,7 +92,7 @@ const Attributes = () => {
                 align={"center"}
               >
                 <Flex align={"center"} gap={"4"}>
-                  <Icon as={BsGear} w={"8"} h={"8"} />
+                  <Icon name={"attribute"} size={"lg"} />
                   <Heading fontWeight={"semibold"}>Attributes</Heading>
                 </Flex>
               </Flex>
@@ -137,7 +139,7 @@ const Attributes = () => {
                                 <Button
                                   key={`view-attribute-${attribute._id}`}
                                   colorScheme={"blackAlpha"}
-                                  rightIcon={<ChevronRightIcon />}
+                                  rightIcon={<Icon name={"c_right"} />}
                                   onClick={() =>
                                     navigate(`/attributes/${attribute._id}`)
                                   }

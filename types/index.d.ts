@@ -185,6 +185,50 @@ export type DataTableProps = {
   editable?: boolean;
 };
 
+// Icon component
+export type IconNames =
+  // Default
+  "unknown" |
+
+  // Locations
+  "dashboard" |
+  "entity" |
+  "collection" |
+  "attribute" |
+
+  // Signal and action icons
+  "activity" |
+  "check" |
+  "info" |
+  "search" |
+  "add" |
+  "edit" |
+  "delete" |
+  "download" |
+  "cross" |
+  "list" |
+  "warning" |
+  "exclamation" |
+  "reload" |
+  "graph" |
+
+  // Parameters
+  "p_date" |
+  "p_text" |
+  "p_number" |
+  "p_url" |
+
+  // Arrows
+  "a_right" |
+
+  // Chevrons
+  "c_left" |
+  "c_double_left" |
+  "c_right" |
+  "c_double_right" |
+  "c_up" |
+  "c_down";
+
 // Query types
 export type QueryToken = "&" | "|" | "!" | "=";
 export type QueryOperator = "AND" | "OR" | "NOT" | "INCLUDES";

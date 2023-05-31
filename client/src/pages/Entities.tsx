@@ -1,33 +1,32 @@
 // React
 import React, { useEffect, useState } from "react";
+
+// Existing and custom components
 import {
   Flex,
   Heading,
   Text,
   useToast,
   Button,
-  Icon,
   useBreakpoint,
 } from "@chakra-ui/react";
-import { BsBox, BsChevronRight } from "react-icons/bs";
 import { createColumnHelper } from "@tanstack/react-table";
+import { Content } from "@components/Container";
+import Icon from "@components/Icon";
+import Error from "@components/Error";
+import Loading from "@components/Loading";
+import DataTable from "@components/DataTable";
 
-// Navigation
-import { useNavigate } from "react-router-dom";
-
-// Database and models
-import { getData } from "@database/functions";
+// Existing and custom types
 import { EntityModel } from "@types";
 
-// Utility libraries
+// Routing and navigation
+import { useNavigate } from "react-router-dom";
+
+// Utility functions and libraries
+import { getData } from "@database/functions";
 import _ from "lodash";
 import dayjs from "dayjs";
-
-// Custom components
-import { Content } from "@components/Container";
-import Loading from "@components/Loading";
-import Error from "@components/Error";
-import DataTable from "@components/DataTable";
 
 const Entities = () => {
   const navigate = useNavigate();
@@ -97,7 +96,7 @@ const Entities = () => {
           <Button
             key={`view-entity-${info.getValue()}`}
             colorScheme={"blackAlpha"}
-            rightIcon={<Icon as={BsChevronRight} />}
+            rightIcon={<Icon name={"c_right"} />}
             onClick={() => navigate(`/entities/${info.getValue()}`)}
           >
             View
@@ -139,7 +138,7 @@ const Entities = () => {
                 align={"center"}
               >
                 <Flex align={"center"} gap={"4"}>
-                  <Icon as={BsBox} w={"8"} h={"8"} />
+                  <Icon name={"entity"} size={"lg"} />
                   <Heading fontWeight={"semibold"}>Entities</Heading>
                 </Flex>
               </Flex>

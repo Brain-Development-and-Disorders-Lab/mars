@@ -1,15 +1,13 @@
+// React
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import {
   Button,
   Flex,
   Heading,
-  Icon,
   Table,
   TableContainer,
   Tag,
   TagLabel,
-  TagRightIcon,
   Tbody,
   Td,
   Text,
@@ -18,19 +16,20 @@ import {
   Tr,
   useToast,
 } from "@chakra-ui/react";
-import { ChevronRightIcon, WarningIcon } from "@chakra-ui/icons";
-import { BsGrid } from "react-icons/bs";
-
-// Custom components
+import { Content } from "@components/Container";
+import Icon from "@components/Icon";
 import Error from "@components/Error";
 import Loading from "@components/Loading";
-import { Content } from "@components/Container";
 
 // Database and models
-import { getData } from "@database/functions";
 import { CollectionModel } from "@types";
 
+// Utility functions and types
+import { getData } from "@database/functions";
 import _ from "lodash";
+
+// Routing and navigation
+import { useNavigate } from "react-router-dom";
 
 const Collections = () => {
   const toast = useToast();
@@ -93,7 +92,7 @@ const Collections = () => {
                 align={"center"}
               >
                 <Flex align={"center"} gap={"4"}>
-                  <Icon as={BsGrid} w={"8"} h={"8"} />
+                  <Icon name={"collection"} size={"lg"} />
                   <Heading fontWeight={"semibold"}>Collections</Heading>
                 </Flex>
               </Flex>
@@ -129,7 +128,7 @@ const Collections = () => {
                                   colorScheme={"orange"}
                                 >
                                   <TagLabel>Not specified</TagLabel>
-                                  <TagRightIcon as={WarningIcon} />
+                                  <Icon name={"warning"} />
                                 </Tag>
                               ) : (
                                 <Text>{collection.name}</Text>
@@ -143,7 +142,7 @@ const Collections = () => {
                                   colorScheme={"orange"}
                                 >
                                   <TagLabel>Not specified</TagLabel>
-                                  <TagRightIcon as={WarningIcon} />
+                                  <Icon name={"warning"} />
                                 </Tag>
                               ) : (
                                 <Text noOfLines={2}>{collection.description}</Text>
@@ -157,7 +156,7 @@ const Collections = () => {
                                   colorScheme={"orange"}
                                 >
                                   <TagLabel>Not specified</TagLabel>
-                                  <TagRightIcon as={WarningIcon} />
+                                  <Icon name={"warning"} />
                                 </Tag>
                               ) : (
                                 <Text>{collection.owner}</Text>
@@ -169,9 +168,10 @@ const Collections = () => {
                                   size={"md"}
                                   key={`warn-${collection._id}`}
                                   colorScheme={"orange"}
+                                  gap={"2"}
                                 >
                                   <TagLabel>Empty</TagLabel>
-                                  <TagRightIcon as={WarningIcon} />
+                                  <Icon name={"warning"} />
                                 </Tag>
                               ) : (
                                 <Text noOfLines={1}>{collection.entities.length}</Text>
@@ -182,7 +182,7 @@ const Collections = () => {
                                 <Button
                                   key={`view-collection-${collection._id}`}
                                   colorScheme={"blackAlpha"}
-                                  rightIcon={<ChevronRightIcon />}
+                                  rightIcon={<Icon name={"c_right"} />}
                                   onClick={() =>
                                     navigate(`/collections/${collection._id}`)
                                   }

@@ -1,5 +1,7 @@
 // React
 import React, { useEffect, useState } from "react";
+
+// Existing and custom components
 import {
   Button,
   Flex,
@@ -14,7 +16,6 @@ import {
   Link,
   useToast,
   Modal,
-  Icon,
   Thead,
   Td,
   Textarea,
@@ -34,7 +35,6 @@ import {
   PopoverArrow,
   Tag,
   TagLabel,
-  TagRightIcon,
   FormControl,
   FormLabel,
   Select,
@@ -46,16 +46,21 @@ import {
   FormHelperText,
   FormErrorMessage,
 } from "@chakra-ui/react";
-import {
-  WarningIcon,
-} from "@chakra-ui/icons";
-import { AiOutlineEdit } from "react-icons/ai";
-import { BsBox, BsChevronRight, BsCheckLg, BsDashLg, BsDiagram2, BsDownload, BsPlusLg, BsTrash, BsXLg } from "react-icons/bs";
+import { Content } from "@components/Container";
+import AttributeCard from "@components/AttributeCard";
+import Error from "@components/Error";
+import Graph from "@components/Graph";
+import Icon from "@components/Icon";
+import Linky from "@components/Linky";
+import Loading from "@components/Loading";
+import ParameterGroup from "@components/ParameterGroup";
 
-// Navigation
-import { useParams, useNavigate } from "react-router-dom";
+// Existing and custom types
+import { AttributeModel, CollectionModel, EntityModel, Parameters } from "@types";
 
-// Utility libraries
+// Utility functions and libraries
+import { deleteData, getData, postData } from "src/database/functions";
+import { validateParameters } from "src/functions";
 import _ from "lodash";
 import dayjs from "dayjs";
 import consola from "consola";
@@ -63,21 +68,10 @@ import FileSaver from "file-saver";
 import slugify from "slugify";
 import { nanoid } from "nanoid";
 
-// Database and models
-import { deleteData, getData, postData } from "src/database/functions";
-import { AttributeModel, CollectionModel, EntityModel, Parameters } from "@types";
-import { validateParameters } from "src/functions";
+// Routing and navigation
+import { useParams, useNavigate } from "react-router-dom";
 
-// Custom components
-import Linky from "src/components/Linky";
-import AttributeCard from "src/components/AttributeCard";
-import Graph from "src/components/Graph";
-import Loading from "src/components/Loading";
-import Error from "@components/Error";
-import { Content } from "@components/Container";
-import ParameterGroup from "@components/ParameterGroup";
-
-export const Entity = () => {
+const Entity = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const toast = useToast();
@@ -516,7 +510,7 @@ export const Entity = () => {
               gap={"4"}
             >
               <Flex align={"center"} gap={"4"} shadow={"lg"} p={"2"} border={"2px"} rounded={"md"} bg={"white"}>
-                <Icon as={BsBox} w={"8"} h={"8"} />
+                <Icon name={"entity"} size={"lg"} />
                 <Heading fontWeight={"semibold"}>{entityData.name}</Heading>
               </Flex>
 
@@ -525,7 +519,7 @@ export const Entity = () => {
                 {editing &&
                   <Popover>
                     <PopoverTrigger>
-                      <Button colorScheme={"red"} rightIcon={<Icon as={BsTrash} />}>
+                      <Button colorScheme={"red"} rightIcon={<Icon name={"delete"} />}>
                         Delete
                       </Button>
                     </PopoverTrigger>
@@ -538,7 +532,7 @@ export const Entity = () => {
                         <Flex direction={"row"} p={"2"} justify={"center"}>
                           <Button
                             colorScheme={"green"}
-                            rightIcon={<Icon as={BsCheckLg} />}
+                            rightIcon={<Icon name={"check"} />}
                             onClick={handleDeleteClick}
                           >
                             Confirm
@@ -552,14 +546,14 @@ export const Entity = () => {
                   onClick={handleEditClick}
                   colorScheme={editing ? "green" : "gray"}
                   rightIcon={
-                    editing ? <Icon as={BsCheckLg} /> : <Icon as={AiOutlineEdit} />
+                    editing ? <Icon name={"check"} /> : <Icon name={"edit"} />
                   }
                 >
                   {editing ? "Done" : "Edit"}
                 </Button>
                 <Button
                   onClick={onGraphOpen}
-                  rightIcon={<Icon as={BsDiagram2} />}
+                  rightIcon={<Icon name={"graph"} />}
                   colorScheme={"orange"}
                   isDisabled={editing}
                 >
@@ -567,7 +561,7 @@ export const Entity = () => {
                 </Button>
                 <Button
                   onClick={handleExportClick}
-                  rightIcon={<Icon as={BsDownload} />}
+                  rightIcon={<Icon name={"download"} />}
                   colorScheme={"blue"}
                   isDisabled={editing}
                 >
@@ -611,11 +605,12 @@ export const Entity = () => {
                             {_.isEqual(entityData.owner, "") ? (
                               <Tag
                                 size={"md"}
+                                gap={"2"}
                                 key={`warn-${entityData._id}`}
                                 colorScheme={"orange"}
                               >
                                 <TagLabel>Not specified</TagLabel>
-                                <TagRightIcon as={WarningIcon} />
+                                <Icon name={"warning"} />
                               </Tag>
                             ) : (
                               <Text>
@@ -652,7 +647,7 @@ export const Entity = () => {
                     {editing ? (
                       <Button
                         colorScheme={"green"}
-                        rightIcon={<Icon as={BsPlusLg} />}
+                        rightIcon={<Icon name={"add"} />}
                         disabled={!editing}
                         onClick={onAddCollectionsOpen}
                       >
@@ -686,7 +681,7 @@ export const Entity = () => {
                                     {editing && (
                                       <Button
                                         key={`remove-${collection}`}
-                                        rightIcon={<Icon as={BsDashLg} />}
+                                        rightIcon={<Icon name={"delete"} />}
                                         colorScheme={"red"}
                                         onClick={() => {
                                           removeCollection(collection);
@@ -699,7 +694,7 @@ export const Entity = () => {
                                     {!editing && (
                                       <Button
                                         key={`view-${collection}`}
-                                        rightIcon={<Icon as={BsChevronRight} />}
+                                        rightIcon={<Icon name={"c_right"} />}
                                         colorScheme={"blackAlpha"}
                                         onClick={() => navigate(`/collections/${collection}`)}
                                       >
@@ -734,7 +729,7 @@ export const Entity = () => {
                     {editing ? (
                       <Button
                         colorScheme={"green"}
-                        rightIcon={<Icon as={BsPlusLg} />}
+                        rightIcon={<Icon name={"add"} />}
                         disabled={!editing}
                         onClick={onAddOriginsOpen}
                       >
@@ -767,7 +762,7 @@ export const Entity = () => {
                                     {editing && (
                                       <Button
                                         key={`remove-${origin.id}`}
-                                        rightIcon={<Icon as={BsDashLg} />}
+                                        rightIcon={<Icon name={"delete"} />}
                                         colorScheme={"red"}
                                         onClick={() => {
                                           removeOrigin(origin.id);
@@ -780,7 +775,7 @@ export const Entity = () => {
                                     {!editing && (
                                       <Button
                                         key={`view-${origin.id}`}
-                                        rightIcon={<Icon as={BsChevronRight} />}
+                                        rightIcon={<Icon name={"c_right"} />}
                                         colorScheme={"blackAlpha"}
                                         onClick={() => navigate(`/entities/${origin.id}`)}
                                       >
@@ -805,7 +800,7 @@ export const Entity = () => {
                     {editing ? (
                       <Button
                         colorScheme={"green"}
-                        rightIcon={<Icon as={BsPlusLg} />}
+                        rightIcon={<Icon name={"add"} />}
                         disabled={!editing}
                         onClick={onAddProductsOpen}
                       >
@@ -838,7 +833,7 @@ export const Entity = () => {
                                     {editing && (
                                       <Button
                                         key={`remove-${product.id}`}
-                                        rightIcon={<Icon as={BsDashLg} />}
+                                        rightIcon={<Icon name={"delete"} />}
                                         colorScheme={"red"}
                                         onClick={() => {
                                           removeProduct(product.id);
@@ -851,7 +846,7 @@ export const Entity = () => {
                                     {!editing && (
                                       <Button
                                         key={`view-${product.id}`}
-                                        rightIcon={<Icon as={BsChevronRight} />}
+                                        rightIcon={<Icon name={"c_right"} />}
                                         colorScheme={"blackAlpha"}
                                         onClick={() => navigate(`/entities/${product.id}`)}
                                       >
@@ -894,7 +889,7 @@ export const Entity = () => {
                   {editing ? (
                     <Button
                       colorScheme={"green"}
-                      rightIcon={<Icon as={BsPlusLg} />}
+                      rightIcon={<Icon name={"add"} />}
                       disabled={!editing}
                       onClick={onAddAttributesOpen}
                     >
@@ -1038,7 +1033,7 @@ export const Entity = () => {
                       <Button
                         colorScheme={"red"}
                         variant={"outline"}
-                        rightIcon={<BsXLg />}
+                        rightIcon={<Icon name={"cross"} />}
                         onClick={onAddAttributesClose}
                       >
                         Cancel
@@ -1046,7 +1041,7 @@ export const Entity = () => {
 
                       <Button
                         colorScheme={"green"}
-                        rightIcon={<Icon as={BsCheckLg} />}
+                        rightIcon={<Icon name={"check"} />}
                         disabled={isAttributeError}
                         onClick={() => {
                           addAttribute();
@@ -1134,7 +1129,7 @@ export const Entity = () => {
                   <Button
                     colorScheme={"red"}
                     variant={"outline"}
-                    rightIcon={<BsXLg />}
+                    rightIcon={<Icon name={"cross"} />}
                     onClick={onAddCollectionsClose}
                   >
                     Cancel
@@ -1142,7 +1137,7 @@ export const Entity = () => {
 
                   <Button
                     colorScheme={"green"}
-                    rightIcon={<Icon as={BsCheckLg} />}
+                    rightIcon={<Icon name={"check"} />}
                     onClick={() => {
                       addCollections(selectedCollections);
                     }}
@@ -1230,7 +1225,7 @@ export const Entity = () => {
                   <Button
                     colorScheme={"red"}
                     variant={"outline"}
-                    rightIcon={<BsXLg />}
+                    rightIcon={<Icon name={"cross"} />}
                     onClick={onAddProductsClose}
                   >
                     Cancel
@@ -1238,7 +1233,7 @@ export const Entity = () => {
 
                   <Button
                     colorScheme={"green"}
-                    rightIcon={<Icon as={BsCheckLg} />}
+                    rightIcon={<Icon name={"check"} />}
                     onClick={() => {
                       if (id) {
                         // Add the Entities to the Collection
@@ -1329,7 +1324,7 @@ export const Entity = () => {
                   <Button
                     colorScheme={"red"}
                     variant={"outline"}
-                    rightIcon={<BsXLg />}
+                    rightIcon={<Icon name={"cross"} />}
                     onClick={onAddOriginsClose}
                   >
                     Cancel
@@ -1337,7 +1332,7 @@ export const Entity = () => {
 
                   <Button
                     colorScheme={"green"}
-                    rightIcon={<Icon as={BsCheckLg} />}
+                    rightIcon={<Icon name={"check"} />}
                     onClick={() => {
                       if (id) {
                         // Add the Entities to the Collection
@@ -1441,7 +1436,7 @@ export const Entity = () => {
                   <Button
                     colorScheme={"green"}
                     onClick={() => handleDownloadClick()}
-                    rightIcon={<Icon as={BsDownload} />}
+                    rightIcon={<Icon name={"download"} />}
                   >
                     Download
                   </Button>

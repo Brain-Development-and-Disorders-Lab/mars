@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+
+// Existing and custom components
 import {
   Button,
   Flex,
   Heading,
-  Icon,
   Text,
   useToast,
   Spacer,
@@ -12,23 +12,26 @@ import {
   ListItem,
   useBreakpoint,
 } from "@chakra-ui/react";
-import { BsBox, BsChevronRight, BsGrid, BsLightning, BsPencil, BsPlusLg, BsTrash } from "react-icons/bs";
 import { createColumnHelper } from "@tanstack/react-table";
-
 import { Content } from "@components/Container";
 import DataTable from "@components/DataTable";
-import Loading from "@components/Loading";
+import Icon from "@components/Icon";
 import Error from "@components/Error";
 import Linky from "@components/Linky";
+import Loading from "@components/Loading";
 
-import { getData } from "src/database/functions";
+// Existing and custom types
 import { CollectionModel, EntityModel, UpdateModel } from "@types";
 
+// Utility functions and libraries
+import { getData } from "src/database/functions";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 dayjs.extend(relativeTime);
-
 import _ from "lodash";
+
+// Routing and navigation
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
   // Enable navigation
@@ -142,7 +145,7 @@ const Dashboard = () => {
             <Button
               key={`view-entity-${info.getValue()}`}
               colorScheme={"blackAlpha"}
-              rightIcon={<Icon as={BsChevronRight} />}
+              rightIcon={<Icon name={"c_right"} />}
               onClick={() => navigate(`/entities/${info.getValue()}`)}
             >
               View
@@ -174,7 +177,7 @@ const Dashboard = () => {
             <Button
               key={`view-entity-${info.getValue()}`}
               colorScheme={"blackAlpha"}
-              rightIcon={<Icon as={BsChevronRight} />}
+              rightIcon={<Icon name={"c_right"} />}
               onClick={() => navigate(`/collections/${info.getValue()}`)}
             >
               View
@@ -212,7 +215,7 @@ const Dashboard = () => {
                 {/* Collections heading */}
                 <Flex direction={"row"} justify={"space-between"} align={"center"}>
                   <Flex align={"center"} gap={"4"} p={"2"}>
-                    <Icon as={BsGrid} w={"8"} h={"8"} />
+                    <Icon name={"collection"} size={"lg"} />
                     <Heading fontWeight={"semibold"}>Collections</Heading>
                   </Flex>
                 </Flex>
@@ -230,7 +233,7 @@ const Dashboard = () => {
                   <Button
                     key={`view-collection-all`}
                     colorScheme={"blackAlpha"}
-                    rightIcon={<BsChevronRight />}
+                    rightIcon={<Icon name={"c_right"} />}
                     onClick={() => navigate(`/collections`)}
                   >
                     View All
@@ -250,7 +253,7 @@ const Dashboard = () => {
                 {/* Entities heading */}
                 <Flex direction={"row"} justify={"space-between"} align={"center"}>
                   <Flex align={"center"} gap={"4"} p={"2"}>
-                    <Icon as={BsBox} w={"8"} h={"8"} />
+                    <Icon name={"entity"} size={"lg"} />
                     <Heading fontWeight={"semibold"}>Entities</Heading>
                   </Flex>
                 </Flex>
@@ -268,7 +271,7 @@ const Dashboard = () => {
                   <Button
                     key={`view-entity-all`}
                     colorScheme={"blackAlpha"}
-                    rightIcon={<BsChevronRight />}
+                    rightIcon={<Icon name={"c_right"} />}
                     onClick={() => navigate(`/entities`)}
                   >
                     View All
@@ -289,7 +292,7 @@ const Dashboard = () => {
               >
                 {/* Activity heading */}
                 <Flex align={"center"} gap={"4"} p={"2"}>
-                  <Icon as={BsLightning} w={"8"} h={"8"} />
+                  <Icon name={"activity"} size={"lg"} />
                   <Heading fontWeight={"semibold"}>Activity</Heading>
                 </Flex>
 
@@ -298,23 +301,21 @@ const Dashboard = () => {
                   {updateData.length > 0 ? (
                     updateData.slice(0, 10).map((update) => {
                       // Configure the badge
-                      const iconSize = "3";
-                      const iconColor = "white";
                       let operationBadgeColor = "green.400";
-                      let operationIcon = <Icon as={BsBox} w={iconSize} h={iconSize} color={iconColor} />;
+                      let operationIcon = <Icon name={"entity"} color={"white"} />;
 
                       switch (update.type) {
                         case "create":
                           operationBadgeColor = "green.400";
-                          operationIcon = <Icon as={BsPlusLg} w={iconSize} h={iconSize} color={iconColor} />;
+                          operationIcon = <Icon name={"add"} color={"white"} />;
                           break;
                         case "update":
                           operationBadgeColor = "blue.400";
-                          operationIcon = <Icon as={BsPencil} w={iconSize} h={iconSize} color={iconColor} />;
+                          operationIcon = <Icon name={"edit"} color={"white"} />;
                           break;
                         case "delete":
                           operationBadgeColor = "red.400";
-                          operationIcon = <Icon as={BsTrash} w={iconSize} h={iconSize} color={iconColor} />;
+                          operationIcon = <Icon name={"delete"} color={"white"} />;
                           break;
                       }
 

@@ -3,9 +3,10 @@ import React from "react";
 
 // Existing components and icons
 import { Icon as ChakraIcon } from "@chakra-ui/react";
-import { BsArrowClockwise, BsArrowRight, BsBarChart, BsBox, BsCalendarWeek, BsCheckLg, BsChevronDoubleLeft, BsChevronDoubleRight, BsChevronDown, BsChevronLeft, BsChevronRight, BsChevronUp, BsExclamationOctagon, BsFillExclamationTriangleFill, BsGraphUp, BsGrid, BsInfoCircle, BsLink45Deg, BsList, BsPencilSquare, BsPlus, BsQuestionOctagon, BsSearch, BsTag, BsTextareaT, BsTrash, BsXLg } from "react-icons/bs";
+import { BsArrowClockwise, BsArrowRight, BsBarChart, BsBox, BsCalendarWeek, BsCheckLg, BsChevronDoubleLeft, BsChevronDoubleRight, BsChevronDown, BsChevronLeft, BsChevronRight, BsChevronUp, BsDiagram2, BsDownload, BsExclamationOctagon, BsFillExclamationTriangleFill, BsGraphUp, BsGrid, BsInfoCircle, BsLightning, BsLink45Deg, BsList, BsPencilSquare, BsPlusLg, BsQuestionOctagon, BsSearch, BsTag, BsTextareaT, BsTrash, BsXLg } from "react-icons/bs";
 
-// Custom types
+// Existing and custom types
+import { IconNames } from "@types";
 import { IconType } from "react-icons";
 
 // Utility functions and libraries
@@ -23,17 +24,20 @@ const SYSTEM_ICONS: {[k: string]: IconType} = {
   "attribute": BsTag,
 
   // Signal and action icons
+  "activity": BsLightning,
   "check": BsCheckLg,
   "info": BsInfoCircle,
   "search": BsSearch,
-  "add": BsPlus,
+  "add": BsPlusLg,
   "edit": BsPencilSquare,
   "delete": BsTrash,
+  "download": BsDownload,
   "cross": BsXLg,
   "list": BsList,
   "warning": BsFillExclamationTriangleFill,
   "exclamation": BsExclamationOctagon,
   "reload": BsArrowClockwise,
+  "graph": BsDiagram2,
 
   // Parameters
   "p_date": BsCalendarWeek,
@@ -53,7 +57,7 @@ const SYSTEM_ICONS: {[k: string]: IconType} = {
   "c_down": BsChevronDown,
 };
 
-const Icon = (props: { name: string, size?: "sm" | "md" | "lg" | "xl" }) => {
+const Icon = (props: { name: IconNames, size?: "sm" | "md" | "lg" | "xl", color?: string }) => {
   // Default to unknown icon type
   let iconComponent = SYSTEM_ICONS["unknown"];
 
@@ -62,36 +66,38 @@ const Icon = (props: { name: string, size?: "sm" | "md" | "lg" | "xl" }) => {
     iconComponent = SYSTEM_ICONS[props.name];
   }
 
+  // Set the icon color if specified
+  const iconColor = !_.isUndefined(props.color) ? props.color : "";
+
   // Set the icon sizing if specified
   if (!_.isUndefined(props.size)) {
     switch (props.size) {
       case "sm":
         return (
-          <ChakraIcon as={iconComponent} w={"2"} h={"2"} />
+          <ChakraIcon as={iconComponent} w={"2"} h={"2"} color={iconColor} />
         );
       case "md":
         return (
-          <ChakraIcon as={iconComponent} w={"4"} h={"4"} />
+          <ChakraIcon as={iconComponent} w={"4"} h={"4"} color={iconColor} />
         );
       case "lg":
         return (
-          <ChakraIcon as={iconComponent} w={"8"} h={"8"} />
+          <ChakraIcon as={iconComponent} w={"8"} h={"8"} color={iconColor} />
         );
       case "xl":
         return (
-          <ChakraIcon as={iconComponent} w={"16"} h={"16"} />
+          <ChakraIcon as={iconComponent} w={"16"} h={"16"} color={iconColor} />
         );
       default:
         return (
-          <ChakraIcon as={iconComponent} />
+          <ChakraIcon as={iconComponent} color={iconColor} />
         );
     }
-
   }
 
   // Return icon with default size
   return (
-    <ChakraIcon as={iconComponent} />
+    <ChakraIcon as={iconComponent} color={iconColor} />
   );
 };
 

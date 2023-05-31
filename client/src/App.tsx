@@ -1,13 +1,15 @@
-// React and React Router
+// React
 import React, { ReactElement } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-
-// Chakra UI provider component
-import { ChakraProvider } from "@chakra-ui/react";
 
 // Styling to be applied across the application
 import "./styles/styles.css";
 import "@fontsource/roboto";
+
+// Chakra provider component
+import { ChakraProvider } from "@chakra-ui/react";
+
+// Routing and navigation
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 // Custom components
 import { Page } from "@components/Container";
@@ -40,10 +42,10 @@ import { DEVELOPER_MODE } from "./variables";
 import { theme } from "./styles/theme";
 
 /**
- *
+ * Base App component containing the page layout and page routing components
  * @return {ReactElement}
  */
-export const App = (): ReactElement => {
+const App = (): ReactElement => {
   // Authentication token
   const [ token, setToken ] = useToken();
 

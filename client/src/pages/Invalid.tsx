@@ -1,6 +1,7 @@
 // React
 import React from "react";
-import { useNavigate } from "react-router-dom";
+
+// Existing and custom components
 import {
   Button,
   Flex,
@@ -9,12 +10,13 @@ import {
   Link,
   Text,
 } from "@chakra-ui/react";
+import { Content } from "@components/Container";
 
-// Utility libraries
+// Utility functions and libraries
 import _ from "lodash";
 
-// Custom components
-import { Content } from "@components/Container";
+// Routing and navigation
+import { useNavigate } from "react-router-dom";
 
 const Invalid = () => {
   const navigate = useNavigate();

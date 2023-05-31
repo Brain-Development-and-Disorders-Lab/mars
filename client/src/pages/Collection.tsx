@@ -1,12 +1,13 @@
 // React
 import React, { useEffect, useState } from "react";
+
+// Existing and custom components
 import {
   Button,
   Flex,
   FormControl,
   FormLabel,
   Heading,
-  Icon,
   Link,
   Modal,
   ModalCloseButton,
@@ -26,7 +27,6 @@ import {
   Tag,
   TagCloseButton,
   TagLabel,
-  TagRightIcon,
   Tbody,
   Td,
   Text,
@@ -37,30 +37,23 @@ import {
   useDisclosure,
   useToast,
 } from "@chakra-ui/react";
-import {
-  AddIcon,
-  ChevronRightIcon,
-  WarningIcon,
-} from "@chakra-ui/icons";
-import { AiOutlineEdit } from "react-icons/ai";
-import { BsCheckLg, BsGrid, BsTrash, BsXLg } from "react-icons/bs";
-
-// Navigation
-import { useParams, useNavigate } from "react-router-dom";
-
-// Database and models
-import { deleteData, getData, postData } from "@database/functions";
-import { CollectionModel, EntityModel } from "@types";
-
-// Custom components
+import { Content } from "@components/Container";
 import Error from "@components/Error";
+import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 import Loading from "@components/Loading";
-import { Content } from "@components/Container";
 
+// Existing and custom types
+import { CollectionModel, EntityModel } from "@types";
+
+// Routing and navigation
+import { useParams, useNavigate } from "react-router-dom";
+
+// Utility functions and libraries
+import { deleteData, getData, postData } from "@database/functions";
 import _ from "lodash";
 
-export const Collection = () => {
+const Collection = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const toast = useToast();
@@ -240,7 +233,7 @@ export const Collection = () => {
               gap={"4"}
             >
               <Flex align={"center"} gap={"4"} shadow={"lg"} p={"2"} border={"2px"} rounded={"md"} bg={"white"}>
-                <Icon as={BsGrid} w={"8"} h={"8"} />
+                <Icon name={"collection"} size={"lg"} />
                 <Heading fontWeight={"semibold"}>{collectionData.name}</Heading>
               </Flex>
 
@@ -249,7 +242,7 @@ export const Collection = () => {
                 {editing &&
                   <Popover>
                     <PopoverTrigger>
-                      <Button colorScheme={"red"} rightIcon={<Icon as={BsTrash} />}>
+                      <Button colorScheme={"red"} rightIcon={<Icon name={"delete"} />}>
                         Delete
                       </Button>
                     </PopoverTrigger>
@@ -262,7 +255,7 @@ export const Collection = () => {
                         <Flex direction={"row"} p={"2"} justify={"center"}>
                           <Button
                             colorScheme={"green"}
-                            rightIcon={<Icon as={BsCheckLg} />}
+                            rightIcon={<Icon name={"check"} />}
                             onClick={handleDeleteClick}
                           >
                             Confirm
@@ -275,7 +268,7 @@ export const Collection = () => {
                 <Button
                   colorScheme={editing ? "green" : "gray"}
                   rightIcon={
-                    editing ? <Icon as={BsCheckLg} /> : <Icon as={AiOutlineEdit} />
+                    editing ? <Icon name={"check"} /> : <Icon name={"edit"} />
                   }
                   onClick={handleEditClick}
                 >
@@ -316,7 +309,7 @@ export const Collection = () => {
                                 colorScheme={"orange"}
                               >
                                 <TagLabel>Not specified</TagLabel>
-                                <TagRightIcon as={WarningIcon} />
+                                <Icon name={"warning"} />
                               </Tag>
                             ) : (
                               <Text>
@@ -335,7 +328,7 @@ export const Collection = () => {
                                 colorScheme={"orange"}
                               >
                                 <TagLabel>Not specified</TagLabel>
-                                <TagRightIcon as={WarningIcon} />
+                                <Icon name={"warning"} />
                               </Tag>
                             ) : (
                               editing ? (
@@ -373,7 +366,7 @@ export const Collection = () => {
                   </Heading>
                   {editing && (
                     <Button
-                      leftIcon={<AddIcon />}
+                      leftIcon={<Icon name={"add"} />}
                       onClick={onOpen}
                       colorScheme={"green"}
                     >
@@ -404,7 +397,7 @@ export const Collection = () => {
                                       <Button
                                         key={`view-collection-${entity}`}
                                         colorScheme={"blackAlpha"}
-                                        rightIcon={<ChevronRightIcon />}
+                                        rightIcon={<Icon name={"c_right"} />}
                                         onClick={() => navigate(`/entities/${entity}`)}
                                       >
                                         View
@@ -414,7 +407,7 @@ export const Collection = () => {
                                     {editing && (
                                       <Button
                                         key={`remove-${entity}`}
-                                        rightIcon={<BsXLg />}
+                                        rightIcon={<Icon name={"delete"} />}
                                         colorScheme={"red"}
                                         onClick={() => {
                                           if (id) {

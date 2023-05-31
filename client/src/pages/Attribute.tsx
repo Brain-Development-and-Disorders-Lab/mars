@@ -1,10 +1,11 @@
+// React
 import React, { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+
+// Existing and custom components
 import {
   Button,
   Flex,
   Heading,
-  Icon,
   Popover,
   PopoverArrow,
   PopoverBody,
@@ -16,7 +17,6 @@ import {
   TableContainer,
   Tag,
   TagLabel,
-  TagRightIcon,
   Tbody,
   Td,
   Text,
@@ -26,21 +26,23 @@ import {
   Tr,
   useToast,
 } from "@chakra-ui/react";
-import { BsCheckLg, BsExclamationTriangle, BsPencil, BsGear, BsTrash } from "react-icons/bs";
-
-// Custom components
-import Error from "@components/Error";
-import ParameterGroup from "@components/ParameterGroup";
-import Loading from "@components/Loading";
 import { Content } from "@components/Container";
+import Error from "@components/Error";
+import Icon from "@components/Icon";
+import Loading from "@components/Loading";
+import ParameterGroup from "@components/ParameterGroup";
 
-// Database and models
-import { deleteData, getData, postData } from "@database/functions";
+// Existing and custom types
 import { AttributeModel, Parameters } from "@types";
 
+// Utility functions and libraries
+import { deleteData, getData, postData } from "@database/functions";
 import _ from "lodash";
 
-export const Attribute = () => {
+// Routing and navigation
+import { useNavigate, useParams } from "react-router-dom";
+
+const Attribute = () => {
   const { id } = useParams();
   const toast = useToast();
   const navigate = useNavigate();
@@ -157,7 +159,7 @@ export const Attribute = () => {
             wrap={"wrap"}
           >
             <Flex align={"center"} gap={"4"} shadow={"lg"} p={"2"} border={"2px"} rounded={"md"} bg={"white"}>
-              <Icon as={BsGear} w={"8"} h={"8"} />
+              <Icon name={"attribute"} size={"lg"} />
               <Heading fontWeight={"semibold"}>{attributeData.name}</Heading>
             </Flex>
 
@@ -166,7 +168,7 @@ export const Attribute = () => {
               {editing &&
                 <Popover>
                   <PopoverTrigger>
-                    <Button colorScheme={"red"} rightIcon={<Icon as={BsTrash} />}>
+                    <Button colorScheme={"red"} rightIcon={<Icon name={"delete"} />}>
                       Delete
                     </Button>
                   </PopoverTrigger>
@@ -179,7 +181,7 @@ export const Attribute = () => {
                       <Flex direction={"row"} p={"2"} justify={"center"}>
                         <Button
                           colorScheme={"green"}
-                          rightIcon={<Icon as={BsCheckLg} />}
+                          rightIcon={<Icon name={"check"} />}
                           onClick={handleDeleteClick}
                         >
                           Confirm
@@ -192,7 +194,7 @@ export const Attribute = () => {
               <Button
                 colorScheme={editing ? "green" : "gray"}
                 rightIcon={
-                  editing ? <Icon as={BsCheckLg} /> : <Icon as={BsPencil} />
+                  editing ? <Icon name={"check"} /> : <Icon name={"edit"} />
                 }
                 onClick={handleEditClick}
               >
@@ -233,7 +235,7 @@ export const Attribute = () => {
                             colorScheme={"orange"}
                           >
                             <TagLabel>Not specified</TagLabel>
-                            <TagRightIcon as={BsExclamationTriangle} />
+                            <Icon name={"warning"} />
                           </Tag>
                         ) : (
                           editing ? (

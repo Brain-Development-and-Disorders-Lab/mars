@@ -1,5 +1,7 @@
 // React
 import React, { useState } from "react";
+
+// Existing and custom components
 import {
   Flex,
   Heading,
@@ -10,15 +12,11 @@ import {
   InputRightElement,
   useToast,
 } from "@chakra-ui/react";
-
-// Utility libraries
-import _ from "lodash";
-
-// Custom components
 import { Content } from "@components/Container";
 
-// Database
+// Utility functions and libraries
 import { postData } from "@database/functions";
+import _ from "lodash";
 
 const Login = (props: { setToken: (token: string) => void }) => {
   const [password, setPassword] = useState("");

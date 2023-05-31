@@ -4,7 +4,6 @@ import {
   Button,
   Flex,
   Heading,
-  Icon,
   Input,
   Modal,
   ModalBody,
@@ -23,23 +22,19 @@ import {
   useDisclosure,
   useToast,
 } from "@chakra-ui/react";
-import {
-  ChevronRightIcon,
-  InfoOutlineIcon,
-  SearchIcon,
-} from "@chakra-ui/icons";
-
-// Navigation
-import { useNavigate } from "react-router-dom";
-
-// Database and models
-import { getData, postData } from "@database/functions";
-import { EntityModel } from "@types";
-
-// Custom components
+import { Content } from "@components/Container";
+import Icon from "@components/Icon";
 import Loading from "@components/Loading";
 import Error from "@components/Error";
-import { Content } from "@components/Container";
+
+// Existing and custom types
+import { EntityModel } from "@types";
+
+// Utility functions and libraries
+import { getData, postData } from "@database/functions";
+
+// Routing and navigation
+import { useNavigate } from "react-router-dom";
 
 const Search = () => {
   const [query, setQuery] = useState("");
@@ -108,11 +103,11 @@ const Search = () => {
           <Flex direction={"column"} p={"2"} pt={"4"} pb={"4"}>
             <Flex direction={"row"} align={"center"} justify={"space-between"}>
               <Flex align={"center"} gap={"4"}>
-                <Icon as={SearchIcon} w={"8"} h={"8"} />
+                <Icon name={"search"} size={"lg"} />
                 <Heading fontWeight={"semibold"}>Search</Heading>
               </Flex>
               <Button
-                rightIcon={<InfoOutlineIcon />}
+                rightIcon={<Icon name={"info"} />}
                 variant={"outline"}
                 onClick={onOpen}
               >
@@ -136,7 +131,7 @@ const Search = () => {
             />
 
             <Button
-              leftIcon={<Icon as={SearchIcon} />}
+              leftIcon={<Icon name={"search"} />}
               isDisabled={query === ""}
               onClick={() => runSearch()}
             >
@@ -174,7 +169,7 @@ const Search = () => {
                               <Td>
                                 <Flex justify={"right"}>
                                   <Button
-                                    rightIcon={<ChevronRightIcon />}
+                                    rightIcon={<Icon name={"c_right"} />}
                                     colorScheme={"blackAlpha"}
                                     onClick={() =>
                                       navigate(`/entities/${result._id}`)
