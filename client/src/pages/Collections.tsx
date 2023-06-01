@@ -79,12 +79,13 @@ const Collections = () => {
             wrap={"wrap"}
           >
             <Flex
-              p={"4"}
               direction={"row"}
+              p={"4"}
               rounded={"md"}
               bg={"white"}
-              flexWrap={"wrap"}
+              wrap={"wrap"}
               gap={"6"}
+              justify={"center"}
             >
               <Flex
                 w={"100%"}

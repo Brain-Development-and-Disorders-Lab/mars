@@ -79,12 +79,13 @@ const Attributes = () => {
             wrap={"wrap"}
           >
             <Flex
-              p={"4"}
               direction={"row"}
+              p={"4"}
               rounded={"md"}
-              background={"white"}
-              flexWrap={"wrap"}
+              bg={"white"}
+              wrap={"wrap"}
               gap={"6"}
+              justify={"center"}
             >
               <Flex
                 w={"100%"}
