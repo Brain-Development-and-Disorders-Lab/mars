@@ -2,21 +2,21 @@
 import _ from "lodash";
 
 // Custom types
-import { IAttribute, Parameters } from "@types";
+import { IAttribute, IValue } from "@types";
 
-export const validateParameters = (
-  parameters: Parameters[],
+export const checkValues = (
+  values: IValue<any>[],
   allowEmptyValues = false
 ) => {
-  for (let parameter of parameters) {
-    // Check the name of the parameter
-    if (_.isEqual(parameter.name, "")) {
+  for (let value of values) {
+    // Check the name of the Value
+    if (_.isEqual(value.name, "")) {
       return false;
     }
 
     // Check data if empty values are not allowed
     if (!allowEmptyValues) {
-      if (_.isUndefined(parameter.data) || _.isEqual(parameter.data, "")) {
+      if (_.isUndefined(value.data) || _.isEqual(value.data, "")) {
         return false;
       }
     }
@@ -24,7 +24,7 @@ export const validateParameters = (
   return true;
 };
 
-export const validateAttributes = (attributes: IAttribute[]) => {
+export const checkAttributes = (attributes: IAttribute[]) => {
   if (attributes.length === 0) return true;
 
   for (let attribute of attributes) {
@@ -34,7 +34,7 @@ export const validateAttributes = (attributes: IAttribute[]) => {
     }
 
     // Check the data
-    if (validateParameters(attribute.parameters) === false) {
+    if (checkValues(attribute.values) === false) {
       return false;
     }
   }

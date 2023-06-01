@@ -139,21 +139,6 @@ const Navigation = () => {
           <Divider />
 
           <Button
-            leftIcon={<Icon name={"entity"} />}
-            w={"100%"}
-            justifyContent={"left"}
-            variant={
-              _.startsWith(location.pathname, "/entities") ? "solid" : "ghost"
-            }
-            onClick={() => navigate("/entities")}
-          >
-            <Flex w={"100%"} align={"center"} gap={"2"}>
-              <Text>Entities</Text>
-              <Spacer />
-              <Tag>{isLoaded ? entityCount : <Spinner size={"xs"} />}</Tag>
-            </Flex>
-          </Button>
-          <Button
             leftIcon={<Icon name={"collection"} />}
             w={"100%"}
             justifyContent={"left"}
@@ -168,6 +153,22 @@ const Navigation = () => {
               <Text>Collections</Text>
               <Spacer />
               <Tag>{isLoaded ? collectionCount : <Spinner size={"xs"} />}</Tag>
+            </Flex>
+          </Button>
+
+          <Button
+            leftIcon={<Icon name={"entity"} />}
+            w={"100%"}
+            justifyContent={"left"}
+            variant={
+              _.startsWith(location.pathname, "/entities") ? "solid" : "ghost"
+            }
+            onClick={() => navigate("/entities")}
+          >
+            <Flex w={"100%"} align={"center"} gap={"2"}>
+              <Text>Entities</Text>
+              <Spacer />
+              <Tag>{isLoaded ? entityCount : <Spinner size={"xs"} />}</Tag>
             </Flex>
           </Button>
           <Button
@@ -247,21 +248,6 @@ const Navigation = () => {
           <Divider />
 
           <Button
-            leftIcon={<Icon name={"entity"} />}
-            w={"100%"}
-            justifyContent={"left"}
-            variant={
-              _.startsWith(location.pathname, "/entities") ? "solid" : "ghost"
-            }
-            onClick={() => responsiveNavigate("/entities")}
-          >
-            <Flex w={"100%"} align={"center"} gap={"2"}>
-              <Text>Entities</Text>
-              <Spacer />
-              <Tag>{isLoaded ? entityCount : <Spinner size={"xs"} />}</Tag>
-            </Flex>
-          </Button>
-          <Button
             leftIcon={<Icon name={"collection"} />}
             w={"100%"}
             justifyContent={"left"}
@@ -278,6 +264,23 @@ const Navigation = () => {
               <Tag>{isLoaded ? collectionCount : <Spinner size={"xs"} />}</Tag>
             </Flex>
           </Button>
+
+          <Button
+            leftIcon={<Icon name={"entity"} />}
+            w={"100%"}
+            justifyContent={"left"}
+            variant={
+              _.startsWith(location.pathname, "/entities") ? "solid" : "ghost"
+            }
+            onClick={() => responsiveNavigate("/entities")}
+          >
+            <Flex w={"100%"} align={"center"} gap={"2"}>
+              <Text>Entities</Text>
+              <Spacer />
+              <Tag>{isLoaded ? entityCount : <Spinner size={"xs"} />}</Tag>
+            </Flex>
+          </Button>
+
           <Button
             leftIcon={<Icon name={"attribute"} />}
             w={"100%"}

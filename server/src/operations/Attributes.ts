@@ -81,7 +81,7 @@ export class Attributes {
             const updates = {
               $set: {
                 description: updatedAttribute.description,
-                parameters: updatedAttribute.parameters,
+                values: updatedAttribute.values,
               },
             };
 

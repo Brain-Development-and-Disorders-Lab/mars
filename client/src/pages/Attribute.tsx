@@ -30,10 +30,10 @@ import { Content } from "@components/Container";
 import Error from "@components/Error";
 import Icon from "@components/Icon";
 import Loading from "@components/Loading";
-import ParameterGroup from "@components/ParameterGroup";
+import Values from "@components/Values";
 
 // Existing and custom types
-import { AttributeModel, Parameters } from "@types";
+import { AttributeModel, IValue } from "@types";
 
 // Utility functions and libraries
 import { deleteData, getData, postData } from "@database/functions";
@@ -53,8 +53,8 @@ const Attribute = () => {
 
   const [attributeData, setAttributeData] = useState({} as AttributeModel);
   const [attributeDescription, setAttributeDescription] = useState("");
-  const [attributeParameters, setAttributeParameters] = useState(
-    [] as Parameters[]
+  const [attributeValues, setAttributeValues] = useState(
+    [] as IValue<any>[]
   );
 
   useEffect(() => {
@@ -63,7 +63,7 @@ const Attribute = () => {
       .then((response) => {
         setAttributeData(response);
         setAttributeDescription(response.description);
-        setAttributeParameters(response.parameters);
+        setAttributeValues(response.values);
       })
       .catch((_error) => {
         toast({
@@ -119,7 +119,7 @@ const Attribute = () => {
         _id: attributeData._id,
         name: attributeData.name,
         description: attributeDescription,
-        parameters: attributeParameters,
+        values: attributeValues,
       };
 
       // Update data
@@ -293,19 +293,19 @@ const Attribute = () => {
                 rounded={"md"}
               >
                 <Heading fontWeight={"semibold"} size={"lg"}>
-                  Parameters
+                  Values
                 </Heading>
 
-                {attributeData.parameters &&
-                attributeData.parameters.length > 0 ? (
-                  <ParameterGroup
-                    parameters={attributeParameters}
-                    viewOnly={!editing}
-                    setParameters={setAttributeParameters}
-                  />
-                ) : (
-                  <Text>No parameters.</Text>
-                )}
+                {attributeData.values &&
+                  attributeData.values.length > 0 ? (
+                    <Values
+                      collection={attributeValues}
+                      viewOnly={!editing}
+                      setValues={setAttributeValues}
+                    />
+                  ) : (
+                    <Text>No values.</Text>
+                  )}
               </Flex>
             </Flex>
           </Flex>

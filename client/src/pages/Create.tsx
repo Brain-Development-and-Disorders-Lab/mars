@@ -41,7 +41,7 @@ import Error from "@components/Error";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 import Loading from "@components/Loading";
-import ParameterGroup from "@components/ParameterGroup";
+import Values from "@components/Values";
 
 // Existing and custom types
 import {
@@ -51,7 +51,7 @@ import {
   CollectionModel,
   IEntity,
   EntityModel,
-  Parameters,
+  IValue,
   ICollection,
 } from "@types";
 
@@ -59,7 +59,7 @@ import {
 import { useNavigate } from "react-router-dom";
 
 // Utility functions and libraries
-import { validateAttributes, validateParameters } from "src/functions";
+import { checkAttributes, checkValues } from "src/functions";
 import { getData, postData } from "@database/functions";
 import _ from "lodash";
 import { nanoid } from "nanoid";
@@ -184,7 +184,7 @@ const EntityPage = () => {
   }, []);
 
   useEffect(() => {
-    setValidAttributes(validateAttributes(selectedAttributes));
+    setValidAttributes(checkAttributes(selectedAttributes));
   }, [selectedAttributes]);
 
   const isValidInput = (): boolean => {
@@ -253,7 +253,7 @@ const EntityPage = () => {
             _id: data.identifier,
             name: data.name,
             description: data.description,
-            parameters: data.parameters,
+            values: data.values,
           };
         }
         return attribute;
@@ -320,7 +320,7 @@ const EntityPage = () => {
                       between Entities and membership to Collections can be
                       specified on the following page. Finally, the metadata
                       associated with this Entity should be specified using
-                      Attributes and corresponding Parameters.
+                      Attributes and corresponding Values.
                     </Text>
 
                     <Flex direction={"row"} gap={"2"} wrap={["wrap", "nowrap"]}>
@@ -390,7 +390,7 @@ const EntityPage = () => {
                         />
                         <FormHelperText>
                           A brief description of the new Entity. Most details
-                          should be inputted as Attributes with Parameters.
+                          should be inputted as Attributes with Values.
                         </FormHelperText>
                       </FormControl>
                     </Flex>
@@ -604,7 +604,7 @@ const EntityPage = () => {
                     </Heading>
                     <Text>
                       The metadata associated with this Entity should be
-                      specified using Attributes and corresponding Parameters.
+                      specified using Attributes and corresponding Values.
                     </Text>
 
                     <Flex
@@ -633,7 +633,7 @@ const EntityPage = () => {
                                       _id: `a-${nanoid(6)}`,
                                       name: attribute.name,
                                       description: attribute.description,
-                                      parameters: attribute.parameters,
+                                      values: attribute.values,
                                     },
                                   ]);
                                   break;
@@ -668,7 +668,7 @@ const EntityPage = () => {
                               _id: `a-${nanoid(6)}`,
                               name: "",
                               description: "",
-                              parameters: [],
+                              values: [],
                             },
                           ]);
                         }}
@@ -685,7 +685,7 @@ const EntityPage = () => {
                           identifier={attribute._id}
                           name={attribute.name}
                           description={attribute.description}
-                          parameters={attribute.parameters}
+                          values={attribute.values}
                           onRemove={onRemoveAttribute}
                           onUpdate={onUpdateAttribute}
                         />
@@ -1016,27 +1016,27 @@ const AttributePage = () => {
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [parameters, setParameters] = useState([] as Parameters[]);
+  const [values, setValues] = useState([] as IValue<any>[]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Various validation error states
   const isNameError = name === "";
   const isDescriptionError = description === "";
-  const isParametersError = parameters.length === 0;
-  const [parameterError, setParameterError] = useState(false);
+  const [isValueError, setIsValueError] = useState(false);
   const isDetailsError =
-    isNameError || isDescriptionError || isParametersError || !parameterError;
+    isNameError || isDescriptionError || isValueError;
 
   const attributeData: IAttribute = {
     name: name,
     description: description,
-    parameters: parameters,
+    values: values,
   };
 
+  // Check the Values for errors each time they update
   useEffect(() => {
-    setParameterError(validateParameters(parameters, true));
-  }, [parameters]);
+    setIsValueError(checkValues(values, true) || values.length === 0);
+  }, [values]);
 
   const onSubmit = () => {
     setIsSubmitting(true);
@@ -1095,7 +1095,7 @@ const AttributePage = () => {
               <Text>
                 Specify some basic details about this template Attribute. The
                 metadata associated with this template should be specified using
-                Parameters.
+                Values.
               </Text>
             </Flex>
 
@@ -1144,12 +1144,12 @@ const AttributePage = () => {
               </Flex>
 
               <Flex>
-                <FormControl isRequired isInvalid={isParametersError}>
-                  <FormLabel>Parameters</FormLabel>
-                  <ParameterGroup
-                    parameters={parameters}
+                <FormControl isRequired isInvalid={isValueError}>
+                  <FormLabel>Values</FormLabel>
+                  <Values
+                    collection={values}
                     viewOnly={false}
-                    setParameters={setParameters}
+                    setValues={setValues}
                   />
                 </FormControl>
               </Flex>
@@ -1186,7 +1186,7 @@ const AttributePage = () => {
           <ModalCloseButton />
           <ModalBody>
             <Text>
-              Individual pieces of metadata should be expressed as Parameters.
+              Individual pieces of metadata should be expressed as Values.
             </Text>
             <Text>There are five supported types of metadata:</Text>
             <List spacing={2}>
@@ -1223,7 +1223,7 @@ const AttributePage = () => {
                 </Flex>
               </ListItem>
             </List>
-            <Text>Parameters can be specified using the buttons.</Text>
+            <Text>Values can be specified using the buttons.</Text>
           </ModalBody>
         </ModalContent>
       </Modal>
@@ -1439,7 +1439,7 @@ const Create = () => {
                         <Flex gap={"2"} wrap={"wrap"}>
                           <Tag colorScheme={"red"}>Name</Tag>
                           <Tag colorScheme={"red"}>Description</Tag>
-                          <Tag colorScheme={"red"}>Parameters</Tag>
+                          <Tag colorScheme={"red"}>Values</Tag>
                         </Flex>
                       </Flex>
                     </Stack>

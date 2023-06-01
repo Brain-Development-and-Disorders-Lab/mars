@@ -250,7 +250,7 @@ describe("POST /entities/create", () => {
         _id: "TestAttribute",
         name: "Attribute_1",
         description: "Test Attribute description",
-        parameters: [],
+        values: [],
       }],
     }).then((result: EntityModel) => {
       // Check that an Attribute exists and it has the correct ID
@@ -544,7 +544,7 @@ describe("POST /entities/update", () => {
         _id: "TestAttribute",
         name: "Attribute_1",
         description: "Test Attribute description",
-        parameters: [],
+        values: [],
       });
     }).then((result: string) => {
       // Get the updated Entity
@@ -572,7 +572,7 @@ describe("POST /entities/update", () => {
         _id: "TestAttribute",
         name: "Attribute_1",
         description: "Test Attribute description",
-        parameters: [],
+        values: [],
       }],
     }).then((result: EntityModel) => {
       // Update Entity to remove an Attribute
@@ -602,7 +602,7 @@ describe("POST /entities/update", () => {
         _id: "TestAttribute",
         name: "Attribute_1",
         description: "Test Attribute description",
-        parameters: [],
+        values: [],
       }],
     }).then((result: EntityModel) => {
       // Update Entity to remove an Attribute
@@ -610,7 +610,7 @@ describe("POST /entities/update", () => {
         _id: "TestAttribute",
         name: "Attribute_2",
         description: "Test Attribute updated",
-        parameters: [],
+        values: [],
       });
     }).then((result: string) => {
       // Get the updated Entity

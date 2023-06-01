@@ -14,36 +14,36 @@ import {
   Textarea,
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
-import ParameterGroup from "@components/ParameterGroup";
+import Values from "@components/Values";
 
 // Existing and custom types
 import { AttributeProps } from "@types";
 
 // Utility functions and libraries
-import { validateParameters } from "src/functions";
+import { checkValues } from "src/functions";
 
 const Attribute = (props: AttributeProps) => {
   const [name, setName] = useState(props.name);
   const [description, setDescription] = useState(props.description);
-  const [parameters, setParameters] = useState(props.parameters);
+  const [values, setValues] = useState(props.values);
   const [finished, setFinished] = useState(false);
 
   const isNameError = name === "";
   const isDescriptionError = description === "";
-  const [validParameters, setValidParameters] = useState(false);
+  const [validValues, setValidValues] = useState(false);
 
   const isAttributesError =
-    isNameError || isDescriptionError || !validParameters;
+    isNameError || isDescriptionError || !validValues;
 
   useEffect(() => {
-    setValidParameters(validateParameters(parameters));
-  }, [parameters]);
+    setValidValues(checkValues(values));
+  }, [values]);
 
   const attributeData: AttributeProps = {
     identifier: props.identifier,
     name: name,
     description: description,
-    parameters: parameters,
+    values: values,
   };
 
   return (
@@ -76,10 +76,10 @@ const Attribute = (props: AttributeProps) => {
           </Flex>
 
           <Flex grow={"1"}>
-            <ParameterGroup
-              parameters={parameters}
+            <Values
+              collection={values}
               viewOnly={finished}
-              setParameters={setParameters}
+              setValues={setValues}
             />
           </Flex>
         </Flex>

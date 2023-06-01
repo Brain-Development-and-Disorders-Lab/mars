@@ -25,7 +25,7 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
-import ParameterGroup from "@components/ParameterGroup";
+import Values from "@components/Values";
 import { Warning } from "@components/Label";
 
 // Existing and custom types
@@ -40,14 +40,14 @@ const AttributeCard = (props: AttributeCardProps) => {
 
   // State to be updated
   const [description, setDescription] = useState(props.attribute.description);
-  const [parameters, setParameters] = useState(props.attribute.parameters);
+  const [values, setValues] = useState(props.attribute.values);
 
   // State to store original values
   const [defaultDescription, _setDefaultDescription] = useState(
     props.attribute.description
   );
-  const [defaultParameters, _setDefaultParameters] = useState(
-    props.attribute.parameters
+  const [defaultValues, _setDefaultValues] = useState(
+    props.attribute.values
   );
 
   return (
@@ -99,16 +99,16 @@ const AttributeCard = (props: AttributeCardProps) => {
             </Text>
 
             <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
-              {parameters.map((parameter) => {
-                switch (parameter.type) {
+              {values.map((value) => {
+                switch (value.type) {
                   case "date": {
                     return (
-                      <Tag key={parameter.identifier}>
+                      <Tag key={value.identifier}>
                         <Icon name={"p_date"} />
                         <TagLabel>
                           <Flex align={"center"} gap={"1"}>
                             <Flex p={"1"} m={"1"}>
-                              {parameter.name}
+                              {value.name}
                             </Flex>
                           </Flex>
                         </TagLabel>
@@ -117,12 +117,12 @@ const AttributeCard = (props: AttributeCardProps) => {
                   }
                   case "entity": {
                     return (
-                      <Tag key={parameter.identifier}>
+                      <Tag key={value.identifier}>
                         <Icon name={"entity"} />
                         <TagLabel>
                           <Flex align={"center"} gap={"1"}>
                             <Flex p={"1"} m={"1"}>
-                              {parameter.name}
+                              {value.name}
                             </Flex>
                           </Flex>
                         </TagLabel>
@@ -131,12 +131,12 @@ const AttributeCard = (props: AttributeCardProps) => {
                   }
                   case "number": {
                     return (
-                      <Tag key={parameter.identifier}>
+                      <Tag key={value.identifier}>
                         <Icon name={"p_number"} />
                         <TagLabel>
                           <Flex align={"center"} gap={"1"}>
                             <Flex p={"1"} m={"1"}>
-                              {parameter.name}
+                              {value.name}
                             </Flex>
                           </Flex>
                         </TagLabel>
@@ -146,12 +146,12 @@ const AttributeCard = (props: AttributeCardProps) => {
 
                   case "url": {
                     return (
-                      <Tag key={parameter.identifier}>
+                      <Tag key={value.identifier}>
                         <Icon name={"p_url"} />
                         <TagLabel>
                           <Flex align={"center"} gap={"1"}>
                             <Flex p={"1"} m={"1"}>
-                              {parameter.name}
+                              {value.name}
                             </Flex>
                           </Flex>
                         </TagLabel>
@@ -160,12 +160,12 @@ const AttributeCard = (props: AttributeCardProps) => {
                   }
                   default: {
                     return (
-                      <Tag key={parameter.identifier}>
+                      <Tag key={value.identifier}>
                         <Icon name={"p_text"} />
                         <TagLabel>
                           <Flex align={"center"} gap={"1"}>
                             <Flex p={"1"} m={"1"}>
-                              {parameter.name}
+                              {value.name}
                             </Flex>
                           </Flex>
                         </TagLabel>
@@ -242,21 +242,21 @@ const AttributeCard = (props: AttributeCardProps) => {
                 bg={"white"}
                 rounded={"md"}
               >
-                <Heading size={"md"}>Parameters</Heading>
+                <Heading size={"md"}>Values</Heading>
                 <Flex
                   direction={"column"}
                   gap={"2"}
                   align={"center"}
                   justify={"center"}
                 >
-                  {parameters && parameters.length > 0 ? (
-                    <ParameterGroup
-                      parameters={parameters}
+                  {values && values.length > 0 ? (
+                    <Values
+                      collection={values}
                       viewOnly={!isEditing}
-                      setParameters={setParameters}
+                      setValues={setValues}
                     />
                   ) : (
-                    <Text>No parameters.</Text>
+                    <Text>No values.</Text>
                   )}
                 </Flex>
               </Flex>
@@ -270,7 +270,7 @@ const AttributeCard = (props: AttributeCardProps) => {
                     onClick={() => {
                       // Reset the changes made to the Attribute
                       setDescription(defaultDescription);
-                      setParameters(defaultParameters);
+                      setValues(defaultValues);
 
                       // Close the modal
                       onClose();
@@ -295,7 +295,7 @@ const AttributeCard = (props: AttributeCardProps) => {
                             _id: props.attribute._id,
                             name: props.attribute.name,
                             description: description,
-                            parameters: parameters,
+                            values: values,
                           })
                         : {};
                     }}

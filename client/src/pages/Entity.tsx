@@ -53,19 +53,19 @@ import Graph from "@components/Graph";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 import Loading from "@components/Loading";
-import ParameterGroup from "@components/ParameterGroup";
+import Values from "@components/Values";
 
 // Existing and custom types
 import {
   AttributeModel,
   CollectionModel,
   EntityModel,
-  Parameters,
+  IValue,
 } from "@types";
 
 // Utility functions and libraries
 import { deleteData, getData, postData } from "src/database/functions";
-import { validateParameters } from "src/functions";
+import { checkValues } from "src/functions";
 import _ from "lodash";
 import dayjs from "dayjs";
 import consola from "consola";
@@ -122,19 +122,17 @@ const Entity = () => {
   } = useDisclosure();
   const [attributeName, setAttributeName] = useState("");
   const [attributeDescription, setAttributeDescription] = useState("");
-  const [attributeParameters, setAttributeParameters] = useState(
-    [] as Parameters[]
+  const [attributeValues, setAttributeValues] = useState(
+    [] as IValue<any>[]
   );
 
   const isAttributeNameError = attributeName === "";
   const isAttributeDescriptionError = attributeDescription === "";
-  const isAttributeParametersError = attributeParameters.length === 0;
-  const [attributeParameterError, setAttributeParameterError] = useState(false);
+  const [isAttributeValueError, setIsAttributeValueError] = useState(false);
   const isAttributeError =
     isAttributeNameError ||
     isAttributeDescriptionError ||
-    isAttributeParametersError ||
-    !attributeParameterError;
+    isAttributeValueError;
 
   const [attributes, setAttributes] = useState([] as AttributeModel[]);
 
@@ -161,8 +159,8 @@ const Entity = () => {
   }, []);
 
   useEffect(() => {
-    setAttributeParameterError(validateParameters(attributeParameters));
-  }, [attributeParameters]);
+    setIsAttributeValueError(checkValues(attributeValues) || attributeValues.length === 0);
+  }, [attributeValues]);
 
   // Toggles
   const [isError, setIsError] = useState(false);
@@ -479,7 +477,7 @@ const Entity = () => {
         _id: `a-${entityData._id}-${nanoid(6)}`,
         name: attributeName,
         description: attributeDescription,
-        parameters: attributeParameters,
+        values: attributeValues,
       },
     ]);
     onAddAttributesClose();
@@ -487,7 +485,7 @@ const Entity = () => {
     // Reset state of creating an Attribute
     setAttributeName("");
     setAttributeDescription("");
-    setAttributeParameters([]);
+    setAttributeValues([]);
   };
 
   // Handle updates to Attributes
@@ -498,7 +496,7 @@ const Entity = () => {
       ...entityAttributes.map((attribute) => {
         if (_.isEqual(attribute._id, updated._id)) {
           attribute.description = updated.description;
-          attribute.parameters = _.cloneDeep(updated.parameters);
+          attribute.values = _.cloneDeep(updated.values);
         }
         return attribute;
       }),
@@ -511,7 +509,7 @@ const Entity = () => {
     // Reset state of creating an Attribute
     setAttributeName("");
     setAttributeDescription("");
-    setAttributeParameters([]);
+    setAttributeValues([]);
   };
 
   /**
@@ -1023,7 +1021,7 @@ const Entity = () => {
                       <Text>
                         Specify some basic details about this Attribute. The
                         metadata associated with this Entity should be specified
-                        using Parameters.
+                        using Values.
                       </Text>
                     </Flex>
 
@@ -1041,7 +1039,7 @@ const Entity = () => {
                               ) {
                                 setAttributeName(attribute.name);
                                 setAttributeDescription(attribute.description);
-                                setAttributeParameters(attribute.parameters);
+                                setAttributeValues(attribute.values);
                                 break;
                               }
                             }
@@ -1117,13 +1115,13 @@ const Entity = () => {
                       <Flex>
                         <FormControl
                           isRequired
-                          isInvalid={isAttributeParametersError}
+                          isInvalid={isAttributeValueError}
                         >
-                          <FormLabel>Parameters</FormLabel>
-                          <ParameterGroup
-                            parameters={attributeParameters}
+                          <FormLabel>Values</FormLabel>
+                          <Values
+                            collection={attributeValues}
                             viewOnly={false}
-                            setParameters={setAttributeParameters}
+                            setValues={setAttributeValues}
                           />
                         </FormControl>
                       </Flex>

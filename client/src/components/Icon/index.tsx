@@ -70,7 +70,7 @@ const SYSTEM_ICONS: { [k: string]: IconType } = {
   reload: BsArrowClockwise,
   graph: BsDiagram2,
 
-  // Parameters
+  // Values
   p_date: BsCalendarWeek,
   p_text: BsTextareaT,
   p_number: BsGraphUp,

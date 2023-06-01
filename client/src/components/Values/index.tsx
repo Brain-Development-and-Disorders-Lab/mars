@@ -25,7 +25,7 @@ import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 
 // Existing and custom types
-import { EntityModel, Parameters } from "@types";
+import { EntityModel, IValue } from "@types";
 
 // Utility functions and libraries
 import { getData } from "@database/functions";
@@ -33,15 +33,15 @@ import _ from "lodash";
 import dayjs from "dayjs";
 
 /**
- * Parameters component use to display a collection of Parameters and enable
- * creating and deleting Parameters. Displays collection as cards.
+ * Values component use to display a collection of Values and enable
+ * creating and deleting Values. Displays collection as cards.
  * @param props collection of props to construct component
  * @return
  */
-const Parameters = (props: {
-  parameters: Parameters[];
+const Values = (props: {
+  collection: IValue<any>[];
   viewOnly: boolean;
-  setParameters?: Dispatch<SetStateAction<Parameters[]>>;
+  setValues?: Dispatch<SetStateAction<IValue<any>[]>>;
 }) => {
   const toast = useToast();
   const [entities, setEntities] = useState([] as EntityModel[]);
@@ -69,17 +69,17 @@ const Parameters = (props: {
     return;
   }, []);
 
-  const onUpdate = (data: Parameters) => {
-    // Store the received Parameter information
-    props.setParameters &&
-      props.setParameters(
-        props.parameters.filter((parameter) => {
-          // Get the relevant Parameter
-          if (parameter.identifier === data.identifier) {
-            parameter.name = data.name;
-            parameter.data = data.data;
+  const onUpdate = (data: IValue<any>) => {
+    // Store the received Value information
+    props.setValues &&
+      props.setValues(
+        props.collection.filter((value) => {
+          // Get the relevant Value
+          if (value.identifier === data.identifier) {
+            value.name = data.name;
+            value.data = data.data;
           }
-          return parameter;
+          return value;
         })
       );
   };
@@ -98,8 +98,8 @@ const Parameters = (props: {
   //     );
   // };
 
-  const data: Parameters[] = props.parameters;
-  const columnHelper = createColumnHelper<Parameters>();
+  const data: IValue<any>[] = props.collection;
+  const columnHelper = createColumnHelper<IValue<any>>();
   const columns = [
     {
       id: "select",
@@ -141,10 +141,10 @@ const Parameters = (props: {
 
         const onBlur = () => {
           if (!props.viewOnly) {
-            // Clone and modify the original Parameter
-            const updatedParameter = _.cloneDeep(row.original);
-            updatedParameter.data = value;
-            onUpdate(updatedParameter);
+            // Clone and modify the original Value
+            const updatedValue = _.cloneDeep(row.original);
+            updatedValue.data = value;
+            onUpdate(updatedValue);
           }
         };
 
@@ -170,10 +170,10 @@ const Parameters = (props: {
 
         const onBlur = () => {
           if (!props.viewOnly) {
-            // Clone and modify the original Parameter
-            const updatedParameter = _.cloneDeep(row.original);
-            updatedParameter.data = value;
-            onUpdate(updatedParameter);
+            // Clone and modify the original Value
+            const updatedValue = _.cloneDeep(row.original);
+            updatedValue.data = value;
+            onUpdate(updatedValue);
           }
         };
 
@@ -245,14 +245,14 @@ const Parameters = (props: {
           justify={"center"}
           align={"center"}
         >
-          {/* Buttons to add Parameters */}
+          {/* Buttons to add Values */}
           <Button
             leftIcon={<Icon name={"p_date"} />}
             onClick={() => {
               // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
-              props.setParameters &&
-                props.setParameters([
-                  ...props.parameters,
+              props.setValues &&
+                props.setValues([
+                  ...props.collection,
                   {
                     identifier: `p_date_${Math.round(performance.now())}`,
                     name: "",
@@ -269,9 +269,9 @@ const Parameters = (props: {
             leftIcon={<Icon name={"p_text"} />}
             onClick={() => {
               // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
-              props.setParameters &&
-                props.setParameters([
-                  ...props.parameters,
+              props.setValues &&
+                props.setValues([
+                  ...props.collection,
                   {
                     identifier: `p_text_${Math.round(performance.now())}`,
                     name: "",
@@ -288,9 +288,9 @@ const Parameters = (props: {
             leftIcon={<Icon name={"p_number"} />}
             onClick={() => {
               // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
-              props.setParameters &&
-                props.setParameters([
-                  ...props.parameters,
+              props.setValues &&
+                props.setValues([
+                  ...props.collection,
                   {
                     identifier: `p_number_${Math.round(performance.now())}`,
                     name: "",
@@ -307,9 +307,9 @@ const Parameters = (props: {
             leftIcon={<Icon name={"p_url"} />}
             onClick={() => {
               // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
-              props.setParameters &&
-                props.setParameters([
-                  ...props.parameters,
+              props.setValues &&
+                props.setValues([
+                  ...props.collection,
                   {
                     identifier: `p_url_${Math.round(performance.now())}`,
                     name: "",
@@ -326,9 +326,9 @@ const Parameters = (props: {
             leftIcon={<Icon name={"entity"} />}
             onClick={() => {
               // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
-              props.setParameters &&
-                props.setParameters([
-                  ...props.parameters,
+              props.setValues &&
+                props.setValues([
+                  ...props.collection,
                   {
                     identifier: `p_entity_${Math.round(performance.now())}`,
                     name: "",
@@ -343,7 +343,7 @@ const Parameters = (props: {
         </Flex>
       )}
 
-      {/* Parameter List */}
+      {/* Values list */}
       <Flex p={["1", "2"]} direction={"column"} gap={"1"} w={"100%"}>
         <DataTable columns={columns} data={data} />
       </Flex>
@@ -351,4 +351,4 @@ const Parameters = (props: {
   );
 };
 
-export default Parameters;
+export default Values;

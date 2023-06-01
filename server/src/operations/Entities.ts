@@ -795,7 +795,7 @@ export class Entities {
               consola.info("Updating an Attribute");
               attribute.name = updatedAttribute.name;
               attribute.description = updatedAttribute.description;
-              attribute.parameters = updatedAttribute.parameters;
+              attribute.values = updatedAttribute.values;
             }
           });
 
@@ -985,9 +985,9 @@ export class Entities {
               const attributeId = field.split("_")[1];
               entity.attributes.map((attribute) => {
                 if (_.isEqual(attribute._id, attributeId)) {
-                  for (let parameter of attribute.parameters) {
-                    headers.push(`${parameter.name} (${attribute.name})`)
-                    row.push(Promise.resolve(`${parameter.data}`));
+                  for (let value of attribute.values) {
+                    headers.push(`${value.name} (${attribute.name})`)
+                    row.push(Promise.resolve(`${value.data}`));
                   }
                 }
               });

@@ -31,11 +31,11 @@ export namespace State.Collection {
 }
 
 // Attributes
-// Generic Attribute interface containing required data parameters
+// Generic Attribute interface containing required Values
 export type IAttribute = {
   name: string;
   description: string;
-  parameters: Parameters[];
+  values: IValue[];
 };
 
 // Database model of Attribute, including assigned ID
@@ -65,48 +65,17 @@ export type AttributeCardProps = {
   cancelCallback?: () => void;
 };
 
-// Parameters
-export namespace Parameter {
-  interface IParameter {
-    identifier: string;
-    name: string;
-    disabled?: boolean;
-    showRemove?: boolean;
-    onRemove?: (identifier: string) => void;
-  }
-
-  type Number = IParameter & {
-    type: "number";
-    data: number;
-    onUpdate?: (data: Number) => void;
-  };
-
-  type Text = IParameter & {
-    type: "text";
-    data: string;
-    onUpdate?: (data: Text) => void;
-  };
-
-  type URL = IParameter & {
-    type: "url";
-    data: string;
-    onUpdate?: (data: URL) => void;
-  };
-
-  type Date = IParameter & {
-    type: "date";
-    data: string;
-    onUpdate?: (data: Date) => void;
-  };
-
-  type Entity = IParameter & {
-    type: "entity";
-    data: string;
-    onUpdate?: (data: Entity) => void;
-  };
-}
-
-export type Parameters = Parameter.Date | Parameter.Entity | Parameter.Number | Parameter.Text | Parameter.URL;
+// Values
+export interface IValue<D> {
+  identifier: string;
+  name: string;
+  type: "number" | "text" | "url" | "date" | "entity";
+  data: D;
+  disabled?: boolean;
+  showRemove?: boolean;
+  onRemove?: (identifier: string) => void;
+  onUpdate?: (data: D) => void;
+};
 
 export type LinkyProps = {
   type: "entities" | "collections" | "attributes";
@@ -212,7 +181,7 @@ export type IconNames =
   "reload" |
   "graph" |
 
-  // Parameters
+  // Values
   "p_date" |
   "p_text" |
   "p_number" |
