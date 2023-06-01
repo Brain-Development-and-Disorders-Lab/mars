@@ -51,7 +51,11 @@ export class Attributes {
 
           // Resolve all operations then resolve overall Promise
           Promise.all(operations).then((_result) => {
-            consola.success("Created new Attribute:", attribute._id, attribute.name);
+            consola.success(
+              "Created new Attribute:",
+              attribute._id,
+              attribute.name
+            );
             resolve(attribute as AttributeModel);
           });
         });
@@ -65,64 +69,58 @@ export class Attributes {
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ATTRIBUTES)
-        .findOne(
-          { _id: updatedAttribute._id },
-          (error: any, result: any) => {
-            if (error) {
-              throw error;
-            }
-
-            // Database operations to perform
-            const operations: Promise<any>[] = [];
-
-            // Cast and store current state of the Collection
-            result as AttributeModel;
-
-            const updates = {
-              $set: {
-                description: updatedAttribute.description,
-                values: updatedAttribute.values,
-              },
-            };
-
-            // Add Update operation
-            operations.push(
-              Updates.create({
-                timestamp: new Date(Date.now()),
-                type: "update",
-                details: "Updated Attribute",
-                target: {
-                  type: "attributes",
-                  id: updatedAttribute._id,
-                  name: updatedAttribute.name,
-                },
-              })
-            );
-
-            getDatabase()
-              .collection(ATTRIBUTES)
-              .updateOne(
-                { _id: updatedAttribute._id },
-                updates,
-                (error: any, _response: any) => {
-                  if (error) {
-                    throw error;
-                  }
-
-                  // Resolve all operations then resolve overall Promise
-                  Promise.all(operations).then((_result) => {
-                    consola.success(
-                      "Updated Attribute:",
-                      updatedAttribute.name
-                    );
-
-                    // Resolve the Promise
-                    resolve(updatedAttribute);
-                  });
-                }
-              );
+        .findOne({ _id: updatedAttribute._id }, (error: any, result: any) => {
+          if (error) {
+            throw error;
           }
-        );
+
+          // Database operations to perform
+          const operations: Promise<any>[] = [];
+
+          // Cast and store current state of the Collection
+          result as AttributeModel;
+
+          const updates = {
+            $set: {
+              description: updatedAttribute.description,
+              values: updatedAttribute.values,
+            },
+          };
+
+          // Add Update operation
+          operations.push(
+            Updates.create({
+              timestamp: new Date(Date.now()),
+              type: "update",
+              details: "Updated Attribute",
+              target: {
+                type: "attributes",
+                id: updatedAttribute._id,
+                name: updatedAttribute.name,
+              },
+            })
+          );
+
+          getDatabase()
+            .collection(ATTRIBUTES)
+            .updateOne(
+              { _id: updatedAttribute._id },
+              updates,
+              (error: any, _response: any) => {
+                if (error) {
+                  throw error;
+                }
+
+                // Resolve all operations then resolve overall Promise
+                Promise.all(operations).then((_result) => {
+                  consola.success("Updated Attribute:", updatedAttribute.name);
+
+                  // Resolve the Promise
+                  resolve(updatedAttribute);
+                });
+              }
+            );
+        });
     });
   };
 
@@ -193,19 +191,16 @@ export class Attributes {
             // Delete the Attribute
             getDatabase()
               .collection(ATTRIBUTES)
-              .deleteOne(
-                { _id: id },
-                (error: any, _content: any) => {
-                  if (error) {
-                    throw error;
-                  }
-
-                  consola.success("Deleted Attribute (id):", id.toString());
-                  resolve(result);
+              .deleteOne({ _id: id }, (error: any, _content: any) => {
+                if (error) {
+                  throw error;
                 }
-              );
+
+                consola.success("Deleted Attribute (id):", id.toString());
+                resolve(result);
+              });
           });
-      });
+        });
     });
   };
-};
+}

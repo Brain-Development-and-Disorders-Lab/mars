@@ -38,20 +38,28 @@ const Page: FC<any> = ({ children }) => {
       p={"0"}
       m={"0"}
     >
-      <Flex p={"4"} justify={"center"} background={"white"}>
+      {/* Navigation component */}
+      <Flex p={"4"} h={"100%"} justify={"center"} background={"white"} zIndex={"2"}>
         <Navigation />
       </Flex>
+
       <Flex direction={"column"} w={"100%"}>
+        {/* Search box component */}
         <Flex
           w={"100%"}
           h={"6vh"}
           align={"center"}
           justify={"center"}
           display={{ base: "none", lg: "flex" }}
+          zIndex={"1"}
           background={"white"}
+          position={{lg: "sticky"}}
+          top={{lg: "0"}}
         >
           <SearchBox />
         </Flex>
+
+        {/* Main content components */}
         <Flex p={"2"} h={"100%"} background={"gray.50"}>
           {children}
         </Flex>

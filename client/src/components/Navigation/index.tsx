@@ -96,6 +96,7 @@ const Navigation = () => {
         direction={"column"}
         display={{ base: "none", lg: "flex" }}
         gap={"6"}
+        alignItems={"stretch"}
       >
         {/* Icon */}
         <Flex direction={"row"} align={"center"} gap={"2"}>
@@ -197,6 +198,8 @@ const Navigation = () => {
           >
             Search
           </Button>
+
+          <Spacer />
         </Flex>
       </Flex>
 
@@ -206,7 +209,7 @@ const Navigation = () => {
           size={"md"}
           display={{ base: "flex", lg: "none" }}
           justifyContent={"center"}
-          icon={<Icon name={isOpen ? "check" : "list"} />}
+          icon={<Icon name={isOpen ? "cross" : "list"} />}
           aria-label={"Open Menu"}
           onClick={isOpen ? onClose : onOpen}
         />

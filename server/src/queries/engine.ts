@@ -23,5 +23,5 @@ export class QueryEngine {
 
     query.tokens = tokens;
     return query;
-  }
-};
+  };
+}

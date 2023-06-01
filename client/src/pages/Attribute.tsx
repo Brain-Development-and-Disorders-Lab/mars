@@ -53,9 +53,7 @@ const Attribute = () => {
 
   const [attributeData, setAttributeData] = useState({} as AttributeModel);
   const [attributeDescription, setAttributeDescription] = useState("");
-  const [attributeValues, setAttributeValues] = useState(
-    [] as IValue<any>[]
-  );
+  const [attributeValues, setAttributeValues] = useState([] as IValue<any>[]);
 
   useEffect(() => {
     // Populate Attribute data
@@ -296,16 +294,15 @@ const Attribute = () => {
                   Values
                 </Heading>
 
-                {attributeData.values &&
-                  attributeData.values.length > 0 ? (
-                    <Values
-                      collection={attributeValues}
-                      viewOnly={!editing}
-                      setValues={setAttributeValues}
-                    />
-                  ) : (
-                    <Text>No values.</Text>
-                  )}
+                {attributeData.values && attributeData.values.length > 0 ? (
+                  <Values
+                    collection={attributeValues}
+                    viewOnly={!editing}
+                    setValues={setAttributeValues}
+                  />
+                ) : (
+                  <Text>No values.</Text>
+                )}
               </Flex>
             </Flex>
           </Flex>

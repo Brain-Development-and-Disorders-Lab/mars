@@ -57,7 +57,11 @@ export class Collections {
 
           // Resolve all operations then resolve overall Promise
           Promise.all(operations).then((_result) => {
-            consola.success("Created new Collection:", collection._id, collection.name);
+            consola.success(
+              "Created new Collection:",
+              collection._id,
+              collection.name
+            );
             resolve(collection as CollectionModel);
           });
         });
@@ -71,85 +75,82 @@ export class Collections {
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(COLLECTIONS)
-        .findOne(
-          { _id: updatedCollection._id },
-          (error: any, result: any) => {
-            if (error) {
-              throw error;
-            }
-
-            // Database operations to perform
-            const operations: Promise<any>[] = [];
-
-            // Cast and store current state of the Collection
-            const currentCollection = result as CollectionModel;
-
-            // Entities
-            const entitiesToKeep = currentCollection.entities.filter((entity) =>
-              updatedCollection.entities.includes(entity)
-            );
-            const entitiesToAdd = updatedCollection.entities.filter(
-              (entity) => !currentCollection.entities.includes(entity)
-            );
-            entitiesToAdd.map((entity: string) => {
-              operations.push(
-                Entities.addCollection(entity, currentCollection._id)
-              );
-            });
-            const entitiesToRemove = currentCollection.entities.filter(
-              (entity) => !entitiesToKeep.includes(entity)
-            );
-            entitiesToRemove.map((entity: string) => {
-              operations.push(
-                Entities.removeCollection(entity, currentCollection._id)
-              );
-            });
-
-            const updates = {
-              $set: {
-                description: updatedCollection.description,
-                entities: [...entitiesToKeep, ...entitiesToAdd],
-              },
-            };
-
-            // Add Update operation
-            operations.push(
-              Updates.create({
-                timestamp: new Date(Date.now()),
-                type: "update",
-                details: "Updated Collection",
-                target: {
-                  type: "collections",
-                  id: updatedCollection._id,
-                  name: updatedCollection.name,
-                },
-              })
-            );
-
-            getDatabase()
-              .collection(COLLECTIONS)
-              .updateOne(
-                { _id: updatedCollection._id },
-                updates,
-                (error: any, _response: any) => {
-                  if (error) {
-                    throw error;
-                  }
-
-                  // Resolve all operations then resolve overall Promise
-                  Promise.all(operations).then((_result) => {
-                    consola.success(
-                      "Updated Collection:",
-                      updatedCollection.name
-                    );
-
-                    // Resolve the Promise
-                    resolve(updatedCollection);
-                  });
-                }
-              );
+        .findOne({ _id: updatedCollection._id }, (error: any, result: any) => {
+          if (error) {
+            throw error;
           }
-        );
+
+          // Database operations to perform
+          const operations: Promise<any>[] = [];
+
+          // Cast and store current state of the Collection
+          const currentCollection = result as CollectionModel;
+
+          // Entities
+          const entitiesToKeep = currentCollection.entities.filter((entity) =>
+            updatedCollection.entities.includes(entity)
+          );
+          const entitiesToAdd = updatedCollection.entities.filter(
+            (entity) => !currentCollection.entities.includes(entity)
+          );
+          entitiesToAdd.map((entity: string) => {
+            operations.push(
+              Entities.addCollection(entity, currentCollection._id)
+            );
+          });
+          const entitiesToRemove = currentCollection.entities.filter(
+            (entity) => !entitiesToKeep.includes(entity)
+          );
+          entitiesToRemove.map((entity: string) => {
+            operations.push(
+              Entities.removeCollection(entity, currentCollection._id)
+            );
+          });
+
+          const updates = {
+            $set: {
+              description: updatedCollection.description,
+              entities: [...entitiesToKeep, ...entitiesToAdd],
+            },
+          };
+
+          // Add Update operation
+          operations.push(
+            Updates.create({
+              timestamp: new Date(Date.now()),
+              type: "update",
+              details: "Updated Collection",
+              target: {
+                type: "collections",
+                id: updatedCollection._id,
+                name: updatedCollection.name,
+              },
+            })
+          );
+
+          getDatabase()
+            .collection(COLLECTIONS)
+            .updateOne(
+              { _id: updatedCollection._id },
+              updates,
+              (error: any, _response: any) => {
+                if (error) {
+                  throw error;
+                }
+
+                // Resolve all operations then resolve overall Promise
+                Promise.all(operations).then((_result) => {
+                  consola.success(
+                    "Updated Collection:",
+                    updatedCollection.name
+                  );
+
+                  // Resolve the Promise
+                  resolve(updatedCollection);
+                });
+              }
+            );
+        });
     });
   };
 
@@ -163,42 +164,39 @@ export class Collections {
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(COLLECTIONS)
-        .findOne(
-          { _id: collection },
-          (error: any, result: any) => {
-            if (error) {
-              throw error;
-            }
-
-            // Update the collection to include the Entity
-            const updatedValues = {
-              $set: {
-                entities: [...result.entities, entity],
-              },
-            };
-
-            getDatabase()
-              .collection(COLLECTIONS)
-              .updateOne(
-                { _id: collection },
-                updatedValues,
-                (error: any, _response: any) => {
-                  if (error) {
-                    throw error;
-                  }
-                  consola.success(
-                    "Added Entity",
-                    entity.toString(),
-                    "to Collection",
-                    collection.toString()
-                  );
-
-                  // Resolve the Promise
-                  resolve(collection);
-                }
-              );
+        .findOne({ _id: collection }, (error: any, result: any) => {
+          if (error) {
+            throw error;
           }
-        );
+
+          // Update the collection to include the Entity
+          const updatedValues = {
+            $set: {
+              entities: [...result.entities, entity],
+            },
+          };
+
+          getDatabase()
+            .collection(COLLECTIONS)
+            .updateOne(
+              { _id: collection },
+              updatedValues,
+              (error: any, _response: any) => {
+                if (error) {
+                  throw error;
+                }
+                consola.success(
+                  "Added Entity",
+                  entity.toString(),
+                  "to Collection",
+                  collection.toString()
+                );
+
+                // Resolve the Promise
+                resolve(collection);
+              }
+            );
+        });
     });
   };
 
@@ -215,44 +213,41 @@ export class Collections {
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(COLLECTIONS)
-        .findOne(
-          { _id: collection },
-          (error: any, result: any) => {
-            if (error) {
-              throw error;
-            }
-
-            // Update the collection to remove the Entity
-            const updatedValues = {
-              $set: {
-                entities: (result as CollectionModel).entities.filter(
-                  (content) => !_.isEqual(content.toString(), entity.toString())
-                ),
-              },
-            };
-
-            getDatabase()
-              .collection(COLLECTIONS)
-              .updateOne(
-                { _id: collection },
-                updatedValues,
-                (error: any, _response: any) => {
-                  if (error) {
-                    throw error;
-                  }
-                  consola.success(
-                    "Removed Entity",
-                    entity.toString(),
-                    "from Collection",
-                    collection.toString()
-                  );
-
-                  // Resolve the Promise
-                  resolve(collection);
-                }
-              );
+        .findOne({ _id: collection }, (error: any, result: any) => {
+          if (error) {
+            throw error;
           }
-        );
+
+          // Update the collection to remove the Entity
+          const updatedValues = {
+            $set: {
+              entities: (result as CollectionModel).entities.filter(
+                (content) => !_.isEqual(content.toString(), entity.toString())
+              ),
+            },
+          };
+
+          getDatabase()
+            .collection(COLLECTIONS)
+            .updateOne(
+              { _id: collection },
+              updatedValues,
+              (error: any, _response: any) => {
+                if (error) {
+                  throw error;
+                }
+                consola.success(
+                  "Removed Entity",
+                  entity.toString(),
+                  "from Collection",
+                  collection.toString()
+                );
+
+                // Resolve the Promise
+                resolve(collection);
+              }
+            );
+        });
     });
   };
 
@@ -328,19 +323,16 @@ export class Collections {
             // Delete the Collection
             getDatabase()
               .collection(COLLECTIONS)
-              .deleteOne(
-                { _id: id },
-                (error: any, _content: any) => {
-                  if (error) {
-                    throw error;
-                  }
-
-                  consola.success("Deleted Collection (id):", id.toString());
-                  resolve(result);
+              .deleteOne({ _id: id }, (error: any, _content: any) => {
+                if (error) {
+                  throw error;
                 }
-              );
+
+                consola.success("Deleted Collection (id):", id.toString());
+                resolve(result);
+              });
           });
-      });
+        });
     });
   };
 }

@@ -46,9 +46,7 @@ const AttributeCard = (props: AttributeCardProps) => {
   const [defaultDescription, _setDefaultDescription] = useState(
     props.attribute.description
   );
-  const [defaultValues, _setDefaultValues] = useState(
-    props.attribute.values
-  );
+  const [defaultValues, _setDefaultValues] = useState(props.attribute.values);
 
   return (
     <Card maxW={"md"} background={"white"} variant={"outline"}>

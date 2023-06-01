@@ -33,7 +33,7 @@ const Linky = (props: LinkyProps) => {
       })
       .finally(() => {
         setIsLoaded(true);
-      })
+      });
   }, []);
 
   const onClickHandler = () => {

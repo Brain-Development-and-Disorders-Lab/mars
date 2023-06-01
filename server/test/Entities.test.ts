@@ -246,12 +246,14 @@ describe("POST /entities/create", () => {
         origins: [],
         products: [],
       },
-      attributes: [{
-        _id: "TestAttribute",
-        name: "Attribute_1",
-        description: "Test Attribute description",
-        values: [],
-      }],
+      attributes: [
+        {
+          _id: "TestAttribute",
+          name: "Attribute_1",
+          description: "Test Attribute description",
+          values: [],
+        },
+      ],
     }).then((result: EntityModel) => {
       // Check that an Attribute exists and it has the correct ID
       expect(result.attributes.length).toBe(1);
@@ -538,22 +540,25 @@ describe("POST /entities/update", () => {
         products: [],
       },
       attributes: [],
-    }).then((result: EntityModel) => {
-      // Update Entity to add an Attribute
-      return Entities.addAttribute(result._id, {
-        _id: "TestAttribute",
-        name: "Attribute_1",
-        description: "Test Attribute description",
-        values: [],
+    })
+      .then((result: EntityModel) => {
+        // Update Entity to add an Attribute
+        return Entities.addAttribute(result._id, {
+          _id: "TestAttribute",
+          name: "Attribute_1",
+          description: "Test Attribute description",
+          values: [],
+        });
+      })
+      .then((result: string) => {
+        // Get the updated Entity
+        return Entities.getOne(result);
+      })
+      .then((result: EntityModel) => {
+        // Check that an Attribute exists and it has the correct ID
+        expect(result.attributes.length).toBe(1);
+        expect(result.attributes[0]._id).toBe("TestAttribute");
       });
-    }).then((result: string) => {
-      // Get the updated Entity
-      return Entities.getOne(result);
-    }).then((result: EntityModel) => {
-      // Check that an Attribute exists and it has the correct ID
-      expect(result.attributes.length).toBe(1);
-      expect(result.attributes[0]._id).toBe("TestAttribute");
-    });
   });
 
   it("should remove an Attribute", async () => {
@@ -568,22 +573,27 @@ describe("POST /entities/update", () => {
         origins: [],
         products: [],
       },
-      attributes: [{
-        _id: "TestAttribute",
-        name: "Attribute_1",
-        description: "Test Attribute description",
-        values: [],
-      }],
-    }).then((result: EntityModel) => {
-      // Update Entity to remove an Attribute
-      return Entities.removeAttribute(result._id, "TestAttribute");
-    }).then((result: string) => {
-      // Get the updated Entity
-      return Entities.getOne(result);
-    }).then((result: EntityModel) => {
-      // Check that an Attribute has been removed
-      expect(result.attributes.length).toBe(0);
-    });
+      attributes: [
+        {
+          _id: "TestAttribute",
+          name: "Attribute_1",
+          description: "Test Attribute description",
+          values: [],
+        },
+      ],
+    })
+      .then((result: EntityModel) => {
+        // Update Entity to remove an Attribute
+        return Entities.removeAttribute(result._id, "TestAttribute");
+      })
+      .then((result: string) => {
+        // Get the updated Entity
+        return Entities.getOne(result);
+      })
+      .then((result: EntityModel) => {
+        // Check that an Attribute has been removed
+        expect(result.attributes.length).toBe(0);
+      });
   });
 
   it("should update an Attribute", async () => {
@@ -598,30 +608,35 @@ describe("POST /entities/update", () => {
         origins: [],
         products: [],
       },
-      attributes: [{
-        _id: "TestAttribute",
-        name: "Attribute_1",
-        description: "Test Attribute description",
-        values: [],
-      }],
-    }).then((result: EntityModel) => {
-      // Update Entity to remove an Attribute
-      return Entities.updateAttribute(result._id, {
-        _id: "TestAttribute",
-        name: "Attribute_2",
-        description: "Test Attribute updated",
-        values: [],
-      });
-    }).then((result: string) => {
-      // Get the updated Entity
-      return Entities.getOne(result);
-    }).then((result: EntityModel) => {
-      // Check that an Attribute has been preserved
-      expect(result.attributes.length).toBe(1);
+      attributes: [
+        {
+          _id: "TestAttribute",
+          name: "Attribute_1",
+          description: "Test Attribute description",
+          values: [],
+        },
+      ],
+    })
+      .then((result: EntityModel) => {
+        // Update Entity to remove an Attribute
+        return Entities.updateAttribute(result._id, {
+          _id: "TestAttribute",
+          name: "Attribute_2",
+          description: "Test Attribute updated",
+          values: [],
+        });
+      })
+      .then((result: string) => {
+        // Get the updated Entity
+        return Entities.getOne(result);
+      })
+      .then((result: EntityModel) => {
+        // Check that an Attribute has been preserved
+        expect(result.attributes.length).toBe(1);
 
-      // Check that the Attribute has been updated
-      expect(result.attributes[0].name).toBe("Attribute_2");
-      expect(result.attributes[0].description).toBe("Test Attribute updated");
-    });
+        // Check that the Attribute has been updated
+        expect(result.attributes[0].name).toBe("Attribute_2");
+        expect(result.attributes[0].description).toBe("Test Attribute updated");
+      });
   });
 });

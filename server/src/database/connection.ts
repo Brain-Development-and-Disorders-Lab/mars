@@ -52,6 +52,8 @@ export const getDatabase = (): Db => {
  * @param type identifier to be assigned an Entity, Attribute, or Collection
  * @return {string}
  */
-export const getIdentifier = (type: "entity" | "attribute" | "collection"): string => {
+export const getIdentifier = (
+  type: "entity" | "attribute" | "collection"
+): string => {
   return `${type.slice(0, 1)}${nanoid(7)}`;
 };

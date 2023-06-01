@@ -56,12 +56,7 @@ import Loading from "@components/Loading";
 import Values from "@components/Values";
 
 // Existing and custom types
-import {
-  AttributeModel,
-  CollectionModel,
-  EntityModel,
-  IValue,
-} from "@types";
+import { AttributeModel, CollectionModel, EntityModel, IValue } from "@types";
 
 // Utility functions and libraries
 import { deleteData, getData, postData } from "src/database/functions";
@@ -122,9 +117,7 @@ const Entity = () => {
   } = useDisclosure();
   const [attributeName, setAttributeName] = useState("");
   const [attributeDescription, setAttributeDescription] = useState("");
-  const [attributeValues, setAttributeValues] = useState(
-    [] as IValue<any>[]
-  );
+  const [attributeValues, setAttributeValues] = useState([] as IValue<any>[]);
 
   const isAttributeNameError = attributeName === "";
   const isAttributeDescriptionError = attributeDescription === "";
@@ -159,7 +152,9 @@ const Entity = () => {
   }, []);
 
   useEffect(() => {
-    setIsAttributeValueError(checkValues(attributeValues) || attributeValues.length === 0);
+    setIsAttributeValueError(
+      checkValues(attributeValues) || attributeValues.length === 0
+    );
   }, [attributeValues]);
 
   // Toggles

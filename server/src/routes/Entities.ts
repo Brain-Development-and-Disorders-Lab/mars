@@ -25,12 +25,14 @@ EntitiesRoute.route("/entities/:id").get((request: any, response: any) => {
 });
 
 // Get JSON-formatted data of the Entity
-EntitiesRoute.route("/entities/export").post((request: { body: { id: string, fields: string[] } }, response: any) => {
-  Entities.getData(request.body).then((path: string) => {
-    response.setHeader("Content-Type", "application/csv");
-    response.download(path, `export_${request.body.id}.csv`);
-  });
-});
+EntitiesRoute.route("/entities/export").post(
+  (request: { body: { id: string; fields: string[] } }, response: any) => {
+    Entities.getData(request.body).then((path: string) => {
+      response.setHeader("Content-Type", "application/csv");
+      response.download(path, `export_${request.body.id}.csv`);
+    });
+  }
+);
 
 // Create a new Entity, expects Entity data
 EntitiesRoute.route("/entities/create").post(

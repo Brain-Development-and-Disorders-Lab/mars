@@ -1024,8 +1024,7 @@ const AttributePage = () => {
   const isNameError = name === "";
   const isDescriptionError = description === "";
   const [isValueError, setIsValueError] = useState(false);
-  const isDetailsError =
-    isNameError || isDescriptionError || isValueError;
+  const isDetailsError = isNameError || isDescriptionError || isValueError;
 
   const attributeData: IAttribute = {
     name: name,
