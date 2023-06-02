@@ -1,9 +1,10 @@
 // React
 import React, {
-  ChangeEvent,
   Dispatch,
   SetStateAction,
+  useCallback,
   useEffect,
+  useMemo,
   useState,
 } from "react";
 
@@ -12,17 +13,22 @@ import {
   Button,
   Checkbox,
   Flex,
+  IconButton,
   Input,
-  Link,
   Select,
-  Spinner,
+  Table,
+  TableContainer,
+  Tbody,
+  Td,
   Text,
+  Th,
+  Thead,
+  Tr,
   useToast,
 } from "@chakra-ui/react";
-import { createColumnHelper } from "@tanstack/react-table";
-import DataTable from "@components/DataTable";
+import { ColumnDef, RowData, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
 import Icon from "@components/Icon";
-import Linky from "@components/Linky";
+// import Linky from "@components/Linky";
 
 // Existing and custom types
 import { EntityModel, IValue } from "@types";
@@ -31,6 +37,29 @@ import { EntityModel, IValue } from "@types";
 import { getData } from "@database/functions";
 import _ from "lodash";
 import dayjs from "dayjs";
+
+// Extend the TableMeta type to incorporate an "updateData" function
+declare module "@tanstack/react-table" {
+  interface TableMeta<TData extends RowData> {
+    updateData: (rowIndex: number, columnId: string, value: unknown) => void;
+  }
+};
+
+// Create custom "skip" hook to prevent table from re-rendering
+const useSkip = () => {
+  const shouldSkipRef = React.useRef(true);
+  const shouldSkip = shouldSkipRef.current;
+
+  const skip = useCallback(() => {
+    shouldSkipRef.current = false;
+  }, [])
+
+  useEffect(() => {
+    shouldSkipRef.current = true
+  });
+
+  return [shouldSkip, skip] as const;
+};
 
 /**
  * Values component use to display a collection of Values and enable
@@ -69,20 +98,20 @@ const Values = (props: {
     return;
   }, []);
 
-  const onUpdate = (data: IValue<any>) => {
-    // Store the received Value information
-    props.setValues &&
-      props.setValues(
-        props.collection.filter((value) => {
-          // Get the relevant Value
-          if (value.identifier === data.identifier) {
-            value.name = data.name;
-            value.data = data.data;
-          }
-          return value;
-        })
-      );
-  };
+  // const onUpdate = (data: IValue<any>) => {
+  //   // Store the received Value information
+  //   props.setValues &&
+  //     props.setValues(
+  //       props.collection.filter((value) => {
+  //         // Get the relevant Value
+  //         if (value.identifier === data.identifier) {
+  //           value.name = data.name;
+  //           value.data = data.data;
+  //         }
+  //         return value;
+  //       })
+  //     );
+  // };
 
   // const onRemove = (identifier: string) => {
   //   props.setParameters &&
@@ -98,9 +127,112 @@ const Values = (props: {
   //     );
   // };
 
-  const data: IValue<any>[] = props.collection;
-  const columnHelper = createColumnHelper<IValue<any>>();
-  const columns = [
+  const [data, setData] = useState(props.collection);
+  const [autoResetPageIndex, skipAutoResetPageIndex] = useSkip();
+
+
+  useEffect(() => {
+    console.info("props.viewOnly", props.viewOnly);
+  }, [props.viewOnly]);
+
+  // Define a default cell within a column
+  const defaultColumn: Partial<ColumnDef<IValue<any>>> = {
+    cell: ({ getValue, row: { original, index }, column: { id }, table }) => {
+      const initialValue = getValue();
+      const valueType = original.type;
+      const [value, setValue] = useState(initialValue);
+
+      // Update the table data on the "blur" event
+      const onBlur = () => {
+        table.options.meta?.updateData(index, id, value);
+      };
+
+      // Update the initial values if these are changed externally
+      useEffect(() => {
+        setValue(initialValue);
+      }, [initialValue]);
+
+      // Different cell types for data column
+      if (_.isEqual(id, "data")) {
+        switch (valueType) {
+          case "date":
+            return (
+              <Input
+                type={"datetime-local"}
+                value={value as string}
+                onChange={e => setValue(e.target.value)}
+                onBlur={onBlur}
+                disabled
+              />
+            );
+          case "entity":
+            return (
+              !props.viewOnly ? (
+                <Select
+                  value={value as string}
+                >
+                  {isLoaded &&
+                    entities.map((entity) => {
+                      return (
+                        <option key={entity._id} value={entity._id}>
+                          {entity.name}
+                        </option>
+                      );
+                    })}
+                </Select>
+              ) : (
+                <Input
+                  value={value as string}
+                  onChange={e => setValue(e.target.value)}
+                  onBlur={onBlur}
+                  disabled
+                />
+              )
+            );
+          case "number":
+            return (
+              <Input
+                type={"number"}
+                value={value as string}
+                onChange={e => setValue(e.target.value)}
+                onBlur={onBlur}
+                disabled={props.viewOnly}
+              />
+            );
+          case "text":
+            return (
+              <Input
+                value={value as string}
+                onChange={e => setValue(e.target.value)}
+                onBlur={onBlur}
+                disabled={props.viewOnly}
+              />
+            );
+          case "url":
+            return (
+              <Input
+                value={value as string}
+                onChange={e => setValue(e.target.value)}
+                onBlur={onBlur}
+                disabled={props.viewOnly}
+              />
+            );
+        };
+      }
+
+      // Default
+      return (
+        <Input
+          value={value as string}
+          onChange={e => setValue(e.target.value)}
+          onBlur={onBlur}
+          disabled={props.viewOnly}
+        />
+      );
+    },
+  };
+
+  const columns = useMemo<ColumnDef<IValue<any>>[]>(() => [
     {
       id: "select",
       header: ({ table }: any) => (
@@ -113,7 +245,7 @@ const Values = (props: {
         />
       ),
       cell: ({ row }: any) => (
-        <div className="px-1">
+        <Flex>
           <Checkbox
             {...{
               isChecked: row.getIsSelected(),
@@ -122,117 +254,51 @@ const Values = (props: {
               onChange: row.getToggleSelectedHandler(),
             }}
           />
-        </div>
+        </Flex>
       ),
     },
-    columnHelper.accessor("type", {
-      cell: ({ getValue }) => {
-        return <Text>{getValue()}</Text>;
+    {
+      header: "name",
+      accessorKey: "name",
+    },
+    {
+      header: "data",
+      accessorKey: "data",
+    }
+  ], []);
+
+  const table = useReactTable({
+    data,
+    columns,
+    defaultColumn,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    autoResetPageIndex,
+    initialState: {
+      pagination: {
+        pageSize: 5,
       },
-    }),
-    columnHelper.accessor("name", {
-      cell: ({ getValue, row }) => {
-        const initialValue = getValue();
-        const [value, setValue] = useState(initialValue);
+    },
+    meta: {
+      updateData: (rowIndex, columnId, value) => {
+        skipAutoResetPageIndex();
 
-        useEffect(() => {
-          setValue(initialValue);
-        }, [initialValue]);
-
-        const onBlur = () => {
-          if (!props.viewOnly) {
-            // Clone and modify the original Value
-            const updatedValue = _.cloneDeep(row.original);
-            updatedValue.data = value;
-            onUpdate(updatedValue);
-          }
-        };
-
-        const onChange = (event: ChangeEvent<HTMLInputElement>) => {
-          if (!props.viewOnly) {
-            setValue(event.target.value);
-          }
-        };
-
-        return <Input value={value} onChange={onChange} onBlur={onBlur} />;
+        setData((values) =>
+        values.map((row, index) => {
+            if (_.isEqual(index, rowIndex)) {
+              return {
+                ...values[rowIndex]!,
+                [columnId]: value,
+              }
+            }
+            return row;
+          })
+        );
       },
-      header: "Name",
-    }),
-    columnHelper.accessor("data", {
-      cell: ({ getValue, row }) => {
-        const initialValue = getValue();
-        const [value, setValue] = useState(initialValue);
-        const type = row.original.type;
-
-        useEffect(() => {
-          setValue(initialValue);
-        }, [initialValue]);
-
-        const onBlur = () => {
-          if (!props.viewOnly) {
-            // Clone and modify the original Value
-            const updatedValue = _.cloneDeep(row.original);
-            updatedValue.data = value;
-            onUpdate(updatedValue);
-          }
-        };
-
-        const onChange = (event: ChangeEvent<HTMLInputElement>) => {
-          if (!props.viewOnly) {
-            setValue(event.target.value);
-          }
-        };
-
-        if (_.isEqual(type, "date")) {
-          return (
-            <Input
-              type={"datetime-local"}
-              value={value}
-              onChange={onChange}
-              onBlur={onBlur}
-            />
-          );
-        } else if (_.isEqual(type, "URL")) {
-          return props.viewOnly ? (
-            <Link href={value.toString()} color="dark-1" isExternal>
-              {value}
-            </Link>
-          ) : (
-            <Input value={value} onChange={onChange} onBlur={onBlur} />
-          );
-        } else if (_.isEqual(type, "entity")) {
-          return props.viewOnly ? (
-            <Linky type="entities" id={value.toString()} />
-          ) : // Show a spinner in place while loading Entity data
-          isLoaded ? (
-            <Select
-              title="Select Entity"
-              value={value}
-              placeholder={"Select Entity"}
-              disabled={props.viewOnly}
-              onChange={(event) => {
-                setValue(event.target.value.toString());
-              }}
-            >
-              {isLoaded &&
-                entities.map((entity) => {
-                  return (
-                    <option key={entity._id} value={entity._id}>
-                      {entity.name}
-                    </option>
-                  );
-                })}
-            </Select>
-          ) : (
-            <Spinner size={"sm"} />
-          );
-        } else {
-          return <Input value={value} onChange={onChange} onBlur={onBlur} />;
-        }
-      },
-      header: "Data",
-    }),
-  ];
+    },
+    debugTable: true,
+  });
 
   return (
     <Flex direction={"column"} gap={"2"} w={"100%"} align={"center"}>
@@ -249,17 +315,16 @@ const Values = (props: {
           <Button
             leftIcon={<Icon name={"p_date"} />}
             onClick={() => {
-              // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
-              props.setValues &&
-                props.setValues([
-                  ...props.collection,
-                  {
-                    identifier: `p_date_${Math.round(performance.now())}`,
-                    name: "",
-                    type: "date",
-                    data: dayjs(new Date()).toISOString(),
-                  },
-                ]);
+              skipAutoResetPageIndex();
+              setData([
+                ...data,
+                {
+                  identifier: `p_date_${Math.round(performance.now())}`,
+                  name: "",
+                  type: "date",
+                  data: dayjs(new Date()).toISOString(),
+                },
+              ]);
             }}
           >
             Date
@@ -268,17 +333,16 @@ const Values = (props: {
           <Button
             leftIcon={<Icon name={"p_text"} />}
             onClick={() => {
-              // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
-              props.setValues &&
-                props.setValues([
-                  ...props.collection,
-                  {
-                    identifier: `p_text_${Math.round(performance.now())}`,
-                    name: "",
-                    type: "text",
-                    data: "",
-                  },
-                ]);
+              skipAutoResetPageIndex();
+              setData([
+                ...data,
+                {
+                  identifier: `p_text_${Math.round(performance.now())}`,
+                  name: "",
+                  type: "text",
+                  data: "",
+                },
+              ]);
             }}
           >
             Text
@@ -287,17 +351,16 @@ const Values = (props: {
           <Button
             leftIcon={<Icon name={"p_number"} />}
             onClick={() => {
-              // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
-              props.setValues &&
-                props.setValues([
-                  ...props.collection,
-                  {
-                    identifier: `p_number_${Math.round(performance.now())}`,
-                    name: "",
-                    type: "number",
-                    data: 0,
-                  },
-                ]);
+              skipAutoResetPageIndex();
+              setData([
+                ...data,
+                {
+                  identifier: `p_number_${Math.round(performance.now())}`,
+                  name: "",
+                  type: "number",
+                  data: 0,
+                },
+              ]);
             }}
           >
             Number
@@ -306,17 +369,16 @@ const Values = (props: {
           <Button
             leftIcon={<Icon name={"p_url"} />}
             onClick={() => {
-              // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
-              props.setValues &&
-                props.setValues([
-                  ...props.collection,
-                  {
-                    identifier: `p_url_${Math.round(performance.now())}`,
-                    name: "",
-                    type: "url",
-                    data: "",
-                  },
-                ]);
+              skipAutoResetPageIndex();
+              setData([
+                ...data,
+                {
+                  identifier: `p_url_${Math.round(performance.now())}`,
+                  name: "",
+                  type: "url",
+                  data: "",
+                },
+              ]);
             }}
           >
             URL
@@ -325,17 +387,16 @@ const Values = (props: {
           <Button
             leftIcon={<Icon name={"entity"} />}
             onClick={() => {
-              // Create an 'empty' attribute and add the data structure to the 'attributeData' collection
-              props.setValues &&
-                props.setValues([
-                  ...props.collection,
-                  {
-                    identifier: `p_entity_${Math.round(performance.now())}`,
-                    name: "",
-                    type: "entity",
-                    data: "",
-                  },
-                ]);
+              skipAutoResetPageIndex();
+              setData([
+                ...data,
+                {
+                  identifier: `p_entity_${Math.round(performance.now())}`,
+                  name: "",
+                  type: "entity",
+                  data: "",
+                },
+              ]);
             }}
           >
             Entity
@@ -345,7 +406,97 @@ const Values = (props: {
 
       {/* Values list */}
       <Flex p={["1", "2"]} direction={"column"} gap={"1"} w={"100%"}>
-        <DataTable columns={columns} data={data} />
+        <TableContainer>
+          <Table>
+            <Thead>
+              {table.getHeaderGroups().map(headerGroup => (
+                <Tr key={headerGroup.id}>
+                  {headerGroup.headers.map(header => {
+                    return (
+                      <Th key={header.id} colSpan={header.colSpan}>
+                        {header.isPlaceholder ? null : (
+                          <Flex>
+                            {flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                          </Flex>
+                        )}
+                      </Th>
+                    )
+                  })}
+                </Tr>
+              ))}
+            </Thead>
+            <Tbody>
+              {table.getRowModel().rows.map(row => {
+                return (
+                  <Tr key={row.id}>
+                    {row.getVisibleCells().map(cell => {
+                      return (
+                        <Td key={cell.id}>
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </Td>
+                      )
+                    })}
+                  </Tr>
+                )
+              })}
+            </Tbody>
+          </Table>
+        </TableContainer>
+
+        <Flex direction={"row"} gap={"4"} justify={"space-between"} w={"100%"}>
+          <Flex direction={"row"} gap={"4"} align={"center"}>
+            <IconButton
+              icon={<Icon name={"c_double_left"} />}
+              aria-label="first page"
+              onClick={() => table.setPageIndex(0)}
+              disabled={!table.getCanPreviousPage()}
+            />
+            <IconButton
+              icon={<Icon name={"c_left"} />}
+              aria-label="previous page"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+            />
+            <Text as={"b"}>
+              {table.getState().pagination.pageIndex + 1} of{" "}
+              {table.getPageCount()}
+            </Text>
+            <IconButton
+              icon={<Icon name={"c_right"} />}
+              aria-label="next page"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            />
+            <IconButton
+              icon={<Icon name={"c_double_right"} />}
+              aria-label="last page"
+              onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+              disabled={!table.getCanNextPage()}
+            />
+          </Flex>
+          <Flex>
+            <Select
+              value={table.getState().pagination.pageSize}
+              onChange={(event) => {
+                table.setPageSize(Number(event.target.value));
+              }}
+            >
+              {[5, 10, 20].map((size) => {
+                return (
+                  <option key={size} value={size}>
+                    Show {size}
+                  </option>
+                );
+              })}
+            </Select>
+          </Flex>
+        </Flex>
       </Flex>
     </Flex>
   );
