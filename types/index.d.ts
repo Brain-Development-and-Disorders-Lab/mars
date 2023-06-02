@@ -152,6 +152,7 @@ export type DataTableProps = {
   setData?: (value: React.SetStateAction<any[]>) => void;
   visibleColumns: VisibilityState;
   hideControls?: boolean;
+  hideSelection?: boolean;
   viewOnly?: boolean;
 };
 

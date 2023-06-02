@@ -353,7 +353,7 @@ const Values = (props: {
 
       {/* Values list */}
       <Flex p={["1", "2"]} direction={"column"} gap={"1"} w={"100%"}>
-        <DataTable columns={columns} data={data} setData={setData} viewOnly={props.viewOnly} />
+        <DataTable columns={columns} visibleColumns={{}} data={data} setData={setData} viewOnly={props.viewOnly} />
       </Flex>
     </Flex>
   );

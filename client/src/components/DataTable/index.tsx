@@ -1,5 +1,5 @@
 // React
-import React, { FC, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 // Existing and custom components
 import {
@@ -29,7 +29,10 @@ import Icon from "@components/Icon";
 // Existing and custom types
 import { DataTableProps, IValue } from "@types";
 
-const DataTable: FC<any> = (props: DataTableProps) => {
+// Utility functions and libraries
+import _ from "lodash";
+
+const DataTable = (props: DataTableProps) => {
   // Table visibility state
   const [columnVisibility, setColumnVisibility] = useState(
     props.visibleColumns
@@ -42,31 +45,32 @@ const DataTable: FC<any> = (props: DataTableProps) => {
   const table = useReactTable({
     columns: [
       // Checkbox select column
-      {
-        id: "select",
-        header: ({ table }: any) => (
-          <Checkbox
-            {...{
-              disabled: props.viewOnly,
-              isChecked: table.getIsAllRowsSelected(),
-              isIndeterminate: table.getIsSomeRowsSelected(),
-              onChange: table.getToggleAllRowsSelectedHandler(),
-            }}
-          />
-        ),
-        cell: ({ row }: any) => (
-          <Flex>
+      ... _.isEqual(props.hideSelection, false) || _.isUndefined(props.hideSelection) ?
+        [{
+          id: "select",
+          header: ({ table }: any) => (
             <Checkbox
               {...{
-                isChecked: row.getIsSelected(),
-                disabled: !row.getCanSelect() || props.viewOnly,
-                isIndeterminate: row.getIsSomeSelected(),
-                onChange: row.getToggleSelectedHandler(),
+                disabled: props.viewOnly,
+                isChecked: table.getIsAllRowsSelected(),
+                isIndeterminate: table.getIsSomeRowsSelected(),
+                onChange: table.getToggleAllRowsSelectedHandler(),
               }}
             />
-          </Flex>
-        ),
-      },
+          ),
+          cell: ({ row }: any) => (
+            <Flex>
+              <Checkbox
+                {...{
+                  isChecked: row.getIsSelected(),
+                  disabled: !row.getCanSelect() || props.viewOnly,
+                  isIndeterminate: row.getIsSomeSelected(),
+                  onChange: row.getToggleSelectedHandler(),
+                }}
+              />
+            </Flex>
+          ),
+        }] : [],
       ...props.columns,
     ],
     data: props.data,
@@ -113,7 +117,7 @@ const DataTable: FC<any> = (props: DataTableProps) => {
 
   return (
     <>
-      {!props.hideControls && !props.viewOnly &&
+      {!props.hideControls && !props.viewOnly && !props.hideSelection &&
         <Flex>
           <Button disabled={Object.keys(selectedRows).length === 0 || props.viewOnly} onClick={onDeleteRows} colorScheme={"red"}>Delete {Object.keys(selectedRows).length} Values</Button>
         </Flex>

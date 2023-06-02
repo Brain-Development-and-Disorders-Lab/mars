@@ -294,15 +294,13 @@ const Attribute = () => {
                   Values
                 </Heading>
 
-                {attributeData.values && attributeData.values.length > 0 ? (
+                {attributeData.values &&
                   <Values
                     collection={attributeValues}
                     viewOnly={!editing}
                     setValues={setAttributeValues}
                   />
-                ) : (
-                  <Text>No values.</Text>
-                )}
+                }
               </Flex>
             </Flex>
           </Flex>

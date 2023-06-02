@@ -154,6 +154,7 @@ const Entities = () => {
                     columns={columns}
                     data={data}
                     visibleColumns={visibleColumns}
+                    hideSelection
                   />
                 </Flex>
               ) : (
