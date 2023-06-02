@@ -29,17 +29,17 @@ export class Search {
         .collection(ENTITIES_COLLECTION)
         .find({
           $or: [
-            { "_id": { $regex: expression }, },
-            { "name": { $regex: expression }, },
-            { "owner": { $regex: expression }, },
-            { "description": { $regex: expression }, },
-            { "associations.origins.name": { $regex: expression }, },
-            { "attributes.description": { $regex: expression }, },
-            { "attributes.description": { $regex: expression }, },
-            { "attributes.parameters": { $regex: expression }, },
-            { "attributes.parameters.name": { $regex: expression }, },
-            { "attributes.parameters.identifier": { $regex: expression }, },
-            { "attributes.parameters.data": { $regex: expression }, },
+            { _id: { $regex: expression } },
+            { name: { $regex: expression } },
+            { owner: { $regex: expression } },
+            { description: { $regex: expression } },
+            { "associations.origins.name": { $regex: expression } },
+            { "attributes.description": { $regex: expression } },
+            { "attributes.description": { $regex: expression } },
+            { "attributes.values": { $regex: expression } },
+            { "attributes.values.name": { $regex: expression } },
+            { "attributes.values.identifier": { $regex: expression } },
+            { "attributes.values.data": { $regex: expression } },
           ],
         })
         .toArray((error, content) => {

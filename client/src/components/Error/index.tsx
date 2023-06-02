@@ -1,20 +1,17 @@
 // React
 import React from "react";
-import { useNavigate } from "react-router-dom";
-import {
-  Button,
-  Flex,
-  Heading,
-  Icon,
-} from "@chakra-ui/react";
-import { BsArrowClockwise, BsExclamationCircle } from "react-icons/bs";
 
-// Utility libraries
+// Existing and custom components
+import { Button, Flex, Heading } from "@chakra-ui/react";
+import Icon from "@components/Icon";
+
+// Routing and navigation
+import { useNavigate } from "react-router-dom";
+
+// Utility functions and libraries
 import _ from "lodash";
 
-// Custom components
-
-export const Error = () => {
+const Error = () => {
   const navigate = useNavigate();
 
   return (
@@ -27,11 +24,10 @@ export const Error = () => {
       pb={"4"}
       gap={"8"}
     >
-      <Icon as={BsExclamationCircle} w={"16"} h={"16"} />
+      <Icon name={"exclamation"} size={"xl"} />
       <Heading fontWeight={"semibold"}>Something's not right.</Heading>
-
       <Button
-        leftIcon={<Icon as={BsArrowClockwise} />}
+        leftIcon={<Icon name={"reload"} />}
         onClick={() => navigate(0)}
         colorScheme={"orange"}
       >
@@ -40,3 +36,5 @@ export const Error = () => {
     </Flex>
   );
 };
+
+export default Error;

@@ -1,12 +1,13 @@
 // React
 import React, { useEffect, useState } from "react";
+
+// Existing and custom components
 import {
   Button,
   Flex,
   FormControl,
   FormLabel,
   Heading,
-  Icon,
   Link,
   Modal,
   ModalCloseButton,
@@ -26,7 +27,6 @@ import {
   Tag,
   TagCloseButton,
   TagLabel,
-  TagRightIcon,
   Tbody,
   Td,
   Text,
@@ -37,30 +37,23 @@ import {
   useDisclosure,
   useToast,
 } from "@chakra-ui/react";
-import {
-  AddIcon,
-  ChevronRightIcon,
-  WarningIcon,
-} from "@chakra-ui/icons";
-import { AiOutlineEdit } from "react-icons/ai";
-import { BsCheckLg, BsFolder, BsTrash, BsXLg } from "react-icons/bs";
+import { Content } from "@components/Container";
+import Error from "@components/Error";
+import Icon from "@components/Icon";
+import Linky from "@components/Linky";
+import Loading from "@components/Loading";
 
-// Navigation
-import { useParams, useNavigate } from "react-router-dom";
-
-// Database and models
-import { deleteData, getData, postData } from "@database/functions";
+// Existing and custom types
 import { CollectionModel, EntityModel } from "@types";
 
-// Custom components
-import { Error } from "@components/Error";
-import Linky from "@components/Linky";
-import { Loading } from "@components/Loading";
-import { ContentContainer } from "@components/ContentContainer";
+// Routing and navigation
+import { useParams, useNavigate } from "react-router-dom";
 
+// Utility functions and libraries
+import { deleteData, getData, postData } from "@database/functions";
 import _ from "lodash";
 
-export const Collection = () => {
+const Collection = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const toast = useToast();
@@ -83,10 +76,11 @@ export const Collection = () => {
     // Populate Collection data
     getData(`/collections/${id}`)
       .then((response) => {
-          setCollectionData(response);
-          setCollectionEntities(response.entities);
-          setCollectionDescription(response.description);
-      }).catch(() => {
+        setCollectionData(response);
+        setCollectionEntities(response.entities);
+        setCollectionDescription(response.description);
+      })
+      .catch(() => {
         toast({
           title: "Error",
           description: "Could not retrieve Collection data.",
@@ -96,18 +90,19 @@ export const Collection = () => {
           isClosable: true,
         });
         setIsError(true);
-      }).finally(() => {
+      })
+      .finally(() => {
         setIsLoaded(true);
       });
 
     // Populate Entity data
     getData(`/entities`)
       .then((response) => {
-          setAllEntities(
-            response.map((e: EntityModel) => {
-              return { name: e.name, id: e._id };
-            })
-          );
+        setAllEntities(
+          response.map((e: EntityModel) => {
+            return { name: e.name, id: e._id };
+          })
+        );
       })
       .catch(() => {
         toast({
@@ -119,7 +114,8 @@ export const Collection = () => {
           isClosable: true,
         });
         setIsError(true);
-      }).finally(() => {
+      })
+      .finally(() => {
         setIsLoaded(true);
       });
   }, [id, isLoaded]);
@@ -180,7 +176,8 @@ export const Collection = () => {
             position: "bottom-right",
             isClosable: true,
           });
-        }).catch(() => {
+        })
+        .catch(() => {
           toast({
             title: "Error",
             description: "An error occurred when saving updates.",
@@ -189,7 +186,8 @@ export const Collection = () => {
             position: "bottom-right",
             isClosable: true,
           });
-        }).finally(() => {
+        })
+        .finally(() => {
           setEditing(false);
         });
     } else {
@@ -209,7 +207,8 @@ export const Collection = () => {
           position: "bottom-right",
           isClosable: true,
         });
-      }).catch(() => {
+      })
+      .catch(() => {
         toast({
           title: "Error",
           description: `An error occurred when deleting Collection "${collectionData.name}".`,
@@ -218,14 +217,15 @@ export const Collection = () => {
           position: "bottom-right",
           isClosable: true,
         });
-      }).finally(() => {
+      })
+      .finally(() => {
         setEditing(false);
         navigate("/collections");
       });
   };
 
   return (
-    <ContentContainer vertical={isError || !isLoaded}>
+    <Content vertical={isError || !isLoaded}>
       {isLoaded ? (
         isError ? (
           <Error />
@@ -239,17 +239,35 @@ export const Collection = () => {
               wrap={"wrap"}
               gap={"4"}
             >
-              <Flex align={"center"} gap={"4"} shadow={"lg"} p={"2"} border={"2px"} rounded={"md"} bg={"white"}>
-                <Icon as={BsFolder} w={"8"} h={"8"} />
+              <Flex
+                align={"center"}
+                gap={"4"}
+                shadow={"lg"}
+                p={"2"}
+                border={"2px"}
+                rounded={"md"}
+                bg={"white"}
+              >
+                <Icon name={"collection"} size={"lg"} />
                 <Heading fontWeight={"semibold"}>{collectionData.name}</Heading>
               </Flex>
 
               {/* Buttons */}
-              <Flex direction={"row"} gap={"4"} wrap={"wrap"} bg={"white"} p={"4"} rounded={"md"}>
-                {editing &&
+              <Flex
+                direction={"row"}
+                gap={"4"}
+                wrap={"wrap"}
+                bg={"white"}
+                p={"4"}
+                rounded={"md"}
+              >
+                {editing && (
                   <Popover>
                     <PopoverTrigger>
-                      <Button colorScheme={"red"} rightIcon={<Icon as={BsTrash} />}>
+                      <Button
+                        colorScheme={"red"}
+                        rightIcon={<Icon name={"delete"} />}
+                      >
                         Delete
                       </Button>
                     </PopoverTrigger>
@@ -262,7 +280,7 @@ export const Collection = () => {
                         <Flex direction={"row"} p={"2"} justify={"center"}>
                           <Button
                             colorScheme={"green"}
-                            rightIcon={<Icon as={BsCheckLg} />}
+                            rightIcon={<Icon name={"check"} />}
                             onClick={handleDeleteClick}
                           >
                             Confirm
@@ -271,11 +289,11 @@ export const Collection = () => {
                       </PopoverBody>
                     </PopoverContent>
                   </Popover>
-                }
+                )}
                 <Button
                   colorScheme={editing ? "green" : "gray"}
                   rightIcon={
-                    editing ? <Icon as={BsCheckLg} /> : <Icon as={AiOutlineEdit} />
+                    editing ? <Icon name={"check"} /> : <Icon name={"edit"} />
                   }
                   onClick={handleEditClick}
                 >
@@ -296,7 +314,9 @@ export const Collection = () => {
               >
                 {/* Details */}
                 <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
-                  <Heading fontWeight={"semibold"} size={"lg"}>Details</Heading>
+                  <Heading fontWeight={"semibold"} size={"lg"}>
+                    Details
+                  </Heading>
                   <TableContainer>
                     <Table variant={"simple"} colorScheme={"blackAlpha"}>
                       <Thead>
@@ -316,7 +336,7 @@ export const Collection = () => {
                                 colorScheme={"orange"}
                               >
                                 <TagLabel>Not specified</TagLabel>
-                                <TagRightIcon as={WarningIcon} />
+                                <Icon name={"warning"} />
                               </Tag>
                             ) : (
                               <Text>
@@ -335,19 +355,17 @@ export const Collection = () => {
                                 colorScheme={"orange"}
                               >
                                 <TagLabel>Not specified</TagLabel>
-                                <TagRightIcon as={WarningIcon} />
+                                <Icon name={"warning"} />
                               </Tag>
+                            ) : editing ? (
+                              <Textarea
+                                value={collectionDescription}
+                                onChange={(event) => {
+                                  setCollectionDescription(event.target.value);
+                                }}
+                              />
                             ) : (
-                              editing ? (
-                                <Textarea
-                                  value={collectionDescription}
-                                  onChange={(event) => {
-                                    setCollectionDescription(event.target.value);
-                                  }}
-                                />
-                              ) : (
-                                <Text>{collectionDescription}</Text>
-                              )
+                              <Text>{collectionDescription}</Text>
                             )}
                           </Td>
                         </Tr>
@@ -373,7 +391,7 @@ export const Collection = () => {
                   </Heading>
                   {editing && (
                     <Button
-                      leftIcon={<AddIcon />}
+                      leftIcon={<Icon name={"add"} />}
                       onClick={onOpen}
                       colorScheme={"green"}
                     >
@@ -404,8 +422,10 @@ export const Collection = () => {
                                       <Button
                                         key={`view-collection-${entity}`}
                                         colorScheme={"blackAlpha"}
-                                        rightIcon={<ChevronRightIcon />}
-                                        onClick={() => navigate(`/entities/${entity}`)}
+                                        rightIcon={<Icon name={"c_right"} />}
+                                        onClick={() =>
+                                          navigate(`/entities/${entity}`)
+                                        }
                                       >
                                         View
                                       </Button>
@@ -414,7 +434,7 @@ export const Collection = () => {
                                     {editing && (
                                       <Button
                                         key={`remove-${entity}`}
-                                        rightIcon={<BsXLg />}
+                                        rightIcon={<Icon name={"delete"} />}
                                         colorScheme={"red"}
                                         onClick={() => {
                                           if (id) {
@@ -466,7 +486,10 @@ export const Collection = () => {
                             isClosable: true,
                           });
                         } else {
-                          setSelectedEntities(selectedEntities => [...selectedEntities, selectedEntity]);
+                          setSelectedEntities((selectedEntities) => [
+                            ...selectedEntities,
+                            selectedEntity,
+                          ]);
                         }
                       }}
                     >
@@ -527,7 +550,7 @@ export const Collection = () => {
       ) : (
         <Loading />
       )}
-    </ContentContainer>
+    </Content>
   );
 };
 

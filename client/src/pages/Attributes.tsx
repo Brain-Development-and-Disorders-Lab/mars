@@ -1,11 +1,11 @@
+// React
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+
+// Existing and custom components
 import {
   Button,
   Flex,
   Heading,
-  Icon,
-  Link,
   Table,
   TableContainer,
   Tbody,
@@ -16,20 +16,21 @@ import {
   Tr,
   useToast,
 } from "@chakra-ui/react";
-import { ChevronRightIcon, AddIcon } from "@chakra-ui/icons";
-import { BsPuzzle } from "react-icons/bs";
+import Error from "@components/Error";
+import Icon from "@components/Icon";
+import Loading from "@components/Loading";
+import { Warning } from "@components/Label";
+import { Content } from "@components/Container";
 
-// Custom components
-import { Error } from "@components/Error";
-import { Loading } from "@components/Loading";
-import { WarningLabel } from "@components/Label";
-import { ContentContainer } from "@components/ContentContainer";
-
-// Database and models
-import { getData } from "@database/functions";
+// Existing and custom types
 import { AttributeModel } from "@types";
 
+// Utility functions and libraries
+import { getData } from "@database/functions";
 import _ from "lodash";
+
+// Routing and navigation
+import { useNavigate } from "react-router-dom";
 
 const Attributes = () => {
   const navigate = useNavigate();
@@ -46,7 +47,8 @@ const Attributes = () => {
       .then((value) => {
         setAttributesData(value);
         setIsLoaded(true);
-      }).catch((_error) => {
+      })
+      .catch((_error) => {
         toast({
           title: "Error",
           status: "error",
@@ -56,13 +58,14 @@ const Attributes = () => {
           isClosable: true,
         });
         setIsError(true);
-      }).finally(() => {
+      })
+      .finally(() => {
         setIsLoaded(true);
       });
   }, []);
 
   return (
-    <ContentContainer vertical={isError || !isLoaded}>
+    <Content vertical={isError || !isLoaded}>
       {isLoaded ? (
         isError ? (
           <Error />
@@ -76,34 +79,26 @@ const Attributes = () => {
             wrap={"wrap"}
           >
             <Flex
-              pt={"4"}
-              pb={"4"}
               direction={"row"}
-              justify={"space-between"}
-              align={"center"}
-            >
-              <Flex align={"center"} gap={"4"}>
-                <Icon as={BsPuzzle} w={"8"} h={"8"} />
-                <Heading fontWeight={"semibold"}>Attributes</Heading>
-              </Flex>
-              <Button
-                rightIcon={<AddIcon />}
-                as={Link}
-                onClick={() => navigate("/create/attribute/start")}
-                colorScheme={"green"}
-              >
-                Create
-              </Button>
-            </Flex>
-
-            <Flex
               p={"4"}
-              direction={"row"}
               rounded={"md"}
-              background={"white"}
-              flexWrap={"wrap"}
+              bg={"white"}
+              wrap={"wrap"}
               gap={"6"}
+              justify={"center"}
             >
+              <Flex
+                w={"100%"}
+                p={"4"}
+                direction={"row"}
+                justify={"space-between"}
+                align={"center"}
+              >
+                <Flex align={"center"} gap={"4"}>
+                  <Icon name={"attribute"} size={"lg"} />
+                  <Heading fontWeight={"semibold"}>Attributes</Heading>
+                </Flex>
+              </Flex>
               {isLoaded && attributesData.length > 0 ? (
                 <TableContainer w={"full"}>
                   <Table variant={"simple"} colorScheme={"blackAlpha"}>
@@ -124,7 +119,7 @@ const Attributes = () => {
                           <Tr key={attribute._id}>
                             <Td>
                               {_.isEqual(attribute.name, "") ? (
-                                <WarningLabel
+                                <Warning
                                   key={`warn-${attribute._id}`}
                                   text={"Not specified"}
                                 />
@@ -134,12 +129,14 @@ const Attributes = () => {
                             </Td>
                             <Td display={{ base: "none", sm: "table-cell" }}>
                               {_.isEqual(attribute.description, "") ? (
-                                <WarningLabel
+                                <Warning
                                   key={`warn-${attribute._id}`}
                                   text={"Not specified"}
                                 />
                               ) : (
-                                <Text noOfLines={2}>{attribute.description}</Text>
+                                <Text noOfLines={2}>
+                                  {attribute.description}
+                                </Text>
                               )}
                             </Td>
                             <Td>
@@ -147,7 +144,7 @@ const Attributes = () => {
                                 <Button
                                   key={`view-attribute-${attribute._id}`}
                                   colorScheme={"blackAlpha"}
-                                  rightIcon={<ChevronRightIcon />}
+                                  rightIcon={<Icon name={"c_right"} />}
                                   onClick={() =>
                                     navigate(`/attributes/${attribute._id}`)
                                   }
@@ -171,7 +168,7 @@ const Attributes = () => {
       ) : (
         <Loading />
       )}
-    </ContentContainer>
+    </Content>
   );
 };
 

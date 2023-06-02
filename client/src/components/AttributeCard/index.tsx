@@ -1,5 +1,7 @@
 // React
 import React, { useState } from "react";
+
+// Existing and custom components
 import {
   Button,
   Card,
@@ -7,7 +9,6 @@ import {
   CardHeader,
   Flex,
   Heading,
-  Icon,
   Input,
   Modal,
   ModalBody,
@@ -20,24 +21,18 @@ import {
   StackDivider,
   Tag,
   TagLabel,
-  TagLeftIcon,
   Text,
   useDisclosure,
 } from "@chakra-ui/react";
-import { InfoOutlineIcon } from "@chakra-ui/icons";
-import { AiOutlineBlock, AiOutlineEdit, AiOutlineLink } from "react-icons/ai";
-import { MdDateRange, MdOutlineTextFields } from "react-icons/md";
-import { RiNumbersLine } from "react-icons/ri";
-import { BsCheckLg, BsDashLg, BsPuzzle, BsXLg } from "react-icons/bs";
+import Icon from "@components/Icon";
+import Values from "@components/Values";
+import { Warning } from "@components/Label";
 
-import _ from "lodash";
-
-// Types
+// Existing and custom types
 import { AttributeCardProps } from "@types";
 
-// Custom components
-import ParameterGroup from "@components/ParameterGroup";
-import { WarningLabel } from "@components/Label";
+// Utility functions and libraries
+import _ from "lodash";
 
 const AttributeCard = (props: AttributeCardProps) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -45,34 +40,47 @@ const AttributeCard = (props: AttributeCardProps) => {
 
   // State to be updated
   const [description, setDescription] = useState(props.attribute.description);
-  const [parameters, setParameters] = useState(props.attribute.parameters);
+  const [values, setValues] = useState(props.attribute.values);
 
   // State to store original values
-  const [defaultDescription, _setDefaultDescription] = useState(props.attribute.description);
-  const [defaultParameters, _setDefaultParameters] = useState(props.attribute.parameters);
+  const [defaultDescription, _setDefaultDescription] = useState(
+    props.attribute.description
+  );
+  const [defaultValues, _setDefaultValues] = useState(props.attribute.values);
 
   return (
-    <Card maxW={"md"} background={"white"}>
+    <Card maxW={"md"} background={"white"} variant={"outline"}>
       <CardHeader p={"2"}>
-        <Flex p={"2"} align={"center"} m={"none"} justify={"space-between"} gap={"4"}>
+        <Flex
+          p={"2"}
+          align={"center"}
+          m={"none"}
+          justify={"space-between"}
+          gap={"4"}
+        >
           <Flex align={"center"} gap={"2"}>
-            <Icon as={BsPuzzle} w={"4"} h={"4"} />
-            <Heading size={"md"} noOfLines={1}>{props.attribute.name}</Heading>
+            <Icon name={"attribute"} size={"md"} />
+            <Heading size={"md"} noOfLines={1}>
+              {props.attribute.name}
+            </Heading>
           </Flex>
 
           <Flex align={"center"} gap={"2"}>
-            {(isEditing && props.removeCallback) &&
+            {isEditing && props.removeCallback && (
               <Button
                 key={`remove-${props.attribute._id}`}
-                rightIcon={<Icon as={BsDashLg} />}
+                rightIcon={<Icon name={"delete"} />}
                 colorScheme={"red"}
                 onClick={props.removeCallback}
               >
                 Remove
               </Button>
-            }
+            )}
 
-            <Button onClick={onOpen} rightIcon={<Icon as={isEditing ? AiOutlineEdit : InfoOutlineIcon} />}>
+            <Button
+              onClick={onOpen}
+              rightIcon={<Icon name={isEditing ? "edit" : "info"} />}
+            >
               {isEditing ? "Edit" : "View"}
             </Button>
           </Flex>
@@ -89,19 +97,16 @@ const AttributeCard = (props: AttributeCardProps) => {
             </Text>
 
             <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
-              {parameters.map((parameter) => {
-                switch (parameter.type) {
+              {values.map((value) => {
+                switch (value.type) {
                   case "date": {
                     return (
-                      <Tag key={parameter.identifier}>
-                        <TagLeftIcon as={MdDateRange} />
+                      <Tag key={value.identifier}>
+                        <Icon name={"p_date"} />
                         <TagLabel>
                           <Flex align={"center"} gap={"1"}>
-                            <Flex
-                              p={"1"}
-                              m={"1"}
-                            >
-                              {parameter.name}
+                            <Flex p={"1"} m={"1"}>
+                              {value.name}
                             </Flex>
                           </Flex>
                         </TagLabel>
@@ -110,15 +115,12 @@ const AttributeCard = (props: AttributeCardProps) => {
                   }
                   case "entity": {
                     return (
-                      <Tag key={parameter.identifier}>
-                        <TagLeftIcon as={AiOutlineBlock} />
+                      <Tag key={value.identifier}>
+                        <Icon name={"entity"} />
                         <TagLabel>
                           <Flex align={"center"} gap={"1"}>
-                            <Flex
-                              p={"1"}
-                              m={"1"}
-                            >
-                              {parameter.name}
+                            <Flex p={"1"} m={"1"}>
+                              {value.name}
                             </Flex>
                           </Flex>
                         </TagLabel>
@@ -127,15 +129,12 @@ const AttributeCard = (props: AttributeCardProps) => {
                   }
                   case "number": {
                     return (
-                      <Tag key={parameter.identifier}>
-                        <TagLeftIcon as={RiNumbersLine} />
+                      <Tag key={value.identifier}>
+                        <Icon name={"p_number"} />
                         <TagLabel>
                           <Flex align={"center"} gap={"1"}>
-                            <Flex
-                              p={"1"}
-                              m={"1"}
-                            >
-                              {parameter.name}
+                            <Flex p={"1"} m={"1"}>
+                              {value.name}
                             </Flex>
                           </Flex>
                         </TagLabel>
@@ -145,15 +144,12 @@ const AttributeCard = (props: AttributeCardProps) => {
 
                   case "url": {
                     return (
-                      <Tag key={parameter.identifier}>
-                        <TagLeftIcon as={AiOutlineLink} />
+                      <Tag key={value.identifier}>
+                        <Icon name={"p_url"} />
                         <TagLabel>
                           <Flex align={"center"} gap={"1"}>
-                            <Flex
-                              p={"1"}
-                              m={"1"}
-                            >
-                              {parameter.name}
+                            <Flex p={"1"} m={"1"}>
+                              {value.name}
                             </Flex>
                           </Flex>
                         </TagLabel>
@@ -162,15 +158,12 @@ const AttributeCard = (props: AttributeCardProps) => {
                   }
                   default: {
                     return (
-                      <Tag key={parameter.identifier}>
-                        <TagLeftIcon as={MdOutlineTextFields} />
+                      <Tag key={value.identifier}>
+                        <Icon name={"p_text"} />
                         <TagLabel>
                           <Flex align={"center"} gap={"1"}>
-                            <Flex
-                              p={"1"}
-                              m={"1"}
-                            >
-                              {parameter.name}
+                            <Flex p={"1"} m={"1"}>
+                              {value.name}
                             </Flex>
                           </Flex>
                         </TagLabel>
@@ -185,7 +178,13 @@ const AttributeCard = (props: AttributeCardProps) => {
       </CardBody>
 
       <ScaleFade initialScale={0.9} in={isOpen}>
-        <Modal onEsc={onClose} onClose={onClose} isOpen={isOpen} size={"3xl"} isCentered>
+        <Modal
+          onEsc={onClose}
+          onClose={onClose}
+          isOpen={isOpen}
+          size={"3xl"}
+          isCentered
+        >
           <ModalOverlay />
 
           <ModalContent p={"2"} m={"2"}>
@@ -196,9 +195,18 @@ const AttributeCard = (props: AttributeCardProps) => {
                 align={"center"}
                 wrap={"wrap"}
               >
-                <Flex align={"center"} gap={"4"} shadow={"lg"} p={"2"} border={"2px"} rounded={"md"}>
-                  <Icon as={BsPuzzle} w={"8"} h={"8"} />
-                  <Heading fontWeight={"semibold"} size={"md"}>{props.attribute.name}</Heading>
+                <Flex
+                  align={"center"}
+                  gap={"4"}
+                  shadow={"lg"}
+                  p={"2"}
+                  border={"2px"}
+                  rounded={"md"}
+                >
+                  <Icon name={"attribute"} size={"lg"} />
+                  <Heading fontWeight={"semibold"} size={"md"}>
+                    {props.attribute.name}
+                  </Heading>
                 </Flex>
               </Flex>
               <ModalCloseButton />
@@ -211,13 +219,16 @@ const AttributeCard = (props: AttributeCardProps) => {
                   description.length > 0 ? (
                     <Text>{description}</Text>
                   ) : (
-                    <WarningLabel
+                    <Warning
                       key={props.attribute.name}
                       text={"No description provided"}
                     />
                   )
                 ) : (
-                  <Input value={description} onChange={(event) => setDescription(event.target.value)} />
+                  <Input
+                    value={description}
+                    onChange={(event) => setDescription(event.target.value)}
+                  />
                 )}
               </Flex>
 
@@ -229,31 +240,35 @@ const AttributeCard = (props: AttributeCardProps) => {
                 bg={"white"}
                 rounded={"md"}
               >
-                <Heading size={"md"}>Parameters</Heading>
+                <Heading size={"md"}>Values</Heading>
                 <Flex
                   direction={"column"}
                   gap={"2"}
                   align={"center"}
                   justify={"center"}
                 >
-                  {parameters && parameters.length > 0 ? (
-                    <ParameterGroup parameters={parameters} viewOnly={!isEditing} setParameters={setParameters} />
+                  {values && values.length > 0 ? (
+                    <Values
+                      collection={values}
+                      viewOnly={!isEditing}
+                      setValues={setValues}
+                    />
                   ) : (
-                    <Text>No parameters.</Text>
+                    <Text>No values.</Text>
                   )}
                 </Flex>
               </Flex>
 
-              {isEditing &&
+              {isEditing && (
                 <Flex direction={"row"} justify={"center"} gap={"4"}>
                   <Button
                     colorScheme={"red"}
                     variant={"outline"}
-                    rightIcon={<Icon as={BsXLg} />}
+                    rightIcon={<Icon name={"check"} />}
                     onClick={() => {
                       // Reset the changes made to the Attribute
                       setDescription(defaultDescription);
-                      setParameters(defaultParameters);
+                      setValues(defaultValues);
 
                       // Close the modal
                       onClose();
@@ -267,20 +282,26 @@ const AttributeCard = (props: AttributeCardProps) => {
 
                   <Button
                     colorScheme={"green"}
-                    rightIcon={<Icon as={BsCheckLg} />}
-                    // disabled={isAttributeError}
+                    rightIcon={<Icon name={"check"} />}
                     onClick={() => {
                       // Close the modal
                       onClose();
 
                       // Run the 'done' action (if specified)
-                      props.doneCallback ? props.doneCallback({ _id: props.attribute._id, name: props.attribute.name, description: description, parameters: parameters}) : {};
+                      props.doneCallback
+                        ? props.doneCallback({
+                            _id: props.attribute._id,
+                            name: props.attribute.name,
+                            description: description,
+                            values: values,
+                          })
+                        : {};
                     }}
                   >
                     Done
                   </Button>
                 </Flex>
-              }
+              )}
             </ModalBody>
           </ModalContent>
         </Modal>

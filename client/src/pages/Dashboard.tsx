@@ -1,32 +1,37 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+
+// Existing and custom components
 import {
   Button,
   Flex,
   Heading,
-  Icon,
   Text,
   useToast,
   Spacer,
   List,
   ListItem,
+  useBreakpoint,
 } from "@chakra-ui/react";
-import { AddIcon, ChevronRightIcon } from "@chakra-ui/icons";
-import { BsBox, BsChevronRight, BsClockHistory, BsFolder, BsPencil, BsPlusLg, BsTrash } from "react-icons/bs";
 import { createColumnHelper } from "@tanstack/react-table";
-
-import { ContentContainer } from "@components/ContentContainer";
-import { DataTable } from "@components/DataTable";
-import { Loading } from "@components/Loading";
-import { Error } from "@components/Error";
+import { Content } from "@components/Container";
+import DataTable from "@components/DataTable";
+import Icon from "@components/Icon";
+import Error from "@components/Error";
 import Linky from "@components/Linky";
+import Loading from "@components/Loading";
 
-import { getData } from "src/database/functions";
+// Existing and custom types
 import { CollectionModel, EntityModel, UpdateModel } from "@types";
 
+// Utility functions and libraries
+import { getData } from "src/database/functions";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 dayjs.extend(relativeTime);
+import _ from "lodash";
+
+// Routing and navigation
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
   // Enable navigation
@@ -38,18 +43,35 @@ const Dashboard = () => {
   // Page state
   const [isLoaded, setIsLoaded] = useState(false);
   const [isError, setIsError] = useState(false);
+  const breakpoint = useBreakpoint({ ssr: false });
 
   // Page data
   const [entityData, setEntityData] = useState([] as EntityModel[]);
   const [collectionData, setCollectionData] = useState([] as CollectionModel[]);
   const [updateData, setUpdateData] = useState([] as UpdateModel[]);
 
+  const [visibleColumns, setVisibleColumns] = useState({});
+
+  // Effect to adjust column visibility
+  useEffect(() => {
+    if (
+      _.isEqual(breakpoint, "sm") ||
+      _.isEqual(breakpoint, "base") ||
+      _.isUndefined(breakpoint)
+    ) {
+      setVisibleColumns({ description: false });
+    } else {
+      setVisibleColumns({});
+    }
+  }, [breakpoint]);
+
   // Get all Entities
   useEffect(() => {
     getData(`/entities`)
       .then((result) => {
         setEntityData(result.reverse());
-      }).catch((_error) => {
+      })
+      .catch((_error) => {
         toast({
           title: "Error",
           status: "error",
@@ -59,49 +81,56 @@ const Dashboard = () => {
           isClosable: true,
         });
         setIsError(true);
-      }).finally(() => {
+      })
+      .finally(() => {
         setIsLoaded(true);
       });
   }, []);
 
   // Get all Collections
   useEffect(() => {
-    getData(`/collections`).then((value) => {
-      setCollectionData(value.reverse());
-      setIsLoaded(true);
-    }).catch((_error) => {
-      toast({
-        title: "Error",
-        status: "error",
-        description: "Could not retrieve Collections data.",
-        duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
+    getData(`/collections`)
+      .then((value) => {
+        setCollectionData(value.reverse());
+        setIsLoaded(true);
+      })
+      .catch((_error) => {
+        toast({
+          title: "Error",
+          status: "error",
+          description: "Could not retrieve Collections data.",
+          duration: 4000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+        setIsError(true);
+      })
+      .finally(() => {
+        setIsLoaded(true);
       });
-      setIsError(true);
-    }).finally(() => {
-      setIsLoaded(true);
-    });
   }, []);
 
   // Get all Updates
   useEffect(() => {
-    getData(`/updates`).then((value) => {
-      setUpdateData(value.reverse());
-      setIsLoaded(true);
-    }).catch((_error) => {
-      toast({
-        title: "Error",
-        status: "error",
-        description: "Could not retrieve Updates data.",
-        duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
+    getData(`/updates`)
+      .then((value) => {
+        setUpdateData(value.reverse());
+        setIsLoaded(true);
+      })
+      .catch((_error) => {
+        toast({
+          title: "Error",
+          status: "error",
+          description: "Could not retrieve Updates data.",
+          duration: 4000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+        setIsError(true);
+      })
+      .finally(() => {
+        setIsLoaded(true);
       });
-      setIsError(true);
-    }).finally(() => {
-      setIsLoaded(true);
-    });
   }, []);
 
   // Configure Entity table
@@ -113,21 +142,25 @@ const Dashboard = () => {
       header: "Name",
     }),
     entityTableColumnHelper.accessor("description", {
-      cell: (info) => info.getValue(),
+      cell: (info) => {
+        return <Text noOfLines={1}>{info.getValue()}</Text>;
+      },
       header: "Description",
       enableHiding: true,
     }),
     entityTableColumnHelper.accessor("_id", {
       cell: (info) => {
         return (
-          <Button
-            key={`view-entity-${info.getValue()}`}
-            colorScheme={"blackAlpha"}
-            rightIcon={<Icon as={BsChevronRight} />}
-            onClick={() => navigate(`/entities/${info.getValue()}`)}
-          >
-            View
-          </Button>
+          <Flex justifyContent={"right"}>
+            <Button
+              key={`view-entity-${info.getValue()}`}
+              colorScheme={"blackAlpha"}
+              rightIcon={<Icon name={"c_right"} />}
+              onClick={() => navigate(`/entities/${info.getValue()}`)}
+            >
+              View
+            </Button>
+          </Flex>
         );
       },
       header: "",
@@ -150,14 +183,16 @@ const Dashboard = () => {
     collectionTableColumnHelper.accessor("_id", {
       cell: (info) => {
         return (
-          <Button
-            key={`view-entity-${info.getValue()}`}
-            colorScheme={"blackAlpha"}
-            rightIcon={<Icon as={BsChevronRight} />}
-            onClick={() => navigate(`/collections/${info.getValue()}`)}
-          >
-            View
-          </Button>
+          <Flex justifyContent={"right"}>
+            <Button
+              key={`view-entity-${info.getValue()}`}
+              colorScheme={"blackAlpha"}
+              rightIcon={<Icon name={"c_right"} />}
+              onClick={() => navigate(`/collections/${info.getValue()}`)}
+            >
+              View
+            </Button>
+          </Flex>
         );
       },
       header: "",
@@ -165,7 +200,7 @@ const Dashboard = () => {
   ];
 
   return (
-    <ContentContainer vertical={isError || !isLoaded}>
+    <Content vertical={isError || !isLoaded}>
       {isLoaded ? (
         isError ? (
           <Error />
@@ -178,21 +213,8 @@ const Dashboard = () => {
             maxW={"7xl"}
             wrap={"wrap"}
           >
+            {/* Entities and Collections */}
             <Flex direction={"column"} gap={"6"} grow={"2"}>
-              <Flex direction={"row"} justify={"space-between"} align={"center"}>
-                <Flex align={"center"} gap={"4"} p={"2"}>
-                  <Icon as={BsFolder} w={"8"} h={"8"} />
-                  <Heading fontWeight={"semibold"}>Collections</Heading>
-                </Flex>
-                <Button
-                  colorScheme={"green"}
-                  leftIcon={<AddIcon />}
-                  onClick={() => navigate("/create/collection/start")}
-                >
-                  Create
-                </Button>
-              </Flex>
-
               <Flex
                 direction={"column"}
                 p={"4"}
@@ -200,9 +222,26 @@ const Dashboard = () => {
                 rounded={"md"}
                 gap={"2"}
               >
-                {/* Collections listing */}
+                {/* Collections heading */}
+                <Flex
+                  direction={"row"}
+                  justify={"space-between"}
+                  align={"center"}
+                >
+                  <Flex align={"center"} gap={"4"} p={"2"}>
+                    <Icon name={"collection"} size={"lg"} />
+                    <Heading fontWeight={"semibold"}>Collections</Heading>
+                  </Flex>
+                </Flex>
+
+                {/* Collections table */}
                 {isLoaded && collectionData.length > 0 ? (
-                  <DataTable columns={collectionTableColumns} data={collectionTableData} hideControls />
+                  <DataTable
+                    columns={collectionTableColumns}
+                    data={collectionTableData}
+                    visibleColumns={visibleColumns}
+                    hideControls
+                  />
                 ) : (
                   <Text>There are no Collections to display.</Text>
                 )}
@@ -213,7 +252,7 @@ const Dashboard = () => {
                   <Button
                     key={`view-collection-all`}
                     colorScheme={"blackAlpha"}
-                    rightIcon={<ChevronRightIcon />}
+                    rightIcon={<Icon name={"c_right"} />}
                     onClick={() => navigate(`/collections`)}
                   >
                     View All
@@ -223,20 +262,6 @@ const Dashboard = () => {
 
               <Spacer />
 
-              <Flex direction={"row"} justify={"space-between"} align={"center"}>
-                <Flex align={"center"} gap={"4"} p={"2"}>
-                  <Icon as={BsBox} w={"8"} h={"8"} />
-                  <Heading fontWeight={"semibold"}>Entities</Heading>
-                </Flex>
-                <Button
-                  colorScheme={"green"}
-                  leftIcon={<AddIcon />}
-                  onClick={() => navigate("/create/entity/start")}
-                >
-                  Create
-                </Button>
-              </Flex>
-
               <Flex
                 direction={"column"}
                 p={"4"}
@@ -244,9 +269,26 @@ const Dashboard = () => {
                 rounded={"md"}
                 gap={"2"}
               >
-                {/* Entities listing */}
+                {/* Entities heading */}
+                <Flex
+                  direction={"row"}
+                  justify={"space-between"}
+                  align={"center"}
+                >
+                  <Flex align={"center"} gap={"4"} p={"2"}>
+                    <Icon name={"entity"} size={"lg"} />
+                    <Heading fontWeight={"semibold"}>Entities</Heading>
+                  </Flex>
+                </Flex>
+
+                {/* Entities table */}
                 {isLoaded && entityData.length > 0 ? (
-                  <DataTable columns={entityTableColumns} data={entityTableData} hideControls />
+                  <DataTable
+                    columns={entityTableColumns}
+                    data={entityTableData}
+                    visibleColumns={visibleColumns}
+                    hideControls
+                  />
                 ) : (
                   <Text>There are no Entities to display.</Text>
                 )}
@@ -257,7 +299,7 @@ const Dashboard = () => {
                   <Button
                     key={`view-entity-all`}
                     colorScheme={"blackAlpha"}
-                    rightIcon={<ChevronRightIcon />}
+                    rightIcon={<Icon name={"c_right"} />}
                     onClick={() => navigate(`/entities`)}
                   >
                     View All
@@ -266,13 +308,8 @@ const Dashboard = () => {
               </Flex>
             </Flex>
 
-            {/* Activity Feed */}
-            <Flex maxW={"lg"} direction={"column"} gap={"6"} >
-              <Flex align={"center"} gap={"4"} p={"2"}>
-                <Icon as={BsClockHistory} w={"8"} h={"8"} />
-                <Heading fontWeight={"semibold"}>Activity Feed</Heading>
-              </Flex>
-
+            {/* Activity */}
+            <Flex direction={"column"} gap={"6"} grow={"1"}>
               <Flex
                 background={"white"}
                 direction={"column"}
@@ -281,27 +318,38 @@ const Dashboard = () => {
                 p={"4"}
                 gap={"2"}
               >
+                {/* Activity heading */}
+                <Flex align={"center"} gap={"4"} p={"2"}>
+                  <Icon name={"activity"} size={"lg"} />
+                  <Heading fontWeight={"semibold"}>Activity</Heading>
+                </Flex>
+
+                {/* Activity list */}
                 <List>
                   {updateData.length > 0 ? (
                     updateData.slice(0, 10).map((update) => {
                       // Configure the badge
-                      const iconSize = "3";
-                      const iconColor = "white";
                       let operationBadgeColor = "green.400";
-                      let operationIcon = <Icon as={BsBox} w={iconSize} h={iconSize} color={iconColor} />;
+                      let operationIcon = (
+                        <Icon name={"entity"} color={"white"} />
+                      );
 
                       switch (update.type) {
                         case "create":
                           operationBadgeColor = "green.400";
-                          operationIcon = <Icon as={BsPlusLg} w={iconSize} h={iconSize} color={iconColor} />;
+                          operationIcon = <Icon name={"add"} color={"white"} />;
                           break;
                         case "update":
                           operationBadgeColor = "blue.400";
-                          operationIcon = <Icon as={BsPencil} w={iconSize} h={iconSize} color={iconColor} />;
+                          operationIcon = (
+                            <Icon name={"edit"} color={"white"} />
+                          );
                           break;
                         case "delete":
                           operationBadgeColor = "red.400";
-                          operationIcon = <Icon as={BsTrash} w={iconSize} h={iconSize} color={iconColor} />;
+                          operationIcon = (
+                            <Icon name={"delete"} color={"white"} />
+                          );
                           break;
                       }
 
@@ -319,17 +367,29 @@ const Dashboard = () => {
                             border={"2px"}
                             borderColor={"gray.100"}
                           >
-                            <Flex rounded={"full"} bg={operationBadgeColor} p={"1.5"}>
+                            <Flex
+                              rounded={"full"}
+                              bg={operationBadgeColor}
+                              p={"1.5"}
+                            >
                               {operationIcon}
                             </Flex>
 
-                            <Text display={{ base: "none", sm: "block" }}>{update.details}</Text>
+                            <Text display={{ base: "none", sm: "block" }}>
+                              {update.details}
+                            </Text>
 
-                            <Linky id={update.target.id} type={update.target.type} fallback={update.target.name} />
+                            <Linky
+                              id={update.target.id}
+                              type={update.target.type}
+                              fallback={update.target.name}
+                            />
 
                             <Spacer />
 
-                            <Text color={"gray.400"}>{dayjs(update.timestamp).fromNow()}</Text>
+                            <Text color={"gray.400"}>
+                              {dayjs(update.timestamp).fromNow()}
+                            </Text>
                           </Flex>
                         </ListItem>
                       );
@@ -345,7 +405,7 @@ const Dashboard = () => {
       ) : (
         <Loading />
       )}
-    </ContentContainer>
+    </Content>
   );
 };
 

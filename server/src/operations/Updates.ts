@@ -2,7 +2,7 @@
 import { getDatabase } from "../database/connection";
 import consola from "consola";
 
-import { UpdateModel, Update } from "@types";
+import { UpdateModel, IUpdate } from "@types";
 
 // Constants
 const UPDATES = "updates";
@@ -13,7 +13,7 @@ export class Updates {
    * @param {Update} update data related to the Update
    * @return {Promise<Update>}
    */
-  static create = (update: Update): Promise<Update> => {
+  static create = (update: IUpdate): Promise<IUpdate> => {
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(UPDATES)
@@ -23,7 +23,7 @@ export class Updates {
           }
 
           consola.success("Created Update:", update.target.name);
-          resolve(result as Update);
+          resolve(result as IUpdate);
         });
     });
   };

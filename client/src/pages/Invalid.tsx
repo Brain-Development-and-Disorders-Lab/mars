@@ -1,26 +1,21 @@
 // React
 import React from "react";
-import { useNavigate } from "react-router-dom";
-import {
-  Button,
-  Flex,
-  Heading,
-  Image,
-  Link,
-  Text,
-} from "@chakra-ui/react";
 
-// Utility libraries
+// Existing and custom components
+import { Button, Flex, Heading, Image, Link, Text } from "@chakra-ui/react";
+import { Content } from "@components/Container";
+
+// Utility functions and libraries
 import _ from "lodash";
 
-// Custom components
-import { ContentContainer } from "@components/ContentContainer";
+// Routing and navigation
+import { useNavigate } from "react-router-dom";
 
 const Invalid = () => {
   const navigate = useNavigate();
 
   return (
-    <ContentContainer vertical>
+    <Content vertical>
       <Flex
         direction={"column"}
         justify={"center"}
@@ -36,9 +31,11 @@ const Invalid = () => {
           <Heading fontWeight={"semibold"}>Oops!</Heading>
           <Text>We can't find that right now.</Text>
         </Flex>
-        <Button as={Link} onClick={() => navigate("/")}>Home</Button>
+        <Button as={Link} onClick={() => navigate("/")}>
+          Home
+        </Button>
       </Flex>
-    </ContentContainer>
+    </Content>
   );
 };
 

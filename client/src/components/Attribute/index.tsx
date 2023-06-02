@@ -1,4 +1,7 @@
+// React
 import React, { useEffect, useState } from "react";
+
+// Existing and custom components
 import {
   Button,
   Card,
@@ -7,39 +10,39 @@ import {
   Divider,
   Flex,
   FormControl,
-  Icon,
   Input,
   Textarea,
 } from "@chakra-ui/react";
-import { CheckIcon } from "@chakra-ui/icons";
-import { BsTrash } from "react-icons/bs";
-import ParameterGroup from "@components/ParameterGroup";
+import Icon from "@components/Icon";
+import Values from "@components/Values";
 
+// Existing and custom types
 import { AttributeProps } from "@types";
 
-import { validateParameters } from "src/functions";
+// Utility functions and libraries
+import { checkValues } from "src/functions";
 
 const Attribute = (props: AttributeProps) => {
   const [name, setName] = useState(props.name);
   const [description, setDescription] = useState(props.description);
-  const [parameters, setParameters] = useState(props.parameters);
+  const [values, setValues] = useState(props.values);
   const [finished, setFinished] = useState(false);
 
   const isNameError = name === "";
   const isDescriptionError = description === "";
-  const [validParameters, setValidParameters] = useState(false);
+  const [validValues, setValidValues] = useState(false);
 
-  const isAttributesError = isNameError || isDescriptionError || !validParameters;
+  const isAttributesError = isNameError || isDescriptionError || !validValues;
 
   useEffect(() => {
-    setValidParameters(validateParameters(parameters));
-  }, [parameters]);
+    setValidValues(checkValues(values));
+  }, [values]);
 
   const attributeData: AttributeProps = {
     identifier: props.identifier,
     name: name,
     description: description,
-    parameters: parameters,
+    values: values,
   };
 
   return (
@@ -72,10 +75,10 @@ const Attribute = (props: AttributeProps) => {
           </Flex>
 
           <Flex grow={"1"}>
-            <ParameterGroup
-              parameters={parameters}
+            <Values
+              collection={values}
               viewOnly={finished}
-              setParameters={setParameters}
+              setValues={setValues}
             />
           </Flex>
         </Flex>
@@ -92,13 +95,13 @@ const Attribute = (props: AttributeProps) => {
                 props.onRemove(props.identifier);
               }
             }}
-            rightIcon={<Icon as={BsTrash} />}
+            rightIcon={<Icon name={"delete"} />}
           >
             Remove
           </Button>
 
           <Button
-            rightIcon={<Icon as={CheckIcon} />}
+            rightIcon={<Icon name={"check"} />}
             colorScheme={"green"}
             onClick={() => {
               setFinished(true);

@@ -27,7 +27,7 @@
       "name": "Test Attribute",
       "description": "An example attribute.",
       "type": "data",
-      "parameters": [
+      "values": [
         {
           "name": "URL",
           "type": "url",

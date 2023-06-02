@@ -1,16 +1,13 @@
+// React
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import {
   Button,
   Flex,
   Heading,
-  Icon,
-  Link,
   Table,
   TableContainer,
   Tag,
   TagLabel,
-  TagRightIcon,
   Tbody,
   Td,
   Text,
@@ -19,19 +16,20 @@ import {
   Tr,
   useToast,
 } from "@chakra-ui/react";
-import { ChevronRightIcon, AddIcon, WarningIcon } from "@chakra-ui/icons";
-import { BsFolder } from "react-icons/bs";
-
-// Custom components
-import { Error } from "@components/Error";
-import { Loading } from "@components/Loading";
-import { ContentContainer } from "@components/ContentContainer";
+import { Content } from "@components/Container";
+import Icon from "@components/Icon";
+import Error from "@components/Error";
+import Loading from "@components/Loading";
 
 // Database and models
-import { getData } from "@database/functions";
 import { CollectionModel } from "@types";
 
+// Utility functions and types
+import { getData } from "@database/functions";
 import _ from "lodash";
+
+// Routing and navigation
+import { useNavigate } from "react-router-dom";
 
 const Collections = () => {
   const toast = useToast();
@@ -49,7 +47,8 @@ const Collections = () => {
     getData(`/collections`)
       .then((value) => {
         setCollectionsData(value);
-      }).catch((_error) => {
+      })
+      .catch((_error) => {
         toast({
           title: "Error",
           status: "error",
@@ -59,13 +58,14 @@ const Collections = () => {
           isClosable: true,
         });
         setIsError(true);
-      }).finally(() => {
+      })
+      .finally(() => {
         setIsLoaded(true);
-      });;
+      });
   }, []);
 
   return (
-    <ContentContainer vertical={isError || !isLoaded}>
+    <Content vertical={isError || !isLoaded}>
       {isLoaded ? (
         isError ? (
           <Error />
@@ -79,34 +79,26 @@ const Collections = () => {
             wrap={"wrap"}
           >
             <Flex
-              pt={"4"}
-              pb={"4"}
               direction={"row"}
-              justify={"space-between"}
-              align={"center"}
-            >
-              <Flex align={"center"} gap={"4"}>
-                <Icon as={BsFolder} w={"8"} h={"8"} />
-                <Heading fontWeight={"semibold"}>Collections</Heading>
-              </Flex>
-              <Button
-                rightIcon={<AddIcon />}
-                as={Link}
-                onClick={() => navigate("/create/collection/start")}
-                colorScheme={"green"}
-              >
-                Create
-              </Button>
-            </Flex>
-
-            <Flex
               p={"4"}
-              direction={"row"}
               rounded={"md"}
               bg={"white"}
-              flexWrap={"wrap"}
+              wrap={"wrap"}
               gap={"6"}
+              justify={"center"}
             >
+              <Flex
+                w={"100%"}
+                p={"4"}
+                direction={"row"}
+                justify={"space-between"}
+                align={"center"}
+              >
+                <Flex align={"center"} gap={"4"}>
+                  <Icon name={"collection"} size={"lg"} />
+                  <Heading fontWeight={"semibold"}>Collections</Heading>
+                </Flex>
+              </Flex>
               {isLoaded && collectionsData.length > 0 ? (
                 <TableContainer w={"full"}>
                   <Table variant={"simple"} colorScheme={"blackAlpha"}>
@@ -139,7 +131,7 @@ const Collections = () => {
                                   colorScheme={"orange"}
                                 >
                                   <TagLabel>Not specified</TagLabel>
-                                  <TagRightIcon as={WarningIcon} />
+                                  <Icon name={"warning"} />
                                 </Tag>
                               ) : (
                                 <Text>{collection.name}</Text>
@@ -153,10 +145,12 @@ const Collections = () => {
                                   colorScheme={"orange"}
                                 >
                                   <TagLabel>Not specified</TagLabel>
-                                  <TagRightIcon as={WarningIcon} />
+                                  <Icon name={"warning"} />
                                 </Tag>
                               ) : (
-                                <Text noOfLines={2}>{collection.description}</Text>
+                                <Text noOfLines={2}>
+                                  {collection.description}
+                                </Text>
                               )}
                             </Td>
                             <Td display={{ base: "none", sm: "table-cell" }}>
@@ -167,7 +161,7 @@ const Collections = () => {
                                   colorScheme={"orange"}
                                 >
                                   <TagLabel>Not specified</TagLabel>
-                                  <TagRightIcon as={WarningIcon} />
+                                  <Icon name={"warning"} />
                                 </Tag>
                               ) : (
                                 <Text>{collection.owner}</Text>
@@ -179,12 +173,15 @@ const Collections = () => {
                                   size={"md"}
                                   key={`warn-${collection._id}`}
                                   colorScheme={"orange"}
+                                  gap={"2"}
                                 >
                                   <TagLabel>Empty</TagLabel>
-                                  <TagRightIcon as={WarningIcon} />
+                                  <Icon name={"warning"} />
                                 </Tag>
                               ) : (
-                                <Text noOfLines={1}>{collection.entities.length}</Text>
+                                <Text noOfLines={1}>
+                                  {collection.entities.length}
+                                </Text>
                               )}
                             </Td>
                             <Td>
@@ -192,7 +189,7 @@ const Collections = () => {
                                 <Button
                                   key={`view-collection-${collection._id}`}
                                   colorScheme={"blackAlpha"}
-                                  rightIcon={<ChevronRightIcon />}
+                                  rightIcon={<Icon name={"c_right"} />}
                                   onClick={() =>
                                     navigate(`/collections/${collection._id}`)
                                   }
@@ -216,7 +213,7 @@ const Collections = () => {
       ) : (
         <Loading />
       )}
-    </ContentContainer>
+    </Content>
   );
 };
 

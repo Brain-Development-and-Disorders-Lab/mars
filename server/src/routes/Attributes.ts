@@ -39,27 +39,27 @@ AttributesRoute.route("/attributes/create").post(
 // Route: Update an Attribute
 AttributesRoute.route("/attributes/update").post(
   (request: { body: AttributeModel }, response: any) => {
-    Attributes.update(request.body).then(
-      (updateAttribute: AttributeModel) => {
-        response.json({
-          id: updateAttribute._id,
-          name: updateAttribute.name,
-          status: "success",
-        });
-      }
-    );
+    Attributes.update(request.body).then((updateAttribute: AttributeModel) => {
+      response.json({
+        id: updateAttribute._id,
+        name: updateAttribute.name,
+        status: "success",
+      });
+    });
   }
 );
 
 // Route: Remove an Attribute
-AttributesRoute.route("/attributes/:id").delete((request: any,response: { json: (content: any) => void }) => {
-  Attributes.delete(request.params.id).then((attribute: AttributeModel) => {
-    response.json({
-      id: attribute._id,
-      name: attribute.name,
-      status: "success",
+AttributesRoute.route("/attributes/:id").delete(
+  (request: any, response: { json: (content: any) => void }) => {
+    Attributes.delete(request.params.id).then((attribute: AttributeModel) => {
+      response.json({
+        id: attribute._id,
+        name: attribute.name,
+        status: "success",
+      });
     });
-  });
-});
+  }
+);
 
 export default AttributesRoute;

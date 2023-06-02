@@ -1,5 +1,7 @@
 // React
 import React, { useState } from "react";
+
+// Existing and custom components
 import {
   Flex,
   Heading,
@@ -10,15 +12,11 @@ import {
   InputRightElement,
   useToast,
 } from "@chakra-ui/react";
+import { Content } from "@components/Container";
 
-// Utility libraries
-import _ from "lodash";
-
-// Custom components
-import { ContentContainer } from "@components/ContentContainer";
-
-// Database
+// Utility functions and libraries
 import { postData } from "@database/functions";
+import _ from "lodash";
 
 const Login = (props: { setToken: (token: string) => void }) => {
   const [password, setPassword] = useState("");
@@ -31,7 +29,10 @@ const Login = (props: { setToken: (token: string) => void }) => {
   // Toast to show errors
   const toast = useToast();
 
-  const performLogin = (credentials: {username: string, password: string}) => {
+  const performLogin = (credentials: {
+    username: string;
+    password: string;
+  }) => {
     postData(`/login`, credentials)
       .then((response) => {
         if (_.isEqual(response.status, "error")) {
@@ -46,7 +47,8 @@ const Login = (props: { setToken: (token: string) => void }) => {
         }
         props.setToken(response.token);
         setIsLoading(false);
-      }).catch((_error) => {
+      })
+      .catch((_error) => {
         toast({
           title: "Error",
           status: "error",
@@ -61,11 +63,11 @@ const Login = (props: { setToken: (token: string) => void }) => {
 
   const onLoginClick = () => {
     setIsLoading(true);
-    performLogin({username: username, password: password});
-  }
+    performLogin({ username: username, password: password });
+  };
 
   return (
-    <ContentContainer vertical>
+    <Content vertical>
       <Flex
         direction={"column"}
         justify={"center"}
@@ -76,7 +78,13 @@ const Login = (props: { setToken: (token: string) => void }) => {
         h={"100vh"}
         wrap={"wrap"}
       >
-        <Flex direction={"column"} p={"8"} gap={"8"} bg={"white"} rounded={"md"}>
+        <Flex
+          direction={"column"}
+          p={"8"}
+          gap={"8"}
+          bg={"white"}
+          rounded={"md"}
+        >
           <Flex align={"center"} gap={"4"}>
             <Image src="/Favicon.png" boxSize={"72px"} />
             <Heading fontWeight={"semibold"}>Login</Heading>
@@ -125,7 +133,7 @@ const Login = (props: { setToken: (token: string) => void }) => {
           </Flex>
         </Flex>
       </Flex>
-    </ContentContainer>
+    </Content>
   );
 };
 

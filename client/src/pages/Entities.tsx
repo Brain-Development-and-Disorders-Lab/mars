@@ -1,33 +1,32 @@
 // React
 import React, { useEffect, useState } from "react";
+
+// Existing and custom components
 import {
   Flex,
   Heading,
   Text,
   useToast,
   Button,
-  Link,
-  Icon,
+  useBreakpoint,
 } from "@chakra-ui/react";
-import { BsBox, BsChevronRight, BsPlusLg } from "react-icons/bs";
-
 import { createColumnHelper } from "@tanstack/react-table";
-// Navigation
-import { useNavigate } from "react-router-dom";
+import { Content } from "@components/Container";
+import Icon from "@components/Icon";
+import Error from "@components/Error";
+import Loading from "@components/Loading";
+import DataTable from "@components/DataTable";
 
-// Database and models
-import { getData } from "@database/functions";
+// Existing and custom types
 import { EntityModel } from "@types";
 
-// Utility libraries
+// Routing and navigation
+import { useNavigate } from "react-router-dom";
+
+// Utility functions and libraries
+import { getData } from "@database/functions";
 import _ from "lodash";
 import dayjs from "dayjs";
-
-// Custom components
-import { ContentContainer } from "@components/ContentContainer";
-import { Loading } from "@components/Loading";
-import { Error } from "@components/Error";
-import { DataTable } from "@components/DataTable";
 
 const Entities = () => {
   const navigate = useNavigate();
@@ -39,11 +38,28 @@ const Entities = () => {
 
   const [entityData, setEntityData] = useState([] as EntityModel[]);
 
+  const breakpoint = useBreakpoint();
+  const [visibleColumns, setVisibleColumns] = useState({});
+
+  // Effect to adjust column visibility
+  useEffect(() => {
+    if (
+      _.isEqual(breakpoint, "sm") ||
+      _.isEqual(breakpoint, "base") ||
+      _.isUndefined(breakpoint)
+    ) {
+      setVisibleColumns({ description: false, owner: false, created: false });
+    } else {
+      setVisibleColumns({});
+    }
+  }, [breakpoint]);
+
   useEffect(() => {
     getData(`/entities`)
       .then((value) => {
         setEntityData(value);
-      }).catch((_error) => {
+      })
+      .catch((_error) => {
         toast({
           title: "Error",
           status: "error",
@@ -53,7 +69,8 @@ const Entities = () => {
           isClosable: true,
         });
         setIsError(true);
-      }).finally(() => {
+      })
+      .finally(() => {
         setIsLoaded(true);
       });
   }, []);
@@ -85,7 +102,7 @@ const Entities = () => {
           <Button
             key={`view-entity-${info.getValue()}`}
             colorScheme={"blackAlpha"}
-            rightIcon={<Icon as={BsChevronRight} />}
+            rightIcon={<Icon name={"c_right"} />}
             onClick={() => navigate(`/entities/${info.getValue()}`)}
           >
             View
@@ -97,7 +114,7 @@ const Entities = () => {
   ];
 
   return (
-    <ContentContainer vertical={isError || !isLoaded}>
+    <Content vertical={isError || !isLoaded}>
       {isLoaded ? (
         isError ? (
           <Error />
@@ -111,27 +128,6 @@ const Entities = () => {
             wrap={"wrap"}
           >
             <Flex
-              pt={"4"}
-              pb={"4"}
-              direction={"row"}
-              justify={"space-between"}
-              align={"center"}
-            >
-              <Flex align={"center"} gap={"4"}>
-                <Icon as={BsBox} w={"8"} h={"8"} />
-                <Heading fontWeight={"semibold"}>Entities</Heading>
-              </Flex>
-              <Button
-                rightIcon={<Icon as={BsPlusLg} />}
-                as={Link}
-                onClick={() => navigate("/create/entity/start")}
-                colorScheme={"green"}
-              >
-                Create
-              </Button>
-            </Flex>
-
-            <Flex
               direction={"row"}
               p={"4"}
               rounded={"md"}
@@ -140,9 +136,26 @@ const Entities = () => {
               gap={"6"}
               justify={"center"}
             >
+              <Flex
+                w={"100%"}
+                p={"4"}
+                direction={"row"}
+                justify={"space-between"}
+                align={"center"}
+              >
+                <Flex align={"center"} gap={"4"}>
+                  <Icon name={"entity"} size={"lg"} />
+                  <Heading fontWeight={"semibold"}>Entities</Heading>
+                </Flex>
+              </Flex>
               {isLoaded && entityData.length > 0 ? (
                 <Flex direction={"column"} gap={"4"} w={"100%"}>
-                  <DataTable columns={columns} data={data} />
+                  <DataTable
+                    columns={columns}
+                    data={data}
+                    visibleColumns={visibleColumns}
+                    hideSelection
+                  />
                 </Flex>
               ) : (
                 <Text>There are no Entities to display.</Text>
@@ -153,7 +166,7 @@ const Entities = () => {
       ) : (
         <Loading />
       )}
-    </ContentContainer>
+    </Content>
   );
 };
 

@@ -1,5 +1,8 @@
+// React
 import React, { useEffect, useState } from "react";
-import { Flex, Icon, Link, Text, useToast } from "@chakra-ui/react";
+
+// Existing and custom components
+import { Flex, Link, Text, useToast } from "@chakra-ui/react";
 import ReactFlow, {
   MiniMap,
   Controls,
@@ -11,19 +14,22 @@ import ReactFlow, {
   Edge,
 } from "reactflow";
 import "reactflow/dist/style.css";
-import { Loading } from "@components/Loading";
-import { Error } from "@components/Error";
-import { BsBox } from "react-icons/bs";
+import Loading from "@components/Loading";
+import Error from "@components/Error";
+import Icon from "@components/Icon";
 
-// Utility libraries
+// Existing and custom types
+import { EntityModel } from "@types";
+
+// Utility functions and libraries
+import { getData } from "@database/functions";
 import _ from "lodash";
 import ELK, { ElkExtendedEdge, ElkNode } from "elkjs";
 
-// Database and models
-import { getData } from "@database/functions";
-import { EntityModel } from "@types";
-
-const Graph = (props: { id: string, entityNavigateHook: (id: string) => void }) => {
+const Graph = (props: {
+  id: string;
+  entityNavigateHook: (id: string) => void;
+}) => {
   const toast = useToast();
   const [isLoaded, setIsLoaded] = useState(false);
   const [isError, setIsError] = useState(false);
@@ -33,19 +39,21 @@ const Graph = (props: { id: string, entityNavigateHook: (id: string) => void }) 
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
   const getEntityData = (id: string): Promise<EntityModel> => {
-    return getData(`/entities/${id}`).then((result) => {
-      return result;
-    }).catch((_error) => {
-      toast({
-        title: "Error",
-        status: "error",
-        description: "Could not get Entity data.",
-        duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
+    return getData(`/entities/${id}`)
+      .then((result) => {
+        return result;
+      })
+      .catch((_error) => {
+        toast({
+          title: "Error",
+          status: "error",
+          description: "Could not get Entity data.",
+          duration: 4000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+        setIsError(true);
       });
-      setIsError(true);
-    });
   };
 
   /**
@@ -89,7 +97,7 @@ const Graph = (props: { id: string, entityNavigateHook: (id: string) => void }) 
         "elk.algorithm": "layered",
         "elk.direction": "DOWN",
         "nodePlacement.strategy": "SIMPLE",
-        "spacing.nodeNodeBetweenLayers": "40"
+        "spacing.nodeNodeBetweenLayers": "40",
       },
       children: nodes,
       edges: edges,
@@ -98,13 +106,15 @@ const Graph = (props: { id: string, entityNavigateHook: (id: string) => void }) 
     return elk.layout(graph);
   };
 
-  const generateLabel = (node: { id: string, name: string }) => {
+  const generateLabel = (node: { id: string; name: string }) => {
     return (
       <Flex direction={"row"} align={"center"} gap={4}>
-        <Icon as={BsBox} w={"4"} h={"4"} />
+        <Icon name={"entity"} size={"lg"} />
         <Flex direction={"column"} align={"baseline"}>
           <Text as={"b"}>Entity</Text>
-          <Link onClick={() => props.entityNavigateHook(node.id)}>{node.name}</Link>
+          <Link onClick={() => props.entityNavigateHook(node.id)}>
+            {node.name}
+          </Link>
         </Flex>
       </Flex>
     );
@@ -208,8 +218,8 @@ const Graph = (props: { id: string, entityNavigateHook: (id: string) => void }) 
       }
 
       // Set the Nodes and Edges
-      setNodes(nodes => [...nodes, ...initialNodes]);
-      setEdges(edges => [...edges, ...initialEdges]);
+      setNodes((nodes) => [...nodes, ...initialNodes]);
+      setEdges((edges) => [...edges, ...initialEdges]);
     });
   };
 
@@ -301,7 +311,10 @@ const Graph = (props: { id: string, entityNavigateHook: (id: string) => void }) 
                   id: product.id,
                   type: "output",
                   data: {
-                    label: generateLabel({ id: product.id, name: product.name }),
+                    label: generateLabel({
+                      id: product.id,
+                      name: product.name,
+                    }),
                   },
                   position: { x: 100, y: 200 },
                 },
@@ -347,21 +360,24 @@ const Graph = (props: { id: string, entityNavigateHook: (id: string) => void }) 
 
   // Get the data and setup the initial nodes and edges
   useEffect(() => {
-    getEntityData(props.id).then((entity) => {
-      setEntityData(entity);
-    }).catch((_error) => {
-      toast({
-        title: "Graph Error",
-        status: "error",
-        description: "Could not setup initial Entity node.",
-        duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
+    getEntityData(props.id)
+      .then((entity) => {
+        setEntityData(entity);
+      })
+      .catch((_error) => {
+        toast({
+          title: "Graph Error",
+          status: "error",
+          description: "Could not setup initial Entity node.",
+          duration: 4000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+        setIsError(true);
+      })
+      .finally(() => {
+        setIsLoaded(true);
       });
-      setIsError(true);
-    }).finally(() => {
-      setIsLoaded(true);
-    });
   }, []);
 
   useEffect(() => {

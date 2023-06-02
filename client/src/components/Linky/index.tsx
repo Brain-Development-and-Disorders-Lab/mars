@@ -1,33 +1,43 @@
+// React
 import React, { useEffect, useState } from "react";
-import { Button, Link } from "@chakra-ui/react";
+
+// Existing and custom components
+import { Button, Link, Spinner } from "@chakra-ui/react";
+
+// Existing and custom types
+import { LinkyProps } from "@types";
+
+// Routing and navigation
 import { useNavigate } from "react-router-dom";
 
-// Database and models
+// Utility functions and libraries
 import { getData } from "@database/functions";
-import {
-  LinkyProps
-} from "@types";
 
 const Linky = (props: LinkyProps) => {
   const navigate = useNavigate();
 
-  const [linkIsValid, setLinkIsValid] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [useFallback, setUseFallback] = useState(false);
   const [linkLabel, setLinkLabel] = useState("Invalid");
 
   useEffect(() => {
-    getData(`/${props.type}/${props.id}`).then((value) => {
-      setLinkIsValid(true);
-      setLinkLabel(value.name);
-    }).catch((_error) => {
-      setLinkIsValid(false);
-      if (props.fallback) {
-        setLinkLabel(props.fallback);
-      }
-    });
+    getData(`/${props.type}/${props.id}`)
+      .then((value) => {
+        setLinkLabel(value.name);
+      })
+      .catch((_error) => {
+        if (props.fallback) {
+          setUseFallback(true);
+          setLinkLabel(props.fallback);
+        }
+      })
+      .finally(() => {
+        setIsLoaded(true);
+      });
   }, []);
 
   const onClickHandler = () => {
-    if (linkIsValid) navigate(`/${props.type}/${props.id}`);
+    if (isLoaded && !useFallback) navigate(`/${props.type}/${props.id}`);
   };
 
   return (
@@ -37,7 +47,7 @@ const Linky = (props: LinkyProps) => {
       as={Link}
       onClick={onClickHandler}
     >
-      {linkLabel}
+      {isLoaded ? linkLabel : <Spinner size={"sm"} />}
     </Button>
   );
 };

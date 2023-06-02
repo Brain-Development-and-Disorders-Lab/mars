@@ -1,14 +1,17 @@
+// React
 import React from "react";
-import { Tag, TagLabel, TagRightIcon } from "@chakra-ui/react";
-import { WarningIcon } from "@chakra-ui/icons";
 
-const WarningLabel = (props: { text: string }) => {
+// Existing and custom components
+import { Tag, TagLabel } from "@chakra-ui/react";
+import Icon from "@components/Icon";
+
+const Warning = (props: { text: string }) => {
   return (
     <Tag size={"md"} colorScheme={"orange"}>
       <TagLabel>{props.text}</TagLabel>
-      <TagRightIcon as={WarningIcon} />
+      <Icon name={"warning"} />
     </Tag>
   );
 };
 
-export { WarningLabel };
+export { Warning };

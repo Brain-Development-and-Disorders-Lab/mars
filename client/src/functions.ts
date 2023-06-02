@@ -2,37 +2,42 @@
 import _ from "lodash";
 
 // Custom types
-import { Attribute, Parameters } from "@types";
+import { IAttribute, IValue } from "@types";
 
-export const validateParameters = (parameters: Parameters[]) => {
-  for (let parameter of parameters) {
-    // Check the name of the parameter
-    if (_.isEqual(parameter.name, "")) {
-      return false;
+export const checkValues = (
+  values: IValue<any>[],
+  allowEmptyValues = false
+) => {
+  for (let value of values) {
+    // Check the name of the Value
+    if (_.isEqual(value.name, "")) {
+      return true;
     }
 
-    // Check data
-    if (_.isUndefined(parameter.data) || _.isEqual(parameter.data, "")) {
-      return false;
+    // Check data if empty values are not allowed
+    if (!allowEmptyValues) {
+      if (_.isUndefined(value.data) || _.isEqual(value.data, "")) {
+        return true;
+      }
     }
   }
-  return true;
+  return false;
 };
 
-export const validateAttributes = (attributes: Attribute[]) => {
+export const checkAttributes = (attributes: IAttribute[]) => {
   if (attributes.length === 0) return true;
 
   for (let attribute of attributes) {
     // Check the name and description
     if (_.isEqual(attribute.name, "") || _.isEqual(attribute.description, "")) {
-      return false;
+      return true;
     }
 
     // Check the data
-    if (validateParameters(attribute.parameters) === false) {
-      return false;
+    if (checkValues(attribute.values) === false) {
+      return true;
     }
   }
 
-  return true;
+  return false;
 };

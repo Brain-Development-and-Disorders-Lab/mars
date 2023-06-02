@@ -1,238 +1,318 @@
-// React and interface library
-import React, { ReactNode } from "react";
+// React
+import React, { useEffect, useState } from "react";
+
+// Existing and custom components
 import {
   Flex,
-  Link,
   IconButton,
   Button,
-  Menu,
-  MenuButton,
-  MenuList,
-  MenuItem,
   useDisclosure,
-  useColorModeValue,
-  Stack,
-  StackDivider,
-  Icon,
   Image,
   Heading,
-  VStack,
+  Text,
+  Divider,
+  useToast,
+  Tag,
+  Spinner,
+  Spacer,
 } from "@chakra-ui/react";
-import {
-  HamburgerIcon,
-  InfoOutlineIcon,
-  AddIcon,
-} from "@chakra-ui/icons";
-import { BsBinoculars, BsBox, BsClipboardData, BsFolder, BsPlusLg, BsPuzzle, BsSearch, BsXLg } from "react-icons/bs";
+import Icon from "@components/Icon";
 
-// Router navigation
-import { useNavigate } from "react-router-dom";
+// Routing and navigation
+import { useLocation, useNavigate } from "react-router-dom";
 
-// NavigationElement sub-component to generalize links
-const NavigationElement = ({
-  children,
-  onClick,
-}: {
-  children: ReactNode;
-  onClick?: () => void;
-}) => (
-  <Link
-    p={"2"}
-    rounded={"md"}
-    _hover={{
-      textDecoration: "none",
-      bg: useColorModeValue("gray.200", "gray.700"),
-    }}
-    onClick={onClick}
-  >
-    {children}
-  </Link>
-);
+// Utility functions and libraries
+import { getData } from "@database/functions";
+import dayjs from "dayjs";
+import _ from "lodash";
 
 const Navigation = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const navigate = useNavigate();
+  const location = useLocation();
+  const toast = useToast();
 
-  const responsiveNavigate = (location: string) => {
-    isOpen ? onClose() : onOpen();
-    navigate(location);
+  /**
+   * Helper function to close menu on responsive screen sizes
+   * when a menu item is clicked
+   * @param {string} destination URL to navigate to
+   */
+  const responsiveNavigate = (destination: string) => {
+    onClose();
+    navigate(destination);
   };
 
+  // Loading state
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  // Entity and Collection status counts
+  const [entityCount, setEntityCount] = useState("0");
+  const [collectionCount, setCollectionCount] = useState("0");
+
+  useEffect(() => {
+    getData(`/entities`)
+      .then((value) => {
+        setEntityCount(value.length > 100 ? "100+" : value.length.toString());
+      })
+      .catch((_error) => {
+        toast({
+          title: "Error",
+          status: "error",
+          description: "Could not retrieve Entities data.",
+          duration: 4000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+      })
+      .finally(() => {
+        setIsLoaded(true);
+      });
+
+    getData(`/collections`)
+      .then((value) => {
+        setCollectionCount(
+          value.length > 100 ? "100+" : value.length.toString()
+        );
+      })
+      .catch((_error) => {
+        toast({
+          title: "Error",
+          status: "error",
+          description: "Could not retrieve Collections data.",
+          duration: 4000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+      })
+      .finally(() => {
+        setIsLoaded(true);
+      });
+  });
+
   return (
-    <>
-      <Flex w={"2xs"} h={"100%"} background={"white"} display={{ base: "none", md: "flex" }} justify={"center"}>
-        <Flex justifyContent={"space-between"} direction={"column"}>
-          {/* Main navigation group */}
-          <VStack spacing={8} align={"center"} h={"100%"} position={"sticky"}>
-            <VStack as={"nav"} spacing={4} display={{ base: "none", md: "flex" }}>
-              {/* Icon */}
-              <Flex direction={"row"} m={"2"} p={"2"} gap={"2"}>
-                <Image src="/Favicon.png" boxSize={"36px"} />
-                <Heading fontWeight={"semibold"} size={"lg"}>MARS</Heading>
-              </Flex>
+    <Flex w={"100%"}>
+      {/* Main navigation group */}
+      <Flex
+        direction={"column"}
+        display={{ base: "none", lg: "flex" }}
+        gap={"6"}
+        alignItems={"stretch"}
+      >
+        {/* Icon */}
+        <Flex direction={"row"} align={"center"} gap={"2"}>
+          <Image src="/Favicon.png" boxSize={"36px"} />
+          <Flex direction={"column"}>
+            <Heading fontWeight={"semibold"} size={"md"}>
+              MARS
+            </Heading>
+            <Text color={"gray.400"}>
+              {dayjs(Date.now()).format("ddd, DD MMM").toString()}
+            </Text>
+          </Flex>
+        </Flex>
 
-              <Flex direction={"column"} align={"baseline"}>
-                <Button key={"dashboard"} bg={"white"} leftIcon={<Icon as={BsClipboardData} />} onClick={() => navigate("/")}>
-                  Dashboard
-                </Button>
+        {/* Menu items */}
+        <Flex direction={"column"} align={"self-start"} gap={"6"}>
+          <Button
+            key={"create"}
+            w={"100%"}
+            colorScheme={"green"}
+            variant={"solid"}
+            leftIcon={<Icon name={"add"} />}
+            onClick={() => navigate("/create")}
+          >
+            <Flex pr={"4"}>Create</Flex>
+          </Button>
 
-                {/* Create menu */}
-                <Menu>
-                  <MenuButton
-                    as={Button}
-                    bg={"white"}
-                    rounded={"md"}
-                    cursor={"pointer"}
-                    minW={0}
-                    leftIcon={<Icon as={BsPlusLg} />}
-                  >
-                    Create
-                  </MenuButton>
-                  <MenuList>
-                    <MenuItem icon={<Icon as={BsBox} />} onClick={() => navigate("/create/entity/start")}>
-                      Entity
-                    </MenuItem>
-                    <MenuItem icon={<Icon as={BsFolder} />} onClick={() => navigate("/create/collection/start")}>
-                      Collection
-                    </MenuItem>
-                    <MenuItem icon={<Icon as={BsPuzzle} />} onClick={() => navigate("/create/attribute/start")}>
-                      Attribute
-                    </MenuItem>
-                  </MenuList>
-                </Menu>
+          <Divider />
 
-                {/* View menu */}
-                <Menu>
-                  <MenuButton
-                    as={Button}
-                    bg={"white"}
-                    rounded={"md"}
-                    cursor={"pointer"}
-                    minW={0}
-                    leftIcon={<Icon as={BsBinoculars} />}
-                  >
-                    View
-                  </MenuButton>
-                  <MenuList>
-                    <MenuItem icon={<Icon as={BsBox} />} onClick={() => navigate("/entities")}>
-                      Entities
-                    </MenuItem>
-                    <MenuItem icon={<Icon as={BsFolder} />} onClick={() => navigate("/collections")}>
-                      Collections
-                    </MenuItem>
-                    <MenuItem icon={<Icon as={BsPuzzle} />} onClick={() => navigate("/attributes")}>
-                      Attributes
-                    </MenuItem>
-                  </MenuList>
-                </Menu>
+          <Button
+            key={"dashboard"}
+            w={"100%"}
+            justifyContent={"left"}
+            variant={_.isEqual(location.pathname, "/") ? "solid" : "ghost"}
+            leftIcon={<Icon name={"dashboard"} />}
+            onClick={() => navigate("/")}
+          >
+            Dashboard
+          </Button>
 
-                <Button
-                  key={"search"}
-                  bg={"white"}
-                  leftIcon={<Icon as={BsSearch} />}
-                  onClick={() => navigate("/search")}
-                >
-                  Search
-                </Button>
-              </Flex>
-            </VStack>
-          </VStack>
+          <Divider />
+
+          <Button
+            leftIcon={<Icon name={"collection"} />}
+            w={"100%"}
+            justifyContent={"left"}
+            variant={
+              _.startsWith(location.pathname, "/collections")
+                ? "solid"
+                : "ghost"
+            }
+            onClick={() => navigate("/collections")}
+          >
+            <Flex w={"100%"} align={"center"} gap={"2"}>
+              <Text>Collections</Text>
+              <Spacer />
+              <Tag>{isLoaded ? collectionCount : <Spinner size={"xs"} />}</Tag>
+            </Flex>
+          </Button>
+
+          <Button
+            leftIcon={<Icon name={"entity"} />}
+            w={"100%"}
+            justifyContent={"left"}
+            variant={
+              _.startsWith(location.pathname, "/entities") ? "solid" : "ghost"
+            }
+            onClick={() => navigate("/entities")}
+          >
+            <Flex w={"100%"} align={"center"} gap={"2"}>
+              <Text>Entities</Text>
+              <Spacer />
+              <Tag>{isLoaded ? entityCount : <Spinner size={"xs"} />}</Tag>
+            </Flex>
+          </Button>
+          <Button
+            leftIcon={<Icon name={"attribute"} />}
+            w={"100%"}
+            justifyContent={"left"}
+            variant={
+              _.startsWith(location.pathname, "/attributes") ? "solid" : "ghost"
+            }
+            onClick={() => navigate("/attributes")}
+          >
+            Attributes
+          </Button>
+
+          <Divider />
+
+          <Button
+            key={"search"}
+            w={"100%"}
+            justifyContent={"left"}
+            variant={
+              _.startsWith(location.pathname, "/search") ? "solid" : "ghost"
+            }
+            leftIcon={<Icon name={"search"} />}
+            onClick={() => navigate("/search")}
+          >
+            Search
+          </Button>
+
+          <Spacer />
         </Flex>
       </Flex>
 
-      <Flex p={"2"} bg={"white"}>
-        {/* Icon to show menu in responsive context */}
+      {/* Icon to show menu in responsive context */}
+      <Flex p={"2"} display={{ lg: "none" }}>
         <IconButton
           size={"md"}
-          icon={<Icon as={isOpen ? BsXLg : HamburgerIcon} />}
+          display={{ base: "flex", lg: "none" }}
+          justifyContent={"center"}
+          icon={<Icon name={isOpen ? "cross" : "list"} />}
           aria-label={"Open Menu"}
-          display={{ md: "none" }}
           onClick={isOpen ? onClose : onOpen}
         />
       </Flex>
 
       {/* Responsive display */}
-      {isOpen ? (
-        <Flex p={4} display={{ md: "none" }}>
-          <Stack as={"nav"} spacing={4} divider={<StackDivider />}>
-            {/* Dashboard */}
-            <Flex direction={"row"} align={"center"} gap={"2"}>
-              <NavigationElement onClick={() => responsiveNavigate("/")}>
-                Dashboard
-              </NavigationElement>
-            </Flex>
+      {isOpen && (
+        <Flex
+          p={"2"}
+          gap={"4"}
+          direction={"column"}
+          align={"self-start"}
+          w={"100%"}
+        >
+          <Button
+            key={"create"}
+            w={"100%"}
+            colorScheme={"green"}
+            variant={"solid"}
+            leftIcon={<Icon name={"add"} />}
+            onClick={() => responsiveNavigate("/create")}
+          >
+            <Flex pr={"4"}>Create</Flex>
+          </Button>
 
-            {/* Create */}
-            <Flex direction={"column"}>
-              <Flex direction={"row"} align={"center"} gap={"2"}>
-                <Icon as={AddIcon} />
-                Create
-              </Flex>
-              <Flex direction={"column"} px={"6"}>
-                <Flex direction={"row"} align={"center"}>
-                  <Icon as={BsBox} />
-                  <NavigationElement
-                    onClick={() => responsiveNavigate("/create/entity/start")}
-                  >
-                    Entity
-                  </NavigationElement>
-                </Flex>
-                <Flex direction={"row"} align={"center"}>
-                  <Icon as={BsFolder} />
-                  <NavigationElement
-                    onClick={() => responsiveNavigate("/create/collection/start")}
-                  >
-                    Collection
-                  </NavigationElement>
-                </Flex>
-                <Flex direction={"row"} align={"center"}>
-                  <Icon as={BsPuzzle} />
-                  <NavigationElement
-                    onClick={() => responsiveNavigate("/create/attribute/start")}
-                  >
-                    Attribute
-                  </NavigationElement>
-                </Flex>
-              </Flex>
-            </Flex>
+          <Divider />
 
-            {/* View */}
-            <Flex direction={"column"}>
-              <Flex direction={"row"} align={"center"} gap={"2"}>
-                <Icon as={InfoOutlineIcon} />
-                View
-              </Flex>
-              <Flex direction={"column"} px={"6"}>
-                <Flex direction={"row"} align={"center"}>
-                  <Icon as={BsBox} />
-                  <NavigationElement
-                    onClick={() => responsiveNavigate("/entities")}
-                  >
-                    Entities
-                  </NavigationElement>
-                </Flex>
-                <Flex direction={"row"} align={"center"}>
-                  <Icon as={BsFolder} />
-                  <NavigationElement
-                    onClick={() => responsiveNavigate("/collections")}
-                  >
-                    Collections
-                  </NavigationElement>
-                </Flex>
-                <Flex direction={"row"} align={"center"}>
-                  <Icon as={BsPuzzle} />
-                  <NavigationElement
-                    onClick={() => responsiveNavigate("/attributes")}
-                  >
-                    Attributes
-                  </NavigationElement>
-                </Flex>
-              </Flex>
+          <Button
+            key={"dashboard"}
+            w={"100%"}
+            justifyContent={"left"}
+            variant={_.isEqual(location.pathname, "/") ? "solid" : "ghost"}
+            leftIcon={<Icon name={"dashboard"} />}
+            onClick={() => responsiveNavigate("/")}
+          >
+            Dashboard
+          </Button>
+
+          <Divider />
+
+          <Button
+            leftIcon={<Icon name={"collection"} />}
+            w={"100%"}
+            justifyContent={"left"}
+            variant={
+              _.startsWith(location.pathname, "/collections")
+                ? "solid"
+                : "ghost"
+            }
+            onClick={() => responsiveNavigate("/collections")}
+          >
+            <Flex w={"100%"} align={"center"} gap={"2"}>
+              <Text>Collections</Text>
+              <Spacer />
+              <Tag>{isLoaded ? collectionCount : <Spinner size={"xs"} />}</Tag>
             </Flex>
-          </Stack>
+          </Button>
+
+          <Button
+            leftIcon={<Icon name={"entity"} />}
+            w={"100%"}
+            justifyContent={"left"}
+            variant={
+              _.startsWith(location.pathname, "/entities") ? "solid" : "ghost"
+            }
+            onClick={() => responsiveNavigate("/entities")}
+          >
+            <Flex w={"100%"} align={"center"} gap={"2"}>
+              <Text>Entities</Text>
+              <Spacer />
+              <Tag>{isLoaded ? entityCount : <Spinner size={"xs"} />}</Tag>
+            </Flex>
+          </Button>
+
+          <Button
+            leftIcon={<Icon name={"attribute"} />}
+            w={"100%"}
+            justifyContent={"left"}
+            variant={
+              _.startsWith(location.pathname, "/attributes") ? "solid" : "ghost"
+            }
+            onClick={() => responsiveNavigate("/attributes")}
+          >
+            Attributes
+          </Button>
+
+          <Divider />
+
+          <Button
+            key={"search"}
+            w={"100%"}
+            justifyContent={"left"}
+            variant={
+              _.startsWith(location.pathname, "/search") ? "solid" : "ghost"
+            }
+            leftIcon={<Icon name={"search"} />}
+            onClick={() => responsiveNavigate("/search")}
+          >
+            Search
+          </Button>
         </Flex>
-      ) : null}
-    </>
+      )}
+    </Flex>
   );
 };
 

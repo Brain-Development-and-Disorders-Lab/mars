@@ -31,15 +31,15 @@ export namespace State.Collection {
 }
 
 // Attributes
-// Generic Attribute interface containing required data parameters
-export type Attribute = {
+// Generic Attribute interface containing required Values
+export type IAttribute = {
   name: string;
   description: string;
-  parameters: Parameters[];
+  values: IValue[];
 };
 
 // Database model of Attribute, including assigned ID
-export type AttributeModel = Attribute & {
+export type AttributeModel = IAttribute & {
   _id: string;
 };
 
@@ -49,7 +49,7 @@ export type AttributeActions = {
   onRemove?: (identifier: string) => void;
 };
 
-export type AttributeProps = Attribute & AttributeActions & {
+export type AttributeProps = IAttribute & AttributeActions & {
   identifier: string;
 };
 
@@ -65,48 +65,17 @@ export type AttributeCardProps = {
   cancelCallback?: () => void;
 };
 
-// Parameters
-export namespace Parameter {
-  interface Generic {
-    identifier: string;
-    name: string;
-    disabled?: boolean;
-    showRemove?: boolean;
-    onRemove?: (identifier: string) => void;
-  }
-
-  type Number = Generic & {
-    type: "number";
-    data: number;
-    onUpdate?: (data: Number) => void;
-  };
-
-  type Text = Generic & {
-    type: "text";
-    data: string;
-    onUpdate?: (data: Text) => void;
-  };
-
-  type URL = Generic & {
-    type: "url";
-    data: string;
-    onUpdate?: (data: URL) => void;
-  };
-
-  type Date = Generic & {
-    type: "date";
-    data: string;
-    onUpdate?: (data: Date) => void;
-  };
-
-  type Entity = Generic & {
-    type: "entity";
-    data: string;
-    onUpdate?: (data: Entity) => void;
-  };
-}
-
-export type Parameters = Parameter.Date | Parameter.Entity | Parameter.Number | Parameter.Text | Parameter.URL;
+// Values
+export interface IValue<D> {
+  identifier: string;
+  name: string;
+  type: "number" | "text" | "url" | "date" | "entity";
+  data: D;
+  disabled?: boolean;
+  showRemove?: boolean;
+  onRemove?: (identifier: string) => void;
+  onUpdate?: (data: D) => void;
+};
 
 export type LinkyProps = {
   type: "entities" | "collections" | "attributes";
@@ -116,7 +85,7 @@ export type LinkyProps = {
 };
 
 // Collection types
-export type Collection = {
+export type ICollection = {
   name: string;
   description: string;
   owner: string;
@@ -124,12 +93,12 @@ export type Collection = {
   entities: string[];
 };
 
-export type CollectionModel = Collection & {
+export type CollectionModel = ICollection & {
   _id: string;
 };
 
 // Entity types
-export type Entity = {
+export type IEntity = {
   name: string;
   created: string;
   owner: string;
@@ -142,7 +111,7 @@ export type Entity = {
   attributes: AttributeModel[];
 };
 
-export type EntityModel = Entity & {
+export type EntityModel = IEntity & {
   _id: string;
 };
 
@@ -157,11 +126,11 @@ export type EntityExport = {
   products: string;
 
   // Generic details
-  [k: string]: string;
+  [key: string]: string;
 }
 
 // Update types
-export type Update = {
+export type IUpdate = {
   timestamp: Date;
   type: "create" | "update" | "delete";
   details: string;
@@ -172,9 +141,64 @@ export type Update = {
   };
 };
 
-export type UpdateModel = Update & {
+export type UpdateModel = IUpdate & {
   _id: string;
 };
+
+// DataTable component
+export type DataTableProps = {
+  columns: any[];
+  data: any[];
+  setData?: (value: React.SetStateAction<any[]>) => void;
+  visibleColumns: VisibilityState;
+  hideControls?: boolean;
+  hideSelection?: boolean;
+  viewOnly?: boolean;
+};
+
+// Icon component
+export type IconNames =
+  // Default
+  "unknown" |
+
+  // Locations
+  "dashboard" |
+  "entity" |
+  "collection" |
+  "attribute" |
+
+  // Signal and action icons
+  "activity" |
+  "check" |
+  "info" |
+  "search" |
+  "add" |
+  "edit" |
+  "delete" |
+  "download" |
+  "cross" |
+  "list" |
+  "warning" |
+  "exclamation" |
+  "reload" |
+  "graph" |
+
+  // Values
+  "p_date" |
+  "p_text" |
+  "p_number" |
+  "p_url" |
+
+  // Arrows
+  "a_right" |
+
+  // Chevrons
+  "c_left" |
+  "c_double_left" |
+  "c_right" |
+  "c_double_right" |
+  "c_up" |
+  "c_down";
 
 // Query types
 export type QueryToken = "&" | "|" | "!" | "=";

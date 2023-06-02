@@ -1,7 +1,10 @@
+// React
 import React from "react";
+
+// Existing and custom components
 import { Flex, Spinner } from "@chakra-ui/react";
 
-export const Loading = () => {
+const Loading = () => {
   return (
     <Flex
       align={"center"}
@@ -15,3 +18,5 @@ export const Loading = () => {
     </Flex>
   );
 };
+
+export default Loading;

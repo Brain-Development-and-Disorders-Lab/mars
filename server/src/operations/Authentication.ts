@@ -14,25 +14,34 @@ export class Authentication {
     consola.start("Performing login...");
     return new Promise((resolve, reject) => {
       const encoder = new TextEncoder();
-      const defaultPassword = encoder.encode(process.env.DEFAULT_PASSWORD || "");
+      const defaultPassword = encoder.encode(
+        process.env.DEFAULT_PASSWORD || ""
+      );
 
       // Hash the default password
       const hashDefault = new Promise<Buffer>((resolve, reject) => {
-        crypto.pbkdf2(defaultPassword, "", 310000, 32, "sha256", ((error, hashed) => {
-          if (error) {
-            reject();
+        crypto.pbkdf2(
+          defaultPassword,
+          "",
+          310000,
+          32,
+          "sha256",
+          (error, hashed) => {
+            if (error) {
+              reject();
+            }
+            resolve(hashed);
           }
-          resolve(hashed);
-        }));
+        );
       });
 
       const hashRecieved = new Promise<Buffer>((resolve, reject) => {
-        crypto.pbkdf2(password, "", 310000, 32, "sha256", ((error, hashed) => {
+        crypto.pbkdf2(password, "", 310000, 32, "sha256", (error, hashed) => {
           if (error) {
             reject();
           }
           resolve(hashed);
-        }));
+        });
       });
 
       // Perform hash comparison after resolving all Promises
@@ -47,4 +56,4 @@ export class Authentication {
       });
     });
   };
-};
+}

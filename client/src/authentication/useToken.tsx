@@ -2,7 +2,7 @@ import { useState } from "react";
 
 const TOKEN_KEY = "MARS_token";
 
-export const useToken = (): [ string, (token: string) => void ] => {
+export const useToken = (): [string, (token: string) => void] => {
   const getToken = () => {
     const storedToken = sessionStorage.getItem(TOKEN_KEY);
     if (storedToken) {
@@ -18,8 +18,5 @@ export const useToken = (): [ string, (token: string) => void ] => {
     setToken(token);
   };
 
-  return [
-    token,
-    storeToken
-  ];
+  return [token, storeToken];
 };
