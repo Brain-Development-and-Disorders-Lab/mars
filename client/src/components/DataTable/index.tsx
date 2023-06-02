@@ -126,10 +126,12 @@ const DataTable: FC<any> = (props: DataTableProps) => {
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
             />
-            <Text as={"b"}>
-              {table.getState().pagination.pageIndex + 1} of{" "}
-              {table.getPageCount()}
-            </Text>
+            {table.getPageCount() > 0 &&
+              <Text as={"b"}>
+                {table.getState().pagination.pageIndex + 1} of{" "}
+                {table.getPageCount()}
+              </Text>
+            }
             <IconButton
               icon={<Icon name={"c_right"} />}
               aria-label="next page"

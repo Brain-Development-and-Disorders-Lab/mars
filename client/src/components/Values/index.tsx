@@ -3,8 +3,6 @@ import React, {
   Dispatch,
   SetStateAction,
   useEffect,
-  // useCallback,
-  // useEffect,
   useState,
 } from "react";
 
@@ -14,31 +12,22 @@ import {
   Checkbox,
   Flex,
   Input,
-  // IconButton,
-  // Input,
-  // Select,
-  // Table,
-  // TableContainer,
-  // Tbody,
-  // Td,
-  // Text,
-  // Th,
-  // Thead,
-  // Tr,
-  // useToast,
+  Link,
+  Select,
+  useToast,
 } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
+import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
-// import Linky from "@components/Linky";
+import Linky from "@components/Linky";
 
 // Existing and custom types
-import { IValue } from "@types";
+import { EntityModel, IValue } from "@types";
 
 // Utility functions and libraries
-// import { getData } from "@database/functions";
+import { getData } from "@database/functions";
 import _ from "lodash";
 import dayjs from "dayjs";
-import DataTable from "@components/DataTable";
 
 /**
  * Values component use to display a collection of Values and enable
@@ -51,31 +40,31 @@ const Values = (props: {
   viewOnly: boolean;
   setValues?: Dispatch<SetStateAction<IValue<any>[]>>;
 }) => {
-  // const toast = useToast();
-  // const [entities, setEntities] = useState([] as EntityModel[]);
-  // const [isLoaded, setIsLoaded] = useState(false);
+  const toast = useToast();
+  const [entities, setEntities] = useState([] as EntityModel[]);
+  const [isLoaded, setIsLoaded] = useState(false);
 
-  // useEffect(() => {
-  //   getData(`/entities`)
-  //     .then((value) => {
-  //       setEntities(value);
-  //       setIsLoaded(true);
-  //     })
-  //     .catch((_error) => {
-  //       toast({
-  //         title: "Error",
-  //         description: "Could not retrieve Entities.",
-  //         status: "error",
-  //         duration: 4000,
-  //         position: "bottom-right",
-  //         isClosable: true,
-  //       });
-  //     })
-  //     .finally(() => {
-  //       setIsLoaded(true);
-  //     });
-  //   return;
-  // }, []);
+  useEffect(() => {
+    getData(`/entities`)
+      .then((value) => {
+        setEntities(value);
+        setIsLoaded(true);
+      })
+      .catch((_error) => {
+        toast({
+          title: "Error",
+          description: "Could not retrieve Entities.",
+          status: "error",
+          duration: 4000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+      })
+      .finally(() => {
+        setIsLoaded(true);
+      });
+    return;
+  }, []);
 
   const [data, setData] = useState(props.collection);
   const columnHelper = createColumnHelper<IValue<any>>();
@@ -86,6 +75,7 @@ const Values = (props: {
       header: ({ table }: any) => (
         <Checkbox
           {...{
+            disabled: props.viewOnly,
             isChecked: table.getIsAllRowsSelected(),
             isIndeterminate: table.getIsSomeRowsSelected(),
             onChange: table.getToggleAllRowsSelectedHandler(),
@@ -97,7 +87,7 @@ const Values = (props: {
           <Checkbox
             {...{
               isChecked: row.getIsSelected(),
-              disabled: !row.getCanSelect(),
+              disabled: !row.getCanSelect() || props.viewOnly,
               isIndeterminate: row.getIsSomeSelected(),
               onChange: row.getToggleSelectedHandler(),
             }}
@@ -107,7 +97,31 @@ const Values = (props: {
     },
     // Value name column
     columnHelper.accessor("name", {
-      cell: (info) => info.getValue(),
+      cell: (info) => {
+        const initialValue = info.getValue();
+        const [value, setValue] = useState(initialValue);
+
+        useEffect(() => {
+          setValue(initialValue);
+        }, [initialValue]);
+
+        const onChange = (event: any) => {
+          setValue(event.target.value);
+        };
+
+        const onBlur = () => {
+          updateName(info.row.original.identifier, value);
+        };
+
+        return (
+          <Input
+            value={value}
+            disabled={props.viewOnly}
+            onChange={onChange}
+            onBlur={onBlur}
+          />
+        );
+      },
       header: "Name",
     }),
     // Value data column
@@ -125,40 +139,139 @@ const Values = (props: {
         };
 
         const onBlur = () => {
-          update(info.row.original.identifier, value);
+          updateData(info.row.original.identifier, value);
         };
 
-        return (
-          <Input
-            value={value}
-            disabled={props.viewOnly}
-            onChange={onChange}
-            onBlur={onBlur}
-          />
-        );
+        switch (info.row.original.type) {
+          case "number": {
+            return (
+              <Input
+                type={"number"}
+                value={value}
+                disabled={props.viewOnly}
+                onChange={onChange}
+                onBlur={onBlur}
+              />
+            );
+          }
+          case "text": {
+            return (
+              <Input
+                value={value}
+                disabled={props.viewOnly}
+                onChange={onChange}
+                onBlur={onBlur}
+              />
+            );
+          }
+          case "url": {
+            if (_.isEqual(props.viewOnly, false)) {
+              return (
+                <Input
+                  value={value}
+                  disabled={props.viewOnly}
+                  onChange={onChange}
+                  onBlur={onBlur}
+                />
+              );
+            } else {
+              return (
+                <Link
+                  href={value}
+                  isExternal
+                >
+                  {value}
+                </Link>
+              );
+            }
+          }
+          case "date": {
+            return (
+              <Input
+                type={"datetime-local"}
+                value={value}
+                disabled={props.viewOnly}
+                onChange={onChange}
+                onBlur={onBlur}
+              />
+            );
+          }
+          case "entity": {
+            if (_.isEqual(props.viewOnly, false)) {
+              return (
+                <Select
+                  title="Select Entity"
+                  value={value}
+                  placeholder={"Select Entity"}
+                  disabled={props.viewOnly}
+                  onChange={onChange}
+                  onBlur={onBlur}
+                >
+                  {isLoaded &&
+                    entities.map((entity) => {
+                      return (
+                        <option key={entity._id} value={entity._id}>
+                          {entity.name}
+                        </option>
+                      );
+                    })}
+                  ;
+                </Select>
+              );
+            } else {
+              console.info("value:", value);
+              return (
+                <Linky type={"entities"} id={value} />
+              );
+            }
+          }
+        }
       },
       header: "Data",
     }),
   ];
 
   /**
+   * Update function called to update the name associated with a Value
+   * @param {string} identifier Value identifier
+   * @param {string} updatedName the updated name to associated with the Value
+   */
+  const updateName = (identifier: string, updatedName: string) => {
+    const updatedCollection = data.map((value) => {
+      if (_.isEqual(value.identifier, identifier)) {
+        // Update the name, if changed
+        value.name = _.cloneDeep(updatedName);
+      }
+      return value;
+    });
+
+    applyUpdate(updatedCollection);
+  };
+
+  /**
    * Update function called to update the data associated with a Value
    * @param {string} identifier Value identifier
    * @param {any} updatedData the updated data to associated with the Value
    */
-  const update = (identifier: string, updatedData: any) => {
+  const updateData = (identifier: string, updatedData: string) => {
     const updatedCollection = data.map((value) => {
       if (_.isEqual(value.identifier, identifier)) {
+        // Update the data, if changed
         value.data = _.cloneDeep(updatedData);
       }
       return value;
     });
-    setData([...updatedCollection]);
+
+    applyUpdate(updatedCollection);
+  };
+
+  const applyUpdate = (collection: IValue<any>[]) => {
+    setData([...collection]);
 
     if (props.setValues) {
-      props.setValues([...updatedCollection]);
+      props.setValues([...collection]);
     }
-  };
+  }
 
   return (
     <Flex direction={"column"} gap={"2"} w={"100%"} align={"center"}>
