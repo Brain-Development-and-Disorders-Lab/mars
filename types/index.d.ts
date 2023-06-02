@@ -149,9 +149,10 @@ export type UpdateModel = IUpdate & {
 export type DataTableProps = {
   columns: any[];
   data: any[];
+  setData?: (value: React.SetStateAction<any[]>) => void;
   visibleColumns: VisibilityState;
   hideControls?: boolean;
-  editable?: boolean;
+  viewOnly?: boolean;
 };
 
 // Icon component

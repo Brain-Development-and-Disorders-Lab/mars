@@ -14,6 +14,8 @@ import {
   Thead,
   Tr,
   Text,
+  Checkbox,
+  Button,
 } from "@chakra-ui/react";
 import {
   flexRender,
@@ -25,7 +27,7 @@ import {
 import Icon from "@components/Icon";
 
 // Existing and custom types
-import { DataTableProps } from "@types";
+import { DataTableProps, IValue } from "@types";
 
 const DataTable: FC<any> = (props: DataTableProps) => {
   // Table visibility state
@@ -33,9 +35,40 @@ const DataTable: FC<any> = (props: DataTableProps) => {
     props.visibleColumns
   );
 
+  // Table row selection state
+  const [selectedRows, setSelectedRows] = useState({});
+
   // Create ReactTable instance
   const table = useReactTable({
-    columns: props.columns,
+    columns: [
+      // Checkbox select column
+      {
+        id: "select",
+        header: ({ table }: any) => (
+          <Checkbox
+            {...{
+              disabled: props.viewOnly,
+              isChecked: table.getIsAllRowsSelected(),
+              isIndeterminate: table.getIsSomeRowsSelected(),
+              onChange: table.getToggleAllRowsSelectedHandler(),
+            }}
+          />
+        ),
+        cell: ({ row }: any) => (
+          <Flex>
+            <Checkbox
+              {...{
+                isChecked: row.getIsSelected(),
+                disabled: !row.getCanSelect() || props.viewOnly,
+                isIndeterminate: row.getIsSomeSelected(),
+                onChange: row.getToggleSelectedHandler(),
+              }}
+            />
+          </Flex>
+        ),
+      },
+      ...props.columns,
+    ],
     data: props.data,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -48,7 +81,9 @@ const DataTable: FC<any> = (props: DataTableProps) => {
     },
     state: {
       columnVisibility: columnVisibility,
+      rowSelection: selectedRows,
     },
+    onRowSelectionChange: setSelectedRows,
     onColumnVisibilityChange: setColumnVisibility,
   });
 
@@ -57,8 +92,33 @@ const DataTable: FC<any> = (props: DataTableProps) => {
     setColumnVisibility(props.visibleColumns);
   }, [props.visibleColumns]);
 
+  /**
+   * Apply delete operation to rows that have been selected
+   */
+  const onDeleteRows = () => {
+    const idToRemove: IValue<any>[] = [];
+    for (let rowIndex of Object.keys(selectedRows)) {
+      idToRemove.push(table.getRow(rowIndex).original.identifier);
+    }
+
+    const updatedCollection = props.data.filter((value) => {
+      return !idToRemove.includes(value.identifier);
+    });
+
+    if (props.setData) {
+      props.setData(updatedCollection);
+      table.resetRowSelection();
+    }
+  };
+
   return (
     <>
+      {!props.hideControls && !props.viewOnly &&
+        <Flex>
+          <Button disabled={Object.keys(selectedRows).length === 0 || props.viewOnly} onClick={onDeleteRows} colorScheme={"red"}>Delete {Object.keys(selectedRows).length} Values</Button>
+        </Flex>
+      }
+
       <TableContainer>
         <Table>
           <Thead>

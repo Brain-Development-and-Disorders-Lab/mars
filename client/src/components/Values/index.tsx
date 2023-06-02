@@ -9,7 +9,6 @@ import React, {
 // Existing and custom components
 import {
   Button,
-  Checkbox,
   Flex,
   Input,
   Link,
@@ -67,34 +66,14 @@ const Values = (props: {
   }, []);
 
   const [data, setData] = useState(props.collection);
+  useEffect(() => {
+    if (props.setValues) {
+      props.setValues([...data]);
+    }
+  }, [data]);
+
   const columnHelper = createColumnHelper<IValue<any>>();
   const columns = [
-    // Checkbox select column
-    {
-      id: "select",
-      header: ({ table }: any) => (
-        <Checkbox
-          {...{
-            disabled: props.viewOnly,
-            isChecked: table.getIsAllRowsSelected(),
-            isIndeterminate: table.getIsSomeRowsSelected(),
-            onChange: table.getToggleAllRowsSelectedHandler(),
-          }}
-        />
-      ),
-      cell: ({ row }: any) => (
-        <Flex>
-          <Checkbox
-            {...{
-              isChecked: row.getIsSelected(),
-              disabled: !row.getCanSelect() || props.viewOnly,
-              isIndeterminate: row.getIsSomeSelected(),
-              onChange: row.getToggleSelectedHandler(),
-            }}
-          />
-        </Flex>
-      ),
-    },
     // Value name column
     columnHelper.accessor("name", {
       cell: (info) => {
@@ -124,6 +103,7 @@ const Values = (props: {
       },
       header: "Name",
     }),
+
     // Value data column
     columnHelper.accessor("data", {
       cell: (info) => {
@@ -219,7 +199,6 @@ const Values = (props: {
                 </Select>
               );
             } else {
-              console.info("value:", value);
               return (
                 <Linky type={"entities"} id={value} />
               );
@@ -269,7 +248,7 @@ const Values = (props: {
     setData([...collection]);
 
     if (props.setValues) {
-      props.setValues([...collection]);
+      props.setValues([...data]);
     }
   }
 
@@ -374,7 +353,7 @@ const Values = (props: {
 
       {/* Values list */}
       <Flex p={["1", "2"]} direction={"column"} gap={"1"} w={"100%"}>
-        <DataTable columns={columns} data={data} viewOnly={props.viewOnly} />
+        <DataTable columns={columns} data={data} setData={setData} viewOnly={props.viewOnly} />
       </Flex>
     </Flex>
   );
