@@ -40,6 +40,7 @@ const DataTable: FC<any> = (props: DataTableProps) => {
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    autoResetPageIndex: false,
     initialState: {
       pagination: {
         pageSize: 5,
@@ -109,6 +110,7 @@ const DataTable: FC<any> = (props: DataTableProps) => {
           </Tbody>
         </Table>
       </TableContainer>
+
       {!props.hideControls && (
         <Flex direction={"row"} gap={"4"} justify={"space-between"} w={"100%"}>
           <Flex direction={"row"} gap={"4"} align={"center"}>
