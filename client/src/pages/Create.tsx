@@ -614,10 +614,10 @@ const EntityPage = () => {
                       justify={"space-between"}
                       wrap={["wrap", "nowrap"]}
                     >
-                      {/* Drop-down to select existing Attributes */}
+                      {/* Drop-down to select template Attributes */}
                       <FormControl maxW={"sm"}>
                         <Select
-                          placeholder={"Add existing Attribute"}
+                          placeholder={"Use template Attribute"}
                           onChange={(event) => {
                             if (!_.isEqual(event.target.value.toString(), "")) {
                               for (let attribute of attributes) {
@@ -1099,13 +1099,13 @@ const AttributePage = () => {
             </Flex>
 
             <Flex
-              direction={"row"}
+              direction={"column"}
               gap={"2"}
               w={"100%"}
               maxW={"4xl"}
               wrap={["wrap", "nowrap"]}
             >
-              <Flex direction={"column"} gap={"4"} wrap={["wrap", "nowrap"]}>
+              <Flex direction={"row"} gap={"4"} wrap={["wrap", "nowrap"]}>
                 <FormControl isRequired>
                   <FormLabel>Name</FormLabel>
                   <Input
@@ -1191,25 +1191,25 @@ const AttributePage = () => {
             <List spacing={2}>
               <ListItem>
                 <Flex gap={"2"} align={"center"}>
-                  <Icon name={"p_date"} />
+                  <Icon name={"v_date"} />
                   <Text>Date: Used to specify a point in time.</Text>
                 </Flex>
               </ListItem>
               <ListItem>
                 <Flex gap={"2"} align={"center"}>
-                  <Icon name={"p_text"} />
+                  <Icon name={"v_text"} />
                   <Text>Text: Used to specify text of variable length.</Text>
                 </Flex>
               </ListItem>
               <ListItem>
                 <Flex gap={"2"} align={"center"}>
-                  <Icon name={"p_number"} />
+                  <Icon name={"v_number"} />
                   <Text>Number: Used to specify a numerical value.</Text>
                 </Flex>
               </ListItem>
               <ListItem>
                 <Flex gap={"2"} align={"center"}>
-                  <Icon name={"p_url"} />
+                  <Icon name={"v_url"} />
                   <Text>URL: Used to specify a link.</Text>
                 </Flex>
               </ListItem>

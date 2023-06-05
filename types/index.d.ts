@@ -184,10 +184,10 @@ export type IconNames =
   "graph" |
 
   // Values
-  "p_date" |
-  "p_text" |
-  "p_number" |
-  "p_url" |
+  "v_date" |
+  "v_text" |
+  "v_number" |
+  "v_url" |
 
   // Arrows
   "a_right" |

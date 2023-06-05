@@ -19,7 +19,6 @@ import {
   TagLabel,
   Tbody,
   Td,
-  Text,
   Textarea,
   Th,
   Thead,
@@ -174,7 +173,7 @@ const Attribute = () => {
                 bg={"white"}
               >
                 <Icon name={"attribute"} size={"lg"} />
-                <Heading fontWeight={"semibold"}>{attributeData.name}</Heading>
+                <Heading fontWeight={"semibold"}>Attribute: {attributeData.name}</Heading>
               </Flex>
 
               {/* Buttons */}
@@ -264,7 +263,7 @@ const Attribute = () => {
                               <TagLabel>Not specified</TagLabel>
                               <Icon name={"warning"} />
                             </Tag>
-                          ) : editing ? (
+                          ) : (
                             <Textarea
                               value={attributeDescription}
                               onChange={(event) => {
@@ -272,8 +271,6 @@ const Attribute = () => {
                               }}
                               disabled={!editing}
                             />
-                          ) : (
-                            <Text>{attributeDescription}</Text>
                           )}
                         </Td>
                       </Tr>

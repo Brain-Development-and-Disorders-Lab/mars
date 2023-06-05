@@ -13,6 +13,7 @@ import {
   Input,
   Link,
   Select,
+  Spacer,
   useToast,
 } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
@@ -72,6 +73,45 @@ const Values = (props: {
 
   const columnHelper = createColumnHelper<IValue<any>>();
   const columns = [
+    // Value type column
+    columnHelper.accessor("type", {
+      cell: (info) => {
+        switch (info.getValue()) {
+          case "number":
+            return (
+              <Flex align={"center"} justify={"center"}>
+                <Icon name={"v_number"} />
+              </Flex>
+            );
+          case "text":
+            return (
+              <Flex align={"center"} justify={"center"}>
+                <Icon name={"v_text"} />
+              </Flex>
+            );
+          case "url":
+            return (
+              <Flex align={"center"} justify={"center"}>
+                <Icon name={"v_url"} />
+              </Flex>
+            );
+          case "date":
+            return (
+              <Flex align={"center"} justify={"center"}>
+                <Icon name={"v_date"} />
+              </Flex>
+            );
+          case "entity":
+            return (
+              <Flex align={"center"} justify={"center"}>
+                <Icon name={"entity"} />
+              </Flex>
+            );
+        }
+      },
+      header: undefined,
+    }),
+
     // Value name column
     columnHelper.accessor("name", {
       cell: (info) => {
@@ -186,7 +226,7 @@ const Values = (props: {
                   title="Select Entity"
                   id={`s_${info.row.original.identifier}_data`}
                   value={value}
-                  placeholder={"Select Entity"}
+                  placeholder={"Entity"}
                   disabled={props.viewOnly}
                   onChange={onChange}
                   onBlur={onBlur}
@@ -257,24 +297,26 @@ const Values = (props: {
   }
 
   return (
-    <Flex direction={"column"} gap={"2"} w={"100%"} align={"center"}>
-      {/* Button Group */}
+    <Flex p={["1", "2"]} direction={"column"} gap={"1"} w={"100%"}>
       {!props.viewOnly && (
         <Flex
+          w={"100%"}
           direction={"row"}
           gap={"2"}
+          p={"4"}
           flexWrap={"wrap"}
           justify={"center"}
           align={"center"}
         >
           {/* Buttons to add Values */}
           <Button
-            leftIcon={<Icon name={"p_date"} />}
+            variant={"outline"}
+            leftIcon={<Icon name={"v_date"} />}
             onClick={() => {
               setData([
                 ...data,
                 {
-                  identifier: `p_date_${Math.round(performance.now())}`,
+                  identifier: `v_date_${Math.round(performance.now())}`,
                   name: "",
                   type: "date",
                   data: dayjs(new Date()).toISOString(),
@@ -286,12 +328,13 @@ const Values = (props: {
           </Button>
 
           <Button
-            leftIcon={<Icon name={"p_text"} />}
+            variant={"outline"}
+            leftIcon={<Icon name={"v_text"} />}
             onClick={() => {
               setData([
                 ...data,
                 {
-                  identifier: `p_text_${Math.round(performance.now())}`,
+                  identifier: `v_text_${Math.round(performance.now())}`,
                   name: "",
                   type: "text",
                   data: "",
@@ -303,12 +346,13 @@ const Values = (props: {
           </Button>
 
           <Button
-            leftIcon={<Icon name={"p_number"} />}
+            variant={"outline"}
+            leftIcon={<Icon name={"v_number"} />}
             onClick={() => {
               setData([
                 ...data,
                 {
-                  identifier: `p_number_${Math.round(performance.now())}`,
+                  identifier: `v_number_${Math.round(performance.now())}`,
                   name: "",
                   type: "number",
                   data: 0,
@@ -320,12 +364,13 @@ const Values = (props: {
           </Button>
 
           <Button
-            leftIcon={<Icon name={"p_url"} />}
+            variant={"outline"}
+            leftIcon={<Icon name={"v_url"} />}
             onClick={() => {
               setData([
                 ...data,
                 {
-                  identifier: `p_url_${Math.round(performance.now())}`,
+                  identifier: `v_url_${Math.round(performance.now())}`,
                   name: "",
                   type: "url",
                   data: "",
@@ -337,6 +382,7 @@ const Values = (props: {
           </Button>
 
           <Button
+            variant={"outline"}
             leftIcon={<Icon name={"entity"} />}
             onClick={() => {
               setData([
@@ -352,13 +398,11 @@ const Values = (props: {
           >
             Entity
           </Button>
+
+          <Spacer />
         </Flex>
       )}
-
-      {/* Values list */}
-      <Flex p={["1", "2"]} direction={"column"} gap={"1"} w={"100%"}>
-        <DataTable columns={columns} visibleColumns={{}} data={data} setData={setData} viewOnly={props.viewOnly} />
-      </Flex>
+      <DataTable columns={columns} visibleColumns={{}} data={data} setData={setData} viewOnly={props.viewOnly} />
     </Flex>
   );
 };

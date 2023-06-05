@@ -71,10 +71,10 @@ const SYSTEM_ICONS: { [k: string]: IconType } = {
   graph: BsDiagram2,
 
   // Values
-  p_date: BsCalendarWeek,
-  p_text: BsTextareaT,
-  p_number: BsGraphUp,
-  p_url: BsLink45Deg,
+  v_date: BsCalendarWeek,
+  v_text: BsTextareaT,
+  v_number: BsGraphUp,
+  v_url: BsLink45Deg,
 
   // Arrows
   a_right: BsArrowRight,

@@ -989,7 +989,7 @@ const Entity = () => {
             <Modal
               isOpen={isAddAttributesOpen}
               onClose={onAddAttributesClose}
-              size={"4xl"}
+              size={"3xl"}
               isCentered
             >
               <ModalOverlay />
@@ -1022,7 +1022,7 @@ const Entity = () => {
 
                     <Flex>
                       <Select
-                        placeholder={"Add existing Attribute"}
+                        placeholder={"Use template Attribute"}
                         onChange={(event) => {
                           if (!_.isEqual(event.target.value.toString(), "")) {
                             for (let attribute of attributes) {
@@ -1054,13 +1054,13 @@ const Entity = () => {
                     </Flex>
 
                     <Flex
-                      direction={"row"}
+                      direction={"column"}
                       gap={"2"}
                       w={"100%"}
                       justify={"center"}
                     >
                       <Flex
-                        direction={"column"}
+                        direction={"row"}
                         gap={"4"}
                         wrap={["wrap", "nowrap"]}
                       >
