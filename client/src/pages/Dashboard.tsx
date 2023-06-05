@@ -240,7 +240,8 @@ const Dashboard = () => {
                     columns={collectionTableColumns}
                     data={collectionTableData}
                     visibleColumns={visibleColumns}
-                    hideControls
+                    hidePagination
+                    hideSelection
                   />
                 ) : (
                   <Text>There are no Collections to display.</Text>
@@ -287,7 +288,8 @@ const Dashboard = () => {
                     columns={entityTableColumns}
                     data={entityTableData}
                     visibleColumns={visibleColumns}
-                    hideControls
+                    hidePagination
+                    hideSelection
                   />
                 ) : (
                   <Text>There are no Entities to display.</Text>

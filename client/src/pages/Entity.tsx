@@ -1034,7 +1034,7 @@ const Entity = () => {
                               ) {
                                 setAttributeName(attribute.name);
                                 setAttributeDescription(attribute.description);
-                                setAttributeValues(attribute.values);
+                                setAttributeValues(() => [...attribute.values]);
                                 break;
                               }
                             }
@@ -1459,7 +1459,7 @@ const Entity = () => {
               </ModalContent>
             </Modal>
 
-            <Modal isOpen={isExportOpen} onClose={onExportClose} isCentered>
+            <Modal isOpen={isExportOpen} onClose={onExportClose} size={"2xl"} isCentered>
               <ModalOverlay />
               <ModalContent p={"4"} w={["sm", "lg", "2xl"]}>
                 {/* Heading and close button */}
@@ -1467,7 +1467,7 @@ const Entity = () => {
                 <ModalCloseButton />
 
                 {/* Selection content */}
-                <Flex direction={"row"}>
+                <Flex direction={"row"} gap={"4"}>
                   <Flex direction={"column"} p={"2"} gap={"2"}>
                     <FormControl>
                       <FormLabel>Details</FormLabel>
