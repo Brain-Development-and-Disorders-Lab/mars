@@ -67,10 +67,8 @@ const Values = (props: {
 
   const [data, setData] = useState(props.collection);
   useEffect(() => {
-    if (props.setValues) {
-      props.setValues([...data]);
-    }
-  }, [data]);
+    setData(props.collection);
+  }, [props.collection]);
 
   const columnHelper = createColumnHelper<IValue<any>>();
   const columns = [
@@ -94,6 +92,7 @@ const Values = (props: {
 
         return (
           <Input
+            id={`i_${info.row.original.identifier}_name`}
             value={value}
             disabled={props.viewOnly}
             onChange={onChange}
@@ -126,6 +125,7 @@ const Values = (props: {
           case "number": {
             return (
               <Input
+                id={`i_${info.row.original.identifier}_data`}
                 type={"number"}
                 value={value}
                 disabled={props.viewOnly}
@@ -137,6 +137,7 @@ const Values = (props: {
           case "text": {
             return (
               <Input
+                id={`i_${info.row.original.identifier}_data`}
                 value={value}
                 disabled={props.viewOnly}
                 onChange={onChange}
@@ -148,6 +149,7 @@ const Values = (props: {
             if (_.isEqual(props.viewOnly, false)) {
               return (
                 <Input
+                  id={`i_${info.row.original.identifier}_data`}
                   value={value}
                   disabled={props.viewOnly}
                   onChange={onChange}
@@ -168,6 +170,7 @@ const Values = (props: {
           case "date": {
             return (
               <Input
+                id={`i_${info.row.original.identifier}_data`}
                 type={"datetime-local"}
                 value={value}
                 disabled={props.viewOnly}
@@ -181,6 +184,7 @@ const Values = (props: {
               return (
                 <Select
                   title="Select Entity"
+                  id={`s_${info.row.original.identifier}_data`}
                   value={value}
                   placeholder={"Select Entity"}
                   disabled={props.viewOnly}

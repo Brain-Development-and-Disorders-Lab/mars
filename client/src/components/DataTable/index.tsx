@@ -62,6 +62,7 @@ const DataTable = (props: DataTableProps) => {
             <Flex>
               <Checkbox
                 {...{
+                  id: `s_${Math.random().toString(16).slice(2)}`,
                   isChecked: row.getIsSelected(),
                   disabled: !row.getCanSelect() || props.viewOnly,
                   isIndeterminate: row.getIsSomeSelected(),
@@ -117,12 +118,6 @@ const DataTable = (props: DataTableProps) => {
 
   return (
     <>
-      {!props.hideControls && !props.viewOnly && !props.hideSelection &&
-        <Flex>
-          <Button disabled={Object.keys(selectedRows).length === 0 || props.viewOnly} onClick={onDeleteRows} colorScheme={"red"}>Delete {Object.keys(selectedRows).length} Values</Button>
-        </Flex>
-      }
-
       <TableContainer>
         <Table>
           <Thead>
@@ -157,11 +152,11 @@ const DataTable = (props: DataTableProps) => {
           </Thead>
           <Tbody>
             {table.getRowModel().rows.map((row) => (
-              <Tr key={row.id}>
+              <Tr id={row.id} key={row.id}>
                 {row.getVisibleCells().map((cell) => {
                   const meta: any = cell.column.columnDef.meta;
                   return (
-                    <Td key={cell.id} isNumeric={meta?.isNumeric}>
+                    <Td id={cell.id} key={cell.id} isNumeric={meta?.isNumeric}>
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
@@ -175,7 +170,7 @@ const DataTable = (props: DataTableProps) => {
         </Table>
       </TableContainer>
 
-      {!props.hideControls && (
+      {!props.hidePagination && (
         <Flex direction={"row"} gap={"4"} justify={"space-between"} w={"100%"}>
           <Flex direction={"row"} gap={"4"} align={"center"}>
             <IconButton
@@ -209,8 +204,15 @@ const DataTable = (props: DataTableProps) => {
               disabled={!table.getCanNextPage()}
             />
           </Flex>
-          <Flex>
+
+          <Flex gap={"4"}>
+            {!props.hidePagination && !props.viewOnly && !props.hideSelection &&
+              <Flex>
+                <Button disabled={Object.keys(selectedRows).length === 0 || props.viewOnly} onClick={onDeleteRows} colorScheme={"red"} rightIcon={<Icon name={"delete"} />}>{Object.keys(selectedRows).length}</Button>
+              </Flex>
+            }
             <Select
+              id={"select-page-size"}
               value={table.getState().pagination.pageSize}
               onChange={(event) => {
                 table.setPageSize(Number(event.target.value));
