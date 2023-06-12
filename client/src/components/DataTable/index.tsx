@@ -117,7 +117,7 @@ const DataTable = (props: DataTableProps) => {
   };
 
   return (
-    <TableContainer maxW={"2xl"} id={"table-container-data"}>
+    <TableContainer>
       <Table>
         <Thead>
           {table.getHeaderGroups().map((headerGroup) => (

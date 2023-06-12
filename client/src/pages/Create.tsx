@@ -233,7 +233,7 @@ const EntityPage = () => {
 
   // Handle clicking "Cancel"
   const onCancel = () => {
-    navigate("/");
+    navigate("/entities");
   };
 
   // Removal callback
@@ -270,9 +270,7 @@ const EntityPage = () => {
           <Flex
             direction={"column"}
             justify={"center"}
-            p={"2"}
             gap={"6"}
-            maxW={"7xl"}
             wrap={"wrap"}
           >
             <Flex
@@ -1051,10 +1049,8 @@ const AttributePage = () => {
     <Content>
       <Flex
         direction={"column"}
-        justify={"center"}
         p={"2"}
         gap={"6"}
-        maxW={"7xl"}
         wrap={"wrap"}
       >
         <Flex
@@ -1062,7 +1058,6 @@ const AttributePage = () => {
           w={"100%"}
           p={"2"}
           bg={"white"}
-          rounded={"md"}
         >
           {/* Page header */}
           <Flex direction={"column"} p={"2"} pt={"4"} pb={"4"}>
@@ -1243,9 +1238,7 @@ const Create = () => {
           <Flex
             direction={"column"}
             justify={"center"}
-            p={"2"}
             gap={"6"}
-            maxW={"7xl"}
             wrap={"wrap"}
           >
             <Flex
@@ -1255,24 +1248,12 @@ const Create = () => {
               bg={"white"}
               rounded={"md"}
             >
-              {/* Page header */}
-              <Flex direction={"column"} p={"4"} pt={"4"} pb={"4"}>
-                <Flex
-                  direction={"row"}
-                  align={"center"}
-                  justify={"space-between"}
-                >
-                  <Heading fontWeight={"semibold"}>Create</Heading>
-                </Flex>
-              </Flex>
               <Flex
                 direction={"row"}
                 justify={"center"}
                 align={"center"}
                 gap={"6"}
                 p={"2"}
-                pb={"6"}
-                mb={["12", "8"]}
                 wrap={"wrap"}
               >
                 {/* Collection card */}

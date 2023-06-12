@@ -230,14 +230,13 @@ const Collection = () => {
         isError ? (
           <Error />
         ) : (
-          <Flex direction={"column"}>
+          <Flex direction={"column"} gap={"4"}>
             <Flex
-              p={"2"}
+              gap={"4"}
               direction={"row"}
               justify={"space-between"}
               align={"center"}
               wrap={"wrap"}
-              gap={"4"}
             >
               <Flex
                 align={"center"}
@@ -302,7 +301,7 @@ const Collection = () => {
               </Flex>
             </Flex>
 
-            <Flex direction={"row"} gap={"4"} p={"2"} wrap={"wrap"}>
+            <Flex direction={"row"} gap={"4"} wrap={"wrap"}>
               <Flex
                 direction={"column"}
                 p={"4"}
@@ -348,25 +347,13 @@ const Collection = () => {
                         <Tr>
                           <Td>Description</Td>
                           <Td>
-                            {_.isEqual(collectionData.description, "") ? (
-                              <Tag
-                                size={"md"}
-                                key={`warn-${collectionData._id}`}
-                                colorScheme={"orange"}
-                              >
-                                <TagLabel>Not specified</TagLabel>
-                                <Icon name={"warning"} />
-                              </Tag>
-                            ) : editing ? (
-                              <Textarea
-                                value={collectionDescription}
-                                onChange={(event) => {
-                                  setCollectionDescription(event.target.value);
-                                }}
-                              />
-                            ) : (
-                              <Text>{collectionDescription}</Text>
-                            )}
+                            <Textarea
+                              value={collectionDescription}
+                              onChange={(event) => {
+                                setCollectionDescription(event.target.value);
+                              }}
+                              disabled={!editing}
+                            />
                           </Td>
                         </Tr>
                       </Tbody>

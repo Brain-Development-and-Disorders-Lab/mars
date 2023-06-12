@@ -526,14 +526,13 @@ const Entity = () => {
         isError ? (
           <Error />
         ) : (
-          <Flex direction={"column"}>
+          <Flex direction={"column"} gap={"4"}>
             <Flex
-              p={"2"}
+              gap={"4"}
               direction={"row"}
               justify={"space-between"}
               align={"center"}
               wrap={"wrap"}
-              gap={"4"}
             >
               <Flex
                 align={"center"}
@@ -615,7 +614,7 @@ const Entity = () => {
               </Flex>
             </Flex>
 
-            <Flex direction={"row"} gap={"4"} p={"2"} wrap={"wrap"}>
+            <Flex direction={"row"} gap={"4"} wrap={"wrap"}>
               <Flex
                 direction={"column"}
                 p={"4"}
@@ -673,16 +672,13 @@ const Entity = () => {
                         <Tr>
                           <Td>Description</Td>
                           <Td>
-                            {editing ? (
-                              <Textarea
-                                value={entityDescription}
-                                onChange={(event) => {
-                                  setEntityDescription(event.target.value);
-                                }}
-                              />
-                            ) : (
-                              <Text>{entityDescription}</Text>
-                            )}
+                            <Textarea
+                              value={entityDescription}
+                              onChange={(event) => {
+                                setEntityDescription(event.target.value);
+                              }}
+                              disabled={!editing}
+                            />
                           </Td>
                         </Tr>
                       </Tbody>
@@ -924,7 +920,6 @@ const Entity = () => {
 
             {/* Attributes */}
             <Flex
-              p={"2"}
               direction={"row"}
               justify={"space-between"}
               align={"center"}

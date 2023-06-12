@@ -172,6 +172,7 @@ export type IconNames =
   "check" |
   "info" |
   "search" |
+  "bell" |
   "add" |
   "edit" |
   "delete" |

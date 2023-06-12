@@ -154,9 +154,8 @@ const Attribute = () => {
         isError ? (
           <Error />
         ) : (
-          <Flex direction={"column"}>
+          <Flex direction={"column"} gap={"4"}>
             <Flex
-              p={"2"}
               gap={"4"}
               direction={"row"}
               justify={"space-between"}
@@ -227,7 +226,7 @@ const Attribute = () => {
               </Flex>
             </Flex>
 
-            <Flex direction={"row"} gap={"4"} p={"2"} wrap={"wrap"}>
+            <Flex direction={"row"} gap={"4"} wrap={"wrap"}>
               <Flex
                 direction={"column"}
                 p={"4"}

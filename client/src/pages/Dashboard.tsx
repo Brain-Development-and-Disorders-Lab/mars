@@ -205,16 +205,9 @@ const Dashboard = () => {
         isError ? (
           <Error />
         ) : (
-          <Flex
-            direction={"row"}
-            justify={"center"}
-            p={["1", "2"]}
-            gap={"6"}
-            maxW={"7xl"}
-            wrap={"wrap"}
-          >
+          <Flex direction={"row"} wrap={"wrap"} gap={"4"}>
             {/* Entities and Collections */}
-            <Flex direction={"column"} gap={"6"} grow={"2"}>
+            <Flex direction={"column"} gap={"4"} grow={"2"}>
               <Flex
                 direction={"column"}
                 p={"4"}
@@ -260,8 +253,6 @@ const Dashboard = () => {
                   </Button>
                 </Flex>
               </Flex>
-
-              <Spacer />
 
               <Flex
                 direction={"column"}
@@ -311,7 +302,7 @@ const Dashboard = () => {
             </Flex>
 
             {/* Activity */}
-            <Flex direction={"column"} gap={"6"} grow={"1"}>
+            <Flex direction={"column"} gap={"4"} grow={"1"}>
               <Flex
                 background={"white"}
                 direction={"column"}

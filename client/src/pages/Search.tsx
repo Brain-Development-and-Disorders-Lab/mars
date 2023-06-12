@@ -100,7 +100,6 @@ const Search = () => {
           justify={"center"}
           p={["1", "2"]}
           gap={"6"}
-          maxW={"7xl"}
           wrap={"wrap"}
           bg={"white"}
           rounded={"md"}

@@ -2,25 +2,27 @@
 import React, { FC } from "react";
 
 // Existing and custom components
-import { Flex } from "@chakra-ui/react";
-import SearchBox from "@components/SearchBox";
+import { Avatar, Flex, Spacer } from "@chakra-ui/react";
+import Icon from "@components/Icon";
 import Navigation from "@components/Navigation";
+import SearchBox from "@components/SearchBox";
 
 // Content container
 const Content: FC<any> = (props: { children: any; vertical?: boolean }) => {
   return (
     <Flex
-      flex={"1"}
       align={props.vertical && props.vertical ? "center" : ""}
       justify={"center"}
     >
       <Flex
         direction={"column"}
-        w={"full"}
-        maxW={"7xl"}
         wrap={"wrap"}
+        justify={"center"}
         gap={"6"}
+        p={"4"}
         h={"auto"}
+        w={"100%"}
+        maxW={"7xl"}
       >
         {props.children}
       </Flex>
@@ -39,30 +41,33 @@ const Page: FC<any> = ({ children }) => {
       m={"0"}
     >
       {/* Navigation component */}
-      <Flex p={"4"} h={"100%"} justify={"center"} background={"white"} zIndex={"2"}>
+      <Flex p={"4"} minH={["", "100vh"]} justify={"center"} background={"white"}>
         <Navigation />
       </Flex>
 
-      <Flex direction={"column"} w={"100%"}>
+      <Flex direction={"column"} minH={["", "100vh"]} w={"100%"}>
         {/* Search box component */}
         <Flex
           w={"100%"}
           h={"6vh"}
           align={"center"}
-          justify={"center"}
           display={{ base: "none", lg: "flex" }}
-          zIndex={"1"}
           background={"white"}
-          position={{lg: "sticky"}}
-          top={{lg: "0"}}
         >
+          <Spacer />
+
           <SearchBox />
+
+          <Spacer />
+
+          <Flex p={"4"} gap={"4"} align={"center"}>
+            <Icon name={"bell"} size={[5, 5]} />
+            <Avatar size={"sm"} />
+          </Flex>
         </Flex>
 
         {/* Main content components */}
-        <Flex p={"2"} h={"100%"} background={"gray.50"}>
-          {children}
-        </Flex>
+        {children}
       </Flex>
     </Flex>
   );
