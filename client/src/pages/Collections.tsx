@@ -71,143 +71,134 @@ const Collections = () => {
           <Error />
         ) : (
           <Flex
-            direction={"column"}
-            justify={"center"}
+            direction={"row"}
             p={"4"}
-            gap={"6"}
-            maxW={"7xl"}
+            rounded={"md"}
+            bg={"white"}
             wrap={"wrap"}
+            gap={"6"}
+            justify={"center"}
           >
             <Flex
-              direction={"row"}
+              w={"100%"}
               p={"4"}
-              rounded={"md"}
-              bg={"white"}
-              wrap={"wrap"}
-              gap={"6"}
-              justify={"center"}
+              direction={"row"}
+              justify={"space-between"}
+              align={"center"}
             >
-              <Flex
-                w={"100%"}
-                p={"4"}
-                direction={"row"}
-                justify={"space-between"}
-                align={"center"}
-              >
-                <Flex align={"center"} gap={"4"}>
-                  <Icon name={"collection"} size={"lg"} />
-                  <Heading fontWeight={"semibold"}>Collections</Heading>
-                </Flex>
+              <Flex align={"center"} gap={"4"}>
+                <Icon name={"collection"} size={"lg"} />
+                <Heading fontWeight={"semibold"}>Collections</Heading>
               </Flex>
-              {isLoaded && collectionsData.length > 0 ? (
-                <TableContainer w={"full"}>
-                  <Table variant={"simple"} colorScheme={"blackAlpha"}>
-                    <Thead>
-                      <Tr>
-                        <Th>
-                          <Heading size={"sm"}>Name</Heading>
-                        </Th>
-                        <Th display={{ base: "none", sm: "table-cell" }}>
-                          <Heading size={"sm"}>Description</Heading>
-                        </Th>
-                        <Th display={{ base: "none", sm: "table-cell" }}>
-                          <Heading size={"sm"}>Owner</Heading>
-                        </Th>
-                        <Th display={{ base: "none", sm: "table-cell" }}>
-                          <Heading size={"sm"}>Count</Heading>
-                        </Th>
-                        <Th></Th>
-                      </Tr>
-                    </Thead>
-                    <Tbody>
-                      {collectionsData.reverse().map((collection) => {
-                        return (
-                          <Tr key={collection._id}>
-                            <Td>
-                              {_.isEqual(collection.name, "") ? (
-                                <Tag
-                                  size={"md"}
-                                  key={`warn-${collection._id}`}
-                                  colorScheme={"orange"}
-                                >
-                                  <TagLabel>Not specified</TagLabel>
-                                  <Icon name={"warning"} />
-                                </Tag>
-                              ) : (
-                                <Text>{collection.name}</Text>
-                              )}
-                            </Td>
-                            <Td display={{ base: "none", sm: "table-cell" }}>
-                              {_.isEqual(collection.description, "") ? (
-                                <Tag
-                                  size={"md"}
-                                  key={`warn-${collection._id}`}
-                                  colorScheme={"orange"}
-                                >
-                                  <TagLabel>Not specified</TagLabel>
-                                  <Icon name={"warning"} />
-                                </Tag>
-                              ) : (
-                                <Text noOfLines={2}>
-                                  {collection.description}
-                                </Text>
-                              )}
-                            </Td>
-                            <Td display={{ base: "none", sm: "table-cell" }}>
-                              {_.isEqual(collection.owner, "") ? (
-                                <Tag
-                                  size={"md"}
-                                  key={`warn-${collection._id}`}
-                                  colorScheme={"orange"}
-                                >
-                                  <TagLabel>Not specified</TagLabel>
-                                  <Icon name={"warning"} />
-                                </Tag>
-                              ) : (
-                                <Text>{collection.owner}</Text>
-                              )}
-                            </Td>
-                            <Td display={{ base: "none", sm: "table-cell" }}>
-                              {_.isEqual(collection.entities.length, 0) ? (
-                                <Tag
-                                  size={"md"}
-                                  key={`warn-${collection._id}`}
-                                  colorScheme={"orange"}
-                                  gap={"2"}
-                                >
-                                  <TagLabel>Empty</TagLabel>
-                                  <Icon name={"warning"} />
-                                </Tag>
-                              ) : (
-                                <Text noOfLines={1}>
-                                  {collection.entities.length}
-                                </Text>
-                              )}
-                            </Td>
-                            <Td>
-                              <Flex justify={"right"}>
-                                <Button
-                                  key={`view-collection-${collection._id}`}
-                                  colorScheme={"blackAlpha"}
-                                  rightIcon={<Icon name={"c_right"} />}
-                                  onClick={() =>
-                                    navigate(`/collections/${collection._id}`)
-                                  }
-                                >
-                                  View
-                                </Button>
-                              </Flex>
-                            </Td>
-                          </Tr>
-                        );
-                      })}
-                    </Tbody>
-                  </Table>
-                </TableContainer>
-              ) : (
-                <Text>There are no Collections to display.</Text>
-              )}
             </Flex>
+            {isLoaded && collectionsData.length > 0 ? (
+              <TableContainer w={"full"}>
+                <Table variant={"simple"} colorScheme={"blackAlpha"}>
+                  <Thead>
+                    <Tr>
+                      <Th>
+                        <Heading size={"sm"}>Name</Heading>
+                      </Th>
+                      <Th display={{ base: "none", sm: "table-cell" }}>
+                        <Heading size={"sm"}>Description</Heading>
+                      </Th>
+                      <Th display={{ base: "none", sm: "table-cell" }}>
+                        <Heading size={"sm"}>Owner</Heading>
+                      </Th>
+                      <Th display={{ base: "none", sm: "table-cell" }}>
+                        <Heading size={"sm"}>Count</Heading>
+                      </Th>
+                      <Th></Th>
+                    </Tr>
+                  </Thead>
+                  <Tbody>
+                    {collectionsData.reverse().map((collection) => {
+                      return (
+                        <Tr key={collection._id}>
+                          <Td>
+                            {_.isEqual(collection.name, "") ? (
+                              <Tag
+                                size={"md"}
+                                key={`warn-${collection._id}`}
+                                colorScheme={"orange"}
+                              >
+                                <TagLabel>Not specified</TagLabel>
+                                <Icon name={"warning"} />
+                              </Tag>
+                            ) : (
+                              <Text>{collection.name}</Text>
+                            )}
+                          </Td>
+                          <Td display={{ base: "none", sm: "table-cell" }}>
+                            {_.isEqual(collection.description, "") ? (
+                              <Tag
+                                size={"md"}
+                                key={`warn-${collection._id}`}
+                                colorScheme={"orange"}
+                              >
+                                <TagLabel>Not specified</TagLabel>
+                                <Icon name={"warning"} />
+                              </Tag>
+                            ) : (
+                              <Text noOfLines={2}>
+                                {collection.description}
+                              </Text>
+                            )}
+                          </Td>
+                          <Td display={{ base: "none", sm: "table-cell" }}>
+                            {_.isEqual(collection.owner, "") ? (
+                              <Tag
+                                size={"md"}
+                                key={`warn-${collection._id}`}
+                                colorScheme={"orange"}
+                              >
+                                <TagLabel>Not specified</TagLabel>
+                                <Icon name={"warning"} />
+                              </Tag>
+                            ) : (
+                              <Text>{collection.owner}</Text>
+                            )}
+                          </Td>
+                          <Td display={{ base: "none", sm: "table-cell" }}>
+                            {_.isEqual(collection.entities.length, 0) ? (
+                              <Tag
+                                size={"md"}
+                                key={`warn-${collection._id}`}
+                                colorScheme={"orange"}
+                                gap={"2"}
+                              >
+                                <TagLabel>Empty</TagLabel>
+                                <Icon name={"warning"} />
+                              </Tag>
+                            ) : (
+                              <Text noOfLines={1}>
+                                {collection.entities.length}
+                              </Text>
+                            )}
+                          </Td>
+                          <Td>
+                            <Flex justify={"right"}>
+                              <Button
+                                key={`view-collection-${collection._id}`}
+                                colorScheme={"blackAlpha"}
+                                rightIcon={<Icon name={"c_right"} />}
+                                onClick={() =>
+                                  navigate(`/collections/${collection._id}`)
+                                }
+                              >
+                                View
+                              </Button>
+                            </Flex>
+                          </Td>
+                        </Tr>
+                      );
+                    })}
+                  </Tbody>
+                </Table>
+              </TableContainer>
+            ) : (
+              <Text>There are no Collections to display.</Text>
+            )}
           </Flex>
         )
       ) : (

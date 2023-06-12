@@ -110,7 +110,7 @@ const SearchBox = () => {
           <Flex w={"100%"} gap={"4"}>
             <Input
               value={query}
-              placeholder={"Search"}
+              placeholder={"Quick Search"}
               background={"white"}
               onChange={(event) => setQuery(event.target.value)}
               onKeyUp={(event) => {

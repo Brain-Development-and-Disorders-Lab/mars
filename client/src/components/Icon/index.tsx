@@ -6,34 +6,35 @@ import { Icon as ChakraIcon } from "@chakra-ui/react";
 import {
   BsArrowClockwise,
   BsArrowRight,
-  BsBarChart,
-  BsBox,
-  BsCalendarWeek,
-  BsCheckLg,
+  BsBarChartFill,
+  BsBellFill,
+  BsBoxFill,
+  BsCalendarWeekFill,
+  BsCheckCircleFill,
   BsChevronDoubleLeft,
   BsChevronDoubleRight,
   BsChevronDown,
   BsChevronLeft,
   BsChevronRight,
   BsChevronUp,
-  BsDiagram2,
-  BsDownload,
-  BsExclamationOctagon,
+  BsCloudDownloadFill,
+  BsDiagram2Fill,
+  BsExclamationOctagonFill,
+  BsFileCodeFill,
+  BsFileTextFill,
   BsFillExclamationTriangleFill,
-  BsGraphUp,
-  BsGrid,
-  BsInfoCircle,
-  BsLightning,
-  BsLink45Deg,
+  BsFillFileBinaryFill,
+  BsGridFill,
+  BsInfoCircleFill,
+  BsLightningFill,
   BsList,
-  BsPencilSquare,
-  BsPlusLg,
-  BsQuestionOctagon,
+  BsPencilFill,
+  BsPlusCircleFill,
+  BsQuestionOctagonFill,
   BsSearch,
-  BsTag,
-  BsTextareaT,
-  BsTrash,
-  BsXLg,
+  BsTagFill,
+  BsTrashFill,
+  BsXCircleFill,
 } from "react-icons/bs";
 
 // Existing and custom types
@@ -46,35 +47,36 @@ import _ from "lodash";
 // Define the icon set
 const SYSTEM_ICONS: { [k: string]: IconType } = {
   // Default
-  unknown: BsQuestionOctagon,
+  unknown: BsQuestionOctagonFill,
 
   // Locations
-  dashboard: BsBarChart,
-  entity: BsBox,
-  collection: BsGrid,
-  attribute: BsTag,
+  dashboard: BsBarChartFill,
+  entity: BsBoxFill,
+  collection: BsGridFill,
+  attribute: BsTagFill,
 
   // Signal and action icons
-  activity: BsLightning,
-  check: BsCheckLg,
-  info: BsInfoCircle,
+  activity: BsLightningFill,
+  check: BsCheckCircleFill,
+  info: BsInfoCircleFill,
   search: BsSearch,
-  add: BsPlusLg,
-  edit: BsPencilSquare,
-  delete: BsTrash,
-  download: BsDownload,
-  cross: BsXLg,
+  bell: BsBellFill,
+  add: BsPlusCircleFill,
+  edit: BsPencilFill,
+  delete: BsTrashFill,
+  download: BsCloudDownloadFill,
+  cross: BsXCircleFill,
   list: BsList,
   warning: BsFillExclamationTriangleFill,
-  exclamation: BsExclamationOctagon,
+  exclamation: BsExclamationOctagonFill,
   reload: BsArrowClockwise,
-  graph: BsDiagram2,
+  graph: BsDiagram2Fill,
 
   // Values
-  p_date: BsCalendarWeek,
-  p_text: BsTextareaT,
-  p_number: BsGraphUp,
-  p_url: BsLink45Deg,
+  v_date: BsCalendarWeekFill,
+  v_text: BsFileTextFill,
+  v_number: BsFillFileBinaryFill,
+  v_url: BsFileCodeFill,
 
   // Arrows
   a_right: BsArrowRight,
@@ -90,7 +92,7 @@ const SYSTEM_ICONS: { [k: string]: IconType } = {
 
 const Icon = (props: {
   name: IconNames;
-  size?: "sm" | "md" | "lg" | "xl";
+  size?: "sm" | "md" | "lg" | "xl" | [number, number];
   color?: string;
 }) => {
   // Default to unknown icon type
@@ -124,7 +126,7 @@ const Icon = (props: {
           <ChakraIcon as={iconComponent} w={"16"} h={"16"} color={iconColor} />
         );
       default:
-        return <ChakraIcon as={iconComponent} color={iconColor} />;
+        return <ChakraIcon as={iconComponent} w={props.size[0]} h={props.size[1]} color={iconColor} />;
     }
   }
 

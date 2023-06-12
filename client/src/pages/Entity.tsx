@@ -526,14 +526,13 @@ const Entity = () => {
         isError ? (
           <Error />
         ) : (
-          <Flex direction={"column"}>
+          <Flex direction={"column"} gap={"4"}>
             <Flex
-              p={"2"}
+              gap={"4"}
               direction={"row"}
               justify={"space-between"}
               align={"center"}
               wrap={"wrap"}
-              gap={"4"}
             >
               <Flex
                 align={"center"}
@@ -615,7 +614,7 @@ const Entity = () => {
               </Flex>
             </Flex>
 
-            <Flex direction={"row"} gap={"4"} p={"2"} wrap={"wrap"}>
+            <Flex direction={"row"} gap={"4"} wrap={"wrap"}>
               <Flex
                 direction={"column"}
                 p={"4"}
@@ -673,16 +672,13 @@ const Entity = () => {
                         <Tr>
                           <Td>Description</Td>
                           <Td>
-                            {editing ? (
-                              <Textarea
-                                value={entityDescription}
-                                onChange={(event) => {
-                                  setEntityDescription(event.target.value);
-                                }}
-                              />
-                            ) : (
-                              <Text>{entityDescription}</Text>
-                            )}
+                            <Textarea
+                              value={entityDescription}
+                              onChange={(event) => {
+                                setEntityDescription(event.target.value);
+                              }}
+                              disabled={!editing}
+                            />
                           </Td>
                         </Tr>
                       </Tbody>
@@ -924,7 +920,6 @@ const Entity = () => {
 
             {/* Attributes */}
             <Flex
-              p={"2"}
               direction={"row"}
               justify={"space-between"}
               align={"center"}
@@ -989,7 +984,7 @@ const Entity = () => {
             <Modal
               isOpen={isAddAttributesOpen}
               onClose={onAddAttributesClose}
-              size={"4xl"}
+              size={"3xl"}
               isCentered
             >
               <ModalOverlay />
@@ -1022,7 +1017,7 @@ const Entity = () => {
 
                     <Flex>
                       <Select
-                        placeholder={"Add existing Attribute"}
+                        placeholder={"Use template Attribute"}
                         onChange={(event) => {
                           if (!_.isEqual(event.target.value.toString(), "")) {
                             for (let attribute of attributes) {
@@ -1034,7 +1029,7 @@ const Entity = () => {
                               ) {
                                 setAttributeName(attribute.name);
                                 setAttributeDescription(attribute.description);
-                                setAttributeValues(attribute.values);
+                                setAttributeValues(() => [...attribute.values]);
                                 break;
                               }
                             }
@@ -1054,13 +1049,13 @@ const Entity = () => {
                     </Flex>
 
                     <Flex
-                      direction={"row"}
+                      direction={"column"}
                       gap={"2"}
                       w={"100%"}
                       justify={"center"}
                     >
                       <Flex
-                        direction={"column"}
+                        direction={"row"}
                         gap={"4"}
                         wrap={["wrap", "nowrap"]}
                       >
@@ -1459,7 +1454,7 @@ const Entity = () => {
               </ModalContent>
             </Modal>
 
-            <Modal isOpen={isExportOpen} onClose={onExportClose} isCentered>
+            <Modal isOpen={isExportOpen} onClose={onExportClose} size={"2xl"} isCentered>
               <ModalOverlay />
               <ModalContent p={"4"} w={["sm", "lg", "2xl"]}>
                 {/* Heading and close button */}
@@ -1467,7 +1462,7 @@ const Entity = () => {
                 <ModalCloseButton />
 
                 {/* Selection content */}
-                <Flex direction={"row"}>
+                <Flex direction={"row"} gap={"4"}>
                   <Flex direction={"column"} p={"2"} gap={"2"}>
                     <FormControl>
                       <FormLabel>Details</FormLabel>

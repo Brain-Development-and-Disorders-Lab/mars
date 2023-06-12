@@ -19,7 +19,6 @@ import {
   TagLabel,
   Tbody,
   Td,
-  Text,
   Textarea,
   Th,
   Thead,
@@ -155,9 +154,8 @@ const Attribute = () => {
         isError ? (
           <Error />
         ) : (
-          <Flex direction={"column"}>
+          <Flex direction={"column"} gap={"4"}>
             <Flex
-              p={"2"}
               gap={"4"}
               direction={"row"}
               justify={"space-between"}
@@ -174,7 +172,7 @@ const Attribute = () => {
                 bg={"white"}
               >
                 <Icon name={"attribute"} size={"lg"} />
-                <Heading fontWeight={"semibold"}>{attributeData.name}</Heading>
+                <Heading fontWeight={"semibold"}>Attribute: {attributeData.name}</Heading>
               </Flex>
 
               {/* Buttons */}
@@ -228,7 +226,7 @@ const Attribute = () => {
               </Flex>
             </Flex>
 
-            <Flex direction={"row"} gap={"4"} p={"2"} wrap={"wrap"}>
+            <Flex direction={"row"} gap={"4"} wrap={"wrap"}>
               <Flex
                 direction={"column"}
                 p={"4"}
@@ -264,7 +262,7 @@ const Attribute = () => {
                               <TagLabel>Not specified</TagLabel>
                               <Icon name={"warning"} />
                             </Tag>
-                          ) : editing ? (
+                          ) : (
                             <Textarea
                               value={attributeDescription}
                               onChange={(event) => {
@@ -272,8 +270,6 @@ const Attribute = () => {
                               }}
                               disabled={!editing}
                             />
-                          ) : (
-                            <Text>{attributeDescription}</Text>
                           )}
                         </Td>
                       </Tr>

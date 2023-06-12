@@ -7,8 +7,10 @@ import {
   Card,
   CardBody,
   CardHeader,
+  Divider,
   Flex,
   Heading,
+  IconButton,
   Input,
   Modal,
   ModalBody,
@@ -17,8 +19,6 @@ import {
   ModalHeader,
   ModalOverlay,
   ScaleFade,
-  Stack,
-  StackDivider,
   Tag,
   TagLabel,
   Text,
@@ -58,7 +58,15 @@ const AttributeCard = (props: AttributeCardProps) => {
           justify={"space-between"}
           gap={"4"}
         >
-          <Flex align={"center"} gap={"2"}>
+          <Flex
+            align={"center"}
+            gap={"4"}
+            shadow={"lg"}
+            p={"2"}
+            border={"2px"}
+            rounded={"md"}
+            bg={"white"}
+          >
             <Icon name={"attribute"} size={"md"} />
             <Heading size={"md"} noOfLines={1}>
               {props.attribute.name}
@@ -66,43 +74,57 @@ const AttributeCard = (props: AttributeCardProps) => {
           </Flex>
 
           <Flex align={"center"} gap={"2"}>
-            {isEditing && props.removeCallback && (
+            {isEditing ? (
+              <IconButton
+                aria-label={"Edit Attribute"}
+                onClick={onOpen}
+                icon={<Icon name={"edit"} />}
+              />
+            ) : (
               <Button
-                key={`remove-${props.attribute._id}`}
-                rightIcon={<Icon name={"delete"} />}
-                colorScheme={"red"}
-                onClick={props.removeCallback}
+                colorScheme={"blackAlpha"}
+                onClick={onOpen}
+                rightIcon={<Icon name={"c_right"} />}
               >
-                Remove
+                View
               </Button>
             )}
 
-            <Button
-              onClick={onOpen}
-              rightIcon={<Icon name={isEditing ? "edit" : "info"} />}
-            >
-              {isEditing ? "Edit" : "View"}
-            </Button>
+            {isEditing && props.removeCallback && (
+              <IconButton
+                aria-label={"Remove Attribute"}
+                key={`remove-${props.attribute._id}`}
+                icon={<Icon name={"delete"} />}
+                colorScheme={"red"}
+                onClick={props.removeCallback}
+              />
+            )}
           </Flex>
         </Flex>
       </CardHeader>
 
       <CardBody>
-        <Flex direction={"column"} p={"sm"} gap={"6"} maxW={"md"}>
-          <Stack divider={<StackDivider />}>
-            <Text>
+        <Flex direction={"column"} p={"1"} gap={"2"} maxW={"sm"}>
+          <Flex gap={"2"} direction={"column"}>
+            <Heading size={"sm"} fontWeight={"semibold"}>Description</Heading>
+            <Text noOfLines={2}>
               {description.length > 0
                 ? description
                 : "No description provided."}
             </Text>
+          </Flex>
 
+          <Divider />
+
+          <Flex gap={"2"} direction={"column"}>
+            <Heading size={"sm"} fontWeight={"semibold"}>Values</Heading>
             <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
               {values.map((value) => {
                 switch (value.type) {
                   case "date": {
                     return (
                       <Tag key={value.identifier}>
-                        <Icon name={"p_date"} />
+                        <Icon name={"v_date"} />
                         <TagLabel>
                           <Flex align={"center"} gap={"1"}>
                             <Flex p={"1"} m={"1"}>
@@ -130,7 +152,7 @@ const AttributeCard = (props: AttributeCardProps) => {
                   case "number": {
                     return (
                       <Tag key={value.identifier}>
-                        <Icon name={"p_number"} />
+                        <Icon name={"v_number"} />
                         <TagLabel>
                           <Flex align={"center"} gap={"1"}>
                             <Flex p={"1"} m={"1"}>
@@ -145,7 +167,7 @@ const AttributeCard = (props: AttributeCardProps) => {
                   case "url": {
                     return (
                       <Tag key={value.identifier}>
-                        <Icon name={"p_url"} />
+                        <Icon name={"v_url"} />
                         <TagLabel>
                           <Flex align={"center"} gap={"1"}>
                             <Flex p={"1"} m={"1"}>
@@ -159,7 +181,7 @@ const AttributeCard = (props: AttributeCardProps) => {
                   default: {
                     return (
                       <Tag key={value.identifier}>
-                        <Icon name={"p_text"} />
+                        <Icon name={"v_text"} />
                         <TagLabel>
                           <Flex align={"center"} gap={"1"}>
                             <Flex p={"1"} m={"1"}>
@@ -173,7 +195,7 @@ const AttributeCard = (props: AttributeCardProps) => {
                 }
               })}
             </Flex>
-          </Stack>
+          </Flex>
         </Flex>
       </CardBody>
 

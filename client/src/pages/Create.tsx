@@ -233,7 +233,7 @@ const EntityPage = () => {
 
   // Handle clicking "Cancel"
   const onCancel = () => {
-    navigate("/");
+    navigate("/entities");
   };
 
   // Removal callback
@@ -270,9 +270,7 @@ const EntityPage = () => {
           <Flex
             direction={"column"}
             justify={"center"}
-            p={"2"}
             gap={"6"}
-            maxW={"7xl"}
             wrap={"wrap"}
           >
             <Flex
@@ -411,7 +409,7 @@ const EntityPage = () => {
                     <Flex direction={"row"} gap={"2"} wrap={["wrap", "nowrap"]}>
                       {/* Origin */}
                       <FormControl>
-                        <FormLabel>Origin Entity</FormLabel>
+                        <FormLabel>Origin Entities</FormLabel>
                         <Select
                           title="Select Entity"
                           placeholder={"Select Entity"}
@@ -458,9 +456,9 @@ const EntityPage = () => {
                             })}
                         </Select>
                         <FormHelperText>
-                          If the source of this Entity currently exists or did
-                          exist in this system, specify that association here by
-                          searching for the origin Entity.
+                          If the sources of this Entity currently exist or did
+                          exist in this system, specify those associations here by
+                          selecting the origin Entities.
                         </FormHelperText>
                         <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
                           {selectedOrigins.map((product) => {
@@ -537,7 +535,7 @@ const EntityPage = () => {
                         <FormHelperText>
                           If this Entity has any derivatives or Entities that
                           have been created from it, specify those associations
-                          here by searching for the corresponding Entity.
+                          here by selecting the corresponding Entities.
                         </FormHelperText>
                         <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
                           {selectedProducts.map((product) => {
@@ -614,10 +612,10 @@ const EntityPage = () => {
                       justify={"space-between"}
                       wrap={["wrap", "nowrap"]}
                     >
-                      {/* Drop-down to select existing Attributes */}
+                      {/* Drop-down to select template Attributes */}
                       <FormControl maxW={"sm"}>
                         <Select
-                          placeholder={"Add existing Attribute"}
+                          placeholder={"Use template Attribute"}
                           onChange={(event) => {
                             if (!_.isEqual(event.target.value.toString(), "")) {
                               for (let attribute of attributes) {
@@ -1051,10 +1049,8 @@ const AttributePage = () => {
     <Content>
       <Flex
         direction={"column"}
-        justify={"center"}
         p={"2"}
         gap={"6"}
-        maxW={"7xl"}
         wrap={"wrap"}
       >
         <Flex
@@ -1062,7 +1058,6 @@ const AttributePage = () => {
           w={"100%"}
           p={"2"}
           bg={"white"}
-          rounded={"md"}
         >
           {/* Page header */}
           <Flex direction={"column"} p={"2"} pt={"4"} pb={"4"}>
@@ -1099,13 +1094,13 @@ const AttributePage = () => {
             </Flex>
 
             <Flex
-              direction={"row"}
+              direction={"column"}
               gap={"2"}
               w={"100%"}
               maxW={"4xl"}
               wrap={["wrap", "nowrap"]}
             >
-              <Flex direction={"column"} gap={"4"} wrap={["wrap", "nowrap"]}>
+              <Flex direction={"row"} gap={"4"} wrap={["wrap", "nowrap"]}>
                 <FormControl isRequired>
                   <FormLabel>Name</FormLabel>
                   <Input
@@ -1191,25 +1186,25 @@ const AttributePage = () => {
             <List spacing={2}>
               <ListItem>
                 <Flex gap={"2"} align={"center"}>
-                  <Icon name={"p_date"} />
+                  <Icon name={"v_date"} />
                   <Text>Date: Used to specify a point in time.</Text>
                 </Flex>
               </ListItem>
               <ListItem>
                 <Flex gap={"2"} align={"center"}>
-                  <Icon name={"p_text"} />
+                  <Icon name={"v_text"} />
                   <Text>Text: Used to specify text of variable length.</Text>
                 </Flex>
               </ListItem>
               <ListItem>
                 <Flex gap={"2"} align={"center"}>
-                  <Icon name={"p_number"} />
+                  <Icon name={"v_number"} />
                   <Text>Number: Used to specify a numerical value.</Text>
                 </Flex>
               </ListItem>
               <ListItem>
                 <Flex gap={"2"} align={"center"}>
-                  <Icon name={"p_url"} />
+                  <Icon name={"v_url"} />
                   <Text>URL: Used to specify a link.</Text>
                 </Flex>
               </ListItem>
@@ -1243,9 +1238,7 @@ const Create = () => {
           <Flex
             direction={"column"}
             justify={"center"}
-            p={"2"}
             gap={"6"}
-            maxW={"7xl"}
             wrap={"wrap"}
           >
             <Flex
@@ -1255,26 +1248,71 @@ const Create = () => {
               bg={"white"}
               rounded={"md"}
             >
-              {/* Page header */}
-              <Flex direction={"column"} p={"4"} pt={"4"} pb={"4"}>
-                <Flex
-                  direction={"row"}
-                  align={"center"}
-                  justify={"space-between"}
-                >
-                  <Heading fontWeight={"semibold"}>Create</Heading>
-                </Flex>
-              </Flex>
               <Flex
                 direction={"row"}
                 justify={"center"}
                 align={"center"}
                 gap={"6"}
                 p={"2"}
-                pb={"6"}
-                mb={["12", "8"]}
                 wrap={"wrap"}
               >
+                {/* Collection card */}
+                <Card maxW={"sm"} h={"lg"} variant={"outline"}>
+                  <CardHeader>
+                    <Flex
+                      gap={"4"}
+                      w={"100%"}
+                      justify={"center"}
+                      align={"center"}
+                    >
+                      <Icon name={"collection"} size={"lg"} />
+                      <Heading>Collection</Heading>
+                    </Flex>
+                  </CardHeader>
+                  <CardBody>
+                    <Stack divider={<StackDivider />} spacing={"2"}>
+                      <Flex
+                        p={"2"}
+                        gap={"4"}
+                        align={"center"}
+                        direction={"column"}
+                      >
+                        <Heading size={"xs"} textTransform={"uppercase"}>
+                          Description
+                        </Heading>
+                        <Text>
+                          Create a Collection to group and organize Entities.
+                        </Text>
+                      </Flex>
+                      <Flex
+                        p={"2"}
+                        gap={"4"}
+                        align={"center"}
+                        direction={"column"}
+                      >
+                        <Heading size={"xs"} textTransform={"uppercase"}>
+                          Details
+                        </Heading>
+                        <Flex gap={"2"}>
+                          <Tag colorScheme={"red"}>Name</Tag>
+                          <Tag colorScheme={"red"}>Description</Tag>
+                        </Flex>
+                      </Flex>
+                    </Stack>
+                  </CardBody>
+                  <CardFooter>
+                    <Flex w={"100%"} justify={"center"}>
+                      <Button
+                        colorScheme={"green"}
+                        rightIcon={<Icon name={"add"} />}
+                        onClick={() => setCreatePage("collection")}
+                      >
+                        Create
+                      </Button>
+                    </Flex>
+                  </CardFooter>
+                </Card>
+
                 {/* Entity card */}
                 <Card maxW={"sm"} h={"lg"} variant={"outline"}>
                   <CardHeader>
@@ -1318,8 +1356,8 @@ const Create = () => {
                           <Tag colorScheme={"red"}>Owner</Tag>
                           <Tag colorScheme={"red"}>Created</Tag>
                           <Tag colorScheme={"teal"}>Description</Tag>
-                          <Tag colorScheme={"teal"}>Origin Entity</Tag>
-                          <Tag colorScheme={"teal"}>Linked Products</Tag>
+                          <Tag colorScheme={"teal"}>Origins</Tag>
+                          <Tag colorScheme={"teal"}>Products</Tag>
                           <Tag colorScheme={"teal"}>Collections</Tag>
                           <Tag colorScheme={"teal"}>Attributes</Tag>
                         </Flex>
@@ -1332,64 +1370,6 @@ const Create = () => {
                         colorScheme={"green"}
                         rightIcon={<Icon name={"add"} />}
                         onClick={() => setCreatePage("entity")}
-                      >
-                        Create
-                      </Button>
-                    </Flex>
-                  </CardFooter>
-                </Card>
-
-                {/* Collection card */}
-                <Card maxW={"sm"} h={"lg"} variant={"outline"}>
-                  <CardHeader>
-                    <Flex
-                      gap={"4"}
-                      w={"100%"}
-                      justify={"center"}
-                      align={"center"}
-                    >
-                      <Icon name={"collection"} size={"lg"} />
-                      <Heading>Collection</Heading>
-                    </Flex>
-                  </CardHeader>
-                  <CardBody>
-                    <Stack divider={<StackDivider />} spacing={"2"}>
-                      <Flex
-                        p={"2"}
-                        gap={"4"}
-                        align={"center"}
-                        direction={"column"}
-                      >
-                        <Heading size={"xs"} textTransform={"uppercase"}>
-                          Description
-                        </Heading>
-                        <Text>
-                          Create a Collection to group and organize Entities.
-                        </Text>
-                      </Flex>
-                      <Flex
-                        p={"2"}
-                        gap={"4"}
-                        align={"center"}
-                        direction={"column"}
-                      >
-                        <Heading size={"xs"} textTransform={"uppercase"}>
-                          Details
-                        </Heading>
-                        <Flex gap={"2"}>
-                          <Tag colorScheme={"red"}>Name</Tag>
-                          <Tag colorScheme={"red"}>Description</Tag>
-                          <Tag colorScheme={"teal"}>Entities</Tag>
-                        </Flex>
-                      </Flex>
-                    </Stack>
-                  </CardBody>
-                  <CardFooter>
-                    <Flex w={"100%"} justify={"center"}>
-                      <Button
-                        colorScheme={"green"}
-                        rightIcon={<Icon name={"add"} />}
-                        onClick={() => setCreatePage("collection")}
                       >
                         Create
                       </Button>

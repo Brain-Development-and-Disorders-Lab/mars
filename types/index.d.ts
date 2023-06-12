@@ -151,7 +151,7 @@ export type DataTableProps = {
   data: any[];
   setData?: (value: React.SetStateAction<any[]>) => void;
   visibleColumns: VisibilityState;
-  hideControls?: boolean;
+  hidePagination?: boolean;
   hideSelection?: boolean;
   viewOnly?: boolean;
 };
@@ -172,6 +172,7 @@ export type IconNames =
   "check" |
   "info" |
   "search" |
+  "bell" |
   "add" |
   "edit" |
   "delete" |
@@ -184,10 +185,10 @@ export type IconNames =
   "graph" |
 
   // Values
-  "p_date" |
-  "p_text" |
-  "p_number" |
-  "p_url" |
+  "v_date" |
+  "v_text" |
+  "v_number" |
+  "v_url" |
 
   // Arrows
   "a_right" |

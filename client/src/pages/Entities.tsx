@@ -120,47 +120,38 @@ const Entities = () => {
           <Error />
         ) : (
           <Flex
-            direction={"column"}
-            justify={"center"}
+            direction={"row"}
             p={"4"}
-            gap={"6"}
-            maxW={"7xl"}
+            rounded={"md"}
+            bg={"white"}
             wrap={"wrap"}
+            gap={"6"}
+            justify={"center"}
           >
             <Flex
-              direction={"row"}
+              w={"100%"}
               p={"4"}
-              rounded={"md"}
-              bg={"white"}
-              wrap={"wrap"}
-              gap={"6"}
-              justify={"center"}
+              direction={"row"}
+              justify={"space-between"}
+              align={"center"}
             >
-              <Flex
-                w={"100%"}
-                p={"4"}
-                direction={"row"}
-                justify={"space-between"}
-                align={"center"}
-              >
-                <Flex align={"center"} gap={"4"}>
-                  <Icon name={"entity"} size={"lg"} />
-                  <Heading fontWeight={"semibold"}>Entities</Heading>
-                </Flex>
+              <Flex align={"center"} gap={"4"}>
+                <Icon name={"entity"} size={"lg"} />
+                <Heading fontWeight={"semibold"}>Entities</Heading>
               </Flex>
-              {isLoaded && entityData.length > 0 ? (
-                <Flex direction={"column"} gap={"4"} w={"100%"}>
-                  <DataTable
-                    columns={columns}
-                    data={data}
-                    visibleColumns={visibleColumns}
-                    hideSelection
-                  />
-                </Flex>
-              ) : (
-                <Text>There are no Entities to display.</Text>
-              )}
             </Flex>
+            {isLoaded && entityData.length > 0 ? (
+              <Flex direction={"column"} gap={"4"} w={"100%"}>
+                <DataTable
+                  columns={columns}
+                  data={data}
+                  visibleColumns={visibleColumns}
+                  hideSelection
+                />
+              </Flex>
+            ) : (
+              <Text>There are no Entities to display.</Text>
+            )}
           </Flex>
         )
       ) : (

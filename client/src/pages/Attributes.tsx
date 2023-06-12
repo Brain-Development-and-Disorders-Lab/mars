@@ -71,98 +71,89 @@ const Attributes = () => {
           <Error />
         ) : (
           <Flex
-            direction={"column"}
-            justify={"center"}
+            direction={"row"}
             p={"4"}
-            gap={"6"}
-            maxW={"7xl"}
+            rounded={"md"}
+            bg={"white"}
             wrap={"wrap"}
+            gap={"6"}
+            justify={"center"}
           >
             <Flex
-              direction={"row"}
+              w={"100%"}
               p={"4"}
-              rounded={"md"}
-              bg={"white"}
-              wrap={"wrap"}
-              gap={"6"}
-              justify={"center"}
+              direction={"row"}
+              justify={"space-between"}
+              align={"center"}
             >
-              <Flex
-                w={"100%"}
-                p={"4"}
-                direction={"row"}
-                justify={"space-between"}
-                align={"center"}
-              >
-                <Flex align={"center"} gap={"4"}>
-                  <Icon name={"attribute"} size={"lg"} />
-                  <Heading fontWeight={"semibold"}>Attributes</Heading>
-                </Flex>
+              <Flex align={"center"} gap={"4"}>
+                <Icon name={"attribute"} size={"lg"} />
+                <Heading fontWeight={"semibold"}>Attributes</Heading>
               </Flex>
-              {isLoaded && attributesData.length > 0 ? (
-                <TableContainer w={"full"}>
-                  <Table variant={"simple"} colorScheme={"blackAlpha"}>
-                    <Thead>
-                      <Tr>
-                        <Th>
-                          <Heading size={"sm"}>Name</Heading>
-                        </Th>
-                        <Th display={{ base: "none", sm: "table-cell" }}>
-                          <Heading size={"sm"}>Description</Heading>
-                        </Th>
-                        <Th></Th>
-                      </Tr>
-                    </Thead>
-                    <Tbody>
-                      {attributesData.reverse().map((attribute) => {
-                        return (
-                          <Tr key={attribute._id}>
-                            <Td>
-                              {_.isEqual(attribute.name, "") ? (
-                                <Warning
-                                  key={`warn-${attribute._id}`}
-                                  text={"Not specified"}
-                                />
-                              ) : (
-                                attribute.name
-                              )}
-                            </Td>
-                            <Td display={{ base: "none", sm: "table-cell" }}>
-                              {_.isEqual(attribute.description, "") ? (
-                                <Warning
-                                  key={`warn-${attribute._id}`}
-                                  text={"Not specified"}
-                                />
-                              ) : (
-                                <Text noOfLines={2}>
-                                  {attribute.description}
-                                </Text>
-                              )}
-                            </Td>
-                            <Td>
-                              <Flex justify={"right"}>
-                                <Button
-                                  key={`view-attribute-${attribute._id}`}
-                                  colorScheme={"blackAlpha"}
-                                  rightIcon={<Icon name={"c_right"} />}
-                                  onClick={() =>
-                                    navigate(`/attributes/${attribute._id}`)
-                                  }
-                                >
-                                  View
-                                </Button>
-                              </Flex>
-                            </Td>
-                          </Tr>
-                        );
-                      })}
-                    </Tbody>
-                  </Table>
-                </TableContainer>
-              ) : (
-                <Text>There are no Attributes to display.</Text>
-              )}
             </Flex>
+            {isLoaded && attributesData.length > 0 ? (
+              <TableContainer w={"full"}>
+                <Table variant={"simple"} colorScheme={"blackAlpha"}>
+                  <Thead>
+                    <Tr>
+                      <Th>
+                        <Heading size={"sm"}>Name</Heading>
+                      </Th>
+                      <Th display={{ base: "none", sm: "table-cell" }}>
+                        <Heading size={"sm"}>Description</Heading>
+                      </Th>
+                      <Th></Th>
+                    </Tr>
+                  </Thead>
+                  <Tbody>
+                    {attributesData.reverse().map((attribute) => {
+                      return (
+                        <Tr key={attribute._id}>
+                          <Td>
+                            {_.isEqual(attribute.name, "") ? (
+                              <Warning
+                                key={`warn-${attribute._id}`}
+                                text={"Not specified"}
+                              />
+                            ) : (
+                              attribute.name
+                            )}
+                          </Td>
+                          <Td display={{ base: "none", sm: "table-cell" }}>
+                            {_.isEqual(attribute.description, "") ? (
+                              <Warning
+                                key={`warn-${attribute._id}`}
+                                text={"Not specified"}
+                              />
+                            ) : (
+                              <Text noOfLines={2}>
+                                {attribute.description}
+                              </Text>
+                            )}
+                          </Td>
+                          <Td>
+                            <Flex justify={"right"}>
+                              <Button
+                                key={`view-attribute-${attribute._id}`}
+                                colorScheme={"blackAlpha"}
+                                rightIcon={<Icon name={"c_right"} />}
+                                onClick={() =>
+                                  navigate(`/attributes/${attribute._id}`)
+                                }
+                              >
+                                View
+                              </Button>
+                            </Flex>
+                          </Td>
+                        </Tr>
+                      );
+                    })}
+                  </Tbody>
+                </Table>
+              </TableContainer>
+            ) : (
+              <Text>There are no Attributes to display.</Text>
+            )}
           </Flex>
         )
       ) : (
