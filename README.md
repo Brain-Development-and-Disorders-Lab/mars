@@ -2,7 +2,7 @@
 
 An open-source and customizable workflow tool for tracking and managing metadata generated from scientific experiments.
 
-<img src="mars.png">
+![mars.png](mars.png)
 
 **⚠️ WARNING: MARS is still in early development. It should not be used to manage real scientific data at this stage. There are known issues updating and deleting Entities and Collections.**
 
@@ -10,7 +10,7 @@ An open-source and customizable workflow tool for tracking and managing metadata
 
 ### Entities 📦
 
-Everything is recognized as an "entity", from physical slices to antibodies. Entities are generalized and expressed using Attributes, expressing data via Parameters.
+Everything is recognized as an "entity", from physical slices to antibodies. Entities are generalized and expressed using Attributes, expressing data via Values.
 
 Entities have the following additional metadata:
 
@@ -24,7 +24,7 @@ Entities have the following additional metadata:
 
 ### Attributes ⚙️
 
-Attributes are the primary method of expressing metadata associated with Entities. Attributes contain points of metadata known as *Parameters*. Parameters can be of the following types:
+Attributes are the primary method of expressing metadata associated with Entities. Attributes contain points of metadata known as *Values*. Values can be of the following types:
 
 - `string`: A textual description of any length.
 - `number`: A numerical value.
@@ -58,7 +58,7 @@ DEFAULT_PASSWORD=password
 Then, to start a fresh instance of the application, use `docker compose`:
 
 ```Bash
-$ docker compose up --build
+docker compose up --build
 ```
 
 This command will build all required containers before starting the containers required to run the system. The system can then be viewed in the browser at `localhost:8080`, and the MongoDB database can be browsed using the `mongo-express` interface accessible at `localhost:8081`.
@@ -71,7 +71,7 @@ To start the MARS interface, run `yarn start` in the `/client` directory. Start 
 
 > Tracking features still to be implemented or finalized.
 
-- Attribute editing within Entities
+- Attribute editing within Entities ✅
 - Metadata query engine, for constructing and executing complex search queries
 - Mechanism to organize and categorize Entities into 'Projects'
-- Drop-down Parameter with customizable options
+- Drop-down Value type with customizable options
