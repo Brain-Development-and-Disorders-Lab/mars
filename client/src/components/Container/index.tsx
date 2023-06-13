@@ -41,11 +41,11 @@ const Page: FC<any> = ({ children }) => {
       m={"0"}
     >
       {/* Navigation component */}
-      <Flex p={"4"} minH={["", "100vh"]} justify={"center"} background={"white"}>
+      <Flex p={"4"} justify={"center"} background={"white"}>
         <Navigation />
       </Flex>
 
-      <Flex direction={"column"} minH={["", "100vh"]} w={"100%"}>
+      <Flex direction={"column"} w={"100%"} background={"gray.50"}>
         {/* Search box component */}
         <Flex
           w={"100%"}

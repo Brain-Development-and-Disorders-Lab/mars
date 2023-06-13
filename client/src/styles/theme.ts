@@ -5,7 +5,6 @@ export const theme = extendTheme({
     global: () => ({
       body: {
         minH: "100vh",
-        background: "gray.50"
       },
     }),
   },
