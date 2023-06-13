@@ -6,20 +6,14 @@ import {
   Button,
   Flex,
   Heading,
-  Table,
-  TableContainer,
-  Tbody,
-  Td,
   Text,
-  Th,
-  Thead,
-  Tr,
+  useBreakpoint,
   useToast,
 } from "@chakra-ui/react";
+import { createColumnHelper } from "@tanstack/react-table";
 import Error from "@components/Error";
 import Icon from "@components/Icon";
 import Loading from "@components/Loading";
-import { Warning } from "@components/Label";
 import { Content } from "@components/Container";
 
 // Existing and custom types
@@ -31,6 +25,7 @@ import _ from "lodash";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
+import DataTable from "@components/DataTable";
 
 const Attributes = () => {
   const navigate = useNavigate();
@@ -42,6 +37,7 @@ const Attributes = () => {
 
   const [attributesData, setAttributesData] = useState([] as AttributeModel[]);
 
+  // Effect to load all Attribute data
   useEffect(() => {
     getData(`/attributes`)
       .then((value) => {
@@ -63,6 +59,56 @@ const Attributes = () => {
         setIsLoaded(true);
       });
   }, []);
+
+  const breakpoint = useBreakpoint();
+  const [visibleColumns, setVisibleColumns] = useState({});
+
+  // Effect to adjust column visibility
+  useEffect(() => {
+    if (
+      _.isEqual(breakpoint, "sm") ||
+      _.isEqual(breakpoint, "base") ||
+      _.isUndefined(breakpoint)
+    ) {
+      setVisibleColumns({ description: false, owner: false, created: false });
+    } else {
+      setVisibleColumns({});
+    }
+  }, [breakpoint]);
+
+  // Configure table columns and data
+  const data: AttributeModel[] = attributesData;
+  const columnHelper = createColumnHelper<AttributeModel>();
+  const columns = [
+    columnHelper.accessor("name", {
+      cell: (info) => info.getValue(),
+      header: "Name",
+    }),
+    columnHelper.accessor("description", {
+      cell: (info) => info.getValue(),
+      header: "Description",
+      enableHiding: true,
+    }),
+    columnHelper.accessor("values", {
+      cell: (info) => info.getValue().length,
+      header: "Values",
+    }),
+    columnHelper.accessor("_id", {
+      cell: (info) => {
+        return (
+          <Button
+            key={`view-entity-${info.getValue()}`}
+            colorScheme={"blackAlpha"}
+            rightIcon={<Icon name={"c_right"} />}
+            onClick={() => navigate(`/attributes/${info.getValue()}`)}
+          >
+            View
+          </Button>
+        );
+      },
+      header: "",
+    }),
+  ];
 
   return (
     <Content vertical={isError || !isLoaded}>
@@ -92,65 +138,14 @@ const Attributes = () => {
               </Flex>
             </Flex>
             {isLoaded && attributesData.length > 0 ? (
-              <TableContainer w={"full"}>
-                <Table variant={"simple"} colorScheme={"blackAlpha"}>
-                  <Thead>
-                    <Tr>
-                      <Th>
-                        <Heading size={"sm"}>Name</Heading>
-                      </Th>
-                      <Th display={{ base: "none", sm: "table-cell" }}>
-                        <Heading size={"sm"}>Description</Heading>
-                      </Th>
-                      <Th></Th>
-                    </Tr>
-                  </Thead>
-                  <Tbody>
-                    {attributesData.reverse().map((attribute) => {
-                      return (
-                        <Tr key={attribute._id}>
-                          <Td>
-                            {_.isEqual(attribute.name, "") ? (
-                              <Warning
-                                key={`warn-${attribute._id}`}
-                                text={"Not specified"}
-                              />
-                            ) : (
-                              attribute.name
-                            )}
-                          </Td>
-                          <Td display={{ base: "none", sm: "table-cell" }}>
-                            {_.isEqual(attribute.description, "") ? (
-                              <Warning
-                                key={`warn-${attribute._id}`}
-                                text={"Not specified"}
-                              />
-                            ) : (
-                              <Text noOfLines={2}>
-                                {attribute.description}
-                              </Text>
-                            )}
-                          </Td>
-                          <Td>
-                            <Flex justify={"right"}>
-                              <Button
-                                key={`view-attribute-${attribute._id}`}
-                                colorScheme={"blackAlpha"}
-                                rightIcon={<Icon name={"c_right"} />}
-                                onClick={() =>
-                                  navigate(`/attributes/${attribute._id}`)
-                                }
-                              >
-                                View
-                              </Button>
-                            </Flex>
-                          </Td>
-                        </Tr>
-                      );
-                    })}
-                  </Tbody>
-                </Table>
-              </TableContainer>
+              <Flex direction={"column"} gap={"4"} w={"100%"}>
+                <DataTable
+                  columns={columns}
+                  data={data}
+                  visibleColumns={visibleColumns}
+                  hideSelection
+                />
+              </Flex>
             ) : (
               <Text>There are no Attributes to display.</Text>
             )}
