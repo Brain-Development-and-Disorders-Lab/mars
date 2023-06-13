@@ -11,6 +11,7 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
+import DataTable from "@components/DataTable";
 import Error from "@components/Error";
 import Icon from "@components/Icon";
 import Loading from "@components/Loading";
@@ -25,7 +26,6 @@ import _ from "lodash";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
-import DataTable from "@components/DataTable";
 
 const Attributes = () => {
   const navigate = useNavigate();
@@ -70,7 +70,7 @@ const Attributes = () => {
       _.isEqual(breakpoint, "base") ||
       _.isUndefined(breakpoint)
     ) {
-      setVisibleColumns({ description: false, owner: false, created: false });
+      setVisibleColumns({ description: false });
     } else {
       setVisibleColumns({});
     }
