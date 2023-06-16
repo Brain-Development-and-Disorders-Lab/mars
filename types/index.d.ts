@@ -69,7 +69,7 @@ export type AttributeCardProps = {
 export interface IValue<D> {
   identifier: string;
   name: string;
-  type: "number" | "text" | "url" | "date" | "entity";
+  type: "number" | "text" | "url" | "date" | "entity" | "select";
   data: D;
   disabled?: boolean;
   showRemove?: boolean;
@@ -189,6 +189,7 @@ export type IconNames =
   "v_text" |
   "v_number" |
   "v_url" |
+  "v_select" |
 
   // Arrows
   "a_right" |

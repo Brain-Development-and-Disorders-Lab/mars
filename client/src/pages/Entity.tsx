@@ -486,7 +486,6 @@ const Entity = () => {
   // Handle updates to Attributes
   const handleUpdateAttribute = (updated: AttributeModel) => {
     // Find the Attribute and update the state
-    consola.info("Updating:", updated._id);
     setEntityAttributes([
       ...entityAttributes.map((attribute) => {
         if (_.isEqual(attribute._id, updated._id)) {

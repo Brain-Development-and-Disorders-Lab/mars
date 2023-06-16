@@ -168,68 +168,68 @@ const DataTable = (props: DataTableProps) => {
         </Tbody>
       </Table>
       {!props.hidePagination && (
-      <Flex direction={"row"} pt={"4"} gap={"4"} justify={"space-between"} w={"100%"} wrap={"wrap"}>
-        <Flex gap={"4"}>
-          <Select
-            id={"select-page-size"}
-            value={table.getState().pagination.pageSize}
-            onChange={(event) => {
-              table.setPageSize(Number(event.target.value));
-            }}
-          >
-            {[5, 10, 20].map((size) => {
-              return (
-                <option key={size} value={size}>
-                  Show {size}
-                </option>
-              );
-            })}
-          </Select>
-          {!props.hidePagination && !props.viewOnly && !props.hideSelection &&
-            <Flex>
-              <Button variant={"outline"} disabled={Object.keys(selectedRows).length === 0 || props.viewOnly} onClick={onDeleteRows} leftIcon={<Icon name={"delete"} />}>{Object.keys(selectedRows).length}</Button>
-            </Flex>
-          }
-        </Flex>
+        <Flex direction={"row"} pt={"4"} gap={"4"} justify={"space-between"} w={"100%"} wrap={"wrap"}>
+          <Flex gap={"4"}>
+            <Select
+              id={"select-page-size"}
+              value={table.getState().pagination.pageSize}
+              onChange={(event) => {
+                table.setPageSize(Number(event.target.value));
+              }}
+            >
+              {[5, 10, 20].map((size) => {
+                return (
+                  <option key={size} value={size}>
+                    Show {size}
+                  </option>
+                );
+              })}
+            </Select>
+            {!props.hidePagination && !props.viewOnly && !props.hideSelection &&
+              <Flex>
+                <Button variant={"outline"} disabled={Object.keys(selectedRows).length === 0 || props.viewOnly} onClick={onDeleteRows} leftIcon={<Icon name={"delete"} />}>{Object.keys(selectedRows).length}</Button>
+              </Flex>
+            }
+          </Flex>
 
-        <Flex direction={"row"} gap={"4"} align={"center"}>
-          <IconButton
-            variant={"outline"}
-            icon={<Icon name={"c_double_left"} />}
-            aria-label="first page"
-            onClick={() => table.setPageIndex(0)}
-            disabled={!table.getCanPreviousPage()}
-          />
-          <IconButton
-            variant={"outline"}
-            icon={<Icon name={"c_left"} />}
-            aria-label="previous page"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          />
-          {table.getPageCount() > 0 &&
-            <Text as={"b"}>
-              {table.getState().pagination.pageIndex + 1} of{" "}
-              {table.getPageCount()}
-            </Text>
-          }
-          <IconButton
-            variant={"outline"}
-            icon={<Icon name={"c_right"} />}
-            aria-label="next page"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          />
-          <IconButton
-            variant={"outline"}
-            icon={<Icon name={"c_double_right"} />}
-            aria-label="last page"
-            onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-            disabled={!table.getCanNextPage()}
-          />
+          <Flex direction={"row"} gap={"4"} align={"center"}>
+            <IconButton
+              variant={"outline"}
+              icon={<Icon name={"c_double_left"} />}
+              aria-label="first page"
+              onClick={() => table.setPageIndex(0)}
+              disabled={!table.getCanPreviousPage()}
+            />
+            <IconButton
+              variant={"outline"}
+              icon={<Icon name={"c_left"} />}
+              aria-label="previous page"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+            />
+            {table.getPageCount() > 0 &&
+              <Text as={"b"}>
+                {table.getState().pagination.pageIndex + 1} of{" "}
+                {table.getPageCount()}
+              </Text>
+            }
+            <IconButton
+              variant={"outline"}
+              icon={<Icon name={"c_right"} />}
+              aria-label="next page"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            />
+            <IconButton
+              variant={"outline"}
+              icon={<Icon name={"c_double_right"} />}
+              aria-label="last page"
+              onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+              disabled={!table.getCanNextPage()}
+            />
+          </Flex>
         </Flex>
-      </Flex>
-    )}
+      )}
     </TableContainer>
   );
 };

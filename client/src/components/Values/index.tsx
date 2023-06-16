@@ -11,9 +11,19 @@ import {
   Button,
   Flex,
   Input,
+  InputGroup,
+  InputLeftAddon,
   Link,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalHeader,
+  ModalOverlay,
+  ScaleFade,
   Select,
   Spacer,
+  useDisclosure,
   useToast,
 } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
@@ -38,9 +48,14 @@ import dayjs from "dayjs";
 const Values = (props: {
   collection: IValue<any>[];
   viewOnly: boolean;
-  setValues?: Dispatch<SetStateAction<IValue<any>[]>>;
+  setValues: Dispatch<SetStateAction<IValue<any>[]>>;
 }) => {
   const toast = useToast();
+
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [option, setOption] = useState("");
+  const [options, setOptions] = useState([] as string[]);
+
   const [entities, setEntities] = useState([] as EntityModel[]);
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -68,50 +83,12 @@ const Values = (props: {
 
   const [data, setData] = useState(props.collection);
   useEffect(() => {
+    props.setValues(props.collection);
     setData(props.collection);
   }, [props.collection]);
 
   const columnHelper = createColumnHelper<IValue<any>>();
   const columns = [
-    // Value type column
-    columnHelper.accessor("type", {
-      cell: (info) => {
-        switch (info.getValue()) {
-          case "number":
-            return (
-              <Flex align={"center"} justify={"center"}>
-                <Icon name={"v_number"} />
-              </Flex>
-            );
-          case "text":
-            return (
-              <Flex align={"center"} justify={"center"}>
-                <Icon name={"v_text"} />
-              </Flex>
-            );
-          case "url":
-            return (
-              <Flex align={"center"} justify={"center"}>
-                <Icon name={"v_url"} />
-              </Flex>
-            );
-          case "date":
-            return (
-              <Flex align={"center"} justify={"center"}>
-                <Icon name={"v_date"} />
-              </Flex>
-            );
-          case "entity":
-            return (
-              <Flex align={"center"} justify={"center"}>
-                <Icon name={"entity"} />
-              </Flex>
-            );
-        }
-      },
-      header: undefined,
-    }),
-
     // Value name column
     columnHelper.accessor("name", {
       cell: (info) => {
@@ -130,14 +107,40 @@ const Values = (props: {
           updateName(info.row.original.identifier, value);
         };
 
+        // Set the icon attached to the name field
+        let valueIcon = <Icon name={"unknown"} />;
+        switch(info.row.original.type) {
+          case "date":
+            valueIcon = <Icon name={"v_date"} />;
+            break;
+          case "number":
+            valueIcon = <Icon name={"v_number"} />;
+            break;
+          case "text":
+            valueIcon = <Icon name={"v_text"} />;
+            break;
+          case "url":
+            valueIcon = <Icon name={"v_url"} />;
+            break;
+          case "entity":
+            valueIcon = <Icon name={"entity"} />;
+            break;
+          case "select":
+            valueIcon = <Icon name={"v_select"} />;
+            break;
+        }
+
         return (
-          <Input
-            id={`i_${info.row.original.identifier}_name`}
-            value={value}
-            disabled={props.viewOnly}
-            onChange={onChange}
-            onBlur={onBlur}
-          />
+          <InputGroup>
+            <InputLeftAddon children={valueIcon} />
+            <Input
+              id={`i_${info.row.original.identifier}_name`}
+              value={value}
+              disabled={props.viewOnly}
+              onChange={onChange}
+              onBlur={onBlur}
+            />
+          </InputGroup>
         );
       },
       header: "Name",
@@ -153,8 +156,23 @@ const Values = (props: {
           setValue(initialValue);
         }, [initialValue]);
 
+        /**
+         * Handle a standard Input change event
+         * @param event change event data
+         */
         const onChange = (event: any) => {
           setValue(event.target.value);
+        };
+
+        /**
+         * Handle a Select change event
+         * @param event change event data
+         */
+        const onSelectChange = (event: any) => {
+          setValue({
+            selected: event.target.value,
+            options: initialValue.options,
+          });
         };
 
         const onBlur = () => {
@@ -248,6 +266,28 @@ const Values = (props: {
               );
             }
           }
+          case "select": {
+           return (
+              <Select
+                title="Select Option"
+                id={`s_${info.row.original.identifier}_data`}
+                value={value.selected}
+                disabled={props.viewOnly}
+                onChange={onSelectChange}
+                onBlur={onBlur}
+              >
+                {isLoaded && value.options &&
+                  value.options.map((value: string) => {
+                    return (
+                      <option key={value} value={value}>
+                        {value}
+                      </option>
+                    );
+                  })
+                }
+              </Select>
+            );
+          }
         }
       },
       header: "Data",
@@ -289,12 +329,30 @@ const Values = (props: {
   };
 
   const applyUpdate = (collection: IValue<any>[]) => {
-    setData([...collection]);
-
-    if (props.setValues) {
-      props.setValues([...data]);
-    }
+    props.setValues([...collection]);
   }
+
+  const addOptions = () => {
+    // Add the Select value with the defined options
+    props.setValues([
+      ...data,
+      {
+        identifier: `p_select_${Math.round(performance.now())}`,
+        name: "",
+        type: "select",
+        data: {
+          selected: option,
+          options: [..._.cloneDeep(options)],
+        },
+      },
+    ]);
+
+    // Reset the options
+    setOptions([]);
+
+    // Close the modal
+    onClose();
+  };
 
   return (
     <Flex p={["1", "2"]} direction={"column"} gap={"1"} w={"100%"}>
@@ -313,7 +371,7 @@ const Values = (props: {
             variant={"outline"}
             leftIcon={<Icon name={"v_date"} />}
             onClick={() => {
-              setData([
+              props.setValues([
                 ...data,
                 {
                   identifier: `v_date_${Math.round(performance.now())}`,
@@ -331,7 +389,7 @@ const Values = (props: {
             variant={"outline"}
             leftIcon={<Icon name={"v_text"} />}
             onClick={() => {
-              setData([
+              props.setValues([
                 ...data,
                 {
                   identifier: `v_text_${Math.round(performance.now())}`,
@@ -349,7 +407,7 @@ const Values = (props: {
             variant={"outline"}
             leftIcon={<Icon name={"v_number"} />}
             onClick={() => {
-              setData([
+              props.setValues([
                 ...data,
                 {
                   identifier: `v_number_${Math.round(performance.now())}`,
@@ -367,7 +425,7 @@ const Values = (props: {
             variant={"outline"}
             leftIcon={<Icon name={"v_url"} />}
             onClick={() => {
-              setData([
+              props.setValues([
                 ...data,
                 {
                   identifier: `v_url_${Math.round(performance.now())}`,
@@ -385,7 +443,7 @@ const Values = (props: {
             variant={"outline"}
             leftIcon={<Icon name={"entity"} />}
             onClick={() => {
-              setData([
+              props.setValues([
                 ...data,
                 {
                   identifier: `p_entity_${Math.round(performance.now())}`,
@@ -399,10 +457,110 @@ const Values = (props: {
             Entity
           </Button>
 
+          <Button
+            variant={"outline"}
+            leftIcon={<Icon name={"v_select"} />}
+            onClick={() => {
+              onOpen();
+            }}
+          >
+            Select
+          </Button>
+
           <Spacer />
         </Flex>
       )}
-      <DataTable columns={columns} visibleColumns={{}} data={data} setData={setData} viewOnly={props.viewOnly} />
+
+      <DataTable columns={columns} visibleColumns={{}} data={data} setData={props.setValues} viewOnly={props.viewOnly} />
+
+      <ScaleFade initialScale={0.9} in={isOpen}>
+        <Modal
+          onEsc={onClose}
+          onClose={onClose}
+          isOpen={isOpen}
+          size={"3xl"}
+          isCentered
+        >
+          <ModalOverlay />
+          <ModalContent p={"2"} m={"2"}>
+            <ModalHeader>Add Options</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody gap={"4"}>
+              <Flex direction={"column"} gap={"4"}>
+                <Flex direction={"row"} gap={"4"}>
+                  <Input placeholder={"Option Value"} value={option} onChange={(event) => setOption(event.target.value)} />
+                  <Button
+                    colorScheme={"green"}
+                    rightIcon={<Icon name={"add"} />}
+                    onClick={() => {
+                      if (!_.includes(options, option)) {
+                        setOptions([...options, option.toString()]);
+                        setOption("");
+                      } else {
+                        toast({
+                          title: "Warning",
+                          description: "Can't add duplicate options.",
+                          status: "warning",
+                          duration: 2000,
+                          position: "bottom-right",
+                          isClosable: true,
+                        });
+                      }
+                    }}
+                    disabled={_.isEqual(option, "")}
+                  >
+                    Add
+                  </Button>
+                </Flex>
+
+                <Flex direction={"column"} gap={"2"}>
+                  {options.length > 0 &&
+                    options.map((option) => {
+                      return (
+                        <Flex direction={"row"} justify={"space-between"} key={option}>
+                          {option}
+                          <Button
+                            colorScheme={"red"}
+                            rightIcon={<Icon name={"delete"} />}
+                            onClick={() => {
+                              setOptions([...options.filter((currentOption) => !_.isEqual(currentOption, option))])
+                            }}
+                          >
+                            Remove
+                          </Button>
+                        </Flex>
+                      );
+                    })
+                  }
+                </Flex>
+
+                <Flex gap={"4"} justify={"center"}>
+                  <Button
+                    colorScheme={"red"}
+                    rightIcon={<Icon name={"cross"} />}
+                    onClick={() => {
+                      // Reset the list of options
+                      setOptions([]);
+
+                      // Close the modal
+                      onClose();
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    colorScheme={"green"}
+                    rightIcon={<Icon name={"check"} />}
+                    onClick={addOptions}
+                  >
+                    Continue
+                  </Button>
+                </Flex>
+              </Flex>
+            </ModalBody>
+          </ModalContent>
+        </Modal>
+      </ScaleFade>
     </Flex>
   );
 };

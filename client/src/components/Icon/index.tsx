@@ -18,6 +18,7 @@ import {
   BsChevronRight,
   BsChevronUp,
   BsCloudDownloadFill,
+  BsCollectionFill,
   BsDiagram2Fill,
   BsExclamationOctagonFill,
   BsFileCodeFill,
@@ -77,6 +78,7 @@ const SYSTEM_ICONS: { [k: string]: IconType } = {
   v_text: BsFileTextFill,
   v_number: BsFillFileBinaryFill,
   v_url: BsFileCodeFill,
+  v_select: BsCollectionFill,
 
   // Arrows
   a_right: BsArrowRight,
