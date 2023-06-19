@@ -128,7 +128,14 @@ const Icon = (props: {
           <ChakraIcon as={iconComponent} w={"16"} h={"16"} color={iconColor} />
         );
       default:
-        return <ChakraIcon as={iconComponent} w={props.size[0]} h={props.size[1]} color={iconColor} />;
+        return (
+          <ChakraIcon
+            as={iconComponent}
+            w={props.size[0]}
+            h={props.size[1]}
+            color={iconColor}
+          />
+        );
     }
   }
 

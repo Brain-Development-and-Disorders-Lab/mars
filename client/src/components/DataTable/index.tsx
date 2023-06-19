@@ -45,33 +45,37 @@ const DataTable = (props: DataTableProps) => {
   const table = useReactTable({
     columns: [
       // Checkbox select column
-      ... (_.isEqual(props.hideSelection, false) || _.isUndefined(props.hideSelection)) ?
-        [{
-          id: "select",
-          header: ({ table }: any) => (
-            <Checkbox
-              {...{
-                disabled: props.viewOnly,
-                isChecked: table.getIsAllRowsSelected(),
-                isIndeterminate: table.getIsSomeRowsSelected(),
-                onChange: table.getToggleAllRowsSelectedHandler(),
-              }}
-            />
-          ),
-          cell: ({ row }: any) => (
-            <Flex>
-              <Checkbox
-                {...{
-                  id: `s_${Math.random().toString(16).slice(2)}`,
-                  isChecked: row.getIsSelected(),
-                  disabled: !row.getCanSelect() || props.viewOnly,
-                  isIndeterminate: row.getIsSomeSelected(),
-                  onChange: row.getToggleSelectedHandler(),
-                }}
-              />
-            </Flex>
-          ),
-        }] : [],
+      ...(_.isEqual(props.hideSelection, false) ||
+      _.isUndefined(props.hideSelection)
+        ? [
+            {
+              id: "select",
+              header: ({ table }: any) => (
+                <Checkbox
+                  {...{
+                    disabled: props.viewOnly,
+                    isChecked: table.getIsAllRowsSelected(),
+                    isIndeterminate: table.getIsSomeRowsSelected(),
+                    onChange: table.getToggleAllRowsSelectedHandler(),
+                  }}
+                />
+              ),
+              cell: ({ row }: any) => (
+                <Flex>
+                  <Checkbox
+                    {...{
+                      id: `s_${Math.random().toString(16).slice(2)}`,
+                      isChecked: row.getIsSelected(),
+                      disabled: !row.getCanSelect() || props.viewOnly,
+                      isIndeterminate: row.getIsSomeSelected(),
+                      onChange: row.getToggleSelectedHandler(),
+                    }}
+                  />
+                </Flex>
+              ),
+            },
+          ]
+        : []),
       ...props.columns,
     ],
     data: props.data,
@@ -156,10 +160,7 @@ const DataTable = (props: DataTableProps) => {
                 const meta: any = cell.column.columnDef.meta;
                 return (
                   <Td id={cell.id} key={cell.id} isNumeric={meta?.isNumeric}>
-                    {flexRender(
-                      cell.column.columnDef.cell,
-                      cell.getContext()
-                    )}
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </Td>
                 );
               })}
@@ -168,7 +169,14 @@ const DataTable = (props: DataTableProps) => {
         </Tbody>
       </Table>
       {!props.hidePagination && (
-        <Flex direction={"row"} pt={"4"} gap={"4"} justify={"space-between"} w={"100%"} wrap={"wrap"}>
+        <Flex
+          direction={"row"}
+          pt={"4"}
+          gap={"4"}
+          justify={"space-between"}
+          w={"100%"}
+          wrap={"wrap"}
+        >
           <Flex gap={"4"}>
             <Select
               id={"select-page-size"}
@@ -185,11 +193,20 @@ const DataTable = (props: DataTableProps) => {
                 );
               })}
             </Select>
-            {!props.hidePagination && !props.viewOnly && !props.hideSelection &&
+            {!props.hidePagination && !props.viewOnly && !props.hideSelection && (
               <Flex>
-                <Button variant={"outline"} disabled={Object.keys(selectedRows).length === 0 || props.viewOnly} onClick={onDeleteRows} leftIcon={<Icon name={"delete"} />}>{Object.keys(selectedRows).length}</Button>
+                <Button
+                  variant={"outline"}
+                  disabled={
+                    Object.keys(selectedRows).length === 0 || props.viewOnly
+                  }
+                  onClick={onDeleteRows}
+                  leftIcon={<Icon name={"delete"} />}
+                >
+                  {Object.keys(selectedRows).length}
+                </Button>
               </Flex>
-            }
+            )}
           </Flex>
 
           <Flex direction={"row"} gap={"4"} align={"center"}>
@@ -207,12 +224,12 @@ const DataTable = (props: DataTableProps) => {
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
             />
-            {table.getPageCount() > 0 &&
+            {table.getPageCount() > 0 && (
               <Text as={"b"}>
                 {table.getState().pagination.pageIndex + 1} of{" "}
                 {table.getPageCount()}
               </Text>
-            }
+            )}
             <IconButton
               variant={"outline"}
               icon={<Icon name={"c_right"} />}

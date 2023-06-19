@@ -269,12 +269,7 @@ const EntityPage = () => {
         isError ? (
           <Error />
         ) : (
-          <Flex
-            direction={"column"}
-            justify={"center"}
-            gap={"6"}
-            wrap={"wrap"}
-          >
+          <Flex direction={"column"} justify={"center"} gap={"6"} wrap={"wrap"}>
             <Flex
               direction={"column"}
               w={["full", "4xl", "7xl"]}
@@ -459,8 +454,8 @@ const EntityPage = () => {
                         </Select>
                         <FormHelperText>
                           If the sources of this Entity currently exist or did
-                          exist in this system, specify those associations here by
-                          selecting the origin Entities.
+                          exist in this system, specify those associations here
+                          by selecting the origin Entities.
                         </FormHelperText>
                         <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
                           {selectedOrigins.map((product) => {
@@ -753,9 +748,7 @@ const EntityPage = () => {
                 <ModalHeader>Entities</ModalHeader>
                 <ModalCloseButton />
                 <ModalBody>
-                  <Text>
-                    Information about creating Entities.
-                  </Text>
+                  <Text>Information about creating Entities.</Text>
                 </ModalBody>
               </ModalContent>
             </Modal>
@@ -1025,18 +1018,8 @@ const AttributePage = () => {
 
   return (
     <Content>
-      <Flex
-        direction={"column"}
-        p={"2"}
-        gap={"6"}
-        wrap={"wrap"}
-      >
-        <Flex
-          direction={"column"}
-          w={"100%"}
-          p={"2"}
-          bg={"white"}
-        >
+      <Flex direction={"column"} p={"2"} gap={"6"} wrap={"wrap"}>
+        <Flex direction={"column"} w={"100%"} p={"2"} bg={"white"}>
           {/* Page header */}
           <Flex direction={"column"} p={"2"} pt={"4"} pb={"4"}>
             <Flex direction={"row"} align={"center"} justify={"space-between"}>
@@ -1222,12 +1205,7 @@ const Create = () => {
       {/* Default landing page for creating metadata */}
       {_.isEqual(createPage, "default") && (
         <Content>
-          <Flex
-            direction={"column"}
-            justify={"center"}
-            gap={"6"}
-            wrap={"wrap"}
-          >
+          <Flex direction={"column"} justify={"center"} gap={"6"} wrap={"wrap"}>
             <Flex
               direction={"column"}
               w={"100%"}

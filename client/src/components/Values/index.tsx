@@ -1,10 +1,5 @@
 // React
-import React, {
-  Dispatch,
-  SetStateAction,
-  useEffect,
-  useState,
-} from "react";
+import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 
 // Existing and custom components
 import {
@@ -110,7 +105,7 @@ const Values = (props: {
 
         // Set the icon attached to the name field
         let valueIcon = <Icon name={"unknown"} />;
-        switch(info.row.original.type) {
+        switch (info.row.original.type) {
           case "date":
             valueIcon = <Icon name={"v_date"} />;
             break;
@@ -220,10 +215,7 @@ const Values = (props: {
               );
             } else {
               return (
-                <Link
-                  href={value}
-                  isExternal
-                >
+                <Link href={value} isExternal>
                   {value}
                 </Link>
               );
@@ -267,13 +259,11 @@ const Values = (props: {
                 </Select>
               );
             } else {
-              return (
-                <Linky type={"entities"} id={value} />
-              );
+              return <Linky type={"entities"} id={value} />;
             }
           }
           case "select": {
-           return (
+            return (
               <Select
                 title="Select Option"
                 id={`s_${info.row.original.identifier}_data`}
@@ -283,15 +273,15 @@ const Values = (props: {
                 onChange={onSelectChange}
                 onBlur={onBlur}
               >
-                {isLoaded && value.options &&
+                {isLoaded &&
+                  value.options &&
                   value.options.map((value: string) => {
                     return (
                       <option key={value} value={value}>
                         {value}
                       </option>
                     );
-                  })
-                }
+                  })}
               </Select>
             );
           }
@@ -337,7 +327,7 @@ const Values = (props: {
 
   const applyUpdate = (collection: IValue<any>[]) => {
     props.setValues([...collection]);
-  }
+  };
 
   const addOptions = () => {
     // Add the Select value with the defined options
@@ -478,7 +468,13 @@ const Values = (props: {
         </Flex>
       )}
 
-      <DataTable columns={columns} visibleColumns={{}} data={data} setData={props.setValues} viewOnly={props.viewOnly} />
+      <DataTable
+        columns={columns}
+        visibleColumns={{}}
+        data={data}
+        setData={props.setValues}
+        viewOnly={props.viewOnly}
+      />
 
       <ScaleFade initialScale={0.9} in={isOpen}>
         <Modal
@@ -495,12 +491,18 @@ const Values = (props: {
             <ModalBody gap={"4"}>
               <Flex direction={"column"} gap={"4"}>
                 <Text>
-                  For a Select value, set the options to be displayed. Duplicates are not permitted.
-                  Name the option, then click "Add" to add it to the collection of options associated
-                  with this Select value. Click "Continue" to add this Select value to the Attribute.
+                  For a Select value, set the options to be displayed.
+                  Duplicates are not permitted. Name the option, then click
+                  "Add" to add it to the collection of options associated with
+                  this Select value. Click "Continue" to add this Select value
+                  to the Attribute.
                 </Text>
                 <Flex direction={"row"} gap={"4"}>
-                  <Input placeholder={"Option Value"} value={option} onChange={(event) => setOption(event.target.value)} />
+                  <Input
+                    placeholder={"Option Value"}
+                    value={option}
+                    onChange={(event) => setOption(event.target.value)}
+                  />
                   <Button
                     colorScheme={"green"}
                     rightIcon={<Icon name={"add"} />}
@@ -529,21 +531,29 @@ const Values = (props: {
                   {options.length > 0 &&
                     options.map((option) => {
                       return (
-                        <Flex direction={"row"} justify={"space-between"} key={option}>
+                        <Flex
+                          direction={"row"}
+                          justify={"space-between"}
+                          key={option}
+                        >
                           {option}
                           <Button
                             colorScheme={"red"}
                             rightIcon={<Icon name={"delete"} />}
                             onClick={() => {
-                              setOptions([...options.filter((currentOption) => !_.isEqual(currentOption, option))])
+                              setOptions([
+                                ...options.filter(
+                                  (currentOption) =>
+                                    !_.isEqual(currentOption, option)
+                                ),
+                              ]);
                             }}
                           >
                             Remove
                           </Button>
                         </Flex>
                       );
-                    })
-                  }
+                    })}
                 </Flex>
 
                 <Flex gap={"4"} justify={"center"}>

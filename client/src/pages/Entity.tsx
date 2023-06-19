@@ -350,7 +350,8 @@ const Entity = () => {
           position: "bottom-right",
           isClosable: true,
         });
-      }).finally(() => {
+      })
+      .finally(() => {
         setEntityData(updateData);
         setIsLoaded(true);
       });
@@ -592,9 +593,7 @@ const Entity = () => {
               >
                 <Icon name={"entity"} size={"lg"} />
                 <Heading fontWeight={"semibold"}>{entityData.name}</Heading>
-                {entityData.deleted &&
-                  <Icon name={"delete"} size={"lg"} />
-                }
+                {entityData.deleted && <Icon name={"delete"} size={"lg"} />}
               </Flex>
 
               {/* Buttons */}
@@ -636,7 +635,7 @@ const Entity = () => {
                     </PopoverContent>
                   </Popover>
                 )}
-                {entityData.deleted ?
+                {entityData.deleted ? (
                   <Button
                     onClick={handleRestoreClick}
                     colorScheme={"green"}
@@ -644,7 +643,7 @@ const Entity = () => {
                   >
                     Restore
                   </Button>
-                :
+                ) : (
                   <Button
                     onClick={handleEditClick}
                     colorScheme={editing ? "green" : "gray"}
@@ -654,7 +653,7 @@ const Entity = () => {
                   >
                     {editing ? "Done" : "Edit"}
                   </Button>
-                }
+                )}
                 <Button
                   onClick={onGraphOpen}
                   rightIcon={<Icon name={"graph"} />}
@@ -1514,7 +1513,12 @@ const Entity = () => {
               </ModalContent>
             </Modal>
 
-            <Modal isOpen={isExportOpen} onClose={onExportClose} size={"2xl"} isCentered>
+            <Modal
+              isOpen={isExportOpen}
+              onClose={onExportClose}
+              size={"2xl"}
+              isCentered
+            >
               <ModalOverlay />
               <ModalContent p={"4"} w={["sm", "lg", "2xl"]}>
                 {/* Heading and close button */}
