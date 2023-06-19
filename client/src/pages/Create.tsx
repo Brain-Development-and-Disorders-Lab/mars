@@ -103,6 +103,7 @@ const EntityPage = () => {
   const entityState: IEntity = {
     name: name,
     created: created,
+    deleted: false,
     owner: owner,
     description: description,
     associations: {
@@ -111,6 +112,7 @@ const EntityPage = () => {
     },
     collections: selectedCollections,
     attributes: selectedAttributes,
+    history: [],
   };
 
   // Various validation error states
@@ -692,61 +694,56 @@ const EntityPage = () => {
                   </Flex>
                 )}
               </Flex>
-            </Flex>
 
-            {/* Action buttons */}
-            <Flex
-              direction={"row"}
-              flexWrap={"wrap"}
-              gap={"6"}
-              justify={"space-between"}
-              alignSelf={"center"}
-              align={"center"}
-              w={["sm", "xl", "3xl"]}
-              maxW={"7xl"}
-              p={"4"}
-              m={"4"}
-              position={"fixed"}
-              bottom={"0%"}
-              bg={"white"}
-              rounded={"md"}
-            >
-              <Flex gap={"4"}>
-                <Button
-                  colorScheme={"red"}
-                  variant={"outline"}
-                  rightIcon={<Icon name={"cross"} />}
-                  onClick={onCancel}
-                >
-                  Cancel
-                </Button>
-                {!_.isEqual("start", pageState) && (
-                  <Button
-                    colorScheme={"orange"}
-                    variant={"outline"}
-                    leftIcon={<Icon name={"c_left"} />}
-                    onClick={onBack}
-                  >
-                    Back
-                  </Button>
-                )}
-              </Flex>
-
-              <Button
-                colorScheme={"green"}
-                rightIcon={
-                  _.isEqual("attributes", pageState) ? (
-                    <Icon name={"check"} />
-                  ) : (
-                    <Icon name={"c_right"} />
-                  )
-                }
-                onClick={onNext}
-                isDisabled={isValidInput() && !isSubmitting}
-                isLoading={isSubmitting}
+              {/* Action buttons */}
+              <Flex
+                direction={"row"}
+                flexWrap={"wrap"}
+                gap={"6"}
+                justify={"space-between"}
+                alignSelf={"center"}
+                align={"center"}
+                w={["sm", "xl", "3xl"]}
+                maxW={"7xl"}
+                p={"4"}
               >
-                {_.isEqual("attributes", pageState) ? "Finish" : "Next"}
-              </Button>
+                <Flex gap={"4"}>
+                  <Button
+                    colorScheme={"red"}
+                    variant={"outline"}
+                    rightIcon={<Icon name={"cross"} />}
+                    onClick={onCancel}
+                  >
+                    Cancel
+                  </Button>
+                  {!_.isEqual("start", pageState) && (
+                    <Button
+                      colorScheme={"orange"}
+                      variant={"outline"}
+                      leftIcon={<Icon name={"c_left"} />}
+                      onClick={onBack}
+                    >
+                      Back
+                    </Button>
+                  )}
+                </Flex>
+
+                <Button
+                  colorScheme={"green"}
+                  rightIcon={
+                    _.isEqual("attributes", pageState) ? (
+                      <Icon name={"check"} />
+                    ) : (
+                      <Icon name={"c_right"} />
+                    )
+                  }
+                  onClick={onNext}
+                  isDisabled={isValidInput() && !isSubmitting}
+                  isLoading={isSubmitting}
+                >
+                  {_.isEqual("attributes", pageState) ? "Finish" : "Next"}
+                </Button>
+              </Flex>
             </Flex>
 
             {/* Information modal */}
@@ -757,21 +754,7 @@ const EntityPage = () => {
                 <ModalCloseButton />
                 <ModalBody>
                   <Text>
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
-                    do eiusmod tempor incididunt ut labore et dolore magna
-                    aliqua.
-                  </Text>
-                  <Text>
-                    Ut enim ad minim veniam, quis nostrud exercitation ullamco
-                    laboris nisi ut aliquip ex ea commodo consequat.
-                  </Text>
-                  <Text>
-                    Duis aute irure dolor in reprehenderit in voluptate velit
-                    esse cillum dolore eu fugiat nulla pariatur.
-                  </Text>
-                  <Text>
-                    Excepteur sint occaecat cupidatat non proident, sunt in
-                    culpa qui officia deserunt mollit anim id est laborum.
+                    Information about creating Entities.
                   </Text>
                 </ModalBody>
               </ModalContent>
@@ -944,49 +927,44 @@ const CollectionPage = () => {
               </Flex>
             </Flex>
           </Flex>
+
+          {/* Action buttons */}
+          <Flex
+            direction={"row"}
+            flexWrap={"wrap"}
+            gap={"6"}
+            justify={"space-between"}
+            alignSelf={"center"}
+            w={["sm", "xl", "3xl"]}
+            maxW={"7xl"}
+            p={"4"}
+          >
+            <Button
+              colorScheme={"red"}
+              rightIcon={<Icon name={"cross"} />}
+              variant={"outline"}
+              onClick={() => navigate("/")}
+            >
+              Cancel
+            </Button>
+
+            <Button
+              colorScheme={"green"}
+              rightIcon={<Icon name={"check"} />}
+              onClick={() => {
+                // Push the data
+                setIsSubmitting(true);
+                postData(`/collections/create`, collectionData).then(() => {
+                  setIsSubmitting(false);
+                  navigate("/collections");
+                });
+              }}
+              isDisabled={isDetailsError && !isSubmitting}
+            >
+              Finish
+            </Button>
+          </Flex>
         </Flex>
-      </Flex>
-
-      {/* Action buttons */}
-      <Flex
-        direction={"row"}
-        flexWrap={"wrap"}
-        gap={"6"}
-        justify={"space-between"}
-        alignSelf={"center"}
-        w={["sm", "xl", "3xl"]}
-        maxW={"7xl"}
-        p={"4"}
-        m={"4"}
-        position={"fixed"}
-        bottom={"0%"}
-        bg={"white"}
-        rounded={"md"}
-      >
-        <Button
-          colorScheme={"red"}
-          rightIcon={<Icon name={"cross"} />}
-          variant={"outline"}
-          onClick={() => navigate("/")}
-        >
-          Cancel
-        </Button>
-
-        <Button
-          colorScheme={"green"}
-          rightIcon={<Icon name={"check"} />}
-          onClick={() => {
-            // Push the data
-            setIsSubmitting(true);
-            postData(`/collections/create`, collectionData).then(() => {
-              setIsSubmitting(false);
-              navigate("/collections");
-            });
-          }}
-          isDisabled={isDetailsError && !isSubmitting}
-        >
-          Finish
-        </Button>
       </Flex>
 
       {/* Information modal */}
@@ -1151,7 +1129,16 @@ const AttributePage = () => {
           </Flex>
 
           {/* Action buttons */}
-          <Flex p={"2"} alignSelf={"center"} gap={"8"}>
+          <Flex
+            direction={"row"}
+            flexWrap={"wrap"}
+            gap={"6"}
+            justify={"space-between"}
+            alignSelf={"center"}
+            w={["sm", "xl", "3xl"]}
+            maxW={"7xl"}
+            p={"4"}
+          >
             <Button
               colorScheme={"red"}
               variant={"outline"}

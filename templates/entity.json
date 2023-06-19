@@ -1,5 +1,6 @@
 {
   "_id": "abcd1234",
+  "deleted": true,
   "name": "Entity Name",
   "created": "2022-05-19T22:34:29.501Z",
   "owner": "henry.burgess@wustl.edu",
@@ -32,6 +33,44 @@
           "name": "URL",
           "type": "url",
           "data": "https://box.wustl.edu"
+        }
+      ]
+    }
+  ],
+  "history": [
+    {
+      "version": "2022-05-19T22:34:29.501Z",
+      "description": "Entity description",
+      "collections": [
+        "abcd1234"
+      ],
+      "associations": {
+        "origins": [
+          {
+            "name": "Origin name",
+            "id": "abcd1234"
+          }
+        ],
+        "products": [
+          {
+            "name": "Product name",
+            "id": "abcd1234"
+          }
+        ]
+      },
+      "attributes": [
+        {
+          "id": "abcd1234",
+          "name": "Test Attribute",
+          "description": "An example attribute.",
+          "type": "data",
+          "values": [
+            {
+              "name": "URL",
+              "type": "url",
+              "data": "https://box.wustl.edu"
+            }
+          ]
         }
       ]
     }

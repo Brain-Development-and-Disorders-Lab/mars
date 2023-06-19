@@ -23,6 +23,7 @@ import {
   ScaleFade,
   Select,
   Spacer,
+  Text,
   useDisclosure,
   useToast,
 } from "@chakra-ui/react";
@@ -186,6 +187,7 @@ const Values = (props: {
                 id={`i_${info.row.original.identifier}_data`}
                 type={"number"}
                 value={value}
+                w={"2xs"}
                 disabled={props.viewOnly}
                 onChange={onChange}
                 onBlur={onBlur}
@@ -197,6 +199,7 @@ const Values = (props: {
               <Input
                 id={`i_${info.row.original.identifier}_data`}
                 value={value}
+                w={"2xs"}
                 disabled={props.viewOnly}
                 onChange={onChange}
                 onBlur={onBlur}
@@ -209,6 +212,7 @@ const Values = (props: {
                 <Input
                   id={`i_${info.row.original.identifier}_data`}
                   value={value}
+                  w={"2xs"}
                   disabled={props.viewOnly}
                   onChange={onChange}
                   onBlur={onBlur}
@@ -231,6 +235,7 @@ const Values = (props: {
                 id={`i_${info.row.original.identifier}_data`}
                 type={"datetime-local"}
                 value={value}
+                w={"2xs"}
                 disabled={props.viewOnly}
                 onChange={onChange}
                 onBlur={onBlur}
@@ -245,6 +250,7 @@ const Values = (props: {
                   id={`s_${info.row.original.identifier}_data`}
                   value={value}
                   placeholder={"Entity"}
+                  w={"2xs"}
                   disabled={props.viewOnly}
                   onChange={onChange}
                   onBlur={onBlur}
@@ -272,6 +278,7 @@ const Values = (props: {
                 title="Select Option"
                 id={`s_${info.row.original.identifier}_data`}
                 value={value.selected}
+                w={"2xs"}
                 disabled={props.viewOnly}
                 onChange={onSelectChange}
                 onBlur={onBlur}
@@ -487,6 +494,11 @@ const Values = (props: {
             <ModalCloseButton />
             <ModalBody gap={"4"}>
               <Flex direction={"column"} gap={"4"}>
+                <Text>
+                  For a Select value, set the options to be displayed. Duplicates are not permitted.
+                  Name the option, then click "Add" to add it to the collection of options associated
+                  with this Select value. Click "Continue" to add this Select value to the Attribute.
+                </Text>
                 <Flex direction={"row"} gap={"4"}>
                   <Input placeholder={"Option Value"} value={option} onChange={(event) => setOption(event.target.value)} />
                   <Button

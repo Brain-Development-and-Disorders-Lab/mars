@@ -269,6 +269,7 @@ const Entity = () => {
         _id: entityData._id,
         name: entityData.name,
         created: entityData.created,
+        deleted: entityData.deleted,
         owner: entityData.owner,
         description: entityDescription,
         collections: entityCollections,
@@ -277,6 +278,7 @@ const Entity = () => {
           products: entityProducts,
         },
         attributes: entityAttributes,
+        history: entityData.history,
       };
 
       // Update data
@@ -306,6 +308,52 @@ const Entity = () => {
     } else {
       setEditing(true);
     }
+  };
+
+  const handleRestoreClick = () => {
+    // Collate data for updating
+    const updateData: EntityModel = {
+      _id: entityData._id,
+      name: entityData.name,
+      created: entityData.created,
+      deleted: false,
+      owner: entityData.owner,
+      description: entityDescription,
+      collections: entityCollections,
+      associations: {
+        origins: entityOrigins,
+        products: entityProducts,
+      },
+      attributes: entityAttributes,
+      history: entityData.history,
+    };
+
+    setIsLoaded(false);
+
+    // Update data
+    postData(`/entities/update`, updateData)
+      .then((_response) => {
+        toast({
+          title: "Restored!",
+          status: "success",
+          duration: 2000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+      })
+      .catch(() => {
+        toast({
+          title: "Error",
+          description: "An error occurred when restoring this Entity.",
+          status: "error",
+          duration: 2000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+      }).finally(() => {
+        setEntityData(updateData);
+        setIsLoaded(true);
+      });
   };
 
   // Handle clicking the "Export" button
@@ -544,6 +592,9 @@ const Entity = () => {
               >
                 <Icon name={"entity"} size={"lg"} />
                 <Heading fontWeight={"semibold"}>{entityData.name}</Heading>
+                {entityData.deleted &&
+                  <Icon name={"delete"} size={"lg"} />
+                }
               </Flex>
 
               {/* Buttons */}
@@ -585,20 +636,30 @@ const Entity = () => {
                     </PopoverContent>
                   </Popover>
                 )}
-                <Button
-                  onClick={handleEditClick}
-                  colorScheme={editing ? "green" : "gray"}
-                  rightIcon={
-                    editing ? <Icon name={"check"} /> : <Icon name={"edit"} />
-                  }
-                >
-                  {editing ? "Done" : "Edit"}
-                </Button>
+                {entityData.deleted ?
+                  <Button
+                    onClick={handleRestoreClick}
+                    colorScheme={"green"}
+                    rightIcon={<Icon name={"check"} />}
+                  >
+                    Restore
+                  </Button>
+                :
+                  <Button
+                    onClick={handleEditClick}
+                    colorScheme={editing ? "green" : "gray"}
+                    rightIcon={
+                      editing ? <Icon name={"check"} /> : <Icon name={"edit"} />
+                    }
+                  >
+                    {editing ? "Done" : "Edit"}
+                  </Button>
+                }
                 <Button
                   onClick={onGraphOpen}
                   rightIcon={<Icon name={"graph"} />}
                   colorScheme={"orange"}
-                  isDisabled={editing}
+                  isDisabled={editing || entityData.deleted}
                 >
                   Links
                 </Button>
@@ -606,7 +667,7 @@ const Entity = () => {
                   onClick={handleExportClick}
                   rightIcon={<Icon name={"download"} />}
                   colorScheme={"blue"}
-                  isDisabled={editing}
+                  isDisabled={editing || entityData.deleted}
                 >
                   Export
                 </Button>

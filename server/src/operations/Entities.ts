@@ -4,7 +4,7 @@ import consola from "consola";
 
 // Utility functions
 import { getDatabase, getIdentifier } from "../database/connection";
-import { Updates } from "./Updates";
+import { Activity } from "./Activity";
 import { Collections } from "./Collections";
 
 // File generation
@@ -80,7 +80,7 @@ export class Entities {
 
           // Add Update operation
           operations.push(
-            Updates.create({
+            Activity.create({
               timestamp: new Date(Date.now()),
               type: "create",
               details: "Created new Entity",
@@ -273,7 +273,7 @@ export class Entities {
 
           // Add Update operation
           operations.push(
-            Updates.create({
+            Activity.create({
               timestamp: new Date(Date.now()),
               type: "update",
               details: "Updated Entity",
@@ -289,6 +289,7 @@ export class Entities {
           Promise.all(operations).then((_result) => {
             const updates = {
               $set: {
+                deleted: updatedEntity.deleted,
                 description: updatedEntity.description,
                 collections: [...collectionsToKeep, ...collectionsToAdd],
                 associations: {
@@ -863,7 +864,9 @@ export class Entities {
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES_COLLECTION)
-        .find({})
+        .find({
+          deleted: false,
+        })
         .toArray((error: any, result: any) => {
           if (error) {
             throw error;
@@ -1011,34 +1014,9 @@ export class Entities {
 
           const operations: Promise<any>[] = [];
 
-          // Remove the Entity from all Collections
-          entity.collections.map((collection) => {
-            operations.push(Collections.removeEntity(collection, entity._id));
-          });
-
-          // Remove the Entity as a Product of the listed Origins
-          entity.associations.origins.map((origin) => {
-            operations.push(
-              Entities.removeProduct(origin, {
-                id: entity._id,
-                name: entity.name,
-              })
-            );
-          });
-
-          // Remove the Entity as a Origin of the listed Products
-          entity.associations.products.map((product) => {
-            operations.push(
-              Entities.removeOrigin(product, {
-                id: entity._id,
-                name: entity.name,
-              })
-            );
-          });
-
           // Add Update operation
           operations.push(
-            Updates.create({
+            Activity.create({
               timestamp: new Date(Date.now()),
               type: "delete",
               details: "Deleted Entity",
@@ -1052,17 +1030,28 @@ export class Entities {
 
           // Resolve all operations then resolve overall Promise
           Promise.all(operations).then((_result) => {
-            // Delete the Entity
+            // Set the deleted flag
+            const updates = {
+              $set: {
+                deleted: true,
+              },
+            };
+
             getDatabase()
               .collection(ENTITIES_COLLECTION)
-              .deleteOne({ _id: id }, (error: any, _content: any) => {
-                if (error) {
-                  throw error;
-                }
+              .updateOne(
+                { _id: entity._id },
+                updates,
+                (error: any, _response: any) => {
+                  if (error) {
+                    throw error;
+                  }
 
-                consola.success("Deleted Entity (id):", id.toString());
-                resolve(entity);
-              });
+                  // Resolve the Promise
+                  consola.success("Deleted Entity:", entity.name);
+                  resolve(entity);
+                }
+              );
           });
         });
     });

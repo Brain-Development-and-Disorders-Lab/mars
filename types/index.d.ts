@@ -101,6 +101,7 @@ export type CollectionModel = ICollection & {
 export type IEntity = {
   name: string;
   created: string;
+  deleted: boolean;
   owner: string;
   description: string;
   collections: string[];
@@ -109,10 +110,23 @@ export type IEntity = {
     products: { name: string; id: string }[];
   };
   attributes: AttributeModel[];
+  history: EntityHistory[];
 };
 
 export type EntityModel = IEntity & {
   _id: string;
+};
+
+export type EntityHistory = {
+  deleted: boolean;
+  owner: string;
+  description: string;
+  collections: string[];
+  associations: {
+    origins: { name: string; id: string }[];
+    products: { name: string; id: string }[];
+  };
+  attributes: AttributeModel[];
 };
 
 export type EntityExport = {
@@ -129,8 +143,8 @@ export type EntityExport = {
   [key: string]: string;
 }
 
-// Update types
-export type IUpdate = {
+// Activity types
+export type IActivity = {
   timestamp: Date;
   type: "create" | "update" | "delete";
   details: string;
@@ -141,7 +155,7 @@ export type IUpdate = {
   };
 };
 
-export type UpdateModel = IUpdate & {
+export type ActivityModel = IActivity & {
   _id: string;
 };
 

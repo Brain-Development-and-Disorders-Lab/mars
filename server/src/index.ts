@@ -10,11 +10,11 @@ import consola from "consola";
 import { connect } from "./database/connection";
 
 // Routes
+import ActivityRoute from "./routes/Activity";
 import EntitiesRoute from "./routes/Entities";
 import CollectionsRoute from "./routes/Collections";
 import AttributesRoute from "./routes/Attributes";
 import SearchRoute from "./routes/Search";
-import UpdatesRoute from "./routes/Updates";
 import AuthenticationRoute from "./routes/Authentication";
 
 const app = express();
@@ -29,7 +29,7 @@ app.use(
   CollectionsRoute,
   AttributesRoute,
   SearchRoute,
-  UpdatesRoute
+  ActivityRoute
 );
 
 // Start the Express server
