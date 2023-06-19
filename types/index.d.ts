@@ -118,6 +118,7 @@ export type EntityModel = IEntity & {
 };
 
 export type EntityHistory = {
+  timestamp: string;
   deleted: boolean;
   owner: string;
   description: string;
@@ -197,6 +198,7 @@ export type IconNames =
   "exclamation" |
   "reload" |
   "graph" |
+  "clock" |
 
   // Values
   "v_date" |

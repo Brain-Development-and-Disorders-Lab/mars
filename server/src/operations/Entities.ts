@@ -306,6 +306,21 @@ export class Entities {
                     ...productsToAdd,
                   ],
                 },
+                history: [
+                  ...currentEntity.history,
+                  {
+                    timestamp: dayjs(Date.now()).toISOString(),
+                    deleted: currentEntity.deleted,
+                    owner: currentEntity.owner,
+                    description: currentEntity.description,
+                    collections: currentEntity.collections,
+                    associations: {
+                      origins: currentEntity.associations.origins,
+                      products: currentEntity.associations.products,
+                    },
+                    attributes: currentEntity.attributes,
+                  }
+                ],
               },
             };
 

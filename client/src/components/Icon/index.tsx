@@ -17,6 +17,7 @@ import {
   BsChevronLeft,
   BsChevronRight,
   BsChevronUp,
+  BsClockHistory,
   BsCloudDownloadFill,
   BsCollectionFill,
   BsDiagram2Fill,
@@ -72,6 +73,7 @@ const SYSTEM_ICONS: { [k: string]: IconType } = {
   exclamation: BsExclamationOctagonFill,
   reload: BsArrowClockwise,
   graph: BsDiagram2Fill,
+  clock: BsClockHistory,
 
   // Values
   v_date: BsCalendarWeekFill,

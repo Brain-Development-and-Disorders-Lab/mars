@@ -606,7 +606,7 @@ const Entity = () => {
                 p={"4"}
                 rounded={"md"}
               >
-                {editing && (
+                {editing &&
                   <Popover>
                     <PopoverTrigger>
                       <Button
@@ -634,7 +634,7 @@ const Entity = () => {
                       </PopoverBody>
                     </PopoverContent>
                   </Popover>
-                )}
+                }
                 {entityData.deleted ? (
                   <Button
                     onClick={handleRestoreClick}
@@ -644,15 +644,23 @@ const Entity = () => {
                     Restore
                   </Button>
                 ) : (
-                  <Button
-                    onClick={handleEditClick}
-                    colorScheme={editing ? "green" : "gray"}
-                    rightIcon={
-                      editing ? <Icon name={"check"} /> : <Icon name={"edit"} />
-                    }
-                  >
-                    {editing ? "Done" : "Edit"}
-                  </Button>
+                  <Flex gap={"4"}>
+                    <Button
+                      colorScheme={"gray"}
+                      rightIcon={<Icon name={"clock"} />}
+                    >
+                      History
+                    </Button>
+                    <Button
+                      onClick={handleEditClick}
+                      colorScheme={editing ? "green" : "gray"}
+                      rightIcon={
+                        editing ? <Icon name={"check"} /> : <Icon name={"edit"} />
+                      }
+                    >
+                      {editing ? "Done" : "Edit"}
+                    </Button>
+                  </Flex>
                 )}
                 <Button
                   onClick={onGraphOpen}
