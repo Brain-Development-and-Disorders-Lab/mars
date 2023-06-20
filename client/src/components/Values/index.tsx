@@ -3,6 +3,7 @@ import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 
 // Existing and custom components
 import {
+  Box,
   Button,
   Flex,
   Input,
@@ -15,9 +16,15 @@ import {
   ModalContent,
   ModalHeader,
   ModalOverlay,
+  Popover,
+  PopoverArrow,
+  PopoverBody,
+  PopoverCloseButton,
+  PopoverContent,
+  PopoverHeader,
+  PopoverTrigger,
   ScaleFade,
   Select,
-  Spacer,
   Text,
   useDisclosure,
   useToast,
@@ -135,6 +142,7 @@ const Values = (props: {
               disabled={props.viewOnly}
               onChange={onChange}
               onBlur={onBlur}
+              minW={"2xs"}
             />
           </InputGroup>
         );
@@ -360,121 +368,140 @@ const Values = (props: {
           gap={"2"}
           p={"4"}
           flexWrap={"wrap"}
-          justify={"center"}
+          justify={"right"}
           align={"center"}
         >
-          {/* Buttons to add Values */}
-          <Button
-            variant={"outline"}
-            leftIcon={<Icon name={"v_date"} />}
-            onClick={() => {
-              props.setValues([
-                ...data,
-                {
-                  identifier: `v_date_${Math.round(performance.now())}`,
-                  name: "",
-                  type: "date",
-                  data: dayjs(new Date()).toISOString(),
-                },
-              ]);
-            }}
-          >
-            Date
-          </Button>
+          <Popover>
+            <PopoverTrigger>
+              <Button
+                colorScheme={"green"}
+                rightIcon={<Icon name={"add"} />}
+              >
+                Add Value
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent>
+              <PopoverArrow />
+              <PopoverCloseButton />
+              <PopoverHeader>Add Value</PopoverHeader>
+              <PopoverBody>
+                <Flex gap={"4"} wrap={"wrap"}>
+                  {/* Buttons to add Values */}
+                  <Button
+                    variant={"outline"}
+                    leftIcon={<Icon name={"v_date"} />}
+                    onClick={() => {
+                      props.setValues([
+                        ...data,
+                        {
+                          identifier: `v_date_${Math.round(performance.now())}`,
+                          name: "",
+                          type: "date",
+                          data: dayjs(new Date()).toISOString(),
+                        },
+                      ]);
+                    }}
+                  >
+                    Date
+                  </Button>
 
-          <Button
-            variant={"outline"}
-            leftIcon={<Icon name={"v_text"} />}
-            onClick={() => {
-              props.setValues([
-                ...data,
-                {
-                  identifier: `v_text_${Math.round(performance.now())}`,
-                  name: "",
-                  type: "text",
-                  data: "",
-                },
-              ]);
-            }}
-          >
-            Text
-          </Button>
+                  <Button
+                    variant={"outline"}
+                    leftIcon={<Icon name={"v_text"} />}
+                    onClick={() => {
+                      props.setValues([
+                        ...data,
+                        {
+                          identifier: `v_text_${Math.round(performance.now())}`,
+                          name: "",
+                          type: "text",
+                          data: "",
+                        },
+                      ]);
+                    }}
+                  >
+                    Text
+                  </Button>
 
-          <Button
-            variant={"outline"}
-            leftIcon={<Icon name={"v_number"} />}
-            onClick={() => {
-              props.setValues([
-                ...data,
-                {
-                  identifier: `v_number_${Math.round(performance.now())}`,
-                  name: "",
-                  type: "number",
-                  data: 0,
-                },
-              ]);
-            }}
-          >
-            Number
-          </Button>
+                  <Button
+                    variant={"outline"}
+                    leftIcon={<Icon name={"v_number"} />}
+                    onClick={() => {
+                      props.setValues([
+                        ...data,
+                        {
+                          identifier: `v_number_${Math.round(performance.now())}`,
+                          name: "",
+                          type: "number",
+                          data: 0,
+                        },
+                      ]);
+                    }}
+                  >
+                    Number
+                  </Button>
 
-          <Button
-            variant={"outline"}
-            leftIcon={<Icon name={"v_url"} />}
-            onClick={() => {
-              props.setValues([
-                ...data,
-                {
-                  identifier: `v_url_${Math.round(performance.now())}`,
-                  name: "",
-                  type: "url",
-                  data: "",
-                },
-              ]);
-            }}
-          >
-            URL
-          </Button>
+                  <Button
+                    variant={"outline"}
+                    leftIcon={<Icon name={"v_url"} />}
+                    onClick={() => {
+                      props.setValues([
+                        ...data,
+                        {
+                          identifier: `v_url_${Math.round(performance.now())}`,
+                          name: "",
+                          type: "url",
+                          data: "",
+                        },
+                      ]);
+                    }}
+                  >
+                    URL
+                  </Button>
 
-          <Button
-            variant={"outline"}
-            leftIcon={<Icon name={"entity"} />}
-            onClick={() => {
-              props.setValues([
-                ...data,
-                {
-                  identifier: `p_entity_${Math.round(performance.now())}`,
-                  name: "",
-                  type: "entity",
-                  data: "",
-                },
-              ]);
-            }}
-          >
-            Entity
-          </Button>
+                  <Button
+                    variant={"outline"}
+                    leftIcon={<Icon name={"entity"} />}
+                    onClick={() => {
+                      props.setValues([
+                        ...data,
+                        {
+                          identifier: `p_entity_${Math.round(performance.now())}`,
+                          name: "",
+                          type: "entity",
+                          data: "",
+                        },
+                      ]);
+                    }}
+                  >
+                    Entity
+                  </Button>
 
-          <Button
-            variant={"outline"}
-            leftIcon={<Icon name={"v_select"} />}
-            onClick={() => {
-              onOpen();
-            }}
-          >
-            Select
-          </Button>
-
-          <Spacer />
+                  <Button
+                    variant={"outline"}
+                    leftIcon={<Icon name={"v_select"} />}
+                    onClick={() => {
+                      onOpen();
+                    }}
+                  >
+                    Select
+                  </Button>
+                </Flex>
+              </PopoverBody>
+            </PopoverContent>
+          </Popover>
         </Flex>
       )}
 
-      <DataTable
-        columns={columns}
-        visibleColumns={{}}
-        data={data}
-        setData={props.setValues}
-        viewOnly={props.viewOnly}
-      />
+      <Box overflowX={"auto"} maxW={"80vw"}>
+        <DataTable
+          columns={columns}
+          visibleColumns={{}}
+          data={data}
+          setData={props.setValues}
+          viewOnly={props.viewOnly}
+        />
+      </Box>
 
       <ScaleFade initialScale={0.9} in={isOpen}>
         <Modal
