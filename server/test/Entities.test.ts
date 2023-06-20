@@ -60,6 +60,7 @@ describe("POST /entities/create", () => {
         products: [],
       },
       attributes: [],
+      history: [],
     }).then((result: EntityModel) => {
       expect(result.name).toBe("TestEntity");
     });
@@ -78,6 +79,7 @@ describe("POST /entities/create", () => {
         products: [],
       },
       attributes: [],
+      history: [],
     })
       .then((result: EntityModel) => {
         // Create a second Entity that is a Product of the initial Entity
@@ -97,6 +99,7 @@ describe("POST /entities/create", () => {
             products: [],
           },
           attributes: [],
+          history: [],
         });
       })
       .then((entity: EntityModel) => {
@@ -140,6 +143,7 @@ describe("POST /entities/create", () => {
         products: [],
       },
       attributes: [],
+      history: [],
     })
       .then((result: EntityModel) => {
         // Create a second Entity that is an Origin of the initial Entity
@@ -159,6 +163,7 @@ describe("POST /entities/create", () => {
             ],
           },
           attributes: [],
+          history: [],
         });
       })
       .then((entity: EntityModel) => {
@@ -211,6 +216,7 @@ describe("POST /entities/create", () => {
             products: [],
           },
           attributes: [],
+          history: [],
         });
       })
       .then((entity: EntityModel) => {
@@ -254,6 +260,7 @@ describe("POST /entities/create", () => {
           values: [],
         },
       ],
+      history: [],
     }).then((result: EntityModel) => {
       // Check that an Attribute exists and it has the correct ID
       expect(result.attributes.length).toBe(1);
@@ -275,6 +282,7 @@ describe("POST /entities/update", () => {
         products: [],
       },
       attributes: [],
+      history: [],
     })
       .then((result: EntityModel) => {
         // Update the description
@@ -299,6 +307,7 @@ describe("POST /entities/update", () => {
         products: [],
       },
       attributes: [],
+      history: [],
     })
       .then((result: EntityModel) => {
         // Create a Collection
@@ -371,6 +380,7 @@ describe("POST /entities/update", () => {
         products: [],
       },
       attributes: [],
+      history: [],
     })
       .then((result: EntityModel) => {
         // Create an Origin
@@ -387,6 +397,7 @@ describe("POST /entities/update", () => {
               products: [],
             },
             attributes: [],
+            history: [],
           }),
         ]);
       })
@@ -455,6 +466,7 @@ describe("POST /entities/update", () => {
         products: [],
       },
       attributes: [],
+      history: [],
     })
       .then((result: EntityModel) => {
         // Create a Product
@@ -471,6 +483,7 @@ describe("POST /entities/update", () => {
               products: [],
             },
             attributes: [],
+            history: [],
           }),
         ]);
       })
@@ -540,6 +553,7 @@ describe("POST /entities/update", () => {
         products: [],
       },
       attributes: [],
+      history: [],
     })
       .then((result: EntityModel) => {
         // Update Entity to add an Attribute
@@ -581,6 +595,7 @@ describe("POST /entities/update", () => {
           values: [],
         },
       ],
+      history: [],
     })
       .then((result: EntityModel) => {
         // Update Entity to remove an Attribute
@@ -616,6 +631,7 @@ describe("POST /entities/update", () => {
           values: [],
         },
       ],
+      history: [],
     })
       .then((result: EntityModel) => {
         // Update Entity to remove an Attribute
