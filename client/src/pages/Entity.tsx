@@ -68,7 +68,13 @@ import Loading from "@components/Loading";
 import Values from "@components/Values";
 
 // Existing and custom types
-import { AttributeModel, CollectionModel, EntityHistory, EntityModel, IValue } from "@types";
+import {
+  AttributeModel,
+  CollectionModel,
+  EntityHistory,
+  EntityModel,
+  IValue,
+} from "@types";
 
 // Utility functions and libraries
 import { deleteData, getData, postData } from "src/database/functions";
@@ -122,7 +128,11 @@ const Entity = () => {
   const [selectedOrigins, setSelectedOrigins] = useState([] as string[]);
 
   // History drawer
-  const { isOpen: isHistoryOpen, onOpen: onHistoryOpen, onClose: onHistoryClose } = useDisclosure();
+  const {
+    isOpen: isHistoryOpen,
+    onOpen: onHistoryOpen,
+    onClose: onHistoryClose,
+  } = useDisclosure();
 
   // Adding Attributes to existing Entity
   const {
@@ -294,36 +304,33 @@ const Entity = () => {
           products: entityProducts,
         },
         attributes: entityAttributes,
-        history: entityData.history,
-      }
+        history: entityHistory,
+      };
 
       // Update data
       postData(`/entities/update`, updateData)
-      .then((response) => {
-        toast({
-          title: "Saved!",
-          status: "success",
-          duration: 2000,
-          position: "bottom-right",
-          isClosable: true,
+        .then((_response) => {
+          toast({
+            title: "Saved!",
+            status: "success",
+            duration: 2000,
+            position: "bottom-right",
+            isClosable: true,
+          });
+        })
+        .catch(() => {
+          toast({
+            title: "Error",
+            description: "An error occurred when saving updates.",
+            status: "error",
+            duration: 2000,
+            position: "bottom-right",
+            isClosable: true,
+          });
+        })
+        .finally(() => {
+          setEditing(false);
         });
-
-        // Update the Entity history instantly
-        setEntityHistory(response.history);
-      })
-      .catch(() => {
-        toast({
-          title: "Error",
-          description: "An error occurred when saving updates.",
-          status: "error",
-          duration: 2000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-      })
-      .finally(() => {
-        setEditing(false);
-      });
     } else {
       setEditing(true);
     }
@@ -411,39 +418,39 @@ const Entity = () => {
 
     // Update data
     postData(`/entities/update`, updateData)
-    .then((_response) => {
-      toast({
-        title: "Saved!",
-        status: "success",
-        duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
-      });
-    })
-    .catch(() => {
-      toast({
-        title: "Error",
-        description: "An error occurred when saving updates.",
-        status: "error",
-        duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
-      });
-    })
-    .finally(() => {
-      // Close the drawer
-      onHistoryClose();
+      .then((_response) => {
+        toast({
+          title: "Saved!",
+          status: "success",
+          duration: 2000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+      })
+      .catch(() => {
+        toast({
+          title: "Error",
+          description: "An error occurred when saving updates.",
+          status: "error",
+          duration: 2000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+      })
+      .finally(() => {
+        // Close the drawer
+        onHistoryClose();
 
-      // Apply updated state
-      setEntityData(updateData);
-      setEntityDescription(updateData.description);
-      setEntityCollections(updateData.collections);
-      setEntityOrigins(updateData.associations.origins);
-      setEntityProducts(updateData.associations.products);
-      setEntityAttributes(updateData.attributes);
-      setEntityHistory(updateData.history);
-      setIsLoaded(true);
-    });
+        // Apply updated state
+        setEntityData(updateData);
+        setEntityDescription(updateData.description);
+        setEntityCollections(updateData.collections);
+        setEntityOrigins(updateData.associations.origins);
+        setEntityProducts(updateData.associations.products);
+        setEntityAttributes(updateData.attributes);
+        setEntityHistory(updateData.history);
+        setIsLoaded(true);
+      });
   };
 
   // Handle clicking the "Export" button
@@ -696,7 +703,7 @@ const Entity = () => {
                   p={"4"}
                   rounded={"md"}
                 >
-                  {editing &&
+                  {editing && (
                     <Popover>
                       <PopoverTrigger>
                         <Button
@@ -724,7 +731,7 @@ const Entity = () => {
                         </PopoverBody>
                       </PopoverContent>
                     </Popover>
-                  }
+                  )}
                   {entityData.deleted ? (
                     <Button
                       onClick={handleRestoreFromDeleteClick}
@@ -739,7 +746,11 @@ const Entity = () => {
                         onClick={handleEditClick}
                         colorScheme={editing ? "green" : "gray"}
                         rightIcon={
-                          editing ? <Icon name={"check"} /> : <Icon name={"edit"} />
+                          editing ? (
+                            <Icon name={"check"} />
+                          ) : (
+                            <Icon name={"edit"} />
+                          )
                         }
                       >
                         {editing ? "Done" : "Edit"}
@@ -1807,19 +1818,23 @@ const Entity = () => {
 
                 <DrawerBody>
                   <VStack spacing={"4"}>
-                    {entityHistory && entityHistory.length > 0 ?
+                    {entityHistory && entityHistory.length > 0 ? (
                       entityHistory.map((entityVersion) => {
                         return (
                           <Card w={"100%"} key={`v_${entityVersion.timestamp}`}>
                             <CardHeader>
                               <Flex align={"center"}>
-                                <Text fontStyle={"italic"}>{dayjs(entityVersion.timestamp).fromNow()}</Text>
+                                <Text fontStyle={"italic"}>
+                                  {dayjs(entityVersion.timestamp).fromNow()}
+                                </Text>
                                 <Spacer />
                                 <Button
                                   colorScheme={"orange"}
                                   rightIcon={<Icon name={"clock"} />}
                                   onClick={() => {
-                                    handleRestoreFromHistoryClick(entityVersion);
+                                    handleRestoreFromHistoryClick(
+                                      entityVersion
+                                    );
                                   }}
                                 >
                                   Restore
@@ -1830,69 +1845,112 @@ const Entity = () => {
                               <VStack gap={"1"} align={"baseline"}>
                                 <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
                                   <Text fontWeight={"bold"}>Description:</Text>
-                                  <Text noOfLines={2}>{_.isEqual(entityVersion.description, "") ? "None" : entityVersion.description}</Text>
+                                  <Text noOfLines={2}>
+                                    {_.isEqual(entityVersion.description, "")
+                                      ? "None"
+                                      : entityVersion.description}
+                                  </Text>
                                 </Flex>
                                 <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
                                   <Text fontWeight={"bold"}>Collections:</Text>
-                                  {entityVersion.collections.length > 0 ?
-                                    entityVersion.collections.map((collection) => {
-                                      return (
-                                        <Tag key={`v_c_${entityVersion.timestamp}_${collection}`}><Linky type={"collections"} id={collection} /></Tag>
-                                      );
-                                    })
-                                  :
+                                  {entityVersion.collections.length > 0 ? (
+                                    entityVersion.collections.map(
+                                      (collection) => {
+                                        return (
+                                          <Tag
+                                            key={`v_c_${entityVersion.timestamp}_${collection}`}
+                                          >
+                                            <Linky
+                                              type={"collections"}
+                                              id={collection}
+                                            />
+                                          </Tag>
+                                        );
+                                      }
+                                    )
+                                  ) : (
                                     <Text>None</Text>
-                                  }
+                                  )}
                                 </Flex>
                                 <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
                                   <Text fontWeight={"bold"}>Attributes:</Text>
-                                  {entityVersion.attributes.length > 0 ?
-                                    entityVersion.attributes.map((attribute) => {
-                                      return (
-                                        <Tag key={`v_a_${entityVersion.timestamp}_${attribute._id}`}>{attribute.name}</Tag>
-                                      );
-                                    })
-                                  :
+                                  {entityVersion.attributes.length > 0 ? (
+                                    entityVersion.attributes.map(
+                                      (attribute) => {
+                                        return (
+                                          <Tag
+                                            key={`v_a_${entityVersion.timestamp}_${attribute._id}`}
+                                          >
+                                            {attribute.name}
+                                          </Tag>
+                                        );
+                                      }
+                                    )
+                                  ) : (
                                     <Text>None</Text>
-                                  }
+                                  )}
                                 </Flex>
                                 <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
                                   <Text fontWeight={"bold"}>Origins:</Text>
-                                  {entityVersion.associations.origins.length > 0 ?
-                                    entityVersion.associations.origins.map((origin) => {
-                                      return (
-                                        <Tag key={`v_o_${entityVersion.timestamp}_${origin.id}`}><Linky type={"entities"} id={origin.id} /></Tag>
-                                      );
-                                    })
-                                  :
+                                  {entityVersion.associations.origins.length >
+                                  0 ? (
+                                    entityVersion.associations.origins.map(
+                                      (origin) => {
+                                        return (
+                                          <Tag
+                                            key={`v_o_${entityVersion.timestamp}_${origin.id}`}
+                                          >
+                                            <Linky
+                                              type={"entities"}
+                                              id={origin.id}
+                                            />
+                                          </Tag>
+                                        );
+                                      }
+                                    )
+                                  ) : (
                                     <Text>None</Text>
-                                  }
+                                  )}
                                 </Flex>
                                 <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
                                   <Text fontWeight={"bold"}>Products:</Text>
-                                  {entityVersion.associations.products.length > 0 ?
-                                    entityVersion.associations.products.map((product) => {
-                                      return (
-                                        <Tag key={`v_p_${entityVersion.timestamp}_${product.id}`}><Linky type={"entities"} id={product.id} /></Tag>
-                                      );
-                                    })
-                                  :
+                                  {entityVersion.associations.products.length >
+                                  0 ? (
+                                    entityVersion.associations.products.map(
+                                      (product) => {
+                                        return (
+                                          <Tag
+                                            key={`v_p_${entityVersion.timestamp}_${product.id}`}
+                                          >
+                                            <Linky
+                                              type={"entities"}
+                                              id={product.id}
+                                            />
+                                          </Tag>
+                                        );
+                                      }
+                                    )
+                                  ) : (
                                     <Text>None</Text>
-                                  }
+                                  )}
                                 </Flex>
                               </VStack>
                             </CardBody>
                           </Card>
                         );
                       })
-                    :
+                    ) : (
                       <Text>No previous versions.</Text>
-                    }
+                    )}
                   </VStack>
                 </DrawerBody>
 
                 <DrawerFooter>
-                  <Button colorScheme={"red"} onClick={onHistoryClose} rightIcon={<Icon name={"cross"} />}>
+                  <Button
+                    colorScheme={"red"}
+                    onClick={onHistoryClose}
+                    rightIcon={<Icon name={"cross"} />}
+                  >
                     Close
                   </Button>
                 </DrawerFooter>
