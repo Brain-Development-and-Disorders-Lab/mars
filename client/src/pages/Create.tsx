@@ -53,6 +53,7 @@ import {
   EntityModel,
   IValue,
   ICollection,
+  CreatePage,
 } from "@types";
 
 // Routing and navigation
@@ -64,7 +65,7 @@ import { getData, postData } from "@database/functions";
 import _ from "lodash";
 import { nanoid } from "nanoid";
 
-const EntityPage = () => {
+const EntityPage = (props: { createPageState: CreatePage, setCreatePageState: React.Dispatch<React.SetStateAction<CreatePage>> }) => {
   // Used to manage what detail inputs are presented
   const [pageState, setPageState] = useState(
     "start" as "start" | "attributes" | "associations"
@@ -235,7 +236,7 @@ const EntityPage = () => {
 
   // Handle clicking "Cancel"
   const onCancel = () => {
-    navigate("/entities");
+    props.setCreatePageState("default");
   };
 
   // Removal callback
@@ -698,8 +699,7 @@ const EntityPage = () => {
                 justify={"space-between"}
                 alignSelf={"center"}
                 align={"center"}
-                w={["sm", "xl", "3xl"]}
-                maxW={"7xl"}
+                w={"100%"}
                 p={"4"}
               >
                 <Flex gap={"4"}>
@@ -761,7 +761,7 @@ const EntityPage = () => {
   );
 };
 
-const CollectionPage = () => {
+const CollectionPage = (props: { createPageState: CreatePage, setCreatePageState: React.Dispatch<React.SetStateAction<CreatePage>> }) => {
   const navigate = useNavigate();
   const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -928,15 +928,14 @@ const CollectionPage = () => {
             gap={"6"}
             justify={"space-between"}
             alignSelf={"center"}
-            w={["sm", "xl", "3xl"]}
-            maxW={"7xl"}
+            w={"100%"}
             p={"4"}
           >
             <Button
               colorScheme={"red"}
               rightIcon={<Icon name={"cross"} />}
               variant={"outline"}
-              onClick={() => navigate("/")}
+              onClick={() => props.setCreatePageState("default")}
             >
               Cancel
             </Button>
@@ -979,7 +978,7 @@ const CollectionPage = () => {
   );
 };
 
-const AttributePage = () => {
+const AttributePage = (props: { createPageState: CreatePage, setCreatePageState: React.Dispatch<React.SetStateAction<CreatePage>> }) => {
   const navigate = useNavigate();
   const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -1118,15 +1117,14 @@ const AttributePage = () => {
             gap={"6"}
             justify={"space-between"}
             alignSelf={"center"}
-            w={["sm", "xl", "3xl"]}
-            maxW={"7xl"}
+            w={"100%"}
             p={"4"}
           >
             <Button
               colorScheme={"red"}
               variant={"outline"}
               rightIcon={<Icon name={"cross"} />}
-              onClick={() => navigate("/")}
+              onClick={() => props.setCreatePageState("default")}
             >
               Cancel
             </Button>
@@ -1196,9 +1194,7 @@ const AttributePage = () => {
 };
 
 const Create = () => {
-  const [createPage, setCreatePage] = useState(
-    "default" as "default" | "entity" | "collection" | "attribute"
-  );
+  const [createPage, setCreatePage] = useState("default" as CreatePage);
 
   return (
     <>
@@ -1407,13 +1403,13 @@ const Create = () => {
       )}
 
       {/* Create an Entity */}
-      {_.isEqual(createPage, "entity") && <EntityPage />}
+      {_.isEqual(createPage, "entity") && <EntityPage createPageState={createPage} setCreatePageState={setCreatePage} />}
 
       {/* Create a Collection */}
-      {_.isEqual(createPage, "collection") && <CollectionPage />}
+      {_.isEqual(createPage, "collection") && <CollectionPage createPageState={createPage} setCreatePageState={setCreatePage} />}
 
       {/* Create an Attribute */}
-      {_.isEqual(createPage, "attribute") && <AttributePage />}
+      {_.isEqual(createPage, "attribute") && <AttributePage createPageState={createPage} setCreatePageState={setCreatePage} />}
     </>
   );
 };
