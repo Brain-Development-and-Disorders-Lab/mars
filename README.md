@@ -2,7 +2,7 @@
 
 An open-source and customizable workflow tool for tracking and managing metadata generated from scientific experiments.
 
-<img src="mars.png">
+![mars.png](mars.png)
 
 **⚠️ WARNING: MARS is still in early development. It should be used with caution.**
 
@@ -10,7 +10,7 @@ An open-source and customizable workflow tool for tracking and managing metadata
 
 ### Entities 📦
 
-Everything is recognized as an "entity", from physical slices to antibodies to spreadsheets. Entities are generalized and expressed using Attributes, and specific metadata points are defined within Parameters.
+Everything is recognized as an "entity", from physical slices to antibodies. Entities are generalized and expressed using Attributes, expressing data via Values.
 
 Entities have the following metadata components:
 
@@ -25,7 +25,7 @@ Entities have the following metadata components:
 
 ### Attributes ⚙️
 
-Attributes are the primary method of expressing detailed metadata associated with Entities. Attributes contain points of metadata known as *Parameters*. A Parameter can be any of the following types:
+Attributes are the primary method of expressing metadata associated with Entities. Attributes contain points of metadata known as *Values*. Values can be of the following types:
 
 - `string`: A textual description of any length.
 - `number`: A numerical value.
@@ -63,7 +63,7 @@ DEFAULT_PASSWORD=password
 To start a fresh instance of the MongoDB database, use `docker compose`:
 
 ```Bash
-$ docker compose up --build
+docker compose up --build
 ```
 
 This command will build all required containers before starting the containers required to run the system. The system can then be viewed in the browser at `localhost:8080`, and the MongoDB database can be browsed using the `mongo-express` interface accessible at `localhost:8081`.
@@ -81,4 +81,4 @@ To start the MARS interface, run `yarn start` in the `/client` directory. Start 
 - Attribute editing within Entities ✅
 - Metadata query engine, for constructing and executing complex search queries
 - Mechanism to organize and categorize Entities into 'Projects'
-- Drop-down Parameter with customizable options
+- Drop-down Value type with customizable options

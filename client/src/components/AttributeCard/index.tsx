@@ -106,7 +106,9 @@ const AttributeCard = (props: AttributeCardProps) => {
       <CardBody>
         <Flex direction={"column"} p={"1"} gap={"2"} maxW={"sm"}>
           <Flex gap={"2"} direction={"column"}>
-            <Heading size={"sm"} fontWeight={"semibold"}>Description</Heading>
+            <Heading size={"sm"} fontWeight={"semibold"}>
+              Description
+            </Heading>
             <Text noOfLines={2}>
               {description.length > 0
                 ? description
@@ -117,7 +119,9 @@ const AttributeCard = (props: AttributeCardProps) => {
           <Divider />
 
           <Flex gap={"2"} direction={"column"}>
-            <Heading size={"sm"} fontWeight={"semibold"}>Values</Heading>
+            <Heading size={"sm"} fontWeight={"semibold"}>
+              Values
+            </Heading>
             <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
               {values.map((value) => {
                 switch (value.type) {

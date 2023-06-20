@@ -53,6 +53,7 @@ import {
   EntityModel,
   IValue,
   ICollection,
+  CreatePage,
 } from "@types";
 
 // Routing and navigation
@@ -64,7 +65,7 @@ import { getData, postData } from "@database/functions";
 import _ from "lodash";
 import { nanoid } from "nanoid";
 
-const EntityPage = () => {
+const EntityPage = (props: { createPageState: CreatePage, setCreatePageState: React.Dispatch<React.SetStateAction<CreatePage>> }) => {
   // Used to manage what detail inputs are presented
   const [pageState, setPageState] = useState(
     "start" as "start" | "attributes" | "associations"
@@ -103,6 +104,7 @@ const EntityPage = () => {
   const entityState: IEntity = {
     name: name,
     created: created,
+    deleted: false,
     owner: owner,
     description: description,
     associations: {
@@ -111,6 +113,7 @@ const EntityPage = () => {
     },
     collections: selectedCollections,
     attributes: selectedAttributes,
+    history: [],
   };
 
   // Various validation error states
@@ -233,7 +236,7 @@ const EntityPage = () => {
 
   // Handle clicking "Cancel"
   const onCancel = () => {
-    navigate("/entities");
+    props.setCreatePageState("default");
   };
 
   // Removal callback
@@ -267,12 +270,7 @@ const EntityPage = () => {
         isError ? (
           <Error />
         ) : (
-          <Flex
-            direction={"column"}
-            justify={"center"}
-            gap={"6"}
-            wrap={"wrap"}
-          >
+          <Flex direction={"column"} justify={"center"} gap={"6"} wrap={"wrap"}>
             <Flex
               direction={"column"}
               w={["full", "4xl", "7xl"]}
@@ -457,8 +455,8 @@ const EntityPage = () => {
                         </Select>
                         <FormHelperText>
                           If the sources of this Entity currently exist or did
-                          exist in this system, specify those associations here by
-                          selecting the origin Entities.
+                          exist in this system, specify those associations here
+                          by selecting the origin Entities.
                         </FormHelperText>
                         <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
                           {selectedOrigins.map((product) => {
@@ -692,61 +690,55 @@ const EntityPage = () => {
                   </Flex>
                 )}
               </Flex>
-            </Flex>
 
-            {/* Action buttons */}
-            <Flex
-              direction={"row"}
-              flexWrap={"wrap"}
-              gap={"6"}
-              justify={"space-between"}
-              alignSelf={"center"}
-              align={"center"}
-              w={["sm", "xl", "3xl"]}
-              maxW={"7xl"}
-              p={"4"}
-              m={"4"}
-              position={"fixed"}
-              bottom={"0%"}
-              bg={"white"}
-              rounded={"md"}
-            >
-              <Flex gap={"4"}>
-                <Button
-                  colorScheme={"red"}
-                  variant={"outline"}
-                  rightIcon={<Icon name={"cross"} />}
-                  onClick={onCancel}
-                >
-                  Cancel
-                </Button>
-                {!_.isEqual("start", pageState) && (
-                  <Button
-                    colorScheme={"orange"}
-                    variant={"outline"}
-                    leftIcon={<Icon name={"c_left"} />}
-                    onClick={onBack}
-                  >
-                    Back
-                  </Button>
-                )}
-              </Flex>
-
-              <Button
-                colorScheme={"green"}
-                rightIcon={
-                  _.isEqual("attributes", pageState) ? (
-                    <Icon name={"check"} />
-                  ) : (
-                    <Icon name={"c_right"} />
-                  )
-                }
-                onClick={onNext}
-                isDisabled={isValidInput() && !isSubmitting}
-                isLoading={isSubmitting}
+              {/* Action buttons */}
+              <Flex
+                direction={"row"}
+                flexWrap={"wrap"}
+                gap={"6"}
+                justify={"space-between"}
+                alignSelf={"center"}
+                align={"center"}
+                w={"100%"}
+                p={"4"}
               >
-                {_.isEqual("attributes", pageState) ? "Finish" : "Next"}
-              </Button>
+                <Flex gap={"4"}>
+                  <Button
+                    colorScheme={"red"}
+                    variant={"outline"}
+                    rightIcon={<Icon name={"cross"} />}
+                    onClick={onCancel}
+                  >
+                    Cancel
+                  </Button>
+                  {!_.isEqual("start", pageState) && (
+                    <Button
+                      colorScheme={"orange"}
+                      variant={"outline"}
+                      leftIcon={<Icon name={"c_left"} />}
+                      onClick={onBack}
+                    >
+                      Back
+                    </Button>
+                  )}
+                </Flex>
+
+                <Button
+                  colorScheme={"green"}
+                  rightIcon={
+                    _.isEqual("attributes", pageState) ? (
+                      <Icon name={"check"} />
+                    ) : (
+                      <Icon name={"c_right"} />
+                    )
+                  }
+                  onClick={onNext}
+                  isDisabled={isValidInput() && !isSubmitting}
+                  isLoading={isSubmitting}
+                >
+                  {_.isEqual("attributes", pageState) ? "Finish" : "Next"}
+                </Button>
+              </Flex>
             </Flex>
 
             {/* Information modal */}
@@ -756,23 +748,7 @@ const EntityPage = () => {
                 <ModalHeader>Entities</ModalHeader>
                 <ModalCloseButton />
                 <ModalBody>
-                  <Text>
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
-                    do eiusmod tempor incididunt ut labore et dolore magna
-                    aliqua.
-                  </Text>
-                  <Text>
-                    Ut enim ad minim veniam, quis nostrud exercitation ullamco
-                    laboris nisi ut aliquip ex ea commodo consequat.
-                  </Text>
-                  <Text>
-                    Duis aute irure dolor in reprehenderit in voluptate velit
-                    esse cillum dolore eu fugiat nulla pariatur.
-                  </Text>
-                  <Text>
-                    Excepteur sint occaecat cupidatat non proident, sunt in
-                    culpa qui officia deserunt mollit anim id est laborum.
-                  </Text>
+                  <Text>Information about creating Entities.</Text>
                 </ModalBody>
               </ModalContent>
             </Modal>
@@ -785,7 +761,7 @@ const EntityPage = () => {
   );
 };
 
-const CollectionPage = () => {
+const CollectionPage = (props: { createPageState: CreatePage, setCreatePageState: React.Dispatch<React.SetStateAction<CreatePage>> }) => {
   const navigate = useNavigate();
   const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -808,6 +784,7 @@ const CollectionPage = () => {
     owner: owner,
     created: created,
     entities: [],
+    history: [],
   };
 
   return (
@@ -944,49 +921,43 @@ const CollectionPage = () => {
               </Flex>
             </Flex>
           </Flex>
+
+          {/* Action buttons */}
+          <Flex
+            direction={"row"}
+            flexWrap={"wrap"}
+            gap={"6"}
+            justify={"space-between"}
+            alignSelf={"center"}
+            w={"100%"}
+            p={"4"}
+          >
+            <Button
+              colorScheme={"red"}
+              rightIcon={<Icon name={"cross"} />}
+              variant={"outline"}
+              onClick={() => props.setCreatePageState("default")}
+            >
+              Cancel
+            </Button>
+
+            <Button
+              colorScheme={"green"}
+              rightIcon={<Icon name={"check"} />}
+              onClick={() => {
+                // Push the data
+                setIsSubmitting(true);
+                postData(`/collections/create`, collectionData).then(() => {
+                  setIsSubmitting(false);
+                  navigate("/collections");
+                });
+              }}
+              isDisabled={isDetailsError && !isSubmitting}
+            >
+              Finish
+            </Button>
+          </Flex>
         </Flex>
-      </Flex>
-
-      {/* Action buttons */}
-      <Flex
-        direction={"row"}
-        flexWrap={"wrap"}
-        gap={"6"}
-        justify={"space-between"}
-        alignSelf={"center"}
-        w={["sm", "xl", "3xl"]}
-        maxW={"7xl"}
-        p={"4"}
-        m={"4"}
-        position={"fixed"}
-        bottom={"0%"}
-        bg={"white"}
-        rounded={"md"}
-      >
-        <Button
-          colorScheme={"red"}
-          rightIcon={<Icon name={"cross"} />}
-          variant={"outline"}
-          onClick={() => navigate("/")}
-        >
-          Cancel
-        </Button>
-
-        <Button
-          colorScheme={"green"}
-          rightIcon={<Icon name={"check"} />}
-          onClick={() => {
-            // Push the data
-            setIsSubmitting(true);
-            postData(`/collections/create`, collectionData).then(() => {
-              setIsSubmitting(false);
-              navigate("/collections");
-            });
-          }}
-          isDisabled={isDetailsError && !isSubmitting}
-        >
-          Finish
-        </Button>
       </Flex>
 
       {/* Information modal */}
@@ -1008,7 +979,7 @@ const CollectionPage = () => {
   );
 };
 
-const AttributePage = () => {
+const AttributePage = (props: { createPageState: CreatePage, setCreatePageState: React.Dispatch<React.SetStateAction<CreatePage>> }) => {
   const navigate = useNavigate();
   const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -1047,18 +1018,8 @@ const AttributePage = () => {
 
   return (
     <Content>
-      <Flex
-        direction={"column"}
-        p={"2"}
-        gap={"6"}
-        wrap={"wrap"}
-      >
-        <Flex
-          direction={"column"}
-          w={"100%"}
-          p={"2"}
-          bg={"white"}
-        >
+      <Flex direction={"column"} p={"2"} gap={"6"} wrap={"wrap"}>
+        <Flex direction={"column"} w={"100%"} p={"2"} bg={"white"}>
           {/* Page header */}
           <Flex direction={"column"} p={"2"} pt={"4"} pb={"4"}>
             <Flex direction={"row"} align={"center"} justify={"space-between"}>
@@ -1151,12 +1112,20 @@ const AttributePage = () => {
           </Flex>
 
           {/* Action buttons */}
-          <Flex p={"2"} alignSelf={"center"} gap={"8"}>
+          <Flex
+            direction={"row"}
+            flexWrap={"wrap"}
+            gap={"6"}
+            justify={"space-between"}
+            alignSelf={"center"}
+            w={"100%"}
+            p={"4"}
+          >
             <Button
               colorScheme={"red"}
               variant={"outline"}
               rightIcon={<Icon name={"cross"} />}
-              onClick={() => navigate("/")}
+              onClick={() => props.setCreatePageState("default")}
             >
               Cancel
             </Button>
@@ -1186,33 +1155,41 @@ const AttributePage = () => {
             <List spacing={2}>
               <ListItem>
                 <Flex gap={"2"} align={"center"}>
-                  <Icon name={"v_date"} />
+                  <Icon name={"v_date"} color={"orange.300"} />
                   <Text>Date: Used to specify a point in time.</Text>
                 </Flex>
               </ListItem>
               <ListItem>
                 <Flex gap={"2"} align={"center"}>
-                  <Icon name={"v_text"} />
+                  <Icon name={"v_text"} color={"blue.300"} />
                   <Text>Text: Used to specify text of variable length.</Text>
                 </Flex>
               </ListItem>
               <ListItem>
                 <Flex gap={"2"} align={"center"}>
-                  <Icon name={"v_number"} />
+                  <Icon name={"v_number"} color={"green.300"} />
                   <Text>Number: Used to specify a numerical value.</Text>
                 </Flex>
               </ListItem>
               <ListItem>
                 <Flex gap={"2"} align={"center"}>
-                  <Icon name={"v_url"} />
+                  <Icon name={"v_url"} color={"yellow.300"} />
                   <Text>URL: Used to specify a link.</Text>
                 </Flex>
               </ListItem>
               <ListItem>
                 <Flex gap={"2"} align={"center"}>
-                  <Icon name={"entity"} />
+                  <Icon name={"entity"} color={"purple.300"} />
                   <Text>
                     Entity: Used to specify a relation to another Entity.
+                  </Text>
+                </Flex>
+              </ListItem>
+              <ListItem>
+                <Flex gap={"2"} align={"center"}>
+                  <Icon name={"v_select"} color={"teal.300"} />
+                  <Text>
+                    Select: Used to specify an option from a group of options.
                   </Text>
                 </Flex>
               </ListItem>
@@ -1226,21 +1203,14 @@ const AttributePage = () => {
 };
 
 const Create = () => {
-  const [createPage, setCreatePage] = useState(
-    "default" as "default" | "entity" | "collection" | "attribute"
-  );
+  const [createPage, setCreatePage] = useState("default" as CreatePage);
 
   return (
     <>
       {/* Default landing page for creating metadata */}
       {_.isEqual(createPage, "default") && (
         <Content>
-          <Flex
-            direction={"column"}
-            justify={"center"}
-            gap={"6"}
-            wrap={"wrap"}
-          >
+          <Flex direction={"column"} justify={"center"} gap={"6"} wrap={"wrap"}>
             <Flex
               direction={"column"}
               w={"100%"}
@@ -1442,13 +1412,13 @@ const Create = () => {
       )}
 
       {/* Create an Entity */}
-      {_.isEqual(createPage, "entity") && <EntityPage />}
+      {_.isEqual(createPage, "entity") && <EntityPage createPageState={createPage} setCreatePageState={setCreatePage} />}
 
       {/* Create a Collection */}
-      {_.isEqual(createPage, "collection") && <CollectionPage />}
+      {_.isEqual(createPage, "collection") && <CollectionPage createPageState={createPage} setCreatePageState={setCreatePage} />}
 
       {/* Create an Attribute */}
-      {_.isEqual(createPage, "attribute") && <AttributePage />}
+      {_.isEqual(createPage, "attribute") && <AttributePage createPageState={createPage} setCreatePageState={setCreatePage} />}
     </>
   );
 };

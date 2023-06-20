@@ -21,7 +21,7 @@ import Linky from "@components/Linky";
 import Loading from "@components/Loading";
 
 // Existing and custom types
-import { CollectionModel, EntityModel, UpdateModel } from "@types";
+import { CollectionModel, EntityModel, ActivityModel } from "@types";
 
 // Utility functions and libraries
 import { getData } from "src/database/functions";
@@ -48,7 +48,7 @@ const Dashboard = () => {
   // Page data
   const [entityData, setEntityData] = useState([] as EntityModel[]);
   const [collectionData, setCollectionData] = useState([] as CollectionModel[]);
-  const [updateData, setUpdateData] = useState([] as UpdateModel[]);
+  const [activityData, setActivityData] = useState([] as ActivityModel[]);
 
   const [visibleColumns, setVisibleColumns] = useState({});
 
@@ -112,9 +112,9 @@ const Dashboard = () => {
 
   // Get all Updates
   useEffect(() => {
-    getData(`/updates`)
+    getData(`/activity`)
       .then((value) => {
-        setUpdateData(value.reverse());
+        setActivityData(value.reverse());
         setIsLoaded(true);
       })
       .catch((_error) => {
@@ -319,15 +319,15 @@ const Dashboard = () => {
 
                 {/* Activity list */}
                 <List>
-                  {updateData.length > 0 ? (
-                    updateData.slice(0, 10).map((update) => {
+                  {activityData.length > 0 ? (
+                    activityData.slice(0, 10).map((activity) => {
                       // Configure the badge
                       let operationBadgeColor = "green.400";
                       let operationIcon = (
                         <Icon name={"entity"} color={"white"} />
                       );
 
-                      switch (update.type) {
+                      switch (activity.type) {
                         case "create":
                           operationBadgeColor = "green.400";
                           operationIcon = <Icon name={"add"} color={"white"} />;
@@ -347,7 +347,7 @@ const Dashboard = () => {
                       }
 
                       return (
-                        <ListItem key={`update-${update._id}`}>
+                        <ListItem key={`activity-${activity._id}`}>
                           <Flex
                             direction={"row"}
                             p={"2"}
@@ -369,19 +369,19 @@ const Dashboard = () => {
                             </Flex>
 
                             <Text display={{ base: "none", sm: "block" }}>
-                              {update.details}
+                              {activity.details}
                             </Text>
 
                             <Linky
-                              id={update.target.id}
-                              type={update.target.type}
-                              fallback={update.target.name}
+                              id={activity.target.id}
+                              type={activity.target.type}
+                              fallback={activity.target.name}
                             />
 
                             <Spacer />
 
                             <Text color={"gray.400"}>
-                              {dayjs(update.timestamp).fromNow()}
+                              {dayjs(activity.timestamp).fromNow()}
                             </Text>
                           </Flex>
                         </ListItem>

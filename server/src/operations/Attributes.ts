@@ -1,6 +1,6 @@
 // Utility functions
 import { getDatabase, getIdentifier } from "../database/connection";
-import { Updates } from "./Updates";
+import { Activity } from "./Activity";
 
 // Utility libraries
 import _ from "lodash";
@@ -37,7 +37,7 @@ export class Attributes {
 
           // Add Update operation
           operations.push(
-            Updates.create({
+            Activity.create({
               timestamp: new Date(Date.now()),
               type: "create",
               details: "Created new Attribute",
@@ -89,7 +89,7 @@ export class Attributes {
 
           // Add Update operation
           operations.push(
-            Updates.create({
+            Activity.create({
               timestamp: new Date(Date.now()),
               type: "update",
               details: "Updated Attribute",
@@ -174,7 +174,7 @@ export class Attributes {
 
           // Add Update operation
           operations.push(
-            Updates.create({
+            Activity.create({
               timestamp: new Date(Date.now()),
               type: "delete",
               details: "Deleted Attribute",

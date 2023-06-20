@@ -45,6 +45,18 @@ import {
   Stack,
   FormHelperText,
   FormErrorMessage,
+  Drawer,
+  DrawerOverlay,
+  DrawerContent,
+  DrawerCloseButton,
+  DrawerFooter,
+  DrawerBody,
+  DrawerHeader,
+  VStack,
+  Card,
+  CardHeader,
+  CardBody,
+  Spacer,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import AttributeCard from "@components/AttributeCard";
@@ -56,7 +68,13 @@ import Loading from "@components/Loading";
 import Values from "@components/Values";
 
 // Existing and custom types
-import { AttributeModel, CollectionModel, EntityModel, IValue } from "@types";
+import {
+  AttributeModel,
+  CollectionModel,
+  EntityHistory,
+  EntityModel,
+  IValue,
+} from "@types";
 
 // Utility functions and libraries
 import { deleteData, getData, postData } from "src/database/functions";
@@ -108,6 +126,13 @@ const Entity = () => {
   } = useDisclosure();
   const [selectedProducts, setSelectedProducts] = useState([] as string[]);
   const [selectedOrigins, setSelectedOrigins] = useState([] as string[]);
+
+  // History drawer
+  const {
+    isOpen: isHistoryOpen,
+    onOpen: onHistoryOpen,
+    onClose: onHistoryClose,
+  } = useDisclosure();
 
   // Adding Attributes to existing Entity
   const {
@@ -175,6 +200,7 @@ const Entity = () => {
   const [entityAttributes, setEntityAttributes] = useState(
     [] as AttributeModel[]
   );
+  const [entityHistory, setEntityHistory] = useState([] as EntityHistory[]);
 
   const {
     isOpen: isExportOpen,
@@ -198,6 +224,7 @@ const Entity = () => {
         setEntityOrigins(response.associations.origins);
         setEntityProducts(response.associations.products);
         setEntityAttributes(response.attributes);
+        setEntityHistory(response.history);
       })
       .catch(() => {
         toast({
@@ -264,11 +291,11 @@ const Entity = () => {
   // Toggle editing status
   const handleEditClick = () => {
     if (editing) {
-      // Collate data for updating
       const updateData: EntityModel = {
         _id: entityData._id,
         name: entityData.name,
         created: entityData.created,
+        deleted: entityData.deleted,
         owner: entityData.owner,
         description: entityDescription,
         collections: entityCollections,
@@ -277,6 +304,7 @@ const Entity = () => {
           products: entityProducts,
         },
         attributes: entityAttributes,
+        history: entityHistory,
       };
 
       // Update data
@@ -306,6 +334,123 @@ const Entity = () => {
     } else {
       setEditing(true);
     }
+  };
+
+  /**
+   * Restore an Entity from a deleted status
+   */
+  const handleRestoreFromDeleteClick = () => {
+    // Collate data for updating
+    const updateData: EntityModel = {
+      _id: entityData._id,
+      name: entityData.name,
+      created: entityData.created,
+      deleted: false,
+      owner: entityData.owner,
+      description: entityDescription,
+      collections: entityCollections,
+      associations: {
+        origins: entityOrigins,
+        products: entityProducts,
+      },
+      attributes: entityAttributes,
+      history: entityData.history,
+    };
+
+    setIsLoaded(false);
+
+    // Update data
+    postData(`/entities/update`, updateData)
+      .then((_response) => {
+        toast({
+          title: "Restored!",
+          status: "success",
+          duration: 2000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+      })
+      .catch(() => {
+        toast({
+          title: "Error",
+          description: "An error occurred when restoring this Entity.",
+          status: "error",
+          duration: 2000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+      })
+      .finally(() => {
+        // Apply updated state
+        setEntityData(updateData);
+        setEntityDescription(updateData.description);
+        setEntityCollections(updateData.collections);
+        setEntityOrigins(updateData.associations.origins);
+        setEntityProducts(updateData.associations.products);
+        setEntityAttributes(updateData.attributes);
+        setEntityHistory(updateData.history);
+        setIsLoaded(true);
+      });
+  };
+
+  /**
+   * Restore an Entity from an earlier point in time
+   * @param {EntityHistory} entityVersion historical Entity data to restore
+   */
+  const handleRestoreFromHistoryClick = (entityVersion: EntityHistory) => {
+    const updateData: EntityModel = {
+      _id: entityData._id,
+      name: entityData.name,
+      created: entityData.created,
+      deleted: entityVersion.deleted,
+      owner: entityVersion.owner,
+      description: entityVersion.description,
+      collections: entityVersion.collections,
+      associations: {
+        origins: entityVersion.associations.origins,
+        products: entityVersion.associations.products,
+      },
+      attributes: entityVersion.attributes,
+      history: entityData.history,
+    };
+
+    setIsLoaded(false);
+
+    // Update data
+    postData(`/entities/update`, updateData)
+      .then((_response) => {
+        toast({
+          title: "Saved!",
+          status: "success",
+          duration: 2000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+      })
+      .catch(() => {
+        toast({
+          title: "Error",
+          description: "An error occurred when saving updates.",
+          status: "error",
+          duration: 2000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+      })
+      .finally(() => {
+        // Close the drawer
+        onHistoryClose();
+
+        // Apply updated state
+        setEntityData(updateData);
+        setEntityDescription(updateData.description);
+        setEntityCollections(updateData.collections);
+        setEntityOrigins(updateData.associations.origins);
+        setEntityProducts(updateData.associations.products);
+        setEntityAttributes(updateData.attributes);
+        setEntityHistory(updateData.history);
+        setIsLoaded(true);
+      });
   };
 
   // Handle clicking the "Export" button
@@ -486,7 +631,6 @@ const Entity = () => {
   // Handle updates to Attributes
   const handleUpdateAttribute = (updated: AttributeModel) => {
     // Find the Attribute and update the state
-    consola.info("Updating:", updated._id);
     setEntityAttributes([
       ...entityAttributes.map((attribute) => {
         if (_.isEqual(attribute._id, updated._id)) {
@@ -545,72 +689,109 @@ const Entity = () => {
               >
                 <Icon name={"entity"} size={"lg"} />
                 <Heading fontWeight={"semibold"}>{entityData.name}</Heading>
+                {entityData.deleted && <Icon name={"delete"} size={"lg"} />}
               </Flex>
 
               {/* Buttons */}
-              <Flex
-                direction={"row"}
-                align={"center"}
-                gap={"4"}
-                wrap={"wrap"}
-                bg={"white"}
-                p={"4"}
-                rounded={"md"}
-              >
-                {editing && (
-                  <Popover>
-                    <PopoverTrigger>
+              <Flex gap={"4"}>
+                <Flex
+                  direction={"row"}
+                  align={"center"}
+                  gap={"4"}
+                  wrap={"wrap"}
+                  bg={"white"}
+                  p={"4"}
+                  rounded={"md"}
+                >
+                  {editing && (
+                    <Popover>
+                      <PopoverTrigger>
+                        <Button
+                          colorScheme={"red"}
+                          rightIcon={<Icon name={"delete"} />}
+                        >
+                          Delete
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent>
+                        <PopoverArrow />
+                        <PopoverCloseButton />
+                        <PopoverHeader>Confirmation</PopoverHeader>
+                        <PopoverBody>
+                          Are you sure you want to delete this Entity?
+                          <Flex direction={"row"} p={"2"} justify={"center"}>
+                            <Button
+                              colorScheme={"green"}
+                              rightIcon={<Icon name={"check"} />}
+                              onClick={handleDeleteClick}
+                            >
+                              Confirm
+                            </Button>
+                          </Flex>
+                        </PopoverBody>
+                      </PopoverContent>
+                    </Popover>
+                  )}
+                  {entityData.deleted ? (
+                    <Button
+                      onClick={handleRestoreFromDeleteClick}
+                      colorScheme={"orange"}
+                      rightIcon={<Icon name={"rewind"} />}
+                    >
+                      Restore
+                    </Button>
+                  ) : (
+                    <Flex gap={"4"}>
                       <Button
-                        colorScheme={"red"}
-                        rightIcon={<Icon name={"delete"} />}
+                        onClick={handleEditClick}
+                        colorScheme={editing ? "green" : "gray"}
+                        rightIcon={
+                          editing ? (
+                            <Icon name={"check"} />
+                          ) : (
+                            <Icon name={"edit"} />
+                          )
+                        }
                       >
-                        Delete
+                        {editing ? "Done" : "Edit"}
                       </Button>
-                    </PopoverTrigger>
-                    <PopoverContent>
-                      <PopoverArrow />
-                      <PopoverCloseButton />
-                      <PopoverHeader>Confirmation</PopoverHeader>
-                      <PopoverBody>
-                        Are you sure you want to delete this Entity?
-                        <Flex direction={"row"} p={"2"} justify={"center"}>
-                          <Button
-                            colorScheme={"green"}
-                            rightIcon={<Icon name={"check"} />}
-                            onClick={handleDeleteClick}
-                          >
-                            Confirm
-                          </Button>
-                        </Flex>
-                      </PopoverBody>
-                    </PopoverContent>
-                  </Popover>
-                )}
-                <Button
-                  onClick={handleEditClick}
-                  colorScheme={editing ? "green" : "gray"}
-                  rightIcon={
-                    editing ? <Icon name={"check"} /> : <Icon name={"edit"} />
-                  }
+                    </Flex>
+                  )}
+                </Flex>
+
+                <Flex
+                  direction={"row"}
+                  align={"center"}
+                  gap={"4"}
+                  wrap={"wrap"}
+                  bg={"white"}
+                  p={"4"}
+                  rounded={"md"}
                 >
-                  {editing ? "Done" : "Edit"}
-                </Button>
-                <Button
-                  onClick={onGraphOpen}
-                  rightIcon={<Icon name={"graph"} />}
-                  colorScheme={"orange"}
-                  isDisabled={editing}
-                >
-                  Links
-                </Button>
-                <Button
-                  onClick={handleExportClick}
-                  rightIcon={<Icon name={"download"} />}
-                  colorScheme={"blue"}
-                  isDisabled={editing}
-                >
-                  Export
-                </Button>
+                  <Button
+                    colorScheme={"gray"}
+                    rightIcon={<Icon name={"clock"} />}
+                    onClick={onHistoryOpen}
+                  >
+                    History
+                  </Button>
+                  <Button
+                    onClick={onGraphOpen}
+                    rightIcon={<Icon name={"graph"} />}
+                    colorScheme={"orange"}
+                    isDisabled={editing || entityData.deleted}
+                  >
+                    Links
+                  </Button>
+                  <Button
+                    onClick={handleExportClick}
+                    rightIcon={<Icon name={"download"} />}
+                    colorScheme={"blue"}
+                    isDisabled={editing || entityData.deleted}
+                  >
+                    Export
+                  </Button>
+                </Flex>
               </Flex>
             </Flex>
 
@@ -1454,7 +1635,12 @@ const Entity = () => {
               </ModalContent>
             </Modal>
 
-            <Modal isOpen={isExportOpen} onClose={onExportClose} size={"2xl"} isCentered>
+            <Modal
+              isOpen={isExportOpen}
+              onClose={onExportClose}
+              size={"2xl"}
+              isCentered
+            >
               <ModalOverlay />
               <ModalContent p={"4"} w={["sm", "lg", "2xl"]}>
                 {/* Heading and close button */}
@@ -1619,6 +1805,158 @@ const Entity = () => {
                 </ModalBody>
               </ModalContent>
             </Modal>
+
+            <Drawer
+              isOpen={isHistoryOpen}
+              placement={"right"}
+              onClose={onHistoryClose}
+            >
+              <DrawerOverlay />
+              <DrawerContent>
+                <DrawerCloseButton />
+                <DrawerHeader>Version History</DrawerHeader>
+
+                <DrawerBody>
+                  <VStack spacing={"4"}>
+                    {entityHistory && entityHistory.length > 0 ? (
+                      entityHistory.map((entityVersion) => {
+                        return (
+                          <Card w={"100%"} key={`v_${entityVersion.timestamp}`}>
+                            <CardHeader>
+                              <Flex align={"center"}>
+                                <Text fontStyle={"italic"}>
+                                  {dayjs(entityVersion.timestamp).fromNow()}
+                                </Text>
+                                <Spacer />
+                                <Button
+                                  colorScheme={"orange"}
+                                  rightIcon={<Icon name={"rewind"} />}
+                                  onClick={() => {
+                                    handleRestoreFromHistoryClick(
+                                      entityVersion
+                                    );
+                                  }}
+                                  disabled={entityData.deleted}
+                                >
+                                  Restore
+                                </Button>
+                              </Flex>
+                            </CardHeader>
+                            <CardBody>
+                              <VStack gap={"1"} align={"baseline"}>
+                                <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
+                                  <Text fontWeight={"bold"}>Description:</Text>
+                                  <Text noOfLines={2}>
+                                    {_.isEqual(entityVersion.description, "")
+                                      ? "None"
+                                      : entityVersion.description}
+                                  </Text>
+                                </Flex>
+                                <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
+                                  <Text fontWeight={"bold"}>Collections:</Text>
+                                  {entityVersion.collections.length > 0 ? (
+                                    entityVersion.collections.map(
+                                      (collection) => {
+                                        return (
+                                          <Tag
+                                            key={`v_c_${entityVersion.timestamp}_${collection}`}
+                                          >
+                                            <Linky
+                                              type={"collections"}
+                                              id={collection}
+                                            />
+                                          </Tag>
+                                        );
+                                      }
+                                    )
+                                  ) : (
+                                    <Text>None</Text>
+                                  )}
+                                </Flex>
+                                <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
+                                  <Text fontWeight={"bold"}>Attributes:</Text>
+                                  {entityVersion.attributes.length > 0 ? (
+                                    entityVersion.attributes.map(
+                                      (attribute) => {
+                                        return (
+                                          <Tag
+                                            key={`v_a_${entityVersion.timestamp}_${attribute._id}`}
+                                          >
+                                            {attribute.name}
+                                          </Tag>
+                                        );
+                                      }
+                                    )
+                                  ) : (
+                                    <Text>None</Text>
+                                  )}
+                                </Flex>
+                                <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
+                                  <Text fontWeight={"bold"}>Origins:</Text>
+                                  {entityVersion.associations.origins.length >
+                                  0 ? (
+                                    entityVersion.associations.origins.map(
+                                      (origin) => {
+                                        return (
+                                          <Tag
+                                            key={`v_o_${entityVersion.timestamp}_${origin.id}`}
+                                          >
+                                            <Linky
+                                              type={"entities"}
+                                              id={origin.id}
+                                            />
+                                          </Tag>
+                                        );
+                                      }
+                                    )
+                                  ) : (
+                                    <Text>None</Text>
+                                  )}
+                                </Flex>
+                                <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
+                                  <Text fontWeight={"bold"}>Products:</Text>
+                                  {entityVersion.associations.products.length >
+                                  0 ? (
+                                    entityVersion.associations.products.map(
+                                      (product) => {
+                                        return (
+                                          <Tag
+                                            key={`v_p_${entityVersion.timestamp}_${product.id}`}
+                                          >
+                                            <Linky
+                                              type={"entities"}
+                                              id={product.id}
+                                            />
+                                          </Tag>
+                                        );
+                                      }
+                                    )
+                                  ) : (
+                                    <Text>None</Text>
+                                  )}
+                                </Flex>
+                              </VStack>
+                            </CardBody>
+                          </Card>
+                        );
+                      })
+                    ) : (
+                      <Text>No previous versions.</Text>
+                    )}
+                  </VStack>
+                </DrawerBody>
+
+                <DrawerFooter>
+                  <Button
+                    colorScheme={"red"}
+                    onClick={onHistoryClose}
+                    rightIcon={<Icon name={"cross"} />}
+                  >
+                    Close
+                  </Button>
+                </DrawerFooter>
+              </DrawerContent>
+            </Drawer>
           </Flex>
         )
       ) : (

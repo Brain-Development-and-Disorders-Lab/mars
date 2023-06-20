@@ -172,7 +172,9 @@ const Attribute = () => {
                 bg={"white"}
               >
                 <Icon name={"attribute"} size={"lg"} />
-                <Heading fontWeight={"semibold"}>Attribute: {attributeData.name}</Heading>
+                <Heading fontWeight={"semibold"}>
+                  Attribute: {attributeData.name}
+                </Heading>
               </Flex>
 
               {/* Buttons */}
@@ -290,13 +292,13 @@ const Attribute = () => {
                   Values
                 </Heading>
 
-                {attributeData.values &&
+                {attributeData.values && (
                   <Values
                     collection={attributeValues}
                     viewOnly={!editing}
                     setValues={setAttributeValues}
                   />
-                }
+                )}
               </Flex>
             </Flex>
           </Flex>

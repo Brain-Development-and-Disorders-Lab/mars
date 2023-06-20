@@ -3,7 +3,7 @@ import express from "express";
 import _ from "lodash";
 
 // Import types from the client to enforce structure
-import { EntityModel, Entity } from "@types";
+import { EntityModel, IEntity } from "@types";
 
 // Utility functions
 import { Entities } from "../operations/Entities";
@@ -36,7 +36,7 @@ EntitiesRoute.route("/entities/export").post(
 
 // Create a new Entity, expects Entity data
 EntitiesRoute.route("/entities/create").post(
-  (request: { body: Entity }, response: any) => {
+  (request: { body: IEntity }, response: any) => {
     Entities.create(request.body).then((entity: EntityModel) => {
       response.json({
         id: entity._id,

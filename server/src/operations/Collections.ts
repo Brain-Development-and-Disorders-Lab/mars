@@ -1,7 +1,7 @@
 // Utility functions
 import { getDatabase, getIdentifier } from "../database/connection";
 import { Entities } from "./Entities";
-import { Updates } from "./Updates";
+import { Activity } from "./Activity";
 
 // Custom types
 import { CollectionModel, ICollection } from "@types";
@@ -9,6 +9,7 @@ import { CollectionModel, ICollection } from "@types";
 // Utility libraries
 import _ from "lodash";
 import consola from "consola";
+import dayjs from "dayjs";
 
 const COLLECTIONS = "collections";
 
@@ -43,7 +44,7 @@ export class Collections {
 
           // Add Update operation
           operations.push(
-            Updates.create({
+            Activity.create({
               timestamp: new Date(Date.now()),
               type: "create",
               details: "Created new Collection",
@@ -111,12 +112,23 @@ export class Collections {
             $set: {
               description: updatedCollection.description,
               entities: [...entitiesToKeep, ...entitiesToAdd],
+              history: [
+                {
+                  timestamp: dayjs(Date.now()).toISOString(),
+                  name: currentCollection.name,
+                  created: currentCollection.created,
+                  owner: currentCollection.owner,
+                  description: currentCollection.description,
+                  entities: currentCollection.entities,
+                },
+                ...currentCollection.history,
+              ],
             },
           };
 
           // Add Update operation
           operations.push(
-            Updates.create({
+            Activity.create({
               timestamp: new Date(Date.now()),
               type: "update",
               details: "Updated Collection",
@@ -306,7 +318,7 @@ export class Collections {
 
           // Add Update operation
           operations.push(
-            Updates.create({
+            Activity.create({
               timestamp: new Date(Date.now()),
               type: "delete",
               details: "Deleted Collection",

@@ -5,6 +5,7 @@ import React from "react";
 import { Icon as ChakraIcon } from "@chakra-ui/react";
 import {
   BsArrowClockwise,
+  BsArrowCounterclockwise,
   BsArrowRight,
   BsBarChartFill,
   BsBellFill,
@@ -17,7 +18,9 @@ import {
   BsChevronLeft,
   BsChevronRight,
   BsChevronUp,
+  BsClockHistory,
   BsCloudDownloadFill,
+  BsCollectionFill,
   BsDiagram2Fill,
   BsExclamationOctagonFill,
   BsFileCodeFill,
@@ -71,12 +74,15 @@ const SYSTEM_ICONS: { [k: string]: IconType } = {
   exclamation: BsExclamationOctagonFill,
   reload: BsArrowClockwise,
   graph: BsDiagram2Fill,
+  clock: BsClockHistory,
+  rewind: BsArrowCounterclockwise,
 
   // Values
   v_date: BsCalendarWeekFill,
   v_text: BsFileTextFill,
   v_number: BsFillFileBinaryFill,
   v_url: BsFileCodeFill,
+  v_select: BsCollectionFill,
 
   // Arrows
   a_right: BsArrowRight,
@@ -126,7 +132,14 @@ const Icon = (props: {
           <ChakraIcon as={iconComponent} w={"16"} h={"16"} color={iconColor} />
         );
       default:
-        return <ChakraIcon as={iconComponent} w={props.size[0]} h={props.size[1]} color={iconColor} />;
+        return (
+          <ChakraIcon
+            as={iconComponent}
+            w={props.size[0]}
+            h={props.size[1]}
+            color={iconColor}
+          />
+        );
     }
   }
 

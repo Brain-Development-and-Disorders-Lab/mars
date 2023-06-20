@@ -1,3 +1,5 @@
+export type CreatePage = "default" | "entity" | "collection" | "attribute";
+
 export namespace State.Entity {
   type Start = {
     location: "none" | "start" | "associations" | "attributes";
@@ -69,7 +71,7 @@ export type AttributeCardProps = {
 export interface IValue<D> {
   identifier: string;
   name: string;
-  type: "number" | "text" | "url" | "date" | "entity";
+  type: "number" | "text" | "url" | "date" | "entity" | "select";
   data: D;
   disabled?: boolean;
   showRemove?: boolean;
@@ -91,16 +93,24 @@ export type ICollection = {
   owner: string;
   created: string;
   entities: string[];
+  history: CollectionHistory[];
 };
 
 export type CollectionModel = ICollection & {
   _id: string;
 };
 
+export type CollectionHistory = {
+  timestamp: string;
+  description: string;
+  entities: string[];
+}
+
 // Entity types
 export type IEntity = {
   name: string;
   created: string;
+  deleted: boolean;
   owner: string;
   description: string;
   collections: string[];
@@ -109,10 +119,24 @@ export type IEntity = {
     products: { name: string; id: string }[];
   };
   attributes: AttributeModel[];
+  history: EntityHistory[];
 };
 
 export type EntityModel = IEntity & {
   _id: string;
+};
+
+export type EntityHistory = {
+  timestamp: string;
+  deleted: boolean;
+  owner: string;
+  description: string;
+  collections: string[];
+  associations: {
+    origins: { name: string; id: string }[];
+    products: { name: string; id: string }[];
+  };
+  attributes: AttributeModel[];
 };
 
 export type EntityExport = {
@@ -129,8 +153,8 @@ export type EntityExport = {
   [key: string]: string;
 }
 
-// Update types
-export type IUpdate = {
+// Activity types
+export type IActivity = {
   timestamp: Date;
   type: "create" | "update" | "delete";
   details: string;
@@ -141,7 +165,7 @@ export type IUpdate = {
   };
 };
 
-export type UpdateModel = IUpdate & {
+export type ActivityModel = IActivity & {
   _id: string;
 };
 
@@ -183,12 +207,15 @@ export type IconNames =
   "exclamation" |
   "reload" |
   "graph" |
+  "clock" |
+  "rewind" |
 
   // Values
   "v_date" |
   "v_text" |
   "v_number" |
   "v_url" |
+  "v_select" |
 
   // Arrows
   "a_right" |
