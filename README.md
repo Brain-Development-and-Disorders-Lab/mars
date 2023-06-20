@@ -4,15 +4,15 @@ An open-source and customizable workflow tool for tracking and managing metadata
 
 ![mars.png](mars.png)
 
-**⚠️ WARNING: MARS is still in early development. It should not be used to manage real scientific data at this stage. There are known issues updating and deleting Entities and Collections.**
+**⚠️ WARNING: MARS is still in early development. It should be used with caution.**
 
-## Concepts
+## Concepts and Abstractions
 
 ### Entities 📦
 
 Everything is recognized as an "entity", from physical slices to antibodies. Entities are generalized and expressed using Attributes, expressing data via Values.
 
-Entities have the following additional metadata:
+Entities have the following metadata components:
 
 - *Name*: This is an ID or general name for an Entity.
 - *Owner*: The owner or creator of the Entity.
@@ -21,6 +21,7 @@ Entities have the following additional metadata:
 - *Collections*: Specify any existing Collections that the Entity belongs to.
 - *Origin*: If the Entity was created as a product of another Entity, then the other Entity is the Origin. The Origin Entity must already exist in the system.
 - *Products*: If the Entity being entered into the system generated subsequent Entities that already exist in the system, the generated Entities can be specified.
+- *Attributes*: This is a specific metadata component and is explained below.
 
 ### Attributes ⚙️
 
@@ -47,7 +48,9 @@ Collections are simply groups of Entities. Collections can be of one type of Ent
 
 ## Deployment 👉
 
-The server component of MARS is containerized using Docker. Before starting the Docker containers, three environment variables must be configured in an `.env` file that should be placed in the `/server` directory. The two variables are `CONNECTION_STRING` and `PORT`, the MongoDB connection string and the port of the server to listen on respectively. Example contents are shown below:
+### Configure environment variables
+
+The server component of MARS is containerized using Docker. Before starting the Docker containers, three environment variables must be configured in an `.env` file that should be placed in the `/server` directory. The variables are `CONNECTION_STRING`, `PORT`, and `DEFAULT_PASSWORD`, the MongoDB connection string, the port of the server to listen on, and the default login password respectively (no specific user functionality exists yet). Example contents are shown below:
 
 ```Text
 CONNECTION_STRING=mongodb://admin:metadataadmin@localhost:27017/
@@ -55,7 +58,9 @@ PORT=8000
 DEFAULT_PASSWORD=password
 ```
 
-Then, to start a fresh instance of the application, use `docker compose`:
+### Starting the database
+
+To start a fresh instance of the MongoDB database, use `docker compose`:
 
 ```Bash
 docker compose up --build
@@ -64,6 +69,8 @@ docker compose up --build
 This command will build all required containers before starting the containers required to run the system. The system can then be viewed in the browser at `localhost:8080`, and the MongoDB database can be browsed using the `mongo-express` interface accessible at `localhost:8081`.
 
 **⚠️ Note: Currently, only the MongoDB instance and `mongo-express` interface are started. See the below instructions to start the MARS interface and server.**
+
+### Starting the interface and server
 
 To start the MARS interface, run `yarn start` in the `/client` directory. Start the MARS server by running `yarn build` and `yarn start` in the `/server` directory. Both the client and server should be running alongside the Docker containers before attempting to access MARS at `localhost:8080`.
 
