@@ -93,11 +93,18 @@ export type ICollection = {
   owner: string;
   created: string;
   entities: string[];
+  history: CollectionHistory[];
 };
 
 export type CollectionModel = ICollection & {
   _id: string;
 };
+
+export type CollectionHistory = {
+  timestamp: string;
+  description: string;
+  entities: string[];
+}
 
 // Entity types
 export type IEntity = {

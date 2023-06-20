@@ -9,6 +9,7 @@ import { CollectionModel, ICollection } from "@types";
 // Utility libraries
 import _ from "lodash";
 import consola from "consola";
+import dayjs from "dayjs";
 
 const COLLECTIONS = "collections";
 
@@ -111,6 +112,17 @@ export class Collections {
             $set: {
               description: updatedCollection.description,
               entities: [...entitiesToKeep, ...entitiesToAdd],
+              history: [
+                {
+                  timestamp: dayjs(Date.now()).toISOString(),
+                  name: currentCollection.name,
+                  created: currentCollection.created,
+                  owner: currentCollection.owner,
+                  description: currentCollection.description,
+                  entities: currentCollection.entities,
+                },
+                ...currentCollection.history,
+              ],
             },
           };
 

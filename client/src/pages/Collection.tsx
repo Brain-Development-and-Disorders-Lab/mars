@@ -4,6 +4,16 @@ import React, { useEffect, useState } from "react";
 // Existing and custom components
 import {
   Button,
+  Card,
+  CardBody,
+  CardHeader,
+  Drawer,
+  DrawerBody,
+  DrawerCloseButton,
+  DrawerContent,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerOverlay,
   Flex,
   FormControl,
   FormLabel,
@@ -22,6 +32,7 @@ import {
   PopoverHeader,
   PopoverTrigger,
   Select,
+  Spacer,
   Table,
   TableContainer,
   Tag,
@@ -34,6 +45,7 @@ import {
   Th,
   Thead,
   Tr,
+  VStack,
   useDisclosure,
   useToast,
 } from "@chakra-ui/react";
@@ -44,7 +56,7 @@ import Linky from "@components/Linky";
 import Loading from "@components/Loading";
 
 // Existing and custom types
-import { CollectionModel, EntityModel } from "@types";
+import { CollectionHistory, CollectionModel, EntityModel } from "@types";
 
 // Routing and navigation
 import { useParams, useNavigate } from "react-router-dom";
@@ -52,12 +64,20 @@ import { useParams, useNavigate } from "react-router-dom";
 // Utility functions and libraries
 import { deleteData, getData, postData } from "@database/functions";
 import _ from "lodash";
+import dayjs from "dayjs";
 
 const Collection = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
+
+  // History drawer
+  const {
+    isOpen: isHistoryOpen,
+    onOpen: onHistoryOpen,
+    onClose: onHistoryClose,
+  } = useDisclosure();
 
   // Page state
   const [editing, setEditing] = useState(false);
@@ -67,6 +87,7 @@ const Collection = () => {
   const [collectionData, setCollectionData] = useState({} as CollectionModel);
   const [collectionEntities, setCollectionEntities] = useState([] as string[]);
   const [collectionDescription, setCollectionDescription] = useState("");
+  const [collectionHistory, setCollectionHistory] = useState([] as CollectionHistory[]);
   const [allEntities, setAllEntities] = useState(
     [] as { name: string; id: string }[]
   );
@@ -79,6 +100,7 @@ const Collection = () => {
         setCollectionData(response);
         setCollectionEntities(response.entities);
         setCollectionDescription(response.description);
+        setCollectionHistory(response.history);
       })
       .catch(() => {
         toast({
@@ -164,6 +186,7 @@ const Collection = () => {
         owner: collectionData.owner,
         created: collectionData.created,
         entities: collectionEntities,
+        history: collectionHistory,
       };
 
       // Update data
@@ -224,6 +247,57 @@ const Collection = () => {
       });
   };
 
+    /**
+   * Restore a Collection from an earlier point in time
+   * @param {CollectionHistory} collectionVersion historical Collection data to restore
+   */
+    const handleRestoreFromHistoryClick = (collectionVersion: CollectionHistory) => {
+      const updateData: CollectionModel = {
+        _id: collectionData._id,
+        name: collectionData.name,
+        created: collectionData.created,
+        owner: collectionData.owner,
+        description: collectionVersion.description,
+        entities: collectionVersion.entities,
+        history: collectionData.history,
+      };
+
+      setIsLoaded(false);
+
+      // Update data
+      postData(`/collections/update`, updateData)
+        .then((_response) => {
+          toast({
+            title: "Saved!",
+            status: "success",
+            duration: 2000,
+            position: "bottom-right",
+            isClosable: true,
+          });
+        })
+        .catch(() => {
+          toast({
+            title: "Error",
+            description: "An error occurred when saving updates.",
+            status: "error",
+            duration: 2000,
+            position: "bottom-right",
+            isClosable: true,
+          });
+        })
+        .finally(() => {
+          // Close the drawer
+          onHistoryClose();
+
+          // Apply updated state
+          setCollectionData(updateData);
+          setCollectionDescription(updateData.description);
+          setCollectionEntities(updateData.entities);
+          setCollectionHistory(updateData.history);
+          setIsLoaded(true);
+        });
+    };
+
   return (
     <Content vertical={isError || !isLoaded}>
       {isLoaded ? (
@@ -252,52 +326,70 @@ const Collection = () => {
               </Flex>
 
               {/* Buttons */}
-              <Flex
-                direction={"row"}
-                gap={"4"}
-                wrap={"wrap"}
-                bg={"white"}
-                p={"4"}
-                rounded={"md"}
-              >
-                {editing && (
-                  <Popover>
-                    <PopoverTrigger>
-                      <Button
-                        colorScheme={"red"}
-                        rightIcon={<Icon name={"delete"} />}
-                      >
-                        Delete
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent>
-                      <PopoverArrow />
-                      <PopoverCloseButton />
-                      <PopoverHeader>Confirmation</PopoverHeader>
-                      <PopoverBody>
-                        Are you sure you want to delete this Collection?
-                        <Flex direction={"row"} p={"2"} justify={"center"}>
-                          <Button
-                            colorScheme={"green"}
-                            rightIcon={<Icon name={"check"} />}
-                            onClick={handleDeleteClick}
-                          >
-                            Confirm
-                          </Button>
-                        </Flex>
-                      </PopoverBody>
-                    </PopoverContent>
-                  </Popover>
-                )}
-                <Button
-                  colorScheme={editing ? "green" : "gray"}
-                  rightIcon={
-                    editing ? <Icon name={"check"} /> : <Icon name={"edit"} />
-                  }
-                  onClick={handleEditClick}
+              <Flex direction={"row"} gap={"4"}>
+                <Flex
+                  direction={"row"}
+                  gap={"4"}
+                  wrap={"wrap"}
+                  bg={"white"}
+                  p={"4"}
+                  rounded={"md"}
                 >
-                  {editing ? "Done" : "Edit"}
-                </Button>
+                  {editing && (
+                    <Popover>
+                      <PopoverTrigger>
+                        <Button
+                          colorScheme={"red"}
+                          rightIcon={<Icon name={"delete"} />}
+                        >
+                          Delete
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent>
+                        <PopoverArrow />
+                        <PopoverCloseButton />
+                        <PopoverHeader>Confirmation</PopoverHeader>
+                        <PopoverBody>
+                          Are you sure you want to delete this Collection?
+                          <Flex direction={"row"} p={"2"} justify={"center"}>
+                            <Button
+                              colorScheme={"green"}
+                              rightIcon={<Icon name={"check"} />}
+                              onClick={handleDeleteClick}
+                            >
+                              Confirm
+                            </Button>
+                          </Flex>
+                        </PopoverBody>
+                      </PopoverContent>
+                    </Popover>
+                  )}
+                  <Button
+                    colorScheme={editing ? "green" : "gray"}
+                    rightIcon={
+                      editing ? <Icon name={"check"} /> : <Icon name={"edit"} />
+                    }
+                    onClick={handleEditClick}
+                  >
+                    {editing ? "Done" : "Edit"}
+                  </Button>
+                </Flex>
+
+                <Flex
+                  direction={"row"}
+                  gap={"4"}
+                  wrap={"wrap"}
+                  bg={"white"}
+                  p={"4"}
+                  rounded={"md"}
+                >
+                  <Button
+                    rightIcon={<Icon name={"clock"} />}
+                    onClick={onHistoryOpen}
+                  >
+                    History
+                  </Button>
+                </Flex>
               </Flex>
             </Flex>
 
@@ -532,6 +624,97 @@ const Collection = () => {
                 </Flex>
               </ModalContent>
             </Modal>
+
+            <Drawer
+              isOpen={isHistoryOpen}
+              placement={"right"}
+              onClose={onHistoryClose}
+            >
+              <DrawerOverlay />
+              <DrawerContent>
+                <DrawerCloseButton />
+                <DrawerHeader>Version History</DrawerHeader>
+
+                <DrawerBody>
+                  <VStack spacing={"4"}>
+                    {collectionHistory && collectionHistory.length > 0 ? (
+                      collectionHistory.map((collectionVersion) => {
+                        return (
+                          <Card w={"100%"} key={`v_${collectionVersion.timestamp}`}>
+                            <CardHeader>
+                              <Flex align={"center"}>
+                                <Text fontStyle={"italic"}>
+                                  {dayjs(collectionVersion.timestamp).fromNow()}
+                                </Text>
+                                <Spacer />
+                                <Button
+                                  colorScheme={"orange"}
+                                  rightIcon={<Icon name={"rewind"} />}
+                                  onClick={() => {
+                                    handleRestoreFromHistoryClick(
+                                      collectionVersion
+                                    );
+                                  }}
+                                  // disabled={collectionVersion.deleted}
+                                >
+                                  Restore
+                                </Button>
+                              </Flex>
+                            </CardHeader>
+                            <CardBody>
+                              <VStack gap={"1"} align={"baseline"}>
+                                <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
+                                  <Text fontWeight={"bold"}>Description:</Text>
+                                  <Text noOfLines={2}>
+                                    {_.isEqual(collectionVersion.description, "")
+                                      ? "None"
+                                      : collectionVersion.description}
+                                  </Text>
+                                </Flex>
+                                <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
+                                  <Text fontWeight={"bold"}>Products:</Text>
+                                  {collectionVersion.entities.length >
+                                  0 ? (
+                                    collectionVersion.entities.map(
+                                      (entity) => {
+                                        return (
+                                          <Tag
+                                            key={`v_p_${collectionVersion.timestamp}_${entity}`}
+                                          >
+                                            <Linky
+                                              type={"entities"}
+                                              id={entity}
+                                            />
+                                          </Tag>
+                                        );
+                                      }
+                                    )
+                                  ) : (
+                                    <Text>None</Text>
+                                  )}
+                                </Flex>
+                              </VStack>
+                            </CardBody>
+                          </Card>
+                        );
+                      })
+                    ) : (
+                      <Text>No previous versions.</Text>
+                    )}
+                  </VStack>
+                </DrawerBody>
+
+                <DrawerFooter>
+                  <Button
+                    colorScheme={"red"}
+                    onClick={onHistoryClose}
+                    rightIcon={<Icon name={"cross"} />}
+                  >
+                    Close
+                  </Button>
+                </DrawerFooter>
+              </DrawerContent>
+            </Drawer>
           </Flex>
         )
       ) : (

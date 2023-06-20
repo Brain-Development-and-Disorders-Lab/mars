@@ -784,6 +784,7 @@ const CollectionPage = (props: { createPageState: CreatePage, setCreatePageState
     owner: owner,
     created: created,
     entities: [],
+    history: [],
   };
 
   return (
