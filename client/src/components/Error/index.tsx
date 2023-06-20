@@ -19,9 +19,7 @@ const Error = () => {
       direction={"column"}
       justify={"center"}
       align={"center"}
-      p={"2"}
-      pt={"4"}
-      pb={"4"}
+      p={"8"}
       gap={"8"}
     >
       <Icon name={"exclamation"} size={"xl"} />

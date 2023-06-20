@@ -229,12 +229,15 @@ export type IconNames =
   "c_down";
 
 // Query types
-export type QueryToken = "&" | "|" | "!" | "=";
-export type QueryOperator = "AND" | "OR" | "NOT" | "INCLUDES";
-export type QueryParameters = "NAME" | "CREATED" | "OWNER";
-export type QueryFocusType = "ENTITY" | "COLLECTION" | "ATTRIBUTE";
+export type QueryOperator = "AND" | "OR";
+export type QueryFocusType = "Entity" | "Collection" | "Attribute";
+export type QueryParameters = "Name" | "Owner" | "Description" | "Collections" | "Origins" | "Products";
+export type QueryQualifier = "Contains" | "Does Not Contain" | "Is" | "Is Not";
 
-export type Query = {
-  raw: string;
-  tokens: string[];
+export type QueryComponent = {
+  operator? :QueryOperator;
+  focus: QueryFocusType;
+  parameter: QueryParameters;
+  qualifier: QueryQualifier;
+  value: string;
 };

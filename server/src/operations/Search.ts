@@ -21,6 +21,7 @@ export class Search {
       const QueryStruct: Query = {
         raw: data.query,
         tokens: [],
+        operations: [],
       };
       const updatedQuery = QueryEngine.tokenize(QueryStruct);
       consola.info("Tokenized query:", updatedQuery.tokens);
