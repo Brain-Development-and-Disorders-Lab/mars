@@ -5,6 +5,7 @@ import React from "react";
 import { Icon as ChakraIcon } from "@chakra-ui/react";
 import {
   BsArrowClockwise,
+  BsArrowCounterclockwise,
   BsArrowRight,
   BsBarChartFill,
   BsBellFill,
@@ -74,6 +75,7 @@ const SYSTEM_ICONS: { [k: string]: IconType } = {
   reload: BsArrowClockwise,
   graph: BsDiagram2Fill,
   clock: BsClockHistory,
+  rewind: BsArrowCounterclockwise,
 
   // Values
   v_date: BsCalendarWeekFill,

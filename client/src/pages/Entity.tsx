@@ -735,8 +735,8 @@ const Entity = () => {
                   {entityData.deleted ? (
                     <Button
                       onClick={handleRestoreFromDeleteClick}
-                      colorScheme={"green"}
-                      rightIcon={<Icon name={"check"} />}
+                      colorScheme={"orange"}
+                      rightIcon={<Icon name={"rewind"} />}
                     >
                       Restore
                     </Button>
@@ -1830,12 +1830,13 @@ const Entity = () => {
                                 <Spacer />
                                 <Button
                                   colorScheme={"orange"}
-                                  rightIcon={<Icon name={"clock"} />}
+                                  rightIcon={<Icon name={"rewind"} />}
                                   onClick={() => {
                                     handleRestoreFromHistoryClick(
                                       entityVersion
                                     );
                                   }}
+                                  disabled={entityData.deleted}
                                 >
                                   Restore
                                 </Button>

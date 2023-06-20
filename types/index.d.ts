@@ -199,6 +199,7 @@ export type IconNames =
   "reload" |
   "graph" |
   "clock" |
+  "rewind" |
 
   // Values
   "v_date" |
