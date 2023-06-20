@@ -307,7 +307,6 @@ export class Entities {
                   ],
                 },
                 history: [
-                  ...currentEntity.history,
                   {
                     timestamp: dayjs(Date.now()).toISOString(),
                     deleted: currentEntity.deleted,
@@ -319,7 +318,8 @@ export class Entities {
                       products: currentEntity.associations.products,
                     },
                     attributes: currentEntity.attributes,
-                  }
+                  },
+                  ...currentEntity.history,
                 ],
               },
             };
