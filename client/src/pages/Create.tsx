@@ -1154,33 +1154,41 @@ const AttributePage = (props: { createPageState: CreatePage, setCreatePageState:
             <List spacing={2}>
               <ListItem>
                 <Flex gap={"2"} align={"center"}>
-                  <Icon name={"v_date"} />
+                  <Icon name={"v_date"} color={"orange.300"} />
                   <Text>Date: Used to specify a point in time.</Text>
                 </Flex>
               </ListItem>
               <ListItem>
                 <Flex gap={"2"} align={"center"}>
-                  <Icon name={"v_text"} />
+                  <Icon name={"v_text"} color={"blue.300"} />
                   <Text>Text: Used to specify text of variable length.</Text>
                 </Flex>
               </ListItem>
               <ListItem>
                 <Flex gap={"2"} align={"center"}>
-                  <Icon name={"v_number"} />
+                  <Icon name={"v_number"} color={"green.300"} />
                   <Text>Number: Used to specify a numerical value.</Text>
                 </Flex>
               </ListItem>
               <ListItem>
                 <Flex gap={"2"} align={"center"}>
-                  <Icon name={"v_url"} />
+                  <Icon name={"v_url"} color={"yellow.300"} />
                   <Text>URL: Used to specify a link.</Text>
                 </Flex>
               </ListItem>
               <ListItem>
                 <Flex gap={"2"} align={"center"}>
-                  <Icon name={"entity"} />
+                  <Icon name={"entity"} color={"purple.300"} />
                   <Text>
                     Entity: Used to specify a relation to another Entity.
+                  </Text>
+                </Flex>
+              </ListItem>
+              <ListItem>
+                <Flex gap={"2"} align={"center"}>
+                  <Icon name={"v_select"} color={"teal.300"} />
+                  <Text>
+                    Select: Used to specify an option from a group of options.
                   </Text>
                 </Flex>
               </ListItem>

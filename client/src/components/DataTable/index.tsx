@@ -56,6 +56,7 @@ const DataTable = (props: DataTableProps) => {
                     disabled: props.viewOnly,
                     isChecked: table.getIsAllRowsSelected(),
                     isIndeterminate: table.getIsSomeRowsSelected(),
+                    isInvalid: false,
                     onChange: table.getToggleAllRowsSelectedHandler(),
                   }}
                 />
@@ -68,6 +69,7 @@ const DataTable = (props: DataTableProps) => {
                       isChecked: row.getIsSelected(),
                       disabled: !row.getCanSelect() || props.viewOnly,
                       isIndeterminate: row.getIsSomeSelected(),
+                      isInvalid: false,
                       onChange: row.getToggleSelectedHandler(),
                     }}
                   />
@@ -187,6 +189,7 @@ const DataTable = (props: DataTableProps) => {
               onChange={(event) => {
                 table.setPageSize(Number(event.target.value));
               }}
+              isInvalid={false}
             >
               {[5, 10, 20].map((size) => {
                 return (

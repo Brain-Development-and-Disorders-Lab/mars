@@ -78,10 +78,6 @@ const Attribute = () => {
       });
   }, [id, isLoaded]);
 
-  useEffect(() => {
-    console.info("Attributes:", attributeValues);
-  }, [attributeValues]);
-
   // Delete the Attribute when confirmed
   const handleDeleteClick = () => {
     // Update data

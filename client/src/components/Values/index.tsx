@@ -114,28 +114,28 @@ const Values = (props: {
         let valueIcon = <Icon name={"unknown"} />;
         switch (info.row.original.type) {
           case "date":
-            valueIcon = <Icon name={"v_date"} />;
+            valueIcon = <Icon name={"v_date"} color={"orange.300"} />;
             break;
           case "number":
-            valueIcon = <Icon name={"v_number"} />;
+            valueIcon = <Icon name={"v_number"} color={"green.300"} />;
             break;
           case "text":
-            valueIcon = <Icon name={"v_text"} />;
+            valueIcon = <Icon name={"v_text"} color={"blue.300"} />;
             break;
           case "url":
-            valueIcon = <Icon name={"v_url"} />;
+            valueIcon = <Icon name={"v_url"} color={"yellow.300"} />;
             break;
           case "entity":
-            valueIcon = <Icon name={"entity"} />;
+            valueIcon = <Icon name={"entity"} color={"purple.300"} />;
             break;
           case "select":
-            valueIcon = <Icon name={"v_select"} />;
+            valueIcon = <Icon name={"v_select"} color={"cyan.300"} />;
             break;
         }
 
         return (
           <InputGroup>
-            <InputLeftAddon children={valueIcon} />
+            <InputLeftAddon children={valueIcon} bgColor={"white"} />
             <Input
               id={`i_${info.row.original.identifier}_name`}
               value={value}
@@ -389,7 +389,7 @@ const Values = (props: {
                   {/* Buttons to add Values */}
                   <Button
                     variant={"outline"}
-                    leftIcon={<Icon name={"v_date"} />}
+                    leftIcon={<Icon name={"v_date"} color={"orange.300"} />}
                     onClick={() => {
                       props.setValues([
                         ...data,
@@ -407,7 +407,7 @@ const Values = (props: {
 
                   <Button
                     variant={"outline"}
-                    leftIcon={<Icon name={"v_text"} />}
+                    leftIcon={<Icon name={"v_text"} color={"blue.300"} />}
                     onClick={() => {
                       props.setValues([
                         ...data,
@@ -425,7 +425,7 @@ const Values = (props: {
 
                   <Button
                     variant={"outline"}
-                    leftIcon={<Icon name={"v_number"} />}
+                    leftIcon={<Icon name={"v_number"} color={"green.300"} />}
                     onClick={() => {
                       props.setValues([
                         ...data,
@@ -443,7 +443,7 @@ const Values = (props: {
 
                   <Button
                     variant={"outline"}
-                    leftIcon={<Icon name={"v_url"} />}
+                    leftIcon={<Icon name={"v_url"} color={"yellow.300"} />}
                     onClick={() => {
                       props.setValues([
                         ...data,
@@ -461,7 +461,7 @@ const Values = (props: {
 
                   <Button
                     variant={"outline"}
-                    leftIcon={<Icon name={"entity"} />}
+                    leftIcon={<Icon name={"entity"} color={"purple.300"} />}
                     onClick={() => {
                       props.setValues([
                         ...data,
@@ -479,7 +479,7 @@ const Values = (props: {
 
                   <Button
                     variant={"outline"}
-                    leftIcon={<Icon name={"v_select"} />}
+                    leftIcon={<Icon name={"v_select"} color={"teal.300"} />}
                     onClick={() => {
                       onOpen();
                     }}
@@ -601,6 +601,7 @@ const Values = (props: {
                     colorScheme={"green"}
                     rightIcon={<Icon name={"check"} />}
                     onClick={addOptions}
+                    disabled={_.isEqual(options.length, 0)}
                   >
                     Continue
                   </Button>

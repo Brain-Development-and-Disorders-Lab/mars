@@ -7,9 +7,11 @@ import {
   Card,
   CardBody,
   CardFooter,
-  Divider,
+  CardHeader,
   Flex,
   FormControl,
+  FormLabel,
+  Heading,
   Input,
   Textarea,
 } from "@chakra-ui/react";
@@ -46,17 +48,20 @@ const Attribute = (props: AttributeProps) => {
   };
 
   return (
-    <Card variant={"outline"} p={["1", "2"]}>
-      <CardBody p={["1", "2"]}>
-        <Flex
-          direction={"row"}
-          gap={"2"}
-          justify={["center", "space-between"]}
-        >
-          <Flex direction={"column"} gap={"2"} grow={"1"}>
+    <Card variant={"outline"} p={"2"}>
+      <CardHeader p={"2"}>
+        <Heading fontWeight={"semibold"} size={"md"}>
+          Attribute Details
+        </Heading>
+      </CardHeader>
+
+      <CardBody p={"2"}>
+        <Flex direction={"column"}>
+          <Flex direction={"row"} gap={"4"} wrap={["wrap", "nowrap"]}>
             <FormControl isRequired isInvalid={isNameError}>
+              <FormLabel>Name</FormLabel>
               <Input
-                placeholder={"Name"}
+                placeholder={"Attribute name"}
                 value={name}
                 disabled={finished}
                 onChange={(event) => setName(event.target.value)}
@@ -64,29 +69,26 @@ const Attribute = (props: AttributeProps) => {
             </FormControl>
 
             <FormControl isRequired isInvalid={isDescriptionError}>
+              <FormLabel>Description</FormLabel>
               <Textarea
                 value={description}
-                placeholder={"Description"}
+                placeholder={"Attribute description"}
                 disabled={finished}
                 onChange={(event) => setDescription(event.target.value)}
               />
             </FormControl>
           </Flex>
 
-          <Flex grow={"1"}>
-            <Values
-              collection={values}
-              viewOnly={finished}
-              setValues={setValues}
-            />
-          </Flex>
+          <Values
+            collection={values}
+            viewOnly={finished}
+            setValues={setValues}
+          />
         </Flex>
       </CardBody>
 
-      <Divider />
-
-      <CardFooter justify={"right"}>
-        <Flex direction={"row"} gap={"2"}>
+      <CardFooter>
+        <Flex direction={"row"} gap={"2"} grow={"1"} justify={"right"}>
           <Button
             colorScheme={"red"}
             onClick={() => {
@@ -110,7 +112,7 @@ const Attribute = (props: AttributeProps) => {
             }}
             isDisabled={finished || isAttributesError}
           >
-            Done
+            Save
           </Button>
         </Flex>
       </CardFooter>
