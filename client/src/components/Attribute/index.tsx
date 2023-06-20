@@ -51,10 +51,9 @@ const Attribute = (props: AttributeProps) => {
         <Flex
           direction={"row"}
           gap={"2"}
-          wrap={"wrap"}
           justify={["center", "space-between"]}
         >
-          <Flex direction={"column"} gap={"2"}>
+          <Flex direction={"column"} gap={"2"} grow={"1"}>
             <FormControl isRequired isInvalid={isNameError}>
               <Input
                 placeholder={"Name"}

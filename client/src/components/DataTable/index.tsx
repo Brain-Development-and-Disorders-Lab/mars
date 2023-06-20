@@ -121,53 +121,56 @@ const DataTable = (props: DataTableProps) => {
   };
 
   return (
-    <TableContainer>
-      <Table>
-        <Thead>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <Tr key={headerGroup.id}>
-              {headerGroup.headers.map((header) => {
-                const meta: any = header.column.columnDef.meta;
-                return (
-                  <Th
-                    key={header.id}
-                    onClick={header.column.getToggleSortingHandler()}
-                    isNumeric={meta?.isNumeric}
-                  >
-                    <Flex gap={"4"} direction={"row"}>
-                      {flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
-                      {header.column.getIsSorted() ? (
-                        header.column.getIsSorted() === "desc" ? (
-                          <Icon name={"c_down"} />
-                        ) : (
-                          <Icon name={"c_up"} />
-                        )
-                      ) : null}
-                    </Flex>
-                  </Th>
-                );
-              })}
-            </Tr>
-          ))}
-        </Thead>
-        <Tbody>
-          {table.getRowModel().rows.map((row) => (
-            <Tr id={row.id} key={row.id}>
-              {row.getVisibleCells().map((cell) => {
-                const meta: any = cell.column.columnDef.meta;
-                return (
-                  <Td id={cell.id} key={cell.id} isNumeric={meta?.isNumeric}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </Td>
-                );
-              })}
-            </Tr>
-          ))}
-        </Tbody>
-      </Table>
+    <>
+      <TableContainer>
+        <Table>
+          <Thead>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <Tr key={headerGroup.id}>
+                {headerGroup.headers.map((header) => {
+                  const meta: any = header.column.columnDef.meta;
+                  return (
+                    <Th
+                      key={header.id}
+                      onClick={header.column.getToggleSortingHandler()}
+                      isNumeric={meta?.isNumeric}
+                    >
+                      <Flex gap={"4"} direction={"row"}>
+                        {flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                        {header.column.getIsSorted() ? (
+                          header.column.getIsSorted() === "desc" ? (
+                            <Icon name={"c_down"} />
+                          ) : (
+                            <Icon name={"c_up"} />
+                          )
+                        ) : null}
+                      </Flex>
+                    </Th>
+                  );
+                })}
+              </Tr>
+            ))}
+          </Thead>
+          <Tbody>
+            {table.getRowModel().rows.map((row) => (
+              <Tr id={row.id} key={row.id}>
+                {row.getVisibleCells().map((cell) => {
+                  const meta: any = cell.column.columnDef.meta;
+                  return (
+                    <Td id={cell.id} key={cell.id} isNumeric={meta?.isNumeric}>
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </Td>
+                  );
+                })}
+              </Tr>
+            ))}
+          </Tbody>
+        </Table>
+      </TableContainer>
+
       {!props.hidePagination && (
         <Flex
           direction={"row"}
@@ -247,7 +250,7 @@ const DataTable = (props: DataTableProps) => {
           </Flex>
         </Flex>
       )}
-    </TableContainer>
+    </>
   );
 };
 
