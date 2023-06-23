@@ -40,6 +40,7 @@ import {
   BsSearch,
   BsTagFill,
   BsTrashFill,
+  BsUpcScan,
   BsXCircleFill,
 } from "react-icons/bs";
 import { SiBox } from "react-icons/si";
@@ -81,6 +82,7 @@ const SYSTEM_ICONS: { [k: string]: IconType } = {
   clock: BsClockHistory,
   rewind: BsArrowCounterclockwise,
   link: BsLink45Deg,
+  scan: BsUpcScan,
 
   // Logos
   l_box: SiBox,

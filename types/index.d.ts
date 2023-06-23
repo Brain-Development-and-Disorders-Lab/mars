@@ -1,3 +1,16 @@
+declare global {
+  interface Navigator {
+      usb: {
+          getDevices(): any;
+          requestDevice({}): any;
+          addEventListener(event: string, handler: (event: any) => void): any;
+          onconnect({}): any;
+      }
+  }
+}
+
+export type ScannerStatus = "disconnected" | "connected" | "error";
+
 export type CreatePage = "default" | "entity" | "collection" | "attribute";
 
 export namespace State.Entity {
@@ -210,6 +223,7 @@ export type IconNames =
   "clock" |
   "rewind" |
   "link" |
+  "scan" |
 
   // Logos
   "l_box" |

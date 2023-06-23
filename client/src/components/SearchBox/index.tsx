@@ -21,23 +21,69 @@ import {
   VStack,
   StackDivider,
   PopoverFooter,
+  IconButton,
+  Tooltip,
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 
 // Existing and custom types
-import { EntityModel } from "@types";
+import { EntityModel, ScannerStatus } from "@types";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
 
 // Utility functions and libraries
 import { getData, postData } from "@database/functions";
+import { connectScanner } from "@devices/Scanner";
+import _ from "lodash";
 
 const SearchBox = () => {
   const [query, setQuery] = useState("");
   const navigate = useNavigate();
   const toast = useToast();
   const { isOpen, onToggle, onClose } = useDisclosure();
+
+  // Scanner status
+  const [scannerStatus, setScannerStatus] = useState("disconnected" as ScannerStatus);
+
+  const handleScannerConnection = () => {
+    if (_.isEqual(scannerStatus, "disconnected")) {
+      // Connect to the scanner if not currently connected
+      connectScanner(setScannerStatus).then((device) => {
+        if (_.isNull(device)) {
+          toast({
+            title: "No device selected",
+            status: "warning",
+            duration: 2000,
+            position: "bottom-right",
+            isClosable: true,
+          });
+        } else {
+          navigator.usb.addEventListener("connect", (_event) => {
+            setScannerStatus("connected");
+            toast({
+              title: "Scanner connected",
+              status: "success",
+              duration: 2000,
+              position: "bottom-right",
+              isClosable: true,
+            });
+          });
+
+          navigator.usb.addEventListener("disconnect", (_event) => {
+            setScannerStatus("disconnected");
+            toast({
+              title: "Scanner disconnected",
+              status: "info",
+              duration: 2000,
+              position: "bottom-right",
+              isClosable: true,
+            });
+          });
+        }
+      });
+    }
+  };
 
   // Search status
   const [hasSearched, setHasSearched] = useState(false);
@@ -108,6 +154,15 @@ const SearchBox = () => {
       >
         <PopoverTrigger>
           <Flex w={"100%"} gap={"4"}>
+            <Tooltip label={_.isEqual(scannerStatus, "connected") ? "Scanner connected" : "Scanner not connected"}>
+              <IconButton
+                aria-label={"Scanner status"}
+                icon={<Icon name={"scan"} />}
+                colorScheme={_.isEqual(scannerStatus, "connected") ? "green" : "gray"}
+                onClick={() => handleScannerConnection()}
+                disabled={_.isEqual(scannerStatus, "connected")}
+              />
+            </Tooltip>
             <Input
               value={query}
               placeholder={"Quick Search"}
