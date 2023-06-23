@@ -327,15 +327,11 @@ const EntityPage = (props: { createPageState: CreatePage, setCreatePageState: Re
                           value={name}
                           onChange={(event) => setName(event.target.value)}
                         />
-                        {!isNameError ? (
-                          <FormHelperText>
-                            A standardised name or ID for the Entity.
-                          </FormHelperText>
-                        ) : (
+                        {isNameError &&
                           <FormErrorMessage>
                             A name or ID must be specified.
                           </FormErrorMessage>
-                        )}
+                        }
                       </FormControl>
 
                       <FormControl isRequired isInvalid={isOwnerError}>
@@ -345,13 +341,11 @@ const EntityPage = (props: { createPageState: CreatePage, setCreatePageState: Re
                           value={owner}
                           onChange={(event) => setOwner(event.target.value)}
                         />
-                        {!isOwnerError ? (
-                          <FormHelperText>Owner of the Entity.</FormHelperText>
-                        ) : (
+                        {isOwnerError &&
                           <FormErrorMessage>
                             An owner of the Entity is required.
                           </FormErrorMessage>
-                        )}
+                        }
                       </FormControl>
                     </Flex>
 
@@ -365,15 +359,11 @@ const EntityPage = (props: { createPageState: CreatePage, setCreatePageState: Re
                           value={created}
                           onChange={(event) => setCreated(event.target.value)}
                         />
-                        {!isDateError ? (
-                          <FormHelperText>
-                            Date the Entity was created.
-                          </FormHelperText>
-                        ) : (
+                        {isDateError &&
                           <FormErrorMessage>
                             A created date must be specified.
                           </FormErrorMessage>
-                        )}
+                        }
                       </FormControl>
 
                       <FormControl>
@@ -850,15 +840,11 @@ const CollectionPage = (props: { createPageState: CreatePage, setCreatePageState
                     value={name}
                     onChange={(event) => setName(event.target.value)}
                   />
-                  {!isNameError ? (
-                    <FormHelperText>
-                      A name or ID for the Collection.
-                    </FormHelperText>
-                  ) : (
+                  {isNameError &&
                     <FormErrorMessage>
                       A name or ID must be specified.
                     </FormErrorMessage>
-                  )}
+                  }
                 </FormControl>
 
                 <FormControl isRequired isInvalid={isOwnerError}>
@@ -873,13 +859,11 @@ const CollectionPage = (props: { createPageState: CreatePage, setCreatePageState
                     value={owner}
                     onChange={(event) => setOwner(event.target.value)}
                   />
-                  {!isOwnerError ? (
-                    <FormHelperText>Owner of the Collection.</FormHelperText>
-                  ) : (
+                  {isOwnerError &&
                     <FormErrorMessage>
                       An owner of the Collection is required.
                     </FormErrorMessage>
-                  )}
+                  }
                 </FormControl>
               </Flex>
 
@@ -908,15 +892,11 @@ const CollectionPage = (props: { createPageState: CreatePage, setCreatePageState
                     value={description}
                     onChange={(event) => setDescription(event.target.value)}
                   />
-                  {!isDescriptionError ? (
-                    <FormHelperText>
-                      A description of the Collection.
-                    </FormHelperText>
-                  ) : (
+                  {isDescriptionError &&
                     <FormErrorMessage>
                       A description must be provided.
                     </FormErrorMessage>
-                  )}
+                  }
                 </FormControl>
               </Flex>
             </Flex>
@@ -1070,13 +1050,11 @@ const AttributePage = (props: { createPageState: CreatePage, setCreatePageState:
                     onChange={(event) => setName(event.target.value)}
                     required
                   />
-                  {!isNameError ? (
-                    <FormHelperText>Name of the Attribute.</FormHelperText>
-                  ) : (
+                  {isNameError &&
                     <FormErrorMessage>
                       A name must be specified for the Attribute.
                     </FormErrorMessage>
-                  )}
+                  }
                 </FormControl>
 
                 <FormControl isRequired>
@@ -1086,15 +1064,11 @@ const AttributePage = (props: { createPageState: CreatePage, setCreatePageState:
                     placeholder={"Attribute Description"}
                     onChange={(event) => setDescription(event.target.value)}
                   />
-                  {!isDescriptionError ? (
-                    <FormHelperText>
-                      Description of the Attribute.
-                    </FormHelperText>
-                  ) : (
+                  {isDescriptionError &&
                     <FormErrorMessage>
                       A description should be provided for the Attribute.
                     </FormErrorMessage>
-                  )}
+                  }
                 </FormControl>
               </Flex>
 
@@ -1265,6 +1239,7 @@ const Create = () => {
                         </Heading>
                         <Flex gap={"2"}>
                           <Tag colorScheme={"red"}>Name</Tag>
+                          <Tag colorScheme={"red"}>Owner</Tag>
                           <Tag colorScheme={"red"}>Description</Tag>
                         </Flex>
                       </Flex>
