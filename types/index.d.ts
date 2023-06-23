@@ -209,6 +209,12 @@ export type IconNames =
   "graph" |
   "clock" |
   "rewind" |
+  "link" |
+
+  // Logos
+  "l_box" |
+  "l_labArchives" |
+  "l_globus" |
 
   // Values
   "v_date" |

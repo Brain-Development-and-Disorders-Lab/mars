@@ -25,11 +25,14 @@ import {
   BsExclamationOctagonFill,
   BsFileCodeFill,
   BsFileTextFill,
+  BsFillBookFill,
   BsFillExclamationTriangleFill,
   BsFillFileBinaryFill,
+  BsGlobe,
   BsGridFill,
   BsInfoCircleFill,
   BsLightningFill,
+  BsLink45Deg,
   BsList,
   BsPencilFill,
   BsPlusCircleFill,
@@ -39,6 +42,7 @@ import {
   BsTrashFill,
   BsXCircleFill,
 } from "react-icons/bs";
+import { SiBox } from "react-icons/si";
 
 // Existing and custom types
 import { IconNames } from "@types";
@@ -76,6 +80,12 @@ const SYSTEM_ICONS: { [k: string]: IconType } = {
   graph: BsDiagram2Fill,
   clock: BsClockHistory,
   rewind: BsArrowCounterclockwise,
+  link: BsLink45Deg,
+
+  // Logos
+  l_box: SiBox,
+  l_labArchives: BsFillBookFill,
+  l_globus: BsGlobe,
 
   // Values
   v_date: BsCalendarWeekFill,

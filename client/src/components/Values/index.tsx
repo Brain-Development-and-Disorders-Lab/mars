@@ -26,6 +26,7 @@ import {
   ScaleFade,
   Select,
   Text,
+  Tooltip,
   VStack,
   useDisclosure,
   useToast,
@@ -223,10 +224,42 @@ const Values = (props: {
                 />
               );
             } else {
+              const domain = new URL(value);
+              const hostname = domain.hostname.replace("www", "");
+              let shortenedUrl = value.toString();
+              shortenedUrl = shortenedUrl.replace("https://", "");
+              shortenedUrl = shortenedUrl.replace("http://", "");
+              shortenedUrl = shortenedUrl.substring(0, 18);
+              shortenedUrl = shortenedUrl.concat("...");
+
+              // Setup Link display depending on destination URL
+              let linkTextColor = "black";
+              let linkBgColor = "gray.100";
+              let linkLogo = null;
+              if (_.isEqual(hostname, "wustl.box.com")) {
+                linkTextColor = "white";
+                linkBgColor = "blue.400";
+                linkLogo = <Icon name={"l_box"} size={[5, 5]} />;
+              } else if (_.isEqual(hostname, "mynotebook.labarchives.com")) {
+                linkTextColor = "white";
+                linkBgColor = "purple.400";
+                linkLogo = <Icon name={"l_labArchives"} size={[5, 5]} />;
+              } else if (_.isEqual(hostname, "app.globus.org")) {
+                linkTextColor = "white";
+                linkBgColor = "blue.600";
+                linkLogo = <Icon name={"l_globus"} size={[5, 5]} />;
+              }
+
               return (
-                <Link href={value} isExternal>
-                  {value}
-                </Link>
+                <Tooltip label={value}>
+                  <Flex direction={"row"} align={"center"} p={"2"} pl={"4"} pr={"4"} rounded={"full"} gap={"2"} bg={linkBgColor} color={linkTextColor} justify={"space-between"}>
+                    {linkLogo}
+                    <Link href={value} isExternal noOfLines={1}>
+                      <Text>{shortenedUrl}</Text>
+                    </Link>
+                    <Icon name={"link"} />
+                  </Flex>
+                </Tooltip>
               );
             }
           }
