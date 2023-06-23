@@ -59,6 +59,7 @@ const SearchBox = () => {
             isClosable: true,
           });
         } else {
+          // Event listener for connect event
           navigator.usb.addEventListener("connect", (_event) => {
             setScannerStatus("connected");
             toast({
@@ -70,6 +71,7 @@ const SearchBox = () => {
             });
           });
 
+          // Event listener for disconnect event
           navigator.usb.addEventListener("disconnect", (_event) => {
             setScannerStatus("disconnected");
             toast({
@@ -79,6 +81,15 @@ const SearchBox = () => {
               position: "bottom-right",
               isClosable: true,
             });
+          });
+
+          // Notify of a successful connection
+          toast({
+            title: "Scanner connected",
+            status: "success",
+            duration: 2000,
+            position: "bottom-right",
+            isClosable: true,
           });
         }
       });

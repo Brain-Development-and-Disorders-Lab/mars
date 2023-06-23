@@ -12,9 +12,16 @@ export const connectScanner = (setScannerStatus: React.Dispatch<React.SetStateAc
   return new Promise((resolve, reject) => {
     navigator.usb.requestDevice({ filters: [{ vendorId: VENDOR_ID }] })
       .then((device: any) => {
-        consola.success("Connected to scanner");
-        setScannerStatus("connected");
-        resolve(device);
+        consola.info(device);
+        device.open().then(() => {
+          setScannerStatus("connected");
+          consola.success("Connected to scanner");
+          resolve(device);
+        }).catch((_error: DOMException) => {
+          consola.error("Error connecting to scanner");
+          setScannerStatus("error");
+          reject("Error connecting to scanner");
+        });
       })
       .catch((error: DOMException) => {
         if (error.message.includes("No device selected.")) {
