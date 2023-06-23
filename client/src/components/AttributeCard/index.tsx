@@ -127,7 +127,7 @@ const AttributeCard = (props: AttributeCardProps) => {
                 switch (value.type) {
                   case "date": {
                     return (
-                      <Tag key={value.identifier}>
+                      <Tag key={value.identifier} colorScheme={"orange"}>
                         <Icon name={"v_date"} />
                         <TagLabel>
                           <Flex align={"center"} gap={"1"}>
@@ -141,7 +141,7 @@ const AttributeCard = (props: AttributeCardProps) => {
                   }
                   case "entity": {
                     return (
-                      <Tag key={value.identifier}>
+                      <Tag key={value.identifier} colorScheme={"purple"}>
                         <Icon name={"entity"} />
                         <TagLabel>
                           <Flex align={"center"} gap={"1"}>
@@ -155,7 +155,7 @@ const AttributeCard = (props: AttributeCardProps) => {
                   }
                   case "number": {
                     return (
-                      <Tag key={value.identifier}>
+                      <Tag key={value.identifier} colorScheme={"green"}>
                         <Icon name={"v_number"} />
                         <TagLabel>
                           <Flex align={"center"} gap={"1"}>
@@ -167,11 +167,24 @@ const AttributeCard = (props: AttributeCardProps) => {
                       </Tag>
                     );
                   }
-
                   case "url": {
                     return (
-                      <Tag key={value.identifier}>
+                      <Tag key={value.identifier} colorScheme={"yellow"}>
                         <Icon name={"v_url"} />
+                        <TagLabel>
+                          <Flex align={"center"} gap={"1"}>
+                            <Flex p={"1"} m={"1"}>
+                              {value.name}
+                            </Flex>
+                          </Flex>
+                        </TagLabel>
+                      </Tag>
+                    );
+                  }
+                  case "select": {
+                    return (
+                      <Tag key={value.identifier} colorScheme={"cyan"}>
+                        <Icon name={"v_select"} />
                         <TagLabel>
                           <Flex align={"center"} gap={"1"}>
                             <Flex p={"1"} m={"1"}>
@@ -184,7 +197,7 @@ const AttributeCard = (props: AttributeCardProps) => {
                   }
                   default: {
                     return (
-                      <Tag key={value.identifier}>
+                      <Tag key={value.identifier} colorScheme={"blue"}>
                         <Icon name={"v_text"} />
                         <TagLabel>
                           <Flex align={"center"} gap={"1"}>

@@ -26,6 +26,7 @@ import {
   ScaleFade,
   Select,
   Text,
+  VStack,
   useDisclosure,
   useToast,
 } from "@chakra-ui/react";
@@ -389,7 +390,11 @@ const Values = (props: {
                   {/* Buttons to add Values */}
                   <Button
                     variant={"outline"}
-                    leftIcon={<Icon name={"v_date"} color={"orange.300"} />}
+                    bg={"orange.300"}
+                    color={"white"}
+                    borderColor={"orange.300"}
+                    _hover={{ bg: "orange.400" }}
+                    leftIcon={<Icon name={"v_date"} />}
                     onClick={() => {
                       props.setValues([
                         ...data,
@@ -407,7 +412,11 @@ const Values = (props: {
 
                   <Button
                     variant={"outline"}
-                    leftIcon={<Icon name={"v_text"} color={"blue.300"} />}
+                    bg={"blue.300"}
+                    color={"white"}
+                    borderColor={"blue.300"}
+                    _hover={{ bg: "blue.400" }}
+                    leftIcon={<Icon name={"v_text"} />}
                     onClick={() => {
                       props.setValues([
                         ...data,
@@ -425,7 +434,11 @@ const Values = (props: {
 
                   <Button
                     variant={"outline"}
-                    leftIcon={<Icon name={"v_number"} color={"green.300"} />}
+                    bg={"green.300"}
+                    color={"white"}
+                    borderColor={"green.300"}
+                    _hover={{ bg: "green.400" }}
+                    leftIcon={<Icon name={"v_number"} />}
                     onClick={() => {
                       props.setValues([
                         ...data,
@@ -443,7 +456,11 @@ const Values = (props: {
 
                   <Button
                     variant={"outline"}
-                    leftIcon={<Icon name={"v_url"} color={"yellow.300"} />}
+                    bg={"yellow.300"}
+                    color={"white"}
+                    borderColor={"yellow.300"}
+                    _hover={{ bg: "yellow.400" }}
+                    leftIcon={<Icon name={"v_url"} />}
                     onClick={() => {
                       props.setValues([
                         ...data,
@@ -461,7 +478,11 @@ const Values = (props: {
 
                   <Button
                     variant={"outline"}
-                    leftIcon={<Icon name={"entity"} color={"purple.300"} />}
+                    bg={"purple.300"}
+                    color={"white"}
+                    borderColor={"purple.300"}
+                    _hover={{ bg: "purple.400" }}
+                    leftIcon={<Icon name={"entity"} />}
                     onClick={() => {
                       props.setValues([
                         ...data,
@@ -479,7 +500,11 @@ const Values = (props: {
 
                   <Button
                     variant={"outline"}
-                    leftIcon={<Icon name={"v_select"} color={"teal.300"} />}
+                    bg={"teal.300"}
+                    color={"white"}
+                    borderColor={"teal.300"}
+                    _hover={{ bg: "teal.400" }}
+                    leftIcon={<Icon name={"v_select"} />}
                     onClick={() => {
                       onOpen();
                     }}
@@ -555,32 +580,39 @@ const Values = (props: {
                 </Flex>
 
                 <Flex direction={"column"} gap={"2"}>
-                  {options.length > 0 &&
-                    options.map((option) => {
-                      return (
-                        <Flex
-                          direction={"row"}
-                          justify={"space-between"}
-                          key={option}
-                        >
-                          {option}
-                          <Button
-                            colorScheme={"red"}
-                            rightIcon={<Icon name={"delete"} />}
-                            onClick={() => {
-                              setOptions([
-                                ...options.filter(
-                                  (currentOption) =>
-                                    !_.isEqual(currentOption, option)
-                                ),
-                              ]);
-                            }}
+                  <VStack gap={"2"}>
+                    {options.length > 0 &&
+                      options.map((option) => {
+                        return (
+                          <Flex
+                            direction={"row"}
+                            w={"100%"}
+                            justify={"space-between"}
+                            align={"center"}
+                            key={option}
                           >
-                            Remove
-                          </Button>
-                        </Flex>
-                      );
-                    })}
+                            <Flex gap={"2"}>
+                              <Text fontWeight={"semibold"}>Option:</Text>
+                              <Text>{option}</Text>
+                            </Flex>
+                            <Button
+                              colorScheme={"red"}
+                              rightIcon={<Icon name={"delete"} />}
+                              onClick={() => {
+                                setOptions([
+                                  ...options.filter(
+                                    (currentOption) =>
+                                      !_.isEqual(currentOption, option)
+                                  ),
+                                ]);
+                              }}
+                            >
+                              Remove
+                            </Button>
+                          </Flex>
+                        );
+                      })}
+                    </VStack>
                 </Flex>
 
                 <Flex gap={"4"} justify={"center"}>

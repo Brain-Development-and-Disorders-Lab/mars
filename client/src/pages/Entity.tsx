@@ -43,7 +43,6 @@ import {
   CheckboxGroup,
   Checkbox,
   Stack,
-  FormHelperText,
   FormErrorMessage,
   Drawer,
   DrawerOverlay,
@@ -1250,15 +1249,11 @@ const Entity = () => {
                             }
                             required
                           />
-                          {!isAttributeNameError ? (
-                            <FormHelperText>
-                              Name of the Attribute.
-                            </FormHelperText>
-                          ) : (
+                          {isAttributeNameError &&
                             <FormErrorMessage>
                               A name must be specified for the Attribute.
                             </FormErrorMessage>
-                          )}
+                          }
                         </FormControl>
 
                         <FormControl isRequired>
@@ -1270,16 +1265,12 @@ const Entity = () => {
                               setAttributeDescription(event.target.value)
                             }
                           />
-                          {!isAttributeDescriptionError ? (
-                            <FormHelperText>
-                              Description of the Attribute.
-                            </FormHelperText>
-                          ) : (
+                          {isAttributeDescriptionError &&
                             <FormErrorMessage>
                               A description should be provided for the
                               Attribute.
                             </FormErrorMessage>
-                          )}
+                          }
                         </FormControl>
                       </Flex>
 
