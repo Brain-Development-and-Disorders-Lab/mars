@@ -79,14 +79,18 @@ export class Search {
           for (let component of queryLogicalGroups.AND) {
             const qualifier = component.qualifier.toLowerCase();
             const parameter = component.parameter.toLowerCase();
-            if (_.isEqual(qualifier, "is")) {
-              expressions.push({ [parameter]: component.value });
-            } else if (_.isEqual(qualifier, "is not")) {
-              expressions.push({ [parameter]: { $ne: component.value } });
-            } else if (_.isEqual(qualifier, "contains")) {
-              expressions.push({ [parameter]: { $regex: new RegExp(component.value, "gi") } });
-            } else if (_.isEqual(qualifier, "does not contain")) {
-              expressions.push({ [parameter]: { $regex: new RegExp(`^((?!${component.value}).)*$`, "gi") } });
+
+            if (_.isEqual(parameter, "description") || _.isEqual(parameter, "name")) {
+              // Parameters: name, description
+              if (_.isEqual(qualifier, "is")) {
+                expressions.push({ [parameter]: component.value });
+              } else if (_.isEqual(qualifier, "is not")) {
+                expressions.push({ [parameter]: { $ne: component.value } });
+              } else if (_.isEqual(qualifier, "contains")) {
+                expressions.push({ [parameter]: { $regex: new RegExp(component.value, "gi") } });
+              } else if (_.isEqual(qualifier, "does not contain")) {
+                expressions.push({ [parameter]: { $regex: new RegExp(`^((?!${component.value}).)*$`, "gi") } });
+              }
             }
           }
           return queryBase.and(expressions);

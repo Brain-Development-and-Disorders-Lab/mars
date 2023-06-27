@@ -205,7 +205,14 @@ const Search = () => {
                       <Select value={queryType} onChange={(event) => setQueryType(event.target.value as QueryFocusType)}>
                         <option>Entity</option>
                       </Select>
-                      <Select value={queryParameter} onChange={(event) => setQueryParameter(event.target.value as QueryParameters)}>
+                      <Select
+                        value={queryParameter}
+                        onChange={(event) => {
+                          setQueryParameter(event.target.value as QueryParameters);
+                          // Set the query qualifier to prevent selection of disabled options
+                          setQueryQualifier("Contains");
+                        }}
+                      >
                         <option>Name</option>
                         <option>Description</option>
                         <option disabled>Collections</option>
@@ -215,8 +222,24 @@ const Search = () => {
                       <Select value={queryQualifier} onChange={(event) => setQueryQualifier(event.target.value as QueryQualifier)}>
                         <option>Contains</option>
                         <option>Does Not Contain</option>
-                        <option>Is Not</option>
-                        <option>Is</option>
+                        <option
+                          disabled={
+                            _.isEqual(queryParameter, "Collections") ||
+                            _.isEqual(queryParameter, "Origins") ||
+                            _.isEqual(queryParameter, "Products")
+                          }
+                        >
+                          Is Not
+                        </option>
+                        <option
+                          disabled={
+                            _.isEqual(queryParameter, "Collections") ||
+                            _.isEqual(queryParameter, "Origins") ||
+                            _.isEqual(queryParameter, "Products")
+                          }
+                        >
+                          Is
+                        </option>
                       </Select>
                       <Input value={queryValue} placeholder={"Value"} onChange={(event) => setQueryValue(event.target.value)} />
                       <IconButton
@@ -379,22 +402,15 @@ const Search = () => {
               <ModalHeader>Search</ModalHeader>
               <ModalCloseButton />
               <ModalBody>
-                <Text>
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
-                  do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                </Text>
-                <Text>
-                  Ut enim ad minim veniam, quis nostrud exercitation ullamco
-                  laboris nisi ut aliquip ex ea commodo consequat.
-                </Text>
-                <Text>
-                  Duis aute irure dolor in reprehenderit in voluptate velit esse
-                  cillum dolore eu fugiat nulla pariatur.
-                </Text>
-                <Text>
-                  Excepteur sint occaecat cupidatat non proident, sunt in culpa
-                  qui officia deserunt mollit anim id est laborum.
-                </Text>
+                <Flex direction={"column"} gap={"4"} p={"2"}>
+                  <Text>
+                    Use the <b>Text Search</b> tab to search for text across all Entity fields.
+                  </Text>
+                  <Text>
+                    The <b>Advanced Queries</b> tab allows search queries to be constructed to target specific fields
+                    and values. Queries can be built using AND and OR logical components.
+                  </Text>
+                </Flex>
               </ModalBody>
             </ModalContent>
           </Modal>
