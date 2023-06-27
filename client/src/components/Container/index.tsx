@@ -2,10 +2,17 @@
 import React, { FC } from "react";
 
 // Existing and custom components
-import { Avatar, Flex, Spacer } from "@chakra-ui/react";
+import { Avatar, Flex, Link, Menu, MenuButton, MenuGroup, MenuItem, MenuList, Spacer, Text } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 import Navigation from "@components/Navigation";
 import SearchBox from "@components/SearchBox";
+
+// Routing and navigation
+import { useNavigate } from "react-router-dom";
+
+// Utility functions and libraries
+import { useToken } from "src/authentication/useToken";
+import dayjs from "dayjs";
 
 // Content container
 const Content: FC<any> = (props: { children: any; vertical?: boolean }) => {
@@ -32,6 +39,20 @@ const Content: FC<any> = (props: { children: any; vertical?: boolean }) => {
 
 // Page container
 const Page: FC<any> = ({ children }) => {
+  const [token, setToken] = useToken();
+  const navigate = useNavigate();
+
+  const performLogout = () => {
+    // Invalidate the token and refresh the page
+    setToken({
+      username: token.username,
+      token: token.token,
+      lastLogin: token.lastLogin,
+      valid: false,
+    });
+    navigate(0);
+  };
+
   return (
     <Flex
       direction={{ base: "column", lg: "row" }}
@@ -62,7 +83,21 @@ const Page: FC<any> = ({ children }) => {
 
           <Flex p={"4"} gap={"4"} align={"center"}>
             <Icon name={"bell"} size={[5, 5]} />
-            <Avatar size={"sm"} />
+            <Menu>
+              <MenuButton as={Avatar} bgColor={"orange.400"} size={"sm"} />
+              <MenuList>
+                <Flex p={"4"} w={"100%"} direction={"column"}>
+                  <Text fontWeight={"semibold"}>Hello, {token.username}!</Text>
+                  <Text>Last login: {dayjs(token.lastLogin).fromNow()}</Text>
+                </Flex>
+                <MenuGroup title={"System"}>
+                  <MenuItem>Backup</MenuItem>
+                </MenuGroup>
+                <MenuGroup title={"Account"}>
+                  <MenuItem as={Link} onClick={() => performLogout()}>Logout</MenuItem>
+                </MenuGroup>
+              </MenuList>
+            </Menu>
           </Flex>
         </Flex>
 

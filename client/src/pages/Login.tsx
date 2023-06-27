@@ -14,11 +14,14 @@ import {
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 
+// Existing and custom types
+import { AuthToken } from "@types";
+
 // Utility functions and libraries
 import { postData } from "@database/functions";
 import _ from "lodash";
 
-const Login = (props: { setToken: (token: string) => void }) => {
+const Login = (props: { setToken: (token: AuthToken) => void }) => {
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
   const [isLoading, setIsLoading] = useState(false);

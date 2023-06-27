@@ -1,6 +1,9 @@
 // Libraries
 import express from "express";
 
+// Existing and custom types
+import { AuthToken } from "@types";
+
 // Operations
 import { Authentication } from "../operations/Authentication";
 
@@ -10,7 +13,7 @@ const AuthenticationRoute = express.Router();
 AuthenticationRoute.route("/login").post(
   (request: { body: { password: string } }, response: any) => {
     Authentication.login(request.body.password)
-      .then((token: string) => {
+      .then((token: AuthToken) => {
         response.json({
           status: "success",
           token: token,
@@ -19,7 +22,7 @@ AuthenticationRoute.route("/login").post(
       .catch(() => {
         response.json({
           status: "error",
-          token: null,
+          token: {},
         });
       });
   }

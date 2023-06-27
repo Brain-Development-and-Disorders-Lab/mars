@@ -261,3 +261,11 @@ export type QueryComponent = {
   qualifier: QueryQualifier;
   value: string;
 };
+
+// Authentication types
+export type AuthToken = {
+  username: string;
+  token: string;
+  lastLogin: string;
+  valid: boolean;
+};

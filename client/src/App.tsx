@@ -35,9 +35,6 @@ import Invalid from "@pages/Invalid";
 // Authentication
 import { useToken } from "./authentication/useToken";
 
-// Variables
-import { DEVELOPER_MODE } from "./variables";
-
 // Theme extension
 import { theme } from "./styles/theme";
 
@@ -52,7 +49,7 @@ const App = (): ReactElement => {
   return (
     <BrowserRouter>
       <ChakraProvider theme={theme}>
-        {!token && !DEVELOPER_MODE ? (
+        {!token ? (
           <Login setToken={setToken} />
         ) : (
           <Page>
