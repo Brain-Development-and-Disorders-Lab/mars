@@ -15,4 +15,11 @@ ServerRoute.route("/server/backup").get((_request: any, response: any) => {
   });
 });
 
+// Route: Import JSON file
+ServerRoute.route("/server/import").post((request: any, response: any) => {
+  Server.import(request.files).then((successful: boolean) => {
+    response.json({ status: successful ? "success" : "error" });
+  });
+});
+
 export default ServerRoute;

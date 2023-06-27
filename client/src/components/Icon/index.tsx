@@ -42,6 +42,7 @@ import {
   BsTagFill,
   BsTrashFill,
   BsUpcScan,
+  BsUpload,
   BsXCircleFill,
 } from "react-icons/bs";
 import { SiBox } from "react-icons/si";
@@ -74,6 +75,7 @@ const SYSTEM_ICONS: { [k: string]: IconType } = {
   edit: BsPencilFill,
   delete: BsTrashFill,
   download: BsCloudDownloadFill,
+  upload: BsUpload,
   cross: BsXCircleFill,
   list: BsList,
   warning: BsFillExclamationTriangleFill,

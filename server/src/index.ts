@@ -6,6 +6,8 @@ import express from "express";
 import cors from "cors";
 import consola from "consola";
 
+const fileUpload = require("express-fileupload");
+
 // Get the connection functions
 import { connect } from "./database/connection";
 
@@ -24,6 +26,7 @@ const port = process.env.PORT || 8000;
 // Configure Express, enable CORS middleware and routes
 app.use(cors());
 app.use(express.json());
+app.use(fileUpload());
 app.use(
   ActivityRoute,
   AttributesRoute,

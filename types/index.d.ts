@@ -215,6 +215,7 @@ export type IconNames =
   "edit" |
   "delete" |
   "download" |
+  "upload" |
   "cross" |
   "list" |
   "warning" |
