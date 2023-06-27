@@ -207,11 +207,10 @@ const Search = () => {
                       </Select>
                       <Select value={queryParameter} onChange={(event) => setQueryParameter(event.target.value as QueryParameters)}>
                         <option>Name</option>
-                        <option>Owner</option>
                         <option>Description</option>
-                        <option>Collections</option>
-                        <option>Origins</option>
-                        <option>Products</option>
+                        <option disabled>Collections</option>
+                        <option disabled>Origins</option>
+                        <option disabled>Products</option>
                       </Select>
                       <Select value={queryQualifier} onChange={(event) => setQueryQualifier(event.target.value as QueryQualifier)}>
                         <option>Contains</option>
@@ -243,18 +242,46 @@ const Search = () => {
                       />
                     </Flex>
 
-                    <VStack p={"2"} gap={"4"}>
+                    <VStack p={"2"} gap={"4"} align={"start"}>
                       {queryComponents.map((component, index) => {
                         return (
-                          <Flex direction={"row"} gap={"4"} w={"100%"}>
+                          <Flex key={`qc_${index}`} direction={"row"} gap={"4"} w={"fit-content"} p={"2"} bg={"gray.50"} rounded={"md"}>
+                            {index > 0 &&
+                              <Select
+                                w={"auto"}
+                                value={_.isEqual(index, 0) ? "" : component.operator}
+                                onChange={(event) => {
+                                  // Update the component operator state
+                                  const updatedQueryComponents = _.cloneDeep(queryComponents);
+                                  updatedQueryComponents[index].operator = event.target.value as QueryOperator;
+                                  setQueryComponents(updatedQueryComponents);
+
+                                  // Update the operator state
+                                  setQueryOperator(event.target.value as QueryOperator)
+                                }}
+                              >
+                                <option>AND</option>
+                                <option>OR</option>
+                              </Select>
+                            }
+
                             <Tag colorScheme={"blue"}>{component.focus}</Tag>
                             <Tag colorScheme={"purple"}>{component.parameter}</Tag>
                             <Tag colorScheme={"green"}>{component.qualifier}</Tag>
-                            <Tag>"{component.value}"</Tag>
-                            <Select colorScheme={"orange"} w={"auto"} value={queryOperator} onChange={(event) => setQueryOperator(event.target.value as QueryOperator)} visibility={_.isEqual(index, queryComponents.length - 1) ? "hidden" : "visible"}>
-                              <option>AND</option>
-                              <option>OR</option>
-                            </Select>
+
+                            <Input w={"fit-content"} value={component.value} disabled />
+
+                            <IconButton
+                              aria-label={"Remove search component"}
+                              icon={<Icon name={"delete"} />}
+                              colorScheme={"red"}
+                              onClick={() => {
+                                // Remove the query component
+                                let updatedQueryComponents = _.cloneDeep(queryComponents);
+                                updatedQueryComponents.splice(index, 1);
+                                setQueryComponents(updatedQueryComponents);
+                              }}
+                            />
                           </Flex>
                         );
                       })}
