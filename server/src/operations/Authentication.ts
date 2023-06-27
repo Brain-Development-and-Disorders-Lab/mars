@@ -56,7 +56,7 @@ export class Authentication {
         } else {
           consola.success("Successful login attempt");
           resolve({
-            username: "Default",
+            username: "User",
             token: `auth_${nanoid(10)}_${Date.now().toFixed()}`,
             lastLogin: dayjs(Date.now()).toString(),
             valid: true,
