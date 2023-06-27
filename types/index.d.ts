@@ -227,6 +227,7 @@ export type IconNames =
   "link" |
   "scan" |
   "lock" |
+  "exit" |
 
   // Logos
   "l_box" |

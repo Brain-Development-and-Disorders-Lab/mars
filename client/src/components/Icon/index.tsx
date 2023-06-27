@@ -37,6 +37,7 @@ import {
   BsLockFill,
   BsPencilFill,
   BsPlusCircleFill,
+  BsPower,
   BsQuestionOctagonFill,
   BsSearch,
   BsTagFill,
@@ -87,6 +88,7 @@ const SYSTEM_ICONS: { [k: string]: IconType } = {
   link: BsLink45Deg,
   scan: BsUpcScan,
   lock: BsLockFill,
+  exit: BsPower,
 
   // Logos
   l_box: SiBox,

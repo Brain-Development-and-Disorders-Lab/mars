@@ -2,7 +2,7 @@
 import React, { FC } from "react";
 
 // Existing and custom components
-import { Avatar, Flex, Link, Menu, MenuButton, MenuGroup, MenuItem, MenuList, Spacer, Text } from "@chakra-ui/react";
+import { Avatar, Flex, Menu, MenuButton, MenuGroup, MenuItem, MenuList, Spacer, Text } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 import Navigation from "@components/Navigation";
 import SearchBox from "@components/SearchBox";
@@ -105,10 +105,20 @@ const Page: FC<any> = ({ children }) => {
                   <Text>Last login: {dayjs(token.lastLogin).fromNow()}</Text>
                 </Flex>
                 <MenuGroup title={"System"}>
-                  <MenuItem onClick={() => performBackup()}>Backup</MenuItem>
+                  <MenuItem onClick={() => performBackup()}>
+                    <Flex direction={"row"} align={"center"} gap={"4"}>
+                      <Icon name={"download"} />
+                      Backup
+                    </Flex>
+                  </MenuItem>
                 </MenuGroup>
                 <MenuGroup title={"Account"}>
-                  <MenuItem as={Link} onClick={() => performLogout()}>Logout</MenuItem>
+                  <MenuItem onClick={() => performLogout()}>
+                    <Flex direction={"row"} align={"center"} gap={"4"}>
+                      <Icon name={"exit"} />
+                      Logout
+                    </Flex>
+                  </MenuItem>
                 </MenuGroup>
               </MenuList>
             </Menu>
