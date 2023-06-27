@@ -15,8 +15,13 @@ import {
   ModalHeader,
   ModalOverlay,
   Select,
+  Tab,
+  TabList,
+  TabPanel,
+  TabPanels,
   Table,
   TableContainer,
+  Tabs,
   Tag,
   Tbody,
   Td,
@@ -38,6 +43,7 @@ import { EntityModel, QueryComponent, QueryFocusType, QueryOperator, QueryParame
 
 // Utility functions and libraries
 import { getData, postData } from "@database/functions";
+import _ from "lodash";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
@@ -101,6 +107,31 @@ const Search = () => {
       });
   };
 
+  const runQuerySearch = () => {
+    // Update state
+    setIsSearching(true);
+    setHasSearched(true);
+
+    postData(`/search/query`, { query: JSON.stringify(queryComponents) })
+      .then((value) => {
+        setResults(value);
+      })
+      .catch((_error) => {
+        toast({
+          title: "Error",
+          status: "error",
+          description: "Could not get search results.",
+          duration: 4000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+        setIsError(true);
+      })
+      .finally(() => {
+        setIsSearching(false);
+      });
+  };
+
   return (
     <Content vertical={isError}>
       {isError ? (
@@ -133,102 +164,125 @@ const Search = () => {
           </Flex>
 
           {/* Search components */}
-          {/* Text search */}
-          <Flex p={"2"} w={"100%"} direction={"column"} gap={"4"}>
-            <Heading size={"md"} fontWeight={"semibold"}>Text Search</Heading>
-            <Flex direction={"row"} align={"center"} gap={"2"}>
-              <Input
-                value={query}
-                placeholder={"Search..."}
-                onChange={(event) => setQuery(event.target.value)}
-                onKeyUp={(event) => {
-                  // Listen for "Enter" key when entering a query
-                  if (event.key === "Enter" && query !== "") {
-                    runSearch();
-                  }
-                }}
-              />
+          <Tabs variant={"soft-rounded"} colorScheme={"blue"}>
+            <TabList p={"2"}>
+              <Tab>Text Search</Tab>
+              <Tab>Advanced Queries</Tab>
+            </TabList>
+            <TabPanels>
+              <TabPanel>
+                {/* Text search */}
+                <Flex p={"2"} w={"100%"} direction={"column"} gap={"4"}>
+                  <Flex direction={"row"} align={"center"} gap={"2"}>
+                    <Input
+                      value={query}
+                      placeholder={"Search..."}
+                      onChange={(event) => setQuery(event.target.value)}
+                      onKeyUp={(event) => {
+                        // Listen for "Enter" key when entering a query
+                        if (event.key === "Enter" && query !== "") {
+                          runSearch();
+                        }
+                      }}
+                    />
 
-              <Button
-                leftIcon={<Icon name={"search"} />}
-                isDisabled={query === ""}
-                onClick={() => runSearch()}
-              >
-                Search
-              </Button>
-            </Flex>
-          </Flex>
-          {/* Query builder */}
-          <Flex p={"2"} w={"100%"} direction={"column"} gap={"4"}>
-            <Heading size={"md"} fontWeight={"semibold"}>Query Builder</Heading>
-            <Flex direction={"column"} p={"2"} rounded={"md"} border={"2px"} borderColor={"gray.200"}>
-              <Flex direction={"row"} p={"2"} gap={"4"}>
-                {/* Query builder components */}
-                <Select value={queryType} onChange={(event) => setQueryType(event.target.value as QueryFocusType)}>
-                  <option>Entity</option>
-                </Select>
-                <Select value={queryParameter} onChange={(event) => setQueryParameter(event.target.value as QueryParameters)}>
-                  <option>Name</option>
-                  <option>Owner</option>
-                  <option>Description</option>
-                  <option>Collections</option>
-                  <option>Origins</option>
-                  <option>Products</option>
-                </Select>
-                <Select value={queryQualifier} onChange={(event) => setQueryQualifier(event.target.value as QueryQualifier)}>
-                  <option>Contains</option>
-                  <option>Does Not Contain</option>
-                  <option>Is Not</option>
-                  <option>Is</option>
-                </Select>
-                <Input value={queryValue} placeholder={"Value"} onChange={(event) => setQueryValue(event.target.value)} />
-                <IconButton
-                  aria-label={"Add query component"}
-                  variant={"outline"}
-                  icon={<Icon name={"add"} />}
-                  onClick={() => {
-                    setQueryComponents([...queryComponents, {
-                      focus: queryType,
-                      parameter: queryParameter,
-                      qualifier: queryQualifier,
-                      value: queryValue,
-                    }]);
-
-                    // Reset query input
-                    setQueryType("Entity");
-                    setQueryParameter("Name");
-                    setQueryQualifier("Contains");
-                    setQueryValue("");
-                  }}
-                />
-              </Flex>
-
-              <VStack p={"2"} gap={"4"}>
-                {queryComponents.map((component) => {
-                  return (
-                    <Flex direction={"row"} gap={"4"} w={"100%"}>
-                      <Select maxW={"2xs"} value={queryOperator} onChange={(event) => setQueryOperator(event.target.value as QueryOperator)}>
-                        <option>AND</option>
-                        <option>OR</option>
+                    <Button
+                      leftIcon={<Icon name={"search"} />}
+                      isDisabled={query === ""}
+                      onClick={() => runSearch()}
+                    >
+                      Search
+                    </Button>
+                  </Flex>
+                </Flex>
+              </TabPanel>
+              <TabPanel>
+                {/* Query builder */}
+                <Flex p={"2"} w={"100%"} direction={"column"} gap={"4"}>
+                  <Flex direction={"column"} p={"2"} rounded={"md"} border={"2px"} borderColor={"gray.200"}>
+                    <Flex direction={"row"} p={"2"} gap={"4"}>
+                      {/* Query builder components */}
+                      <Select value={queryType} onChange={(event) => setQueryType(event.target.value as QueryFocusType)}>
+                        <option>Entity</option>
                       </Select>
-                      <Tag colorScheme={"blue"}>{component.focus}</Tag>
-                      <Tag colorScheme={"purple"}>{component.parameter}</Tag>
-                      <Tag colorScheme={"green"}>{component.qualifier}</Tag>
-                      <Tag>"{component.value}"</Tag>
+                      <Select value={queryParameter} onChange={(event) => setQueryParameter(event.target.value as QueryParameters)}>
+                        <option>Name</option>
+                        <option>Owner</option>
+                        <option>Description</option>
+                        <option>Collections</option>
+                        <option>Origins</option>
+                        <option>Products</option>
+                      </Select>
+                      <Select value={queryQualifier} onChange={(event) => setQueryQualifier(event.target.value as QueryQualifier)}>
+                        <option>Contains</option>
+                        <option>Does Not Contain</option>
+                        <option>Is Not</option>
+                        <option>Is</option>
+                      </Select>
+                      <Input value={queryValue} placeholder={"Value"} onChange={(event) => setQueryValue(event.target.value)} />
+                      <IconButton
+                        aria-label={"Add query component"}
+                        colorScheme={"telegram"}
+                        icon={<Icon name={"add"} />}
+                        disabled={_.isEqual(queryValue, "")}
+                        onClick={() => {
+                          setQueryComponents([...queryComponents, {
+                            operator: queryOperator,
+                            focus: queryType,
+                            parameter: queryParameter,
+                            qualifier: queryQualifier,
+                            value: queryValue,
+                          }]);
+
+                          // Reset query input
+                          setQueryType("Entity");
+                          setQueryParameter("Name");
+                          setQueryQualifier("Contains");
+                          setQueryValue("");
+                        }}
+                      />
                     </Flex>
-                  );
-                })}
-              </VStack>
-            </Flex>
-            <Flex direction={"row"} w={"100%"} justify={"right"}>
-              <Button
-                leftIcon={<Icon name={"search"} />}
-                isDisabled={queryComponents.length === 0}
-              >
-                Search
-              </Button>
-            </Flex>
-          </Flex>
+
+                    <VStack p={"2"} gap={"4"}>
+                      {queryComponents.map((component, index) => {
+                        return (
+                          <Flex direction={"row"} gap={"4"} w={"100%"}>
+                            <Tag colorScheme={"blue"}>{component.focus}</Tag>
+                            <Tag colorScheme={"purple"}>{component.parameter}</Tag>
+                            <Tag colorScheme={"green"}>{component.qualifier}</Tag>
+                            <Tag>"{component.value}"</Tag>
+                            <Select colorScheme={"orange"} w={"auto"} value={queryOperator} onChange={(event) => setQueryOperator(event.target.value as QueryOperator)} visibility={_.isEqual(index, queryComponents.length - 1) ? "hidden" : "visible"}>
+                              <option>AND</option>
+                              <option>OR</option>
+                            </Select>
+                          </Flex>
+                        );
+                      })}
+                    </VStack>
+                  </Flex>
+                  <Flex direction={"row"} w={"100%"} gap={"4"} justify={"right"}>
+                    <Button
+                      leftIcon={<Icon name={"delete"} />}
+                      isDisabled={queryComponents.length === 0}
+                      onClick={() => {
+                        setQueryComponents([])
+                        setResults([]);
+                      }}
+                    >
+                      Reset
+                    </Button>
+                    <Button
+                      leftIcon={<Icon name={"search"} />}
+                      isDisabled={queryComponents.length === 0}
+                      onClick={() => runQuerySearch()}
+                    >
+                      Search
+                    </Button>
+                  </Flex>
+                </Flex>
+              </TabPanel>
+            </TabPanels>
+          </Tabs>
 
           {/* Search Results */}
           <Flex gap={"2"} p={"2"}>
