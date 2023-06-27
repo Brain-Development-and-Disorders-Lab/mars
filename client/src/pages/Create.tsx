@@ -60,7 +60,7 @@ import {
 import { useNavigate } from "react-router-dom";
 
 // Utility functions and libraries
-import { checkAttributes, checkValues } from "src/functions";
+import { isValidAttributes, isValidValues } from "src/functions";
 import { getData, postData } from "@database/functions";
 import _ from "lodash";
 import { nanoid } from "nanoid";
@@ -120,7 +120,7 @@ const EntityPage = (props: { createPageState: CreatePage, setCreatePageState: Re
   const isNameError = name === "";
   const isOwnerError = owner === "";
   const isDateError = created === "";
-  const isDetailsError = isNameError || isOwnerError || isDateError;
+  const validDetails = !isNameError && !isOwnerError && !isDateError;
 
   const [validAttributes, setValidAttributes] = useState(false);
 
@@ -187,16 +187,19 @@ const EntityPage = (props: { createPageState: CreatePage, setCreatePageState: Re
   }, []);
 
   useEffect(() => {
-    setValidAttributes(checkAttributes(selectedAttributes));
+    setValidAttributes(isValidAttributes(selectedAttributes));
   }, [selectedAttributes]);
 
   const isValidInput = (): boolean => {
     if (_.isEqual("start", pageState)) {
-      return isDetailsError;
+      return validDetails;
     } else if (_.isEqual("attributes", pageState)) {
-      return !validAttributes;
+      if (attributes.length > 0) {
+        return validAttributes;
+      }
+      return true;
     }
-    return false;
+    return true;
   };
 
   // Handle clicking "Next"
@@ -723,7 +726,7 @@ const EntityPage = (props: { createPageState: CreatePage, setCreatePageState: Re
                     )
                   }
                   onClick={onNext}
-                  isDisabled={isValidInput() && !isSubmitting}
+                  isDisabled={!isValidInput() && !isSubmitting}
                   isLoading={isSubmitting}
                 >
                   {_.isEqual("attributes", pageState) ? "Finish" : "Next"}
@@ -987,7 +990,7 @@ const AttributePage = (props: { createPageState: CreatePage, setCreatePageState:
 
   // Check the Values for errors each time they update
   useEffect(() => {
-    setIsValueError(checkValues(values, true) || values.length === 0);
+    setIsValueError(!isValidValues(values, true) || values.length === 0);
   }, [values]);
 
   const onSubmit = () => {

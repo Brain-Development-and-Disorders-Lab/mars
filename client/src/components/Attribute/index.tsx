@@ -22,7 +22,7 @@ import Values from "@components/Values";
 import { AttributeProps } from "@types";
 
 // Utility functions and libraries
-import { checkValues } from "src/functions";
+import { isValidValues } from "src/functions";
 
 const Attribute = (props: AttributeProps) => {
   const [name, setName] = useState(props.name);
@@ -34,10 +34,10 @@ const Attribute = (props: AttributeProps) => {
   const isDescriptionError = description === "";
   const [validValues, setValidValues] = useState(false);
 
-  const isAttributesError = isNameError || isDescriptionError || !validValues;
+  const validAttributes = !isNameError && !isDescriptionError && validValues && values.length > 0;
 
   useEffect(() => {
-    setValidValues(checkValues(values));
+    setValidValues(isValidValues(values));
   }, [values]);
 
   const attributeData: AttributeProps = {
@@ -110,7 +110,7 @@ const Attribute = (props: AttributeProps) => {
                 props.onUpdate(attributeData);
               }
             }}
-            isDisabled={finished || isAttributesError}
+            isDisabled={finished || !validAttributes}
           >
             Save
           </Button>

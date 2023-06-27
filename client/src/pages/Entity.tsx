@@ -77,7 +77,7 @@ import {
 
 // Utility functions and libraries
 import { deleteData, getData, postData } from "src/database/functions";
-import { checkValues } from "src/functions";
+import { isValidValues } from "src/functions";
 import _ from "lodash";
 import dayjs from "dayjs";
 import consola from "consola";
@@ -177,7 +177,7 @@ const Entity = () => {
 
   useEffect(() => {
     setIsAttributeValueError(
-      checkValues(attributeValues) || attributeValues.length === 0
+      !isValidValues(attributeValues) || attributeValues.length === 0
     );
   }, [attributeValues]);
 
