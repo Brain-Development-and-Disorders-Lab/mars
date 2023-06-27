@@ -70,8 +70,6 @@ export class Search {
           return _.isEqual(component.operator, "OR");
         }),
       };
-      consola.info("AND:", queryLogicalGroups.AND);
-      consola.info("OR:", queryLogicalGroups.OR);
 
       // Generate logical operations
       const queryLogicalOperations = {
@@ -132,9 +130,17 @@ export class Search {
         });
       } else {
         // Both 'AND' and 'OR' query components
-        queryLogicalOperations.AND().merge(queryLogicalOperations.OR()).collection(collection).exec().then((result: any[]) => {
+        Promise.all([
+          // Evaluate the 'AND' components
+          queryLogicalOperations.AND().collection(collection).exec(),
+          // Evaluate the 'OR' components
+          queryLogicalOperations.OR().collection(collection).exec(),
+        ]).then(([resultAND, resultOR]) => {
+          // Join the results
           consola.success("Searched:", queryComponents.length, "query components");
-          resolve(result);
+
+          // Resolve by unique results
+          resolve(_.uniqBy([...resultAND, ...resultOR], "_id"));
         }).catch((error: any) => {
           reject(error);
         });
