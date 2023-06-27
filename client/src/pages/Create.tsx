@@ -738,7 +738,9 @@ const EntityPage = (props: { createPageState: CreatePage, setCreatePageState: Re
                 <ModalHeader>Entities</ModalHeader>
                 <ModalCloseButton />
                 <ModalBody>
-                  <Text>Information about creating Entities.</Text>
+                  <Flex direction={"column"} gap={"4"} p={"2"}>
+                    <Text>Information about creating Entities.</Text>
+                  </Flex>
                 </ModalBody>
               </ModalContent>
             </Modal>
@@ -947,11 +949,13 @@ const CollectionPage = (props: { createPageState: CreatePage, setCreatePageState
           <ModalHeader>Collections</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <Text>
-              Collections can be used to organize Entities. Any type of Entity
-              can be included in a Collection. Entities can be added and removed
-              from a Collection after it has been created.
-            </Text>
+            <Flex direction={"column"} gap={"4"} p={"2"}>
+              <Text>
+                Collections can be used to organize Entities. Any type of Entity
+                can be included in a Collection. Entities can be added and removed
+                from a Collection after it has been created.
+              </Text>
+            </Flex>
           </ModalBody>
         </ModalContent>
       </Modal>
@@ -1122,53 +1126,55 @@ const AttributePage = (props: { createPageState: CreatePage, setCreatePageState:
           <ModalHeader>Attributes</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <Text>
-              Individual pieces of metadata should be expressed as Values.
-            </Text>
-            <Text>There are five supported types of metadata:</Text>
-            <List spacing={2}>
-              <ListItem>
-                <Flex gap={"2"} align={"center"}>
-                  <Icon name={"v_date"} color={"orange.300"} />
-                  <Text>Date: Used to specify a point in time.</Text>
-                </Flex>
-              </ListItem>
-              <ListItem>
-                <Flex gap={"2"} align={"center"}>
-                  <Icon name={"v_text"} color={"blue.300"} />
-                  <Text>Text: Used to specify text of variable length.</Text>
-                </Flex>
-              </ListItem>
-              <ListItem>
-                <Flex gap={"2"} align={"center"}>
-                  <Icon name={"v_number"} color={"green.300"} />
-                  <Text>Number: Used to specify a numerical value.</Text>
-                </Flex>
-              </ListItem>
-              <ListItem>
-                <Flex gap={"2"} align={"center"}>
-                  <Icon name={"v_url"} color={"yellow.300"} />
-                  <Text>URL: Used to specify a link.</Text>
-                </Flex>
-              </ListItem>
-              <ListItem>
-                <Flex gap={"2"} align={"center"}>
-                  <Icon name={"entity"} color={"purple.300"} />
-                  <Text>
-                    Entity: Used to specify a relation to another Entity.
-                  </Text>
-                </Flex>
-              </ListItem>
-              <ListItem>
-                <Flex gap={"2"} align={"center"}>
-                  <Icon name={"v_select"} color={"teal.300"} />
-                  <Text>
-                    Select: Used to specify an option from a group of options.
-                  </Text>
-                </Flex>
-              </ListItem>
-            </List>
-            <Text>Values can be specified using the buttons.</Text>
+            <Flex direction={"column"} gap={"4"} p={"2"}>
+              <Text>
+                Individual pieces of metadata should be expressed as Values.
+              </Text>
+              <Text>There are five supported types of metadata:</Text>
+              <List spacing={2}>
+                <ListItem>
+                  <Flex gap={"2"} align={"center"}>
+                    <Icon name={"v_date"} color={"orange.300"} />
+                    <Text>Date: Used to specify a point in time.</Text>
+                  </Flex>
+                </ListItem>
+                <ListItem>
+                  <Flex gap={"2"} align={"center"}>
+                    <Icon name={"v_text"} color={"blue.300"} />
+                    <Text>Text: Used to specify text of variable length.</Text>
+                  </Flex>
+                </ListItem>
+                <ListItem>
+                  <Flex gap={"2"} align={"center"}>
+                    <Icon name={"v_number"} color={"green.300"} />
+                    <Text>Number: Used to specify a numerical value.</Text>
+                  </Flex>
+                </ListItem>
+                <ListItem>
+                  <Flex gap={"2"} align={"center"}>
+                    <Icon name={"v_url"} color={"yellow.300"} />
+                    <Text>URL: Used to specify a link.</Text>
+                  </Flex>
+                </ListItem>
+                <ListItem>
+                  <Flex gap={"2"} align={"center"}>
+                    <Icon name={"entity"} color={"purple.300"} />
+                    <Text>
+                      Entity: Used to specify a relation to another Entity.
+                    </Text>
+                  </Flex>
+                </ListItem>
+                <ListItem>
+                  <Flex gap={"2"} align={"center"}>
+                    <Icon name={"v_select"} color={"teal.300"} />
+                    <Text>
+                      Select: Used to specify an option from a group of options.
+                    </Text>
+                  </Flex>
+                </ListItem>
+              </List>
+              <Text>Values can be specified using the buttons.</Text>
+            </Flex>
           </ModalBody>
         </ModalContent>
       </Modal>
