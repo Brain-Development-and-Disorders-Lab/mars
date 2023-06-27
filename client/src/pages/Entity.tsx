@@ -56,6 +56,7 @@ import {
   CardHeader,
   CardBody,
   Spacer,
+  Tooltip,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import AttributeCard from "@components/AttributeCard";
@@ -295,6 +296,7 @@ const Entity = () => {
         name: entityData.name,
         created: entityData.created,
         deleted: entityData.deleted,
+        locked: entityData.locked,
         owner: entityData.owner,
         description: entityDescription,
         collections: entityCollections,
@@ -328,10 +330,26 @@ const Entity = () => {
           });
         })
         .finally(() => {
-          setEditing(false);
+          postData(`/entities/lock/${id}`, {
+            entity: {
+              name: entityData.name,
+              id: entityData._id,
+            },
+            lockState: false,
+          }).then((_response) => {
+            setEditing(false);
+          });
         });
     } else {
-      setEditing(true);
+      postData(`/entities/lock/${id}`, {
+        entity: {
+          name: entityData.name,
+          id: entityData._id,
+        },
+        lockState: true,
+      }).then((_response) => {
+        setEditing(true);
+      });
     }
   };
 
@@ -345,6 +363,7 @@ const Entity = () => {
       name: entityData.name,
       created: entityData.created,
       deleted: false,
+      locked: false,
       owner: entityData.owner,
       description: entityDescription,
       collections: entityCollections,
@@ -402,6 +421,7 @@ const Entity = () => {
       name: entityData.name,
       created: entityData.created,
       deleted: entityVersion.deleted,
+      locked: entityData.locked,
       owner: entityVersion.owner,
       description: entityVersion.description,
       collections: entityVersion.collections,
@@ -741,19 +761,32 @@ const Entity = () => {
                     </Button>
                   ) : (
                     <Flex gap={"4"}>
-                      <Button
-                        onClick={handleEditClick}
-                        colorScheme={editing ? "green" : "gray"}
-                        rightIcon={
-                          editing ? (
-                            <Icon name={"check"} />
-                          ) : (
-                            <Icon name={"edit"} />
-                          )
-                        }
-                      >
-                        {editing ? "Done" : "Edit"}
-                      </Button>
+                      {entityData.locked ?
+                        <Tooltip label={"Currently being edited by another user"}>
+                          <Button
+                            colorScheme={"gray"}
+                            rightIcon={<Icon name={"lock"} />}
+                            disabled={entityData.locked}
+                          >
+                            Edit
+                          </Button>
+                        </Tooltip>
+                      :
+                        <Button
+                          onClick={handleEditClick}
+                          colorScheme={editing ? "green" : "gray"}
+                          rightIcon={
+                            editing ? (
+                              <Icon name={"check"} />
+                            ) : (
+                              <Icon name={"edit"} />
+                            )
+                          }
+                          disabled={entityData.locked}
+                        >
+                          {editing ? "Done" : "Edit"}
+                        </Button>
+                      }
                     </Flex>
                   )}
                 </Flex>

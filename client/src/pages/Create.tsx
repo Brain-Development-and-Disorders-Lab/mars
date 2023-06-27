@@ -105,6 +105,7 @@ const EntityPage = (props: { createPageState: CreatePage, setCreatePageState: Re
     name: name,
     created: created,
     deleted: false,
+    locked: false,
     owner: owner,
     description: description,
     associations: {

@@ -11,8 +11,11 @@ import SearchBox from "@components/SearchBox";
 import { useNavigate } from "react-router-dom";
 
 // Utility functions and libraries
+import { getData } from "@database/functions";
 import { useToken } from "src/authentication/useToken";
 import dayjs from "dayjs";
+import FileSaver from "file-saver";
+import slugify from "slugify";
 
 // Content container
 const Content: FC<any> = (props: { children: any; vertical?: boolean }) => {
@@ -41,6 +44,16 @@ const Content: FC<any> = (props: { children: any; vertical?: boolean }) => {
 const Page: FC<any> = ({ children }) => {
   const [token, setToken] = useToken();
   const navigate = useNavigate();
+
+  const performBackup = () => {
+    // Retrieve all data stored on the server
+    getData(`/server/backup`).then((response) => {
+      FileSaver.saveAs(
+        new Blob([JSON.stringify(response)]),
+        slugify(`server_backup_${dayjs(Date.now()).toJSON()}.json`)
+      );
+    });
+  };
 
   const performLogout = () => {
     // Invalidate the token and refresh the page
@@ -91,7 +104,7 @@ const Page: FC<any> = ({ children }) => {
                   <Text>Last login: {dayjs(token.lastLogin).fromNow()}</Text>
                 </Flex>
                 <MenuGroup title={"System"}>
-                  <MenuItem>Backup</MenuItem>
+                  <MenuItem onClick={() => performBackup()}>Backup</MenuItem>
                 </MenuGroup>
                 <MenuGroup title={"Account"}>
                   <MenuItem as={Link} onClick={() => performLogout()}>Logout</MenuItem>

@@ -24,6 +24,13 @@ EntitiesRoute.route("/entities/:id").get((request: any, response: any) => {
   });
 });
 
+// Lock specific entity
+EntitiesRoute.route("/entities/lock/:id").post((request: { body: { entity: { name: string, id: string }, lockState: boolean } }, response: any) => {
+  Entities.setLock(request.body).then((entity: { name: string, id: string }) => {
+    response.json(entity);
+  });
+});
+
 // Get JSON-formatted data of the Entity
 EntitiesRoute.route("/entities/export").post(
   (request: { body: { id: string; fields: string[] } }, response: any) => {

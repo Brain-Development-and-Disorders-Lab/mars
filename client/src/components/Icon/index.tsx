@@ -34,6 +34,7 @@ import {
   BsLightningFill,
   BsLink45Deg,
   BsList,
+  BsLockFill,
   BsPencilFill,
   BsPlusCircleFill,
   BsQuestionOctagonFill,
@@ -83,6 +84,7 @@ const SYSTEM_ICONS: { [k: string]: IconType } = {
   rewind: BsArrowCounterclockwise,
   link: BsLink45Deg,
   scan: BsUpcScan,
+  lock: BsLockFill,
 
   // Logos
   l_box: SiBox,

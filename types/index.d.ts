@@ -124,6 +124,7 @@ export type IEntity = {
   name: string;
   created: string;
   deleted: boolean;
+  locked: boolean;
   owner: string;
   description: string;
   collections: string[];
@@ -224,6 +225,7 @@ export type IconNames =
   "rewind" |
   "link" |
   "scan" |
+  "lock" |
 
   // Logos
   "l_box" |

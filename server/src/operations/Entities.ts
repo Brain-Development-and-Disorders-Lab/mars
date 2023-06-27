@@ -872,6 +872,66 @@ export class Entities {
   };
 
   /**
+   * Update the description of an Entity
+   * @param entity the Entity of interest
+   * @return {Promise<{ name: string, id: string }>}
+   */
+  static setLock = (
+    entityLockData: { entity: { name: string, id: string }, lockState: boolean }
+  ): Promise<{ name: string; id: string }> => {
+    consola.start(
+      "Setting lock state of Entity",
+      entityLockData.entity.name,
+      "to",
+      entityLockData.lockState ? "locked" : "unlocked"
+    );
+    return new Promise((resolve, _reject) => {
+      getDatabase()
+        .collection(ENTITIES_COLLECTION)
+        .findOne({ _id: entityLockData.entity.id }, (error: any, _result: any) => {
+          if (error) {
+            throw error;
+          }
+
+          // Update the description of this Entity
+          const updates = {
+            $set: {
+              locked: entityLockData.lockState,
+            },
+          };
+
+          getDatabase()
+            .collection(ENTITIES_COLLECTION)
+            .updateOne(
+              { _id: entityLockData.entity.id },
+              updates,
+              (error: any, _response: any) => {
+                if (error) {
+                  throw error;
+                }
+
+                // Update automatic unlock operation after 30 seconds
+                if (entityLockData.lockState === true) {
+                  setTimeout(() => {
+                    this.setLock({entity: entityLockData.entity, lockState: false});
+                  }, 30000);
+                }
+
+                // Resolve the Promise
+                consola.success(
+                  "Set lock state of Entity",
+                  entityLockData.entity.name,
+                  "to",
+                  entityLockData.lockState ? "locked" : "unlocked"
+                );
+                resolve(entityLockData.entity);
+              }
+            );
+        });
+    });
+  };
+
+  /**
    * Retrieve all Entities
    * @return {Promise<EntityModel[]>}
    */
