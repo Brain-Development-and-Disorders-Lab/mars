@@ -47,8 +47,9 @@ const Login = (props: { setToken: (token: AuthToken) => void }) => {
             position: "bottom-right",
             isClosable: true,
           });
+        } else {
+          props.setToken(response.token);
         }
-        props.setToken(response.token);
         setIsLoading(false);
       })
       .catch((_error) => {
