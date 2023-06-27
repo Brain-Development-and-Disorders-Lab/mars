@@ -5,6 +5,7 @@ import { Entities } from "./Entities";
 import { ActivityModel, AttributeModel, CollectionModel, EntityModel } from "@types";
 
 import { consola } from "consola";
+import dayjs from "dayjs";
 import fs from "fs";
 import tmp from "tmp";
 
@@ -26,6 +27,7 @@ export class Server {
           }
 
           fs.writeFileSync(path, JSON.stringify({
+            timestamp: dayjs(Date.now()).toJSON(),
             activity: data[0],
             attributes: data[1],
             collections: data[2],
@@ -35,6 +37,23 @@ export class Server {
           resolve(path);
         });
       });
+    });
+  };
+
+  static import = (files: any): Promise<boolean> => {
+    consola.start("Importing file");
+    return new Promise((resolve, reject) => {
+      if (files.file) {
+        const uploaded = files.file;
+        consola.info("Received file:", uploaded.name);
+
+        // Copy file to local directory
+        uploaded.mv(`${__dirname}/${uploaded.name}`).err;
+        consola.success("Imported file:", uploaded.name);
+        resolve(true);
+      } else {
+        reject(false);
+      }
     });
   };
 };
