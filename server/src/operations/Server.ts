@@ -4,6 +4,7 @@ import { Collections } from "./Collections";
 import { Entities } from "./Entities";
 import { ActivityModel, AttributeModel, CollectionModel, EntityModel } from "@types";
 
+import _ from "lodash";
 import { consola } from "consola";
 import dayjs from "dayjs";
 import fs from "fs";
@@ -40,7 +41,7 @@ export class Server {
     });
   };
 
-  static import = (files: any): Promise<boolean> => {
+  static import = (files: any): Promise<{ status: boolean, message: string }> => {
     consola.start("Received file for import");
     return new Promise((resolve, reject) => {
       if (files.file) {
@@ -56,41 +57,70 @@ export class Server {
         try {
           parsedFileData = JSON.parse(receivedFileData.toString("utf-8"));
           consola.success("Parsed JSON file");
-          consola.info("Version:", parsedFileData["timestamp"]);
-          consola.info("Entities:", parsedFileData["entities"].length);
-          consola.info("Collections:", parsedFileData["collections"].length);
-          consola.info("Attributes:", parsedFileData["attributes"].length);
-          consola.info("Activity:", parsedFileData["activity"].length, "entries");
         } catch (error) {
           consola.error("Error parsing JSON file");
-          reject(false);
+          reject({ message: "Error importing file, could not parse JSON" });
+          return;
         }
+
+        // Check for valid information
+        if (_.isUndefined(parsedFileData)) {
+          reject({ message: "Error importing file" });
+          return;
+        }
+        if (_.isUndefined(parsedFileData["timestamp"])) {
+          reject({ message: "Error importing file, invalid timestamp" });
+          return;
+        }
+        if (_.isUndefined(parsedFileData["entities"])) {
+          reject({ message: "Error importing file, missing 'entities'" });
+          return;
+        }
+        if (_.isUndefined(parsedFileData["collections"])) {
+          reject({ message: "Error importing file, missing 'collections'" });
+          return;
+        }
+        if (_.isUndefined(parsedFileData["attributes"])) {
+          reject({ message: "Error importing file, missing 'attributes'" });
+          return;
+        }
+        if (_.isUndefined(parsedFileData["activity"])) {
+          reject({ message: "Error importing file, missing 'activity'" });
+          return;
+        }
+        consola.success("File contents complete");
 
         // Import each part by checking if it exists, updating if so, otherwise creating
         consola.start("Importing file contents");
 
         // Import Entities
         consola.start("Importing Entities");
-        const importedEntities = parsedFileData["entities"] as EntityModel[];
         const entityOperations = [];
-        for (let entity of importedEntities) {
-          entityOperations.push(Entities.update(entity));
+        if (parsedFileData["entities"]) {
+          const importedEntities = parsedFileData["entities"] as EntityModel[];
+          for (let entity of importedEntities) {
+            entityOperations.push(Entities.update(entity));
+          }
         }
 
         // Import Collections
         consola.start("Importing Entities");
-        const importedCollections = parsedFileData["collections"] as CollectionModel[];
         const collectionOperations = [];
-        for (let collection of importedCollections) {
-          collectionOperations.push(Collections.update(collection));
+        if (parsedFileData["collections"]) {
+          const importedCollections = parsedFileData["collections"] as CollectionModel[];
+          for (let collection of importedCollections) {
+            collectionOperations.push(Collections.update(collection));
+          }
         }
 
         // Import Attributes
         consola.start("Importing Attributes");
-        const importedAttributes = parsedFileData["attributes"] as AttributeModel[];
         const attributeOperations = [];
-        for (let attribute of importedAttributes) {
-          attributeOperations.push(Attributes.update(attribute));
+        if (parsedFileData["attributes"]) {
+          const importedAttributes = parsedFileData["attributes"] as AttributeModel[];
+          for (let attribute of importedAttributes) {
+            attributeOperations.push(Attributes.update(attribute));
+          }
         }
 
         Promise.all([
@@ -102,14 +132,14 @@ export class Server {
           consola.success("Imported", results[1].length, "Attributes");
           consola.success("Imported", results[2].length, "Collections");
           consola.success("Imported file:", receivedFile.name);
-          resolve(true);
+          resolve({ status: true, message: "Successfuly imported JSON file" });
         }).catch((_error) => {
           consola.error("Error importing file");
-          reject(false);
+          reject({ message: "Error importing file" });
         });
       } else {
         consola.error("Error importing file");
-        reject(false);
+        reject({ message: "Error importing file" });
       }
     });
   };

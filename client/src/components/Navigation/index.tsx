@@ -51,23 +51,35 @@ const Navigation = () => {
     formData.append("name", file.name);
     formData.append("file", file);
 
-    postData(`/server/import`, formData).then((_response) => {
-      toast({
-        title: "Success",
-        status: "success",
-        description: "Successfully imported file.",
-        duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
-      });
-      setFile({} as File);
-      onImportClose();
+    postData(`/server/import`, formData).then((response: { status: boolean, message: string }) => {
+      if (_.isEqual(response.status, "success")) {
+        toast({
+          title: "Success",
+          status: "success",
+          description: "Successfully imported file.",
+          duration: 4000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+        // Reset file upload state
+        setFile({} as File);
+        onImportClose();
+      } else {
+        toast({
+          title: "Error",
+          status: "error",
+          description: response.message,
+          duration: 4000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+      }
       setIsUploading(false);
-    }).catch((_error) => {
+    }).catch((error: { message: string }) => {
       toast({
         title: "Error",
         status: "error",
-        description: "Could not import file.",
+        description: error.message,
         duration: 4000,
         position: "bottom-right",
         isClosable: true,
@@ -375,9 +387,9 @@ const Navigation = () => {
           <ModalCloseButton />
           <ModalBody>
             <Flex w={"100%"} align={"center"} justify={"center"}>
-              <Flex direction={"column"} minH={"200px"} w={"100%"} align={"center"} justify={"center"} border={"2px"} borderStyle={"dashed"} borderColor={"gray.100"}>
+              <Flex direction={"column"} minH={"200px"} w={"100%"} align={"center"} justify={"center"} border={"2px"} borderStyle={"dashed"} borderColor={"gray.100"} rounded={"md"}>
                 {_.isEqual(file, {}) ?
-                  <Flex direction={"column"} justify={"center"}>
+                  <Flex direction={"column"} w={"100%"} justify={"center"} align={"center"}>
                     <Text fontWeight={"semibold"}>Drag file here</Text>
                     <Text>or click to upload</Text>
                   </Flex>
@@ -406,7 +418,14 @@ const Navigation = () => {
 
           <ModalFooter>
             <Flex direction={"row"} w={"100%"} justify={"space-between"}>
-              <Button colorScheme={"red"} variant={"outline"} onClick={onImportClose}>
+              <Button
+                colorScheme={"red"}
+                variant={"outline"}
+                onClick={() => {
+                  setFile({} as File);
+                  onImportClose();
+                }}
+              >
                 Cancel
               </Button>
               <Button
