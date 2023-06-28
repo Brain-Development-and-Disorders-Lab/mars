@@ -4,6 +4,7 @@ import { Collections } from "./Collections";
 import { Entities } from "./Entities";
 import { ActivityModel, AttributeModel, CollectionModel, EntityModel } from "@types";
 
+// Utility functions and libraries
 import _ from "lodash";
 import { consola } from "consola";
 import dayjs from "dayjs";
@@ -46,13 +47,10 @@ export class Server {
     return new Promise((resolve, reject) => {
       if (files.file) {
         const receivedFile = files.file;
+        const receivedFileData = receivedFile.data as Buffer;
         consola.info("Received file:", receivedFile.name);
 
-        // Copy file to local directory
-        receivedFile.mv(`${__dirname}/${receivedFile.name}`).err;
-
-        const receivedFileData = receivedFile.data as Buffer;
-
+        // Parse the JSON data
         let parsedFileData;
         try {
           parsedFileData = JSON.parse(receivedFileData.toString("utf-8"));
@@ -123,6 +121,7 @@ export class Server {
           }
         }
 
+        // Execute the import operations
         Promise.all([
           Promise.all(entityOperations),
           Promise.all(attributeOperations),
