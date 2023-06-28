@@ -81,6 +81,6 @@ To start the MARS interface, run `yarn start` in the `/client` directory. Start 
 > Tracking features still to be implemented or finalized.
 
 - Attribute editing within Entities ✅
-- Metadata query engine, for constructing and executing complex search queries
+- Metadata query engine, for constructing and executing complex search queries ✅
 - Mechanism to organize and categorize Entities into 'Projects'
-- Drop-down Value type with customizable options
+- Drop-down Value type with customizable options ✅
