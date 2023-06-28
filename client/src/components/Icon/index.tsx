@@ -25,20 +25,28 @@ import {
   BsExclamationOctagonFill,
   BsFileCodeFill,
   BsFileTextFill,
+  BsFillBookFill,
+  BsFillCloudUploadFill,
   BsFillExclamationTriangleFill,
   BsFillFileBinaryFill,
+  BsGlobe,
   BsGridFill,
   BsInfoCircleFill,
   BsLightningFill,
+  BsLink45Deg,
   BsList,
+  BsLockFill,
   BsPencilFill,
   BsPlusCircleFill,
+  BsPower,
   BsQuestionOctagonFill,
   BsSearch,
   BsTagFill,
   BsTrashFill,
+  BsUpcScan,
   BsXCircleFill,
 } from "react-icons/bs";
+import { SiBox } from "react-icons/si";
 
 // Existing and custom types
 import { IconNames } from "@types";
@@ -68,6 +76,7 @@ const SYSTEM_ICONS: { [k: string]: IconType } = {
   edit: BsPencilFill,
   delete: BsTrashFill,
   download: BsCloudDownloadFill,
+  upload: BsFillCloudUploadFill,
   cross: BsXCircleFill,
   list: BsList,
   warning: BsFillExclamationTriangleFill,
@@ -76,6 +85,15 @@ const SYSTEM_ICONS: { [k: string]: IconType } = {
   graph: BsDiagram2Fill,
   clock: BsClockHistory,
   rewind: BsArrowCounterclockwise,
+  link: BsLink45Deg,
+  scan: BsUpcScan,
+  lock: BsLockFill,
+  exit: BsPower,
+
+  // Logos
+  l_box: SiBox,
+  l_labArchives: BsFillBookFill,
+  l_globus: BsGlobe,
 
   // Values
   v_date: BsCalendarWeekFill,

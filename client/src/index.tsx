@@ -2,18 +2,9 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
 
-// Variables
-import { DEVELOPER_MODE } from "./variables";
-
 // Logging
-import { LogLevels, consola } from "consola";
+import { consola } from "consola";
 consola.wrapConsole();
-
-if (DEVELOPER_MODE) {
-  consola.level = LogLevels.verbose;
-} else {
-  consola.level = LogLevels.error;
-}
 
 // Application
 import App from "./App";

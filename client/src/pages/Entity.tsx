@@ -43,7 +43,6 @@ import {
   CheckboxGroup,
   Checkbox,
   Stack,
-  FormHelperText,
   FormErrorMessage,
   Drawer,
   DrawerOverlay,
@@ -57,6 +56,7 @@ import {
   CardHeader,
   CardBody,
   Spacer,
+  Tooltip,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import AttributeCard from "@components/AttributeCard";
@@ -78,7 +78,7 @@ import {
 
 // Utility functions and libraries
 import { deleteData, getData, postData } from "src/database/functions";
-import { checkValues } from "src/functions";
+import { isValidValues } from "src/functions";
 import _ from "lodash";
 import dayjs from "dayjs";
 import consola from "consola";
@@ -178,7 +178,7 @@ const Entity = () => {
 
   useEffect(() => {
     setIsAttributeValueError(
-      checkValues(attributeValues) || attributeValues.length === 0
+      !isValidValues(attributeValues) || attributeValues.length === 0
     );
   }, [attributeValues]);
 
@@ -296,6 +296,7 @@ const Entity = () => {
         name: entityData.name,
         created: entityData.created,
         deleted: entityData.deleted,
+        locked: entityData.locked,
         owner: entityData.owner,
         description: entityDescription,
         collections: entityCollections,
@@ -329,10 +330,26 @@ const Entity = () => {
           });
         })
         .finally(() => {
-          setEditing(false);
+          postData(`/entities/lock/${id}`, {
+            entity: {
+              name: entityData.name,
+              id: entityData._id,
+            },
+            lockState: false,
+          }).then((_response) => {
+            setEditing(false);
+          });
         });
     } else {
-      setEditing(true);
+      postData(`/entities/lock/${id}`, {
+        entity: {
+          name: entityData.name,
+          id: entityData._id,
+        },
+        lockState: true,
+      }).then((_response) => {
+        setEditing(true);
+      });
     }
   };
 
@@ -346,6 +363,7 @@ const Entity = () => {
       name: entityData.name,
       created: entityData.created,
       deleted: false,
+      locked: false,
       owner: entityData.owner,
       description: entityDescription,
       collections: entityCollections,
@@ -403,6 +421,7 @@ const Entity = () => {
       name: entityData.name,
       created: entityData.created,
       deleted: entityVersion.deleted,
+      locked: entityData.locked,
       owner: entityVersion.owner,
       description: entityVersion.description,
       collections: entityVersion.collections,
@@ -742,19 +761,32 @@ const Entity = () => {
                     </Button>
                   ) : (
                     <Flex gap={"4"}>
-                      <Button
-                        onClick={handleEditClick}
-                        colorScheme={editing ? "green" : "gray"}
-                        rightIcon={
-                          editing ? (
-                            <Icon name={"check"} />
-                          ) : (
-                            <Icon name={"edit"} />
-                          )
-                        }
-                      >
-                        {editing ? "Done" : "Edit"}
-                      </Button>
+                      {entityData.locked ?
+                        <Tooltip label={"Currently being edited by another user"}>
+                          <Button
+                            colorScheme={"gray"}
+                            rightIcon={<Icon name={"lock"} />}
+                            disabled={entityData.locked}
+                          >
+                            Edit
+                          </Button>
+                        </Tooltip>
+                      :
+                        <Button
+                          onClick={handleEditClick}
+                          colorScheme={editing ? "green" : "gray"}
+                          rightIcon={
+                            editing ? (
+                              <Icon name={"check"} />
+                            ) : (
+                              <Icon name={"edit"} />
+                            )
+                          }
+                          disabled={entityData.locked}
+                        >
+                          {editing ? "Done" : "Edit"}
+                        </Button>
+                      }
                     </Flex>
                   )}
                 </Flex>
@@ -1250,15 +1282,11 @@ const Entity = () => {
                             }
                             required
                           />
-                          {!isAttributeNameError ? (
-                            <FormHelperText>
-                              Name of the Attribute.
-                            </FormHelperText>
-                          ) : (
+                          {isAttributeNameError &&
                             <FormErrorMessage>
                               A name must be specified for the Attribute.
                             </FormErrorMessage>
-                          )}
+                          }
                         </FormControl>
 
                         <FormControl isRequired>
@@ -1270,16 +1298,12 @@ const Entity = () => {
                               setAttributeDescription(event.target.value)
                             }
                           />
-                          {!isAttributeDescriptionError ? (
-                            <FormHelperText>
-                              Description of the Attribute.
-                            </FormHelperText>
-                          ) : (
+                          {isAttributeDescriptionError &&
                             <FormErrorMessage>
                               A description should be provided for the
                               Attribute.
                             </FormErrorMessage>
-                          )}
+                          }
                         </FormControl>
                       </Flex>
 

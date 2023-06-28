@@ -10,6 +10,7 @@
     "paths": {
       "@components/*": ["./src/components/*"],
       "@database/*": ["./src/database/*"],
+      "@devices/*": ["./src/devices/*"],
       "@pages/*": ["./src/pages/*"],
       "@types": ["../types"]
     },

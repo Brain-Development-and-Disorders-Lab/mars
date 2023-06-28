@@ -60,7 +60,7 @@ import {
 import { useNavigate } from "react-router-dom";
 
 // Utility functions and libraries
-import { checkAttributes, checkValues } from "src/functions";
+import { isValidAttributes, isValidValues } from "src/functions";
 import { getData, postData } from "@database/functions";
 import _ from "lodash";
 import { nanoid } from "nanoid";
@@ -105,6 +105,7 @@ const EntityPage = (props: { createPageState: CreatePage, setCreatePageState: Re
     name: name,
     created: created,
     deleted: false,
+    locked: false,
     owner: owner,
     description: description,
     associations: {
@@ -120,7 +121,7 @@ const EntityPage = (props: { createPageState: CreatePage, setCreatePageState: Re
   const isNameError = name === "";
   const isOwnerError = owner === "";
   const isDateError = created === "";
-  const isDetailsError = isNameError || isOwnerError || isDateError;
+  const validDetails = !isNameError && !isOwnerError && !isDateError;
 
   const [validAttributes, setValidAttributes] = useState(false);
 
@@ -187,16 +188,19 @@ const EntityPage = (props: { createPageState: CreatePage, setCreatePageState: Re
   }, []);
 
   useEffect(() => {
-    setValidAttributes(checkAttributes(selectedAttributes));
+    setValidAttributes(isValidAttributes(selectedAttributes));
   }, [selectedAttributes]);
 
   const isValidInput = (): boolean => {
     if (_.isEqual("start", pageState)) {
-      return isDetailsError;
+      return validDetails;
     } else if (_.isEqual("attributes", pageState)) {
-      return !validAttributes;
+      if (attributes.length > 0) {
+        return validAttributes;
+      }
+      return true;
     }
-    return false;
+    return true;
   };
 
   // Handle clicking "Next"
@@ -327,15 +331,11 @@ const EntityPage = (props: { createPageState: CreatePage, setCreatePageState: Re
                           value={name}
                           onChange={(event) => setName(event.target.value)}
                         />
-                        {!isNameError ? (
-                          <FormHelperText>
-                            A standardised name or ID for the Entity.
-                          </FormHelperText>
-                        ) : (
+                        {isNameError &&
                           <FormErrorMessage>
                             A name or ID must be specified.
                           </FormErrorMessage>
-                        )}
+                        }
                       </FormControl>
 
                       <FormControl isRequired isInvalid={isOwnerError}>
@@ -345,13 +345,11 @@ const EntityPage = (props: { createPageState: CreatePage, setCreatePageState: Re
                           value={owner}
                           onChange={(event) => setOwner(event.target.value)}
                         />
-                        {!isOwnerError ? (
-                          <FormHelperText>Owner of the Entity.</FormHelperText>
-                        ) : (
+                        {isOwnerError &&
                           <FormErrorMessage>
                             An owner of the Entity is required.
                           </FormErrorMessage>
-                        )}
+                        }
                       </FormControl>
                     </Flex>
 
@@ -365,15 +363,11 @@ const EntityPage = (props: { createPageState: CreatePage, setCreatePageState: Re
                           value={created}
                           onChange={(event) => setCreated(event.target.value)}
                         />
-                        {!isDateError ? (
-                          <FormHelperText>
-                            Date the Entity was created.
-                          </FormHelperText>
-                        ) : (
+                        {isDateError &&
                           <FormErrorMessage>
                             A created date must be specified.
                           </FormErrorMessage>
-                        )}
+                        }
                       </FormControl>
 
                       <FormControl>
@@ -733,7 +727,7 @@ const EntityPage = (props: { createPageState: CreatePage, setCreatePageState: Re
                     )
                   }
                   onClick={onNext}
-                  isDisabled={isValidInput() && !isSubmitting}
+                  isDisabled={!isValidInput() && !isSubmitting}
                   isLoading={isSubmitting}
                 >
                   {_.isEqual("attributes", pageState) ? "Finish" : "Next"}
@@ -748,7 +742,9 @@ const EntityPage = (props: { createPageState: CreatePage, setCreatePageState: Re
                 <ModalHeader>Entities</ModalHeader>
                 <ModalCloseButton />
                 <ModalBody>
-                  <Text>Information about creating Entities.</Text>
+                  <Flex direction={"column"} gap={"4"} p={"2"}>
+                    <Text>Information about creating Entities.</Text>
+                  </Flex>
                 </ModalBody>
               </ModalContent>
             </Modal>
@@ -850,15 +846,11 @@ const CollectionPage = (props: { createPageState: CreatePage, setCreatePageState
                     value={name}
                     onChange={(event) => setName(event.target.value)}
                   />
-                  {!isNameError ? (
-                    <FormHelperText>
-                      A name or ID for the Collection.
-                    </FormHelperText>
-                  ) : (
+                  {isNameError &&
                     <FormErrorMessage>
                       A name or ID must be specified.
                     </FormErrorMessage>
-                  )}
+                  }
                 </FormControl>
 
                 <FormControl isRequired isInvalid={isOwnerError}>
@@ -873,13 +865,11 @@ const CollectionPage = (props: { createPageState: CreatePage, setCreatePageState
                     value={owner}
                     onChange={(event) => setOwner(event.target.value)}
                   />
-                  {!isOwnerError ? (
-                    <FormHelperText>Owner of the Collection.</FormHelperText>
-                  ) : (
+                  {isOwnerError &&
                     <FormErrorMessage>
                       An owner of the Collection is required.
                     </FormErrorMessage>
-                  )}
+                  }
                 </FormControl>
               </Flex>
 
@@ -908,15 +898,11 @@ const CollectionPage = (props: { createPageState: CreatePage, setCreatePageState
                     value={description}
                     onChange={(event) => setDescription(event.target.value)}
                   />
-                  {!isDescriptionError ? (
-                    <FormHelperText>
-                      A description of the Collection.
-                    </FormHelperText>
-                  ) : (
+                  {isDescriptionError &&
                     <FormErrorMessage>
                       A description must be provided.
                     </FormErrorMessage>
-                  )}
+                  }
                 </FormControl>
               </Flex>
             </Flex>
@@ -967,11 +953,13 @@ const CollectionPage = (props: { createPageState: CreatePage, setCreatePageState
           <ModalHeader>Collections</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <Text>
-              Collections can be used to organize Entities. Any type of Entity
-              can be included in a Collection. Entities can be added and removed
-              from a Collection after it has been created.
-            </Text>
+            <Flex direction={"column"} gap={"4"} p={"2"}>
+              <Text>
+                Collections can be used to organize Entities. Any type of Entity
+                can be included in a Collection. Entities can be added and removed
+                from a Collection after it has been created.
+              </Text>
+            </Flex>
           </ModalBody>
         </ModalContent>
       </Modal>
@@ -1003,7 +991,7 @@ const AttributePage = (props: { createPageState: CreatePage, setCreatePageState:
 
   // Check the Values for errors each time they update
   useEffect(() => {
-    setIsValueError(checkValues(values, true) || values.length === 0);
+    setIsValueError(!isValidValues(values, true) || values.length === 0);
   }, [values]);
 
   const onSubmit = () => {
@@ -1070,13 +1058,11 @@ const AttributePage = (props: { createPageState: CreatePage, setCreatePageState:
                     onChange={(event) => setName(event.target.value)}
                     required
                   />
-                  {!isNameError ? (
-                    <FormHelperText>Name of the Attribute.</FormHelperText>
-                  ) : (
+                  {isNameError &&
                     <FormErrorMessage>
                       A name must be specified for the Attribute.
                     </FormErrorMessage>
-                  )}
+                  }
                 </FormControl>
 
                 <FormControl isRequired>
@@ -1086,15 +1072,11 @@ const AttributePage = (props: { createPageState: CreatePage, setCreatePageState:
                     placeholder={"Attribute Description"}
                     onChange={(event) => setDescription(event.target.value)}
                   />
-                  {!isDescriptionError ? (
-                    <FormHelperText>
-                      Description of the Attribute.
-                    </FormHelperText>
-                  ) : (
+                  {isDescriptionError &&
                     <FormErrorMessage>
                       A description should be provided for the Attribute.
                     </FormErrorMessage>
-                  )}
+                  }
                 </FormControl>
               </Flex>
 
@@ -1148,53 +1130,55 @@ const AttributePage = (props: { createPageState: CreatePage, setCreatePageState:
           <ModalHeader>Attributes</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <Text>
-              Individual pieces of metadata should be expressed as Values.
-            </Text>
-            <Text>There are five supported types of metadata:</Text>
-            <List spacing={2}>
-              <ListItem>
-                <Flex gap={"2"} align={"center"}>
-                  <Icon name={"v_date"} color={"orange.300"} />
-                  <Text>Date: Used to specify a point in time.</Text>
-                </Flex>
-              </ListItem>
-              <ListItem>
-                <Flex gap={"2"} align={"center"}>
-                  <Icon name={"v_text"} color={"blue.300"} />
-                  <Text>Text: Used to specify text of variable length.</Text>
-                </Flex>
-              </ListItem>
-              <ListItem>
-                <Flex gap={"2"} align={"center"}>
-                  <Icon name={"v_number"} color={"green.300"} />
-                  <Text>Number: Used to specify a numerical value.</Text>
-                </Flex>
-              </ListItem>
-              <ListItem>
-                <Flex gap={"2"} align={"center"}>
-                  <Icon name={"v_url"} color={"yellow.300"} />
-                  <Text>URL: Used to specify a link.</Text>
-                </Flex>
-              </ListItem>
-              <ListItem>
-                <Flex gap={"2"} align={"center"}>
-                  <Icon name={"entity"} color={"purple.300"} />
-                  <Text>
-                    Entity: Used to specify a relation to another Entity.
-                  </Text>
-                </Flex>
-              </ListItem>
-              <ListItem>
-                <Flex gap={"2"} align={"center"}>
-                  <Icon name={"v_select"} color={"teal.300"} />
-                  <Text>
-                    Select: Used to specify an option from a group of options.
-                  </Text>
-                </Flex>
-              </ListItem>
-            </List>
-            <Text>Values can be specified using the buttons.</Text>
+            <Flex direction={"column"} gap={"4"} p={"2"}>
+              <Text>
+                Individual pieces of metadata should be expressed as Values.
+              </Text>
+              <Text>There are five supported types of metadata:</Text>
+              <List spacing={2}>
+                <ListItem>
+                  <Flex gap={"2"} align={"center"}>
+                    <Icon name={"v_date"} color={"orange.300"} />
+                    <Text>Date: Used to specify a point in time.</Text>
+                  </Flex>
+                </ListItem>
+                <ListItem>
+                  <Flex gap={"2"} align={"center"}>
+                    <Icon name={"v_text"} color={"blue.300"} />
+                    <Text>Text: Used to specify text of variable length.</Text>
+                  </Flex>
+                </ListItem>
+                <ListItem>
+                  <Flex gap={"2"} align={"center"}>
+                    <Icon name={"v_number"} color={"green.300"} />
+                    <Text>Number: Used to specify a numerical value.</Text>
+                  </Flex>
+                </ListItem>
+                <ListItem>
+                  <Flex gap={"2"} align={"center"}>
+                    <Icon name={"v_url"} color={"yellow.300"} />
+                    <Text>URL: Used to specify a link.</Text>
+                  </Flex>
+                </ListItem>
+                <ListItem>
+                  <Flex gap={"2"} align={"center"}>
+                    <Icon name={"entity"} color={"purple.300"} />
+                    <Text>
+                      Entity: Used to specify a relation to another Entity.
+                    </Text>
+                  </Flex>
+                </ListItem>
+                <ListItem>
+                  <Flex gap={"2"} align={"center"}>
+                    <Icon name={"v_select"} color={"teal.300"} />
+                    <Text>
+                      Select: Used to specify an option from a group of options.
+                    </Text>
+                  </Flex>
+                </ListItem>
+              </List>
+              <Text>Values can be specified using the buttons.</Text>
+            </Flex>
           </ModalBody>
         </ModalContent>
       </Modal>
@@ -1265,6 +1249,7 @@ const Create = () => {
                         </Heading>
                         <Flex gap={"2"}>
                           <Tag colorScheme={"red"}>Name</Tag>
+                          <Tag colorScheme={"red"}>Owner</Tag>
                           <Tag colorScheme={"red"}>Description</Tag>
                         </Flex>
                       </Flex>

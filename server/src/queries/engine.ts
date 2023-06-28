@@ -1,8 +1,6 @@
-import { Query } from "@types";
-import { OPERATORS } from "./constants";
+import { QueryComponent } from "@types";
 
 import _ from "lodash";
-import { consola } from "consola";
 
 export class QueryEngine {
   static cleanString = (toClean: string): string => {
@@ -11,17 +9,7 @@ export class QueryEngine {
     return output;
   };
 
-  static tokenize = (query: Query): Query => {
-    let sanitized = this.cleanString(query.raw);
-    let tokens = sanitized.split(" ");
-
-    for (let token of tokens) {
-      if (_.includes(OPERATORS, token)) {
-        consola.info("Found a token:", token);
-      }
-    }
-
-    query.tokens = tokens;
-    return query;
+  static tokenize = (query: QueryComponent[]): string => {
+    return query.toString();
   };
 }

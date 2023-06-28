@@ -1,3 +1,16 @@
+declare global {
+  interface Navigator {
+      usb: {
+          getDevices(): any;
+          requestDevice({}): any;
+          addEventListener(event: string, handler: (event: any) => void): any;
+          onconnect({}): any;
+      }
+  }
+}
+
+export type ScannerStatus = "disconnected" | "connected" | "error";
+
 export type CreatePage = "default" | "entity" | "collection" | "attribute";
 
 export namespace State.Entity {
@@ -111,6 +124,7 @@ export type IEntity = {
   name: string;
   created: string;
   deleted: boolean;
+  locked: boolean;
   owner: string;
   description: string;
   collections: string[];
@@ -201,6 +215,7 @@ export type IconNames =
   "edit" |
   "delete" |
   "download" |
+  "upload" |
   "cross" |
   "list" |
   "warning" |
@@ -209,6 +224,15 @@ export type IconNames =
   "graph" |
   "clock" |
   "rewind" |
+  "link" |
+  "scan" |
+  "lock" |
+  "exit" |
+
+  // Logos
+  "l_box" |
+  "l_labArchives" |
+  "l_globus" |
 
   // Values
   "v_date" |
@@ -229,12 +253,23 @@ export type IconNames =
   "c_down";
 
 // Query types
-export type QueryToken = "&" | "|" | "!" | "=";
-export type QueryOperator = "AND" | "OR" | "NOT" | "INCLUDES";
-export type QueryParameters = "NAME" | "CREATED" | "OWNER";
-export type QueryFocusType = "ENTITY" | "COLLECTION" | "ATTRIBUTE";
+export type QueryOperator = "AND" | "OR";
+export type QueryFocusType = "Entity" | "Collection" | "Attribute";
+export type QueryParameters = "Name" | "Owner" | "Description" | "Collections" | "Origins" | "Products";
+export type QueryQualifier = "Contains" | "Does Not Contain" | "Is" | "Is Not";
 
-export type Query = {
-  raw: string;
-  tokens: string[];
+export type QueryComponent = {
+  operator? :QueryOperator;
+  focus: QueryFocusType;
+  parameter: QueryParameters;
+  qualifier: QueryQualifier;
+  value: string;
+};
+
+// Authentication types
+export type AuthToken = {
+  username: string;
+  token: string;
+  lastLogin: string;
+  valid: boolean;
 };

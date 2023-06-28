@@ -1,16 +1,20 @@
+// Existing and custom types
+import { AuthToken } from "@types";
+
 // Utility libraries
 import _ from "lodash";
 import consola from "consola";
 import crypto from "node:crypto";
+import dayjs from "dayjs";
 import { nanoid } from "nanoid";
 
 export class Authentication {
   /**
    * Validate the password submitted by the user
    * @param {string} password hashed password value submitted by the user
-   * @return {Promise<string>}
+   * @return {Promise<AuthToken>}
    */
-  static login = (password: string): Promise<string> => {
+  static login = (password: string): Promise<AuthToken> => {
     consola.start("Performing login...");
     return new Promise((resolve, reject) => {
       const encoder = new TextEncoder();
@@ -51,7 +55,12 @@ export class Authentication {
           reject("");
         } else {
           consola.success("Successful login attempt");
-          resolve(`auth_${nanoid(10)}_${Date.now().toFixed()}`);
+          resolve({
+            username: "User",
+            token: `auth_${nanoid(10)}_${Date.now().toFixed()}`,
+            lastLogin: dayjs(Date.now()).toString(),
+            valid: true,
+          });
         }
       });
     });

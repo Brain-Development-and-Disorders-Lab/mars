@@ -14,11 +14,14 @@ import {
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 
+// Existing and custom types
+import { AuthToken } from "@types";
+
 // Utility functions and libraries
 import { postData } from "@database/functions";
 import _ from "lodash";
 
-const Login = (props: { setToken: (token: string) => void }) => {
+const Login = (props: { setToken: (token: AuthToken) => void }) => {
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -44,8 +47,9 @@ const Login = (props: { setToken: (token: string) => void }) => {
             position: "bottom-right",
             isClosable: true,
           });
+        } else {
+          props.setToken(response.token);
         }
-        props.setToken(response.token);
         setIsLoading(false);
       })
       .catch((_error) => {
