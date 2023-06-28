@@ -6,6 +6,16 @@ An open-source and customizable workflow tool for tracking and managing metadata
 
 **⚠️ WARNING: MARS is still in early development. It should be used with caution.**
 
+## Features ✨
+
+- Rich metadata entry system, with dynamic relationships between metadata entries.
+- Text-based search and advanced search query system for searching metadata.
+- Visualizations of metadata relationships.
+- Data-first metadata views.
+- Metadata history and version control.
+- Individual metadata or entire database exports for label creation.
+- External scanner connectivity and communication for label creation and scanning.
+
 ## Concepts and Abstractions
 
 ### Entities 📦
@@ -32,19 +42,11 @@ Attributes are the primary method of expressing metadata associated with Entitie
 - `date`: A date or time.
 - `url`: A link to external or internal item.
 - `entity`: A "soft" relation to another Entity. This does not have the significance of an Origin or Product Entity in the overall system, but could be used to express a similar concept.
+- `select`: A drop-down containing a customizable set of options.
 
 ### Collections 📚
 
 Collections are simply groups of Entities. Collections can be of one type of Entities, or a mixture of multiple types.
-
-## Features ✨
-
-- Searchable database of all metadata.
-- Customizable assignment of metadata elements.
-- Extensible and configurable "Entity" concept.
-- Graph illustrations of relationships between and evolutions of Entities.
-- Data export for label creation.
-- Changelog system.
 
 ## Deployment 👉
 
