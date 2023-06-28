@@ -15,6 +15,7 @@ An open-source and customizable workflow tool for tracking and managing metadata
 - Metadata history and version control.
 - Individual metadata or entire database exports for label creation.
 - External scanner connectivity and communication for label creation and scanning.
+- User account system.
 
 ## Concepts and Abstractions
 
