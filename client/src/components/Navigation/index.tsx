@@ -430,7 +430,19 @@ const Navigation = () => {
                 accept={"json/*"}
                 onChange={(event: ChangeEvent<HTMLInputElement>) => {
                   if (event.target.files) {
-                    setFile(event.target.files[0]);
+                    // Only accept JSON files
+                    if (_.isEqual(event.target.files[0].type, "application/json")) {
+                      setFile(event.target.files[0]);
+                    } else {
+                      toast({
+                        title: "Warning",
+                        status: "warning",
+                        description: "Please upload a JSON file",
+                        duration: 4000,
+                        position: "bottom-right",
+                        isClosable: true,
+                      });
+                    }
                   }
                 }}
               />
@@ -441,6 +453,7 @@ const Navigation = () => {
             <Flex direction={"row"} w={"100%"} justify={"space-between"}>
               <Button
                 colorScheme={"red"}
+                rightIcon={<Icon name="cross" />}
                 variant={"outline"}
                 onClick={() => {
                   setFile({} as File);
