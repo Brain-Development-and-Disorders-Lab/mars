@@ -1074,79 +1074,162 @@ export class Entities {
               });
             });
           } else if (_.isEqual(entityExportData.format, "json")) {
-            if (_.isEqual(entityExportData.format, "json")) {
-              // JSON export
-              const tempStructure = {} as {[key: string]: any};
-              const exportOperations = [] as Promise<string>[];
+            // JSON export
+            const tempStructure = {} as {[key: string]: any};
+            const exportOperations = [] as Promise<string>[];
 
-              tempStructure["name"] = entity.name;
-              entityExportData.fields.map((field) => {
-                if (_.isEqual(field, "created")) {
-                  // "created" data field
-                  tempStructure["created"] = dayjs(entity.created).format("DD MMM YYYY").toString();
-                } else if (_.isEqual(field, "owner")) {
-                  // "owner" data field
-                  tempStructure["owner"] = entity.owner;
-                } else if (_.isEqual(field, "description")) {
-                  // "description" data field
-                  tempStructure["description"] = entity.description;
-                } else if (_.startsWith(field, "origin_")) {
-                  // "origins" data field
-                  tempStructure["origins"] = [];
-                  exportOperations.push(
-                    Entities.getOne(_.split(field, "_")[1]).then((entity) => {
-                      tempStructure["origins"].push(entity.name);
-                      return entity.name;
-                    })
-                  );
-                } else if (_.startsWith(field, "product_")) {
-                  // "products" data field
-                  tempStructure["products"] = [];
-                  exportOperations.push(
-                    Entities.getOne(_.split(field, "_")[1]).then((entity) => {
-                      tempStructure["products"].push(entity.name);
-                      return entity.name;
-                    })
-                  );
-                } else if (_.startsWith(field, "attribute_")) {
-                  // "attributes" data field
-                  tempStructure["attributes"] = [];
-                  const attributeId = field.split("_")[1];
-                  entity.attributes.map((attribute) => {
-                    if (_.isEqual(attribute._id, attributeId)) {
-                      // Extract all values
-                      const attributeStruct = {} as {[value: string]: any};
-                      for (let value of attribute.values) {
-                        attributeStruct[value.name] = value.data;
-                      }
-
-                      // Add the Attribute to the exported set
-                      tempStructure["attributes"].push({
-                        [attribute.name]: attributeStruct
-                      });
+            tempStructure["name"] = entity.name;
+            entityExportData.fields.map((field) => {
+              if (_.isEqual(field, "created")) {
+                // "created" data field
+                tempStructure["created"] = dayjs(entity.created).format("DD MMM YYYY").toString();
+              } else if (_.isEqual(field, "owner")) {
+                // "owner" data field
+                tempStructure["owner"] = entity.owner;
+              } else if (_.isEqual(field, "description")) {
+                // "description" data field
+                tempStructure["description"] = entity.description;
+              } else if (_.startsWith(field, "origin_")) {
+                // "origins" data field
+                tempStructure["origins"] = [];
+                exportOperations.push(
+                  Entities.getOne(_.split(field, "_")[1]).then((entity) => {
+                    tempStructure["origins"].push(entity.name);
+                    return entity.name;
+                  })
+                );
+              } else if (_.startsWith(field, "product_")) {
+                // "products" data field
+                tempStructure["products"] = [];
+                exportOperations.push(
+                  Entities.getOne(_.split(field, "_")[1]).then((entity) => {
+                    tempStructure["products"].push(entity.name);
+                    return entity.name;
+                  })
+                );
+              } else if (_.startsWith(field, "attribute_")) {
+                // "attributes" data field
+                tempStructure["attributes"] = [];
+                const attributeId = field.split("_")[1];
+                entity.attributes.map((attribute) => {
+                  if (_.isEqual(attribute._id, attributeId)) {
+                    // Extract all values
+                    const attributeStruct = {} as {[value: string]: any};
+                    for (let value of attribute.values) {
+                      attributeStruct[value.name] = value.data;
                     }
-                  });
-                }
-              });
 
-              // Run all export operations
-              Promise.all(exportOperations).then((_values) => {
-                // Create a temporary file, passing the filename as a response
-                tmp.file((error, path: string, _fd: number) => {
-                  if (error) {
-                    reject(error);
-                    throw error;
+                    // Add the Attribute to the exported set
+                    tempStructure["attributes"].push({
+                      [attribute.name]: attributeStruct
+                    });
                   }
-
-                  fs.writeFileSync(path, JSON.stringify(tempStructure, null, "  "));
-                  consola.success(
-                    "Generated JSON data for  Entity (id):",
-                    entityExportData.id.toString()
-                  );
-                  resolve(path);
                 });
+              }
+            });
+
+            // Run all export operations
+            Promise.all(exportOperations).then((_values) => {
+              // Create a temporary file, passing the filename as a response
+              tmp.file((error, path: string, _fd: number) => {
+                if (error) {
+                  reject(error);
+                  throw error;
+                }
+
+                fs.writeFileSync(path, JSON.stringify(tempStructure, null, "  "));
+                consola.success(
+                  "Generated JSON data for  Entity (id):",
+                  entityExportData.id.toString()
+                );
+                resolve(path);
               });
-            }
+            });
+          } else {
+            // Text export
+            const exportOperations = [] as Promise<string>[];
+            consola.info(entityExportData);
+
+            // Structures to collate data
+            const textDetails = [`Name: ${entity.name}`];
+            const textOrigins = [] as string[];
+            const textProducts = [] as string[];
+            const textAttributes = [] as string[];
+
+            entityExportData.fields.map((field) => {
+              if (_.isEqual(field, "created")) {
+                // "created" data field
+                textDetails.push(`Created: ${dayjs(entity.created).format("DD MMM YYYY").toString()}`);
+              } else if (_.isEqual(field, "owner")) {
+                // "owner" data field
+                textDetails.push(`Owner: ${entity.owner}`);
+              } else if (_.isEqual(field, "description")) {
+                // "description" data field
+                textDetails.push(`Description: ${entity.description}`);
+              } else if (_.startsWith(field, "origin_")) {
+                // "origins" data field
+                exportOperations.push(
+                  Entities.getOne(_.split(field, "_")[1]).then((entity) => {
+                    textOrigins.push(entity.name);
+                    return entity.name;
+                  })
+                );
+              } else if (_.startsWith(field, "product_")) {
+                // "products" data field
+                exportOperations.push(
+                  Entities.getOne(_.split(field, "_")[1]).then((entity) => {
+                    textProducts.push(entity.name);
+                    return entity.name;
+                  })
+                );
+              } else if (_.startsWith(field, "attribute_")) {
+                // "attributes" data field
+                const attributeId = field.split("_")[1];
+                entity.attributes.map((attribute) => {
+                  if (_.isEqual(attribute._id, attributeId)) {
+                    // Extract all values
+                    const attributeStruct = {} as {[value: string]: any};
+                    const attributeValues = [];
+                    for (let value of attribute.values) {
+                      attributeStruct[value.name] = value.data;
+                      attributeValues.push(`    ${value.name}: ${value.data}`);
+                    }
+
+                    // Add the Attribute to the exported set
+                    textAttributes.push(`  ${attribute.name}:\n${attributeValues.join("\n")}`);
+                  }
+                });
+              }
+            });
+
+            // Run all export operations
+            Promise.all(exportOperations).then((_values) => {
+              // Create a temporary file, passing the filename as a response
+              tmp.file((error, path: string, _fd: number) => {
+                if (error) {
+                  reject(error);
+                  throw error;
+                }
+
+                if (textOrigins.length > 0) {
+                  textDetails.push(`Origins: ${textOrigins.join(", ")}`);
+                }
+                if (textProducts.length > 0) {
+                  textDetails.push(`Products: ${textProducts.join(", ")}`);
+                }
+                if (textAttributes.length > 0) {
+                  textDetails.push(`Attributes:`);
+                  textDetails.push(...textAttributes);
+                }
+
+                fs.writeFileSync(path, textDetails.join("\n"));
+                consola.success(
+                  "Generated text data for  Entity (id):",
+                  entityExportData.id.toString()
+                );
+                resolve(path);
+              });
+            });
           }
         });
     });
