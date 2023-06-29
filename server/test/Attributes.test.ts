@@ -64,16 +64,18 @@ describe("POST /attributes/update", () => {
       name: "TestAttribute",
       description: "Attribute description",
       values: [],
-    }).then((result: AttributeModel) => {
-      return Attributes.update({
-        _id: result._id,
-        name: result.name,
-        description: "Updated Attribute description",
-        values: result.values,
+    })
+      .then((result: AttributeModel) => {
+        return Attributes.update({
+          _id: result._id,
+          name: result.name,
+          description: "Updated Attribute description",
+          values: result.values,
+        });
+      })
+      .then((result: AttributeModel) => {
+        expect(result.description).toBe("Updated Attribute description");
       });
-    }).then((result: AttributeModel) => {
-      expect(result.description).toBe("Updated Attribute description");
-    });
   });
 
   it("should update the values", async () => {
@@ -81,23 +83,27 @@ describe("POST /attributes/update", () => {
       name: "TestAttribute",
       description: "Attribute description",
       values: [],
-    }).then((result: AttributeModel) => {
-      return Attributes.update({
-        _id: result._id,
-        name: result.name,
-        description: result.description,
-        values: [{
-          identifier: "v_0",
-          name: "Value0",
-          type: "text",
-          data: "Test",
-        }],
+    })
+      .then((result: AttributeModel) => {
+        return Attributes.update({
+          _id: result._id,
+          name: result.name,
+          description: result.description,
+          values: [
+            {
+              identifier: "v_0",
+              name: "Value0",
+              type: "text",
+              data: "Test",
+            },
+          ],
+        });
+      })
+      .then((result: AttributeModel) => {
+        expect(result.values.length).toBe(1);
+        expect(result.values[0].name).toBe("Value0");
+        expect(result.values[0].type).toBe("text");
+        expect(result.values[0].data).toBe("Test");
       });
-    }).then((result: AttributeModel) => {
-      expect(result.values.length).toBe(1);
-      expect(result.values[0].name).toBe("Value0");
-      expect(result.values[0].type).toBe("text");
-      expect(result.values[0].data).toBe("Test");
-    });
   });
 });

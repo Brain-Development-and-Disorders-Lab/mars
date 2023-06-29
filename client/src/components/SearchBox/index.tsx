@@ -44,7 +44,9 @@ const SearchBox = () => {
   const { isOpen, onToggle, onClose } = useDisclosure();
 
   // Scanner status
-  const [scannerStatus, setScannerStatus] = useState("disconnected" as ScannerStatus);
+  const [scannerStatus, setScannerStatus] = useState(
+    "disconnected" as ScannerStatus
+  );
 
   const handleScannerConnection = () => {
     if (_.isEqual(scannerStatus, "disconnected")) {
@@ -165,11 +167,19 @@ const SearchBox = () => {
       >
         <PopoverTrigger>
           <Flex w={"100%"} gap={"4"}>
-            <Tooltip label={_.isEqual(scannerStatus, "connected") ? "Scanner connected" : "Scanner not connected"}>
+            <Tooltip
+              label={
+                _.isEqual(scannerStatus, "connected")
+                  ? "Scanner connected"
+                  : "Scanner not connected"
+              }
+            >
               <IconButton
                 aria-label={"Scanner status"}
                 icon={<Icon name={"scan"} />}
-                colorScheme={_.isEqual(scannerStatus, "connected") ? "green" : "gray"}
+                colorScheme={
+                  _.isEqual(scannerStatus, "connected") ? "green" : "gray"
+                }
                 onClick={() => handleScannerConnection()}
                 disabled={_.isEqual(scannerStatus, "connected")}
               />

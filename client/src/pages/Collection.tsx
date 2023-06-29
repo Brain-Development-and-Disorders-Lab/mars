@@ -87,7 +87,9 @@ const Collection = () => {
   const [collectionData, setCollectionData] = useState({} as CollectionModel);
   const [collectionEntities, setCollectionEntities] = useState([] as string[]);
   const [collectionDescription, setCollectionDescription] = useState("");
-  const [collectionHistory, setCollectionHistory] = useState([] as CollectionHistory[]);
+  const [collectionHistory, setCollectionHistory] = useState(
+    [] as CollectionHistory[]
+  );
   const [allEntities, setAllEntities] = useState(
     [] as { name: string; id: string }[]
   );
@@ -247,56 +249,58 @@ const Collection = () => {
       });
   };
 
-    /**
+  /**
    * Restore a Collection from an earlier point in time
    * @param {CollectionHistory} collectionVersion historical Collection data to restore
    */
-    const handleRestoreFromHistoryClick = (collectionVersion: CollectionHistory) => {
-      const updateData: CollectionModel = {
-        _id: collectionData._id,
-        name: collectionData.name,
-        created: collectionData.created,
-        owner: collectionData.owner,
-        description: collectionVersion.description,
-        entities: collectionVersion.entities,
-        history: collectionData.history,
-      };
-
-      setIsLoaded(false);
-
-      // Update data
-      postData(`/collections/update`, updateData)
-        .then((_response) => {
-          toast({
-            title: "Saved!",
-            status: "success",
-            duration: 2000,
-            position: "bottom-right",
-            isClosable: true,
-          });
-        })
-        .catch(() => {
-          toast({
-            title: "Error",
-            description: "An error occurred when saving updates.",
-            status: "error",
-            duration: 2000,
-            position: "bottom-right",
-            isClosable: true,
-          });
-        })
-        .finally(() => {
-          // Close the drawer
-          onHistoryClose();
-
-          // Apply updated state
-          setCollectionData(updateData);
-          setCollectionDescription(updateData.description);
-          setCollectionEntities(updateData.entities);
-          setCollectionHistory(updateData.history);
-          setIsLoaded(true);
-        });
+  const handleRestoreFromHistoryClick = (
+    collectionVersion: CollectionHistory
+  ) => {
+    const updateData: CollectionModel = {
+      _id: collectionData._id,
+      name: collectionData.name,
+      created: collectionData.created,
+      owner: collectionData.owner,
+      description: collectionVersion.description,
+      entities: collectionVersion.entities,
+      history: collectionData.history,
     };
+
+    setIsLoaded(false);
+
+    // Update data
+    postData(`/collections/update`, updateData)
+      .then((_response) => {
+        toast({
+          title: "Saved!",
+          status: "success",
+          duration: 2000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+      })
+      .catch(() => {
+        toast({
+          title: "Error",
+          description: "An error occurred when saving updates.",
+          status: "error",
+          duration: 2000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+      })
+      .finally(() => {
+        // Close the drawer
+        onHistoryClose();
+
+        // Apply updated state
+        setCollectionData(updateData);
+        setCollectionDescription(updateData.description);
+        setCollectionEntities(updateData.entities);
+        setCollectionHistory(updateData.history);
+        setIsLoaded(true);
+      });
+  };
 
   return (
     <Content vertical={isError || !isLoaded}>
@@ -640,7 +644,10 @@ const Collection = () => {
                     {collectionHistory && collectionHistory.length > 0 ? (
                       collectionHistory.map((collectionVersion) => {
                         return (
-                          <Card w={"100%"} key={`v_${collectionVersion.timestamp}`}>
+                          <Card
+                            w={"100%"}
+                            key={`v_${collectionVersion.timestamp}`}
+                          >
                             <CardHeader>
                               <Flex align={"center"}>
                                 <Text fontStyle={"italic"}>
@@ -666,29 +673,29 @@ const Collection = () => {
                                 <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
                                   <Text fontWeight={"bold"}>Description:</Text>
                                   <Text noOfLines={2}>
-                                    {_.isEqual(collectionVersion.description, "")
+                                    {_.isEqual(
+                                      collectionVersion.description,
+                                      ""
+                                    )
                                       ? "None"
                                       : collectionVersion.description}
                                   </Text>
                                 </Flex>
                                 <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
                                   <Text fontWeight={"bold"}>Products:</Text>
-                                  {collectionVersion.entities.length >
-                                  0 ? (
-                                    collectionVersion.entities.map(
-                                      (entity) => {
-                                        return (
-                                          <Tag
-                                            key={`v_p_${collectionVersion.timestamp}_${entity}`}
-                                          >
-                                            <Linky
-                                              type={"entities"}
-                                              id={entity}
-                                            />
-                                          </Tag>
-                                        );
-                                      }
-                                    )
+                                  {collectionVersion.entities.length > 0 ? (
+                                    collectionVersion.entities.map((entity) => {
+                                      return (
+                                        <Tag
+                                          key={`v_p_${collectionVersion.timestamp}_${entity}`}
+                                        >
+                                          <Linky
+                                            type={"entities"}
+                                            id={entity}
+                                          />
+                                        </Tag>
+                                      );
+                                    })
                                   ) : (
                                     <Text>None</Text>
                                   )}

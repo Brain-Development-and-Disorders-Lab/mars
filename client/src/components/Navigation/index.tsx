@@ -40,7 +40,11 @@ const Navigation = () => {
   const location = useLocation();
   const toast = useToast();
 
-  const { isOpen: isImportOpen, onOpen: onImportOpen, onClose: onImportClose } = useDisclosure();
+  const {
+    isOpen: isImportOpen,
+    onOpen: onImportOpen,
+    onClose: onImportClose,
+  } = useDisclosure();
   const [file, setFile] = useState({} as File);
   const [isUploading, setIsUploading] = useState(false);
 
@@ -51,41 +55,43 @@ const Navigation = () => {
     formData.append("name", file.name);
     formData.append("file", file);
 
-    postData(`/server/import`, formData).then((response: { status: boolean, message: string }) => {
-      if (_.isEqual(response.status, "success")) {
-        toast({
-          title: "Success",
-          status: "success",
-          description: "Successfully imported file.",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-        // Reset file upload state
-        setFile({} as File);
-        onImportClose();
-      } else {
+    postData(`/server/import`, formData)
+      .then((response: { status: boolean; message: string }) => {
+        if (_.isEqual(response.status, "success")) {
+          toast({
+            title: "Success",
+            status: "success",
+            description: "Successfully imported file.",
+            duration: 4000,
+            position: "bottom-right",
+            isClosable: true,
+          });
+          // Reset file upload state
+          setFile({} as File);
+          onImportClose();
+        } else {
+          toast({
+            title: "Error",
+            status: "error",
+            description: response.message,
+            duration: 4000,
+            position: "bottom-right",
+            isClosable: true,
+          });
+        }
+        setIsUploading(false);
+      })
+      .catch((error: { message: string }) => {
         toast({
           title: "Error",
           status: "error",
-          description: response.message,
+          description: error.message,
           duration: 4000,
           position: "bottom-right",
           isClosable: true,
         });
-      }
-      setIsUploading(false);
-    }).catch((error: { message: string }) => {
-      toast({
-        title: "Error",
-        status: "error",
-        description: error.message,
-        duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
+        setIsUploading(false);
       });
-      setIsUploading(false);
-    });
   };
 
   /**
@@ -387,15 +393,30 @@ const Navigation = () => {
           <ModalCloseButton />
           <ModalBody>
             <Flex w={"100%"} align={"center"} justify={"center"}>
-              <Flex direction={"column"} minH={"200px"} w={"100%"} align={"center"} justify={"center"} border={"2px"} borderStyle={"dashed"} borderColor={"gray.100"} rounded={"md"}>
-                {_.isEqual(file, {}) ?
-                  <Flex direction={"column"} w={"100%"} justify={"center"} align={"center"}>
+              <Flex
+                direction={"column"}
+                minH={"200px"}
+                w={"100%"}
+                align={"center"}
+                justify={"center"}
+                border={"2px"}
+                borderStyle={"dashed"}
+                borderColor={"gray.100"}
+                rounded={"md"}
+              >
+                {_.isEqual(file, {}) ? (
+                  <Flex
+                    direction={"column"}
+                    w={"100%"}
+                    justify={"center"}
+                    align={"center"}
+                  >
                     <Text fontWeight={"semibold"}>Drag file here</Text>
                     <Text>or click to upload</Text>
                   </Flex>
-                :
+                ) : (
                   <Text fontWeight={"semibold"}>{file.name}</Text>
-                }
+                )}
               </Flex>
               <Input
                 type={"file"}

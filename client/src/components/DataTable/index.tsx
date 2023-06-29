@@ -163,7 +163,10 @@ const DataTable = (props: DataTableProps) => {
                   const meta: any = cell.column.columnDef.meta;
                   return (
                     <Td id={cell.id} key={cell.id} isNumeric={meta?.isNumeric}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
                     </Td>
                   );
                 })}

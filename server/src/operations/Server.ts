@@ -2,7 +2,12 @@ import { Activity } from "./Activity";
 import { Attributes } from "./Attributes";
 import { Collections } from "./Collections";
 import { Entities } from "./Entities";
-import { ActivityModel, AttributeModel, CollectionModel, EntityModel } from "@types";
+import {
+  ActivityModel,
+  AttributeModel,
+  CollectionModel,
+  EntityModel,
+} from "@types";
 
 // Utility functions and libraries
 import _ from "lodash";
@@ -20,29 +25,43 @@ export class Server {
         Attributes.getAll(),
         Collections.getAll(),
         Entities.getAll(),
-      ]).then((data: [ActivityModel[], AttributeModel[], CollectionModel[], EntityModel[]]) => {
-        // Create a temporary file, passing the filename as a response
-        tmp.file((error, path: string, _fd: number) => {
-          if (error) {
-            reject(error);
-            throw error;
-          }
+      ]).then(
+        (
+          data: [
+            ActivityModel[],
+            AttributeModel[],
+            CollectionModel[],
+            EntityModel[]
+          ]
+        ) => {
+          // Create a temporary file, passing the filename as a response
+          tmp.file((error, path: string, _fd: number) => {
+            if (error) {
+              reject(error);
+              throw error;
+            }
 
-          fs.writeFileSync(path, JSON.stringify({
-            timestamp: dayjs(Date.now()).toJSON(),
-            activity: data[0],
-            attributes: data[1],
-            collections: data[2],
-            entities: data[3],
-          }));
-          consola.success("Generated server backup");
-          resolve(path);
-        });
-      });
+            fs.writeFileSync(
+              path,
+              JSON.stringify({
+                timestamp: dayjs(Date.now()).toJSON(),
+                activity: data[0],
+                attributes: data[1],
+                collections: data[2],
+                entities: data[3],
+              })
+            );
+            consola.success("Generated server backup");
+            resolve(path);
+          });
+        }
+      );
     });
   };
 
-  static import = (files: any): Promise<{ status: boolean, message: string }> => {
+  static import = (
+    files: any
+  ): Promise<{ status: boolean; message: string }> => {
     consola.start("Received file for import");
     return new Promise((resolve, reject) => {
       if (files.file) {
@@ -105,7 +124,9 @@ export class Server {
         consola.start("Importing Entities");
         const collectionOperations = [];
         if (parsedFileData["collections"]) {
-          const importedCollections = parsedFileData["collections"] as CollectionModel[];
+          const importedCollections = parsedFileData[
+            "collections"
+          ] as CollectionModel[];
           for (let collection of importedCollections) {
             collectionOperations.push(Collections.update(collection));
           }
@@ -115,7 +136,9 @@ export class Server {
         consola.start("Importing Attributes");
         const attributeOperations = [];
         if (parsedFileData["attributes"]) {
-          const importedAttributes = parsedFileData["attributes"] as AttributeModel[];
+          const importedAttributes = parsedFileData[
+            "attributes"
+          ] as AttributeModel[];
           for (let attribute of importedAttributes) {
             attributeOperations.push(Attributes.update(attribute));
           }
@@ -126,20 +149,27 @@ export class Server {
           Promise.all(entityOperations),
           Promise.all(attributeOperations),
           Promise.all(collectionOperations),
-        ]).then((results: [EntityModel[], AttributeModel[], CollectionModel[]]) => {
-          consola.success("Imported", results[0].length, "Entities");
-          consola.success("Imported", results[1].length, "Attributes");
-          consola.success("Imported", results[2].length, "Collections");
-          consola.success("Imported file:", receivedFile.name);
-          resolve({ status: true, message: "Successfuly imported JSON file" });
-        }).catch((_error) => {
-          consola.error("Error importing file");
-          reject({ message: "Error importing file" });
-        });
+        ])
+          .then(
+            (results: [EntityModel[], AttributeModel[], CollectionModel[]]) => {
+              consola.success("Imported", results[0].length, "Entities");
+              consola.success("Imported", results[1].length, "Attributes");
+              consola.success("Imported", results[2].length, "Collections");
+              consola.success("Imported file:", receivedFile.name);
+              resolve({
+                status: true,
+                message: "Successfuly imported JSON file",
+              });
+            }
+          )
+          .catch((_error) => {
+            consola.error("Error importing file");
+            reject({ message: "Error importing file" });
+          });
       } else {
         consola.error("Error importing file");
         reject({ message: "Error importing file" });
       }
     });
   };
-};
+}

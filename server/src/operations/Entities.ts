@@ -876,9 +876,10 @@ export class Entities {
    * @param entity the Entity of interest
    * @return {Promise<{ name: string, id: string }>}
    */
-  static setLock = (
-    entityLockData: { entity: { name: string, id: string }, lockState: boolean }
-  ): Promise<{ name: string; id: string }> => {
+  static setLock = (entityLockData: {
+    entity: { name: string; id: string };
+    lockState: boolean;
+  }): Promise<{ name: string; id: string }> => {
     consola.start(
       "Setting lock state of Entity",
       entityLockData.entity.name,
@@ -888,46 +889,52 @@ export class Entities {
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES_COLLECTION)
-        .findOne({ _id: entityLockData.entity.id }, (error: any, _result: any) => {
-          if (error) {
-            throw error;
+        .findOne(
+          { _id: entityLockData.entity.id },
+          (error: any, _result: any) => {
+            if (error) {
+              throw error;
+            }
+
+            // Update the description of this Entity
+            const updates = {
+              $set: {
+                locked: entityLockData.lockState,
+              },
+            };
+
+            getDatabase()
+              .collection(ENTITIES_COLLECTION)
+              .updateOne(
+                { _id: entityLockData.entity.id },
+                updates,
+                (error: any, _response: any) => {
+                  if (error) {
+                    throw error;
+                  }
+
+                  // Update automatic unlock operation after 30 seconds
+                  if (entityLockData.lockState === true) {
+                    setTimeout(() => {
+                      this.setLock({
+                        entity: entityLockData.entity,
+                        lockState: false,
+                      });
+                    }, 30000);
+                  }
+
+                  // Resolve the Promise
+                  consola.success(
+                    "Set lock state of Entity",
+                    entityLockData.entity.name,
+                    "to",
+                    entityLockData.lockState ? "locked" : "unlocked"
+                  );
+                  resolve(entityLockData.entity);
+                }
+              );
           }
-
-          // Update the description of this Entity
-          const updates = {
-            $set: {
-              locked: entityLockData.lockState,
-            },
-          };
-
-          getDatabase()
-            .collection(ENTITIES_COLLECTION)
-            .updateOne(
-              { _id: entityLockData.entity.id },
-              updates,
-              (error: any, _response: any) => {
-                if (error) {
-                  throw error;
-                }
-
-                // Update automatic unlock operation after 30 seconds
-                if (entityLockData.lockState === true) {
-                  setTimeout(() => {
-                    this.setLock({entity: entityLockData.entity, lockState: false});
-                  }, 30000);
-                }
-
-                // Resolve the Promise
-                consola.success(
-                  "Set lock state of Entity",
-                  entityLockData.entity.name,
-                  "to",
-                  entityLockData.lockState ? "locked" : "unlocked"
-                );
-                resolve(entityLockData.entity);
-              }
-            );
-        });
+        );
     });
   };
 
@@ -1075,14 +1082,16 @@ export class Entities {
             });
           } else if (_.isEqual(entityExportData.format, "json")) {
             // JSON export
-            const tempStructure = {} as {[key: string]: any};
+            const tempStructure = {} as { [key: string]: any };
             const exportOperations = [] as Promise<string>[];
 
             tempStructure["name"] = entity.name;
             entityExportData.fields.map((field) => {
               if (_.isEqual(field, "created")) {
                 // "created" data field
-                tempStructure["created"] = dayjs(entity.created).format("DD MMM YYYY").toString();
+                tempStructure["created"] = dayjs(entity.created)
+                  .format("DD MMM YYYY")
+                  .toString();
               } else if (_.isEqual(field, "owner")) {
                 // "owner" data field
                 tempStructure["owner"] = entity.owner;
@@ -1114,14 +1123,14 @@ export class Entities {
                 entity.attributes.map((attribute) => {
                   if (_.isEqual(attribute._id, attributeId)) {
                     // Extract all values
-                    const attributeStruct = {} as {[value: string]: any};
+                    const attributeStruct = {} as { [value: string]: any };
                     for (let value of attribute.values) {
                       attributeStruct[value.name] = value.data;
                     }
 
                     // Add the Attribute to the exported set
                     tempStructure["attributes"].push({
-                      [attribute.name]: attributeStruct
+                      [attribute.name]: attributeStruct,
                     });
                   }
                 });
@@ -1137,7 +1146,10 @@ export class Entities {
                   throw error;
                 }
 
-                fs.writeFileSync(path, JSON.stringify(tempStructure, null, "  "));
+                fs.writeFileSync(
+                  path,
+                  JSON.stringify(tempStructure, null, "  ")
+                );
                 consola.success(
                   "Generated JSON data for  Entity (id):",
                   entityExportData.id.toString()
@@ -1158,7 +1170,11 @@ export class Entities {
             entityExportData.fields.map((field) => {
               if (_.isEqual(field, "created")) {
                 // "created" data field
-                textDetails.push(`Created: ${dayjs(entity.created).format("DD MMM YYYY").toString()}`);
+                textDetails.push(
+                  `Created: ${dayjs(entity.created)
+                    .format("DD MMM YYYY")
+                    .toString()}`
+                );
               } else if (_.isEqual(field, "owner")) {
                 // "owner" data field
                 textDetails.push(`Owner: ${entity.owner}`);
@@ -1193,7 +1209,9 @@ export class Entities {
                     }
 
                     // Add the Attribute to the exported set
-                    textAttributes.push(`  ${attribute.name}:\n${attributeValues.join("\n")}`);
+                    textAttributes.push(
+                      `  ${attribute.name}:\n${attributeValues.join("\n")}`
+                    );
                   }
                 });
               }

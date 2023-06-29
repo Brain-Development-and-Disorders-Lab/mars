@@ -772,8 +772,10 @@ const Entity = () => {
                     </Button>
                   ) : (
                     <Flex gap={"4"}>
-                      {entityData.locked ?
-                        <Tooltip label={"Currently being edited by another user"}>
+                      {entityData.locked ? (
+                        <Tooltip
+                          label={"Currently being edited by another user"}
+                        >
                           <Button
                             colorScheme={"gray"}
                             rightIcon={<Icon name={"lock"} />}
@@ -782,7 +784,7 @@ const Entity = () => {
                             Edit
                           </Button>
                         </Tooltip>
-                      :
+                      ) : (
                         <Button
                           onClick={handleEditClick}
                           colorScheme={editing ? "green" : "gray"}
@@ -797,7 +799,7 @@ const Entity = () => {
                         >
                           {editing ? "Done" : "Edit"}
                         </Button>
-                      }
+                      )}
                     </Flex>
                   )}
                 </Flex>
@@ -1293,11 +1295,11 @@ const Entity = () => {
                             }
                             required
                           />
-                          {isAttributeNameError &&
+                          {isAttributeNameError && (
                             <FormErrorMessage>
                               A name must be specified for the Attribute.
                             </FormErrorMessage>
-                          }
+                          )}
                         </FormControl>
 
                         <FormControl isRequired>
@@ -1309,12 +1311,12 @@ const Entity = () => {
                               setAttributeDescription(event.target.value)
                             }
                           />
-                          {isAttributeDescriptionError &&
+                          {isAttributeDescriptionError && (
                             <FormErrorMessage>
                               A description should be provided for the
                               Attribute.
                             </FormErrorMessage>
-                          }
+                          )}
                         </FormControl>
                       </Flex>
 
@@ -1721,7 +1723,10 @@ const Entity = () => {
                               disabled={_.isEqual(entityDescription, "")}
                             >
                               <Text noOfLines={1}>
-                                Description: {_.isEqual(entityDescription, "") ? "No description" : entityDescription}
+                                Description:{" "}
+                                {_.isEqual(entityDescription, "")
+                                  ? "No description"
+                                  : entityDescription}
                               </Text>
                             </Checkbox>
                           </Stack>

@@ -17,11 +17,16 @@ ServerRoute.route("/server/backup").get((_request: any, response: any) => {
 
 // Route: Import JSON file
 ServerRoute.route("/server/import").post((request: any, response: any) => {
-  Server.import(request.files).then((result: { status: boolean, message: string }) => {
-    response.json({ status: result.status ? "success" : "error", message: result.message });
-  }).catch((reason: { message: string }) => {
-    response.json({ status: "error", message: reason.message });
-  });
+  Server.import(request.files)
+    .then((result: { status: boolean; message: string }) => {
+      response.json({
+        status: result.status ? "success" : "error",
+        message: result.message,
+      });
+    })
+    .catch((reason: { message: string }) => {
+      response.json({ status: "error", message: reason.message });
+    });
 });
 
 export default ServerRoute;

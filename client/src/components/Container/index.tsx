@@ -2,7 +2,17 @@
 import React, { FC } from "react";
 
 // Existing and custom components
-import { Avatar, Flex, Menu, MenuButton, MenuGroup, MenuItem, MenuList, Spacer, Text } from "@chakra-ui/react";
+import {
+  Avatar,
+  Flex,
+  Menu,
+  MenuButton,
+  MenuGroup,
+  MenuItem,
+  MenuList,
+  Spacer,
+  Text,
+} from "@chakra-ui/react";
 import Icon from "@components/Icon";
 import Navigation from "@components/Navigation";
 import SearchBox from "@components/SearchBox";

@@ -39,7 +39,14 @@ import Loading from "@components/Loading";
 import Error from "@components/Error";
 
 // Existing and custom types
-import { EntityModel, QueryComponent, QueryFocusType, QueryOperator, QueryParameters, QueryQualifier } from "@types";
+import {
+  EntityModel,
+  QueryComponent,
+  QueryFocusType,
+  QueryOperator,
+  QueryParameters,
+  QueryQualifier,
+} from "@types";
 
 // Utility functions and libraries
 import { getData, postData } from "@database/functions";
@@ -61,11 +68,17 @@ const Search = () => {
   const navigate = useNavigate();
   const toast = useToast();
 
-  const [queryComponents, setQueryComponents] = useState([] as QueryComponent[]);
+  const [queryComponents, setQueryComponents] = useState(
+    [] as QueryComponent[]
+  );
   const [queryOperator, setQueryOperator] = useState("AND" as QueryOperator);
   const [queryType, setQueryType] = useState("Entity" as QueryFocusType);
-  const [queryParameter, setQueryParameter] = useState("Name" as QueryParameters);
-  const [queryQualifier, setQueryQualifier] = useState("Contains" as QueryQualifier);
+  const [queryParameter, setQueryParameter] = useState(
+    "Name" as QueryParameters
+  );
+  const [queryQualifier, setQueryQualifier] = useState(
+    "Contains" as QueryQualifier
+  );
   const [queryValue, setQueryValue] = useState("");
 
   // Store results as a set of IDs
@@ -199,16 +212,29 @@ const Search = () => {
               <TabPanel>
                 {/* Query builder */}
                 <Flex p={"2"} w={"100%"} direction={"column"} gap={"4"}>
-                  <Flex direction={"column"} p={"2"} rounded={"md"} border={"2px"} borderColor={"gray.200"}>
+                  <Flex
+                    direction={"column"}
+                    p={"2"}
+                    rounded={"md"}
+                    border={"2px"}
+                    borderColor={"gray.200"}
+                  >
                     <Flex direction={"row"} p={"2"} gap={"4"}>
                       {/* Query builder components */}
-                      <Select value={queryType} onChange={(event) => setQueryType(event.target.value as QueryFocusType)}>
+                      <Select
+                        value={queryType}
+                        onChange={(event) =>
+                          setQueryType(event.target.value as QueryFocusType)
+                        }
+                      >
                         <option>Entity</option>
                       </Select>
                       <Select
                         value={queryParameter}
                         onChange={(event) => {
-                          setQueryParameter(event.target.value as QueryParameters);
+                          setQueryParameter(
+                            event.target.value as QueryParameters
+                          );
                           // Set the query qualifier to prevent selection of disabled options
                           setQueryQualifier("Contains");
                         }}
@@ -219,7 +245,14 @@ const Search = () => {
                         <option disabled>Origins</option>
                         <option disabled>Products</option>
                       </Select>
-                      <Select value={queryQualifier} onChange={(event) => setQueryQualifier(event.target.value as QueryQualifier)}>
+                      <Select
+                        value={queryQualifier}
+                        onChange={(event) =>
+                          setQueryQualifier(
+                            event.target.value as QueryQualifier
+                          )
+                        }
+                      >
                         <option>Contains</option>
                         <option>Does Not Contain</option>
                         <option
@@ -241,20 +274,27 @@ const Search = () => {
                           Is
                         </option>
                       </Select>
-                      <Input value={queryValue} placeholder={"Value"} onChange={(event) => setQueryValue(event.target.value)} />
+                      <Input
+                        value={queryValue}
+                        placeholder={"Value"}
+                        onChange={(event) => setQueryValue(event.target.value)}
+                      />
                       <IconButton
                         aria-label={"Add query component"}
                         colorScheme={"telegram"}
                         icon={<Icon name={"add"} />}
                         disabled={_.isEqual(queryValue, "")}
                         onClick={() => {
-                          setQueryComponents([...queryComponents, {
-                            operator: queryOperator,
-                            focus: queryType,
-                            parameter: queryParameter,
-                            qualifier: queryQualifier,
-                            value: queryValue,
-                          }]);
+                          setQueryComponents([
+                            ...queryComponents,
+                            {
+                              operator: queryOperator,
+                              focus: queryType,
+                              parameter: queryParameter,
+                              qualifier: queryQualifier,
+                              value: queryValue,
+                            },
+                          ]);
 
                           // Reset query input
                           setQueryType("Entity");
@@ -268,31 +308,53 @@ const Search = () => {
                     <VStack p={"2"} gap={"4"} align={"start"}>
                       {queryComponents.map((component, index) => {
                         return (
-                          <Flex key={`qc_${index}`} direction={"row"} gap={"4"} w={"fit-content"} p={"2"} bg={"gray.50"} rounded={"md"}>
-                            {index > 0 &&
+                          <Flex
+                            key={`qc_${index}`}
+                            direction={"row"}
+                            gap={"4"}
+                            w={"fit-content"}
+                            p={"2"}
+                            bg={"gray.50"}
+                            rounded={"md"}
+                          >
+                            {index > 0 && (
                               <Select
                                 w={"auto"}
-                                value={_.isEqual(index, 0) ? "" : component.operator}
+                                value={
+                                  _.isEqual(index, 0) ? "" : component.operator
+                                }
                                 onChange={(event) => {
                                   // Update the component operator state
-                                  const updatedQueryComponents = _.cloneDeep(queryComponents);
-                                  updatedQueryComponents[index].operator = event.target.value as QueryOperator;
+                                  const updatedQueryComponents =
+                                    _.cloneDeep(queryComponents);
+                                  updatedQueryComponents[index].operator = event
+                                    .target.value as QueryOperator;
                                   setQueryComponents(updatedQueryComponents);
 
                                   // Update the operator state
-                                  setQueryOperator(event.target.value as QueryOperator)
+                                  setQueryOperator(
+                                    event.target.value as QueryOperator
+                                  );
                                 }}
                               >
                                 <option>AND</option>
                                 <option>OR</option>
                               </Select>
-                            }
+                            )}
 
                             <Tag colorScheme={"blue"}>{component.focus}</Tag>
-                            <Tag colorScheme={"purple"}>{component.parameter}</Tag>
-                            <Tag colorScheme={"green"}>{component.qualifier}</Tag>
+                            <Tag colorScheme={"purple"}>
+                              {component.parameter}
+                            </Tag>
+                            <Tag colorScheme={"green"}>
+                              {component.qualifier}
+                            </Tag>
 
-                            <Input w={"fit-content"} value={component.value} disabled />
+                            <Input
+                              w={"fit-content"}
+                              value={component.value}
+                              disabled
+                            />
 
                             <IconButton
                               aria-label={"Remove search component"}
@@ -300,7 +362,8 @@ const Search = () => {
                               colorScheme={"red"}
                               onClick={() => {
                                 // Remove the query component
-                                let updatedQueryComponents = _.cloneDeep(queryComponents);
+                                let updatedQueryComponents =
+                                  _.cloneDeep(queryComponents);
                                 updatedQueryComponents.splice(index, 1);
                                 setQueryComponents(updatedQueryComponents);
                               }}
@@ -310,12 +373,17 @@ const Search = () => {
                       })}
                     </VStack>
                   </Flex>
-                  <Flex direction={"row"} w={"100%"} gap={"4"} justify={"right"}>
+                  <Flex
+                    direction={"row"}
+                    w={"100%"}
+                    gap={"4"}
+                    justify={"right"}
+                  >
                     <Button
                       leftIcon={<Icon name={"delete"} />}
                       isDisabled={queryComponents.length === 0}
                       onClick={() => {
-                        setQueryComponents([])
+                        setQueryComponents([]);
                         setResults([]);
                       }}
                     >
@@ -343,7 +411,9 @@ const Search = () => {
             ) : (
               hasSearched && (
                 <Flex direction={"column"} w={"100%"}>
-                  <Heading size={"md"} fontWeight={"semibold"}>Search Results ({results.length}) </Heading>
+                  <Heading size={"md"} fontWeight={"semibold"}>
+                    Search Results ({results.length}){" "}
+                  </Heading>
                   <TableContainer w={"full"}>
                     <Table>
                       <Thead>
@@ -365,10 +435,14 @@ const Search = () => {
                             return (
                               <Tr key={result._id}>
                                 <Td>{result.name}</Td>
-                                <Td display={{ base: "none", sm: "table-cell" }}>
+                                <Td
+                                  display={{ base: "none", sm: "table-cell" }}
+                                >
                                   {new Date(result.created).toDateString()}
                                 </Td>
-                                <Td display={{ base: "none", sm: "table-cell" }}>
+                                <Td
+                                  display={{ base: "none", sm: "table-cell" }}
+                                >
                                   {result.owner}
                                 </Td>
                                 <Td>
@@ -404,11 +478,13 @@ const Search = () => {
               <ModalBody>
                 <Flex direction={"column"} gap={"4"} p={"2"}>
                   <Text>
-                    Use the <b>Text Search</b> tab to search for text across all Entity fields.
+                    Use the <b>Text Search</b> tab to search for text across all
+                    Entity fields.
                   </Text>
                   <Text>
-                    The <b>Advanced Queries</b> tab allows search queries to be constructed to target specific fields
-                    and values. Queries can be built using AND and OR logical components.
+                    The <b>Advanced Queries</b> tab allows search queries to be
+                    constructed to target specific fields and values. Queries
+                    can be built using AND and OR logical components.
                   </Text>
                 </Flex>
               </ModalBody>
