@@ -479,26 +479,37 @@ const Entity = () => {
   };
 
   // Handle clicking the "Download" button
-  const handleDownloadClick = () => {
+  const handleDownloadClick = (format: "json" | "csv" | "txt") => {
     consola.info("Exporting additional fields:", exportFields);
 
     // Send POST data to generate file
     postData(`/entities/export`, {
       id: id,
       fields: exportFields,
+      format: format,
     })
       .then((response) => {
+        let responseData = response;
+
+        // Clean the response data if required
+        if (_.isEqual(format, "json")) {
+          responseData = JSON.stringify(responseData, null, "  ");
+        }
+
         FileSaver.saveAs(
-          new Blob([response]),
-          slugify(`${entityData.name.replace(" ", "")}_export.csv`)
+          new Blob([responseData]),
+          slugify(`${entityData.name.replace(" ", "")}_export.${format}`)
         );
 
         // Close the "Export" modal
         onExportClose();
 
+        // Reset the export state
+        setExportFields([]);
+
         toast({
           title: "Info",
-          description: "Generated CSV file.",
+          description: `Generated ${format.toUpperCase()} file.`,
           status: "info",
           duration: 2000,
           position: "bottom-right",
@@ -1707,9 +1718,10 @@ const Entity = () => {
                                   event.target.checked
                                 )
                               }
+                              disabled={_.isEqual(entityDescription, "")}
                             >
                               <Text noOfLines={1}>
-                                Description: {entityDescription}
+                                Description: {_.isEqual(entityDescription, "") ? "No description" : entityDescription}
                               </Text>
                             </Checkbox>
                           </Stack>
@@ -1796,14 +1808,28 @@ const Entity = () => {
                   </Flex>
                 </Flex>
 
-                {/* "Download" button */}
-                <Flex direction={"row"} p={"md"} justify={"center"}>
+                {/* "Download" buttons */}
+                <Flex direction={"row"} p={"md"} gap={"4"} justify={"center"}>
                   <Button
                     colorScheme={"green"}
-                    onClick={() => handleDownloadClick()}
+                    onClick={() => handleDownloadClick(`json`)}
                     rightIcon={<Icon name={"download"} />}
                   >
-                    Download
+                    JSON
+                  </Button>
+                  <Button
+                    colorScheme={"green"}
+                    onClick={() => handleDownloadClick(`csv`)}
+                    rightIcon={<Icon name={"download"} />}
+                  >
+                    CSV
+                  </Button>
+                  <Button
+                    colorScheme={"green"}
+                    onClick={() => handleDownloadClick(`txt`)}
+                    rightIcon={<Icon name={"download"} />}
+                  >
+                    TXT
                   </Button>
                 </Flex>
               </ModalContent>

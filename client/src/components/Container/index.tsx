@@ -50,7 +50,7 @@ const Page: FC<any> = ({ children }) => {
     // Retrieve all data stored on the server
     getData(`/server/backup`).then((response) => {
       FileSaver.saveAs(
-        new Blob([JSON.stringify(response)]),
+        new Blob([JSON.stringify(response, null, "  ")]),
         slugify(`server_backup_${dayjs(Date.now()).toJSON()}.json`)
       );
     });
