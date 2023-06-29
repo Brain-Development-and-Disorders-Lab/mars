@@ -81,7 +81,6 @@ import { deleteData, getData, postData } from "src/database/functions";
 import { isValidValues } from "src/functions";
 import _ from "lodash";
 import dayjs from "dayjs";
-import consola from "consola";
 import FileSaver from "file-saver";
 import slugify from "slugify";
 import { nanoid } from "nanoid";
@@ -480,8 +479,6 @@ const Entity = () => {
 
   // Handle clicking the "Download" button
   const handleDownloadClick = (format: "json" | "csv" | "txt") => {
-    consola.info("Exporting additional fields:", exportFields);
-
     // Send POST data to generate file
     postData(`/entities/export`, {
       id: id,
@@ -1736,6 +1733,30 @@ const Entity = () => {
                       )}
                     </FormControl>
                     <FormControl>
+                      <FormLabel>Collections</FormLabel>
+                      {isLoaded && entityCollections.length > 0 ? (
+                        <Stack spacing={2} direction={"column"}>
+                          {entityCollections.map((collection) => {
+                            return (
+                              <Checkbox
+                                key={collection}
+                                onChange={(event) =>
+                                  handleExportCheck(
+                                    `collection_${collection}`,
+                                    event.target.checked
+                                  )
+                                }
+                              >
+                                Collection: {<Linky id={collection} type={"collections"} />}
+                              </Checkbox>
+                            );
+                          })}
+                        </Stack>
+                      ) : (
+                        <Text>No Origins</Text>
+                      )}
+                    </FormControl>
+                    <FormControl>
                       <FormLabel>Associations: Origins</FormLabel>
                       {isLoaded && entityOrigins.length > 0 ? (
                         <Stack spacing={2} direction={"column"}>
@@ -1793,7 +1814,7 @@ const Entity = () => {
                           {entityAttributes.map((attribute) => {
                             return (
                               <Checkbox
-                                key={attribute.name}
+                                key={attribute._id}
                                 onChange={(event) =>
                                   handleExportCheck(
                                     `attribute_${attribute._id}`,
@@ -1816,21 +1837,21 @@ const Entity = () => {
                 {/* "Download" buttons */}
                 <Flex direction={"row"} p={"md"} gap={"4"} justify={"center"}>
                   <Button
-                    colorScheme={"green"}
+                    colorScheme={"blue"}
                     onClick={() => handleDownloadClick(`json`)}
                     rightIcon={<Icon name={"download"} />}
                   >
                     JSON
                   </Button>
                   <Button
-                    colorScheme={"green"}
+                    colorScheme={"blue"}
                     onClick={() => handleDownloadClick(`csv`)}
                     rightIcon={<Icon name={"download"} />}
                   >
                     CSV
                   </Button>
                   <Button
-                    colorScheme={"green"}
+                    colorScheme={"blue"}
                     onClick={() => handleDownloadClick(`txt`)}
                     rightIcon={<Icon name={"download"} />}
                   >
