@@ -1148,7 +1148,6 @@ export class Entities {
           } else {
             // Text export
             const exportOperations = [] as Promise<string>[];
-            consola.info(entityExportData);
 
             // Structures to collate data
             const textDetails = [`Name: ${entity.name}`];
@@ -1188,10 +1187,8 @@ export class Entities {
                 entity.attributes.map((attribute) => {
                   if (_.isEqual(attribute._id, attributeId)) {
                     // Extract all values
-                    const attributeStruct = {} as {[value: string]: any};
                     const attributeValues = [];
                     for (let value of attribute.values) {
-                      attributeStruct[value.name] = value.data;
                       attributeValues.push(`    ${value.name}: ${value.data}`);
                     }
 
