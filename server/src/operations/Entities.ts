@@ -1082,10 +1082,18 @@ export class Entities {
             });
           } else if (_.isEqual(entityExportData.format, "json")) {
             // JSON export
-            const tempStructure = {} as { [key: string]: any };
+            const tempStructure = {
+              _id: entity._id,
+              name: entity.name,
+              created: "",
+              owner: "",
+              description: "",
+              associations: {},
+              collections: [],
+              attributes: [],
+            } as { [key: string]: any };
             const exportOperations = [] as Promise<string>[];
 
-            tempStructure["name"] = entity.name;
             entityExportData.fields.map((field) => {
               if (_.isEqual(field, "created")) {
                 // "created" data field
@@ -1098,21 +1106,30 @@ export class Entities {
               } else if (_.isEqual(field, "description")) {
                 // "description" data field
                 tempStructure["description"] = entity.description;
+              } else if (_.startsWith(field, "collection")) {
+                // "collections" data field
+                tempStructure["collections"] = [];
+                exportOperations.push(
+                  Collections.getOne(_.split(field, "_")[1]).then((collection) => {
+                    tempStructure["collections"].push(collection.name);
+                    return collection.name;
+                  })
+                );
               } else if (_.startsWith(field, "origin_")) {
                 // "origins" data field
-                tempStructure["origins"] = [];
+                tempStructure.associations["origins"] = [];
                 exportOperations.push(
                   Entities.getOne(_.split(field, "_")[1]).then((entity) => {
-                    tempStructure["origins"].push(entity.name);
+                    tempStructure.associations["origins"].push(entity.name);
                     return entity.name;
                   })
                 );
               } else if (_.startsWith(field, "product_")) {
                 // "products" data field
-                tempStructure["products"] = [];
+                tempStructure.associations["products"] = [];
                 exportOperations.push(
                   Entities.getOne(_.split(field, "_")[1]).then((entity) => {
-                    tempStructure["products"].push(entity.name);
+                    tempStructure.associations["products"].push(entity.name);
                     return entity.name;
                   })
                 );

@@ -80,71 +80,113 @@ export class Server {
           return;
         }
 
-        // Check for valid information
+        // Attempt to determine the file type from the contents
+        let fileType = "unknown" as "unknown" | "backup" | "entity" | "collection" | "attribute";
+
+        // Utility function to check if a file contains fields
+        const checkFields = (parsedFileData: any, fields: string[]) => {
+          for (let field of fields) {
+            if (_.isUndefined(parsedFileData[field])) {
+              return false;
+            }
+          }
+          return true;
+        };
+
+        // Check parsed data
         if (_.isUndefined(parsedFileData)) {
           reject({ message: "Error importing file" });
           return;
         }
-        if (_.isUndefined(parsedFileData["timestamp"])) {
-          reject({ message: "Error importing file, invalid timestamp" });
+
+        if (checkFields(parsedFileData, ["timestamp", "entities", "collections", "attributes", "activity"])) {
+          // "backup" file type
+          fileType = "backup";
+          consola.info("Importing backup file");
+        } else if (checkFields(parsedFileData, ["name", "owner", "description", "associations", "collections", "attributes"])) {
+          // "entity" file type
+          fileType = "entity";
+          consola.info("Importing Entity file");
+        } else if (checkFields(parsedFileData, ["name", "description", "owner", "created", "entities", "history"])) {
+          // "collection" file type
+          fileType = "collection";
+          consola.info("Importing Collection file");
+        } else if (checkFields(parsedFileData, ["name", "description", "values"])) {
+          // "attribute" file type
+          fileType = "attribute";
+          consola.info("Importing Attribute file");
+        } else {
+          reject({ message: "Unknown file type, check contents" });
           return;
         }
-        if (_.isUndefined(parsedFileData["entities"])) {
-          reject({ message: "Error importing file, missing 'entities'" });
-          return;
-        }
-        if (_.isUndefined(parsedFileData["collections"])) {
-          reject({ message: "Error importing file, missing 'collections'" });
-          return;
-        }
-        if (_.isUndefined(parsedFileData["attributes"])) {
-          reject({ message: "Error importing file, missing 'attributes'" });
-          return;
-        }
-        if (_.isUndefined(parsedFileData["activity"])) {
-          reject({ message: "Error importing file, missing 'activity'" });
-          return;
-        }
+
         consola.success("File contents complete");
 
         // Import each part by checking if it exists, updating if so, otherwise creating
         consola.start("Importing file contents");
 
-        // Import Entities
-        consola.start("Importing Entities");
-        const entityOperations = [];
-        if (parsedFileData["entities"]) {
-          const importedEntities = parsedFileData["entities"] as EntityModel[];
-          for (let entity of importedEntities) {
-            entityOperations.push(Entities.update(entity));
+        const entityOperations = [] as Promise<EntityModel>[];
+        const collectionOperations = [] as Promise<CollectionModel>[];
+        const attributeOperations = [] as Promise<AttributeModel>[];
+
+        // Utility function to import Entities
+        const importEntities = (parsedFileData: any) => {
+          // Import Entities
+          consola.start("Importing Entities");
+          if (parsedFileData["entities"]) {
+            // Run differently if a backup file
+            const importedEntities = parsedFileData["entities"] as EntityModel[];
+            for (let entity of importedEntities) {
+              entityOperations.push(Entities.update(entity));
+            }
+          } else {
+            consola.warn("Not implemented, cannot import individual Entities");
+            reject({ message: "Not implemented, only backups can be imported" });
           }
         }
 
-        // Import Collections
-        consola.start("Importing Entities");
-        const collectionOperations = [];
-        if (parsedFileData["collections"]) {
-          const importedCollections = parsedFileData[
-            "collections"
-          ] as CollectionModel[];
-          for (let collection of importedCollections) {
-            collectionOperations.push(Collections.update(collection));
+        // Utility function to import Collections
+        const importCollections = (parsedFileData: any) => {
+          // Import Collections
+          consola.start("Importing Entities");
+          if (parsedFileData["collections"]) {
+            const importedCollections = parsedFileData[
+              "collections"
+            ] as CollectionModel[];
+            for (let collection of importedCollections) {
+              collectionOperations.push(Collections.update(collection));
+            }
           }
         }
 
-        // Import Attributes
-        consola.start("Importing Attributes");
-        const attributeOperations = [];
-        if (parsedFileData["attributes"]) {
-          const importedAttributes = parsedFileData[
-            "attributes"
-          ] as AttributeModel[];
-          for (let attribute of importedAttributes) {
-            attributeOperations.push(Attributes.update(attribute));
+        // Utility function to import Attributes
+        const importAttribute = (parsedFileData: any) => {
+          // Import Attributes
+          consola.start("Importing Attributes");
+          if (parsedFileData["attributes"]) {
+            const importedAttributes = parsedFileData[
+              "attributes"
+            ] as AttributeModel[];
+            for (let attribute of importedAttributes) {
+              attributeOperations.push(Attributes.update(attribute));
+            }
           }
         }
 
-        // Execute the import operations
+        // Run utility functions depending on the type of file
+        if (_.isEqual(fileType, "entity")) {
+          importEntities(parsedFileData);
+        } else if (_.isEqual(fileType, "collection")) {
+          importCollections(parsedFileData);
+        } else if (_.isEqual(fileType, "attribute")) {
+          importAttribute(parsedFileData);
+        } else if (_.isEqual(fileType, "backup")) {
+          importEntities(parsedFileData);
+          importCollections(parsedFileData);
+          importAttribute(parsedFileData);
+        }
+
+        // Execute all import operations
         Promise.all([
           Promise.all(entityOperations),
           Promise.all(attributeOperations),
