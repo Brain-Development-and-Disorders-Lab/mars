@@ -236,7 +236,7 @@ const Values = (props: {
               let linkTextColor = "black";
               let linkBgColor = "gray.100";
               let linkLogo = null;
-              if (_.isEqual(hostname, "wustl.box.com")) {
+              if (_.isEqual(hostname, "wustl.box.com") || _.isEqual(hostname, "wustl.app.box.com")) {
                 linkTextColor = "white";
                 linkBgColor = "blue.400";
                 linkLogo = <Icon name={"l_box"} size={[5, 5]} />;
