@@ -1,5 +1,5 @@
 // React
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 // Existing and custom components
 import {
@@ -40,6 +40,7 @@ import Error from "@components/Error";
 
 // Existing and custom types
 import {
+  CollectionModel,
   EntityModel,
   QueryComponent,
   QueryFocusType,
@@ -68,6 +69,10 @@ const Search = () => {
   const navigate = useNavigate();
   const toast = useToast();
 
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [entities, setEntities] = useState([] as EntityModel[]);
+  const [collections, setCollections] = useState([] as CollectionModel[]);
+
   const [queryComponents, setQueryComponents] = useState(
     [] as QueryComponent[]
   );
@@ -79,10 +84,53 @@ const Search = () => {
   const [queryQualifier, setQueryQualifier] = useState(
     "Contains" as QueryQualifier
   );
+  const [queryKey, setQueryKey] = useState("");
   const [queryValue, setQueryValue] = useState("");
 
   // Store results as a set of IDs
   const [results, setResults] = useState([] as EntityModel[]);
+
+  useEffect(() => {
+    // Get all Entities
+    getData(`/entities`)
+      .then((response) => {
+        setEntities(response);
+      })
+      .catch((_error) => {
+        toast({
+          title: "Error",
+          status: "error",
+          description: "Could not retrieve Entities data.",
+          duration: 4000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+        setIsError(true);
+      })
+      .finally(() => {
+        setIsLoaded(true);
+      });
+
+    // Get all Collections
+    getData(`/collections`)
+      .then((response) => {
+        setCollections(response);
+      })
+      .catch((_error) => {
+        toast({
+          title: "Error",
+          status: "error",
+          description: "Could not retrieve Collections data.",
+          duration: 4000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+        setIsError(true);
+      })
+      .finally(() => {
+        setIsLoaded(true);
+      });
+  }, []);
 
   const runSearch = () => {
     // Check if an ID has been entered
@@ -229,6 +277,7 @@ const Search = () => {
                       >
                         <option>Entity</option>
                       </Select>
+
                       <Select
                         value={queryParameter}
                         onChange={(event) => {
@@ -241,10 +290,11 @@ const Search = () => {
                       >
                         <option>Name</option>
                         <option>Description</option>
-                        <option disabled>Collections</option>
-                        <option disabled>Origins</option>
-                        <option disabled>Products</option>
+                        <option>Collections</option>
+                        <option>Origins</option>
+                        <option>Products</option>
                       </Select>
+
                       <Select
                         value={queryQualifier}
                         onChange={(event) =>
@@ -274,11 +324,50 @@ const Search = () => {
                           Is
                         </option>
                       </Select>
-                      <Input
-                        value={queryValue}
-                        placeholder={"Value"}
-                        onChange={(event) => setQueryValue(event.target.value)}
-                      />
+
+                      {_.isEqual(queryParameter, "Collections") && isLoaded &&
+                        <Select
+                          placeholder={"Select Collection"}
+                          value={queryKey}
+                          onChange={(event) => {
+                            setQueryKey(event.target.value);
+                            setQueryValue(event.target.options[event.target.selectedIndex].innerText);
+                          }}
+                        >
+                          {collections.map((collection) => {
+                            return (
+                              <option key={collection._id} value={collection._id}>{collection.name}</option>
+                            );
+                          })}
+                        </Select>
+                      }
+                      {_.includes(["Origins", "Products"], queryParameter) && isLoaded &&
+                        <Select
+                          placeholder={"Select Entity"}
+                          value={queryKey}
+                          onChange={(event) => {
+                            setQueryKey(event.target.value);
+                            setQueryValue(event.target.options[event.target.selectedIndex].innerText);
+                          }}
+                        >
+                          {entities.map((entity) => {
+                            return (
+                              <option key={entity._id} value={entity._id}>{entity.name}</option>
+                            );
+                          })}
+                        </Select>
+                      }
+                      {_.includes(["Name", "Description"], queryParameter) &&
+                        <Input
+                          value={queryValue}
+                          placeholder={"Value"}
+                          onChange={(event) => {
+                            setQueryKey(event.target.value);
+                            setQueryValue(event.target.value);
+                          }}
+                        />
+                      }
+
                       <IconButton
                         aria-label={"Add query component"}
                         colorScheme={"telegram"}
@@ -292,6 +381,7 @@ const Search = () => {
                               focus: queryType,
                               parameter: queryParameter,
                               qualifier: queryQualifier,
+                              key: queryKey,
                               value: queryValue,
                             },
                           ]);
@@ -300,6 +390,7 @@ const Search = () => {
                           setQueryType("Entity");
                           setQueryParameter("Name");
                           setQueryQualifier("Contains");
+                          setQueryKey("");
                           setQueryValue("");
                         }}
                       />
@@ -350,11 +441,22 @@ const Search = () => {
                               {component.qualifier}
                             </Tag>
 
-                            <Input
-                              w={"fit-content"}
-                              value={component.value}
-                              disabled
-                            />
+                            {_.includes(["Origins", "Products", "Collections"], component.parameter) && isLoaded &&
+                              <Select
+                                w={"fit-content"}
+                                value={component.value}
+                                disabled
+                              >
+                                <option>{component.value}</option>
+                              </Select>
+                            }
+                            {_.includes(["Name", "Description"], component.parameter) &&
+                              <Input
+                                w={"fit-content"}
+                                value={component.value}
+                                disabled
+                              />
+                            }
 
                             <IconButton
                               aria-label={"Remove search component"}

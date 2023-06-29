@@ -80,10 +80,7 @@ export class Search {
             const qualifier = component.qualifier.toLowerCase();
             const parameter = component.parameter.toLowerCase();
 
-            if (
-              _.isEqual(parameter, "description") ||
-              _.isEqual(parameter, "name")
-            ) {
+            if (_.includes(["description", "name"], parameter)) {
               // Parameters: name, description
               if (_.isEqual(qualifier, "is")) {
                 expressions.push({ [parameter]: component.value });
@@ -100,6 +97,20 @@ export class Search {
                   },
                 });
               }
+            } else if (_.isEqual(parameter, "collections")) {
+              // Parameters: collections
+              if (_.isEqual(qualifier, "contains")) {
+                expressions.push({ [parameter]: { $in: [component.key] } });
+              } else if (_.isEqual(qualifier, "does not contain")) {
+                expressions.push({ [parameter]: { $nin: [component.key] } });
+              }
+            } else if (_.includes(["origins", "products"], parameter)) {
+              // Parameters: origins, products
+              if (_.isEqual(qualifier, "contains")) {
+                expressions.push({ [parameter]: { $in: [component.key] } });
+              } else if (_.isEqual(qualifier, "does not contain")) {
+                expressions.push({ [parameter]: { $nin: [component.key] } });
+              }
             }
           }
           return queryBase.and(expressions);
@@ -110,20 +121,37 @@ export class Search {
           for (let component of queryLogicalGroups.OR) {
             const qualifier = component.qualifier.toLowerCase();
             const parameter = component.parameter.toLowerCase();
-            if (_.isEqual(qualifier, "is")) {
-              expressions.push({ [parameter]: component.value });
-            } else if (_.isEqual(qualifier, "is not")) {
-              expressions.push({ [parameter]: { $ne: component.value } });
-            } else if (_.isEqual(qualifier, "contains")) {
-              expressions.push({
-                [parameter]: { $regex: new RegExp(component.value, "gi") },
-              });
-            } else if (_.isEqual(qualifier, "does not contain")) {
-              expressions.push({
-                [parameter]: {
-                  $regex: new RegExp(`^((?!${component.value}).)*$`, "gi"),
-                },
-              });
+
+            if (_.includes(["description", "name"], parameter)) {
+              if (_.isEqual(qualifier, "is")) {
+                expressions.push({ [parameter]: component.value });
+              } else if (_.isEqual(qualifier, "is not")) {
+                expressions.push({ [parameter]: { $ne: component.value } });
+              } else if (_.isEqual(qualifier, "contains")) {
+                expressions.push({
+                  [parameter]: { $regex: new RegExp(component.value, "gi") },
+                });
+              } else if (_.isEqual(qualifier, "does not contain")) {
+                expressions.push({
+                  [parameter]: {
+                    $regex: new RegExp(`^((?!${component.value}).)*$`, "gi"),
+                  },
+                });
+              }
+            } else if (_.isEqual(parameter, "collections")) {
+              // Parameters: collections
+              if (_.isEqual(qualifier, "contains")) {
+                expressions.push({ [parameter]: { $in: [component.key] } });
+              } else if (_.isEqual(qualifier, "does not contain")) {
+                expressions.push({ [parameter]: { $nin: [component.key] } });
+              }
+            } else if (_.includes(["origins", "products"], parameter)) {
+              // Parameters: origins, products
+              if (_.isEqual(qualifier, "contains")) {
+                expressions.push({ [parameter]: { $in: [component.key] } });
+              } else if (_.isEqual(qualifier, "does not contain")) {
+                expressions.push({ [parameter]: { $nin: [component.key] } });
+              }
             }
           }
           return queryBase.or(expressions);

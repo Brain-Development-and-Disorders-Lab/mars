@@ -264,6 +264,7 @@ export type QueryComponent = {
   parameter: QueryParameters;
   qualifier: QueryQualifier;
   value: string;
+  key: string;
 };
 
 // Authentication types
