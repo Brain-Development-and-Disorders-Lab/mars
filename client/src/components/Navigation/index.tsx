@@ -55,7 +55,7 @@ const Navigation = () => {
     formData.append("name", file.name);
     formData.append("file", file);
 
-    postData(`/server/import`, formData)
+    postData(`/system/import`, formData)
       .then((response: { status: boolean; message: string }) => {
         if (_.isEqual(response.status, "success")) {
           toast({
