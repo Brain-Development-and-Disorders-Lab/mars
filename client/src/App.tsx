@@ -28,6 +28,7 @@ import Create from "@pages/Create";
 
 // Page type - Unique
 import Search from "@pages/Search";
+import Settings from "@pages/Settings";
 import Dashboard from "@pages/Dashboard";
 import Login from "@pages/Login";
 import Invalid from "@pages/Invalid";
@@ -54,31 +55,32 @@ const App = (): ReactElement => {
         ) : (
           <Page>
             <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/create" element={<Create />} />
+              <Route path={"/"} element={<Dashboard />} />
+              <Route path={"/create"} element={<Create />} />
 
               {/* Entity routes */}
-              <Route path="/entities" element={<Entities />} />
-              <Route path="entities">
-                <Route path=":id" element={<Entity />} />
+              <Route path={"/entities"} element={<Entities />} />
+              <Route path={"entities"}>
+                <Route path={":id"} element={<Entity />} />
               </Route>
 
               {/* Collections routes */}
-              <Route path="/collections" element={<Collections />} />
-              <Route path="collections">
-                <Route path=":id" element={<Collection />} />
+              <Route path={"/collections"} element={<Collections />} />
+              <Route path={"collections"}>
+                <Route path={":id"} element={<Collection />} />
               </Route>
 
               {/* Attributes routes */}
-              <Route path="/attributes" element={<Attributes />} />
-              <Route path="attributes">
-                <Route path=":id" element={<Attribute />} />
+              <Route path={"/attributes"} element={<Attributes />} />
+              <Route path={"attributes"}>
+                <Route path={":id"} element={<Attribute />} />
               </Route>
 
               {/* Other routes */}
-              <Route path="/search" element={<Search />} />
-              <Route path="/invalid" element={<Invalid />} />
-              <Route path="*" element={<Navigate to="/invalid" replace />} />
+              <Route path={"/search"} element={<Search />} />
+              <Route path={"/settings"} element={<Settings />} />
+              <Route path={"/invalid"} element={<Invalid />} />
+              <Route path={"*"} element={<Navigate to={"/invalid"} replace />} />
             </Routes>
           </Page>
         )}
