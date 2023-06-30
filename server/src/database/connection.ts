@@ -37,9 +37,9 @@ export const connectPrimary = (): Promise<Db> => {
 export const connectSystem = (): Promise<Db> => {
   return new Promise((resolve, _reject) => {
     client.connect().then((result) => {
-      database = result.db("system");
+      system = result.db("system");
       consola.success("Connected to MongoDB system database");
-      resolve(database);
+      resolve(system);
     });
   });
 };
