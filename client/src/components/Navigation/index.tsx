@@ -52,6 +52,7 @@ const Navigation = () => {
     onClose: onImportClose,
   } = useDisclosure();
   const [file, setFile] = useState({} as File);
+  const [fileType, setFileType] = useState("spreadsheet" as "backup" | "spreadsheet");
   const [isUploading, setIsUploading] = useState(false);
 
   const performImport = () => {
@@ -60,6 +61,7 @@ const Navigation = () => {
     const formData = new FormData();
     formData.append("name", file.name);
     formData.append("file", file);
+    formData.append("type", fileType);
 
     postData(`/system/import`, formData)
       .then((response: { status: boolean; message: string }) => {
@@ -399,10 +401,16 @@ const Navigation = () => {
           <ModalCloseButton />
           <ModalBody>
             <Flex w={"100%"} align={"center"} justify={"center"}>
-              <Tabs variant={"soft-rounded"} w={"100%"}>
+              <Tabs variant={"soft-rounded"} w={"100%"} onChange={(index) => {
+                if (_.isEqual(index, 0)) {
+                  setFileType("spreadsheet");
+                } else {
+                  setFileType("backup");
+                }
+              }}>
                 <TabList>
-                  <Tab>Spreadsheet</Tab>
-                  <Tab>Backup</Tab>
+                  <Tab isDisabled={!_.isUndefined(file.name) && _.isEqual(fileType, "backup")}>Spreadsheet</Tab>
+                  <Tab isDisabled={!_.isUndefined(file.name) && _.isEqual(fileType, "spreadsheet")}>Backup</Tab>
                 </TabList>
                 <TabPanels>
                   <TabPanel>
@@ -429,7 +437,14 @@ const Navigation = () => {
                             <Text>or click to upload</Text>
                           </Flex>
                         ) : (
-                          <Text fontWeight={"semibold"}>{file.name}</Text>
+                          <Flex
+                            direction={"column"}
+                            w={"100%"}
+                            justify={"center"}
+                            align={"center"}
+                          >
+                            <Text fontWeight={"semibold"}>{file.name}</Text>
+                          </Flex>
                         )}
                       </Flex>
                       <Input
@@ -441,14 +456,12 @@ const Navigation = () => {
                         left={"0"}
                         opacity={"0"}
                         aria-hidden={"true"}
-                        accept={"json/*"}
                         onChange={(event: ChangeEvent<HTMLInputElement>) => {
                           if (event.target.files) {
                             // Only accept XLSX or CSV files
                             if (_.includes(["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "text/csv"], event.target.files[0].type)) {
                               setFile(event.target.files[0]);
                             } else {
-                              console.info("Type:", event.target.files[0].type);
                               toast({
                                 title: "Warning",
                                 status: "warning",
@@ -484,11 +497,18 @@ const Navigation = () => {
                             justify={"center"}
                             align={"center"}
                           >
-                            <Text fontWeight={"semibold"}>Drag backup JSON file here</Text>
+                            <Text fontWeight={"semibold"}>Drag backup file here</Text>
                             <Text>or click to upload</Text>
                           </Flex>
                         ) : (
-                          <Text fontWeight={"semibold"}>{file.name}</Text>
+                          <Flex
+                            direction={"column"}
+                            w={"100%"}
+                            justify={"center"}
+                            align={"center"}
+                          >
+                            <Text fontWeight={"semibold"}>{file.name}</Text>
+                          </Flex>
                         )}
                       </Flex>
                       <Input
