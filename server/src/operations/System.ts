@@ -6,6 +6,7 @@ import {
   ActivityModel,
   AttributeModel,
   CollectionModel,
+  DeviceModel,
   EntityModel,
 } from "@types";
 
@@ -16,9 +17,15 @@ import dayjs from "dayjs";
 import fs from "fs";
 import tmp from "tmp";
 
-export class Server {
+// Database operations
+import { getDatabase } from "src/database/connection";
+
+// Constants
+const DEVICES_COLLECTION = "devices";
+
+export class System {
   static backup = (): Promise<string> => {
-    consola.start("Starting server backup");
+    consola.start("Starting system backup");
     return new Promise((resolve, reject) => {
       Promise.all([
         Activity.getAll(),
@@ -51,7 +58,7 @@ export class Server {
                 entities: data[3],
               })
             );
-            consola.success("Generated server backup");
+            consola.success("Generated system backup");
             resolve(path);
           });
         }
@@ -212,6 +219,41 @@ export class Server {
         consola.error("Error importing file");
         reject({ message: "Error importing file" });
       }
+    });
+  };
+
+  static getDevice = (id: string): Promise<DeviceModel> => {
+    consola.start("Retrieving Device (id):", id.toString());
+    return new Promise((resolve, reject) => {
+      getDatabase()
+        .collection(DEVICES_COLLECTION)
+        .findOne({ _id: id }, (error: any, result: any) => {
+          if (error) {
+            reject(error);
+            throw error;
+          }
+
+          consola.success("Retrieved Device (id):", id.toString());
+          resolve(result as DeviceModel);
+        });
+    });
+  };
+
+  static getDevices = (): Promise<DeviceModel[]> => {
+    consola.start("Retrieving Devices");
+    return new Promise((resolve, reject) => {
+      getDatabase()
+        .collection(DEVICES_COLLECTION)
+        .find({})
+        .toArray((error: any, result: any) => {
+          if (error) {
+            reject(error);
+            throw error;
+          }
+
+          consola.success("Retrieved", result.length, "Devices");
+          resolve(result as DeviceModel[]);
+        });
     });
   };
 }

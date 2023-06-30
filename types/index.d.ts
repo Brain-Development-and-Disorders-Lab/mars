@@ -228,6 +228,7 @@ export type IconNames =
   "scan" |
   "lock" |
   "exit" |
+  "settings" |
 
   // Logos
   "l_box" |
@@ -273,4 +274,14 @@ export type AuthToken = {
   token: string;
   lastLogin: string;
   valid: boolean;
+};
+
+// Device types
+export type IDevice = {
+  name: string;
+  vendor_id: number;
+};
+
+export type DeviceModel = IDevice & {
+  _id: string;
 };
