@@ -183,6 +183,7 @@ const Collection = () => {
     if (editing) {
       const updateData: CollectionModel = {
         _id: collectionData._id,
+        type: collectionData.type,
         name: collectionData.name,
         description: collectionDescription,
         owner: collectionData.owner,
@@ -258,6 +259,7 @@ const Collection = () => {
   ) => {
     const updateData: CollectionModel = {
       _id: collectionData._id,
+      type: collectionData.type,
       name: collectionData.name,
       created: collectionData.created,
       owner: collectionData.owner,
@@ -325,7 +327,7 @@ const Collection = () => {
                 rounded={"md"}
                 bg={"white"}
               >
-                <Icon name={"collection"} size={"lg"} />
+                <Icon name={_.isEqual(collectionData.type, "collection") ? "collection" : "project"} size={"lg"} />
                 <Heading fontWeight={"semibold"}>{collectionData.name}</Heading>
               </Flex>
 
@@ -438,6 +440,18 @@ const Collection = () => {
                                 <Link>{collectionData.owner}</Link>
                               </Text>
                             )}
+                          </Td>
+                        </Tr>
+                        <Tr>
+                          <Td>Type</Td>
+                          <Td>
+                            <Tag
+                              size={"md"}
+                              key={`type-${collectionData._id}`}
+                              colorScheme={"blue"}
+                            >
+                              <TagLabel>{collectionData.type}</TagLabel>
+                            </Tag>
                           </Td>
                         </Tr>
                         <Tr>

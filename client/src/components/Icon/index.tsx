@@ -26,6 +26,7 @@ import {
   BsFileCodeFill,
   BsFileTextFill,
   BsFillBookFill,
+  BsFillBookmarkFill,
   BsFillCloudUploadFill,
   BsFillExclamationTriangleFill,
   BsFillFileBinaryFill,
@@ -66,6 +67,7 @@ const SYSTEM_ICONS: { [k: string]: IconType } = {
   dashboard: BsBarChartFill,
   entity: BsBoxFill,
   collection: BsGridFill,
+  project: BsFillBookmarkFill,
   attribute: BsTagFill,
 
   // Signal and action icons

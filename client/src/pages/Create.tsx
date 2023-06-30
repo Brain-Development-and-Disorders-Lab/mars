@@ -32,6 +32,7 @@ import {
   TagCloseButton,
   Text,
   Textarea,
+  Tooltip,
   useDisclosure,
   useToast,
 } from "@chakra-ui/react";
@@ -64,6 +65,8 @@ import { isValidAttributes, isValidValues } from "src/functions";
 import { getData, postData } from "@database/functions";
 import _ from "lodash";
 import { nanoid } from "nanoid";
+import dayjs from "dayjs";
+import { useToken } from "src/authentication/useToken";
 
 const EntityPage = (props: {
   createPageState: CreatePage;
@@ -77,6 +80,7 @@ const EntityPage = (props: {
   const navigate = useNavigate();
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const [token, _useToken] = useToken();
 
   const [entities, setEntities] = useState([] as EntityModel[]);
   const [collections, setCollections] = useState([] as CollectionModel[]);
@@ -88,8 +92,8 @@ const EntityPage = (props: {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [name, setName] = useState("");
-  const [created, setCreated] = useState("");
-  const [owner, setOwner] = useState("");
+  const [created, setCreated] = useState(dayjs(Date.now()).format("YYYY-MM-DDTHH:mm"));
+  const [owner, setOwner] = useState(token.username);
   const [description, setDescription] = useState("");
   const [selectedCollections, setSelectedCollections] = useState(
     [] as string[]
@@ -766,10 +770,12 @@ const CollectionPage = (props: {
 }) => {
   const navigate = useNavigate();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const [token, _useToken] = useToken();
 
+  const [type, setType] = useState("collection" as "collection" | "project");
   const [name, setName] = useState("");
-  const [created, setCreated] = useState("");
-  const [owner, setOwner] = useState("");
+  const [created, setCreated] = useState(dayjs(Date.now()).format("YYYY-MM-DDTHH:mm"));
+  const [owner, setOwner] = useState(token.username);
   const [description, setDescription] = useState("");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -781,6 +787,7 @@ const CollectionPage = (props: {
   const isDetailsError = isNameError || isOwnerError || isDescriptionError;
 
   const collectionData: ICollection = {
+    type: type,
     name: name,
     description: description,
     owner: owner,
@@ -886,11 +893,10 @@ const CollectionPage = (props: {
                   </FormLabel>
 
                   <Input
-                    placeholder="Select Date and Time"
-                    size="md"
-                    type="datetime-local"
+                    size={"md"}
+                    type={"datetime-local"}
                     value={created}
-                    onChange={(event) => setCreated(event.target.value)}
+                    onChange={(event) => setCreated(dayjs(event.target.value).format("YYYY-MM-DDTHH:mm"))}
                   />
                 </FormControl>
 
@@ -909,6 +915,44 @@ const CollectionPage = (props: {
                       A description must be provided.
                     </FormErrorMessage>
                   )}
+                </FormControl>
+              </Flex>
+
+              <Flex direction="row" gap={"4"} wrap={["wrap", "nowrap"]}>
+                <FormControl>
+                  <FormLabel htmlFor="date" fontWeight={"normal"}>
+                    Collection Type
+                  </FormLabel>
+                  <CheckboxGroup>
+                    <Flex direction={"column"} gap={"4"}>
+                      <Checkbox
+                        isChecked={_.isEqual(type, "collection")}
+                        onChange={(_event) => {
+                          setType("collection");
+                        }}
+                      >
+                        <Tooltip label={"A standard Collection with no special properties."}>
+                          <Flex direction={"row"} gap={"4"} align={"center"}>
+                            Standard
+                            <Icon name={"info"} />
+                          </Flex>
+                        </Tooltip>
+                      </Checkbox>
+                      <Checkbox
+                        isChecked={_.isEqual(type, "project")}
+                        onChange={(_event) => {
+                          setType("project");
+                        }}
+                      >
+                        <Tooltip label={"A Collection denoted as a Project."}>
+                          <Flex direction={"row"} gap={"4"} align={"center"}>
+                            Project
+                            <Icon name={"info"} />
+                          </Flex>
+                        </Tooltip>
+                      </Checkbox>
+                    </Flex>
+                  </CheckboxGroup>
                 </FormControl>
               </Flex>
             </Flex>

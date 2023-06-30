@@ -4,6 +4,11 @@ import {
   Button,
   Flex,
   Heading,
+  Tab,
+  TabList,
+  TabPanel,
+  TabPanels,
+  Tabs,
   Text,
   useBreakpoint,
   useToast,
@@ -141,12 +146,34 @@ const Collections = () => {
             </Flex>
             {isLoaded && collectionsData.length > 0 ? (
               <Flex direction={"column"} gap={"4"} w={"100%"}>
-                <DataTable
-                  columns={columns}
-                  data={data}
-                  visibleColumns={visibleColumns}
-                  hideSelection
-                />
+                <Tabs variant={"soft-rounded"}>
+                  <TabList>
+                    <Tab>Standard</Tab>
+                    <Tab>Projects</Tab>
+                  </TabList>
+                  <TabPanels>
+                    <TabPanel>
+                      <DataTable
+                        columns={columns}
+                        data={data.filter((collection) => {
+                          return _.isEqual(collection.type, "collection");
+                        })}
+                        visibleColumns={visibleColumns}
+                        hideSelection
+                      />
+                    </TabPanel>
+                    <TabPanel>
+                      <DataTable
+                        columns={columns}
+                        data={data.filter((collection) => {
+                          return _.isEqual(collection.type, "project");
+                        })}
+                        visibleColumns={visibleColumns}
+                        hideSelection
+                      />
+                    </TabPanel>
+                  </TabPanels>
+                </Tabs>
               </Flex>
             ) : (
               <Text>There are no Collections to display.</Text>

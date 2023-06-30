@@ -102,6 +102,7 @@ export type LinkyProps = {
 // Collection types
 export type ICollection = {
   name: string;
+  type: "collection" | "project";
   description: string;
   owner: string;
   created: string;
@@ -203,6 +204,7 @@ export type IconNames =
   "dashboard" |
   "entity" |
   "collection" |
+  "project" |
   "attribute" |
 
   // Signal and action icons
