@@ -299,11 +299,11 @@ const AttributeCard = (props: AttributeCardProps) => {
               </Flex>
 
               {isEditing && (
-                <Flex direction={"row"} justify={"center"} gap={"4"}>
+                <Flex direction={"row"} justify={"space-between"} gap={"4"}>
                   <Button
                     colorScheme={"red"}
                     variant={"outline"}
-                    rightIcon={<Icon name={"check"} />}
+                    rightIcon={<Icon name={"cross"} />}
                     onClick={() => {
                       // Reset the changes made to the Attribute
                       setDescription(defaultDescription);
