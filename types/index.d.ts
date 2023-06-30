@@ -166,7 +166,7 @@ export type EntityExport = {
 
   // Generic details
   [key: string]: string;
-}
+};
 
 // Activity types
 export type IActivity = {

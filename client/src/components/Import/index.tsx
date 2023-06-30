@@ -22,14 +22,15 @@ import {
   TabPanels,
   TabPanel,
   TabList,
-  VStack,
   Select,
+  FormLabel,
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 
 // Utility functions and libraries
 import { postData } from "@database/functions";
 import _ from "lodash";
+import { EntityExport } from "@types";
 
 const Import = (props: {
   isOpen: boolean,
@@ -47,8 +48,12 @@ const Import = (props: {
     onOpen: onMappingOpen,
     onClose: onMappingClose,
   } = useDisclosure();
-  const [_spreadsheetData, setSpreadsheetData] = useState([] as any[]);
+  const [spreadsheetData, setSpreadsheetData] = useState([] as any[]);
   const [columns, setColumns] = useState([] as string[]);
+
+  // Fields to be assigned to columns
+  const [nameField, setNameField] = useState("");
+  const [descriptionField, setDescriptionField] = useState("");
 
   const performImport = () => {
     setIsUploading(true);
@@ -102,6 +107,59 @@ const Import = (props: {
         });
         setIsUploading(false);
       });
+  };
+
+  const performMapping = () => {
+    const mappingData: { fields: EntityExport, data: any[] } = {
+      fields: {
+        name: nameField,
+        description: descriptionField,
+        created: "",
+        owner: "",
+        collections: "",
+        products: "",
+        origins: "",
+      },
+      data: spreadsheetData,
+    }
+    postData(`/system/import/mapping`, mappingData)
+      .then((response: { status: boolean; message: string; data?: any; }) => {
+        toast({
+          title: "Success",
+          status: "success",
+          description: response.message,
+          duration: 4000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+        onMappingClose();
+      })
+      .catch((error: { message: string }) => {
+        toast({
+          title: "Error",
+          status: "error",
+          description: error.message,
+          duration: 4000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+      });
+  };
+
+  const getSelectComponent = (value: any, setValue: React.SetStateAction<any>) => {
+    return (
+      <Select
+        placeholder={"Select Column"}
+        value={value}
+        onChange={(event) => setValue(event.target.value)}
+      >
+        {columns.map((column) => {
+          return (
+            <option key={column} value={column}>{column}</option>
+          );
+        })}
+      </Select>
+    );
   };
 
   return (
@@ -290,18 +348,19 @@ const Import = (props: {
         <ModalContent>
           <ModalHeader>Map Spreadsheet Data</ModalHeader>
           <ModalBody>
-            <Flex w={"100%"} direction={"column"}>
-              <Text>Columns: {columns.join(", ")}</Text>
-              <Select>
-                {columns.map((column) => {
-                  return (
-                    <option key={column} value={column}>{column}</option>
-                  );
-                })}
-              </Select>
-              <VStack>
-
-              </VStack>
+            <Flex w={"100%"} direction={"column"} gap={"4"}>
+              <Flex direction={"row"} gap={"4"}>
+                <Text fontWeight={"semibold"}>Columns:</Text>
+                <Text>{columns.join(", ")}</Text>
+              </Flex>
+              <FormControl>
+                <FormLabel>Name</FormLabel>
+                {getSelectComponent(nameField, setNameField)}
+              </FormControl>
+              <FormControl>
+                <FormLabel>Description</FormLabel>
+                {getSelectComponent(descriptionField, setDescriptionField)}
+              </FormControl>
             </Flex>
           </ModalBody>
 
@@ -316,6 +375,17 @@ const Import = (props: {
                 }}
               >
                 Cancel
+              </Button>
+
+              <Button
+                colorScheme={"green"}
+                rightIcon={<Icon name="check" />}
+                variant={"outline"}
+                onClick={() => {
+                  performMapping();
+                }}
+              >
+                Apply
               </Button>
             </Flex>
           </ModalFooter>

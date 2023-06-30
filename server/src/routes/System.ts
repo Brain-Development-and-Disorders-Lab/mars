@@ -4,7 +4,7 @@ import _ from "lodash";
 
 import { System } from "../operations/System";
 import dayjs from "dayjs";
-import { DeviceModel } from "@types";
+import { DeviceModel, EntityModel } from "@types";
 
 const SystemRoute = express.Router();
 
@@ -24,6 +24,20 @@ SystemRoute.route("/system/import").post((request: any, response: any) => {
         status: result.status ? "success" : "error",
         message: result.message,
         data: _.isUndefined(result.data) ? "" : result.data,
+      });
+    })
+    .catch((reason: { message: string }) => {
+      response.json({ status: "error", message: reason.message });
+    });
+});
+
+// Route: Import mappings
+SystemRoute.route("/system/import/mapping").post((request: any, response: any) => {
+  System.mapData(request.body.fields, request.body.data)
+    .then((entities: EntityModel[]) => {
+      response.json({
+        status: "success",
+        message: `Imported ${entities.length} Entities`,
       });
     })
     .catch((reason: { message: string }) => {

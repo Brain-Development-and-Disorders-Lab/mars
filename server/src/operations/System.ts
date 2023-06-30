@@ -7,7 +7,9 @@ import {
   AttributeModel,
   CollectionModel,
   DeviceModel,
+  EntityExport,
   EntityModel,
+  IEntity,
 } from "@types";
 
 // Utility functions and libraries
@@ -19,7 +21,7 @@ import tmp from "tmp";
 import XLSX from "xlsx";
 
 // Database operations
-import { getDatabase } from "src/database/connection";
+import { getSystem } from "src/database/connection";
 
 // Constants
 const DEVICES_COLLECTION = "devices";
@@ -211,10 +213,44 @@ export class System {
     });
   };
 
+  static mapData = (entityFields: EntityExport, spreadsheetData: any[]): Promise<EntityModel[]> => {
+    return new Promise((resolve, reject) => {
+      const entityOperations = [] as Promise<EntityModel>[];
+      consola.info(entityFields);
+      spreadsheetData.map((row, index: number) => {
+        consola.info(row);
+        if (index > 0) {
+          const entityData: IEntity = {
+            deleted: false,
+            locked: false,
+            name: row[entityFields.name],
+            owner: "Imported",
+            created: dayjs(Date.now()).toISOString(),
+            description: row[entityFields.description],
+            collections: [],
+            associations: {
+              origins: [],
+              products: [],
+            },
+            attributes: [],
+            history: [],
+          };
+          entityOperations.push(Entities.create(entityData));
+        }
+      });
+
+      Promise.all(entityOperations).then((entities: EntityModel[]) => {
+        resolve(entities);
+      }).catch((reason) => {
+        reject(reason);
+      });
+    });
+  };
+
   static getDevice = (id: string): Promise<DeviceModel> => {
     consola.start("Retrieving Device (id):", id.toString());
     return new Promise((resolve, reject) => {
-      getDatabase()
+      getSystem()
         .collection(DEVICES_COLLECTION)
         .findOne({ _id: id }, (error: any, result: any) => {
           if (error) {
@@ -231,7 +267,7 @@ export class System {
   static getDevices = (): Promise<DeviceModel[]> => {
     consola.start("Retrieving Devices");
     return new Promise((resolve, reject) => {
-      getDatabase()
+      getSystem()
         .collection(DEVICES_COLLECTION)
         .find({})
         .toArray((error: any, result: any) => {
