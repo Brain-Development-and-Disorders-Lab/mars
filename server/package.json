@@ -25,7 +25,8 @@
     "mquery": "^5.0.0",
     "nanoid": "^4.0.2",
     "papaparse": "^5.4.1",
-    "tmp": "^0.2.1"
+    "tmp": "^0.2.1",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@jest/globals": "^29.4.3",

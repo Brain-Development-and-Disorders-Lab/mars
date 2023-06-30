@@ -16,6 +16,7 @@ import { consola } from "consola";
 import dayjs from "dayjs";
 import fs from "fs";
 import tmp from "tmp";
+import XLSX from "xlsx";
 
 // Database operations
 import { getDatabase } from "src/database/connection";
@@ -67,70 +68,14 @@ export class System {
   };
 
   static import = (
-    files: any
-  ): Promise<{ status: boolean; message: string }> => {
-    consola.start("Received file for import");
+    files: any,
+    type: "backup" | "spreadsheet"
+  ): Promise<{ status: boolean; message: string; data?: any; }> => {
     return new Promise((resolve, reject) => {
       if (files.file) {
         const receivedFile = files.file;
         const receivedFileData = receivedFile.data as Buffer;
-        consola.info("Received file:", receivedFile.name);
-
-        // Parse the JSON data
-        let parsedFileData;
-        try {
-          parsedFileData = JSON.parse(receivedFileData.toString("utf-8"));
-          consola.success("Parsed JSON file");
-        } catch (error) {
-          consola.error("Error parsing JSON file");
-          reject({ message: "Error importing file, could not parse JSON" });
-          return;
-        }
-
-        // Attempt to determine the file type from the contents
-        let fileType = "unknown" as "unknown" | "backup" | "entity" | "collection" | "attribute";
-
-        // Utility function to check if a file contains fields
-        const checkFields = (parsedFileData: any, fields: string[]) => {
-          for (let field of fields) {
-            if (_.isUndefined(parsedFileData[field])) {
-              return false;
-            }
-          }
-          return true;
-        };
-
-        // Check parsed data
-        if (_.isUndefined(parsedFileData)) {
-          reject({ message: "Error importing file" });
-          return;
-        }
-
-        if (checkFields(parsedFileData, ["timestamp", "entities", "collections", "attributes", "activity"])) {
-          // "backup" file type
-          fileType = "backup";
-          consola.info("Importing backup file");
-        } else if (checkFields(parsedFileData, ["name", "owner", "description", "associations", "collections", "attributes"])) {
-          // "entity" file type
-          fileType = "entity";
-          consola.info("Importing Entity file");
-        } else if (checkFields(parsedFileData, ["name", "description", "owner", "created", "entities", "history"])) {
-          // "collection" file type
-          fileType = "collection";
-          consola.info("Importing Collection file");
-        } else if (checkFields(parsedFileData, ["name", "description", "values"])) {
-          // "attribute" file type
-          fileType = "attribute";
-          consola.info("Importing Attribute file");
-        } else {
-          reject({ message: "Unknown file type, check contents" });
-          return;
-        }
-
-        consola.success("File contents complete");
-
-        // Import each part by checking if it exists, updating if so, otherwise creating
-        consola.start("Importing file contents");
+        consola.start("Received file:", receivedFile.name);
 
         const entityOperations = [] as Promise<EntityModel>[];
         const collectionOperations = [] as Promise<CollectionModel>[];
@@ -148,7 +93,7 @@ export class System {
             }
           } else {
             consola.warn("Not implemented, cannot import individual Entities");
-            reject({ message: "Not implemented, only backups can be imported" });
+            reject({ message: "Not implemented, only backup JSON files can be imported" });
           }
         }
 
@@ -180,41 +125,85 @@ export class System {
           }
         }
 
-        // Run utility functions depending on the type of file
-        if (_.isEqual(fileType, "entity")) {
-          importEntities(parsedFileData);
-        } else if (_.isEqual(fileType, "collection")) {
-          importCollections(parsedFileData);
-        } else if (_.isEqual(fileType, "attribute")) {
-          importAttribute(parsedFileData);
-        } else if (_.isEqual(fileType, "backup")) {
-          importEntities(parsedFileData);
-          importCollections(parsedFileData);
-          importAttribute(parsedFileData);
-        }
+        // Handle a backup file in JSON format
+        if (_.isEqual(type, "backup")) {
+          // Parse the JSON data
+          let parsedFileData;
+          try {
+            parsedFileData = JSON.parse(receivedFileData.toString("utf-8"));
+            consola.success("Parsed backup JSON file");
+          } catch (error) {
+            consola.error("Error parsing backup JSON file");
+            reject({ message: "Error importing file, could not parse JSON content" });
+            return;
+          }
 
-        // Execute all import operations
-        Promise.all([
-          Promise.all(entityOperations),
-          Promise.all(attributeOperations),
-          Promise.all(collectionOperations),
-        ])
-          .then(
-            (results: [EntityModel[], AttributeModel[], CollectionModel[]]) => {
-              consola.success("Imported", results[0].length, "Entities");
-              consola.success("Imported", results[1].length, "Attributes");
-              consola.success("Imported", results[2].length, "Collections");
-              consola.success("Imported file:", receivedFile.name);
-              resolve({
-                status: true,
-                message: "Successfuly imported JSON file",
-              });
+          // Utility function to check if a file contains fields
+          const checkFields = (parsedFileData: any, fields: string[]) => {
+            for (let field of fields) {
+              if (_.isUndefined(parsedFileData[field])) {
+                return false;
+              }
             }
-          )
-          .catch((_error) => {
-            consola.error("Error importing file");
-            reject({ message: "Error importing file" });
-          });
+            return true;
+          };
+
+          // Check parsed data
+          if (_.isUndefined(parsedFileData)) {
+            reject({ message: "Error importing backup JSON file" });
+            return;
+          }
+
+          if (_.isEqual(type, "backup")) {
+            // Check that the backup file contains all required fields
+            if (checkFields(parsedFileData, ["timestamp", "entities", "collections", "attributes", "activity"])) {
+              consola.info("Importing backup JSON file");
+            } else {
+              consola.error("Missing fields in backup JSON file")
+              reject({ message: "Invalid backup JSON file, check contents" });
+              return;
+            }
+          }
+
+          // Import each part by checking if it exists, updating if so, otherwise creating
+          consola.start("Importing backup JSON file contents");
+
+          importEntities(parsedFileData);
+          importCollections(parsedFileData);
+          importAttribute(parsedFileData);
+
+          // Execute all import operations
+          Promise.all([
+            Promise.all(entityOperations),
+            Promise.all(attributeOperations),
+            Promise.all(collectionOperations),
+          ])
+            .then(
+              (results: [EntityModel[], AttributeModel[], CollectionModel[]]) => {
+                consola.success("Imported", results[0].length, "Entities");
+                consola.success("Imported", results[1].length, "Attributes");
+                consola.success("Imported", results[2].length, "Collections");
+                consola.success("Imported file:", receivedFile.name);
+                resolve({
+                  status: true,
+                  message: "Successfuly imported backup JSON file",
+                });
+              }
+            )
+            .catch((_error) => {
+              consola.error("Error importing backup JSON file");
+              reject({ message: "Error importing backup JSON file" });
+            });
+        } else if (_.isEqual(type, "spreadsheet")) {
+          const spreadsheet = XLSX.read(receivedFileData);
+          if (spreadsheet.SheetNames.length > 0) {
+            const primarySheet = spreadsheet.Sheets[spreadsheet.SheetNames[0]];
+            const parsedSheet = XLSX.utils.sheet_to_json(primarySheet);
+            resolve({ status: true, message: "Parsed spreadsheet successfully", data: parsedSheet });
+          } else {
+            reject({ message: "No sheets in spreadsheet" });
+          }
+        }
       } else {
         consola.error("Error importing file");
         reject({ message: "Error importing file" });

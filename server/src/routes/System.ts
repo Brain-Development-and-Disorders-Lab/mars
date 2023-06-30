@@ -18,11 +18,12 @@ SystemRoute.route("/system/backup").get((_request: any, response: any) => {
 
 // Route: Import JSON file
 SystemRoute.route("/system/import").post((request: any, response: any) => {
-  System.import(request.files)
-    .then((result: { status: boolean; message: string }) => {
+  System.import(request.files, request.body.type)
+    .then((result: { status: boolean; message: string; data?: any }) => {
       response.json({
         status: result.status ? "success" : "error",
         message: result.message,
+        data: _.isUndefined(result.data) ? "" : result.data,
       });
     })
     .catch((reason: { message: string }) => {
