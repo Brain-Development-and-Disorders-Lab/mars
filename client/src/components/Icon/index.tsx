@@ -30,6 +30,7 @@ import {
   BsFillExclamationTriangleFill,
   BsFillFileBinaryFill,
   BsFillGearFill,
+  BsGithub,
   BsGlobe,
   BsGridFill,
   BsInfoCircleFill,
@@ -96,6 +97,7 @@ const SYSTEM_ICONS: { [k: string]: IconType } = {
   l_box: SiBox,
   l_labArchives: BsFillBookFill,
   l_globus: BsGlobe,
+  l_gitHub: BsGithub,
 
   // Values
   v_date: BsCalendarWeekFill,

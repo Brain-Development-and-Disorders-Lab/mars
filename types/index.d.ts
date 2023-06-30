@@ -234,6 +234,7 @@ export type IconNames =
   "l_box" |
   "l_labArchives" |
   "l_globus" |
+  "l_github" |
 
   // Values
   "v_date" |

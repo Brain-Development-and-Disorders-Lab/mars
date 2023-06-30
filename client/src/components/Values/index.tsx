@@ -240,17 +240,25 @@ const Values = (props: {
                 _.isEqual(hostname, "wustl.box.com") ||
                 _.isEqual(hostname, "wustl.app.box.com")
               ) {
+                // Link to Box
                 linkTextColor = "white";
                 linkBgColor = "blue.400";
                 linkLogo = <Icon name={"l_box"} size={[5, 5]} />;
               } else if (_.isEqual(hostname, "mynotebook.labarchives.com")) {
+                // Link to LabArchives
                 linkTextColor = "white";
                 linkBgColor = "purple.400";
                 linkLogo = <Icon name={"l_labArchives"} size={[5, 5]} />;
               } else if (_.isEqual(hostname, "app.globus.org")) {
+                // Link to Globus
                 linkTextColor = "white";
                 linkBgColor = "blue.600";
                 linkLogo = <Icon name={"l_globus"} size={[5, 5]} />;
+              } else if (_.isEqual(hostname, "github.com")) {
+                // Link to GitHub
+                linkTextColor = "white";
+                linkBgColor = "black";
+                linkLogo = <Icon name={"l_github"} size={[5, 5]} />;
               }
 
               return (
