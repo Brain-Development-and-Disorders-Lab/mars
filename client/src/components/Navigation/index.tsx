@@ -23,6 +23,12 @@ import {
   ModalBody,
   Input,
   ModalFooter,
+  FormControl,
+  Tabs,
+  Tab,
+  TabPanels,
+  TabPanel,
+  TabList,
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 
@@ -393,59 +399,130 @@ const Navigation = () => {
           <ModalCloseButton />
           <ModalBody>
             <Flex w={"100%"} align={"center"} justify={"center"}>
-              <Flex
-                direction={"column"}
-                minH={"200px"}
-                w={"100%"}
-                align={"center"}
-                justify={"center"}
-                border={"2px"}
-                borderStyle={"dashed"}
-                borderColor={"gray.100"}
-                rounded={"md"}
-              >
-                {_.isEqual(file, {}) ? (
-                  <Flex
-                    direction={"column"}
-                    w={"100%"}
-                    justify={"center"}
-                    align={"center"}
-                  >
-                    <Text fontWeight={"semibold"}>Drag file here</Text>
-                    <Text>or click to upload</Text>
-                  </Flex>
-                ) : (
-                  <Text fontWeight={"semibold"}>{file.name}</Text>
-                )}
-              </Flex>
-              <Input
-                type={"file"}
-                h={"100%"}
-                w={"100%"}
-                position={"absolute"}
-                top={"0"}
-                left={"0"}
-                opacity={"0"}
-                aria-hidden={"true"}
-                accept={"json/*"}
-                onChange={(event: ChangeEvent<HTMLInputElement>) => {
-                  if (event.target.files) {
-                    // Only accept JSON files
-                    if (_.isEqual(event.target.files[0].type, "application/json")) {
-                      setFile(event.target.files[0]);
-                    } else {
-                      toast({
-                        title: "Warning",
-                        status: "warning",
-                        description: "Please upload a JSON file",
-                        duration: 4000,
-                        position: "bottom-right",
-                        isClosable: true,
-                      });
-                    }
-                  }
-                }}
-              />
+              <Tabs variant={"soft-rounded"} w={"100%"}>
+                <TabList>
+                  <Tab>Spreadsheet</Tab>
+                  <Tab>Backup</Tab>
+                </TabList>
+                <TabPanels>
+                  <TabPanel>
+                    <FormControl>
+                      <Flex
+                        direction={"column"}
+                        minH={"200px"}
+                        w={"100%"}
+                        align={"center"}
+                        justify={"center"}
+                        border={"2px"}
+                        borderStyle={"dashed"}
+                        borderColor={"gray.100"}
+                        rounded={"md"}
+                      >
+                        {_.isEqual(file, {}) ? (
+                          <Flex
+                            direction={"column"}
+                            w={"100%"}
+                            justify={"center"}
+                            align={"center"}
+                          >
+                            <Text fontWeight={"semibold"}>Drag spreadsheet here</Text>
+                            <Text>or click to upload</Text>
+                          </Flex>
+                        ) : (
+                          <Text fontWeight={"semibold"}>{file.name}</Text>
+                        )}
+                      </Flex>
+                      <Input
+                        type={"file"}
+                        h={"100%"}
+                        w={"100%"}
+                        position={"absolute"}
+                        top={"0"}
+                        left={"0"}
+                        opacity={"0"}
+                        aria-hidden={"true"}
+                        accept={"json/*"}
+                        onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                          if (event.target.files) {
+                            // Only accept XLSX or CSV files
+                            if (_.includes(["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "text/csv"], event.target.files[0].type)) {
+                              setFile(event.target.files[0]);
+                            } else {
+                              console.info("Type:", event.target.files[0].type);
+                              toast({
+                                title: "Warning",
+                                status: "warning",
+                                description: "Please upload a XLSX or CSV file",
+                                duration: 4000,
+                                position: "bottom-right",
+                                isClosable: true,
+                              });
+                            }
+                          }
+                        }}
+                      />
+                    </FormControl>
+                  </TabPanel>
+
+                  <TabPanel>
+                    <FormControl>
+                      <Flex
+                        direction={"column"}
+                        minH={"200px"}
+                        w={"100%"}
+                        align={"center"}
+                        justify={"center"}
+                        border={"2px"}
+                        borderStyle={"dashed"}
+                        borderColor={"gray.100"}
+                        rounded={"md"}
+                      >
+                        {_.isEqual(file, {}) ? (
+                          <Flex
+                            direction={"column"}
+                            w={"100%"}
+                            justify={"center"}
+                            align={"center"}
+                          >
+                            <Text fontWeight={"semibold"}>Drag backup JSON file here</Text>
+                            <Text>or click to upload</Text>
+                          </Flex>
+                        ) : (
+                          <Text fontWeight={"semibold"}>{file.name}</Text>
+                        )}
+                      </Flex>
+                      <Input
+                        type={"file"}
+                        h={"100%"}
+                        w={"100%"}
+                        position={"absolute"}
+                        top={"0"}
+                        left={"0"}
+                        opacity={"0"}
+                        aria-hidden={"true"}
+                        accept={"json/*"}
+                        onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                          if (event.target.files) {
+                            // Only accept JSON files
+                            if (_.isEqual(event.target.files[0].type, "application/json")) {
+                              setFile(event.target.files[0]);
+                            } else {
+                              toast({
+                                title: "Warning",
+                                status: "warning",
+                                description: "Please upload a JSON file",
+                                duration: 4000,
+                                position: "bottom-right",
+                                isClosable: true,
+                              });
+                            }
+                          }
+                        }}
+                      />
+                    </FormControl>
+                  </TabPanel>
+                </TabPanels>
+              </Tabs>
             </Flex>
           </ModalBody>
 
