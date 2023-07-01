@@ -215,32 +215,49 @@ export class System {
 
   static mapData = (entityFields: EntityExport, spreadsheetData: any[]): Promise<EntityModel[]> => {
     return new Promise((resolve, reject) => {
-      const entityOperations = [] as Promise<EntityModel>[];
-      consola.info(entityFields);
-      spreadsheetData.map((row, index: number) => {
-        consola.info(row);
-        if (index > 0) {
-          const entityData: IEntity = {
-            deleted: false,
-            locked: false,
-            name: row[entityFields.name],
-            owner: "Imported",
-            created: dayjs(Date.now()).toISOString(),
-            description: row[entityFields.description],
-            collections: [],
-            associations: {
-              origins: [],
-              products: [],
-            },
-            attributes: [],
-            history: [],
-          };
-          entityOperations.push(Entities.create(entityData));
-        }
+      const entities = [] as IEntity[];
+      spreadsheetData.map((row) => {
+        entities.push({
+          deleted: false,
+          locked: false,
+          name: row[entityFields.name],
+          owner: entityFields.owner,
+          created: dayjs(Date.now()).toISOString(),
+          description: row[entityFields.description],
+          collections: [],
+          associations: {
+            origins: [],
+            products: [],
+          },
+          attributes: [],
+          history: [],
+        });
       });
 
-      Promise.all(entityOperations).then((entities: EntityModel[]) => {
-        resolve(entities);
+      Promise.all(entities.map((entity) => {
+        // Create all Entities
+        return Entities.create(entity);
+      })).then((entities: EntityModel[]) => {
+        // Add all Entities to the Collection (if specified)
+        if (!_.isEqual(entityFields.collections, "")) {
+          Collections.getOne(entityFields.collections).then((collection) => {
+            // Get existing and new Entities
+            const existingEntities = collection.entities;
+            const additionalEntities = entities.map((entity) => {
+              return entity._id;
+            });
+
+            // Collate Entities and update Collection
+            const updatedCollection = _.cloneDeep(collection);
+            updatedCollection.entities = [...existingEntities, ...additionalEntities];
+
+            Collections.update(updatedCollection).then((_collection) => {
+              resolve(entities);
+            });
+          });
+        } else {
+          resolve(entities);
+        }
       }).catch((reason) => {
         reject(reason);
       });

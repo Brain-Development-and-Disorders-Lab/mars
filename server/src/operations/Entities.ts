@@ -1,5 +1,5 @@
 // Utility libraries
-import _ from "lodash";
+import _, { reject } from "lodash";
 import consola from "consola";
 
 // Utility functions
@@ -73,7 +73,7 @@ export class Entities {
 
           if (entity.collections.length > 0) {
             // If this Entity has been added to Collections, add the Entity to each Collection
-            entity.collections.map((collection: string) => {
+            entity.collections.forEach((collection: string) => {
               operations.push(Collections.addEntity(collection, entity._id));
             });
           }
@@ -96,6 +96,9 @@ export class Entities {
           Promise.all(operations).then((_result) => {
             consola.success("Created Entity:", entity._id, entity.name);
             resolve(entity);
+          }).catch((_error) => {
+            consola.error("Error creating Entity:", entity._id, entity.name);
+            reject("Error creating Entity");
           });
         });
     });

@@ -180,11 +180,12 @@ export class Collections {
           if (error) {
             throw error;
           }
+          consola.info("Collection:", result);
 
           // Update the collection to include the Entity
           const updatedValues = {
             $set: {
-              entities: [...result.entities, entity],
+              entities: _.concat(result.entities, entity),
             },
           };
 
@@ -201,11 +202,11 @@ export class Collections {
                   "Added Entity",
                   entity.toString(),
                   "to Collection",
-                  collection.toString()
+                  result.name
                 );
 
                 // Resolve the Promise
-                resolve(collection);
+                resolve(result._id);
               }
             );
         });
