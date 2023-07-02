@@ -65,6 +65,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { deleteData, getData, postData } from "@database/functions";
 import _ from "lodash";
 import dayjs from "dayjs";
+import DataTable from "@components/DataTable";
 
 const Collection = () => {
   const { id } = useParams();
@@ -162,18 +163,6 @@ const Collection = () => {
     ]);
     setSelectedEntities([]);
     onClose();
-  };
-
-  /**
-   * Callback function to remove the Entity from the Collection, and refresh the page
-   * @param {{ collection: string, entity: string }} data ID of the Collection and the ID of the Entity to remove
-   */
-  const removeEntity = (id: string): void => {
-    setCollectionEntities(
-      collectionEntities.filter((entity) => {
-        entity !== id;
-      })
-    );
   };
 
   /**
@@ -303,6 +292,33 @@ const Collection = () => {
         setIsLoaded(true);
       });
   };
+
+  // const columnHelper = createColumnHelper<string>();
+  const columns = [
+    {
+      id: (info: any) => info.row.original,
+      cell: (info: any) => <Linky id={info.row.original} type={"entities"} />,
+      header: "Name",
+    },
+    {
+      id: "view",
+      cell: (info: any) => {
+        return (
+          <Flex w={"100%"} justify={"end"}>
+            <Button
+              key={`view-entity-${info.row.original}`}
+              colorScheme={"blackAlpha"}
+              rightIcon={<Icon name={"c_right"} />}
+              onClick={() => navigate(`/entities/${info.row.original}`)}
+            >
+              View
+            </Button>
+          </Flex>
+        );
+      },
+      header: "",
+    },
+  ];
 
   return (
     <Content vertical={isError || !isLoaded}>
@@ -498,58 +514,7 @@ const Collection = () => {
                 </Flex>
                 <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
                   {collectionEntities && collectionEntities.length > 0 ? (
-                    <TableContainer>
-                      <Table variant={"simple"} colorScheme={"blackAlpha"}>
-                        <Thead>
-                          <Tr>
-                            <Th>Name</Th>
-                            <Th></Th>
-                          </Tr>
-                        </Thead>
-                        <Tbody>
-                          {collectionEntities.map((entity) => {
-                            return (
-                              <Tr key={entity}>
-                                <Td>
-                                  <Linky id={entity} type={"entities"} />
-                                </Td>
-                                <Td>
-                                  <Flex justify={"right"} gap={"6"}>
-                                    {!editing && (
-                                      <Button
-                                        key={`view-collection-${entity}`}
-                                        colorScheme={"blackAlpha"}
-                                        rightIcon={<Icon name={"c_right"} />}
-                                        onClick={() =>
-                                          navigate(`/entities/${entity}`)
-                                        }
-                                      >
-                                        View
-                                      </Button>
-                                    )}
-
-                                    {editing && (
-                                      <Button
-                                        key={`remove-${entity}`}
-                                        rightIcon={<Icon name={"delete"} />}
-                                        colorScheme={"red"}
-                                        onClick={() => {
-                                          if (id) {
-                                            removeEntity(entity);
-                                          }
-                                        }}
-                                      >
-                                        Remove
-                                      </Button>
-                                    )}
-                                  </Flex>
-                                </Td>
-                              </Tr>
-                            );
-                          })}
-                        </Tbody>
-                      </Table>
-                    </TableContainer>
+                    <DataTable data={collectionEntities} columns={columns} visibleColumns={{}} viewOnly={!editing} setData={setCollectionEntities} hideSelection={!editing} />
                   ) : (
                     <Text>This Collection is empty.</Text>
                   )}
