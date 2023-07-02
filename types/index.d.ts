@@ -168,6 +168,17 @@ export type EntityExport = {
   [key: string]: string;
 };
 
+export type EntityImport = {
+  // Specific details
+  name: string;
+  created: string;
+  owner: string;
+  description: string;
+  collections: string;
+  origins: {id: string, name: string}[];
+  products: {id: string, name: string}[];
+};
+
 // Activity types
 export type IActivity = {
   timestamp: Date;
