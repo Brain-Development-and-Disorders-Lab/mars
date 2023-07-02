@@ -218,7 +218,7 @@ const Entity = () => {
 
         // Store data and signal data retrieval being completed
         setEntityData(response);
-        setEntityDescription(response.description);
+        setEntityDescription(response.description || "");
         setEntityCollections(response.collections);
         setEntityOrigins(response.associations.origins);
         setEntityProducts(response.associations.products);
@@ -400,7 +400,7 @@ const Entity = () => {
       .finally(() => {
         // Apply updated state
         setEntityData(updateData);
-        setEntityDescription(updateData.description);
+        setEntityDescription(updateData.description || "");
         setEntityCollections(updateData.collections);
         setEntityOrigins(updateData.associations.origins);
         setEntityProducts(updateData.associations.products);
@@ -461,7 +461,7 @@ const Entity = () => {
 
         // Apply updated state
         setEntityData(updateData);
-        setEntityDescription(updateData.description);
+        setEntityDescription(updateData.description || "");
         setEntityCollections(updateData.collections);
         setEntityOrigins(updateData.associations.origins);
         setEntityProducts(updateData.associations.products);
@@ -898,7 +898,7 @@ const Entity = () => {
                             <Textarea
                               value={entityDescription}
                               onChange={(event) => {
-                                setEntityDescription(event.target.value);
+                                setEntityDescription(event.target.value || "");
                               }}
                               disabled={!editing}
                             />
