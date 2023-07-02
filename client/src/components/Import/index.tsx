@@ -26,6 +26,7 @@ import {
   FormLabel,
   Tag,
   TagCloseButton,
+  Link,
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 import Error from "@components/Error";
@@ -178,16 +179,25 @@ const Import = (props: {
     };
 
     postData(`/system/import/mapping`, mappingData)
-      .then((response: { status: boolean; message: string; data?: any; }) => {
+      .then((_response: { status: boolean; message: string; data?: any; }) => {
+        onMappingClose();
         toast({
           title: "Success",
           status: "success",
-          description: response.message,
-          duration: 4000,
-          position: "bottom-right",
+          description:
+            <Flex w={"100%"} direction={"row"} gap={"4"}>
+              Updated data available.
+              <Link onClick={() => window.location.reload()}>
+                <Flex direction={"row"} gap={"1"} align={"center"}>
+                  <Text fontWeight={"semibold"}>Reload</Text>
+                  <Icon name={"reload"} />
+                </Flex>
+              </Link>
+            </Flex>,
+          duration: null,
+          position: "bottom",
           isClosable: true,
         });
-        onMappingClose();
       })
       .catch((error: { message: string }) => {
         toast({
@@ -233,7 +243,7 @@ const Import = (props: {
     );
   };
 
-  const getSelectEntitiesComponent = (value: {name: string, id: string}, setValue: React.SetStateAction<any>) => {
+  const getSelectEntitiesComponent = (value: {name: string, id: string}, setValue: React.SetStateAction<any>, disabled?: boolean) => {
     return (
       <Select
         placeholder={"Select Entity"}
@@ -245,6 +255,7 @@ const Import = (props: {
             setOriginsField([...originsField, selection]);
           }
         }}
+        disabled={_.isUndefined(disabled) ? false : disabled}
       >
         {entities.map((entity) => {
           return (
@@ -494,7 +505,7 @@ const Import = (props: {
                       </FormControl>
                       <FormControl>
                         <FormLabel>Products</FormLabel>
-                        {getSelectEntitiesComponent(selectedProduct, setSelectedProduct)}
+                        {getSelectEntitiesComponent(selectedProduct, setSelectedProduct, true)}
                         {productsField.map((product) => {
                           return (
                             <Tag key={product.id}>
