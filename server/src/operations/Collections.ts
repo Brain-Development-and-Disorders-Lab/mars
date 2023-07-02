@@ -213,6 +213,52 @@ export class Collections {
     });
   };
 
+  static addEntities = (collection: string, entities: string[]): Promise<string> => {
+    consola.start(
+      "Adding",
+      entities.length,
+      "Entities to Collection",
+      collection.toString()
+    );
+    return new Promise((resolve, _reject) => {
+      getDatabase()
+        .collection(COLLECTIONS)
+        .findOne({ _id: collection }, (error: any, result: any) => {
+          if (error) {
+            throw error;
+          }
+
+          // Update the collection to include the Entity
+          const updatedValues = {
+            $set: {
+              entities: _.uniq(_.concat(result.entities, entities)),
+            },
+          };
+
+          getDatabase()
+            .collection(COLLECTIONS)
+            .updateOne(
+              { _id: collection },
+              updatedValues,
+              (error: any, _response: any) => {
+                if (error) {
+                  throw error;
+                }
+                consola.start(
+                  "Added",
+                  entities.length,
+                  "Entities to Collection",
+                  collection.toString()
+                );
+
+                // Resolve the Promise
+                resolve(result._id);
+              }
+            );
+        });
+    });
+  };
+
   static removeEntity = (
     collection: string,
     entity: string
