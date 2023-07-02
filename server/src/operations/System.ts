@@ -7,7 +7,7 @@ import {
   AttributeModel,
   CollectionModel,
   DeviceModel,
-  EntityExport,
+  EntityImport,
   EntityModel,
   IEntity,
 } from "@types";
@@ -200,7 +200,7 @@ export class System {
           const spreadsheet = XLSX.read(receivedFileData);
           if (spreadsheet.SheetNames.length > 0) {
             const primarySheet = spreadsheet.Sheets[spreadsheet.SheetNames[0]];
-            const parsedSheet = XLSX.utils.sheet_to_json(primarySheet);
+            const parsedSheet = XLSX.utils.sheet_to_json(primarySheet, { defval: "" });
             resolve({ status: true, message: "Parsed spreadsheet successfully", data: parsedSheet });
           } else {
             reject({ message: "No sheets in spreadsheet" });
@@ -213,7 +213,7 @@ export class System {
     });
   };
 
-  static mapData = (entityFields: EntityExport, spreadsheetData: any[]): Promise<EntityModel[]> => {
+  static mapData = (entityFields: EntityImport, spreadsheetData: any[]): Promise<EntityModel[]> => {
     return new Promise((resolve, reject) => {
       const entities = [] as IEntity[];
       spreadsheetData.map((row) => {
@@ -238,26 +238,39 @@ export class System {
         // Create all Entities
         return Entities.create(entity);
       })).then((entities: EntityModel[]) => {
+        // Additional operations
+        const operations = [] as Promise<any>[];
+
         // Add all Entities to the Collection (if specified)
         if (!_.isEqual(entityFields.collections, "")) {
-          Collections.getOne(entityFields.collections).then((collection) => {
-            // Get existing and new Entities
-            const existingEntities = collection.entities;
-            const additionalEntities = entities.map((entity) => {
-              return entity._id;
-            });
+          operations.push(Collections.addEntities(entityFields.collections, entities.map((entity) => entity._id)));
 
-            // Collate Entities and update Collection
-            const updatedCollection = _.cloneDeep(collection);
-            updatedCollection.entities = [...existingEntities, ...additionalEntities];
-
-            Collections.update(updatedCollection).then((_collection) => {
-              resolve(entities);
-            });
-          });
-        } else {
-          resolve(entities);
+          // Add Collection to each Entity
+          entities.map((entity) => {
+            operations.push(Entities.addCollection(entity._id, entityFields.collections));
+          })
         }
+
+        // Add Products to Entities (if Origins specified)
+        if (!_.isEmpty(entityFields.origins)) {
+          const minimalEntities = entities.map((entity) => {
+            return { id: entity._id, name: entity.name };
+          });
+
+          // Add all Products to each Origin
+          entityFields.origins.map((origin: { id: string, name: string }) => {
+            operations.push(Entities.addProducts(origin, minimalEntities));
+          });
+
+          // Add all Origins to each Product
+          minimalEntities.map((entity) => {
+            operations.push(Entities.addOrigins(entity, entityFields.origins));
+          });
+        }
+
+        Promise.all(operations).then((_result) => {
+          resolve(entities);
+        });
       }).catch((reason) => {
         reject(reason);
       });
