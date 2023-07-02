@@ -24,6 +24,7 @@ import {
   TabList,
   Select,
   FormLabel,
+  Tag,
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 import Error from "@components/Error";
@@ -81,23 +82,31 @@ const Import = (props: {
     postData(`/system/import`, formData)
       .then((response: { status: boolean; message: string; data?: any; }) => {
         if (_.isEqual(response.status, "success")) {
-          toast({
-            title: "Success",
-            status: "success",
-            description: "Successfully imported file.",
-            duration: 4000,
-            position: "bottom-right",
-            isClosable: true,
-          });
-
           // Reset file upload state
           setFile({} as File);
           props.onClose();
 
           if (!_.isUndefined(response.data)) {
+            toast({
+              title: "Success",
+              status: "success",
+              description: "Successfully read file.",
+              duration: 4000,
+              position: "bottom-right",
+              isClosable: true,
+            });
             setSpreadsheetData(response.data);
             setColumns(Object.keys(response.data[0]));
             setupMapping();
+          } else {
+            toast({
+              title: "Success",
+              status: "success",
+              description: "Successfully imported file.",
+              duration: 4000,
+              position: "bottom-right",
+              isClosable: true,
+            });
           }
         } else {
           toast({
@@ -418,36 +427,48 @@ const Import = (props: {
               </ModalContent>
             </Modal>
 
-            <Modal isOpen={isMappingOpen} onClose={onMappingClose}>
+            <Modal isOpen={isMappingOpen} onClose={onMappingClose} size={"2xl"}>
               <ModalOverlay />
               <ModalContent>
-                <ModalHeader>Map Spreadsheet Data</ModalHeader>
+                <ModalHeader>Import Spreadsheet Data</ModalHeader>
                 <ModalBody>
                   <Flex w={"100%"} direction={"column"} gap={"4"}>
-                    <Flex direction={"row"} gap={"4"}>
+                    <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
                       <Text fontWeight={"semibold"}>Columns:</Text>
-                      <Text>{columns.join(", ")}</Text>
+                      {columns.map((column) => {
+                        return <Tag colorScheme={"teal"}>{column}</Tag>;
+                      })}
                     </Flex>
-                    <FormControl>
-                      <FormLabel>Name</FormLabel>
-                      {getSelectComponent(nameField, setNameField)}
-                    </FormControl>
-                    <FormControl>
-                      <FormLabel>Description</FormLabel>
-                      {getSelectComponent(descriptionField, setDescriptionField)}
-                    </FormControl>
-                    <FormControl>
-                      <FormLabel>Owner</FormLabel>
-                      <Input value={ownerField} disabled />
-                    </FormControl>
-                    <FormControl>
-                      <FormLabel>Collection</FormLabel>
-                      {getSelectCollectionComponent(collectionField, setCollectionField)}
-                    </FormControl>
-                    <FormControl>
-                      <FormLabel>Origin</FormLabel>
-                      {getSelectEntityComponent(originField, setOriginField)}
-                    </FormControl>
+                    <Flex direction={"row"} gap={"4"}>
+                      <FormControl>
+                        <FormLabel>Name</FormLabel>
+                        {getSelectComponent(nameField, setNameField)}
+                      </FormControl>
+                      <FormControl>
+                        <FormLabel>Description</FormLabel>
+                        {getSelectComponent(descriptionField, setDescriptionField)}
+                      </FormControl>
+                    </Flex>
+                    <Flex direction={"row"} gap={"4"}>
+                      <FormControl>
+                        <FormLabel>Owner</FormLabel>
+                        <Input value={ownerField} disabled />
+                      </FormControl>
+                      <FormControl>
+                        <FormLabel>Collection</FormLabel>
+                        {getSelectCollectionComponent(collectionField, setCollectionField)}
+                      </FormControl>
+                    </Flex>
+                    <Flex direction={"row"} gap={"4"}>
+                      <FormControl>
+                        <FormLabel>Origin</FormLabel>
+                        {getSelectEntityComponent(originField, setOriginField)}
+                      </FormControl>
+                      <FormControl>
+                        <FormLabel>Products</FormLabel>
+                        {getSelectEntityComponent(originField, setOriginField)}
+                      </FormControl>
+                    </Flex>
                   </Flex>
                 </ModalBody>
 
