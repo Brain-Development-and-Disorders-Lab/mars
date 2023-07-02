@@ -109,11 +109,11 @@ const DataTable = (props: DataTableProps) => {
   const onDeleteRows = () => {
     const idToRemove: IValue<any>[] = [];
     for (let rowIndex of Object.keys(selectedRows)) {
-      idToRemove.push(table.getRow(rowIndex).original.identifier);
+      idToRemove.push(table.getRow(rowIndex).original);
     }
 
     const updatedCollection = props.data.filter((value) => {
-      return !idToRemove.includes(value.identifier);
+      return !idToRemove.includes(value);
     });
 
     if (props.setData) {
