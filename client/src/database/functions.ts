@@ -27,7 +27,6 @@ export const getData = (path: string): Promise<any> => {
             consola.error("GET:", path);
             reject("Response contents were empty");
           } else {
-            consola.success("GET:", path);
             resolve(parsed);
           }
         });
@@ -56,7 +55,6 @@ export const postData = async (path: string, data: any): Promise<any> => {
           if (!_.isEqual(response.statusText, "OK")) {
             reject("Invalid response");
           } else {
-            consola.success("POST:", path);
             resolve(response.data);
           }
         } else {
@@ -83,7 +81,6 @@ export const deleteData = async (path: string): Promise<any> => {
   })
     .then((response) => {
       if (_.isEqual(response.ok, true)) {
-        consola.success("DELETE:", path);
         return { status: "success" };
       }
       throw new Error("Failed to DELETE");
