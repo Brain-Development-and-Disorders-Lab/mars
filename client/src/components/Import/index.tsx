@@ -25,12 +25,13 @@ import {
   Select,
   FormLabel,
   Tag,
+  TagCloseButton,
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 import Error from "@components/Error";
 
 // Custom and existing types
-import { CollectionModel, EntityExport, EntityModel } from "@types";
+import { CollectionModel, EntityImport, EntityModel } from "@types";
 
 // Utility functions and libraries
 import { getData, postData } from "@database/functions";
@@ -69,7 +70,14 @@ const Import = (props: {
   const [descriptionField, setDescriptionField] = useState("");
   const [ownerField, _setOwnerField] = useState(token.username);
   const [collectionField, setCollectionField] = useState("");
-  const [originField, setOriginField] = useState("");
+  const [selectedOrigin, setSelectedOrigin] = useState({} as { name: string, id: string });
+  const [originsField, setOriginsField] = useState(
+    [] as { name: string; id: string }[]
+  );
+  const [selectedProduct, setSelectedProduct] = useState({} as { name: string, id: string });
+  const [productsField, setProductsField] = useState(
+    [] as { name: string; id: string }[]
+  );
 
   const performImport = () => {
     setIsUploading(true);
@@ -156,15 +164,15 @@ const Import = (props: {
   };
 
   const performMapping = () => {
-    const mappingData: { fields: EntityExport, data: any[] } = {
+    const mappingData: { fields: EntityImport, data: any[] } = {
       fields: {
         name: nameField,
         description: descriptionField,
         created: dayjs(Date.now()).toISOString(),
         owner: token.username,
         collections: collectionField,
-        products: "",
-        origins: "",
+        origins: originsField,
+        products: productsField,
       },
       data: spreadsheetData,
     };
@@ -225,12 +233,18 @@ const Import = (props: {
     );
   };
 
-  const getSelectEntityComponent = (value: string, setValue: React.SetStateAction<any>) => {
+  const getSelectEntitiesComponent = (value: {name: string, id: string}, setValue: React.SetStateAction<any>) => {
     return (
       <Select
         placeholder={"Select Entity"}
-        value={value}
-        onChange={(event) => setValue(event.target.value)}
+        value={value.id}
+        onChange={(event) => {
+          const selection = { id: event.target.value, name: event.target.options[event.target.selectedIndex].label };
+          setValue(selection);
+          if (!_.includes(originsField.map((origin) => origin.id), selection.id)) {
+            setOriginsField([...originsField, selection]);
+          }
+        }}
       >
         {entities.map((entity) => {
           return (
@@ -436,11 +450,11 @@ const Import = (props: {
                     <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
                       <Text fontWeight={"semibold"}>Columns:</Text>
                       {columns.map((column) => {
-                        return <Tag colorScheme={"teal"}>{column}</Tag>;
+                        return <Tag key={column} colorScheme={"teal"}>{column}</Tag>;
                       })}
                     </Flex>
                     <Flex direction={"row"} gap={"4"}>
-                      <FormControl>
+                      <FormControl isRequired isInvalid={_.isEqual(nameField, "")}>
                         <FormLabel>Name</FormLabel>
                         {getSelectComponent(nameField, setNameField)}
                       </FormControl>
@@ -462,11 +476,35 @@ const Import = (props: {
                     <Flex direction={"row"} gap={"4"}>
                       <FormControl>
                         <FormLabel>Origin</FormLabel>
-                        {getSelectEntityComponent(originField, setOriginField)}
+                        <Flex direction={"column"} gap={"4"}>
+                          {getSelectEntitiesComponent(selectedOrigin, setSelectedOrigin)}
+                          <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
+                            {originsField.map((origin) => {
+                              return (
+                                <Tag key={origin.id}>
+                                  {origin.name}
+                                  <TagCloseButton onClick={() => {
+                                    setOriginsField([...originsField.filter((existingOrigin) => !_.isEqual(existingOrigin.id, origin.id))]);
+                                  }} />
+                                </Tag>
+                              );
+                            })}
+                          </Flex>
+                        </Flex>
                       </FormControl>
                       <FormControl>
                         <FormLabel>Products</FormLabel>
-                        {getSelectEntityComponent(originField, setOriginField)}
+                        {getSelectEntitiesComponent(selectedProduct, setSelectedProduct)}
+                        {productsField.map((product) => {
+                          return (
+                            <Tag key={product.id}>
+                              {product.name}
+                              <TagCloseButton onClick={() => {
+                                setProductsField([...productsField.filter((existingProduct) => !_.isEqual(existingProduct.id, product.id))]);
+                              }} />
+                            </Tag>
+                          );
+                        })}
                       </FormControl>
                     </Flex>
                   </Flex>
@@ -488,10 +526,11 @@ const Import = (props: {
                     <Button
                       colorScheme={"green"}
                       rightIcon={<Icon name="check" />}
-                      variant={"outline"}
+                      variant={"solid"}
                       onClick={() => {
                         performMapping();
                       }}
+                      disabled={_.isEqual(nameField, "")}
                     >
                       Apply
                     </Button>
