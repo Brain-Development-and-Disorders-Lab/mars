@@ -91,7 +91,13 @@ export class System {
             // Run differently if a backup file
             const importedEntities = parsedFileData["entities"] as EntityModel[];
             for (let entity of importedEntities) {
-              entityOperations.push(Entities.update(entity));
+              Entities.exists(entity._id).then((exists) => {
+                if (exists) {
+                  entityOperations.push(Entities.update(entity));
+                } else {
+                  entityOperations.push(Entities.restore(entity));
+                }
+              });
             }
           } else {
             consola.warn("Not implemented, cannot import individual Entities");
@@ -103,12 +109,18 @@ export class System {
         const importCollections = (parsedFileData: any) => {
           // Import Collections
           consola.start("Importing Entities");
-          if (parsedFileData["collections"]) {
+          if (!_.isUndefined(parsedFileData["collections"])) {
             const importedCollections = parsedFileData[
               "collections"
             ] as CollectionModel[];
             for (let collection of importedCollections) {
-              collectionOperations.push(Collections.update(collection));
+              Collections.exists(collection._id).then((exists) => {
+                if (exists) {
+                  collectionOperations.push(Collections.update(collection));
+                } else {
+                  collectionOperations.push(Collections.restore(collection));
+                }
+              });
             }
           }
         }
@@ -117,12 +129,18 @@ export class System {
         const importAttribute = (parsedFileData: any) => {
           // Import Attributes
           consola.start("Importing Attributes");
-          if (parsedFileData["attributes"]) {
+          if (!_.isUndefined(parsedFileData["attributes"])) {
             const importedAttributes = parsedFileData[
               "attributes"
             ] as AttributeModel[];
             for (let attribute of importedAttributes) {
-              attributeOperations.push(Attributes.update(attribute));
+              Attributes.exists(attribute._id).then((exists) => {
+                if (exists) {
+                  attributeOperations.push(Attributes.update(attribute));
+                } else {
+                  attributeOperations.push(Attributes.restore(attribute));
+                }
+              });
             }
           }
         }
@@ -177,14 +195,14 @@ export class System {
           // Execute all import operations
           Promise.all([
             Promise.all(entityOperations),
-            Promise.all(attributeOperations),
             Promise.all(collectionOperations),
+            Promise.all(attributeOperations),
           ])
             .then(
-              (results: [EntityModel[], AttributeModel[], CollectionModel[]]) => {
+              (results: [EntityModel[], CollectionModel[], AttributeModel[]]) => {
                 consola.success("Imported", results[0].length, "Entities");
-                consola.success("Imported", results[1].length, "Attributes");
-                consola.success("Imported", results[2].length, "Collections");
+                consola.success("Imported", results[1].length, "Collections");
+                consola.success("Imported", results[2].length, "Attributes");
                 consola.success("Imported file:", receivedFile.name);
                 resolve({
                   status: true,
