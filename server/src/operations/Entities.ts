@@ -21,6 +21,28 @@ const ENTITIES_COLLECTION = "entities";
 
 export class Entities {
   /**
+   * Check if an Entity exists in the system
+   * @param {string} id the Entity identifier
+   * @return {boolean}
+   */
+  static exists = (id: string): Promise<boolean> => {
+    consola.start("Checking if Entity (id):", id.toString(), "exists");
+    return new Promise((resolve, _reject) => {
+      getDatabase()
+        .collection(ENTITIES_COLLECTION)
+        .findOne({ _id: id }, (_error: any, result: any) => {
+          if (_.isNull(result)) {
+            consola.warn("Entity (id):", id.toString(), "does not exist");
+            resolve(false);
+          }
+
+          consola.success("Entity (id):", id.toString(), "exists");
+          resolve(true);
+        });
+    });
+  };
+
+  /**
    * Create a new Entity
    * @param {any} entity all data associated with the new Entity
    * @return {Promise<EntityModel>}
@@ -342,6 +364,45 @@ export class Entities {
                   resolve(updatedEntity);
                 }
               );
+          });
+        });
+    });
+  };
+
+  static restore = (entity: EntityModel): Promise<EntityModel> => {
+    consola.start("Restoring Entity:", entity.name);
+    return new Promise((resolve, _reject) => {
+      getDatabase()
+        .collection(ENTITIES_COLLECTION)
+        .insertOne(entity as any, (error: any, _result: any) => {
+          if (error) {
+            throw error;
+          }
+
+          // Database operations to perform outside of creating a new Entity
+          const operations: Promise<any>[] = [];
+
+          // Add Update operation
+          operations.push(
+            Activity.create({
+              timestamp: new Date(Date.now()),
+              type: "create",
+              details: "Restored Entity",
+              target: {
+                type: "entities",
+                id: entity._id,
+                name: entity.name,
+              },
+            })
+          );
+
+          // Resolve all operations then resolve overall Promise
+          Promise.all(operations).then((_result) => {
+            consola.success("Restored Entity:", entity._id, entity.name);
+            resolve(entity);
+          }).catch((_error) => {
+            consola.error("Error restoring Entity:", entity._id, entity.name);
+            reject("Error restoring Entity");
           });
         });
     });

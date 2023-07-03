@@ -15,6 +15,28 @@ const COLLECTIONS = "collections";
 
 export class Collections {
   /**
+   * Check if a Collection exists in the system
+   * @param id the Collection identifier
+   * @return {boolean}
+   */
+  static exists = (id: string): Promise<boolean> => {
+    consola.start("Checking if Collection (id):", id.toString(), "exists");
+    return new Promise((resolve, _reject) => {
+      getDatabase()
+        .collection(COLLECTIONS)
+        .findOne({ _id: id }, (_error: any, result: any) => {
+          if (_.isNull(result)) {
+            consola.warn("Collection (id):", id.toString(), "does not exist");
+            resolve(false);
+          }
+
+          consola.success("Collection (id):", id.toString(), "exists");
+          resolve(true);
+        });
+    });
+  };
+
+  /**
    * Create a new Collection
    * @param {any} collection all data associated with the new Collection
    * @return {Promise<CollectionModel>}
@@ -162,6 +184,53 @@ export class Collections {
                 });
               }
             );
+        });
+    });
+  };
+
+
+  /**
+   * Create a new Collection
+   * @param {any} collection all data associated with the new Collection
+   * @return {Promise<CollectionModel>}
+   */
+  static restore = (collection: any): Promise<CollectionModel> => {
+    consola.start("Restoring Collection:", collection.name);
+    // Push data to database
+    return new Promise((resolve, _reject) => {
+      getDatabase()
+        .collection(COLLECTIONS)
+        .insertOne(collection, (error: any, _result: any) => {
+          if (error) {
+            throw error;
+          }
+
+          // Database operations to perform
+          const operations: Promise<any>[] = [];
+
+          // Add Update operation
+          operations.push(
+            Activity.create({
+              timestamp: new Date(Date.now()),
+              type: "create",
+              details: "Created new Collection",
+              target: {
+                type: "collections",
+                id: collection._id,
+                name: collection.name,
+              },
+            })
+          );
+
+          // Resolve all operations then resolve overall Promise
+          Promise.all(operations).then((_result) => {
+            consola.success(
+              "Restored Collection:",
+              collection._id,
+              collection.name
+            );
+            resolve(collection as CollectionModel);
+          });
         });
     });
   };

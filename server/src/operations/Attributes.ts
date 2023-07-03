@@ -14,6 +14,28 @@ const ATTRIBUTES = "attributes";
 
 export class Attributes {
   /**
+   * Check if an Attribute exists in the system
+   * @param id the Attribute identifier
+   * @return {boolean}
+   */
+  static exists = (id: string): Promise<boolean> => {
+    consola.start("Checking if Attribute (id):", id.toString(), "exists");
+    return new Promise((resolve, _reject) => {
+      getDatabase()
+        .collection(ATTRIBUTES)
+        .findOne({ _id: id }, (_error: any, result: any) => {
+          if (_.isNull(result)) {
+            consola.warn("Attribute (id):", id.toString(), "does not exist");
+            resolve(false);
+          }
+
+          consola.success("Attribute (id):", id.toString(), "exists");
+          resolve(true);
+        });
+    });
+  };
+
+  /**
    * Create a new Attribute
    * @param {any} attribute all data associated with the new Attribute
    * @return {Promise<AttributeModel>}
@@ -120,6 +142,52 @@ export class Attributes {
                 });
               }
             );
+        });
+    });
+  };
+
+  /**
+   * Create a new Attribute
+   * @param {any} attribute all data associated with the new Attribute
+   * @return {Promise<AttributeModel>}
+   */
+  static restore = (attribute: any): Promise<AttributeModel> => {
+    consola.start("Restoring Attribute:", attribute.name);
+    return new Promise((resolve, _reject) => {
+      // Push data to database
+      getDatabase()
+        .collection(ATTRIBUTES)
+        .insertOne(attribute, (error: any, _result: any) => {
+          if (error) {
+            throw error;
+          }
+
+          // Database operations to perform
+          const operations: Promise<any>[] = [];
+
+          // Add Update operation
+          operations.push(
+            Activity.create({
+              timestamp: new Date(Date.now()),
+              type: "create",
+              details: "Restored Attribute",
+              target: {
+                type: "attributes",
+                id: attribute._id,
+                name: attribute.name,
+              },
+            })
+          );
+
+          // Resolve all operations then resolve overall Promise
+          Promise.all(operations).then((_result) => {
+            consola.success(
+              "Restored Attribute:",
+              attribute._id,
+              attribute.name
+            );
+            resolve(attribute as AttributeModel);
+          });
         });
     });
   };
