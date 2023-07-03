@@ -72,7 +72,7 @@ export class System {
   static import = (
     files: any,
     type: "backup" | "spreadsheet"
-  ): Promise<{ status: boolean; message: string; data?: any; }> => {
+  ): Promise<{ status: boolean; message: string; data?: any }> => {
     return new Promise((resolve, reject) => {
       if (files.file) {
         const receivedFile = files.file;
@@ -89,7 +89,9 @@ export class System {
           consola.start("Importing Entities");
           if (parsedFileData["entities"]) {
             // Run differently if a backup file
-            const importedEntities = parsedFileData["entities"] as EntityModel[];
+            const importedEntities = parsedFileData[
+              "entities"
+            ] as EntityModel[];
             for (let entity of importedEntities) {
               Entities.exists(entity._id).then((exists) => {
                 if (exists) {
@@ -101,9 +103,12 @@ export class System {
             }
           } else {
             consola.warn("Not implemented, cannot import individual Entities");
-            reject({ message: "Not implemented, only backup JSON files can be imported" });
+            reject({
+              message:
+                "Not implemented, only backup JSON files can be imported",
+            });
           }
-        }
+        };
 
         // Utility function to import Collections
         const importCollections = (parsedFileData: any) => {
@@ -123,7 +128,7 @@ export class System {
               });
             }
           }
-        }
+        };
 
         // Utility function to import Attributes
         const importAttribute = (parsedFileData: any) => {
@@ -143,7 +148,7 @@ export class System {
               });
             }
           }
-        }
+        };
 
         // Handle a backup file in JSON format
         if (_.isEqual(type, "backup")) {
@@ -154,7 +159,9 @@ export class System {
             consola.success("Parsed backup JSON file");
           } catch (error) {
             consola.error("Error parsing backup JSON file");
-            reject({ message: "Error importing file, could not parse JSON content" });
+            reject({
+              message: "Error importing file, could not parse JSON content",
+            });
             return;
           }
 
@@ -176,10 +183,18 @@ export class System {
 
           if (_.isEqual(type, "backup")) {
             // Check that the backup file contains all required fields
-            if (checkFields(parsedFileData, ["timestamp", "entities", "collections", "attributes", "activity"])) {
+            if (
+              checkFields(parsedFileData, [
+                "timestamp",
+                "entities",
+                "collections",
+                "attributes",
+                "activity",
+              ])
+            ) {
               consola.info("Importing backup JSON file");
             } else {
-              consola.error("Missing fields in backup JSON file")
+              consola.error("Missing fields in backup JSON file");
               reject({ message: "Invalid backup JSON file, check contents" });
               return;
             }
@@ -199,7 +214,9 @@ export class System {
             Promise.all(attributeOperations),
           ])
             .then(
-              (results: [EntityModel[], CollectionModel[], AttributeModel[]]) => {
+              (
+                results: [EntityModel[], CollectionModel[], AttributeModel[]]
+              ) => {
                 consola.success("Imported", results[0].length, "Entities");
                 consola.success("Imported", results[1].length, "Collections");
                 consola.success("Imported", results[2].length, "Attributes");
@@ -218,8 +235,14 @@ export class System {
           const spreadsheet = XLSX.read(receivedFileData);
           if (spreadsheet.SheetNames.length > 0) {
             const primarySheet = spreadsheet.Sheets[spreadsheet.SheetNames[0]];
-            const parsedSheet = XLSX.utils.sheet_to_json(primarySheet, { defval: "" });
-            resolve({ status: true, message: "Parsed spreadsheet successfully", data: parsedSheet });
+            const parsedSheet = XLSX.utils.sheet_to_json(primarySheet, {
+              defval: "",
+            });
+            resolve({
+              status: true,
+              message: "Parsed spreadsheet successfully",
+              data: parsedSheet,
+            });
           } else {
             reject({ message: "No sheets in spreadsheet" });
           }
@@ -231,7 +254,10 @@ export class System {
     });
   };
 
-  static mapData = (entityFields: EntityImport, spreadsheetData: any[]): Promise<EntityModel[]> => {
+  static mapData = (
+    entityFields: EntityImport,
+    spreadsheetData: any[]
+  ): Promise<EntityModel[]> => {
     return new Promise((resolve, reject) => {
       const entities = [] as IEntity[];
       spreadsheetData.map((row) => {
@@ -252,46 +278,59 @@ export class System {
         });
       });
 
-      Promise.all(entities.map((entity) => {
-        // Create all Entities
-        return Entities.create(entity);
-      })).then((entities: EntityModel[]) => {
-        // Additional operations
-        const operations = [] as Promise<any>[];
+      Promise.all(
+        entities.map((entity) => {
+          // Create all Entities
+          return Entities.create(entity);
+        })
+      )
+        .then((entities: EntityModel[]) => {
+          // Additional operations
+          const operations = [] as Promise<any>[];
 
-        // Add all Entities to the Collection (if specified)
-        if (!_.isEqual(entityFields.collections, "")) {
-          operations.push(Collections.addEntities(entityFields.collections, entities.map((entity) => entity._id)));
+          // Add all Entities to the Collection (if specified)
+          if (!_.isEqual(entityFields.collections, "")) {
+            operations.push(
+              Collections.addEntities(
+                entityFields.collections,
+                entities.map((entity) => entity._id)
+              )
+            );
 
-          // Add Collection to each Entity
-          entities.map((entity) => {
-            operations.push(Entities.addCollection(entity._id, entityFields.collections));
-          })
-        }
+            // Add Collection to each Entity
+            entities.map((entity) => {
+              operations.push(
+                Entities.addCollection(entity._id, entityFields.collections)
+              );
+            });
+          }
 
-        // Add Products to Entities (if Origins specified)
-        if (!_.isEmpty(entityFields.origins)) {
-          const minimalEntities = entities.map((entity) => {
-            return { id: entity._id, name: entity.name };
+          // Add Products to Entities (if Origins specified)
+          if (!_.isEmpty(entityFields.origins)) {
+            const minimalEntities = entities.map((entity) => {
+              return { id: entity._id, name: entity.name };
+            });
+
+            // Add all Products to each Origin
+            entityFields.origins.map((origin: { id: string; name: string }) => {
+              operations.push(Entities.addProducts(origin, minimalEntities));
+            });
+
+            // Add all Origins to each Product
+            minimalEntities.map((entity) => {
+              operations.push(
+                Entities.addOrigins(entity, entityFields.origins)
+              );
+            });
+          }
+
+          Promise.all(operations).then((_result) => {
+            resolve(entities);
           });
-
-          // Add all Products to each Origin
-          entityFields.origins.map((origin: { id: string, name: string }) => {
-            operations.push(Entities.addProducts(origin, minimalEntities));
-          });
-
-          // Add all Origins to each Product
-          minimalEntities.map((entity) => {
-            operations.push(Entities.addOrigins(entity, entityFields.origins));
-          });
-        }
-
-        Promise.all(operations).then((_result) => {
-          resolve(entities);
+        })
+        .catch((reason) => {
+          reject(reason);
         });
-      }).catch((reason) => {
-        reject(reason);
-      });
     });
   };
 

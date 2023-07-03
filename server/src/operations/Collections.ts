@@ -188,7 +188,6 @@ export class Collections {
     });
   };
 
-
   /**
    * Create a new Collection
    * @param {any} collection all data associated with the new Collection
@@ -282,7 +281,10 @@ export class Collections {
     });
   };
 
-  static addEntities = (collection: string, entities: string[]): Promise<string> => {
+  static addEntities = (
+    collection: string,
+    entities: string[]
+  ): Promise<string> => {
     consola.start(
       "Adding",
       entities.length,

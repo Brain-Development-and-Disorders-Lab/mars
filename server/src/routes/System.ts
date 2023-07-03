@@ -32,18 +32,20 @@ SystemRoute.route("/system/import").post((request: any, response: any) => {
 });
 
 // Route: Import mappings
-SystemRoute.route("/system/import/mapping").post((request: any, response: any) => {
-  System.mapData(request.body.fields, request.body.data)
-    .then((entities: EntityModel[]) => {
-      response.json({
-        status: "success",
-        message: `Imported ${entities.length} Entities`,
+SystemRoute.route("/system/import/mapping").post(
+  (request: any, response: any) => {
+    System.mapData(request.body.fields, request.body.data)
+      .then((entities: EntityModel[]) => {
+        response.json({
+          status: "success",
+          message: `Imported ${entities.length} Entities`,
+        });
+      })
+      .catch((reason: { message: string }) => {
+        response.json({ status: "error", message: reason.message });
       });
-    })
-    .catch((reason: { message: string }) => {
-      response.json({ status: "error", message: reason.message });
-    });
-});
+  }
+);
 
 // Route: Get all Devices
 SystemRoute.route("/system/devices").get((_request: any, response: any) => {

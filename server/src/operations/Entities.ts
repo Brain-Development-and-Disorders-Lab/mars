@@ -115,13 +115,15 @@ export class Entities {
           );
 
           // Resolve all operations then resolve overall Promise
-          Promise.all(operations).then((_result) => {
-            consola.success("Created Entity:", entity._id, entity.name);
-            resolve(entity);
-          }).catch((_error) => {
-            consola.error("Error creating Entity:", entity._id, entity.name);
-            reject("Error creating Entity");
-          });
+          Promise.all(operations)
+            .then((_result) => {
+              consola.success("Created Entity:", entity._id, entity.name);
+              resolve(entity);
+            })
+            .catch((_error) => {
+              consola.error("Error creating Entity:", entity._id, entity.name);
+              reject("Error creating Entity");
+            });
         });
     });
   };
@@ -397,13 +399,15 @@ export class Entities {
           );
 
           // Resolve all operations then resolve overall Promise
-          Promise.all(operations).then((_result) => {
-            consola.success("Restored Entity:", entity._id, entity.name);
-            resolve(entity);
-          }).catch((_error) => {
-            consola.error("Error restoring Entity:", entity._id, entity.name);
-            reject("Error restoring Entity");
-          });
+          Promise.all(operations)
+            .then((_result) => {
+              consola.success("Restored Entity:", entity._id, entity.name);
+              resolve(entity);
+            })
+            .catch((_error) => {
+              consola.error("Error restoring Entity:", entity._id, entity.name);
+              reject("Error restoring Entity");
+            });
         });
     });
   };
@@ -534,7 +538,9 @@ export class Entities {
             $set: {
               associations: {
                 origins: result.associations.origins,
-                products: _.uniq(_.concat(result.associations.products, product)),
+                products: _.uniq(
+                  _.concat(result.associations.products, product)
+                ),
               },
             },
           };
@@ -587,7 +593,9 @@ export class Entities {
             $set: {
               associations: {
                 origins: result.associations.origins,
-                products: _.uniq(_.concat(result.associations.products, products)),
+                products: _.uniq(
+                  _.concat(result.associations.products, products)
+                ),
               },
             },
           };
@@ -603,7 +611,12 @@ export class Entities {
                 }
 
                 // Resolve the Promise
-                consola.start("Added", products.length, "Products to Entity", entity.name);
+                consola.start(
+                  "Added",
+                  products.length,
+                  "Products to Entity",
+                  entity.name
+                );
                 resolve(entity);
               }
             );
@@ -1275,10 +1288,12 @@ export class Entities {
                 // "collections" data field
                 tempStructure["collections"] = [];
                 exportOperations.push(
-                  Collections.getOne(_.split(field, "_")[1]).then((collection) => {
-                    tempStructure["collections"].push(collection.name);
-                    return collection.name;
-                  })
+                  Collections.getOne(_.split(field, "_")[1]).then(
+                    (collection) => {
+                      tempStructure["collections"].push(collection.name);
+                      return collection.name;
+                    }
+                  )
                 );
               } else if (_.startsWith(field, "origin_")) {
                 // "origins" data field
