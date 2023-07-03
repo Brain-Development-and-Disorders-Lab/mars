@@ -1747,7 +1747,8 @@ const Entity = () => {
                                   )
                                 }
                               >
-                                Collection: {<Linky id={collection} type={"collections"} />}
+                                Collection:{" "}
+                                {<Linky id={collection} type={"collections"} />}
                               </Checkbox>
                             );
                           })}

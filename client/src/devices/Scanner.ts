@@ -14,7 +14,7 @@ export const connectScanner = (
       const deviceFilters = devices.map((device: DeviceModel) => {
         return {
           vendorId: device.vendor_id,
-        }
+        };
       });
 
       navigator.usb

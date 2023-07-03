@@ -332,7 +332,11 @@ const Navigation = () => {
       )}
 
       {/* Import component containing modals */}
-      <Import isOpen={isImportOpen} onOpen={onImportOpen} onClose={onImportClose} />
+      <Import
+        isOpen={isImportOpen}
+        onOpen={onImportOpen}
+        onClose={onImportClose}
+      />
     </Flex>
   );
 };

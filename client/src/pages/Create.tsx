@@ -92,7 +92,9 @@ const EntityPage = (props: {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [name, setName] = useState("");
-  const [created, setCreated] = useState(dayjs(Date.now()).format("YYYY-MM-DDTHH:mm"));
+  const [created, setCreated] = useState(
+    dayjs(Date.now()).format("YYYY-MM-DDTHH:mm")
+  );
   const [owner, setOwner] = useState(token.username);
   const [description, setDescription] = useState("");
   const [selectedCollections, setSelectedCollections] = useState(
@@ -774,7 +776,9 @@ const CollectionPage = (props: {
 
   const [type, setType] = useState("collection" as "collection" | "project");
   const [name, setName] = useState("");
-  const [created, setCreated] = useState(dayjs(Date.now()).format("YYYY-MM-DDTHH:mm"));
+  const [created, setCreated] = useState(
+    dayjs(Date.now()).format("YYYY-MM-DDTHH:mm")
+  );
   const [owner, setOwner] = useState(token.username);
   const [description, setDescription] = useState("");
 
@@ -896,7 +900,11 @@ const CollectionPage = (props: {
                     size={"md"}
                     type={"datetime-local"}
                     value={created}
-                    onChange={(event) => setCreated(dayjs(event.target.value).format("YYYY-MM-DDTHH:mm"))}
+                    onChange={(event) =>
+                      setCreated(
+                        dayjs(event.target.value).format("YYYY-MM-DDTHH:mm")
+                      )
+                    }
                   />
                 </FormControl>
 
@@ -931,7 +939,11 @@ const CollectionPage = (props: {
                           setType("collection");
                         }}
                       >
-                        <Tooltip label={"A standard Collection with no special properties."}>
+                        <Tooltip
+                          label={
+                            "A standard Collection with no special properties."
+                          }
+                        >
                           <Flex direction={"row"} gap={"4"} align={"center"}>
                             Standard
                             <Icon name={"info"} />

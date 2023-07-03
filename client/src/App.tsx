@@ -80,7 +80,10 @@ const App = (): ReactElement => {
               <Route path={"/search"} element={<Search />} />
               <Route path={"/settings"} element={<Settings />} />
               <Route path={"/invalid"} element={<Invalid />} />
-              <Route path={"*"} element={<Navigate to={"/invalid"} replace />} />
+              <Route
+                path={"*"}
+                element={<Navigate to={"/invalid"} replace />}
+              />
             </Routes>
           </Page>
         )}

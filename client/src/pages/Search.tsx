@@ -325,39 +325,53 @@ const Search = () => {
                         </option>
                       </Select>
 
-                      {_.isEqual(queryParameter, "Collections") && isLoaded &&
+                      {_.isEqual(queryParameter, "Collections") && isLoaded && (
                         <Select
                           placeholder={"Select Collection"}
                           value={queryKey}
                           onChange={(event) => {
                             setQueryKey(event.target.value);
-                            setQueryValue(event.target.options[event.target.selectedIndex].innerText);
+                            setQueryValue(
+                              event.target.options[event.target.selectedIndex]
+                                .innerText
+                            );
                           }}
                         >
                           {collections.map((collection) => {
                             return (
-                              <option key={collection._id} value={collection._id}>{collection.name}</option>
+                              <option
+                                key={collection._id}
+                                value={collection._id}
+                              >
+                                {collection.name}
+                              </option>
                             );
                           })}
                         </Select>
-                      }
-                      {_.includes(["Origins", "Products"], queryParameter) && isLoaded &&
-                        <Select
-                          placeholder={"Select Entity"}
-                          value={queryKey}
-                          onChange={(event) => {
-                            setQueryKey(event.target.value);
-                            setQueryValue(event.target.options[event.target.selectedIndex].innerText);
-                          }}
-                        >
-                          {entities.map((entity) => {
-                            return (
-                              <option key={entity._id} value={entity._id}>{entity.name}</option>
-                            );
-                          })}
-                        </Select>
-                      }
-                      {_.includes(["Name", "Description"], queryParameter) &&
+                      )}
+                      {_.includes(["Origins", "Products"], queryParameter) &&
+                        isLoaded && (
+                          <Select
+                            placeholder={"Select Entity"}
+                            value={queryKey}
+                            onChange={(event) => {
+                              setQueryKey(event.target.value);
+                              setQueryValue(
+                                event.target.options[event.target.selectedIndex]
+                                  .innerText
+                              );
+                            }}
+                          >
+                            {entities.map((entity) => {
+                              return (
+                                <option key={entity._id} value={entity._id}>
+                                  {entity.name}
+                                </option>
+                              );
+                            })}
+                          </Select>
+                        )}
+                      {_.includes(["Name", "Description"], queryParameter) && (
                         <Input
                           value={queryValue}
                           placeholder={"Value"}
@@ -366,7 +380,7 @@ const Search = () => {
                             setQueryValue(event.target.value);
                           }}
                         />
-                      }
+                      )}
 
                       <IconButton
                         aria-label={"Add query component"}
@@ -441,22 +455,29 @@ const Search = () => {
                               {component.qualifier}
                             </Tag>
 
-                            {_.includes(["Origins", "Products", "Collections"], component.parameter) && isLoaded &&
-                              <Select
-                                w={"fit-content"}
-                                value={component.value}
-                                disabled
-                              >
-                                <option>{component.value}</option>
-                              </Select>
-                            }
-                            {_.includes(["Name", "Description"], component.parameter) &&
+                            {_.includes(
+                              ["Origins", "Products", "Collections"],
+                              component.parameter
+                            ) &&
+                              isLoaded && (
+                                <Select
+                                  w={"fit-content"}
+                                  value={component.value}
+                                  disabled
+                                >
+                                  <option>{component.value}</option>
+                                </Select>
+                              )}
+                            {_.includes(
+                              ["Name", "Description"],
+                              component.parameter
+                            ) && (
                               <Input
                                 w={"fit-content"}
                                 value={component.value}
                                 disabled
                               />
-                            }
+                            )}
 
                             <IconButton
                               aria-label={"Remove search component"}

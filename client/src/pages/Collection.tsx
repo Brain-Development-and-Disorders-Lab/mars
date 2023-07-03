@@ -343,7 +343,14 @@ const Collection = () => {
                 rounded={"md"}
                 bg={"white"}
               >
-                <Icon name={_.isEqual(collectionData.type, "collection") ? "collection" : "project"} size={"lg"} />
+                <Icon
+                  name={
+                    _.isEqual(collectionData.type, "collection")
+                      ? "collection"
+                      : "project"
+                  }
+                  size={"lg"}
+                />
                 <Heading fontWeight={"semibold"}>{collectionData.name}</Heading>
               </Flex>
 
@@ -514,7 +521,14 @@ const Collection = () => {
                 </Flex>
                 <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
                   {collectionEntities && collectionEntities.length > 0 ? (
-                    <DataTable data={collectionEntities} columns={columns} visibleColumns={{}} viewOnly={!editing} setData={setCollectionEntities} hideSelection={!editing} />
+                    <DataTable
+                      data={collectionEntities}
+                      columns={columns}
+                      visibleColumns={{}}
+                      viewOnly={!editing}
+                      setData={setCollectionEntities}
+                      hideSelection={!editing}
+                    />
                   ) : (
                     <Text>This Collection is empty.</Text>
                   )}

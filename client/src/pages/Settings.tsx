@@ -21,9 +21,7 @@ import Icon from "@components/Icon";
 import Error from "@components/Error";
 
 // Existing and custom types
-import {
-  DeviceModel,
-} from "@types";
+import { DeviceModel } from "@types";
 
 // Utility functions and libraries
 import { getData } from "@database/functions";
@@ -110,32 +108,56 @@ const Settings = () => {
               <TabPanel>
                 {/* Device settings */}
                 <Flex p={"2"} w={"100%"} direction={"column"} gap={"4"}>
-                  <Text>A list of devices and scanners that have been registered with MARS. Registration is required for pairing an input device such as a scanner.</Text>
+                  <Text>
+                    A list of devices and scanners that have been registered
+                    with MARS. Registration is required for pairing an input
+                    device such as a scanner.
+                  </Text>
                   <Flex>
-                    <Button colorScheme={"green"} rightIcon={<Icon name={"add"} />} disabled>Register</Button>
+                    <Button
+                      colorScheme={"green"}
+                      rightIcon={<Icon name={"add"} />}
+                      disabled
+                    >
+                      Register
+                    </Button>
                   </Flex>
                   <Flex direction={"row"} align={"center"} gap={"2"}>
                     <VStack gap={"4"}>
                       {isLoaded &&
                         devices.map((device) => {
                           return (
-                            <Flex key={device._id} align={"center"} direction={"row"} gap={"4"} p={"2"} pl={"4"} rounded={"md"} bg={"gray.100"}>
+                            <Flex
+                              key={device._id}
+                              align={"center"}
+                              direction={"row"}
+                              gap={"4"}
+                              p={"2"}
+                              pl={"4"}
+                              rounded={"md"}
+                              bg={"gray.100"}
+                            >
                               <Icon name={"scan"} size={"md"} />
                               <Text fontWeight={"semibold"}>{device.name}</Text>
-                              <IconButton aria-label={"Remove device"} icon={<Icon name={"delete"} />} colorScheme={"red"} disabled />
+                              <IconButton
+                                aria-label={"Remove device"}
+                                icon={<Icon name={"delete"} />}
+                                colorScheme={"red"}
+                                disabled
+                              />
                             </Flex>
                           );
-                        })
-                      }
+                        })}
                     </VStack>
                   </Flex>
                 </Flex>
               </TabPanel>
             </TabPanels>
           </Tabs>
-
-        </Flex>)}
-        </Content>
-  )};
+        </Flex>
+      )}
+    </Content>
+  );
+};
 
 export default Settings;
