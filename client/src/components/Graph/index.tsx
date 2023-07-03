@@ -71,6 +71,20 @@ const Graph = (props: {
     return false;
   };
 
+  /**
+   * Utility function to determine membership of an Edge in the graph
+   * @param {string} id Edge ID
+   * @return {boolean}
+   */
+  const containsEdge = (id: string): boolean => {
+    for (let edge of edges) {
+      if (_.isEqual(edge.id, id)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   const generateLayout = (layoutNodes: Node[], layoutEdges: Edge[]) => {
     // Set the layout of the graph using ELK
     const elk = new ELK();
@@ -98,6 +112,7 @@ const Graph = (props: {
         "elk.direction": "DOWN",
         "nodePlacement.strategy": "SIMPLE",
         "spacing.nodeNodeBetweenLayers": "40",
+        "spacing.nodeNode": "40",
       },
       children: nodes,
       edges: edges,
@@ -265,7 +280,9 @@ const Graph = (props: {
                   position: { x: 100, y: 200 },
                 },
               ];
+            }
 
+            if (containsEdge(`edge_${origin.id}_${node.id}`) === false) {
               // Create edge
               updatedEdges = [
                 ...updatedEdges,
@@ -319,7 +336,9 @@ const Graph = (props: {
                   position: { x: 100, y: 200 },
                 },
               ];
+            }
 
+            if (containsEdge(`edge_${node.id}_${product.id}`) === false) {
               // Create edge
               updatedEdges = [
                 ...updatedEdges,
@@ -357,6 +376,10 @@ const Graph = (props: {
       });
     }
   };
+
+  // const addNode = (id: string) => {
+
+  // };
 
   // Get the data and setup the initial nodes and edges
   useEffect(() => {
