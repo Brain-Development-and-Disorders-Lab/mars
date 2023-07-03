@@ -80,16 +80,44 @@ export class Search {
             const qualifier = component.qualifier.toLowerCase();
             const parameter = component.parameter.toLowerCase();
 
-            if (_.isEqual(parameter, "description") || _.isEqual(parameter, "name")) {
+            if (_.includes(["description", "name"], parameter)) {
               // Parameters: name, description
               if (_.isEqual(qualifier, "is")) {
                 expressions.push({ [parameter]: component.value });
               } else if (_.isEqual(qualifier, "is not")) {
                 expressions.push({ [parameter]: { $ne: component.value } });
               } else if (_.isEqual(qualifier, "contains")) {
-                expressions.push({ [parameter]: { $regex: new RegExp(component.value, "gi") } });
+                expressions.push({
+                  [parameter]: { $regex: new RegExp(component.value, "gi") },
+                });
               } else if (_.isEqual(qualifier, "does not contain")) {
-                expressions.push({ [parameter]: { $regex: new RegExp(`^((?!${component.value}).)*$`, "gi") } });
+                expressions.push({
+                  [parameter]: {
+                    $regex: new RegExp(`^((?!${component.value}).)*$`, "gi"),
+                  },
+                });
+              }
+            } else if (_.isEqual(parameter, "collections")) {
+              // Parameters: collections
+              if (_.isEqual(qualifier, "contains")) {
+                expressions.push({ [parameter]: { $in: [component.key] } });
+              } else if (_.isEqual(qualifier, "does not contain")) {
+                expressions.push({ [parameter]: { $nin: [component.key] } });
+              }
+            } else if (_.includes(["origins", "products"], parameter)) {
+              // Parameters: origins, products
+              if (_.isEqual(qualifier, "contains")) {
+                expressions.push({
+                  [`associations.${parameter}`]: {
+                    $elemMatch: { id: { $in: [component.key] } },
+                  },
+                });
+              } else if (_.isEqual(qualifier, "does not contain")) {
+                expressions.push({
+                  [`associations.${parameter}`]: {
+                    $not: { $elemMatch: { id: { $in: [component.key] } } },
+                  },
+                });
               }
             }
           }
@@ -101,37 +129,78 @@ export class Search {
           for (let component of queryLogicalGroups.OR) {
             const qualifier = component.qualifier.toLowerCase();
             const parameter = component.parameter.toLowerCase();
-            if (_.isEqual(qualifier, "is")) {
-              expressions.push({ [parameter]: component.value });
-            } else if (_.isEqual(qualifier, "is not")) {
-              expressions.push({ [parameter]: { $ne: component.value } });
-            } else if (_.isEqual(qualifier, "contains")) {
-              expressions.push({ [parameter]: { $regex: new RegExp(component.value, "gi") } });
-            } else if (_.isEqual(qualifier, "does not contain")) {
-              expressions.push({ [parameter]: { $regex: new RegExp(`^((?!${component.value}).)*$`, "gi") } });
+
+            if (_.includes(["description", "name"], parameter)) {
+              if (_.isEqual(qualifier, "is")) {
+                expressions.push({ [parameter]: component.value });
+              } else if (_.isEqual(qualifier, "is not")) {
+                expressions.push({ [parameter]: { $ne: component.value } });
+              } else if (_.isEqual(qualifier, "contains")) {
+                expressions.push({
+                  [parameter]: { $regex: new RegExp(component.value, "gi") },
+                });
+              } else if (_.isEqual(qualifier, "does not contain")) {
+                expressions.push({
+                  [parameter]: {
+                    $regex: new RegExp(`^((?!${component.value}).)*$`, "gi"),
+                  },
+                });
+              }
+            } else if (_.isEqual(parameter, "collections")) {
+              // Parameters: collections
+              if (_.isEqual(qualifier, "contains")) {
+                expressions.push({ [parameter]: { $in: [component.key] } });
+              } else if (_.isEqual(qualifier, "does not contain")) {
+                expressions.push({ [parameter]: { $nin: [component.key] } });
+              }
+            } else if (_.includes(["origins", "products"], parameter)) {
+              // Parameters: origins, products
+              if (_.isEqual(qualifier, "contains")) {
+                expressions.push({ [parameter]: { $in: [component.key] } });
+              } else if (_.isEqual(qualifier, "does not contain")) {
+                expressions.push({ [parameter]: { $nin: [component.key] } });
+              }
             }
           }
           return queryBase.or(expressions);
-        }
+        },
       };
 
       const collection = getDatabase().collection(ENTITIES_COLLECTION);
       if (_.isEmpty(queryLogicalGroups.AND)) {
         // Only 'OR' query components
-        queryLogicalOperations.OR().collection(collection).exec().then((result: any[]) => {
-          consola.success("Searched:", queryComponents.length, "OR query components");
-          resolve(result);
-        }).catch((error: any) => {
-          reject(error);
-        });
+        queryLogicalOperations
+          .OR()
+          .collection(collection)
+          .exec()
+          .then((result: any[]) => {
+            consola.success(
+              "Searched:",
+              queryComponents.length,
+              "OR query components"
+            );
+            resolve(result);
+          })
+          .catch((error: any) => {
+            reject(error);
+          });
       } else if (_.isEmpty(queryLogicalGroups.OR)) {
         // Only 'AND' query components
-        queryLogicalOperations.AND().collection(collection).exec().then((result: any[]) => {
-          consola.success("Searched:", queryComponents.length, "AND query components");
-          resolve(result);
-        }).catch((error: any) => {
-          reject(error);
-        });
+        queryLogicalOperations
+          .AND()
+          .collection(collection)
+          .exec()
+          .then((result: any[]) => {
+            consola.success(
+              "Searched:",
+              queryComponents.length,
+              "AND query components"
+            );
+            resolve(result);
+          })
+          .catch((error: any) => {
+            reject(error);
+          });
       } else {
         // Both 'AND' and 'OR' query components
         Promise.all([
@@ -139,15 +208,21 @@ export class Search {
           queryLogicalOperations.AND().collection(collection).exec(),
           // Evaluate the 'OR' components
           queryLogicalOperations.OR().collection(collection).exec(),
-        ]).then(([resultAND, resultOR]) => {
-          // Join the results
-          consola.success("Searched:", queryComponents.length, "query components");
+        ])
+          .then(([resultAND, resultOR]) => {
+            // Join the results
+            consola.success(
+              "Searched:",
+              queryComponents.length,
+              "query components"
+            );
 
-          // Resolve by unique results
-          resolve(_.uniqBy([...resultAND, ...resultOR], "_id"));
-        }).catch((error: any) => {
-          reject(error);
-        });
+            // Resolve by unique results
+            resolve(_.uniqBy([...resultAND, ...resultOR], "_id"));
+          })
+          .catch((error: any) => {
+            reject(error);
+          });
       }
     });
   };

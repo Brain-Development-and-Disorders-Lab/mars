@@ -13,36 +13,58 @@ if (_.isUndefined(CONNECTION_STRING)) {
   throw new Error("Connection string is not defined");
 }
 
-// Setup the MongoDB client and database
+// Setup the MongoDB client and databases
 const client: MongoClient = new MongoClient(CONNECTION_STRING, {});
 let database: Db;
+let system: Db;
 
 /**
- * Connect to the database
+ * Connect to the primary database storing metadata
  */
-export const connect = (): Promise<Db> => {
+export const connectPrimary = (): Promise<Db> => {
   return new Promise((resolve, _reject) => {
     client.connect().then((result) => {
-      consola.success("Connected to MongoDB");
       database = result.db("metadata");
+      consola.success("Connected to MongoDB metadata database");
       resolve(database);
     });
   });
 };
 
 /**
- * Disconnect from the database
+ * Connect to the system database storing system data
+ */
+export const connectSystem = (): Promise<Db> => {
+  return new Promise((resolve, _reject) => {
+    client.connect().then((result) => {
+      system = result.db("system");
+      consola.success("Connected to MongoDB system database");
+      resolve(system);
+    });
+  });
+};
+
+/**
+ * Disconnect from MongoDB instance
  */
 export const disconnect = (): Promise<void> => {
   return client.close();
 };
 
 /**
- * Get the MongoDB database object
+ * Get the MongoDB primary database object
  * @return {Db}
  */
 export const getDatabase = (): Db => {
   return database;
+};
+
+/**
+ * Get the MongoDB system database object
+ * @return {Db}
+ */
+export const getSystem = (): Db => {
+  return system;
 };
 
 /**

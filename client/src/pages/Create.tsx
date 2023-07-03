@@ -32,6 +32,7 @@ import {
   TagCloseButton,
   Text,
   Textarea,
+  Tooltip,
   useDisclosure,
   useToast,
 } from "@chakra-ui/react";
@@ -64,8 +65,13 @@ import { isValidAttributes, isValidValues } from "src/functions";
 import { getData, postData } from "@database/functions";
 import _ from "lodash";
 import { nanoid } from "nanoid";
+import dayjs from "dayjs";
+import { useToken } from "src/authentication/useToken";
 
-const EntityPage = (props: { createPageState: CreatePage, setCreatePageState: React.Dispatch<React.SetStateAction<CreatePage>> }) => {
+const EntityPage = (props: {
+  createPageState: CreatePage;
+  setCreatePageState: React.Dispatch<React.SetStateAction<CreatePage>>;
+}) => {
   // Used to manage what detail inputs are presented
   const [pageState, setPageState] = useState(
     "start" as "start" | "attributes" | "associations"
@@ -74,6 +80,7 @@ const EntityPage = (props: { createPageState: CreatePage, setCreatePageState: Re
   const navigate = useNavigate();
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const [token, _useToken] = useToken();
 
   const [entities, setEntities] = useState([] as EntityModel[]);
   const [collections, setCollections] = useState([] as CollectionModel[]);
@@ -85,8 +92,10 @@ const EntityPage = (props: { createPageState: CreatePage, setCreatePageState: Re
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [name, setName] = useState("");
-  const [created, setCreated] = useState("");
-  const [owner, setOwner] = useState("");
+  const [created, setCreated] = useState(
+    dayjs(Date.now()).format("YYYY-MM-DDTHH:mm")
+  );
+  const [owner, setOwner] = useState(token.username);
   const [description, setDescription] = useState("");
   const [selectedCollections, setSelectedCollections] = useState(
     [] as string[]
@@ -331,11 +340,11 @@ const EntityPage = (props: { createPageState: CreatePage, setCreatePageState: Re
                           value={name}
                           onChange={(event) => setName(event.target.value)}
                         />
-                        {isNameError &&
+                        {isNameError && (
                           <FormErrorMessage>
                             A name or ID must be specified.
                           </FormErrorMessage>
-                        }
+                        )}
                       </FormControl>
 
                       <FormControl isRequired isInvalid={isOwnerError}>
@@ -345,11 +354,11 @@ const EntityPage = (props: { createPageState: CreatePage, setCreatePageState: Re
                           value={owner}
                           onChange={(event) => setOwner(event.target.value)}
                         />
-                        {isOwnerError &&
+                        {isOwnerError && (
                           <FormErrorMessage>
                             An owner of the Entity is required.
                           </FormErrorMessage>
-                        }
+                        )}
                       </FormControl>
                     </Flex>
 
@@ -363,11 +372,11 @@ const EntityPage = (props: { createPageState: CreatePage, setCreatePageState: Re
                           value={created}
                           onChange={(event) => setCreated(event.target.value)}
                         />
-                        {isDateError &&
+                        {isDateError && (
                           <FormErrorMessage>
                             A created date must be specified.
                           </FormErrorMessage>
-                        }
+                        )}
                       </FormControl>
 
                       <FormControl>
@@ -757,13 +766,20 @@ const EntityPage = (props: { createPageState: CreatePage, setCreatePageState: Re
   );
 };
 
-const CollectionPage = (props: { createPageState: CreatePage, setCreatePageState: React.Dispatch<React.SetStateAction<CreatePage>> }) => {
+const CollectionPage = (props: {
+  createPageState: CreatePage;
+  setCreatePageState: React.Dispatch<React.SetStateAction<CreatePage>>;
+}) => {
   const navigate = useNavigate();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const [token, _useToken] = useToken();
 
+  const [type, setType] = useState("collection" as "collection" | "project");
   const [name, setName] = useState("");
-  const [created, setCreated] = useState("");
-  const [owner, setOwner] = useState("");
+  const [created, setCreated] = useState(
+    dayjs(Date.now()).format("YYYY-MM-DDTHH:mm")
+  );
+  const [owner, setOwner] = useState(token.username);
   const [description, setDescription] = useState("");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -775,6 +791,7 @@ const CollectionPage = (props: { createPageState: CreatePage, setCreatePageState
   const isDetailsError = isNameError || isOwnerError || isDescriptionError;
 
   const collectionData: ICollection = {
+    type: type,
     name: name,
     description: description,
     owner: owner,
@@ -846,11 +863,11 @@ const CollectionPage = (props: { createPageState: CreatePage, setCreatePageState
                     value={name}
                     onChange={(event) => setName(event.target.value)}
                   />
-                  {isNameError &&
+                  {isNameError && (
                     <FormErrorMessage>
                       A name or ID must be specified.
                     </FormErrorMessage>
-                  }
+                  )}
                 </FormControl>
 
                 <FormControl isRequired isInvalid={isOwnerError}>
@@ -865,11 +882,11 @@ const CollectionPage = (props: { createPageState: CreatePage, setCreatePageState
                     value={owner}
                     onChange={(event) => setOwner(event.target.value)}
                   />
-                  {isOwnerError &&
+                  {isOwnerError && (
                     <FormErrorMessage>
                       An owner of the Collection is required.
                     </FormErrorMessage>
-                  }
+                  )}
                 </FormControl>
               </Flex>
 
@@ -880,11 +897,14 @@ const CollectionPage = (props: { createPageState: CreatePage, setCreatePageState
                   </FormLabel>
 
                   <Input
-                    placeholder="Select Date and Time"
-                    size="md"
-                    type="datetime-local"
+                    size={"md"}
+                    type={"datetime-local"}
                     value={created}
-                    onChange={(event) => setCreated(event.target.value)}
+                    onChange={(event) =>
+                      setCreated(
+                        dayjs(event.target.value).format("YYYY-MM-DDTHH:mm")
+                      )
+                    }
                   />
                 </FormControl>
 
@@ -898,11 +918,53 @@ const CollectionPage = (props: { createPageState: CreatePage, setCreatePageState
                     value={description}
                     onChange={(event) => setDescription(event.target.value)}
                   />
-                  {isDescriptionError &&
+                  {isDescriptionError && (
                     <FormErrorMessage>
                       A description must be provided.
                     </FormErrorMessage>
-                  }
+                  )}
+                </FormControl>
+              </Flex>
+
+              <Flex direction="row" gap={"4"} wrap={["wrap", "nowrap"]}>
+                <FormControl>
+                  <FormLabel htmlFor="date" fontWeight={"normal"}>
+                    Collection Type
+                  </FormLabel>
+                  <CheckboxGroup>
+                    <Flex direction={"column"} gap={"4"}>
+                      <Checkbox
+                        isChecked={_.isEqual(type, "collection")}
+                        onChange={(_event) => {
+                          setType("collection");
+                        }}
+                      >
+                        <Tooltip
+                          label={
+                            "A standard Collection with no special properties."
+                          }
+                        >
+                          <Flex direction={"row"} gap={"4"} align={"center"}>
+                            Standard
+                            <Icon name={"info"} />
+                          </Flex>
+                        </Tooltip>
+                      </Checkbox>
+                      <Checkbox
+                        isChecked={_.isEqual(type, "project")}
+                        onChange={(_event) => {
+                          setType("project");
+                        }}
+                      >
+                        <Tooltip label={"A Collection denoted as a Project."}>
+                          <Flex direction={"row"} gap={"4"} align={"center"}>
+                            Project
+                            <Icon name={"info"} />
+                          </Flex>
+                        </Tooltip>
+                      </Checkbox>
+                    </Flex>
+                  </CheckboxGroup>
                 </FormControl>
               </Flex>
             </Flex>
@@ -956,8 +1018,8 @@ const CollectionPage = (props: { createPageState: CreatePage, setCreatePageState
             <Flex direction={"column"} gap={"4"} p={"2"}>
               <Text>
                 Collections can be used to organize Entities. Any type of Entity
-                can be included in a Collection. Entities can be added and removed
-                from a Collection after it has been created.
+                can be included in a Collection. Entities can be added and
+                removed from a Collection after it has been created.
               </Text>
             </Flex>
           </ModalBody>
@@ -967,7 +1029,10 @@ const CollectionPage = (props: { createPageState: CreatePage, setCreatePageState
   );
 };
 
-const AttributePage = (props: { createPageState: CreatePage, setCreatePageState: React.Dispatch<React.SetStateAction<CreatePage>> }) => {
+const AttributePage = (props: {
+  createPageState: CreatePage;
+  setCreatePageState: React.Dispatch<React.SetStateAction<CreatePage>>;
+}) => {
   const navigate = useNavigate();
   const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -1058,11 +1123,11 @@ const AttributePage = (props: { createPageState: CreatePage, setCreatePageState:
                     onChange={(event) => setName(event.target.value)}
                     required
                   />
-                  {isNameError &&
+                  {isNameError && (
                     <FormErrorMessage>
                       A name must be specified for the Attribute.
                     </FormErrorMessage>
-                  }
+                  )}
                 </FormControl>
 
                 <FormControl isRequired>
@@ -1072,11 +1137,11 @@ const AttributePage = (props: { createPageState: CreatePage, setCreatePageState:
                     placeholder={"Attribute Description"}
                     onChange={(event) => setDescription(event.target.value)}
                   />
-                  {isDescriptionError &&
+                  {isDescriptionError && (
                     <FormErrorMessage>
                       A description should be provided for the Attribute.
                     </FormErrorMessage>
-                  }
+                  )}
                 </FormControl>
               </Flex>
 
@@ -1397,13 +1462,28 @@ const Create = () => {
       )}
 
       {/* Create an Entity */}
-      {_.isEqual(createPage, "entity") && <EntityPage createPageState={createPage} setCreatePageState={setCreatePage} />}
+      {_.isEqual(createPage, "entity") && (
+        <EntityPage
+          createPageState={createPage}
+          setCreatePageState={setCreatePage}
+        />
+      )}
 
       {/* Create a Collection */}
-      {_.isEqual(createPage, "collection") && <CollectionPage createPageState={createPage} setCreatePageState={setCreatePage} />}
+      {_.isEqual(createPage, "collection") && (
+        <CollectionPage
+          createPageState={createPage}
+          setCreatePageState={setCreatePage}
+        />
+      )}
 
       {/* Create an Attribute */}
-      {_.isEqual(createPage, "attribute") && <AttributePage createPageState={createPage} setCreatePageState={setCreatePage} />}
+      {_.isEqual(createPage, "attribute") && (
+        <AttributePage
+          createPageState={createPage}
+          setCreatePageState={setCreatePage}
+        />
+      )}
     </>
   );
 };

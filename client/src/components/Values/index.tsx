@@ -236,23 +236,45 @@ const Values = (props: {
               let linkTextColor = "black";
               let linkBgColor = "gray.100";
               let linkLogo = null;
-              if (_.isEqual(hostname, "wustl.box.com")) {
+              if (
+                _.isEqual(hostname, "wustl.box.com") ||
+                _.isEqual(hostname, "wustl.app.box.com")
+              ) {
+                // Link to Box
                 linkTextColor = "white";
                 linkBgColor = "blue.400";
                 linkLogo = <Icon name={"l_box"} size={[5, 5]} />;
               } else if (_.isEqual(hostname, "mynotebook.labarchives.com")) {
+                // Link to LabArchives
                 linkTextColor = "white";
                 linkBgColor = "purple.400";
                 linkLogo = <Icon name={"l_labArchives"} size={[5, 5]} />;
               } else if (_.isEqual(hostname, "app.globus.org")) {
+                // Link to Globus
                 linkTextColor = "white";
                 linkBgColor = "blue.600";
                 linkLogo = <Icon name={"l_globus"} size={[5, 5]} />;
+              } else if (_.isEqual(hostname, "github.com")) {
+                // Link to GitHub
+                linkTextColor = "white";
+                linkBgColor = "black";
+                linkLogo = <Icon name={"l_github"} size={[5, 5]} />;
               }
 
               return (
                 <Tooltip label={value}>
-                  <Flex direction={"row"} align={"center"} p={"2"} pl={"4"} pr={"4"} rounded={"full"} gap={"2"} bg={linkBgColor} color={linkTextColor} justify={"space-between"}>
+                  <Flex
+                    direction={"row"}
+                    align={"center"}
+                    p={"2"}
+                    pl={"4"}
+                    pr={"4"}
+                    rounded={"full"}
+                    gap={"2"}
+                    bg={linkBgColor}
+                    color={linkTextColor}
+                    justify={"space-between"}
+                  >
                     {linkLogo}
                     <Link href={value} isExternal noOfLines={1}>
                       <Text>{shortenedUrl}</Text>
@@ -407,10 +429,7 @@ const Values = (props: {
         >
           <Popover>
             <PopoverTrigger>
-              <Button
-                colorScheme={"green"}
-                rightIcon={<Icon name={"add"} />}
-              >
+              <Button colorScheme={"green"} rightIcon={<Icon name={"add"} />}>
                 Add Value
               </Button>
             </PopoverTrigger>
@@ -476,7 +495,9 @@ const Values = (props: {
                       props.setValues([
                         ...data,
                         {
-                          identifier: `v_number_${Math.round(performance.now())}`,
+                          identifier: `v_number_${Math.round(
+                            performance.now()
+                          )}`,
                           name: "",
                           type: "number",
                           data: 0,
@@ -520,7 +541,9 @@ const Values = (props: {
                       props.setValues([
                         ...data,
                         {
-                          identifier: `p_entity_${Math.round(performance.now())}`,
+                          identifier: `p_entity_${Math.round(
+                            performance.now()
+                          )}`,
                           name: "",
                           type: "entity",
                           data: "",
@@ -645,7 +668,7 @@ const Values = (props: {
                           </Flex>
                         );
                       })}
-                    </VStack>
+                  </VStack>
                 </Flex>
 
                 <Flex gap={"4"} justify={"center"}>

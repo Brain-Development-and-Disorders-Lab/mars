@@ -11,6 +11,11 @@ import {
   List,
   ListItem,
   useBreakpoint,
+  Tabs,
+  TabList,
+  Tab,
+  TabPanels,
+  TabPanel,
 } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
 import { Content } from "@components/Container";
@@ -229,13 +234,36 @@ const Dashboard = () => {
 
                 {/* Collections table */}
                 {isLoaded && collectionData.length > 0 ? (
-                  <DataTable
-                    columns={collectionTableColumns}
-                    data={collectionTableData}
-                    visibleColumns={visibleColumns}
-                    hidePagination
-                    hideSelection
-                  />
+                  <Tabs variant={"soft-rounded"}>
+                    <TabList>
+                      <Tab>Standard</Tab>
+                      <Tab>Projects</Tab>
+                    </TabList>
+                    <TabPanels>
+                      <TabPanel>
+                        <DataTable
+                          columns={collectionTableColumns}
+                          data={collectionTableData.filter((collection) => {
+                            return _.isEqual(collection.type, "collection");
+                          })}
+                          visibleColumns={visibleColumns}
+                          hidePagination
+                          hideSelection
+                        />
+                      </TabPanel>
+                      <TabPanel>
+                        <DataTable
+                          columns={collectionTableColumns}
+                          data={collectionTableData.filter((collection) => {
+                            return _.isEqual(collection.type, "project");
+                          })}
+                          visibleColumns={visibleColumns}
+                          hidePagination
+                          hideSelection
+                        />
+                      </TabPanel>
+                    </TabPanels>
+                  </Tabs>
                 ) : (
                   <Text>There are no Collections to display.</Text>
                 )}

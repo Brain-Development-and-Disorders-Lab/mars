@@ -99,14 +99,16 @@ const Entities = () => {
     columnHelper.accessor("_id", {
       cell: (info) => {
         return (
-          <Button
-            key={`view-entity-${info.getValue()}`}
-            colorScheme={"blackAlpha"}
-            rightIcon={<Icon name={"c_right"} />}
-            onClick={() => navigate(`/entities/${info.getValue()}`)}
-          >
-            View
-          </Button>
+          <Flex w={"100%"} justify={"end"}>
+            <Button
+              key={`view-entity-${info.getValue()}`}
+              colorScheme={"blackAlpha"}
+              rightIcon={<Icon name={"c_right"} />}
+              onClick={() => navigate(`/entities/${info.getValue()}`)}
+            >
+              View
+            </Button>
+          </Flex>
         );
       },
       header: "",

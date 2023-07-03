@@ -81,7 +81,6 @@ import { deleteData, getData, postData } from "src/database/functions";
 import { isValidValues } from "src/functions";
 import _ from "lodash";
 import dayjs from "dayjs";
-import consola from "consola";
 import FileSaver from "file-saver";
 import slugify from "slugify";
 import { nanoid } from "nanoid";
@@ -219,7 +218,7 @@ const Entity = () => {
 
         // Store data and signal data retrieval being completed
         setEntityData(response);
-        setEntityDescription(response.description);
+        setEntityDescription(response.description || "");
         setEntityCollections(response.collections);
         setEntityOrigins(response.associations.origins);
         setEntityProducts(response.associations.products);
@@ -401,7 +400,7 @@ const Entity = () => {
       .finally(() => {
         // Apply updated state
         setEntityData(updateData);
-        setEntityDescription(updateData.description);
+        setEntityDescription(updateData.description || "");
         setEntityCollections(updateData.collections);
         setEntityOrigins(updateData.associations.origins);
         setEntityProducts(updateData.associations.products);
@@ -462,7 +461,7 @@ const Entity = () => {
 
         // Apply updated state
         setEntityData(updateData);
-        setEntityDescription(updateData.description);
+        setEntityDescription(updateData.description || "");
         setEntityCollections(updateData.collections);
         setEntityOrigins(updateData.associations.origins);
         setEntityProducts(updateData.associations.products);
@@ -479,26 +478,35 @@ const Entity = () => {
   };
 
   // Handle clicking the "Download" button
-  const handleDownloadClick = () => {
-    consola.info("Exporting additional fields:", exportFields);
-
+  const handleDownloadClick = (format: "json" | "csv" | "txt") => {
     // Send POST data to generate file
     postData(`/entities/export`, {
       id: id,
       fields: exportFields,
+      format: format,
     })
       .then((response) => {
+        let responseData = response;
+
+        // Clean the response data if required
+        if (_.isEqual(format, "json")) {
+          responseData = JSON.stringify(responseData, null, "  ");
+        }
+
         FileSaver.saveAs(
-          new Blob([response]),
-          slugify(`${entityData.name.replace(" ", "")}_export.csv`)
+          new Blob([responseData]),
+          slugify(`${entityData.name.replace(" ", "")}_export.${format}`)
         );
 
         // Close the "Export" modal
         onExportClose();
 
+        // Reset the export state
+        setExportFields([]);
+
         toast({
           title: "Info",
-          description: "Generated CSV file.",
+          description: `Generated ${format.toUpperCase()} file.`,
           status: "info",
           duration: 2000,
           position: "bottom-right",
@@ -761,8 +769,10 @@ const Entity = () => {
                     </Button>
                   ) : (
                     <Flex gap={"4"}>
-                      {entityData.locked ?
-                        <Tooltip label={"Currently being edited by another user"}>
+                      {entityData.locked ? (
+                        <Tooltip
+                          label={"Currently being edited by another user"}
+                        >
                           <Button
                             colorScheme={"gray"}
                             rightIcon={<Icon name={"lock"} />}
@@ -771,7 +781,7 @@ const Entity = () => {
                             Edit
                           </Button>
                         </Tooltip>
-                      :
+                      ) : (
                         <Button
                           onClick={handleEditClick}
                           colorScheme={editing ? "green" : "gray"}
@@ -786,7 +796,7 @@ const Entity = () => {
                         >
                           {editing ? "Done" : "Edit"}
                         </Button>
-                      }
+                      )}
                     </Flex>
                   )}
                 </Flex>
@@ -888,7 +898,7 @@ const Entity = () => {
                             <Textarea
                               value={entityDescription}
                               onChange={(event) => {
-                                setEntityDescription(event.target.value);
+                                setEntityDescription(event.target.value || "");
                               }}
                               disabled={!editing}
                             />
@@ -1282,11 +1292,11 @@ const Entity = () => {
                             }
                             required
                           />
-                          {isAttributeNameError &&
+                          {isAttributeNameError && (
                             <FormErrorMessage>
                               A name must be specified for the Attribute.
                             </FormErrorMessage>
-                          }
+                          )}
                         </FormControl>
 
                         <FormControl isRequired>
@@ -1298,12 +1308,12 @@ const Entity = () => {
                               setAttributeDescription(event.target.value)
                             }
                           />
-                          {isAttributeDescriptionError &&
+                          {isAttributeDescriptionError && (
                             <FormErrorMessage>
                               A description should be provided for the
                               Attribute.
                             </FormErrorMessage>
-                          }
+                          )}
                         </FormControl>
                       </Flex>
 
@@ -1707,15 +1717,44 @@ const Entity = () => {
                                   event.target.checked
                                 )
                               }
+                              disabled={_.isEqual(entityDescription, "")}
                             >
                               <Text noOfLines={1}>
-                                Description: {entityDescription}
+                                Description:{" "}
+                                {_.isEqual(entityDescription, "")
+                                  ? "No description"
+                                  : entityDescription}
                               </Text>
                             </Checkbox>
                           </Stack>
                         </CheckboxGroup>
                       ) : (
                         <Text>Loading details</Text>
+                      )}
+                    </FormControl>
+                    <FormControl>
+                      <FormLabel>Collections</FormLabel>
+                      {isLoaded && entityCollections.length > 0 ? (
+                        <Stack spacing={2} direction={"column"}>
+                          {entityCollections.map((collection) => {
+                            return (
+                              <Checkbox
+                                key={collection}
+                                onChange={(event) =>
+                                  handleExportCheck(
+                                    `collection_${collection}`,
+                                    event.target.checked
+                                  )
+                                }
+                              >
+                                Collection:{" "}
+                                {<Linky id={collection} type={"collections"} />}
+                              </Checkbox>
+                            );
+                          })}
+                        </Stack>
+                      ) : (
+                        <Text>No Origins</Text>
                       )}
                     </FormControl>
                     <FormControl>
@@ -1776,7 +1815,7 @@ const Entity = () => {
                           {entityAttributes.map((attribute) => {
                             return (
                               <Checkbox
-                                key={attribute.name}
+                                key={attribute._id}
                                 onChange={(event) =>
                                   handleExportCheck(
                                     `attribute_${attribute._id}`,
@@ -1796,14 +1835,28 @@ const Entity = () => {
                   </Flex>
                 </Flex>
 
-                {/* "Download" button */}
-                <Flex direction={"row"} p={"md"} justify={"center"}>
+                {/* "Download" buttons */}
+                <Flex direction={"row"} p={"md"} gap={"4"} justify={"center"}>
                   <Button
-                    colorScheme={"green"}
-                    onClick={() => handleDownloadClick()}
+                    colorScheme={"blue"}
+                    onClick={() => handleDownloadClick(`json`)}
                     rightIcon={<Icon name={"download"} />}
                   >
-                    Download
+                    JSON
+                  </Button>
+                  <Button
+                    colorScheme={"blue"}
+                    onClick={() => handleDownloadClick(`csv`)}
+                    rightIcon={<Icon name={"download"} />}
+                  >
+                    CSV
+                  </Button>
+                  <Button
+                    colorScheme={"blue"}
+                    onClick={() => handleDownloadClick(`txt`)}
+                    rightIcon={<Icon name={"download"} />}
+                  >
+                    TXT
                   </Button>
                 </Flex>
               </ModalContent>

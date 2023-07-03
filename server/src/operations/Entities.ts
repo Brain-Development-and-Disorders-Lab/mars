@@ -1,5 +1,5 @@
 // Utility libraries
-import _ from "lodash";
+import _, { reject } from "lodash";
 import consola from "consola";
 
 // Utility functions
@@ -20,6 +20,28 @@ import { AttributeModel, EntityModel } from "@types";
 const ENTITIES_COLLECTION = "entities";
 
 export class Entities {
+  /**
+   * Check if an Entity exists in the system
+   * @param {string} id the Entity identifier
+   * @return {boolean}
+   */
+  static exists = (id: string): Promise<boolean> => {
+    consola.start("Checking if Entity (id):", id.toString(), "exists");
+    return new Promise((resolve, _reject) => {
+      getDatabase()
+        .collection(ENTITIES_COLLECTION)
+        .findOne({ _id: id }, (_error: any, result: any) => {
+          if (_.isNull(result)) {
+            consola.warn("Entity (id):", id.toString(), "does not exist");
+            resolve(false);
+          }
+
+          consola.success("Entity (id):", id.toString(), "exists");
+          resolve(true);
+        });
+    });
+  };
+
   /**
    * Create a new Entity
    * @param {any} entity all data associated with the new Entity
@@ -73,7 +95,7 @@ export class Entities {
 
           if (entity.collections.length > 0) {
             // If this Entity has been added to Collections, add the Entity to each Collection
-            entity.collections.map((collection: string) => {
+            entity.collections.forEach((collection: string) => {
               operations.push(Collections.addEntity(collection, entity._id));
             });
           }
@@ -93,10 +115,15 @@ export class Entities {
           );
 
           // Resolve all operations then resolve overall Promise
-          Promise.all(operations).then((_result) => {
-            consola.success("Created Entity:", entity._id, entity.name);
-            resolve(entity);
-          });
+          Promise.all(operations)
+            .then((_result) => {
+              consola.success("Created Entity:", entity._id, entity.name);
+              resolve(entity);
+            })
+            .catch((_error) => {
+              consola.error("Error creating Entity:", entity._id, entity.name);
+              reject("Error creating Entity");
+            });
         });
     });
   };
@@ -344,104 +371,43 @@ export class Entities {
     });
   };
 
-  /**
-   * Add another Entity to a collection of "product" associations
-   * @param {{ name: string, id: string }} entity the Entity of interest
-   * @param {{ name: string, id: string }} product an Entity to add as a "product" association
-   * @return {Promise<{ name: string, id: string }>}
-   */
-  static addProduct = (
-    entity: { name: string; id: string },
-    product: { name: string; id: string }
-  ): Promise<{ name: string; id: string }> => {
-    consola.start("Adding Product", product.name, "to Entity", entity.name);
+  static restore = (entity: EntityModel): Promise<EntityModel> => {
+    consola.start("Restoring Entity:", entity.name);
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES_COLLECTION)
-        .findOne({ _id: entity.id }, (error: any, result: any) => {
+        .insertOne(entity as any, (error: any, _result: any) => {
           if (error) {
             throw error;
           }
 
-          // Update the collection of Products associated with the Entity to include this extra product
-          const updates = {
-            $set: {
-              associations: {
-                origins: result.associations.origins,
-                products: [...result.associations.products, product],
+          // Database operations to perform outside of creating a new Entity
+          const operations: Promise<any>[] = [];
+
+          // Add Update operation
+          operations.push(
+            Activity.create({
+              timestamp: new Date(Date.now()),
+              type: "create",
+              details: "Restored Entity",
+              target: {
+                type: "entities",
+                id: entity._id,
+                name: entity.name,
               },
-            },
-          };
+            })
+          );
 
-          getDatabase()
-            .collection(ENTITIES_COLLECTION)
-            .updateOne(
-              { _id: entity.id },
-              updates,
-              (error: any, _response: any) => {
-                if (error) {
-                  throw error;
-                }
-
-                // Resolve the Promise
-                consola.success(
-                  "Added Product",
-                  product.name,
-                  "to Entity",
-                  entity.name
-                );
-                resolve(entity);
-              }
-            );
-        });
-    });
-  };
-
-  static removeProduct = (
-    entity: { name: string; id: string },
-    product: { name: string; id: string }
-  ): Promise<{ name: string; id: string }> => {
-    consola.start("Removing Product", product.name, "from Entity", entity.name);
-    return new Promise((resolve, _reject) => {
-      getDatabase()
-        .collection(ENTITIES_COLLECTION)
-        .findOne({ _id: entity.id }, (error: any, result: any) => {
-          if (error) {
-            throw error;
-          }
-
-          // Update the collection of Products associated with the Entity to remove this Product
-          const updates = {
-            $set: {
-              associations: {
-                origins: (result as EntityModel).associations.origins,
-                products: (result as EntityModel).associations.products.filter(
-                  (content) => !_.isEqual(product.id, content.id)
-                ),
-              },
-            },
-          };
-
-          getDatabase()
-            .collection(ENTITIES_COLLECTION)
-            .updateOne(
-              { _id: entity.id },
-              updates,
-              (error: any, _response: any) => {
-                if (error) {
-                  throw error;
-                }
-
-                // Resolve the Promise
-                consola.info(
-                  "Removed Product",
-                  product.name,
-                  "from Entity",
-                  entity.name
-                );
-                resolve(entity);
-              }
-            );
+          // Resolve all operations then resolve overall Promise
+          Promise.all(operations)
+            .then((_result) => {
+              consola.success("Restored Entity:", entity._id, entity.name);
+              resolve(entity);
+            })
+            .catch((_error) => {
+              consola.error("Error restoring Entity:", entity._id, entity.name);
+              reject("Error restoring Entity");
+            });
         });
     });
   };
@@ -549,6 +515,165 @@ export class Entities {
   };
 
   /**
+   * Add another Entity to a collection of "product" associations
+   * @param {{ name: string, id: string }} entity the Entity of interest
+   * @param {{ name: string, id: string }} product an Entity to add as a "product" association
+   * @return {Promise<{ name: string, id: string }>}
+   */
+  static addProduct = (
+    entity: { name: string; id: string },
+    product: { name: string; id: string }
+  ): Promise<{ name: string; id: string }> => {
+    consola.start("Adding Product", product.name, "to Entity", entity.name);
+    return new Promise((resolve, _reject) => {
+      getDatabase()
+        .collection(ENTITIES_COLLECTION)
+        .findOne({ _id: entity.id }, (error: any, result: any) => {
+          if (error) {
+            throw error;
+          }
+
+          // Update the collection of Products associated with the Entity to include this extra product
+          const updates = {
+            $set: {
+              associations: {
+                origins: result.associations.origins,
+                products: _.uniq(
+                  _.concat(result.associations.products, product)
+                ),
+              },
+            },
+          };
+
+          getDatabase()
+            .collection(ENTITIES_COLLECTION)
+            .updateOne(
+              { _id: entity.id },
+              updates,
+              (error: any, _response: any) => {
+                if (error) {
+                  throw error;
+                }
+
+                // Resolve the Promise
+                consola.success(
+                  "Added Product",
+                  product.name,
+                  "to Entity",
+                  entity.name
+                );
+                resolve(entity);
+              }
+            );
+        });
+    });
+  };
+
+  /**
+   * Add another Entity to a collection of "product" associations
+   * @param {{ name: string, id: string }} entity the Entity of interest
+   * @param {{ name: string, id: string }[]} products Entities to add as a "product" association
+   * @return {Promise<{ name: string, id: string }[]>}
+   */
+  static addProducts = (
+    entity: { name: string; id: string },
+    products: { name: string; id: string }[]
+  ): Promise<{ name: string; id: string }> => {
+    consola.start("Adding", products.length, "Products to Entity", entity.name);
+    return new Promise((resolve, _reject) => {
+      getDatabase()
+        .collection(ENTITIES_COLLECTION)
+        .findOne({ _id: entity.id }, (error: any, result: any) => {
+          if (error) {
+            throw error;
+          }
+
+          // Update the collection of Products associated with the Entity to include this extra product
+          const updates = {
+            $set: {
+              associations: {
+                origins: result.associations.origins,
+                products: _.uniq(
+                  _.concat(result.associations.products, products)
+                ),
+              },
+            },
+          };
+
+          getDatabase()
+            .collection(ENTITIES_COLLECTION)
+            .updateOne(
+              { _id: entity.id },
+              updates,
+              (error: any, _response: any) => {
+                if (error) {
+                  throw error;
+                }
+
+                // Resolve the Promise
+                consola.start(
+                  "Added",
+                  products.length,
+                  "Products to Entity",
+                  entity.name
+                );
+                resolve(entity);
+              }
+            );
+        });
+    });
+  };
+
+  static removeProduct = (
+    entity: { name: string; id: string },
+    product: { name: string; id: string }
+  ): Promise<{ name: string; id: string }> => {
+    consola.start("Removing Product", product.name, "from Entity", entity.name);
+    return new Promise((resolve, _reject) => {
+      getDatabase()
+        .collection(ENTITIES_COLLECTION)
+        .findOne({ _id: entity.id }, (error: any, result: any) => {
+          if (error) {
+            throw error;
+          }
+
+          // Update the collection of Products associated with the Entity to remove this Product
+          const updates = {
+            $set: {
+              associations: {
+                origins: (result as EntityModel).associations.origins,
+                products: (result as EntityModel).associations.products.filter(
+                  (content) => !_.isEqual(product.id, content.id)
+                ),
+              },
+            },
+          };
+
+          getDatabase()
+            .collection(ENTITIES_COLLECTION)
+            .updateOne(
+              { _id: entity.id },
+              updates,
+              (error: any, _response: any) => {
+                if (error) {
+                  throw error;
+                }
+
+                // Resolve the Promise
+                consola.info(
+                  "Removed Product",
+                  product.name,
+                  "from Entity",
+                  entity.name
+                );
+                resolve(entity);
+              }
+            );
+        });
+    });
+  };
+
+  /**
    * Specify an Entity acting as an Origin
    * @param {{ name: string, id: string }} entity the Entity of interest
    * @param {{ name: string, id: string }} origin an Entity to add as an "origin" association
@@ -598,6 +723,59 @@ export class Entities {
                   "Added Origin",
                   origin.name,
                   "to Entity",
+                  entity.name
+                );
+                resolve(entity);
+              }
+            );
+        });
+    });
+  };
+
+  /**
+   * Specify an Entity acting as an Origin
+   * @param {{ name: string, id: string }} entity the Entity of interest
+   * @param {{ name: string, id: string }[]} origins Entities to add as "origin" associations
+   * @return {Promise<{ name: string, id: string }[]>}
+   */
+  static addOrigins = (
+    entity: { name: string; id: string },
+    origins: { name: string; id: string }[]
+  ): Promise<{ name: string; id: string }> => {
+    consola.start("Adding", origins.length, "Origins to Entity", entity.name);
+    return new Promise((resolve, _reject) => {
+      getDatabase()
+        .collection(ENTITIES_COLLECTION)
+        .findOne({ _id: entity.id }, (error: any, result: any) => {
+          if (error) {
+            throw error;
+          }
+
+          // Add the Origin to this Entity
+          const updates = {
+            $set: {
+              associations: {
+                origins: _.uniq(_.concat(result.associations.origins, origins)),
+                products: result.associations.products,
+              },
+            },
+          };
+
+          getDatabase()
+            .collection(ENTITIES_COLLECTION)
+            .updateOne(
+              { _id: entity.id },
+              updates,
+              (error: any, _response: any) => {
+                if (error) {
+                  throw error;
+                }
+
+                // Resolve the Promise
+                consola.success(
+                  "Added",
+                  origins.length,
+                  "Origins to Entity",
                   entity.name
                 );
                 resolve(entity);
@@ -876,9 +1054,10 @@ export class Entities {
    * @param entity the Entity of interest
    * @return {Promise<{ name: string, id: string }>}
    */
-  static setLock = (
-    entityLockData: { entity: { name: string, id: string }, lockState: boolean }
-  ): Promise<{ name: string; id: string }> => {
+  static setLock = (entityLockData: {
+    entity: { name: string; id: string };
+    lockState: boolean;
+  }): Promise<{ name: string; id: string }> => {
     consola.start(
       "Setting lock state of Entity",
       entityLockData.entity.name,
@@ -888,46 +1067,52 @@ export class Entities {
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES_COLLECTION)
-        .findOne({ _id: entityLockData.entity.id }, (error: any, _result: any) => {
-          if (error) {
-            throw error;
+        .findOne(
+          { _id: entityLockData.entity.id },
+          (error: any, _result: any) => {
+            if (error) {
+              throw error;
+            }
+
+            // Update the description of this Entity
+            const updates = {
+              $set: {
+                locked: entityLockData.lockState,
+              },
+            };
+
+            getDatabase()
+              .collection(ENTITIES_COLLECTION)
+              .updateOne(
+                { _id: entityLockData.entity.id },
+                updates,
+                (error: any, _response: any) => {
+                  if (error) {
+                    throw error;
+                  }
+
+                  // Update automatic unlock operation after 30 seconds
+                  if (entityLockData.lockState === true) {
+                    setTimeout(() => {
+                      this.setLock({
+                        entity: entityLockData.entity,
+                        lockState: false,
+                      });
+                    }, 30000);
+                  }
+
+                  // Resolve the Promise
+                  consola.success(
+                    "Set lock state of Entity",
+                    entityLockData.entity.name,
+                    "to",
+                    entityLockData.lockState ? "locked" : "unlocked"
+                  );
+                  resolve(entityLockData.entity);
+                }
+              );
           }
-
-          // Update the description of this Entity
-          const updates = {
-            $set: {
-              locked: entityLockData.lockState,
-            },
-          };
-
-          getDatabase()
-            .collection(ENTITIES_COLLECTION)
-            .updateOne(
-              { _id: entityLockData.entity.id },
-              updates,
-              (error: any, _response: any) => {
-                if (error) {
-                  throw error;
-                }
-
-                // Update automatic unlock operation after 30 seconds
-                if (entityLockData.lockState === true) {
-                  setTimeout(() => {
-                    this.setLock({entity: entityLockData.entity, lockState: false});
-                  }, 30000);
-                }
-
-                // Resolve the Promise
-                consola.success(
-                  "Set lock state of Entity",
-                  entityLockData.entity.name,
-                  "to",
-                  entityLockData.lockState ? "locked" : "unlocked"
-                );
-                resolve(entityLockData.entity);
-              }
-            );
-        });
+        );
     });
   };
 
@@ -984,6 +1169,7 @@ export class Entities {
   static getData = (entityExportData: {
     id: string;
     fields: string[];
+    format: "json" | "csv" | "txt";
   }): Promise<string> => {
     consola.start(
       "Generating data for Entity (id):",
@@ -1000,77 +1186,263 @@ export class Entities {
 
           const entity = result as EntityModel;
 
-          const headers = ["name"];
-          const row: Promise<string>[] = [Promise.resolve(entity.name)];
+          if (_.isEqual(entityExportData.format, "csv")) {
+            const headers = ["Name"];
+            const row: Promise<string>[] = [Promise.resolve(entity.name)];
 
-          // Iterate over fields and generate a CSV export file
-          entityExportData.fields.map((field) => {
-            if (_.isEqual(field, "created")) {
-              // "created" data field
-              headers.push("Created");
-              row.push(
-                Promise.resolve(
-                  dayjs(entity.created).format("DD MMM YYYY").toString()
-                )
-              );
-            } else if (_.isEqual(field, "owner")) {
-              // "owner" data field
-              headers.push("Owner");
-              row.push(Promise.resolve(entity.owner));
-            } else if (_.isEqual(field, "description")) {
-              // "description" data field
-              headers.push("Description");
-              row.push(Promise.resolve(entity.description));
-            } else if (_.startsWith(field, "origin_")) {
-              // "origins" data field
-              row.push(
-                Entities.getOne(_.split(field, "_")[1]).then((entity) => {
-                  headers.push(`Origin (${entity.name})`);
-                  return entity.name;
-                })
-              );
-            } else if (_.startsWith(field, "product_")) {
-              // "products" data field
-              row.push(
-                Entities.getOne(_.split(field, "_")[1]).then((entity) => {
-                  headers.push(`Product (${entity.name})`);
-                  return entity.name;
-                })
-              );
-            } else if (_.startsWith(field, "attribute_")) {
-              // "attributes" data field
-              const attributeId = field.split("_")[1];
-              entity.attributes.map((attribute) => {
-                if (_.isEqual(attribute._id, attributeId)) {
-                  for (let value of attribute.values) {
-                    headers.push(`${value.name} (${attribute.name})`);
-                    row.push(Promise.resolve(`${value.data}`));
+            // Iterate over fields and generate a CSV export file
+            entityExportData.fields.map((field) => {
+              if (_.isEqual(field, "created")) {
+                // "created" data field
+                headers.push("Created");
+                row.push(
+                  Promise.resolve(
+                    dayjs(entity.created).format("DD MMM YYYY").toString()
+                  )
+                );
+              } else if (_.isEqual(field, "owner")) {
+                // "owner" data field
+                headers.push("Owner");
+                row.push(Promise.resolve(entity.owner));
+              } else if (_.isEqual(field, "description")) {
+                // "description" data field
+                headers.push("Description");
+                row.push(Promise.resolve(entity.description));
+              } else if (_.startsWith(field, "origin_")) {
+                // "origins" data field
+                row.push(
+                  Entities.getOne(_.split(field, "_")[1]).then((entity) => {
+                    headers.push(`Origin (${entity.name})`);
+                    return entity.name;
+                  })
+                );
+              } else if (_.startsWith(field, "product_")) {
+                // "products" data field
+                row.push(
+                  Entities.getOne(_.split(field, "_")[1]).then((entity) => {
+                    headers.push(`Product (${entity.name})`);
+                    return entity.name;
+                  })
+                );
+              } else if (_.startsWith(field, "attribute_")) {
+                // "attributes" data field
+                const attributeId = field.split("_")[1];
+                entity.attributes.map((attribute) => {
+                  if (_.isEqual(attribute._id, attributeId)) {
+                    for (let value of attribute.values) {
+                      headers.push(`${value.name} (${attribute.name})`);
+                      row.push(Promise.resolve(`${value.data}`));
+                    }
                   }
-                }
-              });
-            }
-          });
-
-          // Collate and format data as a CSV string
-          Promise.all(row).then((rowData) => {
-            const collated = [headers, rowData];
-            const formatted = Papa.unparse(collated);
-
-            // Create a temporary file, passing the filename as a response
-            tmp.file((error, path: string, _fd: number) => {
-              if (error) {
-                reject(error);
-                throw error;
+                });
               }
-
-              fs.writeFileSync(path, formatted);
-              consola.success(
-                "Generated data for  Entity (id):",
-                entityExportData.id.toString()
-              );
-              resolve(path);
             });
-          });
+
+            // Collate and format data as a CSV string
+            Promise.all(row).then((rowData) => {
+              const collated = [headers, rowData];
+              const formattedOutput = Papa.unparse(collated);
+
+              // Create a temporary file, passing the filename as a response
+              tmp.file((error, path: string, _fd: number) => {
+                if (error) {
+                  reject(error);
+                  throw error;
+                }
+
+                fs.writeFileSync(path, formattedOutput);
+                consola.success(
+                  "Generated CSV data for  Entity (id):",
+                  entityExportData.id.toString()
+                );
+                resolve(path);
+              });
+            });
+          } else if (_.isEqual(entityExportData.format, "json")) {
+            // JSON export
+            const tempStructure = {
+              _id: entity._id,
+              name: entity.name,
+              created: "",
+              owner: "",
+              description: "",
+              associations: {},
+              collections: [],
+              attributes: [],
+            } as { [key: string]: any };
+            const exportOperations = [] as Promise<string>[];
+
+            entityExportData.fields.map((field) => {
+              if (_.isEqual(field, "created")) {
+                // "created" data field
+                tempStructure["created"] = dayjs(entity.created)
+                  .format("DD MMM YYYY")
+                  .toString();
+              } else if (_.isEqual(field, "owner")) {
+                // "owner" data field
+                tempStructure["owner"] = entity.owner;
+              } else if (_.isEqual(field, "description")) {
+                // "description" data field
+                tempStructure["description"] = entity.description;
+              } else if (_.startsWith(field, "collection")) {
+                // "collections" data field
+                tempStructure["collections"] = [];
+                exportOperations.push(
+                  Collections.getOne(_.split(field, "_")[1]).then(
+                    (collection) => {
+                      tempStructure["collections"].push(collection.name);
+                      return collection.name;
+                    }
+                  )
+                );
+              } else if (_.startsWith(field, "origin_")) {
+                // "origins" data field
+                tempStructure.associations["origins"] = [];
+                exportOperations.push(
+                  Entities.getOne(_.split(field, "_")[1]).then((entity) => {
+                    tempStructure.associations["origins"].push(entity.name);
+                    return entity.name;
+                  })
+                );
+              } else if (_.startsWith(field, "product_")) {
+                // "products" data field
+                tempStructure.associations["products"] = [];
+                exportOperations.push(
+                  Entities.getOne(_.split(field, "_")[1]).then((entity) => {
+                    tempStructure.associations["products"].push(entity.name);
+                    return entity.name;
+                  })
+                );
+              } else if (_.startsWith(field, "attribute_")) {
+                // "attributes" data field
+                tempStructure["attributes"] = [];
+                const attributeId = field.split("_")[1];
+                entity.attributes.map((attribute) => {
+                  if (_.isEqual(attribute._id, attributeId)) {
+                    // Extract all values
+                    const attributeStruct = {} as { [value: string]: any };
+                    for (let value of attribute.values) {
+                      attributeStruct[value.name] = value.data;
+                    }
+
+                    // Add the Attribute to the exported set
+                    tempStructure["attributes"].push({
+                      [attribute.name]: attributeStruct,
+                    });
+                  }
+                });
+              }
+            });
+
+            // Run all export operations
+            Promise.all(exportOperations).then((_values) => {
+              // Create a temporary file, passing the filename as a response
+              tmp.file((error, path: string, _fd: number) => {
+                if (error) {
+                  reject(error);
+                  throw error;
+                }
+
+                fs.writeFileSync(
+                  path,
+                  JSON.stringify(tempStructure, null, "  ")
+                );
+                consola.success(
+                  "Generated JSON data for  Entity (id):",
+                  entityExportData.id.toString()
+                );
+                resolve(path);
+              });
+            });
+          } else {
+            // Text export
+            const exportOperations = [] as Promise<string>[];
+
+            // Structures to collate data
+            const textDetails = [`Name: ${entity.name}`];
+            const textOrigins = [] as string[];
+            const textProducts = [] as string[];
+            const textAttributes = [] as string[];
+
+            entityExportData.fields.map((field) => {
+              if (_.isEqual(field, "created")) {
+                // "created" data field
+                textDetails.push(
+                  `Created: ${dayjs(entity.created)
+                    .format("DD MMM YYYY")
+                    .toString()}`
+                );
+              } else if (_.isEqual(field, "owner")) {
+                // "owner" data field
+                textDetails.push(`Owner: ${entity.owner}`);
+              } else if (_.isEqual(field, "description")) {
+                // "description" data field
+                textDetails.push(`Description: ${entity.description}`);
+              } else if (_.startsWith(field, "origin_")) {
+                // "origins" data field
+                exportOperations.push(
+                  Entities.getOne(_.split(field, "_")[1]).then((entity) => {
+                    textOrigins.push(entity.name);
+                    return entity.name;
+                  })
+                );
+              } else if (_.startsWith(field, "product_")) {
+                // "products" data field
+                exportOperations.push(
+                  Entities.getOne(_.split(field, "_")[1]).then((entity) => {
+                    textProducts.push(entity.name);
+                    return entity.name;
+                  })
+                );
+              } else if (_.startsWith(field, "attribute_")) {
+                // "attributes" data field
+                const attributeId = field.split("_")[1];
+                entity.attributes.map((attribute) => {
+                  if (_.isEqual(attribute._id, attributeId)) {
+                    // Extract all values
+                    const attributeValues = [];
+                    for (let value of attribute.values) {
+                      attributeValues.push(`    ${value.name}: ${value.data}`);
+                    }
+
+                    // Add the Attribute to the exported set
+                    textAttributes.push(
+                      `  ${attribute.name}:\n${attributeValues.join("\n")}`
+                    );
+                  }
+                });
+              }
+            });
+
+            // Run all export operations
+            Promise.all(exportOperations).then((_values) => {
+              // Create a temporary file, passing the filename as a response
+              tmp.file((error, path: string, _fd: number) => {
+                if (error) {
+                  reject(error);
+                  throw error;
+                }
+
+                if (textOrigins.length > 0) {
+                  textDetails.push(`Origins: ${textOrigins.join(", ")}`);
+                }
+                if (textProducts.length > 0) {
+                  textDetails.push(`Products: ${textProducts.join(", ")}`);
+                }
+                if (textAttributes.length > 0) {
+                  textDetails.push(`Attributes:`);
+                  textDetails.push(...textAttributes);
+                }
+
+                fs.writeFileSync(path, textDetails.join("\n"));
+                consola.success(
+                  "Generated text data for  Entity (id):",
+                  entityExportData.id.toString()
+                );
+                resolve(path);
+              });
+            });
+          }
         });
     });
   };

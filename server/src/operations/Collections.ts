@@ -15,6 +15,28 @@ const COLLECTIONS = "collections";
 
 export class Collections {
   /**
+   * Check if a Collection exists in the system
+   * @param id the Collection identifier
+   * @return {boolean}
+   */
+  static exists = (id: string): Promise<boolean> => {
+    consola.start("Checking if Collection (id):", id.toString(), "exists");
+    return new Promise((resolve, _reject) => {
+      getDatabase()
+        .collection(COLLECTIONS)
+        .findOne({ _id: id }, (_error: any, result: any) => {
+          if (_.isNull(result)) {
+            consola.warn("Collection (id):", id.toString(), "does not exist");
+            resolve(false);
+          }
+
+          consola.success("Collection (id):", id.toString(), "exists");
+          resolve(true);
+        });
+    });
+  };
+
+  /**
    * Create a new Collection
    * @param {any} collection all data associated with the new Collection
    * @return {Promise<CollectionModel>}
@@ -166,6 +188,52 @@ export class Collections {
     });
   };
 
+  /**
+   * Create a new Collection
+   * @param {any} collection all data associated with the new Collection
+   * @return {Promise<CollectionModel>}
+   */
+  static restore = (collection: any): Promise<CollectionModel> => {
+    consola.start("Restoring Collection:", collection.name);
+    // Push data to database
+    return new Promise((resolve, _reject) => {
+      getDatabase()
+        .collection(COLLECTIONS)
+        .insertOne(collection, (error: any, _result: any) => {
+          if (error) {
+            throw error;
+          }
+
+          // Database operations to perform
+          const operations: Promise<any>[] = [];
+
+          // Add Update operation
+          operations.push(
+            Activity.create({
+              timestamp: new Date(Date.now()),
+              type: "create",
+              details: "Created new Collection",
+              target: {
+                type: "collections",
+                id: collection._id,
+                name: collection.name,
+              },
+            })
+          );
+
+          // Resolve all operations then resolve overall Promise
+          Promise.all(operations).then((_result) => {
+            consola.success(
+              "Restored Collection:",
+              collection._id,
+              collection.name
+            );
+            resolve(collection as CollectionModel);
+          });
+        });
+    });
+  };
+
   static addEntity = (collection: string, entity: string): Promise<string> => {
     consola.start(
       "Adding Entity",
@@ -180,11 +248,12 @@ export class Collections {
           if (error) {
             throw error;
           }
+          consola.info("Collection:", result);
 
           // Update the collection to include the Entity
           const updatedValues = {
             $set: {
-              entities: [...result.entities, entity],
+              entities: _.concat(result.entities, entity),
             },
           };
 
@@ -201,11 +270,60 @@ export class Collections {
                   "Added Entity",
                   entity.toString(),
                   "to Collection",
+                  result.name
+                );
+
+                // Resolve the Promise
+                resolve(result._id);
+              }
+            );
+        });
+    });
+  };
+
+  static addEntities = (
+    collection: string,
+    entities: string[]
+  ): Promise<string> => {
+    consola.start(
+      "Adding",
+      entities.length,
+      "Entities to Collection",
+      collection.toString()
+    );
+    return new Promise((resolve, _reject) => {
+      getDatabase()
+        .collection(COLLECTIONS)
+        .findOne({ _id: collection }, (error: any, result: any) => {
+          if (error) {
+            throw error;
+          }
+
+          // Update the collection to include the Entity
+          const updatedValues = {
+            $set: {
+              entities: _.uniq(_.concat(result.entities, entities)),
+            },
+          };
+
+          getDatabase()
+            .collection(COLLECTIONS)
+            .updateOne(
+              { _id: collection },
+              updatedValues,
+              (error: any, _response: any) => {
+                if (error) {
+                  throw error;
+                }
+                consola.start(
+                  "Added",
+                  entities.length,
+                  "Entities to Collection",
                   collection.toString()
                 );
 
                 // Resolve the Promise
-                resolve(collection);
+                resolve(result._id);
               }
             );
         });

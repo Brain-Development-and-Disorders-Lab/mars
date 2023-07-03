@@ -26,9 +26,12 @@ import {
   BsFileCodeFill,
   BsFileTextFill,
   BsFillBookFill,
+  BsFillBookmarkFill,
   BsFillCloudUploadFill,
   BsFillExclamationTriangleFill,
   BsFillFileBinaryFill,
+  BsFillGearFill,
+  BsGithub,
   BsGlobe,
   BsGridFill,
   BsInfoCircleFill,
@@ -64,6 +67,7 @@ const SYSTEM_ICONS: { [k: string]: IconType } = {
   dashboard: BsBarChartFill,
   entity: BsBoxFill,
   collection: BsGridFill,
+  project: BsFillBookmarkFill,
   attribute: BsTagFill,
 
   // Signal and action icons
@@ -89,11 +93,13 @@ const SYSTEM_ICONS: { [k: string]: IconType } = {
   scan: BsUpcScan,
   lock: BsLockFill,
   exit: BsPower,
+  settings: BsFillGearFill,
 
   // Logos
   l_box: SiBox,
   l_labArchives: BsFillBookFill,
   l_globus: BsGlobe,
+  l_gitHub: BsGithub,
 
   // Values
   v_date: BsCalendarWeekFill,

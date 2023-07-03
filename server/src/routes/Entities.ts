@@ -25,18 +25,35 @@ EntitiesRoute.route("/entities/:id").get((request: any, response: any) => {
 });
 
 // Lock specific entity
-EntitiesRoute.route("/entities/lock/:id").post((request: { body: { entity: { name: string, id: string }, lockState: boolean } }, response: any) => {
-  Entities.setLock(request.body).then((entity: { name: string, id: string }) => {
-    response.json(entity);
-  });
-});
+EntitiesRoute.route("/entities/lock/:id").post(
+  (
+    request: {
+      body: { entity: { name: string; id: string }; lockState: boolean };
+    },
+    response: any
+  ) => {
+    Entities.setLock(request.body).then(
+      (entity: { name: string; id: string }) => {
+        response.json(entity);
+      }
+    );
+  }
+);
 
 // Get JSON-formatted data of the Entity
 EntitiesRoute.route("/entities/export").post(
-  (request: { body: { id: string; fields: string[] } }, response: any) => {
+  (
+    request: {
+      body: { id: string; fields: string[]; format: "json" | "csv" | "txt" };
+    },
+    response: any
+  ) => {
     Entities.getData(request.body).then((path: string) => {
-      response.setHeader("Content-Type", "application/csv");
-      response.download(path, `export_${request.body.id}.csv`);
+      response.setHeader("Content-Type", `application/${request.body.format}`);
+      response.download(
+        path,
+        `export_${request.body.id}.${request.body.format}`
+      );
     });
   }
 );

@@ -34,7 +34,8 @@ const Attribute = (props: AttributeProps) => {
   const isDescriptionError = description === "";
   const [validValues, setValidValues] = useState(false);
 
-  const validAttributes = !isNameError && !isDescriptionError && validValues && values.length > 0;
+  const validAttributes =
+    !isNameError && !isDescriptionError && validValues && values.length > 0;
 
   useEffect(() => {
     setValidValues(isValidValues(values));

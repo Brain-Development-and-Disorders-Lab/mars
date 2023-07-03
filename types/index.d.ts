@@ -102,6 +102,7 @@ export type LinkyProps = {
 // Collection types
 export type ICollection = {
   name: string;
+  type: "collection" | "project";
   description: string;
   owner: string;
   created: string;
@@ -165,7 +166,18 @@ export type EntityExport = {
 
   // Generic details
   [key: string]: string;
-}
+};
+
+export type EntityImport = {
+  // Specific details
+  name: string;
+  created: string;
+  owner: string;
+  description: string;
+  collections: string;
+  origins: {id: string, name: string}[];
+  products: {id: string, name: string}[];
+};
 
 // Activity types
 export type IActivity = {
@@ -203,6 +215,7 @@ export type IconNames =
   "dashboard" |
   "entity" |
   "collection" |
+  "project" |
   "attribute" |
 
   // Signal and action icons
@@ -228,11 +241,13 @@ export type IconNames =
   "scan" |
   "lock" |
   "exit" |
+  "settings" |
 
   // Logos
   "l_box" |
   "l_labArchives" |
   "l_globus" |
+  "l_github" |
 
   // Values
   "v_date" |
@@ -264,6 +279,7 @@ export type QueryComponent = {
   parameter: QueryParameters;
   qualifier: QueryQualifier;
   value: string;
+  key: string;
 };
 
 // Authentication types
@@ -272,4 +288,14 @@ export type AuthToken = {
   token: string;
   lastLogin: string;
   valid: boolean;
+};
+
+// Device types
+export type IDevice = {
+  name: string;
+  vendor_id: number;
+};
+
+export type DeviceModel = IDevice & {
+  _id: string;
 };
