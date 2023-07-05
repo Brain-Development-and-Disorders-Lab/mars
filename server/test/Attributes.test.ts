@@ -16,11 +16,15 @@ import { AttributeModel } from "../../types";
 import { Attributes } from "../src/operations/Attributes";
 
 // Database connectivity
-import { connect, disconnect, getDatabase } from "../src/database/connection";
+import {
+  connectPrimary,
+  disconnect,
+  getDatabase,
+} from "../src/database/connection";
 
 // Connect to the database before each test
 beforeEach(() => {
-  return connect();
+  return connectPrimary();
 });
 
 // Clear the database after each test
@@ -29,7 +33,7 @@ afterEach(() => {
     getDatabase().collection("attributes").deleteMany({}),
     getDatabase().collection("collections").deleteMany({}),
     getDatabase().collection("entities").deleteMany({}),
-    getDatabase().collection("updates").deleteMany({}),
+    getDatabase().collection("activity").deleteMany({}),
   ]);
 });
 

@@ -101,7 +101,7 @@ const Import = (props: {
           setFile({} as File);
           props.onClose();
 
-          if (!_.isUndefined(response.data)) {
+          if (_.isEqual(fileType, "spreadsheet")) {
             toast({
               title: "Success",
               status: "success",
@@ -120,6 +120,24 @@ const Import = (props: {
               description: "Successfully imported file.",
               duration: 4000,
               position: "bottom-right",
+              isClosable: true,
+            });
+            toast({
+              title: "Success",
+              status: "success",
+              description: (
+                <Flex w={"100%"} direction={"row"} gap={"4"}>
+                  Updated data available.
+                  <Link onClick={() => window.location.reload()}>
+                    <Flex direction={"row"} gap={"1"} align={"center"}>
+                      <Text fontWeight={"semibold"}>Reload</Text>
+                      <Icon name={"reload"} />
+                    </Flex>
+                  </Link>
+                </Flex>
+              ),
+              duration: null,
+              position: "bottom",
               isClosable: true,
             });
           }
@@ -262,6 +280,8 @@ const Import = (props: {
   const getSelectEntitiesComponent = (
     value: { name: string; id: string },
     setValue: React.SetStateAction<any>,
+    selected: { name: string; id: string }[],
+    setSelected: React.SetStateAction<any>,
     disabled?: boolean
   ) => {
     return (
@@ -276,11 +296,11 @@ const Import = (props: {
           setValue(selection);
           if (
             !_.includes(
-              originsField.map((origin) => origin.id),
+              selected.map((entity) => entity.id),
               selection.id
             )
           ) {
-            setOriginsField([...originsField, selection]);
+            setSelected([...selected, selection]);
           }
         }}
         disabled={_.isUndefined(disabled) ? false : disabled}
@@ -572,7 +592,9 @@ const Import = (props: {
                       <Flex direction={"column"} gap={"4"}>
                         {getSelectEntitiesComponent(
                           selectedOrigin,
-                          setSelectedOrigin
+                          setSelectedOrigin,
+                          originsField,
+                          setOriginsField
                         )}
                         <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
                           {originsField.map((origin) => {
@@ -603,7 +625,8 @@ const Import = (props: {
                       {getSelectEntitiesComponent(
                         selectedProduct,
                         setSelectedProduct,
-                        true
+                        productsField,
+                        setProductsField
                       )}
                       {productsField.map((product) => {
                         return (

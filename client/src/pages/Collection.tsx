@@ -655,7 +655,6 @@ const Collection = () => {
                                       collectionVersion
                                     );
                                   }}
-                                  // disabled={collectionVersion.deleted}
                                 >
                                   Restore
                                 </Button>

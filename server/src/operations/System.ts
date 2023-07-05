@@ -305,12 +305,12 @@ export class System {
             });
           }
 
+          const minimalEntities = entities.map((entity) => {
+            return { id: entity._id, name: entity.name };
+          });
+
           // Add Products to Entities (if Origins specified)
           if (!_.isEmpty(entityFields.origins)) {
-            const minimalEntities = entities.map((entity) => {
-              return { id: entity._id, name: entity.name };
-            });
-
             // Add all Products to each Origin
             entityFields.origins.map((origin: { id: string; name: string }) => {
               operations.push(Entities.addProducts(origin, minimalEntities));
@@ -320,6 +320,23 @@ export class System {
             minimalEntities.map((entity) => {
               operations.push(
                 Entities.addOrigins(entity, entityFields.origins)
+              );
+            });
+          }
+
+          // Add Origins to Entities (if Products specified)
+          if (!_.isEmpty(entityFields.products)) {
+            // Add all Origins to each Product
+            entityFields.products.map(
+              (product: { id: string; name: string }) => {
+                operations.push(Entities.addOrigins(product, minimalEntities));
+              }
+            );
+
+            // Add all Products to each Origin
+            minimalEntities.map((entity) => {
+              operations.push(
+                Entities.addProducts(entity, entityFields.products)
               );
             });
           }
