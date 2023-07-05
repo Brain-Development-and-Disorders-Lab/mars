@@ -143,7 +143,13 @@ const Dashboard = () => {
   const entityTableColumnHelper = createColumnHelper<EntityModel>();
   const entityTableColumns = [
     entityTableColumnHelper.accessor("name", {
-      cell: (info) => <Linky id={info.row.original._id} type={"entities"} fallback={info.row.original.name} />,
+      cell: (info) => (
+        <Linky
+          id={info.row.original._id}
+          type={"entities"}
+          fallback={info.row.original.name}
+        />
+      ),
       header: "Name",
     }),
     entityTableColumnHelper.accessor("description", {
@@ -243,7 +249,9 @@ const Dashboard = () => {
                       <TabPanel>
                         <DataTable
                           columns={collectionTableColumns}
-                          data={collectionTableData.filter((collection) => _.isEqual(collection.type, "collection"))}
+                          data={collectionTableData.filter((collection) =>
+                            _.isEqual(collection.type, "collection")
+                          )}
                           visibleColumns={visibleColumns}
                           hidePagination
                           hideSelection
@@ -252,7 +260,9 @@ const Dashboard = () => {
                       <TabPanel>
                         <DataTable
                           columns={collectionTableColumns}
-                          data={collectionTableData.filter((collection) => _.isEqual(collection.type, "project"))}
+                          data={collectionTableData.filter((collection) =>
+                            _.isEqual(collection.type, "project")
+                          )}
                           visibleColumns={visibleColumns}
                           hidePagination
                           hideSelection
@@ -301,7 +311,9 @@ const Dashboard = () => {
                 {isLoaded && entityData.length > 0 ? (
                   <DataTable
                     columns={entityTableColumns}
-                    data={entityTableData.filter((entity) => _.isEqual(entity.deleted, false))}
+                    data={entityTableData.filter((entity) =>
+                      _.isEqual(entity.deleted, false)
+                    )}
                     visibleColumns={visibleColumns}
                     hidePagination
                     hideSelection

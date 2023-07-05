@@ -83,7 +83,7 @@ const Graph = (props: {
       }
     }
     return false;
-  }
+  };
 
   const generateLayout = (layoutNodes: Node[], layoutEdges: Edge[]) => {
     // Set the layout of the graph using ELK

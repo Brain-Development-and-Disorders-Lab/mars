@@ -594,7 +594,7 @@ const Import = (props: {
                           selectedOrigin,
                           setSelectedOrigin,
                           originsField,
-                          setOriginsField,
+                          setOriginsField
                         )}
                         <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
                           {originsField.map((origin) => {
@@ -626,7 +626,7 @@ const Import = (props: {
                         selectedProduct,
                         setSelectedProduct,
                         productsField,
-                        setProductsField,
+                        setProductsField
                       )}
                       {productsField.map((product) => {
                         return (
