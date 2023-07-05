@@ -16,12 +16,12 @@ import { CollectionModel, EntityModel } from "../../types";
 import { Entities } from "../src/operations/Entities";
 
 // Database connectivity
-import { connect, disconnect, getDatabase } from "../src/database/connection";
+import { connectPrimary, disconnect, getDatabase } from "../src/database/connection";
 import { Collections } from "../src/operations/Collections";
 
 // Connect to the database before each test
 beforeEach(() => {
-  return connect();
+  return connectPrimary();
 });
 
 // Clear the database after each test
