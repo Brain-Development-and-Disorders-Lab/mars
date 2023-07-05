@@ -30,7 +30,7 @@ afterEach(() => {
     getDatabase().collection("attributes").deleteMany({}),
     getDatabase().collection("collections").deleteMany({}),
     getDatabase().collection("entities").deleteMany({}),
-    getDatabase().collection("updates").deleteMany({}),
+    getDatabase().collection("activity").deleteMany({}),
   ]);
 });
 
