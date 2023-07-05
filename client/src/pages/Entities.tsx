@@ -146,7 +146,7 @@ const Entities = () => {
               <Flex direction={"column"} gap={"4"} w={"100%"}>
                 <DataTable
                   columns={columns}
-                  data={data}
+                  data={data.filter((entity) => _.isEqual(entity.deleted, false))}
                   visibleColumns={visibleColumns}
                   hideSelection
                 />

@@ -44,7 +44,7 @@ const Collections = () => {
 
   useEffect(() => {
     getData(`/collections`)
-      .then((value) => {
+      .then((value: CollectionModel[]) => {
         setCollectionsData(value);
       })
       .catch((_error) => {
@@ -98,7 +98,7 @@ const Collections = () => {
     }),
     columnHelper.accessor("entities", {
       cell: (info) => info.getValue().length,
-      header: "Count",
+      header: "Entity Count",
     }),
     columnHelper.accessor("_id", {
       cell: (info) => {
