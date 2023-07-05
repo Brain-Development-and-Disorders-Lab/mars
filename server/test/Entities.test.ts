@@ -17,7 +17,11 @@ import { Entities } from "../src/operations/Entities";
 import { Collections } from "../src/operations/Collections";
 
 // Database connectivity
-import { connectPrimary, disconnect, getDatabase } from "../src/database/connection";
+import {
+  connectPrimary,
+  disconnect,
+  getDatabase,
+} from "../src/database/connection";
 
 // Connect to the database before each test
 beforeEach(() => {

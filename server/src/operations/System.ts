@@ -327,9 +327,11 @@ export class System {
           // Add Origins to Entities (if Products specified)
           if (!_.isEmpty(entityFields.products)) {
             // Add all Origins to each Product
-            entityFields.products.map((product: { id: string; name: string }) => {
-              operations.push(Entities.addOrigins(product, minimalEntities));
-            });
+            entityFields.products.map(
+              (product: { id: string; name: string }) => {
+                operations.push(Entities.addOrigins(product, minimalEntities));
+              }
+            );
 
             // Add all Products to each Origin
             minimalEntities.map((entity) => {

@@ -16,7 +16,11 @@ import { AttributeModel } from "../../types";
 import { Attributes } from "../src/operations/Attributes";
 
 // Database connectivity
-import { connectPrimary, disconnect, getDatabase } from "../src/database/connection";
+import {
+  connectPrimary,
+  disconnect,
+  getDatabase,
+} from "../src/database/connection";
 
 // Connect to the database before each test
 beforeEach(() => {
