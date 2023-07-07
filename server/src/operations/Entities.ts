@@ -1187,8 +1187,8 @@ export class Entities {
           const entity = result as EntityModel;
 
           if (_.isEqual(entityExportData.format, "csv")) {
-            const headers = ["Name"];
-            const row: Promise<string>[] = [Promise.resolve(entity.name)];
+            const headers = ["ID", "Name"];
+            const row: Promise<string>[] = [Promise.resolve(entity._id), Promise.resolve(entity.name)];
 
             // Iterate over fields and generate a CSV export file
             entityExportData.fields.map((field) => {
@@ -1359,7 +1359,7 @@ export class Entities {
             const exportOperations = [] as Promise<string>[];
 
             // Structures to collate data
-            const textDetails = [`Name: ${entity.name}`];
+            const textDetails = [`ID: ${entity._id}`, `Name: ${entity.name}`];
             const textOrigins = [] as string[];
             const textProducts = [] as string[];
             const textAttributes = [] as string[];
