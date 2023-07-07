@@ -685,6 +685,7 @@ const EntityPage = (props: {
                           name={attribute.name}
                           description={attribute.description}
                           values={attribute.values}
+                          restrictDataValues={false}
                           onRemove={onRemoveAttribute}
                           onUpdate={onUpdateAttribute}
                         />

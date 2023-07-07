@@ -31,7 +31,7 @@ export namespace State.Entity {
   };
 
   type Attributes = Associations & {
-    attributes: Attribute[];
+    attributes: IAttribute[];
   };
 }
 
@@ -50,7 +50,7 @@ export namespace State.Collection {
 export type IAttribute = {
   name: string;
   description: string;
-  values: IValue[];
+  values: IValue<any>[];
 };
 
 // Database model of Attribute, including assigned ID
@@ -66,6 +66,8 @@ export type AttributeActions = {
 
 export type AttributeProps = IAttribute & AttributeActions & {
   identifier: string;
+  restrictDataValues: boolean;
+  permittedDataValues?: string[];
 };
 
 export type AttributeGroupProps = AttributeActions & {
@@ -90,7 +92,7 @@ export interface IValue<D> {
   showRemove?: boolean;
   onRemove?: (identifier: string) => void;
   onUpdate?: (data: D) => void;
-};
+}
 
 export type LinkyProps = {
   type: "entities" | "collections" | "attributes";
@@ -177,6 +179,7 @@ export type EntityImport = {
   collections: string;
   origins: {id: string, name: string}[];
   products: {id: string, name: string}[];
+  attributes: AttributeModel[];
 };
 
 // Activity types

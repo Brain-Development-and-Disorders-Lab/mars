@@ -10,6 +10,7 @@ import {
   EntityImport,
   EntityModel,
   IEntity,
+  IValue,
 } from "@types";
 
 // Utility functions and libraries
@@ -259,8 +260,27 @@ export class System {
     spreadsheetData: any[]
   ): Promise<EntityModel[]> => {
     return new Promise((resolve, reject) => {
+      // Extract Entities
       const entities = [] as IEntity[];
       spreadsheetData.map((row) => {
+        const attributes = [] as AttributeModel[];
+        // Extract Attributes
+        entityFields.attributes.map((attribute) => {
+          attributes.push({
+            _id: attribute._id,
+            name: attribute.name,
+            description: attribute.description,
+            values: attribute.values.map((value: IValue<any>) => {
+              return {
+                identifier: value.identifier,
+                name: value.name,
+                type: value.type,
+                data: row[value.data],
+              };
+            }),
+          })
+        });
+
         entities.push({
           deleted: false,
           locked: false,
@@ -273,7 +293,7 @@ export class System {
             origins: [],
             products: [],
           },
-          attributes: [],
+          attributes: attributes,
           history: [],
         });
       });

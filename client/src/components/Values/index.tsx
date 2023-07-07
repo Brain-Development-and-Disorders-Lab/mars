@@ -54,6 +54,7 @@ const Values = (props: {
   collection: IValue<any>[];
   viewOnly: boolean;
   setValues: Dispatch<SetStateAction<IValue<any>[]>>;
+  permittedValues?: string[];
 }) => {
   const toast = useToast();
 
@@ -185,34 +186,22 @@ const Values = (props: {
           updateData(info.row.original.identifier, value);
         };
 
-        switch (info.row.original.type) {
-          case "number": {
-            return (
-              <Input
-                id={`i_${info.row.original.identifier}_data`}
-                type={"number"}
-                value={value}
-                w={"2xs"}
-                disabled={props.viewOnly}
-                onChange={onChange}
-                onBlur={onBlur}
-              />
-            );
-          }
-          case "text": {
-            return (
-              <Input
-                id={`i_${info.row.original.identifier}_data`}
-                value={value}
-                w={"2xs"}
-                disabled={props.viewOnly}
-                onChange={onChange}
-                onBlur={onBlur}
-              />
-            );
-          }
-          case "url": {
-            if (_.isEqual(props.viewOnly, false)) {
+        if (_.isUndefined(props.permittedValues)) {
+          switch (info.row.original.type) {
+            case "number": {
+              return (
+                <Input
+                  id={`i_${info.row.original.identifier}_data`}
+                  type={"number"}
+                  value={value}
+                  w={"2xs"}
+                  disabled={props.viewOnly}
+                  onChange={onChange}
+                  onBlur={onBlur}
+                />
+              );
+            }
+            case "text": {
               return (
                 <Input
                   id={`i_${info.row.original.identifier}_data`}
@@ -223,132 +212,169 @@ const Values = (props: {
                   onBlur={onBlur}
                 />
               );
-            } else {
-              const domain = new URL(value);
-              const hostname = domain.hostname.replace("www", "");
-              let shortenedUrl = value.toString();
-              shortenedUrl = shortenedUrl.replace("https://", "");
-              shortenedUrl = shortenedUrl.replace("http://", "");
-              shortenedUrl = shortenedUrl.substring(0, 18);
-              shortenedUrl = shortenedUrl.concat("...");
-
-              // Setup Link display depending on destination URL
-              let linkTextColor = "black";
-              let linkBgColor = "gray.100";
-              let linkLogo = null;
-              if (
-                _.isEqual(hostname, "wustl.box.com") ||
-                _.isEqual(hostname, "wustl.app.box.com")
-              ) {
-                // Link to Box
-                linkTextColor = "white";
-                linkBgColor = "blue.400";
-                linkLogo = <Icon name={"l_box"} size={[5, 5]} />;
-              } else if (_.isEqual(hostname, "mynotebook.labarchives.com")) {
-                // Link to LabArchives
-                linkTextColor = "white";
-                linkBgColor = "purple.400";
-                linkLogo = <Icon name={"l_labArchives"} size={[5, 5]} />;
-              } else if (_.isEqual(hostname, "app.globus.org")) {
-                // Link to Globus
-                linkTextColor = "white";
-                linkBgColor = "blue.600";
-                linkLogo = <Icon name={"l_globus"} size={[5, 5]} />;
-              } else if (_.isEqual(hostname, "github.com")) {
-                // Link to GitHub
-                linkTextColor = "white";
-                linkBgColor = "black";
-                linkLogo = <Icon name={"l_github"} size={[5, 5]} />;
-              }
-
-              return (
-                <Tooltip label={value}>
-                  <Flex
-                    direction={"row"}
-                    align={"center"}
-                    p={"2"}
-                    pl={"4"}
-                    pr={"4"}
-                    rounded={"full"}
-                    gap={"2"}
-                    bg={linkBgColor}
-                    color={linkTextColor}
-                    justify={"space-between"}
-                  >
-                    {linkLogo}
-                    <Link href={value} isExternal noOfLines={1}>
-                      <Text>{shortenedUrl}</Text>
-                    </Link>
-                    <Icon name={"link"} />
-                  </Flex>
-                </Tooltip>
-              );
             }
-          }
-          case "date": {
-            return (
-              <Input
-                id={`i_${info.row.original.identifier}_data`}
-                type={"datetime-local"}
-                value={value}
-                w={"2xs"}
-                disabled={props.viewOnly}
-                onChange={onChange}
-                onBlur={onBlur}
-              />
-            );
-          }
-          case "entity": {
-            if (_.isEqual(props.viewOnly, false)) {
+            case "url": {
+              if (_.isEqual(props.viewOnly, false)) {
+                return (
+                  <Input
+                    id={`i_${info.row.original.identifier}_data`}
+                    value={value}
+                    w={"2xs"}
+                    disabled={props.viewOnly}
+                    onChange={onChange}
+                    onBlur={onBlur}
+                  />
+                );
+              } else {
+                const domain = new URL(value);
+                const hostname = domain.hostname.replace("www", "");
+                let shortenedUrl = value.toString();
+                shortenedUrl = shortenedUrl.replace("https://", "");
+                shortenedUrl = shortenedUrl.replace("http://", "");
+                shortenedUrl = shortenedUrl.substring(0, 18);
+                shortenedUrl = shortenedUrl.concat("...");
+
+                // Setup Link display depending on destination URL
+                let linkTextColor = "black";
+                let linkBgColor = "gray.100";
+                let linkLogo = null;
+                if (
+                  _.isEqual(hostname, "wustl.box.com") ||
+                  _.isEqual(hostname, "wustl.app.box.com")
+                ) {
+                  // Link to Box
+                  linkTextColor = "white";
+                  linkBgColor = "blue.400";
+                  linkLogo = <Icon name={"l_box"} size={[5, 5]} />;
+                } else if (_.isEqual(hostname, "mynotebook.labarchives.com")) {
+                  // Link to LabArchives
+                  linkTextColor = "white";
+                  linkBgColor = "purple.400";
+                  linkLogo = <Icon name={"l_labArchives"} size={[5, 5]} />;
+                } else if (_.isEqual(hostname, "app.globus.org")) {
+                  // Link to Globus
+                  linkTextColor = "white";
+                  linkBgColor = "blue.600";
+                  linkLogo = <Icon name={"l_globus"} size={[5, 5]} />;
+                } else if (_.isEqual(hostname, "github.com")) {
+                  // Link to GitHub
+                  linkTextColor = "white";
+                  linkBgColor = "black";
+                  linkLogo = <Icon name={"l_github"} size={[5, 5]} />;
+                }
+
+                return (
+                  <Tooltip label={value}>
+                    <Flex
+                      direction={"row"}
+                      align={"center"}
+                      p={"2"}
+                      pl={"4"}
+                      pr={"4"}
+                      rounded={"full"}
+                      gap={"2"}
+                      bg={linkBgColor}
+                      color={linkTextColor}
+                      justify={"space-between"}
+                    >
+                      {linkLogo}
+                      <Link href={value} isExternal noOfLines={1}>
+                        <Text>{shortenedUrl}</Text>
+                      </Link>
+                      <Icon name={"link"} />
+                    </Flex>
+                  </Tooltip>
+                );
+              }
+            }
+            case "date": {
               return (
-                <Select
-                  title="Select Entity"
-                  id={`s_${info.row.original.identifier}_data`}
+                <Input
+                  id={`i_${info.row.original.identifier}_data`}
+                  type={"datetime-local"}
                   value={value}
-                  placeholder={"Entity"}
                   w={"2xs"}
                   disabled={props.viewOnly}
                   onChange={onChange}
                   onBlur={onBlur}
+                />
+              );
+            }
+            case "entity": {
+              if (_.isEqual(props.viewOnly, false)) {
+                return (
+                  <Select
+                    title="Select Entity"
+                    id={`s_${info.row.original.identifier}_data`}
+                    value={value}
+                    placeholder={"Entity"}
+                    w={"2xs"}
+                    disabled={props.viewOnly}
+                    onChange={onChange}
+                    onBlur={onBlur}
+                  >
+                    {isLoaded &&
+                      entities.map((entity) => {
+                        return (
+                          <option key={entity._id} value={entity._id}>
+                            {entity.name}
+                          </option>
+                        );
+                      })}
+                    ;
+                  </Select>
+                );
+              } else {
+                return <Linky type={"entities"} id={value} />;
+              }
+            }
+            case "select": {
+              return (
+                <Select
+                  title="Select Option"
+                  id={`s_${info.row.original.identifier}_data`}
+                  value={value.selected}
+                  w={"2xs"}
+                  disabled={props.viewOnly}
+                  onChange={onSelectChange}
+                  onBlur={onBlur}
                 >
                   {isLoaded &&
-                    entities.map((entity) => {
+                    value.options &&
+                    value.options.map((value: string) => {
                       return (
-                        <option key={entity._id} value={entity._id}>
-                          {entity.name}
+                        <option key={value} value={value}>
+                          {value}
                         </option>
                       );
                     })}
-                  ;
                 </Select>
               );
-            } else {
-              return <Linky type={"entities"} id={value} />;
             }
           }
-          case "select": {
-            return (
-              <Select
-                title="Select Option"
-                id={`s_${info.row.original.identifier}_data`}
-                value={value.selected}
-                w={"2xs"}
-                disabled={props.viewOnly}
-                onChange={onSelectChange}
-                onBlur={onBlur}
-              >
-                {isLoaded &&
-                  value.options &&
-                  value.options.map((value: string) => {
-                    return (
-                      <option key={value} value={value}>
-                        {value}
-                      </option>
-                    );
-                  })}
-              </Select>
-            );
-          }
+        } else {
+          return (
+            <Select
+              title="Select Column"
+              id={`s_${info.row.original.identifier}_data`}
+              value={value}
+              placeholder={"Column"}
+              w={"2xs"}
+              disabled={props.viewOnly}
+              onChange={onChange}
+              onBlur={onBlur}
+            >
+              {isLoaded &&
+                props.permittedValues.map((value) => {
+                  return (
+                    <option key={value} value={value}>
+                      {value}
+                    </option>
+                  );
+                })}
+              ;
+            </Select>
+          );
         }
       },
       header: "Data",
@@ -561,6 +587,7 @@ const Values = (props: {
                     borderColor={"teal.300"}
                     _hover={{ bg: "teal.400" }}
                     leftIcon={<Icon name={"v_select"} />}
+                    disabled={!_.isUndefined(props.permittedValues)}
                     onClick={() => {
                       onOpen();
                     }}
