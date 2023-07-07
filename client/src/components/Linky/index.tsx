@@ -54,7 +54,7 @@ const Linky = (props: LinkyProps) => {
         onClick={onClickHandler}
       >
         {isLoaded ? (
-          <Text as={showDeleted ? "s" : "p"}>{linkLabel}</Text>
+          <Text as={showDeleted ? "s" : "p"}>{_.truncate(linkLabel, {length: 20})}</Text>
         ) : (
           <Spinner size={"sm"} />
         )}
