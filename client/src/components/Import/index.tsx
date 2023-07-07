@@ -791,8 +791,8 @@ const Import = (props: {
 
                   <Button
                     colorScheme={"green"}
-                    rightIcon={<Icon name="check" />}
-                    variant={"solid"}
+                    rightIcon={_.isEqual(interfacePage, "start") ? <Icon name="c_right" /> : <Icon name="check" />}
+                    variant={_.isEqual(interfacePage, "start") ? "outline" : "solid"}
                     onClick={() => {
                       if (_.isEqual(interfacePage, "start")) {
                         setInterfacePage("attributes");

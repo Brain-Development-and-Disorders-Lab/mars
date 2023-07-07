@@ -927,7 +927,7 @@ const Entity = () => {
 
                   {entityCollections.length === 0 ? (
                     <Text>
-                      {entityData.name} is not a member of any Collections.
+                      No Collections specified.
                     </Text>
                   ) : (
                     <TableContainer>
@@ -1010,7 +1010,7 @@ const Entity = () => {
                   </Flex>
 
                   {entityOrigins.length === 0 ? (
-                    <Text>{entityData.name} does not have any Origins.</Text>
+                    <Text>No Origins specified.</Text>
                   ) : (
                     <TableContainer>
                       <Table colorScheme={"blackAlpha"}>
@@ -1083,7 +1083,7 @@ const Entity = () => {
                   </Flex>
 
                   {entityProducts.length === 0 ? (
-                    <Text>{entityData.name} does not have any Products.</Text>
+                    <Text>No Products specified.</Text>
                   ) : (
                     <TableContainer>
                       <Table colorScheme={"blackAlpha"}>
