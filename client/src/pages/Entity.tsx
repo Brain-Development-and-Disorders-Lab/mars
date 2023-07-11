@@ -185,6 +185,7 @@ const Entity = () => {
   const [isError, setIsError] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [editing, setEditing] = useState(false);
+  const [exportAll, setExportAll] = useState(false);
 
   // Break up entity data into editable fields
   const [entityData, setEntityData] = useState({} as EntityModel);
@@ -482,7 +483,7 @@ const Entity = () => {
     // Send POST data to generate file
     postData(`/entities/export`, {
       id: id,
-      fields: exportFields,
+      fields: exportAll ? allExportFields : exportFields,
       format: format,
     })
       .then((response) => {
@@ -524,6 +525,9 @@ const Entity = () => {
         });
       });
   };
+
+  // A list of all fields that can be exported, generated when the interface is opened
+  const allExportFields = ["name", "created", "owner", "description"];
 
   // Handle checkbox selection on the export modal
   const handleExportCheck = (field: string, checkState: boolean) => {
@@ -669,6 +673,7 @@ const Entity = () => {
     ]);
   };
 
+  // Handle cancelling adding an Attribute by clearing the state
   const handleCancelAttribute = () => {
     onAddAttributesClose();
 
@@ -1676,7 +1681,7 @@ const Entity = () => {
               isCentered
             >
               <ModalOverlay />
-              <ModalContent p={"4"} w={["sm", "lg", "2xl"]}>
+              <ModalContent p={"4"} gap={"4"} w={["sm", "lg", "2xl"]}>
                 {/* Heading and close button */}
                 <ModalHeader p={"2"}>Export Entity</ModalHeader>
                 <ModalCloseButton />
@@ -1693,6 +1698,7 @@ const Entity = () => {
                               Name: {entityData.name}
                             </Checkbox>
                             <Checkbox
+                              isChecked={exportAll || _.includes(exportFields, "created")}
                               onChange={(event) =>
                                 handleExportCheck(
                                   "created",
@@ -1704,6 +1710,7 @@ const Entity = () => {
                               {dayjs(entityData.created).format("DD MMM YYYY")}
                             </Checkbox>
                             <Checkbox
+                              isChecked={exportAll || _.includes(exportFields, "owner")}
                               onChange={(event) =>
                                 handleExportCheck("owner", event.target.checked)
                               }
@@ -1711,6 +1718,7 @@ const Entity = () => {
                               Owner: {entityData.owner}
                             </Checkbox>
                             <Checkbox
+                              isChecked={exportAll || _.includes(exportFields, "description")}
                               onChange={(event) =>
                                 handleExportCheck(
                                   "description",
@@ -1737,9 +1745,11 @@ const Entity = () => {
                       {isLoaded && entityCollections.length > 0 ? (
                         <Stack spacing={2} direction={"column"}>
                           {entityCollections.map((collection) => {
+                            allExportFields.push(`collection_${collection}`);
                             return (
                               <Checkbox
                                 key={collection}
+                                isChecked={exportAll || _.includes(exportFields, `collection_${collection}`)}
                                 onChange={(event) =>
                                   handleExportCheck(
                                     `collection_${collection}`,
@@ -1754,17 +1764,22 @@ const Entity = () => {
                           })}
                         </Stack>
                       ) : (
-                        <Text>No Origins</Text>
+                        <Text>No Collections.</Text>
                       )}
                     </FormControl>
+                  </Flex>
+
+                  <Flex direction={"column"} p={"2"} gap={"2"}>
                     <FormControl>
                       <FormLabel>Associations: Origins</FormLabel>
                       {isLoaded && entityOrigins.length > 0 ? (
                         <Stack spacing={2} direction={"column"}>
                           {entityOrigins.map((origin) => {
+                            allExportFields.push(`origin_${origin.id}`);
                             return (
                               <Checkbox
                                 key={origin.id}
+                                isChecked={exportAll || _.includes(exportFields, `origin_${origin.id}`)}
                                 onChange={(event) =>
                                   handleExportCheck(
                                     `origin_${origin.id}`,
@@ -1778,7 +1793,7 @@ const Entity = () => {
                           })}
                         </Stack>
                       ) : (
-                        <Text>No Origins</Text>
+                        <Text>No Origins.</Text>
                       )}
                     </FormControl>
                     <FormControl>
@@ -1786,9 +1801,11 @@ const Entity = () => {
                       {isLoaded && entityProducts.length > 0 ? (
                         <Stack spacing={2} direction={"column"}>
                           {entityProducts.map((product) => {
+                            allExportFields.push(`product_${product.id}`);
                             return (
                               <Checkbox
                                 key={product.id}
+                                isChecked={exportAll || _.includes(exportFields, `product_${product.id}`)}
                                 onChange={(event) =>
                                   handleExportCheck(
                                     `product_${product.id}`,
@@ -1802,7 +1819,7 @@ const Entity = () => {
                           })}
                         </Stack>
                       ) : (
-                        <Text>No Products</Text>
+                        <Text>No Products.</Text>
                       )}
                     </FormControl>
                   </Flex>
@@ -1813,9 +1830,11 @@ const Entity = () => {
                       {isLoaded && entityAttributes.length > 0 ? (
                         <Stack spacing={2} direction={"column"}>
                           {entityAttributes.map((attribute) => {
+                            allExportFields.push(`attribute_${attribute._id}`);
                             return (
                               <Checkbox
                                 key={attribute._id}
+                                isChecked={exportAll || _.includes(exportFields, `attribute_${attribute._id}`)}
                                 onChange={(event) =>
                                   handleExportCheck(
                                     `attribute_${attribute._id}`,
@@ -1836,7 +1855,14 @@ const Entity = () => {
                 </Flex>
 
                 {/* "Download" buttons */}
-                <Flex direction={"row"} p={"md"} gap={"4"} justify={"center"}>
+                <Flex direction={"row"} p={"md"} gap={"4"} justify={"center"} align={"center"}>
+                  <Checkbox onChange={(event) => setExportAll(event.target.checked)}>
+                    Select All
+                  </Checkbox>
+
+                  <Spacer />
+
+                  <Text>Download as:</Text>
                   <Button
                     colorScheme={"blue"}
                     onClick={() => handleDownloadClick(`json`)}
