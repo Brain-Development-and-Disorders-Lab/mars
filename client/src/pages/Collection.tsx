@@ -71,7 +71,12 @@ const Collection = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const toast = useToast();
-  const { isOpen, onOpen, onClose } = useDisclosure();
+
+  // Add Entities
+  const { isOpen: isEntitiesOpen, onOpen: onEntitiesOpen, onClose: onEntitiesClose } = useDisclosure();
+
+  // Add Collections
+  const { isOpen: isCollectionsOpen, onOpen: onCollectionsOpen, onClose: onCollectionsClose } = useDisclosure();
 
   // History drawer
   const {
@@ -87,22 +92,32 @@ const Collection = () => {
 
   const [collectionData, setCollectionData] = useState({} as CollectionModel);
   const [collectionEntities, setCollectionEntities] = useState([] as string[]);
+  const [collectionCollections, setCollectionCollections] = useState([] as string[]);
   const [collectionDescription, setCollectionDescription] = useState("");
   const [collectionHistory, setCollectionHistory] = useState(
     [] as CollectionHistory[]
   );
+
+  // Entities that can be added
   const [allEntities, setAllEntities] = useState(
     [] as { name: string; id: string }[]
   );
   const [selectedEntities, setSelectedEntities] = useState([] as string[]);
+
+  // Collections that can be added
+  const [allCollections, setAllCollections] = useState(
+    [] as { name: string; id: string }[]
+  );
+  const [selectedCollections, setSelectedCollections] = useState([] as string[]);
 
   useEffect(() => {
     // Populate Collection data
     getData(`/collections/${id}`)
       .then((response) => {
         setCollectionData(response);
-        setCollectionEntities(response.entities);
         setCollectionDescription(response.description);
+        setCollectionCollections(response.collections);
+        setCollectionEntities(response.entities);
         setCollectionHistory(response.history);
       })
       .catch(() => {
@@ -143,6 +158,30 @@ const Collection = () => {
       .finally(() => {
         setIsLoaded(true);
       });
+
+    // Populate all Collection data
+    getData(`/collections`)
+      .then((response) => {
+        setAllCollections(
+          response.map((e: CollectionModel) => {
+            return { name: e.name, id: e._id };
+          })
+        );
+      })
+      .catch(() => {
+        toast({
+          title: "Error",
+          description: "Could not retrieve Collections data.",
+          status: "error",
+          duration: 4000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+        setIsError(true);
+      })
+      .finally(() => {
+        setIsLoaded(true);
+      });
   }, [id, isLoaded]);
 
   useEffect(() => {
@@ -162,7 +201,21 @@ const Collection = () => {
       ...entities.filter((entity) => !_.isEqual("", entity)),
     ]);
     setSelectedEntities([]);
-    onClose();
+    onEntitiesClose();
+  };
+
+  /**
+   * Callback function to add Collections to a Collection
+   * @param {string[]} collections List of Collections to add
+   */
+  const addCollections = (collections: string[]): void => {
+    console.info(collectionCollections);
+    setCollectionCollections([
+      ...collectionCollections,
+      ...collections.filter((collection) => !_.isEqual("", collection)),
+    ]);
+    setSelectedCollections([]);
+    onCollectionsClose();
   };
 
   /**
@@ -177,6 +230,7 @@ const Collection = () => {
         description: collectionDescription,
         owner: collectionData.owner,
         created: collectionData.created,
+        collections: collectionCollections,
         entities: collectionEntities,
         history: collectionHistory,
       };
@@ -253,6 +307,7 @@ const Collection = () => {
       created: collectionData.created,
       owner: collectionData.owner,
       description: collectionVersion.description,
+      collections: collectionVersion.collections,
       entities: collectionVersion.entities,
       history: collectionData.history,
     };
@@ -287,14 +342,14 @@ const Collection = () => {
         // Apply updated state
         setCollectionData(updateData);
         setCollectionDescription(updateData.description);
+        setCollectionCollections(updateData.collections);
         setCollectionEntities(updateData.entities);
         setCollectionHistory(updateData.history);
         setIsLoaded(true);
       });
   };
 
-  // const columnHelper = createColumnHelper<string>();
-  const columns = [
+  const entitiesColumns = [
     {
       id: (info: any) => info.row.original,
       cell: (info: any) => <Linky id={info.row.original} type={"entities"} />,
@@ -310,6 +365,32 @@ const Collection = () => {
               colorScheme={"blackAlpha"}
               rightIcon={<Icon name={"c_right"} />}
               onClick={() => navigate(`/entities/${info.row.original}`)}
+            >
+              View
+            </Button>
+          </Flex>
+        );
+      },
+      header: "",
+    },
+  ];
+
+  const collectionsColumns = [
+    {
+      id: (info: any) => info.row.original,
+      cell: (info: any) => <Linky id={info.row.original} type={"collections"} />,
+      header: "Name",
+    },
+    {
+      id: "view",
+      cell: (info: any) => {
+        return (
+          <Flex w={"100%"} justify={"end"}>
+            <Button
+              key={`view-entity-${info.row.original}`}
+              colorScheme={"blackAlpha"}
+              rightIcon={<Icon name={"c_right"} />}
+              onClick={() => navigate(`/collections/${info.row.original}`)}
             >
               View
             </Button>
@@ -455,7 +536,7 @@ const Collection = () => {
                                 key={`warn-${collectionData._id}`}
                                 colorScheme={"orange"}
                               >
-                                <TagLabel>Not specified</TagLabel>
+                                <TagLabel>Not Specified</TagLabel>
                                 <Icon name={"warning"} />
                               </Tag>
                             ) : (
@@ -495,48 +576,90 @@ const Collection = () => {
                 </Flex>
               </Flex>
 
-              <Flex
-                direction={"column"}
-                p={"4"}
-                gap={"4"}
-                grow={"2"}
-                h={"fit-content"}
-                bg={"white"}
-                rounded={"md"}
-              >
-                <Flex direction={"row"} justify={"space-between"}>
-                  {/* Entities in the Collection */}
-                  <Heading fontWeight={"semibold"} size={"lg"}>
-                    Entities
-                  </Heading>
-                  {editing && (
-                    <Button
-                      leftIcon={<Icon name={"add"} />}
-                      onClick={onOpen}
-                      colorScheme={"green"}
-                    >
-                      Add
-                    </Button>
-                  )}
+              {/* Display Entities and Collections */}
+              <Flex direction={"column"} gap={"4"} grow={"2"}>
+                <Flex
+                  direction={"column"}
+                  p={"4"}
+                  gap={"4"}
+                  h={"fit-content"}
+                  bg={"white"}
+                  rounded={"md"}
+                >
+                  <Flex direction={"row"} justify={"space-between"}>
+                    {/* Entities in the Collection */}
+                    <Heading fontWeight={"semibold"} size={"lg"}>
+                      Entities
+                    </Heading>
+                    {editing && (
+                      <Button
+                        leftIcon={<Icon name={"add"} />}
+                        onClick={onEntitiesOpen}
+                        colorScheme={"green"}
+                      >
+                        Add
+                      </Button>
+                    )}
+                  </Flex>
+                  <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
+                    {collectionEntities && collectionEntities.length > 0 ? (
+                      <DataTable
+                        data={collectionEntities}
+                        columns={entitiesColumns}
+                        visibleColumns={{}}
+                        viewOnly={!editing}
+                        setData={setCollectionEntities}
+                        hideSelection={!editing}
+                      />
+                    ) : (
+                      <Text>No Entities.</Text>
+                    )}
+                  </Flex>
                 </Flex>
-                <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
-                  {collectionEntities && collectionEntities.length > 0 ? (
-                    <DataTable
-                      data={collectionEntities}
-                      columns={columns}
-                      visibleColumns={{}}
-                      viewOnly={!editing}
-                      setData={setCollectionEntities}
-                      hideSelection={!editing}
-                    />
-                  ) : (
-                    <Text>This Collection is empty.</Text>
-                  )}
+
+                <Flex
+                  direction={"column"}
+                  p={"4"}
+                  gap={"4"}
+                  h={"fit-content"}
+                  bg={"white"}
+                  rounded={"md"}
+                >
+                  <Flex direction={"row"} justify={"space-between"}>
+                    {/* Entities in the Collection */}
+                    <Heading fontWeight={"semibold"} size={"lg"}>
+                      Collections
+                    </Heading>
+                    {editing && (
+                      <Button
+                        leftIcon={<Icon name={"add"} />}
+                        onClick={onCollectionsOpen}
+                        colorScheme={"green"}
+                      >
+                        Add
+                      </Button>
+                    )}
+                  </Flex>
+                  <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
+                    {collectionCollections && collectionCollections.length > 0 ? (
+                      <DataTable
+                        data={collectionCollections}
+                        columns={collectionsColumns}
+                        visibleColumns={{}}
+                        viewOnly={!editing}
+                        setData={setCollectionCollections}
+                        hideSelection={!editing}
+                      />
+                    ) : (
+                      <Text>No Collections.</Text>
+                    )}
+                  </Flex>
                 </Flex>
               </Flex>
             </Flex>
 
-            <Modal isOpen={isOpen} onClose={onClose}>
+            {/* Modal to add Entities */}
+            <Modal isOpen={isEntitiesOpen} onClose={onEntitiesClose}>
               <ModalOverlay />
               <ModalContent p={"4"}>
                 {/* Heading and close button */}
@@ -613,6 +736,94 @@ const Collection = () => {
                       if (id) {
                         // Add the Entities to the Collection
                         addEntities(selectedEntities);
+                      }
+                    }}
+                  >
+                    Done
+                  </Button>
+                </Flex>
+              </ModalContent>
+            </Modal>
+
+
+            {/* Modal to add Collections */}
+            <Modal isOpen={isCollectionsOpen} onClose={onCollectionsClose}>
+              <ModalOverlay />
+              <ModalContent p={"4"}>
+                {/* Heading and close button */}
+                <ModalHeader>Add Collections</ModalHeader>
+                <ModalCloseButton />
+
+                {/* Select component for Entities */}
+                <Flex direction={"column"} p={"2"} gap={"2"}>
+                  <FormControl>
+                    <FormLabel>Add Collections</FormLabel>
+                    <Select
+                      title="Select Collection"
+                      placeholder={"Select Collection"}
+                      onChange={(event) => {
+                        const selectedCollection = event.target.value.toString();
+                        if (selectedCollections.includes(selectedCollection)) {
+                          toast({
+                            title: "Warning",
+                            description: "Collection has already been selected.",
+                            status: "warning",
+                            duration: 2000,
+                            position: "bottom-right",
+                            isClosable: true,
+                          });
+                        } else {
+                          setSelectedCollections([
+                            ...selectedCollections,
+                            selectedCollection,
+                          ]);
+                        }
+                      }}
+                    >
+                      {isLoaded &&
+                        allCollections.map((collection) => {
+                          return (
+                            <option key={collection.id} value={collection.id}>
+                              {collection.name}
+                            </option>
+                          );
+                        })}
+                      ;
+                    </Select>
+                  </FormControl>
+
+                  <Flex direction={"row"} p={"2"} gap={"2"}>
+                    {selectedCollections.map((collection) => {
+                      if (!_.isEqual(collection, "")) {
+                        return (
+                          <Tag key={`tag-${collection}`}>
+                            <Linky id={collection} type={"collections"} />
+                            <TagCloseButton
+                              onClick={() => {
+                                setSelectedCollections(
+                                  selectedCollections.filter((selected) => {
+                                    return !_.isEqual(collection, selected);
+                                  })
+                                );
+                              }}
+                            />
+                          </Tag>
+                        );
+                      } else {
+                        return null;
+                      }
+                    })}
+                  </Flex>
+                </Flex>
+
+                {/* "Done" button */}
+                <Flex direction={"row"} p={"md"} justify={"center"}>
+                  <Button
+                    colorScheme={"green"}
+                    onClick={() => {
+                      if (id) {
+                        // Add the Collections to the Collection
+                        addCollections(selectedCollections);
                       }
                     }}
                   >

@@ -130,9 +130,18 @@ export class Collections {
             );
           });
 
+          // Collections
+          const collectionsToKeep = currentCollection.collections.filter((collection) =>
+            updatedCollection.collections.includes(collection)
+          );
+          const collectionsToAdd = updatedCollection.collections.filter(
+            (collection) => !currentCollection.collections.includes(collection)
+          );
+
           const updates = {
             $set: {
               description: updatedCollection.description,
+              collections: [...collectionsToKeep, ...collectionsToAdd],
               entities: [...entitiesToKeep, ...entitiesToAdd],
               history: [
                 {

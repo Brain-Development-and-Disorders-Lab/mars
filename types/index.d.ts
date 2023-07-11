@@ -108,6 +108,7 @@ export type ICollection = {
   description: string;
   owner: string;
   created: string;
+  collections: string[];
   entities: string[];
   history: CollectionHistory[];
 };
@@ -119,6 +120,7 @@ export type CollectionModel = ICollection & {
 export type CollectionHistory = {
   timestamp: string;
   description: string;
+  collections: string[];
   entities: string[];
 }
 

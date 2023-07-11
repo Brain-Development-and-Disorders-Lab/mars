@@ -797,6 +797,7 @@ const CollectionPage = (props: {
     description: description,
     owner: owner,
     created: created,
+    collections: [],
     entities: [],
     history: [],
   };
