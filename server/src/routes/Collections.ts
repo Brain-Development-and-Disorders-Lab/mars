@@ -3,7 +3,7 @@ import express from "express";
 import _ from "lodash";
 
 // Database connection
-import { CollectionModel, Collection } from "@types";
+import { CollectionModel, ICollection } from "@types";
 
 // Operations
 import { Collections } from "../operations/Collections";
@@ -30,7 +30,7 @@ CollectionsRoute.route("/collections/:id").get(
 
 // Create a new Collection, expects Collection data
 CollectionsRoute.route("/collections/create").post(
-  (request: { body: Collection }, response: any) => {
+  (request: { body: ICollection }, response: any) => {
     Collections.create(request.body).then((collection: CollectionModel) => {
       response.json({
         id: collection._id,
@@ -72,6 +72,24 @@ CollectionsRoute.route("/collections/update").post(
         });
       }
     );
+  }
+);
+
+// Get JSON-formatted data of the Entity
+CollectionsRoute.route("/collections/export").post(
+  (
+    request: {
+      body: { id: string; fields: string[]; format: "json" | "csv" | "txt" };
+    },
+    response: any
+  ) => {
+    Collections.getData(request.body).then((path: string) => {
+      response.setHeader("Content-Type", `application/${request.body.format}`);
+      response.download(
+        path,
+        `export_${request.body.id}.${request.body.format}`
+      );
+    });
   }
 );
 

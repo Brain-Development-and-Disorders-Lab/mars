@@ -7,6 +7,8 @@ import {
   Card,
   CardBody,
   CardHeader,
+  Checkbox,
+  CheckboxGroup,
   Drawer,
   DrawerBody,
   DrawerCloseButton,
@@ -33,6 +35,7 @@ import {
   PopoverTrigger,
   Select,
   Spacer,
+  Stack,
   Table,
   TableContainer,
   Tag,
@@ -66,6 +69,8 @@ import { deleteData, getData, postData } from "@database/functions";
 import _ from "lodash";
 import dayjs from "dayjs";
 import DataTable from "@components/DataTable";
+import FileSaver from "file-saver";
+import slugify from "slugify";
 
 const Collection = () => {
   const { id } = useParams();
@@ -89,6 +94,7 @@ const Collection = () => {
   const [editing, setEditing] = useState(false);
   const [isError, setIsError] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [exportAll, setExportAll] = useState(false);
 
   const [collectionData, setCollectionData] = useState({} as CollectionModel);
   const [collectionEntities, setCollectionEntities] = useState([] as string[]);
@@ -109,6 +115,13 @@ const Collection = () => {
     [] as { name: string; id: string }[]
   );
   const [selectedCollections, setSelectedCollections] = useState([] as string[]);
+
+  const {
+    isOpen: isExportOpen,
+    onOpen: onExportOpen,
+    onClose: onExportClose,
+  } = useDisclosure();
+  const [exportFields, setExportFields] = useState([] as string[]);
 
   useEffect(() => {
     // Populate Collection data
@@ -349,6 +362,86 @@ const Collection = () => {
       });
   };
 
+    // Handle clicking the "Export" button
+    const handleExportClick = () => {
+      setCollectionData(collectionData);
+      onExportOpen();
+    };
+
+    // Handle clicking the "Download" button
+    const handleDownloadClick = (format: "json" | "csv" | "txt") => {
+      // Send POST data to generate file
+      postData(`/collections/export`, {
+        id: id,
+        fields: exportAll ? allExportFields : exportFields,
+        format: format,
+      })
+        .then((response) => {
+          let responseData = response;
+
+          // Clean the response data if required
+          if (_.isEqual(format, "json")) {
+            responseData = JSON.stringify(responseData, null, "  ");
+          }
+
+          FileSaver.saveAs(
+            new Blob([responseData]),
+            slugify(`${collectionData.name.replace(" ", "")}_export.${format}`)
+          );
+
+          // Close the "Export" modal
+          onExportClose();
+
+          // Reset the export state
+          setExportFields([]);
+
+          toast({
+            title: "Info",
+            description: `Generated ${format.toUpperCase()} file.`,
+            status: "info",
+            duration: 2000,
+            position: "bottom-right",
+            isClosable: true,
+          });
+        })
+        .catch((_error) => {
+          toast({
+            title: "Error",
+            description: "An error occurred when exporting this Collection.",
+            status: "error",
+            duration: 2000,
+            position: "bottom-right",
+            isClosable: true,
+          });
+        });
+    };
+
+    // A list of all fields that can be exported, generated when the interface is opened
+    const allExportFields = ["name", "created", "owner", "description"];
+
+    // Handle checkbox selection on the export modal
+    const handleExportCheck = (field: string, checkState: boolean) => {
+      if (_.isEqual(checkState, true)) {
+        // If checked after click, add field to exportFields
+        if (!exportFields.includes(field)) {
+          const updatedFields = [...exportFields, field];
+          setExportFields(updatedFields);
+        }
+      } else {
+        // If unchecked after click, remove the field from exportFields
+        if (exportFields.includes(field)) {
+          const updatedFields = exportFields.filter((existingField) => {
+            if (!_.isEqual(existingField, field)) {
+              return existingField;
+            }
+            return;
+          });
+          setExportFields(updatedFields);
+        }
+      }
+    };
+
+  // Define the columns for Entities listing
   const entitiesColumns = [
     {
       id: (info: any) => info.row.original,
@@ -375,6 +468,7 @@ const Collection = () => {
     },
   ];
 
+  // Define the columns for Collections listing
   const collectionsColumns = [
     {
       id: (info: any) => info.row.original,
@@ -498,6 +592,14 @@ const Collection = () => {
                     onClick={onHistoryOpen}
                   >
                     History
+                  </Button>
+                  <Button
+                    onClick={handleExportClick}
+                    rightIcon={<Icon name={"download"} />}
+                    colorScheme={"blue"}
+                    isDisabled={editing}
+                  >
+                    Export
                   </Button>
                 </Flex>
               </Flex>
@@ -828,6 +930,165 @@ const Collection = () => {
                     }}
                   >
                     Done
+                  </Button>
+                </Flex>
+              </ModalContent>
+            </Modal>
+
+            <Modal
+              isOpen={isExportOpen}
+              onClose={onExportClose}
+              size={"2xl"}
+              isCentered
+            >
+              <ModalOverlay />
+              <ModalContent p={"4"} gap={"4"} w={["sm", "lg", "2xl"]}>
+                {/* Heading and close button */}
+                <ModalHeader p={"2"}>Export Entity</ModalHeader>
+                <ModalCloseButton />
+
+                {/* Selection content */}
+                <Flex direction={"row"} gap={"4"}>
+                  <Flex direction={"column"} p={"2"} gap={"2"}>
+                    <FormControl>
+                      <FormLabel>Details</FormLabel>
+                      {isLoaded ? (
+                        <CheckboxGroup>
+                          <Stack spacing={2} direction={"column"}>
+                            <Checkbox disabled defaultChecked>
+                              Name: {collectionData.name}
+                            </Checkbox>
+                            <Checkbox
+                              isChecked={exportAll || _.includes(exportFields, "created")}
+                              onChange={(event) =>
+                                handleExportCheck(
+                                  "created",
+                                  event.target.checked
+                                )
+                              }
+                            >
+                              Created:{" "}
+                              {dayjs(collectionData.created).format("DD MMM YYYY")}
+                            </Checkbox>
+                            <Checkbox
+                              isChecked={exportAll || _.includes(exportFields, "owner")}
+                              onChange={(event) =>
+                                handleExportCheck("owner", event.target.checked)
+                              }
+                            >
+                              Owner: {collectionData.owner}
+                            </Checkbox>
+                            <Checkbox
+                              isChecked={exportAll || _.includes(exportFields, "description")}
+                              onChange={(event) =>
+                                handleExportCheck(
+                                  "description",
+                                  event.target.checked
+                                )
+                              }
+                              disabled={_.isEqual(collectionDescription, "")}
+                            >
+                              <Text noOfLines={1}>
+                                Description:{" "}
+                                {_.isEqual(collectionDescription, "")
+                                  ? "No description"
+                                  : collectionDescription}
+                              </Text>
+                            </Checkbox>
+                          </Stack>
+                        </CheckboxGroup>
+                      ) : (
+                        <Text>Loading details</Text>
+                      )}
+                    </FormControl>
+                    <FormControl>
+                      <FormLabel>Collections</FormLabel>
+                      {isLoaded && collectionCollections.length > 0 ? (
+                        <Stack spacing={2} direction={"column"}>
+                          {collectionCollections.map((collection) => {
+                            allExportFields.push(`collection_${collection}`);
+                            return (
+                              <Checkbox
+                                key={collection}
+                                isChecked={exportAll || _.includes(exportFields, `collection_${collection}`)}
+                                onChange={(event) =>
+                                  handleExportCheck(
+                                    `collection_${collection}`,
+                                    event.target.checked
+                                  )
+                                }
+                              >
+                                Collection:{" "}
+                                {<Linky id={collection} type={"collections"} />}
+                              </Checkbox>
+                            );
+                          })}
+                        </Stack>
+                      ) : (
+                        <Text>No Collections</Text>
+                      )}
+                    </FormControl>
+                  </Flex>
+
+                  <Flex direction={"column"} p={"2"} gap={"2"}>
+                    <FormControl>
+                      <FormLabel>Entities</FormLabel>
+                      {isLoaded && collectionEntities.length > 0 ? (
+                        <Stack spacing={2} direction={"column"}>
+                          {collectionEntities.map((entity) => {
+                            allExportFields.push(`entity_${entity}`);
+                            return (
+                              <Checkbox
+                                key={entity}
+                                isChecked={exportAll || _.includes(exportFields, `entity_${entity}`)}
+                                onChange={(event) =>
+                                  handleExportCheck(
+                                    `entity_${entity}`,
+                                    event.target.checked
+                                  )
+                                }
+                              >
+                                Entity: <Linky type={"entities"} id={entity} />
+                              </Checkbox>
+                            );
+                          })}
+                        </Stack>
+                      ) : (
+                        <Text>No Entities.</Text>
+                      )}
+                    </FormControl>
+                  </Flex>
+                </Flex>
+
+                {/* "Download" buttons */}
+                <Flex direction={"row"} p={"md"} gap={"4"} justify={"center"} align={"center"}>
+                  <Checkbox onChange={(event) => setExportAll(event.target.checked)}>
+                    Select All
+                  </Checkbox>
+
+                  <Spacer />
+
+                  <Text>Download as:</Text>
+                  <Button
+                    colorScheme={"blue"}
+                    onClick={() => handleDownloadClick(`json`)}
+                    rightIcon={<Icon name={"download"} />}
+                  >
+                    JSON
+                  </Button>
+                  <Button
+                    colorScheme={"blue"}
+                    onClick={() => handleDownloadClick(`csv`)}
+                    rightIcon={<Icon name={"download"} />}
+                  >
+                    CSV
+                  </Button>
+                  <Button
+                    colorScheme={"blue"}
+                    onClick={() => handleDownloadClick(`txt`)}
+                    rightIcon={<Icon name={"download"} />}
+                  >
+                    TXT
                   </Button>
                 </Flex>
               </ModalContent>

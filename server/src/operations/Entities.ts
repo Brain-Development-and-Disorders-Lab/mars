@@ -1161,7 +1161,7 @@ export class Entities {
   };
 
   /**
-   * Collage and generate a CSV string containing all data pertaining to
+   * Collate and generate a data string containing all data pertaining to
    * an Entity
    * @param {{ id: string, fields: string[] }} entityExportData the export data of the Entity
    * @return {Promise<string>}
