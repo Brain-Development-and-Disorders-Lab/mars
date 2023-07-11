@@ -878,7 +878,7 @@ const Entity = () => {
                                 key={`warn-${entityData._id}`}
                                 colorScheme={"orange"}
                               >
-                                <TagLabel>Not specified</TagLabel>
+                                <TagLabel>Not Specified</TagLabel>
                                 <Icon name={"warning"} />
                               </Tag>
                             ) : (
@@ -927,7 +927,7 @@ const Entity = () => {
 
                   {entityCollections.length === 0 ? (
                     <Text>
-                      No Collections specified.
+                      No Collections.
                     </Text>
                   ) : (
                     <TableContainer>
@@ -1010,7 +1010,7 @@ const Entity = () => {
                   </Flex>
 
                   {entityOrigins.length === 0 ? (
-                    <Text>No Origins specified.</Text>
+                    <Text>No Origins.</Text>
                   ) : (
                     <TableContainer>
                       <Table colorScheme={"blackAlpha"}>
@@ -1083,7 +1083,7 @@ const Entity = () => {
                   </Flex>
 
                   {entityProducts.length === 0 ? (
-                    <Text>No Products specified.</Text>
+                    <Text>No Products.</Text>
                   ) : (
                     <TableContainer>
                       <Table colorScheme={"blackAlpha"}>

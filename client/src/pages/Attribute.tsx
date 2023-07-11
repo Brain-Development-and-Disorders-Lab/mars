@@ -261,7 +261,7 @@ const Attribute = () => {
                               key={`warn-${attributeData._id}`}
                               colorScheme={"orange"}
                             >
-                              <TagLabel>Not specified</TagLabel>
+                              <TagLabel>Not Specified</TagLabel>
                               <Icon name={"warning"} />
                             </Tag>
                           ) : (
