@@ -191,6 +191,10 @@ const Dashboard = () => {
       header: "Entity Count",
       enableHiding: true,
     }),
+    collectionTableColumnHelper.accessor("collections", {
+      cell: (info) => info.getValue().length,
+      header: "Collection Count",
+    }),
     collectionTableColumnHelper.accessor("_id", {
       cell: (info) => {
         return (

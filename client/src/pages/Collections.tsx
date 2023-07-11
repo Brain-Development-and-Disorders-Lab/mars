@@ -73,7 +73,7 @@ const Collections = () => {
       _.isEqual(breakpoint, "base") ||
       _.isUndefined(breakpoint)
     ) {
-      setVisibleColumns({ description: false, owner: false });
+      setVisibleColumns({ description: false, owner: false, entities: false, collections: false });
     } else {
       setVisibleColumns({});
     }
@@ -99,6 +99,10 @@ const Collections = () => {
     columnHelper.accessor("entities", {
       cell: (info) => info.getValue().length,
       header: "Entity Count",
+    }),
+    columnHelper.accessor("collections", {
+      cell: (info) => info.getValue().length,
+      header: "Collection Count",
     }),
     columnHelper.accessor("_id", {
       cell: (info) => {
