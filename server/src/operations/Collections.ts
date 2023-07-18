@@ -10,6 +10,9 @@ import { CollectionModel, ICollection } from "@types";
 import _ from "lodash";
 import consola from "consola";
 import dayjs from "dayjs";
+import fs from "fs";
+import Papa from "papaparse";
+import tmp from "tmp";
 
 const COLLECTIONS = "collections";
 
@@ -130,9 +133,18 @@ export class Collections {
             );
           });
 
+          // Collections
+          const collectionsToKeep = currentCollection.collections.filter(
+            (collection) => updatedCollection.collections.includes(collection)
+          );
+          const collectionsToAdd = updatedCollection.collections.filter(
+            (collection) => !currentCollection.collections.includes(collection)
+          );
+
           const updates = {
             $set: {
               description: updatedCollection.description,
+              collections: [...collectionsToKeep, ...collectionsToAdd],
               entities: [...entitiesToKeep, ...entitiesToAdd],
               history: [
                 {
@@ -412,6 +424,246 @@ export class Collections {
           consola.success("Retrieved Collection (id):", id.toString());
           resolve(result as CollectionModel);
         });
+    });
+  };
+
+  /**
+   * Collate and generate a data string containing all data pertaining to
+   * a Collection
+   * @param {{ id: string, fields: string[] }} collectionExportData the export data of the Collection
+   * @return {Promise<string>}
+   */
+  static getData = (collectionExportData: {
+    id: string;
+    fields: string[];
+    format: "json" | "csv" | "txt";
+  }): Promise<string> => {
+    consola.start(
+      "Generating data for Collection (id):",
+      collectionExportData.id.toString()
+    );
+    return new Promise((resolve, reject) => {
+      getDatabase()
+        .collection(COLLECTIONS)
+        .findOne(
+          { _id: collectionExportData.id },
+          (error: any, result: any) => {
+            if (error) {
+              reject(error);
+              throw error;
+            }
+
+            const collection = result as CollectionModel;
+
+            if (_.isEqual(collectionExportData.format, "csv")) {
+              const headers = ["ID", "Name"];
+              const row: Promise<string>[] = [
+                Promise.resolve(collection._id),
+                Promise.resolve(collection.name),
+              ];
+
+              // Iterate over fields and generate a CSV export file
+              collectionExportData.fields.map((field) => {
+                if (_.isEqual(field, "created")) {
+                  // "created" data field
+                  headers.push("Created");
+                  row.push(
+                    Promise.resolve(
+                      dayjs(collection.created).format("DD MMM YYYY").toString()
+                    )
+                  );
+                } else if (_.isEqual(field, "owner")) {
+                  // "owner" data field
+                  headers.push("Owner");
+                  row.push(Promise.resolve(collection.owner));
+                } else if (_.isEqual(field, "description")) {
+                  // "description" data field
+                  headers.push("Description");
+                  row.push(Promise.resolve(collection.description));
+                } else if (_.startsWith(field, "collection_")) {
+                  // "collection" data fields
+                  row.push(
+                    Collections.getOne(_.split(field, "_")[1]).then(
+                      (collection) => {
+                        headers.push(`Collection (${collection.name})`);
+                        return collection.name;
+                      }
+                    )
+                  );
+                } else if (_.startsWith(field, "entity_")) {
+                  // "entity" data fields
+                  row.push(
+                    Entities.getOne(_.split(field, "_")[1]).then((entity) => {
+                      headers.push(`Entity (${entity.name})`);
+                      return entity.name;
+                    })
+                  );
+                }
+              });
+
+              // Collate and format data as a CSV string
+              Promise.all(row).then((rowData) => {
+                const collated = [headers, rowData];
+                const formattedOutput = Papa.unparse(collated);
+
+                // Create a temporary file, passing the filename as a response
+                tmp.file((error, path: string, _fd: number) => {
+                  if (error) {
+                    reject(error);
+                    throw error;
+                  }
+
+                  fs.writeFileSync(path, formattedOutput);
+                  consola.success(
+                    "Generated CSV data for  Collection (id):",
+                    collectionExportData.id.toString()
+                  );
+                  resolve(path);
+                });
+              });
+            } else if (_.isEqual(collectionExportData.format, "json")) {
+              // JSON export
+              const tempStructure = {
+                _id: collection._id,
+                name: collection.name,
+                created: "",
+                owner: "",
+                description: "",
+                collections: [],
+                entities: [],
+              } as { [key: string]: any };
+              const exportOperations = [] as Promise<string>[];
+
+              collectionExportData.fields.map((field) => {
+                if (_.isEqual(field, "created")) {
+                  // "created" data field
+                  tempStructure["created"] = dayjs(collection.created)
+                    .format("DD MMM YYYY")
+                    .toString();
+                } else if (_.isEqual(field, "owner")) {
+                  // "owner" data field
+                  tempStructure["owner"] = collection.owner;
+                } else if (_.isEqual(field, "description")) {
+                  // "description" data field
+                  tempStructure["description"] = collection.description;
+                } else if (_.startsWith(field, "collection")) {
+                  // "collection" data fields
+                  tempStructure["collections"] = [];
+                  exportOperations.push(
+                    Collections.getOne(_.split(field, "_")[1]).then(
+                      (collection) => {
+                        tempStructure["collections"].push(collection.name);
+                        return collection.name;
+                      }
+                    )
+                  );
+                } else if (_.startsWith(field, "entity_")) {
+                  // "entity" data fields
+                  exportOperations.push(
+                    Entities.getOne(_.split(field, "_")[1]).then((entity) => {
+                      tempStructure["entities"].push(entity.name);
+                      return entity.name;
+                    })
+                  );
+                }
+              });
+
+              // Run all export operations
+              Promise.all(exportOperations).then((_values) => {
+                // Create a temporary file, passing the filename as a response
+                tmp.file((error, path: string, _fd: number) => {
+                  if (error) {
+                    reject(error);
+                    throw error;
+                  }
+
+                  fs.writeFileSync(
+                    path,
+                    JSON.stringify(tempStructure, null, "  ")
+                  );
+                  consola.success(
+                    "Generated JSON data for Collection (id):",
+                    collectionExportData.id.toString()
+                  );
+                  resolve(path);
+                });
+              });
+            } else {
+              // Text export
+              const exportOperations = [] as Promise<string>[];
+
+              // Structures to collate data
+              const textDetails = [
+                `ID: ${collection._id}`,
+                `Name: ${collection.name}`,
+              ];
+              const textCollections = [] as string[];
+              const textEntities = [] as string[];
+
+              collectionExportData.fields.map((field) => {
+                if (_.isEqual(field, "created")) {
+                  // "created" data field
+                  textDetails.push(
+                    `Created: ${dayjs(collection.created)
+                      .format("DD MMM YYYY")
+                      .toString()}`
+                  );
+                } else if (_.isEqual(field, "owner")) {
+                  // "owner" data field
+                  textDetails.push(`Owner: ${collection.owner}`);
+                } else if (_.isEqual(field, "description")) {
+                  // "description" data field
+                  textDetails.push(`Description: ${collection.description}`);
+                } else if (_.startsWith(field, "collection_")) {
+                  // "collection" data fields
+                  exportOperations.push(
+                    Collections.getOne(_.split(field, "_")[1]).then(
+                      (collection) => {
+                        textCollections.push(collection.name);
+                        return collection.name;
+                      }
+                    )
+                  );
+                } else if (_.startsWith(field, "entity_")) {
+                  // "entity" data fields
+                  exportOperations.push(
+                    Entities.getOne(_.split(field, "_")[1]).then((entity) => {
+                      textEntities.push(entity.name);
+                      return entity.name;
+                    })
+                  );
+                }
+              });
+
+              // Run all export operations
+              Promise.all(exportOperations).then((_values) => {
+                // Create a temporary file, passing the filename as a response
+                tmp.file((error, path: string, _fd: number) => {
+                  if (error) {
+                    reject(error);
+                    throw error;
+                  }
+
+                  if (textCollections.length > 0) {
+                    textDetails.push(
+                      `Collections: ${textCollections.join(", ")}`
+                    );
+                  }
+                  if (textEntities.length > 0) {
+                    textDetails.push(`Entities: ${textEntities.join(", ")}`);
+                  }
+
+                  fs.writeFileSync(path, textDetails.join("\n"));
+                  consola.success(
+                    "Generated text data for  Entity (id):",
+                    collectionExportData.id.toString()
+                  );
+                  resolve(path);
+                });
+              });
+            }
+          }
+        );
     });
   };
 

@@ -1161,7 +1161,7 @@ export class Entities {
   };
 
   /**
-   * Collage and generate a CSV string containing all data pertaining to
+   * Collate and generate a data string containing all data pertaining to
    * an Entity
    * @param {{ id: string, fields: string[] }} entityExportData the export data of the Entity
    * @return {Promise<string>}
@@ -1188,7 +1188,10 @@ export class Entities {
 
           if (_.isEqual(entityExportData.format, "csv")) {
             const headers = ["ID", "Name"];
-            const row: Promise<string>[] = [Promise.resolve(entity._id), Promise.resolve(entity.name)];
+            const row: Promise<string>[] = [
+              Promise.resolve(entity._id),
+              Promise.resolve(entity.name),
+            ];
 
             // Iterate over fields and generate a CSV export file
             entityExportData.fields.map((field) => {

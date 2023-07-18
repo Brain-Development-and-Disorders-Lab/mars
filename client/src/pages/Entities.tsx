@@ -9,6 +9,7 @@ import {
   useToast,
   Button,
   useBreakpoint,
+  Tooltip,
 } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
 import { Content } from "@components/Container";
@@ -80,11 +81,23 @@ const Entities = () => {
   const columnHelper = createColumnHelper<EntityModel>();
   const columns = [
     columnHelper.accessor("name", {
-      cell: (info) => info.getValue(),
+      cell: (info) => {
+        return (
+          <Tooltip label={info.getValue()}>
+            <Text>{_.truncate(info.getValue(), { length: 20 })}</Text>
+          </Tooltip>
+        );
+      },
       header: "Name",
     }),
     columnHelper.accessor("description", {
-      cell: (info) => info.getValue(),
+      cell: (info) => {
+        return (
+          <Tooltip label={info.getValue()}>
+            <Text>{_.truncate(info.getValue(), { length: 20 })}</Text>
+          </Tooltip>
+        );
+      },
       header: "Description",
       enableHiding: true,
     }),

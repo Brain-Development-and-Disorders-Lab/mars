@@ -46,6 +46,7 @@ const Attribute = (props: AttributeProps) => {
     name: name,
     description: description,
     values: values,
+    restrictDataValues: props.restrictDataValues,
   };
 
   return (
@@ -80,11 +81,21 @@ const Attribute = (props: AttributeProps) => {
             </FormControl>
           </Flex>
 
-          <Values
-            collection={values}
-            viewOnly={finished}
-            setValues={setValues}
-          />
+          {attributeData.restrictDataValues ? (
+            // Restrict the data to options from a drop-down
+            <Values
+              collection={values}
+              viewOnly={finished}
+              setValues={setValues}
+              permittedValues={props.permittedDataValues}
+            />
+          ) : (
+            <Values
+              collection={values}
+              viewOnly={finished}
+              setValues={setValues}
+            />
+          )}
         </Flex>
       </CardBody>
 

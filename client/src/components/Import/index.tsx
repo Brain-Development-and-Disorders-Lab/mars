@@ -30,15 +30,23 @@ import {
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 import Error from "@components/Error";
+import Attribute from "@components/Attribute";
 
 // Custom and existing types
-import { CollectionModel, EntityImport, EntityModel } from "@types";
+import {
+  AttributeModel,
+  AttributeProps,
+  CollectionModel,
+  EntityImport,
+  EntityModel,
+} from "@types";
 
 // Utility functions and libraries
 import { getData, postData } from "@database/functions";
 import { useToken } from "src/authentication/useToken";
 import _ from "lodash";
 import dayjs from "dayjs";
+import { nanoid } from "nanoid";
 
 const Import = (props: {
   isOpen: boolean;
@@ -61,6 +69,10 @@ const Import = (props: {
     onOpen: onMappingOpen,
     onClose: onMappingClose,
   } = useDisclosure();
+  const [interfacePage, setInterfacePage] = useState(
+    "start" as "start" | "attributes"
+  );
+
   const [spreadsheetData, setSpreadsheetData] = useState([] as any[]);
   const [columns, setColumns] = useState([] as string[]);
 
@@ -84,6 +96,10 @@ const Import = (props: {
   );
   const [productsField, setProductsField] = useState(
     [] as { name: string; id: string }[]
+  );
+  const [attributes, setAttributes] = useState([] as AttributeModel[]);
+  const [attributesField, setAttributesField] = useState(
+    [] as AttributeModel[]
   );
 
   const performImport = () => {
@@ -167,10 +183,15 @@ const Import = (props: {
   };
 
   const setupMapping = () => {
-    Promise.all([getData(`/entities`), getData(`/collections`)])
-      .then((results: [EntityModel[], CollectionModel[]]) => {
+    Promise.all([
+      getData(`/entities`),
+      getData(`/collections`),
+      getData(`/attributes`),
+    ])
+      .then((results: [EntityModel[], CollectionModel[], AttributeModel[]]) => {
         setEntities(results[0]);
         setCollections(results[1]);
+        setAttributes(results[2]);
         setIsLoaded(true);
         onMappingOpen();
       })
@@ -197,6 +218,7 @@ const Import = (props: {
         collections: collectionField,
         origins: originsField,
         products: productsField,
+        attributes: attributesField,
       },
       data: spreadsheetData,
     };
@@ -314,6 +336,31 @@ const Import = (props: {
         })}
       </Select>
     );
+  };
+
+  // Removal callback
+  const onRemoveAttribute = (identifier: string) => {
+    // We need to filter the removed attribute from the total collection
+    setAttributesField(
+      attributesField.filter((attribute) => attribute._id !== identifier)
+    );
+  };
+
+  // Used to receive data from a Attribute component
+  const onUpdateAttribute = (data: AttributeProps) => {
+    setAttributesField([
+      ...attributesField.map((attribute) => {
+        if (_.isEqual(attribute._id, data.identifier)) {
+          return {
+            _id: data.identifier,
+            name: data.name,
+            description: data.description,
+            values: data.values,
+          };
+        }
+        return attribute;
+      }),
+    ]);
   };
 
   return (
@@ -541,113 +588,209 @@ const Import = (props: {
             </ModalContent>
           </Modal>
 
-          <Modal isOpen={isMappingOpen} onClose={onMappingClose} size={"2xl"}>
+          <Modal isOpen={isMappingOpen} onClose={onMappingClose} size={"4xl"}>
             <ModalOverlay />
             <ModalContent>
               <ModalHeader>Import Spreadsheet Data</ModalHeader>
               <ModalBody>
-                <Flex w={"100%"} direction={"column"} gap={"4"}>
-                  <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
-                    <Text fontWeight={"semibold"}>Columns:</Text>
-                    {columns.map((column) => {
-                      return (
-                        <Tag key={column} colorScheme={"teal"}>
-                          {column}
-                        </Tag>
-                      );
-                    })}
-                  </Flex>
-                  <Flex direction={"row"} gap={"4"}>
-                    <FormControl
-                      isRequired
-                      isInvalid={_.isEqual(nameField, "")}
-                    >
-                      <FormLabel>Name</FormLabel>
-                      {getSelectComponent(nameField, setNameField)}
-                    </FormControl>
-                    <FormControl>
-                      <FormLabel>Description</FormLabel>
-                      {getSelectComponent(
-                        descriptionField,
-                        setDescriptionField
-                      )}
-                    </FormControl>
-                  </Flex>
-                  <Flex direction={"row"} gap={"4"}>
-                    <FormControl>
-                      <FormLabel>Owner</FormLabel>
-                      <Input value={ownerField} disabled />
-                    </FormControl>
-                    <FormControl>
-                      <FormLabel>Collection</FormLabel>
-                      {getSelectCollectionComponent(
-                        collectionField,
-                        setCollectionField
-                      )}
-                    </FormControl>
-                  </Flex>
-                  <Flex direction={"row"} gap={"4"}>
-                    <FormControl>
-                      <FormLabel>Origin</FormLabel>
-                      <Flex direction={"column"} gap={"4"}>
-                        {getSelectEntitiesComponent(
-                          selectedOrigin,
-                          setSelectedOrigin,
-                          originsField,
-                          setOriginsField
-                        )}
-                        <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
-                          {originsField.map((origin) => {
-                            return (
-                              <Tag key={origin.id}>
-                                {origin.name}
-                                <TagCloseButton
-                                  onClick={() => {
-                                    setOriginsField([
-                                      ...originsField.filter(
-                                        (existingOrigin) =>
-                                          !_.isEqual(
-                                            existingOrigin.id,
-                                            origin.id
-                                          )
-                                      ),
-                                    ]);
-                                  }}
-                                />
-                              </Tag>
-                            );
-                          })}
-                        </Flex>
-                      </Flex>
-                    </FormControl>
-                    <FormControl>
-                      <FormLabel>Products</FormLabel>
-                      {getSelectEntitiesComponent(
-                        selectedProduct,
-                        setSelectedProduct,
-                        productsField,
-                        setProductsField
-                      )}
-                      {productsField.map((product) => {
+                {_.isEqual(interfacePage, "start") && (
+                  <Flex w={"100%"} direction={"column"} gap={"4"}>
+                    <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
+                      <Text fontWeight={"semibold"}>Columns:</Text>
+                      {columns.map((column) => {
                         return (
-                          <Tag key={product.id}>
-                            {product.name}
-                            <TagCloseButton
-                              onClick={() => {
-                                setProductsField([
-                                  ...productsField.filter(
-                                    (existingProduct) =>
-                                      !_.isEqual(existingProduct.id, product.id)
-                                  ),
-                                ]);
-                              }}
-                            />
+                          <Tag key={column} colorScheme={"teal"}>
+                            {column}
                           </Tag>
                         );
                       })}
-                    </FormControl>
+                    </Flex>
+                    <Flex direction={"row"} gap={"4"}>
+                      <FormControl
+                        isRequired
+                        isInvalid={_.isEqual(nameField, "")}
+                      >
+                        <FormLabel>Name</FormLabel>
+                        {getSelectComponent(nameField, setNameField)}
+                      </FormControl>
+                      <FormControl>
+                        <FormLabel>Description</FormLabel>
+                        {getSelectComponent(
+                          descriptionField,
+                          setDescriptionField
+                        )}
+                      </FormControl>
+                    </Flex>
+                    <Flex direction={"row"} gap={"4"}>
+                      <FormControl>
+                        <FormLabel>Owner</FormLabel>
+                        <Input value={ownerField} disabled />
+                      </FormControl>
+                      <FormControl>
+                        <FormLabel>Collection</FormLabel>
+                        {getSelectCollectionComponent(
+                          collectionField,
+                          setCollectionField
+                        )}
+                      </FormControl>
+                    </Flex>
+                    <Flex direction={"row"} gap={"4"}>
+                      <FormControl>
+                        <FormLabel>Origin</FormLabel>
+                        <Flex direction={"column"} gap={"4"}>
+                          {getSelectEntitiesComponent(
+                            selectedOrigin,
+                            setSelectedOrigin,
+                            originsField,
+                            setOriginsField
+                          )}
+                          <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
+                            {originsField.map((origin) => {
+                              return (
+                                <Tag key={origin.id}>
+                                  {origin.name}
+                                  <TagCloseButton
+                                    onClick={() => {
+                                      setOriginsField([
+                                        ...originsField.filter(
+                                          (existingOrigin) =>
+                                            !_.isEqual(
+                                              existingOrigin.id,
+                                              origin.id
+                                            )
+                                        ),
+                                      ]);
+                                    }}
+                                  />
+                                </Tag>
+                              );
+                            })}
+                          </Flex>
+                        </Flex>
+                      </FormControl>
+                      <FormControl>
+                        <FormLabel>Products</FormLabel>
+                        {getSelectEntitiesComponent(
+                          selectedProduct,
+                          setSelectedProduct,
+                          productsField,
+                          setProductsField
+                        )}
+                        {productsField.map((product) => {
+                          return (
+                            <Tag key={product.id}>
+                              {product.name}
+                              <TagCloseButton
+                                onClick={() => {
+                                  setProductsField([
+                                    ...productsField.filter(
+                                      (existingProduct) =>
+                                        !_.isEqual(
+                                          existingProduct.id,
+                                          product.id
+                                        )
+                                    ),
+                                  ]);
+                                }}
+                              />
+                            </Tag>
+                          );
+                        })}
+                      </FormControl>
+                    </Flex>
                   </Flex>
-                </Flex>
+                )}
+                {_.isEqual(interfacePage, "attributes") && (
+                  <Flex w={"100%"} direction={"column"} gap={"4"}>
+                    <Text>Attributes</Text>
+                    <Flex
+                      direction={"row"}
+                      gap={"2"}
+                      align={"center"}
+                      justify={"space-between"}
+                      wrap={["wrap", "nowrap"]}
+                    >
+                      {/* Drop-down to select template Attributes */}
+                      <FormControl maxW={"sm"}>
+                        <Select
+                          placeholder={"Use template Attribute"}
+                          onChange={(event) => {
+                            if (!_.isEqual(event.target.value.toString(), "")) {
+                              for (let attribute of attributes) {
+                                if (
+                                  _.isEqual(
+                                    event.target.value.toString(),
+                                    attribute._id
+                                  )
+                                ) {
+                                  setAttributesField([
+                                    ...attributesField,
+                                    {
+                                      _id: `a-${nanoid(6)}`,
+                                      name: attribute.name,
+                                      description: attribute.description,
+                                      values: attribute.values,
+                                    },
+                                  ]);
+                                  break;
+                                }
+                              }
+                            }
+                          }}
+                        >
+                          {isLoaded &&
+                            attributes.map((attribute) => {
+                              return (
+                                <option
+                                  key={attribute._id}
+                                  value={attribute._id}
+                                >
+                                  {attribute.name}
+                                </option>
+                              );
+                            })}
+                          ;
+                        </Select>
+                      </FormControl>
+
+                      <Button
+                        leftIcon={<Icon name={"add"} />}
+                        colorScheme={"green"}
+                        onClick={() => {
+                          // Create an 'empty' Attribute and add the data structure to the 'selectedAttributes' collection
+                          setAttributesField([
+                            ...attributesField,
+                            {
+                              _id: `a-${nanoid(6)}`,
+                              name: "",
+                              description: "",
+                              values: [],
+                            },
+                          ]);
+                        }}
+                      >
+                        Create
+                      </Button>
+                    </Flex>
+
+                    {/* Display all Attributes */}
+                    {attributesField.map((attribute) => {
+                      return (
+                        <Attribute
+                          key={attribute._id}
+                          identifier={attribute._id}
+                          name={attribute.name}
+                          description={attribute.description}
+                          values={attribute.values}
+                          restrictDataValues={true}
+                          permittedDataValues={columns}
+                          onRemove={onRemoveAttribute}
+                          onUpdate={onUpdateAttribute}
+                        />
+                      );
+                    })}
+                  </Flex>
+                )}
               </ModalBody>
 
               <ModalFooter>
@@ -665,14 +808,26 @@ const Import = (props: {
 
                   <Button
                     colorScheme={"green"}
-                    rightIcon={<Icon name="check" />}
-                    variant={"solid"}
+                    rightIcon={
+                      _.isEqual(interfacePage, "start") ? (
+                        <Icon name="c_right" />
+                      ) : (
+                        <Icon name="check" />
+                      )
+                    }
+                    variant={
+                      _.isEqual(interfacePage, "start") ? "outline" : "solid"
+                    }
                     onClick={() => {
-                      performMapping();
+                      if (_.isEqual(interfacePage, "start")) {
+                        setInterfacePage("attributes");
+                      } else {
+                        performMapping();
+                      }
                     }}
                     disabled={_.isEqual(nameField, "")}
                   >
-                    Apply
+                    {_.isEqual(interfacePage, "start") ? "Continue" : "Apply"}
                   </Button>
                 </Flex>
               </ModalFooter>
