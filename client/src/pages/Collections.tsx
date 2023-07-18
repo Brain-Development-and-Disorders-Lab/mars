@@ -73,7 +73,12 @@ const Collections = () => {
       _.isEqual(breakpoint, "base") ||
       _.isUndefined(breakpoint)
     ) {
-      setVisibleColumns({ description: false, owner: false, entities: false, collections: false });
+      setVisibleColumns({
+        description: false,
+        owner: false,
+        entities: false,
+        collections: false,
+      });
     } else {
       setVisibleColumns({});
     }

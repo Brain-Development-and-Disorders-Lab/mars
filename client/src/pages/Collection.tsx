@@ -78,10 +78,18 @@ const Collection = () => {
   const toast = useToast();
 
   // Add Entities
-  const { isOpen: isEntitiesOpen, onOpen: onEntitiesOpen, onClose: onEntitiesClose } = useDisclosure();
+  const {
+    isOpen: isEntitiesOpen,
+    onOpen: onEntitiesOpen,
+    onClose: onEntitiesClose,
+  } = useDisclosure();
 
   // Add Collections
-  const { isOpen: isCollectionsOpen, onOpen: onCollectionsOpen, onClose: onCollectionsClose } = useDisclosure();
+  const {
+    isOpen: isCollectionsOpen,
+    onOpen: onCollectionsOpen,
+    onClose: onCollectionsClose,
+  } = useDisclosure();
 
   // History drawer
   const {
@@ -98,7 +106,9 @@ const Collection = () => {
 
   const [collectionData, setCollectionData] = useState({} as CollectionModel);
   const [collectionEntities, setCollectionEntities] = useState([] as string[]);
-  const [collectionCollections, setCollectionCollections] = useState([] as string[]);
+  const [collectionCollections, setCollectionCollections] = useState(
+    [] as string[]
+  );
   const [collectionDescription, setCollectionDescription] = useState("");
   const [collectionHistory, setCollectionHistory] = useState(
     [] as CollectionHistory[]
@@ -114,7 +124,9 @@ const Collection = () => {
   const [allCollections, setAllCollections] = useState(
     [] as { name: string; id: string }[]
   );
-  const [selectedCollections, setSelectedCollections] = useState([] as string[]);
+  const [selectedCollections, setSelectedCollections] = useState(
+    [] as string[]
+  );
 
   const {
     isOpen: isExportOpen,
@@ -362,84 +374,84 @@ const Collection = () => {
       });
   };
 
-    // Handle clicking the "Export" button
-    const handleExportClick = () => {
-      setCollectionData(collectionData);
-      onExportOpen();
-    };
+  // Handle clicking the "Export" button
+  const handleExportClick = () => {
+    setCollectionData(collectionData);
+    onExportOpen();
+  };
 
-    // Handle clicking the "Download" button
-    const handleDownloadClick = (format: "json" | "csv" | "txt") => {
-      // Send POST data to generate file
-      postData(`/collections/export`, {
-        id: id,
-        fields: exportAll ? allExportFields : exportFields,
-        format: format,
-      })
-        .then((response) => {
-          let responseData = response;
+  // Handle clicking the "Download" button
+  const handleDownloadClick = (format: "json" | "csv" | "txt") => {
+    // Send POST data to generate file
+    postData(`/collections/export`, {
+      id: id,
+      fields: exportAll ? allExportFields : exportFields,
+      format: format,
+    })
+      .then((response) => {
+        let responseData = response;
 
-          // Clean the response data if required
-          if (_.isEqual(format, "json")) {
-            responseData = JSON.stringify(responseData, null, "  ");
-          }
+        // Clean the response data if required
+        if (_.isEqual(format, "json")) {
+          responseData = JSON.stringify(responseData, null, "  ");
+        }
 
-          FileSaver.saveAs(
-            new Blob([responseData]),
-            slugify(`${collectionData.name.replace(" ", "")}_export.${format}`)
-          );
+        FileSaver.saveAs(
+          new Blob([responseData]),
+          slugify(`${collectionData.name.replace(" ", "")}_export.${format}`)
+        );
 
-          // Close the "Export" modal
-          onExportClose();
+        // Close the "Export" modal
+        onExportClose();
 
-          // Reset the export state
-          setExportFields([]);
+        // Reset the export state
+        setExportFields([]);
 
-          toast({
-            title: "Info",
-            description: `Generated ${format.toUpperCase()} file.`,
-            status: "info",
-            duration: 2000,
-            position: "bottom-right",
-            isClosable: true,
-          });
-        })
-        .catch((_error) => {
-          toast({
-            title: "Error",
-            description: "An error occurred when exporting this Collection.",
-            status: "error",
-            duration: 2000,
-            position: "bottom-right",
-            isClosable: true,
-          });
+        toast({
+          title: "Info",
+          description: `Generated ${format.toUpperCase()} file.`,
+          status: "info",
+          duration: 2000,
+          position: "bottom-right",
+          isClosable: true,
         });
-    };
+      })
+      .catch((_error) => {
+        toast({
+          title: "Error",
+          description: "An error occurred when exporting this Collection.",
+          status: "error",
+          duration: 2000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+      });
+  };
 
-    // A list of all fields that can be exported, generated when the interface is opened
-    const allExportFields = ["name", "created", "owner", "description"];
+  // A list of all fields that can be exported, generated when the interface is opened
+  const allExportFields = ["name", "created", "owner", "description"];
 
-    // Handle checkbox selection on the export modal
-    const handleExportCheck = (field: string, checkState: boolean) => {
-      if (_.isEqual(checkState, true)) {
-        // If checked after click, add field to exportFields
-        if (!exportFields.includes(field)) {
-          const updatedFields = [...exportFields, field];
-          setExportFields(updatedFields);
-        }
-      } else {
-        // If unchecked after click, remove the field from exportFields
-        if (exportFields.includes(field)) {
-          const updatedFields = exportFields.filter((existingField) => {
-            if (!_.isEqual(existingField, field)) {
-              return existingField;
-            }
-            return;
-          });
-          setExportFields(updatedFields);
-        }
+  // Handle checkbox selection on the export modal
+  const handleExportCheck = (field: string, checkState: boolean) => {
+    if (_.isEqual(checkState, true)) {
+      // If checked after click, add field to exportFields
+      if (!exportFields.includes(field)) {
+        const updatedFields = [...exportFields, field];
+        setExportFields(updatedFields);
       }
-    };
+    } else {
+      // If unchecked after click, remove the field from exportFields
+      if (exportFields.includes(field)) {
+        const updatedFields = exportFields.filter((existingField) => {
+          if (!_.isEqual(existingField, field)) {
+            return existingField;
+          }
+          return;
+        });
+        setExportFields(updatedFields);
+      }
+    }
+  };
 
   // Define the columns for Entities listing
   const entitiesColumns = [
@@ -472,7 +484,9 @@ const Collection = () => {
   const collectionsColumns = [
     {
       id: (info: any) => info.row.original,
-      cell: (info: any) => <Linky id={info.row.original} type={"collections"} />,
+      cell: (info: any) => (
+        <Linky id={info.row.original} type={"collections"} />
+      ),
       header: "Name",
     },
     {
@@ -743,7 +757,8 @@ const Collection = () => {
                     )}
                   </Flex>
                   <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
-                    {collectionCollections && collectionCollections.length > 0 ? (
+                    {collectionCollections &&
+                    collectionCollections.length > 0 ? (
                       <DataTable
                         data={collectionCollections}
                         columns={collectionsColumns}
@@ -847,7 +862,6 @@ const Collection = () => {
               </ModalContent>
             </Modal>
 
-
             {/* Modal to add Collections */}
             <Modal isOpen={isCollectionsOpen} onClose={onCollectionsClose}>
               <ModalOverlay />
@@ -864,11 +878,13 @@ const Collection = () => {
                       title="Select Collection"
                       placeholder={"Select Collection"}
                       onChange={(event) => {
-                        const selectedCollection = event.target.value.toString();
+                        const selectedCollection =
+                          event.target.value.toString();
                         if (selectedCollections.includes(selectedCollection)) {
                           toast({
                             title: "Warning",
-                            description: "Collection has already been selected.",
+                            description:
+                              "Collection has already been selected.",
                             status: "warning",
                             duration: 2000,
                             position: "bottom-right",
@@ -959,7 +975,9 @@ const Collection = () => {
                               Name: {collectionData.name}
                             </Checkbox>
                             <Checkbox
-                              isChecked={exportAll || _.includes(exportFields, "created")}
+                              isChecked={
+                                exportAll || _.includes(exportFields, "created")
+                              }
                               onChange={(event) =>
                                 handleExportCheck(
                                   "created",
@@ -968,10 +986,14 @@ const Collection = () => {
                               }
                             >
                               Created:{" "}
-                              {dayjs(collectionData.created).format("DD MMM YYYY")}
+                              {dayjs(collectionData.created).format(
+                                "DD MMM YYYY"
+                              )}
                             </Checkbox>
                             <Checkbox
-                              isChecked={exportAll || _.includes(exportFields, "owner")}
+                              isChecked={
+                                exportAll || _.includes(exportFields, "owner")
+                              }
                               onChange={(event) =>
                                 handleExportCheck("owner", event.target.checked)
                               }
@@ -979,7 +1001,10 @@ const Collection = () => {
                               Owner: {collectionData.owner}
                             </Checkbox>
                             <Checkbox
-                              isChecked={exportAll || _.includes(exportFields, "description")}
+                              isChecked={
+                                exportAll ||
+                                _.includes(exportFields, "description")
+                              }
                               onChange={(event) =>
                                 handleExportCheck(
                                   "description",
@@ -1010,7 +1035,13 @@ const Collection = () => {
                             return (
                               <Checkbox
                                 key={collection}
-                                isChecked={exportAll || _.includes(exportFields, `collection_${collection}`)}
+                                isChecked={
+                                  exportAll ||
+                                  _.includes(
+                                    exportFields,
+                                    `collection_${collection}`
+                                  )
+                                }
                                 onChange={(event) =>
                                   handleExportCheck(
                                     `collection_${collection}`,
@@ -1040,7 +1071,10 @@ const Collection = () => {
                             return (
                               <Checkbox
                                 key={entity}
-                                isChecked={exportAll || _.includes(exportFields, `entity_${entity}`)}
+                                isChecked={
+                                  exportAll ||
+                                  _.includes(exportFields, `entity_${entity}`)
+                                }
                                 onChange={(event) =>
                                   handleExportCheck(
                                     `entity_${entity}`,
@@ -1061,8 +1095,16 @@ const Collection = () => {
                 </Flex>
 
                 {/* "Download" buttons */}
-                <Flex direction={"row"} p={"md"} gap={"4"} justify={"center"} align={"center"}>
-                  <Checkbox onChange={(event) => setExportAll(event.target.checked)}>
+                <Flex
+                  direction={"row"}
+                  p={"md"}
+                  gap={"4"}
+                  justify={"center"}
+                  align={"center"}
+                >
+                  <Checkbox
+                    onChange={(event) => setExportAll(event.target.checked)}
+                  >
                     Select All
                   </Checkbox>
 

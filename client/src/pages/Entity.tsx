@@ -931,9 +931,7 @@ const Entity = () => {
                   </Flex>
 
                   {entityCollections.length === 0 ? (
-                    <Text>
-                      No Collections.
-                    </Text>
+                    <Text>No Collections.</Text>
                   ) : (
                     <TableContainer>
                       <Table variant={"simple"} colorScheme={"blackAlpha"}>
@@ -1698,7 +1696,9 @@ const Entity = () => {
                               Name: {entityData.name}
                             </Checkbox>
                             <Checkbox
-                              isChecked={exportAll || _.includes(exportFields, "created")}
+                              isChecked={
+                                exportAll || _.includes(exportFields, "created")
+                              }
                               onChange={(event) =>
                                 handleExportCheck(
                                   "created",
@@ -1710,7 +1710,9 @@ const Entity = () => {
                               {dayjs(entityData.created).format("DD MMM YYYY")}
                             </Checkbox>
                             <Checkbox
-                              isChecked={exportAll || _.includes(exportFields, "owner")}
+                              isChecked={
+                                exportAll || _.includes(exportFields, "owner")
+                              }
                               onChange={(event) =>
                                 handleExportCheck("owner", event.target.checked)
                               }
@@ -1718,7 +1720,10 @@ const Entity = () => {
                               Owner: {entityData.owner}
                             </Checkbox>
                             <Checkbox
-                              isChecked={exportAll || _.includes(exportFields, "description")}
+                              isChecked={
+                                exportAll ||
+                                _.includes(exportFields, "description")
+                              }
                               onChange={(event) =>
                                 handleExportCheck(
                                   "description",
@@ -1749,7 +1754,13 @@ const Entity = () => {
                             return (
                               <Checkbox
                                 key={collection}
-                                isChecked={exportAll || _.includes(exportFields, `collection_${collection}`)}
+                                isChecked={
+                                  exportAll ||
+                                  _.includes(
+                                    exportFields,
+                                    `collection_${collection}`
+                                  )
+                                }
                                 onChange={(event) =>
                                   handleExportCheck(
                                     `collection_${collection}`,
@@ -1779,7 +1790,13 @@ const Entity = () => {
                             return (
                               <Checkbox
                                 key={origin.id}
-                                isChecked={exportAll || _.includes(exportFields, `origin_${origin.id}`)}
+                                isChecked={
+                                  exportAll ||
+                                  _.includes(
+                                    exportFields,
+                                    `origin_${origin.id}`
+                                  )
+                                }
                                 onChange={(event) =>
                                   handleExportCheck(
                                     `origin_${origin.id}`,
@@ -1805,7 +1822,13 @@ const Entity = () => {
                             return (
                               <Checkbox
                                 key={product.id}
-                                isChecked={exportAll || _.includes(exportFields, `product_${product.id}`)}
+                                isChecked={
+                                  exportAll ||
+                                  _.includes(
+                                    exportFields,
+                                    `product_${product.id}`
+                                  )
+                                }
                                 onChange={(event) =>
                                   handleExportCheck(
                                     `product_${product.id}`,
@@ -1834,7 +1857,13 @@ const Entity = () => {
                             return (
                               <Checkbox
                                 key={attribute._id}
-                                isChecked={exportAll || _.includes(exportFields, `attribute_${attribute._id}`)}
+                                isChecked={
+                                  exportAll ||
+                                  _.includes(
+                                    exportFields,
+                                    `attribute_${attribute._id}`
+                                  )
+                                }
                                 onChange={(event) =>
                                   handleExportCheck(
                                     `attribute_${attribute._id}`,
@@ -1855,8 +1884,16 @@ const Entity = () => {
                 </Flex>
 
                 {/* "Download" buttons */}
-                <Flex direction={"row"} p={"md"} gap={"4"} justify={"center"} align={"center"}>
-                  <Checkbox onChange={(event) => setExportAll(event.target.checked)}>
+                <Flex
+                  direction={"row"}
+                  p={"md"}
+                  gap={"4"}
+                  justify={"center"}
+                  align={"center"}
+                >
+                  <Checkbox
+                    onChange={(event) => setExportAll(event.target.checked)}
+                  >
                     Select All
                   </Checkbox>
 

@@ -33,7 +33,13 @@ import Error from "@components/Error";
 import Attribute from "@components/Attribute";
 
 // Custom and existing types
-import { AttributeModel, AttributeProps, CollectionModel, EntityImport, EntityModel } from "@types";
+import {
+  AttributeModel,
+  AttributeProps,
+  CollectionModel,
+  EntityImport,
+  EntityModel,
+} from "@types";
 
 // Utility functions and libraries
 import { getData, postData } from "@database/functions";
@@ -63,7 +69,9 @@ const Import = (props: {
     onOpen: onMappingOpen,
     onClose: onMappingClose,
   } = useDisclosure();
-  const [interfacePage, setInterfacePage] = useState("start" as "start" | "attributes");
+  const [interfacePage, setInterfacePage] = useState(
+    "start" as "start" | "attributes"
+  );
 
   const [spreadsheetData, setSpreadsheetData] = useState([] as any[]);
   const [columns, setColumns] = useState([] as string[]);
@@ -90,7 +98,9 @@ const Import = (props: {
     [] as { name: string; id: string }[]
   );
   const [attributes, setAttributes] = useState([] as AttributeModel[]);
-  const [attributesField, setAttributesField] = useState([] as AttributeModel[]);
+  const [attributesField, setAttributesField] = useState(
+    [] as AttributeModel[]
+  );
 
   const performImport = () => {
     setIsUploading(true);
@@ -173,7 +183,11 @@ const Import = (props: {
   };
 
   const setupMapping = () => {
-    Promise.all([getData(`/entities`), getData(`/collections`), getData(`/attributes`)])
+    Promise.all([
+      getData(`/entities`),
+      getData(`/collections`),
+      getData(`/attributes`),
+    ])
       .then((results: [EntityModel[], CollectionModel[], AttributeModel[]]) => {
         setEntities(results[0]);
         setCollections(results[1]);
@@ -579,7 +593,7 @@ const Import = (props: {
             <ModalContent>
               <ModalHeader>Import Spreadsheet Data</ModalHeader>
               <ModalBody>
-                {_.isEqual(interfacePage, "start") &&
+                {_.isEqual(interfacePage, "start") && (
                   <Flex w={"100%"} direction={"column"} gap={"4"}>
                     <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
                       <Text fontWeight={"semibold"}>Columns:</Text>
@@ -671,7 +685,10 @@ const Import = (props: {
                                   setProductsField([
                                     ...productsField.filter(
                                       (existingProduct) =>
-                                        !_.isEqual(existingProduct.id, product.id)
+                                        !_.isEqual(
+                                          existingProduct.id,
+                                          product.id
+                                        )
                                     ),
                                   ]);
                                 }}
@@ -682,8 +699,8 @@ const Import = (props: {
                       </FormControl>
                     </Flex>
                   </Flex>
-                }
-                {_.isEqual(interfacePage, "attributes") &&
+                )}
+                {_.isEqual(interfacePage, "attributes") && (
                   <Flex w={"100%"} direction={"column"} gap={"4"}>
                     <Text>Attributes</Text>
                     <Flex
@@ -773,7 +790,7 @@ const Import = (props: {
                       );
                     })}
                   </Flex>
-                }
+                )}
               </ModalBody>
 
               <ModalFooter>
@@ -791,8 +808,16 @@ const Import = (props: {
 
                   <Button
                     colorScheme={"green"}
-                    rightIcon={_.isEqual(interfacePage, "start") ? <Icon name="c_right" /> : <Icon name="check" />}
-                    variant={_.isEqual(interfacePage, "start") ? "outline" : "solid"}
+                    rightIcon={
+                      _.isEqual(interfacePage, "start") ? (
+                        <Icon name="c_right" />
+                      ) : (
+                        <Icon name="check" />
+                      )
+                    }
+                    variant={
+                      _.isEqual(interfacePage, "start") ? "outline" : "solid"
+                    }
                     onClick={() => {
                       if (_.isEqual(interfacePage, "start")) {
                         setInterfacePage("attributes");

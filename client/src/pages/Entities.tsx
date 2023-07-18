@@ -82,9 +82,9 @@ const Entities = () => {
   const columns = [
     columnHelper.accessor("name", {
       cell: (info) => {
-        return(
+        return (
           <Tooltip label={info.getValue()}>
-            <Text>{_.truncate(info.getValue(), {length: 20})}</Text>
+            <Text>{_.truncate(info.getValue(), { length: 20 })}</Text>
           </Tooltip>
         );
       },
@@ -92,9 +92,9 @@ const Entities = () => {
     }),
     columnHelper.accessor("description", {
       cell: (info) => {
-        return(
+        return (
           <Tooltip label={info.getValue()}>
-            <Text>{_.truncate(info.getValue(), {length: 20})}</Text>
+            <Text>{_.truncate(info.getValue(), { length: 20 })}</Text>
           </Tooltip>
         );
       },
