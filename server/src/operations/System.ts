@@ -278,7 +278,7 @@ export class System {
                 data: row[value.data],
               };
             }),
-          })
+          });
         });
 
         entities.push({

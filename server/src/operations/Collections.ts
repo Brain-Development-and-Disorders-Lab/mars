@@ -134,8 +134,8 @@ export class Collections {
           });
 
           // Collections
-          const collectionsToKeep = currentCollection.collections.filter((collection) =>
-            updatedCollection.collections.includes(collection)
+          const collectionsToKeep = currentCollection.collections.filter(
+            (collection) => updatedCollection.collections.includes(collection)
           );
           const collectionsToAdd = updatedCollection.collections.filter(
             (collection) => !currentCollection.collections.includes(collection)
@@ -427,25 +427,27 @@ export class Collections {
     });
   };
 
-    /**
+  /**
    * Collate and generate a data string containing all data pertaining to
    * a Collection
    * @param {{ id: string, fields: string[] }} collectionExportData the export data of the Collection
    * @return {Promise<string>}
    */
-    static getData = (collectionExportData: {
-      id: string;
-      fields: string[];
-      format: "json" | "csv" | "txt";
-    }): Promise<string> => {
-      consola.start(
-        "Generating data for Collection (id):",
-        collectionExportData.id.toString()
-      );
-      return new Promise((resolve, reject) => {
-        getDatabase()
-          .collection(COLLECTIONS)
-          .findOne({ _id: collectionExportData.id }, (error: any, result: any) => {
+  static getData = (collectionExportData: {
+    id: string;
+    fields: string[];
+    format: "json" | "csv" | "txt";
+  }): Promise<string> => {
+    consola.start(
+      "Generating data for Collection (id):",
+      collectionExportData.id.toString()
+    );
+    return new Promise((resolve, reject) => {
+      getDatabase()
+        .collection(COLLECTIONS)
+        .findOne(
+          { _id: collectionExportData.id },
+          (error: any, result: any) => {
             if (error) {
               reject(error);
               throw error;
@@ -455,7 +457,10 @@ export class Collections {
 
             if (_.isEqual(collectionExportData.format, "csv")) {
               const headers = ["ID", "Name"];
-              const row: Promise<string>[] = [Promise.resolve(collection._id), Promise.resolve(collection.name)];
+              const row: Promise<string>[] = [
+                Promise.resolve(collection._id),
+                Promise.resolve(collection.name),
+              ];
 
               // Iterate over fields and generate a CSV export file
               collectionExportData.fields.map((field) => {
@@ -478,10 +483,12 @@ export class Collections {
                 } else if (_.startsWith(field, "collection_")) {
                   // "collection" data fields
                   row.push(
-                    Collections.getOne(_.split(field, "_")[1]).then((collection) => {
-                      headers.push(`Collection (${collection.name})`);
-                      return collection.name;
-                    })
+                    Collections.getOne(_.split(field, "_")[1]).then(
+                      (collection) => {
+                        headers.push(`Collection (${collection.name})`);
+                        return collection.name;
+                      }
+                    )
                   );
                 } else if (_.startsWith(field, "entity_")) {
                   // "entity" data fields
@@ -586,7 +593,10 @@ export class Collections {
               const exportOperations = [] as Promise<string>[];
 
               // Structures to collate data
-              const textDetails = [`ID: ${collection._id}`, `Name: ${collection.name}`];
+              const textDetails = [
+                `ID: ${collection._id}`,
+                `Name: ${collection.name}`,
+              ];
               const textCollections = [] as string[];
               const textEntities = [] as string[];
 
@@ -607,10 +617,12 @@ export class Collections {
                 } else if (_.startsWith(field, "collection_")) {
                   // "collection" data fields
                   exportOperations.push(
-                    Collections.getOne(_.split(field, "_")[1]).then((collection) => {
-                      textCollections.push(collection.name);
-                      return collection.name;
-                    })
+                    Collections.getOne(_.split(field, "_")[1]).then(
+                      (collection) => {
+                        textCollections.push(collection.name);
+                        return collection.name;
+                      }
+                    )
                   );
                 } else if (_.startsWith(field, "entity_")) {
                   // "entity" data fields
@@ -633,7 +645,9 @@ export class Collections {
                   }
 
                   if (textCollections.length > 0) {
-                    textDetails.push(`Collections: ${textCollections.join(", ")}`);
+                    textDetails.push(
+                      `Collections: ${textCollections.join(", ")}`
+                    );
                   }
                   if (textEntities.length > 0) {
                     textDetails.push(`Entities: ${textEntities.join(", ")}`);
@@ -648,9 +662,10 @@ export class Collections {
                 });
               });
             }
-          });
-      });
-    };
+          }
+        );
+    });
+  };
 
   static delete = (id: string): Promise<CollectionModel> => {
     consola.start("Deleting Collection (id):", id.toString());
