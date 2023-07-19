@@ -462,6 +462,9 @@ export class Collections {
                 Promise.resolve(collection.name),
               ];
 
+              const entities: Promise<string>[] = [];
+              const collections: Promise<string>[] = [];
+
               // Iterate over fields and generate a CSV export file
               collectionExportData.fields.map((field) => {
                 if (_.isEqual(field, "created")) {
@@ -482,43 +485,58 @@ export class Collections {
                   row.push(Promise.resolve(collection.description));
                 } else if (_.startsWith(field, "collection_")) {
                   // "collection" data fields
-                  row.push(
+                  collections.push(
                     Collections.getOne(_.split(field, "_")[1]).then(
                       (collection) => {
-                        headers.push(`Collection (${collection.name})`);
                         return collection.name;
                       }
                     )
                   );
                 } else if (_.startsWith(field, "entity_")) {
                   // "entity" data fields
-                  row.push(
+                  entities.push(
                     Entities.getOne(_.split(field, "_")[1]).then((entity) => {
-                      headers.push(`Entity (${entity.name})`);
                       return entity.name;
                     })
                   );
                 }
               });
 
-              // Collate and format data as a CSV string
-              Promise.all(row).then((rowData) => {
-                const collated = [headers, rowData];
-                const formattedOutput = Papa.unparse(collated);
-
-                // Create a temporary file, passing the filename as a response
-                tmp.file((error, path: string, _fd: number) => {
-                  if (error) {
-                    reject(error);
-                    throw error;
+              Promise.all([
+                Promise.all(entities),
+                Promise.all(collections),
+              ]).then(([entities, collections]) => {
+                // Collate and format data as a CSV string
+                Promise.all(row).then((rowData) => {
+                  // Append Entities
+                  if (entities.length > 0) {
+                    headers.push("Entities");
+                    rowData.push(entities.join(", "));
                   }
 
-                  fs.writeFileSync(path, formattedOutput);
-                  consola.success(
-                    "Generated CSV data for  Collection (id):",
-                    collectionExportData.id.toString()
-                  );
-                  resolve(path);
+                  // Append Collections
+                  if (collections.length > 0) {
+                    headers.push("Collections");
+                    rowData.push(collections.join(", "));
+                  }
+
+                  const collated = [headers, rowData];
+                  const formattedOutput = Papa.unparse(collated);
+
+                  // Create a temporary file, passing the filename as a response
+                  tmp.file((error, path: string, _fd: number) => {
+                    if (error) {
+                      reject(error);
+                      throw error;
+                    }
+
+                    fs.writeFileSync(path, formattedOutput);
+                    consola.success(
+                      "Generated CSV data for  Collection (id):",
+                      collectionExportData.id.toString()
+                    );
+                    resolve(path);
+                  });
                 });
               });
             } else if (_.isEqual(collectionExportData.format, "json")) {
