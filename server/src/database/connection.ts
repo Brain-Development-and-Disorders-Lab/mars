@@ -1,5 +1,5 @@
 // Libraries
-import { Db, MongoClient } from "mongodb";
+import { Db, GridFSBucket, MongoClient } from "mongodb";
 import consola from "consola";
 import _ from "lodash";
 import { nanoid } from "nanoid";
@@ -16,7 +16,10 @@ if (_.isUndefined(CONNECTION_STRING)) {
 // Setup the MongoDB client and databases
 const client: MongoClient = new MongoClient(CONNECTION_STRING, {});
 let database: Db;
+let storage: Db;
 let system: Db;
+
+let attachments: GridFSBucket;
 
 /**
  * Connect to the primary database storing metadata
@@ -25,7 +28,15 @@ export const connectPrimary = (): Promise<Db> => {
   return new Promise((resolve, _reject) => {
     client.connect().then((result) => {
       database = result.db("metadata");
-      consola.success("Connected to MongoDB metadata database");
+      consola.success("Connected to metadata database");
+
+      storage = result.db("storage");
+      consola.success("Connected to storage database");
+
+      consola.start("Accessing \"attachments\" storage bucket");
+      attachments = new GridFSBucket(storage, { bucketName: "attachments" });
+      consola.success("Created \"attachments\" storage bucket");
+
       resolve(database);
     });
   });
@@ -65,6 +76,22 @@ export const getDatabase = (): Db => {
  */
 export const getSystem = (): Db => {
   return system;
+};
+
+/**
+ * Get the MongoDB database for storage
+ * @return {Db}
+ */
+export const getStorage = (): Db => {
+  return storage;
+};
+
+/**
+ * Get the MongoDB storage buckets for attachments
+ * @return {GridFSBucket}
+ */
+export const getAttachments = (): GridFSBucket => {
+  return attachments;
 };
 
 /**
