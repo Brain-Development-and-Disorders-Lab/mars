@@ -247,6 +247,7 @@ export type IconNames =
   "lock" |
   "exit" |
   "settings" |
+  "view" |
 
   // Logos
   "l_box" |

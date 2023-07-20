@@ -47,6 +47,21 @@ SystemRoute.route("/system/import/mapping").post(
   }
 );
 
+// Route: Upload image
+SystemRoute.route("/system/upload").post((request: any, response: any) => {
+  System.upload(request.files, request.body.target)
+    .then((result: { status: boolean; message: string; data?: any }) => {
+      response.json({
+        status: result.status ? "success" : "error",
+        message: result.message,
+        data: _.isUndefined(result.data) ? "" : result.data,
+      });
+    })
+    .catch((reason: { message: string }) => {
+      response.json({ status: "error", message: reason.message });
+    });
+});
+
 // Route: Get all Devices
 SystemRoute.route("/system/devices").get((_request: any, response: any) => {
   System.getDevices().then((devices: DeviceModel[]) => {

@@ -371,6 +371,10 @@ export class System {
     });
   };
 
+  static upload = (files: any, target: string): Promise<{ status: boolean; message: string; data?: any }> => {
+    return Entities.upload(files, target);
+  };
+
   static getDevice = (id: string): Promise<DeviceModel> => {
     consola.start("Retrieving Device (id):", id.toString());
     return new Promise((resolve, reject) => {

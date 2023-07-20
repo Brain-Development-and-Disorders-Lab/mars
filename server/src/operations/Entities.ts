@@ -3,12 +3,13 @@ import _, { reject } from "lodash";
 import consola from "consola";
 
 // Utility functions
-import { getDatabase, getIdentifier } from "../database/connection";
+import { getAttachments, getDatabase, getIdentifier } from "../database/connection";
 import { Activity } from "./Activity";
 import { Collections } from "./Collections";
 
 // File generation
 import fs from "fs";
+import stream, { Readable } from "stream";
 import Papa from "papaparse";
 import tmp from "tmp";
 import dayjs from "dayjs";
@@ -1049,6 +1050,48 @@ export class Entities {
     });
   };
 
+  static addAttachment = (id: string, attachment: { name: string, id: string }): Promise<{ name: string; id: string }> => {
+    consola.start("Adding Attachment", attachment.name, "to Entity (id):", id);
+    return new Promise((resolve, _reject) => {
+      getDatabase()
+        .collection(ENTITIES_COLLECTION)
+        .findOne({ _id: id }, (error: any, result: any) => {
+          if (error) {
+            throw error;
+          }
+
+          // Add the Origin to this Entity
+          const updates = {
+            $set: {
+              attachments: [
+                ...result.attachments,
+                {
+                  name: attachment.name,
+                  id: attachment.id,
+                },
+              ],
+            },
+          };
+
+          getDatabase()
+            .collection(ENTITIES_COLLECTION)
+            .updateOne(
+              { _id: id },
+              updates,
+              (error: any, _response: any) => {
+                if (error) {
+                  throw error;
+                }
+
+                // Resolve the Promise
+                consola.success("Added Attachment", attachment.name, "to Entity (id):", id);
+                resolve(attachment);
+              }
+            );
+        });
+    });
+  };
+
   /**
    * Update the description of an Entity
    * @param entity the Entity of interest
@@ -1449,6 +1492,38 @@ export class Entities {
         });
     });
   };
+
+  /**
+   * Handle uploading and assigning an attachment to an Entity
+   * @param {any} files image to be attached to the Entity
+   * @param {string} target Entity identifier to receive the image
+   * @return {Promise<{ status: boolean; message: string; data?: any }>}
+   */
+  static upload = (files: any, target: string): Promise<{ status: boolean; message: string; data?: any }> => {
+    return new Promise((resolve, reject) => {
+      if (files.file) {
+        const receivedFile = files.file;
+        const receivedFileData = receivedFile.data as Buffer;
+        consola.start("Received file:", receivedFile.name);
+
+        // Access bucket and create open stream to write to storage
+        const bucket = getAttachments();
+
+        // Create stream from buffer
+        const streamedFile = Readable.from(receivedFileData);
+        const uploadStream = bucket.openUploadStream(receivedFile.name);
+        streamedFile.pipe(uploadStream)
+          .on("error", (_error: Error) => {
+            reject("Error occurred uploading file");
+          })
+          .on("finish", () => {
+            // Once the upload is finished, register attachment with Entity
+            Entities.addAttachment(target, { name: receivedFile.name, id: uploadStream.id.toString() });
+            resolve({ status: true, message: "Uploaded file" });
+          });
+      }
+    });
+  }
 
   static delete = (id: string): Promise<EntityModel> => {
     consola.start("Deleting Entity (id):", id.toString());
