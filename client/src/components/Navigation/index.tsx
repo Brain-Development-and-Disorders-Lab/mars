@@ -25,7 +25,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { getData } from "@database/functions";
 import dayjs from "dayjs";
 import _ from "lodash";
-import Import from "@components/Import";
+import Importer from "@components/Importer";
 
 const Navigation = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -331,8 +331,8 @@ const Navigation = () => {
         </Flex>
       )}
 
-      {/* Import component containing modals */}
-      <Import
+      {/* Importer component containing modals */}
+      <Importer
         isOpen={isImportOpen}
         onOpen={onImportOpen}
         onClose={onImportClose}
