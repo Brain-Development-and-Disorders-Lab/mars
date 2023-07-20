@@ -11,7 +11,7 @@ import { SERVER_URL } from "src/variables";
  * @param {string} path exact API path to get data from
  * @return {Promise<any>} an object containing information from the database
  */
-export const getData = (path: string): Promise<any> => {
+export const getData = (path: string, skipParse?: boolean): Promise<any> => {
   return new Promise((resolve, reject) => {
     fetch(`${SERVER_URL}${path}`)
       .then((response) => {
@@ -22,14 +22,20 @@ export const getData = (path: string): Promise<any> => {
         }
 
         // Check the contents of the response
-        response.json().then((parsed) => {
-          if (!parsed) {
-            consola.error("GET:", path);
-            reject("Response contents were empty");
-          } else {
-            resolve(parsed);
-          }
-        });
+        if (_.isUndefined(skipParse) || _.isEqual(skipParse, false)) {
+          // Parse the response as JSON by default
+          response.json().then((parsed) => {
+            if (!parsed) {
+              consola.error("GET:", path);
+              reject("Response contents were empty");
+            } else {
+              resolve(parsed);
+            }
+          });
+        } else {
+          // Resolve with the default, untouched, response
+          resolve(response);
+        }
       })
       .catch((error) => {
         consola.error("GET:", path);
