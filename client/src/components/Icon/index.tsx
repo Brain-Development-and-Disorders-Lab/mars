@@ -29,6 +29,7 @@ import {
   BsFillBookmarkFill,
   BsFillCloudUploadFill,
   BsFillExclamationTriangleFill,
+  BsFillEyeFill,
   BsFillFileBinaryFill,
   BsFillGearFill,
   BsGithub,
@@ -94,6 +95,7 @@ const SYSTEM_ICONS: { [k: string]: IconType } = {
   lock: BsLockFill,
   exit: BsPower,
   settings: BsFillGearFill,
+  view: BsFillEyeFill,
 
   // Logos
   l_box: SiBox,
