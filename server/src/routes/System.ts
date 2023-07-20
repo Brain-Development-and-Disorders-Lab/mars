@@ -5,6 +5,7 @@ import _ from "lodash";
 import { System } from "../operations/System";
 import dayjs from "dayjs";
 import { DeviceModel, EntityModel } from "@types";
+import { GridFSBucketReadStream } from "mongodb";
 
 const SystemRoute = express.Router();
 
@@ -55,6 +56,27 @@ SystemRoute.route("/system/upload").post((request: any, response: any) => {
         status: result.status ? "success" : "error",
         message: result.message,
         data: _.isUndefined(result.data) ? "" : result.data,
+      });
+    })
+    .catch((reason: { message: string }) => {
+      response.json({ status: "error", message: reason.message });
+    });
+});
+
+// Route: Download file
+SystemRoute.route("/system/download/:id").get((request: any, response: any) => {
+  System.download(request.params.id)
+    .then((result: { status: boolean; stream: GridFSBucketReadStream }) => {
+      result.stream.on("data", (chunk) => {
+        response.write(chunk);
+      });
+
+      result.stream.on("error", () => {
+        response.sendStatus(404);
+      });
+
+      result.stream.on("end", () => {
+        response.end();
       });
     })
     .catch((reason: { message: string }) => {
