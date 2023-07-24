@@ -1511,7 +1511,7 @@ export class Entities {
 
         // Create stream from buffer
         const streamedFile = Readable.from(receivedFileData);
-        const uploadStream = bucket.openUploadStream(receivedFile.name);
+        const uploadStream = bucket.openUploadStream(receivedFile.name, { metadata: { type: receivedFile.mimetype }});
         streamedFile.pipe(uploadStream)
           .on("error", (_error: Error) => {
             reject("Error occurred uploading file");
@@ -1523,7 +1523,7 @@ export class Entities {
           });
       }
     });
-  }
+  };
 
   static delete = (id: string): Promise<EntityModel> => {
     consola.start("Deleting Entity (id):", id.toString());

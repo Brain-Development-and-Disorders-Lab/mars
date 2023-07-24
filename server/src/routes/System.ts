@@ -84,6 +84,17 @@ SystemRoute.route("/system/download/:id").get((request: any, response: any) => {
     });
 });
 
+// Route: Get file information
+SystemRoute.route("/system/file/:id").get((request: any, response: any) => {
+  System.getFileInformation(request.params.id)
+    .then((result: { status: boolean; data: any[] }) => {
+      response.json(result);
+    })
+    .catch((reason: { message: string }) => {
+      response.json({ status: "error", message: reason.message });
+    });
+});
+
 // Route: Get all Devices
 SystemRoute.route("/system/devices").get((_request: any, response: any) => {
   System.getDevices().then((devices: DeviceModel[]) => {

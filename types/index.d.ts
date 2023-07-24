@@ -184,6 +184,15 @@ export type EntityImport = {
   attributes: AttributeModel[];
 };
 
+// Attachment data
+export type AttachmentData = {
+  _id: string;
+  length: number;
+  chunkSize: number;
+  uploadDate: string;
+  filename: string;
+};
+
 // Activity types
 export type IActivity = {
   timestamp: Date;
@@ -225,6 +234,7 @@ export type IconNames =
 
   // Signal and action icons
   "activity" |
+  "attachment" |
   "check" |
   "info" |
   "search" |
