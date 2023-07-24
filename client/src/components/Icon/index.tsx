@@ -40,6 +40,7 @@ import {
   BsLink45Deg,
   BsList,
   BsLockFill,
+  BsPaperclip,
   BsPencilFill,
   BsPlusCircleFill,
   BsPower,
@@ -73,6 +74,7 @@ const SYSTEM_ICONS: { [k: string]: IconType } = {
 
   // Signal and action icons
   activity: BsLightningFill,
+  attachment: BsPaperclip,
   check: BsCheckCircleFill,
   info: BsInfoCircleFill,
   search: BsSearch,

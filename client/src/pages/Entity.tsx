@@ -57,10 +57,11 @@ import {
   CardBody,
   Spacer,
   Tooltip,
+  IconButton,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
-import Attachment from "@components/Attachment";
 import AttributeCard from "@components/AttributeCard";
+import DataTable from "@components/DataTable";
 import Error from "@components/Error";
 import Graph from "@components/Graph";
 import Icon from "@components/Icon";
@@ -68,6 +69,7 @@ import Linky from "@components/Linky";
 import Loading from "@components/Loading";
 import Uploader from "@components/Uploader";
 import Values from "@components/Values";
+import { createColumnHelper } from "@tanstack/react-table";
 
 // Existing and custom types
 import {
@@ -421,6 +423,47 @@ const Entity = () => {
         setIsLoaded(true);
       });
   };
+
+    // Configure table columns and data
+    const attachmentData: {id: string, name: string}[] = entityAttachments;
+    const columnHelper = createColumnHelper<{id: string, name: string}>();
+    const attachmentTableColumns = [
+      columnHelper.accessor("name", {
+        cell: (info) => {
+          return (
+            <Tooltip label={info.getValue()}>
+              <Text>{_.truncate(info.getValue(), { length: 48 })}</Text>
+            </Tooltip>
+          );
+        },
+        header: "Name",
+      }),
+      columnHelper.accessor("id", {
+        cell: (info) => {
+          const handleDownload = () => {
+            getData(`/system/download/${info.getValue()}`, { responseType: "blob" })
+              .then((response) => {
+                FileSaver.saveAs(new Blob([response], {type: "image/jpeg"}), slugify(info.row.original.name));
+              })
+              .catch((error) => {
+                console.error(error);
+              });
+          };
+          return (
+            <Flex w={"100%"} justify={"end"}>
+              <IconButton
+                aria-label={"Download attachment"}
+                key={`download-file-${info.getValue()}`}
+                colorScheme={"blue"}
+                icon={<Icon name={"download"} />}
+                onClick={() => handleDownload()}
+               />
+            </Flex>
+          );
+        },
+        header: "",
+      }),
+    ];
 
   /**
    * Restore an Entity from an earlier point in time
@@ -1154,56 +1197,11 @@ const Entity = () => {
                     )}
                   </Flex>
                 </Flex>
-
-                <Flex
-                  direction={"column"}
-                  p={"4"}
-                  gap={"4"}
-                  grow={"2"}
-                  h={"fit-content"}
-                  bg={"white"}
-                  rounded={"md"}
-                >
-                  {/* Attachments */}
-                  <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
-                    <Flex direction={"row"} justify={"space-between"}>
-                      <Heading size={"lg"}>Attachments</Heading>
-                      {editing ? (
-                        <Button
-                          colorScheme={"green"}
-                          rightIcon={<Icon name={"upload"} />}
-                          disabled={!editing}
-                          onClick={onUploadOpen}
-                        >
-                          Upload
-                        </Button>
-                      ) : null}
-                    </Flex>
-
-                    {entityAttachments.length === 0 ? (
-                      <Text>No Attachments.</Text>
-                    ) : (
-                      <Flex>
-                        {entityAttachments.map((attachment) => {
-                          return (
-                            <Attachment text={attachment.name} />
-                          );
-                        })}
-                      </Flex>
-                    )}
-                  </Flex>
-                </Flex>
               </Flex>
             </Flex>
 
-            {/* Attributes */}
-            <Flex
-              direction={"row"}
-              justify={"space-between"}
-              align={"center"}
-              wrap={"wrap"}
-              gap={"4"}
-            >
+            <Flex direction={"row"} gap={"4"} wrap={"wrap"}>
+              {/* Attributes */}
               <Flex
                 direction={"column"}
                 p={"4"}
@@ -1256,6 +1254,46 @@ const Entity = () => {
                     <Text>{entityData.name} does not have any Attributes.</Text>
                   )}
                 </SimpleGrid>
+              </Flex>
+
+              {/* Attachments */}
+              <Flex
+                direction={"column"}
+                p={"4"}
+                gap={"4"}
+                maxW={"2xl"}
+                grow={"1"}
+                h={"fit-content"}
+                bg={"white"}
+                rounded={"md"}
+              >
+                <Flex gap={"2"} direction={"column"} minH={"32"}>
+                  <Flex direction={"row"} justify={"space-between"}>
+                    <Heading size={"lg"}>Attachments</Heading>
+                    {editing ? (
+                      <Button
+                        colorScheme={"green"}
+                        rightIcon={<Icon name={"upload"} />}
+                        disabled={!editing}
+                        onClick={onUploadOpen}
+                      >
+                        Upload
+                      </Button>
+                    ) : null}
+                  </Flex>
+
+                  {entityAttachments.length === 0 ? (
+                    <Text>No Attachments.</Text>
+                  ) : (
+                    <DataTable
+                      data={attachmentData}
+                      columns={attachmentTableColumns}
+                      visibleColumns={{}}
+                      viewOnly={!editing}
+                      hideSelection={!editing}
+                    />
+                  )}
+                </Flex>
               </Flex>
             </Flex>
 

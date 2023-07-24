@@ -1,7 +1,7 @@
 // Utility functions and libraries
 import consola from "consola";
 import _ from "lodash";
-import axios from "axios";
+import axios, { AxiosRequestConfig } from "axios";
 
 // Get the URL of the database
 import { SERVER_URL } from "src/variables";
@@ -11,31 +11,18 @@ import { SERVER_URL } from "src/variables";
  * @param {string} path exact API path to get data from
  * @return {Promise<any>} an object containing information from the database
  */
-export const getData = (path: string, skipParse?: boolean): Promise<any> => {
+export const getData = (path: string, options?: AxiosRequestConfig): Promise<any> => {
   return new Promise((resolve, reject) => {
-    fetch(`${SERVER_URL}${path}`)
+    axios.get(`${SERVER_URL}${path}`, options)
       .then((response) => {
         // Check response status
-        if (!response.ok) {
+        if (!response) {
           consola.error("GET:", path);
           reject("Invalid response from database");
         }
 
-        // Check the contents of the response
-        if (_.isUndefined(skipParse) || _.isEqual(skipParse, false)) {
-          // Parse the response as JSON by default
-          response.json().then((parsed) => {
-            if (!parsed) {
-              consola.error("GET:", path);
-              reject("Response contents were empty");
-            } else {
-              resolve(parsed);
-            }
-          });
-        } else {
-          // Resolve with the default, untouched, response
-          resolve(response);
-        }
+        // Resolve with the response data
+        resolve(response.data);
       })
       .catch((error) => {
         consola.error("GET:", path);
@@ -49,10 +36,10 @@ export const getData = (path: string, skipParse?: boolean): Promise<any> => {
  * @param {string} path exact API path to post data to
  * @param {any} data the data to be posted to Lab
  */
-export const postData = async (path: string, data: any): Promise<any> => {
+export const postData = async (path: string, data: any, options?: AxiosRequestConfig): Promise<any> => {
   return new Promise((resolve, reject) => {
     axios
-      .post(`${SERVER_URL}${path}`, data)
+      .post(`${SERVER_URL}${path}`, data, options)
       .then((response) => {
         const contentType = response.headers["content-type"];
         if (_.isNull(contentType)) {
