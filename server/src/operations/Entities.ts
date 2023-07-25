@@ -9,7 +9,7 @@ import { Collections } from "./Collections";
 
 // File generation
 import fs from "fs";
-import stream, { Readable } from "stream";
+import { Readable } from "stream";
 import Papa from "papaparse";
 import tmp from "tmp";
 import dayjs from "dayjs";
