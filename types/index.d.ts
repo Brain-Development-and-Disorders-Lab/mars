@@ -138,6 +138,7 @@ export type IEntity = {
     products: { name: string; id: string }[];
   };
   attributes: AttributeModel[];
+  attachments: { name: string; id: string }[];
   history: EntityHistory[];
 };
 
@@ -156,6 +157,7 @@ export type EntityHistory = {
     products: { name: string; id: string }[];
   };
   attributes: AttributeModel[];
+  attachments: { name: string; id: string }[];
 };
 
 export type EntityExport = {

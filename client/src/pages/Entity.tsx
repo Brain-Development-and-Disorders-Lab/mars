@@ -224,12 +224,7 @@ const Entity = () => {
   useEffect(() => {
     getData(`/entities/${id}`)
       .then((response) => {
-        // Check for issues with an empty array being stored haphazardly as "null"
-        if (response.associations.origins === null) {
-          response.associations.origins = [];
-        }
-
-        // Store data and signal data retrieval being completed
+        // Store all received data and assign to specific fields
         setEntityData(response);
         setEntityDescription(response.description || "");
         setEntityCollections(response.collections);
@@ -318,6 +313,7 @@ const Entity = () => {
           products: entityProducts,
         },
         attributes: entityAttributes,
+        attachments: entityAttachments,
         history: entityHistory,
       };
 
@@ -385,6 +381,7 @@ const Entity = () => {
         products: entityProducts,
       },
       attributes: entityAttributes,
+      attachments: entityAttachments,
       history: entityData.history,
     };
 
@@ -586,13 +583,23 @@ const Entity = () => {
         };
         return (
           <Flex w={"100%"} justify={"end"}>
-            <IconButton
-              aria-label={"Download attachment"}
-              key={`download-file-${info.getValue()}`}
-              colorScheme={"blue"}
-              icon={<Icon name={"download"} />}
-              onClick={() => handleDownload()}
+            {editing ?
+              <IconButton
+                aria-label={"Delete attachment"}
+                key={`delete-file-${info.getValue()}`}
+                colorScheme={"red"}
+                icon={<Icon name={"delete"} />}
+                onClick={() => removeAttachment(info.getValue())}
               />
+            :
+              <IconButton
+                aria-label={"Download attachment"}
+                key={`download-file-${info.getValue()}`}
+                colorScheme={"blue"}
+                icon={<Icon name={"download"} />}
+                onClick={() => handleDownload()}
+              />
+            }
           </Flex>
         );
       },
@@ -619,6 +626,7 @@ const Entity = () => {
         products: entityVersion.associations.products,
       },
       attributes: entityVersion.attributes,
+      attachments: entityVersion.attachments,
       history: entityData.history,
     };
 
@@ -816,6 +824,15 @@ const Entity = () => {
     setEntityCollections(
       entityCollections.filter((collection) => {
         return collection !== id;
+      })
+    );
+  };
+
+  // Remove Attachments from the Entity state
+  const removeAttachment = (id: string) => {
+    setEntityAttachments(
+      entityAttachments.filter((attachment) => {
+        return attachment.id !== id;
       })
     );
   };
@@ -1255,7 +1272,7 @@ const Entity = () => {
                       );
                     })
                   ) : (
-                    <Text>{entityData.name} does not have any Attributes.</Text>
+                    <Text>No Attributes.</Text>
                   )}
                 </SimpleGrid>
               </Flex>

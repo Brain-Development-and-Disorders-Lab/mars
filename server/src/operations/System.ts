@@ -295,6 +295,7 @@ export class System {
             products: [],
           },
           attributes: attributes,
+          attachments: [],
           history: [],
         });
       });
@@ -372,11 +373,16 @@ export class System {
     });
   };
 
-  static upload = (files: any, target: string): Promise<{ status: boolean; message: string; data?: any }> => {
+  static upload = (
+    files: any,
+    target: string
+  ): Promise<{ status: boolean; message: string; data?: any }> => {
     return Entities.upload(files, target);
   };
 
-  static download = (id: string): Promise<{ status: boolean, stream: GridFSBucketReadStream }> => {
+  static download = (
+    id: string
+  ): Promise<{ status: boolean; stream: GridFSBucketReadStream }> => {
     consola.start("Retrieving file (id):", id.toString());
     return new Promise((resolve, _reject) => {
       // Access bucket and create open stream to write to storage
@@ -390,7 +396,9 @@ export class System {
     });
   };
 
-  static getFileInformation = (id: string): Promise<{ status: boolean; data: any[] }> => {
+  static getFileInformation = (
+    id: string
+  ): Promise<{ status: boolean; data: any[] }> => {
     consola.start("Retrieving file information (id):", id.toString());
     return new Promise((resolve, _reject) => {
       // Access bucket and create open stream to write to storage

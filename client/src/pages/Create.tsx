@@ -123,6 +123,7 @@ const EntityPage = (props: {
     },
     collections: selectedCollections,
     attributes: selectedAttributes,
+    attachments: [],
     history: [],
   };
 

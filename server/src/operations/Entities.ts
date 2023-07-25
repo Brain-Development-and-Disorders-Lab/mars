@@ -3,7 +3,11 @@ import _, { reject } from "lodash";
 import consola from "consola";
 
 // Utility functions
-import { getAttachments, getDatabase, getIdentifier } from "../database/connection";
+import {
+  getAttachments,
+  getDatabase,
+  getIdentifier,
+} from "../database/connection";
 import { Activity } from "./Activity";
 import { Collections } from "./Collections";
 
@@ -20,6 +24,9 @@ import { AttributeModel, EntityModel } from "@types";
 // Constants
 const ENTITIES_COLLECTION = "entities";
 
+/**
+ * Class defining the set of operations to apply for Entities
+ */
 export class Entities {
   /**
    * Check if an Entity exists in the system
@@ -153,7 +160,6 @@ export class Entities {
           const collectionsToKeep = currentEntity.collections.filter(
             (collection) => updatedEntity.collections.includes(collection)
           );
-
           const collectionsToAdd = updatedEntity.collections.filter(
             (collection) => !collectionsToKeep.includes(collection)
           );
@@ -164,7 +170,6 @@ export class Entities {
               })
             );
           }
-
           const collectionsToRemove = currentEntity.collections.filter(
             (collection) => !collectionsToKeep.includes(collection)
           );
@@ -299,6 +304,25 @@ export class Entities {
             );
           }
 
+          // Attachments
+          const attachmentsToKeep = currentEntity.attachments
+            .map((attachment) => attachment.id)
+            .filter((attachment) =>
+              updatedEntity.attachments
+                .map((attachment) => attachment.id)
+                .includes(attachment)
+            );
+          const attachmentsToRemove = currentEntity.attachments.filter(
+            (attachment) => !attachmentsToKeep.includes(attachment.id)
+          );
+          if (attachmentsToRemove.length > 0) {
+            operations.push(
+              attachmentsToRemove.map((attachment) => {
+                Entities.removeAttachment(updatedEntity._id, attachment);
+              })
+            );
+          }
+
           // Add Update operation
           operations.push(
             Activity.create({
@@ -372,6 +396,11 @@ export class Entities {
     });
   };
 
+  /**
+   * Restore a version of an Entity
+   * @param {EntityModel} entity the Entity data to restore
+   * @return {Promise<EntityModel>}
+   */
   static restore = (entity: EntityModel): Promise<EntityModel> => {
     consola.start("Restoring Entity:", entity.name);
     return new Promise((resolve, _reject) => {
@@ -1050,7 +1079,10 @@ export class Entities {
     });
   };
 
-  static addAttachment = (id: string, attachment: { name: string, id: string }): Promise<{ name: string; id: string }> => {
+  static addAttachment = (
+    id: string,
+    attachment: { name: string; id: string }
+  ): Promise<{ name: string; id: string }> => {
     consola.start("Adding Attachment", attachment.name, "to Entity (id):", id);
     return new Promise((resolve, _reject) => {
       getDatabase()
@@ -1075,19 +1107,69 @@ export class Entities {
 
           getDatabase()
             .collection(ENTITIES_COLLECTION)
-            .updateOne(
-              { _id: id },
-              updates,
-              (error: any, _response: any) => {
-                if (error) {
-                  throw error;
-                }
-
-                // Resolve the Promise
-                consola.success("Added Attachment", attachment.name, "to Entity (id):", id);
-                resolve(attachment);
+            .updateOne({ _id: id }, updates, (error: any, _response: any) => {
+              if (error) {
+                throw error;
               }
-            );
+
+              // Resolve the Promise
+              consola.success(
+                "Added Attachment",
+                attachment.name,
+                "to Entity (id):",
+                id
+              );
+              resolve(attachment);
+            });
+        });
+    });
+  };
+
+  static removeAttachment = (
+    id: string,
+    attachment: { name: string; id: string }
+  ): Promise<{ name: string; id: string }> => {
+    consola.start(
+      "Removing Attachment",
+      attachment.name,
+      "from Entity (id):",
+      id
+    );
+    return new Promise((resolve, _reject) => {
+      getDatabase()
+        .collection(ENTITIES_COLLECTION)
+        .findOne({ _id: id }, (error: any, result: any) => {
+          if (error) {
+            throw error;
+          }
+
+          // Add the Origin to this Entity
+          const updates = {
+            $set: {
+              attachments: [
+                ...(result as EntityModel).attachments.filter(
+                  (existing) => !_.isEqual(existing.id, attachment.id)
+                ),
+              ],
+            },
+          };
+
+          getDatabase()
+            .collection(ENTITIES_COLLECTION)
+            .updateOne({ _id: id }, updates, (error: any, _response: any) => {
+              if (error) {
+                throw error;
+              }
+
+              // Resolve the Promise
+              consola.success(
+                "Removed Attachment",
+                attachment.name,
+                "from Entity (id):",
+                id
+              );
+              resolve(attachment);
+            });
         });
     });
   };
@@ -1499,7 +1581,10 @@ export class Entities {
    * @param {string} target Entity identifier to receive the image
    * @return {Promise<{ status: boolean; message: string; data?: any }>}
    */
-  static upload = (files: any, target: string): Promise<{ status: boolean; message: string; data?: any }> => {
+  static upload = (
+    files: any,
+    target: string
+  ): Promise<{ status: boolean; message: string; data?: any }> => {
     return new Promise((resolve, reject) => {
       if (files.file) {
         const receivedFile = files.file;
@@ -1511,14 +1596,20 @@ export class Entities {
 
         // Create stream from buffer
         const streamedFile = Readable.from(receivedFileData);
-        const uploadStream = bucket.openUploadStream(receivedFile.name, { metadata: { type: receivedFile.mimetype }});
-        streamedFile.pipe(uploadStream)
+        const uploadStream = bucket.openUploadStream(receivedFile.name, {
+          metadata: { type: receivedFile.mimetype },
+        });
+        streamedFile
+          .pipe(uploadStream)
           .on("error", (_error: Error) => {
             reject("Error occurred uploading file");
           })
           .on("finish", () => {
             // Once the upload is finished, register attachment with Entity
-            Entities.addAttachment(target, { name: receivedFile.name, id: uploadStream.id.toString() });
+            Entities.addAttachment(target, {
+              name: receivedFile.name,
+              id: uploadStream.id.toString(),
+            });
             resolve({ status: true, message: "Uploaded file" });
           });
       }
