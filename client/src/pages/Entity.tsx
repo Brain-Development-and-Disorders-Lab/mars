@@ -224,12 +224,7 @@ const Entity = () => {
   useEffect(() => {
     getData(`/entities/${id}`)
       .then((response) => {
-        // Check for issues with an empty array being stored haphazardly as "null"
-        if (response.associations.origins === null) {
-          response.associations.origins = [];
-        }
-
-        // Store data and signal data retrieval being completed
+        // Store all received data and assign to specific fields
         setEntityData(response);
         setEntityDescription(response.description || "");
         setEntityCollections(response.collections);
@@ -318,6 +313,7 @@ const Entity = () => {
           products: entityProducts,
         },
         attributes: entityAttributes,
+        attachments: entityAttachments,
         history: entityHistory,
       };
 
@@ -385,6 +381,7 @@ const Entity = () => {
         products: entityProducts,
       },
       attributes: entityAttributes,
+      attachments: entityAttachments,
       history: entityData.history,
     };
 
@@ -619,6 +616,7 @@ const Entity = () => {
         products: entityVersion.associations.products,
       },
       attributes: entityVersion.attributes,
+      attachments: [],
       history: entityData.history,
     };
 
@@ -1255,7 +1253,7 @@ const Entity = () => {
                       );
                     })
                   ) : (
-                    <Text>{entityData.name} does not have any Attributes.</Text>
+                    <Text>No Attributes.</Text>
                   )}
                 </SimpleGrid>
               </Flex>
