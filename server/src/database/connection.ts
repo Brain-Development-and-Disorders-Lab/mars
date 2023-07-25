@@ -33,9 +33,9 @@ export const connectPrimary = (): Promise<Db> => {
       storage = result.db("storage");
       consola.success("Connected to storage database");
 
-      consola.start("Accessing \"attachments\" storage bucket");
+      consola.start('Accessing "attachments" storage bucket');
       attachments = new GridFSBucket(storage, { bucketName: "attachments" });
-      consola.success("Created \"attachments\" storage bucket");
+      consola.success('Created "attachments" storage bucket');
 
       resolve(database);
     });
