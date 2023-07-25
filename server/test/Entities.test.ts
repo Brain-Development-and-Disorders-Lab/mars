@@ -64,6 +64,7 @@ describe("POST /entities/create", () => {
         products: [],
       },
       attributes: [],
+      attachments: [],
       history: [],
     }).then((result: EntityModel) => {
       expect(result.name).toBe("TestEntity");
@@ -83,6 +84,7 @@ describe("POST /entities/create", () => {
         products: [],
       },
       attributes: [],
+      attachments: [],
       history: [],
     })
       .then((result: EntityModel) => {
@@ -103,6 +105,7 @@ describe("POST /entities/create", () => {
             products: [],
           },
           attributes: [],
+          attachments: [],
           history: [],
         });
       })
@@ -147,6 +150,7 @@ describe("POST /entities/create", () => {
         products: [],
       },
       attributes: [],
+      attachments: [],
       history: [],
     })
       .then((result: EntityModel) => {
@@ -167,6 +171,7 @@ describe("POST /entities/create", () => {
             ],
           },
           attributes: [],
+          attachments: [],
           history: [],
         });
       })
@@ -220,6 +225,7 @@ describe("POST /entities/create", () => {
             products: [],
           },
           attributes: [],
+          attachments: [],
           history: [],
         });
       })
@@ -264,6 +270,7 @@ describe("POST /entities/create", () => {
           values: [],
         },
       ],
+      attachments: [],
       history: [],
     }).then((result: EntityModel) => {
       // Check that an Attribute exists and it has the correct ID
@@ -286,6 +293,7 @@ describe("POST /entities/update", () => {
         products: [],
       },
       attributes: [],
+      attachments: [],
       history: [],
     })
       .then((result: EntityModel) => {
@@ -311,6 +319,7 @@ describe("POST /entities/update", () => {
         products: [],
       },
       attributes: [],
+      attachments: [],
       history: [],
     })
       .then((result: EntityModel) => {
@@ -384,6 +393,7 @@ describe("POST /entities/update", () => {
         products: [],
       },
       attributes: [],
+      attachments: [],
       history: [],
     })
       .then((result: EntityModel) => {
@@ -401,6 +411,7 @@ describe("POST /entities/update", () => {
               products: [],
             },
             attributes: [],
+            attachments: [],
             history: [],
           }),
         ]);
@@ -470,6 +481,7 @@ describe("POST /entities/update", () => {
         products: [],
       },
       attributes: [],
+      attachments: [],
       history: [],
     })
       .then((result: EntityModel) => {
@@ -487,6 +499,7 @@ describe("POST /entities/update", () => {
               products: [],
             },
             attributes: [],
+            attachments: [],
             history: [],
           }),
         ]);
@@ -557,6 +570,7 @@ describe("POST /entities/update", () => {
         products: [],
       },
       attributes: [],
+      attachments: [],
       history: [],
     })
       .then((result: EntityModel) => {
@@ -599,6 +613,7 @@ describe("POST /entities/update", () => {
           values: [],
         },
       ],
+      attachments: [],
       history: [],
     })
       .then((result: EntityModel) => {
@@ -635,6 +650,7 @@ describe("POST /entities/update", () => {
           values: [],
         },
       ],
+      attachments: [],
       history: [],
     })
       .then((result: EntityModel) => {
