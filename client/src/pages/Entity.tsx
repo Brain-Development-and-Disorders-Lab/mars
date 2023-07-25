@@ -424,46 +424,181 @@ const Entity = () => {
       });
   };
 
-    // Configure table columns and data
-    const attachmentData: {id: string, name: string}[] = entityAttachments;
-    const columnHelper = createColumnHelper<{id: string, name: string}>();
-    const attachmentTableColumns = [
-      columnHelper.accessor("name", {
-        cell: (info) => {
-          return (
-            <Tooltip label={info.getValue()}>
-              <Text>{_.truncate(info.getValue(), { length: 48 })}</Text>
-            </Tooltip>
-          );
-        },
-        header: "Name",
-      }),
-      columnHelper.accessor("id", {
-        cell: (info) => {
-          const handleDownload = () => {
-            getData(`/system/download/${info.getValue()}`, { responseType: "blob" })
-              .then((response) => {
-                FileSaver.saveAs(new Blob([response], {type: "image/jpeg"}), slugify(info.row.original.name));
-              })
-              .catch((error) => {
-                console.error(error);
-              });
-          };
-          return (
-            <Flex w={"100%"} justify={"end"}>
-              <IconButton
-                aria-label={"Download attachment"}
-                key={`download-file-${info.getValue()}`}
-                colorScheme={"blue"}
-                icon={<Icon name={"download"} />}
-                onClick={() => handleDownload()}
-               />
-            </Flex>
-          );
-        },
-        header: "",
-      }),
-    ];
+  // Configure collections table columns and data
+  const collectionTableColumns = [
+    {
+      id: (info: any) => info.row.original,
+      cell: (info: any) => <Linky id={info.row.original} type={"collections"} />,
+      header: "Name",
+    },
+    {
+      id: "view",
+      cell: (info: any) => {
+        return (
+          <Flex w={"100%"} justify={"end"}>
+            {editing ?
+              <Button
+                key={`remove-${info.row.original}`}
+                rightIcon={<Icon name={"delete"} />}
+                colorScheme={"red"}
+                onClick={() => {
+                  removeCollection(info.row.original);
+                }}
+              >
+                Remove
+              </Button>
+            :
+              <Button
+                key={`view-${info.row.original}`}
+                rightIcon={<Icon name={"c_right"} />}
+                colorScheme={"teal"}
+                onClick={() =>
+                  navigate(`/collections/${info.row.original}`)
+                }
+              >
+                View
+              </Button>
+            }
+          </Flex>
+        );
+      },
+      header: "",
+    },
+  ];
+
+  // Configure origins table columns and data
+  const originTableColumnHelper = createColumnHelper<{id: string, name: string}>();
+  const originTableColumns = [
+    originTableColumnHelper.accessor("name", {
+      cell: (info) => {
+        return (
+          <Tooltip label={info.getValue()}>
+            <Text>{_.truncate(info.getValue(), { length: 48 })}</Text>
+          </Tooltip>
+        );
+      },
+      header: "Name",
+    }),
+    originTableColumnHelper.accessor("id", {
+      cell: (info) => {
+        return (
+          <Flex w={"100%"} justify={"end"}>
+            {editing ?
+              <Button
+                key={`remove-${info.row.original.id}`}
+                rightIcon={<Icon name={"delete"} />}
+                colorScheme={"red"}
+                onClick={() => {
+                  removeOrigin(info.row.original.id);
+                }}
+              >
+                Remove
+              </Button>
+            :
+              <Button
+                key={`view-${info.row.original.id}`}
+                rightIcon={<Icon name={"c_right"} />}
+                colorScheme={"teal"}
+                onClick={() =>
+                  navigate(`/entities/${info.row.original.id}`)
+                }
+              >
+                View
+              </Button>
+            }
+          </Flex>
+        );
+      },
+      header: "",
+    }),
+  ];
+
+  // Configure products table columns and data
+  const productTableColumnHelper = createColumnHelper<{id: string, name: string}>();
+  const productTableColumns = [
+    productTableColumnHelper.accessor("name", {
+      cell: (info) => {
+        return (
+          <Tooltip label={info.getValue()}>
+            <Text>{_.truncate(info.getValue(), { length: 48 })}</Text>
+          </Tooltip>
+        );
+      },
+      header: "Name",
+    }),
+    productTableColumnHelper.accessor("id", {
+      cell: (info) => {
+        return (
+          <Flex w={"100%"} justify={"end"}>
+            {editing ?
+              <Button
+                key={`remove-${info.row.original.id}`}
+                rightIcon={<Icon name={"delete"} />}
+                colorScheme={"red"}
+                onClick={() => {
+                  removeProduct(info.row.original.id);
+                }}
+              >
+                Remove
+              </Button>
+            :
+              <Button
+                key={`view-${info.row.original.id}`}
+                rightIcon={<Icon name={"c_right"} />}
+                colorScheme={"teal"}
+                onClick={() =>
+                  navigate(`/entities/${info.row.original.id}`)
+                }
+              >
+                View
+              </Button>
+            }
+          </Flex>
+        );
+      },
+      header: "",
+    }),
+  ];
+
+  // Configure attachment table columns and data
+  const attachmentTableColumnHelper = createColumnHelper<{id: string, name: string}>();
+  const attachmentTableColumns = [
+    attachmentTableColumnHelper.accessor("name", {
+      cell: (info) => {
+        return (
+          <Tooltip label={info.getValue()}>
+            <Text>{_.truncate(info.getValue(), { length: 48 })}</Text>
+          </Tooltip>
+        );
+      },
+      header: "Name",
+    }),
+    attachmentTableColumnHelper.accessor("id", {
+      cell: (info) => {
+        const handleDownload = () => {
+          getData(`/system/download/${info.getValue()}`, { responseType: "blob" })
+            .then((response) => {
+              FileSaver.saveAs(new Blob([response], {type: "image/jpeg"}), slugify(info.row.original.name));
+            })
+            .catch((error) => {
+              console.error(error);
+            });
+        };
+        return (
+          <Flex w={"100%"} justify={"end"}>
+            <IconButton
+              aria-label={"Download attachment"}
+              key={`download-file-${info.getValue()}`}
+              colorScheme={"blue"}
+              icon={<Icon name={"download"} />}
+              onClick={() => handleDownload()}
+              />
+          </Flex>
+        );
+      },
+      header: "",
+    }),
+  ];
 
   /**
    * Restore an Entity from an earlier point in time
@@ -987,56 +1122,13 @@ const Entity = () => {
                   {entityCollections.length === 0 ? (
                     <Text>No Collections.</Text>
                   ) : (
-                    <TableContainer>
-                      <Table variant={"simple"} colorScheme={"blackAlpha"}>
-                        <Thead>
-                          <Tr>
-                            <Th>Collection</Th>
-                            <Th></Th>
-                          </Tr>
-                        </Thead>
-                        <Tbody>
-                          {entityCollections.map((collection) => {
-                            return (
-                              <Tr key={collection}>
-                                <Td>
-                                  <Linky type="collections" id={collection} />
-                                </Td>
-                                <Td>
-                                  <Flex w={"full"} gap={"2"} justify={"right"}>
-                                    {editing && (
-                                      <Button
-                                        key={`remove-${collection}`}
-                                        rightIcon={<Icon name={"delete"} />}
-                                        colorScheme={"red"}
-                                        onClick={() => {
-                                          removeCollection(collection);
-                                        }}
-                                      >
-                                        Remove
-                                      </Button>
-                                    )}
-
-                                    {!editing && (
-                                      <Button
-                                        key={`view-${collection}`}
-                                        rightIcon={<Icon name={"c_right"} />}
-                                        colorScheme={"blackAlpha"}
-                                        onClick={() =>
-                                          navigate(`/collections/${collection}`)
-                                        }
-                                      >
-                                        View
-                                      </Button>
-                                    )}
-                                  </Flex>
-                                </Td>
-                              </Tr>
-                            );
-                          })}
-                        </Tbody>
-                      </Table>
-                    </TableContainer>
+                    <DataTable
+                      data={entityCollections}
+                      columns={collectionTableColumns}
+                      visibleColumns={{}}
+                      viewOnly={!editing}
+                      hideSelection={!editing}
+                    />
                   )}
                 </Flex>
               </Flex>
@@ -1070,57 +1162,13 @@ const Entity = () => {
                     {entityOrigins.length === 0 ? (
                       <Text>No Origins.</Text>
                     ) : (
-                      <TableContainer>
-                        <Table colorScheme={"blackAlpha"}>
-                          <Thead>
-                            <Tr>
-                              <Th>Origin</Th>
-                              <Th></Th>
-                            </Tr>
-                          </Thead>
-
-                          <Tbody>
-                            {entityOrigins.map((origin) => {
-                              return (
-                                <Tr key={origin.id}>
-                                  <Td>
-                                    <Linky type="entities" id={origin.id} />
-                                  </Td>
-                                  <Td>
-                                    <Flex w={"full"} gap={"2"} justify={"right"}>
-                                      {editing && (
-                                        <Button
-                                          key={`remove-${origin.id}`}
-                                          rightIcon={<Icon name={"delete"} />}
-                                          colorScheme={"red"}
-                                          onClick={() => {
-                                            removeOrigin(origin.id);
-                                          }}
-                                        >
-                                          Remove
-                                        </Button>
-                                      )}
-
-                                      {!editing && (
-                                        <Button
-                                          key={`view-${origin.id}`}
-                                          rightIcon={<Icon name={"c_right"} />}
-                                          colorScheme={"blackAlpha"}
-                                          onClick={() =>
-                                            navigate(`/entities/${origin.id}`)
-                                          }
-                                        >
-                                          View
-                                        </Button>
-                                      )}
-                                    </Flex>
-                                  </Td>
-                                </Tr>
-                              );
-                            })}
-                          </Tbody>
-                        </Table>
-                      </TableContainer>
+                      <DataTable
+                        data={entityOrigins}
+                        columns={originTableColumns}
+                        visibleColumns={{}}
+                        viewOnly={!editing}
+                        hideSelection={!editing}
+                      />
                     )}
                   </Flex>
 
@@ -1143,57 +1191,13 @@ const Entity = () => {
                     {entityProducts.length === 0 ? (
                       <Text>No Products.</Text>
                     ) : (
-                      <TableContainer>
-                        <Table colorScheme={"blackAlpha"}>
-                          <Thead>
-                            <Tr>
-                              <Th>Product</Th>
-                              <Th></Th>
-                            </Tr>
-                          </Thead>
-
-                          <Tbody>
-                            {entityProducts.map((product) => {
-                              return (
-                                <Tr key={product.id}>
-                                  <Td>
-                                    <Linky type="entities" id={product.id} />
-                                  </Td>
-                                  <Td>
-                                    <Flex w={"full"} gap={"2"} justify={"right"}>
-                                      {editing && (
-                                        <Button
-                                          key={`remove-${product.id}`}
-                                          rightIcon={<Icon name={"delete"} />}
-                                          colorScheme={"red"}
-                                          onClick={() => {
-                                            removeProduct(product.id);
-                                          }}
-                                        >
-                                          Remove
-                                        </Button>
-                                      )}
-
-                                      {!editing && (
-                                        <Button
-                                          key={`view-${product.id}`}
-                                          rightIcon={<Icon name={"c_right"} />}
-                                          colorScheme={"blackAlpha"}
-                                          onClick={() =>
-                                            navigate(`/entities/${product.id}`)
-                                          }
-                                        >
-                                          View
-                                        </Button>
-                                      )}
-                                    </Flex>
-                                  </Td>
-                                </Tr>
-                              );
-                            })}
-                          </Tbody>
-                        </Table>
-                      </TableContainer>
+                      <DataTable
+                        data={entityProducts}
+                        columns={productTableColumns}
+                        visibleColumns={{}}
+                        viewOnly={!editing}
+                        hideSelection={!editing}
+                      />
                     )}
                   </Flex>
                 </Flex>
@@ -1286,7 +1290,7 @@ const Entity = () => {
                     <Text>No Attachments.</Text>
                   ) : (
                     <DataTable
-                      data={attachmentData}
+                      data={entityAttachments}
                       columns={attachmentTableColumns}
                       visibleColumns={{}}
                       viewOnly={!editing}

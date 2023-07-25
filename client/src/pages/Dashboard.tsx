@@ -283,7 +283,7 @@ const Dashboard = () => {
                 <Flex justify={"right"}>
                   <Button
                     key={`view-collection-all`}
-                    colorScheme={"blackAlpha"}
+                    colorScheme={"teal"}
                     rightIcon={<Icon name={"c_right"} />}
                     onClick={() => navigate(`/collections`)}
                   >
@@ -331,7 +331,7 @@ const Dashboard = () => {
                 <Flex justify={"right"}>
                   <Button
                     key={`view-entity-all`}
-                    colorScheme={"blackAlpha"}
+                    colorScheme={"teal"}
                     rightIcon={<Icon name={"c_right"} />}
                     onClick={() => navigate(`/entities`)}
                   >
