@@ -57,15 +57,19 @@ import {
   CardBody,
   Spacer,
   Tooltip,
+  IconButton,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import AttributeCard from "@components/AttributeCard";
+import DataTable from "@components/DataTable";
 import Error from "@components/Error";
 import Graph from "@components/Graph";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 import Loading from "@components/Loading";
+import Uploader from "@components/Uploader";
 import Values from "@components/Values";
+import { createColumnHelper } from "@tanstack/react-table";
 
 // Existing and custom types
 import {
@@ -201,6 +205,8 @@ const Entity = () => {
     [] as AttributeModel[]
   );
   const [entityHistory, setEntityHistory] = useState([] as EntityHistory[]);
+  const [entityAttachments, setEntityAttachments] = useState([] as { name: string; id: string }[]);
+  const [toUploadAttachments, setToUploadAttachments] = useState([] as string[]);
 
   const {
     isOpen: isExportOpen,
@@ -208,6 +214,12 @@ const Entity = () => {
     onClose: onExportClose,
   } = useDisclosure();
   const [exportFields, setExportFields] = useState([] as string[]);
+
+  const {
+    isOpen: isUploadOpen,
+    onOpen: onUploadOpen,
+    onClose: onUploadClose,
+  } = useDisclosure();
 
   useEffect(() => {
     getData(`/entities/${id}`)
@@ -224,6 +236,7 @@ const Entity = () => {
         setEntityOrigins(response.associations.origins);
         setEntityProducts(response.associations.products);
         setEntityAttributes(response.attributes);
+        setEntityAttachments(response.attachments);
         setEntityHistory(response.history);
       })
       .catch(() => {
@@ -410,6 +423,182 @@ const Entity = () => {
         setIsLoaded(true);
       });
   };
+
+  // Configure collections table columns and data
+  const collectionTableColumns = [
+    {
+      id: (info: any) => info.row.original,
+      cell: (info: any) => <Linky id={info.row.original} type={"collections"} />,
+      header: "Name",
+    },
+    {
+      id: "view",
+      cell: (info: any) => {
+        return (
+          <Flex w={"100%"} justify={"end"}>
+            {editing ?
+              <Button
+                key={`remove-${info.row.original}`}
+                rightIcon={<Icon name={"delete"} />}
+                colorScheme={"red"}
+                onClick={() => {
+                  removeCollection(info.row.original);
+                }}
+              >
+                Remove
+              </Button>
+            :
+              <Button
+                key={`view-${info.row.original}`}
+                rightIcon={<Icon name={"c_right"} />}
+                colorScheme={"teal"}
+                onClick={() =>
+                  navigate(`/collections/${info.row.original}`)
+                }
+              >
+                View
+              </Button>
+            }
+          </Flex>
+        );
+      },
+      header: "",
+    },
+  ];
+
+  // Configure origins table columns and data
+  const originTableColumnHelper = createColumnHelper<{id: string, name: string}>();
+  const originTableColumns = [
+    originTableColumnHelper.accessor("name", {
+      cell: (info) => {
+        return (
+          <Tooltip label={info.getValue()}>
+            <Text>{_.truncate(info.getValue(), { length: 48 })}</Text>
+          </Tooltip>
+        );
+      },
+      header: "Name",
+    }),
+    originTableColumnHelper.accessor("id", {
+      cell: (info) => {
+        return (
+          <Flex w={"100%"} justify={"end"}>
+            {editing ?
+              <Button
+                key={`remove-${info.row.original.id}`}
+                rightIcon={<Icon name={"delete"} />}
+                colorScheme={"red"}
+                onClick={() => {
+                  removeOrigin(info.row.original.id);
+                }}
+              >
+                Remove
+              </Button>
+            :
+              <Button
+                key={`view-${info.row.original.id}`}
+                rightIcon={<Icon name={"c_right"} />}
+                colorScheme={"teal"}
+                onClick={() =>
+                  navigate(`/entities/${info.row.original.id}`)
+                }
+              >
+                View
+              </Button>
+            }
+          </Flex>
+        );
+      },
+      header: "",
+    }),
+  ];
+
+  // Configure products table columns and data
+  const productTableColumnHelper = createColumnHelper<{id: string, name: string}>();
+  const productTableColumns = [
+    productTableColumnHelper.accessor("name", {
+      cell: (info) => {
+        return (
+          <Tooltip label={info.getValue()}>
+            <Text>{_.truncate(info.getValue(), { length: 48 })}</Text>
+          </Tooltip>
+        );
+      },
+      header: "Name",
+    }),
+    productTableColumnHelper.accessor("id", {
+      cell: (info) => {
+        return (
+          <Flex w={"100%"} justify={"end"}>
+            {editing ?
+              <Button
+                key={`remove-${info.row.original.id}`}
+                rightIcon={<Icon name={"delete"} />}
+                colorScheme={"red"}
+                onClick={() => {
+                  removeProduct(info.row.original.id);
+                }}
+              >
+                Remove
+              </Button>
+            :
+              <Button
+                key={`view-${info.row.original.id}`}
+                rightIcon={<Icon name={"c_right"} />}
+                colorScheme={"teal"}
+                onClick={() =>
+                  navigate(`/entities/${info.row.original.id}`)
+                }
+              >
+                View
+              </Button>
+            }
+          </Flex>
+        );
+      },
+      header: "",
+    }),
+  ];
+
+  // Configure attachment table columns and data
+  const attachmentTableColumnHelper = createColumnHelper<{id: string, name: string}>();
+  const attachmentTableColumns = [
+    attachmentTableColumnHelper.accessor("name", {
+      cell: (info) => {
+        return (
+          <Tooltip label={info.getValue()}>
+            <Text>{_.truncate(info.getValue(), { length: 48 })}</Text>
+          </Tooltip>
+        );
+      },
+      header: "Name",
+    }),
+    attachmentTableColumnHelper.accessor("id", {
+      cell: (info) => {
+        const handleDownload = () => {
+          getData(`/system/download/${info.getValue()}`, { responseType: "blob" })
+            .then((response) => {
+              FileSaver.saveAs(new Blob([response], {type: "image/jpeg"}), slugify(info.row.original.name));
+            })
+            .catch((error) => {
+              console.error(error);
+            });
+        };
+        return (
+          <Flex w={"100%"} justify={"end"}>
+            <IconButton
+              aria-label={"Download attachment"}
+              key={`download-file-${info.getValue()}`}
+              colorScheme={"blue"}
+              icon={<Icon name={"download"} />}
+              onClick={() => handleDownload()}
+              />
+          </Flex>
+        );
+      },
+      header: "",
+    }),
+  ];
 
   /**
    * Restore an Entity from an earlier point in time
@@ -933,225 +1122,90 @@ const Entity = () => {
                   {entityCollections.length === 0 ? (
                     <Text>No Collections.</Text>
                   ) : (
-                    <TableContainer>
-                      <Table variant={"simple"} colorScheme={"blackAlpha"}>
-                        <Thead>
-                          <Tr>
-                            <Th>Collection</Th>
-                            <Th></Th>
-                          </Tr>
-                        </Thead>
-                        <Tbody>
-                          {entityCollections.map((collection) => {
-                            return (
-                              <Tr key={collection}>
-                                <Td>
-                                  <Linky type="collections" id={collection} />
-                                </Td>
-                                <Td>
-                                  <Flex w={"full"} gap={"2"} justify={"right"}>
-                                    {editing && (
-                                      <Button
-                                        key={`remove-${collection}`}
-                                        rightIcon={<Icon name={"delete"} />}
-                                        colorScheme={"red"}
-                                        onClick={() => {
-                                          removeCollection(collection);
-                                        }}
-                                      >
-                                        Remove
-                                      </Button>
-                                    )}
-
-                                    {!editing && (
-                                      <Button
-                                        key={`view-${collection}`}
-                                        rightIcon={<Icon name={"c_right"} />}
-                                        colorScheme={"blackAlpha"}
-                                        onClick={() =>
-                                          navigate(`/collections/${collection}`)
-                                        }
-                                      >
-                                        View
-                                      </Button>
-                                    )}
-                                  </Flex>
-                                </Td>
-                              </Tr>
-                            );
-                          })}
-                        </Tbody>
-                      </Table>
-                    </TableContainer>
+                    <DataTable
+                      data={entityCollections}
+                      columns={collectionTableColumns}
+                      visibleColumns={{}}
+                      viewOnly={!editing}
+                      hideSelection={!editing}
+                    />
                   )}
                 </Flex>
               </Flex>
 
-              <Flex
-                direction={"column"}
-                p={"4"}
-                gap={"4"}
-                grow={"2"}
-                h={"fit-content"}
-                bg={"white"}
-                rounded={"md"}
-              >
-                {/* Origins */}
-                <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
-                  <Flex direction={"row"} justify={"space-between"}>
-                    <Heading size={"lg"}>Origins</Heading>
-                    {editing ? (
-                      <Button
-                        colorScheme={"green"}
-                        rightIcon={<Icon name={"add"} />}
-                        disabled={!editing}
-                        onClick={onAddOriginsOpen}
-                      >
-                        Add
-                      </Button>
-                    ) : null}
+              <Flex direction={"column"} gap={"4"} grow={"2"}>
+                <Flex
+                  direction={"column"}
+                  p={"4"}
+                  gap={"4"}
+                  grow={"2"}
+                  h={"fit-content"}
+                  bg={"white"}
+                  rounded={"md"}
+                >
+                  {/* Origins */}
+                  <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
+                    <Flex direction={"row"} justify={"space-between"}>
+                      <Heading size={"lg"}>Origins</Heading>
+                      {editing ? (
+                        <Button
+                          colorScheme={"green"}
+                          rightIcon={<Icon name={"add"} />}
+                          disabled={!editing}
+                          onClick={onAddOriginsOpen}
+                        >
+                          Add
+                        </Button>
+                      ) : null}
+                    </Flex>
+
+                    {entityOrigins.length === 0 ? (
+                      <Text>No Origins.</Text>
+                    ) : (
+                      <DataTable
+                        data={entityOrigins}
+                        columns={originTableColumns}
+                        visibleColumns={{}}
+                        viewOnly={!editing}
+                        hideSelection={!editing}
+                      />
+                    )}
                   </Flex>
 
-                  {entityOrigins.length === 0 ? (
-                    <Text>No Origins.</Text>
-                  ) : (
-                    <TableContainer>
-                      <Table colorScheme={"blackAlpha"}>
-                        <Thead>
-                          <Tr>
-                            <Th>Origin</Th>
-                            <Th></Th>
-                          </Tr>
-                        </Thead>
+                  {/* Products */}
+                  <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
+                    <Flex direction={"row"} justify={"space-between"}>
+                      <Heading size={"lg"}>Products</Heading>
+                      {editing ? (
+                        <Button
+                          colorScheme={"green"}
+                          rightIcon={<Icon name={"add"} />}
+                          disabled={!editing}
+                          onClick={onAddProductsOpen}
+                        >
+                          Add
+                        </Button>
+                      ) : null}
+                    </Flex>
 
-                        <Tbody>
-                          {entityOrigins.map((origin) => {
-                            return (
-                              <Tr key={origin.id}>
-                                <Td>
-                                  <Linky type="entities" id={origin.id} />
-                                </Td>
-                                <Td>
-                                  <Flex w={"full"} gap={"2"} justify={"right"}>
-                                    {editing && (
-                                      <Button
-                                        key={`remove-${origin.id}`}
-                                        rightIcon={<Icon name={"delete"} />}
-                                        colorScheme={"red"}
-                                        onClick={() => {
-                                          removeOrigin(origin.id);
-                                        }}
-                                      >
-                                        Remove
-                                      </Button>
-                                    )}
-
-                                    {!editing && (
-                                      <Button
-                                        key={`view-${origin.id}`}
-                                        rightIcon={<Icon name={"c_right"} />}
-                                        colorScheme={"blackAlpha"}
-                                        onClick={() =>
-                                          navigate(`/entities/${origin.id}`)
-                                        }
-                                      >
-                                        View
-                                      </Button>
-                                    )}
-                                  </Flex>
-                                </Td>
-                              </Tr>
-                            );
-                          })}
-                        </Tbody>
-                      </Table>
-                    </TableContainer>
-                  )}
-                </Flex>
-
-                {/* Products */}
-                <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
-                  <Flex direction={"row"} justify={"space-between"}>
-                    <Heading size={"lg"}>Products</Heading>
-                    {editing ? (
-                      <Button
-                        colorScheme={"green"}
-                        rightIcon={<Icon name={"add"} />}
-                        disabled={!editing}
-                        onClick={onAddProductsOpen}
-                      >
-                        Add
-                      </Button>
-                    ) : null}
+                    {entityProducts.length === 0 ? (
+                      <Text>No Products.</Text>
+                    ) : (
+                      <DataTable
+                        data={entityProducts}
+                        columns={productTableColumns}
+                        visibleColumns={{}}
+                        viewOnly={!editing}
+                        hideSelection={!editing}
+                      />
+                    )}
                   </Flex>
-
-                  {entityProducts.length === 0 ? (
-                    <Text>No Products.</Text>
-                  ) : (
-                    <TableContainer>
-                      <Table colorScheme={"blackAlpha"}>
-                        <Thead>
-                          <Tr>
-                            <Th>Product</Th>
-                            <Th></Th>
-                          </Tr>
-                        </Thead>
-
-                        <Tbody>
-                          {entityProducts.map((product) => {
-                            return (
-                              <Tr key={product.id}>
-                                <Td>
-                                  <Linky type="entities" id={product.id} />
-                                </Td>
-                                <Td>
-                                  <Flex w={"full"} gap={"2"} justify={"right"}>
-                                    {editing && (
-                                      <Button
-                                        key={`remove-${product.id}`}
-                                        rightIcon={<Icon name={"delete"} />}
-                                        colorScheme={"red"}
-                                        onClick={() => {
-                                          removeProduct(product.id);
-                                        }}
-                                      >
-                                        Remove
-                                      </Button>
-                                    )}
-
-                                    {!editing && (
-                                      <Button
-                                        key={`view-${product.id}`}
-                                        rightIcon={<Icon name={"c_right"} />}
-                                        colorScheme={"blackAlpha"}
-                                        onClick={() =>
-                                          navigate(`/entities/${product.id}`)
-                                        }
-                                      >
-                                        View
-                                      </Button>
-                                    )}
-                                  </Flex>
-                                </Td>
-                              </Tr>
-                            );
-                          })}
-                        </Tbody>
-                      </Table>
-                    </TableContainer>
-                  )}
                 </Flex>
               </Flex>
             </Flex>
 
-            {/* Attributes */}
-            <Flex
-              direction={"row"}
-              justify={"space-between"}
-              align={"center"}
-              wrap={"wrap"}
-              gap={"4"}
-            >
+            <Flex direction={"row"} gap={"4"} wrap={"wrap"}>
+              {/* Attributes */}
               <Flex
                 direction={"column"}
                 p={"4"}
@@ -1205,8 +1259,49 @@ const Entity = () => {
                   )}
                 </SimpleGrid>
               </Flex>
+
+              {/* Attachments */}
+              <Flex
+                direction={"column"}
+                p={"4"}
+                gap={"4"}
+                maxW={"2xl"}
+                grow={"1"}
+                h={"fit-content"}
+                bg={"white"}
+                rounded={"md"}
+              >
+                <Flex gap={"2"} direction={"column"} minH={"32"}>
+                  <Flex direction={"row"} justify={"space-between"}>
+                    <Heading size={"lg"}>Attachments</Heading>
+                    {editing ? (
+                      <Button
+                        colorScheme={"green"}
+                        rightIcon={<Icon name={"upload"} />}
+                        disabled={!editing}
+                        onClick={onUploadOpen}
+                      >
+                        Upload
+                      </Button>
+                    ) : null}
+                  </Flex>
+
+                  {entityAttachments.length === 0 ? (
+                    <Text>No Attachments.</Text>
+                  ) : (
+                    <DataTable
+                      data={entityAttachments}
+                      columns={attachmentTableColumns}
+                      visibleColumns={{}}
+                      viewOnly={!editing}
+                      hideSelection={!editing}
+                    />
+                  )}
+                </Flex>
+              </Flex>
             </Flex>
 
+            {/* Add Attributes modal */}
             <Modal
               isOpen={isAddAttributesOpen}
               onClose={onAddAttributesClose}
@@ -1367,6 +1462,7 @@ const Entity = () => {
               </ModalContent>
             </Modal>
 
+            {/* Add Collections modal */}
             <Modal
               isOpen={isAddCollectionsOpen}
               onClose={onAddCollectionsClose}
@@ -1466,6 +1562,7 @@ const Entity = () => {
               </ModalContent>
             </Modal>
 
+            {/* Add Products modal */}
             <Modal
               isOpen={isAddProductsOpen}
               onClose={onAddProductsClose}
@@ -1569,6 +1666,7 @@ const Entity = () => {
               </ModalContent>
             </Modal>
 
+            {/* Add Origins modal */}
             <Modal
               isOpen={isAddOriginsOpen}
               onClose={onAddOriginsClose}
@@ -1672,6 +1770,17 @@ const Entity = () => {
               </ModalContent>
             </Modal>
 
+            {/* Upload modal */}
+            <Uploader
+              isOpen={isUploadOpen}
+              onOpen={onUploadOpen}
+              onClose={onUploadClose}
+              uploads={toUploadAttachments}
+              setUploads={setToUploadAttachments}
+              target={entityData._id}
+            />
+
+            {/* Export modal */}
             <Modal
               isOpen={isExportOpen}
               onClose={onExportClose}
@@ -1925,6 +2034,7 @@ const Entity = () => {
               </ModalContent>
             </Modal>
 
+            {/* Graph modal */}
             <Modal
               size={"full"}
               onEsc={onGraphClose}
@@ -1946,6 +2056,7 @@ const Entity = () => {
               </ModalContent>
             </Modal>
 
+            {/* Version history */}
             <Drawer
               isOpen={isHistoryOpen}
               placement={"right"}

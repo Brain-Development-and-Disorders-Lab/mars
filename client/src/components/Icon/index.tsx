@@ -29,6 +29,7 @@ import {
   BsFillBookmarkFill,
   BsFillCloudUploadFill,
   BsFillExclamationTriangleFill,
+  BsFillEyeFill,
   BsFillFileBinaryFill,
   BsFillGearFill,
   BsGithub,
@@ -39,6 +40,7 @@ import {
   BsLink45Deg,
   BsList,
   BsLockFill,
+  BsPaperclip,
   BsPencilFill,
   BsPlusCircleFill,
   BsPower,
@@ -72,6 +74,7 @@ const SYSTEM_ICONS: { [k: string]: IconType } = {
 
   // Signal and action icons
   activity: BsLightningFill,
+  attachment: BsPaperclip,
   check: BsCheckCircleFill,
   info: BsInfoCircleFill,
   search: BsSearch,
@@ -94,6 +97,7 @@ const SYSTEM_ICONS: { [k: string]: IconType } = {
   lock: BsLockFill,
   exit: BsPower,
   settings: BsFillGearFill,
+  view: BsFillEyeFill,
 
   // Logos
   l_box: SiBox,

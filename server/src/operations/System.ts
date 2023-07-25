@@ -18,11 +18,12 @@ import _ from "lodash";
 import { consola } from "consola";
 import dayjs from "dayjs";
 import fs from "fs";
+import { FindCursor, GridFSBucketReadStream, ObjectId } from "mongodb";
 import tmp from "tmp";
 import XLSX from "xlsx";
 
 // Database operations
-import { getSystem } from "src/database/connection";
+import { getAttachments, getSystem } from "src/database/connection";
 
 // Constants
 const DEVICES_COLLECTION = "devices";
@@ -368,6 +369,40 @@ export class System {
         .catch((reason) => {
           reject(reason);
         });
+    });
+  };
+
+  static upload = (files: any, target: string): Promise<{ status: boolean; message: string; data?: any }> => {
+    return Entities.upload(files, target);
+  };
+
+  static download = (id: string): Promise<{ status: boolean, stream: GridFSBucketReadStream }> => {
+    consola.start("Retrieving file (id):", id.toString());
+    return new Promise((resolve, _reject) => {
+      // Access bucket and create open stream to write to storage
+      const bucket = getAttachments();
+
+      // Create stream from buffer
+      const downloadStream = bucket.openDownloadStream(new ObjectId(id));
+
+      consola.success("Retrieved file (id):", id.toString());
+      resolve({ status: true, stream: downloadStream });
+    });
+  };
+
+  static getFileInformation = (id: string): Promise<{ status: boolean; data: any[] }> => {
+    consola.start("Retrieving file information (id):", id.toString());
+    return new Promise((resolve, _reject) => {
+      // Access bucket and create open stream to write to storage
+      const bucket = getAttachments();
+
+      // Locate the file
+      const result: FindCursor = bucket.find({ _id: new ObjectId(id) });
+
+      result.toArray().then((file) => {
+        consola.success("Retrieved file information (id):", id.toString());
+        resolve({ status: true, data: file });
+      });
     });
   };
 

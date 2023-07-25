@@ -48,7 +48,7 @@ import _ from "lodash";
 import dayjs from "dayjs";
 import { nanoid } from "nanoid";
 
-const Import = (props: {
+const Importer = (props: {
   isOpen: boolean;
   onOpen: () => void;
   onClose: () => void;
@@ -839,4 +839,4 @@ const Import = (props: {
   );
 };
 
-export default Import;
+export default Importer;
