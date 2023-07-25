@@ -295,6 +295,7 @@ export class System {
             products: [],
           },
           attributes: attributes,
+          attachments: [],
           history: [],
         });
       });

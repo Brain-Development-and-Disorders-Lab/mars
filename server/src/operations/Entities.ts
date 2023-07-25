@@ -153,7 +153,6 @@ export class Entities {
           const collectionsToKeep = currentEntity.collections.filter(
             (collection) => updatedEntity.collections.includes(collection)
           );
-
           const collectionsToAdd = updatedEntity.collections.filter(
             (collection) => !collectionsToKeep.includes(collection)
           );
@@ -164,7 +163,6 @@ export class Entities {
               })
             );
           }
-
           const collectionsToRemove = currentEntity.collections.filter(
             (collection) => !collectionsToKeep.includes(collection)
           );
@@ -183,7 +181,7 @@ export class Entities {
               updatedEntity.associations.products
                 .map((product) => product.id)
                 .includes(product)
-            );
+          );
           const productsToAdd = updatedEntity.associations.products.filter(
             (product) => !productsToKeep.includes(product.id)
           );
@@ -269,7 +267,7 @@ export class Entities {
               updatedEntity.attributes
                 .map((attribute) => attribute._id)
                 .includes(attribute)
-            );
+          );
           operations.push(
             attributesToKeep.map((attribute: string) => {
               const updatedAttribute = updatedEntity.attributes.filter(
@@ -295,6 +293,25 @@ export class Entities {
             operations.push(
               attributesToRemove.map((attribute) => {
                 Entities.removeAttribute(updatedEntity._id, attribute._id);
+              })
+            );
+          }
+
+          // Attachments
+          const attachmentsToKeep = currentEntity.attachments
+            .map((attachment) => attachment.id)
+            .filter((attachment) =>
+              updatedEntity.attachments
+                .map((attachment) => attachment.id)
+                .includes(attachment)
+          );
+          const attachmentsToRemove = currentEntity.attachments.filter(
+            (attachment) => !attachmentsToKeep.includes(attachment.id)
+          );
+          if (attachmentsToRemove.length > 0) {
+            operations.push(
+              attachmentsToRemove.map((attachment) => {
+                Entities.removeAttachment(updatedEntity._id, attachment);
               })
             );
           }
@@ -1085,6 +1102,46 @@ export class Entities {
 
                 // Resolve the Promise
                 consola.success("Added Attachment", attachment.name, "to Entity (id):", id);
+                resolve(attachment);
+              }
+            );
+        });
+    });
+  };
+
+  static removeAttachment = (id: string, attachment: { name: string, id: string }): Promise<{ name: string; id: string }> => {
+    consola.start("Removing Attachment", attachment.name, "from Entity (id):", id);
+    return new Promise((resolve, _reject) => {
+      getDatabase()
+        .collection(ENTITIES_COLLECTION)
+        .findOne({ _id: id }, (error: any, result: any) => {
+          if (error) {
+            throw error;
+          }
+
+          // Add the Origin to this Entity
+          const updates = {
+            $set: {
+              attachments: [
+                ...(result as EntityModel).attachments.filter(
+                  (existing) => !_.isEqual(existing.id, attachment.id)
+                ),
+              ],
+            },
+          };
+
+          getDatabase()
+            .collection(ENTITIES_COLLECTION)
+            .updateOne(
+              { _id: id },
+              updates,
+              (error: any, _response: any) => {
+                if (error) {
+                  throw error;
+                }
+
+                // Resolve the Promise
+                consola.success("Removed Attachment", attachment.name, "from Entity (id):", id);
                 resolve(attachment);
               }
             );
