@@ -43,7 +43,7 @@ const Viewer = (props: { src: string }) => {
         </Document>
       </Flex>
 
-      <Flex direction={"row"} gap={"4"} align={"center"} justify={"center"}>
+      <Flex direction={"row"} gap={"4"} align={"center"} justify={"center"} pb={"2"}>
         <IconButton aria-label={"Go back"} onClick={previousPage} icon={<Icon name={"c_left"} />} disabled={previewIndex === 1}/>
         <Text>Page {previewIndex} of {previewPages}</Text>
         <IconButton aria-label={"Go forward"} onClick={nextPage} icon={<Icon name={"c_right"} />} disabled={previewIndex === previewPages} />
