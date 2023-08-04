@@ -59,7 +59,6 @@ import {
   Spacer,
   Tooltip,
   IconButton,
-  ModalFooter,
   Spinner,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
@@ -94,6 +93,7 @@ import { nanoid } from "nanoid";
 
 // Routing and navigation
 import { useParams, useNavigate } from "react-router-dom";
+import Viewer from "@components/Viewer";
 
 const Entity = () => {
   const { id } = useParams();
@@ -226,6 +226,7 @@ const Entity = () => {
 
   const [isPreviewLoaded, setIsPreviewLoaded] = useState(false);
   const [previewSource, setPreviewSource] = useState("");
+  const [previewType, setPreviewType] = useState("");
   const { isOpen: isPreviewOpen, onOpen: onPreviewOpen, onClose: onPreviewClose } = useDisclosure();
 
   useEffect(() => {
@@ -593,10 +594,20 @@ const Entity = () => {
           setIsPreviewLoaded(false);
           onPreviewOpen();
 
-          getData(`/system/download/${info.getValue()}`, { responseType: "blob" })
-            .then((response) => {
-              setPreviewSource(URL.createObjectURL(response));
-              setIsPreviewLoaded(true);
+          getData(`/system/file/${info.getValue()}`)
+            .then((response: { status: boolean, data: any[] }) => {
+              // Set attachment type
+              setPreviewType(response.data[0].metadata.type);
+
+              // Get attachment
+              getData(`/system/download/${info.getValue()}`, { responseType: "blob" })
+                .then((response) => {
+                  setPreviewSource(URL.createObjectURL(response));
+                  setIsPreviewLoaded(true);
+                })
+                .catch((error) => {
+                  console.error(error);
+                });
             })
             .catch((error) => {
               console.error(error);
@@ -2114,16 +2125,14 @@ const Entity = () => {
                     {!isPreviewLoaded ?
                       <Spinner />
                     :
-                      <Image src={previewSource} maxH={"70%"} />
+                      _.isEqual("application/pdf", previewType) ? (
+                        <Viewer src={previewSource} />
+                      ) : (
+                        <Image src={previewSource} maxH={"70%"} />
+                      )
                     }
                   </Flex>
                 </ModalBody>
-
-                <ModalFooter>
-                  <Button colorScheme={"blue"} onClick={onPreviewClose}>
-                    Close
-                  </Button>
-                </ModalFooter>
               </ModalContent>
             </Modal>
 
