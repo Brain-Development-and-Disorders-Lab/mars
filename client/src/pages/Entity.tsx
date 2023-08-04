@@ -60,6 +60,7 @@ import {
   Tooltip,
   IconButton,
   Spinner,
+  useBreakpoint,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import AttributeCard from "@components/AttributeCard";
@@ -97,6 +98,7 @@ import Viewer from "@components/Viewer";
 
 const Entity = () => {
   const { id } = useParams();
+  const breakpoint = useBreakpoint();
   const navigate = useNavigate();
   const toast = useToast();
 
@@ -429,6 +431,8 @@ const Entity = () => {
       });
   };
 
+  const truncateTableText = _.isEqual(breakpoint, "sm") || _.isEqual(breakpoint, "base") || _.isUndefined(breakpoint);
+
   // Configure collections table columns and data
   const collectionTableColumns = [
     {
@@ -478,7 +482,7 @@ const Entity = () => {
       cell: (info) => {
         return (
           <Tooltip label={info.getValue()}>
-            <Text>{_.truncate(info.getValue(), { length: 48 })}</Text>
+            <Text>{_.truncate(info.getValue(), { length: truncateTableText ? 12 : 24 })}</Text>
           </Tooltip>
         );
       },
@@ -525,7 +529,7 @@ const Entity = () => {
       cell: (info) => {
         return (
           <Tooltip label={info.getValue()}>
-            <Text>{_.truncate(info.getValue(), { length: 48 })}</Text>
+            <Text>{_.truncate(info.getValue(), { length: truncateTableText ? 12 : 24 })}</Text>
           </Tooltip>
         );
       },
@@ -572,7 +576,7 @@ const Entity = () => {
       cell: (info) => {
         return (
           <Tooltip label={info.getValue()}>
-            <Text>{_.truncate(info.getValue(), { length: 48 })}</Text>
+            <Text>{_.truncate(info.getValue(), { length: truncateTableText ? 12 : 24 })}</Text>
           </Tooltip>
         );
       },
@@ -1191,73 +1195,71 @@ const Entity = () => {
                 </Flex>
               </Flex>
 
-              <Flex direction={"column"} gap={"4"} grow={"2"}>
-                <Flex
-                  direction={"column"}
-                  p={"4"}
-                  gap={"4"}
-                  grow={"2"}
-                  h={"fit-content"}
-                  bg={"white"}
-                  rounded={"md"}
-                >
-                  {/* Origins */}
-                  <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
-                    <Flex direction={"row"} justify={"space-between"}>
-                      <Heading size={"lg"}>Origins</Heading>
-                      {editing ? (
-                        <Button
-                          colorScheme={"green"}
-                          rightIcon={<Icon name={"add"} />}
-                          disabled={!editing}
-                          onClick={onAddOriginsOpen}
-                        >
-                          Add
-                        </Button>
-                      ) : null}
-                    </Flex>
-
-                    {entityOrigins.length === 0 ? (
-                      <Text>No Origins.</Text>
-                    ) : (
-                      <DataTable
-                        data={entityOrigins}
-                        columns={originTableColumns}
-                        visibleColumns={{}}
-                        viewOnly={!editing}
-                        hideSelection={!editing}
-                      />
-                    )}
+              <Flex
+                direction={"column"}
+                p={"4"}
+                gap={"4"}
+                grow={"2"}
+                h={"fit-content"}
+                bg={"white"}
+                rounded={"md"}
+              >
+                {/* Origins */}
+                <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
+                  <Flex direction={"row"} justify={"space-between"}>
+                    <Heading size={"lg"}>Origins</Heading>
+                    {editing ? (
+                      <Button
+                        colorScheme={"green"}
+                        rightIcon={<Icon name={"add"} />}
+                        disabled={!editing}
+                        onClick={onAddOriginsOpen}
+                      >
+                        Add
+                      </Button>
+                    ) : null}
                   </Flex>
 
-                  {/* Products */}
-                  <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
-                    <Flex direction={"row"} justify={"space-between"}>
-                      <Heading size={"lg"}>Products</Heading>
-                      {editing ? (
-                        <Button
-                          colorScheme={"green"}
-                          rightIcon={<Icon name={"add"} />}
-                          disabled={!editing}
-                          onClick={onAddProductsOpen}
-                        >
-                          Add
-                        </Button>
-                      ) : null}
-                    </Flex>
+                  {entityOrigins.length === 0 ? (
+                    <Text>No Origins.</Text>
+                  ) : (
+                    <DataTable
+                      data={entityOrigins}
+                      columns={originTableColumns}
+                      visibleColumns={{}}
+                      viewOnly={!editing}
+                      hideSelection={!editing}
+                    />
+                  )}
+                </Flex>
 
-                    {entityProducts.length === 0 ? (
-                      <Text>No Products.</Text>
-                    ) : (
-                      <DataTable
-                        data={entityProducts}
-                        columns={productTableColumns}
-                        visibleColumns={{}}
-                        viewOnly={!editing}
-                        hideSelection={!editing}
-                      />
-                    )}
+                {/* Products */}
+                <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
+                  <Flex direction={"row"} justify={"space-between"}>
+                    <Heading size={"lg"}>Products</Heading>
+                    {editing ? (
+                      <Button
+                        colorScheme={"green"}
+                        rightIcon={<Icon name={"add"} />}
+                        disabled={!editing}
+                        onClick={onAddProductsOpen}
+                      >
+                        Add
+                      </Button>
+                    ) : null}
                   </Flex>
+
+                  {entityProducts.length === 0 ? (
+                    <Text>No Products.</Text>
+                  ) : (
+                    <DataTable
+                      data={entityProducts}
+                      columns={productTableColumns}
+                      visibleColumns={{}}
+                      viewOnly={!editing}
+                      hideSelection={!editing}
+                    />
+                  )}
                 </Flex>
               </Flex>
             </Flex>
@@ -2121,7 +2123,7 @@ const Entity = () => {
                 <ModalHeader>Preview Attachment</ModalHeader>
                 <ModalCloseButton />
                 <ModalBody>
-                  <Flex w={"100%"} h={"100%"} justify={"center"} align={"center"}>
+                  <Flex w={"100%"} h={"100%"} justify={"center"} align={"center"} pb={"2"}>
                     {!isPreviewLoaded ?
                       <Spinner />
                     :
