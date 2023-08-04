@@ -247,13 +247,13 @@ const Search = () => {
                       }}
                     />
 
-                    <Button
-                      leftIcon={<Icon name={"search"} />}
+                    <IconButton
+                      aria-label={"Search"}
+                      icon={<Icon name={"search"} />}
+                      colorScheme={"green"}
                       isDisabled={query === ""}
                       onClick={() => runSearch()}
-                    >
-                      Search
-                    </Button>
+                    />
                   </Flex>
                 </Flex>
               </TabPanel>
@@ -267,7 +267,7 @@ const Search = () => {
                     border={"2px"}
                     borderColor={"gray.200"}
                   >
-                    <Flex direction={"row"} p={"2"} gap={"4"}>
+                    <Flex direction={"row"} p={"2"} gap={"4"} wrap={"wrap"}>
                       {/* Query builder components */}
                       <Select
                         value={queryType}
@@ -421,6 +421,7 @@ const Search = () => {
                             p={"2"}
                             bg={"gray.50"}
                             rounded={"md"}
+                            wrap={"wrap"}
                           >
                             {index > 0 && (
                               <Select
@@ -503,7 +504,7 @@ const Search = () => {
                     justify={"right"}
                   >
                     <Button
-                      leftIcon={<Icon name={"delete"} />}
+                      leftIcon={<Icon name={"rewind"} />}
                       isDisabled={queryComponents.length === 0}
                       onClick={() => {
                         setQueryComponents([]);
@@ -512,13 +513,13 @@ const Search = () => {
                     >
                       Reset
                     </Button>
-                    <Button
-                      leftIcon={<Icon name={"search"} />}
+                    <IconButton
+                      aria-label={"Search"}
+                      colorScheme={"green"}
+                      icon={<Icon name={"search"} />}
                       isDisabled={queryComponents.length === 0}
                       onClick={() => runQuerySearch()}
-                    >
-                      Search
-                    </Button>
+                    />
                   </Flex>
                 </Flex>
               </TabPanel>
