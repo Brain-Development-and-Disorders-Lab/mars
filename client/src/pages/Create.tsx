@@ -287,7 +287,7 @@ const EntityPage = (props: {
           <Flex direction={"column"} justify={"center"} gap={"6"} wrap={"wrap"}>
             <Flex
               direction={"column"}
-              w={["full", "4xl", "7xl"]}
+              w={"100%"}
               bg={"white"}
               p={"2"}
               rounded={"md"}
@@ -815,7 +815,7 @@ const CollectionPage = (props: {
       >
         <Flex
           direction={"column"}
-          w={["full", "4xl", "7xl"]}
+          w={"100%"}
           p={"2"}
           bg={"white"}
           rounded={"md"}
@@ -846,7 +846,7 @@ const CollectionPage = (props: {
             <Flex
               direction={"column"}
               gap={"2"}
-              w={["full", "4xl"]}
+              w={"100%"}
               maxW={"4xl"}
             >
               <Heading fontWeight={"semibold"} size={"lg"}>
