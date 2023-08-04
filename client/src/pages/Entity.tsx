@@ -7,6 +7,7 @@ import {
   Flex,
   Heading,
   Input,
+  Image,
   Table,
   TableContainer,
   Tbody,
@@ -58,6 +59,8 @@ import {
   Spacer,
   Tooltip,
   IconButton,
+  ModalFooter,
+  Spinner,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import AttributeCard from "@components/AttributeCard";
@@ -220,6 +223,10 @@ const Entity = () => {
     onOpen: onUploadOpen,
     onClose: onUploadClose,
   } = useDisclosure();
+
+  const [isPreviewLoaded, setIsPreviewLoaded] = useState(false);
+  const [previewSource, setPreviewSource] = useState("");
+  const { isOpen: isPreviewOpen, onOpen: onPreviewOpen, onClose: onPreviewClose } = useDisclosure();
 
   useEffect(() => {
     getData(`/entities/${id}`)
@@ -581,8 +588,30 @@ const Entity = () => {
               console.error(error);
             });
         };
+
+        const handlePreview = () => {
+          setIsPreviewLoaded(false);
+          onPreviewOpen();
+
+          getData(`/system/download/${info.getValue()}`, { responseType: "blob" })
+            .then((response) => {
+              setPreviewSource(URL.createObjectURL(response));
+              setIsPreviewLoaded(true);
+            })
+            .catch((error) => {
+              console.error(error);
+            });
+        };
+
         return (
-          <Flex w={"100%"} justify={"end"}>
+          <Flex w={"100%"} justify={"end"} gap={"4"}>
+            <IconButton
+              aria-label={"Preview attachment"}
+              key={`preview-file-${info.getValue()}`}
+              colorScheme={"gray"}
+              icon={<Icon name={"view"} />}
+              onClick={() => handlePreview()}
+            />
             {editing ?
               <IconButton
                 aria-label={"Delete attachment"}
@@ -600,6 +629,7 @@ const Entity = () => {
                 onClick={() => handleDownload()}
               />
             }
+
           </Flex>
         );
       },
@@ -2070,6 +2100,30 @@ const Entity = () => {
                     />
                   </Container>
                 </ModalBody>
+              </ModalContent>
+            </Modal>
+
+            {/* Preview attachments */}
+            <Modal isOpen={isPreviewOpen} onClose={onPreviewClose}>
+              <ModalOverlay />
+              <ModalContent minW={"3xl"}>
+                <ModalHeader>Preview Attachment</ModalHeader>
+                <ModalCloseButton />
+                <ModalBody>
+                  <Flex w={"100%"} h={"100%"} justify={"center"} align={"center"}>
+                    {!isPreviewLoaded ?
+                      <Spinner />
+                    :
+                      <Image src={previewSource} maxH={"70%"} />
+                    }
+                  </Flex>
+                </ModalBody>
+
+                <ModalFooter>
+                  <Button colorScheme={"blue"} onClick={onPreviewClose}>
+                    Close
+                  </Button>
+                </ModalFooter>
               </ModalContent>
             </Modal>
 
