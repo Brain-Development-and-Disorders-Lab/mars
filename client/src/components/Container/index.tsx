@@ -86,11 +86,11 @@ const Page: FC<any> = ({ children }) => {
       m={"0"}
     >
       {/* Navigation component */}
-      <Flex p={"4"} justify={"center"} w={{ base: "100%", lg: "20%" }} background={"white"}>
+      <Flex p={"4"} justify={"center"} w={{ base: "100%", lg: "15%" }} background={"white"}>
         <Navigation />
       </Flex>
 
-      <Flex direction={"column"} w={{ base: "100%", lg: "80%" }} background={"gray.50"}>
+      <Flex direction={"column"} w={{ base: "100%", lg: "85%" }} background={"gray.50"}>
         {/* Search box component */}
         <Flex
           w={"100%"}
