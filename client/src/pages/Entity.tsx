@@ -7,6 +7,7 @@ import {
   Flex,
   Heading,
   Input,
+  Image,
   Table,
   TableContainer,
   Tbody,
@@ -58,6 +59,8 @@ import {
   Spacer,
   Tooltip,
   IconButton,
+  Spinner,
+  useBreakpoint,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import AttributeCard from "@components/AttributeCard";
@@ -91,9 +94,11 @@ import { nanoid } from "nanoid";
 
 // Routing and navigation
 import { useParams, useNavigate } from "react-router-dom";
+import Viewer from "@components/Viewer";
 
 const Entity = () => {
   const { id } = useParams();
+  const breakpoint = useBreakpoint();
   const navigate = useNavigate();
   const toast = useToast();
 
@@ -220,6 +225,11 @@ const Entity = () => {
     onOpen: onUploadOpen,
     onClose: onUploadClose,
   } = useDisclosure();
+
+  const [isPreviewLoaded, setIsPreviewLoaded] = useState(false);
+  const [previewSource, setPreviewSource] = useState("");
+  const [previewType, setPreviewType] = useState("");
+  const { isOpen: isPreviewOpen, onOpen: onPreviewOpen, onClose: onPreviewClose } = useDisclosure();
 
   useEffect(() => {
     getData(`/entities/${id}`)
@@ -421,6 +431,8 @@ const Entity = () => {
       });
   };
 
+  const truncateTableText = _.isEqual(breakpoint, "sm") || _.isEqual(breakpoint, "base") || _.isUndefined(breakpoint);
+
   // Configure collections table columns and data
   const collectionTableColumns = [
     {
@@ -470,7 +482,7 @@ const Entity = () => {
       cell: (info) => {
         return (
           <Tooltip label={info.getValue()}>
-            <Text>{_.truncate(info.getValue(), { length: 48 })}</Text>
+            <Text>{_.truncate(info.getValue(), { length: truncateTableText ? 12 : 24 })}</Text>
           </Tooltip>
         );
       },
@@ -517,7 +529,7 @@ const Entity = () => {
       cell: (info) => {
         return (
           <Tooltip label={info.getValue()}>
-            <Text>{_.truncate(info.getValue(), { length: 48 })}</Text>
+            <Text>{_.truncate(info.getValue(), { length: truncateTableText ? 12 : 24 })}</Text>
           </Tooltip>
         );
       },
@@ -564,7 +576,7 @@ const Entity = () => {
       cell: (info) => {
         return (
           <Tooltip label={info.getValue()}>
-            <Text>{_.truncate(info.getValue(), { length: 48 })}</Text>
+            <Text>{_.truncate(info.getValue(), { length: truncateTableText ? 12 : 24 })}</Text>
           </Tooltip>
         );
       },
@@ -581,8 +593,40 @@ const Entity = () => {
               console.error(error);
             });
         };
+
+        const handlePreview = () => {
+          setIsPreviewLoaded(false);
+          onPreviewOpen();
+
+          getData(`/system/file/${info.getValue()}`)
+            .then((response: { status: boolean, data: any[] }) => {
+              // Set attachment type
+              setPreviewType(response.data[0].metadata.type);
+
+              // Get attachment
+              getData(`/system/download/${info.getValue()}`, { responseType: "blob" })
+                .then((response) => {
+                  setPreviewSource(URL.createObjectURL(response));
+                  setIsPreviewLoaded(true);
+                })
+                .catch((error) => {
+                  console.error(error);
+                });
+            })
+            .catch((error) => {
+              console.error(error);
+            });
+        };
+
         return (
-          <Flex w={"100%"} justify={"end"}>
+          <Flex w={"100%"} justify={"end"} gap={"4"}>
+            <IconButton
+              aria-label={"Preview attachment"}
+              key={`preview-file-${info.getValue()}`}
+              colorScheme={"gray"}
+              icon={<Icon name={"view"} />}
+              onClick={() => handlePreview()}
+            />
             {editing ?
               <IconButton
                 aria-label={"Delete attachment"}
@@ -600,6 +644,7 @@ const Entity = () => {
                 onClick={() => handleDownload()}
               />
             }
+
           </Flex>
         );
       },
@@ -1150,73 +1195,71 @@ const Entity = () => {
                 </Flex>
               </Flex>
 
-              <Flex direction={"column"} gap={"4"} grow={"2"}>
-                <Flex
-                  direction={"column"}
-                  p={"4"}
-                  gap={"4"}
-                  grow={"2"}
-                  h={"fit-content"}
-                  bg={"white"}
-                  rounded={"md"}
-                >
-                  {/* Origins */}
-                  <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
-                    <Flex direction={"row"} justify={"space-between"}>
-                      <Heading size={"lg"}>Origins</Heading>
-                      {editing ? (
-                        <Button
-                          colorScheme={"green"}
-                          rightIcon={<Icon name={"add"} />}
-                          disabled={!editing}
-                          onClick={onAddOriginsOpen}
-                        >
-                          Add
-                        </Button>
-                      ) : null}
-                    </Flex>
-
-                    {entityOrigins.length === 0 ? (
-                      <Text>No Origins.</Text>
-                    ) : (
-                      <DataTable
-                        data={entityOrigins}
-                        columns={originTableColumns}
-                        visibleColumns={{}}
-                        viewOnly={!editing}
-                        hideSelection={!editing}
-                      />
-                    )}
+              <Flex
+                direction={"column"}
+                p={"4"}
+                gap={"4"}
+                grow={"2"}
+                h={"fit-content"}
+                bg={"white"}
+                rounded={"md"}
+              >
+                {/* Origins */}
+                <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
+                  <Flex direction={"row"} justify={"space-between"}>
+                    <Heading size={"lg"}>Origins</Heading>
+                    {editing ? (
+                      <Button
+                        colorScheme={"green"}
+                        rightIcon={<Icon name={"add"} />}
+                        disabled={!editing}
+                        onClick={onAddOriginsOpen}
+                      >
+                        Add
+                      </Button>
+                    ) : null}
                   </Flex>
 
-                  {/* Products */}
-                  <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
-                    <Flex direction={"row"} justify={"space-between"}>
-                      <Heading size={"lg"}>Products</Heading>
-                      {editing ? (
-                        <Button
-                          colorScheme={"green"}
-                          rightIcon={<Icon name={"add"} />}
-                          disabled={!editing}
-                          onClick={onAddProductsOpen}
-                        >
-                          Add
-                        </Button>
-                      ) : null}
-                    </Flex>
+                  {entityOrigins.length === 0 ? (
+                    <Text>No Origins.</Text>
+                  ) : (
+                    <DataTable
+                      data={entityOrigins}
+                      columns={originTableColumns}
+                      visibleColumns={{}}
+                      viewOnly={!editing}
+                      hideSelection={!editing}
+                    />
+                  )}
+                </Flex>
 
-                    {entityProducts.length === 0 ? (
-                      <Text>No Products.</Text>
-                    ) : (
-                      <DataTable
-                        data={entityProducts}
-                        columns={productTableColumns}
-                        visibleColumns={{}}
-                        viewOnly={!editing}
-                        hideSelection={!editing}
-                      />
-                    )}
+                {/* Products */}
+                <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
+                  <Flex direction={"row"} justify={"space-between"}>
+                    <Heading size={"lg"}>Products</Heading>
+                    {editing ? (
+                      <Button
+                        colorScheme={"green"}
+                        rightIcon={<Icon name={"add"} />}
+                        disabled={!editing}
+                        onClick={onAddProductsOpen}
+                      >
+                        Add
+                      </Button>
+                    ) : null}
                   </Flex>
+
+                  {entityProducts.length === 0 ? (
+                    <Text>No Products.</Text>
+                  ) : (
+                    <DataTable
+                      data={entityProducts}
+                      columns={productTableColumns}
+                      visibleColumns={{}}
+                      viewOnly={!editing}
+                      hideSelection={!editing}
+                    />
+                  )}
                 </Flex>
               </Flex>
             </Flex>
@@ -2069,6 +2112,28 @@ const Entity = () => {
                       entityNavigateHook={handleEntityNodeClick}
                     />
                   </Container>
+                </ModalBody>
+              </ModalContent>
+            </Modal>
+
+            {/* Preview attachments */}
+            <Modal isOpen={isPreviewOpen} onClose={onPreviewClose}>
+              <ModalOverlay />
+              <ModalContent minW={"3xl"}>
+                <ModalHeader>Preview Attachment</ModalHeader>
+                <ModalCloseButton />
+                <ModalBody>
+                  <Flex w={"100%"} h={"100%"} justify={"center"} align={"center"} pb={"2"}>
+                    {!isPreviewLoaded ?
+                      <Spinner />
+                    :
+                      _.isEqual("application/pdf", previewType) ? (
+                        <Viewer src={previewSource} />
+                      ) : (
+                        <Image src={previewSource} maxH={"70%"} />
+                      )
+                    }
+                  </Flex>
                 </ModalBody>
               </ModalContent>
             </Modal>

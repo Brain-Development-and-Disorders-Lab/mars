@@ -148,7 +148,7 @@ const Uploader = (props: {
                           align={"center"}
                         >
                           <Text fontWeight={"semibold"}>
-                            Drag image here
+                            Drag file here
                           </Text>
                           <Text>or click to upload</Text>
                         </Flex>
@@ -176,12 +176,13 @@ const Uploader = (props: {
                         event: ChangeEvent<HTMLInputElement>
                       ) => {
                         if (event.target.files) {
-                          // Only accept image files
+                          // Only accept image or PDF files
                           if (
                             _.includes(
                               [
                                 "image/jpeg",
                                 "image/png",
+                                "application/pdf",
                               ],
                               event.target.files[0].type
                             )
@@ -192,7 +193,7 @@ const Uploader = (props: {
                               title: "Warning",
                               status: "warning",
                               description:
-                                "Please upload a JPEG or PNG image",
+                                "Please upload an image (JPEG, PNG) or PDF file",
                               duration: 4000,
                               position: "bottom-right",
                               isClosable: true,

@@ -3,7 +3,6 @@ import React, { useState } from "react";
 
 // Existing and custom components
 import {
-  Button,
   Flex,
   Input,
   useToast,
@@ -197,13 +196,13 @@ const SearchBox = () => {
               }}
             />
 
-            <Button
-              leftIcon={<Icon name={"search"} />}
+            <IconButton
+              aria-label={"Quick search"}
+              icon={<Icon name={"search"} />}
+              colorScheme={"green"}
               isDisabled={query === ""}
               onClick={handleClick}
-            >
-              Go
-            </Button>
+            />
           </Flex>
         </PopoverTrigger>
 

@@ -287,9 +287,9 @@ const EntityPage = (props: {
           <Flex direction={"column"} justify={"center"} gap={"6"} wrap={"wrap"}>
             <Flex
               direction={"column"}
-              w={["full", "4xl", "7xl"]}
+              w={"100%"}
               bg={"white"}
-              p={"2"}
+              p={"4"}
               rounded={"md"}
             >
               {/* Page header */}
@@ -815,8 +815,8 @@ const CollectionPage = (props: {
       >
         <Flex
           direction={"column"}
-          w={["full", "4xl", "7xl"]}
-          p={"2"}
+          w={"100%"}
+          p={"4"}
           bg={"white"}
           rounded={"md"}
         >
@@ -846,7 +846,7 @@ const CollectionPage = (props: {
             <Flex
               direction={"column"}
               gap={"2"}
-              w={["full", "4xl"]}
+              w={"100%"}
               maxW={"4xl"}
             >
               <Heading fontWeight={"semibold"} size={"lg"}>
@@ -1075,7 +1075,7 @@ const AttributePage = (props: {
   return (
     <Content>
       <Flex direction={"column"} p={"2"} gap={"6"} wrap={"wrap"}>
-        <Flex direction={"column"} w={"100%"} p={"2"} bg={"white"}>
+        <Flex direction={"column"} w={"100%"} p={"4"} bg={"white"}>
           {/* Page header */}
           <Flex direction={"column"} p={"2"} pt={"4"} pb={"4"}>
             <Flex direction={"row"} align={"center"} justify={"space-between"}>
@@ -1199,10 +1199,7 @@ const AttributePage = (props: {
           <ModalCloseButton />
           <ModalBody>
             <Flex direction={"column"} gap={"4"} p={"2"}>
-              <Text>
-                Individual pieces of metadata should be expressed as Values.
-              </Text>
-              <Text>There are five supported types of metadata:</Text>
+              <Text>There are six supported types of metadata:</Text>
               <List spacing={2}>
                 <ListItem>
                   <Flex gap={"2"} align={"center"}>
@@ -1288,7 +1285,7 @@ const Create = () => {
                       align={"center"}
                     >
                       <Icon name={"collection"} size={"lg"} />
-                      <Heading>Collection</Heading>
+                      <Heading size={"lg"}>Collection</Heading>
                     </Flex>
                   </CardHeader>
                   <CardBody>
@@ -1313,7 +1310,7 @@ const Create = () => {
                         direction={"column"}
                       >
                         <Heading size={"xs"} textTransform={"uppercase"}>
-                          Details
+                          Fields
                         </Heading>
                         <Flex gap={"2"}>
                           <Tag colorScheme={"red"}>Name</Tag>
@@ -1346,7 +1343,7 @@ const Create = () => {
                       align={"center"}
                     >
                       <Icon name={"entity"} size={"lg"} />
-                      <Heading>Entity</Heading>
+                      <Heading size={"lg"}>Entity</Heading>
                     </Flex>
                   </CardHeader>
                   <CardBody>
@@ -1372,7 +1369,7 @@ const Create = () => {
                         direction={"column"}
                       >
                         <Heading size={"xs"} textTransform={"uppercase"}>
-                          Details
+                          Fields
                         </Heading>
                         <Flex gap={"2"} wrap={"wrap"}>
                           <Tag colorScheme={"red"}>Name</Tag>
@@ -1410,7 +1407,7 @@ const Create = () => {
                       align={"center"}
                     >
                       <Icon name={"attribute"} size={"lg"} />
-                      <Heading>Attribute</Heading>
+                      <Heading size={"lg"}>Template Attribute</Heading>
                     </Flex>
                   </CardHeader>
                   <CardBody>
@@ -1436,7 +1433,7 @@ const Create = () => {
                         direction={"column"}
                       >
                         <Heading size={"xs"} textTransform={"uppercase"}>
-                          Details
+                          Fields
                         </Heading>
                         <Flex gap={"2"} wrap={"wrap"}>
                           <Tag colorScheme={"red"}>Name</Tag>

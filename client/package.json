@@ -5,6 +5,9 @@
   "types": "dist/index.d.ts",
   "author": "Henry Burgess <henryjburg@gmail.com>",
   "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "start": "webpack serve",
     "build": "webpack",
@@ -29,9 +32,11 @@
     "framer-motion": "^7.6.9",
     "lodash": "^4.17.21",
     "nanoid": "^4.0.2",
+    "pdfjs-dist": "^3.9.179",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-icons": "^4.9.0",
+    "react-pdf": "^7.3.3",
     "react-router-dom": "^6.3.0",
     "reactflow": "^11.7.0",
     "slugify": "^1.6.6",
