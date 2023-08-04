@@ -5,6 +5,9 @@
   "types": "dist/index.d.ts",
   "author": "Henry Burgess <henryjburg@gmail.com>",
   "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "start": "webpack serve",
     "build": "webpack",
