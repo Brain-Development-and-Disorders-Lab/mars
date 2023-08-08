@@ -9,7 +9,6 @@ import {
   TabPanel,
   TabPanels,
   Tabs,
-  Text,
   useBreakpoint,
   useToast,
 } from "@chakra-ui/react";
@@ -155,8 +154,7 @@ const Collections = () => {
                 <Heading fontWeight={"semibold"}>Collections</Heading>
               </Flex>
             </Flex>
-            {isLoaded && collectionsData.length > 0 ? (
-              <Flex direction={"column"} gap={"4"} w={"100%"}>
+            <Flex direction={"column"} gap={"4"} w={"100%"}>
                 <Tabs variant={"soft-rounded"}>
                   <TabList>
                     <Tab>Standard</Tab>
@@ -185,10 +183,7 @@ const Collections = () => {
                     </TabPanel>
                   </TabPanels>
                 </Tabs>
-              </Flex>
-            ) : (
-              <Text>There are no Collections to display.</Text>
-            )}
+            </Flex>
           </Flex>
         )
       ) : (

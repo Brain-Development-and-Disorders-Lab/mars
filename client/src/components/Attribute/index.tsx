@@ -22,7 +22,7 @@ import Values from "@components/Values";
 import { AttributeProps } from "@types";
 
 // Utility functions and libraries
-import { isValidValues } from "src/functions";
+import { isValidValues } from "src/util";
 
 const Attribute = (props: AttributeProps) => {
   const [name, setName] = useState(props.name);

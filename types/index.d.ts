@@ -11,8 +11,6 @@ declare global {
 
 export type ScannerStatus = "disconnected" | "connected" | "error";
 
-export type CreatePage = "default" | "entity" | "collection" | "attribute";
-
 export namespace State.Entity {
   type Start = {
     location: "none" | "start" | "associations" | "attributes";

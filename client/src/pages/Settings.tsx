@@ -28,9 +28,6 @@ import { getData } from "@database/functions";
 import { useToken } from "src/authentication/useToken";
 import _ from "lodash";
 
-// Routing and navigation
-// import { useNavigate } from "react-router-dom";
-
 const Settings = () => {
   const [isError, setIsError] = useState(false);
 

@@ -6,7 +6,7 @@ import {
   Button,
   Flex,
   Heading,
-  Text,
+  Spacer,
   useBreakpoint,
   useToast,
 } from "@chakra-ui/react";
@@ -138,19 +138,19 @@ const Attributes = () => {
                 <Icon name={"attribute"} size={"lg"} />
                 <Heading fontWeight={"semibold"}>Attributes</Heading>
               </Flex>
+              <Spacer />
+              <Button leftIcon={<Icon name={"add"} />} colorScheme={"green"} onClick={() => navigate("/create/attribute")}>
+                Create
+              </Button>
             </Flex>
-            {isLoaded && attributesData.length > 0 ? (
-              <Flex direction={"column"} gap={"4"} w={"100%"}>
-                <DataTable
-                  columns={columns}
-                  data={data}
-                  visibleColumns={visibleColumns}
-                  hideSelection
-                />
-              </Flex>
-            ) : (
-              <Text>There are no Attributes to display.</Text>
-            )}
+            <Flex direction={"column"} gap={"4"} w={"100%"}>
+              <DataTable
+                columns={columns}
+                data={data}
+                visibleColumns={visibleColumns}
+                hideSelection
+              />
+            </Flex>
           </Flex>
         )
       ) : (

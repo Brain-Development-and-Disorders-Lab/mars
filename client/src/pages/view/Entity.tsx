@@ -72,6 +72,7 @@ import Linky from "@components/Linky";
 import Loading from "@components/Loading";
 import Uploader from "@components/Uploader";
 import Values from "@components/Values";
+import Preview from "@components/Preview";
 import { createColumnHelper } from "@tanstack/react-table";
 
 // Existing and custom types
@@ -85,7 +86,7 @@ import {
 
 // Utility functions and libraries
 import { deleteData, getData, postData } from "src/database/functions";
-import { isValidValues } from "src/functions";
+import { isValidValues } from "src/util";
 import _ from "lodash";
 import dayjs from "dayjs";
 import FileSaver from "file-saver";
@@ -94,7 +95,6 @@ import { nanoid } from "nanoid";
 
 // Routing and navigation
 import { useParams, useNavigate } from "react-router-dom";
-import Viewer from "@components/Viewer";
 
 const Entity = () => {
   const { id } = useParams();
@@ -2128,7 +2128,7 @@ const Entity = () => {
                       <Spinner />
                     :
                       _.isEqual("application/pdf", previewType) ? (
-                        <Viewer src={previewSource} />
+                        <Preview src={previewSource} />
                       ) : (
                         <Image src={previewSource} maxH={"70%"} />
                       )

@@ -15,7 +15,7 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   import.meta.url,
 ).toString();
 
-const Viewer = (props: { src: string }) => {
+const Preview = (props: { src: string }) => {
   const [previewPages, setPreviewPages] = useState(0);
   const [previewIndex, setPreviewIndex] = useState(1);
 
@@ -52,4 +52,4 @@ const Viewer = (props: { src: string }) => {
   );
 };
 
-export default Viewer;
+export default Preview;

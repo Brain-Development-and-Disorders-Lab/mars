@@ -155,20 +155,16 @@ const Entities = () => {
                 <Heading fontWeight={"semibold"}>Entities</Heading>
               </Flex>
             </Flex>
-            {isLoaded && entityData.length > 0 ? (
-              <Flex direction={"column"} gap={"4"} w={"100%"}>
-                <DataTable
-                  columns={columns}
-                  data={data.filter((entity) =>
-                    _.isEqual(entity.deleted, false)
-                  )}
-                  visibleColumns={visibleColumns}
-                  hideSelection
-                />
-              </Flex>
-            ) : (
-              <Text>There are no Entities to display.</Text>
-            )}
+            <Flex direction={"column"} gap={"4"} w={"100%"}>
+              <DataTable
+                columns={columns}
+                data={data.filter((entity) =>
+                  _.isEqual(entity.deleted, false)
+                )}
+                visibleColumns={visibleColumns}
+                hideSelection
+              />
+            </Flex>
           </Flex>
         )
       ) : (
