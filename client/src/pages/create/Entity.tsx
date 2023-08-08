@@ -2,16 +2,14 @@
 import React, { useEffect, useState } from "react";
 
 // Existing and custom components
-import { Button, Checkbox, CheckboxGroup, Flex, FormControl, FormErrorMessage, FormHelperText, FormLabel, Heading, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalHeader, ModalOverlay, Select, Stack, Tag, TagCloseButton, Text, Textarea, useDisclosure, useToast } from "@chakra-ui/react";
+import { Button, Checkbox, CheckboxGroup, Flex, FormControl, FormErrorMessage, FormHelperText, FormLabel, Heading, IconButton, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalHeader, ModalOverlay, Progress, Select, Stack, Tag, TagCloseButton, Text, Textarea, useDisclosure, useToast } from "@chakra-ui/react";
 import { Content } from "@components/Container";
-import Error from "@components/Error";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
-import Attribute from "@components/Attribute";
-import Loading from "@components/Loading";
+import AttributeCard from "@components/AttributeCard";
 
 // Existing and custom types
-import { AttributeModel, AttributeProps, CollectionModel, EntityModel, IEntity } from "@types";
+import { AttributeModel, AttributeCardProps, CollectionModel, EntityModel, IEntity } from "@types";
 
 // Utility functions and libraries
 import { getData, postData } from "@database/functions";
@@ -29,6 +27,7 @@ const Entity = () => {
   const [pageState, setPageState] = useState(
     "start" as "start" | "attributes" | "associations"
   );
+  const [pageProgress, setPageProgress] = useState(33);
 
   const navigate = useNavigate();
   const toast = useToast();
@@ -40,7 +39,6 @@ const Entity = () => {
   const [attributes, setAttributes] = useState([] as AttributeModel[]);
 
   const [isLoaded, setIsLoaded] = useState(false);
-  const [isError, setIsError] = useState(false);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -88,6 +86,26 @@ const Entity = () => {
 
   const [validAttributes, setValidAttributes] = useState(false);
 
+  const [viewingAttribute, setViewingAttribute] = useState<AttributeModel>();
+  const [viewingAttributeIndex, setViewingAttributeIndex] = useState(0);
+
+  const onAttributeCardNext = () => {
+    if (viewingAttributeIndex + 1 < selectedAttributes.length) {
+      setViewingAttributeIndex(viewingAttributeIndex + 1);
+    }
+  };
+
+  const onAttributeCardBack = () => {
+    if (viewingAttributeIndex > 0) {
+      setViewingAttributeIndex(viewingAttributeIndex - 1);
+    }
+  };
+
+  useEffect(() => {
+    setViewingAttribute(selectedAttributes[viewingAttributeIndex - 1]);
+    console.info("Update")
+  }, [viewingAttributeIndex]);
+
   useEffect(() => {
     // Get all Entities
     getData(`/entities`)
@@ -103,7 +121,6 @@ const Entity = () => {
           position: "bottom-right",
           isClosable: true,
         });
-        setIsError(true);
       })
       .finally(() => {
         setIsLoaded(true);
@@ -123,7 +140,6 @@ const Entity = () => {
           position: "bottom-right",
           isClosable: true,
         });
-        setIsError(true);
       })
       .finally(() => {
         setIsLoaded(true);
@@ -143,7 +159,6 @@ const Entity = () => {
           position: "bottom-right",
           isClosable: true,
         });
-        setIsError(true);
       })
       .finally(() => {
         setIsLoaded(true);
@@ -167,11 +182,13 @@ const Entity = () => {
   };
 
   // Handle clicking "Next"
-  const onNext = () => {
+  const onPageNext = () => {
     if (_.isEqual("start", pageState)) {
       setPageState("associations");
+      setPageProgress(66);
     } else if (_.isEqual("associations", pageState)) {
       setPageState("attributes");
+      setPageProgress(100);
     } else if (_.isEqual("attributes", pageState)) {
       setIsSubmitting(true);
       postData(`/entities/create`, entityState)
@@ -193,24 +210,26 @@ const Entity = () => {
   };
 
   // Handle clicking "Back"
-  const onBack = () => {
+  const onPageBack = () => {
     if (_.isEqual("associations", pageState)) {
       setPageState("start");
+      setPageProgress(33);
     } else if (_.isEqual("attributes", pageState)) {
       setPageState("associations");
+      setPageProgress(66);
     }
   };
 
   // Removal callback
-  const onRemoveAttribute = (identifier: string) => {
+  const onRemoveAttributeCard = (identifier: string) => {
     // We need to filter the removed attribute from the total collection
     setSelectedAttributes(
       selectedAttributes.filter((attribute) => attribute._id !== identifier)
     );
   };
 
-  // Used to receive data from a Attribute component
-  const onUpdateAttribute = (data: AttributeProps) => {
+  // Used to receive data from a AttributeCard component
+  const onUpdateAttributeCard = (data: AttributeCardProps) => {
     setSelectedAttributes([
       ...selectedAttributes.map((attribute) => {
         if (_.isEqual(attribute._id, data.identifier)) {
@@ -227,491 +246,539 @@ const Entity = () => {
   };
 
   return (
-    <Content vertical={isError || !isLoaded}>
-      {isLoaded ? (
-        isError ? (
-          <Error />
-        ) : (
-          <Flex direction={"column"} justify={"center"} gap={"6"} wrap={"wrap"}>
-            <Flex
-              direction={"column"}
-              w={"100%"}
-              bg={"white"}
-              p={"4"}
-              rounded={"md"}
-            >
-              {/* Page header */}
-              <Flex direction={"column"} p={"2"} pt={"4"} pb={"4"}>
+    <Content vertical>
+      <Flex direction={"column"} gap={"6"} w={"100%"} h={"100%"} p={"4"} bg={"white"} maxW={"4xl"}>
+        {/* Page header */}
+        <Flex direction={"row"} align={"center"} justify={"space-between"}>
+          <Heading fontWeight={"semibold"} size={"lg"}>Create a new Entity</Heading>
+          <Button
+            rightIcon={<Icon name={"info"} />}
+            variant={"outline"}
+            onClick={onOpen}
+          >
+            Info
+          </Button>
+        </Flex>
+
+
+        {/* Main pages */}
+        <Flex
+          direction={"column"}
+          gap={"6"}
+          p={"2"}
+          h={"100%"}
+          grow={"1"}
+        >
+          {/* Progress bar */}
+          <Progress value={pageProgress} hasStripe isAnimated rounded={"md"} />
+
+          {/* "Start" page */}
+          {_.isEqual("start", pageState) && (
+            <Flex direction={"column"} gap={"2"}>
+              <FormControl isRequired isInvalid={isNameError}>
+                <FormLabel>Entity Name</FormLabel>
+                <Input
+                  name={"name"}
+                  value={name}
+                  placeholder={"Name"}
+                  w={["100%", "md"]}
+                  onChange={(event) => setName(event.target.value)}
+                />
+                {isNameError && (
+                  <FormErrorMessage>
+                    A name or ID must be specified.
+                  </FormErrorMessage>
+                )}
+              </FormControl>
+
+              <FormControl isRequired isInvalid={isOwnerError}>
+                <FormLabel>Entity Owner</FormLabel>
+                <Input
+                  name={"owner"}
+                  value={owner}
+                  placeholder={"Owner"}
+                  w={["100%", "md"]}
+                  onChange={(event) => setOwner(event.target.value)}
+                />
+                {isOwnerError && (
+                  <FormErrorMessage>
+                    An owner of the Entity is required.
+                  </FormErrorMessage>
+                )}
+              </FormControl>
+
+              <FormControl isRequired isInvalid={isDateError}>
+                <FormLabel>Created</FormLabel>
+                <Input
+                  placeholder={"Select Date and Time"}
+                  type={"datetime-local"}
+                  value={created}
+                  w={["100%", "md"]}
+                  onChange={(event) => setCreated(event.target.value)}
+                />
+                {isDateError && (
+                  <FormErrorMessage>
+                    A created date must be specified.
+                  </FormErrorMessage>
+                )}
+              </FormControl>
+
+              <FormControl>
+                <FormLabel>Entity Description</FormLabel>
+                <Textarea
+                  value={description}
+                  placeholder={"Description"}
+                  w={["100%", "lg"]}
+                  onChange={(event) =>
+                    setDescription(event.target.value)
+                  }
+                />
+                <FormHelperText>
+                  A brief description of the new Entity. Most details
+                  should be inputted as Attributes with Values.
+                </FormHelperText>
+              </FormControl>
+            </Flex>
+          )}
+
+          {/* "Associations" page */}
+          {_.isEqual("associations", pageState) && (
+            <Flex direction={"column"} gap={"4"} h={"100%"}>
+              <Flex direction={"row"} gap={"4"} wrap={"wrap"}>
+                {/* Origins */}
                 <Flex
-                  direction={"row"}
-                  align={"center"}
-                  justify={"space-between"}
+                  gap={"2"}
+                  p={"2"}
+                  direction={"column"}
+                  rounded={"md"}
+                  border={"1px"}
+                  borderColor={"gray.100"}
                 >
-                  <Heading fontWeight={"semibold"}>Create Entity</Heading>
-                  <Button
-                    rightIcon={<Icon name={"info"} />}
-                    variant={"outline"}
-                    onClick={onOpen}
-                  >
-                    Info
-                  </Button>
-                </Flex>
-              </Flex>
-
-              {/* Main pages */}
-              <Flex
-                direction={"row"}
-                justify={"center"}
-                gap={"6"}
-                p={"2"}
-                pb={"6"}
-                mb={["12", "8"]}
-              >
-                {/* "Start" page */}
-                {_.isEqual("start", pageState) && (
-                  <Flex direction={"column"} gap={"2"} maxW={"4xl"} p={"1"}>
-                    <Heading fontWeight={"semibold"} size={"lg"}>
-                      Details
-                    </Heading>
-                    <Text>
-                      Specify some basic details about this Entity. Relations
-                      between Entities and membership to Collections can be
-                      specified on the following page. Finally, the metadata
-                      associated with this Entity should be specified using
-                      Attributes and corresponding Values.
-                    </Text>
-
-                    <Flex direction={"row"} gap={"2"} wrap={["wrap", "nowrap"]}>
-                      <FormControl isRequired isInvalid={isNameError}>
-                        <FormLabel>Name</FormLabel>
-                        <Input
-                          name="name"
-                          value={name}
-                          onChange={(event) => setName(event.target.value)}
-                        />
-                        {isNameError && (
-                          <FormErrorMessage>
-                            A name or ID must be specified.
-                          </FormErrorMessage>
-                        )}
-                      </FormControl>
-
-                      <FormControl isRequired isInvalid={isOwnerError}>
-                        <FormLabel>Owner</FormLabel>
-                        <Input
-                          name="owner"
-                          value={owner}
-                          onChange={(event) => setOwner(event.target.value)}
-                        />
-                        {isOwnerError && (
-                          <FormErrorMessage>
-                            An owner of the Entity is required.
-                          </FormErrorMessage>
-                        )}
-                      </FormControl>
-                    </Flex>
-
-                    <Flex direction={"row"} gap={"2"} wrap={["wrap", "nowrap"]}>
-                      <FormControl isRequired isInvalid={isDateError}>
-                        <FormLabel>Created</FormLabel>
-                        <Input
-                          placeholder="Select Date and Time"
-                          size="md"
-                          type="datetime-local"
-                          value={created}
-                          onChange={(event) => setCreated(event.target.value)}
-                        />
-                        {isDateError && (
-                          <FormErrorMessage>
-                            A created date must be specified.
-                          </FormErrorMessage>
-                        )}
-                      </FormControl>
-
-                      <FormControl>
-                        <FormLabel>Description</FormLabel>
-                        <Textarea
-                          value={description}
-                          onChange={(event) =>
-                            setDescription(event.target.value)
-                          }
-                        />
-                        <FormHelperText>
-                          A brief description of the new Entity. Most details
-                          should be inputted as Attributes with Values.
-                        </FormHelperText>
-                      </FormControl>
-                    </Flex>
-                  </Flex>
-                )}
-
-                {/* "Associations" page */}
-                {_.isEqual("associations", pageState) && (
-                  <Flex direction={"column"} gap={"2"} maxW={"4xl"} p={"1"}>
-                    <Heading fontWeight={"semibold"} size={"lg"}>
-                      Associations
-                    </Heading>
-                    <Text>
-                      Relations between Entities and membership to Collections
-                      can be specified on this page.
-                    </Text>
-
-                    <Flex direction={"row"} gap={"2"} wrap={["wrap", "nowrap"]}>
-                      {/* Origin */}
-                      <FormControl>
-                        <FormLabel>Origin Entities</FormLabel>
-                        <Select
-                          title="Select Entity"
-                          placeholder={"Select Entity"}
-                          onChange={(event) => {
-                            if (
-                              _.find(selectedOrigins, (product) => {
-                                return _.isEqual(
-                                  product.id,
-                                  event.target.value
-                                );
-                              })
-                            ) {
-                              toast({
-                                title: "Warning",
-                                description:
-                                  "Origin has already been selected.",
-                                status: "warning",
-                                duration: 2000,
-                                position: "bottom-right",
-                                isClosable: true,
-                              });
-                            } else if (
-                              !_.isEqual(event.target.value.toString(), "")
-                            ) {
-                              setSelectedOrigins([
-                                ...selectedOrigins,
-                                {
-                                  id: event.target.value.toString(),
-                                  name: event.target.options[
-                                    event.target.selectedIndex
-                                  ].text,
-                                },
-                              ]);
-                            }
-                          }}
-                        >
-                          {isLoaded &&
-                            entities.map((entity) => {
-                              return (
-                                <option key={entity._id} value={entity._id}>
-                                  {entity.name}
-                                </option>
-                              );
-                            })}
-                        </Select>
-                        <FormHelperText>
-                          If the sources of this Entity currently exist or did
-                          exist in this system, specify those associations here
-                          by selecting the origin Entities.
-                        </FormHelperText>
-                        <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
-                          {selectedOrigins.map((product) => {
-                            return (
-                              <Tag key={`tag-${product.id}`}>
-                                <Linky id={product.id} type={"entities"} />
-                                <TagCloseButton
-                                  onClick={() => {
-                                    setSelectedOrigins(
-                                      selectedOrigins.filter((selected) => {
-                                        return !_.isEqual(
-                                          product.id,
-                                          selected.id
-                                        );
-                                      })
-                                    );
-                                  }}
-                                />
-                              </Tag>
+                  <FormControl>
+                    <FormLabel>Origin Entities</FormLabel>
+                    <Select
+                      title="Select Entity"
+                      placeholder={"Select Entity"}
+                      onChange={(event) => {
+                        if (
+                          _.find(selectedOrigins, (product) => {
+                            return _.isEqual(
+                              product.id,
+                              event.target.value
                             );
-                          })}
-                        </Flex>
-                      </FormControl>
-
-                      {/* Products */}
-                      <FormControl>
-                        <FormLabel>Linked Products</FormLabel>
-                        <Select
-                          title="Select Entity"
-                          placeholder={"Select Entity"}
-                          onChange={(event) => {
-                            if (
-                              _.find(selectedProducts, (product) => {
-                                return _.isEqual(
-                                  product.id,
-                                  event.target.value
-                                );
-                              })
-                            ) {
-                              toast({
-                                title: "Warning",
-                                description:
-                                  "Entity has already been selected.",
-                                status: "warning",
-                                duration: 2000,
-                                position: "bottom-right",
-                                isClosable: true,
-                              });
-                            } else if (
-                              !_.isEqual(event.target.value.toString(), "")
-                            ) {
-                              setSelectedProducts([
-                                ...selectedProducts,
-                                {
-                                  id: event.target.value.toString(),
-                                  name: event.target.options[
-                                    event.target.selectedIndex
-                                  ].text,
-                                },
-                              ]);
-                            }
-                          }}
-                        >
-                          {isLoaded &&
-                            entities.map((entity) => {
-                              return (
-                                <option key={entity._id} value={entity._id}>
-                                  {entity.name}
-                                </option>
-                              );
-                            })}
-                          ;
-                        </Select>
-                        <FormHelperText>
-                          If this Entity has any derivatives or Entities that
-                          have been created from it, specify those associations
-                          here by selecting the corresponding Entities.
-                        </FormHelperText>
-                        <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
-                          {selectedProducts.map((product) => {
-                            return (
-                              <Tag key={`tag-${product.id}`}>
-                                <Linky id={product.id} type={"entities"} />
-                                <TagCloseButton
-                                  onClick={() => {
-                                    setSelectedProducts(
-                                      selectedProducts.filter((selected) => {
-                                        return !_.isEqual(
-                                          product.id,
-                                          selected.id
-                                        );
-                                      })
-                                    );
-                                  }}
-                                />
-                              </Tag>
-                            );
-                          })}
-                        </Flex>
-                      </FormControl>
-                    </Flex>
-
-                    {/* Collections */}
-                    <FormControl>
-                      <FormLabel>Collections</FormLabel>
-                      <CheckboxGroup
-                        value={selectedCollections}
-                        onChange={(event: string[]) => {
-                          if (event) {
-                            setSelectedCollections([...event]);
-                          }
-                        }}
-                      >
-                        <Stack spacing={[1, 5]} direction={"column"}>
-                          {collections.map((collection) => {
-                            return (
-                              <Checkbox
-                                key={collection._id}
-                                value={collection._id}
-                              >
-                                {collection.name}
-                              </Checkbox>
-                            );
-                          })}
-                        </Stack>
-                      </CheckboxGroup>
-                      <FormHelperText>
-                        Specify the collections that this new Entity should be
-                        included with. The Entity will then show up underneath
-                        the specified collections.
-                      </FormHelperText>
-                    </FormControl>
-                  </Flex>
-                )}
-
-                {/* "Attributes" page */}
-                {_.isEqual("attributes", pageState) && (
-                  <Flex direction={"column"} gap={"2"} maxW={"4xl"} p={"1"}>
-                    <Heading fontWeight={"semibold"} size={"lg"}>
-                      Attributes
-                    </Heading>
-                    <Text>
-                      The metadata associated with this Entity should be
-                      specified using Attributes and corresponding Values.
-                    </Text>
-
-                    <Flex
-                      direction={"row"}
-                      gap={"2"}
-                      align={"center"}
-                      justify={"space-between"}
-                      wrap={["wrap", "nowrap"]}
-                    >
-                      {/* Drop-down to select template Attributes */}
-                      <FormControl maxW={"sm"}>
-                        <Select
-                          placeholder={"Use template Attribute"}
-                          onChange={(event) => {
-                            if (!_.isEqual(event.target.value.toString(), "")) {
-                              for (let attribute of attributes) {
-                                if (
-                                  _.isEqual(
-                                    event.target.value.toString(),
-                                    attribute._id
-                                  )
-                                ) {
-                                  setSelectedAttributes([
-                                    ...selectedAttributes,
-                                    {
-                                      _id: `a-${nanoid(6)}`,
-                                      name: attribute.name,
-                                      description: attribute.description,
-                                      values: attribute.values,
-                                    },
-                                  ]);
-                                  break;
-                                }
-                              }
-                            }
-                          }}
-                        >
-                          {isLoaded &&
-                            attributes.map((attribute) => {
-                              return (
-                                <option
-                                  key={attribute._id}
-                                  value={attribute._id}
-                                >
-                                  {attribute.name}
-                                </option>
-                              );
-                            })}
-                          ;
-                        </Select>
-                      </FormControl>
-
-                      <Button
-                        leftIcon={<Icon name={"add"} />}
-                        colorScheme={"green"}
-                        onClick={() => {
-                          // Create an 'empty' Attribute and add the data structure to the 'selectedAttributes' collection
-                          setSelectedAttributes([
-                            ...selectedAttributes,
+                          })
+                        ) {
+                          toast({
+                            title: "Warning",
+                            description:
+                              "Origin has already been selected.",
+                            status: "warning",
+                            duration: 2000,
+                            position: "bottom-right",
+                            isClosable: true,
+                          });
+                        } else if (
+                          !_.isEqual(event.target.value.toString(), "")
+                        ) {
+                          setSelectedOrigins([
+                            ...selectedOrigins,
                             {
-                              _id: `a-${nanoid(6)}`,
-                              name: "",
-                              description: "",
-                              values: [],
+                              id: event.target.value.toString(),
+                              name: event.target.options[
+                                event.target.selectedIndex
+                              ].text,
                             },
                           ]);
-                        }}
-                      >
-                        Create
-                      </Button>
-                    </Flex>
+                        }
+                      }}
+                    >
+                      {isLoaded &&
+                        entities.map((entity) => {
+                          return (
+                            <option key={entity._id} value={entity._id}>
+                              {entity.name}
+                            </option>
+                          );
+                        })}
+                    </Select>
+                    <FormHelperText>
+                      If the sources of this Entity currently exist or did
+                      exist in this system, specify those associations here
+                      by selecting the origin Entities.
+                    </FormHelperText>
+                  </FormControl>
 
-                    {/* Display all Attributes */}
-                    {selectedAttributes.map((attribute) => {
+                  {/* List selected Origins */}
+                  <Flex
+                    direction={"row"}
+                    p={"2"}
+                    w={"100%"}
+                    gap={"2"}
+                    wrap={"wrap"}
+                  >
+                    {selectedOrigins.map((product) => {
                       return (
-                        <Attribute
-                          key={attribute._id}
-                          identifier={attribute._id}
-                          name={attribute.name}
-                          description={attribute.description}
-                          values={attribute.values}
-                          restrictDataValues={false}
-                          onRemove={onRemoveAttribute}
-                          onUpdate={onUpdateAttribute}
-                        />
+                        <Tag key={`tag-${product.id}`}>
+                          <Linky id={product.id} type={"entities"} />
+                          <TagCloseButton
+                            onClick={() => {
+                              setSelectedOrigins(
+                                selectedOrigins.filter((selected) => {
+                                  return !_.isEqual(
+                                    product.id,
+                                    selected.id
+                                  );
+                                })
+                              );
+                            }}
+                          />
+                        </Tag>
                       );
                     })}
+                    {selectedOrigins.length === 0 &&
+                      <Text>No Origins selected.</Text>
+                    }
                   </Flex>
-                )}
-              </Flex>
-
-              {/* Action buttons */}
-              <Flex
-                direction={"row"}
-                flexWrap={"wrap"}
-                gap={"6"}
-                justify={"space-between"}
-                alignSelf={"center"}
-                align={"center"}
-                w={"100%"}
-                p={"4"}
-              >
-                <Flex gap={"4"}>
-                  <Button
-                    colorScheme={"red"}
-                    variant={"outline"}
-                    rightIcon={<Icon name={"cross"} />}
-                    onClick={() => navigate("/entities")}
-                  >
-                    Cancel
-                  </Button>
-                  {!_.isEqual("start", pageState) && (
-                    <Button
-                      colorScheme={"orange"}
-                      variant={"outline"}
-                      leftIcon={<Icon name={"c_left"} />}
-                      onClick={onBack}
-                    >
-                      Back
-                    </Button>
-                  )}
                 </Flex>
 
-                <Button
-                  colorScheme={"green"}
-                  rightIcon={
-                    _.isEqual("attributes", pageState) ? (
-                      <Icon name={"check"} />
-                    ) : (
-                      <Icon name={"c_right"} />
-                    )
-                  }
-                  onClick={onNext}
-                  isDisabled={!isValidInput() && !isSubmitting}
-                  isLoading={isSubmitting}
+                {/* Products */}
+                <Flex
+                  gap={"2"}
+                  p={"2"}
+                  direction={"column"}
+                  rounded={"md"}
+                  border={"1px"}
+                  borderColor={"gray.100"}
                 >
-                  {_.isEqual("attributes", pageState) ? "Finish" : "Next"}
-                </Button>
+                  <FormControl>
+                    <FormLabel>Product Entities</FormLabel>
+                    <Select
+                      title="Select Entity"
+                      placeholder={"Select Entity"}
+                      onChange={(event) => {
+                        if (
+                          _.find(selectedProducts, (product) => {
+                            return _.isEqual(
+                              product.id,
+                              event.target.value
+                            );
+                          })
+                        ) {
+                          toast({
+                            title: "Warning",
+                            description:
+                              "Entity has already been selected.",
+                            status: "warning",
+                            duration: 2000,
+                            position: "bottom-right",
+                            isClosable: true,
+                          });
+                        } else if (
+                          !_.isEqual(event.target.value.toString(), "")
+                        ) {
+                          setSelectedProducts([
+                            ...selectedProducts,
+                            {
+                              id: event.target.value.toString(),
+                              name: event.target.options[
+                                event.target.selectedIndex
+                              ].text,
+                            },
+                          ]);
+                        }
+                      }}
+                    >
+                      {isLoaded &&
+                        entities.map((entity) => {
+                          return (
+                            <option key={entity._id} value={entity._id}>
+                              {entity.name}
+                            </option>
+                          );
+                        })}
+                      ;
+                    </Select>
+                    <FormHelperText>
+                      If this Entity has any derivatives or Entities that
+                      have been created from it, specify those associations
+                      here by selecting the corresponding Entities.
+                    </FormHelperText>
+
+                  </FormControl>
+
+                  <Flex
+                    direction={"row"}
+                    p={"2"}
+                    w={"100%"}
+                    gap={"2"}
+                    wrap={"wrap"}
+                  >
+                    {selectedProducts.map((product) => {
+                      return (
+                        <Tag key={`tag-${product.id}`}>
+                          <Linky id={product.id} type={"entities"} />
+                          <TagCloseButton
+                            onClick={() => {
+                              setSelectedProducts(
+                                selectedProducts.filter((selected) => {
+                                  return !_.isEqual(
+                                    product.id,
+                                    selected.id
+                                  );
+                                })
+                              );
+                            }}
+                          />
+                        </Tag>
+                      );
+                    })}
+                    {selectedProducts.length === 0 &&
+                      <Text>No Products selected.</Text>
+                    }
+                  </Flex>
+                </Flex>
+              </Flex>
+
+              {/* Collections */}
+              <Flex
+                gap={"2"}
+                p={"2"}
+                direction={"column"}
+                rounded={"md"}
+                border={"1px"}
+                borderColor={"gray.100"}
+              >
+                <FormControl>
+                  <FormLabel>Collections</FormLabel>
+                  <CheckboxGroup
+                    value={selectedCollections}
+                    onChange={(event: string[]) => {
+                      if (event) {
+                        setSelectedCollections([...event]);
+                      }
+                    }}
+                  >
+                    <Stack spacing={[1, 5]} direction={"column"}>
+                      {collections.map((collection) => {
+                        return (
+                          <Checkbox
+                            key={collection._id}
+                            value={collection._id}
+                          >
+                            {collection.name}
+                          </Checkbox>
+                        );
+                      })}
+                      {collections.length === 0 &&
+                        <Text>No Collections.</Text>
+                      }
+                    </Stack>
+                  </CheckboxGroup>
+                  <FormHelperText>
+                    Specify the collections that this new Entity should be
+                    included with. The Entity will then show up underneath
+                    the specified collections.
+                  </FormHelperText>
+                </FormControl>
               </Flex>
             </Flex>
+          )}
 
-            {/* Information modal */}
-            <Modal isOpen={isOpen} onClose={onClose}>
-              <ModalOverlay />
-              <ModalContent>
-                <ModalHeader>Entities</ModalHeader>
-                <ModalCloseButton />
-                <ModalBody>
-                  <Flex direction={"column"} gap={"4"} p={"2"}>
-                    <Text>Information about creating Entities.</Text>
-                  </Flex>
-                </ModalBody>
-              </ModalContent>
-            </Modal>
+          {/* "Attributes" page */}
+          {_.isEqual("attributes", pageState) && (
+            <Flex direction={"column"} gap={"4"}>
+              <Flex
+                direction={"row"}
+                gap={"2"}
+                align={"center"}
+                justify={"space-between"}
+              >
+                {/* Drop-down to select template Attributes */}
+                <FormControl maxW={"sm"}>
+                  <Select
+                    placeholder={"Template Attribute"}
+                    onChange={(event) => {
+                      if (!_.isEqual(event.target.value.toString(), "")) {
+                        for (let attribute of attributes) {
+                          if (
+                            _.isEqual(
+                              event.target.value.toString(),
+                              attribute._id
+                            )
+                          ) {
+                            setSelectedAttributes([
+                              ...selectedAttributes,
+                              {
+                                _id: `a-${nanoid(6)}`,
+                                name: attribute.name,
+                                description: attribute.description,
+                                values: attribute.values,
+                              },
+                            ]);
+                            setViewingAttributeIndex(selectedAttributes.length);
+                            break;
+                          }
+                        }
+                      }
+                    }}
+                  >
+                    {isLoaded &&
+                      attributes.map((attribute) => {
+                        return (
+                          <option
+                            key={attribute._id}
+                            value={attribute._id}
+                          >
+                            {attribute.name}
+                          </option>
+                        );
+                      })}
+                    ;
+                  </Select>
+                </FormControl>
+
+                <Button
+                  leftIcon={<Icon name={"add"} />}
+                  colorScheme={"green"}
+                  onClick={() => {
+                    // Create an 'empty' Attribute and add the data structure to the 'selectedAttributes' collection
+                    setSelectedAttributes([
+                      ...selectedAttributes,
+                      {
+                        _id: `a-${nanoid(6)}`,
+                        name: "",
+                        description: "",
+                        values: [],
+                      },
+                    ]);
+                    setViewingAttributeIndex(selectedAttributes.length);
+                  }}
+                >
+                  Create
+                </Button>
+              </Flex>
+
+              {/* Display all Attributes */}
+              {/* <VStack gap={"2"} w={"100%"}>
+                {selectedAttributes.map((attribute) => {
+                  return (
+                    <Attribute
+                      key={attribute._id}
+                      identifier={attribute._id}
+                      name={attribute.name}
+                      description={attribute.description}
+                      values={attribute.values}
+                      restrictDataValues={false}
+                      onRemove={onRemoveAttribute}
+                      onUpdate={onUpdateAttribute}
+                    />
+                  );
+                })}
+              </VStack> */}
+
+              <Flex>
+                {viewingAttribute && selectedAttributes.length > 0 &&
+                  <AttributeCard
+                    key={viewingAttribute._id}
+                    identifier={viewingAttribute._id}
+                    name={viewingAttribute.name}
+                    description={viewingAttribute.description}
+                    values={viewingAttribute.values}
+                    restrictDataValues={false}
+                    onRemove={onRemoveAttributeCard}
+                    onUpdate={onUpdateAttributeCard}
+                  />
+                }
+              </Flex>
+
+              <Flex direction={"row"} gap={"4"}>
+                <IconButton aria-label={"Previous Attribute"} onClick={onAttributeCardBack} icon={<Icon name={"c_left"} />} disabled={selectedAttributes.length === 0} />
+                <Text>Attribute {selectedAttributes.length === 0 ? "0" : viewingAttributeIndex + 1} of {selectedAttributes.length}</Text>
+                <IconButton aria-label={"Previous Attribute"} onClick={onAttributeCardNext} icon={<Icon name={"c_right"} />} disabled={selectedAttributes.length === 0} />
+              </Flex>
+            </Flex>
+          )}
+        </Flex>
+
+        {/* Action buttons */}
+        <Flex
+          direction={"row"}
+          wrap={"wrap"}
+          gap={"6"}
+          justify={"space-between"}
+          align={"center"}
+          w={"100%"}
+          p={"4"}
+        >
+          <Flex gap={"4"}>
+            <Button
+              colorScheme={"red"}
+              variant={"outline"}
+              rightIcon={<Icon name={"cross"} />}
+              onClick={() => navigate("/entities")}
+            >
+              Cancel
+            </Button>
+            {!_.isEqual("start", pageState) && (
+              <Button
+                colorScheme={"orange"}
+                variant={"outline"}
+                leftIcon={<Icon name={"c_left"} />}
+                onClick={onPageBack}
+              >
+                Back
+              </Button>
+            )}
           </Flex>
-        )
-      ) : (
-        <Loading />
-      )}
+
+          <Button
+            colorScheme={"green"}
+            rightIcon={
+              _.isEqual("attributes", pageState) ? (
+                <Icon name={"check"} />
+              ) : (
+                <Icon name={"c_right"} />
+              )
+            }
+            onClick={onPageNext}
+            isDisabled={!isValidInput() && !isSubmitting}
+            isLoading={isSubmitting}
+          >
+            {_.isEqual("attributes", pageState) ? "Finish" : "Next"}
+          </Button>
+        </Flex>
+
+        {/* Information modal */}
+        <Modal isOpen={isOpen} onClose={onClose}>
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader>Entities</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody>
+              <Flex direction={"column"} gap={"4"} p={"2"}>
+                <Heading size={"md"}>Overview</Heading>
+                <Text>
+                  Specify some basic details about this Entity. Relations
+                  between Entities and membership to Collections can be
+                  specified on the following page. Finally, the metadata
+                  associated with this Entity should be specified using
+                  Attributes and corresponding Values.
+                </Text>
+                <Heading size={"md"}>Associations</Heading>
+                <Text>
+                  Relations between Entities and membership to Collections
+                  can be specified using Associations.
+                </Text>
+                <Heading size={"md"}>Attributes</Heading>
+                <Text>
+                  The metadata associated with this Entity should be
+                  specified using Attributes and corresponding Values.
+                </Text>
+              </Flex>
+            </ModalBody>
+          </ModalContent>
+        </Modal>
+      </Flex>
     </Content>
   );
 };

@@ -156,7 +156,7 @@ const Collections = () => {
             </Flex>
             <Flex direction={"column"} gap={"4"} w={"100%"}>
                 <Tabs variant={"soft-rounded"}>
-                  <TabList>
+                  <TabList gap={"2"} p={"2"}>
                     <Tab>Standard</Tab>
                     <Tab>Projects</Tab>
                   </TabList>

@@ -220,32 +220,33 @@ const Dashboard = () => {
         isError ? (
           <Error />
         ) : (
-          <Flex direction={"row"} wrap={"wrap"} gap={"4"}>
-            {/* Entities and Collections */}
-            <Flex direction={"column"} gap={"4"} grow={"2"}>
+          <Flex direction={"row"} wrap={"wrap"} gap={"4"} p={"4"} h={"100%"}>
+            <Flex direction={"column"} gap={"4"} grow={"2"} h={"100%"}>
+              {/* Collections and Entities */}
               <Flex
+                h={"50%"}
                 direction={"column"}
                 p={"4"}
                 background={"white"}
                 rounded={"md"}
                 gap={"2"}
+                border={"1px"}
+                borderColor={"gray.100"}
               >
                 {/* Collections heading */}
                 <Flex
                   direction={"row"}
-                  justify={"space-between"}
                   align={"center"}
+                  gap={"4"}
                 >
-                  <Flex align={"center"} gap={"4"} p={"2"}>
                     <Icon name={"collection"} size={"lg"} />
                     <Heading fontWeight={"semibold"}>Collections</Heading>
-                  </Flex>
                 </Flex>
 
                 {/* Collections table */}
                 {isLoaded && collectionData.length > 0 ? (
                   <Tabs variant={"soft-rounded"}>
-                    <TabList>
+                    <TabList gap={"2"} p={"2"}>
                       <Tab>Standard</Tab>
                       <Tab>Projects</Tab>
                     </TabList>
@@ -293,22 +294,23 @@ const Dashboard = () => {
               </Flex>
 
               <Flex
+                h={"50%"}
                 direction={"column"}
                 p={"4"}
                 background={"white"}
                 rounded={"md"}
                 gap={"2"}
+                border={"1px"}
+                borderColor={"gray.100"}
               >
                 {/* Entities heading */}
                 <Flex
                   direction={"row"}
-                  justify={"space-between"}
                   align={"center"}
+                  gap={"4"}
                 >
-                  <Flex align={"center"} gap={"4"} p={"2"}>
-                    <Icon name={"entity"} size={"lg"} />
-                    <Heading fontWeight={"semibold"}>Entities</Heading>
-                  </Flex>
+                  <Icon name={"entity"} size={"lg"} />
+                  <Heading fontWeight={"semibold"}>Entities</Heading>
                 </Flex>
 
                 {/* Entities table */}
@@ -342,7 +344,15 @@ const Dashboard = () => {
             </Flex>
 
             {/* Activity */}
-            <Flex direction={"column"} gap={"4"} grow={"1"}>
+            <Flex
+              direction={"column"}
+              gap={"4"}
+              grow={"1"}
+              h={"100%"}
+              rounded={"md"}
+              border={"1px"}
+              borderColor={"gray.100"}
+            >
               <Flex
                 background={"white"}
                 direction={"column"}

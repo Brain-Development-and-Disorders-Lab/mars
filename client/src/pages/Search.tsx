@@ -226,9 +226,9 @@ const Search = () => {
 
           {/* Search components */}
           <Tabs variant={"soft-rounded"} colorScheme={"blue"}>
-            <TabList p={"2"}>
-              <Tab>Text Search</Tab>
-              <Tab>Advanced Queries</Tab>
+            <TabList p={"2"} gap={"2"}>
+              <Tab>Text</Tab>
+              <Tab>Query Builder</Tab>
             </TabList>
             <TabPanels>
               <TabPanel>
@@ -270,6 +270,7 @@ const Search = () => {
                     <Flex direction={"row"} p={"2"} gap={"4"} wrap={"wrap"}>
                       {/* Query builder components */}
                       <Select
+                        w={"auto"}
                         value={queryType}
                         onChange={(event) =>
                           setQueryType(event.target.value as QueryFocusType)
@@ -279,6 +280,7 @@ const Search = () => {
                       </Select>
 
                       <Select
+                        w={"auto"}
                         value={queryParameter}
                         onChange={(event) => {
                           setQueryParameter(
@@ -296,6 +298,7 @@ const Search = () => {
                       </Select>
 
                       <Select
+                        w={"auto"}
                         value={queryQualifier}
                         onChange={(event) =>
                           setQueryQualifier(
@@ -327,6 +330,7 @@ const Search = () => {
 
                       {_.isEqual(queryParameter, "Collections") && isLoaded && (
                         <Select
+                          w={"auto"}
                           placeholder={"Select Collection"}
                           value={queryKey}
                           onChange={(event) => {
@@ -352,6 +356,7 @@ const Search = () => {
                       {_.includes(["Origins", "Products"], queryParameter) &&
                         isLoaded && (
                           <Select
+                            w={"auto"}
                             placeholder={"Select Entity"}
                             value={queryKey}
                             onChange={(event) => {
@@ -373,6 +378,7 @@ const Search = () => {
                         )}
                       {_.includes(["Name", "Description"], queryParameter) && (
                         <Input
+                          w={"auto"}
                           value={queryValue}
                           placeholder={"Value"}
                           onChange={(event) => {
@@ -418,6 +424,7 @@ const Search = () => {
                             direction={"row"}
                             gap={"4"}
                             w={"fit-content"}
+                            align={"center"}
                             p={"2"}
                             bg={"gray.50"}
                             rounded={"md"}
@@ -448,13 +455,15 @@ const Search = () => {
                               </Select>
                             )}
 
-                            <Tag colorScheme={"blue"}>{component.focus}</Tag>
-                            <Tag colorScheme={"purple"}>
-                              {component.parameter}
-                            </Tag>
-                            <Tag colorScheme={"green"}>
-                              {component.qualifier}
-                            </Tag>
+                            <Flex direction={"row"} gap={"4"} h={"fit-content"}>
+                              <Tag colorScheme={"blue"}>{component.focus}</Tag>
+                              <Tag colorScheme={"purple"}>
+                                {component.parameter}
+                              </Tag>
+                              <Tag colorScheme={"green"}>
+                                {component.qualifier}
+                              </Tag>
+                            </Flex>
 
                             {_.includes(
                               ["Origins", "Products", "Collections"],

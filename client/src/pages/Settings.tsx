@@ -87,7 +87,7 @@ const Settings = () => {
 
           {/* Settings components */}
           <Tabs variant={"soft-rounded"} colorScheme={"blue"}>
-            <TabList p={"2"}>
+            <TabList gap={"2"} p={"2"}>
               <Tab>Account</Tab>
               <Tab>Devices</Tab>
             </TabList>

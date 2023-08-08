@@ -445,7 +445,6 @@ const Values = (props: {
     <Flex p={["1", "2"]} direction={"column"} gap={"1"} w={"100%"}>
       {!props.viewOnly && (
         <Flex
-          w={"100%"}
           direction={"row"}
           gap={"2"}
           p={"4"}
@@ -455,7 +454,7 @@ const Values = (props: {
         >
           <Popover>
             <PopoverTrigger>
-              <Button colorScheme={"green"} rightIcon={<Icon name={"add"} />}>
+              <Button variant={"outline"} rightIcon={<Icon name={"add"} />}>
                 Add Value
               </Button>
             </PopoverTrigger>

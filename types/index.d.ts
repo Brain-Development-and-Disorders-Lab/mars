@@ -56,13 +56,13 @@ export type AttributeModel = IAttribute & {
   _id: string;
 };
 
-export type AttributeActions = {
+export type AttributeCardActions = {
   showRemove?: boolean;
-  onUpdate?: (data: AttributeProps) => void;
+  onUpdate?: (data: AttributeCardProps) => void;
   onRemove?: (identifier: string) => void;
 };
 
-export type AttributeProps = IAttribute & AttributeActions & {
+export type AttributeCardProps = IAttribute & AttributeCardActions & {
   identifier: string;
   restrictDataValues: boolean;
   permittedDataValues?: string[];
@@ -72,7 +72,7 @@ export type AttributeGroupProps = AttributeActions & {
   attributes: AttributeModel[];
 };
 
-export type AttributeCardProps = {
+export type AttributePreviewProps = {
   attribute: AttributeModel;
   editing?: boolean;
   removeCallback?: () => void;

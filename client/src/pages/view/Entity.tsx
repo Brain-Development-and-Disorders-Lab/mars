@@ -63,7 +63,7 @@ import {
   useBreakpoint,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
-import AttributeCard from "@components/AttributeCard";
+import AttributeCard from "@components/AttributePreview";
 import DataTable from "@components/DataTable";
 import Error from "@components/Error";
 import Graph from "@components/Graph";

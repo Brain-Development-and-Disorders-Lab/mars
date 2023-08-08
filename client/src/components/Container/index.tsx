@@ -33,20 +33,16 @@ const Content: FC<any> = (props: { children: any; vertical?: boolean }) => {
   return (
     <Flex
       align={props.vertical && props.vertical ? "center" : ""}
+      direction={"column"}
+      wrap={"wrap"}
       justify={"center"}
+      gap={"6"}
+      w={"100%"}
+      h={"100%"}
+      maxH={{base: "100%", lg: "92vh"}}
+      overflowY={"auto"}
     >
-      <Flex
-        direction={"column"}
-        wrap={"wrap"}
-        justify={"center"}
-        gap={"6"}
-        p={"4"}
-        h={"auto"}
-        w={"100%"}
-        maxW={"7xl"}
-      >
-        {props.children}
-      </Flex>
+      {props.children}
     </Flex>
   );
 };
@@ -86,18 +82,20 @@ const Page: FC<any> = ({ children }) => {
       m={"0"}
     >
       {/* Navigation component */}
-      <Flex p={"4"} justify={"center"} w={{ base: "100%", lg: "15%" }} background={"white"}>
+      <Flex p={"4"} justify={"center"} w={{ base: "100%", lg: "15%" }} borderBottom={{ base: "1px", lg: "none" }} borderColor={{ base: "gray.100", lg: "gray.100" }}>
         <Navigation />
       </Flex>
 
-      <Flex direction={"column"} w={{ base: "100%", lg: "85%" }} background={"gray.50"}>
+      <Flex direction={"column"} w={{ base: "100%", lg: "85%" }} borderLeft={{ base: "none", lg: "1px" }} borderColor={{ base: "gray.100", lg: "gray.100" }}>
         {/* Search box component */}
         <Flex
           w={"100%"}
-          h={"6vh"}
+          h={"8vh"}
           align={"center"}
           display={{ base: "none", lg: "flex" }}
           background={"white"}
+          borderBottom={"1px"}
+          borderColor={"gray.100"}
         >
           <Spacer />
 
@@ -105,13 +103,27 @@ const Page: FC<any> = ({ children }) => {
 
           <Spacer />
 
-          <Flex p={"4"} gap={"4"} align={"center"}>
+          <Flex p={"4"} pr={"0"} gap={"4"} align={"center"}>
             <Icon name={"bell"} size={[5, 5]} />
             <Menu>
-              <MenuButton as={Avatar} bgColor={"orange.400"} size={"sm"} />
+              <MenuButton
+                _hover={{ bg: "gray.200" }}
+              >
+                <Flex direction={"row"} align={"center"} gap={"4"} h={"100%"} p={"1"}>
+                  <Flex pl={"4"}>
+                    <Avatar size={"sm"} />
+                  </Flex>
+                  <Flex direction={"column"} gap={"0"} pt={"1"} pb={"1"} align={"baseline"}>
+                    <Text size={"xs"} fontWeight={"semibold"}>{token.username}</Text>
+                    <Text size={"xs"} fontWeight={"semibold"} color={"gray.400"}>{_.truncate("email@email.com", { length: 12 })}</Text>
+                  </Flex>
+                  <Flex pl={"4"} pr={"4"}>
+                    <Icon name={"c_down"} />
+                  </Flex>
+                </Flex>
+              </MenuButton>
               <MenuList>
                 <Flex p={"4"} w={"100%"} direction={"column"}>
-                  <Text fontWeight={"semibold"}>Hello, {token.username}!</Text>
                   <Text>Last login: {dayjs(token.lastLogin).fromNow()}</Text>
                 </Flex>
                 <MenuGroup title={"System"}>
