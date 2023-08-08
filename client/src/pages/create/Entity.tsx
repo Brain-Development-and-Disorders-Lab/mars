@@ -153,7 +153,7 @@ const Entity = () => {
     if (_.isEqual("start", pageState)) {
       return validDetails;
     } else if (_.isEqual("attributes", pageState)) {
-      if (attributes.length > 0) {
+      if (selectedAttributes.length > 0) {
         return validAttributes;
       }
       return true;
@@ -690,7 +690,7 @@ const Entity = () => {
               )
             }
             onClick={onPageNext}
-            isDisabled={!isValidInput() && !isSubmitting}
+            disabled={!isValidInput()}
             isLoading={isSubmitting}
           >
             {_.isEqual("attributes", pageState) ? "Finish" : "Next"}
