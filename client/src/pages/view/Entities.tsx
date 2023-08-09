@@ -148,7 +148,11 @@ const Entities = () => {
             <Icon name={"entity"} size={"lg"} />
             <Heading fontWeight={"semibold"}>Entities</Heading>
             <Spacer />
-            <Button leftIcon={<Icon name={"add"} />} colorScheme={"green"} onClick={() => navigate("/create/entity")}>
+            <Button
+              leftIcon={<Icon name={"add"} />}
+              colorScheme={"green"}
+              onClick={() => navigate("/create/entity")}
+            >
               Create
             </Button>
           </Flex>
@@ -156,9 +160,7 @@ const Entities = () => {
         <Flex direction={"column"} gap={"4"} w={"100%"}>
           <DataTable
             columns={columns}
-            data={data.filter((entity) =>
-              _.isEqual(entity.deleted, false)
-            )}
+            data={data.filter((entity) => _.isEqual(entity.deleted, false))}
             visibleColumns={visibleColumns}
             hideSelection
           />

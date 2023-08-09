@@ -11,9 +11,13 @@ import { SERVER_URL } from "src/variables";
  * @param {string} path exact API path to get data from
  * @return {Promise<any>} an object containing information from the database
  */
-export const getData = (path: string, options?: AxiosRequestConfig): Promise<any> => {
+export const getData = (
+  path: string,
+  options?: AxiosRequestConfig
+): Promise<any> => {
   return new Promise((resolve, reject) => {
-    axios.get(`${SERVER_URL}${path}`, options)
+    axios
+      .get(`${SERVER_URL}${path}`, options)
       .then((response) => {
         // Check response status
         if (!response) {
@@ -36,7 +40,11 @@ export const getData = (path: string, options?: AxiosRequestConfig): Promise<any
  * @param {string} path exact API path to post data to
  * @param {any} data the data to be posted to Lab
  */
-export const postData = async (path: string, data: any, options?: AxiosRequestConfig): Promise<any> => {
+export const postData = async (
+  path: string,
+  data: any,
+  options?: AxiosRequestConfig
+): Promise<any> => {
   return new Promise((resolve, reject) => {
     axios
       .post(`${SERVER_URL}${path}`, data, options)

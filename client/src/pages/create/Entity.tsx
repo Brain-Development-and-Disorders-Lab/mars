@@ -2,14 +2,47 @@
 import React, { useEffect, useState } from "react";
 
 // Existing and custom components
-import { Button, Checkbox, CheckboxGroup, Flex, FormControl, FormErrorMessage, FormHelperText, FormLabel, Heading, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalHeader, ModalOverlay, Progress, Select, Stack, Tag, TagCloseButton, Text, Textarea, VStack, useDisclosure, useToast } from "@chakra-ui/react";
+import {
+  Button,
+  Checkbox,
+  CheckboxGroup,
+  Flex,
+  FormControl,
+  FormErrorMessage,
+  FormHelperText,
+  FormLabel,
+  Heading,
+  Input,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalHeader,
+  ModalOverlay,
+  Progress,
+  Select,
+  Stack,
+  Tag,
+  TagCloseButton,
+  Text,
+  Textarea,
+  VStack,
+  useDisclosure,
+  useToast,
+} from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 import AttributeCard from "@components/AttributeCard";
 
 // Existing and custom types
-import { AttributeModel, AttributeCardProps, CollectionModel, EntityModel, IEntity } from "@types";
+import {
+  AttributeModel,
+  AttributeCardProps,
+  CollectionModel,
+  EntityModel,
+  IEntity,
+} from "@types";
 
 // Utility functions and libraries
 import { getData, postData } from "@database/functions";
@@ -227,10 +260,21 @@ const Entity = () => {
 
   return (
     <Content>
-      <Flex direction={"column"} alignSelf={"center"} gap={"6"} w={"100%"} h={"100%"} p={"4"} bg={"white"} maxW={"4xl"}>
+      <Flex
+        direction={"column"}
+        alignSelf={"center"}
+        gap={"6"}
+        w={"100%"}
+        h={"100%"}
+        p={"4"}
+        bg={"white"}
+        maxW={"4xl"}
+      >
         {/* Page header */}
         <Flex direction={"row"} align={"center"} justify={"space-between"}>
-          <Heading fontWeight={"semibold"} size={"lg"}>Create a new Entity</Heading>
+          <Heading fontWeight={"semibold"} size={"lg"}>
+            Create a new Entity
+          </Heading>
           <Button
             rightIcon={<Icon name={"info"} />}
             variant={"outline"}
@@ -301,13 +345,11 @@ const Entity = () => {
                 value={description}
                 placeholder={"Description"}
                 w={["100%", "lg"]}
-                onChange={(event) =>
-                  setDescription(event.target.value)
-                }
+                onChange={(event) => setDescription(event.target.value)}
               />
               <FormHelperText>
-                A brief description of the new Entity. Most details
-                should be inputted as Attributes with Values.
+                A brief description of the new Entity. Most details should be
+                inputted as Attributes with Values.
               </FormHelperText>
             </FormControl>
           </Flex>
@@ -334,16 +376,12 @@ const Entity = () => {
                     onChange={(event) => {
                       if (
                         _.find(selectedOrigins, (product) => {
-                          return _.isEqual(
-                            product.id,
-                            event.target.value
-                          );
+                          return _.isEqual(product.id, event.target.value);
                         })
                       ) {
                         toast({
                           title: "Warning",
-                          description:
-                            "Origin has already been selected.",
+                          description: "Origin has already been selected.",
                           status: "warning",
                           duration: 2000,
                           position: "bottom-right",
@@ -374,9 +412,9 @@ const Entity = () => {
                       })}
                   </Select>
                   <FormHelperText>
-                    If the sources of this Entity currently exist or did
-                    exist in this system, specify those associations here
-                    by selecting the origin Entities.
+                    If the sources of this Entity currently exist or did exist
+                    in this system, specify those associations here by selecting
+                    the origin Entities.
                   </FormHelperText>
                 </FormControl>
 
@@ -396,10 +434,7 @@ const Entity = () => {
                           onClick={() => {
                             setSelectedOrigins(
                               selectedOrigins.filter((selected) => {
-                                return !_.isEqual(
-                                  product.id,
-                                  selected.id
-                                );
+                                return !_.isEqual(product.id, selected.id);
                               })
                             );
                           }}
@@ -407,9 +442,9 @@ const Entity = () => {
                       </Tag>
                     );
                   })}
-                  {selectedOrigins.length === 0 &&
+                  {selectedOrigins.length === 0 && (
                     <Text>No Origins selected.</Text>
-                  }
+                  )}
                 </Flex>
               </Flex>
 
@@ -430,16 +465,12 @@ const Entity = () => {
                     onChange={(event) => {
                       if (
                         _.find(selectedProducts, (product) => {
-                          return _.isEqual(
-                            product.id,
-                            event.target.value
-                          );
+                          return _.isEqual(product.id, event.target.value);
                         })
                       ) {
                         toast({
                           title: "Warning",
-                          description:
-                            "Entity has already been selected.",
+                          description: "Entity has already been selected.",
                           status: "warning",
                           duration: 2000,
                           position: "bottom-right",
@@ -471,11 +502,10 @@ const Entity = () => {
                     ;
                   </Select>
                   <FormHelperText>
-                    If this Entity has any derivatives or Entities that
-                    have been created from it, specify those associations
-                    here by selecting the corresponding Entities.
+                    If this Entity has any derivatives or Entities that have
+                    been created from it, specify those associations here by
+                    selecting the corresponding Entities.
                   </FormHelperText>
-
                 </FormControl>
 
                 <Flex
@@ -493,10 +523,7 @@ const Entity = () => {
                           onClick={() => {
                             setSelectedProducts(
                               selectedProducts.filter((selected) => {
-                                return !_.isEqual(
-                                  product.id,
-                                  selected.id
-                                );
+                                return !_.isEqual(product.id, selected.id);
                               })
                             );
                           }}
@@ -504,9 +531,9 @@ const Entity = () => {
                       </Tag>
                     );
                   })}
-                  {selectedProducts.length === 0 &&
+                  {selectedProducts.length === 0 && (
                     <Text>No Products selected.</Text>
-                  }
+                  )}
                 </Flex>
               </Flex>
             </Flex>
@@ -533,23 +560,18 @@ const Entity = () => {
                   <Stack spacing={[1, 5]} direction={"column"}>
                     {collections.map((collection) => {
                       return (
-                        <Checkbox
-                          key={collection._id}
-                          value={collection._id}
-                        >
+                        <Checkbox key={collection._id} value={collection._id}>
                           {collection.name}
                         </Checkbox>
                       );
                     })}
-                    {collections.length === 0 &&
-                      <Text>No Collections.</Text>
-                    }
+                    {collections.length === 0 && <Text>No Collections.</Text>}
                   </Stack>
                 </CheckboxGroup>
                 <FormHelperText>
                   Specify the collections that this new Entity should be
-                  included with. The Entity will then show up underneath
-                  the specified collections.
+                  included with. The Entity will then show up underneath the
+                  specified collections.
                 </FormHelperText>
               </FormControl>
             </Flex>
@@ -596,10 +618,7 @@ const Entity = () => {
                   {isLoaded &&
                     attributes.map((attribute) => {
                       return (
-                        <option
-                          key={attribute._id}
-                          value={attribute._id}
-                        >
+                        <option key={attribute._id} value={attribute._id}>
                           {attribute.name}
                         </option>
                       );
@@ -715,13 +734,13 @@ const Entity = () => {
                 </Text>
                 <Heading size={"md"}>Associations</Heading>
                 <Text>
-                  Relations between Entities and membership to Collections
-                  can be specified using Associations.
+                  Relations between Entities and membership to Collections can
+                  be specified using Associations.
                 </Text>
                 <Heading size={"md"}>Attributes</Heading>
                 <Text>
-                  The metadata associated with this Entity should be
-                  specified using Attributes and corresponding Values.
+                  The metadata associated with this Entity should be specified
+                  using Attributes and corresponding Values.
                 </Text>
               </Flex>
             </ModalBody>

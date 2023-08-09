@@ -46,23 +46,17 @@ const Content: FC<ContentProps> = ({ children, isError, isLoaded }) => {
       gap={"6"}
       w={"100%"}
       h={"100%"}
-      maxH={{base: "100%", lg: "92vh"}}
+      maxH={{ base: "100%", lg: "92vh" }}
       overflowY={"auto"}
     >
       {/* Present an error screen */}
-      {isError &&
-        <Error />
-      }
+      {isError && <Error />}
 
       {/* Present a loading screen */}
-      {!isLoaded && !isError &&
-        <Loading />
-      }
+      {!isLoaded && !isError && <Loading />}
 
       {/* Show children once done loading and no errors present */}
-      {isLoaded && !isError &&
-        children
-      }
+      {isLoaded && !isError && children}
     </Flex>
   );
 };
@@ -102,11 +96,22 @@ const Page: FC<any> = ({ children }) => {
       m={"0"}
     >
       {/* Navigation component */}
-      <Flex p={"4"} justify={"center"} w={{ base: "100%", lg: "15%" }} borderBottom={{ base: "1px", lg: "none" }} borderColor={{ base: "gray.100", lg: "gray.100" }}>
+      <Flex
+        p={"4"}
+        justify={"center"}
+        w={{ base: "100%", lg: "15%" }}
+        borderBottom={{ base: "1px", lg: "none" }}
+        borderColor={{ base: "gray.100", lg: "gray.100" }}
+      >
         <Navigation />
       </Flex>
 
-      <Flex direction={"column"} w={{ base: "100%", lg: "85%" }} borderLeft={{ base: "none", lg: "1px" }} borderColor={{ base: "gray.100", lg: "gray.100" }}>
+      <Flex
+        direction={"column"}
+        w={{ base: "100%", lg: "85%" }}
+        borderLeft={{ base: "none", lg: "1px" }}
+        borderColor={{ base: "gray.100", lg: "gray.100" }}
+      >
         {/* Search box component */}
         <Flex
           w={"100%"}
@@ -126,16 +131,34 @@ const Page: FC<any> = ({ children }) => {
           <Flex p={"4"} pr={"0"} gap={"4"} align={"center"}>
             <Icon name={"bell"} size={[5, 5]} />
             <Menu>
-              <MenuButton
-                _hover={{ bg: "gray.200" }}
-              >
-                <Flex direction={"row"} align={"center"} gap={"4"} h={"100%"} p={"1"}>
+              <MenuButton _hover={{ bg: "gray.200" }}>
+                <Flex
+                  direction={"row"}
+                  align={"center"}
+                  gap={"4"}
+                  h={"100%"}
+                  p={"1"}
+                >
                   <Flex pl={"4"}>
                     <Avatar size={"sm"} />
                   </Flex>
-                  <Flex direction={"column"} gap={"0"} pt={"1"} pb={"1"} align={"baseline"}>
-                    <Text size={"xs"} fontWeight={"semibold"}>{token.username}</Text>
-                    <Text size={"xs"} fontWeight={"semibold"} color={"gray.400"}>{_.truncate("email@email.com", { length: 12 })}</Text>
+                  <Flex
+                    direction={"column"}
+                    gap={"0"}
+                    pt={"1"}
+                    pb={"1"}
+                    align={"baseline"}
+                  >
+                    <Text size={"xs"} fontWeight={"semibold"}>
+                      {token.username}
+                    </Text>
+                    <Text
+                      size={"xs"}
+                      fontWeight={"semibold"}
+                      color={"gray.400"}
+                    >
+                      {_.truncate("email@email.com", { length: 12 })}
+                    </Text>
                   </Flex>
                   <Flex pl={"4"} pr={"4"}>
                     <Icon name={"c_down"} />

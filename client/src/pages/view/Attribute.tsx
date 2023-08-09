@@ -195,8 +195,8 @@ const Attribute = () => {
                   <PopoverCloseButton />
                   <PopoverHeader>Confirmation</PopoverHeader>
                   <PopoverBody>
-                    Are you sure you want to delete this Attribute? It will
-                    not be removed from any existing Entities.
+                    Are you sure you want to delete this Attribute? It will not
+                    be removed from any existing Entities.
                     <Flex direction={"row"} p={"2"} justify={"center"}>
                       <Button
                         colorScheme={"green"}

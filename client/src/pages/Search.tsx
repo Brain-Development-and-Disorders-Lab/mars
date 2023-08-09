@@ -297,9 +297,7 @@ const Search = () => {
                       w={"auto"}
                       value={queryQualifier}
                       onChange={(event) =>
-                        setQueryQualifier(
-                          event.target.value as QueryQualifier
-                        )
+                        setQueryQualifier(event.target.value as QueryQualifier)
                       }
                     >
                       <option>Contains</option>
@@ -339,10 +337,7 @@ const Search = () => {
                       >
                         {collections.map((collection) => {
                           return (
-                            <option
-                              key={collection._id}
-                              value={collection._id}
-                            >
+                            <option key={collection._id} value={collection._id}>
                               {collection.name}
                             </option>
                           );
@@ -502,12 +497,7 @@ const Search = () => {
                     })}
                   </VStack>
                 </Flex>
-                <Flex
-                  direction={"row"}
-                  w={"100%"}
-                  gap={"4"}
-                  justify={"right"}
-                >
+                <Flex direction={"row"} w={"100%"} gap={"4"} justify={"right"}>
                   <Button
                     leftIcon={<Icon name={"rewind"} />}
                     isDisabled={queryComponents.length === 0}
@@ -564,14 +554,10 @@ const Search = () => {
                           return (
                             <Tr key={result._id}>
                               <Td>{result.name}</Td>
-                              <Td
-                                display={{ base: "none", sm: "table-cell" }}
-                              >
+                              <Td display={{ base: "none", sm: "table-cell" }}>
                                 {new Date(result.created).toDateString()}
                               </Td>
-                              <Td
-                                display={{ base: "none", sm: "table-cell" }}
-                              >
+                              <Td display={{ base: "none", sm: "table-cell" }}>
                                 {result.owner}
                               </Td>
                               <Td>
@@ -612,8 +598,8 @@ const Search = () => {
                 </Text>
                 <Text>
                   The <b>Advanced Queries</b> tab allows search queries to be
-                  constructed to target specific fields and values. Queries
-                  can be built using AND and OR logical components.
+                  constructed to target specific fields and values. Queries can
+                  be built using AND and OR logical components.
                 </Text>
               </Flex>
             </ModalBody>

@@ -133,7 +133,11 @@ const Attributes = () => {
             <Heading fontWeight={"semibold"}>Attributes</Heading>
           </Flex>
           <Spacer />
-          <Button leftIcon={<Icon name={"add"} />} colorScheme={"green"} onClick={() => navigate("/create/attribute")}>
+          <Button
+            leftIcon={<Icon name={"add"} />}
+            colorScheme={"green"}
+            onClick={() => navigate("/create/attribute")}
+          >
             Create
           </Button>
         </Flex>

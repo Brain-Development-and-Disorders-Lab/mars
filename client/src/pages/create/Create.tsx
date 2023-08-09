@@ -41,37 +41,20 @@ const Create = () => {
         {/* Collection card */}
         <Card maxW={"sm"} h={"lg"} variant={"outline"}>
           <CardHeader>
-            <Flex
-              gap={"4"}
-              w={"100%"}
-              justify={"center"}
-              align={"center"}
-            >
+            <Flex gap={"4"} w={"100%"} justify={"center"} align={"center"}>
               <Icon name={"collection"} size={"lg"} />
               <Heading size={"lg"}>Collection</Heading>
             </Flex>
           </CardHeader>
           <CardBody>
             <Stack divider={<StackDivider />} spacing={"2"}>
-              <Flex
-                p={"2"}
-                gap={"4"}
-                align={"center"}
-                direction={"column"}
-              >
+              <Flex p={"2"} gap={"4"} align={"center"} direction={"column"}>
                 <Heading size={"xs"} textTransform={"uppercase"}>
                   Description
                 </Heading>
-                <Text>
-                  Create a Collection to group and organize Entities.
-                </Text>
+                <Text>Create a Collection to group and organize Entities.</Text>
               </Flex>
-              <Flex
-                p={"2"}
-                gap={"4"}
-                align={"center"}
-                direction={"column"}
-              >
+              <Flex p={"2"} gap={"4"} align={"center"} direction={"column"}>
                 <Heading size={"xs"} textTransform={"uppercase"}>
                   Fields
                 </Heading>
@@ -99,38 +82,23 @@ const Create = () => {
         {/* Entity card */}
         <Card maxW={"sm"} h={"lg"} variant={"outline"}>
           <CardHeader>
-            <Flex
-              gap={"4"}
-              w={"100%"}
-              justify={"center"}
-              align={"center"}
-            >
+            <Flex gap={"4"} w={"100%"} justify={"center"} align={"center"}>
               <Icon name={"entity"} size={"lg"} />
               <Heading size={"lg"}>Entity</Heading>
             </Flex>
           </CardHeader>
           <CardBody>
             <Stack divider={<StackDivider />} spacing={"2"}>
-              <Flex
-                p={"2"}
-                gap={"4"}
-                align={"center"}
-                direction={"column"}
-              >
+              <Flex p={"2"} gap={"4"} align={"center"} direction={"column"}>
                 <Heading size={"xs"} textTransform={"uppercase"}>
                   Description
                 </Heading>
                 <Text>
-                  Create an Entity to group metadata about a physical or
-                  digital resource.
+                  Create an Entity to group metadata about a physical or digital
+                  resource.
                 </Text>
               </Flex>
-              <Flex
-                p={"2"}
-                gap={"4"}
-                align={"center"}
-                direction={"column"}
-              >
+              <Flex p={"2"} gap={"4"} align={"center"} direction={"column"}>
                 <Heading size={"xs"} textTransform={"uppercase"}>
                   Fields
                 </Heading>
@@ -163,38 +131,23 @@ const Create = () => {
         {/* Attribute card */}
         <Card maxW={"sm"} h={"lg"} variant={"outline"}>
           <CardHeader>
-            <Flex
-              gap={"4"}
-              w={"100%"}
-              justify={"center"}
-              align={"center"}
-            >
+            <Flex gap={"4"} w={"100%"} justify={"center"} align={"center"}>
               <Icon name={"attribute"} size={"lg"} />
               <Heading size={"lg"}>Template Attribute</Heading>
             </Flex>
           </CardHeader>
           <CardBody>
             <Stack divider={<StackDivider />} spacing={"2"}>
-              <Flex
-                p={"2"}
-                gap={"4"}
-                align={"center"}
-                direction={"column"}
-              >
+              <Flex p={"2"} gap={"4"} align={"center"} direction={"column"}>
                 <Heading size={"xs"} textTransform={"uppercase"}>
                   Description
                 </Heading>
                 <Text>
-                  Create a template Attribute to standardize reusable
-                  components of metadata to be associated with Entities.
+                  Create a template Attribute to standardize reusable components
+                  of metadata to be associated with Entities.
                 </Text>
               </Flex>
-              <Flex
-                p={"2"}
-                gap={"4"}
-                align={"center"}
-                direction={"column"}
-              >
+              <Flex p={"2"} gap={"4"} align={"center"} direction={"column"}>
                 <Heading size={"xs"} textTransform={"uppercase"}>
                   Fields
                 </Heading>

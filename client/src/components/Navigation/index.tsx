@@ -163,9 +163,7 @@ const Navigation = () => {
             w={"100%"}
             justifyContent={"left"}
             variant={
-              _.includes(location.pathname, "/collection")
-                ? "solid"
-                : "ghost"
+              _.includes(location.pathname, "/collection") ? "solid" : "ghost"
             }
             onClick={() => navigate("/collections")}
           >

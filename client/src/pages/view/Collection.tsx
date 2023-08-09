@@ -751,8 +751,7 @@ const Collection = () => {
                 )}
               </Flex>
               <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
-                {collectionCollections &&
-                collectionCollections.length > 0 ? (
+                {collectionCollections && collectionCollections.length > 0 ? (
                   <DataTable
                     data={collectionCollections}
                     columns={collectionsColumns}
@@ -872,13 +871,11 @@ const Collection = () => {
                   title="Select Collection"
                   placeholder={"Select Collection"}
                   onChange={(event) => {
-                    const selectedCollection =
-                      event.target.value.toString();
+                    const selectedCollection = event.target.value.toString();
                     if (selectedCollections.includes(selectedCollection)) {
                       toast({
                         title: "Warning",
-                        description:
-                          "Collection has already been selected.",
+                        description: "Collection has already been selected.",
                         status: "warning",
                         duration: 2000,
                         position: "bottom-right",
@@ -973,16 +970,11 @@ const Collection = () => {
                             exportAll || _.includes(exportFields, "created")
                           }
                           onChange={(event) =>
-                            handleExportCheck(
-                              "created",
-                              event.target.checked
-                            )
+                            handleExportCheck("created", event.target.checked)
                           }
                         >
                           Created:{" "}
-                          {dayjs(collectionData.created).format(
-                            "DD MMM YYYY"
-                          )}
+                          {dayjs(collectionData.created).format("DD MMM YYYY")}
                         </Checkbox>
                         <Checkbox
                           isChecked={
@@ -996,8 +988,7 @@ const Collection = () => {
                         </Checkbox>
                         <Checkbox
                           isChecked={
-                            exportAll ||
-                            _.includes(exportFields, "description")
+                            exportAll || _.includes(exportFields, "description")
                           }
                           onChange={(event) =>
                             handleExportCheck(
@@ -1145,10 +1136,7 @@ const Collection = () => {
                 {collectionHistory && collectionHistory.length > 0 ? (
                   collectionHistory.map((collectionVersion) => {
                     return (
-                      <Card
-                        w={"100%"}
-                        key={`v_${collectionVersion.timestamp}`}
-                      >
+                      <Card w={"100%"} key={`v_${collectionVersion.timestamp}`}>
                         <CardHeader>
                           <Flex align={"center"}>
                             <Text fontStyle={"italic"}>
@@ -1173,10 +1161,7 @@ const Collection = () => {
                             <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
                               <Text fontWeight={"bold"}>Description:</Text>
                               <Text noOfLines={2}>
-                                {_.isEqual(
-                                  collectionVersion.description,
-                                  ""
-                                )
+                                {_.isEqual(collectionVersion.description, "")
                                   ? "None"
                                   : collectionVersion.description}
                               </Text>
@@ -1189,10 +1174,7 @@ const Collection = () => {
                                     <Tag
                                       key={`v_p_${collectionVersion.timestamp}_${entity}`}
                                     >
-                                      <Linky
-                                        type={"entities"}
-                                        id={entity}
-                                      />
+                                      <Linky type={"entities"} id={entity} />
                                     </Tag>
                                   );
                                 })

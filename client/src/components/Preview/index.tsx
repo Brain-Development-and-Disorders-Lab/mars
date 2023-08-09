@@ -11,15 +11,19 @@ import "react-pdf/dist/Page/TextLayer.css";
 
 // Setup PDF worker
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-  'pdfjs-dist/build/pdf.worker.min.js',
-  import.meta.url,
+  "pdfjs-dist/build/pdf.worker.min.js",
+  import.meta.url
 ).toString();
 
 const Preview = (props: { src: string }) => {
   const [previewPages, setPreviewPages] = useState(0);
   const [previewIndex, setPreviewIndex] = useState(1);
 
-  const onPreviewDocumentLoadSuccess = ({ numPages }: { numPages: number }): void => {
+  const onPreviewDocumentLoadSuccess = ({
+    numPages,
+  }: {
+    numPages: number;
+  }): void => {
     setPreviewPages(numPages);
   };
 
@@ -43,10 +47,28 @@ const Preview = (props: { src: string }) => {
         </Document>
       </Flex>
 
-      <Flex direction={"row"} gap={"4"} align={"center"} justify={"center"} pb={"2"}>
-        <IconButton aria-label={"Go back"} onClick={previousPage} icon={<Icon name={"c_left"} />} disabled={previewIndex === 1}/>
-        <Text>Page {previewIndex} of {previewPages}</Text>
-        <IconButton aria-label={"Go forward"} onClick={nextPage} icon={<Icon name={"c_right"} />} disabled={previewIndex === previewPages} />
+      <Flex
+        direction={"row"}
+        gap={"4"}
+        align={"center"}
+        justify={"center"}
+        pb={"2"}
+      >
+        <IconButton
+          aria-label={"Go back"}
+          onClick={previousPage}
+          icon={<Icon name={"c_left"} />}
+          disabled={previewIndex === 1}
+        />
+        <Text>
+          Page {previewIndex} of {previewPages}
+        </Text>
+        <IconButton
+          aria-label={"Go forward"}
+          onClick={nextPage}
+          icon={<Icon name={"c_right"} />}
+          disabled={previewIndex === previewPages}
+        />
       </Flex>
     </Flex>
   );

@@ -208,8 +208,12 @@ const Entity = () => {
     [] as AttributeModel[]
   );
   const [entityHistory, setEntityHistory] = useState([] as EntityHistory[]);
-  const [entityAttachments, setEntityAttachments] = useState([] as { name: string; id: string }[]);
-  const [toUploadAttachments, setToUploadAttachments] = useState([] as string[]);
+  const [entityAttachments, setEntityAttachments] = useState(
+    [] as { name: string; id: string }[]
+  );
+  const [toUploadAttachments, setToUploadAttachments] = useState(
+    [] as string[]
+  );
 
   const {
     isOpen: isExportOpen,
@@ -227,7 +231,11 @@ const Entity = () => {
   const [isPreviewLoaded, setIsPreviewLoaded] = useState(false);
   const [previewSource, setPreviewSource] = useState("");
   const [previewType, setPreviewType] = useState("");
-  const { isOpen: isPreviewOpen, onOpen: onPreviewOpen, onClose: onPreviewClose } = useDisclosure();
+  const {
+    isOpen: isPreviewOpen,
+    onOpen: onPreviewOpen,
+    onClose: onPreviewClose,
+  } = useDisclosure();
 
   useEffect(() => {
     getData(`/entities/${id}`)
@@ -429,13 +437,18 @@ const Entity = () => {
       });
   };
 
-  const truncateTableText = _.isEqual(breakpoint, "sm") || _.isEqual(breakpoint, "base") || _.isUndefined(breakpoint);
+  const truncateTableText =
+    _.isEqual(breakpoint, "sm") ||
+    _.isEqual(breakpoint, "base") ||
+    _.isUndefined(breakpoint);
 
   // Configure collections table columns and data
   const collectionTableColumns = [
     {
       id: (info: any) => info.row.original,
-      cell: (info: any) => <Linky id={info.row.original} type={"collections"} />,
+      cell: (info: any) => (
+        <Linky id={info.row.original} type={"collections"} />
+      ),
       header: "Name",
     },
     {
@@ -443,7 +456,7 @@ const Entity = () => {
       cell: (info: any) => {
         return (
           <Flex w={"100%"} justify={"end"}>
-            {editing ?
+            {editing ? (
               <Button
                 key={`remove-${info.row.original}`}
                 rightIcon={<Icon name={"delete"} />}
@@ -454,18 +467,16 @@ const Entity = () => {
               >
                 Remove
               </Button>
-            :
+            ) : (
               <Button
                 key={`view-${info.row.original}`}
                 rightIcon={<Icon name={"c_right"} />}
                 colorScheme={"teal"}
-                onClick={() =>
-                  navigate(`/collections/${info.row.original}`)
-                }
+                onClick={() => navigate(`/collections/${info.row.original}`)}
               >
                 View
               </Button>
-            }
+            )}
           </Flex>
         );
       },
@@ -474,13 +485,20 @@ const Entity = () => {
   ];
 
   // Configure origins table columns and data
-  const originTableColumnHelper = createColumnHelper<{id: string, name: string}>();
+  const originTableColumnHelper = createColumnHelper<{
+    id: string;
+    name: string;
+  }>();
   const originTableColumns = [
     originTableColumnHelper.accessor("name", {
       cell: (info) => {
         return (
           <Tooltip label={info.getValue()}>
-            <Text>{_.truncate(info.getValue(), { length: truncateTableText ? 12 : 24 })}</Text>
+            <Text>
+              {_.truncate(info.getValue(), {
+                length: truncateTableText ? 12 : 24,
+              })}
+            </Text>
           </Tooltip>
         );
       },
@@ -490,7 +508,7 @@ const Entity = () => {
       cell: (info) => {
         return (
           <Flex w={"100%"} justify={"end"}>
-            {editing ?
+            {editing ? (
               <Button
                 key={`remove-${info.row.original.id}`}
                 rightIcon={<Icon name={"delete"} />}
@@ -501,18 +519,16 @@ const Entity = () => {
               >
                 Remove
               </Button>
-            :
+            ) : (
               <Button
                 key={`view-${info.row.original.id}`}
                 rightIcon={<Icon name={"c_right"} />}
                 colorScheme={"teal"}
-                onClick={() =>
-                  navigate(`/entities/${info.row.original.id}`)
-                }
+                onClick={() => navigate(`/entities/${info.row.original.id}`)}
               >
                 View
               </Button>
-            }
+            )}
           </Flex>
         );
       },
@@ -521,13 +537,20 @@ const Entity = () => {
   ];
 
   // Configure products table columns and data
-  const productTableColumnHelper = createColumnHelper<{id: string, name: string}>();
+  const productTableColumnHelper = createColumnHelper<{
+    id: string;
+    name: string;
+  }>();
   const productTableColumns = [
     productTableColumnHelper.accessor("name", {
       cell: (info) => {
         return (
           <Tooltip label={info.getValue()}>
-            <Text>{_.truncate(info.getValue(), { length: truncateTableText ? 12 : 24 })}</Text>
+            <Text>
+              {_.truncate(info.getValue(), {
+                length: truncateTableText ? 12 : 24,
+              })}
+            </Text>
           </Tooltip>
         );
       },
@@ -537,7 +560,7 @@ const Entity = () => {
       cell: (info) => {
         return (
           <Flex w={"100%"} justify={"end"}>
-            {editing ?
+            {editing ? (
               <Button
                 key={`remove-${info.row.original.id}`}
                 rightIcon={<Icon name={"delete"} />}
@@ -548,18 +571,16 @@ const Entity = () => {
               >
                 Remove
               </Button>
-            :
+            ) : (
               <Button
                 key={`view-${info.row.original.id}`}
                 rightIcon={<Icon name={"c_right"} />}
                 colorScheme={"teal"}
-                onClick={() =>
-                  navigate(`/entities/${info.row.original.id}`)
-                }
+                onClick={() => navigate(`/entities/${info.row.original.id}`)}
               >
                 View
               </Button>
-            }
+            )}
           </Flex>
         );
       },
@@ -568,13 +589,20 @@ const Entity = () => {
   ];
 
   // Configure attachment table columns and data
-  const attachmentTableColumnHelper = createColumnHelper<{id: string, name: string}>();
+  const attachmentTableColumnHelper = createColumnHelper<{
+    id: string;
+    name: string;
+  }>();
   const attachmentTableColumns = [
     attachmentTableColumnHelper.accessor("name", {
       cell: (info) => {
         return (
           <Tooltip label={info.getValue()}>
-            <Text>{_.truncate(info.getValue(), { length: truncateTableText ? 12 : 24 })}</Text>
+            <Text>
+              {_.truncate(info.getValue(), {
+                length: truncateTableText ? 12 : 24,
+              })}
+            </Text>
           </Tooltip>
         );
       },
@@ -583,9 +611,14 @@ const Entity = () => {
     attachmentTableColumnHelper.accessor("id", {
       cell: (info) => {
         const handleDownload = () => {
-          getData(`/system/download/${info.getValue()}`, { responseType: "blob" })
+          getData(`/system/download/${info.getValue()}`, {
+            responseType: "blob",
+          })
             .then((response) => {
-              FileSaver.saveAs(new Blob([response], {type: "image/jpeg"}), slugify(info.row.original.name));
+              FileSaver.saveAs(
+                new Blob([response], { type: "image/jpeg" }),
+                slugify(info.row.original.name)
+              );
             })
             .catch((error) => {
               console.error(error);
@@ -597,12 +630,14 @@ const Entity = () => {
           onPreviewOpen();
 
           getData(`/system/file/${info.getValue()}`)
-            .then((response: { status: boolean, data: any[] }) => {
+            .then((response: { status: boolean; data: any[] }) => {
               // Set attachment type
               setPreviewType(response.data[0].metadata.type);
 
               // Get attachment
-              getData(`/system/download/${info.getValue()}`, { responseType: "blob" })
+              getData(`/system/download/${info.getValue()}`, {
+                responseType: "blob",
+              })
                 .then((response) => {
                   setPreviewSource(URL.createObjectURL(response));
                   setIsPreviewLoaded(true);
@@ -625,7 +660,7 @@ const Entity = () => {
               icon={<Icon name={"view"} />}
               onClick={() => handlePreview()}
             />
-            {editing ?
+            {editing ? (
               <IconButton
                 aria-label={"Delete attachment"}
                 key={`delete-file-${info.getValue()}`}
@@ -633,7 +668,7 @@ const Entity = () => {
                 icon={<Icon name={"delete"} />}
                 onClick={() => removeAttachment(info.getValue())}
               />
-            :
+            ) : (
               <IconButton
                 aria-label={"Download attachment"}
                 key={`download-file-${info.getValue()}`}
@@ -641,8 +676,7 @@ const Entity = () => {
                 icon={<Icon name={"download"} />}
                 onClick={() => handleDownload()}
               />
-            }
-
+            )}
           </Flex>
         );
       },
@@ -1020,9 +1054,7 @@ const Entity = () => {
               ) : (
                 <Flex gap={"4"}>
                   {entityData.locked ? (
-                    <Tooltip
-                      label={"Currently being edited by another user"}
-                    >
+                    <Tooltip label={"Currently being edited by another user"}>
                       <Button
                         colorScheme={"gray"}
                         rightIcon={<Icon name={"lock"} />}
@@ -1429,11 +1461,7 @@ const Entity = () => {
                   w={"100%"}
                   justify={"center"}
                 >
-                  <Flex
-                    direction={"row"}
-                    gap={"4"}
-                    wrap={["wrap", "nowrap"]}
-                  >
+                  <Flex direction={"row"} gap={"4"} wrap={["wrap", "nowrap"]}>
                     <FormControl isRequired>
                       <FormLabel>Name</FormLabel>
                       <Input
@@ -1462,18 +1490,14 @@ const Entity = () => {
                       />
                       {isAttributeDescriptionError && (
                         <FormErrorMessage>
-                          A description should be provided for the
-                          Attribute.
+                          A description should be provided for the Attribute.
                         </FormErrorMessage>
                       )}
                     </FormControl>
                   </Flex>
 
                   <Flex>
-                    <FormControl
-                      isRequired
-                      isInvalid={isAttributeValueError}
-                    >
+                    <FormControl isRequired isInvalid={isAttributeValueError}>
                       <FormLabel>Values</FormLabel>
                       <Values
                         collection={attributeValues}
@@ -1485,12 +1509,7 @@ const Entity = () => {
                 </Flex>
 
                 {/* "Done" button */}
-                <Flex
-                  direction={"row"}
-                  p={"md"}
-                  justify={"center"}
-                  gap={"8"}
-                >
+                <Flex direction={"row"} p={"md"} justify={"center"} gap={"8"}>
                   <Button
                     colorScheme={"red"}
                     variant={"outline"}
@@ -1536,13 +1555,11 @@ const Entity = () => {
                   title="Select Collection"
                   placeholder={"Select Collection"}
                   onChange={(event) => {
-                    const selectedCollection =
-                      event.target.value.toString();
+                    const selectedCollection = event.target.value.toString();
                     if (selectedCollections.includes(selectedCollection)) {
                       toast({
                         title: "Warning",
-                        description:
-                          "Collection has already been selected.",
+                        description: "Collection has already been selected.",
                         status: "warning",
                         duration: 2000,
                         position: "bottom-right",
@@ -1721,11 +1738,7 @@ const Entity = () => {
         </Modal>
 
         {/* Add Origins modal */}
-        <Modal
-          isOpen={isAddOriginsOpen}
-          onClose={onAddOriginsClose}
-          isCentered
-        >
+        <Modal isOpen={isAddOriginsOpen} onClose={onAddOriginsClose} isCentered>
           <ModalOverlay />
           <ModalContent p={"4"}>
             {/* Heading and close button */}
@@ -1863,10 +1876,7 @@ const Entity = () => {
                             exportAll || _.includes(exportFields, "created")
                           }
                           onChange={(event) =>
-                            handleExportCheck(
-                              "created",
-                              event.target.checked
-                            )
+                            handleExportCheck("created", event.target.checked)
                           }
                         >
                           Created:{" "}
@@ -1884,8 +1894,7 @@ const Entity = () => {
                         </Checkbox>
                         <Checkbox
                           isChecked={
-                            exportAll ||
-                            _.includes(exportFields, "description")
+                            exportAll || _.includes(exportFields, "description")
                           }
                           onChange={(event) =>
                             handleExportCheck(
@@ -1955,10 +1964,7 @@ const Entity = () => {
                             key={origin.id}
                             isChecked={
                               exportAll ||
-                              _.includes(
-                                exportFields,
-                                `origin_${origin.id}`
-                              )
+                              _.includes(exportFields, `origin_${origin.id}`)
                             }
                             onChange={(event) =>
                               handleExportCheck(
@@ -1987,10 +1993,7 @@ const Entity = () => {
                             key={product.id}
                             isChecked={
                               exportAll ||
-                              _.includes(
-                                exportFields,
-                                `product_${product.id}`
-                              )
+                              _.includes(exportFields, `product_${product.id}`)
                             }
                             onChange={(event) =>
                               handleExportCheck(
@@ -2117,16 +2120,20 @@ const Entity = () => {
             <ModalHeader>Preview Attachment</ModalHeader>
             <ModalCloseButton />
             <ModalBody>
-              <Flex w={"100%"} h={"100%"} justify={"center"} align={"center"} pb={"2"}>
-                {!isPreviewLoaded ?
+              <Flex
+                w={"100%"}
+                h={"100%"}
+                justify={"center"}
+                align={"center"}
+                pb={"2"}
+              >
+                {!isPreviewLoaded ? (
                   <Spinner />
-                :
-                  _.isEqual("application/pdf", previewType) ? (
-                    <Preview src={previewSource} />
-                  ) : (
-                    <Image src={previewSource} maxH={"70%"} />
-                  )
-                }
+                ) : _.isEqual("application/pdf", previewType) ? (
+                  <Preview src={previewSource} />
+                ) : (
+                  <Image src={previewSource} maxH={"70%"} />
+                )}
               </Flex>
             </ModalBody>
           </ModalContent>
@@ -2159,9 +2166,7 @@ const Entity = () => {
                               colorScheme={"orange"}
                               rightIcon={<Icon name={"rewind"} />}
                               onClick={() => {
-                                handleRestoreFromHistoryClick(
-                                  entityVersion
-                                );
+                                handleRestoreFromHistoryClick(entityVersion);
                               }}
                               disabled={entityData.deleted}
                             >
@@ -2182,20 +2187,18 @@ const Entity = () => {
                             <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
                               <Text fontWeight={"bold"}>Collections:</Text>
                               {entityVersion.collections.length > 0 ? (
-                                entityVersion.collections.map(
-                                  (collection) => {
-                                    return (
-                                      <Tag
-                                        key={`v_c_${entityVersion.timestamp}_${collection}`}
-                                      >
-                                        <Linky
-                                          type={"collections"}
-                                          id={collection}
-                                        />
-                                      </Tag>
-                                    );
-                                  }
-                                )
+                                entityVersion.collections.map((collection) => {
+                                  return (
+                                    <Tag
+                                      key={`v_c_${entityVersion.timestamp}_${collection}`}
+                                    >
+                                      <Linky
+                                        type={"collections"}
+                                        id={collection}
+                                      />
+                                    </Tag>
+                                  );
+                                })
                               ) : (
                                 <Text>None</Text>
                               )}
@@ -2203,25 +2206,22 @@ const Entity = () => {
                             <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
                               <Text fontWeight={"bold"}>Attributes:</Text>
                               {entityVersion.attributes.length > 0 ? (
-                                entityVersion.attributes.map(
-                                  (attribute) => {
-                                    return (
-                                      <Tag
-                                        key={`v_a_${entityVersion.timestamp}_${attribute._id}`}
-                                      >
-                                        {attribute.name}
-                                      </Tag>
-                                    );
-                                  }
-                                )
+                                entityVersion.attributes.map((attribute) => {
+                                  return (
+                                    <Tag
+                                      key={`v_a_${entityVersion.timestamp}_${attribute._id}`}
+                                    >
+                                      {attribute.name}
+                                    </Tag>
+                                  );
+                                })
                               ) : (
                                 <Text>None</Text>
                               )}
                             </Flex>
                             <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
                               <Text fontWeight={"bold"}>Origins:</Text>
-                              {entityVersion.associations.origins.length >
-                              0 ? (
+                              {entityVersion.associations.origins.length > 0 ? (
                                 entityVersion.associations.origins.map(
                                   (origin) => {
                                     return (

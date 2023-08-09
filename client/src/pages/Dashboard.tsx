@@ -228,13 +228,9 @@ const Dashboard = () => {
             borderColor={"gray.100"}
           >
             {/* Collections heading */}
-            <Flex
-              direction={"row"}
-              align={"center"}
-              gap={"4"}
-            >
-                <Icon name={"collection"} size={"lg"} />
-                <Heading fontWeight={"semibold"}>Collections</Heading>
+            <Flex direction={"row"} align={"center"} gap={"4"}>
+              <Icon name={"collection"} size={"lg"} />
+              <Heading fontWeight={"semibold"}>Collections</Heading>
             </Flex>
 
             {/* Collections table */}
@@ -298,11 +294,7 @@ const Dashboard = () => {
             borderColor={"gray.100"}
           >
             {/* Entities heading */}
-            <Flex
-              direction={"row"}
-              align={"center"}
-              gap={"4"}
-            >
+            <Flex direction={"row"} align={"center"} gap={"4"}>
               <Icon name={"entity"} size={"lg"} />
               <Heading fontWeight={"semibold"}>Entities</Heading>
             </Flex>
@@ -367,9 +359,7 @@ const Dashboard = () => {
                 activityData.slice(0, 10).map((activity) => {
                   // Configure the badge
                   let operationBadgeColor = "green.400";
-                  let operationIcon = (
-                    <Icon name={"entity"} color={"white"} />
-                  );
+                  let operationIcon = <Icon name={"entity"} color={"white"} />;
 
                   switch (activity.type) {
                     case "create":
@@ -378,15 +368,11 @@ const Dashboard = () => {
                       break;
                     case "update":
                       operationBadgeColor = "blue.400";
-                      operationIcon = (
-                        <Icon name={"edit"} color={"white"} />
-                      );
+                      operationIcon = <Icon name={"edit"} color={"white"} />;
                       break;
                     case "delete":
                       operationBadgeColor = "red.400";
-                      operationIcon = (
-                        <Icon name={"delete"} color={"white"} />
-                      );
+                      operationIcon = <Icon name={"delete"} color={"white"} />;
                       break;
                   }
 

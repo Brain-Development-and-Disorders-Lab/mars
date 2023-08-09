@@ -2,7 +2,28 @@
 import React, { useState } from "react";
 
 // Existing and custom components
-import { Button, Checkbox, CheckboxGroup, Flex, FormControl, FormErrorMessage, FormHelperText, FormLabel, Heading, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalHeader, ModalOverlay, Text, Textarea, Tooltip, useDisclosure } from "@chakra-ui/react";
+import {
+  Button,
+  Checkbox,
+  CheckboxGroup,
+  Flex,
+  FormControl,
+  FormErrorMessage,
+  FormHelperText,
+  FormLabel,
+  Heading,
+  Input,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalHeader,
+  ModalOverlay,
+  Text,
+  Textarea,
+  Tooltip,
+  useDisclosure,
+} from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 
@@ -52,10 +73,21 @@ const Collection = () => {
 
   return (
     <Content>
-      <Flex direction={"column"} alignSelf={"center"} gap={"6"} w={"100%"} h={"100%"} p={"4"} bg={"white"} maxW={"4xl"}>
+      <Flex
+        direction={"column"}
+        alignSelf={"center"}
+        gap={"6"}
+        w={"100%"}
+        h={"100%"}
+        p={"4"}
+        bg={"white"}
+        maxW={"4xl"}
+      >
         {/* Page header */}
         <Flex direction={"row"} align={"center"} justify={"space-between"}>
-          <Heading fontWeight={"semibold"} size={"lg"}>Create a new Collection</Heading>
+          <Heading fontWeight={"semibold"} size={"lg"}>
+            Create a new Collection
+          </Heading>
           <Button
             rightIcon={<Icon name={"info"} />}
             variant={"outline"}
@@ -66,12 +98,7 @@ const Collection = () => {
         </Flex>
 
         {/* Data input */}
-        <Flex
-          direction={"column"}
-          gap={"6"}
-          p={"2"}
-          h={"100%"}
-        >
+        <Flex direction={"column"} gap={"6"} p={"2"} h={"100%"}>
           <FormControl isRequired isInvalid={isNameError}>
             <FormLabel htmlFor={"name"} fontWeight={"normal"}>
               Collection Name
@@ -126,9 +153,7 @@ const Collection = () => {
               type={"datetime-local"}
               value={created}
               onChange={(event) =>
-                setCreated(
-                  dayjs(event.target.value).format("YYYY-MM-DDTHH:mm")
-                )
+                setCreated(dayjs(event.target.value).format("YYYY-MM-DDTHH:mm"))
               }
             />
 
@@ -153,7 +178,9 @@ const Collection = () => {
                 A description must be provided.
               </FormErrorMessage>
             )}
-            <FormHelperText>Describe the Collection and its contents.</FormHelperText>
+            <FormHelperText>
+              Describe the Collection and its contents.
+            </FormHelperText>
           </FormControl>
 
           <FormControl>
@@ -169,9 +196,7 @@ const Collection = () => {
                   }}
                 >
                   <Tooltip
-                    label={
-                      "A standard Collection with no special properties."
-                    }
+                    label={"A standard Collection with no special properties."}
                   >
                     <Flex direction={"row"} gap={"4"} align={"center"}>
                       Standard
@@ -195,7 +220,8 @@ const Collection = () => {
               </Flex>
             </CheckboxGroup>
             <FormHelperText>
-              Specify if this Collection is a regular Collection or a Project-type Collection.
+              Specify if this Collection is a regular Collection or a
+              Project-type Collection.
             </FormHelperText>
           </FormControl>
         </Flex>
@@ -252,8 +278,14 @@ const Collection = () => {
                 removed from a Collection after it has been created.
               </Text>
               <Heading size={"md"}>Types</Heading>
-              <Text>A <b>Standard</b>-type Collection is a regular set of Entities that are organized in one group.</Text>
-              <Text>A <b>Project</b>-type Collection is a set of Entities that correspond to a specific project.</Text>
+              <Text>
+                A <b>Standard</b>-type Collection is a regular set of Entities
+                that are organized in one group.
+              </Text>
+              <Text>
+                A <b>Project</b>-type Collection is a set of Entities that
+                correspond to a specific project.
+              </Text>
             </Flex>
           </ModalBody>
         </ModalContent>

@@ -30,8 +30,8 @@ const Uploader = (props: {
   onOpen: () => void;
   onClose: () => void;
   target: string;
-  uploads: string[],
-  setUploads: React.Dispatch<React.SetStateAction<string[]>>,
+  uploads: string[];
+  setUploads: React.Dispatch<React.SetStateAction<string[]>>;
 }) => {
   const [file, setFile] = useState({} as File);
   const [isError, setIsError] = useState(false);
@@ -147,9 +147,7 @@ const Uploader = (props: {
                           justify={"center"}
                           align={"center"}
                         >
-                          <Text fontWeight={"semibold"}>
-                            Drag file here
-                          </Text>
+                          <Text fontWeight={"semibold"}>Drag file here</Text>
                           <Text>or click to upload</Text>
                         </Flex>
                       ) : (
@@ -172,18 +170,12 @@ const Uploader = (props: {
                       left={"0"}
                       opacity={"0"}
                       aria-hidden={"true"}
-                      onChange={(
-                        event: ChangeEvent<HTMLInputElement>
-                      ) => {
+                      onChange={(event: ChangeEvent<HTMLInputElement>) => {
                         if (event.target.files) {
                           // Only accept image or PDF files
                           if (
                             _.includes(
-                              [
-                                "image/jpeg",
-                                "image/png",
-                                "application/pdf",
-                              ],
+                              ["image/jpeg", "image/png", "application/pdf"],
                               event.target.files[0].type
                             )
                           ) {
