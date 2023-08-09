@@ -8,10 +8,10 @@
     "sourceMap": true,
     "baseUrl": "./",
     "paths": {
-      "@components/*": ["./src/components/*"],
-      "@database/*": ["./src/database/*"],
-      "@devices/*": ["./src/devices/*"],
-      "@pages/*": ["./src/pages/*"],
+      "@components/*": ["src/components/*"],
+      "@database/*": ["src/database/*"],
+      "@devices/*": ["src/devices/*"],
+      "@pages/*": ["src/pages/*"],
       "@types": ["../types"]
     },
     "rootDirs": ["src"],

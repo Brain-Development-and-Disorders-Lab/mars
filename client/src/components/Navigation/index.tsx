@@ -163,9 +163,7 @@ const Navigation = () => {
             w={"100%"}
             justifyContent={"left"}
             variant={
-              _.startsWith(location.pathname, "/collections")
-                ? "solid"
-                : "ghost"
+              _.includes(location.pathname, "/collection") ? "solid" : "ghost"
             }
             onClick={() => navigate("/collections")}
           >
@@ -181,7 +179,7 @@ const Navigation = () => {
             w={"100%"}
             justifyContent={"left"}
             variant={
-              _.startsWith(location.pathname, "/entities") ? "solid" : "ghost"
+              _.includes(location.pathname, "/entit") ? "solid" : "ghost"
             }
             onClick={() => navigate("/entities")}
           >
@@ -196,7 +194,7 @@ const Navigation = () => {
             w={"100%"}
             justifyContent={"left"}
             variant={
-              _.startsWith(location.pathname, "/attributes") ? "solid" : "ghost"
+              _.includes(location.pathname, "/attribute") ? "solid" : "ghost"
             }
             onClick={() => navigate("/attributes")}
           >
@@ -210,7 +208,7 @@ const Navigation = () => {
             w={"100%"}
             justifyContent={"left"}
             variant={
-              _.startsWith(location.pathname, "/search") ? "solid" : "ghost"
+              _.includes(location.pathname, "/search") ? "solid" : "ghost"
             }
             leftIcon={<Icon name={"search"} />}
             onClick={() => navigate("/search")}

@@ -30,12 +30,12 @@ import {
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 import Error from "@components/Error";
-import Attribute from "@components/Attribute";
+import Attribute from "@components/AttributeCard";
 
 // Custom and existing types
 import {
   AttributeModel,
-  AttributeProps,
+  AttributeCardProps,
   CollectionModel,
   EntityImport,
   EntityModel,
@@ -347,7 +347,7 @@ const Importer = (props: {
   };
 
   // Used to receive data from a Attribute component
-  const onUpdateAttribute = (data: AttributeProps) => {
+  const onUpdateAttribute = (data: AttributeCardProps) => {
     setAttributesField([
       ...attributesField.map((attribute) => {
         if (_.isEqual(attribute._id, data.identifier)) {
@@ -387,7 +387,7 @@ const Importer = (props: {
                       }
                     }}
                   >
-                    <TabList>
+                    <TabList gap={"2"} p={"2"}>
                       <Tab
                         isDisabled={
                           !_.isUndefined(file.name) &&
@@ -402,7 +402,7 @@ const Importer = (props: {
                           _.isEqual(fileType, "spreadsheet")
                         }
                       >
-                        Backup
+                        System Backup
                       </Tab>
                     </TabList>
                     <TabPanels>

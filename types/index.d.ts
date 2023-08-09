@@ -11,8 +11,6 @@ declare global {
 
 export type ScannerStatus = "disconnected" | "connected" | "error";
 
-export type CreatePage = "default" | "entity" | "collection" | "attribute";
-
 export namespace State.Entity {
   type Start = {
     location: "none" | "start" | "associations" | "attributes";
@@ -58,13 +56,13 @@ export type AttributeModel = IAttribute & {
   _id: string;
 };
 
-export type AttributeActions = {
+export type AttributeCardActions = {
   showRemove?: boolean;
-  onUpdate?: (data: AttributeProps) => void;
+  onUpdate?: (data: AttributeCardProps) => void;
   onRemove?: (identifier: string) => void;
 };
 
-export type AttributeProps = IAttribute & AttributeActions & {
+export type AttributeCardProps = IAttribute & AttributeCardActions & {
   identifier: string;
   restrictDataValues: boolean;
   permittedDataValues?: string[];
@@ -74,7 +72,7 @@ export type AttributeGroupProps = AttributeActions & {
   attributes: AttributeModel[];
 };
 
-export type AttributeCardProps = {
+export type AttributePreviewProps = {
   attribute: AttributeModel;
   editing?: boolean;
   removeCallback?: () => void;
@@ -210,6 +208,13 @@ export type IActivity = {
 export type ActivityModel = IActivity & {
   _id: string;
 };
+
+// Content component
+export type ContentProps = {
+  children: React.ReactChild | React.ReactChild[];
+  isError?: boolean;
+  isLoaded?: boolean;
+}
 
 // DataTable component
 export type DataTableProps = {

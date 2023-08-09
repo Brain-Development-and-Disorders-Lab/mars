@@ -21,6 +21,7 @@ const Error = () => {
       align={"center"}
       p={"8"}
       gap={"8"}
+      h={"100%"}
     >
       <Icon name={"exclamation"} size={"xl"} />
       <Heading fontWeight={"semibold"}>Something's not right.</Heading>

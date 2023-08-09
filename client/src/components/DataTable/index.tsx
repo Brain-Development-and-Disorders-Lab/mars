@@ -210,7 +210,7 @@ const DataTable = (props: DataTableProps) => {
                     Object.keys(selectedRows).length === 0 || props.viewOnly
                   }
                   onClick={onDeleteRows}
-                  leftIcon={<Icon name={"delete"} />}
+                  rightIcon={<Icon name={"delete"} />}
                 >
                   {Object.keys(selectedRows).length}
                 </Button>

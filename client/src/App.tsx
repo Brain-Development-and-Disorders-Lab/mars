@@ -16,15 +16,18 @@ import { Page } from "@components/Container";
 
 // Pages
 // Page type - View
-import Attribute from "@pages/Attribute";
-import Attributes from "@pages/Attributes";
-import Collection from "@pages/Collection";
-import Collections from "@pages/Collections";
-import Entity from "@pages/Entity";
-import Entities from "@pages/Entities";
+import Attribute from "@pages/view/Attribute";
+import Attributes from "@pages/view/Attributes";
+import Collection from "@pages/view/Collection";
+import Collections from "@pages/view/Collections";
+import Entity from "@pages/view/Entity";
+import Entities from "@pages/view/Entities";
 
 // Page type - Create
-import Create from "@pages/Create";
+import Create from "@pages/create/Create";
+import CreateAttribute from "@pages/create/Attribute";
+import CreateEntity from "@pages/create/Entity";
+import CreateCollection from "@pages/create/Collection";
 
 // Page type - Unique
 import Search from "@pages/Search";
@@ -56,6 +59,14 @@ const App = (): ReactElement => {
           <Page>
             <Routes>
               <Route path={"/"} element={<Dashboard />} />
+
+              {/* Create routes */}
+              <Route path={"/create/attribute"} element={<CreateAttribute />} />
+              <Route
+                path={"/create/collection"}
+                element={<CreateCollection />}
+              />
+              <Route path={"/create/entity"} element={<CreateEntity />} />
               <Route path={"/create"} element={<Create />} />
 
               {/* Entity routes */}

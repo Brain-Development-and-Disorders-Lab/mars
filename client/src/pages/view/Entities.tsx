@@ -10,12 +10,11 @@ import {
   Button,
   useBreakpoint,
   Tooltip,
+  Spacer,
 } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
-import Error from "@components/Error";
-import Loading from "@components/Loading";
 import DataTable from "@components/DataTable";
 
 // Existing and custom types
@@ -129,51 +128,44 @@ const Entities = () => {
   ];
 
   return (
-    <Content vertical={isError || !isLoaded}>
-      {isLoaded ? (
-        isError ? (
-          <Error />
-        ) : (
-          <Flex
-            direction={"row"}
-            p={"4"}
-            rounded={"md"}
-            bg={"white"}
-            wrap={"wrap"}
-            gap={"6"}
-            justify={"center"}
-          >
-            <Flex
-              w={"100%"}
-              p={"4"}
-              direction={"row"}
-              justify={"space-between"}
-              align={"center"}
+    <Content isError={isError} isLoaded={isLoaded}>
+      <Flex
+        direction={"row"}
+        p={"4"}
+        rounded={"md"}
+        bg={"white"}
+        wrap={"wrap"}
+        gap={"6"}
+      >
+        <Flex
+          w={"100%"}
+          p={"4"}
+          direction={"row"}
+          justify={"space-between"}
+          align={"center"}
+        >
+          <Flex align={"center"} gap={"4"} w={"100%"}>
+            <Icon name={"entity"} size={"lg"} />
+            <Heading fontWeight={"semibold"}>Entities</Heading>
+            <Spacer />
+            <Button
+              leftIcon={<Icon name={"add"} />}
+              colorScheme={"green"}
+              onClick={() => navigate("/create/entity")}
             >
-              <Flex align={"center"} gap={"4"}>
-                <Icon name={"entity"} size={"lg"} />
-                <Heading fontWeight={"semibold"}>Entities</Heading>
-              </Flex>
-            </Flex>
-            {isLoaded && entityData.length > 0 ? (
-              <Flex direction={"column"} gap={"4"} w={"100%"}>
-                <DataTable
-                  columns={columns}
-                  data={data.filter((entity) =>
-                    _.isEqual(entity.deleted, false)
-                  )}
-                  visibleColumns={visibleColumns}
-                  hideSelection
-                />
-              </Flex>
-            ) : (
-              <Text>There are no Entities to display.</Text>
-            )}
+              Create
+            </Button>
           </Flex>
-        )
-      ) : (
-        <Loading />
-      )}
+        </Flex>
+        <Flex direction={"column"} gap={"4"} w={"100%"}>
+          <DataTable
+            columns={columns}
+            data={data.filter((entity) => _.isEqual(entity.deleted, false))}
+            visibleColumns={visibleColumns}
+            hideSelection
+          />
+        </Flex>
+      </Flex>
     </Content>
   );
 };

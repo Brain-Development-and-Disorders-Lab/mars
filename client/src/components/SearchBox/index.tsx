@@ -33,7 +33,7 @@ import { useNavigate } from "react-router-dom";
 
 // Utility functions and libraries
 import { getData, postData } from "@database/functions";
-import { connectScanner } from "@devices/Scanner";
+import { connectScanner } from "src/devices/Scanner";
 import _ from "lodash";
 
 const SearchBox = () => {

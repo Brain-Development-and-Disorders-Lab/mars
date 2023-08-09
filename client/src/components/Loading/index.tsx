@@ -13,6 +13,7 @@ const Loading = () => {
       gap={"3"}
       p={"8"}
       m={"8"}
+      h={"100%"}
     >
       <Spinner size="xl" />
     </Flex>
