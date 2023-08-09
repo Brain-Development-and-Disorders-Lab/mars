@@ -31,8 +31,9 @@ const Create = () => {
     <Content>
       <Flex
         direction={"row"}
-        justify={"center"}
+        h={"100%"}
         align={"center"}
+        justify={"center"}
         gap={"6"}
         p={"2"}
         wrap={"wrap"}

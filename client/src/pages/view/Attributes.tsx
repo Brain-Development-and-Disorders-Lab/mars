@@ -12,9 +12,7 @@ import {
 } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
 import DataTable from "@components/DataTable";
-import Error from "@components/Error";
 import Icon from "@components/Icon";
-import Loading from "@components/Loading";
 import { Content } from "@components/Container";
 
 // Existing and custom types
@@ -113,49 +111,41 @@ const Attributes = () => {
   ];
 
   return (
-    <Content vertical={isError || !isLoaded}>
-      {isLoaded ? (
-        isError ? (
-          <Error />
-        ) : (
-          <Flex
-            direction={"row"}
-            p={"4"}
-            rounded={"md"}
-            bg={"white"}
-            wrap={"wrap"}
-            gap={"6"}
-            justify={"center"}
-          >
-            <Flex
-              w={"100%"}
-              p={"4"}
-              direction={"row"}
-              justify={"space-between"}
-              align={"center"}
-            >
-              <Flex align={"center"} gap={"4"}>
-                <Icon name={"attribute"} size={"lg"} />
-                <Heading fontWeight={"semibold"}>Attributes</Heading>
-              </Flex>
-              <Spacer />
-              <Button leftIcon={<Icon name={"add"} />} colorScheme={"green"} onClick={() => navigate("/create/attribute")}>
-                Create
-              </Button>
-            </Flex>
-            <Flex direction={"column"} gap={"4"} w={"100%"}>
-              <DataTable
-                columns={columns}
-                data={data}
-                visibleColumns={visibleColumns}
-                hideSelection
-              />
-            </Flex>
+    <Content isError={isError} isLoaded={isLoaded}>
+      <Flex
+        direction={"row"}
+        p={"4"}
+        rounded={"md"}
+        bg={"white"}
+        wrap={"wrap"}
+        gap={"6"}
+        justify={"center"}
+      >
+        <Flex
+          w={"100%"}
+          p={"4"}
+          direction={"row"}
+          justify={"space-between"}
+          align={"center"}
+        >
+          <Flex align={"center"} gap={"4"}>
+            <Icon name={"attribute"} size={"lg"} />
+            <Heading fontWeight={"semibold"}>Attributes</Heading>
           </Flex>
-        )
-      ) : (
-        <Loading />
-      )}
+          <Spacer />
+          <Button leftIcon={<Icon name={"add"} />} colorScheme={"green"} onClick={() => navigate("/create/attribute")}>
+            Create
+          </Button>
+        </Flex>
+        <Flex direction={"column"} gap={"4"} w={"100%"}>
+          <DataTable
+            columns={columns}
+            data={data}
+            visibleColumns={visibleColumns}
+            hideSelection
+          />
+        </Flex>
+      </Flex>
     </Content>
   );
 };

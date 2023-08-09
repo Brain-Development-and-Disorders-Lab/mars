@@ -53,10 +53,8 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
-import Error from "@components/Error";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
-import Loading from "@components/Loading";
 
 // Existing and custom types
 import { CollectionHistory, CollectionModel, EntityModel } from "@types";
@@ -510,729 +508,721 @@ const Collection = () => {
   ];
 
   return (
-    <Content vertical={isError || !isLoaded}>
-      {isLoaded ? (
-        isError ? (
-          <Error />
-        ) : (
-          <Flex direction={"column"} gap={"4"}>
+    <Content isError={isError} isLoaded={isLoaded}>
+      <Flex direction={"column"} gap={"4"}>
+        <Flex
+          gap={"4"}
+          direction={"row"}
+          justify={"space-between"}
+          align={"center"}
+          wrap={"wrap"}
+        >
+          <Flex
+            align={"center"}
+            gap={"4"}
+            shadow={"lg"}
+            p={"2"}
+            border={"2px"}
+            rounded={"md"}
+            bg={"white"}
+          >
+            <Icon
+              name={
+                _.isEqual(collectionData.type, "collection")
+                  ? "collection"
+                  : "project"
+              }
+              size={"lg"}
+            />
+            <Heading fontWeight={"semibold"}>{collectionData.name}</Heading>
+          </Flex>
+
+          {/* Buttons */}
+          <Flex direction={"row"} gap={"4"}>
             <Flex
-              gap={"4"}
               direction={"row"}
-              justify={"space-between"}
-              align={"center"}
+              gap={"4"}
               wrap={"wrap"}
+              bg={"white"}
+              p={"4"}
+              rounded={"md"}
             >
-              <Flex
-                align={"center"}
-                gap={"4"}
-                shadow={"lg"}
-                p={"2"}
-                border={"2px"}
-                rounded={"md"}
-                bg={"white"}
+              {editing && (
+                <Popover>
+                  <PopoverTrigger>
+                    <Button
+                      colorScheme={"red"}
+                      rightIcon={<Icon name={"delete"} />}
+                    >
+                      Delete
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent>
+                    <PopoverArrow />
+                    <PopoverCloseButton />
+                    <PopoverHeader>Confirmation</PopoverHeader>
+                    <PopoverBody>
+                      Are you sure you want to delete this Collection?
+                      <Flex direction={"row"} p={"2"} justify={"center"}>
+                        <Button
+                          colorScheme={"green"}
+                          rightIcon={<Icon name={"check"} />}
+                          onClick={handleDeleteClick}
+                        >
+                          Confirm
+                        </Button>
+                      </Flex>
+                    </PopoverBody>
+                  </PopoverContent>
+                </Popover>
+              )}
+              <Button
+                colorScheme={editing ? "green" : "gray"}
+                rightIcon={
+                  editing ? <Icon name={"check"} /> : <Icon name={"edit"} />
+                }
+                onClick={handleEditClick}
               >
-                <Icon
-                  name={
-                    _.isEqual(collectionData.type, "collection")
-                      ? "collection"
-                      : "project"
+                {editing ? "Done" : "Edit"}
+              </Button>
+            </Flex>
+
+            <Flex
+              direction={"row"}
+              gap={"4"}
+              wrap={"wrap"}
+              bg={"white"}
+              p={"4"}
+              rounded={"md"}
+            >
+              <Button
+                rightIcon={<Icon name={"clock"} />}
+                onClick={onHistoryOpen}
+              >
+                History
+              </Button>
+              <Button
+                onClick={handleExportClick}
+                rightIcon={<Icon name={"download"} />}
+                colorScheme={"blue"}
+                isDisabled={editing}
+              >
+                Export
+              </Button>
+            </Flex>
+          </Flex>
+        </Flex>
+
+        <Flex direction={"row"} gap={"4"} wrap={"wrap"}>
+          <Flex
+            direction={"column"}
+            p={"4"}
+            gap={"4"}
+            grow={"1"}
+            h={"fit-content"}
+            bg={"white"}
+            rounded={"md"}
+          >
+            {/* Details */}
+            <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
+              <Heading fontWeight={"semibold"} size={"lg"}>
+                Details
+              </Heading>
+              <TableContainer>
+                <Table variant={"simple"} colorScheme={"blackAlpha"}>
+                  <Thead>
+                    <Tr>
+                      <Th>Field</Th>
+                      <Th>Value</Th>
+                    </Tr>
+                  </Thead>
+                  <Tbody>
+                    <Tr>
+                      <Td>Owner</Td>
+                      <Td>
+                        {_.isEqual(collectionData.owner, "") ? (
+                          <Tag
+                            size={"md"}
+                            key={`warn-${collectionData._id}`}
+                            colorScheme={"orange"}
+                          >
+                            <TagLabel>Not Specified</TagLabel>
+                            <Icon name={"warning"} />
+                          </Tag>
+                        ) : (
+                          <Text>
+                            <Link>{collectionData.owner}</Link>
+                          </Text>
+                        )}
+                      </Td>
+                    </Tr>
+                    <Tr>
+                      <Td>Type</Td>
+                      <Td>
+                        <Tag
+                          size={"md"}
+                          key={`type-${collectionData._id}`}
+                          colorScheme={"blue"}
+                        >
+                          <TagLabel>{collectionData.type}</TagLabel>
+                        </Tag>
+                      </Td>
+                    </Tr>
+                    <Tr>
+                      <Td>Description</Td>
+                      <Td>
+                        <Textarea
+                          value={collectionDescription}
+                          onChange={(event) => {
+                            setCollectionDescription(event.target.value);
+                          }}
+                          disabled={!editing}
+                        />
+                      </Td>
+                    </Tr>
+                  </Tbody>
+                </Table>
+              </TableContainer>
+            </Flex>
+          </Flex>
+
+          {/* Display Entities and Collections */}
+          <Flex direction={"column"} gap={"4"} grow={"2"}>
+            <Flex
+              direction={"column"}
+              p={"4"}
+              gap={"4"}
+              h={"fit-content"}
+              bg={"white"}
+              rounded={"md"}
+            >
+              <Flex direction={"row"} justify={"space-between"}>
+                {/* Entities in the Collection */}
+                <Heading fontWeight={"semibold"} size={"lg"}>
+                  Entities
+                </Heading>
+                {editing && (
+                  <Button
+                    leftIcon={<Icon name={"add"} />}
+                    onClick={onEntitiesOpen}
+                    colorScheme={"green"}
+                  >
+                    Add
+                  </Button>
+                )}
+              </Flex>
+              <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
+                {collectionEntities && collectionEntities.length > 0 ? (
+                  <DataTable
+                    data={collectionEntities}
+                    columns={entitiesColumns}
+                    visibleColumns={{}}
+                    viewOnly={!editing}
+                    setData={setCollectionEntities}
+                    hideSelection={!editing}
+                  />
+                ) : (
+                  <Text>No Entities.</Text>
+                )}
+              </Flex>
+            </Flex>
+
+            <Flex
+              direction={"column"}
+              p={"4"}
+              gap={"4"}
+              h={"fit-content"}
+              bg={"white"}
+              rounded={"md"}
+            >
+              <Flex direction={"row"} justify={"space-between"}>
+                {/* Entities in the Collection */}
+                <Heading fontWeight={"semibold"} size={"lg"}>
+                  Collections
+                </Heading>
+                {editing && (
+                  <Button
+                    leftIcon={<Icon name={"add"} />}
+                    onClick={onCollectionsOpen}
+                    colorScheme={"green"}
+                  >
+                    Add
+                  </Button>
+                )}
+              </Flex>
+              <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
+                {collectionCollections &&
+                collectionCollections.length > 0 ? (
+                  <DataTable
+                    data={collectionCollections}
+                    columns={collectionsColumns}
+                    visibleColumns={{}}
+                    viewOnly={!editing}
+                    setData={setCollectionCollections}
+                    hideSelection={!editing}
+                  />
+                ) : (
+                  <Text>No Collections.</Text>
+                )}
+              </Flex>
+            </Flex>
+          </Flex>
+        </Flex>
+
+        {/* Modal to add Entities */}
+        <Modal isOpen={isEntitiesOpen} onClose={onEntitiesClose}>
+          <ModalOverlay />
+          <ModalContent p={"4"}>
+            {/* Heading and close button */}
+            <ModalHeader>Add Entities</ModalHeader>
+            <ModalCloseButton />
+
+            {/* Select component for Entities */}
+            <Flex direction={"column"} p={"2"} gap={"2"}>
+              <FormControl>
+                <FormLabel>Add Entities</FormLabel>
+                <Select
+                  title="Select Entity"
+                  placeholder={"Select Entity"}
+                  onChange={(event) => {
+                    const selectedEntity = event.target.value.toString();
+                    if (selectedEntities.includes(selectedEntity)) {
+                      toast({
+                        title: "Warning",
+                        description: "Entity has already been selected.",
+                        status: "warning",
+                        duration: 2000,
+                        position: "bottom-right",
+                        isClosable: true,
+                      });
+                    } else {
+                      setSelectedEntities((selectedEntities) => [
+                        ...selectedEntities,
+                        selectedEntity,
+                      ]);
+                    }
+                  }}
+                >
+                  {isLoaded &&
+                    allEntities.map((entity) => {
+                      return (
+                        <option key={entity.id} value={entity.id}>
+                          {entity.name}
+                        </option>
+                      );
+                    })}
+                  ;
+                </Select>
+              </FormControl>
+
+              <Flex direction={"row"} p={"2"} gap={"2"}>
+                {selectedEntities.map((entity) => {
+                  if (!_.isEqual(entity, "")) {
+                    return (
+                      <Tag key={`tag-${entity}`}>
+                        <Linky id={entity} type={"entities"} />
+                        <TagCloseButton
+                          onClick={() => {
+                            setSelectedEntities(
+                              selectedEntities.filter((selected) => {
+                                return !_.isEqual(entity, selected);
+                              })
+                            );
+                          }}
+                        />
+                      </Tag>
+                    );
+                  } else {
+                    return null;
                   }
-                  size={"lg"}
-                />
-                <Heading fontWeight={"semibold"}>{collectionData.name}</Heading>
+                })}
+              </Flex>
+            </Flex>
+
+            {/* "Done" button */}
+            <Flex direction={"row"} p={"md"} justify={"center"}>
+              <Button
+                colorScheme={"green"}
+                onClick={() => {
+                  if (id) {
+                    // Add the Entities to the Collection
+                    addEntities(selectedEntities);
+                  }
+                }}
+              >
+                Done
+              </Button>
+            </Flex>
+          </ModalContent>
+        </Modal>
+
+        {/* Modal to add Collections */}
+        <Modal isOpen={isCollectionsOpen} onClose={onCollectionsClose}>
+          <ModalOverlay />
+          <ModalContent p={"4"}>
+            {/* Heading and close button */}
+            <ModalHeader>Add Collections</ModalHeader>
+            <ModalCloseButton />
+
+            {/* Select component for Entities */}
+            <Flex direction={"column"} p={"2"} gap={"2"}>
+              <FormControl>
+                <FormLabel>Add Collections</FormLabel>
+                <Select
+                  title="Select Collection"
+                  placeholder={"Select Collection"}
+                  onChange={(event) => {
+                    const selectedCollection =
+                      event.target.value.toString();
+                    if (selectedCollections.includes(selectedCollection)) {
+                      toast({
+                        title: "Warning",
+                        description:
+                          "Collection has already been selected.",
+                        status: "warning",
+                        duration: 2000,
+                        position: "bottom-right",
+                        isClosable: true,
+                      });
+                    } else {
+                      setSelectedCollections([
+                        ...selectedCollections,
+                        selectedCollection,
+                      ]);
+                    }
+                  }}
+                >
+                  {isLoaded &&
+                    allCollections.map((collection) => {
+                      return (
+                        <option key={collection.id} value={collection.id}>
+                          {collection.name}
+                        </option>
+                      );
+                    })}
+                  ;
+                </Select>
+              </FormControl>
+
+              <Flex direction={"row"} p={"2"} gap={"2"}>
+                {selectedCollections.map((collection) => {
+                  if (!_.isEqual(collection, "")) {
+                    return (
+                      <Tag key={`tag-${collection}`}>
+                        <Linky id={collection} type={"collections"} />
+                        <TagCloseButton
+                          onClick={() => {
+                            setSelectedCollections(
+                              selectedCollections.filter((selected) => {
+                                return !_.isEqual(collection, selected);
+                              })
+                            );
+                          }}
+                        />
+                      </Tag>
+                    );
+                  } else {
+                    return null;
+                  }
+                })}
+              </Flex>
+            </Flex>
+
+            {/* "Done" button */}
+            <Flex direction={"row"} p={"md"} justify={"center"}>
+              <Button
+                colorScheme={"green"}
+                onClick={() => {
+                  if (id) {
+                    // Add the Collections to the Collection
+                    addCollections(selectedCollections);
+                  }
+                }}
+              >
+                Done
+              </Button>
+            </Flex>
+          </ModalContent>
+        </Modal>
+
+        <Modal
+          isOpen={isExportOpen}
+          onClose={onExportClose}
+          size={"2xl"}
+          isCentered
+        >
+          <ModalOverlay />
+          <ModalContent p={"4"} gap={"4"} w={["sm", "lg", "2xl"]}>
+            {/* Heading and close button */}
+            <ModalHeader p={"2"}>Export Entity</ModalHeader>
+            <ModalCloseButton />
+
+            {/* Selection content */}
+            <Flex direction={"row"} gap={"4"}>
+              <Flex direction={"column"} p={"2"} gap={"2"}>
+                <FormControl>
+                  <FormLabel>Details</FormLabel>
+                  {isLoaded ? (
+                    <CheckboxGroup>
+                      <Stack spacing={2} direction={"column"}>
+                        <Checkbox disabled defaultChecked>
+                          Name: {collectionData.name}
+                        </Checkbox>
+                        <Checkbox
+                          isChecked={
+                            exportAll || _.includes(exportFields, "created")
+                          }
+                          onChange={(event) =>
+                            handleExportCheck(
+                              "created",
+                              event.target.checked
+                            )
+                          }
+                        >
+                          Created:{" "}
+                          {dayjs(collectionData.created).format(
+                            "DD MMM YYYY"
+                          )}
+                        </Checkbox>
+                        <Checkbox
+                          isChecked={
+                            exportAll || _.includes(exportFields, "owner")
+                          }
+                          onChange={(event) =>
+                            handleExportCheck("owner", event.target.checked)
+                          }
+                        >
+                          Owner: {collectionData.owner}
+                        </Checkbox>
+                        <Checkbox
+                          isChecked={
+                            exportAll ||
+                            _.includes(exportFields, "description")
+                          }
+                          onChange={(event) =>
+                            handleExportCheck(
+                              "description",
+                              event.target.checked
+                            )
+                          }
+                          disabled={_.isEqual(collectionDescription, "")}
+                        >
+                          <Text noOfLines={1}>
+                            Description:{" "}
+                            {_.isEqual(collectionDescription, "")
+                              ? "No description"
+                              : collectionDescription}
+                          </Text>
+                        </Checkbox>
+                      </Stack>
+                    </CheckboxGroup>
+                  ) : (
+                    <Text>Loading details</Text>
+                  )}
+                </FormControl>
+                <FormControl>
+                  <FormLabel>Collections</FormLabel>
+                  {isLoaded && collectionCollections.length > 0 ? (
+                    <Stack spacing={2} direction={"column"}>
+                      {collectionCollections.map((collection) => {
+                        allExportFields.push(`collection_${collection}`);
+                        return (
+                          <Checkbox
+                            key={collection}
+                            isChecked={
+                              exportAll ||
+                              _.includes(
+                                exportFields,
+                                `collection_${collection}`
+                              )
+                            }
+                            onChange={(event) =>
+                              handleExportCheck(
+                                `collection_${collection}`,
+                                event.target.checked
+                              )
+                            }
+                          >
+                            Collection:{" "}
+                            {<Linky id={collection} type={"collections"} />}
+                          </Checkbox>
+                        );
+                      })}
+                    </Stack>
+                  ) : (
+                    <Text>No Collections</Text>
+                  )}
+                </FormControl>
               </Flex>
 
-              {/* Buttons */}
-              <Flex direction={"row"} gap={"4"}>
-                <Flex
-                  direction={"row"}
-                  gap={"4"}
-                  wrap={"wrap"}
-                  bg={"white"}
-                  p={"4"}
-                  rounded={"md"}
-                >
-                  {editing && (
-                    <Popover>
-                      <PopoverTrigger>
-                        <Button
-                          colorScheme={"red"}
-                          rightIcon={<Icon name={"delete"} />}
-                        >
-                          Delete
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent>
-                        <PopoverArrow />
-                        <PopoverCloseButton />
-                        <PopoverHeader>Confirmation</PopoverHeader>
-                        <PopoverBody>
-                          Are you sure you want to delete this Collection?
-                          <Flex direction={"row"} p={"2"} justify={"center"}>
+              <Flex direction={"column"} p={"2"} gap={"2"}>
+                <FormControl>
+                  <FormLabel>Entities</FormLabel>
+                  {isLoaded && collectionEntities.length > 0 ? (
+                    <Stack spacing={2} direction={"column"}>
+                      {collectionEntities.map((entity) => {
+                        allExportFields.push(`entity_${entity}`);
+                        return (
+                          <Checkbox
+                            key={entity}
+                            isChecked={
+                              exportAll ||
+                              _.includes(exportFields, `entity_${entity}`)
+                            }
+                            onChange={(event) =>
+                              handleExportCheck(
+                                `entity_${entity}`,
+                                event.target.checked
+                              )
+                            }
+                          >
+                            Entity: <Linky type={"entities"} id={entity} />
+                          </Checkbox>
+                        );
+                      })}
+                    </Stack>
+                  ) : (
+                    <Text>No Entities.</Text>
+                  )}
+                </FormControl>
+              </Flex>
+            </Flex>
+
+            {/* "Download" buttons */}
+            <Flex
+              direction={"row"}
+              p={"md"}
+              gap={"4"}
+              justify={"center"}
+              align={"center"}
+            >
+              <Checkbox
+                onChange={(event) => setExportAll(event.target.checked)}
+              >
+                Select All
+              </Checkbox>
+
+              <Spacer />
+
+              <Text>Download as:</Text>
+              <Button
+                colorScheme={"blue"}
+                onClick={() => handleDownloadClick(`json`)}
+                rightIcon={<Icon name={"download"} />}
+              >
+                JSON
+              </Button>
+              <Button
+                colorScheme={"blue"}
+                onClick={() => handleDownloadClick(`csv`)}
+                rightIcon={<Icon name={"download"} />}
+              >
+                CSV
+              </Button>
+              <Button
+                colorScheme={"blue"}
+                onClick={() => handleDownloadClick(`txt`)}
+                rightIcon={<Icon name={"download"} />}
+              >
+                TXT
+              </Button>
+            </Flex>
+          </ModalContent>
+        </Modal>
+
+        <Drawer
+          isOpen={isHistoryOpen}
+          placement={"right"}
+          onClose={onHistoryClose}
+        >
+          <DrawerOverlay />
+          <DrawerContent>
+            <DrawerCloseButton />
+            <DrawerHeader>Version History</DrawerHeader>
+
+            <DrawerBody>
+              <VStack spacing={"4"}>
+                {collectionHistory && collectionHistory.length > 0 ? (
+                  collectionHistory.map((collectionVersion) => {
+                    return (
+                      <Card
+                        w={"100%"}
+                        key={`v_${collectionVersion.timestamp}`}
+                      >
+                        <CardHeader>
+                          <Flex align={"center"}>
+                            <Text fontStyle={"italic"}>
+                              {dayjs(collectionVersion.timestamp).fromNow()}
+                            </Text>
+                            <Spacer />
                             <Button
-                              colorScheme={"green"}
-                              rightIcon={<Icon name={"check"} />}
-                              onClick={handleDeleteClick}
+                              colorScheme={"orange"}
+                              rightIcon={<Icon name={"rewind"} />}
+                              onClick={() => {
+                                handleRestoreFromHistoryClick(
+                                  collectionVersion
+                                );
+                              }}
                             >
-                              Confirm
+                              Restore
                             </Button>
                           </Flex>
-                        </PopoverBody>
-                      </PopoverContent>
-                    </Popover>
-                  )}
-                  <Button
-                    colorScheme={editing ? "green" : "gray"}
-                    rightIcon={
-                      editing ? <Icon name={"check"} /> : <Icon name={"edit"} />
-                    }
-                    onClick={handleEditClick}
-                  >
-                    {editing ? "Done" : "Edit"}
-                  </Button>
-                </Flex>
-
-                <Flex
-                  direction={"row"}
-                  gap={"4"}
-                  wrap={"wrap"}
-                  bg={"white"}
-                  p={"4"}
-                  rounded={"md"}
-                >
-                  <Button
-                    rightIcon={<Icon name={"clock"} />}
-                    onClick={onHistoryOpen}
-                  >
-                    History
-                  </Button>
-                  <Button
-                    onClick={handleExportClick}
-                    rightIcon={<Icon name={"download"} />}
-                    colorScheme={"blue"}
-                    isDisabled={editing}
-                  >
-                    Export
-                  </Button>
-                </Flex>
-              </Flex>
-            </Flex>
-
-            <Flex direction={"row"} gap={"4"} wrap={"wrap"}>
-              <Flex
-                direction={"column"}
-                p={"4"}
-                gap={"4"}
-                grow={"1"}
-                h={"fit-content"}
-                bg={"white"}
-                rounded={"md"}
-              >
-                {/* Details */}
-                <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
-                  <Heading fontWeight={"semibold"} size={"lg"}>
-                    Details
-                  </Heading>
-                  <TableContainer>
-                    <Table variant={"simple"} colorScheme={"blackAlpha"}>
-                      <Thead>
-                        <Tr>
-                          <Th>Field</Th>
-                          <Th>Value</Th>
-                        </Tr>
-                      </Thead>
-                      <Tbody>
-                        <Tr>
-                          <Td>Owner</Td>
-                          <Td>
-                            {_.isEqual(collectionData.owner, "") ? (
-                              <Tag
-                                size={"md"}
-                                key={`warn-${collectionData._id}`}
-                                colorScheme={"orange"}
-                              >
-                                <TagLabel>Not Specified</TagLabel>
-                                <Icon name={"warning"} />
-                              </Tag>
-                            ) : (
-                              <Text>
-                                <Link>{collectionData.owner}</Link>
-                              </Text>
-                            )}
-                          </Td>
-                        </Tr>
-                        <Tr>
-                          <Td>Type</Td>
-                          <Td>
-                            <Tag
-                              size={"md"}
-                              key={`type-${collectionData._id}`}
-                              colorScheme={"blue"}
-                            >
-                              <TagLabel>{collectionData.type}</TagLabel>
-                            </Tag>
-                          </Td>
-                        </Tr>
-                        <Tr>
-                          <Td>Description</Td>
-                          <Td>
-                            <Textarea
-                              value={collectionDescription}
-                              onChange={(event) => {
-                                setCollectionDescription(event.target.value);
-                              }}
-                              disabled={!editing}
-                            />
-                          </Td>
-                        </Tr>
-                      </Tbody>
-                    </Table>
-                  </TableContainer>
-                </Flex>
-              </Flex>
-
-              {/* Display Entities and Collections */}
-              <Flex direction={"column"} gap={"4"} grow={"2"}>
-                <Flex
-                  direction={"column"}
-                  p={"4"}
-                  gap={"4"}
-                  h={"fit-content"}
-                  bg={"white"}
-                  rounded={"md"}
-                >
-                  <Flex direction={"row"} justify={"space-between"}>
-                    {/* Entities in the Collection */}
-                    <Heading fontWeight={"semibold"} size={"lg"}>
-                      Entities
-                    </Heading>
-                    {editing && (
-                      <Button
-                        leftIcon={<Icon name={"add"} />}
-                        onClick={onEntitiesOpen}
-                        colorScheme={"green"}
-                      >
-                        Add
-                      </Button>
-                    )}
-                  </Flex>
-                  <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
-                    {collectionEntities && collectionEntities.length > 0 ? (
-                      <DataTable
-                        data={collectionEntities}
-                        columns={entitiesColumns}
-                        visibleColumns={{}}
-                        viewOnly={!editing}
-                        setData={setCollectionEntities}
-                        hideSelection={!editing}
-                      />
-                    ) : (
-                      <Text>No Entities.</Text>
-                    )}
-                  </Flex>
-                </Flex>
-
-                <Flex
-                  direction={"column"}
-                  p={"4"}
-                  gap={"4"}
-                  h={"fit-content"}
-                  bg={"white"}
-                  rounded={"md"}
-                >
-                  <Flex direction={"row"} justify={"space-between"}>
-                    {/* Entities in the Collection */}
-                    <Heading fontWeight={"semibold"} size={"lg"}>
-                      Collections
-                    </Heading>
-                    {editing && (
-                      <Button
-                        leftIcon={<Icon name={"add"} />}
-                        onClick={onCollectionsOpen}
-                        colorScheme={"green"}
-                      >
-                        Add
-                      </Button>
-                    )}
-                  </Flex>
-                  <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
-                    {collectionCollections &&
-                    collectionCollections.length > 0 ? (
-                      <DataTable
-                        data={collectionCollections}
-                        columns={collectionsColumns}
-                        visibleColumns={{}}
-                        viewOnly={!editing}
-                        setData={setCollectionCollections}
-                        hideSelection={!editing}
-                      />
-                    ) : (
-                      <Text>No Collections.</Text>
-                    )}
-                  </Flex>
-                </Flex>
-              </Flex>
-            </Flex>
-
-            {/* Modal to add Entities */}
-            <Modal isOpen={isEntitiesOpen} onClose={onEntitiesClose}>
-              <ModalOverlay />
-              <ModalContent p={"4"}>
-                {/* Heading and close button */}
-                <ModalHeader>Add Entities</ModalHeader>
-                <ModalCloseButton />
-
-                {/* Select component for Entities */}
-                <Flex direction={"column"} p={"2"} gap={"2"}>
-                  <FormControl>
-                    <FormLabel>Add Entities</FormLabel>
-                    <Select
-                      title="Select Entity"
-                      placeholder={"Select Entity"}
-                      onChange={(event) => {
-                        const selectedEntity = event.target.value.toString();
-                        if (selectedEntities.includes(selectedEntity)) {
-                          toast({
-                            title: "Warning",
-                            description: "Entity has already been selected.",
-                            status: "warning",
-                            duration: 2000,
-                            position: "bottom-right",
-                            isClosable: true,
-                          });
-                        } else {
-                          setSelectedEntities((selectedEntities) => [
-                            ...selectedEntities,
-                            selectedEntity,
-                          ]);
-                        }
-                      }}
-                    >
-                      {isLoaded &&
-                        allEntities.map((entity) => {
-                          return (
-                            <option key={entity.id} value={entity.id}>
-                              {entity.name}
-                            </option>
-                          );
-                        })}
-                      ;
-                    </Select>
-                  </FormControl>
-
-                  <Flex direction={"row"} p={"2"} gap={"2"}>
-                    {selectedEntities.map((entity) => {
-                      if (!_.isEqual(entity, "")) {
-                        return (
-                          <Tag key={`tag-${entity}`}>
-                            <Linky id={entity} type={"entities"} />
-                            <TagCloseButton
-                              onClick={() => {
-                                setSelectedEntities(
-                                  selectedEntities.filter((selected) => {
-                                    return !_.isEqual(entity, selected);
-                                  })
-                                );
-                              }}
-                            />
-                          </Tag>
-                        );
-                      } else {
-                        return null;
-                      }
-                    })}
-                  </Flex>
-                </Flex>
-
-                {/* "Done" button */}
-                <Flex direction={"row"} p={"md"} justify={"center"}>
-                  <Button
-                    colorScheme={"green"}
-                    onClick={() => {
-                      if (id) {
-                        // Add the Entities to the Collection
-                        addEntities(selectedEntities);
-                      }
-                    }}
-                  >
-                    Done
-                  </Button>
-                </Flex>
-              </ModalContent>
-            </Modal>
-
-            {/* Modal to add Collections */}
-            <Modal isOpen={isCollectionsOpen} onClose={onCollectionsClose}>
-              <ModalOverlay />
-              <ModalContent p={"4"}>
-                {/* Heading and close button */}
-                <ModalHeader>Add Collections</ModalHeader>
-                <ModalCloseButton />
-
-                {/* Select component for Entities */}
-                <Flex direction={"column"} p={"2"} gap={"2"}>
-                  <FormControl>
-                    <FormLabel>Add Collections</FormLabel>
-                    <Select
-                      title="Select Collection"
-                      placeholder={"Select Collection"}
-                      onChange={(event) => {
-                        const selectedCollection =
-                          event.target.value.toString();
-                        if (selectedCollections.includes(selectedCollection)) {
-                          toast({
-                            title: "Warning",
-                            description:
-                              "Collection has already been selected.",
-                            status: "warning",
-                            duration: 2000,
-                            position: "bottom-right",
-                            isClosable: true,
-                          });
-                        } else {
-                          setSelectedCollections([
-                            ...selectedCollections,
-                            selectedCollection,
-                          ]);
-                        }
-                      }}
-                    >
-                      {isLoaded &&
-                        allCollections.map((collection) => {
-                          return (
-                            <option key={collection.id} value={collection.id}>
-                              {collection.name}
-                            </option>
-                          );
-                        })}
-                      ;
-                    </Select>
-                  </FormControl>
-
-                  <Flex direction={"row"} p={"2"} gap={"2"}>
-                    {selectedCollections.map((collection) => {
-                      if (!_.isEqual(collection, "")) {
-                        return (
-                          <Tag key={`tag-${collection}`}>
-                            <Linky id={collection} type={"collections"} />
-                            <TagCloseButton
-                              onClick={() => {
-                                setSelectedCollections(
-                                  selectedCollections.filter((selected) => {
-                                    return !_.isEqual(collection, selected);
-                                  })
-                                );
-                              }}
-                            />
-                          </Tag>
-                        );
-                      } else {
-                        return null;
-                      }
-                    })}
-                  </Flex>
-                </Flex>
-
-                {/* "Done" button */}
-                <Flex direction={"row"} p={"md"} justify={"center"}>
-                  <Button
-                    colorScheme={"green"}
-                    onClick={() => {
-                      if (id) {
-                        // Add the Collections to the Collection
-                        addCollections(selectedCollections);
-                      }
-                    }}
-                  >
-                    Done
-                  </Button>
-                </Flex>
-              </ModalContent>
-            </Modal>
-
-            <Modal
-              isOpen={isExportOpen}
-              onClose={onExportClose}
-              size={"2xl"}
-              isCentered
-            >
-              <ModalOverlay />
-              <ModalContent p={"4"} gap={"4"} w={["sm", "lg", "2xl"]}>
-                {/* Heading and close button */}
-                <ModalHeader p={"2"}>Export Entity</ModalHeader>
-                <ModalCloseButton />
-
-                {/* Selection content */}
-                <Flex direction={"row"} gap={"4"}>
-                  <Flex direction={"column"} p={"2"} gap={"2"}>
-                    <FormControl>
-                      <FormLabel>Details</FormLabel>
-                      {isLoaded ? (
-                        <CheckboxGroup>
-                          <Stack spacing={2} direction={"column"}>
-                            <Checkbox disabled defaultChecked>
-                              Name: {collectionData.name}
-                            </Checkbox>
-                            <Checkbox
-                              isChecked={
-                                exportAll || _.includes(exportFields, "created")
-                              }
-                              onChange={(event) =>
-                                handleExportCheck(
-                                  "created",
-                                  event.target.checked
+                        </CardHeader>
+                        <CardBody>
+                          <VStack gap={"1"} align={"baseline"}>
+                            <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
+                              <Text fontWeight={"bold"}>Description:</Text>
+                              <Text noOfLines={2}>
+                                {_.isEqual(
+                                  collectionVersion.description,
+                                  ""
                                 )
-                              }
-                            >
-                              Created:{" "}
-                              {dayjs(collectionData.created).format(
-                                "DD MMM YYYY"
+                                  ? "None"
+                                  : collectionVersion.description}
+                              </Text>
+                            </Flex>
+                            <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
+                              <Text fontWeight={"bold"}>Products:</Text>
+                              {collectionVersion.entities.length > 0 ? (
+                                collectionVersion.entities.map((entity) => {
+                                  return (
+                                    <Tag
+                                      key={`v_p_${collectionVersion.timestamp}_${entity}`}
+                                    >
+                                      <Linky
+                                        type={"entities"}
+                                        id={entity}
+                                      />
+                                    </Tag>
+                                  );
+                                })
+                              ) : (
+                                <Text>None</Text>
                               )}
-                            </Checkbox>
-                            <Checkbox
-                              isChecked={
-                                exportAll || _.includes(exportFields, "owner")
-                              }
-                              onChange={(event) =>
-                                handleExportCheck("owner", event.target.checked)
-                              }
-                            >
-                              Owner: {collectionData.owner}
-                            </Checkbox>
-                            <Checkbox
-                              isChecked={
-                                exportAll ||
-                                _.includes(exportFields, "description")
-                              }
-                              onChange={(event) =>
-                                handleExportCheck(
-                                  "description",
-                                  event.target.checked
-                                )
-                              }
-                              disabled={_.isEqual(collectionDescription, "")}
-                            >
-                              <Text noOfLines={1}>
-                                Description:{" "}
-                                {_.isEqual(collectionDescription, "")
-                                  ? "No description"
-                                  : collectionDescription}
-                              </Text>
-                            </Checkbox>
-                          </Stack>
-                        </CheckboxGroup>
-                      ) : (
-                        <Text>Loading details</Text>
-                      )}
-                    </FormControl>
-                    <FormControl>
-                      <FormLabel>Collections</FormLabel>
-                      {isLoaded && collectionCollections.length > 0 ? (
-                        <Stack spacing={2} direction={"column"}>
-                          {collectionCollections.map((collection) => {
-                            allExportFields.push(`collection_${collection}`);
-                            return (
-                              <Checkbox
-                                key={collection}
-                                isChecked={
-                                  exportAll ||
-                                  _.includes(
-                                    exportFields,
-                                    `collection_${collection}`
-                                  )
-                                }
-                                onChange={(event) =>
-                                  handleExportCheck(
-                                    `collection_${collection}`,
-                                    event.target.checked
-                                  )
-                                }
-                              >
-                                Collection:{" "}
-                                {<Linky id={collection} type={"collections"} />}
-                              </Checkbox>
-                            );
-                          })}
-                        </Stack>
-                      ) : (
-                        <Text>No Collections</Text>
-                      )}
-                    </FormControl>
-                  </Flex>
+                            </Flex>
+                          </VStack>
+                        </CardBody>
+                      </Card>
+                    );
+                  })
+                ) : (
+                  <Text>No previous versions.</Text>
+                )}
+              </VStack>
+            </DrawerBody>
 
-                  <Flex direction={"column"} p={"2"} gap={"2"}>
-                    <FormControl>
-                      <FormLabel>Entities</FormLabel>
-                      {isLoaded && collectionEntities.length > 0 ? (
-                        <Stack spacing={2} direction={"column"}>
-                          {collectionEntities.map((entity) => {
-                            allExportFields.push(`entity_${entity}`);
-                            return (
-                              <Checkbox
-                                key={entity}
-                                isChecked={
-                                  exportAll ||
-                                  _.includes(exportFields, `entity_${entity}`)
-                                }
-                                onChange={(event) =>
-                                  handleExportCheck(
-                                    `entity_${entity}`,
-                                    event.target.checked
-                                  )
-                                }
-                              >
-                                Entity: <Linky type={"entities"} id={entity} />
-                              </Checkbox>
-                            );
-                          })}
-                        </Stack>
-                      ) : (
-                        <Text>No Entities.</Text>
-                      )}
-                    </FormControl>
-                  </Flex>
-                </Flex>
-
-                {/* "Download" buttons */}
-                <Flex
-                  direction={"row"}
-                  p={"md"}
-                  gap={"4"}
-                  justify={"center"}
-                  align={"center"}
-                >
-                  <Checkbox
-                    onChange={(event) => setExportAll(event.target.checked)}
-                  >
-                    Select All
-                  </Checkbox>
-
-                  <Spacer />
-
-                  <Text>Download as:</Text>
-                  <Button
-                    colorScheme={"blue"}
-                    onClick={() => handleDownloadClick(`json`)}
-                    rightIcon={<Icon name={"download"} />}
-                  >
-                    JSON
-                  </Button>
-                  <Button
-                    colorScheme={"blue"}
-                    onClick={() => handleDownloadClick(`csv`)}
-                    rightIcon={<Icon name={"download"} />}
-                  >
-                    CSV
-                  </Button>
-                  <Button
-                    colorScheme={"blue"}
-                    onClick={() => handleDownloadClick(`txt`)}
-                    rightIcon={<Icon name={"download"} />}
-                  >
-                    TXT
-                  </Button>
-                </Flex>
-              </ModalContent>
-            </Modal>
-
-            <Drawer
-              isOpen={isHistoryOpen}
-              placement={"right"}
-              onClose={onHistoryClose}
-            >
-              <DrawerOverlay />
-              <DrawerContent>
-                <DrawerCloseButton />
-                <DrawerHeader>Version History</DrawerHeader>
-
-                <DrawerBody>
-                  <VStack spacing={"4"}>
-                    {collectionHistory && collectionHistory.length > 0 ? (
-                      collectionHistory.map((collectionVersion) => {
-                        return (
-                          <Card
-                            w={"100%"}
-                            key={`v_${collectionVersion.timestamp}`}
-                          >
-                            <CardHeader>
-                              <Flex align={"center"}>
-                                <Text fontStyle={"italic"}>
-                                  {dayjs(collectionVersion.timestamp).fromNow()}
-                                </Text>
-                                <Spacer />
-                                <Button
-                                  colorScheme={"orange"}
-                                  rightIcon={<Icon name={"rewind"} />}
-                                  onClick={() => {
-                                    handleRestoreFromHistoryClick(
-                                      collectionVersion
-                                    );
-                                  }}
-                                >
-                                  Restore
-                                </Button>
-                              </Flex>
-                            </CardHeader>
-                            <CardBody>
-                              <VStack gap={"1"} align={"baseline"}>
-                                <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
-                                  <Text fontWeight={"bold"}>Description:</Text>
-                                  <Text noOfLines={2}>
-                                    {_.isEqual(
-                                      collectionVersion.description,
-                                      ""
-                                    )
-                                      ? "None"
-                                      : collectionVersion.description}
-                                  </Text>
-                                </Flex>
-                                <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
-                                  <Text fontWeight={"bold"}>Products:</Text>
-                                  {collectionVersion.entities.length > 0 ? (
-                                    collectionVersion.entities.map((entity) => {
-                                      return (
-                                        <Tag
-                                          key={`v_p_${collectionVersion.timestamp}_${entity}`}
-                                        >
-                                          <Linky
-                                            type={"entities"}
-                                            id={entity}
-                                          />
-                                        </Tag>
-                                      );
-                                    })
-                                  ) : (
-                                    <Text>None</Text>
-                                  )}
-                                </Flex>
-                              </VStack>
-                            </CardBody>
-                          </Card>
-                        );
-                      })
-                    ) : (
-                      <Text>No previous versions.</Text>
-                    )}
-                  </VStack>
-                </DrawerBody>
-
-                <DrawerFooter>
-                  <Button
-                    colorScheme={"red"}
-                    onClick={onHistoryClose}
-                    rightIcon={<Icon name={"cross"} />}
-                  >
-                    Close
-                  </Button>
-                </DrawerFooter>
-              </DrawerContent>
-            </Drawer>
-          </Flex>
-        )
-      ) : (
-        <Loading />
-      )}
+            <DrawerFooter>
+              <Button
+                colorScheme={"red"}
+                onClick={onHistoryClose}
+                rightIcon={<Icon name={"cross"} />}
+              >
+                Close
+              </Button>
+            </DrawerFooter>
+          </DrawerContent>
+        </Drawer>
+      </Flex>
     </Content>
   );
 };

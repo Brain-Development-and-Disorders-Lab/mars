@@ -15,7 +15,7 @@ const Invalid = () => {
   const navigate = useNavigate();
 
   return (
-    <Content vertical>
+    <Content>
       <Flex
         direction={"column"}
         justify={"center"}

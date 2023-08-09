@@ -71,7 +71,7 @@ const Login = (props: { setToken: (token: AuthToken) => void }) => {
   };
 
   return (
-    <Content vertical>
+    <Content>
       <Flex
         direction={"column"}
         justify={"center"}

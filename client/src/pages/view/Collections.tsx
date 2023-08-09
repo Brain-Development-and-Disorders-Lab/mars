@@ -4,6 +4,7 @@ import {
   Button,
   Flex,
   Heading,
+  Spacer,
   Tab,
   TabList,
   TabPanel,
@@ -16,8 +17,6 @@ import { Content } from "@components/Container";
 import { createColumnHelper } from "@tanstack/react-table";
 import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
-import Error from "@components/Error";
-import Loading from "@components/Loading";
 
 // Database and models
 import { CollectionModel } from "@types";
@@ -128,67 +127,63 @@ const Collections = () => {
   ];
 
   return (
-    <Content vertical={isError || !isLoaded}>
-      {isLoaded ? (
-        isError ? (
-          <Error />
-        ) : (
-          <Flex
-            direction={"row"}
-            p={"4"}
-            rounded={"md"}
-            bg={"white"}
-            wrap={"wrap"}
-            gap={"6"}
-            justify={"center"}
-          >
-            <Flex
-              w={"100%"}
-              p={"4"}
-              direction={"row"}
-              justify={"space-between"}
-              align={"center"}
-            >
-              <Flex align={"center"} gap={"4"}>
-                <Icon name={"collection"} size={"lg"} />
-                <Heading fontWeight={"semibold"}>Collections</Heading>
-              </Flex>
-            </Flex>
-            <Flex direction={"column"} gap={"4"} w={"100%"}>
-                <Tabs variant={"soft-rounded"}>
-                  <TabList gap={"2"} p={"2"}>
-                    <Tab>Standard</Tab>
-                    <Tab>Projects</Tab>
-                  </TabList>
-                  <TabPanels>
-                    <TabPanel>
-                      <DataTable
-                        columns={columns}
-                        data={data.filter((collection) => {
-                          return _.isEqual(collection.type, "collection");
-                        })}
-                        visibleColumns={visibleColumns}
-                        hideSelection
-                      />
-                    </TabPanel>
-                    <TabPanel>
-                      <DataTable
-                        columns={columns}
-                        data={data.filter((collection) => {
-                          return _.isEqual(collection.type, "project");
-                        })}
-                        visibleColumns={visibleColumns}
-                        hideSelection
-                      />
-                    </TabPanel>
-                  </TabPanels>
-                </Tabs>
-            </Flex>
+    <Content isError={isError} isLoaded={isLoaded}>
+      <Flex
+        direction={"row"}
+        p={"4"}
+        rounded={"md"}
+        bg={"white"}
+        wrap={"wrap"}
+        gap={"6"}
+        justify={"center"}
+      >
+        <Flex
+          w={"100%"}
+          p={"4"}
+          direction={"row"}
+          justify={"space-between"}
+          align={"center"}
+        >
+          <Flex align={"center"} gap={"4"} w={"100%"}>
+            <Icon name={"collection"} size={"lg"} />
+            <Heading fontWeight={"semibold"}>Collections</Heading>
+            <Spacer />
+            <Button leftIcon={<Icon name={"add"} />} colorScheme={"green"} onClick={() => navigate("/create/collection")}>
+              Create
+            </Button>
           </Flex>
-        )
-      ) : (
-        <Loading />
-      )}
+        </Flex>
+        <Flex direction={"column"} gap={"4"} w={"100%"}>
+            <Tabs variant={"soft-rounded"}>
+              <TabList gap={"2"} p={"2"}>
+                <Tab>Standard</Tab>
+                <Tab>Projects</Tab>
+              </TabList>
+              <TabPanels>
+                <TabPanel>
+                  <DataTable
+                    columns={columns}
+                    data={data.filter((collection) => {
+                      return _.isEqual(collection.type, "collection");
+                    })}
+                    visibleColumns={visibleColumns}
+                    hideSelection
+                  />
+                </TabPanel>
+                <TabPanel>
+                  <DataTable
+                    columns={columns}
+                    data={data.filter((collection) => {
+                      return _.isEqual(collection.type, "project");
+                    })}
+                    visibleColumns={visibleColumns}
+                    hideSelection
+                  />
+                </TabPanel>
+              </TabPanels>
+            </Tabs>
+        </Flex>
+      </Flex>
     </Content>
   );
 };

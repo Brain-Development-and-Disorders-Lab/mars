@@ -26,9 +26,7 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
-import Error from "@components/Error";
 import Icon from "@components/Icon";
-import Loading from "@components/Loading";
 import Values from "@components/Values";
 
 // Existing and custom types
@@ -149,163 +147,155 @@ const Attribute = () => {
   };
 
   return (
-    <Content vertical={isError || !isLoaded}>
-      {isLoaded ? (
-        isError ? (
-          <Error />
-        ) : (
-          <Flex direction={"column"} gap={"4"}>
-            <Flex
-              gap={"4"}
-              direction={"row"}
-              justify={"space-between"}
-              align={"center"}
-              wrap={"wrap"}
-            >
-              <Flex
-                align={"center"}
-                gap={"4"}
-                shadow={"lg"}
-                p={"2"}
-                border={"2px"}
-                rounded={"md"}
-                bg={"white"}
-              >
-                <Icon name={"attribute"} size={"lg"} />
-                <Heading fontWeight={"semibold"}>
-                  Attribute: {attributeData.name}
-                </Heading>
-              </Flex>
-
-              {/* Buttons */}
-              <Flex
-                direction={"row"}
-                gap={"4"}
-                wrap={"wrap"}
-                bg={"white"}
-                p={"4"}
-                rounded={"md"}
-              >
-                {editing && (
-                  <Popover>
-                    <PopoverTrigger>
-                      <Button
-                        colorScheme={"red"}
-                        rightIcon={<Icon name={"delete"} />}
-                      >
-                        Delete
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent>
-                      <PopoverArrow />
-                      <PopoverCloseButton />
-                      <PopoverHeader>Confirmation</PopoverHeader>
-                      <PopoverBody>
-                        Are you sure you want to delete this Attribute? It will
-                        not be removed from any existing Entities.
-                        <Flex direction={"row"} p={"2"} justify={"center"}>
-                          <Button
-                            colorScheme={"green"}
-                            rightIcon={<Icon name={"check"} />}
-                            onClick={handleDeleteClick}
-                          >
-                            Confirm
-                          </Button>
-                        </Flex>
-                      </PopoverBody>
-                    </PopoverContent>
-                  </Popover>
-                )}
-                <Button
-                  colorScheme={editing ? "green" : "gray"}
-                  rightIcon={
-                    editing ? <Icon name={"check"} /> : <Icon name={"edit"} />
-                  }
-                  onClick={handleEditClick}
-                >
-                  {editing ? "Done" : "Edit"}
-                </Button>
-              </Flex>
-            </Flex>
-
-            <Flex direction={"row"} gap={"4"} wrap={"wrap"}>
-              <Flex
-                direction={"column"}
-                p={"4"}
-                gap={"2"}
-                grow={"1"}
-                h={"fit-content"}
-                bg={"white"}
-                rounded={"md"}
-              >
-                {/* Details */}
-                <Heading fontWeight={"semibold"} size={"lg"}>
-                  Details
-                </Heading>
-
-                <TableContainer>
-                  <Table variant={"simple"} colorScheme={"blackAlpha"}>
-                    <Thead>
-                      <Tr>
-                        <Th>Field</Th>
-                        <Th>Value</Th>
-                      </Tr>
-                    </Thead>
-                    <Tbody>
-                      <Tr>
-                        <Td>Description</Td>
-                        <Td>
-                          {_.isEqual(attributeData.description, "") ? (
-                            <Tag
-                              size={"md"}
-                              key={`warn-${attributeData._id}`}
-                              colorScheme={"orange"}
-                            >
-                              <TagLabel>Not Specified</TagLabel>
-                              <Icon name={"warning"} />
-                            </Tag>
-                          ) : (
-                            <Textarea
-                              value={attributeDescription}
-                              onChange={(event) => {
-                                setAttributeDescription(event.target.value);
-                              }}
-                              disabled={!editing}
-                            />
-                          )}
-                        </Td>
-                      </Tr>
-                    </Tbody>
-                  </Table>
-                </TableContainer>
-              </Flex>
-              <Flex
-                direction={"column"}
-                p={"4"}
-                gap={"2"}
-                grow={"1"}
-                h={"fit-content"}
-                bg={"white"}
-                rounded={"md"}
-              >
-                <Heading fontWeight={"semibold"} size={"lg"}>
-                  Values
-                </Heading>
-
-                {attributeData.values && (
-                  <Values
-                    collection={attributeValues}
-                    viewOnly={!editing}
-                    setValues={setAttributeValues}
-                  />
-                )}
-              </Flex>
-            </Flex>
+    <Content isError={isError} isLoaded={isLoaded}>
+      <Flex direction={"column"} gap={"4"}>
+        <Flex
+          gap={"4"}
+          direction={"row"}
+          justify={"space-between"}
+          align={"center"}
+          wrap={"wrap"}
+        >
+          <Flex
+            align={"center"}
+            gap={"4"}
+            shadow={"lg"}
+            p={"2"}
+            border={"2px"}
+            rounded={"md"}
+            bg={"white"}
+          >
+            <Icon name={"attribute"} size={"lg"} />
+            <Heading fontWeight={"semibold"}>
+              Attribute: {attributeData.name}
+            </Heading>
           </Flex>
-        )
-      ) : (
-        <Loading />
-      )}
+
+          {/* Buttons */}
+          <Flex
+            direction={"row"}
+            gap={"4"}
+            wrap={"wrap"}
+            bg={"white"}
+            p={"4"}
+            rounded={"md"}
+          >
+            {editing && (
+              <Popover>
+                <PopoverTrigger>
+                  <Button
+                    colorScheme={"red"}
+                    rightIcon={<Icon name={"delete"} />}
+                  >
+                    Delete
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent>
+                  <PopoverArrow />
+                  <PopoverCloseButton />
+                  <PopoverHeader>Confirmation</PopoverHeader>
+                  <PopoverBody>
+                    Are you sure you want to delete this Attribute? It will
+                    not be removed from any existing Entities.
+                    <Flex direction={"row"} p={"2"} justify={"center"}>
+                      <Button
+                        colorScheme={"green"}
+                        rightIcon={<Icon name={"check"} />}
+                        onClick={handleDeleteClick}
+                      >
+                        Confirm
+                      </Button>
+                    </Flex>
+                  </PopoverBody>
+                </PopoverContent>
+              </Popover>
+            )}
+            <Button
+              colorScheme={editing ? "green" : "gray"}
+              rightIcon={
+                editing ? <Icon name={"check"} /> : <Icon name={"edit"} />
+              }
+              onClick={handleEditClick}
+            >
+              {editing ? "Done" : "Edit"}
+            </Button>
+          </Flex>
+        </Flex>
+
+        <Flex direction={"row"} gap={"4"} wrap={"wrap"}>
+          <Flex
+            direction={"column"}
+            p={"4"}
+            gap={"2"}
+            grow={"1"}
+            h={"fit-content"}
+            bg={"white"}
+            rounded={"md"}
+          >
+            {/* Details */}
+            <Heading fontWeight={"semibold"} size={"lg"}>
+              Details
+            </Heading>
+
+            <TableContainer>
+              <Table variant={"simple"} colorScheme={"blackAlpha"}>
+                <Thead>
+                  <Tr>
+                    <Th>Field</Th>
+                    <Th>Value</Th>
+                  </Tr>
+                </Thead>
+                <Tbody>
+                  <Tr>
+                    <Td>Description</Td>
+                    <Td>
+                      {_.isEqual(attributeData.description, "") ? (
+                        <Tag
+                          size={"md"}
+                          key={`warn-${attributeData._id}`}
+                          colorScheme={"orange"}
+                        >
+                          <TagLabel>Not Specified</TagLabel>
+                          <Icon name={"warning"} />
+                        </Tag>
+                      ) : (
+                        <Textarea
+                          value={attributeDescription}
+                          onChange={(event) => {
+                            setAttributeDescription(event.target.value);
+                          }}
+                          disabled={!editing}
+                        />
+                      )}
+                    </Td>
+                  </Tr>
+                </Tbody>
+              </Table>
+            </TableContainer>
+          </Flex>
+          <Flex
+            direction={"column"}
+            p={"4"}
+            gap={"2"}
+            grow={"1"}
+            h={"fit-content"}
+            bg={"white"}
+            rounded={"md"}
+          >
+            <Heading fontWeight={"semibold"} size={"lg"}>
+              Values
+            </Heading>
+
+            {attributeData.values && (
+              <Values
+                collection={attributeValues}
+                viewOnly={!editing}
+                setValues={setAttributeValues}
+              />
+            )}
+          </Flex>
+        </Flex>
+      </Flex>
     </Content>
   );
 };

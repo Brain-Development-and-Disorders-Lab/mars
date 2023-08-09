@@ -21,9 +21,7 @@ import { createColumnHelper } from "@tanstack/react-table";
 import { Content } from "@components/Container";
 import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
-import Error from "@components/Error";
 import Linky from "@components/Linky";
-import Loading from "@components/Loading";
 
 // Existing and custom types
 import { CollectionModel, EntityModel, ActivityModel } from "@types";
@@ -215,239 +213,231 @@ const Dashboard = () => {
   ];
 
   return (
-    <Content vertical={isError || !isLoaded}>
-      {isLoaded ? (
-        isError ? (
-          <Error />
-        ) : (
-          <Flex direction={"row"} wrap={"wrap"} gap={"4"} p={"4"} h={"100%"}>
-            <Flex direction={"column"} gap={"4"} grow={"2"} h={"100%"}>
-              {/* Collections and Entities */}
-              <Flex
-                h={"50%"}
-                direction={"column"}
-                p={"4"}
-                background={"white"}
-                rounded={"md"}
-                gap={"2"}
-                border={"1px"}
-                borderColor={"gray.100"}
-              >
-                {/* Collections heading */}
-                <Flex
-                  direction={"row"}
-                  align={"center"}
-                  gap={"4"}
-                >
-                    <Icon name={"collection"} size={"lg"} />
-                    <Heading fontWeight={"semibold"}>Collections</Heading>
-                </Flex>
-
-                {/* Collections table */}
-                {isLoaded && collectionData.length > 0 ? (
-                  <Tabs variant={"soft-rounded"}>
-                    <TabList gap={"2"} p={"2"}>
-                      <Tab>Standard</Tab>
-                      <Tab>Projects</Tab>
-                    </TabList>
-                    <TabPanels>
-                      <TabPanel>
-                        <DataTable
-                          columns={collectionTableColumns}
-                          data={collectionTableData.filter((collection) =>
-                            _.isEqual(collection.type, "collection")
-                          )}
-                          visibleColumns={visibleColumns}
-                          hidePagination
-                          hideSelection
-                        />
-                      </TabPanel>
-                      <TabPanel>
-                        <DataTable
-                          columns={collectionTableColumns}
-                          data={collectionTableData.filter((collection) =>
-                            _.isEqual(collection.type, "project")
-                          )}
-                          visibleColumns={visibleColumns}
-                          hidePagination
-                          hideSelection
-                        />
-                      </TabPanel>
-                    </TabPanels>
-                  </Tabs>
-                ) : (
-                  <Text>There are no Collections to display.</Text>
-                )}
-
-                <Spacer />
-
-                <Flex justify={"right"}>
-                  <Button
-                    key={`view-collection-all`}
-                    colorScheme={"teal"}
-                    rightIcon={<Icon name={"c_right"} />}
-                    onClick={() => navigate(`/collections`)}
-                  >
-                    View All
-                  </Button>
-                </Flex>
-              </Flex>
-
-              <Flex
-                h={"50%"}
-                direction={"column"}
-                p={"4"}
-                background={"white"}
-                rounded={"md"}
-                gap={"2"}
-                border={"1px"}
-                borderColor={"gray.100"}
-              >
-                {/* Entities heading */}
-                <Flex
-                  direction={"row"}
-                  align={"center"}
-                  gap={"4"}
-                >
-                  <Icon name={"entity"} size={"lg"} />
-                  <Heading fontWeight={"semibold"}>Entities</Heading>
-                </Flex>
-
-                {/* Entities table */}
-                {isLoaded && entityData.length > 0 ? (
-                  <DataTable
-                    columns={entityTableColumns}
-                    data={entityTableData.filter((entity) =>
-                      _.isEqual(entity.deleted, false)
-                    )}
-                    visibleColumns={visibleColumns}
-                    hidePagination
-                    hideSelection
-                  />
-                ) : (
-                  <Text>There are no Entities to display.</Text>
-                )}
-
-                <Spacer />
-
-                <Flex justify={"right"}>
-                  <Button
-                    key={`view-entity-all`}
-                    colorScheme={"teal"}
-                    rightIcon={<Icon name={"c_right"} />}
-                    onClick={() => navigate(`/entities`)}
-                  >
-                    View All
-                  </Button>
-                </Flex>
-              </Flex>
+    <Content isError={isError} isLoaded={isLoaded}>
+      <Flex direction={"row"} wrap={"wrap"} gap={"4"} p={"4"} h={"100%"}>
+        <Flex direction={"column"} gap={"4"} grow={"2"} h={"100%"}>
+          {/* Collections and Entities */}
+          <Flex
+            h={"50%"}
+            direction={"column"}
+            p={"4"}
+            background={"white"}
+            rounded={"md"}
+            gap={"2"}
+            border={"1px"}
+            borderColor={"gray.100"}
+          >
+            {/* Collections heading */}
+            <Flex
+              direction={"row"}
+              align={"center"}
+              gap={"4"}
+            >
+                <Icon name={"collection"} size={"lg"} />
+                <Heading fontWeight={"semibold"}>Collections</Heading>
             </Flex>
 
-            {/* Activity */}
-            <Flex
-              direction={"column"}
-              gap={"4"}
-              grow={"1"}
-              h={"100%"}
-              rounded={"md"}
-              border={"1px"}
-              borderColor={"gray.100"}
-            >
-              <Flex
-                background={"white"}
-                direction={"column"}
-                rounded={"md"}
-                h={"fit-content"}
-                p={"4"}
-                gap={"2"}
+            {/* Collections table */}
+            {isLoaded && collectionData.length > 0 ? (
+              <Tabs variant={"soft-rounded"}>
+                <TabList gap={"2"} p={"2"}>
+                  <Tab>Standard</Tab>
+                  <Tab>Projects</Tab>
+                </TabList>
+                <TabPanels>
+                  <TabPanel>
+                    <DataTable
+                      columns={collectionTableColumns}
+                      data={collectionTableData.filter((collection) =>
+                        _.isEqual(collection.type, "collection")
+                      )}
+                      visibleColumns={visibleColumns}
+                      hidePagination
+                      hideSelection
+                    />
+                  </TabPanel>
+                  <TabPanel>
+                    <DataTable
+                      columns={collectionTableColumns}
+                      data={collectionTableData.filter((collection) =>
+                        _.isEqual(collection.type, "project")
+                      )}
+                      visibleColumns={visibleColumns}
+                      hidePagination
+                      hideSelection
+                    />
+                  </TabPanel>
+                </TabPanels>
+              </Tabs>
+            ) : (
+              <Text>There are no Collections to display.</Text>
+            )}
+
+            <Spacer />
+
+            <Flex justify={"right"}>
+              <Button
+                key={`view-collection-all`}
+                colorScheme={"teal"}
+                rightIcon={<Icon name={"c_right"} />}
+                onClick={() => navigate(`/collections`)}
               >
-                {/* Activity heading */}
-                <Flex align={"center"} gap={"4"} p={"2"}>
-                  <Icon name={"activity"} size={"lg"} />
-                  <Heading fontWeight={"semibold"}>Activity</Heading>
-                </Flex>
-
-                {/* Activity list */}
-                <List>
-                  {activityData.length > 0 ? (
-                    activityData.slice(0, 10).map((activity) => {
-                      // Configure the badge
-                      let operationBadgeColor = "green.400";
-                      let operationIcon = (
-                        <Icon name={"entity"} color={"white"} />
-                      );
-
-                      switch (activity.type) {
-                        case "create":
-                          operationBadgeColor = "green.400";
-                          operationIcon = <Icon name={"add"} color={"white"} />;
-                          break;
-                        case "update":
-                          operationBadgeColor = "blue.400";
-                          operationIcon = (
-                            <Icon name={"edit"} color={"white"} />
-                          );
-                          break;
-                        case "delete":
-                          operationBadgeColor = "red.400";
-                          operationIcon = (
-                            <Icon name={"delete"} color={"white"} />
-                          );
-                          break;
-                      }
-
-                      return (
-                        <ListItem key={`activity-${activity._id}`}>
-                          <Flex
-                            direction={"row"}
-                            p={"2"}
-                            gap={"2"}
-                            mt={"2"}
-                            mb={"2"}
-                            align={"center"}
-                            background={"white"}
-                            rounded={"md"}
-                            border={"2px"}
-                            borderColor={"gray.100"}
-                          >
-                            <Flex
-                              rounded={"full"}
-                              bg={operationBadgeColor}
-                              p={"1.5"}
-                            >
-                              {operationIcon}
-                            </Flex>
-
-                            <Text display={{ base: "none", sm: "block" }}>
-                              {activity.details}
-                            </Text>
-
-                            <Linky
-                              id={activity.target.id}
-                              type={activity.target.type}
-                              fallback={activity.target.name}
-                            />
-
-                            <Spacer />
-
-                            <Text color={"gray.400"}>
-                              {dayjs(activity.timestamp).fromNow()}
-                            </Text>
-                          </Flex>
-                        </ListItem>
-                      );
-                    })
-                  ) : (
-                    <Text fontSize={"md"}>No recent activity to show.</Text>
-                  )}
-                </List>
-              </Flex>
+                View All
+              </Button>
             </Flex>
           </Flex>
-        )
-      ) : (
-        <Loading />
-      )}
+
+          <Flex
+            h={"50%"}
+            direction={"column"}
+            p={"4"}
+            background={"white"}
+            rounded={"md"}
+            gap={"2"}
+            border={"1px"}
+            borderColor={"gray.100"}
+          >
+            {/* Entities heading */}
+            <Flex
+              direction={"row"}
+              align={"center"}
+              gap={"4"}
+            >
+              <Icon name={"entity"} size={"lg"} />
+              <Heading fontWeight={"semibold"}>Entities</Heading>
+            </Flex>
+
+            {/* Entities table */}
+            {isLoaded && entityData.length > 0 ? (
+              <DataTable
+                columns={entityTableColumns}
+                data={entityTableData.filter((entity) =>
+                  _.isEqual(entity.deleted, false)
+                )}
+                visibleColumns={visibleColumns}
+                hidePagination
+                hideSelection
+              />
+            ) : (
+              <Text>There are no Entities to display.</Text>
+            )}
+
+            <Spacer />
+
+            <Flex justify={"right"}>
+              <Button
+                key={`view-entity-all`}
+                colorScheme={"teal"}
+                rightIcon={<Icon name={"c_right"} />}
+                onClick={() => navigate(`/entities`)}
+              >
+                View All
+              </Button>
+            </Flex>
+          </Flex>
+        </Flex>
+
+        {/* Activity */}
+        <Flex
+          direction={"column"}
+          gap={"4"}
+          grow={"1"}
+          h={"100%"}
+          rounded={"md"}
+          border={"1px"}
+          borderColor={"gray.100"}
+        >
+          <Flex
+            background={"white"}
+            direction={"column"}
+            rounded={"md"}
+            h={"fit-content"}
+            p={"4"}
+            gap={"2"}
+          >
+            {/* Activity heading */}
+            <Flex align={"center"} gap={"4"} p={"2"}>
+              <Icon name={"activity"} size={"lg"} />
+              <Heading fontWeight={"semibold"}>Activity</Heading>
+            </Flex>
+
+            {/* Activity list */}
+            <List>
+              {activityData.length > 0 ? (
+                activityData.slice(0, 10).map((activity) => {
+                  // Configure the badge
+                  let operationBadgeColor = "green.400";
+                  let operationIcon = (
+                    <Icon name={"entity"} color={"white"} />
+                  );
+
+                  switch (activity.type) {
+                    case "create":
+                      operationBadgeColor = "green.400";
+                      operationIcon = <Icon name={"add"} color={"white"} />;
+                      break;
+                    case "update":
+                      operationBadgeColor = "blue.400";
+                      operationIcon = (
+                        <Icon name={"edit"} color={"white"} />
+                      );
+                      break;
+                    case "delete":
+                      operationBadgeColor = "red.400";
+                      operationIcon = (
+                        <Icon name={"delete"} color={"white"} />
+                      );
+                      break;
+                  }
+
+                  return (
+                    <ListItem key={`activity-${activity._id}`}>
+                      <Flex
+                        direction={"row"}
+                        p={"2"}
+                        gap={"2"}
+                        mt={"2"}
+                        mb={"2"}
+                        align={"center"}
+                        background={"white"}
+                        rounded={"md"}
+                        border={"2px"}
+                        borderColor={"gray.100"}
+                      >
+                        <Flex
+                          rounded={"full"}
+                          bg={operationBadgeColor}
+                          p={"1.5"}
+                        >
+                          {operationIcon}
+                        </Flex>
+
+                        <Text display={{ base: "none", sm: "block" }}>
+                          {activity.details}
+                        </Text>
+
+                        <Linky
+                          id={activity.target.id}
+                          type={activity.target.type}
+                          fallback={activity.target.name}
+                        />
+
+                        <Spacer />
+
+                        <Text color={"gray.400"}>
+                          {dayjs(activity.timestamp).fromNow()}
+                        </Text>
+                      </Flex>
+                    </ListItem>
+                  );
+                })
+              ) : (
+                <Text fontSize={"md"}>No recent activity to show.</Text>
+              )}
+            </List>
+          </Flex>
+        </Flex>
+      </Flex>
     </Content>
   );
 };

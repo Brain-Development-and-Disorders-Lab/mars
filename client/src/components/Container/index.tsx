@@ -16,6 +16,10 @@ import {
 import Icon from "@components/Icon";
 import Navigation from "@components/Navigation";
 import SearchBox from "@components/SearchBox";
+import Error from "@components/Error";
+
+// Existing and custom types
+import { ContentProps } from "@types";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
@@ -27,22 +31,38 @@ import _ from "lodash";
 import dayjs from "dayjs";
 import FileSaver from "file-saver";
 import slugify from "slugify";
+import Loading from "@components/Loading";
 
 // Content container
-const Content: FC<any> = (props: { children: any; vertical?: boolean }) => {
+const Content: FC<ContentProps> = ({ children, isError, isLoaded }) => {
+  // Check values and set defaults if required
+  if (_.isUndefined(isError)) isError = false;
+  if (_.isUndefined(isLoaded)) isLoaded = true;
+
   return (
     <Flex
-      align={props.vertical && props.vertical ? "center" : ""}
       direction={"column"}
       wrap={"wrap"}
-      justify={"center"}
       gap={"6"}
       w={"100%"}
       h={"100%"}
       maxH={{base: "100%", lg: "92vh"}}
       overflowY={"auto"}
     >
-      {props.children}
+      {/* Present an error screen */}
+      {isError &&
+        <Error />
+      }
+
+      {/* Present a loading screen */}
+      {!isLoaded && !isError &&
+        <Loading />
+      }
+
+      {/* Show children once done loading and no errors present */}
+      {isLoaded && !isError &&
+        children
+      }
     </Flex>
   );
 };

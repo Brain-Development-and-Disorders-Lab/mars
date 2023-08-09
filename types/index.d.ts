@@ -209,6 +209,13 @@ export type ActivityModel = IActivity & {
   _id: string;
 };
 
+// Content component
+export type ContentProps = {
+  children: React.ReactChild | React.ReactChild[];
+  isError?: boolean;
+  isLoaded?: boolean;
+}
+
 // DataTable component
 export type DataTableProps = {
   columns: any[];

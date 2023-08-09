@@ -51,8 +51,8 @@ const Collection = () => {
   };
 
   return (
-    <Content vertical>
-      <Flex direction={"column"} gap={"6"} w={"100%"} h={"100%"} p={"4"} bg={"white"} maxW={"4xl"}>
+    <Content>
+      <Flex direction={"column"} alignSelf={"center"} gap={"6"} w={"100%"} h={"100%"} p={"4"} bg={"white"} maxW={"4xl"}>
         {/* Page header */}
         <Flex direction={"row"} align={"center"} justify={"space-between"}>
           <Heading fontWeight={"semibold"} size={"lg"}>Create a new Collection</Heading>

@@ -55,8 +55,8 @@ const Attribute = () => {
   };
 
   return (
-    <Content vertical>
-      <Flex direction={"column"} gap={"6"} w={"100%"} h={"100%"} p={"4"} bg={"white"} maxW={"4xl"}>
+    <Content>
+      <Flex direction={"column"} alignSelf={"center"} gap={"6"} w={"100%"} h={"100%"} p={"4"} bg={"white"} maxW={"4xl"}>
         {/* Page header */}
         <Flex direction={"row"} align={"center"} justify={"space-between"}>
           <Heading fontWeight={"semibold"} size={"lg"}>Create a new template Attribute</Heading>
@@ -104,7 +104,7 @@ const Attribute = () => {
           </FormControl>
         </Flex>
 
-        <Flex w={"100%"}>
+        <Flex w={"100%"} h={"100%"}>
           <FormControl isRequired isInvalid={isValueError}>
             <FormLabel>Values</FormLabel>
             <Values
