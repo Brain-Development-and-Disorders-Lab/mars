@@ -718,7 +718,6 @@ const Collection = () => {
                     columns={entitiesColumns}
                     visibleColumns={{}}
                     viewOnly={!editing}
-                    setData={setCollectionEntities}
                     hideSelection={!editing}
                   />
                 ) : (
@@ -754,10 +753,10 @@ const Collection = () => {
                 {collectionCollections && collectionCollections.length > 0 ? (
                   <DataTable
                     data={collectionCollections}
+                    setData={setCollectionCollections}
                     columns={collectionsColumns}
                     visibleColumns={{}}
                     viewOnly={!editing}
-                    setData={setCollectionCollections}
                     hideSelection={!editing}
                   />
                 ) : (

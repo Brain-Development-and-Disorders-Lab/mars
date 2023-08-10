@@ -288,8 +288,8 @@ const AttributePreview = (props: AttributePreviewProps) => {
                 >
                   {values && values.length > 0 ? (
                     <Values
-                      collection={values}
                       viewOnly={!isEditing}
+                      values={values}
                       setValues={setValues}
                     />
                   ) : (

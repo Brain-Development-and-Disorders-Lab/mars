@@ -1500,8 +1500,8 @@ const Entity = () => {
                     <FormControl isRequired isInvalid={isAttributeValueError}>
                       <FormLabel>Values</FormLabel>
                       <Values
-                        collection={attributeValues}
                         viewOnly={false}
+                        values={attributeValues}
                         setValues={setAttributeValues}
                       />
                     </FormControl>

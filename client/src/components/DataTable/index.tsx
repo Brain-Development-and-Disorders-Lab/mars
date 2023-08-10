@@ -23,11 +23,17 @@ import {
   useReactTable,
   getCoreRowModel,
   getSortedRowModel,
+  RowData,
 } from "@tanstack/react-table";
 import Icon from "@components/Icon";
 
 // Existing and custom types
 import { DataTableProps, IValue } from "@types";
+declare module "@tanstack/react-table" {
+  interface TableMeta<TData extends RowData> {
+    updateData: (rowIndex: number, columnId: string, value: unknown) => void;
+  }
+};
 
 // Utility functions and libraries
 import _ from "lodash";
@@ -96,6 +102,21 @@ const DataTable = (props: DataTableProps) => {
     },
     onRowSelectionChange: setSelectedRows,
     onColumnVisibilityChange: setColumnVisibility,
+    meta: {
+      updateData: (rowIndex: number, columnId: any, value: any) => {
+        props.setData && props.setData((data) =>
+          data.map((row, index) => {
+            if (index === rowIndex) {
+              return {
+                ...data[rowIndex]!,
+                [columnId]: value,
+              }
+            }
+            return row;
+          })
+        );
+      },
+    },
   });
 
   // Effect to update the column visibility

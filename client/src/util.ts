@@ -8,6 +8,10 @@ export const isValidValues = (
   values: IValue<any>[],
   allowEmptyValues = false
 ) => {
+  if (values.length === 0) {
+    return false;
+  }
+
   for (let value of values) {
     // Check the name of the Value
     if (_.isEqual(value.name, "")) {
@@ -34,7 +38,7 @@ export const isValidAttributes = (attributes: IAttribute[]) => {
     }
 
     // Check the data
-    if (isValidValues(attribute.values) === false) {
+    if (_.isEqual(isValidValues(attribute.values), false)) {
       return false;
     }
   }

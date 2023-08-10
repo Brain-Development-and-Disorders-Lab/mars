@@ -33,10 +33,10 @@ import { IAttribute, IValue } from "@types";
 
 // Utility functions and libraries
 import { postData } from "@database/functions";
-import { isValidValues } from "src/util";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
+import { isValidValues } from "src/util";
 
 const Attribute = () => {
   const navigate = useNavigate();
@@ -51,20 +51,22 @@ const Attribute = () => {
   // Various validation error states
   const isNameError = name === "";
   const isDescriptionError = description === "";
+  const isDetailsError = isNameError || isDescriptionError;
   const [isValueError, setIsValueError] = useState(false);
-  const isDetailsError = isNameError || isDescriptionError || isValueError;
+  useEffect(() => {
+    setIsValueError(!isValidValues(values, true));
+  }, [values]);
 
+  // Store Attribute data
   const attributeData: IAttribute = {
     name: name,
     description: description,
     values: values,
   };
 
-  // Check the Values for errors each time they update
-  useEffect(() => {
-    setIsValueError(!isValidValues(values, true) || values.length === 0);
-  }, [values]);
-
+  /**
+   * Handle creation of a new Attribute
+   */
   const onSubmit = () => {
     setIsSubmitting(true);
 
@@ -141,11 +143,11 @@ const Attribute = () => {
         </Flex>
 
         <Flex w={"100%"} h={"100%"}>
-          <FormControl isRequired isInvalid={isValueError}>
+          <FormControl>
             <FormLabel>Values</FormLabel>
             <Values
-              collection={values}
               viewOnly={false}
+              values={values}
               setValues={setValues}
             />
             <FormHelperText>
@@ -171,7 +173,7 @@ const Attribute = () => {
             colorScheme={"green"}
             rightIcon={<Icon name={"check"} />}
             onClick={onSubmit}
-            isDisabled={isDetailsError && !isSubmitting}
+            isDisabled={isDetailsError || isValueError || isSubmitting}
           >
             Finish
           </Button>

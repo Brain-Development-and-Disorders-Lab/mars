@@ -288,8 +288,8 @@ const Attribute = () => {
 
             {attributeData.values && (
               <Values
-                collection={attributeValues}
                 viewOnly={!editing}
+                values={attributeValues}
                 setValues={setAttributeValues}
               />
             )}

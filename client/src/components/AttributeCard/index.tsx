@@ -78,16 +78,18 @@ const AttributeCard = (props: AttributeCardProps) => {
           {attributeCardData.restrictDataValues ? (
             // Restrict the data to options from a drop-down
             <Values
-              collection={values}
               viewOnly={finished}
+              values={values}
               setValues={setValues}
               permittedValues={props.permittedDataValues}
+              requireData
             />
           ) : (
             <Values
-              collection={values}
               viewOnly={finished}
+              values={values}
               setValues={setValues}
+              requireData
             />
           )}
         </Flex>
