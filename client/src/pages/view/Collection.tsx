@@ -512,6 +512,7 @@ const Collection = () => {
       <Flex direction={"column"} gap={"4"}>
         <Flex
           gap={"4"}
+          p={"4"}
           direction={"row"}
           justify={"space-between"}
           align={"center"}
@@ -524,7 +525,6 @@ const Collection = () => {
             p={"2"}
             border={"2px"}
             rounded={"md"}
-            bg={"white"}
           >
             <Icon
               name={
@@ -543,7 +543,6 @@ const Collection = () => {
               direction={"row"}
               gap={"4"}
               wrap={"wrap"}
-              bg={"white"}
               p={"4"}
               rounded={"md"}
             >
@@ -591,7 +590,6 @@ const Collection = () => {
               direction={"row"}
               gap={"4"}
               wrap={"wrap"}
-              bg={"white"}
               p={"4"}
               rounded={"md"}
             >
@@ -613,7 +611,7 @@ const Collection = () => {
           </Flex>
         </Flex>
 
-        <Flex direction={"row"} gap={"4"} wrap={"wrap"}>
+        <Flex direction={"row"} gap={"4"} p={"4"} wrap={"wrap"}>
           <Flex
             direction={"column"}
             p={"4"}
@@ -622,6 +620,8 @@ const Collection = () => {
             h={"fit-content"}
             bg={"white"}
             rounded={"md"}
+            border={"1px"}
+            borderColor={"gray.100"}
           >
             {/* Details */}
             <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
@@ -693,8 +693,9 @@ const Collection = () => {
               p={"4"}
               gap={"4"}
               h={"fit-content"}
-              bg={"white"}
               rounded={"md"}
+              border={"1px"}
+              borderColor={"gray.100"}
             >
               <Flex direction={"row"} justify={"space-between"}>
                 {/* Entities in the Collection */}
@@ -731,8 +732,9 @@ const Collection = () => {
               p={"4"}
               gap={"4"}
               h={"fit-content"}
-              bg={"white"}
               rounded={"md"}
+              border={"1px"}
+              borderColor={"gray.100"}
             >
               <Flex direction={"row"} justify={"space-between"}>
                 {/* Entities in the Collection */}

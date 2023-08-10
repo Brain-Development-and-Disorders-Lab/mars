@@ -984,6 +984,7 @@ const Entity = () => {
       <Flex direction={"column"} gap={"4"}>
         <Flex
           gap={"4"}
+          p={"4"}
           direction={"row"}
           justify={"space-between"}
           align={"center"}
@@ -996,7 +997,6 @@ const Entity = () => {
             p={"2"}
             border={"2px"}
             rounded={"md"}
-            bg={"white"}
           >
             <Icon name={"entity"} size={"lg"} />
             <Heading fontWeight={"semibold"}>{entityData.name}</Heading>
@@ -1010,7 +1010,6 @@ const Entity = () => {
               align={"center"}
               gap={"4"}
               wrap={"wrap"}
-              bg={"white"}
               p={"4"}
               rounded={"md"}
             >
@@ -1088,7 +1087,6 @@ const Entity = () => {
               align={"center"}
               gap={"4"}
               wrap={"wrap"}
-              bg={"white"}
               p={"4"}
               rounded={"md"}
             >
@@ -1130,7 +1128,16 @@ const Entity = () => {
             rounded={"md"}
           >
             {/* Details */}
-            <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
+            <Flex
+              gap={"2"}
+              p={"4"}
+              grow={"1"}
+              direction={"column"}
+              minH={"32"}
+              rounded={"md"}
+              border={"1px"}
+              borderColor={"gray.100"}
+            >
               <Heading size={"lg"}>Details</Heading>
               <TableContainer>
                 <Table variant={"simple"} colorScheme={"blackAlpha"}>
@@ -1192,7 +1199,16 @@ const Entity = () => {
             </Flex>
 
             {/* Collections */}
-            <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
+            <Flex
+              gap={"2"}
+              p={"4"}
+              grow={"1"}
+              direction={"column"}
+              minH={"32"}
+              rounded={"md"}
+              border={"1px"}
+              borderColor={"gray.100"}
+            >
               <Flex direction={"row"} justify={"space-between"}>
                 <Heading size={"lg"}>Collections</Heading>
                 {editing ? (
@@ -1231,7 +1247,16 @@ const Entity = () => {
             rounded={"md"}
           >
             {/* Origins */}
-            <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
+            <Flex
+              gap={"2"}
+              p={"4"}
+              grow={"1"}
+              direction={"column"}
+              minH={"32"}
+              rounded={"md"}
+              border={"1px"}
+              borderColor={"gray.100"}
+            >
               <Flex direction={"row"} justify={"space-between"}>
                 <Heading size={"lg"}>Origins</Heading>
                 {editing ? (
@@ -1260,7 +1285,16 @@ const Entity = () => {
             </Flex>
 
             {/* Products */}
-            <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
+            <Flex
+              gap={"2"}
+              p={"4"}
+              grow={"1"}
+              direction={"column"}
+              minH={"32"}
+              rounded={"md"}
+              border={"1px"}
+              borderColor={"gray.100"}
+            >
               <Flex direction={"row"} justify={"space-between"}>
                 <Heading size={"lg"}>Products</Heading>
                 {editing ? (
@@ -1290,7 +1324,7 @@ const Entity = () => {
           </Flex>
         </Flex>
 
-        <Flex direction={"row"} gap={"4"} wrap={"wrap"}>
+        <Flex direction={"row"} gap={"4"} p={"4"} wrap={"wrap"}>
           {/* Attributes */}
           <Flex
             direction={"column"}
@@ -1300,6 +1334,8 @@ const Entity = () => {
             h={"fit-content"}
             bg={"white"}
             rounded={"md"}
+            border={"1px"}
+            borderColor={"gray.100"}
           >
             <Flex direction={"row"} justify={"space-between"}>
               <Heading size={"lg"}>Attributes</Heading>
@@ -1356,6 +1392,8 @@ const Entity = () => {
             h={"fit-content"}
             bg={"white"}
             rounded={"md"}
+            border={"1px"}
+            borderColor={"gray.100"}
           >
             <Flex gap={"2"} direction={"column"} minH={"32"}>
               <Flex direction={"row"} justify={"space-between"}>
