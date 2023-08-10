@@ -133,15 +133,10 @@ const Search = () => {
 
   const runSearch = () => {
     // Check if an ID has been entered
-    let isEntity = false;
     getData(`/entities/${query}`)
       .then((entity) => {
-        isEntity = true;
-        navigate(`/entities/${entity._id}`);
-      })
-      .catch(() => {
-        if (!isEntity) {
-          // Update state
+        if (_.isNull(entity)) {
+          // Not an Entity ID
           setIsSearching(true);
           setHasSearched(true);
 
@@ -163,7 +158,21 @@ const Search = () => {
             .finally(() => {
               setIsSearching(false);
             });
+        } else {
+          // Entity with given ID exists
+          navigate(`/entities/${entity._id}`);
         }
+      })
+      .catch(() => {
+        toast({
+          title: "Error",
+          status: "error",
+          description: "Error occurred when searching for Entity.",
+          duration: 4000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+        setIsError(true);
       });
   };
 
@@ -190,6 +199,14 @@ const Search = () => {
       .finally(() => {
         setIsSearching(false);
       });
+  };
+
+  const onTabChange = () => {
+    // Reset search state
+    setQuery("");
+    setQueryComponents([]);
+    setHasSearched(false);
+    setResults([]);
   };
 
   return (
@@ -221,10 +238,10 @@ const Search = () => {
         </Flex>
 
         {/* Search components */}
-        <Tabs variant={"soft-rounded"} colorScheme={"blue"}>
+        <Tabs variant={"soft-rounded"} colorScheme={"blue"} onChange={onTabChange}>
           <TabList p={"2"} gap={"2"}>
-            <Tab>Text</Tab>
-            <Tab>Query Builder</Tab>
+            <Tab disabled={isSearching}>Text</Tab>
+            <Tab disabled={isSearching}>Query Builder</Tab>
           </TabList>
           <TabPanels>
             <TabPanel>
@@ -403,6 +420,10 @@ const Search = () => {
                         setQueryQualifier("Contains");
                         setQueryKey("");
                         setQueryValue("");
+
+                        // Clear search results
+                        setHasSearched(false);
+                        setResults([]);
                       }}
                     />
                   </Flex>
@@ -490,6 +511,10 @@ const Search = () => {
                                 _.cloneDeep(queryComponents);
                               updatedQueryComponents.splice(index, 1);
                               setQueryComponents(updatedQueryComponents);
+
+                              // Clear search results
+                              setHasSearched(false);
+                              setResults([]);
                             }}
                           />
                         </Flex>
@@ -503,6 +528,7 @@ const Search = () => {
                     isDisabled={queryComponents.length === 0}
                     onClick={() => {
                       setQueryComponents([]);
+                      setHasSearched(false);
                       setResults([]);
                     }}
                   >
@@ -531,7 +557,7 @@ const Search = () => {
             hasSearched && (
               <Flex direction={"column"} w={"100%"}>
                 <Heading size={"md"} fontWeight={"semibold"}>
-                  Search Results ({results.length}){" "}
+                  {results.length} search result{results.length > 1 || results.length === 0 ? "s" : ""}
                 </Heading>
                 <TableContainer w={"full"}>
                   <Table>
