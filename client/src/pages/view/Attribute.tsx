@@ -151,6 +151,7 @@ const Attribute = () => {
       <Flex direction={"column"} gap={"4"}>
         <Flex
           gap={"4"}
+          p={"4"}
           direction={"row"}
           justify={"space-between"}
           align={"center"}
@@ -163,7 +164,6 @@ const Attribute = () => {
             p={"2"}
             border={"2px"}
             rounded={"md"}
-            bg={"white"}
           >
             <Icon name={"attribute"} size={"lg"} />
             <Heading fontWeight={"semibold"}>
@@ -176,7 +176,6 @@ const Attribute = () => {
             direction={"row"}
             gap={"4"}
             wrap={"wrap"}
-            bg={"white"}
             p={"4"}
             rounded={"md"}
           >
@@ -222,15 +221,16 @@ const Attribute = () => {
           </Flex>
         </Flex>
 
-        <Flex direction={"row"} gap={"4"} wrap={"wrap"}>
+        <Flex direction={"row"} gap={"4"} p={"4"} wrap={"wrap"}>
           <Flex
             direction={"column"}
             p={"4"}
             gap={"2"}
             grow={"1"}
             h={"fit-content"}
-            bg={"white"}
             rounded={"md"}
+            border={"1px"}
+            borderColor={"gray.100"}
           >
             {/* Details */}
             <Heading fontWeight={"semibold"} size={"lg"}>
@@ -279,8 +279,9 @@ const Attribute = () => {
             gap={"2"}
             grow={"1"}
             h={"fit-content"}
-            bg={"white"}
             rounded={"md"}
+            border={"1px"}
+            borderColor={"gray.100"}
           >
             <Heading fontWeight={"semibold"} size={"lg"}>
               Values
