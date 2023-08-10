@@ -144,8 +144,8 @@ const Attribute = () => {
           <FormControl isRequired isInvalid={isValueError}>
             <FormLabel>Values</FormLabel>
             <Values
-              collection={values}
               viewOnly={false}
+              values={values}
               setValues={setValues}
             />
             <FormHelperText>

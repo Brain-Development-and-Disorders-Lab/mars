@@ -1,5 +1,5 @@
 // React
-import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
+import React, { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
 
 // Existing and custom components
 import {
@@ -51,8 +51,8 @@ import dayjs from "dayjs";
  * @return
  */
 const Values = (props: {
-  collection: IValue<any>[];
   viewOnly: boolean;
+  values: IValue<any>[];
   setValues: Dispatch<SetStateAction<IValue<any>[]>>;
   permittedValues?: string[];
 }) => {
@@ -87,20 +87,13 @@ const Values = (props: {
     return;
   }, []);
 
-  const [data, setData] = useState(props.collection);
-  useEffect(() => {
-    props.setValues(props.collection);
-    setData(props.collection);
-  }, [props.collection]);
-
   const columnHelper = createColumnHelper<IValue<any>>();
-  const columns = [
+  const columns = useMemo(() => [
     // Value name column
     columnHelper.accessor("name", {
-      cell: (info) => {
-        const initialValue = info.getValue();
+      cell: ({ getValue, row: { index, original }, column: { id }, table }) => {
+        const initialValue = getValue();
         const [value, setValue] = useState(initialValue);
-
         useEffect(() => {
           setValue(initialValue);
         }, [initialValue]);
@@ -110,12 +103,12 @@ const Values = (props: {
         };
 
         const onBlur = () => {
-          updateName(info.row.original.identifier, value);
+          table.options.meta?.updateData(index, id, value);
         };
 
         // Set the icon attached to the name field
         let valueIcon = <Icon name={"unknown"} />;
-        switch (info.row.original.type) {
+        switch (original.type) {
           case "date":
             valueIcon = <Icon name={"v_date"} color={"orange.300"} />;
             break;
@@ -140,7 +133,7 @@ const Values = (props: {
           <InputGroup>
             <InputLeftAddon children={valueIcon} bgColor={"white"} />
             <Input
-              id={`i_${info.row.original.identifier}_name`}
+              id={`i_${original.identifier}_name`}
               value={value}
               disabled={props.viewOnly}
               onChange={onChange}
@@ -155,10 +148,9 @@ const Values = (props: {
 
     // Value data column
     columnHelper.accessor("data", {
-      cell: (info) => {
-        const initialValue = info.getValue();
+      cell: ({ getValue, row: { index, original }, column: { id }, table }) => {
+        const initialValue = getValue();
         const [value, setValue] = useState(initialValue);
-
         useEffect(() => {
           setValue(initialValue);
         }, [initialValue]);
@@ -183,15 +175,15 @@ const Values = (props: {
         };
 
         const onBlur = () => {
-          updateData(info.row.original.identifier, value);
+          table.options.meta?.updateData(index, id, value);
         };
 
         if (_.isUndefined(props.permittedValues)) {
-          switch (info.row.original.type) {
+          switch (original.type) {
             case "number": {
               return (
                 <Input
-                  id={`i_${info.row.original.identifier}_data`}
+                  id={`i_${original.identifier}_data`}
                   type={"number"}
                   value={value}
                   w={"2xs"}
@@ -204,7 +196,7 @@ const Values = (props: {
             case "text": {
               return (
                 <Input
-                  id={`i_${info.row.original.identifier}_data`}
+                  id={`i_${original.identifier}_data`}
                   value={value}
                   w={"2xs"}
                   disabled={props.viewOnly}
@@ -217,7 +209,7 @@ const Values = (props: {
               if (_.isEqual(props.viewOnly, false)) {
                 return (
                   <Input
-                    id={`i_${info.row.original.identifier}_data`}
+                    id={`i_${original.identifier}_data`}
                     value={value}
                     w={"2xs"}
                     disabled={props.viewOnly}
@@ -290,7 +282,7 @@ const Values = (props: {
             case "date": {
               return (
                 <Input
-                  id={`i_${info.row.original.identifier}_data`}
+                  id={`i_${original.identifier}_data`}
                   type={"datetime-local"}
                   value={value}
                   w={"2xs"}
@@ -305,7 +297,7 @@ const Values = (props: {
                 return (
                   <Select
                     title="Select Entity"
-                    id={`s_${info.row.original.identifier}_data`}
+                    id={`s_${original.identifier}_data`}
                     value={value}
                     placeholder={"Entity"}
                     w={"2xs"}
@@ -332,7 +324,7 @@ const Values = (props: {
               return (
                 <Select
                   title="Select Option"
-                  id={`s_${info.row.original.identifier}_data`}
+                  id={`s_${original.identifier}_data`}
                   value={value.selected}
                   w={"2xs"}
                   disabled={props.viewOnly}
@@ -356,7 +348,7 @@ const Values = (props: {
           return (
             <Select
               title="Select Column"
-              id={`s_${info.row.original.identifier}_data`}
+              id={`s_${original.identifier}_data`}
               value={value}
               placeholder={"Column"}
               w={"2xs"}
@@ -379,50 +371,12 @@ const Values = (props: {
       },
       header: "Data",
     }),
-  ];
-
-  /**
-   * Update function called to update the name associated with a Value
-   * @param {string} identifier Value identifier
-   * @param {string} updatedName the updated name to associated with the Value
-   */
-  const updateName = (identifier: string, updatedName: string) => {
-    const updatedCollection = data.map((value) => {
-      if (_.isEqual(value.identifier, identifier)) {
-        // Update the name, if changed
-        value.name = _.cloneDeep(updatedName);
-      }
-      return value;
-    });
-
-    applyUpdate(updatedCollection);
-  };
-
-  /**
-   * Update function called to update the data associated with a Value
-   * @param {string} identifier Value identifier
-   * @param {any} updatedData the updated data to associated with the Value
-   */
-  const updateData = (identifier: string, updatedData: string) => {
-    const updatedCollection = data.map((value) => {
-      if (_.isEqual(value.identifier, identifier)) {
-        // Update the data, if changed
-        value.data = _.cloneDeep(updatedData);
-      }
-      return value;
-    });
-
-    applyUpdate(updatedCollection);
-  };
-
-  const applyUpdate = (collection: IValue<any>[]) => {
-    props.setValues([...collection]);
-  };
+  ], []);
 
   const addOptions = () => {
     // Add the Select value with the defined options
     props.setValues([
-      ...data,
+      ...props.values,
       {
         identifier: `p_select_${Math.round(performance.now())}`,
         name: "",
@@ -474,7 +428,7 @@ const Values = (props: {
                     leftIcon={<Icon name={"v_date"} />}
                     onClick={() => {
                       props.setValues([
-                        ...data,
+                        ...props.values,
                         {
                           identifier: `v_date_${Math.round(performance.now())}`,
                           name: "",
@@ -496,7 +450,7 @@ const Values = (props: {
                     leftIcon={<Icon name={"v_text"} />}
                     onClick={() => {
                       props.setValues([
-                        ...data,
+                        ...props.values,
                         {
                           identifier: `v_text_${Math.round(performance.now())}`,
                           name: "",
@@ -518,7 +472,7 @@ const Values = (props: {
                     leftIcon={<Icon name={"v_number"} />}
                     onClick={() => {
                       props.setValues([
-                        ...data,
+                        ...props.values,
                         {
                           identifier: `v_number_${Math.round(
                             performance.now()
@@ -542,7 +496,7 @@ const Values = (props: {
                     leftIcon={<Icon name={"v_url"} />}
                     onClick={() => {
                       props.setValues([
-                        ...data,
+                        ...props.values,
                         {
                           identifier: `v_url_${Math.round(performance.now())}`,
                           name: "",
@@ -564,7 +518,7 @@ const Values = (props: {
                     leftIcon={<Icon name={"entity"} />}
                     onClick={() => {
                       props.setValues([
-                        ...data,
+                        ...props.values,
                         {
                           identifier: `p_entity_${Math.round(
                             performance.now()
@@ -604,7 +558,7 @@ const Values = (props: {
         <DataTable
           columns={columns}
           visibleColumns={{}}
-          data={data}
+          data={props.values}
           setData={props.setValues}
           viewOnly={props.viewOnly}
         />
