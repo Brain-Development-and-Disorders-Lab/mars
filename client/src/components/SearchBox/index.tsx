@@ -107,39 +107,47 @@ const SearchBox = () => {
 
   const runSearch = () => {
     // Check if an ID has been entered
-    let isEntity = false;
     getData(`/entities/${query}`)
       .then((entity) => {
-        isEntity = true;
-        setQuery("");
-        onClose();
-        navigate(`/entities/${entity._id}`);
+        if (_.isNull(entity)) {
+        // Update state
+        setIsSearching(true);
+        setHasSearched(true);
+
+        postData(`/search`, { query: query })
+          .then((value) => {
+            setResults(value);
+          })
+          .catch((_error) => {
+            toast({
+              title: "Error",
+              status: "error",
+              description: "Could not get search results.",
+              duration: 4000,
+              position: "bottom-right",
+              isClosable: true,
+            });
+            setIsError(true);
+          })
+          .finally(() => {
+            setIsSearching(false);
+          });
+        } else {
+          setQuery("");
+          onClose();
+          navigate(`/entities/${entity._id}`);
+        }
       })
       .catch(() => {
-        if (!isEntity) {
-          // Update state
-          setIsSearching(true);
-          setHasSearched(true);
-
-          postData(`/search`, { query: query })
-            .then((value) => {
-              setResults(value);
-            })
-            .catch((_error) => {
-              toast({
-                title: "Error",
-                status: "error",
-                description: "Could not get search results.",
-                duration: 4000,
-                position: "bottom-right",
-                isClosable: true,
-              });
-              setIsError(true);
-            })
-            .finally(() => {
-              setIsSearching(false);
-            });
-        }
+        toast({
+          title: "Error",
+          status: "error",
+          description: "Could not get search results.",
+          duration: 4000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+        setIsError(true);
       });
   };
 
