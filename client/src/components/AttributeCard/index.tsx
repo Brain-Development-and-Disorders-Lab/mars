@@ -82,12 +82,14 @@ const AttributeCard = (props: AttributeCardProps) => {
               values={values}
               setValues={setValues}
               permittedValues={props.permittedDataValues}
+              requireData
             />
           ) : (
             <Values
               viewOnly={finished}
               values={values}
               setValues={setValues}
+              requireData
             />
           )}
         </Flex>
