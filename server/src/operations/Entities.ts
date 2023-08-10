@@ -1175,8 +1175,8 @@ export class Entities {
   };
 
   /**
-   * Update the description of an Entity
-   * @param entity the Entity of interest
+   * Update the lock state of an Entity
+   * @param {{ entity: { name: string; id: string }; lockState: boolean; }} entityLockData the Entity of interest and a flag if the Entity is "locked", or editable
    * @return {Promise<{ name: string, id: string }>}
    */
   static setLock = (entityLockData: {
@@ -1199,7 +1199,11 @@ export class Entities {
               throw error;
             }
 
-            // Update the description of this Entity
+            // Update the lock state of this Entity
+            // Note: This feature is temporarily disabled
+            entityLockData.lockState = false;
+            consola.warn("Edit locking temporarily disabled");
+
             const updates = {
               $set: {
                 locked: entityLockData.lockState,
