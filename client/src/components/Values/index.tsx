@@ -54,6 +54,7 @@ const Values = (props: {
   viewOnly: boolean;
   values: IValue<any>[];
   setValues: Dispatch<SetStateAction<IValue<any>[]>>;
+  requireData?: true | false;
   permittedValues?: string[];
 }) => {
   const toast = useToast();
@@ -139,6 +140,7 @@ const Values = (props: {
               onChange={onChange}
               onBlur={onBlur}
               minW={"2xs"}
+              isInvalid={_.isEqual(value, "")}
             />
           </InputGroup>
         );
@@ -190,6 +192,7 @@ const Values = (props: {
                   disabled={props.viewOnly}
                   onChange={onChange}
                   onBlur={onBlur}
+                  isInvalid={_.isEqual(value, "") && _.isEqual(props.requireData, true)}
                 />
               );
             }
@@ -202,6 +205,7 @@ const Values = (props: {
                   disabled={props.viewOnly}
                   onChange={onChange}
                   onBlur={onBlur}
+                  isInvalid={_.isEqual(value, "") && _.isEqual(props.requireData, true)}
                 />
               );
             }
@@ -215,6 +219,7 @@ const Values = (props: {
                     disabled={props.viewOnly}
                     onChange={onChange}
                     onBlur={onBlur}
+                    isInvalid={_.isEqual(value, "") && _.isEqual(props.requireData, true)}
                   />
                 );
               } else {
@@ -289,6 +294,7 @@ const Values = (props: {
                   disabled={props.viewOnly}
                   onChange={onChange}
                   onBlur={onBlur}
+                  isInvalid={_.isEqual(value, "") && _.isEqual(props.requireData, true)}
                 />
               );
             }
@@ -330,6 +336,7 @@ const Values = (props: {
                   disabled={props.viewOnly}
                   onChange={onSelectChange}
                   onBlur={onBlur}
+                  isInvalid={_.isEqual(value, "") && _.isEqual(props.requireData, true)}
                 >
                   {isLoaded &&
                     value.options &&
@@ -355,6 +362,7 @@ const Values = (props: {
               disabled={props.viewOnly}
               onChange={onChange}
               onBlur={onBlur}
+              isInvalid={_.isEqual(value, "") && _.isEqual(props.requireData, true)}
             >
               {isLoaded &&
                 props.permittedValues.map((value) => {
