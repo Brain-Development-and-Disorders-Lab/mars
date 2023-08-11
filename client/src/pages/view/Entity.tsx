@@ -7,7 +7,6 @@ import {
   Flex,
   Heading,
   Input,
-  Image,
   Table,
   TableContainer,
   Tbody,
@@ -2168,9 +2167,9 @@ const Entity = () => {
                 {!isPreviewLoaded ? (
                   <Spinner />
                 ) : _.isEqual("application/pdf", previewType) ? (
-                  <Preview src={previewSource} />
+                  <Preview src={previewSource} type={"document"} />
                 ) : (
-                  <Image src={previewSource} maxH={"70%"} />
+                  <Preview src={previewSource} type={"image"} />
                 )}
               </Flex>
             </ModalBody>

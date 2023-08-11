@@ -265,6 +265,8 @@ export type IconNames =
   "exit" |
   "settings" |
   "view" |
+  "zoom_in" |
+  "zoom_out" |
 
   // Logos
   "l_box" |
