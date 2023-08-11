@@ -50,6 +50,8 @@ import {
   BsTrashFill,
   BsUpcScan,
   BsXCircleFill,
+  BsZoomIn,
+  BsZoomOut,
 } from "react-icons/bs";
 import { SiBox } from "react-icons/si";
 
@@ -98,6 +100,8 @@ const SYSTEM_ICONS: { [k: string]: IconType } = {
   exit: BsPower,
   settings: BsFillGearFill,
   view: BsFillEyeFill,
+  zoom_in: BsZoomIn,
+  zoom_out: BsZoomOut,
 
   // Logos
   l_box: SiBox,
