@@ -1,14 +1,14 @@
 import { useState } from "react";
 
 // Existing and custom types
-import { AuthToken } from "@types";
+import { AuthInfo } from "@types";
 
 // Utility functions and libraries
 import _ from "lodash";
 
-const TOKEN_KEY = "MARS_token";
+const TOKEN_KEY = "reusable_token";
 
-export const useToken = (): [AuthToken, (token: AuthToken) => void] => {
+export const useToken = (): [AuthInfo, (token: AuthInfo) => void] => {
   const getToken = () => {
     const storedToken = sessionStorage.getItem(TOKEN_KEY);
     if (!_.isNull(storedToken) && !_.isUndefined(storedToken)) {
@@ -19,9 +19,8 @@ export const useToken = (): [AuthToken, (token: AuthToken) => void] => {
 
   const [token, setToken] = useState(getToken());
 
-  const storeToken = (token: AuthToken) => {
-    if (token.valid === false) {
-      // Equivalent of logout operation
+  const storeToken = (token: AuthInfo) => {
+    if (_.isEqual(token, {})) {
       sessionStorage.removeItem(TOKEN_KEY);
     } else {
       sessionStorage.setItem(TOKEN_KEY, JSON.stringify(token));

@@ -79,7 +79,7 @@ const Entity = () => {
   const [created, setCreated] = useState(
     dayjs(Date.now()).format("YYYY-MM-DDTHH:mm")
   );
-  const [owner, setOwner] = useState(token.username);
+  const [owner, setOwner] = useState(token.name);
   const [description, setDescription] = useState("");
   const [selectedCollections, setSelectedCollections] = useState(
     [] as string[]

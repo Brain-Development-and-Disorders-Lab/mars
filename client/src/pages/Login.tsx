@@ -1,5 +1,5 @@
 // React
-import React, { useState } from "react";
+import React, { FC, useMemo, useState } from "react";
 
 // Existing and custom components
 import {
@@ -7,48 +7,60 @@ import {
   Heading,
   Button,
   Image,
-  Input,
-  InputGroup,
-  InputRightElement,
+  Text,
   useToast,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 
+// Routing and navigation
+import { useLocation } from "react-router-dom";
+
 // Existing and custom types
-import { AuthToken } from "@types";
+import { LoginProps } from "@types";
 
 // Utility functions and libraries
-import { postData } from "@database/functions";
+import { useToken } from "src/authentication/useToken";
 import _ from "lodash";
+import { postData } from "@database/functions";
 
-const Login = (props: { setToken: (token: AuthToken) => void }) => {
-  const [password, setPassword] = useState("");
-  const [username, setUsername] = useState("");
+const useQuery = () => {
+  // Get URL query parameters
+  const { search } = useLocation();
+  return useMemo(() => new URLSearchParams(search), [search]);
+};
+
+const Login: FC<LoginProps> = ({ setAuthenticated }) => {
   const [isLoading, setIsLoading] = useState(false);
 
-  const [show, setShow] = useState(false);
-  const handleClick = () => setShow(!show);
-
-  // Toast to show errors
   const toast = useToast();
 
-  const performLogin = (credentials: {
-    username: string;
-    password: string;
-  }) => {
-    postData(`/login`, credentials)
+  // Enable authentication modification
+  const [token, setToken] = useToken();
+
+  const query = useQuery();
+
+  // Extract query parameters
+  const accessCode = query.get("code");
+
+  // Check if token exists
+  if ((_.isUndefined(token) || _.isEqual(token.id_token, "")) && accessCode) {
+    console.info("Code:", accessCode);
+
+    // Now perform login and data retrieval via server, check if user permitted access
+    postData(`/login`, { code: accessCode })
       .then((response) => {
         if (_.isEqual(response.status, "error")) {
           toast({
             title: "Error",
             status: "error",
-            description: "Incorrect username or password. Please try again.",
+            description: "Error occurred while authenticating. Try again later.",
             duration: 4000,
             position: "bottom-right",
             isClosable: true,
           });
         } else {
-          props.setToken(response.token);
+          setToken(response.token);
+          setAuthenticated(true);
         }
         setIsLoading(false);
       })
@@ -63,11 +75,17 @@ const Login = (props: { setToken: (token: AuthToken) => void }) => {
         });
         setIsLoading(false);
       });
-  };
+  }
+
+  // Define login parameters
+  const clientID = "APP-BBVHCTCNDUJ4CAXV";
+  const redirectURI = "https://reusable.bio";
+  const requestURI =
+    `https://orcid.org/oauth/authorize?client_id=${clientID}&response_type=code&scope=openid&redirect_uri=${redirectURI}`;
 
   const onLoginClick = () => {
     setIsLoading(true);
-    performLogin({ username: username, password: password });
+    window.location.href = requestURI;
   };
 
   return (
@@ -100,40 +118,11 @@ const Login = (props: { setToken: (token: AuthToken) => void }) => {
             align={"center"}
             gap={"4"}
           >
-            <Input
-              type={"text"}
-              placeholder={"Username"}
-              onChange={(event) => setUsername(event.target.value)}
-              disabled
-            />
-
-            <InputGroup>
-              <Input
-                type={show ? "text" : "password"}
-                placeholder={"Password"}
-                onChange={(event) => setPassword(event.target.value)}
-                onKeyUp={(event) => {
-                  if (event.key === "Enter" && password.length > 0) {
-                    onLoginClick();
-                  }
-                }}
-              />
-              <InputRightElement width="4.5rem">
-                <Button h={"1.75rem"} size={"sm"} onClick={handleClick}>
-                  {show ? "Hide" : "Show"}
-                </Button>
-              </InputRightElement>
-            </InputGroup>
-
-            <Button
-              onClick={onLoginClick}
-              loadingText={""}
-              isLoading={isLoading}
-              colorScheme={"green"}
-              disabled={!(password.length > 0) || isLoading}
-            >
-              Login
+            <Button colorScheme={"gray"} gap={"4"} onClick={onLoginClick} isLoading={isLoading}>
+              <Image src={"https://orcid.org/sites/default/files/images/orcid_16x16.png"} />
+              Connect your ORCID iD
             </Button>
+            <Text>Log in or create an account with your ORCID.</Text>
           </Flex>
         </Flex>
       </Flex>

@@ -19,7 +19,7 @@ import SearchBox from "@components/SearchBox";
 import Error from "@components/Error";
 
 // Existing and custom types
-import { ContentProps } from "@types";
+import { ContentProps, PageProps } from "@types";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
@@ -62,9 +62,10 @@ const Content: FC<ContentProps> = ({ children, isError, isLoaded }) => {
 };
 
 // Page container
-const Page: FC<any> = ({ children }) => {
-  const [token, setToken] = useToken();
+const Page: FC<PageProps> = ({ children }) => {
   const navigate = useNavigate();
+
+  const [token, setToken] = useToken();
 
   const performBackup = () => {
     // Retrieve all data stored in the system
@@ -79,10 +80,9 @@ const Page: FC<any> = ({ children }) => {
   const performLogout = () => {
     // Invalidate the token and refresh the page
     setToken({
-      username: token.username,
-      token: token.token,
-      lastLogin: token.lastLogin,
-      valid: false,
+      name: token.name,
+      orcid: token.orcid,
+      id_token: "",
     });
     navigate(0);
   };
@@ -150,14 +150,14 @@ const Page: FC<any> = ({ children }) => {
                     align={"baseline"}
                   >
                     <Text size={"xs"} fontWeight={"semibold"}>
-                      {token.username}
+                      {token.name}
                     </Text>
                     <Text
                       size={"xs"}
                       fontWeight={"semibold"}
                       color={"gray.400"}
                     >
-                      {_.truncate("email@email.com", { length: 12 })}
+                      {_.truncate(token.orcid, { length: 12 })}
                     </Text>
                   </Flex>
                   <Flex pl={"4"} pr={"4"}>
@@ -166,9 +166,6 @@ const Page: FC<any> = ({ children }) => {
                 </Flex>
               </MenuButton>
               <MenuList>
-                <Flex p={"4"} w={"100%"} direction={"column"}>
-                  <Text>Last login: {dayjs(token.lastLogin).fromNow()}</Text>
-                </Flex>
                 <MenuGroup title={"System"}>
                   <MenuItem onClick={() => performBackup()}>
                     <Flex direction={"row"} align={"center"} gap={"4"}>

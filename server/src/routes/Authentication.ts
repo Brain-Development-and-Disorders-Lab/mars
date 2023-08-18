@@ -11,8 +11,8 @@ const AuthenticationRoute = express.Router();
 
 // Route: View all attributes
 AuthenticationRoute.route("/login").post(
-  (request: { body: { password: string } }, response: any) => {
-    Authentication.login(request.body.password)
+  (request: { body: { code: string } }, response: any) => {
+    Authentication.login(request.body.code)
       .then((token: AuthToken) => {
         response.json({
           status: "success",
