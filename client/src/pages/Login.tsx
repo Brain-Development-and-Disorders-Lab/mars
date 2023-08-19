@@ -103,11 +103,17 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
         <Flex
           direction={"column"}
           p={"8"}
-          gap={"8"}
+          gap={"12"}
+          maxW={"sm"}
+          h={"md"}
           bg={"white"}
-          rounded={"md"}
+          rounded={"lg"}
+          border={"2px"}
+          borderColor={"gray.300"}
+          align={"center"}
+          justify={"center"}
         >
-          <Flex align={"center"} gap={"4"}>
+          <Flex align={"center"} gap={"4"} justify={"center"}>
             <Image src="/Favicon.png" boxSize={"72px"} />
             <Heading fontWeight={"semibold"}>Login</Heading>
           </Flex>
@@ -116,13 +122,13 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
             direction={"column"}
             justify={"center"}
             align={"center"}
-            gap={"4"}
+            gap={"8"}
           >
+            <Text align={"center"}>Log in or create an account with your ORCID iD.</Text>
             <Button colorScheme={"gray"} gap={"4"} onClick={onLoginClick} isLoading={isLoading}>
               <Image src={"https://orcid.org/sites/default/files/images/orcid_16x16.png"} />
               Connect your ORCID iD
             </Button>
-            <Text>Log in or create an account with your ORCID.</Text>
           </Flex>
         </Flex>
       </Flex>

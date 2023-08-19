@@ -56,7 +56,6 @@ const App = (): ReactElement => {
   const [authenticated, setAuthenticated] = useState(false);
 
   useEffect(() => {
-    console.info("Token:", token);
     if (_.isUndefined(token) || _.isEqual(token.id_token, "")) {
       setAuthenticated(false);
     } else {
