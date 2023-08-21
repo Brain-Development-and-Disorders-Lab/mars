@@ -3,6 +3,7 @@
   "name": "Test Project",
   "created": "date",
   "owner": ["xxxx-xxxx"],
+  "description": "Project description",
   "users": ["xxxx-xxxx", "xxxx-yyyy"],
   "entities": ["e_1234", "e_abcd"],
   "collections": ["c_1234", "c_abcd"],

@@ -199,6 +199,7 @@ export type IProject = {
   name: string;
   created: string;
   owner: string;
+  description: string;
   users: string[];
   entities: string[];
   collections: string[];
@@ -253,8 +254,8 @@ export type IconNames =
   "dashboard" |
   "entity" |
   "collection" |
-  "project" |
   "attribute" |
+  "project" |
 
   // Signal and action icons
   "activity" |

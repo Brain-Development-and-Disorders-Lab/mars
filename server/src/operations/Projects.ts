@@ -165,14 +165,16 @@ export class Projects {
           const updates = {
             $set: {
               name: updatedProject.name,
+              description: updatedProject.description,
               users: [...usersToKeep, ...usersToAdd],
               entities: [...entitiesToKeep, ...entitiesToAdd],
               collections: [...collectionsToKeep, ...collectionsToAdd],
-              attributes: [...attributesToKeep, attributesToAdd],
+              attributes: [...attributesToKeep, ...attributesToAdd],
               history: [
                 {
                   name: currentProject.name,
                   timestamp: dayjs(Date.now()).toISOString(),
+                  desciption: currentProject.description,
                   owner: currentProject.owner,
                   users: currentProject.users,
                   created: currentProject.created,

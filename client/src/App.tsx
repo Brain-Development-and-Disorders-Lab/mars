@@ -22,6 +22,7 @@ import Collection from "@pages/view/Collection";
 import Collections from "@pages/view/Collections";
 import Entity from "@pages/view/Entity";
 import Entities from "@pages/view/Entities";
+import Project from "@pages/view/Project";
 
 // Page type - Create
 import Create from "@pages/create/Create";
@@ -59,6 +60,11 @@ const App = (): ReactElement => {
           <Page>
             <Routes>
               <Route path={"/"} element={<Dashboard />} />
+
+              {/* Project routes */}
+              <Route path={"projects"}>
+                <Route path={":id"} element={<Project />} />
+              </Route>
 
               {/* Create routes */}
               <Route path={"/create/attribute"} element={<CreateAttribute />} />
