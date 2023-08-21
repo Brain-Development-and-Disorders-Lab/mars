@@ -93,7 +93,7 @@ export interface IValue<D> {
 }
 
 export type LinkyProps = {
-  type: "entities" | "collections" | "attributes";
+  type: "entities" | "collections" | "attributes" | "projects";
   id: string;
   fallback?: string;
   color?: string;
@@ -193,13 +193,30 @@ export type AttachmentData = {
   filename: string;
 };
 
+// Project types
+export type IProject = {
+  _id: string;
+  name: string;
+  created: string;
+  owner: string;
+  users: string[];
+  entities: string[];
+  collections: string[];
+  attributes: string[];
+  history: any[];
+};
+
+export type ProjectModel = IProject & {
+  _id: string;
+};
+
 // Activity types
 export type IActivity = {
   timestamp: Date;
   type: "create" | "update" | "delete";
   details: string;
   target: {
-    type: "entities" | "collections" | "attributes",
+    type: "entities" | "collections" | "attributes" | "projects",
     id: string,
     name: string,
   };

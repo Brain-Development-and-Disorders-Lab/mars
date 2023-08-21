@@ -19,6 +19,7 @@ import AttributesRoute from "./routes/Attributes";
 import SearchRoute from "./routes/Search";
 import SystemRoute from "./routes/System";
 import AuthenticationRoute from "./routes/Authentication";
+import ProjectsRoute from "./routes/Projects";
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -33,6 +34,7 @@ app.use(
   AuthenticationRoute,
   CollectionsRoute,
   EntitiesRoute,
+  ProjectsRoute,
   SearchRoute,
   SystemRoute
 );

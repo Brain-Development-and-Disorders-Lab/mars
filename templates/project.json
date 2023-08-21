@@ -1,0 +1,19 @@
+{
+  "_id": "p_123_abc",
+  "name": "Test Project",
+  "created": "date",
+  "owner": ["xxxx-xxxx"],
+  "users": ["xxxx-xxxx", "xxxx-yyyy"],
+  "entities": ["e_1234", "e_abcd"],
+  "collections": ["c_1234", "c_abcd"],
+  "attributes": ["a_1234", "a_abcd"],
+  "history": [
+    {
+      "name": "Test Project",
+      "users": ["xxxx-xxxx", "xxxx-yyyy"],
+      "entities": ["e_1234", "e_abcd"],
+      "collections": ["c_1234", "c_abcd"],
+      "attributes": ["a_1234", "a_abcd"]
+    }
+  ]
+}
