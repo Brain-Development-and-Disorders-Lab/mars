@@ -8,6 +8,7 @@
   "entities": ["e_1234", "e_abcd"],
   "collections": ["c_1234", "c_abcd"],
   "attributes": ["a_1234", "a_abcd"],
+  "activity": [],
   "history": [
     {
       "name": "Test Project",

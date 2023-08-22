@@ -204,6 +204,7 @@ export type IProject = {
   entities: string[];
   collections: string[];
   attributes: string[];
+  activity: ActivityModel[];
   history: any[];
 };
 
