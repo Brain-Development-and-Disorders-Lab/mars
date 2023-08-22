@@ -39,7 +39,7 @@ import Loading from "@components/Loading";
 
 // Existing and custom types
 import {
-  CollectionModel,
+  ProjectModel,
   EntityModel,
   QueryComponent,
   QueryFocusType,
@@ -70,7 +70,7 @@ const Search = () => {
 
   const [isLoaded, setIsLoaded] = useState(false);
   const [entities, setEntities] = useState([] as EntityModel[]);
-  const [collections, setCollections] = useState([] as CollectionModel[]);
+  const [projects, setProjects] = useState([] as ProjectModel[]);
 
   const [queryComponents, setQueryComponents] = useState(
     [] as QueryComponent[]
@@ -110,16 +110,16 @@ const Search = () => {
         setIsLoaded(true);
       });
 
-    // Get all Collections
-    getData(`/collections`)
+    // Get all Projects
+    getData(`/projects`)
       .then((response) => {
-        setCollections(response);
+        setProjects(response);
       })
       .catch((_error) => {
         toast({
           title: "Error",
           status: "error",
-          description: "Could not retrieve Collections data.",
+          description: "Could not retrieve Project data.",
           duration: 4000,
           position: "bottom-right",
           isClosable: true,
@@ -305,7 +305,7 @@ const Search = () => {
                     >
                       <option>Name</option>
                       <option>Description</option>
-                      <option>Collections</option>
+                      <option>Projects</option>
                       <option>Origins</option>
                       <option>Products</option>
                     </Select>
@@ -321,7 +321,7 @@ const Search = () => {
                       <option>Does Not Contain</option>
                       <option
                         disabled={
-                          _.isEqual(queryParameter, "Collections") ||
+                          _.isEqual(queryParameter, "Projects") ||
                           _.isEqual(queryParameter, "Origins") ||
                           _.isEqual(queryParameter, "Products")
                         }
@@ -330,7 +330,7 @@ const Search = () => {
                       </option>
                       <option
                         disabled={
-                          _.isEqual(queryParameter, "Collections") ||
+                          _.isEqual(queryParameter, "Projects") ||
                           _.isEqual(queryParameter, "Origins") ||
                           _.isEqual(queryParameter, "Products")
                         }
@@ -339,10 +339,10 @@ const Search = () => {
                       </option>
                     </Select>
 
-                    {_.isEqual(queryParameter, "Collections") && isLoaded && (
+                    {_.isEqual(queryParameter, "Projects") && isLoaded && (
                       <Select
                         w={"auto"}
-                        placeholder={"Select Collection"}
+                        placeholder={"Select Project"}
                         value={queryKey}
                         onChange={(event) => {
                           setQueryKey(event.target.value);
@@ -352,10 +352,10 @@ const Search = () => {
                           );
                         }}
                       >
-                        {collections.map((collection) => {
+                        {projects.map((project) => {
                           return (
-                            <option key={collection._id} value={collection._id}>
-                              {collection.name}
+                            <option key={project._id} value={project._id}>
+                              {project.name}
                             </option>
                           );
                         })}
@@ -478,7 +478,7 @@ const Search = () => {
                           </Flex>
 
                           {_.includes(
-                            ["Origins", "Products", "Collections"],
+                            ["Origins", "Products", "Projects"],
                             component.parameter
                           ) &&
                             isLoaded && (
@@ -611,12 +611,12 @@ const Search = () => {
         </Flex>
 
         {/* Information modal */}
-        <Modal isOpen={isOpen} onClose={onClose}>
+        <Modal isOpen={isOpen} onClose={onClose} isCentered>
           <ModalOverlay />
-          <ModalContent>
-            <ModalHeader>Search</ModalHeader>
+          <ModalContent p={"2"} gap={"4"} w={["lg", "xl", "2xl"]}>
+            <ModalHeader p={"2"}>Search</ModalHeader>
             <ModalCloseButton />
-            <ModalBody>
+            <ModalBody p={"2"}>
               <Flex direction={"column"} gap={"4"} p={"2"}>
                 <Text>
                   Use the <b>Text Search</b> tab to search for text across all

@@ -34,7 +34,6 @@ import {
   BsFillGearFill,
   BsGithub,
   BsGlobe,
-  BsGridFill,
   BsInfoCircleFill,
   BsLightningFill,
   BsLink45Deg,
@@ -70,7 +69,6 @@ const SYSTEM_ICONS: { [k: string]: IconType } = {
   // Locations
   dashboard: BsBarChartFill,
   entity: BsBoxFill,
-  collection: BsGridFill,
   project: BsFillBookmarkFill,
   attribute: BsTagFill,
 

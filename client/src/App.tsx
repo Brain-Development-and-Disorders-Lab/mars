@@ -21,8 +21,8 @@ import { Page } from "@components/Container";
 // Page type - View
 import Attribute from "@pages/view/Attribute";
 import Attributes from "@pages/view/Attributes";
-import Collection from "@pages/view/Collection";
-import Collections from "@pages/view/Collections";
+import Project from "@pages/view/Project";
+import Projects from "@pages/view/Projects";
 import Entity from "@pages/view/Entity";
 import Entities from "@pages/view/Entities";
 
@@ -30,7 +30,7 @@ import Entities from "@pages/view/Entities";
 import Create from "@pages/create/Create";
 import CreateAttribute from "@pages/create/Attribute";
 import CreateEntity from "@pages/create/Entity";
-import CreateCollection from "@pages/create/Collection";
+import CreateProject from "@pages/create/Project";
 
 // Page type - Unique
 import Search from "@pages/Search";
@@ -76,8 +76,8 @@ const App = (): ReactElement => {
               {/* Create routes */}
               <Route path={"/create/attribute"} element={<CreateAttribute />} />
               <Route
-                path={"/create/collection"}
-                element={<CreateCollection />}
+                path={"/create/project"}
+                element={<CreateProject />}
               />
               <Route path={"/create/entity"} element={<CreateEntity />} />
               <Route path={"/create"} element={<Create />} />
@@ -88,10 +88,10 @@ const App = (): ReactElement => {
                 <Route path={":id"} element={<Entity />} />
               </Route>
 
-              {/* Collections routes */}
-              <Route path={"/collections"} element={<Collections />} />
-              <Route path={"collections"}>
-                <Route path={":id"} element={<Collection />} />
+              {/* Projects routes */}
+              <Route path={"/projects"} element={<Projects />} />
+              <Route path={"projects"}>
+                <Route path={":id"} element={<Project />} />
               </Route>
 
               {/* Attributes routes */}

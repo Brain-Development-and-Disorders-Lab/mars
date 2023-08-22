@@ -193,7 +193,7 @@ const SearchBox = () => {
             </Tooltip>
             <Input
               value={query}
-              placeholder={"Quick Search"}
+              placeholder={"Search"}
               background={"white"}
               onChange={(event) => setQuery(event.target.value)}
               onKeyUp={(event) => {
@@ -205,7 +205,7 @@ const SearchBox = () => {
             />
 
             <IconButton
-              aria-label={"Quick search"}
+              aria-label={"Search"}
               icon={<Icon name={"search"} />}
               colorScheme={"green"}
               isDisabled={query === ""}

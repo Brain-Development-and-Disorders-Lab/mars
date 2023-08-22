@@ -181,12 +181,12 @@ const Attribute = () => {
       </Flex>
 
       {/* Information modal */}
-      <Modal isOpen={isOpen} onClose={onClose} size={"2xl"}>
+      <Modal isOpen={isOpen} onClose={onClose} size={"2xl"} isCentered>
         <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Creating Template Attributes</ModalHeader>
+        <ModalContent p={"2"} gap={"4"} w={["lg", "xl", "2xl"]}>
+          <ModalHeader p={"2"}>Creating Template Attributes</ModalHeader>
           <ModalCloseButton />
-          <ModalBody>
+          <ModalBody p={"2"}>
             <Flex direction={"column"} gap={"4"} p={"4"}>
               <Heading size={"md"}>Overview</Heading>
               <Text>

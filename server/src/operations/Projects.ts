@@ -4,7 +4,7 @@ import { Entities } from "./Entities";
 import { Activity } from "./Activity";
 
 // Custom types
-import { CollectionModel, ICollection } from "@types";
+import { ProjectModel, IProject } from "@types";
 
 // Utility libraries
 import _ from "lodash";
@@ -14,47 +14,47 @@ import fs from "fs";
 import Papa from "papaparse";
 import tmp from "tmp";
 
-const COLLECTIONS = "collections";
+const PROJECTS = "projects";
 
-export class Collections {
+export class Projects {
   /**
-   * Check if a Collection exists in the system
-   * @param id the Collection identifier
+   * Check if a Project exists in the system
+   * @param id the Project identifier
    * @return {boolean}
    */
   static exists = (id: string): Promise<boolean> => {
-    consola.start("Checking if Collection (id):", id.toString(), "exists");
+    consola.start("Checking if Project (id):", id.toString(), "exists");
     return new Promise((resolve, _reject) => {
       getDatabase()
-        .collection(COLLECTIONS)
+        .collection(PROJECTS)
         .findOne({ _id: id }, (_error: any, result: any) => {
           if (_.isNull(result)) {
-            consola.warn("Collection (id):", id.toString(), "does not exist");
+            consola.warn("Project (id):", id.toString(), "does not exist");
             resolve(false);
           }
 
-          consola.success("Collection (id):", id.toString(), "exists");
+          consola.success("Project (id):", id.toString(), "exists");
           resolve(true);
         });
     });
   };
 
   /**
-   * Create a new Collection
-   * @param {any} collection all data associated with the new Collection
-   * @return {Promise<CollectionModel>}
+   * Create a new Project
+   * @param {any} project all data associated with the new Project
+   * @return {Promise<ProjectModel>}
    */
-  static create = (collection: any): Promise<CollectionModel> => {
-    consola.start("Creating new Collection:", collection.name);
+  static create = (project: any): Promise<ProjectModel> => {
+    consola.start("Creating new Project:", project.name);
 
-    // Allocate a new identifier and join with Collection data
-    collection["_id"] = getIdentifier("collection");
+    // Allocate a new identifier and join with Project data
+    project["_id"] = getIdentifier("project");
 
     // Push data to database
     return new Promise((resolve, _reject) => {
       getDatabase()
-        .collection(COLLECTIONS)
-        .insertOne(collection, (error: any, result: any) => {
+        .collection(PROJECTS)
+        .insertOne(project, (error: any, result: any) => {
           if (error) {
             throw error;
           }
@@ -62,9 +62,9 @@ export class Collections {
           // Database operations to perform
           const operations: Promise<any>[] = [];
 
-          // Add any Entities to the Collection
-          for (const entity of (collection as ICollection).entities) {
-            operations.push(Collections.addEntity(result.insertedId, entity));
+          // Add any Entities to the Project
+          for (const entity of (project as IProject).entities) {
+            operations.push(Projects.addEntity(result.insertedId, entity));
           }
 
           // Add Update operation
@@ -72,11 +72,11 @@ export class Collections {
             Activity.create({
               timestamp: new Date(Date.now()),
               type: "create",
-              details: "Created new Collection",
+              details: "Created new Project",
               target: {
-                type: "collections",
-                id: collection._id,
-                name: collection.name,
+                type: "projects",
+                id: project._id,
+                name: project.name,
               },
             })
           );
@@ -84,24 +84,24 @@ export class Collections {
           // Resolve all operations then resolve overall Promise
           Promise.all(operations).then((_result) => {
             consola.success(
-              "Created new Collection:",
-              collection._id,
-              collection.name
+              "Created new Project:",
+              project._id,
+              project.name
             );
-            resolve(collection as CollectionModel);
+            resolve(project as ProjectModel);
           });
         });
     });
   };
 
   static update = (
-    updatedCollection: CollectionModel
-  ): Promise<CollectionModel> => {
-    consola.start("Updating Collection:", updatedCollection.name);
+    updatedProject: ProjectModel
+  ): Promise<ProjectModel> => {
+    consola.start("Updating Project:", updatedProject.name);
     return new Promise((resolve, _reject) => {
       getDatabase()
-        .collection(COLLECTIONS)
-        .findOne({ _id: updatedCollection._id }, (error: any, result: any) => {
+        .collection(PROJECTS)
+        .findOne({ _id: updatedProject._id }, (error: any, result: any) => {
           if (error) {
             throw error;
           }
@@ -109,53 +109,45 @@ export class Collections {
           // Database operations to perform
           const operations: Promise<any>[] = [];
 
-          // Cast and store current state of the Collection
-          const currentCollection = result as CollectionModel;
+          // Cast and store current state of the Project
+          const currentProject = result as ProjectModel;
 
           // Entities
-          const entitiesToKeep = currentCollection.entities.filter((entity) =>
-            updatedCollection.entities.includes(entity)
+          const entitiesToKeep = currentProject.entities.filter((entity) =>
+            updatedProject.entities.includes(entity)
           );
-          const entitiesToAdd = updatedCollection.entities.filter(
-            (entity) => !currentCollection.entities.includes(entity)
+          const entitiesToAdd = updatedProject.entities.filter(
+            (entity) => !currentProject.entities.includes(entity)
           );
           entitiesToAdd.map((entity: string) => {
             operations.push(
-              Entities.addCollection(entity, currentCollection._id)
+              Entities.addProject(entity, currentProject._id)
             );
           });
-          const entitiesToRemove = currentCollection.entities.filter(
+          const entitiesToRemove = currentProject.entities.filter(
             (entity) => !entitiesToKeep.includes(entity)
           );
           entitiesToRemove.map((entity: string) => {
             operations.push(
-              Entities.removeCollection(entity, currentCollection._id)
+              Entities.removeProject(entity, currentProject._id)
             );
           });
 
-          // Collections
-          const collectionsToKeep = currentCollection.collections.filter(
-            (collection) => updatedCollection.collections.includes(collection)
-          );
-          const collectionsToAdd = updatedCollection.collections.filter(
-            (collection) => !currentCollection.collections.includes(collection)
-          );
-
           const updates = {
             $set: {
-              description: updatedCollection.description,
-              collections: [...collectionsToKeep, ...collectionsToAdd],
+              description: updatedProject.description,
               entities: [...entitiesToKeep, ...entitiesToAdd],
               history: [
                 {
                   timestamp: dayjs(Date.now()).toISOString(),
-                  name: currentCollection.name,
-                  created: currentCollection.created,
-                  owner: currentCollection.owner,
-                  description: currentCollection.description,
-                  entities: currentCollection.entities,
+                  name: currentProject.name,
+                  created: currentProject.created,
+                  owner: currentProject.owner,
+                  shared: currentProject.shared,
+                  description: currentProject.description,
+                  entities: currentProject.entities,
                 },
-                ...currentCollection.history,
+                ...currentProject.history,
               ],
             },
           };
@@ -165,19 +157,19 @@ export class Collections {
             Activity.create({
               timestamp: new Date(Date.now()),
               type: "update",
-              details: "Updated Collection",
+              details: "Updated Project",
               target: {
-                type: "collections",
-                id: updatedCollection._id,
-                name: updatedCollection.name,
+                type: "projects",
+                id: updatedProject._id,
+                name: updatedProject.name,
               },
             })
           );
 
           getDatabase()
-            .collection(COLLECTIONS)
+            .collection(PROJECTS)
             .updateOne(
-              { _id: updatedCollection._id },
+              { _id: updatedProject._id },
               updates,
               (error: any, _response: any) => {
                 if (error) {
@@ -187,12 +179,12 @@ export class Collections {
                 // Resolve all operations then resolve overall Promise
                 Promise.all(operations).then((_result) => {
                   consola.success(
-                    "Updated Collection:",
-                    updatedCollection.name
+                    "Updated Project:",
+                    updatedProject.name
                   );
 
                   // Resolve the Promise
-                  resolve(updatedCollection);
+                  resolve(updatedProject);
                 });
               }
             );
@@ -201,17 +193,17 @@ export class Collections {
   };
 
   /**
-   * Create a new Collection
-   * @param {any} collection all data associated with the new Collection
-   * @return {Promise<CollectionModel>}
+   * Create a new Project
+   * @param {any} project all data associated with the new Project
+   * @return {Promise<ProjectModel>}
    */
-  static restore = (collection: any): Promise<CollectionModel> => {
-    consola.start("Restoring Collection:", collection.name);
+  static restore = (project: any): Promise<ProjectModel> => {
+    consola.start("Restoring Project:", project.name);
     // Push data to database
     return new Promise((resolve, _reject) => {
       getDatabase()
-        .collection(COLLECTIONS)
-        .insertOne(collection, (error: any, _result: any) => {
+        .collection(PROJECTS)
+        .insertOne(project, (error: any, _result: any) => {
           if (error) {
             throw error;
           }
@@ -224,11 +216,11 @@ export class Collections {
             Activity.create({
               timestamp: new Date(Date.now()),
               type: "create",
-              details: "Created new Collection",
+              details: "Created new Project",
               target: {
-                type: "collections",
-                id: collection._id,
-                name: collection.name,
+                type: "projects",
+                id: project._id,
+                name: project.name,
               },
             })
           );
@@ -236,31 +228,30 @@ export class Collections {
           // Resolve all operations then resolve overall Promise
           Promise.all(operations).then((_result) => {
             consola.success(
-              "Restored Collection:",
-              collection._id,
-              collection.name
+              "Restored Project:",
+              project._id,
+              project.name
             );
-            resolve(collection as CollectionModel);
+            resolve(project as ProjectModel);
           });
         });
     });
   };
 
-  static addEntity = (collection: string, entity: string): Promise<string> => {
+  static addEntity = (project: string, entity: string): Promise<string> => {
     consola.start(
       "Adding Entity",
       entity.toString(),
-      "to Collection",
-      collection.toString()
+      "to Project",
+      project.toString()
     );
     return new Promise((resolve, _reject) => {
       getDatabase()
-        .collection(COLLECTIONS)
-        .findOne({ _id: collection }, (error: any, result: any) => {
+        .collection(PROJECTS)
+        .findOne({ _id: project }, (error: any, result: any) => {
           if (error) {
             throw error;
           }
-          consola.info("Collection:", result);
 
           // Update the collection to include the Entity
           const updatedValues = {
@@ -270,9 +261,9 @@ export class Collections {
           };
 
           getDatabase()
-            .collection(COLLECTIONS)
+            .collection(PROJECTS)
             .updateOne(
-              { _id: collection },
+              { _id: project },
               updatedValues,
               (error: any, _response: any) => {
                 if (error) {
@@ -281,7 +272,7 @@ export class Collections {
                 consola.success(
                   "Added Entity",
                   entity.toString(),
-                  "to Collection",
+                  "to Project",
                   result.name
                 );
 
@@ -294,19 +285,19 @@ export class Collections {
   };
 
   static addEntities = (
-    collection: string,
+    project: string,
     entities: string[]
   ): Promise<string> => {
     consola.start(
       "Adding",
       entities.length,
-      "Entities to Collection",
-      collection.toString()
+      "Entities to Project",
+      project.toString()
     );
     return new Promise((resolve, _reject) => {
       getDatabase()
-        .collection(COLLECTIONS)
-        .findOne({ _id: collection }, (error: any, result: any) => {
+        .collection(PROJECTS)
+        .findOne({ _id: project }, (error: any, result: any) => {
           if (error) {
             throw error;
           }
@@ -319,9 +310,9 @@ export class Collections {
           };
 
           getDatabase()
-            .collection(COLLECTIONS)
+            .collection(PROJECTS)
             .updateOne(
-              { _id: collection },
+              { _id: project },
               updatedValues,
               (error: any, _response: any) => {
                 if (error) {
@@ -330,8 +321,8 @@ export class Collections {
                 consola.start(
                   "Added",
                   entities.length,
-                  "Entities to Collection",
-                  collection.toString()
+                  "Entities to Project",
+                  project.toString()
                 );
 
                 // Resolve the Promise
@@ -343,19 +334,19 @@ export class Collections {
   };
 
   static removeEntity = (
-    collection: string,
+    project: string,
     entity: string
   ): Promise<string> => {
     consola.start(
       "Removing Entity",
       entity.toString(),
-      "from Collection",
-      collection.toString()
+      "from Project",
+      project.toString()
     );
     return new Promise((resolve, _reject) => {
       getDatabase()
-        .collection(COLLECTIONS)
-        .findOne({ _id: collection }, (error: any, result: any) => {
+        .collection(PROJECTS)
+        .findOne({ _id: project }, (error: any, result: any) => {
           if (error) {
             throw error;
           }
@@ -363,16 +354,16 @@ export class Collections {
           // Update the collection to remove the Entity
           const updatedValues = {
             $set: {
-              entities: (result as CollectionModel).entities.filter(
+              entities: (result as ProjectModel).entities.filter(
                 (content) => !_.isEqual(content.toString(), entity.toString())
               ),
             },
           };
 
           getDatabase()
-            .collection(COLLECTIONS)
+            .collection(PROJECTS)
             .updateOne(
-              { _id: collection },
+              { _id: project },
               updatedValues,
               (error: any, _response: any) => {
                 if (error) {
@@ -381,114 +372,114 @@ export class Collections {
                 consola.success(
                   "Removed Entity",
                   entity.toString(),
-                  "from Collection",
-                  collection.toString()
+                  "from Project",
+                  project.toString()
                 );
 
                 // Resolve the Promise
-                resolve(collection);
+                resolve(project);
               }
             );
         });
     });
   };
 
-  static getAll = (): Promise<CollectionModel[]> => {
+  static getAll = (): Promise<ProjectModel[]> => {
     return new Promise((resolve, _reject) => {
       getDatabase()
-        .collection(COLLECTIONS)
+        .collection(PROJECTS)
         .find({})
         .toArray((error: any, result: any) => {
           if (error) {
             throw error;
           }
-          consola.success("Retrieved all Collections");
-          resolve(result as CollectionModel[]);
+          consola.success("Retrieved all Projects");
+          resolve(result as ProjectModel[]);
         });
     });
   };
 
   /**
-   * Get a single Collection
-   * @return {Promise<CollectionModel>}
+   * Get a single Project
+   * @return {Promise<ProjectModel>}
    */
-  static getOne = (id: string): Promise<CollectionModel> => {
+  static getOne = (id: string): Promise<ProjectModel> => {
     return new Promise((resolve, _reject) => {
       getDatabase()
-        .collection(COLLECTIONS)
+        .collection(PROJECTS)
         .findOne({ _id: id }, (error: any, result: any) => {
           if (error) {
             throw error;
           }
 
-          consola.success("Retrieved Collection (id):", id.toString());
-          resolve(result as CollectionModel);
+          consola.success("Retrieved Project (id):", id.toString());
+          resolve(result as ProjectModel);
         });
     });
   };
 
   /**
    * Collate and generate a data string containing all data pertaining to
-   * a Collection
-   * @param {{ id: string, fields: string[] }} collectionExportData the export data of the Collection
+   * a Project
+   * @param {{ id: string, fields: string[] }} projectExportData the export data of the Project
    * @return {Promise<string>}
    */
-  static getData = (collectionExportData: {
+  static getData = (projectExportData: {
     id: string;
     fields: string[];
     format: "json" | "csv" | "txt";
   }): Promise<string> => {
     consola.start(
-      "Generating data for Collection (id):",
-      collectionExportData.id.toString()
+      "Generating data for Project (id):",
+      projectExportData.id.toString()
     );
     return new Promise((resolve, reject) => {
       getDatabase()
-        .collection(COLLECTIONS)
+        .collection(PROJECTS)
         .findOne(
-          { _id: collectionExportData.id },
+          { _id: projectExportData.id },
           (error: any, result: any) => {
             if (error) {
               reject(error);
               throw error;
             }
 
-            const collection = result as CollectionModel;
+            const project = result as ProjectModel;
 
-            if (_.isEqual(collectionExportData.format, "csv")) {
+            if (_.isEqual(projectExportData.format, "csv")) {
               const headers = ["ID", "Name"];
               const row: Promise<string>[] = [
-                Promise.resolve(collection._id),
-                Promise.resolve(collection.name),
+                Promise.resolve(project._id),
+                Promise.resolve(project.name),
               ];
 
               const entities: Promise<string>[] = [];
-              const collections: Promise<string>[] = [];
+              const projects: Promise<string>[] = [];
 
               // Iterate over fields and generate a CSV export file
-              collectionExportData.fields.map((field) => {
+              projectExportData.fields.map((field) => {
                 if (_.isEqual(field, "created")) {
                   // "created" data field
                   headers.push("Created");
                   row.push(
                     Promise.resolve(
-                      dayjs(collection.created).format("DD MMM YYYY").toString()
+                      dayjs(project.created).format("DD MMM YYYY").toString()
                     )
                   );
                 } else if (_.isEqual(field, "owner")) {
                   // "owner" data field
                   headers.push("Owner");
-                  row.push(Promise.resolve(collection.owner));
+                  row.push(Promise.resolve(project.owner));
                 } else if (_.isEqual(field, "description")) {
                   // "description" data field
                   headers.push("Description");
-                  row.push(Promise.resolve(collection.description));
-                } else if (_.startsWith(field, "collection_")) {
-                  // "collection" data fields
-                  collections.push(
-                    Collections.getOne(_.split(field, "_")[1]).then(
-                      (collection) => {
-                        return collection.name;
+                  row.push(Promise.resolve(project.description));
+                } else if (_.startsWith(field, "project_")) {
+                  // "project" data fields
+                  projects.push(
+                    Projects.getOne(_.split(field, "_")[1]).then(
+                      (project) => {
+                        return project.name;
                       }
                     )
                   );
@@ -504,8 +495,8 @@ export class Collections {
 
               Promise.all([
                 Promise.all(entities),
-                Promise.all(collections),
-              ]).then(([entities, collections]) => {
+                Promise.all(projects),
+              ]).then(([entities, projects]) => {
                 // Collate and format data as a CSV string
                 Promise.all(row).then((rowData) => {
                   // Append Entities
@@ -514,10 +505,10 @@ export class Collections {
                     rowData.push(entities.join(", "));
                   }
 
-                  // Append Collections
-                  if (collections.length > 0) {
-                    headers.push("Collections");
-                    rowData.push(collections.join(", "));
+                  // Append Projects
+                  if (projects.length > 0) {
+                    headers.push("Projects");
+                    rowData.push(projects.join(", "));
                   }
 
                   const collated = [headers, rowData];
@@ -532,46 +523,46 @@ export class Collections {
 
                     fs.writeFileSync(path, formattedOutput);
                     consola.success(
-                      "Generated CSV data for  Collection (id):",
-                      collectionExportData.id.toString()
+                      "Generated CSV data for  Project (id):",
+                      projectExportData.id.toString()
                     );
                     resolve(path);
                   });
                 });
               });
-            } else if (_.isEqual(collectionExportData.format, "json")) {
+            } else if (_.isEqual(projectExportData.format, "json")) {
               // JSON export
               const tempStructure = {
-                _id: collection._id,
-                name: collection.name,
+                _id: project._id,
+                name: project.name,
                 created: "",
                 owner: "",
                 description: "",
-                collections: [],
+                projects: [],
                 entities: [],
               } as { [key: string]: any };
               const exportOperations = [] as Promise<string>[];
 
-              collectionExportData.fields.map((field) => {
+              projectExportData.fields.map((field) => {
                 if (_.isEqual(field, "created")) {
                   // "created" data field
-                  tempStructure["created"] = dayjs(collection.created)
+                  tempStructure["created"] = dayjs(project.created)
                     .format("DD MMM YYYY")
                     .toString();
                 } else if (_.isEqual(field, "owner")) {
                   // "owner" data field
-                  tempStructure["owner"] = collection.owner;
+                  tempStructure["owner"] = project.owner;
                 } else if (_.isEqual(field, "description")) {
                   // "description" data field
-                  tempStructure["description"] = collection.description;
-                } else if (_.startsWith(field, "collection")) {
-                  // "collection" data fields
-                  tempStructure["collections"] = [];
+                  tempStructure["description"] = project.description;
+                } else if (_.startsWith(field, "project")) {
+                  // "project" data fields
+                  tempStructure["projects"] = [];
                   exportOperations.push(
-                    Collections.getOne(_.split(field, "_")[1]).then(
-                      (collection) => {
-                        tempStructure["collections"].push(collection.name);
-                        return collection.name;
+                    Projects.getOne(_.split(field, "_")[1]).then(
+                      (project) => {
+                        tempStructure["projects"].push(project.name);
+                        return project.name;
                       }
                     )
                   );
@@ -600,8 +591,8 @@ export class Collections {
                     JSON.stringify(tempStructure, null, "  ")
                   );
                   consola.success(
-                    "Generated JSON data for Collection (id):",
-                    collectionExportData.id.toString()
+                    "Generated JSON data for Project (id):",
+                    projectExportData.id.toString()
                   );
                   resolve(path);
                 });
@@ -612,33 +603,33 @@ export class Collections {
 
               // Structures to collate data
               const textDetails = [
-                `ID: ${collection._id}`,
-                `Name: ${collection.name}`,
+                `ID: ${project._id}`,
+                `Name: ${project.name}`,
               ];
-              const textCollections = [] as string[];
+              const textProjects = [] as string[];
               const textEntities = [] as string[];
 
-              collectionExportData.fields.map((field) => {
+              projectExportData.fields.map((field) => {
                 if (_.isEqual(field, "created")) {
                   // "created" data field
                   textDetails.push(
-                    `Created: ${dayjs(collection.created)
+                    `Created: ${dayjs(project.created)
                       .format("DD MMM YYYY")
                       .toString()}`
                   );
                 } else if (_.isEqual(field, "owner")) {
                   // "owner" data field
-                  textDetails.push(`Owner: ${collection.owner}`);
+                  textDetails.push(`Owner: ${project.owner}`);
                 } else if (_.isEqual(field, "description")) {
                   // "description" data field
-                  textDetails.push(`Description: ${collection.description}`);
-                } else if (_.startsWith(field, "collection_")) {
-                  // "collection" data fields
+                  textDetails.push(`Description: ${project.description}`);
+                } else if (_.startsWith(field, "project_")) {
+                  // "project" data fields
                   exportOperations.push(
-                    Collections.getOne(_.split(field, "_")[1]).then(
-                      (collection) => {
-                        textCollections.push(collection.name);
-                        return collection.name;
+                    Projects.getOne(_.split(field, "_")[1]).then(
+                      (project) => {
+                        textProjects.push(project.name);
+                        return project.name;
                       }
                     )
                   );
@@ -662,9 +653,9 @@ export class Collections {
                     throw error;
                   }
 
-                  if (textCollections.length > 0) {
+                  if (textProjects.length > 0) {
                     textDetails.push(
-                      `Collections: ${textCollections.join(", ")}`
+                      `Projects: ${textProjects.join(", ")}`
                     );
                   }
                   if (textEntities.length > 0) {
@@ -674,7 +665,7 @@ export class Collections {
                   fs.writeFileSync(path, textDetails.join("\n"));
                   consola.success(
                     "Generated text data for  Entity (id):",
-                    collectionExportData.id.toString()
+                    projectExportData.id.toString()
                   );
                   resolve(path);
                 });
@@ -685,23 +676,23 @@ export class Collections {
     });
   };
 
-  static delete = (id: string): Promise<CollectionModel> => {
-    consola.start("Deleting Collection (id):", id.toString());
+  static delete = (id: string): Promise<ProjectModel> => {
+    consola.start("Deleting Project (id):", id.toString());
     return new Promise((resolve, _reject) => {
       getDatabase()
-        .collection(COLLECTIONS)
+        .collection(PROJECTS)
         .findOne({ _id: id }, (error: any, result: any) => {
           if (error) {
             throw error;
           }
-          // Store the Collection data
-          const collection: CollectionModel = result;
+          // Store the Project data
+          const project: ProjectModel = result;
 
           const operations: Promise<any>[] = [];
 
-          // Remove the Entities from the Collection
-          collection.entities.map((entity) => {
-            operations.push(Entities.removeCollection(entity, collection._id));
+          // Remove the Entities from the Project
+          project.entities.map((entity) => {
+            operations.push(Entities.removeProject(entity, project._id));
           });
 
           // Add Update operation
@@ -709,26 +700,26 @@ export class Collections {
             Activity.create({
               timestamp: new Date(Date.now()),
               type: "delete",
-              details: "Deleted Collection",
+              details: "Deleted Project",
               target: {
-                type: "collections",
-                id: collection._id,
-                name: collection.name,
+                type: "projects",
+                id: project._id,
+                name: project.name,
               },
             })
           );
 
           // Resolve all operations then resolve overall Promise
           Promise.all(operations).then((_result) => {
-            // Delete the Collection
+            // Delete the Project
             getDatabase()
-              .collection(COLLECTIONS)
+              .collection(PROJECTS)
               .deleteOne({ _id: id }, (error: any, _content: any) => {
                 if (error) {
                   throw error;
                 }
 
-                consola.success("Deleted Collection (id):", id.toString());
+                consola.success("Deleted Project (id):", id.toString());
                 resolve(result);
               });
           });

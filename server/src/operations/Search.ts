@@ -8,7 +8,7 @@ import mquery from "mquery";
 import { getDatabase } from "src/database/connection";
 import _ from "lodash";
 
-const ENTITIES_COLLECTION = "entities";
+const ENTITIES = "entities";
 
 export class Search {
   static get = (data: { query: string }): Promise<any[]> => {
@@ -19,7 +19,7 @@ export class Search {
       const expression = new RegExp(data.query, "gi");
 
       getDatabase()
-        .collection(ENTITIES_COLLECTION)
+        .collection(ENTITIES)
         .find({
           $or: [
             { _id: { $regex: expression } },
@@ -71,6 +71,7 @@ export class Search {
         }),
       };
 
+
       // Generate logical operations
       const queryLogicalOperations = {
         AND: () => {
@@ -97,8 +98,8 @@ export class Search {
                   },
                 });
               }
-            } else if (_.isEqual(parameter, "collections")) {
-              // Parameters: collections
+            } else if (_.isEqual(parameter, "projects")) {
+              // Parameters: projects
               if (_.isEqual(qualifier, "contains")) {
                 expressions.push({ [parameter]: { $in: [component.key] } });
               } else if (_.isEqual(qualifier, "does not contain")) {
@@ -146,8 +147,8 @@ export class Search {
                   },
                 });
               }
-            } else if (_.isEqual(parameter, "collections")) {
-              // Parameters: collections
+            } else if (_.isEqual(parameter, "projects")) {
+              // Parameters: projects
               if (_.isEqual(qualifier, "contains")) {
                 expressions.push({ [parameter]: { $in: [component.key] } });
               } else if (_.isEqual(qualifier, "does not contain")) {
@@ -166,7 +167,7 @@ export class Search {
         },
       };
 
-      const collection = getDatabase().collection(ENTITIES_COLLECTION);
+      const collection = getDatabase().collection(ENTITIES);
       if (_.isEmpty(queryLogicalGroups.AND)) {
         // Only 'OR' query components
         queryLogicalOperations

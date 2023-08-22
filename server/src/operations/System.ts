@@ -1,11 +1,11 @@
 import { Activity } from "./Activity";
 import { Attributes } from "./Attributes";
-import { Collections } from "./Collections";
+import { Projects } from "./Projects";
 import { Entities } from "./Entities";
 import {
   ActivityModel,
   AttributeModel,
-  CollectionModel,
+  ProjectModel,
   DeviceModel,
   EntityImport,
   EntityModel,
@@ -26,7 +26,7 @@ import XLSX from "xlsx";
 import { getAttachments, getSystem } from "src/database/connection";
 
 // Constants
-const DEVICES_COLLECTION = "devices";
+const DEVICES = "devices";
 
 export class System {
   static backup = (): Promise<string> => {
@@ -35,14 +35,14 @@ export class System {
       Promise.all([
         Activity.getAll(),
         Attributes.getAll(),
-        Collections.getAll(),
+        Projects.getAll(),
         Entities.getAll(),
       ]).then(
         (
           data: [
             ActivityModel[],
             AttributeModel[],
-            CollectionModel[],
+            ProjectModel[],
             EntityModel[]
           ]
         ) => {
@@ -59,7 +59,7 @@ export class System {
                 timestamp: dayjs(Date.now()).toJSON(),
                 activity: data[0],
                 attributes: data[1],
-                collections: data[2],
+                projects: data[2],
                 entities: data[3],
               })
             );
@@ -82,7 +82,7 @@ export class System {
         consola.start("Received file:", receivedFile.name);
 
         const entityOperations = [] as Promise<EntityModel>[];
-        const collectionOperations = [] as Promise<CollectionModel>[];
+        const projectsOperations = [] as Promise<ProjectModel>[];
         const attributeOperations = [] as Promise<AttributeModel>[];
 
         // Utility function to import Entities
@@ -112,20 +112,20 @@ export class System {
           }
         };
 
-        // Utility function to import Collections
-        const importCollections = (parsedFileData: any) => {
-          // Import Collections
+        // Utility function to import Projects
+        const importProjects = (parsedFileData: any) => {
+          // Import Projects
           consola.start("Importing Entities");
-          if (!_.isUndefined(parsedFileData["collections"])) {
-            const importedCollections = parsedFileData[
-              "collections"
-            ] as CollectionModel[];
-            for (let collection of importedCollections) {
-              Collections.exists(collection._id).then((exists) => {
+          if (!_.isUndefined(parsedFileData["projects"])) {
+            const importedProjects = parsedFileData[
+              "projects"
+            ] as ProjectModel[];
+            for (let project of importedProjects) {
+              Projects.exists(project._id).then((exists) => {
                 if (exists) {
-                  collectionOperations.push(Collections.update(collection));
+                  projectsOperations.push(Projects.update(project));
                 } else {
-                  collectionOperations.push(Collections.restore(collection));
+                  projectsOperations.push(Projects.restore(project));
                 }
               });
             }
@@ -189,7 +189,7 @@ export class System {
               checkFields(parsedFileData, [
                 "timestamp",
                 "entities",
-                "collections",
+                "projects",
                 "attributes",
                 "activity",
               ])
@@ -206,21 +206,21 @@ export class System {
           consola.start("Importing backup JSON file contents");
 
           importEntities(parsedFileData);
-          importCollections(parsedFileData);
+          importProjects(parsedFileData);
           importAttribute(parsedFileData);
 
           // Execute all import operations
           Promise.all([
             Promise.all(entityOperations),
-            Promise.all(collectionOperations),
+            Promise.all(projectsOperations),
             Promise.all(attributeOperations),
           ])
             .then(
               (
-                results: [EntityModel[], CollectionModel[], AttributeModel[]]
+                results: [EntityModel[], ProjectModel[], AttributeModel[]]
               ) => {
                 consola.success("Imported", results[0].length, "Entities");
-                consola.success("Imported", results[1].length, "Collections");
+                consola.success("Imported", results[1].length, "Projects");
                 consola.success("Imported", results[2].length, "Attributes");
                 consola.success("Imported file:", receivedFile.name);
                 resolve({
@@ -289,7 +289,7 @@ export class System {
           owner: entityFields.owner,
           created: dayjs(Date.now()).toISOString(),
           description: row[entityFields.description],
-          collections: [],
+          projects: [],
           associations: {
             origins: [],
             products: [],
@@ -310,19 +310,19 @@ export class System {
           // Additional operations
           const operations = [] as Promise<any>[];
 
-          // Add all Entities to the Collection (if specified)
-          if (!_.isEqual(entityFields.collections, "")) {
+          // Add all Entities to the Project (if specified)
+          if (!_.isEqual(entityFields.projects, "")) {
             operations.push(
-              Collections.addEntities(
-                entityFields.collections,
+              Projects.addEntities(
+                entityFields.projects,
                 entities.map((entity) => entity._id)
               )
             );
 
-            // Add Collection to each Entity
+            // Add Project to each Entity
             entities.map((entity) => {
               operations.push(
-                Entities.addCollection(entity._id, entityFields.collections)
+                Entities.addProject(entity._id, entityFields.projects)
               );
             });
           }
@@ -418,7 +418,7 @@ export class System {
     consola.start("Retrieving Device (id):", id.toString());
     return new Promise((resolve, reject) => {
       getSystem()
-        .collection(DEVICES_COLLECTION)
+        .collection(DEVICES)
         .findOne({ _id: id }, (error: any, result: any) => {
           if (error) {
             reject(error);
@@ -435,7 +435,7 @@ export class System {
     consola.start("Retrieving Devices");
     return new Promise((resolve, reject) => {
       getSystem()
-        .collection(DEVICES_COLLECTION)
+        .collection(DEVICES)
         .find({})
         .toArray((error: any, result: any) => {
           if (error) {

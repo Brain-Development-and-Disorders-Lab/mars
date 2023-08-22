@@ -46,9 +46,9 @@ const Navigation = () => {
   // Loading state
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Entity and Collection status counts
+  // Entity and Project status counts
   const [entityCount, setEntityCount] = useState("0");
-  const [collectionCount, setCollectionCount] = useState("0");
+  const [projectCount, setProjectCount] = useState("0");
 
   const {
     isOpen: isImportOpen,
@@ -75,9 +75,9 @@ const Navigation = () => {
         setIsLoaded(true);
       });
 
-    getData(`/collections`)
+    getData(`/projects`)
       .then((value) => {
-        setCollectionCount(
+        setProjectCount(
           value.length > 100 ? "100+" : value.length.toString()
         );
       })
@@ -85,7 +85,7 @@ const Navigation = () => {
         toast({
           title: "Error",
           status: "error",
-          description: "Could not retrieve Collections data.",
+          description: "Could not retrieve Project data.",
           duration: 4000,
           position: "bottom-right",
           isClosable: true,
@@ -159,18 +159,18 @@ const Navigation = () => {
           <Divider />
 
           <Button
-            leftIcon={<Icon name={"collection"} />}
+            leftIcon={<Icon name={"project"} />}
             w={"100%"}
             justifyContent={"left"}
             variant={
-              _.includes(location.pathname, "/collection") ? "solid" : "ghost"
+              _.includes(location.pathname, "/project") ? "solid" : "ghost"
             }
-            onClick={() => navigate("/collections")}
+            onClick={() => navigate("/projects")}
           >
             <Flex w={"100%"} align={"center"} gap={"2"}>
-              <Text>Collections</Text>
+              <Text>Projects</Text>
               <Spacer />
-              <Tag>{isLoaded ? collectionCount : <Spinner size={"xs"} />}</Tag>
+              <Tag>{isLoaded ? projectCount : <Spinner size={"xs"} />}</Tag>
             </Flex>
           </Button>
 
@@ -213,7 +213,7 @@ const Navigation = () => {
             leftIcon={<Icon name={"search"} />}
             onClick={() => navigate("/search")}
           >
-            Search
+            Query Search
           </Button>
 
           <Spacer />
@@ -268,20 +268,20 @@ const Navigation = () => {
           <Divider />
 
           <Button
-            leftIcon={<Icon name={"collection"} />}
+            leftIcon={<Icon name={"project"} />}
             w={"100%"}
             justifyContent={"left"}
             variant={
-              _.startsWith(location.pathname, "/collections")
+              _.startsWith(location.pathname, "/project")
                 ? "solid"
                 : "ghost"
             }
-            onClick={() => responsiveNavigate("/collections")}
+            onClick={() => responsiveNavigate("/projects")}
           >
             <Flex w={"100%"} align={"center"} gap={"2"}>
-              <Text>Collections</Text>
+              <Text>Projects</Text>
               <Spacer />
-              <Tag>{isLoaded ? collectionCount : <Spinner size={"xs"} />}</Tag>
+              <Tag>{isLoaded ? projectCount : <Spinner size={"xs"} />}</Tag>
             </Flex>
           </Button>
 
