@@ -9,7 +9,7 @@ import {
   getIdentifier,
 } from "../database/connection";
 import { Activity } from "./Activity";
-import { Collections } from "./Collections";
+import { Projects } from "./Projects";
 
 // File generation
 import fs from "fs";
@@ -22,7 +22,7 @@ import dayjs from "dayjs";
 import { AttributeModel, EntityModel } from "@types";
 
 // Constants
-const ENTITIES_COLLECTION = "entities";
+const ENTITIES = "entities";
 
 /**
  * Class defining the set of operations to apply for Entities
@@ -37,7 +37,7 @@ export class Entities {
     consola.start("Checking if Entity (id):", id.toString(), "exists");
     return new Promise((resolve, _reject) => {
       getDatabase()
-        .collection(ENTITIES_COLLECTION)
+        .collection(ENTITIES)
         .findOne({ _id: id }, (_error: any, result: any) => {
           if (_.isNull(result)) {
             consola.warn("Entity (id):", id.toString(), "does not exist");
@@ -64,8 +64,8 @@ export class Entities {
     // Push data to database
     return new Promise((resolve, _reject) => {
       getDatabase()
-        .collection(ENTITIES_COLLECTION)
-        .insertOne(entity, (error: any, _result: any) => {
+        .collection(ENTITIES)
+        .insertOne(entity as any, (error: any, _result: any) => {
           if (error) {
             throw error;
           }
@@ -101,10 +101,10 @@ export class Entities {
             );
           }
 
-          if (entity.collections.length > 0) {
-            // If this Entity has been added to Collections, add the Entity to each Collection
-            entity.collections.forEach((collection: string) => {
-              operations.push(Collections.addEntity(collection, entity._id));
+          if (entity.projects.length > 0) {
+            // If this Entity has been added to Projects, add the Entity to each Project
+            entity.projects.forEach((project: string) => {
+              operations.push(Projects.addEntity(project, entity._id));
             });
           }
 
@@ -145,7 +145,7 @@ export class Entities {
     consola.start("Updating Entity:", updatedEntity.name);
     return new Promise((resolve, _reject) => {
       getDatabase()
-        .collection(ENTITIES_COLLECTION)
+        .collection(ENTITIES)
         .findOne({ _id: updatedEntity._id }, (error: any, result: any) => {
           if (error) {
             throw error;
@@ -156,27 +156,27 @@ export class Entities {
           // List of operations to perform the update
           const operations = [];
 
-          // Collections
-          const collectionsToKeep = currentEntity.collections.filter(
-            (collection) => updatedEntity.collections.includes(collection)
+          // Projects
+          const projectsToKeep = currentEntity.projects.filter(
+            (project) => updatedEntity.projects.includes(project)
           );
-          const collectionsToAdd = updatedEntity.collections.filter(
-            (collection) => !collectionsToKeep.includes(collection)
+          const projectsToAdd = updatedEntity.projects.filter(
+            (project) => !projectsToKeep.includes(project)
           );
-          if (collectionsToAdd.length > 0) {
+          if (projectsToAdd.length > 0) {
             operations.push(
-              collectionsToAdd.map((collection: string) => {
-                Collections.addEntity(collection, updatedEntity._id);
+              projectsToAdd.map((project: string) => {
+                Projects.addEntity(project, updatedEntity._id);
               })
             );
           }
-          const collectionsToRemove = currentEntity.collections.filter(
-            (collection) => !collectionsToKeep.includes(collection)
+          const projectsToRemove = currentEntity.projects.filter(
+            (project) => !projectsToKeep.includes(project)
           );
-          if (collectionsToRemove.length > 0) {
+          if (projectsToRemove.length > 0) {
             operations.push(
-              collectionsToRemove.map((collection: string) => {
-                Collections.removeEntity(collection, updatedEntity._id);
+              projectsToRemove.map((project: string) => {
+                Projects.removeEntity(project, updatedEntity._id);
               })
             );
           }
@@ -343,7 +343,7 @@ export class Entities {
               $set: {
                 deleted: updatedEntity.deleted,
                 description: updatedEntity.description,
-                collections: [...collectionsToKeep, ...collectionsToAdd],
+                projects: [...projectsToKeep, ...projectsToAdd],
                 associations: {
                   origins: [
                     ...currentEntity.associations.origins.filter((origin) =>
@@ -364,7 +364,7 @@ export class Entities {
                     deleted: currentEntity.deleted,
                     owner: currentEntity.owner,
                     description: currentEntity.description,
-                    collections: currentEntity.collections,
+                    projects: currentEntity.projects,
                     associations: {
                       origins: currentEntity.associations.origins,
                       products: currentEntity.associations.products,
@@ -377,7 +377,7 @@ export class Entities {
             };
 
             getDatabase()
-              .collection(ENTITIES_COLLECTION)
+              .collection(ENTITIES)
               .updateOne(
                 { _id: updatedEntity._id },
                 updates,
@@ -405,7 +405,7 @@ export class Entities {
     consola.start("Restoring Entity:", entity.name);
     return new Promise((resolve, _reject) => {
       getDatabase()
-        .collection(ENTITIES_COLLECTION)
+        .collection(ENTITIES)
         .insertOne(entity as any, (error: any, _result: any) => {
           if (error) {
             throw error;
@@ -442,33 +442,33 @@ export class Entities {
     });
   };
 
-  static addCollection = (
+  static addProject = (
     entity: string,
-    collection: string
+    project: string
   ): Promise<string> => {
     consola.start(
       "Adding Entity (id):",
       entity.toString(),
-      "to Collection (id):",
-      collection.toString()
+      "to Project (id):",
+      project.toString()
     );
     return new Promise((resolve, _reject) => {
       getDatabase()
-        .collection(ENTITIES_COLLECTION)
+        .collection(ENTITIES)
         .findOne({ _id: entity }, (error: any, result: any) => {
           if (error) {
             throw error;
           }
 
-          // Update the collection of Collections associated with the Entity to include this extra Collection
+          // Update the collection of Projects associated with the Entity to include this extra Project
           const updates = {
             $set: {
-              collections: [...(result as EntityModel).collections, collection],
+              projects: [...(result as EntityModel).projects, project],
             },
           };
 
           getDatabase()
-            .collection(ENTITIES_COLLECTION)
+            .collection(ENTITIES)
             .updateOne(
               { _id: entity },
               updates,
@@ -481,8 +481,8 @@ export class Entities {
                 consola.success(
                   "Added Entity (id):",
                   entity.toString(),
-                  "to Collection (id):",
-                  collection.toString()
+                  "to Project (id):",
+                  project.toString()
                 );
                 resolve(entity);
               }
@@ -491,37 +491,37 @@ export class Entities {
     });
   };
 
-  static removeCollection = (
+  static removeProject = (
     entity: string,
-    collection: string
+    project: string
   ): Promise<string> => {
     consola.start(
       "Removing Entity (id):",
       entity.toString(),
-      "from Collection (id):",
-      collection.toString()
+      "from Project (id):",
+      project.toString()
     );
     return new Promise((resolve, _reject) => {
       getDatabase()
-        .collection(ENTITIES_COLLECTION)
+        .collection(ENTITIES)
         .findOne({ _id: entity }, (error: any, result: any) => {
           if (error) {
             throw error;
           }
 
-          // Update the collection of Collections associated with the Entity to remove this Collection
+          // Update the collection of Projects associated with the Entity to remove this Project
           const updates = {
             $set: {
-              collections: [
-                ...(result as EntityModel).collections.filter(
-                  (content) => !_.isEqual(content, collection)
+              projects: [
+                ...(result as EntityModel).projects.filter(
+                  (content) => !_.isEqual(content, project)
                 ),
               ],
             },
           };
 
           getDatabase()
-            .collection(ENTITIES_COLLECTION)
+            .collection(ENTITIES)
             .updateOne(
               { _id: entity },
               updates,
@@ -534,8 +534,8 @@ export class Entities {
                 consola.success(
                   "Removed Entity (id):",
                   entity.toString(),
-                  "from Collection (id):",
-                  collection.toString()
+                  "from Project (id):",
+                  project.toString()
                 );
                 resolve(entity);
               }
@@ -557,7 +557,7 @@ export class Entities {
     consola.start("Adding Product", product.name, "to Entity", entity.name);
     return new Promise((resolve, _reject) => {
       getDatabase()
-        .collection(ENTITIES_COLLECTION)
+        .collection(ENTITIES)
         .findOne({ _id: entity.id }, (error: any, result: any) => {
           if (error) {
             throw error;
@@ -576,7 +576,7 @@ export class Entities {
           };
 
           getDatabase()
-            .collection(ENTITIES_COLLECTION)
+            .collection(ENTITIES)
             .updateOne(
               { _id: entity.id },
               updates,
@@ -612,7 +612,7 @@ export class Entities {
     consola.start("Adding", products.length, "Products to Entity", entity.name);
     return new Promise((resolve, _reject) => {
       getDatabase()
-        .collection(ENTITIES_COLLECTION)
+        .collection(ENTITIES)
         .findOne({ _id: entity.id }, (error: any, result: any) => {
           if (error) {
             throw error;
@@ -631,7 +631,7 @@ export class Entities {
           };
 
           getDatabase()
-            .collection(ENTITIES_COLLECTION)
+            .collection(ENTITIES)
             .updateOne(
               { _id: entity.id },
               updates,
@@ -661,7 +661,7 @@ export class Entities {
     consola.start("Removing Product", product.name, "from Entity", entity.name);
     return new Promise((resolve, _reject) => {
       getDatabase()
-        .collection(ENTITIES_COLLECTION)
+        .collection(ENTITIES)
         .findOne({ _id: entity.id }, (error: any, result: any) => {
           if (error) {
             throw error;
@@ -680,7 +680,7 @@ export class Entities {
           };
 
           getDatabase()
-            .collection(ENTITIES_COLLECTION)
+            .collection(ENTITIES)
             .updateOne(
               { _id: entity.id },
               updates,
@@ -716,7 +716,7 @@ export class Entities {
     consola.start("Adding Origin", origin.name, "to Entity", entity.name);
     return new Promise((resolve, _reject) => {
       getDatabase()
-        .collection(ENTITIES_COLLECTION)
+        .collection(ENTITIES)
         .findOne({ _id: entity.id }, (error: any, result: any) => {
           if (error) {
             throw error;
@@ -739,7 +739,7 @@ export class Entities {
           };
 
           getDatabase()
-            .collection(ENTITIES_COLLECTION)
+            .collection(ENTITIES)
             .updateOne(
               { _id: entity.id },
               updates,
@@ -775,7 +775,7 @@ export class Entities {
     consola.start("Adding", origins.length, "Origins to Entity", entity.name);
     return new Promise((resolve, _reject) => {
       getDatabase()
-        .collection(ENTITIES_COLLECTION)
+        .collection(ENTITIES)
         .findOne({ _id: entity.id }, (error: any, result: any) => {
           if (error) {
             throw error;
@@ -792,7 +792,7 @@ export class Entities {
           };
 
           getDatabase()
-            .collection(ENTITIES_COLLECTION)
+            .collection(ENTITIES)
             .updateOne(
               { _id: entity.id },
               updates,
@@ -822,7 +822,7 @@ export class Entities {
     consola.start("Removing Origin", origin.name, "from Entity", entity.name);
     return new Promise((resolve, _reject) => {
       getDatabase()
-        .collection(ENTITIES_COLLECTION)
+        .collection(ENTITIES)
         .findOne({ _id: entity.id }, (error: any, result: any) => {
           if (error) {
             throw error;
@@ -841,7 +841,7 @@ export class Entities {
           };
 
           getDatabase()
-            .collection(ENTITIES_COLLECTION)
+            .collection(ENTITIES)
             .updateOne(
               { _id: entity.id },
               updates,
@@ -876,7 +876,7 @@ export class Entities {
     );
     return new Promise((resolve, _reject) => {
       getDatabase()
-        .collection(ENTITIES_COLLECTION)
+        .collection(ENTITIES)
         .findOne({ _id: entity }, (error: any, result: any) => {
           if (error) {
             throw error;
@@ -890,7 +890,7 @@ export class Entities {
           };
 
           getDatabase()
-            .collection(ENTITIES_COLLECTION)
+            .collection(ENTITIES)
             .updateOne(
               { _id: entity },
               updates,
@@ -925,7 +925,7 @@ export class Entities {
     );
     return new Promise((resolve, _reject) => {
       getDatabase()
-        .collection(ENTITIES_COLLECTION)
+        .collection(ENTITIES)
         .findOne({ _id: entity }, (error: any, result: any) => {
           if (error) {
             throw error;
@@ -943,7 +943,7 @@ export class Entities {
           };
 
           getDatabase()
-            .collection(ENTITIES_COLLECTION)
+            .collection(ENTITIES)
             .updateOne(
               { _id: entity },
               updates,
@@ -978,7 +978,7 @@ export class Entities {
     );
     return new Promise((resolve, _reject) => {
       getDatabase()
-        .collection(ENTITIES_COLLECTION)
+        .collection(ENTITIES)
         .findOne({ _id: entity }, (error: any, result: any) => {
           if (error) {
             throw error;
@@ -1001,7 +1001,7 @@ export class Entities {
           };
 
           getDatabase()
-            .collection(ENTITIES_COLLECTION)
+            .collection(ENTITIES)
             .updateOne(
               { _id: entity },
               updates,
@@ -1042,7 +1042,7 @@ export class Entities {
     );
     return new Promise((resolve, _reject) => {
       getDatabase()
-        .collection(ENTITIES_COLLECTION)
+        .collection(ENTITIES)
         .findOne({ _id: entity.id }, (error: any, _result: any) => {
           if (error) {
             throw error;
@@ -1056,7 +1056,7 @@ export class Entities {
           };
 
           getDatabase()
-            .collection(ENTITIES_COLLECTION)
+            .collection(ENTITIES)
             .updateOne(
               { _id: entity.id },
               updates,
@@ -1086,7 +1086,7 @@ export class Entities {
     consola.start("Adding Attachment", attachment.name, "to Entity (id):", id);
     return new Promise((resolve, _reject) => {
       getDatabase()
-        .collection(ENTITIES_COLLECTION)
+        .collection(ENTITIES)
         .findOne({ _id: id }, (error: any, result: any) => {
           if (error) {
             throw error;
@@ -1106,7 +1106,7 @@ export class Entities {
           };
 
           getDatabase()
-            .collection(ENTITIES_COLLECTION)
+            .collection(ENTITIES)
             .updateOne({ _id: id }, updates, (error: any, _response: any) => {
               if (error) {
                 throw error;
@@ -1137,7 +1137,7 @@ export class Entities {
     );
     return new Promise((resolve, _reject) => {
       getDatabase()
-        .collection(ENTITIES_COLLECTION)
+        .collection(ENTITIES)
         .findOne({ _id: id }, (error: any, result: any) => {
           if (error) {
             throw error;
@@ -1155,7 +1155,7 @@ export class Entities {
           };
 
           getDatabase()
-            .collection(ENTITIES_COLLECTION)
+            .collection(ENTITIES)
             .updateOne({ _id: id }, updates, (error: any, _response: any) => {
               if (error) {
                 throw error;
@@ -1191,7 +1191,7 @@ export class Entities {
     );
     return new Promise((resolve, _reject) => {
       getDatabase()
-        .collection(ENTITIES_COLLECTION)
+        .collection(ENTITIES)
         .findOne(
           { _id: entityLockData.entity.id },
           (error: any, _result: any) => {
@@ -1211,7 +1211,7 @@ export class Entities {
             };
 
             getDatabase()
-              .collection(ENTITIES_COLLECTION)
+              .collection(ENTITIES)
               .updateOne(
                 { _id: entityLockData.entity.id },
                 updates,
@@ -1252,7 +1252,7 @@ export class Entities {
   static getAll = (): Promise<EntityModel[]> => {
     return new Promise((resolve, _reject) => {
       getDatabase()
-        .collection(ENTITIES_COLLECTION)
+        .collection(ENTITIES)
         .find({
           deleted: false,
         })
@@ -1276,7 +1276,7 @@ export class Entities {
     consola.start("Retrieving Entity (id):", id.toString());
     return new Promise((resolve, reject) => {
       getDatabase()
-        .collection(ENTITIES_COLLECTION)
+        .collection(ENTITIES)
         .findOne({ _id: id }, (error: any, result: any) => {
           if (error) {
             reject(error);
@@ -1306,7 +1306,7 @@ export class Entities {
     );
     return new Promise((resolve, reject) => {
       getDatabase()
-        .collection(ENTITIES_COLLECTION)
+        .collection(ENTITIES)
         .findOne({ _id: entityExportData.id }, (error: any, result: any) => {
           if (error) {
             reject(error);
@@ -1399,7 +1399,7 @@ export class Entities {
               owner: "",
               description: "",
               associations: {},
-              collections: [],
+              projects: [],
               attributes: [],
             } as { [key: string]: any };
             const exportOperations = [] as Promise<string>[];
@@ -1416,14 +1416,14 @@ export class Entities {
               } else if (_.isEqual(field, "description")) {
                 // "description" data field
                 tempStructure["description"] = entity.description;
-              } else if (_.startsWith(field, "collection")) {
-                // "collections" data field
-                tempStructure["collections"] = [];
+              } else if (_.startsWith(field, "project")) {
+                // "projects" data field
+                tempStructure["projects"] = [];
                 exportOperations.push(
-                  Collections.getOne(_.split(field, "_")[1]).then(
-                    (collection) => {
-                      tempStructure["collections"].push(collection.name);
-                      return collection.name;
+                  Projects.getOne(_.split(field, "_")[1]).then(
+                    (project) => {
+                      tempStructure["projects"].push(project.name);
+                      return project.name;
                     }
                   )
                 );
@@ -1624,7 +1624,7 @@ export class Entities {
     consola.start("Deleting Entity (id):", id.toString());
     return new Promise((resolve, _reject) => {
       getDatabase()
-        .collection(ENTITIES_COLLECTION)
+        .collection(ENTITIES)
         .findOne({ _id: id }, (error: any, result: any) => {
           if (error) {
             throw error;
@@ -1658,7 +1658,7 @@ export class Entities {
             };
 
             getDatabase()
-              .collection(ENTITIES_COLLECTION)
+              .collection(ENTITIES)
               .updateOne(
                 { _id: entity._id },
                 updates,

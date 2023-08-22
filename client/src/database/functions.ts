@@ -93,14 +93,14 @@ export const deleteData = async (path: string): Promise<any> => {
 };
 
 /**
- * Check if an Entity, Collection, or Attribute still exists in MARS
- * @param {string} id Identifier of the Entity, Collection, or Attribute
- * @param {"entities" | "collections" | "attributes"} type Specify whether an Entity, Collection, or Attribute is being checked
+ * Check if an Entity, Project, or Attribute still exists in MARS
+ * @param {string} id Identifier of the Entity, Project, or Attribute
+ * @param {"entities" | "projects" | "attributes"} type Specify whether an Entity, Project, or Attribute is being checked
  * @return {Promise<boolean>}
  */
 export const doesExist = async (
   id: string,
-  type: "entities" | "collections" | "attributes"
+  type: "entities" | "projects" | "attributes"
 ): Promise<boolean> => {
   return new Promise((resolve, _reject) => {
     getData(`/${type}/${id}`).then((result) => {

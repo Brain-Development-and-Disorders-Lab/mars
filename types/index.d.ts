@@ -21,7 +21,7 @@ export namespace State.Entity {
   };
 
   type Associations = Start & {
-    collections: string[];
+    projects: string[];
     associations: {
       origins: { name: string; id: string };
       products: { name: string; id: string }[];
@@ -33,7 +33,7 @@ export namespace State.Entity {
   };
 }
 
-export namespace State.Collection {
+export namespace State.Project {
   type Start = {
     location: "none" | "start";
     name: string;
@@ -68,7 +68,7 @@ export type AttributeCardProps = IAttribute & AttributeCardActions & {
   permittedDataValues?: string[];
 };
 
-export type AttributeGroupProps = AttributeActions & {
+export type AttributeGroupProps = AttributeCardActions & {
   attributes: AttributeModel[];
 };
 
@@ -93,32 +93,30 @@ export interface IValue<D> {
 }
 
 export type LinkyProps = {
-  type: "entities" | "collections" | "attributes";
+  type: "entities" | "attributes" | "projects";
   id: string;
   fallback?: string;
   color?: string;
 };
 
-// Collection types
-export type ICollection = {
+// Project types
+export type IProject = {
   name: string;
-  type: "collection" | "project";
   description: string;
   owner: string;
+  shared: string[];
   created: string;
-  collections: string[];
   entities: string[];
-  history: CollectionHistory[];
+  history: ProjectHistory[];
 };
 
-export type CollectionModel = ICollection & {
+export type ProjectModel = IProject & {
   _id: string;
 };
 
-export type CollectionHistory = {
+export type ProjectHistory = {
   timestamp: string;
   description: string;
-  collections: string[];
   entities: string[];
 }
 
@@ -130,7 +128,7 @@ export type IEntity = {
   locked: boolean;
   owner: string;
   description: string;
-  collections: string[];
+  projects: string[];
   associations: {
     origins: { name: string; id: string }[];
     products: { name: string; id: string }[];
@@ -149,7 +147,7 @@ export type EntityHistory = {
   deleted: boolean;
   owner: string;
   description: string;
-  collections: string[];
+  projects: string[];
   associations: {
     origins: { name: string; id: string }[];
     products: { name: string; id: string }[];
@@ -164,7 +162,7 @@ export type EntityExport = {
   created: string;
   owner: string;
   description: string;
-  collections: string;
+  projects: string;
   origins: string;
   products: string;
 
@@ -178,7 +176,7 @@ export type EntityImport = {
   created: string;
   owner: string;
   description: string;
-  collections: string;
+  projects: string;
   origins: {id: string, name: string}[];
   products: {id: string, name: string}[];
   attributes: AttributeModel[];
@@ -199,7 +197,7 @@ export type IActivity = {
   type: "create" | "update" | "delete";
   details: string;
   target: {
-    type: "entities" | "collections" | "attributes",
+    type: "entities" | "projects" | "attributes",
     id: string,
     name: string,
   };
@@ -214,7 +212,7 @@ export type ContentProps = {
   children: React.ReactChild | React.ReactChild[];
   isError?: boolean;
   isLoaded?: boolean;
-}
+};
 
 // DataTable component
 export type DataTableProps = {
@@ -235,9 +233,8 @@ export type IconNames =
   // Locations
   "dashboard" |
   "entity" |
-  "collection" |
-  "project" |
   "attribute" |
+  "project" |
 
   // Signal and action icons
   "activity" |
@@ -294,8 +291,8 @@ export type IconNames =
 
 // Query types
 export type QueryOperator = "AND" | "OR";
-export type QueryFocusType = "Entity" | "Collection" | "Attribute";
-export type QueryParameters = "Name" | "Owner" | "Description" | "Collections" | "Origins" | "Products";
+export type QueryFocusType = "Entity" | "Project" | "Attribute";
+export type QueryParameters = "Name" | "Owner" | "Description" | "Projects" | "Origins" | "Products";
 export type QueryQualifier = "Contains" | "Does Not Contain" | "Is" | "Is Not";
 
 export type QueryComponent = {

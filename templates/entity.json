@@ -6,7 +6,7 @@
   "created": "2022-05-19T22:34:29.501Z",
   "owner": "henry.burgess@wustl.edu",
   "description": "Entity description",
-  "collections": [
+  "projects": [
     "abcd1234"
   ],
   "associations": {
@@ -42,7 +42,7 @@
     {
       "timestamp": "2022-05-19T22:34:29.501Z",
       "description": "Entity description",
-      "collections": [
+      "projects": [
         "abcd1234"
       ],
       "associations": {

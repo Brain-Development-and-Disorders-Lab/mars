@@ -14,7 +14,7 @@ import { connectPrimary, connectSystem } from "./database/connection";
 // Routes
 import ActivityRoute from "./routes/Activity";
 import EntitiesRoute from "./routes/Entities";
-import CollectionsRoute from "./routes/Collections";
+import ProjectsRoute from "./routes/Projects";
 import AttributesRoute from "./routes/Attributes";
 import SearchRoute from "./routes/Search";
 import SystemRoute from "./routes/System";
@@ -31,8 +31,8 @@ app.use(
   ActivityRoute,
   AttributesRoute,
   AuthenticationRoute,
-  CollectionsRoute,
   EntitiesRoute,
+  ProjectsRoute,
   SearchRoute,
   SystemRoute
 );

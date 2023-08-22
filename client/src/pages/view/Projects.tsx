@@ -5,11 +5,6 @@ import {
   Flex,
   Heading,
   Spacer,
-  Tab,
-  TabList,
-  TabPanel,
-  TabPanels,
-  Tabs,
   useBreakpoint,
   useToast,
 } from "@chakra-ui/react";
@@ -18,8 +13,8 @@ import { createColumnHelper } from "@tanstack/react-table";
 import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
 
-// Database and models
-import { CollectionModel } from "@types";
+// Existing and custom types
+import { ProjectModel } from "@types";
 
 // Utility functions and types
 import { getData } from "@database/functions";
@@ -28,7 +23,7 @@ import _ from "lodash";
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
 
-const Collections = () => {
+const Projects = () => {
   const toast = useToast();
   const navigate = useNavigate();
 
@@ -36,20 +31,20 @@ const Collections = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isError, setIsError] = useState(false);
 
-  const [collectionsData, setCollectionsData] = useState(
-    [] as CollectionModel[]
+  const [projectsData, setProjectsData] = useState(
+    [] as ProjectModel[]
   );
 
   useEffect(() => {
-    getData(`/collections`)
-      .then((value: CollectionModel[]) => {
-        setCollectionsData(value);
+    getData(`/projects`)
+      .then((value: ProjectModel[]) => {
+        setProjectsData(value);
       })
       .catch((_error) => {
         toast({
           title: "Error",
           status: "error",
-          description: "Could not retrieve Collections data.",
+          description: "Could not retrieve Project data.",
           duration: 4000,
           position: "bottom-right",
           isClosable: true,
@@ -75,7 +70,6 @@ const Collections = () => {
         description: false,
         owner: false,
         entities: false,
-        collections: false,
       });
     } else {
       setVisibleColumns({});
@@ -83,8 +77,8 @@ const Collections = () => {
   }, [breakpoint]);
 
   // Configure table columns and data
-  const data: CollectionModel[] = collectionsData;
-  const columnHelper = createColumnHelper<CollectionModel>();
+  const data: ProjectModel[] = projectsData;
+  const columnHelper = createColumnHelper<ProjectModel>();
   const columns = [
     columnHelper.accessor("name", {
       cell: (info) => info.getValue(),
@@ -103,10 +97,6 @@ const Collections = () => {
       cell: (info) => info.getValue().length,
       header: "Entity Count",
     }),
-    columnHelper.accessor("collections", {
-      cell: (info) => info.getValue().length,
-      header: "Collection Count",
-    }),
     columnHelper.accessor("_id", {
       cell: (info) => {
         return (
@@ -115,7 +105,7 @@ const Collections = () => {
               key={`view-entity-${info.getValue()}`}
               colorScheme={"blackAlpha"}
               rightIcon={<Icon name={"c_right"} />}
-              onClick={() => navigate(`/collections/${info.getValue()}`)}
+              onClick={() => navigate(`/projects/${info.getValue()}`)}
             >
               View
             </Button>
@@ -145,51 +135,29 @@ const Collections = () => {
           align={"center"}
         >
           <Flex align={"center"} gap={"4"} w={"100%"}>
-            <Icon name={"collection"} size={"lg"} />
-            <Heading fontWeight={"semibold"}>Collections</Heading>
+            <Icon name={"project"} size={"lg"} />
+            <Heading fontWeight={"semibold"}>Projects</Heading>
             <Spacer />
             <Button
               leftIcon={<Icon name={"add"} />}
               colorScheme={"green"}
-              onClick={() => navigate("/create/collection")}
+              onClick={() => navigate("/create/project")}
             >
               Create
             </Button>
           </Flex>
         </Flex>
         <Flex direction={"column"} gap={"4"} w={"100%"}>
-          <Tabs variant={"soft-rounded"}>
-            <TabList gap={"2"} p={"2"}>
-              <Tab>Standard</Tab>
-              <Tab>Projects</Tab>
-            </TabList>
-            <TabPanels>
-              <TabPanel>
-                <DataTable
-                  columns={columns}
-                  data={data.filter((collection) => {
-                    return _.isEqual(collection.type, "collection");
-                  })}
-                  visibleColumns={visibleColumns}
-                  hideSelection
-                />
-              </TabPanel>
-              <TabPanel>
-                <DataTable
-                  columns={columns}
-                  data={data.filter((collection) => {
-                    return _.isEqual(collection.type, "project");
-                  })}
-                  visibleColumns={visibleColumns}
-                  hideSelection
-                />
-              </TabPanel>
-            </TabPanels>
-          </Tabs>
+          <DataTable
+            columns={columns}
+            data={data}
+            visibleColumns={visibleColumns}
+            hideSelection
+          />
         </Flex>
       </Flex>
     </Content>
   );
 };
 
-export default Collections;
+export default Projects;

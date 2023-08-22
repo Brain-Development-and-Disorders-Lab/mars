@@ -1,0 +1,15 @@
+{
+  "_id": "abcd1234",
+  "name": "Example Project",
+  "owner": "",
+  "shared": [],
+  "description": "This is an example Project that is used as a template for testing.",
+  "entities": [],
+  "history": [
+    {
+      "timestamp": "2022-05-19T22:34:29.501Z",
+      "description": "This is an example Project.",
+      "entities": []
+    }
+  ]
+}

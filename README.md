@@ -29,7 +29,7 @@ Entities have the following metadata components:
 - *Owner*: The owner or creator of the Entity.
 - *Date*: The date that the Entity came into existence.
 - *Description*: An entirely textual description of the Entity. Further metadata should be expressed later as Attributes.
-- *Collections*: Specify any existing Collections that the Entity belongs to.
+- *Projects*: Specify any existing Projects that the Entity belongs to.
 - *Origin*: If the Entity was created as a product of another Entity, then the other Entity is the Origin. The Origin Entity must already exist in the system.
 - *Products*: If the Entity being entered into the system generated subsequent Entities that already exist in the system, the generated Entities can be specified.
 - *Attributes*: This is a specific metadata component and is explained below.
@@ -45,9 +45,9 @@ Attributes are the primary method of expressing metadata associated with Entitie
 - `entity`: A "soft" relation to another Entity. This does not have the significance of an Origin or Product Entity in the overall system, but could be used to express a similar concept.
 - `select`: A drop-down containing a customizable set of options.
 
-### Collections 📚
+### Projects 📚
 
-Collections are simply groups of Entities. Collections can be of one type of Entities, or a mixture of multiple types.
+Projects are simply groups of Entities. Projects can be of one type of Entities, or a mixture of multiple types.
 
 ## Deployment 👉
 

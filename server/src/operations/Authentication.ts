@@ -19,7 +19,7 @@ export class Authentication {
     return new Promise((resolve, reject) => {
       const encoder = new TextEncoder();
       const defaultPassword = encoder.encode(
-        process.env.DEFAULT_PASSWORD || ""
+        process.env.DEFAULT_PASSWORD || "default"
       );
 
       // Hash the default password

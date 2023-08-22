@@ -121,12 +121,12 @@ const Uploader = (props: {
         <Error />
       ) : (
         <>
-          <Modal isOpen={props.isOpen} onClose={props.onClose}>
+          <Modal isOpen={props.isOpen} onClose={props.onClose} isCentered>
             <ModalOverlay />
-            <ModalContent>
-              <ModalHeader>Upload Attachment</ModalHeader>
+            <ModalContent p={"2"} gap={"4"} w={["lg", "xl", "2xl"]}>
+              <ModalHeader p={"2"}>Upload Attachment</ModalHeader>
               <ModalCloseButton />
-              <ModalBody>
+              <ModalBody p={"2"}>
                 <Flex w={"100%"} align={"center"} justify={"center"}>
                   <FormControl>
                     <Flex
@@ -198,7 +198,7 @@ const Uploader = (props: {
                 </Flex>
               </ModalBody>
 
-              <ModalFooter>
+              <ModalFooter p={"2"}>
                 <Flex direction={"row"} w={"100%"} justify={"space-between"}>
                   <Button
                     colorScheme={"red"}

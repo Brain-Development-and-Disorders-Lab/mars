@@ -38,12 +38,12 @@ const Create = () => {
         p={"2"}
         wrap={"wrap"}
       >
-        {/* Collection card */}
+        {/* Project card */}
         <Card maxW={"sm"} h={"lg"} variant={"outline"}>
           <CardHeader>
             <Flex gap={"4"} w={"100%"} justify={"center"} align={"center"}>
-              <Icon name={"collection"} size={"lg"} />
-              <Heading size={"lg"}>Collection</Heading>
+              <Icon name={"project"} size={"lg"} />
+              <Heading size={"lg"}>Project</Heading>
             </Flex>
           </CardHeader>
           <CardBody>
@@ -52,7 +52,7 @@ const Create = () => {
                 <Heading size={"xs"} textTransform={"uppercase"}>
                   Description
                 </Heading>
-                <Text>Create a Collection to group and organize Entities.</Text>
+                <Text>Create a Project to organize and share Entities.</Text>
               </Flex>
               <Flex p={"2"} gap={"4"} align={"center"} direction={"column"}>
                 <Heading size={"xs"} textTransform={"uppercase"}>
@@ -71,7 +71,7 @@ const Create = () => {
               <Button
                 colorScheme={"green"}
                 rightIcon={<Icon name={"add"} />}
-                onClick={() => navigate("/create/collection")}
+                onClick={() => navigate("/create/project")}
               >
                 Create
               </Button>
@@ -107,9 +107,9 @@ const Create = () => {
                   <Tag colorScheme={"red"}>Owner</Tag>
                   <Tag colorScheme={"red"}>Created</Tag>
                   <Tag colorScheme={"teal"}>Description</Tag>
+                  <Tag colorScheme={"teal"}>Projects</Tag>
                   <Tag colorScheme={"teal"}>Origins</Tag>
                   <Tag colorScheme={"teal"}>Products</Tag>
-                  <Tag colorScheme={"teal"}>Collections</Tag>
                   <Tag colorScheme={"teal"}>Attributes</Tag>
                 </Flex>
               </Flex>

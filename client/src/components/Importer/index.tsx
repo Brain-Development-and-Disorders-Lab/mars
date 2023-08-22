@@ -36,7 +36,7 @@ import Attribute from "@components/AttributeCard";
 import {
   AttributeModel,
   AttributeCardProps,
-  CollectionModel,
+  ProjectModel,
   EntityImport,
   EntityModel,
 } from "@types";
@@ -78,13 +78,13 @@ const Importer = (props: {
 
   // Data to inform field assignment
   const [entities, setEntities] = useState([] as EntityModel[]);
-  const [collections, setCollections] = useState([] as CollectionModel[]);
+  const [projects, setProjects] = useState([] as ProjectModel[]);
 
   // Fields to be assigned to columns
   const [nameField, setNameField] = useState("");
   const [descriptionField, setDescriptionField] = useState("");
   const [ownerField, _setOwnerField] = useState(token.username);
-  const [collectionField, setCollectionField] = useState("");
+  const [projectField, setProjectField] = useState("");
   const [selectedOrigin, setSelectedOrigin] = useState(
     {} as { name: string; id: string }
   );
@@ -185,12 +185,12 @@ const Importer = (props: {
   const setupMapping = () => {
     Promise.all([
       getData(`/entities`),
-      getData(`/collections`),
+      getData(`/projects`),
       getData(`/attributes`),
     ])
-      .then((results: [EntityModel[], CollectionModel[], AttributeModel[]]) => {
+      .then((results: [EntityModel[], ProjectModel[], AttributeModel[]]) => {
         setEntities(results[0]);
-        setCollections(results[1]);
+        setProjects(results[1]);
         setAttributes(results[2]);
         setIsLoaded(true);
         onMappingOpen();
@@ -215,7 +215,7 @@ const Importer = (props: {
         description: descriptionField,
         created: dayjs(Date.now()).toISOString(),
         owner: token.username,
-        collections: collectionField,
+        projects: projectField,
         origins: originsField,
         products: productsField,
         attributes: attributesField,
@@ -278,20 +278,20 @@ const Importer = (props: {
     );
   };
 
-  const getSelectCollectionComponent = (
+  const getSelectProjectComponent = (
     value: string,
     setValue: React.SetStateAction<any>
   ) => {
     return (
       <Select
-        placeholder={"Select Collection"}
+        placeholder={"Select Project"}
         value={value}
         onChange={(event) => setValue(event.target.value)}
       >
-        {collections.map((collection) => {
+        {projects.map((project) => {
           return (
-            <option key={collection._id} value={collection._id}>
-              {collection.name}
+            <option key={project._id} value={project._id}>
+              {project.name}
             </option>
           );
         })}
@@ -340,7 +340,7 @@ const Importer = (props: {
 
   // Removal callback
   const onRemoveAttribute = (identifier: string) => {
-    // We need to filter the removed attribute from the total collection
+    // We need to filter the removed attribute
     setAttributesField(
       attributesField.filter((attribute) => attribute._id !== identifier)
     );
@@ -369,12 +369,12 @@ const Importer = (props: {
         <Error />
       ) : (
         <>
-          <Modal isOpen={props.isOpen} onClose={props.onClose}>
+          <Modal isOpen={props.isOpen} onClose={props.onClose} isCentered>
             <ModalOverlay />
-            <ModalContent>
-              <ModalHeader>Import Data</ModalHeader>
+            <ModalContent p={"2"} gap={"2"} w={["lg", "xl", "2xl"]}>
+              <ModalHeader p={"2"}>Import Data</ModalHeader>
               <ModalCloseButton />
-              <ModalBody>
+              <ModalBody p={"2"}>
                 <Flex w={"100%"} align={"center"} justify={"center"}>
                   <Tabs
                     variant={"soft-rounded"}
@@ -387,7 +387,7 @@ const Importer = (props: {
                       }
                     }}
                   >
-                    <TabList gap={"2"} p={"2"}>
+                    <TabList gap={"2"}>
                       <Tab
                         isDisabled={
                           !_.isUndefined(file.name) &&
@@ -561,7 +561,7 @@ const Importer = (props: {
                 </Flex>
               </ModalBody>
 
-              <ModalFooter>
+              <ModalFooter p={"2"}>
                 <Flex direction={"row"} w={"100%"} justify={"space-between"}>
                   <Button
                     colorScheme={"red"}
@@ -588,11 +588,11 @@ const Importer = (props: {
             </ModalContent>
           </Modal>
 
-          <Modal isOpen={isMappingOpen} onClose={onMappingClose} size={"4xl"}>
+          <Modal isOpen={isMappingOpen} onClose={onMappingClose} size={"4xl"} isCentered>
             <ModalOverlay />
-            <ModalContent>
-              <ModalHeader>Import Spreadsheet Data</ModalHeader>
-              <ModalBody>
+            <ModalContent p={"2"} gap={"4"} w={["lg", "xl", "2xl"]}>
+              <ModalHeader p={"2"}>Import Spreadsheet Data</ModalHeader>
+              <ModalBody p={"2"}>
                 {_.isEqual(interfacePage, "start") && (
                   <Flex w={"100%"} direction={"column"} gap={"4"}>
                     <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
@@ -627,10 +627,10 @@ const Importer = (props: {
                         <Input value={ownerField} disabled />
                       </FormControl>
                       <FormControl>
-                        <FormLabel>Collection</FormLabel>
-                        {getSelectCollectionComponent(
-                          collectionField,
-                          setCollectionField
+                        <FormLabel>Project</FormLabel>
+                        {getSelectProjectComponent(
+                          projectField,
+                          setProjectField
                         )}
                       </FormControl>
                     </Flex>
@@ -757,7 +757,7 @@ const Importer = (props: {
                         leftIcon={<Icon name={"add"} />}
                         colorScheme={"green"}
                         onClick={() => {
-                          // Create an 'empty' Attribute and add the data structure to the 'selectedAttributes' collection
+                          // Create an 'empty' Attribute and add the data structure to 'selectedAttributes'
                           setAttributesField([
                             ...attributesField,
                             {
@@ -793,7 +793,7 @@ const Importer = (props: {
                 )}
               </ModalBody>
 
-              <ModalFooter>
+              <ModalFooter p={"2"}>
                 <Flex direction={"row"} w={"100%"} justify={"space-between"}>
                   <Button
                     colorScheme={"red"}
