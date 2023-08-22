@@ -143,6 +143,7 @@ export class Projects {
                   name: currentProject.name,
                   created: currentProject.created,
                   owner: currentProject.owner,
+                  shared: currentProject.shared,
                   description: currentProject.description,
                   entities: currentProject.entities,
                 },

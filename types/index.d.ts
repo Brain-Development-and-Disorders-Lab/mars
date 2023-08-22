@@ -68,7 +68,7 @@ export type AttributeCardProps = IAttribute & AttributeCardActions & {
   permittedDataValues?: string[];
 };
 
-export type AttributeGroupProps = AttributeActions & {
+export type AttributeGroupProps = AttributeCardActions & {
   attributes: AttributeModel[];
 };
 
@@ -104,6 +104,7 @@ export type IProject = {
   name: string;
   description: string;
   owner: string;
+  shared: string[];
   created: string;
   entities: string[];
   history: ProjectHistory[];
@@ -211,7 +212,7 @@ export type ContentProps = {
   children: React.ReactChild | React.ReactChild[];
   isError?: boolean;
   isLoaded?: boolean;
-}
+};
 
 // DataTable component
 export type DataTableProps = {

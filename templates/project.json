@@ -1,6 +1,8 @@
 {
   "_id": "abcd1234",
   "name": "Example Project",
+  "owner": "",
+  "shared": [],
   "description": "This is an example Project that is used as a template for testing.",
   "entities": [],
   "history": [

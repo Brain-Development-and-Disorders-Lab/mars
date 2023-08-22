@@ -60,6 +60,7 @@ const Project = () => {
     name: name,
     description: description,
     owner: owner,
+    shared: [],
     created: created,
     entities: [],
     history: [],
