@@ -369,12 +369,12 @@ const Importer = (props: {
         <Error />
       ) : (
         <>
-          <Modal isOpen={props.isOpen} onClose={props.onClose}>
+          <Modal isOpen={props.isOpen} onClose={props.onClose} isCentered>
             <ModalOverlay />
-            <ModalContent>
-              <ModalHeader>Import Data</ModalHeader>
+            <ModalContent p={"2"} gap={"2"} w={["lg", "xl", "2xl"]}>
+              <ModalHeader p={"2"}>Import Data</ModalHeader>
               <ModalCloseButton />
-              <ModalBody>
+              <ModalBody p={"2"}>
                 <Flex w={"100%"} align={"center"} justify={"center"}>
                   <Tabs
                     variant={"soft-rounded"}
@@ -387,7 +387,7 @@ const Importer = (props: {
                       }
                     }}
                   >
-                    <TabList gap={"2"} p={"2"}>
+                    <TabList gap={"2"}>
                       <Tab
                         isDisabled={
                           !_.isUndefined(file.name) &&
@@ -561,7 +561,7 @@ const Importer = (props: {
                 </Flex>
               </ModalBody>
 
-              <ModalFooter>
+              <ModalFooter p={"2"}>
                 <Flex direction={"row"} w={"100%"} justify={"space-between"}>
                   <Button
                     colorScheme={"red"}
@@ -588,11 +588,11 @@ const Importer = (props: {
             </ModalContent>
           </Modal>
 
-          <Modal isOpen={isMappingOpen} onClose={onMappingClose} size={"4xl"}>
+          <Modal isOpen={isMappingOpen} onClose={onMappingClose} size={"4xl"} isCentered>
             <ModalOverlay />
-            <ModalContent>
-              <ModalHeader>Import Spreadsheet Data</ModalHeader>
-              <ModalBody>
+            <ModalContent p={"2"} gap={"4"} w={["lg", "xl", "2xl"]}>
+              <ModalHeader p={"2"}>Import Spreadsheet Data</ModalHeader>
+              <ModalBody p={"2"}>
                 {_.isEqual(interfacePage, "start") && (
                   <Flex w={"100%"} direction={"column"} gap={"4"}>
                     <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
@@ -793,7 +793,7 @@ const Importer = (props: {
                 )}
               </ModalBody>
 
-              <ModalFooter>
+              <ModalFooter p={"2"}>
                 <Flex direction={"row"} w={"100%"} justify={"space-between"}>
                   <Button
                     colorScheme={"red"}

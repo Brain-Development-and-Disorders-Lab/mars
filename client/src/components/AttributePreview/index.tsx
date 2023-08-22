@@ -226,7 +226,7 @@ const AttributePreview = (props: AttributePreviewProps) => {
         >
           <ModalOverlay />
 
-          <ModalContent p={"2"} m={"2"}>
+          <ModalContent p={"2"} gap={"4"} w={["lg", "xl", "2xl"]}>
             <ModalHeader>
               <Flex
                 direction={"row"}

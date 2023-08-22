@@ -60,6 +60,7 @@ import {
   IconButton,
   Spinner,
   useBreakpoint,
+  ModalFooter,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import AttributeCard from "@components/AttributePreview";
@@ -1397,16 +1398,13 @@ const Entity = () => {
             <Flex gap={"2"} direction={"column"} minH={"32"}>
               <Flex direction={"row"} justify={"space-between"}>
                 <Heading size={"lg"}>Attachments</Heading>
-                {editing ? (
-                  <Button
-                    colorScheme={"green"}
-                    rightIcon={<Icon name={"upload"} />}
-                    disabled={!editing}
-                    onClick={onUploadOpen}
-                  >
-                    Upload
-                  </Button>
-                ) : null}
+                <Button
+                  colorScheme={"green"}
+                  rightIcon={<Icon name={"upload"} />}
+                  onClick={onUploadOpen}
+                >
+                  Upload
+                </Button>
               </Flex>
 
               {entityAttachments.length === 0 ? (
@@ -1432,143 +1430,143 @@ const Entity = () => {
           isCentered
         >
           <ModalOverlay />
-          <ModalContent>
-            <ModalHeader>Add Attribute</ModalHeader>
-            {/* Heading and close button */}
+          <ModalContent p={"2"} gap={"4"} w={["lg", "xl", "2xl"]}>
+            <ModalHeader p={"2"}>Add Attribute</ModalHeader>
             <ModalCloseButton />
 
-            {/* Attribute creation */}
-            <Flex justify={"center"}>
-              <Flex
-                direction={"column"}
-                gap={"6"}
-                p={"4"}
-                pb={"6"}
-                mb={["12", "8"]}
-                maxW={"7xl"}
-                justify={"center"}
-              >
-                <Flex direction={"column"}>
-                  <Heading fontWeight={"semibold"} size={"lg"}>
-                    Details
-                  </Heading>
-                  <Text>
-                    Specify some basic details about this Attribute. The
-                    metadata associated with this Entity should be specified
-                    using Values.
-                  </Text>
-                </Flex>
-
-                <Flex>
-                  <Select
-                    placeholder={"Use template Attribute"}
-                    onChange={(event) => {
-                      if (!_.isEqual(event.target.value.toString(), "")) {
-                        for (let attribute of attributes) {
-                          if (
-                            _.isEqual(
-                              event.target.value.toString(),
-                              attribute._id
-                            )
-                          ) {
-                            setAttributeName(attribute.name);
-                            setAttributeDescription(attribute.description);
-                            setAttributeValues(() => [...attribute.values]);
-                            break;
-                          }
-                        }
-                      }
-                    }}
-                  >
-                    {isLoaded &&
-                      attributes.map((attribute) => {
-                        return (
-                          <option key={attribute._id} value={attribute._id}>
-                            {attribute.name}
-                          </option>
-                        );
-                      })}
-                    ;
-                  </Select>
-                </Flex>
-
+            <ModalBody p={"2"}>
+              {/* Attribute creation */}
+              <Flex justify={"center"}>
                 <Flex
                   direction={"column"}
-                  gap={"2"}
-                  w={"100%"}
+                  gap={"6"}
+                  pb={"6"}
+                  mb={["12", "8"]}
+                  maxW={"7xl"}
                   justify={"center"}
                 >
-                  <Flex direction={"row"} gap={"4"} wrap={["wrap", "nowrap"]}>
-                    <FormControl isRequired>
-                      <FormLabel>Name</FormLabel>
-                      <Input
-                        placeholder={"Name"}
-                        value={attributeName}
-                        onChange={(event) =>
-                          setAttributeName(event.target.value)
-                        }
-                        required
-                      />
-                      {isAttributeNameError && (
-                        <FormErrorMessage>
-                          A name must be specified for the Attribute.
-                        </FormErrorMessage>
-                      )}
-                    </FormControl>
-
-                    <FormControl isRequired>
-                      <FormLabel>Description</FormLabel>
-                      <Textarea
-                        value={attributeDescription}
-                        placeholder={"Attribute Description"}
-                        onChange={(event) =>
-                          setAttributeDescription(event.target.value)
-                        }
-                      />
-                      {isAttributeDescriptionError && (
-                        <FormErrorMessage>
-                          A description should be provided for the Attribute.
-                        </FormErrorMessage>
-                      )}
-                    </FormControl>
+                  <Flex direction={"column"}>
+                    <Heading fontWeight={"semibold"} size={"lg"}>
+                      Details
+                    </Heading>
+                    <Text>
+                      Specify some basic details about this Attribute. The
+                      metadata associated with this Entity should be specified
+                      using Values.
+                    </Text>
                   </Flex>
 
                   <Flex>
-                    <FormControl isRequired isInvalid={isAttributeValueError}>
-                      <FormLabel>Values</FormLabel>
-                      <Values
-                        viewOnly={false}
-                        values={attributeValues}
-                        setValues={setAttributeValues}
-                      />
-                    </FormControl>
+                    <Select
+                      placeholder={"Use template Attribute"}
+                      onChange={(event) => {
+                        if (!_.isEqual(event.target.value.toString(), "")) {
+                          for (let attribute of attributes) {
+                            if (
+                              _.isEqual(
+                                event.target.value.toString(),
+                                attribute._id
+                              )
+                            ) {
+                              setAttributeName(attribute.name);
+                              setAttributeDescription(attribute.description);
+                              setAttributeValues(() => [...attribute.values]);
+                              break;
+                            }
+                          }
+                        }
+                      }}
+                    >
+                      {isLoaded &&
+                        attributes.map((attribute) => {
+                          return (
+                            <option key={attribute._id} value={attribute._id}>
+                              {attribute.name}
+                            </option>
+                          );
+                        })}
+                      ;
+                    </Select>
+                  </Flex>
+
+                  <Flex
+                    direction={"column"}
+                    gap={"2"}
+                    w={"100%"}
+                    justify={"center"}
+                  >
+                    <Flex direction={"row"} gap={"4"} wrap={["wrap", "nowrap"]}>
+                      <FormControl isRequired>
+                        <FormLabel>Name</FormLabel>
+                        <Input
+                          placeholder={"Name"}
+                          value={attributeName}
+                          onChange={(event) =>
+                            setAttributeName(event.target.value)
+                          }
+                          required
+                        />
+                        {isAttributeNameError && (
+                          <FormErrorMessage>
+                            A name must be specified for the Attribute.
+                          </FormErrorMessage>
+                        )}
+                      </FormControl>
+
+                      <FormControl isRequired>
+                        <FormLabel>Description</FormLabel>
+                        <Textarea
+                          value={attributeDescription}
+                          placeholder={"Attribute Description"}
+                          onChange={(event) =>
+                            setAttributeDescription(event.target.value)
+                          }
+                        />
+                        {isAttributeDescriptionError && (
+                          <FormErrorMessage>
+                            A description should be provided for the Attribute.
+                          </FormErrorMessage>
+                        )}
+                      </FormControl>
+                    </Flex>
+
+                    <Flex>
+                      <FormControl isRequired isInvalid={isAttributeValueError}>
+                        <FormLabel>Values</FormLabel>
+                        <Values
+                          viewOnly={false}
+                          values={attributeValues}
+                          setValues={setAttributeValues}
+                        />
+                      </FormControl>
+                    </Flex>
+                  </Flex>
+
+                  {/* "Done" button */}
+                  <Flex direction={"row"} p={"md"} justify={"center"} gap={"8"}>
+                    <Button
+                      colorScheme={"red"}
+                      variant={"outline"}
+                      rightIcon={<Icon name={"cross"} />}
+                      onClick={onAddAttributesClose}
+                    >
+                      Cancel
+                    </Button>
+
+                    <Button
+                      colorScheme={"green"}
+                      rightIcon={<Icon name={"check"} />}
+                      disabled={isAttributeError}
+                      onClick={() => {
+                        addAttribute();
+                      }}
+                    >
+                      Done
+                    </Button>
                   </Flex>
                 </Flex>
-
-                {/* "Done" button */}
-                <Flex direction={"row"} p={"md"} justify={"center"} gap={"8"}>
-                  <Button
-                    colorScheme={"red"}
-                    variant={"outline"}
-                    rightIcon={<Icon name={"cross"} />}
-                    onClick={onAddAttributesClose}
-                  >
-                    Cancel
-                  </Button>
-
-                  <Button
-                    colorScheme={"green"}
-                    rightIcon={<Icon name={"check"} />}
-                    disabled={isAttributeError}
-                    onClick={() => {
-                      addAttribute();
-                    }}
-                  >
-                    Done
-                  </Button>
-                </Flex>
               </Flex>
-            </Flex>
+            </ModalBody>
           </ModalContent>
         </Modal>
 
@@ -1579,94 +1577,98 @@ const Entity = () => {
           isCentered
         >
           <ModalOverlay />
-          <ModalContent p={"4"}>
+          <ModalContent p={"2"} gap={"4"} w={["lg", "xl", "2xl"]}>
             {/* Heading and close button */}
-            <ModalHeader>Add to Project</ModalHeader>
+            <ModalHeader p={"2"}>Add to Project</ModalHeader>
             <ModalCloseButton />
 
-            {/* Select component for Projects */}
-            <Flex direction={"column"} p={"2"} gap={"2"}>
-              <FormControl>
-                <FormLabel>Add Entity to Projects</FormLabel>
-                <Select
-                  title="Select Project"
-                  placeholder={"Select Project"}
-                  onChange={(event) => {
-                    const selectedProject = event.target.value.toString();
-                    if (selectedProjects.includes(selectedProject)) {
-                      toast({
-                        title: "Warning",
-                        description: "Project has already been selected.",
-                        status: "warning",
-                        duration: 2000,
-                        position: "bottom-right",
-                        isClosable: true,
-                      });
+            <ModalBody p={"2"}>
+              {/* Select component for Projects */}
+              <Flex direction={"column"} gap={"2"}>
+                <FormControl>
+                  <FormLabel>Add Entity to Projects</FormLabel>
+                  <Select
+                    title="Select Project"
+                    placeholder={"Select Project"}
+                    onChange={(event) => {
+                      const selectedProject = event.target.value.toString();
+                      if (selectedProjects.includes(selectedProject)) {
+                        toast({
+                          title: "Warning",
+                          description: "Project has already been selected.",
+                          status: "warning",
+                          duration: 2000,
+                          position: "bottom-right",
+                          isClosable: true,
+                        });
+                      } else {
+                        setSelectedProjects([
+                          ...selectedProjects,
+                          selectedProject,
+                        ]);
+                      }
+                    }}
+                  >
+                    {isLoaded &&
+                      projectData.map((project) => {
+                        return (
+                          <option key={project._id} value={project._id}>
+                            {project.name}
+                          </option>
+                        );
+                      })}
+                    ;
+                  </Select>
+                </FormControl>
+
+                <Flex direction={"row"} p={"2"} gap={"2"}>
+                  {selectedProjects.map((project) => {
+                    if (!_.isEqual(project, "")) {
+                      return (
+                        <Tag key={`tag-${project}`}>
+                          <Linky id={project} type={"projects"} />
+                          <TagCloseButton
+                            onClick={() => {
+                              setSelectedProjects(
+                                selectedProjects.filter((selected) => {
+                                  return !_.isEqual(project, selected);
+                                })
+                              );
+                            }}
+                          />
+                        </Tag>
+                      );
                     } else {
-                      setSelectedProjects([
-                        ...selectedProjects,
-                        selectedProject,
-                      ]);
+                      return null;
                     }
+                  })}
+                </Flex>
+              </Flex>
+            </ModalBody>
+
+            <ModalFooter p={"2"}>
+              {/* "Done" button */}
+              <Flex direction={"row"} gap={"8"} justify={"center"}>
+                <Button
+                  colorScheme={"red"}
+                  variant={"outline"}
+                  rightIcon={<Icon name={"cross"} />}
+                  onClick={onAddProjectsClose}
+                >
+                  Cancel
+                </Button>
+
+                <Button
+                  colorScheme={"green"}
+                  rightIcon={<Icon name={"check"} />}
+                  onClick={() => {
+                    addProjects(selectedProjects);
                   }}
                 >
-                  {isLoaded &&
-                    projectData.map((project) => {
-                      return (
-                        <option key={project._id} value={project._id}>
-                          {project.name}
-                        </option>
-                      );
-                    })}
-                  ;
-                </Select>
-              </FormControl>
-
-              <Flex direction={"row"} p={"2"} gap={"2"}>
-                {selectedProjects.map((project) => {
-                  if (!_.isEqual(project, "")) {
-                    return (
-                      <Tag key={`tag-${project}`}>
-                        <Linky id={project} type={"projects"} />
-                        <TagCloseButton
-                          onClick={() => {
-                            setSelectedProjects(
-                              selectedProjects.filter((selected) => {
-                                return !_.isEqual(project, selected);
-                              })
-                            );
-                          }}
-                        />
-                      </Tag>
-                    );
-                  } else {
-                    return null;
-                  }
-                })}
+                  Done
+                </Button>
               </Flex>
-            </Flex>
-
-            {/* "Done" button */}
-            <Flex direction={"row"} p={"md"} gap={"8"} justify={"center"}>
-              <Button
-                colorScheme={"red"}
-                variant={"outline"}
-                rightIcon={<Icon name={"cross"} />}
-                onClick={onAddProjectsClose}
-              >
-                Cancel
-              </Button>
-
-              <Button
-                colorScheme={"green"}
-                rightIcon={<Icon name={"check"} />}
-                onClick={() => {
-                  addProjects(selectedProjects);
-                }}
-              >
-                Done
-              </Button>
-            </Flex>
+            </ModalFooter>
           </ModalContent>
         </Modal>
 
@@ -1677,200 +1679,208 @@ const Entity = () => {
           isCentered
         >
           <ModalOverlay />
-          <ModalContent p={"4"}>
+          <ModalContent p={"2"} gap={"4"} w={["lg", "xl", "2xl"]}>
             {/* Heading and close button */}
-            <ModalHeader>Add Products</ModalHeader>
+            <ModalHeader p={"2"}>Add Products</ModalHeader>
             <ModalCloseButton />
 
-            {/* Select component for Entities */}
-            <Flex direction={"column"} p={"2"} gap={"2"}>
-              <FormControl>
-                <FormLabel>Add Products</FormLabel>
-                <Select
-                  title="Select Products"
-                  placeholder={"Select Product"}
-                  onChange={(event) => {
-                    if (
-                      entityProducts
-                        .map((product) => product.id)
-                        .includes(event.target.value.toString())
-                    ) {
-                      toast({
-                        title: "Warning",
-                        description: "Product has already been selected.",
-                        status: "warning",
-                        duration: 2000,
-                        position: "bottom-right",
-                        isClosable: true,
-                      });
+            <ModalBody p={"2"}>
+              {/* Select component for Entities */}
+              <Flex direction={"column"} gap={"2"}>
+                <FormControl>
+                  <FormLabel>Add Products</FormLabel>
+                  <Select
+                    title="Select Products"
+                    placeholder={"Select Product"}
+                    onChange={(event) => {
+                      if (
+                        entityProducts
+                          .map((product) => product.id)
+                          .includes(event.target.value.toString())
+                      ) {
+                        toast({
+                          title: "Warning",
+                          description: "Product has already been selected.",
+                          status: "warning",
+                          duration: 2000,
+                          position: "bottom-right",
+                          isClosable: true,
+                        });
+                      } else {
+                        setSelectedProducts([
+                          ...selectedProducts,
+                          event.target.value.toString(),
+                        ]);
+                      }
+                    }}
+                  >
+                    {isLoaded &&
+                      allEntities.map((entity) => {
+                        return (
+                          <option key={entity.id} value={entity.id}>
+                            {entity.name}
+                          </option>
+                        );
+                      })}
+                    ;
+                  </Select>
+                </FormControl>
+
+                <Flex direction={"row"} p={"2"} gap={"2"}>
+                  {selectedProducts.map((entity) => {
+                    if (!_.isEqual(entity, "")) {
+                      return (
+                        <Tag key={`tag-${entity}`}>
+                          <Linky id={entity} type={"entities"} />
+                          <TagCloseButton
+                            onClick={() => {
+                              setSelectedProducts(
+                                selectedProducts.filter((selected) => {
+                                  return !_.isEqual(entity, selected);
+                                })
+                              );
+                            }}
+                          />
+                        </Tag>
+                      );
                     } else {
-                      setSelectedProducts([
-                        ...selectedProducts,
-                        event.target.value.toString(),
-                      ]);
+                      return null;
+                    }
+                  })}
+                </Flex>
+              </Flex>
+            </ModalBody>
+
+            <ModalFooter p={"2"}>
+              {/* "Done" button */}
+              <Flex direction={"row"} gap={"8"} justify={"center"}>
+                <Button
+                  colorScheme={"red"}
+                  variant={"outline"}
+                  rightIcon={<Icon name={"cross"} />}
+                  onClick={onAddProductsClose}
+                >
+                  Cancel
+                </Button>
+
+                <Button
+                  colorScheme={"green"}
+                  rightIcon={<Icon name={"check"} />}
+                  onClick={() => {
+                    if (id) {
+                      // Add the Entities to the Project
+                      addProducts(selectedProducts);
                     }
                   }}
                 >
-                  {isLoaded &&
-                    allEntities.map((entity) => {
-                      return (
-                        <option key={entity.id} value={entity.id}>
-                          {entity.name}
-                        </option>
-                      );
-                    })}
-                  ;
-                </Select>
-              </FormControl>
-
-              <Flex direction={"row"} p={"2"} gap={"2"}>
-                {selectedProducts.map((entity) => {
-                  if (!_.isEqual(entity, "")) {
-                    return (
-                      <Tag key={`tag-${entity}`}>
-                        <Linky id={entity} type={"entities"} />
-                        <TagCloseButton
-                          onClick={() => {
-                            setSelectedProducts(
-                              selectedProducts.filter((selected) => {
-                                return !_.isEqual(entity, selected);
-                              })
-                            );
-                          }}
-                        />
-                      </Tag>
-                    );
-                  } else {
-                    return null;
-                  }
-                })}
+                  Done
+                </Button>
               </Flex>
-            </Flex>
-
-            {/* "Done" button */}
-            <Flex direction={"row"} p={"md"} gap={"8"} justify={"center"}>
-              <Button
-                colorScheme={"red"}
-                variant={"outline"}
-                rightIcon={<Icon name={"cross"} />}
-                onClick={onAddProductsClose}
-              >
-                Cancel
-              </Button>
-
-              <Button
-                colorScheme={"green"}
-                rightIcon={<Icon name={"check"} />}
-                onClick={() => {
-                  if (id) {
-                    // Add the Entities to the Project
-                    addProducts(selectedProducts);
-                  }
-                }}
-              >
-                Done
-              </Button>
-            </Flex>
+            </ModalFooter>
           </ModalContent>
         </Modal>
 
         {/* Add Origins modal */}
         <Modal isOpen={isAddOriginsOpen} onClose={onAddOriginsClose} isCentered>
           <ModalOverlay />
-          <ModalContent p={"4"}>
+          <ModalContent p={"2"} gap={"4"} w={["lg", "xl", "2xl"]}>
             {/* Heading and close button */}
-            <ModalHeader>Add Origins</ModalHeader>
+            <ModalHeader p={"2"}>Add Origins</ModalHeader>
             <ModalCloseButton />
 
-            {/* Select component for Entities */}
-            <Flex direction={"column"} p={"2"} gap={"2"}>
-              <FormControl>
-                <FormLabel>Add Origins</FormLabel>
-                <Select
-                  title="Select Origins"
-                  placeholder={"Select Origin"}
-                  onChange={(event) => {
-                    if (
-                      entityOrigins
-                        .map((origin) => origin.id)
-                        .includes(event.target.value.toString())
-                    ) {
-                      toast({
-                        title: "Warning",
-                        description: "Origin has already been selected.",
-                        status: "warning",
-                        duration: 2000,
-                        position: "bottom-right",
-                        isClosable: true,
-                      });
+            <ModalBody p={"2"}>
+              {/* Select component for Entities */}
+              <Flex direction={"column"} gap={"2"}>
+                <FormControl>
+                  <FormLabel>Add Origins</FormLabel>
+                  <Select
+                    title="Select Origins"
+                    placeholder={"Select Origin"}
+                    onChange={(event) => {
+                      if (
+                        entityOrigins
+                          .map((origin) => origin.id)
+                          .includes(event.target.value.toString())
+                      ) {
+                        toast({
+                          title: "Warning",
+                          description: "Origin has already been selected.",
+                          status: "warning",
+                          duration: 2000,
+                          position: "bottom-right",
+                          isClosable: true,
+                        });
+                      } else {
+                        setSelectedOrigins([
+                          ...selectedOrigins,
+                          event.target.value.toString(),
+                        ]);
+                      }
+                    }}
+                  >
+                    {isLoaded &&
+                      allEntities.map((entity) => {
+                        return (
+                          <option key={entity.id} value={entity.id}>
+                            {entity.name}
+                          </option>
+                        );
+                      })}
+                    ;
+                  </Select>
+                </FormControl>
+
+                <Flex direction={"row"} p={"2"} gap={"2"}>
+                  {selectedOrigins.map((entity) => {
+                    if (!_.isEqual(entity, "")) {
+                      return (
+                        <Tag key={`tag-${entity}`}>
+                          <Linky id={entity} type={"entities"} />
+                          <TagCloseButton
+                            onClick={() => {
+                              setSelectedOrigins(
+                                selectedOrigins.filter((selected) => {
+                                  return !_.isEqual(entity, selected);
+                                })
+                              );
+                            }}
+                          />
+                        </Tag>
+                      );
                     } else {
-                      setSelectedOrigins([
-                        ...selectedOrigins,
-                        event.target.value.toString(),
-                      ]);
+                      return null;
+                    }
+                  })}
+                </Flex>
+              </Flex>
+            </ModalBody>
+
+            <ModalFooter p={"2"}>
+              {/* "Done" button */}
+              <Flex direction={"row"} gap={"8"} justify={"center"}>
+                <Button
+                  colorScheme={"red"}
+                  variant={"outline"}
+                  rightIcon={<Icon name={"cross"} />}
+                  onClick={onAddOriginsClose}
+                >
+                  Cancel
+                </Button>
+
+                <Button
+                  colorScheme={"green"}
+                  rightIcon={<Icon name={"check"} />}
+                  onClick={() => {
+                    if (id) {
+                      // Add the Entities to the Project
+                      addOrigins(selectedOrigins);
                     }
                   }}
                 >
-                  {isLoaded &&
-                    allEntities.map((entity) => {
-                      return (
-                        <option key={entity.id} value={entity.id}>
-                          {entity.name}
-                        </option>
-                      );
-                    })}
-                  ;
-                </Select>
-              </FormControl>
-
-              <Flex direction={"row"} p={"2"} gap={"2"}>
-                {selectedOrigins.map((entity) => {
-                  if (!_.isEqual(entity, "")) {
-                    return (
-                      <Tag key={`tag-${entity}`}>
-                        <Linky id={entity} type={"entities"} />
-                        <TagCloseButton
-                          onClick={() => {
-                            setSelectedOrigins(
-                              selectedOrigins.filter((selected) => {
-                                return !_.isEqual(entity, selected);
-                              })
-                            );
-                          }}
-                        />
-                      </Tag>
-                    );
-                  } else {
-                    return null;
-                  }
-                })}
+                  Done
+                </Button>
               </Flex>
-            </Flex>
-
-            {/* "Done" button */}
-            <Flex direction={"row"} p={"md"} gap={"8"} justify={"center"}>
-              <Button
-                colorScheme={"red"}
-                variant={"outline"}
-                rightIcon={<Icon name={"cross"} />}
-                onClick={onAddOriginsClose}
-              >
-                Cancel
-              </Button>
-
-              <Button
-                colorScheme={"green"}
-                rightIcon={<Icon name={"check"} />}
-                onClick={() => {
-                  if (id) {
-                    // Add the Entities to the Project
-                    addOrigins(selectedOrigins);
-                  }
-                }}
-              >
-                Done
-              </Button>
-            </Flex>
+            </ModalFooter>
           </ModalContent>
         </Modal>
 
@@ -1892,239 +1902,243 @@ const Entity = () => {
           isCentered
         >
           <ModalOverlay />
-          <ModalContent p={"4"} gap={"4"} w={["sm", "lg", "2xl"]}>
+          <ModalContent p={"2"} gap={"4"} w={["lg", "xl", "2xl"]}>
             {/* Heading and close button */}
             <ModalHeader p={"2"}>Export Entity</ModalHeader>
             <ModalCloseButton />
 
-            {/* Selection content */}
-            <Flex direction={"row"} gap={"4"}>
-              <Flex direction={"column"} p={"2"} gap={"2"}>
-                <FormControl>
-                  <FormLabel>Details</FormLabel>
-                  {isLoaded ? (
-                    <CheckboxGroup>
+            <ModalBody p={"2"}>
+              {/* Selection content */}
+              <Flex direction={"row"} gap={"4"}>
+                <Flex direction={"column"} gap={"2"}>
+                  <FormControl>
+                    <FormLabel>Details</FormLabel>
+                    {isLoaded ? (
+                      <CheckboxGroup>
+                        <Stack spacing={2} direction={"column"}>
+                          <Checkbox disabled defaultChecked>
+                            Name: {entityData.name}
+                          </Checkbox>
+                          <Checkbox
+                            isChecked={
+                              exportAll || _.includes(exportFields, "created")
+                            }
+                            onChange={(event) =>
+                              handleExportCheck("created", event.target.checked)
+                            }
+                          >
+                            Created:{" "}
+                            {dayjs(entityData.created).format("DD MMM YYYY")}
+                          </Checkbox>
+                          <Checkbox
+                            isChecked={
+                              exportAll || _.includes(exportFields, "owner")
+                            }
+                            onChange={(event) =>
+                              handleExportCheck("owner", event.target.checked)
+                            }
+                          >
+                            Owner: {entityData.owner}
+                          </Checkbox>
+                          <Checkbox
+                            isChecked={
+                              exportAll || _.includes(exportFields, "description")
+                            }
+                            onChange={(event) =>
+                              handleExportCheck(
+                                "description",
+                                event.target.checked
+                              )
+                            }
+                            disabled={_.isEqual(entityDescription, "")}
+                          >
+                            <Text noOfLines={1}>
+                              Description:{" "}
+                              {_.isEqual(entityDescription, "")
+                                ? "No description"
+                                : entityDescription}
+                            </Text>
+                          </Checkbox>
+                        </Stack>
+                      </CheckboxGroup>
+                    ) : (
+                      <Text>Loading details</Text>
+                    )}
+                  </FormControl>
+                  <FormControl>
+                    <FormLabel>Projects</FormLabel>
+                    {isLoaded && entityProjects.length > 0 ? (
                       <Stack spacing={2} direction={"column"}>
-                        <Checkbox disabled defaultChecked>
-                          Name: {entityData.name}
-                        </Checkbox>
-                        <Checkbox
-                          isChecked={
-                            exportAll || _.includes(exportFields, "created")
-                          }
-                          onChange={(event) =>
-                            handleExportCheck("created", event.target.checked)
-                          }
-                        >
-                          Created:{" "}
-                          {dayjs(entityData.created).format("DD MMM YYYY")}
-                        </Checkbox>
-                        <Checkbox
-                          isChecked={
-                            exportAll || _.includes(exportFields, "owner")
-                          }
-                          onChange={(event) =>
-                            handleExportCheck("owner", event.target.checked)
-                          }
-                        >
-                          Owner: {entityData.owner}
-                        </Checkbox>
-                        <Checkbox
-                          isChecked={
-                            exportAll || _.includes(exportFields, "description")
-                          }
-                          onChange={(event) =>
-                            handleExportCheck(
-                              "description",
-                              event.target.checked
-                            )
-                          }
-                          disabled={_.isEqual(entityDescription, "")}
-                        >
-                          <Text noOfLines={1}>
-                            Description:{" "}
-                            {_.isEqual(entityDescription, "")
-                              ? "No description"
-                              : entityDescription}
-                          </Text>
-                        </Checkbox>
+                        {entityProjects.map((project) => {
+                          allExportFields.push(`project_${project}`);
+                          return (
+                            <Checkbox
+                              key={project}
+                              isChecked={
+                                exportAll ||
+                                _.includes(
+                                  exportFields,
+                                  `project_${project}`
+                                )
+                              }
+                              onChange={(event) =>
+                                handleExportCheck(
+                                  `project_${project}`,
+                                  event.target.checked
+                                )
+                              }
+                            >
+                              Project:{" "}
+                              {<Linky id={project} type={"projects"} />}
+                            </Checkbox>
+                          );
+                        })}
                       </Stack>
-                    </CheckboxGroup>
-                  ) : (
-                    <Text>Loading details</Text>
-                  )}
-                </FormControl>
-                <FormControl>
-                  <FormLabel>Projects</FormLabel>
-                  {isLoaded && entityProjects.length > 0 ? (
-                    <Stack spacing={2} direction={"column"}>
-                      {entityProjects.map((project) => {
-                        allExportFields.push(`project_${project}`);
-                        return (
-                          <Checkbox
-                            key={project}
-                            isChecked={
-                              exportAll ||
-                              _.includes(
-                                exportFields,
-                                `project_${project}`
-                              )
-                            }
-                            onChange={(event) =>
-                              handleExportCheck(
-                                `project_${project}`,
-                                event.target.checked
-                              )
-                            }
-                          >
-                            Project:{" "}
-                            {<Linky id={project} type={"projects"} />}
-                          </Checkbox>
-                        );
-                      })}
-                    </Stack>
-                  ) : (
-                    <Text>No Projects.</Text>
-                  )}
-                </FormControl>
+                    ) : (
+                      <Text>No Projects.</Text>
+                    )}
+                  </FormControl>
+                </Flex>
+
+                <Flex direction={"column"} gap={"2"}>
+                  <FormControl>
+                    <FormLabel>Associations: Origins</FormLabel>
+                    {isLoaded && entityOrigins.length > 0 ? (
+                      <Stack spacing={2} direction={"column"}>
+                        {entityOrigins.map((origin) => {
+                          allExportFields.push(`origin_${origin.id}`);
+                          return (
+                            <Checkbox
+                              key={origin.id}
+                              isChecked={
+                                exportAll ||
+                                _.includes(exportFields, `origin_${origin.id}`)
+                              }
+                              onChange={(event) =>
+                                handleExportCheck(
+                                  `origin_${origin.id}`,
+                                  event.target.checked
+                                )
+                              }
+                            >
+                              Origin: {origin.name}
+                            </Checkbox>
+                          );
+                        })}
+                      </Stack>
+                    ) : (
+                      <Text>No Origins.</Text>
+                    )}
+                  </FormControl>
+                  <FormControl>
+                    <FormLabel>Associations: Products</FormLabel>
+                    {isLoaded && entityProducts.length > 0 ? (
+                      <Stack spacing={2} direction={"column"}>
+                        {entityProducts.map((product) => {
+                          allExportFields.push(`product_${product.id}`);
+                          return (
+                            <Checkbox
+                              key={product.id}
+                              isChecked={
+                                exportAll ||
+                                _.includes(exportFields, `product_${product.id}`)
+                              }
+                              onChange={(event) =>
+                                handleExportCheck(
+                                  `product_${product.id}`,
+                                  event.target.checked
+                                )
+                              }
+                            >
+                              Product: {product.name}
+                            </Checkbox>
+                          );
+                        })}
+                      </Stack>
+                    ) : (
+                      <Text>No Products.</Text>
+                    )}
+                  </FormControl>
+                </Flex>
+
+                <Flex direction={"column"} gap={"2"}>
+                  <FormControl>
+                    <FormLabel>Attributes</FormLabel>
+                    {isLoaded && entityAttributes.length > 0 ? (
+                      <Stack spacing={2} direction={"column"}>
+                        {entityAttributes.map((attribute) => {
+                          allExportFields.push(`attribute_${attribute._id}`);
+                          return (
+                            <Checkbox
+                              key={attribute._id}
+                              isChecked={
+                                exportAll ||
+                                _.includes(
+                                  exportFields,
+                                  `attribute_${attribute._id}`
+                                )
+                              }
+                              onChange={(event) =>
+                                handleExportCheck(
+                                  `attribute_${attribute._id}`,
+                                  event.target.checked
+                                )
+                              }
+                            >
+                              {attribute.name}
+                            </Checkbox>
+                          );
+                        })}
+                      </Stack>
+                    ) : (
+                      <Text>No Attributes</Text>
+                    )}
+                  </FormControl>
+                </Flex>
               </Flex>
+            </ModalBody>
 
-              <Flex direction={"column"} p={"2"} gap={"2"}>
-                <FormControl>
-                  <FormLabel>Associations: Origins</FormLabel>
-                  {isLoaded && entityOrigins.length > 0 ? (
-                    <Stack spacing={2} direction={"column"}>
-                      {entityOrigins.map((origin) => {
-                        allExportFields.push(`origin_${origin.id}`);
-                        return (
-                          <Checkbox
-                            key={origin.id}
-                            isChecked={
-                              exportAll ||
-                              _.includes(exportFields, `origin_${origin.id}`)
-                            }
-                            onChange={(event) =>
-                              handleExportCheck(
-                                `origin_${origin.id}`,
-                                event.target.checked
-                              )
-                            }
-                          >
-                            Origin: {origin.name}
-                          </Checkbox>
-                        );
-                      })}
-                    </Stack>
-                  ) : (
-                    <Text>No Origins.</Text>
-                  )}
-                </FormControl>
-                <FormControl>
-                  <FormLabel>Associations: Products</FormLabel>
-                  {isLoaded && entityProducts.length > 0 ? (
-                    <Stack spacing={2} direction={"column"}>
-                      {entityProducts.map((product) => {
-                        allExportFields.push(`product_${product.id}`);
-                        return (
-                          <Checkbox
-                            key={product.id}
-                            isChecked={
-                              exportAll ||
-                              _.includes(exportFields, `product_${product.id}`)
-                            }
-                            onChange={(event) =>
-                              handleExportCheck(
-                                `product_${product.id}`,
-                                event.target.checked
-                              )
-                            }
-                          >
-                            Product: {product.name}
-                          </Checkbox>
-                        );
-                      })}
-                    </Stack>
-                  ) : (
-                    <Text>No Products.</Text>
-                  )}
-                </FormControl>
+            <ModalFooter p={"2"}>
+              {/* "Download" buttons */}
+              <Flex
+                direction={"row"}
+                w={"100%"}
+                gap={"4"}
+                justify={"center"}
+                align={"center"}
+              >
+                <Checkbox
+                  onChange={(event) => setExportAll(event.target.checked)}
+                >
+                  Select All
+                </Checkbox>
+
+                <Spacer />
+
+                <Text>Download as:</Text>
+                <Button
+                  colorScheme={"blue"}
+                  onClick={() => handleDownloadClick(`json`)}
+                  rightIcon={<Icon name={"download"} />}
+                >
+                  JSON
+                </Button>
+                <Button
+                  colorScheme={"blue"}
+                  onClick={() => handleDownloadClick(`csv`)}
+                  rightIcon={<Icon name={"download"} />}
+                >
+                  CSV
+                </Button>
+                <Button
+                  colorScheme={"blue"}
+                  onClick={() => handleDownloadClick(`txt`)}
+                  rightIcon={<Icon name={"download"} />}
+                >
+                  TXT
+                </Button>
               </Flex>
-
-              <Flex direction={"column"} p={"2"} gap={"2"}>
-                <FormControl>
-                  <FormLabel>Attributes</FormLabel>
-                  {isLoaded && entityAttributes.length > 0 ? (
-                    <Stack spacing={2} direction={"column"}>
-                      {entityAttributes.map((attribute) => {
-                        allExportFields.push(`attribute_${attribute._id}`);
-                        return (
-                          <Checkbox
-                            key={attribute._id}
-                            isChecked={
-                              exportAll ||
-                              _.includes(
-                                exportFields,
-                                `attribute_${attribute._id}`
-                              )
-                            }
-                            onChange={(event) =>
-                              handleExportCheck(
-                                `attribute_${attribute._id}`,
-                                event.target.checked
-                              )
-                            }
-                          >
-                            {attribute.name}
-                          </Checkbox>
-                        );
-                      })}
-                    </Stack>
-                  ) : (
-                    <Text>No Attributes</Text>
-                  )}
-                </FormControl>
-              </Flex>
-            </Flex>
-
-            {/* "Download" buttons */}
-            <Flex
-              direction={"row"}
-              p={"md"}
-              gap={"4"}
-              justify={"center"}
-              align={"center"}
-            >
-              <Checkbox
-                onChange={(event) => setExportAll(event.target.checked)}
-              >
-                Select All
-              </Checkbox>
-
-              <Spacer />
-
-              <Text>Download as:</Text>
-              <Button
-                colorScheme={"blue"}
-                onClick={() => handleDownloadClick(`json`)}
-                rightIcon={<Icon name={"download"} />}
-              >
-                JSON
-              </Button>
-              <Button
-                colorScheme={"blue"}
-                onClick={() => handleDownloadClick(`csv`)}
-                rightIcon={<Icon name={"download"} />}
-              >
-                CSV
-              </Button>
-              <Button
-                colorScheme={"blue"}
-                onClick={() => handleDownloadClick(`txt`)}
-                rightIcon={<Icon name={"download"} />}
-              >
-                TXT
-              </Button>
-            </Flex>
+            </ModalFooter>
           </ModalContent>
         </Modal>
 

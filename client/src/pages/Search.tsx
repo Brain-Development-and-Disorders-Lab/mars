@@ -611,12 +611,12 @@ const Search = () => {
         </Flex>
 
         {/* Information modal */}
-        <Modal isOpen={isOpen} onClose={onClose}>
+        <Modal isOpen={isOpen} onClose={onClose} isCentered>
           <ModalOverlay />
-          <ModalContent>
-            <ModalHeader>Search</ModalHeader>
+          <ModalContent p={"2"} gap={"4"} w={["lg", "xl", "2xl"]}>
+            <ModalHeader p={"2"}>Search</ModalHeader>
             <ModalCloseButton />
-            <ModalBody>
+            <ModalBody p={"2"}>
               <Flex direction={"column"} gap={"4"} p={"2"}>
                 <Text>
                   Use the <b>Text Search</b> tab to search for text across all

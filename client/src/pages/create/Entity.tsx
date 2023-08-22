@@ -717,12 +717,12 @@ const Entity = () => {
         </Flex>
 
         {/* Information modal */}
-        <Modal isOpen={isOpen} onClose={onClose}>
+        <Modal isOpen={isOpen} onClose={onClose} isCentered>
           <ModalOverlay />
-          <ModalContent>
-            <ModalHeader>Entities</ModalHeader>
+          <ModalContent p={"2"} gap={"4"} w={["lg", "xl", "2xl"]}>
+            <ModalHeader p={"2"}>Entities</ModalHeader>
             <ModalCloseButton />
-            <ModalBody>
+            <ModalBody p={"2"}>
               <Flex direction={"column"} gap={"4"} p={"2"}>
                 <Heading size={"md"}>Overview</Heading>
                 <Text>
