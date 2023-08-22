@@ -12,9 +12,9 @@ import {
 } from "@jest/globals";
 
 // Entity operations and types
-import { CollectionModel, EntityModel } from "../../types";
+import { ProjectModel, EntityModel } from "../../types";
 import { Entities } from "../src/operations/Entities";
-import { Collections } from "../src/operations/Collections";
+import { Projects } from "../src/operations/Projects";
 
 // Database connectivity
 import {
@@ -32,7 +32,7 @@ beforeEach(() => {
 afterEach(() => {
   return Promise.all([
     getDatabase().collection("attributes").deleteMany({}),
-    getDatabase().collection("collections").deleteMany({}),
+    getDatabase().collection("projects").deleteMany({}),
     getDatabase().collection("entities").deleteMany({}),
     getDatabase().collection("activity").deleteMany({}),
   ]);
@@ -58,7 +58,7 @@ describe("POST /entities/create", () => {
       created: new Date(Date.now()),
       owner: "henry.burgess@wustl.edu",
       description: "Test",
-      collections: [],
+      projects: [],
       associations: {
         origins: [],
         products: [],
@@ -78,7 +78,7 @@ describe("POST /entities/create", () => {
       created: new Date(Date.now()).toISOString(),
       owner: "henry.burgess@wustl.edu",
       description: "Test Origin",
-      collections: [],
+      projects: [],
       associations: {
         origins: [],
         products: [],
@@ -94,7 +94,7 @@ describe("POST /entities/create", () => {
           created: new Date(Date.now()).toISOString(),
           owner: "henry.burgess@wustl.edu",
           description: "Test Product",
-          collections: [],
+          projects: [],
           associations: {
             origins: [
               {
@@ -144,7 +144,7 @@ describe("POST /entities/create", () => {
       created: new Date(Date.now()).toISOString(),
       owner: "henry.burgess@wustl.edu",
       description: "Test Product",
-      collections: [],
+      projects: [],
       associations: {
         origins: [],
         products: [],
@@ -160,7 +160,7 @@ describe("POST /entities/create", () => {
           created: new Date(Date.now()).toISOString(),
           owner: "henry.burgess@wustl.edu",
           description: "Test Origin",
-          collections: [],
+          projects: [],
           associations: {
             origins: [],
             products: [
@@ -203,23 +203,23 @@ describe("POST /entities/create", () => {
       });
   });
 
-  it("should insert an Entity into a Collection if specified", async () => {
+  it("should insert an Entity into a Project if specified", async () => {
     // Start by creating the two Entities
-    return Collections.create({
-      name: "TestCollection",
+    return Projects.create({
+      name: "TestProject",
       created: new Date(Date.now()).toISOString(),
       owner: "henry.burgess@wustl.edu",
-      description: "Test Collection",
+      description: "Test Project",
       entities: [],
     })
-      .then((result: CollectionModel) => {
-        // Create an Entity that is a member of the Collection
+      .then((result: ProjectModel) => {
+        // Create an Entity that is a member of the Project
         return Entities.create({
           name: "TestEntity",
           created: new Date(Date.now()).toISOString(),
           owner: "henry.burgess@wustl.edu",
           description: "Test",
-          collections: [result._id],
+          projects: [result._id],
           associations: {
             origins: [],
             products: [],
@@ -230,23 +230,23 @@ describe("POST /entities/create", () => {
         });
       })
       .then((entity: EntityModel) => {
-        // Confirm Entity created before retrieving Collection
+        // Confirm Entity created before retrieving Project
         expect(entity.name).toBe("TestEntity");
-        expect(entity.collections.length).toBe(1);
+        expect(entity.projects.length).toBe(1);
 
-        return Promise.all([entity, Collections.getOne(entity.collections[0])]);
+        return Promise.all([entity, Projects.getOne(entity.projects[0])]);
       })
       .then((entities: any[]) => {
         const entity: EntityModel = entities[0];
-        const collection: CollectionModel = entities[1];
+        const project: ProjectModel = entities[1];
 
-        // Check the Collection associated with the Entity
-        expect(entity.collections.length).toBe(1);
-        expect(entity.collections[0]).toStrictEqual(collection._id);
+        // Check the Project associated with the Entity
+        expect(entity.projects.length).toBe(1);
+        expect(entity.projects[0]).toStrictEqual(project._id);
 
-        // Check the Entity contained in the Collection
-        expect(collection.entities.length).toBe(1);
-        expect(collection.entities[0]).toStrictEqual(entity._id);
+        // Check the Entity contained in the Project
+        expect(project.entities.length).toBe(1);
+        expect(project.entities[0]).toStrictEqual(entity._id);
       });
   });
 
@@ -257,7 +257,7 @@ describe("POST /entities/create", () => {
       created: new Date(Date.now()),
       owner: "henry.burgess@wustl.edu",
       description: "Test",
-      collections: [],
+      projects: [],
       associations: {
         origins: [],
         products: [],
@@ -287,7 +287,7 @@ describe("POST /entities/update", () => {
       created: new Date(Date.now()).toISOString(),
       owner: "henry.burgess@wustl.edu",
       description: "Test",
-      collections: [],
+      projects: [],
       associations: {
         origins: [],
         products: [],
@@ -307,13 +307,13 @@ describe("POST /entities/update", () => {
       });
   });
 
-  it("should update Collection membership", async () => {
+  it("should update Project membership", async () => {
     return Entities.create({
       name: "TestEntity",
       created: new Date(Date.now()).toISOString(),
       owner: "henry.burgess@wustl.edu",
       description: "Test",
-      collections: [],
+      projects: [],
       associations: {
         origins: [],
         products: [],
@@ -323,60 +323,60 @@ describe("POST /entities/update", () => {
       history: [],
     })
       .then((result: EntityModel) => {
-        // Create a Collection
+        // Create a Project
         return Promise.all([
           result,
-          Collections.create({
-            name: "TestCollection",
+          Projects.create({
+            name: "TestProject",
             created: new Date(Date.now()).toISOString(),
             owner: "henry.burgess@wustl.edu",
-            description: "Test Collection",
+            description: "Test Project",
             entities: [],
           }),
         ]);
       })
-      .then((result: [EntityModel, CollectionModel]) => {
-        // Update Entity to include Collection
-        result[0].collections.push(result[1]._id);
+      .then((result: [EntityModel, ProjectModel]) => {
+        // Update Entity to include Project
+        result[0].projects.push(result[1]._id);
 
         return Promise.all([Entities.update(result[0]), result[1]]);
       })
-      .then((result: [EntityModel, CollectionModel]) => {
-        // Retrieve both the Entity and Collection
+      .then((result: [EntityModel, ProjectModel]) => {
+        // Retrieve both the Entity and Project
         return Promise.all([
           Entities.getOne(result[0]._id),
-          Collections.getOne(result[1]._id),
+          Projects.getOne(result[1]._id),
         ]);
       })
-      .then((result: [EntityModel, CollectionModel]) => {
-        // Check that the Entity stores membership to the Collection
-        expect(result[0].collections.length).toBe(1);
-        expect(result[0].collections[0]).toStrictEqual(result[1]._id);
+      .then((result: [EntityModel, ProjectModel]) => {
+        // Check that the Entity stores membership to the Project
+        expect(result[0].projects.length).toBe(1);
+        expect(result[0].projects[0]).toStrictEqual(result[1]._id);
 
-        // Check that the Collection stores membership of the Entity
+        // Check that the Project stores membership of the Entity
         expect(result[1].entities.length).toBe(1);
         expect(result[1].entities[0]).toStrictEqual(result[0]._id);
 
         return result;
       })
-      .then((result: [EntityModel, CollectionModel]) => {
-        // Update Entity to remove Collection
-        result[0].collections = [];
+      .then((result: [EntityModel, ProjectModel]) => {
+        // Update Entity to remove Project
+        result[0].projects = [];
 
         return Promise.all([Entities.update(result[0]), result[1]]);
       })
-      .then((result: [EntityModel, CollectionModel]) => {
-        // Retrieve both the Entity and Collection
+      .then((result: [EntityModel, ProjectModel]) => {
+        // Retrieve both the Entity and Project
         return Promise.all([
           Entities.getOne(result[0]._id),
-          Collections.getOne(result[1]._id),
+          Projects.getOne(result[1]._id),
         ]);
       })
-      .then((result: [EntityModel, CollectionModel]) => {
-        // Check that the Entity has no membership to the Collection
-        expect(result[0].collections.length).toBe(0);
+      .then((result: [EntityModel, ProjectModel]) => {
+        // Check that the Entity has no membership to the Project
+        expect(result[0].projects.length).toBe(0);
 
-        // Check that the Collection has no membership of the Entity
+        // Check that the Project has no membership of the Entity
         expect(result[1].entities.length).toBe(0);
       });
   });
@@ -387,7 +387,7 @@ describe("POST /entities/update", () => {
       created: new Date(Date.now()).toISOString(),
       owner: "henry.burgess@wustl.edu",
       description: "Test",
-      collections: [],
+      projects: [],
       associations: {
         origins: [],
         products: [],
@@ -405,7 +405,7 @@ describe("POST /entities/update", () => {
             created: new Date(Date.now()).toISOString(),
             owner: "henry.burgess@wustl.edu",
             description: "Test",
-            collections: [],
+            projects: [],
             associations: {
               origins: [],
               products: [],
@@ -454,7 +454,7 @@ describe("POST /entities/update", () => {
         return Promise.all([Entities.update(result[0]), result[1]]);
       })
       .then((result: [EntityModel, EntityModel]) => {
-        // Retrieve both the Entity and Collection
+        // Retrieve both the Entity and Project
         return Promise.all([
           Entities.getOne(result[0]._id),
           Entities.getOne(result[1]._id),
@@ -475,7 +475,7 @@ describe("POST /entities/update", () => {
       created: new Date(Date.now()).toISOString(),
       owner: "henry.burgess@wustl.edu",
       description: "Test",
-      collections: [],
+      projects: [],
       associations: {
         origins: [],
         products: [],
@@ -493,7 +493,7 @@ describe("POST /entities/update", () => {
             created: new Date(Date.now()).toISOString(),
             owner: "henry.burgess@wustl.edu",
             description: "Test",
-            collections: [],
+            projects: [],
             associations: {
               origins: [],
               products: [],
@@ -514,7 +514,7 @@ describe("POST /entities/update", () => {
         return Promise.all([Entities.update(result[0]), result[1]]);
       })
       .then((result: [EntityModel, EntityModel]) => {
-        // Retrieve both the Entity and Collection
+        // Retrieve both the Entity and Project
         return Promise.all([
           Entities.getOne(result[0]._id),
           Entities.getOne(result[1]._id),
@@ -564,7 +564,7 @@ describe("POST /entities/update", () => {
       created: new Date(Date.now()),
       owner: "henry.burgess@wustl.edu",
       description: "Test",
-      collections: [],
+      projects: [],
       associations: {
         origins: [],
         products: [],
@@ -600,7 +600,7 @@ describe("POST /entities/update", () => {
       created: new Date(Date.now()),
       owner: "henry.burgess@wustl.edu",
       description: "Test",
-      collections: [],
+      projects: [],
       associations: {
         origins: [],
         products: [],
@@ -637,7 +637,7 @@ describe("POST /entities/update", () => {
       created: new Date(Date.now()),
       owner: "henry.burgess@wustl.edu",
       description: "Test",
-      collections: [],
+      projects: [],
       associations: {
         origins: [],
         products: [],

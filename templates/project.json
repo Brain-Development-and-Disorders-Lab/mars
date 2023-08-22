@@ -1,21 +1,13 @@
 {
-  "_id": "p_123_abc",
-  "name": "Test Project",
-  "created": "date",
-  "owner": ["xxxx-xxxx"],
-  "description": "Project description",
-  "users": ["xxxx-xxxx", "xxxx-yyyy"],
-  "entities": ["e_1234", "e_abcd"],
-  "collections": ["c_1234", "c_abcd"],
-  "attributes": ["a_1234", "a_abcd"],
-  "activity": [],
+  "_id": "abcd1234",
+  "name": "Example Project",
+  "description": "This is an example Project that is used as a template for testing.",
+  "entities": [],
   "history": [
     {
-      "name": "Test Project",
-      "users": ["xxxx-xxxx", "xxxx-yyyy"],
-      "entities": ["e_1234", "e_abcd"],
-      "collections": ["c_1234", "c_abcd"],
-      "attributes": ["a_1234", "a_abcd"]
+      "timestamp": "2022-05-19T22:34:29.501Z",
+      "description": "This is an example Project.",
+      "entities": []
     }
   ]
 }

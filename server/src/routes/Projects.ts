@@ -114,16 +114,16 @@ ProjectsRoute.route("/projects/remove").post(
 );
 
 // Route: Remove a Project
-// ProjectsRoute.route("/projects/:id").delete(
-//   (request: { params: { id: any } }, response: any) => {
-//     Projects.delete(request.params.id).then((project) => {
-//       response.json({
-//         id: project._id,
-//         name: project.name,
-//         status: "success",
-//       });
-//     });
-//   }
-// );
+ProjectsRoute.route("/projects/:id").delete(
+  (request: { params: { id: any } }, response: any) => {
+    Projects.delete(request.params.id).then((project) => {
+      response.json({
+        id: project._id,
+        name: project.name,
+        status: "success",
+      });
+    });
+  }
+);
 
 export default ProjectsRoute;

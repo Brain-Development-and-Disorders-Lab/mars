@@ -1,66 +1,134 @@
+// React
 import React, { useEffect, useState } from "react";
 
 // Existing and custom components
 import {
   Button,
+  Card,
+  CardBody,
+  CardHeader,
+  Checkbox,
+  CheckboxGroup,
+  Drawer,
+  DrawerBody,
+  DrawerCloseButton,
+  DrawerContent,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerOverlay,
   Flex,
+  FormControl,
+  FormLabel,
   Heading,
-  Text,
-  useToast,
+  Link,
+  Modal,
+  ModalCloseButton,
+  ModalContent,
+  ModalHeader,
+  ModalOverlay,
+  Popover,
+  PopoverArrow,
+  PopoverBody,
+  PopoverCloseButton,
+  PopoverContent,
+  PopoverHeader,
+  PopoverTrigger,
+  Select,
   Spacer,
-  List,
-  ListItem,
+  Stack,
+  Table,
+  TableContainer,
+  Tag,
+  TagCloseButton,
+  TagLabel,
+  Tbody,
+  Td,
+  Text,
+  Textarea,
+  Th,
+  Thead,
+  Tr,
+  VStack,
+  useDisclosure,
+  useToast,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
-import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 
 // Existing and custom types
-import { ActivityModel, ProjectModel } from "@types";
-
-// Utility functions and libraries
-import { getData } from "src/database/functions";
-import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
-dayjs.extend(relativeTime);
-import _ from "lodash";
+import { ProjectHistory, ProjectModel, EntityModel } from "@types";
 
 // Routing and navigation
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+
+// Utility functions and libraries
+import { deleteData, getData, postData } from "@database/functions";
+import _ from "lodash";
+import dayjs from "dayjs";
+import DataTable from "@components/DataTable";
+import FileSaver from "file-saver";
+import slugify from "slugify";
 
 const Project = () => {
-  // Enable navigation
-  const navigate = useNavigate();
   const { id } = useParams();
-
-  // Toast to show errors
+  const navigate = useNavigate();
   const toast = useToast();
 
-  // Page state
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [isError, setIsError] = useState(false);
+  // Add Entities
+  const {
+    isOpen: isEntitiesOpen,
+    onOpen: onEntitiesOpen,
+    onClose: onEntitiesClose,
+  } = useDisclosure();
 
-  // Page data
+  // History drawer
+  const {
+    isOpen: isHistoryOpen,
+    onOpen: onHistoryOpen,
+    onClose: onHistoryClose,
+  } = useDisclosure();
+
+  // Page state
+  const [editing, setEditing] = useState(false);
+  const [isError, setIsError] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [exportAll, setExportAll] = useState(false);
+
   const [projectData, setProjectData] = useState({} as ProjectModel);
   const [projectEntities, setProjectEntities] = useState([] as string[]);
-  const [projectCollections, setProjectCollections] = useState([] as string[]);
-  const [projectActivity, setProjectActivity] = useState([] as ActivityModel[]);
+  const [projectDescription, setProjectDescription] = useState("");
+  const [projectHistory, setProjectHistory] = useState(
+    [] as ProjectHistory[]
+  );
 
-  // Get all Project data
+  // Entities that can be added
+  const [allEntities, setAllEntities] = useState(
+    [] as { name: string; id: string }[]
+  );
+  const [selectedEntities, setSelectedEntities] = useState([] as string[]);
+
+  const {
+    isOpen: isExportOpen,
+    onOpen: onExportOpen,
+    onClose: onExportClose,
+  } = useDisclosure();
+  const [exportFields, setExportFields] = useState([] as string[]);
+
   useEffect(() => {
+    // Populate Project data
     getData(`/projects/${id}`)
-      .then((result: ProjectModel) => {
-        setProjectData(result);
-        setProjectEntities(result.entities);
-        setProjectCollections(result.collections);
-        setProjectActivity(result.activity);
+      .then((response) => {
+        setProjectData(response);
+        setProjectDescription(response.description);
+        setProjectEntities(response.entities);
+        setProjectHistory(response.history);
       })
-      .catch((_error) => {
+      .catch(() => {
         toast({
           title: "Error",
-          status: "error",
           description: "Could not retrieve Project data.",
+          status: "error",
           duration: 4000,
           position: "bottom-right",
           isClosable: true,
@@ -70,66 +138,275 @@ const Project = () => {
       .finally(() => {
         setIsLoaded(true);
       });
-  }, []);
 
-  // Configure Entity table
-  const entityTableData: string[] = projectEntities;
-  const entityTableColumns = [
-    {
-      id: (info: any) => info.row.original._id,
-      cell: (info: any) => (
-        <Linky
-          id={info.row.original._id}
-          type={"entities"}
-          fallback={info.row.original._id}
-        />
-      ),
-    header: "Name",
-    },
-    {
-      id: (info: any) => `n_${info.row.original._id}`,
-      cell: (info: any) => {
-        return (
-          <Flex justifyContent={"right"}>
-            <Button
-              key={`view-entity-${info.getValue()}`}
-              colorScheme={"blackAlpha"}
-              rightIcon={<Icon name={"c_right"} />}
-              onClick={() => navigate(`/entities/${info.getValue()}`)}
-            >
-              View
-            </Button>
-          </Flex>
+    // Populate Entity data
+    getData(`/entities`)
+      .then((response) => {
+        setAllEntities(
+          response.map((e: EntityModel) => {
+            return { name: e.name, id: e._id };
+          })
         );
-      },
-      header: "",
-    },
-  ];
+      })
+      .catch(() => {
+        toast({
+          title: "Error",
+          description: "Could not retrieve Entity data.",
+          status: "error",
+          duration: 4000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+        setIsError(true);
+      })
+      .finally(() => {
+        setIsLoaded(true);
+      });
+  }, [id, isLoaded]);
 
-  // Configure Collections table
-  const collectionTableData: string[] = projectCollections;
-  const collectionTableColumns = [
+  useEffect(() => {
+    if (isLoaded) {
+      // Update the state of editable data fields
+      setProjectEntities(projectData.entities);
+    }
+  }, [isLoaded]);
+
+  /**
+   * Callback function to add Entities to a Project
+   * @param {string[]} entities List of Entities to add
+   */
+  const addEntities = (entities: string[]): void => {
+    setProjectEntities([
+      ...projectEntities,
+      ...entities.filter((entity) => !_.isEqual("", entity)),
+    ]);
+    setSelectedEntities([]);
+    onEntitiesClose();
+  };
+
+  /**
+   * Handle the edit button being clicked
+   */
+  const handleEditClick = () => {
+    if (editing) {
+      const updateData: ProjectModel = {
+        _id: projectData._id,
+        name: projectData.name,
+        description: projectDescription,
+        owner: projectData.owner,
+        created: projectData.created,
+        entities: projectEntities,
+        history: projectHistory,
+      };
+
+      // Update data
+      postData(`/projects/update`, updateData)
+        .then((_response) => {
+          toast({
+            title: "Saved!",
+            status: "success",
+            duration: 2000,
+            position: "bottom-right",
+            isClosable: true,
+          });
+        })
+        .catch(() => {
+          toast({
+            title: "Error",
+            description: "An error occurred when saving updates.",
+            status: "error",
+            duration: 2000,
+            position: "bottom-right",
+            isClosable: true,
+          });
+        })
+        .finally(() => {
+          setEditing(false);
+        });
+    } else {
+      setEditing(true);
+    }
+  };
+
+  // Delete the Project when confirmed
+  const handleDeleteClick = () => {
+    // Update data
+    deleteData(`/projects/${id}`)
+      .then((_response) => {
+        toast({
+          title: "Deleted!",
+          status: "success",
+          duration: 2000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+      })
+      .catch(() => {
+        toast({
+          title: "Error",
+          description: `An error occurred when deleting Project "${projectData.name}".`,
+          status: "error",
+          duration: 2000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+      })
+      .finally(() => {
+        setEditing(false);
+        navigate("/projects");
+      });
+  };
+
+  /**
+   * Restore a Project from an earlier point in time
+   * @param {ProjectHistory} projectVersion historical Project data to restore
+   */
+  const handleRestoreFromHistoryClick = (
+    projectVersion: ProjectHistory
+  ) => {
+    const updateData: ProjectModel = {
+      _id: projectData._id,
+      name: projectData.name,
+      created: projectData.created,
+      owner: projectData.owner,
+      description: projectVersion.description,
+      entities: projectVersion.entities,
+      history: projectData.history,
+    };
+
+    setIsLoaded(false);
+
+    // Update data
+    postData(`/projects/update`, updateData)
+      .then((_response) => {
+        toast({
+          title: "Saved!",
+          status: "success",
+          duration: 2000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+      })
+      .catch(() => {
+        toast({
+          title: "Error",
+          description: "An error occurred when saving updates.",
+          status: "error",
+          duration: 2000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+      })
+      .finally(() => {
+        // Close the drawer
+        onHistoryClose();
+
+        // Apply updated state
+        setProjectData(updateData);
+        setProjectDescription(updateData.description);
+        setProjectEntities(updateData.entities);
+        setProjectHistory(updateData.history);
+        setIsLoaded(true);
+      });
+  };
+
+  // Handle clicking the "Export" button
+  const handleExportClick = () => {
+    setProjectData(projectData);
+    onExportOpen();
+  };
+
+  // A list of all fields that can be exported, generated when the interface is opened
+  const allExportFields = ["name", "created", "owner", "description"];
+
+  // Handle clicking the "Download" button
+  const handleDownloadClick = (format: "json" | "csv" | "txt") => {
+    // Send POST data to generate file
+    postData(`/projects/export`, {
+      id: id,
+      fields: exportAll ? allExportFields : exportFields,
+      format: format,
+    })
+      .then((response) => {
+        let responseData = response;
+
+        // Clean the response data if required
+        if (_.isEqual(format, "json")) {
+          responseData = JSON.stringify(responseData, null, "  ");
+        }
+
+        FileSaver.saveAs(
+          new Blob([responseData]),
+          slugify(`${projectData.name.replace(" ", "")}_export.${format}`)
+        );
+
+        // Close the "Export" modal
+        onExportClose();
+
+        // Reset the export state
+        setExportFields([]);
+
+        toast({
+          title: "Info",
+          description: `Generated ${format.toUpperCase()} file.`,
+          status: "info",
+          duration: 2000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+      })
+      .catch((_error) => {
+        toast({
+          title: "Error",
+          description: "An error occurred when exporting this Project.",
+          status: "error",
+          duration: 2000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+      });
+  };
+
+
+  // Handle checkbox selection on the export modal
+  const handleExportCheck = (field: string, checkState: boolean) => {
+    if (_.isEqual(checkState, true)) {
+      // If checked after click, add field to exportFields
+      if (!exportFields.includes(field)) {
+        const updatedFields = [...exportFields, field];
+        setExportFields(updatedFields);
+      }
+    } else {
+      // If unchecked after click, remove the field from exportFields
+      if (exportFields.includes(field)) {
+        const updatedFields = exportFields.filter((existingField) => {
+          if (!_.isEqual(existingField, field)) {
+            return existingField;
+          }
+          return;
+        });
+        setExportFields(updatedFields);
+      }
+    }
+  };
+
+  // Define the columns for Entities listing
+  const entitiesColumns = [
     {
-      id: (info: any) => info.row.original._id,
-      cell: (info: any) => (
-        <Linky
-          id={info.row.original._id}
-          type={"entities"}
-          fallback={info.row.original._id}
-        />
-      ),
-    header: "Name",
+      id: (info: any) => info.row.original,
+      cell: (info: any) => <Linky id={info.row.original} type={"entities"} />,
+      header: "Name",
     },
     {
-      id: (info: any) => `n_${info.row.original._id}`,
+      id: "view",
       cell: (info: any) => {
         return (
-          <Flex justifyContent={"right"}>
+          <Flex w={"100%"} justify={"end"}>
             <Button
-              key={`view-entity-${info.getValue()}`}
+              key={`view-entity-${info.row.original}`}
               colorScheme={"blackAlpha"}
               rightIcon={<Icon name={"c_right"} />}
-              onClick={() => navigate(`/entities/${info.getValue()}`)}
+              onClick={() => navigate(`/entities/${info.row.original}`)}
             >
               View
             </Button>
@@ -142,213 +419,523 @@ const Project = () => {
 
   return (
     <Content isError={isError} isLoaded={isLoaded}>
-      <Flex direction={"row"} wrap={"wrap"} gap={"4"} p={"4"} h={"100%"}>
-        <Flex direction={"column"} gap={"4"} grow={"2"} h={"100%"}>
-          <Flex
-            gap={"4"}
-            p={"4"}
-            direction={"row"}
-            justify={"space-between"}
-            align={"center"}
-            wrap={"wrap"}
-          >
-            <Flex
-              align={"center"}
-              gap={"4"}
-              shadow={"lg"}
-              p={"2"}
-              border={"2px"}
-              rounded={"md"}
-            >
-              <Icon
-                name={"project"}
-                size={"lg"}
-              />
-              <Heading fontWeight={"semibold"}>{projectData.name}</Heading>
-            </Flex>
-          </Flex>
-          {/* Collections and Entities */}
-          <Flex
-            h={"50%"}
-            direction={"column"}
-            p={"4"}
-            background={"white"}
-            rounded={"md"}
-            gap={"2"}
-            border={"1px"}
-            borderColor={"gray.100"}
-          >
-            {/* Collections heading */}
-            <Flex direction={"row"} align={"center"} gap={"4"}>
-              <Icon name={"collection"} size={"lg"} />
-              <Heading fontWeight={"semibold"}>Collections</Heading>
-            </Flex>
-
-            {/* Collections table */}
-            {projectCollections && projectCollections.length > 0 ? (
-                <DataTable
-                  columns={collectionTableColumns}
-                  data={collectionTableData}
-                  visibleColumns={{}}
-                  hidePagination
-                  hideSelection
-                />
-            ) : (
-              <Text>There are no Collections to display.</Text>
-            )}
-
-            <Spacer />
-
-            <Flex justify={"right"}>
-              <Button
-                key={`view-collection-all`}
-                colorScheme={"teal"}
-                rightIcon={<Icon name={"c_right"} />}
-                onClick={() => navigate(`/collections`)}
-              >
-                View All
-              </Button>
-            </Flex>
-          </Flex>
-
-          <Flex
-            h={"50%"}
-            direction={"column"}
-            p={"4"}
-            background={"white"}
-            rounded={"md"}
-            gap={"2"}
-            border={"1px"}
-            borderColor={"gray.100"}
-          >
-            {/* Entities heading */}
-            <Flex direction={"row"} align={"center"} gap={"4"}>
-              <Icon name={"entity"} size={"lg"} />
-              <Heading fontWeight={"semibold"}>Entities</Heading>
-            </Flex>
-
-            {/* Entities table */}
-            {projectEntities && projectEntities.length > 0 ? (
-              <DataTable
-                columns={entityTableColumns}
-                data={entityTableData}
-                visibleColumns={{}}
-                hidePagination
-                hideSelection
-              />
-            ) : (
-              <Text>There are no Entities to display.</Text>
-            )}
-
-            <Spacer />
-
-            <Flex justify={"right"}>
-              <Button
-                key={`view-entity-all`}
-                colorScheme={"teal"}
-                rightIcon={<Icon name={"c_right"} />}
-                onClick={() => navigate(`/entities`)}
-              >
-                View All
-              </Button>
-            </Flex>
-          </Flex>
-        </Flex>
-
-        {/* Activity */}
+      <Flex direction={"column"} gap={"4"}>
         <Flex
-          direction={"column"}
           gap={"4"}
-          grow={"1"}
-          h={"100%"}
-          rounded={"md"}
-          border={"1px"}
-          borderColor={"gray.100"}
+          p={"4"}
+          direction={"row"}
+          justify={"space-between"}
+          align={"center"}
+          wrap={"wrap"}
         >
           <Flex
-            background={"white"}
-            direction={"column"}
+            align={"center"}
+            gap={"4"}
+            shadow={"lg"}
+            p={"2"}
+            border={"2px"}
             rounded={"md"}
-            h={"fit-content"}
-            p={"4"}
-            gap={"2"}
           >
-            {/* Activity heading */}
-            <Flex align={"center"} gap={"4"} p={"2"}>
-              <Icon name={"activity"} size={"lg"} />
-              <Heading fontWeight={"semibold"}>Activity</Heading>
+            <Icon name={"project"} size={"lg"} />
+            <Heading fontWeight={"semibold"}>{projectData.name}</Heading>
+          </Flex>
+
+          {/* Buttons */}
+          <Flex direction={"row"} gap={"4"}>
+            <Flex
+              direction={"row"}
+              gap={"4"}
+              wrap={"wrap"}
+              p={"4"}
+              rounded={"md"}
+            >
+              {editing && (
+                <Popover>
+                  <PopoverTrigger>
+                    <Button
+                      colorScheme={"red"}
+                      rightIcon={<Icon name={"delete"} />}
+                    >
+                      Delete
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent>
+                    <PopoverArrow />
+                    <PopoverCloseButton />
+                    <PopoverHeader>Confirmation</PopoverHeader>
+                    <PopoverBody>
+                      Are you sure you want to delete this Project?
+                      <Flex direction={"row"} p={"2"} justify={"center"}>
+                        <Button
+                          colorScheme={"green"}
+                          rightIcon={<Icon name={"check"} />}
+                          onClick={handleDeleteClick}
+                        >
+                          Confirm
+                        </Button>
+                      </Flex>
+                    </PopoverBody>
+                  </PopoverContent>
+                </Popover>
+              )}
+              <Button
+                colorScheme={editing ? "green" : "gray"}
+                rightIcon={
+                  editing ? <Icon name={"check"} /> : <Icon name={"edit"} />
+                }
+                onClick={handleEditClick}
+              >
+                {editing ? "Done" : "Edit"}
+              </Button>
             </Flex>
 
-            {/* Activity list */}
-            <List>
-              {projectActivity && projectActivity.length > 0 ? (
-                projectData.activity.slice(0, 10).map((activity) => {
-                  // Configure the badge
-                  let operationBadgeColor = "green.400";
-                  let operationIcon = <Icon name={"entity"} color={"white"} />;
-
-                  switch (activity.type) {
-                    case "create":
-                      operationBadgeColor = "green.400";
-                      operationIcon = <Icon name={"add"} color={"white"} />;
-                      break;
-                    case "update":
-                      operationBadgeColor = "blue.400";
-                      operationIcon = <Icon name={"edit"} color={"white"} />;
-                      break;
-                    case "delete":
-                      operationBadgeColor = "red.400";
-                      operationIcon = <Icon name={"delete"} color={"white"} />;
-                      break;
-                  }
-
-                  return (
-                    <ListItem key={`activity-${activity._id}`}>
-                      <Flex
-                        direction={"row"}
-                        p={"2"}
-                        gap={"2"}
-                        mt={"2"}
-                        mb={"2"}
-                        align={"center"}
-                        background={"white"}
-                        rounded={"md"}
-                        border={"2px"}
-                        borderColor={"gray.100"}
-                      >
-                        <Flex
-                          rounded={"full"}
-                          bg={operationBadgeColor}
-                          p={"1.5"}
-                        >
-                          {operationIcon}
-                        </Flex>
-
-                        <Text display={{ base: "none", sm: "block" }}>
-                          {activity.details}
-                        </Text>
-
-                        <Linky
-                          id={activity.target.id}
-                          type={activity.target.type}
-                          fallback={activity.target.name}
-                        />
-
-                        <Spacer />
-
-                        <Text color={"gray.400"}>
-                          {dayjs(activity.timestamp).fromNow()}
-                        </Text>
-                      </Flex>
-                    </ListItem>
-                  );
-                })
-              ) : (
-                <Text fontSize={"md"}>No recent activity to show.</Text>
-              )}
-            </List>
+            <Flex
+              direction={"row"}
+              gap={"4"}
+              wrap={"wrap"}
+              p={"4"}
+              rounded={"md"}
+            >
+              <Button
+                rightIcon={<Icon name={"clock"} />}
+                onClick={onHistoryOpen}
+              >
+                History
+              </Button>
+              <Button
+                onClick={handleExportClick}
+                rightIcon={<Icon name={"download"} />}
+                colorScheme={"blue"}
+                isDisabled={editing}
+              >
+                Export
+              </Button>
+            </Flex>
           </Flex>
         </Flex>
+
+        <Flex direction={"row"} gap={"4"} p={"4"} wrap={"wrap"}>
+          <Flex
+            direction={"column"}
+            p={"4"}
+            gap={"4"}
+            grow={"1"}
+            h={"fit-content"}
+            bg={"white"}
+            rounded={"md"}
+            border={"1px"}
+            borderColor={"gray.100"}
+          >
+            {/* Details */}
+            <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
+              <Heading fontWeight={"semibold"} size={"lg"}>
+                Details
+              </Heading>
+              <TableContainer>
+                <Table variant={"simple"} colorScheme={"blackAlpha"}>
+                  <Thead>
+                    <Tr>
+                      <Th>Field</Th>
+                      <Th>Value</Th>
+                    </Tr>
+                  </Thead>
+                  <Tbody>
+                    <Tr>
+                      <Td>Owner</Td>
+                      <Td>
+                        {_.isEqual(projectData.owner, "") ? (
+                          <Tag
+                            size={"md"}
+                            key={`warn-${projectData._id}`}
+                            colorScheme={"orange"}
+                          >
+                            <TagLabel>Not Specified</TagLabel>
+                            <Icon name={"warning"} />
+                          </Tag>
+                        ) : (
+                          <Text>
+                            <Link>{projectData.owner}</Link>
+                          </Text>
+                        )}
+                      </Td>
+                    </Tr>
+                    <Tr>
+                      <Td>Description</Td>
+                      <Td>
+                        <Textarea
+                          value={projectDescription}
+                          onChange={(event) => {
+                            setProjectDescription(event.target.value);
+                          }}
+                          disabled={!editing}
+                        />
+                      </Td>
+                    </Tr>
+                  </Tbody>
+                </Table>
+              </TableContainer>
+            </Flex>
+          </Flex>
+
+          {/* Display Entities and Projects */}
+          <Flex direction={"column"} gap={"4"} grow={"2"}>
+            <Flex
+              direction={"column"}
+              p={"4"}
+              gap={"4"}
+              h={"fit-content"}
+              rounded={"md"}
+              border={"1px"}
+              borderColor={"gray.100"}
+            >
+              <Flex direction={"row"} justify={"space-between"}>
+                {/* Entities in the Project */}
+                <Heading fontWeight={"semibold"} size={"lg"}>
+                  Entities
+                </Heading>
+                {editing && (
+                  <Button
+                    leftIcon={<Icon name={"add"} />}
+                    onClick={onEntitiesOpen}
+                    colorScheme={"green"}
+                  >
+                    Add
+                  </Button>
+                )}
+              </Flex>
+              <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
+                {projectEntities && projectEntities.length > 0 ? (
+                  <DataTable
+                    data={projectEntities}
+                    columns={entitiesColumns}
+                    visibleColumns={{}}
+                    viewOnly={!editing}
+                    hideSelection={!editing}
+                  />
+                ) : (
+                  <Text>No Entities.</Text>
+                )}
+              </Flex>
+            </Flex>
+          </Flex>
+        </Flex>
+
+        {/* Modal to add Entities */}
+        <Modal isOpen={isEntitiesOpen} onClose={onEntitiesClose}>
+          <ModalOverlay />
+          <ModalContent p={"4"}>
+            {/* Heading and close button */}
+            <ModalHeader>Add Entities</ModalHeader>
+            <ModalCloseButton />
+
+            {/* Select component for Entities */}
+            <Flex direction={"column"} p={"2"} gap={"2"}>
+              <FormControl>
+                <FormLabel>Add Entities</FormLabel>
+                <Select
+                  title="Select Entity"
+                  placeholder={"Select Entity"}
+                  onChange={(event) => {
+                    const selectedEntity = event.target.value.toString();
+                    if (selectedEntities.includes(selectedEntity)) {
+                      toast({
+                        title: "Warning",
+                        description: "Entity has already been selected.",
+                        status: "warning",
+                        duration: 2000,
+                        position: "bottom-right",
+                        isClosable: true,
+                      });
+                    } else {
+                      setSelectedEntities((selectedEntities) => [
+                        ...selectedEntities,
+                        selectedEntity,
+                      ]);
+                    }
+                  }}
+                >
+                  {isLoaded &&
+                    allEntities.map((entity) => {
+                      return (
+                        <option key={entity.id} value={entity.id}>
+                          {entity.name}
+                        </option>
+                      );
+                    })}
+                  ;
+                </Select>
+              </FormControl>
+
+              <Flex direction={"row"} p={"2"} gap={"2"}>
+                {selectedEntities.map((entity) => {
+                  if (!_.isEqual(entity, "")) {
+                    return (
+                      <Tag key={`tag-${entity}`}>
+                        <Linky id={entity} type={"entities"} />
+                        <TagCloseButton
+                          onClick={() => {
+                            setSelectedEntities(
+                              selectedEntities.filter((selected) => {
+                                return !_.isEqual(entity, selected);
+                              })
+                            );
+                          }}
+                        />
+                      </Tag>
+                    );
+                  } else {
+                    return null;
+                  }
+                })}
+              </Flex>
+            </Flex>
+
+            {/* "Done" button */}
+            <Flex direction={"row"} p={"md"} justify={"center"}>
+              <Button
+                colorScheme={"green"}
+                onClick={() => {
+                  if (id) {
+                    // Add the Entities to the Project
+                    addEntities(selectedEntities);
+                  }
+                }}
+              >
+                Done
+              </Button>
+            </Flex>
+          </ModalContent>
+        </Modal>
+
+        <Modal
+          isOpen={isExportOpen}
+          onClose={onExportClose}
+          size={"2xl"}
+          isCentered
+        >
+          <ModalOverlay />
+          <ModalContent p={"4"} gap={"4"} w={["sm", "lg", "2xl"]}>
+            {/* Heading and close button */}
+            <ModalHeader p={"2"}>Export Entity</ModalHeader>
+            <ModalCloseButton />
+
+            {/* Selection content */}
+            <Flex direction={"row"} gap={"4"}>
+              <Flex direction={"column"} p={"2"} gap={"2"}>
+                <FormControl>
+                  <FormLabel>Details</FormLabel>
+                  {isLoaded ? (
+                    <CheckboxGroup>
+                      <Stack spacing={2} direction={"column"}>
+                        <Checkbox disabled defaultChecked>
+                          Name: {projectData.name}
+                        </Checkbox>
+                        <Checkbox
+                          isChecked={
+                            exportAll || _.includes(exportFields, "created")
+                          }
+                          onChange={(event) =>
+                            handleExportCheck("created", event.target.checked)
+                          }
+                        >
+                          Created:{" "}
+                          {dayjs(projectData.created).format("DD MMM YYYY")}
+                        </Checkbox>
+                        <Checkbox
+                          isChecked={
+                            exportAll || _.includes(exportFields, "owner")
+                          }
+                          onChange={(event) =>
+                            handleExportCheck("owner", event.target.checked)
+                          }
+                        >
+                          Owner: {projectData.owner}
+                        </Checkbox>
+                        <Checkbox
+                          isChecked={
+                            exportAll || _.includes(exportFields, "description")
+                          }
+                          onChange={(event) =>
+                            handleExportCheck(
+                              "description",
+                              event.target.checked
+                            )
+                          }
+                          disabled={_.isEqual(projectDescription, "")}
+                        >
+                          <Text noOfLines={1}>
+                            Description:{" "}
+                            {_.isEqual(projectDescription, "")
+                              ? "No description"
+                              : projectDescription}
+                          </Text>
+                        </Checkbox>
+                      </Stack>
+                    </CheckboxGroup>
+                  ) : (
+                    <Text>Loading details</Text>
+                  )}
+                </FormControl>
+              </Flex>
+
+              <Flex direction={"column"} p={"2"} gap={"2"}>
+                <FormControl>
+                  <FormLabel>Entities</FormLabel>
+                  {isLoaded && projectEntities.length > 0 ? (
+                    <Stack spacing={2} direction={"column"}>
+                      {projectEntities.map((entity) => {
+                        allExportFields.push(`entity_${entity}`);
+                        return (
+                          <Checkbox
+                            key={entity}
+                            isChecked={
+                              exportAll ||
+                              _.includes(exportFields, `entity_${entity}`)
+                            }
+                            onChange={(event) =>
+                              handleExportCheck(
+                                `entity_${entity}`,
+                                event.target.checked
+                              )
+                            }
+                          >
+                            Entity: <Linky type={"entities"} id={entity} />
+                          </Checkbox>
+                        );
+                      })}
+                    </Stack>
+                  ) : (
+                    <Text>No Entities.</Text>
+                  )}
+                </FormControl>
+              </Flex>
+            </Flex>
+
+            {/* "Download" buttons */}
+            <Flex
+              direction={"row"}
+              p={"md"}
+              gap={"4"}
+              justify={"center"}
+              align={"center"}
+            >
+              <Checkbox
+                onChange={(event) => setExportAll(event.target.checked)}
+              >
+                Select All
+              </Checkbox>
+
+              <Spacer />
+
+              <Text>Download as:</Text>
+              <Button
+                colorScheme={"blue"}
+                onClick={() => handleDownloadClick(`json`)}
+                rightIcon={<Icon name={"download"} />}
+              >
+                JSON
+              </Button>
+              <Button
+                colorScheme={"blue"}
+                onClick={() => handleDownloadClick(`csv`)}
+                rightIcon={<Icon name={"download"} />}
+              >
+                CSV
+              </Button>
+              <Button
+                colorScheme={"blue"}
+                onClick={() => handleDownloadClick(`txt`)}
+                rightIcon={<Icon name={"download"} />}
+              >
+                TXT
+              </Button>
+            </Flex>
+          </ModalContent>
+        </Modal>
+
+        <Drawer
+          isOpen={isHistoryOpen}
+          placement={"right"}
+          onClose={onHistoryClose}
+        >
+          <DrawerOverlay />
+          <DrawerContent>
+            <DrawerCloseButton />
+            <DrawerHeader>Version History</DrawerHeader>
+
+            <DrawerBody>
+              <VStack spacing={"4"}>
+                {projectHistory && projectHistory.length > 0 ? (
+                  projectHistory.map((projectVersion) => {
+                    return (
+                      <Card w={"100%"} key={`v_${projectVersion.timestamp}`}>
+                        <CardHeader>
+                          <Flex align={"center"}>
+                            <Text fontStyle={"italic"}>
+                              {dayjs(projectVersion.timestamp).fromNow()}
+                            </Text>
+                            <Spacer />
+                            <Button
+                              colorScheme={"orange"}
+                              rightIcon={<Icon name={"rewind"} />}
+                              onClick={() => {
+                                handleRestoreFromHistoryClick(
+                                  projectVersion
+                                );
+                              }}
+                            >
+                              Restore
+                            </Button>
+                          </Flex>
+                        </CardHeader>
+                        <CardBody>
+                          <VStack gap={"1"} align={"baseline"}>
+                            <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
+                              <Text fontWeight={"bold"}>Description:</Text>
+                              <Text noOfLines={2}>
+                                {_.isEqual(projectVersion.description, "")
+                                  ? "None"
+                                  : projectVersion.description}
+                              </Text>
+                            </Flex>
+                            <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
+                              <Text fontWeight={"bold"}>Products:</Text>
+                              {projectVersion.entities.length > 0 ? (
+                                projectVersion.entities.map((entity) => {
+                                  return (
+                                    <Tag
+                                      key={`v_p_${projectVersion.timestamp}_${entity}`}
+                                    >
+                                      <Linky type={"entities"} id={entity} />
+                                    </Tag>
+                                  );
+                                })
+                              ) : (
+                                <Text>None</Text>
+                              )}
+                            </Flex>
+                          </VStack>
+                        </CardBody>
+                      </Card>
+                    );
+                  })
+                ) : (
+                  <Text>No previous versions.</Text>
+                )}
+              </VStack>
+            </DrawerBody>
+
+            <DrawerFooter>
+              <Button
+                colorScheme={"red"}
+                onClick={onHistoryClose}
+                rightIcon={<Icon name={"cross"} />}
+              >
+                Close
+              </Button>
+            </DrawerFooter>
+          </DrawerContent>
+        </Drawer>
       </Flex>
     </Content>
   );

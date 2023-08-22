@@ -39,9 +39,9 @@ import AttributeCard from "@components/AttributeCard";
 import {
   AttributeModel,
   AttributeCardProps,
-  CollectionModel,
   EntityModel,
   IEntity,
+  ProjectModel,
 } from "@types";
 
 // Utility functions and libraries
@@ -68,7 +68,7 @@ const Entity = () => {
   const [token, _useToken] = useToken();
 
   const [entities, setEntities] = useState([] as EntityModel[]);
-  const [collections, setCollections] = useState([] as CollectionModel[]);
+  const [projects, setProjects] = useState([] as ProjectModel[]);
   const [attributes, setAttributes] = useState([] as AttributeModel[]);
 
   const [isLoaded, setIsLoaded] = useState(false);
@@ -81,7 +81,7 @@ const Entity = () => {
   );
   const [owner, setOwner] = useState(token.username);
   const [description, setDescription] = useState("");
-  const [selectedCollections, setSelectedCollections] = useState(
+  const [selectedProjects, setSelectedProjects] = useState(
     [] as string[]
   );
   const [selectedOrigins, setSelectedOrigins] = useState(
@@ -105,7 +105,7 @@ const Entity = () => {
       origins: selectedOrigins,
       products: selectedProducts,
     },
-    collections: selectedCollections,
+    projects: selectedProjects,
     attributes: selectedAttributes,
     attachments: [],
     history: [],
@@ -139,16 +139,16 @@ const Entity = () => {
         setIsLoaded(true);
       });
 
-    // Get all Collections
-    getData(`/collections`)
+    // Get all Projects
+    getData(`/projects`)
       .then((response) => {
-        setCollections(response);
+        setProjects(response);
       })
       .catch((_error) => {
         toast({
           title: "Error",
           status: "error",
-          description: "Could not retrieve Collections data.",
+          description: "Could not retrieve Project data.",
           duration: 4000,
           position: "bottom-right",
           isClosable: true,
@@ -235,7 +235,7 @@ const Entity = () => {
 
   // Removal callback
   const onRemoveAttributeCard = (identifier: string) => {
-    // We need to filter the removed attribute from the total collection
+    // We need to filter the removed attribute
     setSelectedAttributes(
       selectedAttributes.filter((attribute) => attribute._id !== identifier)
     );
@@ -538,7 +538,7 @@ const Entity = () => {
               </Flex>
             </Flex>
 
-            {/* Collections */}
+            {/* Projects */}
             <Flex
               gap={"2"}
               p={"2"}
@@ -548,30 +548,30 @@ const Entity = () => {
               borderColor={"gray.100"}
             >
               <FormControl>
-                <FormLabel>Collections</FormLabel>
+                <FormLabel>Projects</FormLabel>
                 <CheckboxGroup
-                  value={selectedCollections}
+                  value={selectedProjects}
                   onChange={(event: string[]) => {
                     if (event) {
-                      setSelectedCollections([...event]);
+                      setSelectedProjects([...event]);
                     }
                   }}
                 >
                   <Stack spacing={[1, 5]} direction={"column"}>
-                    {collections.map((collection) => {
+                    {projects.map((project) => {
                       return (
-                        <Checkbox key={collection._id} value={collection._id}>
-                          {collection.name}
+                        <Checkbox key={project._id} value={project._id}>
+                          {project.name}
                         </Checkbox>
                       );
                     })}
-                    {collections.length === 0 && <Text>No Collections.</Text>}
+                    {projects.length === 0 && <Text>No Projects.</Text>}
                   </Stack>
                 </CheckboxGroup>
                 <FormHelperText>
-                  Specify the collections that this new Entity should be
+                  Specify the Projects that this new Entity should be
                   included with. The Entity will then show up underneath the
-                  specified collections.
+                  specified Projects.
                 </FormHelperText>
               </FormControl>
             </Flex>
@@ -631,7 +631,7 @@ const Entity = () => {
                 leftIcon={<Icon name={"add"} />}
                 colorScheme={"green"}
                 onClick={() => {
-                  // Create an 'empty' Attribute and add the data structure to the 'selectedAttributes' collection
+                  // Create an 'empty' Attribute and add the data structure to 'selectedAttributes'
                   setSelectedAttributes([
                     ...selectedAttributes,
                     {
@@ -727,14 +727,14 @@ const Entity = () => {
                 <Heading size={"md"}>Overview</Heading>
                 <Text>
                   Specify some basic details about this Entity. Relations
-                  between Entities and membership to Collections can be
+                  between Entities and membership to Projects can be
                   specified on the following page. Finally, the metadata
                   associated with this Entity should be specified using
                   Attributes and corresponding Values.
                 </Text>
                 <Heading size={"md"}>Associations</Heading>
                 <Text>
-                  Relations between Entities and membership to Collections can
+                  Relations between Entities and membership to Projects can
                   be specified using Associations.
                 </Text>
                 <Heading size={"md"}>Attributes</Heading>

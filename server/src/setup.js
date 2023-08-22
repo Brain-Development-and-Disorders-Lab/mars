@@ -13,6 +13,6 @@ db.createUser({
 
 // Step 2: Create collections to manage metadata within the overall "metadata" database
 db.createCollection("entities");
-db.createCollection("collections");
+db.createCollection("projects");
 db.createCollection("attributes");
 db.createCollection("updates");

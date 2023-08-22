@@ -14,12 +14,11 @@ import { connectPrimary, connectSystem } from "./database/connection";
 // Routes
 import ActivityRoute from "./routes/Activity";
 import EntitiesRoute from "./routes/Entities";
-import CollectionsRoute from "./routes/Collections";
+import ProjectsRoute from "./routes/Projects";
 import AttributesRoute from "./routes/Attributes";
 import SearchRoute from "./routes/Search";
 import SystemRoute from "./routes/System";
 import AuthenticationRoute from "./routes/Authentication";
-import ProjectsRoute from "./routes/Projects";
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -32,7 +31,6 @@ app.use(
   ActivityRoute,
   AttributesRoute,
   AuthenticationRoute,
-  CollectionsRoute,
   EntitiesRoute,
   ProjectsRoute,
   SearchRoute,

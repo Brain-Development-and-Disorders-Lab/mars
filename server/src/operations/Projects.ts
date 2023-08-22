@@ -4,7 +4,7 @@ import { Entities } from "./Entities";
 import { Activity } from "./Activity";
 
 // Custom types
-import { CollectionModel, ProjectModel } from "@types";
+import { ProjectModel, IProject } from "@types";
 
 // Utility libraries
 import _ from "lodash";
@@ -13,7 +13,6 @@ import dayjs from "dayjs";
 import fs from "fs";
 import Papa from "papaparse";
 import tmp from "tmp";
-import { Collections } from "./Collections";
 
 const PROJECTS = "projects";
 
@@ -55,7 +54,7 @@ export class Projects {
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(PROJECTS)
-        .insertOne(project, (error: any, _result: any) => {
+        .insertOne(project, (error: any, result: any) => {
           if (error) {
             throw error;
           }
@@ -63,12 +62,17 @@ export class Projects {
           // Database operations to perform
           const operations: Promise<any>[] = [];
 
+          // Add any Entities to the Project
+          for (const entity of (project as IProject).entities) {
+            operations.push(Projects.addEntity(result.insertedId, entity));
+          }
+
           // Add Update operation
           operations.push(
             Activity.create({
               timestamp: new Date(Date.now()),
               type: "create",
-              details: "Created new Collection",
+              details: "Created new Project",
               target: {
                 type: "projects",
                 id: project._id,
@@ -110,14 +114,14 @@ export class Projects {
 
           // Entities
           const entitiesToKeep = currentProject.entities.filter((entity) =>
-          updatedProject.entities.includes(entity)
+            updatedProject.entities.includes(entity)
           );
           const entitiesToAdd = updatedProject.entities.filter(
             (entity) => !currentProject.entities.includes(entity)
           );
           entitiesToAdd.map((entity: string) => {
             operations.push(
-              Entities.addCollection(entity, currentProject._id)
+              Entities.addProject(entity, currentProject._id)
             );
           });
           const entitiesToRemove = currentProject.entities.filter(
@@ -125,62 +129,22 @@ export class Projects {
           );
           entitiesToRemove.map((entity: string) => {
             operations.push(
-              Entities.removeCollection(entity, currentProject._id)
+              Entities.removeProject(entity, currentProject._id)
             );
           });
 
-          // Collections
-          const collectionsToKeep = currentProject.collections.filter(
-            (collection) => updatedProject.collections.includes(collection)
-          );
-          const collectionsToAdd = updatedProject.collections.filter(
-            (collection) => !currentProject.collections.includes(collection)
-          );
-          // const collectionsToRemove = currentProject.collections.filter(
-          //   (collection) => !collectionsToKeep.includes(collection)
-          // );
-
-          // Attributes
-          const attributesToKeep = currentProject.attributes.filter(
-            (attribute) => updatedProject.attributes.includes(attribute)
-          );
-          const attributesToAdd = updatedProject.attributes.filter(
-            (attribute) => !currentProject.attributes.includes(attribute)
-          );
-          // const attributesToRemove = currentProject.attributes.filter(
-          //   (attribute) => !collectionsToKeep.includes(attribute)
-          // );
-
-          // Users
-          const usersToKeep = currentProject.users.filter(
-            (user) => updatedProject.users.includes(user)
-          );
-          const usersToAdd = updatedProject.users.filter(
-            (user) => !currentProject.users.includes(user)
-          );
-          // const usersToRemove = currentProject.users.filter(
-          //   (user) => !usersToKeep.includes(user)
-          // );
-
           const updates = {
             $set: {
-              name: updatedProject.name,
               description: updatedProject.description,
-              users: [...usersToKeep, ...usersToAdd],
               entities: [...entitiesToKeep, ...entitiesToAdd],
-              collections: [...collectionsToKeep, ...collectionsToAdd],
-              attributes: [...attributesToKeep, ...attributesToAdd],
               history: [
                 {
-                  name: currentProject.name,
                   timestamp: dayjs(Date.now()).toISOString(),
-                  desciption: currentProject.description,
-                  owner: currentProject.owner,
-                  users: currentProject.users,
+                  name: currentProject.name,
                   created: currentProject.created,
+                  owner: currentProject.owner,
+                  description: currentProject.description,
                   entities: currentProject.entities,
-                  collections: currentProject.collections,
-                  attributes: currentProject.attributes,
                 },
                 ...currentProject.history,
               ],
@@ -288,7 +252,7 @@ export class Projects {
             throw error;
           }
 
-          // Update the Project to include the Entity
+          // Update the collection to include the Entity
           const updatedValues = {
             $set: {
               entities: _.concat(result.entities, entity),
@@ -337,7 +301,7 @@ export class Projects {
             throw error;
           }
 
-          // Update the Project to include the Entities
+          // Update the collection to include the Entity
           const updatedValues = {
             $set: {
               entities: _.uniq(_.concat(result.entities, entities)),
@@ -386,7 +350,7 @@ export class Projects {
             throw error;
           }
 
-          // Update the Project to remove the Entity
+          // Update the collection to remove the Entity
           const updatedValues = {
             $set: {
               entities: (result as ProjectModel).entities.filter(
@@ -435,7 +399,7 @@ export class Projects {
   };
 
   /**
-   * Get a single Collection
+   * Get a single Project
    * @return {Promise<ProjectModel>}
    */
   static getOne = (id: string): Promise<ProjectModel> => {
@@ -479,17 +443,17 @@ export class Projects {
               throw error;
             }
 
-            const collection = result as CollectionModel;
+            const project = result as ProjectModel;
 
             if (_.isEqual(projectExportData.format, "csv")) {
               const headers = ["ID", "Name"];
               const row: Promise<string>[] = [
-                Promise.resolve(collection._id),
-                Promise.resolve(collection.name),
+                Promise.resolve(project._id),
+                Promise.resolve(project.name),
               ];
 
               const entities: Promise<string>[] = [];
-              const collections: Promise<string>[] = [];
+              const projects: Promise<string>[] = [];
 
               // Iterate over fields and generate a CSV export file
               projectExportData.fields.map((field) => {
@@ -498,23 +462,23 @@ export class Projects {
                   headers.push("Created");
                   row.push(
                     Promise.resolve(
-                      dayjs(collection.created).format("DD MMM YYYY").toString()
+                      dayjs(project.created).format("DD MMM YYYY").toString()
                     )
                   );
                 } else if (_.isEqual(field, "owner")) {
                   // "owner" data field
                   headers.push("Owner");
-                  row.push(Promise.resolve(collection.owner));
+                  row.push(Promise.resolve(project.owner));
                 } else if (_.isEqual(field, "description")) {
                   // "description" data field
                   headers.push("Description");
-                  row.push(Promise.resolve(collection.description));
-                } else if (_.startsWith(field, "collection_")) {
-                  // "collection" data fields
-                  collections.push(
-                    Collections.getOne(_.split(field, "_")[1]).then(
-                      (collection) => {
-                        return collection.name;
+                  row.push(Promise.resolve(project.description));
+                } else if (_.startsWith(field, "project_")) {
+                  // "project" data fields
+                  projects.push(
+                    Projects.getOne(_.split(field, "_")[1]).then(
+                      (project) => {
+                        return project.name;
                       }
                     )
                   );
@@ -530,8 +494,8 @@ export class Projects {
 
               Promise.all([
                 Promise.all(entities),
-                Promise.all(collections),
-              ]).then(([entities, collections]) => {
+                Promise.all(projects),
+              ]).then(([entities, projects]) => {
                 // Collate and format data as a CSV string
                 Promise.all(row).then((rowData) => {
                   // Append Entities
@@ -540,10 +504,10 @@ export class Projects {
                     rowData.push(entities.join(", "));
                   }
 
-                  // Append Collections
-                  if (collections.length > 0) {
-                    headers.push("Collections");
-                    rowData.push(collections.join(", "));
+                  // Append Projects
+                  if (projects.length > 0) {
+                    headers.push("Projects");
+                    rowData.push(projects.join(", "));
                   }
 
                   const collated = [headers, rowData];
@@ -568,12 +532,12 @@ export class Projects {
             } else if (_.isEqual(projectExportData.format, "json")) {
               // JSON export
               const tempStructure = {
-                _id: collection._id,
-                name: collection.name,
+                _id: project._id,
+                name: project.name,
                 created: "",
                 owner: "",
                 description: "",
-                collections: [],
+                projects: [],
                 entities: [],
               } as { [key: string]: any };
               const exportOperations = [] as Promise<string>[];
@@ -581,23 +545,23 @@ export class Projects {
               projectExportData.fields.map((field) => {
                 if (_.isEqual(field, "created")) {
                   // "created" data field
-                  tempStructure["created"] = dayjs(collection.created)
+                  tempStructure["created"] = dayjs(project.created)
                     .format("DD MMM YYYY")
                     .toString();
                 } else if (_.isEqual(field, "owner")) {
                   // "owner" data field
-                  tempStructure["owner"] = collection.owner;
+                  tempStructure["owner"] = project.owner;
                 } else if (_.isEqual(field, "description")) {
                   // "description" data field
-                  tempStructure["description"] = collection.description;
-                } else if (_.startsWith(field, "collection")) {
-                  // "collection" data fields
-                  tempStructure["collections"] = [];
+                  tempStructure["description"] = project.description;
+                } else if (_.startsWith(field, "project")) {
+                  // "project" data fields
+                  tempStructure["projects"] = [];
                   exportOperations.push(
-                    Collections.getOne(_.split(field, "_")[1]).then(
-                      (collection) => {
-                        tempStructure["collections"].push(collection.name);
-                        return collection.name;
+                    Projects.getOne(_.split(field, "_")[1]).then(
+                      (project) => {
+                        tempStructure["projects"].push(project.name);
+                        return project.name;
                       }
                     )
                   );
@@ -638,33 +602,33 @@ export class Projects {
 
               // Structures to collate data
               const textDetails = [
-                `ID: ${collection._id}`,
-                `Name: ${collection.name}`,
+                `ID: ${project._id}`,
+                `Name: ${project.name}`,
               ];
-              const textCollections = [] as string[];
+              const textProjects = [] as string[];
               const textEntities = [] as string[];
 
               projectExportData.fields.map((field) => {
                 if (_.isEqual(field, "created")) {
                   // "created" data field
                   textDetails.push(
-                    `Created: ${dayjs(collection.created)
+                    `Created: ${dayjs(project.created)
                       .format("DD MMM YYYY")
                       .toString()}`
                   );
                 } else if (_.isEqual(field, "owner")) {
                   // "owner" data field
-                  textDetails.push(`Owner: ${collection.owner}`);
+                  textDetails.push(`Owner: ${project.owner}`);
                 } else if (_.isEqual(field, "description")) {
                   // "description" data field
-                  textDetails.push(`Description: ${collection.description}`);
-                } else if (_.startsWith(field, "collection_")) {
-                  // "collection" data fields
+                  textDetails.push(`Description: ${project.description}`);
+                } else if (_.startsWith(field, "project_")) {
+                  // "project" data fields
                   exportOperations.push(
-                    Collections.getOne(_.split(field, "_")[1]).then(
-                      (collection) => {
-                        textCollections.push(collection.name);
-                        return collection.name;
+                    Projects.getOne(_.split(field, "_")[1]).then(
+                      (project) => {
+                        textProjects.push(project.name);
+                        return project.name;
                       }
                     )
                   );
@@ -688,9 +652,9 @@ export class Projects {
                     throw error;
                   }
 
-                  if (textCollections.length > 0) {
+                  if (textProjects.length > 0) {
                     textDetails.push(
-                      `Collections: ${textCollections.join(", ")}`
+                      `Projects: ${textProjects.join(", ")}`
                     );
                   }
                   if (textEntities.length > 0) {
@@ -711,54 +675,54 @@ export class Projects {
     });
   };
 
-  // static delete = (id: string): Promise<ProjectModel> => {
-  //   consola.start("Deleting Project (id):", id.toString());
-  //   return new Promise((resolve, _reject) => {
-  //     getDatabase()
-  //       .collection(PROJECTS)
-  //       .findOne({ _id: id }, (error: any, result: any) => {
-  //         if (error) {
-  //           throw error;
-  //         }
-  //         // Store the Project data
-  //         const collection: ProjectModel = result;
+  static delete = (id: string): Promise<ProjectModel> => {
+    consola.start("Deleting Project (id):", id.toString());
+    return new Promise((resolve, _reject) => {
+      getDatabase()
+        .collection(PROJECTS)
+        .findOne({ _id: id }, (error: any, result: any) => {
+          if (error) {
+            throw error;
+          }
+          // Store the Project data
+          const project: ProjectModel = result;
 
-  //         const operations: Promise<any>[] = [];
+          const operations: Promise<any>[] = [];
 
-  //         // Remove the Entities from the Project
-  //         collection.entities.map((entity) => {
-  //           operations.push(Entities.removeCollection(entity, collection._id));
-  //         });
+          // Remove the Entities from the Project
+          project.entities.map((entity) => {
+            operations.push(Entities.removeProject(entity, project._id));
+          });
 
-  //         // Add Update operation
-  //         operations.push(
-  //           Activity.create({
-  //             timestamp: new Date(Date.now()),
-  //             type: "delete",
-  //             details: "Deleted Collection",
-  //             target: {
-  //               type: "collections",
-  //               id: collection._id,
-  //               name: collection.name,
-  //             },
-  //           })
-  //         );
+          // Add Update operation
+          operations.push(
+            Activity.create({
+              timestamp: new Date(Date.now()),
+              type: "delete",
+              details: "Deleted Project",
+              target: {
+                type: "projects",
+                id: project._id,
+                name: project.name,
+              },
+            })
+          );
 
-  //         // Resolve all operations then resolve overall Promise
-  //         Promise.all(operations).then((_result) => {
-  //           // Delete the Collection
-  //           getDatabase()
-  //             .collection(COLLECTIONS)
-  //             .deleteOne({ _id: id }, (error: any, _content: any) => {
-  //               if (error) {
-  //                 throw error;
-  //               }
+          // Resolve all operations then resolve overall Promise
+          Promise.all(operations).then((_result) => {
+            // Delete the Project
+            getDatabase()
+              .collection(PROJECTS)
+              .deleteOne({ _id: id }, (error: any, _content: any) => {
+                if (error) {
+                  throw error;
+                }
 
-  //               consola.success("Deleted Collection (id):", id.toString());
-  //               resolve(result);
-  //             });
-  //         });
-  //       });
-  //   });
-  // };
+                consola.success("Deleted Project (id):", id.toString());
+                resolve(result);
+              });
+          });
+        });
+    });
+  };
 }

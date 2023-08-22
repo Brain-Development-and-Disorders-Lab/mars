@@ -11,11 +11,6 @@ import {
   List,
   ListItem,
   useBreakpoint,
-  Tabs,
-  TabList,
-  Tab,
-  TabPanels,
-  TabPanel,
 } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
 import { Content } from "@components/Container";
@@ -24,7 +19,7 @@ import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 
 // Existing and custom types
-import { CollectionModel, EntityModel, ActivityModel } from "@types";
+import { ProjectModel, EntityModel, ActivityModel } from "@types";
 
 // Utility functions and libraries
 import { getData } from "src/database/functions";
@@ -50,7 +45,7 @@ const Dashboard = () => {
 
   // Page data
   const [entityData, setEntityData] = useState([] as EntityModel[]);
-  const [collectionData, setCollectionData] = useState([] as CollectionModel[]);
+  const [projectData, setProjectData] = useState([] as ProjectModel[]);
   const [activityData, setActivityData] = useState([] as ActivityModel[]);
 
   const [visibleColumns, setVisibleColumns] = useState({});
@@ -90,18 +85,18 @@ const Dashboard = () => {
       });
   }, []);
 
-  // Get all Collections
+  // Get all Projects
   useEffect(() => {
-    getData(`/collections`)
+    getData(`/projects`)
       .then((value) => {
-        setCollectionData(value.reverse());
+        setProjectData(value.reverse());
         setIsLoaded(true);
       })
       .catch((_error) => {
         toast({
           title: "Error",
           status: "error",
-          description: "Could not retrieve Collections data.",
+          description: "Could not retrieve Projects data.",
           duration: 4000,
           position: "bottom-right",
           isClosable: true,
@@ -176,24 +171,20 @@ const Dashboard = () => {
     }),
   ];
 
-  // Configure Collections table
-  const collectionTableData: CollectionModel[] = collectionData;
-  const collectionTableColumnHelper = createColumnHelper<CollectionModel>();
-  const collectionTableColumns = [
-    collectionTableColumnHelper.accessor("name", {
+  // Configure Projects table
+  const projectTableData: ProjectModel[] = projectData;
+  const projectTableColumnHelper = createColumnHelper<ProjectModel>();
+  const projectTableColumns = [
+    projectTableColumnHelper.accessor("name", {
       cell: (info) => info.getValue(),
       header: "Name",
     }),
-    collectionTableColumnHelper.accessor("entities", {
+    projectTableColumnHelper.accessor("entities", {
       cell: (info) => info.getValue().length,
       header: "Entity Count",
       enableHiding: true,
     }),
-    collectionTableColumnHelper.accessor("collections", {
-      cell: (info) => info.getValue().length,
-      header: "Collection Count",
-    }),
-    collectionTableColumnHelper.accessor("_id", {
+    projectTableColumnHelper.accessor("_id", {
       cell: (info) => {
         return (
           <Flex justifyContent={"right"}>
@@ -201,7 +192,7 @@ const Dashboard = () => {
               key={`view-entity-${info.getValue()}`}
               colorScheme={"blackAlpha"}
               rightIcon={<Icon name={"c_right"} />}
-              onClick={() => navigate(`/collections/${info.getValue()}`)}
+              onClick={() => navigate(`/projects/${info.getValue()}`)}
             >
               View
             </Button>
@@ -216,7 +207,7 @@ const Dashboard = () => {
     <Content isError={isError} isLoaded={isLoaded}>
       <Flex direction={"row"} wrap={"wrap"} gap={"4"} p={"4"} h={"100%"}>
         <Flex direction={"column"} gap={"4"} grow={"2"} h={"100%"}>
-          {/* Collections and Entities */}
+          {/* Projects and Entities */}
           <Flex
             h={"50%"}
             direction={"column"}
@@ -227,56 +218,33 @@ const Dashboard = () => {
             border={"1px"}
             borderColor={"gray.100"}
           >
-            {/* Collections heading */}
+            {/* Projects heading */}
             <Flex direction={"row"} align={"center"} gap={"4"}>
-              <Icon name={"collection"} size={"lg"} />
-              <Heading fontWeight={"semibold"}>Collections</Heading>
+              <Icon name={"project"} size={"lg"} />
+              <Heading fontWeight={"semibold"}>Projects</Heading>
             </Flex>
 
-            {/* Collections table */}
-            {isLoaded && collectionData.length > 0 ? (
-              <Tabs variant={"soft-rounded"}>
-                <TabList gap={"2"} p={"2"}>
-                  <Tab>Standard</Tab>
-                  <Tab>Projects</Tab>
-                </TabList>
-                <TabPanels>
-                  <TabPanel>
-                    <DataTable
-                      columns={collectionTableColumns}
-                      data={collectionTableData.filter((collection) =>
-                        _.isEqual(collection.type, "collection")
-                      )}
-                      visibleColumns={visibleColumns}
-                      hidePagination
-                      hideSelection
-                    />
-                  </TabPanel>
-                  <TabPanel>
-                    <DataTable
-                      columns={collectionTableColumns}
-                      data={collectionTableData.filter((collection) =>
-                        _.isEqual(collection.type, "project")
-                      )}
-                      visibleColumns={visibleColumns}
-                      hidePagination
-                      hideSelection
-                    />
-                  </TabPanel>
-                </TabPanels>
-              </Tabs>
+            {/* Projects table */}
+            {isLoaded && projectData.length > 0 ? (
+              <DataTable
+                columns={projectTableColumns}
+                data={projectTableData}
+                visibleColumns={visibleColumns}
+                hidePagination
+                hideSelection
+              />
             ) : (
-              <Text>There are no Collections to display.</Text>
+              <Text>There are no Projects to display.</Text>
             )}
 
             <Spacer />
 
             <Flex justify={"right"}>
               <Button
-                key={`view-collection-all`}
+                key={`view-projects-all`}
                 colorScheme={"teal"}
                 rightIcon={<Icon name={"c_right"} />}
-                onClick={() => navigate(`/collections`)}
+                onClick={() => navigate(`/projects`)}
               >
                 View All
               </Button>

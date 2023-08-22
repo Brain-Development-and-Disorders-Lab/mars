@@ -75,10 +75,10 @@ import { createColumnHelper } from "@tanstack/react-table";
 // Existing and custom types
 import {
   AttributeModel,
-  CollectionModel,
   EntityHistory,
   EntityModel,
   IValue,
+  ProjectModel,
 } from "@types";
 
 // Utility functions and libraries
@@ -106,12 +106,12 @@ const Entity = () => {
   } = useDisclosure();
 
   const {
-    isOpen: isAddCollectionsOpen,
-    onOpen: onAddCollectionsOpen,
-    onClose: onAddCollectionsClose,
+    isOpen: isAddProjectsOpen,
+    onOpen: onAddProjectsOpen,
+    onClose: onAddProjectsClose,
   } = useDisclosure();
-  const [collectionData, setCollectionData] = useState([] as CollectionModel[]);
-  const [selectedCollections, setSelectedCollections] = useState(
+  const [projectData, setProjectData] = useState([] as ProjectModel[]);
+  const [selectedProjects, setSelectedProjects] = useState(
     [] as string[]
   );
 
@@ -196,7 +196,7 @@ const Entity = () => {
   // Break up entity data into editable fields
   const [entityData, setEntityData] = useState({} as EntityModel);
   const [entityDescription, setEntityDescription] = useState("");
-  const [entityCollections, setEntityCollections] = useState([] as string[]);
+  const [entityProjects, setEntityProjects] = useState([] as string[]);
   const [entityOrigins, setEntityOrigins] = useState(
     [] as { name: string; id: string }[]
   );
@@ -242,7 +242,7 @@ const Entity = () => {
         // Store all received data and assign to specific fields
         setEntityData(response);
         setEntityDescription(response.description || "");
-        setEntityCollections(response.collections);
+        setEntityProjects(response.projects);
         setEntityOrigins(response.associations.origins);
         setEntityProducts(response.associations.products);
         setEntityAttributes(response.attributes);
@@ -264,15 +264,15 @@ const Entity = () => {
         setIsLoaded(true);
       });
 
-    // Populate Collection data
-    getData(`/collections`)
+    // Populate Project data
+    getData(`/projects`)
       .then((response) => {
-        setCollectionData(response);
+        setProjectData(response);
       })
       .catch(() => {
         toast({
           title: "Error",
-          description: "Could not retrieve Collections data.",
+          description: "Could not retrieve Project data.",
           status: "error",
           duration: 4000,
           position: "bottom-right",
@@ -322,7 +322,7 @@ const Entity = () => {
         locked: entityData.locked,
         owner: entityData.owner,
         description: entityDescription,
-        collections: entityCollections,
+        projects: entityProjects,
         associations: {
           origins: entityOrigins,
           products: entityProducts,
@@ -390,7 +390,7 @@ const Entity = () => {
       locked: false,
       owner: entityData.owner,
       description: entityDescription,
-      collections: entityCollections,
+      projects: entityProjects,
       associations: {
         origins: entityOrigins,
         products: entityProducts,
@@ -427,7 +427,7 @@ const Entity = () => {
         // Apply updated state
         setEntityData(updateData);
         setEntityDescription(updateData.description || "");
-        setEntityCollections(updateData.collections);
+        setEntityProjects(updateData.projects);
         setEntityOrigins(updateData.associations.origins);
         setEntityProducts(updateData.associations.products);
         setEntityAttributes(updateData.attributes);
@@ -441,12 +441,12 @@ const Entity = () => {
     _.isEqual(breakpoint, "base") ||
     _.isUndefined(breakpoint);
 
-  // Configure collections table columns and data
-  const collectionTableColumns = [
+  // Configure Projects table columns and data
+  const projectsTableColumns = [
     {
       id: (info: any) => info.row.original,
       cell: (info: any) => (
-        <Linky id={info.row.original} type={"collections"} />
+        <Linky id={info.row.original} type={"projects"} />
       ),
       header: "Name",
     },
@@ -461,7 +461,7 @@ const Entity = () => {
                 rightIcon={<Icon name={"delete"} />}
                 colorScheme={"red"}
                 onClick={() => {
-                  removeCollection(info.row.original);
+                  removeProject(info.row.original);
                 }}
               >
                 Remove
@@ -471,7 +471,7 @@ const Entity = () => {
                 key={`view-${info.row.original}`}
                 rightIcon={<Icon name={"c_right"} />}
                 colorScheme={"teal"}
-                onClick={() => navigate(`/collections/${info.row.original}`)}
+                onClick={() => navigate(`/projects/${info.row.original}`)}
               >
                 View
               </Button>
@@ -696,7 +696,7 @@ const Entity = () => {
       locked: entityData.locked,
       owner: entityVersion.owner,
       description: entityVersion.description,
-      collections: entityVersion.collections,
+      projects: entityVersion.projects,
       associations: {
         origins: entityVersion.associations.origins,
         products: entityVersion.associations.products,
@@ -736,7 +736,7 @@ const Entity = () => {
         // Apply updated state
         setEntityData(updateData);
         setEntityDescription(updateData.description || "");
-        setEntityCollections(updateData.collections);
+        setEntityProjects(updateData.projects);
         setEntityOrigins(updateData.associations.origins);
         setEntityProducts(updateData.associations.products);
         setEntityAttributes(updateData.attributes);
@@ -895,11 +895,11 @@ const Entity = () => {
     );
   };
 
-  // Remove Collections from the Entity state
-  const removeCollection = (id: string) => {
-    setEntityCollections(
-      entityCollections.filter((collection) => {
-        return collection !== id;
+  // Remove a Project from the Entity state
+  const removeProject = (id: string) => {
+    setEntityProjects(
+      entityProjects.filter((project) => {
+        return project !== id;
       })
     );
   };
@@ -966,16 +966,16 @@ const Entity = () => {
   };
 
   /**
-   * Callback function to the Entity to Collections
-   * @param {{ entities: string[], collection: string }} data List of Entities and a Collection to add the Entities to
+   * Callback function to the Entity to Projects
+   * @param {string[]} projects List of Projects to add the Entities to
    */
-  const addCollections = (collections: string[]): void => {
-    setEntityCollections([
-      ...entityCollections,
-      ...collections.filter((collection) => !_.isEqual("", collection)),
+  const addProjects = (projects: string[]): void => {
+    setEntityProjects([
+      ...entityProjects,
+      ...projects.filter((project) => !_.isEqual("", project)),
     ]);
-    setSelectedCollections([]);
-    onAddCollectionsClose();
+    setSelectedProjects([]);
+    onAddProjectsClose();
   };
 
   return (
@@ -1197,7 +1197,7 @@ const Entity = () => {
               </TableContainer>
             </Flex>
 
-            {/* Collections */}
+            {/* Projects */}
             <Flex
               gap={"2"}
               p={"4"}
@@ -1209,25 +1209,25 @@ const Entity = () => {
               borderColor={"gray.100"}
             >
               <Flex direction={"row"} justify={"space-between"}>
-                <Heading size={"lg"}>Collections</Heading>
+                <Heading size={"lg"}>Projects</Heading>
                 {editing ? (
                   <Button
                     colorScheme={"green"}
                     rightIcon={<Icon name={"add"} />}
                     disabled={!editing}
-                    onClick={onAddCollectionsOpen}
+                    onClick={onAddProjectsOpen}
                   >
                     Add
                   </Button>
                 ) : null}
               </Flex>
 
-              {entityCollections.length === 0 ? (
-                <Text>No Collections.</Text>
+              {entityProjects.length === 0 ? (
+                <Text>No Projects.</Text>
               ) : (
                 <DataTable
-                  data={entityCollections}
-                  columns={collectionTableColumns}
+                  data={entityProjects}
+                  columns={projectsTableColumns}
                   visibleColumns={{}}
                   viewOnly={!editing}
                   hideSelection={!editing}
@@ -1572,49 +1572,49 @@ const Entity = () => {
           </ModalContent>
         </Modal>
 
-        {/* Add Collections modal */}
+        {/* Add Projects modal */}
         <Modal
-          isOpen={isAddCollectionsOpen}
-          onClose={onAddCollectionsClose}
+          isOpen={isAddProjectsOpen}
+          onClose={onAddProjectsClose}
           isCentered
         >
           <ModalOverlay />
           <ModalContent p={"4"}>
             {/* Heading and close button */}
-            <ModalHeader>Add to Collection</ModalHeader>
+            <ModalHeader>Add to Project</ModalHeader>
             <ModalCloseButton />
 
-            {/* Select component for Collections */}
+            {/* Select component for Projects */}
             <Flex direction={"column"} p={"2"} gap={"2"}>
               <FormControl>
-                <FormLabel>Add Entity to Collections</FormLabel>
+                <FormLabel>Add Entity to Projects</FormLabel>
                 <Select
-                  title="Select Collection"
-                  placeholder={"Select Collection"}
+                  title="Select Project"
+                  placeholder={"Select Project"}
                   onChange={(event) => {
-                    const selectedCollection = event.target.value.toString();
-                    if (selectedCollections.includes(selectedCollection)) {
+                    const selectedProject = event.target.value.toString();
+                    if (selectedProjects.includes(selectedProject)) {
                       toast({
                         title: "Warning",
-                        description: "Collection has already been selected.",
+                        description: "Project has already been selected.",
                         status: "warning",
                         duration: 2000,
                         position: "bottom-right",
                         isClosable: true,
                       });
                     } else {
-                      setSelectedCollections([
-                        ...selectedCollections,
-                        selectedCollection,
+                      setSelectedProjects([
+                        ...selectedProjects,
+                        selectedProject,
                       ]);
                     }
                   }}
                 >
                   {isLoaded &&
-                    collectionData.map((collection) => {
+                    projectData.map((project) => {
                       return (
-                        <option key={collection._id} value={collection._id}>
-                          {collection.name}
+                        <option key={project._id} value={project._id}>
+                          {project.name}
                         </option>
                       );
                     })}
@@ -1623,16 +1623,16 @@ const Entity = () => {
               </FormControl>
 
               <Flex direction={"row"} p={"2"} gap={"2"}>
-                {selectedCollections.map((collection) => {
-                  if (!_.isEqual(collection, "")) {
+                {selectedProjects.map((project) => {
+                  if (!_.isEqual(project, "")) {
                     return (
-                      <Tag key={`tag-${collection}`}>
-                        <Linky id={collection} type={"collections"} />
+                      <Tag key={`tag-${project}`}>
+                        <Linky id={project} type={"projects"} />
                         <TagCloseButton
                           onClick={() => {
-                            setSelectedCollections(
-                              selectedCollections.filter((selected) => {
-                                return !_.isEqual(collection, selected);
+                            setSelectedProjects(
+                              selectedProjects.filter((selected) => {
+                                return !_.isEqual(project, selected);
                               })
                             );
                           }}
@@ -1652,7 +1652,7 @@ const Entity = () => {
                 colorScheme={"red"}
                 variant={"outline"}
                 rightIcon={<Icon name={"cross"} />}
-                onClick={onAddCollectionsClose}
+                onClick={onAddProjectsClose}
               >
                 Cancel
               </Button>
@@ -1661,7 +1661,7 @@ const Entity = () => {
                 colorScheme={"green"}
                 rightIcon={<Icon name={"check"} />}
                 onClick={() => {
-                  addCollections(selectedCollections);
+                  addProjects(selectedProjects);
                 }}
               >
                 Done
@@ -1763,7 +1763,7 @@ const Entity = () => {
                 rightIcon={<Icon name={"check"} />}
                 onClick={() => {
                   if (id) {
-                    // Add the Entities to the Collection
+                    // Add the Entities to the Project
                     addProducts(selectedProducts);
                   }
                 }}
@@ -1863,7 +1863,7 @@ const Entity = () => {
                 rightIcon={<Icon name={"check"} />}
                 onClick={() => {
                   if (id) {
-                    // Add the Entities to the Collection
+                    // Add the Entities to the Project
                     addOrigins(selectedOrigins);
                   }
                 }}
@@ -1955,36 +1955,36 @@ const Entity = () => {
                   )}
                 </FormControl>
                 <FormControl>
-                  <FormLabel>Collections</FormLabel>
-                  {isLoaded && entityCollections.length > 0 ? (
+                  <FormLabel>Projects</FormLabel>
+                  {isLoaded && entityProjects.length > 0 ? (
                     <Stack spacing={2} direction={"column"}>
-                      {entityCollections.map((collection) => {
-                        allExportFields.push(`collection_${collection}`);
+                      {entityProjects.map((project) => {
+                        allExportFields.push(`project_${project}`);
                         return (
                           <Checkbox
-                            key={collection}
+                            key={project}
                             isChecked={
                               exportAll ||
                               _.includes(
                                 exportFields,
-                                `collection_${collection}`
+                                `project_${project}`
                               )
                             }
                             onChange={(event) =>
                               handleExportCheck(
-                                `collection_${collection}`,
+                                `project_${project}`,
                                 event.target.checked
                               )
                             }
                           >
-                            Collection:{" "}
-                            {<Linky id={collection} type={"collections"} />}
+                            Project:{" "}
+                            {<Linky id={project} type={"projects"} />}
                           </Checkbox>
                         );
                       })}
                     </Stack>
                   ) : (
-                    <Text>No Collections.</Text>
+                    <Text>No Projects.</Text>
                   )}
                 </FormControl>
               </Flex>
@@ -2222,16 +2222,16 @@ const Entity = () => {
                               </Text>
                             </Flex>
                             <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
-                              <Text fontWeight={"bold"}>Collections:</Text>
-                              {entityVersion.collections.length > 0 ? (
-                                entityVersion.collections.map((collection) => {
+                              <Text fontWeight={"bold"}>Projects:</Text>
+                              {entityVersion.projects.length > 0 ? (
+                                entityVersion.projects.map((project) => {
                                   return (
                                     <Tag
-                                      key={`v_c_${entityVersion.timestamp}_${collection}`}
+                                      key={`v_c_${entityVersion.timestamp}_${project}`}
                                     >
                                       <Linky
-                                        type={"collections"}
-                                        id={collection}
+                                        type={"projects"}
+                                        id={project}
                                       />
                                     </Tag>
                                   );
