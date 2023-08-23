@@ -60,7 +60,6 @@ const Create = () => {
                 </Heading>
                 <Flex gap={"2"}>
                   <Tag colorScheme={"red"}>Name</Tag>
-                  <Tag colorScheme={"red"}>Owner</Tag>
                   <Tag colorScheme={"red"}>Description</Tag>
                 </Flex>
               </Flex>
@@ -104,7 +103,6 @@ const Create = () => {
                 </Heading>
                 <Flex gap={"2"} wrap={"wrap"}>
                   <Tag colorScheme={"red"}>Name</Tag>
-                  <Tag colorScheme={"red"}>Owner</Tag>
                   <Tag colorScheme={"red"}>Created</Tag>
                   <Tag colorScheme={"teal"}>Description</Tag>
                   <Tag colorScheme={"teal"}>Projects</Tag>

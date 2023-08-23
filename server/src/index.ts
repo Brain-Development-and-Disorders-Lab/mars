@@ -4,6 +4,7 @@ import "dotenv/config";
 // Libraries
 import express from "express";
 import cors from "cors";
+import helmet from "helmet";
 import consola from "consola";
 
 const fileUpload = require("express-fileupload");
@@ -19,11 +20,13 @@ import AttributesRoute from "./routes/Attributes";
 import SearchRoute from "./routes/Search";
 import SystemRoute from "./routes/System";
 import AuthenticationRoute from "./routes/Authentication";
+import UsersRoute from "./routes/Users";
 
 const app = express();
 const port = process.env.PORT || 8000;
 
 // Configure Express, enable CORS middleware and routes
+app.use(helmet());
 app.use(cors({ credentials: true, origin: true }));
 app.use(express.json({ limit: "50mb" }));
 app.use(fileUpload());
@@ -34,7 +37,8 @@ app.use(
   EntitiesRoute,
   ProjectsRoute,
   SearchRoute,
-  SystemRoute
+  SystemRoute,
+  UsersRoute,
 );
 
 // Start the Express server

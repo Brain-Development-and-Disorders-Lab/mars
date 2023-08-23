@@ -1,67 +1,50 @@
 // Existing and custom types
-import { AuthToken } from "@types";
+import { AuthInfo, AuthToken } from "@types";
 
 // Utility libraries
+import { postData } from "src/util";
 import _ from "lodash";
 import consola from "consola";
-import crypto from "node:crypto";
-import dayjs from "dayjs";
-import { nanoid } from "nanoid";
+import { Users } from "./Users";
+
+const TOKEN_URL = "https://orcid.org/oauth/token";
+const CLIENT_ID = process.env.CLIENT_ID as string;
+const CLIENT_SECRET = process.env.CLIENT_SECRET as string;
+const REDIRECT_URI = "https://reusable.bio";
 
 export class Authentication {
   /**
-   * Validate the password submitted by the user
-   * @param {string} password hashed password value submitted by the user
-   * @return {Promise<AuthToken>}
+   * Validate the ORCiD login submitted by the user
+   * @param {string} code authentication code provided by ORCiD
+   * @return {Promise<AuthInfo>}
    */
-  static login = (password: string): Promise<AuthToken> => {
+  static login = (code: string): Promise<AuthInfo> => {
     consola.start("Performing login...");
+
+    // Retrieve a token
     return new Promise((resolve, reject) => {
-      const encoder = new TextEncoder();
-      const defaultPassword = encoder.encode(
-        process.env.DEFAULT_PASSWORD || "default"
-      );
-
-      // Hash the default password
-      const hashDefault = new Promise<Buffer>((resolve, reject) => {
-        crypto.pbkdf2(
-          defaultPassword,
-          "",
-          310000,
-          32,
-          "sha256",
-          (error, hashed) => {
-            if (error) {
-              reject();
-            }
-            resolve(hashed);
-          }
-        );
-      });
-
-      const hashRecieved = new Promise<Buffer>((resolve, reject) => {
-        crypto.pbkdf2(password, "", 310000, 32, "sha256", (error, hashed) => {
-          if (error) {
-            reject();
-          }
-          resolve(hashed);
-        });
-      });
-
-      // Perform hash comparison after resolving all Promises
-      Promise.all([hashDefault, hashRecieved]).then((hashes: Buffer[]) => {
-        if (!crypto.timingSafeEqual(hashes[0], hashes[1])) {
-          consola.warn("Invalid login attempt");
-          reject("");
-        } else {
-          consola.success("Successful login attempt");
-          resolve({
-            username: "User",
-            token: `auth_${nanoid(10)}_${Date.now().toFixed()}`,
-            lastLogin: dayjs(Date.now()).toString(),
-            valid: true,
-          });
+      const tokenRequestData = `client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}&grant_type=authorization_code&code=${code}&redirect_uri=${REDIRECT_URI}`;
+      postData(TOKEN_URL, tokenRequestData, {
+        headers: {
+          "Accept": "application/json",
+          "Content-Type": "application/x-www-form-urlencoded",
         }
+      }).then((response: AuthToken) => {
+        consola.success("Valid token");
+        consola.start("Checking access...");
+        Users.get(response.orcid).then(() => {
+          resolve({
+            name: response.name,
+            orcid: response.orcid,
+            id_token: response.id_token,
+          });
+        }).catch((_error: any) => {
+          consola.error(`ORCiD "${response.orcid}" does not have access. Please contact the administrator.`);
+          reject(`ORCiD "${response.orcid}" does not have access. Please contact the administrator.`);
+        });
+      }).catch((error: any) => {
+        consola.error(`Error authenticating with ORCiD:`, error.message);
+        reject(`Error authenticating with ORCiD`);
       });
     });
   };

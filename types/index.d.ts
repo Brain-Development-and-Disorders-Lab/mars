@@ -214,6 +214,16 @@ export type ContentProps = {
   isLoaded?: boolean;
 };
 
+// Page component
+export type PageProps = {
+  children: React.ReactChild | React.ReactChild[];
+};
+
+// Login component
+export type LoginProps = {
+  setAuthenticated: React.Dispatch<React.SetStateAction<boolean>>;
+};
+
 // DataTable component
 export type DataTableProps = {
   columns: any[];
@@ -305,11 +315,28 @@ export type QueryComponent = {
 };
 
 // Authentication types
-export type AuthToken = {
-  username: string;
-  token: string;
-  lastLogin: string;
-  valid: boolean;
+export type AuthInfo = {
+  name: string;
+  orcid: string;
+  id_token: string;
+};
+
+export type AuthToken = AuthInfo & {
+  access_token: string;
+  token_type: string;
+  refesh_token: string;
+  expires_in: number;
+  scope: string;
+};
+
+// User types
+export type IUser = {
+  name: string;
+  email: string;
+};
+
+export type UserModel = IUser & {
+  _id: string;
 };
 
 // Device types

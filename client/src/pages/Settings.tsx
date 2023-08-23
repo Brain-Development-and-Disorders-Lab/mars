@@ -93,8 +93,8 @@ const Settings = () => {
               <Flex p={"2"} w={"100%"} direction={"column"} gap={"4"}>
                 <Text>Manage account settings.</Text>
                 <Flex direction={"row"} gap={"4"}>
-                  <Text fontWeight={"semibold"}>Username:</Text>
-                  <Text>{token.username}</Text>
+                  <Text fontWeight={"semibold"}>User:</Text>
+                  <Text>{token.name}</Text>
                 </Flex>
               </Flex>
             </TabPanel>

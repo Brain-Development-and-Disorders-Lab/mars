@@ -4,7 +4,8 @@
   "locked": false,
   "name": "Entity Name",
   "created": "2022-05-19T22:34:29.501Z",
-  "owner": "henry.burgess@wustl.edu",
+  "owner" : "0000-0002-3481-952X",
+  "shared" : [ ],
   "description": "Entity description",
   "projects": [
     "abcd1234"
@@ -38,42 +39,5 @@
       ]
     }
   ],
-  "history": [
-    {
-      "timestamp": "2022-05-19T22:34:29.501Z",
-      "description": "Entity description",
-      "projects": [
-        "abcd1234"
-      ],
-      "associations": {
-        "origins": [
-          {
-            "name": "Origin name",
-            "id": "abcd1234"
-          }
-        ],
-        "products": [
-          {
-            "name": "Product name",
-            "id": "abcd1234"
-          }
-        ]
-      },
-      "attributes": [
-        {
-          "id": "abcd1234",
-          "name": "Test Attribute",
-          "description": "An example attribute.",
-          "type": "data",
-          "values": [
-            {
-              "name": "URL",
-              "type": "url",
-              "data": "https://box.wustl.edu"
-            }
-          ]
-        }
-      ]
-    }
-  ]
+  "history": []
 }

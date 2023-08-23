@@ -1,10 +1,10 @@
-# Metadata Aggregator for Reproducible Science (MARS) 🧪
+# reusable.bio 🔬
 
-An open-source and customizable workflow tool for tracking and managing metadata generated from scientific experiments.
+An open-source and customizable workflow tool for organizing, linking, and tracking metadata generated from scientific experiments. Named after the underlying philosophy of the FAIR data principles, that data should ultimately be reusable.
 
 ![mars.png](mars.png)
 
-**⚠️ WARNING: MARS is still in early development. It should be used with caution.**
+**⚠️ WARNING: reusable.bio is still in early development and should be used with caution.**
 
 ## Features ✨
 
@@ -53,7 +53,7 @@ Projects are simply groups of Entities. Projects can be of one type of Entities,
 
 ### Configure environment variables
 
-The server component of MARS is containerized using Docker. Before starting the Docker containers, three environment variables must be configured in an `.env` file that should be placed in the `/server` directory. The variables are `CONNECTION_STRING`, `PORT`, and `DEFAULT_PASSWORD`, the MongoDB connection string, the port of the server to listen on, and the default login password respectively (no specific user functionality exists yet). Example contents are shown below:
+The server component of reusable.bio is containerized using Docker. Before starting the Docker containers, three environment variables must be configured in an `.env` file that should be placed in the `/server` directory. The variables are `CONNECTION_STRING`, `PORT`, and `DEFAULT_PASSWORD`, the MongoDB connection string, the port of the server to listen on, and the default login password respectively (no specific user functionality exists yet). Example contents are shown below:
 
 ```Text
 CONNECTION_STRING=mongodb://admin:metadataadmin@localhost:27017/
@@ -75,7 +75,7 @@ This command will build all required containers before starting the containers r
 
 ### Starting the interface and server
 
-To start the MARS interface, run `yarn start` in the `/client` directory. Start the MARS server by running `yarn build` and `yarn start` in the `/server` directory. Both the client and server should be running alongside the Docker containers before attempting to access MARS at `localhost:8080`.
+To start the reusable interface, run `yarn start` in the `/client` directory. Start the MARS server by running `yarn build` and `yarn start` in the `/server` directory. Both the client and server should be running alongside the Docker containers before attempting to access MARS at `localhost:8080`.
 
 ## Roadmap 🗺️
 
@@ -83,5 +83,5 @@ To start the MARS interface, run `yarn start` in the `/client` directory. Start 
 
 - Attribute editing within Entities ✅
 - Metadata query engine, for constructing and executing complex search queries ✅
-- Mechanism to organize and categorize Entities into 'Projects'
+- Mechanism to organize and categorize Entities into 'Projects' ✅
 - Drop-down Value type with customizable options ✅

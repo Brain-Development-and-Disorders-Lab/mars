@@ -1,5 +1,5 @@
 // React
-import React, { ReactElement } from "react";
+import React, { ReactElement, useEffect, useState } from "react";
 
 // Styling to be applied across the application
 import "./styles/styles.css";
@@ -10,6 +10,9 @@ import { ChakraProvider } from "@chakra-ui/react";
 
 // Routing and navigation
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+
+// Utility functions
+import _ from "lodash";
 
 // Custom components
 import { Page } from "@components/Container";
@@ -36,25 +39,35 @@ import Dashboard from "@pages/Dashboard";
 import Login from "@pages/Login";
 import Invalid from "@pages/Invalid";
 
-// Authentication
-import { useToken } from "./authentication/useToken";
-
 // Theme extension
 import { theme } from "./styles/theme";
+
+// Authentication
+import { useToken } from "src/authentication/useToken";
 
 /**
  * Base App component containing the page layout and page routing components
  * @return {ReactElement}
  */
 const App = (): ReactElement => {
-  // Authentication token
-  const [token, setToken] = useToken();
+  // Setup token authentication
+  const [token, _setToken] = useToken();
+
+  const [authenticated, setAuthenticated] = useState(false);
+
+  useEffect(() => {
+    if (_.isUndefined(token) || _.isEqual(token.id_token, "")) {
+      setAuthenticated(false);
+    } else {
+      setAuthenticated(true);
+    }
+  }, [token]);
 
   return (
     <BrowserRouter>
       <ChakraProvider theme={theme}>
-        {!token ? (
-          <Login setToken={setToken} />
+        {!authenticated ? (
+          <Login setAuthenticated={setAuthenticated} />
         ) : (
           <Page>
             <Routes>

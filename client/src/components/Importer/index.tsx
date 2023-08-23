@@ -83,7 +83,7 @@ const Importer = (props: {
   // Fields to be assigned to columns
   const [nameField, setNameField] = useState("");
   const [descriptionField, setDescriptionField] = useState("");
-  const [ownerField, _setOwnerField] = useState(token.username);
+  const [ownerField, _setOwnerField] = useState(token.orcid);
   const [projectField, setProjectField] = useState("");
   const [selectedOrigin, setSelectedOrigin] = useState(
     {} as { name: string; id: string }
@@ -214,7 +214,7 @@ const Importer = (props: {
         name: nameField,
         description: descriptionField,
         created: dayjs(Date.now()).toISOString(),
-        owner: token.username,
+        owner: token.orcid,
         projects: projectField,
         origins: originsField,
         products: productsField,
