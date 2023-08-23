@@ -3,8 +3,9 @@ import { AuthInfo, AuthToken } from "@types";
 
 // Utility libraries
 import { postData } from "src/util";
-import _, { reject } from "lodash";
+import _ from "lodash";
 import consola from "consola";
+import { Users } from "./Users";
 
 const TOKEN_URL = "https://orcid.org/oauth/token";
 const CLIENT_ID = process.env.CLIENT_ID as string;
@@ -21,7 +22,7 @@ export class Authentication {
     consola.start("Performing login...");
 
     // Retrieve a token
-    return new Promise((resolve, _reject) => {
+    return new Promise((resolve, reject) => {
       const tokenRequestData = `client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}&grant_type=authorization_code&code=${code}&redirect_uri=${REDIRECT_URI}`;
       postData(TOKEN_URL, tokenRequestData, {
         headers: {
@@ -29,14 +30,19 @@ export class Authentication {
           "Content-Type": "application/x-www-form-urlencoded",
         }
       }).then((response: AuthToken) => {
-        consola.success("Successfully performed login");
-        resolve({
-          name: response.name,
-          orcid: response.orcid,
-          id_token: response.id_token,
+        consola.success("Valid token");
+        consola.start("Checking access...");
+        Users.get(response.orcid).then(() => {
+          resolve({
+            name: response.name,
+            orcid: response.orcid,
+            id_token: response.id_token,
+          });
+        }).catch((_error: any) => {
+          reject(`ORCiD "${response.orcid}" does not have access. Please contact the administrator.`);
         });
       }).catch((_error: any) => {
-        reject("Error occurred while authenticating");
+        reject(`Error authenticating with ORCiD`);
       });
     });
   };

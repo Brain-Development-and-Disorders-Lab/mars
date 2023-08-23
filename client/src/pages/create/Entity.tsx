@@ -79,7 +79,7 @@ const Entity = () => {
   const [created, setCreated] = useState(
     dayjs(Date.now()).format("YYYY-MM-DDTHH:mm")
   );
-  const [owner, setOwner] = useState(token.name);
+  const [owner, _setOwner] = useState(token.orcid);
   const [description, setDescription] = useState("");
   const [selectedProjects, setSelectedProjects] = useState(
     [] as string[]
@@ -113,9 +113,8 @@ const Entity = () => {
 
   // Various validation error states
   const isNameError = name === "";
-  const isOwnerError = owner === "";
   const isDateError = created === "";
-  const validDetails = !isNameError && !isOwnerError && !isDateError;
+  const validDetails = !isNameError && !isDateError;
 
   const [validAttributes, setValidAttributes] = useState(false);
 
@@ -307,23 +306,7 @@ const Entity = () => {
               )}
             </FormControl>
 
-            <FormControl isRequired isInvalid={isOwnerError}>
-              <FormLabel>Entity Owner</FormLabel>
-              <Input
-                name={"owner"}
-                value={owner}
-                placeholder={"Owner"}
-                w={["100%", "md"]}
-                onChange={(event) => setOwner(event.target.value)}
-              />
-              {isOwnerError && (
-                <FormErrorMessage>
-                  An owner of the Entity is required.
-                </FormErrorMessage>
-              )}
-            </FormControl>
-
-            <FormControl isRequired isInvalid={isDateError}>
+            <FormControl isInvalid={isDateError}>
               <FormLabel>Created</FormLabel>
               <Input
                 placeholder={"Select Date and Time"}

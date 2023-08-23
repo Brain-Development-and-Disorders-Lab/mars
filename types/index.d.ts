@@ -329,6 +329,16 @@ export type AuthToken = AuthInfo & {
   scope: string;
 };
 
+// User types
+export type IUser = {
+  name: string;
+  email: string;
+};
+
+export type UserModel = IUser & {
+  _id: string;
+};
+
 // Device types
 export type IDevice = {
   name: string;

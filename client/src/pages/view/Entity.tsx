@@ -13,7 +13,6 @@ import {
   Th,
   Text,
   Tr,
-  Link,
   useToast,
   Modal,
   Thead,
@@ -1160,24 +1159,11 @@ const Entity = () => {
                     <Tr>
                       <Td>Owner</Td>
                       <Td>
-                        {_.isEqual(entityData.owner, "") ? (
-                          <Tag
-                            size={"md"}
-                            gap={"2"}
-                            key={`warn-${entityData._id}`}
-                            colorScheme={"orange"}
-                          >
-                            <TagLabel>Not Specified</TagLabel>
-                            <Icon name={"warning"} />
-                          </Tag>
-                        ) : (
-                          <Text>
-                            <Link>
-                              {entityData.owner &&
-                                entityData.owner.split("@")[0].trim()}
-                            </Link>
-                          </Text>
-                        )}
+                        <Tag colorScheme={"green"}>
+                          <TagLabel>
+                            {entityData.owner}
+                          </TagLabel>
+                        </Tag>
                       </Td>
                     </Tr>
 
@@ -1626,7 +1612,9 @@ const Entity = () => {
                     if (!_.isEqual(project, "")) {
                       return (
                         <Tag key={`tag-${project}`}>
-                          <Linky id={project} type={"projects"} />
+                          <TagLabel>
+                            <Linky id={project} type={"projects"} />
+                          </TagLabel>
                           <TagCloseButton
                             onClick={() => {
                               setSelectedProjects(
@@ -1731,7 +1719,9 @@ const Entity = () => {
                     if (!_.isEqual(entity, "")) {
                       return (
                         <Tag key={`tag-${entity}`}>
-                          <Linky id={entity} type={"entities"} />
+                          <TagLabel>
+                            <Linky id={entity} type={"entities"} />
+                          </TagLabel>
                           <TagCloseButton
                             onClick={() => {
                               setSelectedProducts(
@@ -1835,7 +1825,9 @@ const Entity = () => {
                     if (!_.isEqual(entity, "")) {
                       return (
                         <Tag key={`tag-${entity}`}>
-                          <Linky id={entity} type={"entities"} />
+                          <TagLabel>
+                            <Linky id={entity} type={"entities"} />
+                          </TagLabel>
                           <TagCloseButton
                             onClick={() => {
                               setSelectedOrigins(
@@ -2243,10 +2235,12 @@ const Entity = () => {
                                     <Tag
                                       key={`v_c_${entityVersion.timestamp}_${project}`}
                                     >
-                                      <Linky
-                                        type={"projects"}
-                                        id={project}
-                                      />
+                                      <TagLabel>
+                                        <Linky
+                                          type={"projects"}
+                                          id={project}
+                                        />
+                                      </TagLabel>
                                     </Tag>
                                   );
                                 })
@@ -2262,7 +2256,9 @@ const Entity = () => {
                                     <Tag
                                       key={`v_a_${entityVersion.timestamp}_${attribute._id}`}
                                     >
-                                      {attribute.name}
+                                      <TagLabel>
+                                        {attribute.name}
+                                      </TagLabel>
                                     </Tag>
                                   );
                                 })
@@ -2279,10 +2275,12 @@ const Entity = () => {
                                       <Tag
                                         key={`v_o_${entityVersion.timestamp}_${origin.id}`}
                                       >
-                                        <Linky
-                                          type={"entities"}
-                                          id={origin.id}
-                                        />
+                                        <TagLabel>
+                                          <Linky
+                                            type={"entities"}
+                                            id={origin.id}
+                                          />
+                                        </TagLabel>
                                       </Tag>
                                     );
                                   }
@@ -2301,10 +2299,12 @@ const Entity = () => {
                                       <Tag
                                         key={`v_p_${entityVersion.timestamp}_${product.id}`}
                                       >
-                                        <Linky
-                                          type={"entities"}
-                                          id={product.id}
-                                        />
+                                        <TagLabel>
+                                          <Linky
+                                            type={"entities"}
+                                            id={product.id}
+                                          />
+                                        </TagLabel>
                                       </Tag>
                                     );
                                   }

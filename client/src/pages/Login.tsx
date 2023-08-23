@@ -44,8 +44,6 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
 
   // Check if token exists
   if ((_.isUndefined(token) || _.isEqual(token.id_token, "")) && accessCode) {
-    console.info("Code:", accessCode);
-
     // Now perform login and data retrieval via server, check if user permitted access
     postData(`/login`, { code: accessCode })
       .then((response) => {
