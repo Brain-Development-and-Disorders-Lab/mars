@@ -74,7 +74,7 @@ const Attribute = () => {
       .finally(() => {
         setIsLoaded(true);
       });
-  }, [id, isLoaded]);
+  }, [id]);
 
   // Delete the Attribute when confirmed
   const handleDeleteClick = () => {

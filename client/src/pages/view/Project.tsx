@@ -20,7 +20,6 @@ import {
   FormControl,
   FormLabel,
   Heading,
-  Link,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -547,20 +546,11 @@ const Project = () => {
                     <Tr>
                       <Td>Owner</Td>
                       <Td>
-                        {_.isEqual(projectData.owner, "") ? (
-                          <Tag
-                            size={"md"}
-                            key={`warn-${projectData._id}`}
-                            colorScheme={"orange"}
-                          >
-                            <TagLabel>Not Specified</TagLabel>
-                            <Icon name={"warning"} />
-                          </Tag>
-                        ) : (
-                          <Text>
-                            <Link>{projectData.owner}</Link>
-                          </Text>
-                        )}
+                        <Tag colorScheme={"green"}>
+                          <TagLabel>
+                            {projectData.owner}
+                          </TagLabel>
+                        </Tag>
                       </Td>
                     </Tr>
                     <Tr>
