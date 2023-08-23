@@ -39,9 +39,11 @@ export class Authentication {
             id_token: response.id_token,
           });
         }).catch((_error: any) => {
+          consola.error(`ORCiD "${response.orcid}" does not have access. Please contact the administrator.`);
           reject(`ORCiD "${response.orcid}" does not have access. Please contact the administrator.`);
         });
-      }).catch((_error: any) => {
+      }).catch((error: any) => {
+        consola.error(`Error authenticating with ORCiD:`, error.message);
         reject(`Error authenticating with ORCiD`);
       });
     });

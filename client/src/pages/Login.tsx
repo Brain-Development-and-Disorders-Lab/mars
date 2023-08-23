@@ -13,7 +13,7 @@ import {
 import { Content } from "@components/Container";
 
 // Routing and navigation
-import { useLocation } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 
 // Existing and custom types
 import { LoginProps } from "@types";
@@ -42,6 +42,16 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
   // Extract query parameters
   const accessCode = query.get("code");
 
+  // Access parameters to remove code after authentication
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const removeCode = () => {
+    if (searchParams.has("code")) {
+      searchParams.delete("code");
+      setSearchParams(searchParams);
+    }
+  };
+
   // Check if token exists
   if ((_.isUndefined(token) || _.isEqual(token.id_token, "")) && accessCode) {
     // Now perform login and data retrieval via server, check if user permitted access
@@ -57,6 +67,7 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
             isClosable: true,
           });
         } else {
+          removeCode();
           setToken(response.token);
           setAuthenticated(true);
         }
