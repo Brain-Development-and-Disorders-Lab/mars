@@ -15,6 +15,7 @@ import {
   ModalHeader,
   ModalOverlay,
   Select,
+  Spacer,
   Tab,
   TabList,
   TabPanel,
@@ -46,6 +47,7 @@ import {
   QueryOperator,
   QueryParameters,
   QueryQualifier,
+  QuerySubQualifier,
 } from "@types";
 
 // Utility functions and libraries
@@ -83,6 +85,7 @@ const Search = () => {
   const [queryQualifier, setQueryQualifier] = useState(
     "Contains" as QueryQualifier
   );
+  const [querySubQualifier, setQuerySubQualifier] = useState("Date" as QuerySubQualifier);
   const [queryKey, setQueryKey] = useState("");
   const [queryValue, setQueryValue] = useState("");
 
@@ -308,6 +311,7 @@ const Search = () => {
                       <option>Projects</option>
                       <option>Origins</option>
                       <option>Products</option>
+                      <option>Attributes</option>
                     </Select>
 
                     <Select
@@ -323,7 +327,8 @@ const Search = () => {
                         disabled={
                           _.isEqual(queryParameter, "Projects") ||
                           _.isEqual(queryParameter, "Origins") ||
-                          _.isEqual(queryParameter, "Products")
+                          _.isEqual(queryParameter, "Products") ||
+                          _.isEqual(queryParameter, "Attributes")
                         }
                       >
                         Is Not
@@ -332,13 +337,15 @@ const Search = () => {
                         disabled={
                           _.isEqual(queryParameter, "Projects") ||
                           _.isEqual(queryParameter, "Origins") ||
-                          _.isEqual(queryParameter, "Products")
+                          _.isEqual(queryParameter, "Products") ||
+                          _.isEqual(queryParameter, "Attributes")
                         }
                       >
                         Is
                       </option>
                     </Select>
 
+                    {/* Projects */}
                     {_.isEqual(queryParameter, "Projects") && isLoaded && (
                       <Select
                         w={"auto"}
@@ -361,6 +368,8 @@ const Search = () => {
                         })}
                       </Select>
                     )}
+
+                    {/* Origins and Products */}
                     {_.includes(["Origins", "Products"], queryParameter) &&
                       isLoaded && (
                         <Select
@@ -384,6 +393,8 @@ const Search = () => {
                           })}
                         </Select>
                       )}
+
+                    {/* Name and Description */}
                     {_.includes(["Name", "Description"], queryParameter) && (
                       <Input
                         w={"auto"}
@@ -395,6 +406,88 @@ const Search = () => {
                         }}
                       />
                     )}
+
+                    {/* Attributes */}
+                    {_.includes(["Attributes"], queryParameter) && (
+                      <Flex gap={"4"}>
+                        <Select
+                          w={"auto"}
+                          value={querySubQualifier}
+                          onChange={(event) => {
+                            setQuerySubQualifier(event.target.value as QuerySubQualifier);
+                          }}
+                        >
+                          <option>Date</option>
+                          <option>Text</option>
+                          <option>Number</option>
+                          <option>URL</option>
+                          <option>Entity</option>
+                          <option>Select</option>
+                        </Select>
+                        {_.isEqual(querySubQualifier, "Date") &&
+                          <Input
+                            w={"auto"}
+                            value={queryValue}
+                            placeholder={"Value"}
+                            type={"date"}
+                            onChange={(event) => {
+                              setQueryKey(event.target.value);
+                              setQueryValue(event.target.value);
+                            }}
+                          />
+                        }
+                        {_.isEqual(querySubQualifier, "Number") &&
+                          <Input
+                            w={"auto"}
+                            value={queryValue}
+                            placeholder={"Value"}
+                            type={"number"}
+                            onChange={(event) => {
+                              setQueryKey(event.target.value);
+                              setQueryValue(event.target.value);
+                            }}
+                          />
+                        }
+                        {_.isEqual(querySubQualifier, "Entity") &&
+                          isLoaded && (
+                            <Select
+                              w={"auto"}
+                              placeholder={"Select Entity"}
+                              value={queryKey}
+                              onChange={(event) => {
+                                setQueryKey(event.target.value);
+                                setQueryValue(
+                                  event.target.options[event.target.selectedIndex]
+                                    .innerText
+                                );
+                              }}
+                            >
+                              {entities.map((entity) => {
+                                return (
+                                  <option key={entity._id} value={entity._id}>
+                                    {entity.name}
+                                  </option>
+                                );
+                              })}
+                            </Select>
+                        )}
+                        {_.includes(["Text", "URL", "Select"], querySubQualifier) &&
+                          <Input
+                            w={"auto"}
+                            value={queryValue}
+                            placeholder={"Value"}
+                            type={"text"}
+                            onChange={(event) => {
+                              setQueryKey(event.target.value);
+                              setQueryValue(event.target.value);
+                            }}
+                          />
+                        }
+
+                      </Flex>
+                    )}
+
+                    <Spacer />
 
                     <IconButton
                       aria-label={"Add query component"}
@@ -409,6 +502,7 @@ const Search = () => {
                             focus: queryType,
                             parameter: queryParameter,
                             qualifier: queryQualifier,
+                            subQualifier: querySubQualifier,
                             key: queryKey,
                             value: queryValue,
                           },
@@ -418,6 +512,7 @@ const Search = () => {
                         setQueryType("Entity");
                         setQueryParameter("Name");
                         setQueryQualifier("Contains");
+                        setQuerySubQualifier("Date");
                         setQueryKey("");
                         setQueryValue("");
 
@@ -475,6 +570,11 @@ const Search = () => {
                             <Tag colorScheme={"green"}>
                               {component.qualifier}
                             </Tag>
+                            {_.isEqual("Attributes", component.parameter) &&
+                              <Tag colorScheme={"yellow"}>
+                                {component.subQualifier}
+                              </Tag>
+                            }
                           </Flex>
 
                           {_.includes(
@@ -500,6 +600,34 @@ const Search = () => {
                               disabled
                             />
                           )}
+                          {_.isEqual("Attributes", component.parameter) &&
+                            _.isEqual(component.subQualifier, "Date") &&
+                              <Input
+                                w={"fit-content"}
+                                type={"date"}
+                                value={component.value}
+                                disabled
+                              />
+                          }
+                          {_.isEqual("Attributes", component.parameter) &&
+                            _.includes(["Text", "Number", "URL", "Select"], component.subQualifier) &&
+                              <Input
+                                w={"fit-content"}
+                                type={"text"}
+                                value={component.value}
+                                disabled
+                              />
+                          }
+                          {_.isEqual("Attributes", component.parameter) &&
+                            _.isEqual(component.subQualifier, "Entity") &&
+                              <Select
+                                w={"fit-content"}
+                                value={component.value}
+                                disabled
+                              >
+                                <option>{component.value}</option>
+                              </Select>
+                          }
 
                           <IconButton
                             aria-label={"Remove search component"}

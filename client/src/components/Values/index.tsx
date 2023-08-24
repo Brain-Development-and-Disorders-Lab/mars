@@ -288,7 +288,7 @@ const Values = (props: {
               return (
                 <Input
                   id={`i_${original.identifier}_data`}
-                  type={"datetime-local"}
+                  type={"date"}
                   value={value}
                   w={"2xs"}
                   disabled={props.viewOnly}
