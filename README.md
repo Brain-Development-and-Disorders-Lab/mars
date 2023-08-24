@@ -1,10 +1,12 @@
-# reusable.bio 🔬
+# MARS 🔬
+
+> Metadata Aggegator for Reusable / Reproducible Science
 
 An open-source and customizable workflow tool for organizing, linking, and tracking metadata generated from scientific experiments. Named after the underlying philosophy of the FAIR data principles, that data should ultimately be reusable.
 
 ![mars.png](mars.png)
 
-**⚠️ WARNING: reusable.bio is still in early development and should be used with caution.**
+**⚠️ WARNING: MARS is still in early development and should be used with caution.**
 
 ## Features ✨
 

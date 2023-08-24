@@ -14,7 +14,7 @@ import { verify } from "jsonwebtoken";
 const TOKEN_URL = "https://orcid.org/oauth/token";
 const CLIENT_ID = process.env.CLIENT_ID as string;
 const CLIENT_SECRET = process.env.CLIENT_SECRET as string;
-const REDIRECT_URI = "https://reusable.bio";
+const REDIRECT_URI = "https://mars.reusable.bio";
 
 export class Authentication {
   /**
