@@ -17,7 +17,7 @@ export const getData = (
 ): Promise<any> => {
   return new Promise((resolve, reject) => {
     axios
-      .get(`${SERVER_URL}/api${path}`, options)
+      .get(`${SERVER_URL}${path}`, options)
       .then((response) => {
         // Check response status
         if (!response) {
@@ -47,7 +47,7 @@ export const postData = async (
 ): Promise<any> => {
   return new Promise((resolve, reject) => {
     axios
-      .post(`${SERVER_URL}/api${path}`, data, options)
+      .post(`${SERVER_URL}${path}`, data, options)
       .then((response) => {
         const contentType = response.headers["content-type"];
         if (_.isNull(contentType)) {

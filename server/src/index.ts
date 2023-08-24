@@ -41,11 +41,8 @@ app.use(
   UsersRoute,
 );
 
-const wrapper = express();
-wrapper.use("/api", app);
-
 // Start the Express server
-wrapper.listen(port, () => {
+app.listen(port, () => {
   // Connect to the primary database when the server starts
   connectPrimary().then(() => {
     // Connect to the system database
