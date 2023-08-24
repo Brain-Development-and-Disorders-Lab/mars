@@ -122,7 +122,7 @@ const Project = () => {
 
             <Input
               w={["100%", "md"]}
-              type={"datetime-local"}
+              type={"date"}
               value={created}
               onChange={(event) =>
                 setCreated(dayjs(event.target.value).format("YYYY-MM-DDTHH:mm"))

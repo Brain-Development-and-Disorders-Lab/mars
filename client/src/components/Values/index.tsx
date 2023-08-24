@@ -70,7 +70,6 @@ const Values = (props: {
     getData(`/entities`)
       .then((value) => {
         setEntities(value);
-        setIsLoaded(true);
       })
       .catch((_error) => {
         toast({
@@ -85,7 +84,6 @@ const Values = (props: {
       .finally(() => {
         setIsLoaded(true);
       });
-    return;
   }, []);
 
   const columnHelper = createColumnHelper<IValue<any>>();
@@ -288,7 +286,7 @@ const Values = (props: {
               return (
                 <Input
                   id={`i_${original.identifier}_data`}
-                  type={"datetime-local"}
+                  type={"date"}
                   value={value}
                   w={"2xs"}
                   disabled={props.viewOnly}
@@ -311,15 +309,13 @@ const Values = (props: {
                     onChange={onChange}
                     onBlur={onBlur}
                   >
-                    {isLoaded &&
-                      entities.map((entity) => {
-                        return (
-                          <option key={entity._id} value={entity._id}>
-                            {entity.name}
-                          </option>
-                        );
-                      })}
-                    ;
+                    {entities.map((entity) => {
+                      return (
+                        <option key={entity._id} value={entity._id}>
+                          {entity.name}
+                        </option>
+                      );
+                    })}
                   </Select>
                 );
               } else {
@@ -379,7 +375,7 @@ const Values = (props: {
       },
       header: "Data",
     }),
-  ], [props.viewOnly]);
+  ], [props.viewOnly, entities]);
 
   const addOptions = () => {
     // Add the Select value with the defined options

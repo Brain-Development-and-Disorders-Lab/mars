@@ -304,12 +304,14 @@ export type QueryOperator = "AND" | "OR";
 export type QueryFocusType = "Entity" | "Project" | "Attribute";
 export type QueryParameters = "Name" | "Owner" | "Description" | "Projects" | "Origins" | "Products";
 export type QueryQualifier = "Contains" | "Does Not Contain" | "Is" | "Is Not";
+export type QuerySubQualifier = "Date" | "Text" | "Number" | "URL" | "Entity" | "Select";
 
 export type QueryComponent = {
   operator? :QueryOperator;
   focus: QueryFocusType;
   parameter: QueryParameters;
   qualifier: QueryQualifier;
+  subQualifier?: QuerySubQualifier;
   value: string;
   key: string;
 };

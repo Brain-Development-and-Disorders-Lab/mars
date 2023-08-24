@@ -30,8 +30,6 @@ const useQuery = () => {
 };
 
 const Login: FC<LoginProps> = ({ setAuthenticated }) => {
-  const [isLoading, setIsLoading] = useState(false);
-
   const toast = useToast();
 
   // Enable authentication modification
@@ -45,12 +43,16 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
   // Access parameters to remove code after authentication
   const [searchParams, setSearchParams] = useSearchParams();
 
+  // Remove the "code" search parameter upon login
   const removeCode = () => {
     if (searchParams.has("code")) {
       searchParams.delete("code");
       setSearchParams(searchParams);
     }
   };
+
+  // Loading state, dependent on "code"
+  const [isLoading, setIsLoading] = useState(searchParams.has("code"));
 
   // Check if token exists
   if ((_.isUndefined(token) || _.isEqual(token.id_token, "")) && accessCode) {
@@ -66,12 +68,12 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
             position: "bottom-right",
             isClosable: true,
           });
+          setIsLoading(false);
         } else {
           removeCode();
           setToken(response.token);
           setAuthenticated(true);
         }
-        setIsLoading(false);
       })
       .catch((error) => {
         toast({
@@ -93,7 +95,6 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
     `https://orcid.org/oauth/authorize?client_id=${clientID}&response_type=code&scope=openid&redirect_uri=${redirectURI}`;
 
   const onLoginClick = () => {
-    setIsLoading(true);
     window.location.href = requestURI;
   };
 

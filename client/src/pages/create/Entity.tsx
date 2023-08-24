@@ -310,7 +310,7 @@ const Entity = () => {
               <FormLabel>Created</FormLabel>
               <Input
                 placeholder={"Select Date and Time"}
-                type={"datetime-local"}
+                type={"date"}
                 value={created}
                 w={["100%", "md"]}
                 onChange={(event) => setCreated(event.target.value)}
