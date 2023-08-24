@@ -19,10 +19,11 @@ AuthenticationRoute.route("/login").post(
           token: token,
         });
       })
-      .catch(() => {
+      .catch((error) => {
         response.json({
           status: "error",
           token: {},
+          message: error,
         });
       });
   }

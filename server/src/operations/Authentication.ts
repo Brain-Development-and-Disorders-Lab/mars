@@ -43,8 +43,8 @@ export class Authentication {
           reject(`ORCiD "${response.orcid}" does not have access. Please contact the administrator.`);
         });
       }).catch((error: any) => {
-        consola.error(`Error authenticating with ORCiD:`, error.message);
-        reject(`Error authenticating with ORCiD`);
+        consola.error(error.response.data.error_description);
+        reject(error.response.data.error_description);
       });
     });
   };

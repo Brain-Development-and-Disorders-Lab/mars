@@ -48,10 +48,10 @@ export const postData = async (
       .then((response) => {
         const contentType = response.headers["content-type"];
         if (_.isNull(contentType)) {
-          reject("Invalid response");
+          reject(`"content-type" is null`);
         } else if (_.startsWith(contentType, "application/json")) {
           if (!_.isEqual(response.statusText, "OK")) {
-            reject("Invalid response");
+            reject(`Response status: ${response.statusText}`);
           } else {
             resolve(response.data);
           }
@@ -61,7 +61,7 @@ export const postData = async (
       })
       .catch((error) => {
         consola.error("POST:", url);
-        reject(error);
+        reject(`Unknown error: ${error}`);
       });
   });
 };
