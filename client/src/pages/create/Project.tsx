@@ -45,7 +45,7 @@ const Project = () => {
   const [created, setCreated] = useState(
     dayjs(Date.now()).format("YYYY-MM-DDTHH:mm")
   );
-  const [owner, setOwner] = useState(token.name);
+  const [owner, _setOwner] = useState(token.orcid);
   const [description, setDescription] = useState("");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -113,29 +113,6 @@ const Project = () => {
                 A name or ID must be specified.
               </FormErrorMessage>
             )}
-          </FormControl>
-
-          <FormControl isRequired isInvalid={isOwnerError}>
-            <FormLabel htmlFor="owner" fontWeight={"normal"}>
-              Project Owner
-            </FormLabel>
-            <Input
-              id={"owner"}
-              name={"owner"}
-              w={["100%", "md"]}
-              borderColor={"blackAlpha.300"}
-              focusBorderColor={"black"}
-              value={owner}
-              onChange={(event) => setOwner(event.target.value)}
-            />
-            {isOwnerError && (
-              <FormErrorMessage>
-                A Project owner is required.
-              </FormErrorMessage>
-            )}
-            <FormHelperText>
-              The user who created the Project is the default owner.
-            </FormHelperText>
           </FormControl>
 
           <FormControl>

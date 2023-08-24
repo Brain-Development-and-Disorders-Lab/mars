@@ -1416,7 +1416,7 @@ const Entity = () => {
           isCentered
         >
           <ModalOverlay />
-          <ModalContent p={"2"} gap={"4"} w={["lg", "xl", "2xl"]}>
+          <ModalContent p={"2"} gap={"4"} w={["auto"]}>
             <ModalHeader p={"2"}>Add Attribute</ModalHeader>
             <ModalCloseButton />
 

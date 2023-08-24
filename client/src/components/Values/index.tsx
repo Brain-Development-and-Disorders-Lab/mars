@@ -379,7 +379,7 @@ const Values = (props: {
       },
       header: "Data",
     }),
-  ], []);
+  ], [props.viewOnly]);
 
   const addOptions = () => {
     // Add the Select value with the defined options
