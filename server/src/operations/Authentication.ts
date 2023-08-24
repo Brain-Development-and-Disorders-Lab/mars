@@ -1,11 +1,15 @@
 // Existing and custom types
 import { AuthInfo, AuthToken } from "@types";
 
+// Operations
+import { Users } from "./Users";
+
 // Utility libraries
 import { postData } from "src/util";
 import _ from "lodash";
 import consola from "consola";
-import { Users } from "./Users";
+import { JwksClient } from "jwks-rsa";
+import { verify } from "jsonwebtoken";
 
 const TOKEN_URL = "https://orcid.org/oauth/token";
 const CLIENT_ID = process.env.CLIENT_ID as string;
@@ -33,6 +37,7 @@ export class Authentication {
         consola.success("Valid token");
         consola.start("Checking access...");
         Users.get(response.orcid).then(() => {
+          consola.info("id_token:", response.id_token);
           resolve({
             name: response.name,
             orcid: response.orcid,
@@ -46,6 +51,37 @@ export class Authentication {
         consola.error(error.response.data.error_description);
         reject(error.response.data.error_description);
       });
+    });
+  };
+
+  static validate = (id_token: string): Promise<boolean> => {
+    return new Promise((resolve, reject) => {
+      const client = new JwksClient({
+        jwksUri: "https://orcid.org/oauth/jwks",
+        requestHeaders: {},
+        timeout: 30000,
+      });
+
+      client.getSigningKey("production-orcid-org-7hdmdswarosg3gjujo8agwtazgkp1ojs").then((result) => {
+        const orcid = verify(id_token, result.getPublicKey()).sub;
+
+        if (_.isUndefined(orcid)) {
+          resolve(false);
+        } else {
+          Users.get(orcid.toString()).then((result) => {
+            if (_.isEqual(result.status, "success")) {
+              // User exists and is valid
+              resolve(true);
+            } else {
+              // Invalid user
+              resolve(false);
+            }
+          });
+        }
+      }).catch((error) => {
+        consola.error("Error validating token:", error);
+        reject("Error validating token");
+      })
     });
   };
 }

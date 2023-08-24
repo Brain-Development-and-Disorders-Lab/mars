@@ -7,25 +7,26 @@ import { EntityModel, IEntity } from "@types";
 
 // Utility functions
 import { Entities } from "../operations/Entities";
+import { authenticate } from "src/util";
 
 const EntitiesRoute = express.Router();
 
 // View all Entities
-EntitiesRoute.route("/entities").get((_request: any, response: any) => {
+EntitiesRoute.route("/entities").get(authenticate, (_request: any, response: any) => {
   Entities.getAll().then((entities: EntityModel[]) => {
     response.json(entities);
   });
 });
 
 // View specific Entity
-EntitiesRoute.route("/entities/:id").get((request: any, response: any) => {
+EntitiesRoute.route("/entities/:id").get(authenticate, (request: any, response: any) => {
   Entities.getOne(request.params.id).then((entity: EntityModel) => {
     response.json(entity);
   });
 });
 
 // Lock specific entity
-EntitiesRoute.route("/entities/lock/:id").post(
+EntitiesRoute.route("/entities/lock/:id").post(authenticate,
   (
     request: {
       body: { entity: { name: string; id: string }; lockState: boolean };
@@ -41,7 +42,7 @@ EntitiesRoute.route("/entities/lock/:id").post(
 );
 
 // Get JSON-formatted data of the Entity
-EntitiesRoute.route("/entities/export").post(
+EntitiesRoute.route("/entities/export").post(authenticate,
   (
     request: {
       body: { id: string; fields: string[]; format: "json" | "csv" | "txt" };
@@ -59,7 +60,7 @@ EntitiesRoute.route("/entities/export").post(
 );
 
 // Create a new Entity, expects Entity data
-EntitiesRoute.route("/entities/create").post(
+EntitiesRoute.route("/entities/create").post(authenticate,
   (request: { body: IEntity }, response: any) => {
     Entities.create(request.body).then((entity: EntityModel) => {
       response.json({
@@ -72,7 +73,7 @@ EntitiesRoute.route("/entities/create").post(
 );
 
 // Update an Entity
-EntitiesRoute.route("/entities/update").post(
+EntitiesRoute.route("/entities/update").post(authenticate,
   (request: { body: EntityModel }, response: any) => {
     Entities.update(request.body).then((updatedEntity: EntityModel) => {
       response.json({
@@ -85,7 +86,7 @@ EntitiesRoute.route("/entities/update").post(
 );
 
 // Delete an Entity
-EntitiesRoute.route("/entities/:id").delete(
+EntitiesRoute.route("/entities/:id").delete(authenticate,
   (request: { params: { id: string } }, response: any) => {
     Entities.delete(request.params.id).then((entity) => {
       response.json({
