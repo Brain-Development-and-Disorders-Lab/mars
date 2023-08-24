@@ -71,7 +71,6 @@ export class Search {
         }),
       };
 
-
       // Generate logical operations
       const queryLogicalOperations = {
         AND: () => {
@@ -120,6 +119,15 @@ export class Search {
                   },
                 });
               }
+            } else if (_.isEqual(parameter, "attributes")) {
+              // Parameters: attributes
+              if (_.isEqual(qualifier, "contains")) {
+                expressions.push({ [`attributes.values.data`]: { $regex: new RegExp(component.value, "gi") } });
+              } else if (_.isEqual(qualifier, "does not contain")) {
+                expressions.push({ [`attributes.values.data`]: {
+                  $regex: new RegExp(`^((?!${component.value}).)*$`, "gi"),
+                } });
+              }
             }
           }
           return queryBase.and(expressions);
@@ -157,9 +165,26 @@ export class Search {
             } else if (_.includes(["origins", "products"], parameter)) {
               // Parameters: origins, products
               if (_.isEqual(qualifier, "contains")) {
-                expressions.push({ [parameter]: { $in: [component.key] } });
+                expressions.push({
+                  [`associations.${parameter}`]: {
+                    $elemMatch: { id: { $in: [component.key] } },
+                  },
+                });
               } else if (_.isEqual(qualifier, "does not contain")) {
-                expressions.push({ [parameter]: { $nin: [component.key] } });
+                expressions.push({
+                  [`associations.${parameter}`]: {
+                    $not: { $elemMatch: { id: { $in: [component.key] } } },
+                  },
+                });
+              }
+            } else if (_.isEqual(parameter, "attributes")) {
+              // Parameters: attributes
+              if (_.isEqual(qualifier, "contains")) {
+                expressions.push({ [`attributes.values.data`]: { $regex: new RegExp(component.value, "gi") } });
+              } else if (_.isEqual(qualifier, "does not contain")) {
+                expressions.push({ [`attributes.values.data`]: {
+                  $regex: new RegExp(`^((?!${component.value}).)*$`, "gi"),
+                } });
               }
             }
           }
