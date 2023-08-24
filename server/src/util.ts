@@ -2,6 +2,9 @@ import axios, { AxiosRequestConfig } from "axios";
 import { consola } from "consola";
 import _ from "lodash";
 
+// Authentication methods
+import { Authentication } from "./operations/Authentication";
+
 /**
  * Get data from an API using the JavaScript `fetch` function
  * @param {string} url exact URL to GET data from
@@ -48,10 +51,10 @@ export const postData = async (
       .then((response) => {
         const contentType = response.headers["content-type"];
         if (_.isNull(contentType)) {
-          reject("Invalid response");
+          reject(`"content-type" is null`);
         } else if (_.startsWith(contentType, "application/json")) {
           if (!_.isEqual(response.statusText, "OK")) {
-            reject("Invalid response");
+            reject(`Response status: ${response.statusText}`);
           } else {
             resolve(response.data);
           }
@@ -61,7 +64,21 @@ export const postData = async (
       })
       .catch((error) => {
         consola.error("POST:", url);
-        reject(error);
+        reject(`Unknown error: ${error}`);
       });
+  });
+};
+
+export const authenticate = (request: any, response: any, next: () => void) => {
+  Authentication.validate(request.headers["id_token"]).then((result) => {
+    if (result) {
+      next();
+    } else {
+      response.status(403);
+      response.json("Not authenticated");
+    }
+  }).catch((_error) => {
+    response.status(403);
+    response.json("Invalid token");
   });
 };

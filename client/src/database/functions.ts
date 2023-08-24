@@ -4,7 +4,10 @@ import _ from "lodash";
 import axios, { AxiosRequestConfig } from "axios";
 
 // Get the URL of the database
-import { SERVER_URL } from "src/variables";
+import { SERVER_URL, TOKEN_KEY } from "src/variables";
+
+// Token for request authorization
+import { getToken } from "src/util";
 
 /**
  * Get data from the Lab API using the JavaScript `fetch` API
@@ -15,14 +18,26 @@ export const getData = (
   path: string,
   options?: AxiosRequestConfig
 ): Promise<any> => {
+  // Configure authorization
+  const requestOptions: AxiosRequestConfig = {
+    ...options,
+  };
+
+  if (!_.isUndefined(getToken(TOKEN_KEY))) {
+    requestOptions.headers = {
+      id_token: getToken(TOKEN_KEY).id_token,
+      ...requestOptions.headers,
+    }
+  }
+
   return new Promise((resolve, reject) => {
     axios
-      .get(`${SERVER_URL}${path}`, options)
+      .get(`${SERVER_URL}${path}`, requestOptions)
       .then((response) => {
         // Check response status
         if (!response) {
           consola.error("GET:", path);
-          reject("Invalid response from database");
+          reject("Invalid response");
         }
 
         // Resolve with the response data
@@ -45,9 +60,21 @@ export const postData = async (
   data: any,
   options?: AxiosRequestConfig
 ): Promise<any> => {
+  // Configure authorization
+  const requestOptions: AxiosRequestConfig = {
+    ...options,
+  };
+
+  if (!_.isUndefined(getToken(TOKEN_KEY))) {
+    requestOptions.headers = {
+      id_token: getToken(TOKEN_KEY).id_token,
+      ...requestOptions.headers,
+    }
+  }
+
   return new Promise((resolve, reject) => {
     axios
-      .post(`${SERVER_URL}${path}`, data, options)
+      .post(`${SERVER_URL}${path}`, data, requestOptions)
       .then((response) => {
         const contentType = response.headers["content-type"];
         if (_.isNull(contentType)) {
@@ -73,23 +100,36 @@ export const postData = async (
  * Delete data to the Lab API using the JavaScript `fetch` API
  * @param {string} path the path of the database objected to be deleted
  */
-export const deleteData = async (path: string): Promise<any> => {
-  return await fetch(`${SERVER_URL}${path}`, {
-    method: "DELETE",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  })
-    .then((response) => {
-      if (_.isEqual(response.ok, true)) {
-        return { status: "success" };
-      }
-      throw new Error("Failed to DELETE");
-    })
-    .catch((error) => {
-      consola.error("DELETE:", path);
-      return { status: "error", error: error };
-    });
+export const deleteData = async (path: string, options?: AxiosRequestConfig): Promise<any> => {
+  // Configure authorization
+  const requestOptions: AxiosRequestConfig = {
+    ...options,
+  };
+
+  if (!_.isUndefined(getToken(TOKEN_KEY))) {
+    requestOptions.headers = {
+      id_token: getToken(TOKEN_KEY).id_token,
+      ...requestOptions.headers,
+    }
+  }
+  return new Promise((resolve, reject) => {
+    axios
+      .delete(`${SERVER_URL}${path}`, requestOptions)
+      .then((response) => {
+        // Check response status
+        if (!response) {
+          consola.error("GET:", path);
+          reject("Invalid response");
+        }
+
+        // Resolve with the response data
+        resolve(response.data);
+      })
+      .catch((error) => {
+        consola.error("DELETE:", path);
+        reject(error);
+      });
+  });
 };
 
 /**

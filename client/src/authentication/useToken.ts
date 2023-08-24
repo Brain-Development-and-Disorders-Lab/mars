@@ -4,20 +4,14 @@ import { useState } from "react";
 import { AuthInfo } from "@types";
 
 // Utility functions and libraries
+import { getToken } from "src/util";
 import _ from "lodash";
 
-const TOKEN_KEY = "reusable_token";
+// Variables
+import { TOKEN_KEY } from "src/variables";
 
 export const useToken = (): [AuthInfo, (token: AuthInfo) => void] => {
-  const getToken = () => {
-    const storedToken = sessionStorage.getItem(TOKEN_KEY);
-    if (!_.isNull(storedToken) && !_.isUndefined(storedToken)) {
-      return JSON.parse(storedToken);
-    }
-    return undefined;
-  };
-
-  const [token, setToken] = useState(getToken());
+  const [token, setToken] = useState(getToken(TOKEN_KEY));
 
   const storeToken = (token: AuthInfo) => {
     if (_.isEqual(token, {})) {

@@ -59,9 +59,9 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
       .then((response) => {
         if (_.isEqual(response.status, "error")) {
           toast({
-            title: "Error",
+            title: "Error authenticating with ORCiD",
             status: "error",
-            description: "Error occurred while authenticating. Try again later.",
+            description: response.message,
             duration: 4000,
             position: "bottom-right",
             isClosable: true,
@@ -73,11 +73,11 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
         }
         setIsLoading(false);
       })
-      .catch((_error) => {
+      .catch((error) => {
         toast({
-          title: "Error",
+          title: "Error authenticating with ORCiD",
           status: "error",
-          description: "Could not perform login right now.",
+          description: error.message,
           duration: 4000,
           position: "bottom-right",
           isClosable: true,

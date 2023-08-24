@@ -8,17 +8,20 @@ import { ProjectModel, IProject } from "@types";
 // Operations
 import { Projects } from "../operations/Projects";
 
+// Utility functions and libraries
+import { authenticate } from "src/util";
+
 const ProjectsRoute = express.Router();
 
 // View all Projects
-ProjectsRoute.route("/projects").get((_request: any, response: any) => {
+ProjectsRoute.route("/projects").get(authenticate, (_request: any, response: any) => {
   Projects.getAll().then((projects: ProjectModel[]) => {
     response.json(projects);
   });
 });
 
 // View a specific Project
-ProjectsRoute.route("/projects/:id").get(
+ProjectsRoute.route("/projects/:id").get(authenticate,
   (request: any, response: any) => {
     Projects.getOne(request.params.id).then(
       (project: ProjectModel) => {
@@ -29,7 +32,7 @@ ProjectsRoute.route("/projects/:id").get(
 );
 
 // Create a new Project, expects Project data
-ProjectsRoute.route("/projects/create").post(
+ProjectsRoute.route("/projects/create").post(authenticate,
   (request: { body: IProject }, response: any) => {
     Projects.create(request.body).then((project: ProjectModel) => {
       response.json({
@@ -41,10 +44,8 @@ ProjectsRoute.route("/projects/create").post(
   }
 );
 
-/**
- * Route: Add an Entity to a Project, expects Entity and Project ID data.
- */
-ProjectsRoute.route("/projects/add").post(
+// Route: Add an Entity to a Project, expects Entity and Project ID data.
+ProjectsRoute.route("/projects/add").post(authenticate,
   (
     request: { body: { project: string; entity: string } },
     response: any
@@ -61,7 +62,7 @@ ProjectsRoute.route("/projects/add").post(
 );
 
 // Route: Update a Project
-ProjectsRoute.route("/projects/update").post(
+ProjectsRoute.route("/projects/update").post(authenticate,
   (request: { body: ProjectModel }, response: any) => {
     Projects.update(request.body).then(
       (updatedProject: ProjectModel) => {
@@ -76,7 +77,7 @@ ProjectsRoute.route("/projects/update").post(
 );
 
 // Get JSON-formatted data of the Entity
-ProjectsRoute.route("/projects/export").post(
+ProjectsRoute.route("/projects/export").post(authenticate,
   (
     request: {
       body: { id: string; fields: string[]; format: "json" | "csv" | "txt" };
@@ -93,10 +94,8 @@ ProjectsRoute.route("/projects/export").post(
   }
 );
 
-/**
- * Route: Remove an Entity from a Project, expects Entity and Project ID data.
- */
-ProjectsRoute.route("/projects/remove").post(
+// Route: Remove an Entity from a Project, expects Entity and Project ID data.
+ProjectsRoute.route("/projects/remove").post(authenticate,
   (
     request: { body: { entity: string; project: string } },
     response: any
@@ -114,7 +113,7 @@ ProjectsRoute.route("/projects/remove").post(
 );
 
 // Route: Remove a Project
-ProjectsRoute.route("/projects/:id").delete(
+ProjectsRoute.route("/projects/:id").delete(authenticate,
   (request: { params: { id: any } }, response: any) => {
     Projects.delete(request.params.id).then((project) => {
       response.json({

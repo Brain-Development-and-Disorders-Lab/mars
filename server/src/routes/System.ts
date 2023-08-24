@@ -6,11 +6,12 @@ import { System } from "../operations/System";
 import dayjs from "dayjs";
 import { DeviceModel, EntityModel } from "@types";
 import { GridFSBucketReadStream } from "mongodb";
+import { authenticate } from "src/util";
 
 const SystemRoute = express.Router();
 
 // Route: Start backup operation
-SystemRoute.route("/system/backup").get((_request: any, response: any) => {
+SystemRoute.route("/system/backup").get(authenticate, (_request: any, response: any) => {
   System.backup().then((path: string) => {
     response.setHeader("Content-Type", "application/json");
     response.download(path, `backup_${dayjs(Date.now()).toJSON()}.json`);
@@ -18,7 +19,7 @@ SystemRoute.route("/system/backup").get((_request: any, response: any) => {
 });
 
 // Route: Import JSON file
-SystemRoute.route("/system/import").post((request: any, response: any) => {
+SystemRoute.route("/system/import").post(authenticate, (request: any, response: any) => {
   System.import(request.files, request.body.type)
     .then((result: { status: boolean; message: string; data?: any }) => {
       response.json({
@@ -33,7 +34,7 @@ SystemRoute.route("/system/import").post((request: any, response: any) => {
 });
 
 // Route: Import mappings
-SystemRoute.route("/system/import/mapping").post(
+SystemRoute.route("/system/import/mapping").post(authenticate,
   (request: any, response: any) => {
     System.mapData(request.body.fields, request.body.data)
       .then((entities: EntityModel[]) => {
@@ -49,7 +50,7 @@ SystemRoute.route("/system/import/mapping").post(
 );
 
 // Route: Upload image
-SystemRoute.route("/system/upload").post((request: any, response: any) => {
+SystemRoute.route("/system/upload").post(authenticate, (request: any, response: any) => {
   System.upload(request.files, request.body.target)
     .then((result: { status: boolean; message: string; data?: any }) => {
       response.json({
@@ -64,7 +65,7 @@ SystemRoute.route("/system/upload").post((request: any, response: any) => {
 });
 
 // Route: Download file
-SystemRoute.route("/system/download/:id").get((request: any, response: any) => {
+SystemRoute.route("/system/download/:id").get(authenticate, (request: any, response: any) => {
   System.download(request.params.id)
     .then((result: { status: boolean; stream: GridFSBucketReadStream }) => {
       result.stream.on("data", (chunk) => {
@@ -85,7 +86,7 @@ SystemRoute.route("/system/download/:id").get((request: any, response: any) => {
 });
 
 // Route: Get file information
-SystemRoute.route("/system/file/:id").get((request: any, response: any) => {
+SystemRoute.route("/system/file/:id").get(authenticate, (request: any, response: any) => {
   System.getFileInformation(request.params.id)
     .then((result: { status: boolean; data: any[] }) => {
       response.json(result);
@@ -96,14 +97,14 @@ SystemRoute.route("/system/file/:id").get((request: any, response: any) => {
 });
 
 // Route: Get all Devices
-SystemRoute.route("/system/devices").get((_request: any, response: any) => {
+SystemRoute.route("/system/devices").get(authenticate, (_request: any, response: any) => {
   System.getDevices().then((devices: DeviceModel[]) => {
     response.json(devices);
   });
 });
 
 // Route: Get specific Device
-SystemRoute.route("/system/devices/:id").get((request: any, response: any) => {
+SystemRoute.route("/system/devices/:id").get(authenticate, (request: any, response: any) => {
   System.getDevice(request.params.id).then((device: DeviceModel) => {
     response.json(device);
   });

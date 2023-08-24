@@ -45,3 +45,16 @@ export const isValidAttributes = (attributes: IAttribute[]) => {
 
   return true;
 };
+
+/**
+ * Retrieve an authentication token from session storage
+ * @param {string} tokenKey the key of the token in storage
+ * @return {any}
+ */
+export const getToken = (tokenKey: string): any => {
+  const storedToken = sessionStorage.getItem(tokenKey);
+  if (!_.isNull(storedToken) && !_.isUndefined(storedToken)) {
+    return JSON.parse(storedToken);
+  }
+  return undefined;
+};
