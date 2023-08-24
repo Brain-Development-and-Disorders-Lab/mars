@@ -41,8 +41,11 @@ app.use(
   UsersRoute,
 );
 
+const wrapper = express();
+wrapper.use("/mars", app);
+
 // Start the Express server
-app.listen(port, () => {
+wrapper.listen(port, () => {
   // Connect to the primary database when the server starts
   connectPrimary().then(() => {
     // Connect to the system database

@@ -90,7 +90,7 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
 
   // Define login parameters
   const clientID = "APP-BBVHCTCNDUJ4CAXV";
-  const redirectURI = "https://reusable.bio";
+  const redirectURI = "https://mars.reusable.bio";
   const requestURI =
     `https://orcid.org/oauth/authorize?client_id=${clientID}&response_type=code&scope=openid&redirect_uri=${redirectURI}`;
 
