@@ -2268,50 +2268,23 @@ const Entity = () => {
                             </Flex>
                             <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
                               <Text fontWeight={"bold"}>Origins:</Text>
-                              {entityVersion.associations.origins.length > 0 ? (
-                                entityVersion.associations.origins.map(
-                                  (origin) => {
-                                    return (
-                                      <Tag
-                                        key={`v_o_${entityVersion.timestamp}_${origin.id}`}
-                                      >
-                                        <TagLabel>
-                                          <Linky
-                                            type={"entities"}
-                                            id={origin.id}
-                                          />
-                                        </TagLabel>
-                                      </Tag>
-                                    );
-                                  }
-                                )
-                              ) : (
-                                <Text>None</Text>
-                              )}
+                              <Tag
+                                key={`v_o_${entityVersion.timestamp}`}
+                              >
+                                <TagLabel>
+                                  {entityVersion.associations.origins.length}
+                                </TagLabel>
+                              </Tag>
                             </Flex>
                             <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
                               <Text fontWeight={"bold"}>Products:</Text>
-                              {entityVersion.associations.products.length >
-                              0 ? (
-                                entityVersion.associations.products.map(
-                                  (product) => {
-                                    return (
-                                      <Tag
-                                        key={`v_p_${entityVersion.timestamp}_${product.id}`}
-                                      >
-                                        <TagLabel>
-                                          <Linky
-                                            type={"entities"}
-                                            id={product.id}
-                                          />
-                                        </TagLabel>
-                                      </Tag>
-                                    );
-                                  }
-                                )
-                              ) : (
-                                <Text>None</Text>
-                              )}
+                              <Tag
+                                key={`v_o_${entityVersion.timestamp}`}
+                              >
+                                <TagLabel>
+                                  {entityVersion.associations.products.length}
+                                </TagLabel>
+                              </Tag>
                             </Flex>
                           </VStack>
                         </CardBody>

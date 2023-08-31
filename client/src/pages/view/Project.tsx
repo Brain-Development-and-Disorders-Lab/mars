@@ -901,20 +901,12 @@ const Project = () => {
                               </Text>
                             </Flex>
                             <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
-                              <Text fontWeight={"bold"}>Products:</Text>
-                              {projectVersion.entities.length > 0 ? (
-                                projectVersion.entities.map((entity) => {
-                                  return (
-                                    <Tag
-                                      key={`v_p_${projectVersion.timestamp}_${entity}`}
-                                    >
-                                      <Linky type={"entities"} id={entity} />
-                                    </Tag>
-                                  );
-                                })
-                              ) : (
-                                <Text>None</Text>
-                              )}
+                              <Text fontWeight={"bold"}>Entities:</Text>
+                              <Tag
+                                key={`v_p_${projectVersion.timestamp}`}
+                              >
+                                {projectVersion.entities.length}
+                              </Tag>
                             </Flex>
                           </VStack>
                         </CardBody>
