@@ -70,15 +70,20 @@ export const postData = async (
 };
 
 export const authenticate = (request: any, response: any, next: () => void) => {
-  Authentication.validate(request.headers["id_token"]).then((result) => {
-    if (result) {
-      next();
-    } else {
+  if (_.isEqual(process.env.NODE_ENV, "development")) {
+    // Bypass authentication in development mode
+    next();
+  } else {
+    Authentication.validate(request.headers["id_token"]).then((result) => {
+      if (result) {
+        next();
+      } else {
+        response.status(403);
+        response.json("Not authenticated");
+      }
+    }).catch((_error) => {
       response.status(403);
-      response.json("Not authenticated");
-    }
-  }).catch((_error) => {
-    response.status(403);
-    response.json("Invalid token");
-  });
+      response.json("Invalid token");
+    });
+  }
 };

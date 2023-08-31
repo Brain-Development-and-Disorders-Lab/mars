@@ -56,5 +56,15 @@ export const getToken = (tokenKey: string): any => {
   if (!_.isNull(storedToken) && !_.isUndefined(storedToken)) {
     return JSON.parse(storedToken);
   }
-  return undefined;
+
+  if (_.isEqual(process.env.NODE_ENV, "development")) {
+    // Return a dummy token
+    return {
+      name: "Test User",
+      orcid: "XXXX-1234-ABCD-0000",
+      id_token: "ABCD1234",
+    };
+  } else {
+    return undefined;
+  }
 };

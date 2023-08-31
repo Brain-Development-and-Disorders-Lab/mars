@@ -3,19 +3,13 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 module.exports = {
   entry: "./src/index.tsx",
-  mode: "development",
   plugins: [
     new HtmlWebpackPlugin({
       favicon: "img/Favicon.png",
-      title: "Laboratory Data Management",
+      title: "MARS",
       template: "src/index.html",
     }),
   ],
-  devServer: {
-    static: [path.join(__dirname, "dist"), path.join(__dirname, "img")],
-    hot: true,
-    historyApiFallback: true,
-  },
   module: {
     rules: [
       {

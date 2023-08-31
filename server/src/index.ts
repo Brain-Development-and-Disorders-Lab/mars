@@ -2,10 +2,11 @@
 import "dotenv/config";
 
 // Libraries
+import _ from "lodash";
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
-import consola from "consola";
+import consola, { LogLevels } from "consola";
 
 const fileUpload = require("express-fileupload");
 
@@ -21,6 +22,9 @@ import SearchRoute from "./routes/Search";
 import SystemRoute from "./routes/System";
 import AuthenticationRoute from "./routes/Authentication";
 import UsersRoute from "./routes/Users";
+
+// Set logging level
+consola.level = _.isEqual(process.env.NODE_ENV, "development") ? LogLevels.verbose : LogLevels.error;
 
 const app = express();
 const port = process.env.PORT || 8000;
