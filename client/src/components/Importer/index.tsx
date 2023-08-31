@@ -60,6 +60,7 @@ const Importer = (props: {
   const [isError, setIsError] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [isMapping, setIsMapping] = useState(false);
 
   const toast = useToast();
   const [token, _setToken] = useToken();
@@ -209,6 +210,10 @@ const Importer = (props: {
   };
 
   const performMapping = () => {
+    // Set the mapping status
+    setIsMapping(true);
+
+    // Collate data to be mapped
     const mappingData: { fields: EntityImport; data: any[] } = {
       fields: {
         name: nameField,
@@ -254,6 +259,9 @@ const Importer = (props: {
           position: "bottom-right",
           isClosable: true,
         });
+      })
+      .finally(() => {
+        setIsMapping(false);
       });
   };
 
@@ -826,6 +834,8 @@ const Importer = (props: {
                       }
                     }}
                     disabled={_.isEqual(nameField, "")}
+                    isLoading={isMapping}
+                    loadingText={"Please wait..."}
                   >
                     {_.isEqual(interfacePage, "start") ? "Continue" : "Apply"}
                   </Button>

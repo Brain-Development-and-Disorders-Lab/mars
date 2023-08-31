@@ -169,8 +169,6 @@ const Navigation = () => {
           >
             <Flex w={"100%"} align={"center"} gap={"2"}>
               <Text>Projects</Text>
-              <Spacer />
-              <Tag>{isLoaded ? projectCount : <Spinner size={"xs"} />}</Tag>
             </Flex>
           </Button>
 
@@ -185,8 +183,6 @@ const Navigation = () => {
           >
             <Flex w={"100%"} align={"center"} gap={"2"}>
               <Text>Entities</Text>
-              <Spacer />
-              <Tag>{isLoaded ? entityCount : <Spinner size={"xs"} />}</Tag>
             </Flex>
           </Button>
           <Button

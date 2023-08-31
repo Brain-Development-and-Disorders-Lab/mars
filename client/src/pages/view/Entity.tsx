@@ -190,6 +190,7 @@ const Entity = () => {
   // Toggles
   const [isError, setIsError] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
   const [editing, setEditing] = useState(false);
   const [exportAll, setExportAll] = useState(false);
 
@@ -314,6 +315,9 @@ const Entity = () => {
   // Toggle editing status
   const handleEditClick = () => {
     if (editing) {
+      setIsUpdating(true);
+
+      // Collate Entity update data
       const updateData: EntityModel = {
         _id: entityData._id,
         name: entityData.name,
@@ -363,6 +367,7 @@ const Entity = () => {
           }).then((_response) => {
             setEditing(false);
           });
+          setIsUpdating(false);
         });
     } else {
       postData(`/entities/lock/${id}`, {
@@ -1073,6 +1078,8 @@ const Entity = () => {
                         )
                       }
                       disabled={entityData.locked}
+                      loadingText={"Saving..."}
+                      isLoading={isUpdating}
                     >
                       {editing ? "Done" : "Edit"}
                     </Button>

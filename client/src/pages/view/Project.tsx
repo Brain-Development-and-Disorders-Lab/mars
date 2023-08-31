@@ -94,6 +94,7 @@ const Project = () => {
   const [editing, setEditing] = useState(false);
   const [isError, setIsError] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
   const [exportAll, setExportAll] = useState(false);
 
   const [projectData, setProjectData] = useState({} as ProjectModel);
@@ -190,6 +191,9 @@ const Project = () => {
    */
   const handleEditClick = () => {
     if (editing) {
+      setIsUpdating(true);
+
+      // Collate update data
       const updateData: ProjectModel = {
         _id: projectData._id,
         name: projectData.name,
@@ -224,6 +228,7 @@ const Project = () => {
         })
         .finally(() => {
           setEditing(false);
+          setIsUpdating(false);
         });
     } else {
       setEditing(true);
@@ -458,6 +463,7 @@ const Project = () => {
                     <Button
                       colorScheme={"red"}
                       rightIcon={<Icon name={"delete"} />}
+                      disabled={isUpdating}
                     >
                       Delete
                     </Button>
@@ -487,6 +493,8 @@ const Project = () => {
                   editing ? <Icon name={"check"} /> : <Icon name={"edit"} />
                 }
                 onClick={handleEditClick}
+                loadingText={"Saving..."}
+                isLoading={isUpdating}
               >
                 {editing ? "Done" : "Edit"}
               </Button>
