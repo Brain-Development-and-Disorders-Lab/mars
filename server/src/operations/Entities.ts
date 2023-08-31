@@ -986,7 +986,6 @@ export class Entities {
 
           (result as EntityModel).attributes.forEach((attribute) => {
             if (_.isEqual(updatedAttribute._id, attribute._id)) {
-              consola.info("Updating an Attribute");
               attribute.name = updatedAttribute.name;
               attribute.description = updatedAttribute.description;
               attribute.values = updatedAttribute.values;
