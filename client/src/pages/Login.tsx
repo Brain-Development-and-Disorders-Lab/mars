@@ -135,7 +135,7 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
             gap={"8"}
           >
             <Text align={"center"}>Log in or create an account with your ORCID iD.</Text>
-            <Button colorScheme={"gray"} gap={"4"} onClick={onLoginClick} isLoading={isLoading}>
+            <Button colorScheme={"gray"} gap={"4"} onClick={onLoginClick} isLoading={isLoading} loadingText={"Logging in..."}>
               <Image src={"https://orcid.org/sites/default/files/images/orcid_16x16.png"} />
               Connect your ORCID iD
             </Button>

@@ -209,7 +209,6 @@ const Dashboard = () => {
         <Flex direction={"column"} gap={"4"} grow={"2"} h={"100%"}>
           {/* Projects and Entities */}
           <Flex
-            h={"50%"}
             direction={"column"}
             p={"4"}
             background={"white"}
@@ -252,7 +251,6 @@ const Dashboard = () => {
           </Flex>
 
           <Flex
-            h={"50%"}
             direction={"column"}
             p={"4"}
             background={"white"}
@@ -326,21 +324,17 @@ const Dashboard = () => {
               {activityData.length > 0 ? (
                 activityData.slice(0, 10).map((activity) => {
                   // Configure the badge
-                  let operationBadgeColor = "green.400";
                   let operationIcon = <Icon name={"entity"} color={"white"} />;
 
                   switch (activity.type) {
                     case "create":
-                      operationBadgeColor = "green.400";
-                      operationIcon = <Icon name={"add"} color={"white"} />;
+                      operationIcon = <Icon name={"add"} color={"green.400"} />;
                       break;
                     case "update":
-                      operationBadgeColor = "blue.400";
-                      operationIcon = <Icon name={"edit"} color={"white"} />;
+                      operationIcon = <Icon name={"edit"} color={"blue.400"} />;
                       break;
                     case "delete":
-                      operationBadgeColor = "red.400";
-                      operationIcon = <Icon name={"delete"} color={"white"} />;
+                      operationIcon = <Icon name={"delete"} color={"red.400"} />;
                       break;
                   }
 
@@ -360,7 +354,7 @@ const Dashboard = () => {
                       >
                         <Flex
                           rounded={"full"}
-                          bg={operationBadgeColor}
+                          bg={"white"}
                           p={"1.5"}
                         >
                           {operationIcon}
