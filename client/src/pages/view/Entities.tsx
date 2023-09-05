@@ -11,6 +11,7 @@ import {
   useBreakpoint,
   Tooltip,
   Spacer,
+  Tag,
 } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
 import { Content } from "@components/Container";
@@ -91,6 +92,9 @@ const Entities = () => {
     }),
     columnHelper.accessor("description", {
       cell: (info) => {
+        if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
+          return <Tag colorScheme={"orange"}>Empty</Tag>
+        }
         return (
           <Tooltip label={info.getValue()}>
             <Text>{_.truncate(info.getValue(), { length: 20 })}</Text>

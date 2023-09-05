@@ -11,6 +11,7 @@ import {
   List,
   ListItem,
   useBreakpoint,
+  Tag,
 } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
 import { Content } from "@components/Container";
@@ -148,6 +149,9 @@ const Dashboard = () => {
     }),
     entityTableColumnHelper.accessor("description", {
       cell: (info) => {
+        if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
+          return <Tag colorScheme={"orange"}>Empty</Tag>
+        }
         return <Text noOfLines={1}>{info.getValue()}</Text>;
       },
       header: "Description",
@@ -225,7 +229,8 @@ const Dashboard = () => {
             </Flex>
 
             {/* Projects table */}
-            {isLoaded && projectData.length > 0 ? (
+            {/* Condition: Loaded and content present */}
+            {isLoaded && projectData.length > 0 &&
               <DataTable
                 columns={projectTableColumns}
                 data={projectTableData}
@@ -233,9 +238,17 @@ const Dashboard = () => {
                 hidePagination
                 hideSelection
               />
-            ) : (
-              <Loading />
-            )}
+            }
+
+            {/* Condition: Loaded and no content present */}
+            {isLoaded && _.isEmpty(projectData) &&
+              <Flex w={"100%"} direction={"row"} p={"4"} justify={"center"} align={"center"}>
+                <Text fontWeight={"bold"}>No Projects yet</Text>
+              </Flex>
+            }
+
+            {/* Condition: Not loaded */}
+            {!isLoaded && <Loading />}
 
             <Spacer />
 
@@ -267,7 +280,8 @@ const Dashboard = () => {
             </Flex>
 
             {/* Entities table */}
-            {isLoaded && entityData.length > 0 ? (
+            {/* Condition: Loaded and content present */}
+            {isLoaded && entityData.length > 0 &&
               <DataTable
                 columns={entityTableColumns}
                 data={entityTableData.filter((entity) =>
@@ -277,9 +291,17 @@ const Dashboard = () => {
                 hidePagination
                 hideSelection
               />
-            ) : (
-              <Loading />
-            )}
+            }
+
+            {/* Condition: Loaded and no content present */}
+            {isLoaded && _.isEmpty(entityData) &&
+              <Flex w={"100%"} direction={"row"} p={"4"} justify={"center"} align={"center"}>
+                <Text fontWeight={"bold"}>No Entities yet</Text>
+              </Flex>
+            }
+
+            {/* Condition: Not loaded */}
+            {!isLoaded && <Loading />}
 
             <Spacer />
 
@@ -321,69 +343,71 @@ const Dashboard = () => {
             </Flex>
 
             {/* Activity list */}
-            <List>
-              {activityData.length > 0 ? (
-                activityData.slice(0, 10).map((activity) => {
-                  // Configure the badge
-                  let operationIcon = <Icon name={"entity"} color={"white"} />;
+            {activityData.length > 0 ? (
+              <List>
+                {activityData.slice(0, 10).map((activity) => {
+                // Configure the badge
+                let operationIcon = <Icon name={"entity"} color={"white"} />;
 
-                  switch (activity.type) {
-                    case "create":
-                      operationIcon = <Icon name={"add"} color={"green.400"} />;
-                      break;
-                    case "update":
-                      operationIcon = <Icon name={"edit"} color={"blue.400"} />;
-                      break;
-                    case "delete":
-                      operationIcon = <Icon name={"delete"} color={"red.400"} />;
-                      break;
-                  }
+                switch (activity.type) {
+                  case "create":
+                    operationIcon = <Icon name={"add"} color={"green.400"} />;
+                    break;
+                  case "update":
+                    operationIcon = <Icon name={"edit"} color={"blue.400"} />;
+                    break;
+                  case "delete":
+                    operationIcon = <Icon name={"delete"} color={"red.400"} />;
+                    break;
+                }
 
-                  return (
-                    <ListItem key={`activity-${activity._id}`}>
+                return (
+                  <ListItem key={`activity-${activity._id}`}>
+                    <Flex
+                      direction={"row"}
+                      p={"2"}
+                      gap={"2"}
+                      mt={"2"}
+                      mb={"2"}
+                      align={"center"}
+                      background={"white"}
+                      rounded={"md"}
+                      border={"2px"}
+                      borderColor={"gray.100"}
+                    >
                       <Flex
-                        direction={"row"}
-                        p={"2"}
-                        gap={"2"}
-                        mt={"2"}
-                        mb={"2"}
-                        align={"center"}
-                        background={"white"}
-                        rounded={"md"}
-                        border={"2px"}
-                        borderColor={"gray.100"}
+                        rounded={"full"}
+                        bg={"white"}
+                        p={"1.5"}
                       >
-                        <Flex
-                          rounded={"full"}
-                          bg={"white"}
-                          p={"1.5"}
-                        >
-                          {operationIcon}
-                        </Flex>
-
-                        <Text display={{ base: "none", sm: "block" }}>
-                          {activity.details}
-                        </Text>
-
-                        <Linky
-                          id={activity.target.id}
-                          type={activity.target.type}
-                          fallback={activity.target.name}
-                        />
-
-                        <Spacer />
-
-                        <Text color={"gray.400"}>
-                          {dayjs(activity.timestamp).fromNow()}
-                        </Text>
+                        {operationIcon}
                       </Flex>
-                    </ListItem>
-                  );
-                })
-              ) : (
-                <Text fontSize={"md"}>No recent activity to show.</Text>
-              )}
-            </List>
+
+                      <Text display={{ base: "none", sm: "block" }}>
+                        {activity.details}
+                      </Text>
+
+                      <Linky
+                        id={activity.target.id}
+                        type={activity.target.type}
+                        fallback={activity.target.name}
+                      />
+
+                      <Spacer />
+
+                      <Text color={"gray.400"}>
+                        {dayjs(activity.timestamp).fromNow()}
+                      </Text>
+                    </Flex>
+                  </ListItem>
+                );
+                })}
+              </List>
+            ) : (
+              <Flex w={"100%"} justify={"center"}>
+                <Text fontSize={"md"} fontWeight={"bold"}>No Activity yet</Text>
+              </Flex>
+            )}
           </Flex>
         </Flex>
       </Flex>

@@ -234,7 +234,7 @@ export class System {
               reject({ message: "Error importing backup JSON file" });
             });
         } else if (_.isEqual(type, "spreadsheet")) {
-          const spreadsheet = XLSX.read(receivedFileData);
+          const spreadsheet = XLSX.read(receivedFileData, { cellDates: true });
           if (spreadsheet.SheetNames.length > 0) {
             const primarySheet = spreadsheet.Sheets[spreadsheet.SheetNames[0]];
             const parsedSheet = XLSX.utils.sheet_to_json(primarySheet, {
@@ -263,6 +263,7 @@ export class System {
     return new Promise((resolve, reject) => {
       // Extract Entities
       const entities = [] as IEntity[];
+
       spreadsheetData.map((row) => {
         const attributes = [] as AttributeModel[];
         // Extract Attributes
@@ -272,11 +273,24 @@ export class System {
             name: attribute.name,
             description: attribute.description,
             values: attribute.values.map((value: IValue<any>) => {
+              // Clean the data for specific types
+              let valueData = row[value.data];
+              if (_.isEqual(value.type, "date")) {
+                // "date" type
+                valueData = dayjs(row[value.data]).format("YYYY-MM-DD");
+              }
+              if (_.isEqual(value.type, "select")) {
+                // "select" type
+                valueData = {
+                  selected: row[value.data],
+                  options: [row[value.data]]
+                }
+              }
               return {
                 identifier: value.identifier,
                 name: value.name,
                 type: value.type,
-                data: row[value.data],
+                data: valueData,
               };
             }),
           });
