@@ -11,6 +11,7 @@ import {
   List,
   ListItem,
   useBreakpoint,
+  Tag,
 } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
 import { Content } from "@components/Container";
@@ -148,6 +149,9 @@ const Dashboard = () => {
     }),
     entityTableColumnHelper.accessor("description", {
       cell: (info) => {
+        if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
+          return <Tag colorScheme={"orange"}>Empty</Tag>
+        }
         return <Text noOfLines={1}>{info.getValue()}</Text>;
       },
       header: "Description",
@@ -225,7 +229,8 @@ const Dashboard = () => {
             </Flex>
 
             {/* Projects table */}
-            {isLoaded && projectData.length > 0 ? (
+            {/* Condition: Loaded and content present */}
+            {isLoaded && projectData.length > 0 &&
               <DataTable
                 columns={projectTableColumns}
                 data={projectTableData}
@@ -233,9 +238,17 @@ const Dashboard = () => {
                 hidePagination
                 hideSelection
               />
-            ) : (
-              <Loading />
-            )}
+            }
+
+            {/* Condition: Loaded and no content present */}
+            {isLoaded && _.isEmpty(projectData) &&
+              <Flex w={"100%"} direction={"row"} p={"4"} justify={"center"} align={"center"}>
+                <Text fontWeight={"bold"}>No Projects yet</Text>
+              </Flex>
+            }
+
+            {/* Condition: Not loaded */}
+            {!isLoaded && <Loading />}
 
             <Spacer />
 
@@ -267,7 +280,8 @@ const Dashboard = () => {
             </Flex>
 
             {/* Entities table */}
-            {isLoaded && entityData.length > 0 ? (
+            {/* Condition: Loaded and content present */}
+            {isLoaded && entityData.length > 0 &&
               <DataTable
                 columns={entityTableColumns}
                 data={entityTableData.filter((entity) =>
@@ -277,9 +291,17 @@ const Dashboard = () => {
                 hidePagination
                 hideSelection
               />
-            ) : (
-              <Loading />
-            )}
+            }
+
+            {/* Condition: Loaded and no content present */}
+            {isLoaded && _.isEmpty(entityData) &&
+              <Flex w={"100%"} direction={"row"} p={"4"} justify={"center"} align={"center"}>
+                <Text fontWeight={"bold"}>No Entities yet</Text>
+              </Flex>
+            }
+
+            {/* Condition: Not loaded */}
+            {!isLoaded && <Loading />}
 
             <Spacer />
 
@@ -381,7 +403,7 @@ const Dashboard = () => {
                   );
                 })
               ) : (
-                <Text fontSize={"md"}>No recent activity to show.</Text>
+                <Text fontSize={"md"} fontWeight={"bold"}>No Activity yet</Text>
               )}
             </List>
           </Flex>
