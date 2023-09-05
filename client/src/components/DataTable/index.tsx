@@ -15,7 +15,12 @@ import {
   Tr,
   Text,
   Checkbox,
+  Spacer,
+  Menu,
+  MenuButton,
   Button,
+  MenuList,
+  MenuItem,
 } from "@chakra-ui/react";
 import {
   flexRender,
@@ -28,7 +33,7 @@ import {
 import Icon from "@components/Icon";
 
 // Existing and custom types
-import { DataTableProps, IValue } from "@types";
+import { DataTableProps } from "@types";
 declare module "@tanstack/react-table" {
   interface TableMeta<TData extends RowData> {
     updateData: (rowIndex: number, columnId: string, value: unknown) => void;
@@ -123,27 +128,8 @@ const DataTable = (props: DataTableProps) => {
     setColumnVisibility(props.visibleColumns);
   }, [props.visibleColumns]);
 
-  /**
-   * Apply delete operation to rows that have been selected
-   */
-  const onDeleteRows = () => {
-    const idToRemove: IValue<any>[] = [];
-    for (let rowIndex of Object.keys(selectedRows)) {
-      idToRemove.push(table.getRow(rowIndex).original);
-    }
-
-    const updatedCollection = props.data.filter((value) => {
-      return !idToRemove.includes(value);
-    });
-
-    if (props.setData) {
-      props.setData(updatedCollection);
-      table.resetRowSelection();
-    }
-  };
-
   return (
-    <>
+    <Flex direction={"column"}>
       <TableContainer>
         <Table>
           <Thead>
@@ -196,87 +182,102 @@ const DataTable = (props: DataTableProps) => {
         </Table>
       </TableContainer>
 
-      {props.showPagination && (
-        <Flex
-          direction={"row"}
-          pt={"4"}
-          gap={"4"}
-          justify={"space-between"}
-          w={"100%"}
-          wrap={"wrap"}
-        >
-          <Flex gap={"4"}>
-            <Select
-              id={"select-page-size"}
-              value={table.getState().pagination.pageSize}
-              onChange={(event) => {
-                table.setPageSize(Number(event.target.value));
-              }}
-              isInvalid={false}
-            >
-              {[5, 10, 20].map((size) => {
-                return (
-                  <option key={size} value={size}>
-                    Show {size}
-                  </option>
-                );
-              })}
-            </Select>
-            {props.showPagination && !props.viewOnly && props.showSelection && (
-              <Flex>
-                <Button
-                  variant={"outline"}
-                  disabled={
-                    Object.keys(selectedRows).length === 0 || props.viewOnly
-                  }
-                  onClick={onDeleteRows}
-                  rightIcon={<Icon name={"delete"} />}
-                >
-                  {Object.keys(selectedRows).length}
-                </Button>
-              </Flex>
-            )}
+      <Flex
+        direction={"row"}
+        pt={"4"}
+        gap={"4"}
+        justify={"space-between"}
+        w={"100%"}
+        wrap={"wrap"}
+      >
+        {props.showSelection &&
+          <Flex>
+            <Menu>
+              <MenuButton as={Button} rightIcon={<Icon name={"c_down"} />} disabled={Object.keys(selectedRows).length === 0 || _.isUndefined(props.actions) || props.actions?.length === 0}>
+                Bulk Actions
+              </MenuButton>
+              <MenuList>
+                {props.actions?.map((action) => {
+                  return (
+                    <MenuItem
+                      onClick={() => {
+                        action.action(table, selectedRows);
+                      }}
+                      icon={<Icon name={action.icon} />}
+                      key={action.label}
+                    >
+                      {action.label}
+                    </MenuItem>
+                  );
+                })}
+              </MenuList>
+            </Menu>
           </Flex>
+        }
 
-          <Flex direction={"row"} gap={"4"} align={"center"}>
-            <IconButton
-              variant={"outline"}
-              icon={<Icon name={"c_double_left"} />}
-              aria-label="first page"
-              onClick={() => table.setPageIndex(0)}
-              disabled={!table.getCanPreviousPage()}
-            />
-            <IconButton
-              variant={"outline"}
-              icon={<Icon name={"c_left"} />}
-              aria-label="previous page"
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-            />
-            {table.getPageCount() > 0 && (
-              <Text as={"b"}>
-                {table.getState().pagination.pageIndex + 1} of{" "}
-                {table.getPageCount()}
-              </Text>
-            )}
-            <IconButton
-              variant={"outline"}
-              icon={<Icon name={"c_right"} />}
-              aria-label="next page"
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-            />
-            <IconButton
-              variant={"outline"}
-              icon={<Icon name={"c_double_right"} />}
-              aria-label="last page"
-              onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-              disabled={!table.getCanNextPage()}
-            />
+        <Spacer />
+
+        {props.showPagination && (
+          <Flex gap={"4"}>
+            <Flex>
+              <Select
+                id={"select-page-size"}
+                value={table.getState().pagination.pageSize}
+                onChange={(event) => {
+                  table.setPageSize(Number(event.target.value));
+                }}
+                isInvalid={false}
+              >
+                {[5, 10, 20].map((size) => {
+                  return (
+                    <option key={size} value={size}>
+                      Show {size}
+                    </option>
+                  );
+                })}
+              </Select>
+            </Flex>
+
+            <Flex direction={"row"} gap={"4"} align={"center"}>
+              <IconButton
+                variant={"outline"}
+                icon={<Icon name={"c_double_left"} />}
+                aria-label="first page"
+                onClick={() => table.setPageIndex(0)}
+                disabled={!table.getCanPreviousPage()}
+              />
+              <IconButton
+                variant={"outline"}
+                icon={<Icon name={"c_left"} />}
+                aria-label="previous page"
+                onClick={() => table.previousPage()}
+                disabled={!table.getCanPreviousPage()}
+              />
+              {table.getPageCount() > 0 && (
+                <Text as={"b"}>
+                  {table.getState().pagination.pageIndex + 1} of{" "}
+                  {table.getPageCount()}
+                </Text>
+              )}
+              <IconButton
+                variant={"outline"}
+                icon={<Icon name={"c_right"} />}
+                aria-label="next page"
+                onClick={() => table.nextPage()}
+                disabled={!table.getCanNextPage()}
+              />
+              <IconButton
+                variant={"outline"}
+                icon={<Icon name={"c_double_right"} />}
+                aria-label="last page"
+                onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+                disabled={!table.getCanNextPage()}
+              />
+            </Flex>
           </Flex>
-        </Flex>
-      )}
-    </>
+        )}
+      </Flex>
+    </Flex>
   );
 };
 

@@ -230,12 +230,18 @@ export type DataTableProps = {
   visibleColumns: VisibilityState;
   data: any[];
   setData?: (value: React.SetStateAction<any[]>) => void;
+  viewOnly?: boolean;
+
+  // Interface visibility
   showPagination?: boolean;
   showSelection?: boolean;
-  showDelete?: boolean;
-  showExport?: boolean;
-  exportHandler?: (rows: any[]) => void;
-  viewOnly?: boolean;
+  actions?: DataTableAction[];
+};
+
+export type DataTableAction = {
+  label: string;
+  icon: IconNames;
+  action: (table: any, rows: any) => void;
 };
 
 // Icon component
