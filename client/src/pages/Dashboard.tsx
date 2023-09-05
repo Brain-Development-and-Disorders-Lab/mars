@@ -17,6 +17,7 @@ import { Content } from "@components/Container";
 import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
+import Loading from "@components/Loading";
 
 // Existing and custom types
 import { ProjectModel, EntityModel, ActivityModel } from "@types";
@@ -233,7 +234,7 @@ const Dashboard = () => {
                 hideSelection
               />
             ) : (
-              <Text>There are no Projects to display.</Text>
+              <Loading />
             )}
 
             <Spacer />
@@ -277,7 +278,7 @@ const Dashboard = () => {
                 hideSelection
               />
             ) : (
-              <Text>There are no Entities to display.</Text>
+              <Loading />
             )}
 
             <Spacer />
