@@ -51,8 +51,7 @@ const DataTable = (props: DataTableProps) => {
   const table = useReactTable({
     columns: [
       // Checkbox select column
-      ...(_.isEqual(props.hideSelection, false) ||
-      _.isUndefined(props.hideSelection)
+      ...(_.isEqual(props.showSelection, true)
         ? [
             {
               id: "select",
@@ -197,7 +196,7 @@ const DataTable = (props: DataTableProps) => {
         </Table>
       </TableContainer>
 
-      {!props.hidePagination && (
+      {props.showPagination && (
         <Flex
           direction={"row"}
           pt={"4"}
@@ -223,7 +222,7 @@ const DataTable = (props: DataTableProps) => {
                 );
               })}
             </Select>
-            {!props.hidePagination && !props.viewOnly && !props.hideSelection && (
+            {props.showPagination && !props.viewOnly && props.showSelection && (
               <Flex>
                 <Button
                   variant={"outline"}

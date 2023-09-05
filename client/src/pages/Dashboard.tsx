@@ -235,8 +235,6 @@ const Dashboard = () => {
                 columns={projectTableColumns}
                 data={projectTableData}
                 visibleColumns={visibleColumns}
-                hidePagination
-                hideSelection
               />
             }
 
@@ -288,8 +286,6 @@ const Dashboard = () => {
                   _.isEqual(entity.deleted, false)
                 )}
                 visibleColumns={visibleColumns}
-                hidePagination
-                hideSelection
               />
             }
 

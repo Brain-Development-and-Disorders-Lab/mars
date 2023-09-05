@@ -227,11 +227,14 @@ export type LoginProps = {
 // DataTable component
 export type DataTableProps = {
   columns: any[];
+  visibleColumns: VisibilityState;
   data: any[];
   setData?: (value: React.SetStateAction<any[]>) => void;
-  visibleColumns: VisibilityState;
-  hidePagination?: boolean;
-  hideSelection?: boolean;
+  showPagination?: boolean;
+  showSelection?: boolean;
+  showDelete?: boolean;
+  showExport?: boolean;
+  exportHandler?: (rows: any[]) => void;
   viewOnly?: boolean;
 };
 

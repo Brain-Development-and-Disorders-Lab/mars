@@ -612,7 +612,7 @@ const Project = () => {
                     columns={entitiesColumns}
                     visibleColumns={{}}
                     viewOnly={!editing}
-                    hideSelection={!editing}
+                    showSelection={editing}
                   />
                 ) : (
                   <Text>No Entities.</Text>

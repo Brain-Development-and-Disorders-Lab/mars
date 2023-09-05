@@ -146,7 +146,6 @@ const Attributes = () => {
             columns={columns}
             data={data}
             visibleColumns={visibleColumns}
-            hideSelection
           />
         </Flex>
       </Flex>

@@ -1224,7 +1224,7 @@ const Entity = () => {
                   columns={projectsTableColumns}
                   visibleColumns={{}}
                   viewOnly={!editing}
-                  hideSelection={!editing}
+                  showSelection={editing}
                 />
               )}
             </Flex>
@@ -1272,7 +1272,7 @@ const Entity = () => {
                   columns={originTableColumns}
                   visibleColumns={{}}
                   viewOnly={!editing}
-                  hideSelection={!editing}
+                  showSelection={editing}
                 />
               )}
             </Flex>
@@ -1310,7 +1310,7 @@ const Entity = () => {
                   columns={productTableColumns}
                   visibleColumns={{}}
                   viewOnly={!editing}
-                  hideSelection={!editing}
+                  showSelection={editing}
                 />
               )}
             </Flex>
@@ -1408,7 +1408,7 @@ const Entity = () => {
                   columns={attachmentTableColumns}
                   visibleColumns={{}}
                   viewOnly={!editing}
-                  hideSelection={!editing}
+                  showSelection={editing}
                 />
               )}
             </Flex>

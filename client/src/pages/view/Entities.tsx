@@ -166,7 +166,6 @@ const Entities = () => {
             columns={columns}
             data={data.filter((entity) => _.isEqual(entity.deleted, false))}
             visibleColumns={visibleColumns}
-            hideSelection
           />
         </Flex>
       </Flex>

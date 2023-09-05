@@ -152,7 +152,6 @@ const Projects = () => {
             columns={columns}
             data={data}
             visibleColumns={visibleColumns}
-            hideSelection
           />
         </Flex>
       </Flex>

@@ -565,6 +565,8 @@ const Values = (props: {
           data={props.values}
           setData={props.setValues}
           viewOnly={props.viewOnly}
+          showPagination
+          showSelection={!props.viewOnly}
         />
       </Box>
 
