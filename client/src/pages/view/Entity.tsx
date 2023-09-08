@@ -75,6 +75,7 @@ import { createColumnHelper } from "@tanstack/react-table";
 // Existing and custom types
 import {
   AttributeModel,
+  DataTableAction,
   EntityHistory,
   EntityModel,
   IValue,
@@ -485,6 +486,19 @@ const Entity = () => {
       header: "",
     },
   ];
+  const projectsTableActions: DataTableAction[] = [
+    {
+      label: "Remove Projects",
+      icon: "delete",
+      action(table, rows) {
+        const projectsToRemove: string[] = [];
+        for (let rowIndex of Object.keys(rows)) {
+          projectsToRemove.push(table.getRow(rowIndex).original);
+        }
+        removeProjects(projectsToRemove);
+      },
+    }
+  ];
 
   // Configure origins table columns and data
   const originTableColumnHelper = createColumnHelper<{
@@ -535,6 +549,19 @@ const Entity = () => {
       header: "",
     }),
   ];
+  const originTableActions: DataTableAction[] = [
+    {
+      label: "Remove Origins",
+      icon: "delete",
+      action(table, rows) {
+        const originsToRemove: string[] = [];
+        for (let rowIndex of Object.keys(rows)) {
+          originsToRemove.push(table.getRow(rowIndex).original.id);
+        }
+        removeOrigins(originsToRemove);
+      },
+    },
+  ];
 
   // Configure products table columns and data
   const productTableColumnHelper = createColumnHelper<{
@@ -584,6 +611,19 @@ const Entity = () => {
       },
       header: "",
     }),
+  ];
+  const productTableActions: DataTableAction[] = [
+    {
+      label: "Remove Products",
+      icon: "delete",
+      action(table, rows) {
+        const productsToRemove: string[] = [];
+        for (let rowIndex of Object.keys(rows)) {
+          productsToRemove.push(table.getRow(rowIndex).original.id);
+        }
+        removeProducts(productsToRemove);
+      },
+    },
   ];
 
   // Configure attachment table columns and data
@@ -680,6 +720,19 @@ const Entity = () => {
       },
       header: "",
     }),
+  ];
+  const attachmentTableActions: DataTableAction[] = [
+    {
+      label: "Remove Attachments",
+      icon: "delete",
+      action(table, rows) {
+        const attachmentsToRemove: string[] = [];
+        for (let rowIndex of Object.keys(rows)) {
+          attachmentsToRemove.push(table.getRow(rowIndex).original.id);
+        }
+        removeAttachments(attachmentsToRemove);
+      },
+    },
   ];
 
   /**
@@ -874,6 +927,14 @@ const Entity = () => {
     );
   };
 
+  const removeProducts = (ids: string[]) => {
+    setEntityProducts(
+      entityProducts.filter((product) => {
+        return !_.includes(ids, product.id);
+      })
+    );
+  };
+
   // Add Origins to the Entity state
   const addOrigins = (origins: string[]): void => {
     setEntityOrigins([
@@ -893,6 +954,14 @@ const Entity = () => {
     );
   };
 
+  const removeOrigins = (ids: string[]) => {
+    setEntityOrigins(
+      entityOrigins.filter((origin) => {
+        return !_.includes(ids, origin.id);
+      })
+    );
+  };
+
   // Remove a Project from the Entity state
   const removeProject = (id: string) => {
     setEntityProjects(
@@ -902,11 +971,27 @@ const Entity = () => {
     );
   };
 
+  const removeProjects = (ids: string[]) => {
+    setEntityProjects(
+      entityProjects.filter((project) => {
+        return !_.includes(ids, project);
+      })
+    );
+  };
+
   // Remove Attachments from the Entity state
   const removeAttachment = (id: string) => {
     setEntityAttachments(
       entityAttachments.filter((attachment) => {
         return attachment.id !== id;
+      })
+    );
+  };
+
+  const removeAttachments = (ids: string[]) => {
+    setEntityAttachments(
+      entityAttachments.filter((attachment) => {
+        return !_.includes(ids, attachment.id);
       })
     );
   };
@@ -1218,6 +1303,7 @@ const Entity = () => {
                   visibleColumns={{}}
                   viewOnly={!editing}
                   showSelection={editing}
+                  actions={projectsTableActions}
                 />
               )}
             </Flex>
@@ -1266,6 +1352,7 @@ const Entity = () => {
                   visibleColumns={{}}
                   viewOnly={!editing}
                   showSelection={editing}
+                  actions={originTableActions}
                 />
               )}
             </Flex>
@@ -1304,6 +1391,7 @@ const Entity = () => {
                   visibleColumns={{}}
                   viewOnly={!editing}
                   showSelection={editing}
+                  actions={productTableActions}
                 />
               )}
             </Flex>
@@ -1402,6 +1490,7 @@ const Entity = () => {
                   visibleColumns={{}}
                   viewOnly={!editing}
                   showSelection={editing}
+                  actions={attachmentTableActions}
                 />
               )}
             </Flex>
