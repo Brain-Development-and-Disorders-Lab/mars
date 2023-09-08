@@ -461,21 +461,19 @@ const Entity = () => {
         return (
           <Flex w={"100%"} justify={"end"}>
             {editing ? (
-              <Button
-                key={`remove-${info.row.original}`}
-                rightIcon={<Icon name={"delete"} />}
+              <IconButton
+                icon={<Icon name={"delete"} />}
+                aria-label={"Remove project"}
                 colorScheme={"red"}
                 onClick={() => {
                   removeProject(info.row.original);
                 }}
-              >
-                Remove
-              </Button>
+              />
             ) : (
               <Button
                 key={`view-${info.row.original}`}
                 rightIcon={<Icon name={"c_right"} />}
-                colorScheme={"teal"}
+                colorScheme={"gray"}
                 onClick={() => navigate(`/projects/${info.row.original}`)}
               >
                 View
@@ -513,21 +511,19 @@ const Entity = () => {
         return (
           <Flex w={"100%"} justify={"end"}>
             {editing ? (
-              <Button
-                key={`remove-${info.row.original.id}`}
-                rightIcon={<Icon name={"delete"} />}
+              <IconButton
+                icon={<Icon name={"delete"} />}
+                aria-label={"Remove origin"}
                 colorScheme={"red"}
                 onClick={() => {
                   removeOrigin(info.row.original.id);
                 }}
-              >
-                Remove
-              </Button>
+              />
             ) : (
               <Button
                 key={`view-${info.row.original.id}`}
                 rightIcon={<Icon name={"c_right"} />}
-                colorScheme={"teal"}
+                colorScheme={"gray"}
                 onClick={() => navigate(`/entities/${info.row.original.id}`)}
               >
                 View
@@ -565,21 +561,19 @@ const Entity = () => {
         return (
           <Flex w={"100%"} justify={"end"}>
             {editing ? (
-              <Button
-                key={`remove-${info.row.original.id}`}
-                rightIcon={<Icon name={"delete"} />}
+              <IconButton
+                icon={<Icon name={"delete"} />}
+                aria-label={"Remove product"}
                 colorScheme={"red"}
                 onClick={() => {
                   removeProduct(info.row.original.id);
                 }}
-              >
-                Remove
-              </Button>
+              />
             ) : (
               <Button
                 key={`view-${info.row.original.id}`}
                 rightIcon={<Icon name={"c_right"} />}
-                colorScheme={"teal"}
+                colorScheme={"gray"}
                 onClick={() => navigate(`/entities/${info.row.original.id}`)}
               >
                 View
@@ -759,8 +753,7 @@ const Entity = () => {
   // Handle clicking the "Download" button
   const handleDownloadClick = (format: "json" | "csv" | "txt") => {
     // Send POST data to generate file
-    postData(`/entities/export`, {
-      id: id,
+    postData(`/entities/export/${id}`, {
       fields: exportAll ? allExportFields : exportFields,
       format: format,
     })
@@ -1109,7 +1102,7 @@ const Entity = () => {
                 colorScheme={"orange"}
                 isDisabled={editing || entityData.deleted}
               >
-                Links
+                Visualize
               </Button>
               <Button
                 onClick={handleExportClick}
@@ -1146,7 +1139,7 @@ const Entity = () => {
             >
               <Heading size={"lg"}>Details</Heading>
               <TableContainer>
-                <Table variant={"simple"} colorScheme={"blackAlpha"}>
+                <Table variant={"simple"} colorScheme={"gray"}>
                   <Thead>
                     <Tr>
                       <Th maxW={"xs"}>Field</Th>

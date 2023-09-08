@@ -72,18 +72,16 @@ const DataTable = (props: DataTableProps) => {
                 />
               ),
               cell: ({ row }: any) => (
-                <Flex>
-                  <Checkbox
-                    {...{
-                      id: `s_${Math.random().toString(16).slice(2)}`,
-                      isChecked: row.getIsSelected(),
-                      disabled: !row.getCanSelect() || props.viewOnly,
-                      isIndeterminate: row.getIsSomeSelected(),
-                      isInvalid: false,
-                      onChange: row.getToggleSelectedHandler(),
-                    }}
-                  />
-                </Flex>
+                <Checkbox
+                  {...{
+                    id: `s_${Math.random().toString(16).slice(2)}`,
+                    isChecked: row.getIsSelected(),
+                    disabled: !row.getCanSelect() || props.viewOnly,
+                    isIndeterminate: row.getIsSomeSelected(),
+                    isInvalid: false,
+                    onChange: row.getToggleSelectedHandler(),
+                  }}
+                />
               ),
             },
           ]
