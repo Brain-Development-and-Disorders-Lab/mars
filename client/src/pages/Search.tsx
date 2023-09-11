@@ -718,7 +718,7 @@ const Search = () => {
                                 <Flex justify={"right"}>
                                   <Button
                                     rightIcon={<Icon name={"c_right"} />}
-                                    colorScheme={"blackAlpha"}
+                                    colorScheme={"gray"}
                                     onClick={() =>
                                       navigate(`/entities/${result._id}`)
                                     }

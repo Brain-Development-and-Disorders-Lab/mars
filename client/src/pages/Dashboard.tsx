@@ -163,7 +163,7 @@ const Dashboard = () => {
           <Flex justifyContent={"right"}>
             <Button
               key={`view-entity-${info.getValue()}`}
-              colorScheme={"blackAlpha"}
+              colorScheme={"gray"}
               rightIcon={<Icon name={"c_right"} />}
               onClick={() => navigate(`/entities/${info.getValue()}`)}
             >
@@ -195,7 +195,7 @@ const Dashboard = () => {
           <Flex justifyContent={"right"}>
             <Button
               key={`view-entity-${info.getValue()}`}
-              colorScheme={"blackAlpha"}
+              colorScheme={"gray"}
               rightIcon={<Icon name={"c_right"} />}
               onClick={() => navigate(`/projects/${info.getValue()}`)}
             >

@@ -103,7 +103,7 @@ const Projects = () => {
           <Flex w={"100%"} justify={"end"}>
             <Button
               key={`view-entity-${info.getValue()}`}
-              colorScheme={"blackAlpha"}
+              colorScheme={"gray"}
               rightIcon={<Icon name={"c_right"} />}
               onClick={() => navigate(`/projects/${info.getValue()}`)}
             >
