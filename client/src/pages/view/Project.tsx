@@ -640,6 +640,7 @@ const Project = () => {
                     viewOnly={!editing}
                     showSelection={editing}
                     actions={entitiesTableActions}
+                    showPagination
                   />
                 ) : (
                   <Text>No Entities.</Text>

@@ -82,7 +82,7 @@ const AttributePreview = (props: AttributePreviewProps) => {
               />
             ) : (
               <Button
-                colorScheme={"blackAlpha"}
+                colorScheme={"gray"}
                 onClick={onOpen}
                 rightIcon={<Icon name={"c_right"} />}
               >

@@ -146,6 +146,7 @@ const Attributes = () => {
             columns={columns}
             data={data}
             visibleColumns={visibleColumns}
+            showPagination
           />
         </Flex>
       </Flex>

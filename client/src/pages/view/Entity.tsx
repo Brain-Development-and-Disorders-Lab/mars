@@ -1304,6 +1304,7 @@ const Entity = () => {
                   viewOnly={!editing}
                   showSelection={editing}
                   actions={projectsTableActions}
+                  showPagination
                 />
               )}
             </Flex>
@@ -1353,6 +1354,7 @@ const Entity = () => {
                   viewOnly={!editing}
                   showSelection={editing}
                   actions={originTableActions}
+                  showPagination
                 />
               )}
             </Flex>
@@ -1392,6 +1394,7 @@ const Entity = () => {
                   viewOnly={!editing}
                   showSelection={editing}
                   actions={productTableActions}
+                  showPagination
                 />
               )}
             </Flex>
@@ -1491,6 +1494,7 @@ const Entity = () => {
                   viewOnly={!editing}
                   showSelection={editing}
                   actions={attachmentTableActions}
+                  showPagination
                 />
               )}
             </Flex>

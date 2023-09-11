@@ -209,7 +209,7 @@ const Navigation = () => {
             leftIcon={<Icon name={"search"} />}
             onClick={() => navigate("/search")}
           >
-            Query Search
+            Search
           </Button>
 
           <Spacer />

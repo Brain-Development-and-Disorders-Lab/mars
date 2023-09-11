@@ -197,6 +197,7 @@ const Entities = () => {
             visibleColumns={visibleColumns}
             actions={actions}
             showSelection
+            showPagination
           />
         </Flex>
       </Flex>
