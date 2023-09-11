@@ -238,7 +238,7 @@ const Attribute = () => {
             </Heading>
 
             <TableContainer>
-              <Table variant={"simple"} colorScheme={"blackAlpha"}>
+              <Table variant={"simple"} colorScheme={"gray"}>
                 <Thead>
                   <Tr>
                     <Th>Field</Th>

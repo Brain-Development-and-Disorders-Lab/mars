@@ -75,6 +75,7 @@ import { createColumnHelper } from "@tanstack/react-table";
 // Existing and custom types
 import {
   AttributeModel,
+  DataTableAction,
   EntityHistory,
   EntityModel,
   IValue,
@@ -461,21 +462,19 @@ const Entity = () => {
         return (
           <Flex w={"100%"} justify={"end"}>
             {editing ? (
-              <Button
-                key={`remove-${info.row.original}`}
-                rightIcon={<Icon name={"delete"} />}
+              <IconButton
+                icon={<Icon name={"delete"} />}
+                aria-label={"Remove project"}
                 colorScheme={"red"}
                 onClick={() => {
                   removeProject(info.row.original);
                 }}
-              >
-                Remove
-              </Button>
+              />
             ) : (
               <Button
                 key={`view-${info.row.original}`}
                 rightIcon={<Icon name={"c_right"} />}
-                colorScheme={"teal"}
+                colorScheme={"gray"}
                 onClick={() => navigate(`/projects/${info.row.original}`)}
               >
                 View
@@ -486,6 +485,19 @@ const Entity = () => {
       },
       header: "",
     },
+  ];
+  const projectsTableActions: DataTableAction[] = [
+    {
+      label: "Remove Projects",
+      icon: "delete",
+      action(table, rows) {
+        const projectsToRemove: string[] = [];
+        for (let rowIndex of Object.keys(rows)) {
+          projectsToRemove.push(table.getRow(rowIndex).original);
+        }
+        removeProjects(projectsToRemove);
+      },
+    }
   ];
 
   // Configure origins table columns and data
@@ -513,21 +525,19 @@ const Entity = () => {
         return (
           <Flex w={"100%"} justify={"end"}>
             {editing ? (
-              <Button
-                key={`remove-${info.row.original.id}`}
-                rightIcon={<Icon name={"delete"} />}
+              <IconButton
+                icon={<Icon name={"delete"} />}
+                aria-label={"Remove origin"}
                 colorScheme={"red"}
                 onClick={() => {
                   removeOrigin(info.row.original.id);
                 }}
-              >
-                Remove
-              </Button>
+              />
             ) : (
               <Button
                 key={`view-${info.row.original.id}`}
                 rightIcon={<Icon name={"c_right"} />}
-                colorScheme={"teal"}
+                colorScheme={"gray"}
                 onClick={() => navigate(`/entities/${info.row.original.id}`)}
               >
                 View
@@ -538,6 +548,19 @@ const Entity = () => {
       },
       header: "",
     }),
+  ];
+  const originTableActions: DataTableAction[] = [
+    {
+      label: "Remove Origins",
+      icon: "delete",
+      action(table, rows) {
+        const originsToRemove: string[] = [];
+        for (let rowIndex of Object.keys(rows)) {
+          originsToRemove.push(table.getRow(rowIndex).original.id);
+        }
+        removeOrigins(originsToRemove);
+      },
+    },
   ];
 
   // Configure products table columns and data
@@ -565,21 +588,19 @@ const Entity = () => {
         return (
           <Flex w={"100%"} justify={"end"}>
             {editing ? (
-              <Button
-                key={`remove-${info.row.original.id}`}
-                rightIcon={<Icon name={"delete"} />}
+              <IconButton
+                icon={<Icon name={"delete"} />}
+                aria-label={"Remove product"}
                 colorScheme={"red"}
                 onClick={() => {
                   removeProduct(info.row.original.id);
                 }}
-              >
-                Remove
-              </Button>
+              />
             ) : (
               <Button
                 key={`view-${info.row.original.id}`}
                 rightIcon={<Icon name={"c_right"} />}
-                colorScheme={"teal"}
+                colorScheme={"gray"}
                 onClick={() => navigate(`/entities/${info.row.original.id}`)}
               >
                 View
@@ -590,6 +611,19 @@ const Entity = () => {
       },
       header: "",
     }),
+  ];
+  const productTableActions: DataTableAction[] = [
+    {
+      label: "Remove Products",
+      icon: "delete",
+      action(table, rows) {
+        const productsToRemove: string[] = [];
+        for (let rowIndex of Object.keys(rows)) {
+          productsToRemove.push(table.getRow(rowIndex).original.id);
+        }
+        removeProducts(productsToRemove);
+      },
+    },
   ];
 
   // Configure attachment table columns and data
@@ -687,6 +721,19 @@ const Entity = () => {
       header: "",
     }),
   ];
+  const attachmentTableActions: DataTableAction[] = [
+    {
+      label: "Remove Attachments",
+      icon: "delete",
+      action(table, rows) {
+        const attachmentsToRemove: string[] = [];
+        for (let rowIndex of Object.keys(rows)) {
+          attachmentsToRemove.push(table.getRow(rowIndex).original.id);
+        }
+        removeAttachments(attachmentsToRemove);
+      },
+    },
+  ];
 
   /**
    * Restore an Entity from an earlier point in time
@@ -759,8 +806,7 @@ const Entity = () => {
   // Handle clicking the "Download" button
   const handleDownloadClick = (format: "json" | "csv" | "txt") => {
     // Send POST data to generate file
-    postData(`/entities/export`, {
-      id: id,
+    postData(`/entities/export/${id}`, {
       fields: exportAll ? allExportFields : exportFields,
       format: format,
     })
@@ -881,6 +927,14 @@ const Entity = () => {
     );
   };
 
+  const removeProducts = (ids: string[]) => {
+    setEntityProducts(
+      entityProducts.filter((product) => {
+        return !_.includes(ids, product.id);
+      })
+    );
+  };
+
   // Add Origins to the Entity state
   const addOrigins = (origins: string[]): void => {
     setEntityOrigins([
@@ -900,6 +954,14 @@ const Entity = () => {
     );
   };
 
+  const removeOrigins = (ids: string[]) => {
+    setEntityOrigins(
+      entityOrigins.filter((origin) => {
+        return !_.includes(ids, origin.id);
+      })
+    );
+  };
+
   // Remove a Project from the Entity state
   const removeProject = (id: string) => {
     setEntityProjects(
@@ -909,11 +971,27 @@ const Entity = () => {
     );
   };
 
+  const removeProjects = (ids: string[]) => {
+    setEntityProjects(
+      entityProjects.filter((project) => {
+        return !_.includes(ids, project);
+      })
+    );
+  };
+
   // Remove Attachments from the Entity state
   const removeAttachment = (id: string) => {
     setEntityAttachments(
       entityAttachments.filter((attachment) => {
         return attachment.id !== id;
+      })
+    );
+  };
+
+  const removeAttachments = (ids: string[]) => {
+    setEntityAttachments(
+      entityAttachments.filter((attachment) => {
+        return !_.includes(ids, attachment.id);
       })
     );
   };
@@ -1109,7 +1187,7 @@ const Entity = () => {
                 colorScheme={"orange"}
                 isDisabled={editing || entityData.deleted}
               >
-                Links
+                Visualize
               </Button>
               <Button
                 onClick={handleExportClick}
@@ -1146,7 +1224,7 @@ const Entity = () => {
             >
               <Heading size={"lg"}>Details</Heading>
               <TableContainer>
-                <Table variant={"simple"} colorScheme={"blackAlpha"}>
+                <Table variant={"simple"} colorScheme={"gray"}>
                   <Thead>
                     <Tr>
                       <Th maxW={"xs"}>Field</Th>
@@ -1224,7 +1302,9 @@ const Entity = () => {
                   columns={projectsTableColumns}
                   visibleColumns={{}}
                   viewOnly={!editing}
-                  hideSelection={!editing}
+                  showSelection={editing}
+                  actions={projectsTableActions}
+                  showPagination
                 />
               )}
             </Flex>
@@ -1272,7 +1352,9 @@ const Entity = () => {
                   columns={originTableColumns}
                   visibleColumns={{}}
                   viewOnly={!editing}
-                  hideSelection={!editing}
+                  showSelection={editing}
+                  actions={originTableActions}
+                  showPagination
                 />
               )}
             </Flex>
@@ -1310,7 +1392,9 @@ const Entity = () => {
                   columns={productTableColumns}
                   visibleColumns={{}}
                   viewOnly={!editing}
-                  hideSelection={!editing}
+                  showSelection={editing}
+                  actions={productTableActions}
+                  showPagination
                 />
               )}
             </Flex>
@@ -1408,7 +1492,9 @@ const Entity = () => {
                   columns={attachmentTableColumns}
                   visibleColumns={{}}
                   viewOnly={!editing}
-                  hideSelection={!editing}
+                  showSelection={editing}
+                  actions={attachmentTableActions}
+                  showPagination
                 />
               )}
             </Flex>

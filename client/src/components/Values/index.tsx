@@ -37,7 +37,7 @@ import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 
 // Existing and custom types
-import { EntityModel, IValue } from "@types";
+import { DataTableAction, EntityModel, IValue } from "@types";
 
 // Utility functions and libraries
 import { getData } from "@database/functions";
@@ -399,6 +399,27 @@ const Values = (props: {
     onClose();
   };
 
+  const actions: DataTableAction[] = [
+    {
+      label: "Delete Values",
+      icon: "delete",
+      action: (table, rows: any) => {
+        // Delete rows that have been selected
+        const idToRemove: IValue<any>[] = [];
+        for (let rowIndex of Object.keys(rows)) {
+          idToRemove.push(table.getRow(rowIndex).original);
+        }
+
+        const updatedValues = props.values.filter((value) => {
+          return !idToRemove.includes(value);
+        });
+
+        props.setValues(updatedValues);
+        table.resetRowSelection();
+      }
+    }
+  ];
+
   return (
     <Flex p={["1", "2"]} direction={"column"} gap={"1"} w={"100%"}>
       {!props.viewOnly && (
@@ -565,6 +586,9 @@ const Values = (props: {
           data={props.values}
           setData={props.setValues}
           viewOnly={props.viewOnly}
+          showPagination
+          showSelection={!props.viewOnly}
+          actions={actions}
         />
       </Box>
 

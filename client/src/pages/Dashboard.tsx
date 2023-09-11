@@ -163,7 +163,7 @@ const Dashboard = () => {
           <Flex justifyContent={"right"}>
             <Button
               key={`view-entity-${info.getValue()}`}
-              colorScheme={"blackAlpha"}
+              colorScheme={"gray"}
               rightIcon={<Icon name={"c_right"} />}
               onClick={() => navigate(`/entities/${info.getValue()}`)}
             >
@@ -195,7 +195,7 @@ const Dashboard = () => {
           <Flex justifyContent={"right"}>
             <Button
               key={`view-entity-${info.getValue()}`}
-              colorScheme={"blackAlpha"}
+              colorScheme={"gray"}
               rightIcon={<Icon name={"c_right"} />}
               onClick={() => navigate(`/projects/${info.getValue()}`)}
             >
@@ -235,8 +235,6 @@ const Dashboard = () => {
                 columns={projectTableColumns}
                 data={projectTableData}
                 visibleColumns={visibleColumns}
-                hidePagination
-                hideSelection
               />
             }
 
@@ -288,8 +286,6 @@ const Dashboard = () => {
                   _.isEqual(entity.deleted, false)
                 )}
                 visibleColumns={visibleColumns}
-                hidePagination
-                hideSelection
               />
             }
 

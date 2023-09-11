@@ -97,7 +97,7 @@ const Attributes = () => {
           <Flex w={"100%"} justify={"end"}>
             <Button
               key={`view-entity-${info.getValue()}`}
-              colorScheme={"blackAlpha"}
+              colorScheme={"gray"}
               rightIcon={<Icon name={"c_right"} />}
               onClick={() => navigate(`/attributes/${info.getValue()}`)}
             >
@@ -146,7 +146,7 @@ const Attributes = () => {
             columns={columns}
             data={data}
             visibleColumns={visibleColumns}
-            hideSelection
+            showPagination
           />
         </Flex>
       </Flex>

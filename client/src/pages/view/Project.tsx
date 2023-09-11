@@ -20,6 +20,7 @@ import {
   FormControl,
   FormLabel,
   Heading,
+  IconButton,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -58,7 +59,7 @@ import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 
 // Existing and custom types
-import { ProjectHistory, ProjectModel, EntityModel } from "@types";
+import { ProjectHistory, ProjectModel, EntityModel, DataTableAction } from "@types";
 
 // Routing and navigation
 import { useParams, useNavigate } from "react-router-dom";
@@ -410,18 +411,43 @@ const Project = () => {
       cell: (info: any) => {
         return (
           <Flex w={"100%"} justify={"end"}>
-            <Button
-              key={`view-entity-${info.row.original}`}
-              colorScheme={"blackAlpha"}
-              rightIcon={<Icon name={"c_right"} />}
-              onClick={() => navigate(`/entities/${info.row.original}`)}
-            >
-              View
-            </Button>
+            {editing ? (
+              <IconButton
+                icon={<Icon name={"delete"} />}
+                aria-label={"Remove entity"}
+                colorScheme={"red"}
+                onClick={() => {
+                  console.warn("Not implemented");
+                }}
+              />
+            ) : (
+              <Button
+                key={`view-entity-${info.row.original}`}
+                colorScheme={"gray"}
+                rightIcon={<Icon name={"c_right"} />}
+                onClick={() => navigate(`/entities/${info.row.original}`)}
+              >
+                View
+              </Button>
+            )}
+
           </Flex>
         );
       },
       header: "",
+    },
+  ];
+  const entitiesTableActions: DataTableAction[] = [
+    {
+      label: "Remove Entities",
+      icon: "delete",
+      action(table, rows) {
+        const entitiesToRemove: string[] = [];
+        for (let rowIndex of Object.keys(rows)) {
+          entitiesToRemove.push(table.getRow(rowIndex).original.id);
+        }
+        console.warn("Not implemented");
+      },
     },
   ];
 
@@ -543,7 +569,7 @@ const Project = () => {
                 Details
               </Heading>
               <TableContainer>
-                <Table variant={"simple"} colorScheme={"blackAlpha"}>
+                <Table variant={"simple"} colorScheme={"gray"}>
                   <Thead>
                     <Tr>
                       <Th>Field</Th>
@@ -612,7 +638,9 @@ const Project = () => {
                     columns={entitiesColumns}
                     visibleColumns={{}}
                     viewOnly={!editing}
-                    hideSelection={!editing}
+                    showSelection={editing}
+                    actions={entitiesTableActions}
+                    showPagination
                   />
                 ) : (
                   <Text>No Entities.</Text>

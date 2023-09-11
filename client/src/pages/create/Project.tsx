@@ -103,7 +103,7 @@ const Project = () => {
               name={"name"}
               w={["100%", "md"]}
               placeholder={"Name"}
-              borderColor={"blackAlpha.300"}
+              borderColor={"gray.300"}
               focusBorderColor={"black"}
               value={name}
               onChange={(event) => setName(event.target.value)}

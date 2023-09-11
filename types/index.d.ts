@@ -227,12 +227,21 @@ export type LoginProps = {
 // DataTable component
 export type DataTableProps = {
   columns: any[];
+  visibleColumns: VisibilityState;
   data: any[];
   setData?: (value: React.SetStateAction<any[]>) => void;
-  visibleColumns: VisibilityState;
-  hidePagination?: boolean;
-  hideSelection?: boolean;
   viewOnly?: boolean;
+
+  // Interface visibility
+  showPagination?: boolean;
+  showSelection?: boolean;
+  actions?: DataTableAction[];
+};
+
+export type DataTableAction = {
+  label: string;
+  icon: IconNames;
+  action: (table: any, rows: any) => void;
 };
 
 // Icon component
