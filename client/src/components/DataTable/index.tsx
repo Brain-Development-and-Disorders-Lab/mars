@@ -38,7 +38,7 @@ declare module "@tanstack/react-table" {
   interface TableMeta<TData extends RowData> {
     updateData: (rowIndex: number, columnId: string, value: unknown) => void;
   }
-};
+}
 
 // Utility functions and libraries
 import _ from "lodash";
@@ -106,17 +106,18 @@ const DataTable = (props: DataTableProps) => {
     onColumnVisibilityChange: setColumnVisibility,
     meta: {
       updateData: (rowIndex: number, columnId: any, value: any) => {
-        props.setData && props.setData((data) =>
-          data.map((row, index) => {
-            if (index === rowIndex) {
-              return {
-                ...data[rowIndex]!,
-                [columnId]: value,
+        props.setData &&
+          props.setData((data) =>
+            data.map((row, index) => {
+              if (index === rowIndex) {
+                return {
+                  ...data[rowIndex]!,
+                  [columnId]: value,
+                };
               }
-            }
-            return row;
-          })
-        );
+              return row;
+            })
+          );
       },
     },
   });
@@ -188,10 +189,18 @@ const DataTable = (props: DataTableProps) => {
         w={"100%"}
         wrap={"wrap"}
       >
-        {props.showSelection &&
+        {props.showSelection && (
           <Flex>
             <Menu>
-              <MenuButton as={Button} rightIcon={<Icon name={"c_down"} />} disabled={Object.keys(selectedRows).length === 0 || _.isUndefined(props.actions) || props.actions?.length === 0}>
+              <MenuButton
+                as={Button}
+                rightIcon={<Icon name={"c_down"} />}
+                disabled={
+                  Object.keys(selectedRows).length === 0 ||
+                  _.isUndefined(props.actions) ||
+                  props.actions?.length === 0
+                }
+              >
                 Bulk Actions
               </MenuButton>
               <MenuList>
@@ -211,7 +220,7 @@ const DataTable = (props: DataTableProps) => {
               </MenuList>
             </Menu>
           </Flex>
-        }
+        )}
 
         <Spacer />
 

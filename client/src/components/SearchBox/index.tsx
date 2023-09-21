@@ -110,28 +110,28 @@ const SearchBox = () => {
     getData(`/entities/${query}`)
       .then((entity) => {
         if (_.isNull(entity)) {
-        // Update state
-        setIsSearching(true);
-        setHasSearched(true);
+          // Update state
+          setIsSearching(true);
+          setHasSearched(true);
 
-        postData(`/search`, { query: query })
-          .then((value) => {
-            setResults(value);
-          })
-          .catch((_error) => {
-            toast({
-              title: "Error",
-              status: "error",
-              description: "Could not get search results.",
-              duration: 4000,
-              position: "bottom-right",
-              isClosable: true,
+          postData(`/search`, { query: query })
+            .then((value) => {
+              setResults(value);
+            })
+            .catch((_error) => {
+              toast({
+                title: "Error",
+                status: "error",
+                description: "Could not get search results.",
+                duration: 4000,
+                position: "bottom-right",
+                isClosable: true,
+              });
+              setIsError(true);
+            })
+            .finally(() => {
+              setIsSearching(false);
             });
-            setIsError(true);
-          })
-          .finally(() => {
-            setIsSearching(false);
-          });
         } else {
           setQuery("");
           onClose();

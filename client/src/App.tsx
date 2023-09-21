@@ -75,10 +75,7 @@ const App = (): ReactElement => {
 
               {/* Create routes */}
               <Route path={"/create/attribute"} element={<CreateAttribute />} />
-              <Route
-                path={"/create/project"}
-                element={<CreateProject />}
-              />
+              <Route path={"/create/project"} element={<CreateProject />} />
               <Route path={"/create/entity"} element={<CreateEntity />} />
               <Route path={"/create"} element={<Create />} />
 

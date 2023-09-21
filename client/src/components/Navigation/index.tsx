@@ -77,9 +77,7 @@ const Navigation = () => {
 
     getData(`/projects`)
       .then((value) => {
-        setProjectCount(
-          value.length > 100 ? "100+" : value.length.toString()
-        );
+        setProjectCount(value.length > 100 ? "100+" : value.length.toString());
       })
       .catch((_error) => {
         toast({
@@ -268,9 +266,7 @@ const Navigation = () => {
             w={"100%"}
             justifyContent={"left"}
             variant={
-              _.startsWith(location.pathname, "/project")
-                ? "solid"
-                : "ghost"
+              _.startsWith(location.pathname, "/project") ? "solid" : "ghost"
             }
             onClick={() => responsiveNavigate("/projects")}
           >

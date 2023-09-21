@@ -59,7 +59,12 @@ import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 
 // Existing and custom types
-import { ProjectHistory, ProjectModel, EntityModel, DataTableAction } from "@types";
+import {
+  ProjectHistory,
+  ProjectModel,
+  EntityModel,
+  DataTableAction,
+} from "@types";
 
 // Routing and navigation
 import { useParams, useNavigate } from "react-router-dom";
@@ -101,9 +106,7 @@ const Project = () => {
   const [projectData, setProjectData] = useState({} as ProjectModel);
   const [projectEntities, setProjectEntities] = useState([] as string[]);
   const [projectDescription, setProjectDescription] = useState("");
-  const [projectHistory, setProjectHistory] = useState(
-    [] as ProjectHistory[]
-  );
+  const [projectHistory, setProjectHistory] = useState([] as ProjectHistory[]);
 
   // Entities that can be added
   const [allEntities, setAllEntities] = useState(
@@ -269,9 +272,7 @@ const Project = () => {
    * Restore a Project from an earlier point in time
    * @param {ProjectHistory} projectVersion historical Project data to restore
    */
-  const handleRestoreFromHistoryClick = (
-    projectVersion: ProjectHistory
-  ) => {
+  const handleRestoreFromHistoryClick = (projectVersion: ProjectHistory) => {
     const updateData: ProjectModel = {
       _id: projectData._id,
       name: projectData.name,
@@ -376,7 +377,6 @@ const Project = () => {
       });
   };
 
-
   // Handle checkbox selection on the export modal
   const handleExportCheck = (field: string, checkState: boolean) => {
     if (_.isEqual(checkState, true)) {
@@ -430,7 +430,6 @@ const Project = () => {
                 View
               </Button>
             )}
-
           </Flex>
         );
       },
@@ -581,9 +580,7 @@ const Project = () => {
                       <Td>Owner</Td>
                       <Td>
                         <Tag colorScheme={"green"}>
-                          <TagLabel>
-                            {projectData.owner}
-                          </TagLabel>
+                          <TagLabel>{projectData.owner}</TagLabel>
                         </Tag>
                       </Td>
                     </Tr>
@@ -788,7 +785,8 @@ const Project = () => {
                           </Checkbox>
                           <Checkbox
                             isChecked={
-                              exportAll || _.includes(exportFields, "description")
+                              exportAll ||
+                              _.includes(exportFields, "description")
                             }
                             onChange={(event) =>
                               handleExportCheck(
@@ -917,9 +915,7 @@ const Project = () => {
                               colorScheme={"orange"}
                               rightIcon={<Icon name={"rewind"} />}
                               onClick={() => {
-                                handleRestoreFromHistoryClick(
-                                  projectVersion
-                                );
+                                handleRestoreFromHistoryClick(projectVersion);
                               }}
                             >
                               Restore
@@ -938,9 +934,7 @@ const Project = () => {
                             </Flex>
                             <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
                               <Text fontWeight={"bold"}>Entities:</Text>
-                              <Tag
-                                key={`v_p_${projectVersion.timestamp}`}
-                              >
+                              <Tag key={`v_p_${projectVersion.timestamp}`}>
                                 {projectVersion.entities.length}
                               </Tag>
                             </Flex>

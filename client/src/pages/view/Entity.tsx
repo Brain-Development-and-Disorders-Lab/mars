@@ -112,9 +112,7 @@ const Entity = () => {
     onClose: onAddProjectsClose,
   } = useDisclosure();
   const [projectData, setProjectData] = useState([] as ProjectModel[]);
-  const [selectedProjects, setSelectedProjects] = useState(
-    [] as string[]
-  );
+  const [selectedProjects, setSelectedProjects] = useState([] as string[]);
 
   const [allEntities, setAllEntities] = useState(
     [] as { name: string; id: string }[]
@@ -451,9 +449,7 @@ const Entity = () => {
   const projectsTableColumns = [
     {
       id: (info: any) => info.row.original,
-      cell: (info: any) => (
-        <Linky id={info.row.original} type={"projects"} />
-      ),
+      cell: (info: any) => <Linky id={info.row.original} type={"projects"} />,
       header: "Name",
     },
     {
@@ -497,7 +493,7 @@ const Entity = () => {
         }
         removeProjects(projectsToRemove);
       },
-    }
+    },
   ];
 
   // Configure origins table columns and data
@@ -1245,9 +1241,7 @@ const Entity = () => {
                       <Td>Owner</Td>
                       <Td>
                         <Tag colorScheme={"green"}>
-                          <TagLabel>
-                            {entityData.owner}
-                          </TagLabel>
+                          <TagLabel>{entityData.owner}</TagLabel>
                         </Tag>
                       </Td>
                     </Tr>
@@ -2027,7 +2021,8 @@ const Entity = () => {
                           </Checkbox>
                           <Checkbox
                             isChecked={
-                              exportAll || _.includes(exportFields, "description")
+                              exportAll ||
+                              _.includes(exportFields, "description")
                             }
                             onChange={(event) =>
                               handleExportCheck(
@@ -2061,10 +2056,7 @@ const Entity = () => {
                               key={project}
                               isChecked={
                                 exportAll ||
-                                _.includes(
-                                  exportFields,
-                                  `project_${project}`
-                                )
+                                _.includes(exportFields, `project_${project}`)
                               }
                               onChange={(event) =>
                                 handleExportCheck(
@@ -2126,7 +2118,10 @@ const Entity = () => {
                               key={product.id}
                               isChecked={
                                 exportAll ||
-                                _.includes(exportFields, `product_${product.id}`)
+                                _.includes(
+                                  exportFields,
+                                  `product_${product.id}`
+                                )
                               }
                               onChange={(event) =>
                                 handleExportCheck(
@@ -2329,10 +2324,7 @@ const Entity = () => {
                                       key={`v_c_${entityVersion.timestamp}_${project}`}
                                     >
                                       <TagLabel>
-                                        <Linky
-                                          type={"projects"}
-                                          id={project}
-                                        />
+                                        <Linky type={"projects"} id={project} />
                                       </TagLabel>
                                     </Tag>
                                   );
@@ -2349,9 +2341,7 @@ const Entity = () => {
                                     <Tag
                                       key={`v_a_${entityVersion.timestamp}_${attribute._id}`}
                                     >
-                                      <TagLabel>
-                                        {attribute.name}
-                                      </TagLabel>
+                                      <TagLabel>{attribute.name}</TagLabel>
                                     </Tag>
                                   );
                                 })
@@ -2361,9 +2351,7 @@ const Entity = () => {
                             </Flex>
                             <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
                               <Text fontWeight={"bold"}>Origins:</Text>
-                              <Tag
-                                key={`v_o_${entityVersion.timestamp}`}
-                              >
+                              <Tag key={`v_o_${entityVersion.timestamp}`}>
                                 <TagLabel>
                                   {entityVersion.associations.origins.length}
                                 </TagLabel>
@@ -2371,9 +2359,7 @@ const Entity = () => {
                             </Flex>
                             <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
                               <Text fontWeight={"bold"}>Products:</Text>
-                              <Tag
-                                key={`v_o_${entityVersion.timestamp}`}
-                              >
+                              <Tag key={`v_o_${entityVersion.timestamp}`}>
                                 <TagLabel>
                                   {entityVersion.associations.products.length}
                                 </TagLabel>

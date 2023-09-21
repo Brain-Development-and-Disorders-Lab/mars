@@ -596,7 +596,12 @@ const Importer = (props: {
             </ModalContent>
           </Modal>
 
-          <Modal isOpen={isMappingOpen} onClose={onMappingClose} size={"4xl"} isCentered>
+          <Modal
+            isOpen={isMappingOpen}
+            onClose={onMappingClose}
+            size={"4xl"}
+            isCentered
+          >
             <ModalOverlay />
             <ModalContent p={"2"} gap={"4"} w={["lg", "xl", "2xl"]}>
               <ModalHeader p={"2"}>Import Spreadsheet Data</ModalHeader>

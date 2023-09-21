@@ -95,7 +95,7 @@ const Entities = () => {
     columnHelper.accessor("description", {
       cell: (info) => {
         if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
-          return <Tag colorScheme={"orange"}>Empty</Tag>
+          return <Tag colorScheme={"orange"}>Empty</Tag>;
         }
         return (
           <Tooltip label={info.getValue()}>
@@ -108,9 +108,7 @@ const Entities = () => {
     }),
     columnHelper.accessor("owner", {
       cell: (info) => {
-        return (
-          <Tag colorScheme={"green"}>{info.getValue()}</Tag>
-        );
+        return <Tag colorScheme={"green"}>{info.getValue()}</Tag>;
       },
       header: "Owner",
     }),
@@ -148,16 +146,20 @@ const Entities = () => {
           toExport.push(table.getRow(rowIndex).original._id);
         }
 
-        postData(`/entities/export`, { entities: toExport }).then((response) => {
-          FileSaver.saveAs(
-            new Blob([response]),
-            slugify(`export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.csv`)
-          );
-        });
+        postData(`/entities/export`, { entities: toExport }).then(
+          (response) => {
+            FileSaver.saveAs(
+              new Blob([response]),
+              slugify(
+                `export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.csv`
+              )
+            );
+          }
+        );
 
         table.resetRowSelection();
-      }
-    }
+      },
+    },
   ];
 
   return (
