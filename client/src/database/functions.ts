@@ -27,7 +27,7 @@ export const getData = (
     requestOptions.headers = {
       id_token: getToken(TOKEN_KEY).id_token,
       ...requestOptions.headers,
-    }
+    };
   }
 
   return new Promise((resolve, reject) => {
@@ -69,7 +69,7 @@ export const postData = async (
     requestOptions.headers = {
       id_token: getToken(TOKEN_KEY).id_token,
       ...requestOptions.headers,
-    }
+    };
   }
 
   return new Promise((resolve, reject) => {
@@ -100,7 +100,10 @@ export const postData = async (
  * Delete data to the Lab API using the JavaScript `fetch` API
  * @param {string} path the path of the database objected to be deleted
  */
-export const deleteData = async (path: string, options?: AxiosRequestConfig): Promise<any> => {
+export const deleteData = async (
+  path: string,
+  options?: AxiosRequestConfig
+): Promise<any> => {
   // Configure authorization
   const requestOptions: AxiosRequestConfig = {
     ...options,
@@ -110,7 +113,7 @@ export const deleteData = async (path: string, options?: AxiosRequestConfig): Pr
     requestOptions.headers = {
       id_token: getToken(TOKEN_KEY).id_token,
       ...requestOptions.headers,
-    }
+    };
   }
   return new Promise((resolve, reject) => {
     axios

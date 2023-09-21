@@ -203,8 +203,8 @@ const Project = () => {
             <Flex direction={"column"} gap={"4"} p={"2"}>
               <Heading size={"md"}>Overview</Heading>
               <Text>
-                Projects can be used to organize and share Entities. Any type of Entity
-                can be included in a Project. Entities can be added and
+                Projects can be used to organize and share Entities. Any type of
+                Entity can be included in a Project. Entities can be added and
                 removed from a Project after it has been created.
               </Text>
             </Flex>

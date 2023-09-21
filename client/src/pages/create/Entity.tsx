@@ -81,9 +81,7 @@ const Entity = () => {
   );
   const [owner, _setOwner] = useState(token.orcid);
   const [description, setDescription] = useState("");
-  const [selectedProjects, setSelectedProjects] = useState(
-    [] as string[]
-  );
+  const [selectedProjects, setSelectedProjects] = useState([] as string[]);
   const [selectedOrigins, setSelectedOrigins] = useState(
     [] as { name: string; id: string }[]
   );
@@ -552,9 +550,9 @@ const Entity = () => {
                   </Stack>
                 </CheckboxGroup>
                 <FormHelperText>
-                  Specify the Projects that this new Entity should be
-                  included with. The Entity will then show up underneath the
-                  specified Projects.
+                  Specify the Projects that this new Entity should be included
+                  with. The Entity will then show up underneath the specified
+                  Projects.
                 </FormHelperText>
               </FormControl>
             </Flex>
@@ -710,15 +708,15 @@ const Entity = () => {
                 <Heading size={"md"}>Overview</Heading>
                 <Text>
                   Specify some basic details about this Entity. Relations
-                  between Entities and membership to Projects can be
-                  specified on the following page. Finally, the metadata
-                  associated with this Entity should be specified using
-                  Attributes and corresponding Values.
+                  between Entities and membership to Projects can be specified
+                  on the following page. Finally, the metadata associated with
+                  this Entity should be specified using Attributes and
+                  corresponding Values.
                 </Text>
                 <Heading size={"md"}>Associations</Heading>
                 <Text>
-                  Relations between Entities and membership to Projects can
-                  be specified using Associations.
+                  Relations between Entities and membership to Projects can be
+                  specified using Associations.
                 </Text>
                 <Heading size={"md"}>Attributes</Heading>
                 <Text>

@@ -16,7 +16,7 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   import.meta.url
 ).toString();
 
-const Preview = (props: { src: string, type: "image" | "document" }) => {
+const Preview = (props: { src: string; type: "image" | "document" }) => {
   // Page view state
   const [previewPages, setPreviewPages] = useState(0);
   const [previewIndex, setPreviewIndex] = useState(1);
@@ -73,10 +73,18 @@ const Preview = (props: { src: string, type: "image" | "document" }) => {
 
   return (
     <Flex>
-      {_.isEqual(props.type, "image") &&
+      {_.isEqual(props.type, "image") && (
         <Flex direction={"column"} gap={"4"} maxH={"70vh"}>
           <Flex overflow={"auto"} h={"100%"}>
-            <Image src={props.src} w={"100%"} objectFit={"contain"} style={{ transform: `scale(${zoomLevel /100})`, rotate: `${rotateLevel}deg`}} />
+            <Image
+              src={props.src}
+              w={"100%"}
+              objectFit={"contain"}
+              style={{
+                transform: `scale(${zoomLevel / 100})`,
+                rotate: `${rotateLevel}deg`,
+              }}
+            />
           </Flex>
 
           <Flex
@@ -92,9 +100,7 @@ const Preview = (props: { src: string, type: "image" | "document" }) => {
               icon={<Icon name={"zoom_out"} />}
               disabled={zoomLevel === minZoom}
             />
-            <Text>
-              {zoomLevel}%
-            </Text>
+            <Text>{zoomLevel}%</Text>
             <IconButton
               aria-label={"Zoom in"}
               onClick={increaseZoom}
@@ -108,12 +114,15 @@ const Preview = (props: { src: string, type: "image" | "document" }) => {
             />
           </Flex>
         </Flex>
-      }
+      )}
 
-      {_.isEqual(props.type, "document") &&
+      {_.isEqual(props.type, "document") && (
         <Flex direction={"column"} gap={"4"} maxH={"70vh"}>
           <Flex overflowY={"scroll"}>
-            <Document file={props.src} onLoadSuccess={onPreviewDocumentLoadSuccess}>
+            <Document
+              file={props.src}
+              onLoadSuccess={onPreviewDocumentLoadSuccess}
+            >
               <Page key={`page_${previewIndex}`} pageNumber={previewIndex} />
             </Document>
           </Flex>
@@ -142,7 +151,7 @@ const Preview = (props: { src: string, type: "image" | "document" }) => {
             />
           </Flex>
         </Flex>
-      }
+      )}
     </Flex>
   );
 };

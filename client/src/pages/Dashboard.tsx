@@ -150,7 +150,7 @@ const Dashboard = () => {
     entityTableColumnHelper.accessor("description", {
       cell: (info) => {
         if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
-          return <Tag colorScheme={"orange"}>Empty</Tag>
+          return <Tag colorScheme={"orange"}>Empty</Tag>;
         }
         return <Text noOfLines={1}>{info.getValue()}</Text>;
       },
@@ -230,20 +230,26 @@ const Dashboard = () => {
 
             {/* Projects table */}
             {/* Condition: Loaded and content present */}
-            {isLoaded && projectData.length > 0 &&
+            {isLoaded && projectData.length > 0 && (
               <DataTable
                 columns={projectTableColumns}
                 data={projectTableData}
                 visibleColumns={visibleColumns}
               />
-            }
+            )}
 
             {/* Condition: Loaded and no content present */}
-            {isLoaded && _.isEmpty(projectData) &&
-              <Flex w={"100%"} direction={"row"} p={"4"} justify={"center"} align={"center"}>
+            {isLoaded && _.isEmpty(projectData) && (
+              <Flex
+                w={"100%"}
+                direction={"row"}
+                p={"4"}
+                justify={"center"}
+                align={"center"}
+              >
                 <Text fontWeight={"bold"}>No Projects yet</Text>
               </Flex>
-            }
+            )}
 
             {/* Condition: Not loaded */}
             {!isLoaded && <Loading />}
@@ -279,7 +285,7 @@ const Dashboard = () => {
 
             {/* Entities table */}
             {/* Condition: Loaded and content present */}
-            {isLoaded && entityData.length > 0 &&
+            {isLoaded && entityData.length > 0 && (
               <DataTable
                 columns={entityTableColumns}
                 data={entityTableData.filter((entity) =>
@@ -287,14 +293,20 @@ const Dashboard = () => {
                 )}
                 visibleColumns={visibleColumns}
               />
-            }
+            )}
 
             {/* Condition: Loaded and no content present */}
-            {isLoaded && _.isEmpty(entityData) &&
-              <Flex w={"100%"} direction={"row"} p={"4"} justify={"center"} align={"center"}>
+            {isLoaded && _.isEmpty(entityData) && (
+              <Flex
+                w={"100%"}
+                direction={"row"}
+                p={"4"}
+                justify={"center"}
+                align={"center"}
+              >
                 <Text fontWeight={"bold"}>No Entities yet</Text>
               </Flex>
-            }
+            )}
 
             {/* Condition: Not loaded */}
             {!isLoaded && <Loading />}
@@ -342,66 +354,66 @@ const Dashboard = () => {
             {activityData.length > 0 ? (
               <List>
                 {activityData.slice(0, 10).map((activity) => {
-                // Configure the badge
-                let operationIcon = <Icon name={"entity"} color={"white"} />;
+                  // Configure the badge
+                  let operationIcon = <Icon name={"entity"} color={"white"} />;
 
-                switch (activity.type) {
-                  case "create":
-                    operationIcon = <Icon name={"add"} color={"green.400"} />;
-                    break;
-                  case "update":
-                    operationIcon = <Icon name={"edit"} color={"blue.400"} />;
-                    break;
-                  case "delete":
-                    operationIcon = <Icon name={"delete"} color={"red.400"} />;
-                    break;
-                }
+                  switch (activity.type) {
+                    case "create":
+                      operationIcon = <Icon name={"add"} color={"green.400"} />;
+                      break;
+                    case "update":
+                      operationIcon = <Icon name={"edit"} color={"blue.400"} />;
+                      break;
+                    case "delete":
+                      operationIcon = (
+                        <Icon name={"delete"} color={"red.400"} />
+                      );
+                      break;
+                  }
 
-                return (
-                  <ListItem key={`activity-${activity._id}`}>
-                    <Flex
-                      direction={"row"}
-                      p={"2"}
-                      gap={"2"}
-                      mt={"2"}
-                      mb={"2"}
-                      align={"center"}
-                      background={"white"}
-                      rounded={"md"}
-                      border={"2px"}
-                      borderColor={"gray.100"}
-                    >
+                  return (
+                    <ListItem key={`activity-${activity._id}`}>
                       <Flex
-                        rounded={"full"}
-                        bg={"white"}
-                        p={"1.5"}
+                        direction={"row"}
+                        p={"2"}
+                        gap={"2"}
+                        mt={"2"}
+                        mb={"2"}
+                        align={"center"}
+                        background={"white"}
+                        rounded={"md"}
+                        border={"2px"}
+                        borderColor={"gray.100"}
                       >
-                        {operationIcon}
+                        <Flex rounded={"full"} bg={"white"} p={"1.5"}>
+                          {operationIcon}
+                        </Flex>
+
+                        <Text display={{ base: "none", sm: "block" }}>
+                          {activity.details}
+                        </Text>
+
+                        <Linky
+                          id={activity.target.id}
+                          type={activity.target.type}
+                          fallback={activity.target.name}
+                        />
+
+                        <Spacer />
+
+                        <Text color={"gray.400"}>
+                          {dayjs(activity.timestamp).fromNow()}
+                        </Text>
                       </Flex>
-
-                      <Text display={{ base: "none", sm: "block" }}>
-                        {activity.details}
-                      </Text>
-
-                      <Linky
-                        id={activity.target.id}
-                        type={activity.target.type}
-                        fallback={activity.target.name}
-                      />
-
-                      <Spacer />
-
-                      <Text color={"gray.400"}>
-                        {dayjs(activity.timestamp).fromNow()}
-                      </Text>
-                    </Flex>
-                  </ListItem>
-                );
+                    </ListItem>
+                  );
                 })}
               </List>
             ) : (
               <Flex w={"100%"} justify={"center"}>
-                <Text fontSize={"md"} fontWeight={"bold"}>No Activity yet</Text>
+                <Text fontSize={"md"} fontWeight={"bold"}>
+                  No Activity yet
+                </Text>
               </Flex>
             )}
           </Flex>

@@ -20,21 +20,16 @@ import {
   TabList,
   TabPanel,
   TabPanels,
-  Table,
-  TableContainer,
   Tabs,
   Tag,
-  Tbody,
-  Td,
   Text,
-  Th,
-  Thead,
-  Tr,
   VStack,
   useDisclosure,
   useToast,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
+import DataTable from "@components/DataTable";
+import Linky from "@components/Linky";
 import Icon from "@components/Icon";
 import Loading from "@components/Loading";
 
@@ -48,14 +43,19 @@ import {
   QueryParameters,
   QueryQualifier,
   QuerySubQualifier,
+  DataTableAction,
 } from "@types";
 
 // Utility functions and libraries
 import { getData, postData } from "@database/functions";
 import _ from "lodash";
+import { createColumnHelper } from "@tanstack/react-table";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
+import FileSaver from "file-saver";
+import slugify from "slugify";
+import dayjs from "dayjs";
 
 const Search = () => {
   const [query, setQuery] = useState("");
@@ -85,7 +85,9 @@ const Search = () => {
   const [queryQualifier, setQueryQualifier] = useState(
     "Contains" as QueryQualifier
   );
-  const [querySubQualifier, setQuerySubQualifier] = useState("Date" as QuerySubQualifier);
+  const [querySubQualifier, setQuerySubQualifier] = useState(
+    "Date" as QuerySubQualifier
+  );
   const [queryKey, setQueryKey] = useState("");
   const [queryValue, setQueryValue] = useState("");
 
@@ -212,6 +214,73 @@ const Search = () => {
     setResults([]);
   };
 
+  const searchResultColumnHelper = createColumnHelper<EntityModel>();
+  const searchResultColumns = [
+    searchResultColumnHelper.accessor("name", {
+      cell: (info) => (
+        <Linky
+          id={info.row.original._id}
+          type={"entities"}
+          fallback={info.row.original.name}
+        />
+      ),
+      header: "Name",
+    }),
+    searchResultColumnHelper.accessor("description", {
+      cell: (info) => {
+        if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
+          return <Tag colorScheme={"orange"}>Empty</Tag>;
+        }
+        return <Text noOfLines={1}>{info.getValue()}</Text>;
+      },
+      header: "Description",
+      enableHiding: true,
+    }),
+    searchResultColumnHelper.accessor("_id", {
+      cell: (info) => {
+        return (
+          <Flex justifyContent={"right"}>
+            <Button
+              key={`view-entity-${info.getValue()}`}
+              colorScheme={"gray"}
+              rightIcon={<Icon name={"c_right"} />}
+              onClick={() => navigate(`/entities/${info.getValue()}`)}
+            >
+              View
+            </Button>
+          </Flex>
+        );
+      },
+      header: "",
+    }),
+  ];
+  const searchResultActions: DataTableAction[] = [
+    {
+      label: "Export Entities",
+      icon: "download",
+      action(table, rows) {
+        // Export rows that have been selected
+        const toExport: string[] = [];
+        for (let rowIndex of Object.keys(rows)) {
+          toExport.push(table.getRow(rowIndex).original._id);
+        }
+
+        postData(`/entities/export`, { entities: toExport }).then(
+          (response) => {
+            FileSaver.saveAs(
+              new Blob([response]),
+              slugify(
+                `export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.csv`
+              )
+            );
+          }
+        );
+
+        table.resetRowSelection();
+      },
+    },
+  ];
+
   return (
     <Content isError={isError}>
       <Flex
@@ -241,7 +310,11 @@ const Search = () => {
         </Flex>
 
         {/* Search components */}
-        <Tabs variant={"soft-rounded"} colorScheme={"blue"} onChange={onTabChange}>
+        <Tabs
+          variant={"soft-rounded"}
+          colorScheme={"blue"}
+          onChange={onTabChange}
+        >
           <TabList p={"2"} gap={"2"}>
             <Tab disabled={isSearching}>Text</Tab>
             <Tab disabled={isSearching}>Query Builder</Tab>
@@ -414,7 +487,9 @@ const Search = () => {
                           w={"auto"}
                           value={querySubQualifier}
                           onChange={(event) => {
-                            setQuerySubQualifier(event.target.value as QuerySubQualifier);
+                            setQuerySubQualifier(
+                              event.target.value as QuerySubQualifier
+                            );
                           }}
                         >
                           <option>Date</option>
@@ -424,7 +499,7 @@ const Search = () => {
                           <option>Entity</option>
                           <option>Select</option>
                         </Select>
-                        {_.isEqual(querySubQualifier, "Date") &&
+                        {_.isEqual(querySubQualifier, "Date") && (
                           <Input
                             w={"auto"}
                             value={queryValue}
@@ -435,8 +510,8 @@ const Search = () => {
                               setQueryValue(event.target.value);
                             }}
                           />
-                        }
-                        {_.isEqual(querySubQualifier, "Number") &&
+                        )}
+                        {_.isEqual(querySubQualifier, "Number") && (
                           <Input
                             w={"auto"}
                             value={queryValue}
@@ -447,31 +522,33 @@ const Search = () => {
                               setQueryValue(event.target.value);
                             }}
                           />
-                        }
-                        {_.isEqual(querySubQualifier, "Entity") &&
-                          isLoaded && (
-                            <Select
-                              w={"auto"}
-                              placeholder={"Select Entity"}
-                              value={queryKey}
-                              onChange={(event) => {
-                                setQueryKey(event.target.value);
-                                setQueryValue(
-                                  event.target.options[event.target.selectedIndex]
-                                    .innerText
-                                );
-                              }}
-                            >
-                              {entities.map((entity) => {
-                                return (
-                                  <option key={entity._id} value={entity._id}>
-                                    {entity.name}
-                                  </option>
-                                );
-                              })}
-                            </Select>
                         )}
-                        {_.includes(["Text", "URL", "Select"], querySubQualifier) &&
+                        {_.isEqual(querySubQualifier, "Entity") && isLoaded && (
+                          <Select
+                            w={"auto"}
+                            placeholder={"Select Entity"}
+                            value={queryKey}
+                            onChange={(event) => {
+                              setQueryKey(event.target.value);
+                              setQueryValue(
+                                event.target.options[event.target.selectedIndex]
+                                  .innerText
+                              );
+                            }}
+                          >
+                            {entities.map((entity) => {
+                              return (
+                                <option key={entity._id} value={entity._id}>
+                                  {entity.name}
+                                </option>
+                              );
+                            })}
+                          </Select>
+                        )}
+                        {_.includes(
+                          ["Text", "URL", "Select"],
+                          querySubQualifier
+                        ) && (
                           <Input
                             w={"auto"}
                             value={queryValue}
@@ -482,8 +559,7 @@ const Search = () => {
                               setQueryValue(event.target.value);
                             }}
                           />
-                        }
-
+                        )}
                       </Flex>
                     )}
 
@@ -570,11 +646,11 @@ const Search = () => {
                             <Tag colorScheme={"green"}>
                               {component.qualifier}
                             </Tag>
-                            {_.isEqual("Attributes", component.parameter) &&
+                            {_.isEqual("Attributes", component.parameter) && (
                               <Tag colorScheme={"yellow"}>
                                 {component.subQualifier}
                               </Tag>
-                            }
+                            )}
                           </Flex>
 
                           {_.includes(
@@ -601,25 +677,28 @@ const Search = () => {
                             />
                           )}
                           {_.isEqual("Attributes", component.parameter) &&
-                            _.isEqual(component.subQualifier, "Date") &&
+                            _.isEqual(component.subQualifier, "Date") && (
                               <Input
                                 w={"fit-content"}
                                 type={"date"}
                                 value={component.value}
                                 disabled
                               />
-                          }
+                            )}
                           {_.isEqual("Attributes", component.parameter) &&
-                            _.includes(["Text", "Number", "URL", "Select"], component.subQualifier) &&
+                            _.includes(
+                              ["Text", "Number", "URL", "Select"],
+                              component.subQualifier
+                            ) && (
                               <Input
                                 w={"fit-content"}
                                 type={"text"}
                                 value={component.value}
                                 disabled
                               />
-                          }
+                            )}
                           {_.isEqual("Attributes", component.parameter) &&
-                            _.isEqual(component.subQualifier, "Entity") &&
+                            _.isEqual(component.subQualifier, "Entity") && (
                               <Select
                                 w={"fit-content"}
                                 value={component.value}
@@ -627,7 +706,7 @@ const Search = () => {
                               >
                                 <option>{component.value}</option>
                               </Select>
-                          }
+                            )}
 
                           <IconButton
                             aria-label={"Remove search component"}
@@ -685,54 +764,17 @@ const Search = () => {
             hasSearched && (
               <Flex direction={"column"} w={"100%"}>
                 <Heading size={"md"} fontWeight={"semibold"}>
-                  {results.length} search result{results.length > 1 || results.length === 0 ? "s" : ""}
+                  {results.length} search result
+                  {results.length > 1 || results.length === 0 ? "s" : ""}
                 </Heading>
-                <TableContainer w={"full"}>
-                  <Table>
-                    <Thead>
-                      <Tr>
-                        <Th>Identifier</Th>
-                        <Th display={{ base: "none", sm: "table-cell" }}>
-                          Created
-                        </Th>
-                        <Th display={{ base: "none", sm: "table-cell" }}>
-                          Owner
-                        </Th>
-                        <Th></Th>
-                      </Tr>
-                    </Thead>
-
-                    <Tbody>
-                      {results.length > 0 &&
-                        results.map((result) => {
-                          return (
-                            <Tr key={result._id}>
-                              <Td>{result.name}</Td>
-                              <Td display={{ base: "none", sm: "table-cell" }}>
-                                {new Date(result.created).toDateString()}
-                              </Td>
-                              <Td display={{ base: "none", sm: "table-cell" }}>
-                                {result.owner}
-                              </Td>
-                              <Td>
-                                <Flex justify={"right"}>
-                                  <Button
-                                    rightIcon={<Icon name={"c_right"} />}
-                                    colorScheme={"gray"}
-                                    onClick={() =>
-                                      navigate(`/entities/${result._id}`)
-                                    }
-                                  >
-                                    View
-                                  </Button>
-                                </Flex>
-                              </Td>
-                            </Tr>
-                          );
-                        })}
-                    </Tbody>
-                  </Table>
-                </TableContainer>
+                <DataTable
+                  columns={searchResultColumns}
+                  visibleColumns={{}}
+                  data={results}
+                  showPagination
+                  showSelection
+                  actions={searchResultActions}
+                />
               </Flex>
             )
           )}

@@ -1,5 +1,11 @@
 // React
-import React, { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
+import React, {
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 // Existing and custom components
 import {
@@ -87,128 +93,127 @@ const Values = (props: {
   }, []);
 
   const columnHelper = createColumnHelper<IValue<any>>();
-  const columns = useMemo(() => [
-    // Value name column
-    columnHelper.accessor("name", {
-      cell: ({ getValue, row: { index, original }, column: { id }, table }) => {
-        const initialValue = getValue();
-        const [value, setValue] = useState(initialValue);
-        useEffect(() => {
-          setValue(initialValue);
-        }, [initialValue]);
+  const columns = useMemo(
+    () => [
+      // Value name column
+      columnHelper.accessor("name", {
+        cell: ({
+          getValue,
+          row: { index, original },
+          column: { id },
+          table,
+        }) => {
+          const initialValue = getValue();
+          const [value, setValue] = useState(initialValue);
+          useEffect(() => {
+            setValue(initialValue);
+          }, [initialValue]);
 
-        const onChange = (event: any) => {
-          setValue(event.target.value);
-        };
+          const onChange = (event: any) => {
+            setValue(event.target.value);
+          };
 
-        const onBlur = () => {
-          table.options.meta?.updateData(index, id, value);
-        };
+          const onBlur = () => {
+            table.options.meta?.updateData(index, id, value);
+          };
 
-        // Set the icon attached to the name field
-        let valueIcon = <Icon name={"unknown"} />;
-        switch (original.type) {
-          case "date":
-            valueIcon = <Icon name={"v_date"} color={"orange.300"} />;
-            break;
-          case "number":
-            valueIcon = <Icon name={"v_number"} color={"green.300"} />;
-            break;
-          case "text":
-            valueIcon = <Icon name={"v_text"} color={"blue.300"} />;
-            break;
-          case "url":
-            valueIcon = <Icon name={"v_url"} color={"yellow.300"} />;
-            break;
-          case "entity":
-            valueIcon = <Icon name={"entity"} color={"purple.300"} />;
-            break;
-          case "select":
-            valueIcon = <Icon name={"v_select"} color={"cyan.300"} />;
-            break;
-        }
-
-        return (
-          <InputGroup>
-            <InputLeftAddon children={valueIcon} bgColor={"white"} />
-            <Input
-              id={`i_${original.identifier}_name`}
-              value={value}
-              disabled={props.viewOnly}
-              onChange={onChange}
-              onBlur={onBlur}
-              minW={"2xs"}
-              isInvalid={_.isEqual(value, "")}
-            />
-          </InputGroup>
-        );
-      },
-      header: "Name",
-    }),
-
-    // Value data column
-    columnHelper.accessor("data", {
-      cell: ({ getValue, row: { index, original }, column: { id }, table }) => {
-        const initialValue = getValue();
-        const [value, setValue] = useState(initialValue);
-        useEffect(() => {
-          setValue(initialValue);
-        }, [initialValue]);
-
-        /**
-         * Handle a standard Input change event
-         * @param event change event data
-         */
-        const onChange = (event: any) => {
-          setValue(event.target.value);
-        };
-
-        /**
-         * Handle a Select change event
-         * @param event change event data
-         */
-        const onSelectChange = (event: any) => {
-          setValue({
-            selected: event.target.value,
-            options: initialValue.options,
-          });
-        };
-
-        const onBlur = () => {
-          table.options.meta?.updateData(index, id, value);
-        };
-
-        if (_.isUndefined(props.permittedValues)) {
+          // Set the icon attached to the name field
+          let valueIcon = <Icon name={"unknown"} />;
           switch (original.type) {
-            case "number": {
-              return (
-                <Input
-                  id={`i_${original.identifier}_data`}
-                  type={"number"}
-                  value={value}
-                  w={"2xs"}
-                  disabled={props.viewOnly}
-                  onChange={onChange}
-                  onBlur={onBlur}
-                  isInvalid={_.isEqual(value, "") && _.isEqual(props.requireData, true)}
-                />
-              );
-            }
-            case "text": {
-              return (
-                <Input
-                  id={`i_${original.identifier}_data`}
-                  value={value}
-                  w={"2xs"}
-                  disabled={props.viewOnly}
-                  onChange={onChange}
-                  onBlur={onBlur}
-                  isInvalid={_.isEqual(value, "") && _.isEqual(props.requireData, true)}
-                />
-              );
-            }
-            case "url": {
-              if (_.isEqual(props.viewOnly, false)) {
+            case "date":
+              valueIcon = <Icon name={"v_date"} color={"orange.300"} />;
+              break;
+            case "number":
+              valueIcon = <Icon name={"v_number"} color={"green.300"} />;
+              break;
+            case "text":
+              valueIcon = <Icon name={"v_text"} color={"blue.300"} />;
+              break;
+            case "url":
+              valueIcon = <Icon name={"v_url"} color={"yellow.300"} />;
+              break;
+            case "entity":
+              valueIcon = <Icon name={"entity"} color={"purple.300"} />;
+              break;
+            case "select":
+              valueIcon = <Icon name={"v_select"} color={"cyan.300"} />;
+              break;
+          }
+
+          return (
+            <InputGroup>
+              <InputLeftAddon children={valueIcon} bgColor={"white"} />
+              <Input
+                id={`i_${original.identifier}_name`}
+                value={value}
+                disabled={props.viewOnly}
+                onChange={onChange}
+                onBlur={onBlur}
+                minW={"2xs"}
+                isInvalid={_.isEqual(value, "")}
+              />
+            </InputGroup>
+          );
+        },
+        header: "Name",
+      }),
+
+      // Value data column
+      columnHelper.accessor("data", {
+        cell: ({
+          getValue,
+          row: { index, original },
+          column: { id },
+          table,
+        }) => {
+          const initialValue = getValue();
+          const [value, setValue] = useState(initialValue);
+          useEffect(() => {
+            setValue(initialValue);
+          }, [initialValue]);
+
+          /**
+           * Handle a standard Input change event
+           * @param event change event data
+           */
+          const onChange = (event: any) => {
+            setValue(event.target.value);
+          };
+
+          /**
+           * Handle a Select change event
+           * @param event change event data
+           */
+          const onSelectChange = (event: any) => {
+            setValue({
+              selected: event.target.value,
+              options: initialValue.options,
+            });
+          };
+
+          const onBlur = () => {
+            table.options.meta?.updateData(index, id, value);
+          };
+
+          if (_.isUndefined(props.permittedValues)) {
+            switch (original.type) {
+              case "number": {
+                return (
+                  <Input
+                    id={`i_${original.identifier}_data`}
+                    type={"number"}
+                    value={value}
+                    w={"2xs"}
+                    disabled={props.viewOnly}
+                    onChange={onChange}
+                    onBlur={onBlur}
+                    isInvalid={
+                      _.isEqual(value, "") && _.isEqual(props.requireData, true)
+                    }
+                  />
+                );
+              }
+              case "text": {
                 return (
                   <Input
                     id={`i_${original.identifier}_data`}
@@ -217,165 +222,194 @@ const Values = (props: {
                     disabled={props.viewOnly}
                     onChange={onChange}
                     onBlur={onBlur}
-                    isInvalid={_.isEqual(value, "") && _.isEqual(props.requireData, true)}
+                    isInvalid={
+                      _.isEqual(value, "") && _.isEqual(props.requireData, true)
+                    }
                   />
                 );
-              } else {
-                const domain = new URL(value);
-                const hostname = domain.hostname.replace("www", "");
-                let shortenedUrl = value.toString();
-                shortenedUrl = shortenedUrl.replace("https://", "");
-                shortenedUrl = shortenedUrl.replace("http://", "");
-                shortenedUrl = shortenedUrl.substring(0, 18);
-                shortenedUrl = shortenedUrl.concat("...");
-
-                // Setup Link display depending on destination URL
-                let linkTextColor = "black";
-                let linkBgColor = "gray.100";
-                let linkLogo = null;
-                if (
-                  _.isEqual(hostname, "wustl.box.com") ||
-                  _.isEqual(hostname, "wustl.app.box.com")
-                ) {
-                  // Link to Box
-                  linkTextColor = "white";
-                  linkBgColor = "blue.400";
-                  linkLogo = <Icon name={"l_box"} size={[5, 5]} />;
-                } else if (_.isEqual(hostname, "mynotebook.labarchives.com")) {
-                  // Link to LabArchives
-                  linkTextColor = "white";
-                  linkBgColor = "purple.400";
-                  linkLogo = <Icon name={"l_labArchives"} size={[5, 5]} />;
-                } else if (_.isEqual(hostname, "app.globus.org")) {
-                  // Link to Globus
-                  linkTextColor = "white";
-                  linkBgColor = "blue.600";
-                  linkLogo = <Icon name={"l_globus"} size={[5, 5]} />;
-                } else if (_.isEqual(hostname, "github.com")) {
-                  // Link to GitHub
-                  linkTextColor = "white";
-                  linkBgColor = "black";
-                  linkLogo = <Icon name={"l_github"} size={[5, 5]} />;
-                }
-
-                return (
-                  <Tooltip label={value}>
-                    <Flex
-                      direction={"row"}
-                      align={"center"}
-                      p={"2"}
-                      pl={"4"}
-                      pr={"4"}
-                      rounded={"full"}
-                      gap={"2"}
-                      bg={linkBgColor}
-                      color={linkTextColor}
-                      justify={"space-between"}
-                    >
-                      {linkLogo}
-                      <Link href={value} isExternal noOfLines={1}>
-                        <Text>{shortenedUrl}</Text>
-                      </Link>
-                      <Icon name={"link"} />
-                    </Flex>
-                  </Tooltip>
-                );
               }
-            }
-            case "date": {
-              return (
-                <Input
-                  id={`i_${original.identifier}_data`}
-                  type={"date"}
-                  value={value}
-                  w={"2xs"}
-                  disabled={props.viewOnly}
-                  onChange={onChange}
-                  onBlur={onBlur}
-                  isInvalid={_.isEqual(value, "") && _.isEqual(props.requireData, true)}
-                />
-              );
-            }
-            case "entity": {
-              if (_.isEqual(props.viewOnly, false)) {
+              case "url": {
+                if (_.isEqual(props.viewOnly, false)) {
+                  return (
+                    <Input
+                      id={`i_${original.identifier}_data`}
+                      value={value}
+                      w={"2xs"}
+                      disabled={props.viewOnly}
+                      onChange={onChange}
+                      onBlur={onBlur}
+                      isInvalid={
+                        _.isEqual(value, "") &&
+                        _.isEqual(props.requireData, true)
+                      }
+                    />
+                  );
+                } else {
+                  const domain = new URL(value);
+                  const hostname = domain.hostname.replace("www", "");
+                  let shortenedUrl = value.toString();
+                  shortenedUrl = shortenedUrl.replace("https://", "");
+                  shortenedUrl = shortenedUrl.replace("http://", "");
+                  shortenedUrl = shortenedUrl.substring(0, 18);
+                  shortenedUrl = shortenedUrl.concat("...");
+
+                  // Setup Link display depending on destination URL
+                  let linkTextColor = "black";
+                  let linkBgColor = "gray.100";
+                  let linkLogo = null;
+                  if (
+                    _.isEqual(hostname, "wustl.box.com") ||
+                    _.isEqual(hostname, "wustl.app.box.com")
+                  ) {
+                    // Link to Box
+                    linkTextColor = "white";
+                    linkBgColor = "blue.400";
+                    linkLogo = <Icon name={"l_box"} size={[5, 5]} />;
+                  } else if (
+                    _.isEqual(hostname, "mynotebook.labarchives.com")
+                  ) {
+                    // Link to LabArchives
+                    linkTextColor = "white";
+                    linkBgColor = "purple.400";
+                    linkLogo = <Icon name={"l_labArchives"} size={[5, 5]} />;
+                  } else if (_.isEqual(hostname, "app.globus.org")) {
+                    // Link to Globus
+                    linkTextColor = "white";
+                    linkBgColor = "blue.600";
+                    linkLogo = <Icon name={"l_globus"} size={[5, 5]} />;
+                  } else if (_.isEqual(hostname, "github.com")) {
+                    // Link to GitHub
+                    linkTextColor = "white";
+                    linkBgColor = "black";
+                    linkLogo = <Icon name={"l_github"} size={[5, 5]} />;
+                  }
+
+                  return (
+                    <Tooltip label={value}>
+                      <Flex
+                        direction={"row"}
+                        align={"center"}
+                        p={"2"}
+                        pl={"4"}
+                        pr={"4"}
+                        rounded={"full"}
+                        gap={"2"}
+                        bg={linkBgColor}
+                        color={linkTextColor}
+                        justify={"space-between"}
+                      >
+                        {linkLogo}
+                        <Link href={value} isExternal noOfLines={1}>
+                          <Text>{shortenedUrl}</Text>
+                        </Link>
+                        <Icon name={"link"} />
+                      </Flex>
+                    </Tooltip>
+                  );
+                }
+              }
+              case "date": {
                 return (
-                  <Select
-                    title="Select Entity"
-                    id={`s_${original.identifier}_data`}
+                  <Input
+                    id={`i_${original.identifier}_data`}
+                    type={"date"}
                     value={value}
-                    placeholder={"Entity"}
                     w={"2xs"}
                     disabled={props.viewOnly}
                     onChange={onChange}
                     onBlur={onBlur}
+                    isInvalid={
+                      _.isEqual(value, "") && _.isEqual(props.requireData, true)
+                    }
+                  />
+                );
+              }
+              case "entity": {
+                if (_.isEqual(props.viewOnly, false)) {
+                  return (
+                    <Select
+                      title="Select Entity"
+                      id={`s_${original.identifier}_data`}
+                      value={value}
+                      placeholder={"Entity"}
+                      w={"2xs"}
+                      disabled={props.viewOnly}
+                      onChange={onChange}
+                      onBlur={onBlur}
+                    >
+                      {entities.map((entity) => {
+                        return (
+                          <option key={entity._id} value={entity._id}>
+                            {entity.name}
+                          </option>
+                        );
+                      })}
+                    </Select>
+                  );
+                } else {
+                  return <Linky type={"entities"} id={value} />;
+                }
+              }
+              case "select": {
+                return (
+                  <Select
+                    title="Select Option"
+                    id={`s_${original.identifier}_data`}
+                    value={value.selected}
+                    w={"2xs"}
+                    disabled={props.viewOnly}
+                    onChange={onSelectChange}
+                    onBlur={onBlur}
+                    isInvalid={
+                      _.isEqual(value, "") && _.isEqual(props.requireData, true)
+                    }
                   >
-                    {entities.map((entity) => {
-                      return (
-                        <option key={entity._id} value={entity._id}>
-                          {entity.name}
-                        </option>
-                      );
-                    })}
+                    {isLoaded &&
+                      value.options &&
+                      value.options.map((value: string) => {
+                        return (
+                          <option key={value} value={value}>
+                            {value}
+                          </option>
+                        );
+                      })}
                   </Select>
                 );
-              } else {
-                return <Linky type={"entities"} id={value} />;
               }
             }
-            case "select": {
-              return (
-                <Select
-                  title="Select Option"
-                  id={`s_${original.identifier}_data`}
-                  value={value.selected}
-                  w={"2xs"}
-                  disabled={props.viewOnly}
-                  onChange={onSelectChange}
-                  onBlur={onBlur}
-                  isInvalid={_.isEqual(value, "") && _.isEqual(props.requireData, true)}
-                >
-                  {isLoaded &&
-                    value.options &&
-                    value.options.map((value: string) => {
-                      return (
-                        <option key={value} value={value}>
-                          {value}
-                        </option>
-                      );
-                    })}
-                </Select>
-              );
-            }
+          } else {
+            return (
+              <Select
+                title="Select Column"
+                id={`s_${original.identifier}_data`}
+                value={value}
+                placeholder={"Column"}
+                w={"2xs"}
+                disabled={props.viewOnly}
+                onChange={onChange}
+                onBlur={onBlur}
+                isInvalid={
+                  _.isEqual(value, "") && _.isEqual(props.requireData, true)
+                }
+              >
+                {isLoaded &&
+                  props.permittedValues.map((value) => {
+                    return (
+                      <option key={value} value={value}>
+                        {value}
+                      </option>
+                    );
+                  })}
+                ;
+              </Select>
+            );
           }
-        } else {
-          return (
-            <Select
-              title="Select Column"
-              id={`s_${original.identifier}_data`}
-              value={value}
-              placeholder={"Column"}
-              w={"2xs"}
-              disabled={props.viewOnly}
-              onChange={onChange}
-              onBlur={onBlur}
-              isInvalid={_.isEqual(value, "") && _.isEqual(props.requireData, true)}
-            >
-              {isLoaded &&
-                props.permittedValues.map((value) => {
-                  return (
-                    <option key={value} value={value}>
-                      {value}
-                    </option>
-                  );
-                })}
-              ;
-            </Select>
-          );
-        }
-      },
-      header: "Data",
-    }),
-  ], [props.viewOnly, entities]);
+        },
+        header: "Data",
+      }),
+    ],
+    [props.viewOnly, entities]
+  );
 
   const addOptions = () => {
     // Add the Select value with the defined options
@@ -416,8 +450,8 @@ const Values = (props: {
 
         props.setValues(updatedValues);
         table.resetRowSelection();
-      }
-    }
+      },
+    },
   ];
 
   return (

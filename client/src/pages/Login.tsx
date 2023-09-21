@@ -2,14 +2,7 @@
 import React, { FC, useMemo, useState } from "react";
 
 // Existing and custom components
-import {
-  Flex,
-  Heading,
-  Button,
-  Image,
-  Text,
-  useToast,
-} from "@chakra-ui/react";
+import { Flex, Heading, Button, Image, Text, useToast } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 
 // Routing and navigation
@@ -91,8 +84,7 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
   // Define login parameters
   const clientID = "APP-BBVHCTCNDUJ4CAXV";
   const redirectURI = "https://mars.reusable.bio";
-  const requestURI =
-    `https://orcid.org/oauth/authorize?client_id=${clientID}&response_type=code&scope=openid&redirect_uri=${redirectURI}`;
+  const requestURI = `https://orcid.org/oauth/authorize?client_id=${clientID}&response_type=code&scope=openid&redirect_uri=${redirectURI}`;
 
   const onLoginClick = () => {
     window.location.href = requestURI;
@@ -134,9 +126,21 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
             align={"center"}
             gap={"8"}
           >
-            <Text align={"center"}>Log in or create an account with your ORCID iD.</Text>
-            <Button colorScheme={"gray"} gap={"4"} onClick={onLoginClick} isLoading={isLoading} loadingText={"Logging in..."}>
-              <Image src={"https://orcid.org/sites/default/files/images/orcid_16x16.png"} />
+            <Text align={"center"}>
+              Log in or create an account with your ORCID iD.
+            </Text>
+            <Button
+              colorScheme={"gray"}
+              gap={"4"}
+              onClick={onLoginClick}
+              isLoading={isLoading}
+              loadingText={"Logging in..."}
+            >
+              <Image
+                src={
+                  "https://orcid.org/sites/default/files/images/orcid_16x16.png"
+                }
+              />
               Connect your ORCID iD
             </Button>
           </Flex>

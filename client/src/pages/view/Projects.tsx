@@ -31,9 +31,7 @@ const Projects = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isError, setIsError] = useState(false);
 
-  const [projectsData, setProjectsData] = useState(
-    [] as ProjectModel[]
-  );
+  const [projectsData, setProjectsData] = useState([] as ProjectModel[]);
 
   useEffect(() => {
     getData(`/projects`)

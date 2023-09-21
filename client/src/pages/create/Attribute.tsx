@@ -145,11 +145,7 @@ const Attribute = () => {
         <Flex w={"100%"} h={"100%"}>
           <FormControl>
             <FormLabel>Values</FormLabel>
-            <Values
-              viewOnly={false}
-              values={values}
-              setValues={setValues}
-            />
+            <Values viewOnly={false} values={values} setValues={setValues} />
             <FormHelperText>
               Add Values to the template Attribute. Values must be named, but
               they are not required to have data associated with them. Data can
