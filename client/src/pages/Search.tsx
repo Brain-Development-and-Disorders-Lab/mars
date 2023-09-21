@@ -20,21 +20,16 @@ import {
   TabList,
   TabPanel,
   TabPanels,
-  Table,
-  TableContainer,
   Tabs,
   Tag,
-  Tbody,
-  Td,
   Text,
-  Th,
-  Thead,
-  Tr,
   VStack,
   useDisclosure,
   useToast,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
+import DataTable from "@components/DataTable";
+import Linky from "@components/Linky";
 import Icon from "@components/Icon";
 import Loading from "@components/Loading";
 
@@ -48,14 +43,19 @@ import {
   QueryParameters,
   QueryQualifier,
   QuerySubQualifier,
+  DataTableAction,
 } from "@types";
 
 // Utility functions and libraries
 import { getData, postData } from "@database/functions";
 import _ from "lodash";
+import { createColumnHelper } from "@tanstack/react-table";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
+import FileSaver from "file-saver";
+import slugify from "slugify";
+import dayjs from "dayjs";
 
 const Search = () => {
   const [query, setQuery] = useState("");
@@ -211,6 +211,69 @@ const Search = () => {
     setHasSearched(false);
     setResults([]);
   };
+
+  const searchResultColumnHelper = createColumnHelper<EntityModel>();
+  const searchResultColumns = [
+    searchResultColumnHelper.accessor("name", {
+      cell: (info) => (
+        <Linky
+          id={info.row.original._id}
+          type={"entities"}
+          fallback={info.row.original.name}
+        />
+      ),
+      header: "Name",
+    }),
+    searchResultColumnHelper.accessor("description", {
+      cell: (info) => {
+        if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
+          return <Tag colorScheme={"orange"}>Empty</Tag>
+        }
+        return <Text noOfLines={1}>{info.getValue()}</Text>;
+      },
+      header: "Description",
+      enableHiding: true,
+    }),
+    searchResultColumnHelper.accessor("_id", {
+      cell: (info) => {
+        return (
+          <Flex justifyContent={"right"}>
+            <Button
+              key={`view-entity-${info.getValue()}`}
+              colorScheme={"gray"}
+              rightIcon={<Icon name={"c_right"} />}
+              onClick={() => navigate(`/entities/${info.getValue()}`)}
+            >
+              View
+            </Button>
+          </Flex>
+        );
+      },
+      header: "",
+    }),
+  ];
+  const searchResultActions: DataTableAction[] = [
+    {
+      label: "Export Entities",
+      icon: "download",
+      action(table, rows) {
+        // Export rows that have been selected
+        const toExport: string[] = [];
+        for (let rowIndex of Object.keys(rows)) {
+          toExport.push(table.getRow(rowIndex).original._id);
+        }
+
+        postData(`/entities/export`, { entities: toExport }).then((response) => {
+          FileSaver.saveAs(
+            new Blob([response]),
+            slugify(`export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.csv`)
+          );
+        });
+
+        table.resetRowSelection();
+      },
+    }
+  ];
 
   return (
     <Content isError={isError}>
@@ -687,52 +750,14 @@ const Search = () => {
                 <Heading size={"md"} fontWeight={"semibold"}>
                   {results.length} search result{results.length > 1 || results.length === 0 ? "s" : ""}
                 </Heading>
-                <TableContainer w={"full"}>
-                  <Table>
-                    <Thead>
-                      <Tr>
-                        <Th>Identifier</Th>
-                        <Th display={{ base: "none", sm: "table-cell" }}>
-                          Created
-                        </Th>
-                        <Th display={{ base: "none", sm: "table-cell" }}>
-                          Owner
-                        </Th>
-                        <Th></Th>
-                      </Tr>
-                    </Thead>
-
-                    <Tbody>
-                      {results.length > 0 &&
-                        results.map((result) => {
-                          return (
-                            <Tr key={result._id}>
-                              <Td>{result.name}</Td>
-                              <Td display={{ base: "none", sm: "table-cell" }}>
-                                {new Date(result.created).toDateString()}
-                              </Td>
-                              <Td display={{ base: "none", sm: "table-cell" }}>
-                                {result.owner}
-                              </Td>
-                              <Td>
-                                <Flex justify={"right"}>
-                                  <Button
-                                    rightIcon={<Icon name={"c_right"} />}
-                                    colorScheme={"gray"}
-                                    onClick={() =>
-                                      navigate(`/entities/${result._id}`)
-                                    }
-                                  >
-                                    View
-                                  </Button>
-                                </Flex>
-                              </Td>
-                            </Tr>
-                          );
-                        })}
-                    </Tbody>
-                  </Table>
-                </TableContainer>
+                <DataTable
+                  columns={searchResultColumns}
+                  visibleColumns={{}}
+                  data={results}
+                  showPagination
+                  showSelection
+                  actions={searchResultActions}
+                />
               </Flex>
             )
           )}
