@@ -284,33 +284,38 @@ const Search = () => {
   return (
     <Content isError={isError}>
       <Flex
-        direction={"column"}
-        justify={"center"}
-        p={["1", "2"]}
-        gap={"6"}
-        wrap={"wrap"}
-        bg={"white"}
+        direction={"row"}
+        p={"4"}
         rounded={"md"}
+        bg={"white"}
+        wrap={"wrap"}
+        gap={"6"}
+        justify={"center"}
       >
-        {/* Page header */}
-        <Flex direction={"column"} p={"2"} pt={"4"} pb={"4"}>
-          <Flex direction={"row"} align={"center"} justify={"space-between"}>
-            <Flex align={"center"} gap={"4"}>
-              <Icon name={"search"} size={"lg"} />
-              <Heading fontWeight={"semibold"}>Search</Heading>
-            </Flex>
-            <Button
-              rightIcon={<Icon name={"info"} />}
-              variant={"outline"}
-              onClick={onOpen}
-            >
-              Info
-            </Button>
+        <Flex
+          w={"100%"}
+          p={"4"}
+          direction={"row"}
+          justify={"space-between"}
+          align={"center"}
+        >
+          {/* Page header */}
+          <Flex align={"center"} gap={"4"}>
+            <Icon name={"search"} size={"lg"} />
+            <Heading fontWeight={"semibold"}>Search</Heading>
           </Flex>
+          <Button
+            rightIcon={<Icon name={"info"} />}
+            variant={"outline"}
+            onClick={onOpen}
+          >
+            Info
+          </Button>
         </Flex>
 
         {/* Search components */}
         <Tabs
+          w={"100%"}
           variant={"soft-rounded"}
           colorScheme={"blue"}
           onChange={onTabChange}
@@ -320,9 +325,9 @@ const Search = () => {
             <Tab disabled={isSearching}>Query Builder</Tab>
           </TabList>
           <TabPanels>
+            {/* Text search */}
             <TabPanel>
-              {/* Text search */}
-              <Flex p={"2"} w={"100%"} direction={"column"} gap={"4"}>
+              <Flex w={"100%"} direction={"column"} gap={"4"}>
                 <Flex direction={"row"} align={"center"} gap={"2"}>
                   <Input
                     value={query}
@@ -346,9 +351,10 @@ const Search = () => {
                 </Flex>
               </Flex>
             </TabPanel>
+
+            {/* Query builder */}
             <TabPanel>
-              {/* Query builder */}
-              <Flex p={"2"} w={"100%"} direction={"column"} gap={"4"}>
+              <Flex w={"100%"} direction={"column"} gap={"4"}>
                 <Flex
                   direction={"column"}
                   p={"2"}
@@ -755,7 +761,7 @@ const Search = () => {
         </Tabs>
 
         {/* Search Results */}
-        <Flex gap={"2"} p={"2"}>
+        <Flex gap={"4"} p={"4"} w={"100%"}>
           {isSearching ? (
             <Flex w={"full"} align={"center"} justify={"center"}>
               <Loading />
