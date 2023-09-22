@@ -38,18 +38,11 @@ import {
   Select,
   Spacer,
   Stack,
-  Table,
-  TableContainer,
   Tag,
   TagCloseButton,
   TagLabel,
-  Tbody,
-  Td,
   Text,
   Textarea,
-  Th,
-  Thead,
-  Tr,
   VStack,
   useDisclosure,
   useToast,
@@ -513,7 +506,7 @@ const Project = () => {
                 </Popover>
               )}
               <Button
-                colorScheme={editing ? "green" : "gray"}
+                colorScheme={editing ? "green" : "blue"}
                 rightIcon={
                   editing ? <Icon name={"check"} /> : <Icon name={"edit"} />
                 }
@@ -523,28 +516,20 @@ const Project = () => {
               >
                 {editing ? "Done" : "Edit"}
               </Button>
-            </Flex>
-
-            <Flex
-              direction={"row"}
-              gap={"4"}
-              wrap={"wrap"}
-              p={"4"}
-              rounded={"md"}
-            >
               <Button
+                colorScheme={"blue"}
+                rightIcon={<Icon name={"download"} />}
+                onClick={handleExportClick}
+                isDisabled={editing}
+              >
+                Export
+              </Button>
+              <Button
+                colorScheme={"blue"}
                 rightIcon={<Icon name={"clock"} />}
                 onClick={onHistoryOpen}
               >
                 History
-              </Button>
-              <Button
-                onClick={handleExportClick}
-                rightIcon={<Icon name={"download"} />}
-                colorScheme={"blue"}
-                isDisabled={editing}
-              >
-                Export
               </Button>
             </Flex>
           </Flex>
@@ -555,55 +540,42 @@ const Project = () => {
             direction={"column"}
             p={"4"}
             gap={"4"}
-            grow={"1"}
             h={"fit-content"}
-            bg={"white"}
+            grow={"1"}
+            basis={"25%"}
+            bg={"gray.50"}
             rounded={"md"}
-            border={"1px"}
-            borderColor={"gray.100"}
           >
-            {/* Details */}
-            <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
-              <Heading fontWeight={"semibold"} size={"lg"}>
-                Details
+            {/* Project Overview */}
+            <Flex gap={"4"} grow={"1"} direction={"column"} minH={"32"}>
+              <Heading fontWeight={"semibold"} size={"md"}>
+                Project Overview
               </Heading>
-              <TableContainer>
-                <Table variant={"simple"} colorScheme={"gray"}>
-                  <Thead>
-                    <Tr>
-                      <Th>Field</Th>
-                      <Th>Value</Th>
-                    </Tr>
-                  </Thead>
-                  <Tbody>
-                    <Tr>
-                      <Td>Owner</Td>
-                      <Td>
-                        <Tag colorScheme={"green"}>
-                          <TagLabel>{projectData.owner}</TagLabel>
-                        </Tag>
-                      </Td>
-                    </Tr>
-                    <Tr>
-                      <Td>Description</Td>
-                      <Td>
-                        <Textarea
-                          value={projectDescription}
-                          onChange={(event) => {
-                            setProjectDescription(event.target.value);
-                          }}
-                          disabled={!editing}
-                        />
-                      </Td>
-                    </Tr>
-                  </Tbody>
-                </Table>
-              </TableContainer>
+
+              <Flex gap={"2"} direction={"column"}>
+                <Text fontWeight={"semibold"}>Owner</Text>
+                <Flex>
+                  <Tag colorScheme={"green"}>
+                    <TagLabel>{projectData.owner}</TagLabel>
+                  </Tag>
+                </Flex>
+              </Flex>
+
+              <Flex gap={"2"} direction={"column"}>
+                <Text fontWeight={"semibold"}>Description</Text>
+                <Textarea
+                  value={projectDescription}
+                  onChange={(event) => {
+                    setProjectDescription(event.target.value);
+                  }}
+                  disabled={!editing}
+                />
+              </Flex>
             </Flex>
           </Flex>
 
           {/* Display Entities and Projects */}
-          <Flex direction={"column"} gap={"4"} grow={"2"}>
+          <Flex direction={"column"} gap={"4"} grow={"1"} basis={"60%"}>
             <Flex
               direction={"column"}
               p={"4"}
@@ -615,8 +587,8 @@ const Project = () => {
             >
               <Flex direction={"row"} justify={"space-between"}>
                 {/* Entities in the Project */}
-                <Heading fontWeight={"semibold"} size={"lg"}>
-                  Entities
+                <Heading fontWeight={"semibold"} size={"md"}>
+                  Project Entities
                 </Heading>
                 {editing && (
                   <Button
@@ -624,7 +596,7 @@ const Project = () => {
                     onClick={onEntitiesOpen}
                     colorScheme={"green"}
                   >
-                    Add
+                    Add Entity
                   </Button>
                 )}
               </Flex>
@@ -640,7 +612,7 @@ const Project = () => {
                     showPagination
                   />
                 ) : (
-                  <Text>No Entities.</Text>
+                  <Text>This Project does not contain any Entities.</Text>
                 )}
               </Flex>
             </Flex>
