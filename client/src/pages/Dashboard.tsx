@@ -223,10 +223,7 @@ const Dashboard = () => {
             borderColor={"gray.100"}
           >
             {/* Projects heading */}
-            <Flex direction={"row"} align={"center"} gap={"4"}>
-              <Icon name={"project"} size={"lg"} />
-              <Heading fontWeight={"semibold"}>Projects</Heading>
-            </Flex>
+            <Heading size={"lg"} fontWeight={"semibold"}>Projects</Heading>
 
             {/* Projects table */}
             {/* Condition: Loaded and content present */}
@@ -263,7 +260,7 @@ const Dashboard = () => {
                 rightIcon={<Icon name={"c_right"} />}
                 onClick={() => navigate(`/projects`)}
               >
-                View All
+                All Projects
               </Button>
             </Flex>
           </Flex>
@@ -278,10 +275,7 @@ const Dashboard = () => {
             borderColor={"gray.100"}
           >
             {/* Entities heading */}
-            <Flex direction={"row"} align={"center"} gap={"4"}>
-              <Icon name={"entity"} size={"lg"} />
-              <Heading fontWeight={"semibold"}>Entities</Heading>
-            </Flex>
+            <Heading size={"lg"} fontWeight={"semibold"}>Entities</Heading>
 
             {/* Entities table */}
             {/* Condition: Loaded and content present */}
@@ -320,7 +314,7 @@ const Dashboard = () => {
                 rightIcon={<Icon name={"c_right"} />}
                 onClick={() => navigate(`/entities`)}
               >
-                View All
+                All Entities
               </Button>
             </Flex>
           </Flex>
@@ -345,10 +339,7 @@ const Dashboard = () => {
             gap={"2"}
           >
             {/* Activity heading */}
-            <Flex align={"center"} gap={"4"} p={"2"}>
-              <Icon name={"activity"} size={"lg"} />
-              <Heading fontWeight={"semibold"}>Activity</Heading>
-            </Flex>
+            <Heading size={"lg"} fontWeight={"semibold"}>Activity</Heading>
 
             {/* Activity list */}
             {activityData.length > 0 ? (
