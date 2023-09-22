@@ -223,7 +223,10 @@ const Dashboard = () => {
             borderColor={"gray.100"}
           >
             {/* Projects heading */}
-            <Heading size={"lg"} fontWeight={"semibold"}>Projects</Heading>
+            <Flex direction={"row"} align={"center"} gap={"2"}>
+              <Icon name={"project"} size={"md"} />
+              <Heading size={"lg"} fontWeight={"semibold"}>Projects</Heading>
+            </Flex>
 
             {/* Projects table */}
             {/* Condition: Loaded and content present */}
@@ -275,7 +278,10 @@ const Dashboard = () => {
             borderColor={"gray.100"}
           >
             {/* Entities heading */}
-            <Heading size={"lg"} fontWeight={"semibold"}>Entities</Heading>
+            <Flex direction={"row"} align={"center"} gap={"2"}>
+              <Icon name={"entity"} size={"md"} />
+              <Heading size={"lg"} fontWeight={"semibold"}>Entities</Heading>
+            </Flex>
 
             {/* Entities table */}
             {/* Condition: Loaded and content present */}
@@ -339,7 +345,10 @@ const Dashboard = () => {
             gap={"2"}
           >
             {/* Activity heading */}
-            <Heading size={"lg"} fontWeight={"semibold"}>Activity</Heading>
+            <Flex align={"center"} gap={"2"}>
+              <Icon name={"activity"} size={"md"} />
+              <Heading size={"lg"} fontWeight={"semibold"}>Activity</Heading>
+            </Flex>
 
             {/* Activity list */}
             {activityData.length > 0 ? (

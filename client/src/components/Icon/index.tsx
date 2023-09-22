@@ -128,7 +128,7 @@ const SYSTEM_ICONS: { [k: string]: IconType } = {
 
 const Icon = (props: {
   name: IconNames;
-  size?: "sm" | "md" | "lg" | "xl" | [number, number];
+  size?: "xs" | "sm" | "md" | "lg" | "xl" | [number, number];
   color?: string;
 }) => {
   // Default to unknown icon type
@@ -145,13 +145,17 @@ const Icon = (props: {
   // Set the icon sizing if specified
   if (!_.isUndefined(props.size)) {
     switch (props.size) {
-      case "sm":
+      case "xs":
         return (
           <ChakraIcon as={iconComponent} w={"2"} h={"2"} color={iconColor} />
         );
-      case "md":
+      case "sm":
         return (
           <ChakraIcon as={iconComponent} w={"4"} h={"4"} color={iconColor} />
+        );
+      case "md":
+        return (
+          <ChakraIcon as={iconComponent} w={"6"} h={"6"} color={iconColor} />
         );
       case "lg":
         return (

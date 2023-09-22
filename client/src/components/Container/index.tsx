@@ -7,10 +7,12 @@ import {
   Flex,
   Menu,
   MenuButton,
+  MenuDivider,
   MenuGroup,
   MenuItem,
   MenuList,
   Spacer,
+  Tag,
   Text,
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
@@ -128,61 +130,54 @@ const Page: FC<PageProps> = ({ children }) => {
 
           <Spacer />
 
-          <Flex p={"4"} pr={"0"} gap={"4"} align={"center"}>
-            <Icon name={"bell"} size={[5, 5]} />
+          <Flex gap={"4"} align={"center"} h={"100%"}>
             <Menu>
-              <MenuButton _hover={{ bg: "gray.200" }}>
+              <MenuButton h={"100%"} _hover={{ bg: "gray.200" }}>
                 <Flex
                   direction={"row"}
                   align={"center"}
-                  gap={"4"}
-                  h={"100%"}
+                  gap={"2"}
                   p={"1"}
+                  ml={"2"}
+                  mr={"2"}
                 >
-                  <Flex pl={"4"}>
-                    <Avatar size={"sm"} />
-                  </Flex>
-                  <Flex
-                    direction={"column"}
-                    gap={"0"}
-                    pt={"1"}
-                    pb={"1"}
-                    align={"baseline"}
-                  >
-                    <Text size={"xs"} fontWeight={"semibold"}>
-                      {token.name}
-                    </Text>
-                    <Text
-                      size={"xs"}
-                      fontWeight={"semibold"}
-                      color={"gray.400"}
-                    >
-                      {_.truncate(token.orcid, { length: 12 })}
-                    </Text>
-                  </Flex>
-                  <Flex pl={"4"} pr={"4"}>
-                    <Icon name={"c_down"} />
-                  </Flex>
+                  <Avatar name={token.name} size={"sm"} />
+                  <Text size={"xs"} fontWeight={"semibold"}>
+                    {token.name}
+                  </Text>
+                  <Icon name={"c_down"} />
                 </Flex>
               </MenuButton>
-              <MenuList>
+
+              {/* List of drop-down menu items */}
+              <MenuList ml={"2"} mr={"2"}>
+                <MenuGroup>
+                  <Flex p={"4"} pt={"2"} pb={"2"} gap={"4"} direction={"column"}>
+                    <Text fontWeight={"semibold"}>Hello {token.name.split(" ")[0]}!</Text>
+                    <Tag colorScheme={"green"}>{token.orcid}</Tag>
+                  </Flex>
+                </MenuGroup>
+                <MenuDivider />
+
                 <MenuGroup title={"System"}>
                   <MenuItem onClick={() => performBackup()}>
-                    <Flex direction={"row"} align={"center"} gap={"4"}>
+                    <Flex direction={"row"} align={"center"} gap={"4"} ml={"2"}>
                       <Icon name={"download"} />
                       Backup
                     </Flex>
                   </MenuItem>
                   <MenuItem onClick={() => navigate(`/settings`)}>
-                    <Flex direction={"row"} align={"center"} gap={"4"}>
+                    <Flex direction={"row"} align={"center"} gap={"4"} ml={"2"}>
                       <Icon name={"settings"} />
                       Settings
                     </Flex>
                   </MenuItem>
                 </MenuGroup>
+                <MenuDivider />
+
                 <MenuGroup title={"Account"}>
                   <MenuItem onClick={() => performLogout()}>
-                    <Flex direction={"row"} align={"center"} gap={"4"}>
+                    <Flex direction={"row"} align={"center"} gap={"4"} ml={"2"}>
                       <Icon name={"exit"} />
                       Logout
                     </Flex>
