@@ -56,36 +56,32 @@ const DataTable = (props: DataTableProps) => {
   const table = useReactTable({
     columns: [
       // Checkbox select column
-      ...(_.isEqual(props.showSelection, true)
-        ? [
-            {
-              id: "select",
-              header: ({ table }: any) => (
-                <Checkbox
-                  {...{
-                    disabled: props.viewOnly,
-                    isChecked: table.getIsAllRowsSelected(),
-                    isIndeterminate: table.getIsSomeRowsSelected(),
-                    isInvalid: false,
-                    onChange: table.getToggleAllRowsSelectedHandler(),
-                  }}
-                />
-              ),
-              cell: ({ row }: any) => (
-                <Checkbox
-                  {...{
-                    id: `s_${Math.random().toString(16).slice(2)}`,
-                    isChecked: row.getIsSelected(),
-                    disabled: !row.getCanSelect() || props.viewOnly,
-                    isIndeterminate: row.getIsSomeSelected(),
-                    isInvalid: false,
-                    onChange: row.getToggleSelectedHandler(),
-                  }}
-                />
-              ),
-            },
-          ]
-        : []),
+      ...(_.isEqual(props.showSelection, true) ? [{
+        id: "select",
+        header: ({ table }: any) => (
+          <Checkbox
+            {...{
+              disabled: props.viewOnly,
+              isChecked: table.getIsAllRowsSelected(),
+              isIndeterminate: table.getIsSomeRowsSelected(),
+              isInvalid: false,
+              onChange: table.getToggleAllRowsSelectedHandler(),
+            }}
+          />
+        ),
+        cell: ({ row }: any) => (
+          <Checkbox
+            {...{
+              id: `s_${Math.random().toString(16).slice(2)}`,
+              isChecked: row.getIsSelected(),
+              disabled: !row.getCanSelect() || props.viewOnly,
+              isIndeterminate: row.getIsSomeSelected(),
+              isInvalid: false,
+              onChange: row.getToggleSelectedHandler(),
+            }}
+          />
+        ),
+      }] : []),
       ...props.columns,
     ],
     data: props.data,
@@ -131,6 +127,7 @@ const DataTable = (props: DataTableProps) => {
     <Flex direction={"column"}>
       <TableContainer>
         <Table>
+          {/* Table head */}
           <Thead>
             {table.getHeaderGroups().map((headerGroup) => (
               <Tr key={headerGroup.id}>
@@ -141,29 +138,31 @@ const DataTable = (props: DataTableProps) => {
                       key={header.id}
                       onClick={header.column.getToggleSortingHandler()}
                       isNumeric={meta?.isNumeric}
+                      // Dynamically set the width for the checkboxes
+                      w={_.isEqual(header.id, "select") ? "1" : "auto"}
                     >
-                      <Flex gap={"4"} direction={"row"}>
-                        {flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                        {header.column.getIsSorted() ? (
-                          header.column.getIsSorted() === "desc" ? (
-                            <Icon name={"c_down"} />
-                          ) : (
-                            <Icon name={"c_up"} />
-                          )
-                        ) : null}
-                      </Flex>
+                      {flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
+                      {header.column.getIsSorted() ? (
+                        header.column.getIsSorted() === "desc" ? (
+                          <Icon name={"c_down"} />
+                        ) : (
+                          <Icon name={"c_up"} />
+                        )
+                      ) : null}
                     </Th>
                   );
                 })}
               </Tr>
             ))}
           </Thead>
+
+          {/* Table body */}
           <Tbody>
             {table.getRowModel().rows.map((row) => (
-              <Tr id={row.id} key={row.id}>
+              <Tr id={row.id} key={row.id} w={"auto"}>
                 {row.getVisibleCells().map((cell) => {
                   const meta: any = cell.column.columnDef.meta;
                   return (
@@ -225,7 +224,7 @@ const DataTable = (props: DataTableProps) => {
         <Spacer />
 
         {props.showPagination && (
-          <Flex gap={"4"}>
+          <Flex gap={"4"} wrap={"wrap"}>
             <Flex>
               <Select
                 id={"select-page-size"}
