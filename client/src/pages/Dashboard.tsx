@@ -21,7 +21,7 @@ import Linky from "@components/Linky";
 import Loading from "@components/Loading";
 
 // Existing and custom types
-import { ProjectModel, EntityModel, ActivityModel } from "@types";
+import { ProjectModel, EntityModel, ActivityModel, IconNames } from "@types";
 
 // Utility functions and libraries
 import { getData } from "src/database/functions";
@@ -329,94 +329,88 @@ const Dashboard = () => {
         {/* Activity */}
         <Flex
           direction={"column"}
-          gap={"4"}
+          p={"4"}
+          gap={"2"}
           grow={"1"}
-          h={"100%"}
           rounded={"md"}
           border={"1px"}
           borderColor={"gray.100"}
         >
-          <Flex
-            background={"white"}
-            direction={"column"}
-            rounded={"md"}
-            h={"fit-content"}
-            p={"4"}
-            gap={"2"}
-          >
-            {/* Activity heading */}
-            <Flex align={"center"} gap={"2"}>
-              <Icon name={"activity"} size={"md"} />
-              <Heading size={"lg"} fontWeight={"semibold"}>Activity</Heading>
-            </Flex>
+          {/* Activity heading */}
+          <Flex align={"center"} gap={"2"}>
+            <Icon name={"activity"} size={"md"} />
+            <Heading size={"lg"} fontWeight={"semibold"}>Activity</Heading>
 
-            {/* Activity list */}
-            {activityData.length > 0 ? (
-              <List>
-                {activityData.slice(0, 10).map((activity) => {
-                  // Configure the badge
-                  let operationIcon = <Icon name={"entity"} color={"white"} />;
-
-                  switch (activity.type) {
-                    case "create":
-                      operationIcon = <Icon name={"add"} color={"green.400"} />;
-                      break;
-                    case "update":
-                      operationIcon = <Icon name={"edit"} color={"blue.400"} />;
-                      break;
-                    case "delete":
-                      operationIcon = (
-                        <Icon name={"delete"} color={"red.400"} />
-                      );
-                      break;
-                  }
-
-                  return (
-                    <ListItem key={`activity-${activity._id}`}>
-                      <Flex
-                        direction={"row"}
-                        p={"2"}
-                        gap={"2"}
-                        mt={"2"}
-                        mb={"2"}
-                        align={"center"}
-                        background={"white"}
-                        rounded={"md"}
-                        border={"2px"}
-                        borderColor={"gray.100"}
-                      >
-                        <Flex rounded={"full"} bg={"white"} p={"1.5"}>
-                          {operationIcon}
-                        </Flex>
-
-                        <Text display={{ base: "none", sm: "block" }}>
-                          {activity.details}
-                        </Text>
-
-                        <Linky
-                          id={activity.target.id}
-                          type={activity.target.type}
-                          fallback={activity.target.name}
-                        />
-
-                        <Spacer />
-
-                        <Text color={"gray.400"}>
-                          {dayjs(activity.timestamp).fromNow()}
-                        </Text>
-                      </Flex>
-                    </ListItem>
-                  );
-                })}
-              </List>
-            ) : (
-              <Flex w={"100%"} justify={"center"}>
-                <Text fontSize={"md"} fontWeight={"bold"}>
-                  No Activity yet
-                </Text>
-              </Flex>
-            )}
           </Flex>
+
+          {/* Activity list */}
+          {activityData.length > 0 ? (
+            <List>
+              {activityData.slice(0, 10).map((activity) => {
+                // Configure the badge
+                let operationIcon: IconNames = "entity";
+                let operationIconColor = "white";
+
+                switch (activity.type) {
+                  case "create":
+                    operationIcon = "add";
+                    operationIconColor = "green.400";
+                    break;
+                  case "update":
+                    operationIcon = "edit";
+                    operationIconColor = "blue.400";
+                    break;
+                  case "delete":
+                    operationIcon = "delete";
+                    operationIconColor = "red.400";
+                    break;
+                }
+
+                return (
+                  <ListItem key={`activity-${activity._id}`}>
+                    <Flex
+                      direction={"row"}
+                      p={"2"}
+                      gap={"2"}
+                      mt={"1"}
+                      mb={"1"}
+                      align={"center"}
+                      rounded={"md"}
+                      background={"white"}
+                      border={"1px"}
+                      borderColor={"gray.100"}
+                    >
+                      <Flex rounded={"full"} bg={operationIconColor} p={"1"}>
+                        <Icon size={"xs"} name={operationIcon} color={"white"} />
+                      </Flex>
+
+                      <Text display={{ base: "none", sm: "block" }}>
+                        {activity.details}
+                      </Text>
+
+                      <Linky
+                        id={activity.target.id}
+                        type={activity.target.type}
+                        fallback={activity.target.name}
+                      />
+
+                      <Spacer />
+
+                      <Text color={"gray.400"}>
+                        {dayjs(activity.timestamp).fromNow()}
+                      </Text>
+                    </Flex>
+                  </ListItem>
+                );
+              })}
+            </List>
+          ) : (
+            <Flex w={"100%"} justify={"center"}>
+              <Text fontSize={"md"} fontWeight={"bold"}>
+                No Activity yet
+              </Text>
+            </Flex>
+          )}
         </Flex>
       </Flex>
     </Content>
