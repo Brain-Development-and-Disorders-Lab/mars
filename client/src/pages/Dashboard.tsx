@@ -372,8 +372,8 @@ const Dashboard = () => {
                       direction={"row"}
                       p={"2"}
                       gap={"2"}
-                      mt={"1"}
-                      mb={"1"}
+                      mt={"2"}
+                      mb={"2"}
                       align={"center"}
                       rounded={"md"}
                       background={"white"}
