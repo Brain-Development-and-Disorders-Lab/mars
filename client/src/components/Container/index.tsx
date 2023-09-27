@@ -2,22 +2,18 @@
 import React, { FC } from "react";
 
 // Existing and custom components
-import {
-  Flex,
-  Spacer,
-} from "@chakra-ui/react";
+import { Flex, Spacer } from "@chakra-ui/react";
 import Navigation from "@components/Navigation";
 import SearchBox from "@components/SearchBox";
 import Error from "@components/Error";
+import Loading from "@components/Loading";
+import AccountMenu from "@components/AccountMenu";
 
 // Existing and custom types
 import { ContentProps, PageProps } from "@types";
 
 // Utility functions and libraries
 import _ from "lodash";
-
-import Loading from "@components/Loading";
-import { AccountMenu } from "@components/AccountMenu";
 
 // Content container
 const Content: FC<ContentProps> = ({ children, isError, isLoaded }) => {

@@ -25,7 +25,7 @@ import dayjs from "dayjs";
 import FileSaver from "file-saver";
 import slugify from "slugify";
 
-export const AccountMenu = () => {
+const AccountMenu = () => {
   const navigate = useNavigate();
 
   const [token, setToken] = useToken();
@@ -74,7 +74,9 @@ export const AccountMenu = () => {
         <MenuList ml={"2"} mr={"2"}>
           <MenuGroup>
             <Flex p={"4"} pt={"2"} pb={"2"} gap={"4"} direction={"column"}>
-              <Text fontWeight={"semibold"}>Hello {token.name.split(" ")[0]}!</Text>
+              <Text fontWeight={"semibold"}>
+                Hello {token.name.split(" ")[0]}!
+              </Text>
               <Tag colorScheme={"green"}>{token.orcid}</Tag>
             </Flex>
           </MenuGroup>
@@ -109,3 +111,5 @@ export const AccountMenu = () => {
     </Flex>
   );
 };
+
+export default AccountMenu;

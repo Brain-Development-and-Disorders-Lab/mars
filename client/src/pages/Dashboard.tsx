@@ -225,7 +225,9 @@ const Dashboard = () => {
             {/* Projects heading */}
             <Flex direction={"row"} align={"center"} gap={"2"}>
               <Icon name={"project"} size={"md"} />
-              <Heading size={"lg"} fontWeight={"semibold"}>Projects</Heading>
+              <Heading size={"lg"} fontWeight={"semibold"}>
+                Projects
+              </Heading>
             </Flex>
 
             {/* Projects table */}
@@ -280,7 +282,9 @@ const Dashboard = () => {
             {/* Entities heading */}
             <Flex direction={"row"} align={"center"} gap={"2"}>
               <Icon name={"entity"} size={"md"} />
-              <Heading size={"lg"} fontWeight={"semibold"}>Entities</Heading>
+              <Heading size={"lg"} fontWeight={"semibold"}>
+                Entities
+              </Heading>
             </Flex>
 
             {/* Entities table */}
@@ -339,8 +343,9 @@ const Dashboard = () => {
           {/* Activity heading */}
           <Flex align={"center"} gap={"2"}>
             <Icon name={"activity"} size={"md"} />
-            <Heading size={"lg"} fontWeight={"semibold"}>Activity</Heading>
-
+            <Heading size={"lg"} fontWeight={"semibold"}>
+              Activity
+            </Heading>
           </Flex>
 
           {/* Activity list */}
@@ -381,7 +386,11 @@ const Dashboard = () => {
                       borderColor={"gray.100"}
                     >
                       <Flex rounded={"full"} bg={operationIconColor} p={"1"}>
-                        <Icon size={"xs"} name={operationIcon} color={"white"} />
+                        <Icon
+                          size={"xs"}
+                          name={operationIcon}
+                          color={"white"}
+                        />
                       </Flex>
 
                       <Text display={{ base: "none", sm: "block" }}>

@@ -56,32 +56,36 @@ const DataTable = (props: DataTableProps) => {
   const table = useReactTable({
     columns: [
       // Checkbox select column
-      ...(_.isEqual(props.showSelection, true) ? [{
-        id: "select",
-        header: ({ table }: any) => (
-          <Checkbox
-            {...{
-              disabled: props.viewOnly,
-              isChecked: table.getIsAllRowsSelected(),
-              isIndeterminate: table.getIsSomeRowsSelected(),
-              isInvalid: false,
-              onChange: table.getToggleAllRowsSelectedHandler(),
-            }}
-          />
-        ),
-        cell: ({ row }: any) => (
-          <Checkbox
-            {...{
-              id: `s_${Math.random().toString(16).slice(2)}`,
-              isChecked: row.getIsSelected(),
-              disabled: !row.getCanSelect() || props.viewOnly,
-              isIndeterminate: row.getIsSomeSelected(),
-              isInvalid: false,
-              onChange: row.getToggleSelectedHandler(),
-            }}
-          />
-        ),
-      }] : []),
+      ...(_.isEqual(props.showSelection, true)
+        ? [
+            {
+              id: "select",
+              header: ({ table }: any) => (
+                <Checkbox
+                  {...{
+                    disabled: props.viewOnly,
+                    isChecked: table.getIsAllRowsSelected(),
+                    isIndeterminate: table.getIsSomeRowsSelected(),
+                    isInvalid: false,
+                    onChange: table.getToggleAllRowsSelectedHandler(),
+                  }}
+                />
+              ),
+              cell: ({ row }: any) => (
+                <Checkbox
+                  {...{
+                    id: `s_${Math.random().toString(16).slice(2)}`,
+                    isChecked: row.getIsSelected(),
+                    disabled: !row.getCanSelect() || props.viewOnly,
+                    isIndeterminate: row.getIsSomeSelected(),
+                    isInvalid: false,
+                    onChange: row.getToggleSelectedHandler(),
+                  }}
+                />
+              ),
+            },
+          ]
+        : []),
       ...props.columns,
     ],
     data: props.data,
