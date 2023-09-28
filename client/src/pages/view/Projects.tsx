@@ -5,6 +5,7 @@ import {
   Flex,
   Heading,
   Spacer,
+  Tag,
   useBreakpoint,
   useToast,
 } from "@chakra-ui/react";
@@ -88,7 +89,9 @@ const Projects = () => {
       enableHiding: true,
     }),
     columnHelper.accessor("owner", {
-      cell: (info) => info.getValue(),
+      cell: (info) => {
+        return <Tag colorScheme={"green"}>{info.getValue()}</Tag>;
+      },
       header: "Owner",
     }),
     columnHelper.accessor("entities", {
