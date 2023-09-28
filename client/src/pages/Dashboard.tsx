@@ -210,7 +210,7 @@ const Dashboard = () => {
 
   return (
     <Content isError={isError} isLoaded={isLoaded}>
-      <Flex direction={"row"} wrap={"wrap"} gap={"4"} p={"4"} h={"100%"}>
+      <Flex direction={"row"} wrap={"wrap"} gap={"4"} p={"4"}>
         <Flex direction={"column"} gap={"4"} grow={"2"} h={"100%"}>
           {/* Projects and Entities */}
           <Flex
