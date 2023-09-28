@@ -254,14 +254,14 @@ const DataTable = (props: DataTableProps) => {
                 icon={<Icon name={"c_double_left"} />}
                 aria-label="first page"
                 onClick={() => table.setPageIndex(0)}
-                disabled={!table.getCanPreviousPage()}
+                isDisabled={!table.getCanPreviousPage()}
               />
               <IconButton
                 variant={"outline"}
                 icon={<Icon name={"c_left"} />}
                 aria-label="previous page"
                 onClick={() => table.previousPage()}
-                disabled={!table.getCanPreviousPage()}
+                isDisabled={!table.getCanPreviousPage()}
               />
               {table.getPageCount() > 0 && (
                 <Text as={"b"}>
@@ -274,14 +274,14 @@ const DataTable = (props: DataTableProps) => {
                 icon={<Icon name={"c_right"} />}
                 aria-label="next page"
                 onClick={() => table.nextPage()}
-                disabled={!table.getCanNextPage()}
+                isDisabled={!table.getCanNextPage()}
               />
               <IconButton
                 variant={"outline"}
                 icon={<Icon name={"c_double_right"} />}
                 aria-label="last page"
                 onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-                disabled={!table.getCanNextPage()}
+                isDisabled={!table.getCanNextPage()}
               />
             </Flex>
           </Flex>
