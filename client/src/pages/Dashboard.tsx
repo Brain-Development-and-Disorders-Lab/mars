@@ -184,9 +184,14 @@ const Dashboard = () => {
       cell: (info) => info.getValue(),
       header: "Name",
     }),
-    projectTableColumnHelper.accessor("entities", {
-      cell: (info) => info.getValue().length,
-      header: "Entity Count",
+    projectTableColumnHelper.accessor("description", {
+      cell: (info) => {
+        if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
+          return <Tag colorScheme={"orange"}>Empty</Tag>;
+        }
+        return <Text noOfLines={1}>{info.getValue()}</Text>;
+      },
+      header: "Description",
       enableHiding: true,
     }),
     projectTableColumnHelper.accessor("_id", {
