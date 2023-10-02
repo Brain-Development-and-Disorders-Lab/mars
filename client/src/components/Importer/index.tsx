@@ -26,7 +26,17 @@ import {
   FormLabel,
   Tag,
   TagCloseButton,
-  Link,
+  useSteps,
+  Stepper,
+  Step,
+  StepIndicator,
+  StepStatus,
+  StepIcon,
+  StepNumber,
+  Box,
+  StepTitle,
+  StepDescription,
+  StepSeparator,
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 import Error from "@components/Error";
@@ -40,6 +50,9 @@ import {
   EntityImport,
   EntityModel,
 } from "@types";
+
+// Routing and navigation
+import { useNavigate } from "react-router-dom";
 
 // Utility functions and libraries
 import { getData, postData } from "@database/functions";
@@ -62,6 +75,7 @@ const Importer = (props: {
   const [isUploading, setIsUploading] = useState(false);
   const [isMapping, setIsMapping] = useState(false);
 
+  const navigate = useNavigate();
   const toast = useToast();
   const [token, _setToken] = useToken();
 
@@ -73,6 +87,11 @@ const Importer = (props: {
   const [interfacePage, setInterfacePage] = useState(
     "start" as "start" | "attributes"
   );
+  const pageSteps = [
+    { title: "Start", description: "Basic information" },
+    { title: "Attributes", description: "Mapping fields to Attributes" },
+  ];
+  const { activeStep, setActiveStep } = useSteps({ index: 0, count: pageSteps.length });
 
   const [spreadsheetData, setSpreadsheetData] = useState([] as any[]);
   const [columns, setColumns] = useState([] as string[]);
@@ -139,24 +158,7 @@ const Importer = (props: {
               position: "bottom-right",
               isClosable: true,
             });
-            toast({
-              title: "Success",
-              status: "success",
-              description: (
-                <Flex w={"100%"} direction={"row"} gap={"4"}>
-                  Updated data available.
-                  <Link onClick={() => window.location.reload()}>
-                    <Flex direction={"row"} gap={"1"} align={"center"}>
-                      <Text fontWeight={"semibold"}>Reload</Text>
-                      <Icon name={"reload"} />
-                    </Flex>
-                  </Link>
-                </Flex>
-              ),
-              duration: null,
-              position: "bottom",
-              isClosable: true,
-            });
+            navigate(0);
           }
         } else {
           toast({
@@ -231,24 +233,7 @@ const Importer = (props: {
     postData(`/system/import/mapping`, mappingData)
       .then((_response: { status: boolean; message: string; data?: any }) => {
         onMappingClose();
-        toast({
-          title: "Success",
-          status: "success",
-          description: (
-            <Flex w={"100%"} direction={"row"} gap={"4"}>
-              Updated data available.
-              <Link onClick={() => window.location.reload()}>
-                <Flex direction={"row"} gap={"1"} align={"center"}>
-                  <Text fontWeight={"semibold"}>Reload</Text>
-                  <Icon name={"reload"} />
-                </Flex>
-              </Link>
-            </Flex>
-          ),
-          duration: null,
-          position: "bottom",
-          isClosable: true,
-        });
+        navigate(0);
       })
       .catch((error: { message: string }) => {
         toast({
@@ -377,9 +362,9 @@ const Importer = (props: {
         <Error />
       ) : (
         <>
-          <Modal isOpen={props.isOpen} onClose={props.onClose} isCentered>
+          <Modal isOpen={props.isOpen} onClose={props.onClose} isCentered size={"3xl"}>
             <ModalOverlay />
-            <ModalContent p={"2"} gap={"2"} w={["lg", "xl", "2xl"]}>
+            <ModalContent p={"2"} gap={"2"}>
               <ModalHeader p={"2"}>Import Data</ModalHeader>
               <ModalCloseButton />
               <ModalBody p={"2"}>
@@ -603,9 +588,34 @@ const Importer = (props: {
             isCentered
           >
             <ModalOverlay />
-            <ModalContent p={"2"} gap={"4"} w={["lg", "xl", "2xl"]}>
+            <ModalContent p={"2"} gap={"4"}>
               <ModalHeader p={"2"}>Import Spreadsheet Data</ModalHeader>
               <ModalBody p={"2"}>
+                {/* Stepper progress indicator */}
+                <Flex pb={"4"}>
+                  <Stepper index={activeStep} w={"100%"}>
+                    {pageSteps.map((step, index) => (
+                      <Step key={index}>
+                        <StepIndicator>
+                          <StepStatus
+                            complete={<StepIcon />}
+                            incomplete={<StepNumber />}
+                            active={<StepNumber />}
+                          />
+                        </StepIndicator>
+
+                        <Box flexShrink={"0"}>
+                          <StepTitle>{step.title}</StepTitle>
+                          <StepDescription>{step.description}</StepDescription>
+                        </Box>
+
+                        <StepSeparator />
+                      </Step>
+                    ))}
+                  </Stepper>
+                </Flex>
+
+                {/* Page content */}
                 {_.isEqual(interfacePage, "start") && (
                   <Flex w={"100%"} direction={"column"} gap={"4"}>
                     <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
@@ -713,6 +723,7 @@ const Importer = (props: {
                     </Flex>
                   </Flex>
                 )}
+
                 {_.isEqual(interfacePage, "attributes") && (
                   <Flex w={"100%"} direction={"column"} gap={"4"}>
                     <Text>Attributes</Text>
@@ -828,11 +839,10 @@ const Importer = (props: {
                         <Icon name="check" />
                       )
                     }
-                    variant={
-                      _.isEqual(interfacePage, "start") ? "outline" : "solid"
-                    }
+                    variant={"solid"}
                     onClick={() => {
                       if (_.isEqual(interfacePage, "start")) {
+                        setActiveStep(1);
                         setInterfacePage("attributes");
                       } else {
                         performMapping();
