@@ -21,6 +21,10 @@ import {
   FormLabel,
   Heading,
   IconButton,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -467,120 +471,143 @@ const Project = () => {
           </Flex>
 
           {/* Buttons */}
-          <Flex direction={"row"} gap={"4"}>
-            <Flex
-              direction={"row"}
-              gap={"4"}
-              wrap={"wrap"}
-              p={"4"}
-              rounded={"md"}
+          <Flex
+            direction={"row"}
+            gap={"4"}
+            wrap={"wrap"}
+          >
+            {editing && (
+              <Popover>
+                <PopoverTrigger>
+                  <Button
+                    colorScheme={"red"}
+                    rightIcon={<Icon name={"delete"} />}
+                    disabled={isUpdating}
+                  >
+                    Delete
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent>
+                  <PopoverArrow />
+                  <PopoverCloseButton />
+                  <PopoverHeader>Confirmation</PopoverHeader>
+                  <PopoverBody>
+                    Are you sure you want to delete this Project?
+                    <Flex direction={"row"} p={"2"} justify={"center"}>
+                      <Button
+                        colorScheme={"green"}
+                        rightIcon={<Icon name={"check"} />}
+                        onClick={handleDeleteClick}
+                      >
+                        Confirm
+                      </Button>
+                    </Flex>
+                  </PopoverBody>
+                </PopoverContent>
+              </Popover>
+            )}
+            <Button
+              colorScheme={editing ? "green" : "blue"}
+              rightIcon={
+                editing ? <Icon name={"check"} /> : <Icon name={"edit"} />
+              }
+              onClick={handleEditClick}
+              loadingText={"Saving..."}
+              isLoading={isUpdating}
             >
-              {editing && (
-                <Popover>
-                  <PopoverTrigger>
-                    <Button
-                      colorScheme={"red"}
-                      rightIcon={<Icon name={"delete"} />}
-                      disabled={isUpdating}
-                    >
-                      Delete
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent>
-                    <PopoverArrow />
-                    <PopoverCloseButton />
-                    <PopoverHeader>Confirmation</PopoverHeader>
-                    <PopoverBody>
-                      Are you sure you want to delete this Project?
-                      <Flex direction={"row"} p={"2"} justify={"center"}>
-                        <Button
-                          colorScheme={"green"}
-                          rightIcon={<Icon name={"check"} />}
-                          onClick={handleDeleteClick}
-                        >
-                          Confirm
-                        </Button>
-                      </Flex>
-                    </PopoverBody>
-                  </PopoverContent>
-                </Popover>
-              )}
-              <Button
-                colorScheme={editing ? "green" : "blue"}
-                rightIcon={
-                  editing ? <Icon name={"check"} /> : <Icon name={"edit"} />
-                }
-                onClick={handleEditClick}
-                loadingText={"Saving..."}
-                isLoading={isUpdating}
-              >
-                {editing ? "Done" : "Edit"}
-              </Button>
-              <Button
-                colorScheme={"blue"}
-                rightIcon={<Icon name={"download"} />}
-                onClick={handleExportClick}
-                isDisabled={editing}
-              >
-                Export
-              </Button>
-              <Button
-                colorScheme={"blue"}
-                rightIcon={<Icon name={"clock"} />}
-                onClick={onHistoryOpen}
-              >
-                History
-              </Button>
-            </Flex>
+              {editing ? "Done" : "Edit"}
+            </Button>
+
+            {/* Actions Menu */}
+            <Menu>
+              <MenuButton as={Button} colorScheme={"blue"} rightIcon={<Icon name={"c_down"} />}>
+                Actions
+              </MenuButton>
+              <MenuList>
+                <MenuItem
+                  icon={<Icon name={"clock"} />}
+                  onClick={onHistoryOpen}
+                >
+                  History
+                </MenuItem>
+                <MenuItem
+                  onClick={handleExportClick}
+                  icon={<Icon name={"download"} />}
+                  isDisabled={editing}
+                >
+                  Export
+                </MenuItem>
+              </MenuList>
+            </Menu>
           </Flex>
         </Flex>
 
-        <Flex direction={"row"} gap={"4"} p={"4"} wrap={"wrap"}>
+        <Flex direction={"row"} wrap={"wrap"}>
           <Flex
             direction={"column"}
             p={"4"}
             gap={"4"}
-            h={"fit-content"}
             grow={"1"}
-            basis={"25%"}
-            bg={"gray.50"}
+            basis={"50%"}
+            h={"fit-content"}
+            bg={"white"}
             rounded={"md"}
           >
-            {/* Project Overview */}
-            <Flex gap={"4"} grow={"1"} direction={"column"} minH={"32"}>
-              <Heading fontWeight={"semibold"} size={"md"}>
-                Project Overview
-              </Heading>
+            <Flex
+              direction={"column"}
+              p={"4"}
+              h={"fit-content"}
+              grow={"1"}
+              bg={"gray.50"}
+              rounded={"md"}
+            >
+              {/* Project Overview */}
+              <Flex gap={"4"} grow={"1"} direction={"column"} minH={"32"}>
+                <Heading fontWeight={"semibold"} size={"md"}>
+                  Project Overview
+                </Heading>
 
-              <Flex gap={"2"} direction={"column"}>
-                <Text fontWeight={"semibold"}>Owner</Text>
-                <Flex>
-                  <Tag colorScheme={"green"}>
-                    <TagLabel>{projectData.owner}</TagLabel>
-                  </Tag>
+                <Flex gap={"2"} direction={"row"}>
+                  <Flex gap={"2"} direction={"column"} basis={"40%"}>
+                    <Text fontWeight={"semibold"}>Owner</Text>
+                    <Flex>
+                      <Tag colorScheme={"green"}>
+                        <TagLabel>{projectData.owner}</TagLabel>
+                      </Tag>
+                    </Flex>
+                  </Flex>
+
+                  <Flex gap={"2"} direction={"column"} basis={"60%"}>
+                    <Text fontWeight={"semibold"}>Description</Text>
+                    <Textarea
+                      value={projectDescription}
+                      onChange={(event) => {
+                        setProjectDescription(event.target.value);
+                      }}
+                      disabled={!editing}
+                    />
+                  </Flex>
                 </Flex>
-              </Flex>
-
-              <Flex gap={"2"} direction={"column"}>
-                <Text fontWeight={"semibold"}>Description</Text>
-                <Textarea
-                  value={projectDescription}
-                  onChange={(event) => {
-                    setProjectDescription(event.target.value);
-                  }}
-                  disabled={!editing}
-                />
               </Flex>
             </Flex>
           </Flex>
 
           {/* Display Entities and Projects */}
-          <Flex direction={"column"} gap={"4"} grow={"1"} basis={"60%"}>
+          <Flex
+            direction={"column"}
+            p={"4"}
+            gap={"4"}
+            grow={"1"}
+            basis={"50%"}
+            h={"fit-content"}
+            bg={"white"}
+            rounded={"md"}
+          >
             <Flex
               direction={"column"}
               p={"4"}
-              gap={"4"}
               h={"fit-content"}
+              grow={"1"}
               rounded={"md"}
               border={"1px"}
               borderColor={"gray.100"}

@@ -7,16 +7,9 @@ import {
   Flex,
   Heading,
   Input,
-  Table,
-  TableContainer,
-  Tbody,
-  Th,
   Text,
-  Tr,
   useToast,
   Modal,
-  Thead,
-  Td,
   Textarea,
   ModalOverlay,
   ModalContent,
@@ -60,6 +53,10 @@ import {
   Spinner,
   useBreakpoint,
   ModalFooter,
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuItem,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import AttributeCard from "@components/AttributePreview";
@@ -310,6 +307,28 @@ const Entity = () => {
         setIsLoaded(true);
       });
   }, [id]);
+
+  useEffect(() => {
+    getData(`/entities/${id}`)
+      .then((response) => {
+        // Store all received data and assign to specific fields
+        setEntityAttachments(response.attachments);
+      })
+      .catch(() => {
+        toast({
+          title: "Error",
+          description: "Could not retrieve updated Entity attachments.",
+          status: "error",
+          duration: 4000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+        setIsError(true);
+      })
+      .finally(() => {
+        setIsLoaded(true);
+      });
+  }, [toUploadAttachments]);
 
   // Toggle editing status
   const handleEditClick = () => {
@@ -1059,10 +1078,11 @@ const Entity = () => {
 
   return (
     <Content isError={isError} isLoaded={isLoaded}>
-      <Flex direction={"column"} gap={"4"}>
+      <Flex direction={"column"}>
         <Flex
           gap={"4"}
           p={"4"}
+          pb={"2"}
           direction={"row"}
           justify={"space-between"}
           align={"center"}
@@ -1082,185 +1102,167 @@ const Entity = () => {
           </Flex>
 
           {/* Buttons */}
-          <Flex gap={"4"}>
-            <Flex
-              direction={"row"}
-              align={"center"}
-              gap={"4"}
-              wrap={"wrap"}
-              p={"4"}
-              rounded={"md"}
-            >
-              {editing && (
-                <Popover>
-                  <PopoverTrigger>
-                    <Button
-                      colorScheme={"red"}
-                      rightIcon={<Icon name={"delete"} />}
-                    >
-                      Delete
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent>
-                    <PopoverArrow />
-                    <PopoverCloseButton />
-                    <PopoverHeader>Confirmation</PopoverHeader>
-                    <PopoverBody>
-                      Are you sure you want to delete this Entity?
-                      <Flex direction={"row"} p={"2"} justify={"center"}>
-                        <Button
-                          colorScheme={"green"}
-                          rightIcon={<Icon name={"check"} />}
-                          onClick={handleDeleteClick}
-                        >
-                          Confirm
-                        </Button>
-                      </Flex>
-                    </PopoverBody>
-                  </PopoverContent>
-                </Popover>
-              )}
-              {entityData.deleted ? (
-                <Button
-                  onClick={handleRestoreFromDeleteClick}
-                  colorScheme={"orange"}
-                  rightIcon={<Icon name={"rewind"} />}
-                >
-                  Restore
-                </Button>
-              ) : (
-                <Flex gap={"4"}>
-                  {entityData.locked ? (
-                    <Tooltip label={"Currently being edited by another user"}>
+          <Flex
+            direction={"row"}
+            gap={"4"}
+            wrap={"wrap"}
+          >
+            {editing && (
+              <Popover>
+                <PopoverTrigger>
+                  <Button
+                    colorScheme={"red"}
+                    rightIcon={<Icon name={"delete"} />}
+                  >
+                    Delete
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent>
+                  <PopoverArrow />
+                  <PopoverCloseButton />
+                  <PopoverHeader>Confirmation</PopoverHeader>
+                  <PopoverBody>
+                    Are you sure you want to delete this Entity?
+                    <Flex direction={"row"} p={"2"} justify={"center"}>
                       <Button
-                        colorScheme={"gray"}
-                        rightIcon={<Icon name={"lock"} />}
-                        disabled={entityData.locked}
+                        colorScheme={"green"}
+                        rightIcon={<Icon name={"check"} />}
+                        onClick={handleDeleteClick}
                       >
-                        Edit
+                        Confirm
                       </Button>
-                    </Tooltip>
-                  ) : (
-                    <Button
-                      onClick={handleEditClick}
-                      colorScheme={editing ? "green" : "gray"}
-                      rightIcon={
-                        editing ? (
-                          <Icon name={"check"} />
-                        ) : (
-                          <Icon name={"edit"} />
-                        )
-                      }
-                      disabled={entityData.locked}
-                      loadingText={"Saving..."}
-                      isLoading={isUpdating}
-                    >
-                      {editing ? "Done" : "Edit"}
-                    </Button>
-                  )}
-                </Flex>
-              )}
-            </Flex>
-
-            <Flex
-              direction={"row"}
-              align={"center"}
-              gap={"4"}
-              wrap={"wrap"}
-              p={"4"}
-              rounded={"md"}
-            >
+                    </Flex>
+                  </PopoverBody>
+                </PopoverContent>
+              </Popover>
+            )}
+            {entityData.deleted ? (
               <Button
-                colorScheme={"gray"}
-                rightIcon={<Icon name={"clock"} />}
-                onClick={onHistoryOpen}
-              >
-                History
-              </Button>
-              <Button
-                onClick={onGraphOpen}
-                rightIcon={<Icon name={"graph"} />}
+                onClick={handleRestoreFromDeleteClick}
                 colorScheme={"orange"}
-                isDisabled={editing || entityData.deleted}
+                rightIcon={<Icon name={"rewind"} />}
               >
-                Visualize
+                Restore
               </Button>
-              <Button
-                onClick={handleExportClick}
-                rightIcon={<Icon name={"download"} />}
-                colorScheme={"blue"}
-                isDisabled={editing || entityData.deleted}
-              >
-                Export
-              </Button>
-            </Flex>
+            ) : (
+              <Flex gap={"4"}>
+                {entityData.locked ? (
+                  <Tooltip label={"Currently being edited by another user"}>
+                    <Button
+                      colorScheme={"blue"}
+                      rightIcon={<Icon name={"lock"} />}
+                      disabled={entityData.locked}
+                    >
+                      Edit
+                    </Button>
+                  </Tooltip>
+                ) : (
+                  <Button
+                    onClick={handleEditClick}
+                    colorScheme={editing ? "green" : "blue"}
+                    rightIcon={
+                      editing ? (
+                        <Icon name={"check"} />
+                      ) : (
+                        <Icon name={"edit"} />
+                      )
+                    }
+                    disabled={entityData.locked}
+                    loadingText={"Saving..."}
+                    isLoading={isUpdating}
+                  >
+                    {editing ? "Done" : "Edit"}
+                  </Button>
+                )}
+              </Flex>
+            )}
+
+            {/* Actions Menu */}
+            <Menu>
+              <MenuButton as={Button} colorScheme={"blue"} rightIcon={<Icon name={"c_down"} />}>
+                Actions
+              </MenuButton>
+              <MenuList>
+                <MenuItem
+                  icon={<Icon name={"graph"} />}
+                  onClick={onGraphOpen}
+                  isDisabled={editing || entityData.deleted}
+                >
+                  Visualize
+                </MenuItem>
+                <MenuItem
+                  icon={<Icon name={"clock"} />}
+                  onClick={onHistoryOpen}
+                >
+                  History
+                </MenuItem>
+                <MenuItem
+                  onClick={handleExportClick}
+                  icon={<Icon name={"download"} />}
+                  isDisabled={editing || entityData.deleted}
+                >
+                  Export
+                </MenuItem>
+              </MenuList>
+            </Menu>
           </Flex>
         </Flex>
 
-        <Flex direction={"row"} gap={"4"} wrap={"wrap"}>
+        <Flex direction={"row"} wrap={"wrap"}>
           <Flex
             direction={"column"}
             p={"4"}
             gap={"4"}
             grow={"1"}
+            basis={"50%"}
             h={"fit-content"}
             bg={"white"}
             rounded={"md"}
           >
-            {/* Details */}
+            {/* Entity Overview */}
             <Flex
-              gap={"2"}
-              p={"4"}
-              grow={"1"}
               direction={"column"}
-              minH={"32"}
+              p={"4"}
+              h={"fit-content"}
+              grow={"1"}
+              bg={"gray.50"}
               rounded={"md"}
-              border={"1px"}
-              borderColor={"gray.100"}
             >
-              <Heading size={"lg"}>Details</Heading>
-              <TableContainer>
-                <Table variant={"simple"} colorScheme={"gray"}>
-                  <Thead>
-                    <Tr>
-                      <Th maxW={"xs"}>Field</Th>
-                      <Th>Value</Th>
-                    </Tr>
-                  </Thead>
-                  <Tbody>
-                    <Tr>
-                      <Td>Created</Td>
-                      <Td>
-                        <Text>
-                          {dayjs(entityData.created).format("DD MMM YYYY")}
-                        </Text>
-                      </Td>
-                    </Tr>
-
-                    <Tr>
-                      <Td>Owner</Td>
-                      <Td>
-                        <Tag colorScheme={"green"}>
-                          <TagLabel>{entityData.owner}</TagLabel>
-                        </Tag>
-                      </Td>
-                    </Tr>
-
-                    <Tr>
-                      <Td>Description</Td>
-                      <Td>
-                        <Textarea
-                          value={entityDescription}
-                          onChange={(event) => {
-                            setEntityDescription(event.target.value || "");
-                          }}
-                          disabled={!editing}
-                        />
-                      </Td>
-                    </Tr>
-                  </Tbody>
-                </Table>
-              </TableContainer>
+              <Flex gap={"4"} grow={"1"} direction={"column"} minH={"32"}>
+                <Heading fontWeight={"semibold"} size={"md"}>
+                  Entity Overview
+                </Heading>
+                <Flex gap={"2"} direction={"row"}>
+                  {/* "Created" and "Owner" fields */}
+                  <Flex gap={"2"} direction={"column"} basis={"40%"}>
+                    <Text fontWeight={"semibold"}>Created</Text>
+                    <Flex>
+                      <Text>
+                        {dayjs(entityData.created).format("DD MMM YYYY")}
+                      </Text>
+                    </Flex>
+                    <Text fontWeight={"semibold"}>Owner</Text>
+                    <Flex>
+                      <Tag colorScheme={"green"}>
+                        <TagLabel>{entityData.owner}</TagLabel>
+                      </Tag>
+                    </Flex>
+                  </Flex>
+                  {/* "Description" field */}
+                  <Flex gap={"2"} direction={"column"} basis={"60%"}>
+                    <Text fontWeight={"semibold"}>Description</Text>
+                    <Flex>
+                      <Textarea
+                        value={entityDescription}
+                        onChange={(event) => {
+                          setEntityDescription(event.target.value || "");
+                        }}
+                        disabled={!editing}
+                      />
+                    </Flex>
+                  </Flex>
+                </Flex>
+              </Flex>
             </Flex>
 
             {/* Projects */}
@@ -1275,7 +1277,7 @@ const Entity = () => {
               borderColor={"gray.100"}
             >
               <Flex direction={"row"} justify={"space-between"}>
-                <Heading size={"lg"}>Projects</Heading>
+                <Heading fontWeight={"semibold"} size={"md"}>Entity Projects</Heading>
                 {editing ? (
                   <Button
                     colorScheme={"green"}
@@ -1308,7 +1310,8 @@ const Entity = () => {
             direction={"column"}
             p={"4"}
             gap={"4"}
-            grow={"2"}
+            grow={"1"}
+            basis={"50%"}
             h={"fit-content"}
             bg={"white"}
             rounded={"md"}
@@ -1325,7 +1328,7 @@ const Entity = () => {
               borderColor={"gray.100"}
             >
               <Flex direction={"row"} justify={"space-between"}>
-                <Heading size={"lg"}>Origins</Heading>
+              <Heading fontWeight={"semibold"} size={"md"}>Entity Origins</Heading>
                 {editing ? (
                   <Button
                     colorScheme={"green"}
@@ -1365,7 +1368,7 @@ const Entity = () => {
               borderColor={"gray.100"}
             >
               <Flex direction={"row"} justify={"space-between"}>
-                <Heading size={"lg"}>Products</Heading>
+                <Heading fontWeight={"semibold"} size={"md"}>Entity Products</Heading>
                 {editing ? (
                   <Button
                     colorScheme={"green"}
@@ -1395,62 +1398,71 @@ const Entity = () => {
           </Flex>
         </Flex>
 
-        <Flex direction={"row"} gap={"4"} p={"4"} wrap={"wrap"}>
+        <Flex direction={"row"} wrap={"wrap"}>
           {/* Attributes */}
           <Flex
             direction={"column"}
             p={"4"}
             gap={"4"}
             grow={"1"}
+            basis={"50%"}
             h={"fit-content"}
             bg={"white"}
             rounded={"md"}
-            border={"1px"}
-            borderColor={"gray.100"}
           >
-            <Flex direction={"row"} justify={"space-between"}>
-              <Heading size={"lg"}>Attributes</Heading>
-              {editing ? (
-                <Button
-                  colorScheme={"green"}
-                  rightIcon={<Icon name={"add"} />}
-                  disabled={!editing}
-                  onClick={onAddAttributesOpen}
-                >
-                  Add
-                </Button>
-              ) : null}
-            </Flex>
-
-            <SimpleGrid
-              spacing={"4"}
-              templateColumns={"repeat(auto-fill, minmax(300px, 1fr))"}
+            <Flex
+              direction={"column"}
+              p={"4"}
+              h={"fit-content"}
+              grow={"1"}
+              rounded={"md"}
+              border={"1px"}
+              borderColor={"gray.100"}
             >
-              {entityAttributes.length > 0 ? (
-                entityAttributes.map((attribute) => {
-                  return (
-                    <Flex
-                      key={`${attribute._id}`}
-                      direction={"column"}
-                      gap={"2"}
-                      width={"100%"}
-                    >
-                      <AttributeCard
-                        attribute={attribute}
-                        editing={editing}
-                        doneCallback={handleUpdateAttribute}
-                        cancelCallback={handleCancelAttribute}
-                        removeCallback={() => {
-                          removeAttribute(attribute._id);
-                        }}
-                      />
-                    </Flex>
-                  );
-                })
-              ) : (
-                <Text>No Attributes.</Text>
-              )}
-            </SimpleGrid>
+              <Flex direction={"row"} justify={"space-between"}>
+                <Heading fontWeight={"semibold"} size={"md"}>Entity Attributes</Heading>
+                {editing ? (
+                  <Button
+                    colorScheme={"green"}
+                    rightIcon={<Icon name={"add"} />}
+                    disabled={!editing}
+                    onClick={onAddAttributesOpen}
+                  >
+                    Add
+                  </Button>
+                ) : null}
+              </Flex>
+
+              <SimpleGrid
+                spacing={"4"}
+                templateColumns={"repeat(auto-fill, minmax(300px, 1fr))"}
+              >
+                {entityAttributes.length > 0 ? (
+                  entityAttributes.map((attribute) => {
+                    return (
+                      <Flex
+                        key={`${attribute._id}`}
+                        direction={"column"}
+                        gap={"2"}
+                        width={"100%"}
+                      >
+                        <AttributeCard
+                          attribute={attribute}
+                          editing={editing}
+                          doneCallback={handleUpdateAttribute}
+                          cancelCallback={handleCancelAttribute}
+                          removeCallback={() => {
+                            removeAttribute(attribute._id);
+                          }}
+                        />
+                      </Flex>
+                    );
+                  })
+                ) : (
+                  <Text>No Attributes.</Text>
+                )}
+              </SimpleGrid>
+            </Flex>
           </Flex>
 
           {/* Attachments */}
@@ -1458,39 +1470,47 @@ const Entity = () => {
             direction={"column"}
             p={"4"}
             gap={"4"}
-            maxW={"2xl"}
             grow={"1"}
+            basis={"50%"}
             h={"fit-content"}
             bg={"white"}
             rounded={"md"}
-            border={"1px"}
-            borderColor={"gray.100"}
           >
-            <Flex gap={"2"} direction={"column"} minH={"32"}>
-              <Flex direction={"row"} justify={"space-between"}>
-                <Heading size={"lg"}>Attachments</Heading>
-                <Button
-                  colorScheme={"green"}
-                  rightIcon={<Icon name={"upload"} />}
-                  onClick={onUploadOpen}
-                >
-                  Upload
-                </Button>
-              </Flex>
+            <Flex
+              direction={"column"}
+              p={"4"}
+              h={"fit-content"}
+              grow={"1"}
+              rounded={"md"}
+              border={"1px"}
+              borderColor={"gray.100"}
+            >
+              <Flex gap={"2"} direction={"column"} minH={"32"}>
+                <Flex direction={"row"} justify={"space-between"}>
+                  <Heading size={"lg"}>Attachments</Heading>
+                  <Button
+                    colorScheme={"green"}
+                    rightIcon={<Icon name={"upload"} />}
+                    onClick={onUploadOpen}
+                  >
+                    Upload
+                  </Button>
+                </Flex>
 
-              {entityAttachments.length === 0 ? (
-                <Text>No Attachments.</Text>
-              ) : (
-                <DataTable
-                  data={entityAttachments}
-                  columns={attachmentTableColumns}
-                  visibleColumns={{}}
-                  viewOnly={!editing}
-                  showSelection={editing}
-                  actions={attachmentTableActions}
-                  showPagination
-                />
-              )}
+                {entityAttachments.length === 0 ? (
+                  <Text>No Attachments.</Text>
+                ) : (
+                  <DataTable
+                    data={entityAttachments}
+                    columns={attachmentTableColumns}
+                    visibleColumns={{}}
+                    viewOnly={!editing}
+                    showSelection={editing}
+                    actions={attachmentTableActions}
+                    showPagination
+                  />
+                )}
+              </Flex>
             </Flex>
           </Flex>
         </Flex>
