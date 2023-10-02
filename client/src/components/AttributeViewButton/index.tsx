@@ -54,7 +54,7 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
       >
         <ModalOverlay />
 
-        <ModalContent p={"2"} gap={"4"} w={["lg", "xl", "2xl"]}>
+        <ModalContent p={"2"} gap={"4"} w={"auto"}>
           <ModalHeader>
             <Flex
               direction={"row"}

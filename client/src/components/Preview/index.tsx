@@ -98,14 +98,14 @@ const Preview = (props: { src: string; type: "image" | "document" }) => {
               aria-label={"Zoom out"}
               onClick={decreaseZoom}
               icon={<Icon name={"zoom_out"} />}
-              disabled={zoomLevel === minZoom}
+              isDisabled={zoomLevel === minZoom}
             />
             <Text>{zoomLevel}%</Text>
             <IconButton
               aria-label={"Zoom in"}
               onClick={increaseZoom}
               icon={<Icon name={"zoom_in"} />}
-              disabled={zoomLevel === maxZoom}
+              isDisabled={zoomLevel === maxZoom}
             />
             <IconButton
               aria-label={"Rotate"}
@@ -138,7 +138,7 @@ const Preview = (props: { src: string; type: "image" | "document" }) => {
               aria-label={"Go back"}
               onClick={previousPage}
               icon={<Icon name={"c_left"} />}
-              disabled={previewIndex === 1}
+              isDisabled={previewIndex === 1}
             />
             <Text>
               Page {previewIndex} of {previewPages}
@@ -147,7 +147,7 @@ const Preview = (props: { src: string; type: "image" | "document" }) => {
               aria-label={"Go forward"}
               onClick={nextPage}
               icon={<Icon name={"c_right"} />}
-              disabled={previewIndex === previewPages}
+              isDisabled={previewIndex === previewPages}
             />
           </Flex>
         </Flex>
