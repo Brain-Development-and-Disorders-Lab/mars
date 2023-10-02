@@ -198,7 +198,7 @@ const DataTable = (props: DataTableProps) => {
               <MenuButton
                 as={Button}
                 rightIcon={<Icon name={"c_down"} />}
-                disabled={
+                isDisabled={
                   Object.keys(selectedRows).length === 0 ||
                   _.isUndefined(props.actions) ||
                   props.actions?.length === 0

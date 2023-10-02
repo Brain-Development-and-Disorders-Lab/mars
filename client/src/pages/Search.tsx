@@ -321,8 +321,8 @@ const Search = () => {
           onChange={onTabChange}
         >
           <TabList p={"2"} gap={"2"}>
-            <Tab disabled={isSearching}>Text</Tab>
-            <Tab disabled={isSearching}>Query Builder</Tab>
+            <Tab isDisabled={isSearching}>Text</Tab>
+            <Tab isDisabled={isSearching}>Query Builder</Tab>
           </TabList>
           <TabPanels>
             {/* Text search */}
@@ -575,7 +575,7 @@ const Search = () => {
                       aria-label={"Add query component"}
                       colorScheme={"telegram"}
                       icon={<Icon name={"add"} />}
-                      disabled={_.isEqual(queryValue, "")}
+                      isDisabled={_.isEqual(queryValue, "")}
                       onClick={() => {
                         setQueryComponents([
                           ...queryComponents,

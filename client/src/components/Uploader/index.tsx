@@ -193,7 +193,7 @@ const Uploader = (props: {
                   </Button>
                   <Button
                     colorScheme={"blue"}
-                    disabled={_.isEqual(file, {}) || isUploading}
+                    isDisabled={_.isEqual(file, {}) || isUploading}
                     rightIcon={<Icon name={"upload"} />}
                     onClick={() => performUpload()}
                     isLoading={isUploading}

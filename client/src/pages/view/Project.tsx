@@ -481,7 +481,7 @@ const Project = () => {
                   <Button
                     colorScheme={"red"}
                     rightIcon={<Icon name={"delete"} />}
-                    disabled={isUpdating}
+                    isDisabled={isUpdating}
                   >
                     Delete
                   </Button>
@@ -792,7 +792,7 @@ const Project = () => {
                                 event.target.checked
                               )
                             }
-                            disabled={_.isEqual(projectDescription, "")}
+                            isDisabled={_.isEqual(projectDescription, "")}
                           >
                             <Text noOfLines={1}>
                               Description:{" "}

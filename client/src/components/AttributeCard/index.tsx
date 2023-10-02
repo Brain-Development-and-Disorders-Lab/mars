@@ -57,7 +57,7 @@ const AttributeCard = (props: AttributeCardProps) => {
               <Input
                 placeholder={"Name"}
                 value={name}
-                disabled={finished}
+                isDisabled={finished}
                 w={"xs"}
                 onChange={(event) => setName(event.target.value)}
               />
@@ -68,7 +68,7 @@ const AttributeCard = (props: AttributeCardProps) => {
               <Textarea
                 value={description}
                 placeholder={"Description"}
-                disabled={finished}
+                isDisabled={finished}
                 w={"100%"}
                 onChange={(event) => setDescription(event.target.value)}
               />

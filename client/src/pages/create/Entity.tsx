@@ -690,7 +690,7 @@ const Entity = () => {
               )
             }
             onClick={onPageNext}
-            disabled={!isValidInput()}
+            isDisabled={!isValidInput()}
             isLoading={isSubmitting}
           >
             {_.isEqual("attributes", pageState) ? "Finish" : "Next"}

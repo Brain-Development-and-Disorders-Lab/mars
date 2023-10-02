@@ -146,7 +146,7 @@ const Values = (props: {
               <Input
                 id={`i_${original.identifier}_name`}
                 value={value}
-                disabled={props.viewOnly}
+                isDisabled={props.viewOnly}
                 onChange={onChange}
                 onBlur={onBlur}
                 minW={"2xs"}
@@ -204,7 +204,7 @@ const Values = (props: {
                     type={"number"}
                     value={value}
                     w={"2xs"}
-                    disabled={props.viewOnly}
+                    isDisabled={props.viewOnly}
                     onChange={onChange}
                     onBlur={onBlur}
                     isInvalid={
@@ -219,7 +219,7 @@ const Values = (props: {
                     id={`i_${original.identifier}_data`}
                     value={value}
                     w={"2xs"}
-                    disabled={props.viewOnly}
+                    isDisabled={props.viewOnly}
                     onChange={onChange}
                     onBlur={onBlur}
                     isInvalid={
@@ -235,7 +235,7 @@ const Values = (props: {
                       id={`i_${original.identifier}_data`}
                       value={value}
                       w={"2xs"}
-                      disabled={props.viewOnly}
+                      isDisabled={props.viewOnly}
                       onChange={onChange}
                       onBlur={onBlur}
                       isInvalid={
@@ -315,7 +315,7 @@ const Values = (props: {
                     type={"date"}
                     value={value}
                     w={"2xs"}
-                    disabled={props.viewOnly}
+                    isDisabled={props.viewOnly}
                     onChange={onChange}
                     onBlur={onBlur}
                     isInvalid={
@@ -333,7 +333,7 @@ const Values = (props: {
                       value={value}
                       placeholder={"Entity"}
                       w={"2xs"}
-                      disabled={props.viewOnly}
+                      isDisabled={props.viewOnly}
                       onChange={onChange}
                       onBlur={onBlur}
                     >
@@ -357,7 +357,7 @@ const Values = (props: {
                     id={`s_${original.identifier}_data`}
                     value={value.selected}
                     w={"2xs"}
-                    disabled={props.viewOnly}
+                    isDisabled={props.viewOnly}
                     onChange={onSelectChange}
                     onBlur={onBlur}
                     isInvalid={
@@ -385,7 +385,7 @@ const Values = (props: {
                 value={value}
                 placeholder={"Column"}
                 w={"2xs"}
-                disabled={props.viewOnly}
+                isDisabled={props.viewOnly}
                 onChange={onChange}
                 onBlur={onBlur}
                 isInvalid={
@@ -599,7 +599,7 @@ const Values = (props: {
                     borderColor={"teal.300"}
                     _hover={{ bg: "teal.400" }}
                     leftIcon={<Icon name={"v_select"} />}
-                    disabled={!_.isUndefined(props.permittedValues)}
+                    isDisabled={!_.isUndefined(props.permittedValues)}
                     onClick={() => {
                       onOpen();
                     }}
@@ -671,7 +671,7 @@ const Values = (props: {
                         });
                       }
                     }}
-                    disabled={_.isEqual(option, "")}
+                    isDisabled={_.isEqual(option, "")}
                   >
                     Add
                   </Button>
@@ -731,7 +731,7 @@ const Values = (props: {
                     colorScheme={"green"}
                     rightIcon={<Icon name={"check"} />}
                     onClick={addOptions}
-                    disabled={_.isEqual(options.length, 0)}
+                    isDisabled={_.isEqual(options.length, 0)}
                   >
                     Continue
                   </Button>

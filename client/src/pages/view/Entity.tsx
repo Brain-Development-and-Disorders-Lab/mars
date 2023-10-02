@@ -1240,7 +1240,7 @@ const Entity = () => {
                     <Button
                       colorScheme={"blue"}
                       rightIcon={<Icon name={"lock"} />}
-                      disabled={entityData.locked}
+                      isDisabled={entityData.locked}
                     >
                       Edit
                     </Button>
@@ -1256,7 +1256,7 @@ const Entity = () => {
                         <Icon name={"edit"} />
                       )
                     }
-                    disabled={entityData.locked}
+                    isDisabled={entityData.locked}
                     loadingText={"Saving..."}
                     isLoading={isUpdating}
                   >
@@ -1364,7 +1364,7 @@ const Entity = () => {
                   <Button
                     colorScheme={"green"}
                     rightIcon={<Icon name={"add"} />}
-                    disabled={!editing}
+                    isDisabled={!editing}
                     onClick={onAddProjectsOpen}
                   >
                     Add
@@ -1410,7 +1410,7 @@ const Entity = () => {
                   <Button
                     colorScheme={"green"}
                     rightIcon={<Icon name={"add"} />}
-                    disabled={!editing}
+                    isDisabled={!editing}
                     onClick={onAddAttributesOpen}
                   >
                     Add
@@ -1465,7 +1465,7 @@ const Entity = () => {
                     <Button
                       colorScheme={"green"}
                       rightIcon={<Icon name={"add"} />}
-                      disabled={!editing}
+                      isDisabled={!editing}
                       onClick={() => {
                         _.isEqual(relationsIndex, 0) ? onAddOriginsOpen() : onAddProductsOpen();
                       }}
@@ -1561,11 +1561,11 @@ const Entity = () => {
         <Modal
           isOpen={isAddAttributesOpen}
           onClose={onAddAttributesClose}
-          size={"3xl"}
+          size={"4xl"}
           isCentered
         >
-          <ModalOverlay />
-          <ModalContent p={"2"} gap={"4"} w={["auto"]}>
+          <ModalOverlay  />
+          <ModalContent p={"2"} gap={"4"}>
             <ModalHeader p={"2"}>Add Attribute</ModalHeader>
             <ModalCloseButton />
 
@@ -1576,12 +1576,10 @@ const Entity = () => {
                   direction={"column"}
                   gap={"6"}
                   pb={"6"}
-                  mb={["12", "8"]}
-                  maxW={"7xl"}
                   justify={"center"}
                 >
                   <Flex direction={"column"}>
-                    <Heading fontWeight={"semibold"} size={"lg"}>
+                    <Heading fontWeight={"semibold"} size={"md"}>
                       Details
                     </Heading>
                     <Text>
@@ -1691,7 +1689,7 @@ const Entity = () => {
                     <Button
                       colorScheme={"green"}
                       rightIcon={<Icon name={"check"} />}
-                      disabled={isAttributeError}
+                      isDisabled={isAttributeError}
                       onClick={() => {
                         addAttribute();
                       }}
@@ -2092,7 +2090,7 @@ const Entity = () => {
                                 event.target.checked
                               )
                             }
-                            disabled={_.isEqual(entityDescription, "")}
+                            isDisabled={_.isEqual(entityDescription, "")}
                           >
                             <Text noOfLines={1}>
                               Description:{" "}
@@ -2361,7 +2359,7 @@ const Entity = () => {
                               onClick={() => {
                                 handleRestoreFromHistoryClick(entityVersion);
                               }}
-                              disabled={entityData.deleted}
+                              isDisabled={entityData.deleted}
                             >
                               Restore
                             </Button>

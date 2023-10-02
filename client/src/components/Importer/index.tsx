@@ -333,7 +333,7 @@ const Importer = (props: {
             setSelected([...selected, selection]);
           }
         }}
-        disabled={_.isUndefined(disabled) ? false : disabled}
+        isDisabled={_.isUndefined(disabled) ? false : disabled}
       >
         {entities.map((entity) => {
           return (
@@ -584,7 +584,7 @@ const Importer = (props: {
                   </Button>
                   <Button
                     colorScheme={"blue"}
-                    disabled={_.isEqual(file, {}) || isUploading}
+                    isDisabled={_.isEqual(file, {}) || isUploading}
                     rightIcon={<Icon name={"upload"} />}
                     onClick={() => performImport()}
                     isLoading={isUploading}
@@ -838,7 +838,7 @@ const Importer = (props: {
                         performMapping();
                       }
                     }}
-                    disabled={_.isEqual(nameField, "")}
+                    isDisabled={_.isEqual(nameField, "")}
                     isLoading={isMapping}
                     loadingText={"Please wait..."}
                   >

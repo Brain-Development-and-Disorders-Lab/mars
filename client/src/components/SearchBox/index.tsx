@@ -188,7 +188,7 @@ const SearchBox = () => {
                   _.isEqual(scannerStatus, "connected") ? "green" : "gray"
                 }
                 onClick={() => handleScannerConnection()}
-                disabled={_.isEqual(scannerStatus, "connected")}
+                isDisabled={_.isEqual(scannerStatus, "connected")}
               />
             </Tooltip>
             <Input
