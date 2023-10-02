@@ -72,7 +72,7 @@ export type AttributeGroupProps = AttributeCardActions & {
   attributes: AttributeModel[];
 };
 
-export type AttributePreviewProps = {
+export type AttributeViewButtonProps = {
   attribute: AttributeModel;
   editing?: boolean;
   removeCallback?: () => void;

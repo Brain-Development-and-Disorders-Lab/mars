@@ -160,7 +160,6 @@ const Attribute = () => {
           <Flex
             align={"center"}
             gap={"4"}
-            shadow={"lg"}
             p={"2"}
             border={"2px"}
             rounded={"md"}

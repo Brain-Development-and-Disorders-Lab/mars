@@ -461,7 +461,6 @@ const Project = () => {
           <Flex
             align={"center"}
             gap={"4"}
-            shadow={"lg"}
             p={"2"}
             border={"2px"}
             rounded={"md"}
@@ -563,7 +562,7 @@ const Project = () => {
             >
               {/* Project Overview */}
               <Flex gap={"4"} grow={"1"} direction={"column"} minH={"32"}>
-                <Heading fontWeight={"semibold"} size={"md"}>
+                <Heading fontWeight={"semibold"} size={"md"} pt={"2"} pb={"2"}>
                   Project Overview
                 </Heading>
 
@@ -612,9 +611,9 @@ const Project = () => {
               border={"1px"}
               borderColor={"gray.100"}
             >
-              <Flex direction={"row"} justify={"space-between"}>
+              <Flex direction={"row"} justify={"space-between"} align={"center"}>
                 {/* Entities in the Project */}
-                <Heading fontWeight={"semibold"} size={"md"}>
+                <Heading fontWeight={"semibold"} size={"md"} pt={"2"} pb={"2"}>
                   Project Entities
                 </Heading>
                 {editing && (
