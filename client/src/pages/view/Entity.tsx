@@ -31,7 +31,6 @@ import {
   FormLabel,
   Select,
   TagCloseButton,
-  SimpleGrid,
   CheckboxGroup,
   Checkbox,
   Stack,
@@ -57,9 +56,13 @@ import {
   MenuButton,
   MenuList,
   MenuItem,
+  Tabs,
+  TabList,
+  Tab,
+  TabPanel,
+  TabPanels,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
-import AttributeCard from "@components/AttributePreview";
 import DataTable from "@components/DataTable";
 import Graph from "@components/Graph";
 import Icon from "@components/Icon";
@@ -90,6 +93,7 @@ import { nanoid } from "nanoid";
 
 // Routing and navigation
 import { useParams, useNavigate } from "react-router-dom";
+import AttributeViewButton from "@components/AttributeViewButton";
 
 const Entity = () => {
   const { id } = useParams();
@@ -210,6 +214,9 @@ const Entity = () => {
   const [toUploadAttachments, setToUploadAttachments] = useState(
     [] as string[]
   );
+
+  // Manage the tab index between "Entity Origins" and "Entity Products"
+  const [relationsIndex, setRelationsIndex] = useState(0);
 
   const {
     isOpen: isExportOpen,
@@ -640,6 +647,78 @@ const Entity = () => {
       },
     },
   ];
+
+  // Configure attribute table columns and data
+  const attributeTableColumnHelper = createColumnHelper<AttributeModel>();
+  const attributeTableColumns = [
+    attributeTableColumnHelper.accessor("name", {
+      cell: (info) => {
+        return (
+          <Tooltip label={info.getValue()}>
+            <Text>
+              {_.truncate(info.getValue(), {
+                length: truncateTableText ? 12 : 24,
+              })}
+            </Text>
+          </Tooltip>
+        );
+      },
+      header: "Name",
+    }),
+    attributeTableColumnHelper.accessor("description", {
+      cell: (info) => {
+        return (
+          <Tooltip label={info.getValue()}>
+            <Text>{_.truncate(info.getValue(), { length: 12 })}</Text>
+          </Tooltip>
+        );
+      },
+      header: "Description",
+    }),
+    attributeTableColumnHelper.accessor("values", {
+      cell: (info) => {
+        const tooltipLabelValue: string = `${info.row.original.values.slice(0, 5).map((value) => value.name).join(", ")}${info.row.original.values.length > 5 ? "..." : ""}`;
+        return (
+          <Tooltip label={tooltipLabelValue}>
+            <Text>{info.row.original.values.length}</Text>
+          </Tooltip>
+        );
+      },
+      header: "Values",
+    }),
+    attributeTableColumnHelper.accessor("_id", {
+      cell: (info) => {
+        return (
+          <Flex w={"100%"} justify={"end"} gap={"4"}>
+            <AttributeViewButton
+              attribute={info.row.original}
+              editing={editing}
+              doneCallback={handleUpdateAttribute}
+              cancelCallback={handleCancelAttribute}
+              removeCallback={() => {
+                removeAttribute(info.row.original._id);
+              }}
+            />
+          </Flex>
+        );
+      },
+      header: "",
+    }),
+  ];
+  const [visibleAttributeTableColumns, setVisibleAttributeTableColumns] = useState({});
+
+  // Effect to adjust column visibility
+  useEffect(() => {
+    if (
+      _.isEqual(breakpoint, "sm") ||
+      _.isEqual(breakpoint, "base") ||
+      _.isUndefined(breakpoint)
+    ) {
+      setVisibleAttributeTableColumns({ description: false });
+    } else {
+      setVisibleAttributeTableColumns({});
+    }
+  }, [breakpoint]);
 
   // Configure attachment table columns and data
   const attachmentTableColumnHelper = createColumnHelper<{
@@ -1091,7 +1170,6 @@ const Entity = () => {
           <Flex
             align={"center"}
             gap={"4"}
-            shadow={"lg"}
             p={"2"}
             border={"2px"}
             rounded={"md"}
@@ -1215,21 +1293,17 @@ const Entity = () => {
             gap={"4"}
             grow={"1"}
             basis={"50%"}
-            h={"fit-content"}
-            bg={"white"}
             rounded={"md"}
           >
             {/* Entity Overview */}
             <Flex
               direction={"column"}
               p={"4"}
-              h={"fit-content"}
-              grow={"1"}
               bg={"gray.50"}
               rounded={"md"}
             >
-              <Flex gap={"4"} grow={"1"} direction={"column"} minH={"32"}>
-                <Heading fontWeight={"semibold"} size={"md"}>
+              <Flex gap={"4"} direction={"column"}>
+                <Heading fontWeight={"semibold"} size={"md"} pt={"2"} pb={"2"}>
                   Entity Overview
                 </Heading>
                 <Flex gap={"2"} direction={"row"}>
@@ -1267,17 +1341,14 @@ const Entity = () => {
 
             {/* Projects */}
             <Flex
-              gap={"2"}
-              p={"4"}
-              grow={"1"}
               direction={"column"}
-              minH={"32"}
+              p={"4"}
               rounded={"md"}
               border={"1px"}
               borderColor={"gray.100"}
             >
-              <Flex direction={"row"} justify={"space-between"}>
-                <Heading fontWeight={"semibold"} size={"md"}>Entity Projects</Heading>
+              <Flex direction={"row"} justify={"space-between"} align={"center"}>
+                <Heading fontWeight={"semibold"} size={"md"} pt={"2"} pb={"2"}>Entity Projects</Heading>
                 {editing ? (
                   <Button
                     colorScheme={"green"}
@@ -1306,99 +1377,6 @@ const Entity = () => {
             </Flex>
           </Flex>
 
-          <Flex
-            direction={"column"}
-            p={"4"}
-            gap={"4"}
-            grow={"1"}
-            basis={"50%"}
-            h={"fit-content"}
-            bg={"white"}
-            rounded={"md"}
-          >
-            {/* Origins */}
-            <Flex
-              gap={"2"}
-              p={"4"}
-              grow={"1"}
-              direction={"column"}
-              minH={"32"}
-              rounded={"md"}
-              border={"1px"}
-              borderColor={"gray.100"}
-            >
-              <Flex direction={"row"} justify={"space-between"}>
-              <Heading fontWeight={"semibold"} size={"md"}>Entity Origins</Heading>
-                {editing ? (
-                  <Button
-                    colorScheme={"green"}
-                    rightIcon={<Icon name={"add"} />}
-                    disabled={!editing}
-                    onClick={onAddOriginsOpen}
-                  >
-                    Add
-                  </Button>
-                ) : null}
-              </Flex>
-
-              {entityOrigins.length === 0 ? (
-                <Text>No Origins.</Text>
-              ) : (
-                <DataTable
-                  data={entityOrigins}
-                  columns={originTableColumns}
-                  visibleColumns={{}}
-                  viewOnly={!editing}
-                  showSelection={editing}
-                  actions={originTableActions}
-                  showPagination
-                />
-              )}
-            </Flex>
-
-            {/* Products */}
-            <Flex
-              gap={"2"}
-              p={"4"}
-              grow={"1"}
-              direction={"column"}
-              minH={"32"}
-              rounded={"md"}
-              border={"1px"}
-              borderColor={"gray.100"}
-            >
-              <Flex direction={"row"} justify={"space-between"}>
-                <Heading fontWeight={"semibold"} size={"md"}>Entity Products</Heading>
-                {editing ? (
-                  <Button
-                    colorScheme={"green"}
-                    rightIcon={<Icon name={"add"} />}
-                    disabled={!editing}
-                    onClick={onAddProductsOpen}
-                  >
-                    Add
-                  </Button>
-                ) : null}
-              </Flex>
-
-              {entityProducts.length === 0 ? (
-                <Text>No Products.</Text>
-              ) : (
-                <DataTable
-                  data={entityProducts}
-                  columns={productTableColumns}
-                  visibleColumns={{}}
-                  viewOnly={!editing}
-                  showSelection={editing}
-                  actions={productTableActions}
-                  showPagination
-                />
-              )}
-            </Flex>
-          </Flex>
-        </Flex>
-
-        <Flex direction={"row"} wrap={"wrap"}>
           {/* Attributes */}
           <Flex
             direction={"column"}
@@ -1406,21 +1384,17 @@ const Entity = () => {
             gap={"4"}
             grow={"1"}
             basis={"50%"}
-            h={"fit-content"}
-            bg={"white"}
             rounded={"md"}
           >
             <Flex
               direction={"column"}
               p={"4"}
-              h={"fit-content"}
-              grow={"1"}
               rounded={"md"}
               border={"1px"}
               borderColor={"gray.100"}
             >
-              <Flex direction={"row"} justify={"space-between"}>
-                <Heading fontWeight={"semibold"} size={"md"}>Entity Attributes</Heading>
+              <Flex direction={"row"} justify={"space-between"} align={"center"}>
+                <Heading fontWeight={"semibold"} size={"md"} pt={"2"} pb={"2"}>Entity Attributes</Heading>
                 {editing ? (
                   <Button
                     colorScheme={"green"}
@@ -1433,35 +1407,95 @@ const Entity = () => {
                 ) : null}
               </Flex>
 
-              <SimpleGrid
-                spacing={"4"}
-                templateColumns={"repeat(auto-fill, minmax(300px, 1fr))"}
+              {entityAttributes.length === 0 ? (
+                <Text>No Attributes.</Text>
+              ) : (
+                <DataTable
+                  data={entityAttributes}
+                  columns={attributeTableColumns}
+                  visibleColumns={visibleAttributeTableColumns}
+                  viewOnly={!editing}
+                  showSelection={editing}
+                  showPagination
+                />
+              )}
+            </Flex>
+          </Flex>
+        </Flex>
+
+        <Flex direction={"row"} wrap={"wrap"}>
+          <Flex
+            direction={"column"}
+            p={"4"}
+            gap={"4"}
+            grow={"1"}
+            basis={"50%"}
+            bg={"white"}
+            rounded={"md"}
+          >
+            {/* Origins and Products */}
+            <Flex
+              direction={"column"}
+              p={"4"}
+              rounded={"md"}
+              border={"1px"}
+              borderColor={"gray.100"}
+            >
+              <Tabs
+                variant={"soft-rounded"}
+                colorScheme={"blue"}
+                onChange={(index) => setRelationsIndex(index)}
               >
-                {entityAttributes.length > 0 ? (
-                  entityAttributes.map((attribute) => {
-                    return (
-                      <Flex
-                        key={`${attribute._id}`}
-                        direction={"column"}
-                        gap={"2"}
-                        width={"100%"}
-                      >
-                        <AttributeCard
-                          attribute={attribute}
-                          editing={editing}
-                          doneCallback={handleUpdateAttribute}
-                          cancelCallback={handleCancelAttribute}
-                          removeCallback={() => {
-                            removeAttribute(attribute._id);
-                          }}
-                        />
-                      </Flex>
-                    );
-                  })
-                ) : (
-                  <Text>No Attributes.</Text>
-                )}
-              </SimpleGrid>
+                <TabList>
+                  <Tab>Entity Origins</Tab>
+                  <Tab>Entity Products</Tab>
+                  <Spacer />
+                  {editing ? (
+                    <Button
+                      colorScheme={"green"}
+                      rightIcon={<Icon name={"add"} />}
+                      disabled={!editing}
+                      onClick={() => {
+                        _.isEqual(relationsIndex, 0) ? onAddOriginsOpen() : onAddProductsOpen();
+                      }}
+                    >
+                      Add
+                    </Button>
+                  ) : null}
+                </TabList>
+                <TabPanels>
+                  <TabPanel>
+                    {entityOrigins.length === 0 ? (
+                      <Text>No Origins.</Text>
+                    ) : (
+                      <DataTable
+                        data={entityOrigins}
+                        columns={originTableColumns}
+                        visibleColumns={{}}
+                        viewOnly={!editing}
+                        showSelection={editing}
+                        actions={originTableActions}
+                        showPagination
+                      />
+                    )}
+                  </TabPanel>
+                  <TabPanel>
+                    {entityProducts.length === 0 ? (
+                      <Text>No Products.</Text>
+                    ) : (
+                      <DataTable
+                        data={entityProducts}
+                        columns={productTableColumns}
+                        visibleColumns={{}}
+                        viewOnly={!editing}
+                        showSelection={editing}
+                        actions={productTableActions}
+                        showPagination
+                      />
+                    )}
+                  </TabPanel>
+                </TabPanels>
+              </Tabs>
             </Flex>
           </Flex>
 
@@ -1472,22 +1506,19 @@ const Entity = () => {
             gap={"4"}
             grow={"1"}
             basis={"50%"}
-            h={"fit-content"}
             bg={"white"}
             rounded={"md"}
           >
             <Flex
               direction={"column"}
               p={"4"}
-              h={"fit-content"}
-              grow={"1"}
               rounded={"md"}
               border={"1px"}
               borderColor={"gray.100"}
             >
               <Flex gap={"2"} direction={"column"} minH={"32"}>
-                <Flex direction={"row"} justify={"space-between"}>
-                  <Heading size={"lg"}>Attachments</Heading>
+                <Flex direction={"row"} justify={"space-between"} align={"center"}>
+                  <Heading fontWeight={"semibold"} size={"md"} pt={"2"} pb={"2"}>Attachments</Heading>
                   <Button
                     colorScheme={"green"}
                     rightIcon={<Icon name={"upload"} />}
