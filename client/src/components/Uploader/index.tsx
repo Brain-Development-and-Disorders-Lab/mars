@@ -16,7 +16,6 @@ import {
   Input,
   ModalFooter,
   FormControl,
-  Link,
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 import Error from "@components/Error";
@@ -68,25 +67,6 @@ const Uploader = (props: {
             description: "Successfully uploaded file.",
             duration: 4000,
             position: "bottom-right",
-            isClosable: true,
-          });
-
-          toast({
-            title: "Success",
-            status: "success",
-            description: (
-              <Flex w={"100%"} direction={"row"} gap={"4"}>
-                Updated data available.
-                <Link onClick={() => window.location.reload()}>
-                  <Flex direction={"row"} gap={"1"} align={"center"}>
-                    <Text fontWeight={"semibold"}>Reload</Text>
-                    <Icon name={"reload"} />
-                  </Flex>
-                </Link>
-              </Flex>
-            ),
-            duration: null,
-            position: "bottom",
             isClosable: true,
           });
         } else {
