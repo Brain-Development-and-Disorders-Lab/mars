@@ -24,8 +24,6 @@ const Content: FC<ContentProps> = ({ children, isError, isLoaded }) => {
   return (
     <Flex
       direction={"column"}
-      wrap={"wrap"}
-      gap={"6"}
       w={"100%"}
       h={"100%"}
       maxH={{ base: "100%", lg: "92vh" }}
