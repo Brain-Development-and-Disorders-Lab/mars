@@ -1342,7 +1342,7 @@ const Entity = () => {
                         onChange={(event) => {
                           setEntityDescription(event.target.value || "");
                         }}
-                        disabled={!editing}
+                        isReadOnly={!editing}
                       />
                     </Flex>
                   </Flex>

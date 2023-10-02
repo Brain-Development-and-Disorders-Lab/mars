@@ -583,7 +583,7 @@ const Project = () => {
                       onChange={(event) => {
                         setProjectDescription(event.target.value);
                       }}
-                      disabled={!editing}
+                      isReadOnly={!editing}
                     />
                   </Flex>
                 </Flex>

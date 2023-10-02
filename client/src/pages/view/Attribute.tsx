@@ -263,7 +263,7 @@ const Attribute = () => {
                           onChange={(event) => {
                             setAttributeDescription(event.target.value);
                           }}
-                          disabled={!editing}
+                          isReadOnly={!editing}
                         />
                       )}
                     </Td>
