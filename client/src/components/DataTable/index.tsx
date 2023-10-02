@@ -130,7 +130,7 @@ const DataTable = (props: DataTableProps) => {
   return (
     <Flex direction={"column"}>
       <TableContainer>
-        <Table>
+        <Table variant={"simple"} size={"sm"}>
           {/* Table head */}
           <Thead>
             {table.getHeaderGroups().map((headerGroup) => (
