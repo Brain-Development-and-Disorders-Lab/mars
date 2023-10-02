@@ -680,7 +680,7 @@ const Entity = () => {
         const tooltipLabelValue: string = `${info.row.original.values.slice(0, 5).map((value) => value.name).join(", ")}${info.row.original.values.length > 5 ? "..." : ""}`;
         return (
           <Tooltip label={tooltipLabelValue}>
-            <Text>{info.row.original.values.length}</Text>
+            <Tag colorScheme={"purple"}>{info.row.original.values.length}</Tag>
           </Tooltip>
         );
       },
@@ -740,6 +740,17 @@ const Entity = () => {
       },
       header: "Name",
     }),
+    {
+      id: (info: any) => `type_${info.row.original.name}`,
+      cell: (info: any) => {
+        let fileExtension = _.upperCase(_.last(info.row.original.name.split(".")));
+        const fileColorScheme = _.isEqual(fileExtension, "PDF") ? "red" : "yellow";
+        return (
+          <Tag colorScheme={fileColorScheme}>{fileExtension}</Tag>
+        );
+      },
+      header: "Type",
+    },
     attachmentTableColumnHelper.accessor("id", {
       cell: (info) => {
         const handleDownload = () => {
@@ -748,7 +759,7 @@ const Entity = () => {
           })
             .then((response) => {
               FileSaver.saveAs(
-                new Blob([response], { type: "image/jpeg" }),
+                new Blob([response]),
                 slugify(info.row.original.name)
               );
             })
