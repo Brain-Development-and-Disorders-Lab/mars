@@ -13,16 +13,10 @@ import {
   PopoverContent,
   PopoverHeader,
   PopoverTrigger,
-  Table,
-  TableContainer,
   Tag,
   TagLabel,
-  Tbody,
-  Td,
+  Text,
   Textarea,
-  Th,
-  Thead,
-  Tr,
   useToast,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
@@ -209,7 +203,7 @@ const Attribute = () => {
               </Popover>
             )}
             <Button
-              colorScheme={editing ? "green" : "gray"}
+              colorScheme={editing ? "green" : "blue"}
               rightIcon={
                 editing ? <Icon name={"check"} /> : <Icon name={"edit"} />
               }
@@ -224,65 +218,52 @@ const Attribute = () => {
           <Flex
             direction={"column"}
             p={"4"}
-            gap={"2"}
-            grow={"1"}
             h={"fit-content"}
+            grow={"1"}
+            basis={"40%"}
+            bg={"gray.50"}
             rounded={"md"}
-            border={"1px"}
-            borderColor={"gray.100"}
           >
-            {/* Details */}
-            <Heading fontWeight={"semibold"} size={"lg"}>
-              Details
-            </Heading>
-
-            <TableContainer>
-              <Table variant={"simple"} colorScheme={"gray"}>
-                <Thead>
-                  <Tr>
-                    <Th>Field</Th>
-                    <Th>Value</Th>
-                  </Tr>
-                </Thead>
-                <Tbody>
-                  <Tr>
-                    <Td>Description</Td>
-                    <Td>
-                      {_.isEqual(attributeData.description, "") ? (
-                        <Tag
-                          size={"md"}
-                          key={`warn-${attributeData._id}`}
-                          colorScheme={"orange"}
-                        >
-                          <TagLabel>Not Specified</TagLabel>
-                          <Icon name={"warning"} />
-                        </Tag>
-                      ) : (
-                        <Textarea
-                          value={attributeDescription}
-                          onChange={(event) => {
-                            setAttributeDescription(event.target.value);
-                          }}
-                          isReadOnly={!editing}
-                        />
-                      )}
-                    </Td>
-                  </Tr>
-                </Tbody>
-              </Table>
-            </TableContainer>
+            {/* Project Overview */}
+            <Flex gap={"4"} grow={"1"} direction={"column"} minH={"32"}>
+              {/* Details */}
+              <Heading fontWeight={"semibold"} size={"md"}>
+                Template Details
+              </Heading>
+              <Text fontWeight={"semibold"}>Description</Text>
+              {_.isEqual(attributeData.description, "") ? (
+                <Tag
+                  size={"md"}
+                  key={`warn-${attributeData._id}`}
+                  colorScheme={"orange"}
+                >
+                  <TagLabel>Not Specified</TagLabel>
+                  <Icon name={"warning"} />
+                </Tag>
+              ) : (
+                <Textarea
+                  value={attributeDescription}
+                  onChange={(event) => {
+                    setAttributeDescription(event.target.value);
+                  }}
+                  isReadOnly={!editing}
+                />
+              )}
+            </Flex>
           </Flex>
+
           <Flex
             direction={"column"}
             p={"4"}
             gap={"2"}
             grow={"1"}
+            basis={"50%"}
             h={"fit-content"}
             rounded={"md"}
             border={"1px"}
             borderColor={"gray.100"}
           >
-            <Heading fontWeight={"semibold"} size={"lg"}>
+            <Heading fontWeight={"semibold"} size={"md"}>
               Values
             </Heading>
 
