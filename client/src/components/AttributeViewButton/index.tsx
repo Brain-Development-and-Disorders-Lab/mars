@@ -3,7 +3,6 @@ import React, { useState } from "react";
 
 // Existing and custom components
 import {
-  Box,
   Button,
   Flex,
   Heading,
@@ -43,8 +42,12 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
   const [defaultValues, _setDefaultValues] = useState(props.attribute.values);
 
   return (
-    <Box>
+    <Flex gap={"2"}>
       <IconButton aria-label={"View attribute"} icon={<Icon name={"view"} />} onClick={onOpen} />
+      {isEditing &&
+        <IconButton aria-label={"Delete attribute"} colorScheme={"red"} icon={<Icon name={"delete"} />} onClick={props.removeCallback} />
+      }
+
       <Modal
         onEsc={onClose}
         onClose={onClose}
@@ -171,7 +174,7 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
           </ModalBody>
         </ModalContent>
       </Modal>
-    </Box>
+    </Flex>
   );
 };
 
