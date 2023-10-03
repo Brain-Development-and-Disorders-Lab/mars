@@ -7,7 +7,6 @@ import {
   Flex,
   Heading,
   IconButton,
-  Input,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -15,11 +14,11 @@ import {
   ModalHeader,
   ModalOverlay,
   Text,
+  Textarea,
   useDisclosure,
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 import Values from "@components/Values";
-import { Warning } from "@components/Label";
 
 // Existing and custom types
 import { AttributeViewButtonProps } from "@types";
@@ -43,7 +42,7 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
 
   return (
     <Flex gap={"2"}>
-      <IconButton aria-label={"View attribute"} icon={<Icon name={"view"} />} onClick={onOpen} />
+      <IconButton aria-label={"View attribute"} icon={<Icon name={isEditing ? "edit" : "view"} />} onClick={onOpen} />
       {isEditing &&
         <IconButton aria-label={"Delete attribute"} colorScheme={"red"} icon={<Icon name={"delete"} />} onClick={props.removeCallback} />
       }
@@ -52,12 +51,12 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
         onEsc={onClose}
         onClose={onClose}
         isOpen={isOpen}
-        size={"3xl"}
+        size={"4xl"}
         isCentered
       >
         <ModalOverlay />
 
-        <ModalContent p={"2"} gap={"4"} w={"auto"}>
+        <ModalContent p={"2"} gap={"4"}>
           <ModalHeader>
             <Flex
               direction={"row"}
@@ -82,32 +81,32 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
           </ModalHeader>
 
           <ModalBody gap={"4"}>
-            <Flex mb={"4"} gap={"2"} direction={"column"}>
-              <Heading size={"md"}>Description</Heading>
-              {!isEditing ? (
-                description.length > 0 ? (
-                  <Text>{description}</Text>
-                ) : (
-                  <Warning
-                    key={props.attribute.name}
-                    text={"No description provided"}
-                  />
-                )
-              ) : (
-                <Input
-                  value={description}
-                  onChange={(event) => setDescription(event.target.value)}
-                />
-              )}
+            <Flex
+              mb={"4"}
+              gap={"2"}
+              p={"4"}
+              rounded={"md"}
+              direction={"column"}
+              bg={"gray.50"}
+            >
+              <Text size={"md"} fontWeight={"semibold"}>Description</Text>
+              <Textarea
+                value={description}
+                onChange={(event) => setDescription(event.target.value)}
+                isReadOnly={!isEditing}
+              />
             </Flex>
 
             <Flex
               direction={"column"}
               gap={"4"}
+              p={"4"}
               grow={"1"}
               h={"fit-content"}
               bg={"white"}
               rounded={"md"}
+              border={"1px"}
+              borderColor={"gray.100"}
             >
               <Heading size={"md"}>Values</Heading>
               <Flex
@@ -129,7 +128,7 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
             </Flex>
 
             {isEditing && (
-              <Flex direction={"row"} justify={"space-between"} gap={"4"}>
+              <Flex direction={"row"} justify={"space-between"} gap={"4"} mt={"4"}>
                 <Button
                   colorScheme={"red"}
                   variant={"outline"}

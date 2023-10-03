@@ -460,21 +460,20 @@ const Values = (props: {
         <Flex
           direction={"row"}
           gap={"2"}
-          p={"4"}
           flexWrap={"wrap"}
           justify={"right"}
           align={"center"}
         >
           <Popover>
             <PopoverTrigger>
-              <Button variant={"outline"} rightIcon={<Icon name={"add"} />}>
-                Add Value
+              <Button variant={"solid"} colorScheme={"green"} rightIcon={<Icon name={"add"} />}>
+                Add
               </Button>
             </PopoverTrigger>
             <PopoverContent>
               <PopoverArrow />
               <PopoverCloseButton />
-              <PopoverHeader>Add Value</PopoverHeader>
+              <PopoverHeader>Value Type</PopoverHeader>
               <PopoverBody>
                 <Flex gap={"4"} wrap={"wrap"}>
                   {/* Buttons to add Values */}

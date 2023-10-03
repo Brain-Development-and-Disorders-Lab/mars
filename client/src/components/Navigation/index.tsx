@@ -1,5 +1,5 @@
 // React
-import React, { useEffect, useState } from "react";
+import React from "react";
 
 // Existing and custom components
 import {
@@ -11,9 +11,6 @@ import {
   Heading,
   Text,
   Divider,
-  useToast,
-  Tag,
-  Spinner,
   Spacer,
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
@@ -22,7 +19,6 @@ import Icon from "@components/Icon";
 import { useLocation, useNavigate } from "react-router-dom";
 
 // Utility functions and libraries
-import { getData } from "@database/functions";
 import dayjs from "dayjs";
 import _ from "lodash";
 import Importer from "@components/Importer";
@@ -31,7 +27,6 @@ const Navigation = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const navigate = useNavigate();
   const location = useLocation();
-  const toast = useToast();
 
   /**
    * Helper function to close menu on responsive screen sizes
@@ -43,56 +38,11 @@ const Navigation = () => {
     navigate(destination);
   };
 
-  // Loading state
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  // Entity and Project status counts
-  const [entityCount, setEntityCount] = useState("0");
-  const [projectCount, setProjectCount] = useState("0");
-
   const {
     isOpen: isImportOpen,
     onOpen: onImportOpen,
     onClose: onImportClose,
   } = useDisclosure();
-
-  useEffect(() => {
-    getData(`/entities`)
-      .then((value) => {
-        setEntityCount(value.length > 100 ? "100+" : value.length.toString());
-      })
-      .catch((_error) => {
-        toast({
-          title: "Error",
-          status: "error",
-          description: "Could not retrieve Entities data.",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-      })
-      .finally(() => {
-        setIsLoaded(true);
-      });
-
-    getData(`/projects`)
-      .then((value) => {
-        setProjectCount(value.length > 100 ? "100+" : value.length.toString());
-      })
-      .catch((_error) => {
-        toast({
-          title: "Error",
-          status: "error",
-          description: "Could not retrieve Project data.",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-      })
-      .finally(() => {
-        setIsLoaded(true);
-      });
-  });
 
   return (
     <Flex w={"100%"}>
@@ -272,8 +222,6 @@ const Navigation = () => {
           >
             <Flex w={"100%"} align={"center"} gap={"2"}>
               <Text>Projects</Text>
-              <Spacer />
-              <Tag>{isLoaded ? projectCount : <Spinner size={"xs"} />}</Tag>
             </Flex>
           </Button>
 
@@ -288,8 +236,6 @@ const Navigation = () => {
           >
             <Flex w={"100%"} align={"center"} gap={"2"}>
               <Text>Entities</Text>
-              <Spacer />
-              <Tag>{isLoaded ? entityCount : <Spinner size={"xs"} />}</Tag>
             </Flex>
           </Button>
 
