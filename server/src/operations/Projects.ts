@@ -83,20 +83,14 @@ export class Projects {
 
           // Resolve all operations then resolve overall Promise
           Promise.all(operations).then((_result) => {
-            consola.success(
-              "Created new Project:",
-              project._id,
-              project.name
-            );
+            consola.success("Created new Project:", project._id, project.name);
             resolve(project as ProjectModel);
           });
         });
     });
   };
 
-  static update = (
-    updatedProject: ProjectModel
-  ): Promise<ProjectModel> => {
+  static update = (updatedProject: ProjectModel): Promise<ProjectModel> => {
     consola.start("Updating Project:", updatedProject.name);
     return new Promise((resolve, _reject) => {
       getDatabase()
@@ -120,17 +114,13 @@ export class Projects {
             (entity) => !currentProject.entities.includes(entity)
           );
           entitiesToAdd.map((entity: string) => {
-            operations.push(
-              Entities.addProject(entity, currentProject._id)
-            );
+            operations.push(Entities.addProject(entity, currentProject._id));
           });
           const entitiesToRemove = currentProject.entities.filter(
             (entity) => !entitiesToKeep.includes(entity)
           );
           entitiesToRemove.map((entity: string) => {
-            operations.push(
-              Entities.removeProject(entity, currentProject._id)
-            );
+            operations.push(Entities.removeProject(entity, currentProject._id));
           });
 
           const updates = {
@@ -178,10 +168,7 @@ export class Projects {
 
                 // Resolve all operations then resolve overall Promise
                 Promise.all(operations).then((_result) => {
-                  consola.success(
-                    "Updated Project:",
-                    updatedProject.name
-                  );
+                  consola.success("Updated Project:", updatedProject.name);
 
                   // Resolve the Promise
                   resolve(updatedProject);
@@ -227,11 +214,7 @@ export class Projects {
 
           // Resolve all operations then resolve overall Promise
           Promise.all(operations).then((_result) => {
-            consola.success(
-              "Restored Project:",
-              project._id,
-              project.name
-            );
+            consola.success("Restored Project:", project._id, project.name);
             resolve(project as ProjectModel);
           });
         });
@@ -333,10 +316,7 @@ export class Projects {
     });
   };
 
-  static removeEntity = (
-    project: string,
-    entity: string
-  ): Promise<string> => {
+  static removeEntity = (project: string, entity: string): Promise<string> => {
     consola.start(
       "Removing Entity",
       entity.toString(),
@@ -436,67 +416,61 @@ export class Projects {
     return new Promise((resolve, reject) => {
       getDatabase()
         .collection(PROJECTS)
-        .findOne(
-          { _id: projectExportData.id },
-          (error: any, result: any) => {
-            if (error) {
-              reject(error);
-              throw error;
-            }
+        .findOne({ _id: projectExportData.id }, (error: any, result: any) => {
+          if (error) {
+            reject(error);
+            throw error;
+          }
 
-            const project = result as ProjectModel;
+          const project = result as ProjectModel;
 
-            if (_.isEqual(projectExportData.format, "csv")) {
-              const headers = ["ID", "Name"];
-              const row: Promise<string>[] = [
-                Promise.resolve(project._id),
-                Promise.resolve(project.name),
-              ];
+          if (_.isEqual(projectExportData.format, "csv")) {
+            const headers = ["ID", "Name"];
+            const row: Promise<string>[] = [
+              Promise.resolve(project._id),
+              Promise.resolve(project.name),
+            ];
 
-              const entities: Promise<string>[] = [];
-              const projects: Promise<string>[] = [];
+            const entities: Promise<string>[] = [];
+            const projects: Promise<string>[] = [];
 
-              // Iterate over fields and generate a CSV export file
-              projectExportData.fields.map((field) => {
-                if (_.isEqual(field, "created")) {
-                  // "created" data field
-                  headers.push("Created");
-                  row.push(
-                    Promise.resolve(
-                      dayjs(project.created).format("DD MMM YYYY").toString()
-                    )
-                  );
-                } else if (_.isEqual(field, "owner")) {
-                  // "owner" data field
-                  headers.push("Owner");
-                  row.push(Promise.resolve(project.owner));
-                } else if (_.isEqual(field, "description")) {
-                  // "description" data field
-                  headers.push("Description");
-                  row.push(Promise.resolve(project.description));
-                } else if (_.startsWith(field, "project_")) {
-                  // "project" data fields
-                  projects.push(
-                    Projects.getOne(_.split(field, "_")[1]).then(
-                      (project) => {
-                        return project.name;
-                      }
-                    )
-                  );
-                } else if (_.startsWith(field, "entity_")) {
-                  // "entity" data fields
-                  entities.push(
-                    Entities.getOne(_.split(field, "_")[1]).then((entity) => {
-                      return entity.name;
-                    })
-                  );
-                }
-              });
+            // Iterate over fields and generate a CSV export file
+            projectExportData.fields.map((field) => {
+              if (_.isEqual(field, "created")) {
+                // "created" data field
+                headers.push("Created");
+                row.push(
+                  Promise.resolve(
+                    dayjs(project.created).format("DD MMM YYYY").toString()
+                  )
+                );
+              } else if (_.isEqual(field, "owner")) {
+                // "owner" data field
+                headers.push("Owner");
+                row.push(Promise.resolve(project.owner));
+              } else if (_.isEqual(field, "description")) {
+                // "description" data field
+                headers.push("Description");
+                row.push(Promise.resolve(project.description));
+              } else if (_.startsWith(field, "project_")) {
+                // "project" data fields
+                projects.push(
+                  Projects.getOne(_.split(field, "_")[1]).then((project) => {
+                    return project.name;
+                  })
+                );
+              } else if (_.startsWith(field, "entity_")) {
+                // "entity" data fields
+                entities.push(
+                  Entities.getOne(_.split(field, "_")[1]).then((entity) => {
+                    return entity.name;
+                  })
+                );
+              }
+            });
 
-              Promise.all([
-                Promise.all(entities),
-                Promise.all(projects),
-              ]).then(([entities, projects]) => {
+            Promise.all([Promise.all(entities), Promise.all(projects)]).then(
+              ([entities, projects]) => {
                 // Collate and format data as a CSV string
                 Promise.all(row).then((rowData) => {
                   // Append Entities
@@ -529,150 +503,141 @@ export class Projects {
                     resolve(path);
                   });
                 });
-              });
-            } else if (_.isEqual(projectExportData.format, "json")) {
-              // JSON export
-              const tempStructure = {
-                _id: project._id,
-                name: project.name,
-                created: "",
-                owner: "",
-                description: "",
-                projects: [],
-                entities: [],
-              } as { [key: string]: any };
-              const exportOperations = [] as Promise<string>[];
+              }
+            );
+          } else if (_.isEqual(projectExportData.format, "json")) {
+            // JSON export
+            const tempStructure = {
+              _id: project._id,
+              name: project.name,
+              created: "",
+              owner: "",
+              description: "",
+              projects: [],
+              entities: [],
+            } as { [key: string]: any };
+            const exportOperations = [] as Promise<string>[];
 
-              projectExportData.fields.map((field) => {
-                if (_.isEqual(field, "created")) {
-                  // "created" data field
-                  tempStructure["created"] = dayjs(project.created)
+            projectExportData.fields.map((field) => {
+              if (_.isEqual(field, "created")) {
+                // "created" data field
+                tempStructure["created"] = dayjs(project.created)
+                  .format("DD MMM YYYY")
+                  .toString();
+              } else if (_.isEqual(field, "owner")) {
+                // "owner" data field
+                tempStructure["owner"] = project.owner;
+              } else if (_.isEqual(field, "description")) {
+                // "description" data field
+                tempStructure["description"] = project.description;
+              } else if (_.startsWith(field, "project")) {
+                // "project" data fields
+                tempStructure["projects"] = [];
+                exportOperations.push(
+                  Projects.getOne(_.split(field, "_")[1]).then((project) => {
+                    tempStructure["projects"].push(project.name);
+                    return project.name;
+                  })
+                );
+              } else if (_.startsWith(field, "entity_")) {
+                // "entity" data fields
+                exportOperations.push(
+                  Entities.getOne(_.split(field, "_")[1]).then((entity) => {
+                    tempStructure["entities"].push(entity.name);
+                    return entity.name;
+                  })
+                );
+              }
+            });
+
+            // Run all export operations
+            Promise.all(exportOperations).then((_values) => {
+              // Create a temporary file, passing the filename as a response
+              tmp.file((error, path: string, _fd: number) => {
+                if (error) {
+                  reject(error);
+                  throw error;
+                }
+
+                fs.writeFileSync(
+                  path,
+                  JSON.stringify(tempStructure, null, "  ")
+                );
+                consola.success(
+                  "Generated JSON data for Project (id):",
+                  projectExportData.id.toString()
+                );
+                resolve(path);
+              });
+            });
+          } else {
+            // Text export
+            const exportOperations = [] as Promise<string>[];
+
+            // Structures to collate data
+            const textDetails = [`ID: ${project._id}`, `Name: ${project.name}`];
+            const textProjects = [] as string[];
+            const textEntities = [] as string[];
+
+            projectExportData.fields.map((field) => {
+              if (_.isEqual(field, "created")) {
+                // "created" data field
+                textDetails.push(
+                  `Created: ${dayjs(project.created)
                     .format("DD MMM YYYY")
-                    .toString();
-                } else if (_.isEqual(field, "owner")) {
-                  // "owner" data field
-                  tempStructure["owner"] = project.owner;
-                } else if (_.isEqual(field, "description")) {
-                  // "description" data field
-                  tempStructure["description"] = project.description;
-                } else if (_.startsWith(field, "project")) {
-                  // "project" data fields
-                  tempStructure["projects"] = [];
-                  exportOperations.push(
-                    Projects.getOne(_.split(field, "_")[1]).then(
-                      (project) => {
-                        tempStructure["projects"].push(project.name);
-                        return project.name;
-                      }
-                    )
-                  );
-                } else if (_.startsWith(field, "entity_")) {
-                  // "entity" data fields
-                  exportOperations.push(
-                    Entities.getOne(_.split(field, "_")[1]).then((entity) => {
-                      tempStructure["entities"].push(entity.name);
-                      return entity.name;
-                    })
-                  );
+                    .toString()}`
+                );
+              } else if (_.isEqual(field, "owner")) {
+                // "owner" data field
+                textDetails.push(`Owner: ${project.owner}`);
+              } else if (_.isEqual(field, "description")) {
+                // "description" data field
+                textDetails.push(`Description: ${project.description}`);
+              } else if (_.startsWith(field, "project_")) {
+                // "project" data fields
+                exportOperations.push(
+                  Projects.getOne(_.split(field, "_")[1]).then((project) => {
+                    textProjects.push(project.name);
+                    return project.name;
+                  })
+                );
+              } else if (_.startsWith(field, "entity_")) {
+                // "entity" data fields
+                exportOperations.push(
+                  Entities.getOne(_.split(field, "_")[1]).then((entity) => {
+                    textEntities.push(entity.name);
+                    return entity.name;
+                  })
+                );
+              }
+            });
+
+            // Run all export operations
+            Promise.all(exportOperations).then((_values) => {
+              // Create a temporary file, passing the filename as a response
+              tmp.file((error, path: string, _fd: number) => {
+                if (error) {
+                  reject(error);
+                  throw error;
                 }
-              });
 
-              // Run all export operations
-              Promise.all(exportOperations).then((_values) => {
-                // Create a temporary file, passing the filename as a response
-                tmp.file((error, path: string, _fd: number) => {
-                  if (error) {
-                    reject(error);
-                    throw error;
-                  }
-
-                  fs.writeFileSync(
-                    path,
-                    JSON.stringify(tempStructure, null, "  ")
-                  );
-                  consola.success(
-                    "Generated JSON data for Project (id):",
-                    projectExportData.id.toString()
-                  );
-                  resolve(path);
-                });
-              });
-            } else {
-              // Text export
-              const exportOperations = [] as Promise<string>[];
-
-              // Structures to collate data
-              const textDetails = [
-                `ID: ${project._id}`,
-                `Name: ${project.name}`,
-              ];
-              const textProjects = [] as string[];
-              const textEntities = [] as string[];
-
-              projectExportData.fields.map((field) => {
-                if (_.isEqual(field, "created")) {
-                  // "created" data field
-                  textDetails.push(
-                    `Created: ${dayjs(project.created)
-                      .format("DD MMM YYYY")
-                      .toString()}`
-                  );
-                } else if (_.isEqual(field, "owner")) {
-                  // "owner" data field
-                  textDetails.push(`Owner: ${project.owner}`);
-                } else if (_.isEqual(field, "description")) {
-                  // "description" data field
-                  textDetails.push(`Description: ${project.description}`);
-                } else if (_.startsWith(field, "project_")) {
-                  // "project" data fields
-                  exportOperations.push(
-                    Projects.getOne(_.split(field, "_")[1]).then(
-                      (project) => {
-                        textProjects.push(project.name);
-                        return project.name;
-                      }
-                    )
-                  );
-                } else if (_.startsWith(field, "entity_")) {
-                  // "entity" data fields
-                  exportOperations.push(
-                    Entities.getOne(_.split(field, "_")[1]).then((entity) => {
-                      textEntities.push(entity.name);
-                      return entity.name;
-                    })
-                  );
+                if (textProjects.length > 0) {
+                  textDetails.push(`Projects: ${textProjects.join(", ")}`);
                 }
+                if (textEntities.length > 0) {
+                  textDetails.push(`Entities: ${textEntities.join(", ")}`);
+                }
+
+                fs.writeFileSync(path, textDetails.join("\n"));
+                consola.success(
+                  "Generated text data for  Entity (id):",
+                  projectExportData.id.toString()
+                );
+                resolve(path);
               });
-
-              // Run all export operations
-              Promise.all(exportOperations).then((_values) => {
-                // Create a temporary file, passing the filename as a response
-                tmp.file((error, path: string, _fd: number) => {
-                  if (error) {
-                    reject(error);
-                    throw error;
-                  }
-
-                  if (textProjects.length > 0) {
-                    textDetails.push(
-                      `Projects: ${textProjects.join(", ")}`
-                    );
-                  }
-                  if (textEntities.length > 0) {
-                    textDetails.push(`Entities: ${textEntities.join(", ")}`);
-                  }
-
-                  fs.writeFileSync(path, textDetails.join("\n"));
-                  consola.success(
-                    "Generated text data for  Entity (id):",
-                    projectExportData.id.toString()
-                  );
-                  resolve(path);
-                });
-              });
-            }
+            });
           }
-        );
+        });
     });
   };
 

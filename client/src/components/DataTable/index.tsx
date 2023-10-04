@@ -130,7 +130,8 @@ const DataTable = (props: DataTableProps) => {
   return (
     <Flex direction={"column"}>
       <TableContainer>
-        <Table>
+        <Table variant={"simple"} size={"sm"}>
+          {/* Table head */}
           <Thead>
             {table.getHeaderGroups().map((headerGroup) => (
               <Tr key={headerGroup.id}>
@@ -141,29 +142,31 @@ const DataTable = (props: DataTableProps) => {
                       key={header.id}
                       onClick={header.column.getToggleSortingHandler()}
                       isNumeric={meta?.isNumeric}
+                      // Dynamically set the width for the checkboxes
+                      w={_.isEqual(header.id, "select") ? "1" : "auto"}
                     >
-                      <Flex gap={"4"} direction={"row"}>
-                        {flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                        {header.column.getIsSorted() ? (
-                          header.column.getIsSorted() === "desc" ? (
-                            <Icon name={"c_down"} />
-                          ) : (
-                            <Icon name={"c_up"} />
-                          )
-                        ) : null}
-                      </Flex>
+                      {flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
+                      {header.column.getIsSorted() ? (
+                        header.column.getIsSorted() === "desc" ? (
+                          <Icon name={"c_down"} />
+                        ) : (
+                          <Icon name={"c_up"} />
+                        )
+                      ) : null}
                     </Th>
                   );
                 })}
               </Tr>
             ))}
           </Thead>
+
+          {/* Table body */}
           <Tbody>
             {table.getRowModel().rows.map((row) => (
-              <Tr id={row.id} key={row.id}>
+              <Tr id={row.id} key={row.id} w={"auto"}>
                 {row.getVisibleCells().map((cell) => {
                   const meta: any = cell.column.columnDef.meta;
                   return (
@@ -195,7 +198,7 @@ const DataTable = (props: DataTableProps) => {
               <MenuButton
                 as={Button}
                 rightIcon={<Icon name={"c_down"} />}
-                disabled={
+                isDisabled={
                   Object.keys(selectedRows).length === 0 ||
                   _.isUndefined(props.actions) ||
                   props.actions?.length === 0
@@ -225,7 +228,7 @@ const DataTable = (props: DataTableProps) => {
         <Spacer />
 
         {props.showPagination && (
-          <Flex gap={"4"}>
+          <Flex gap={"4"} wrap={"wrap"}>
             <Flex>
               <Select
                 id={"select-page-size"}
@@ -251,14 +254,14 @@ const DataTable = (props: DataTableProps) => {
                 icon={<Icon name={"c_double_left"} />}
                 aria-label="first page"
                 onClick={() => table.setPageIndex(0)}
-                disabled={!table.getCanPreviousPage()}
+                isDisabled={!table.getCanPreviousPage()}
               />
               <IconButton
                 variant={"outline"}
                 icon={<Icon name={"c_left"} />}
                 aria-label="previous page"
                 onClick={() => table.previousPage()}
-                disabled={!table.getCanPreviousPage()}
+                isDisabled={!table.getCanPreviousPage()}
               />
               {table.getPageCount() > 0 && (
                 <Text as={"b"}>
@@ -271,14 +274,14 @@ const DataTable = (props: DataTableProps) => {
                 icon={<Icon name={"c_right"} />}
                 aria-label="next page"
                 onClick={() => table.nextPage()}
-                disabled={!table.getCanNextPage()}
+                isDisabled={!table.getCanNextPage()}
               />
               <IconButton
                 variant={"outline"}
                 icon={<Icon name={"c_double_right"} />}
                 aria-label="last page"
                 onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-                disabled={!table.getCanNextPage()}
+                isDisabled={!table.getCanNextPage()}
               />
             </Flex>
           </Flex>

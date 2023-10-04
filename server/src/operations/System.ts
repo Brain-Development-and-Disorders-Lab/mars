@@ -216,9 +216,7 @@ export class System {
             Promise.all(attributeOperations),
           ])
             .then(
-              (
-                results: [EntityModel[], ProjectModel[], AttributeModel[]]
-              ) => {
+              (results: [EntityModel[], ProjectModel[], AttributeModel[]]) => {
                 consola.success("Imported", results[0].length, "Entities");
                 consola.success("Imported", results[1].length, "Projects");
                 consola.success("Imported", results[2].length, "Attributes");
@@ -283,8 +281,8 @@ export class System {
                 // "select" type
                 valueData = {
                   selected: row[value.data],
-                  options: [row[value.data]]
-                }
+                  options: [row[value.data]],
+                };
               }
               return {
                 identifier: value.identifier,

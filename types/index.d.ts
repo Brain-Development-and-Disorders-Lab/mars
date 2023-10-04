@@ -72,7 +72,7 @@ export type AttributeGroupProps = AttributeCardActions & {
   attributes: AttributeModel[];
 };
 
-export type AttributePreviewProps = {
+export type AttributeViewButtonProps = {
   attribute: AttributeModel;
   editing?: boolean;
   removeCallback?: () => void;
@@ -102,10 +102,10 @@ export type LinkyProps = {
 // Project types
 export type IProject = {
   name: string;
-  description: string;
-  owner: string;
-  shared: string[];
   created: string;
+  owner: string;
+  description: string;
+  shared: string[];
   entities: string[];
   history: ProjectHistory[];
 };

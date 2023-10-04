@@ -188,12 +188,12 @@ const SearchBox = () => {
                   _.isEqual(scannerStatus, "connected") ? "green" : "gray"
                 }
                 onClick={() => handleScannerConnection()}
-                disabled={_.isEqual(scannerStatus, "connected")}
+                isDisabled={_.isEqual(scannerStatus, "connected")}
               />
             </Tooltip>
             <Input
               value={query}
-              placeholder={"Search"}
+              placeholder={"Quick Search"}
               background={"white"}
               onChange={(event) => setQuery(event.target.value)}
               onKeyUp={(event) => {

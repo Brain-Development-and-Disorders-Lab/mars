@@ -2,36 +2,18 @@
 import React, { FC } from "react";
 
 // Existing and custom components
-import {
-  Avatar,
-  Flex,
-  Menu,
-  MenuButton,
-  MenuGroup,
-  MenuItem,
-  MenuList,
-  Spacer,
-  Text,
-} from "@chakra-ui/react";
-import Icon from "@components/Icon";
+import { Flex, Spacer } from "@chakra-ui/react";
 import Navigation from "@components/Navigation";
 import SearchBox from "@components/SearchBox";
 import Error from "@components/Error";
+import Loading from "@components/Loading";
+import AccountMenu from "@components/AccountMenu";
 
 // Existing and custom types
 import { ContentProps, PageProps } from "@types";
 
-// Routing and navigation
-import { useNavigate } from "react-router-dom";
-
 // Utility functions and libraries
-import { getData } from "@database/functions";
-import { useToken } from "src/authentication/useToken";
 import _ from "lodash";
-import dayjs from "dayjs";
-import FileSaver from "file-saver";
-import slugify from "slugify";
-import Loading from "@components/Loading";
 
 // Content container
 const Content: FC<ContentProps> = ({ children, isError, isLoaded }) => {
@@ -42,8 +24,6 @@ const Content: FC<ContentProps> = ({ children, isError, isLoaded }) => {
   return (
     <Flex
       direction={"column"}
-      wrap={"wrap"}
-      gap={"6"}
       w={"100%"}
       h={"100%"}
       maxH={{ base: "100%", lg: "92vh" }}
@@ -63,30 +43,6 @@ const Content: FC<ContentProps> = ({ children, isError, isLoaded }) => {
 
 // Page container
 const Page: FC<PageProps> = ({ children }) => {
-  const navigate = useNavigate();
-
-  const [token, setToken] = useToken();
-
-  const performBackup = () => {
-    // Retrieve all data stored in the system
-    getData(`/system/backup`).then((response) => {
-      FileSaver.saveAs(
-        new Blob([JSON.stringify(response, null, "  ")]),
-        slugify(`backup_${dayjs(Date.now()).toJSON()}.json`)
-      );
-    });
-  };
-
-  const performLogout = () => {
-    // Invalidate the token and refresh the page
-    setToken({
-      name: token.name,
-      orcid: token.orcid,
-      id_token: "",
-    });
-    navigate(0);
-  };
-
   return (
     <Flex
       direction={{ base: "column", lg: "row" }}
@@ -123,74 +79,9 @@ const Page: FC<PageProps> = ({ children }) => {
           borderColor={"gray.100"}
         >
           <Spacer />
-
           <SearchBox />
-
           <Spacer />
-
-          <Flex p={"4"} pr={"0"} gap={"4"} align={"center"}>
-            <Icon name={"bell"} size={[5, 5]} />
-            <Menu>
-              <MenuButton _hover={{ bg: "gray.200" }}>
-                <Flex
-                  direction={"row"}
-                  align={"center"}
-                  gap={"4"}
-                  h={"100%"}
-                  p={"1"}
-                >
-                  <Flex pl={"4"}>
-                    <Avatar size={"sm"} />
-                  </Flex>
-                  <Flex
-                    direction={"column"}
-                    gap={"0"}
-                    pt={"1"}
-                    pb={"1"}
-                    align={"baseline"}
-                  >
-                    <Text size={"xs"} fontWeight={"semibold"}>
-                      {token.name}
-                    </Text>
-                    <Text
-                      size={"xs"}
-                      fontWeight={"semibold"}
-                      color={"gray.400"}
-                    >
-                      {_.truncate(token.orcid, { length: 12 })}
-                    </Text>
-                  </Flex>
-                  <Flex pl={"4"} pr={"4"}>
-                    <Icon name={"c_down"} />
-                  </Flex>
-                </Flex>
-              </MenuButton>
-              <MenuList>
-                <MenuGroup title={"System"}>
-                  <MenuItem onClick={() => performBackup()}>
-                    <Flex direction={"row"} align={"center"} gap={"4"}>
-                      <Icon name={"download"} />
-                      Backup
-                    </Flex>
-                  </MenuItem>
-                  <MenuItem onClick={() => navigate(`/settings`)}>
-                    <Flex direction={"row"} align={"center"} gap={"4"}>
-                      <Icon name={"settings"} />
-                      Settings
-                    </Flex>
-                  </MenuItem>
-                </MenuGroup>
-                <MenuGroup title={"Account"}>
-                  <MenuItem onClick={() => performLogout()}>
-                    <Flex direction={"row"} align={"center"} gap={"4"}>
-                      <Icon name={"exit"} />
-                      Logout
-                    </Flex>
-                  </MenuItem>
-                </MenuGroup>
-              </MenuList>
-            </Menu>
-          </Flex>
+          <AccountMenu />
         </Flex>
 
         {/* Main content components */}

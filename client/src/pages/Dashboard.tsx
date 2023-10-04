@@ -21,7 +21,7 @@ import Linky from "@components/Linky";
 import Loading from "@components/Loading";
 
 // Existing and custom types
-import { ProjectModel, EntityModel, ActivityModel } from "@types";
+import { ProjectModel, EntityModel, ActivityModel, IconNames } from "@types";
 
 // Utility functions and libraries
 import { getData } from "src/database/functions";
@@ -184,9 +184,14 @@ const Dashboard = () => {
       cell: (info) => info.getValue(),
       header: "Name",
     }),
-    projectTableColumnHelper.accessor("entities", {
-      cell: (info) => info.getValue().length,
-      header: "Entity Count",
+    projectTableColumnHelper.accessor("description", {
+      cell: (info) => {
+        if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
+          return <Tag colorScheme={"orange"}>Empty</Tag>;
+        }
+        return <Text noOfLines={1}>{info.getValue()}</Text>;
+      },
+      header: "Description",
       enableHiding: true,
     }),
     projectTableColumnHelper.accessor("_id", {
@@ -210,8 +215,14 @@ const Dashboard = () => {
 
   return (
     <Content isError={isError} isLoaded={isLoaded}>
-      <Flex direction={"row"} wrap={"wrap"} gap={"4"} p={"4"} h={"100%"}>
-        <Flex direction={"column"} gap={"4"} grow={"2"} h={"100%"}>
+      <Flex direction={"row"} wrap={"wrap"} gap={"4"} p={"4"}>
+        <Flex
+          direction={"column"}
+          gap={"4"}
+          grow={"1"}
+          basis={"60%"}
+          h={"100%"}
+        >
           {/* Projects and Entities */}
           <Flex
             direction={"column"}
@@ -223,9 +234,11 @@ const Dashboard = () => {
             borderColor={"gray.100"}
           >
             {/* Projects heading */}
-            <Flex direction={"row"} align={"center"} gap={"4"}>
-              <Icon name={"project"} size={"lg"} />
-              <Heading fontWeight={"semibold"}>Projects</Heading>
+            <Flex direction={"row"} align={"center"} gap={"2"}>
+              <Icon name={"project"} size={"md"} />
+              <Heading size={"lg"} fontWeight={"semibold"}>
+                Projects
+              </Heading>
             </Flex>
 
             {/* Projects table */}
@@ -263,7 +276,7 @@ const Dashboard = () => {
                 rightIcon={<Icon name={"c_right"} />}
                 onClick={() => navigate(`/projects`)}
               >
-                View All
+                All Projects
               </Button>
             </Flex>
           </Flex>
@@ -278,9 +291,11 @@ const Dashboard = () => {
             borderColor={"gray.100"}
           >
             {/* Entities heading */}
-            <Flex direction={"row"} align={"center"} gap={"4"}>
-              <Icon name={"entity"} size={"lg"} />
-              <Heading fontWeight={"semibold"}>Entities</Heading>
+            <Flex direction={"row"} align={"center"} gap={"2"}>
+              <Icon name={"entity"} size={"md"} />
+              <Heading size={"lg"} fontWeight={"semibold"}>
+                Entities
+              </Heading>
             </Flex>
 
             {/* Entities table */}
@@ -320,7 +335,7 @@ const Dashboard = () => {
                 rightIcon={<Icon name={"c_right"} />}
                 onClick={() => navigate(`/entities`)}
               >
-                View All
+                All Entities
               </Button>
             </Flex>
           </Flex>
@@ -329,94 +344,93 @@ const Dashboard = () => {
         {/* Activity */}
         <Flex
           direction={"column"}
-          gap={"4"}
+          p={"4"}
+          gap={"2"}
           grow={"1"}
-          h={"100%"}
           rounded={"md"}
           border={"1px"}
           borderColor={"gray.100"}
         >
-          <Flex
-            background={"white"}
-            direction={"column"}
-            rounded={"md"}
-            h={"fit-content"}
-            p={"4"}
-            gap={"2"}
-          >
-            {/* Activity heading */}
-            <Flex align={"center"} gap={"4"} p={"2"}>
-              <Icon name={"activity"} size={"lg"} />
-              <Heading fontWeight={"semibold"}>Activity</Heading>
-            </Flex>
-
-            {/* Activity list */}
-            {activityData.length > 0 ? (
-              <List>
-                {activityData.slice(0, 10).map((activity) => {
-                  // Configure the badge
-                  let operationIcon = <Icon name={"entity"} color={"white"} />;
-
-                  switch (activity.type) {
-                    case "create":
-                      operationIcon = <Icon name={"add"} color={"green.400"} />;
-                      break;
-                    case "update":
-                      operationIcon = <Icon name={"edit"} color={"blue.400"} />;
-                      break;
-                    case "delete":
-                      operationIcon = (
-                        <Icon name={"delete"} color={"red.400"} />
-                      );
-                      break;
-                  }
-
-                  return (
-                    <ListItem key={`activity-${activity._id}`}>
-                      <Flex
-                        direction={"row"}
-                        p={"2"}
-                        gap={"2"}
-                        mt={"2"}
-                        mb={"2"}
-                        align={"center"}
-                        background={"white"}
-                        rounded={"md"}
-                        border={"2px"}
-                        borderColor={"gray.100"}
-                      >
-                        <Flex rounded={"full"} bg={"white"} p={"1.5"}>
-                          {operationIcon}
-                        </Flex>
-
-                        <Text display={{ base: "none", sm: "block" }}>
-                          {activity.details}
-                        </Text>
-
-                        <Linky
-                          id={activity.target.id}
-                          type={activity.target.type}
-                          fallback={activity.target.name}
-                        />
-
-                        <Spacer />
-
-                        <Text color={"gray.400"}>
-                          {dayjs(activity.timestamp).fromNow()}
-                        </Text>
-                      </Flex>
-                    </ListItem>
-                  );
-                })}
-              </List>
-            ) : (
-              <Flex w={"100%"} justify={"center"}>
-                <Text fontSize={"md"} fontWeight={"bold"}>
-                  No Activity yet
-                </Text>
-              </Flex>
-            )}
+          {/* Activity heading */}
+          <Flex align={"center"} gap={"2"}>
+            <Icon name={"activity"} size={"md"} />
+            <Heading size={"lg"} fontWeight={"semibold"}>
+              Activity
+            </Heading>
           </Flex>
+
+          {/* Activity list */}
+          {activityData.length > 0 ? (
+            <List>
+              {activityData.slice(0, 10).map((activity) => {
+                // Configure the badge
+                let operationIcon: IconNames = "entity";
+                let operationIconColor = "white";
+
+                switch (activity.type) {
+                  case "create":
+                    operationIcon = "add";
+                    operationIconColor = "green.400";
+                    break;
+                  case "update":
+                    operationIcon = "edit";
+                    operationIconColor = "blue.400";
+                    break;
+                  case "delete":
+                    operationIcon = "delete";
+                    operationIconColor = "red.400";
+                    break;
+                }
+
+                return (
+                  <ListItem key={`activity-${activity._id}`}>
+                    <Flex
+                      direction={"row"}
+                      p={"2"}
+                      gap={"2"}
+                      mt={"2"}
+                      mb={"2"}
+                      align={"center"}
+                      rounded={"md"}
+                      background={"white"}
+                      border={"1px"}
+                      borderColor={"gray.100"}
+                    >
+                      <Flex rounded={"full"} bg={operationIconColor} p={"1"}>
+                        <Icon
+                          size={"xs"}
+                          name={operationIcon}
+                          color={"white"}
+                        />
+                      </Flex>
+
+                      <Text display={{ base: "none", sm: "block" }}>
+                        {activity.details}
+                      </Text>
+
+                      <Linky
+                        id={activity.target.id}
+                        type={activity.target.type}
+                        fallback={activity.target.name}
+                      />
+
+                      <Spacer />
+
+                      <Text color={"gray.400"}>
+                        {dayjs(activity.timestamp).fromNow()}
+                      </Text>
+                    </Flex>
+                  </ListItem>
+                );
+              })}
+            </List>
+          ) : (
+            <Flex w={"100%"} justify={"center"}>
+              <Text fontSize={"md"} fontWeight={"bold"}>
+                No Activity yet
+              </Text>
+            </Flex>
+          )}
         </Flex>
       </Flex>
     </Content>

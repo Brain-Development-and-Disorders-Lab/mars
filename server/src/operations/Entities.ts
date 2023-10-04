@@ -157,8 +157,8 @@ export class Entities {
           const operations = [];
 
           // Projects
-          const projectsToKeep = currentEntity.projects.filter(
-            (project) => updatedEntity.projects.includes(project)
+          const projectsToKeep = currentEntity.projects.filter((project) =>
+            updatedEntity.projects.includes(project)
           );
           const projectsToAdd = updatedEntity.projects.filter(
             (project) => !projectsToKeep.includes(project)
@@ -442,10 +442,7 @@ export class Entities {
     });
   };
 
-  static addProject = (
-    entity: string,
-    project: string
-  ): Promise<string> => {
+  static addProject = (entity: string, project: string): Promise<string> => {
     consola.start(
       "Adding Entity (id):",
       entity.toString(),
@@ -491,10 +488,7 @@ export class Entities {
     });
   };
 
-  static removeProject = (
-    entity: string,
-    project: string
-  ): Promise<string> => {
+  static removeProject = (entity: string, project: string): Promise<string> => {
     consola.start(
       "Removing Entity (id):",
       entity.toString(),
@@ -1294,14 +1288,14 @@ export class Entities {
    * @param {{ id: string, fields: string[] }} entityExportData the export data of the Entity
    * @return {Promise<string>}
    */
-  static getData = (entityId: string, exportInfo: {
-    fields: string[];
-    format: "json" | "csv" | "txt";
-  }): Promise<string> => {
-    consola.start(
-      "Generating data for Entity (id):",
-      entityId.toString()
-    );
+  static getData = (
+    entityId: string,
+    exportInfo: {
+      fields: string[];
+      format: "json" | "csv" | "txt";
+    }
+  ): Promise<string> => {
+    consola.start("Generating data for Entity (id):", entityId.toString());
     return new Promise((resolve, reject) => {
       getDatabase()
         .collection(ENTITIES)
@@ -1418,12 +1412,10 @@ export class Entities {
                 // "projects" data field
                 tempStructure["projects"] = [];
                 exportOperations.push(
-                  Projects.getOne(_.split(field, "_")[1]).then(
-                    (project) => {
-                      tempStructure["projects"].push(project.name);
-                      return project.name;
-                    }
-                  )
+                  Projects.getOne(_.split(field, "_")[1]).then((project) => {
+                    tempStructure["projects"].push(project.name);
+                    return project.name;
+                  })
                 );
               } else if (_.startsWith(field, "origin_")) {
                 // "origins" data field
@@ -1578,9 +1570,7 @@ export class Entities {
   };
 
   static getDataMultiple = (entities: string[]): Promise<string> => {
-    consola.start(
-      "Generating data for", entities.length, "Entities...",
-    );
+    consola.start("Generating data for", entities.length, "Entities...");
     return new Promise((resolve, reject) => {
       // Get the data for each Entity and store
       const entityData: Promise<EntityModel>[] = [];
@@ -1590,101 +1580,129 @@ export class Entities {
 
       Promise.all(entityData).then((entities: EntityModel[]) => {
         // Find any common Attributes and append to headers
-        const commonAttributes = _.uniqBy(_.flatten(entities.map((entity) => entity.attributes)), (attribute) => attribute.name);
+        const commonAttributes = _.uniqBy(
+          _.flatten(entities.map((entity) => entity.attributes)),
+          (attribute) => attribute.name
+        );
 
         // Once all Entity data has been retrieved, iterate and add to rows
         const entityRowData = entities.map((entity: EntityModel) => {
-          return new Promise<{ [header: string]: string }>((resolve, _reject) => {
-            // Setup base data structure (later to be transformed into row)
-            const exportEntityRow: { [header: string]: string } = {
-              "ID": entity._id,
-              "Name": entity.name,
-              "Owner": entity.owner,
-              "Created": entity.created,
-              "Projects": "",
-              "Products": "",
-              "Origins": "",
-            };
+          return new Promise<{ [header: string]: string }>(
+            (resolve, _reject) => {
+              // Setup base data structure (later to be transformed into row)
+              const exportEntityRow: { [header: string]: string } = {
+                ID: entity._id,
+                Name: entity.name,
+                Owner: entity.owner,
+                Created: entity.created,
+                Projects: "",
+                Products: "",
+                Origins: "",
+              };
 
-            // Get Projects
-            const entityProjects: Promise<ProjectModel>[] = [];
-            entity.projects.map((projectId: string) => {
-              entityProjects.push(Projects.getOne(projectId));
-            });
-            Promise.all(entityProjects).then((projects: ProjectModel[]) => {
-              // Collate Projects
-              const formattedProjects = projects.map((project: ProjectModel) => {
-                return project.name;
+              // Get Projects
+              const entityProjects: Promise<ProjectModel>[] = [];
+              entity.projects.map((projectId: string) => {
+                entityProjects.push(Projects.getOne(projectId));
               });
-              if (formattedProjects.length > 0) {
-                exportEntityRow.Projects = formattedProjects.join(" ");
-              }
-            }).then(() => {
-              // Collate Products and Origins
-              const formattedProducts = entity.associations.products.map((product) => {
-                return product.name;
-              });
-              if (formattedProducts.length > 0) {
-                exportEntityRow.Products = formattedProducts.join(" ");
-              }
+              Promise.all(entityProjects)
+                .then((projects: ProjectModel[]) => {
+                  // Collate Projects
+                  const formattedProjects = projects.map(
+                    (project: ProjectModel) => {
+                      return project.name;
+                    }
+                  );
+                  if (formattedProjects.length > 0) {
+                    exportEntityRow.Projects = formattedProjects.join(" ");
+                  }
+                })
+                .then(() => {
+                  // Collate Products and Origins
+                  const formattedProducts = entity.associations.products.map(
+                    (product) => {
+                      return product.name;
+                    }
+                  );
+                  if (formattedProducts.length > 0) {
+                    exportEntityRow.Products = formattedProducts.join(" ");
+                  }
 
-              const formattedOrigins = entity.associations.origins.map((origin) => {
-                return origin.name;
-              });
-              if (formattedOrigins.length > 0) {
-                exportEntityRow.Origins = formattedOrigins.join(" ");
-              }
-            }).then(() => {
-              // Add Attributes (if existing)
-              entity.attributes.map((attribute: AttributeModel) => {
-                // If current Attribute is a common Attribute, add the information
-                if (_.includes(commonAttributes.map((commonAttribute) => commonAttribute.name), attribute.name)) {
-                  attribute.values.map((value: IValue<any>) => {
-                    if (_.isEqual(value.type, "select")) {
-                      exportEntityRow[`${attribute.name} (${value.name})`] = value.data.selected;
-                    } else {
-                      exportEntityRow[`${attribute.name} (${value.name})`] = value.data;
+                  const formattedOrigins = entity.associations.origins.map(
+                    (origin) => {
+                      return origin.name;
+                    }
+                  );
+                  if (formattedOrigins.length > 0) {
+                    exportEntityRow.Origins = formattedOrigins.join(" ");
+                  }
+                })
+                .then(() => {
+                  // Add Attributes (if existing)
+                  entity.attributes.map((attribute: AttributeModel) => {
+                    // If current Attribute is a common Attribute, add the information
+                    if (
+                      _.includes(
+                        commonAttributes.map(
+                          (commonAttribute) => commonAttribute.name
+                        ),
+                        attribute.name
+                      )
+                    ) {
+                      attribute.values.map((value: IValue<any>) => {
+                        if (_.isEqual(value.type, "select")) {
+                          exportEntityRow[`${attribute.name} (${value.name})`] =
+                            value.data.selected;
+                        } else {
+                          exportEntityRow[`${attribute.name} (${value.name})`] =
+                            value.data;
+                        }
+                      });
                     }
                   });
-                }
-              });
-            }).finally(() => {
-              // Add row to the existing set of rows
-              resolve(exportEntityRow);
-            });
-          });
-        });
-
-        Promise.all(entityRowData).then((generatedRows: { [header: string]: string }[]) => {
-          // Create set of rows
-          const rows = [];
-
-          // Create a header row
-          const leadingRow = Object.keys(generatedRows[0]);
-          rows.push(leadingRow);
-
-          // Add all rows by extracting values
-          generatedRows.map((generatedRow: { [header: string]: string }) => {
-            rows.push(Object.values(generatedRow));
-          });
-
-          // Format the output by unparsing the rows
-          const formattedOutput = Papa.unparse(rows);
-
-          // Create a temporary file, passing the filename as a response
-          tmp.file((error, path: string, _fd: number) => {
-            if (error) {
-              reject(error);
-              throw error;
+                })
+                .finally(() => {
+                  // Add row to the existing set of rows
+                  resolve(exportEntityRow);
+                });
             }
-
-            fs.writeFileSync(path, formattedOutput);
-            consola.start(
-              "Generated data for", entities.length, "Entities...",
-            );
-            resolve(path);
-          });
+          );
         });
+
+        Promise.all(entityRowData).then(
+          (generatedRows: { [header: string]: string }[]) => {
+            // Create set of rows
+            const rows = [];
+
+            // Create a header row
+            const leadingRow = Object.keys(generatedRows[0]);
+            rows.push(leadingRow);
+
+            // Add all rows by extracting values
+            generatedRows.map((generatedRow: { [header: string]: string }) => {
+              rows.push(Object.values(generatedRow));
+            });
+
+            // Format the output by unparsing the rows
+            const formattedOutput = Papa.unparse(rows);
+
+            // Create a temporary file, passing the filename as a response
+            tmp.file((error, path: string, _fd: number) => {
+              if (error) {
+                reject(error);
+                throw error;
+              }
+
+              fs.writeFileSync(path, formattedOutput);
+              consola.start(
+                "Generated data for",
+                entities.length,
+                "Entities..."
+              );
+              resolve(path);
+            });
+          }
+        );
       });
     });
   };

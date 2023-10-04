@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 
 // Existing and custom components
-import { Button, Link, Spinner, Text, Tooltip } from "@chakra-ui/react";
+import { Button, Link, Skeleton, Text, Tooltip } from "@chakra-ui/react";
 
 // Existing and custom types
 import { LinkyProps } from "@types";
@@ -18,7 +18,6 @@ const Linky = (props: LinkyProps) => {
   const navigate = useNavigate();
 
   const [isLoaded, setIsLoaded] = useState(false);
-  const [useFallback, setUseFallback] = useState(false);
   const [linkLabel, setLinkLabel] = useState("Invalid");
   const [showDeleted, setShowDeleted] = useState(false);
 
@@ -32,17 +31,16 @@ const Linky = (props: LinkyProps) => {
       })
       .catch((_error) => {
         if (props.fallback) {
-          setUseFallback(true);
           setLinkLabel(props.fallback);
         }
       })
       .finally(() => {
         setIsLoaded(true);
       });
-  }, []);
+  }, [props.id]);
 
   const onClickHandler = () => {
-    if (isLoaded && !useFallback) navigate(`/${props.type}/${props.id}`);
+    if (isLoaded && !props.fallback) navigate(`/${props.type}/${props.id}`);
   };
 
   return (
@@ -53,13 +51,11 @@ const Linky = (props: LinkyProps) => {
         as={Link}
         onClick={onClickHandler}
       >
-        {isLoaded ? (
+        <Skeleton isLoaded={isLoaded}>
           <Text as={showDeleted ? "s" : "p"}>
             {_.truncate(linkLabel, { length: 20 })}
           </Text>
-        ) : (
-          <Spinner size={"sm"} />
-        )}
+        </Skeleton>
       </Button>
     </Tooltip>
   );

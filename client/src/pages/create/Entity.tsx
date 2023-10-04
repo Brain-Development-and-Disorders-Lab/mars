@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 
 // Existing and custom components
 import {
+  Box,
   Button,
   Checkbox,
   CheckboxGroup,
@@ -19,15 +20,24 @@ import {
   ModalContent,
   ModalHeader,
   ModalOverlay,
-  Progress,
   Select,
   Stack,
+  Step,
+  StepDescription,
+  StepIcon,
+  StepIndicator,
+  StepNumber,
+  StepSeparator,
+  StepStatus,
+  StepTitle,
+  Stepper,
   Tag,
   TagCloseButton,
   Text,
   Textarea,
   VStack,
   useDisclosure,
+  useSteps,
   useToast,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
@@ -60,7 +70,16 @@ const Entity = () => {
   const [pageState, setPageState] = useState(
     "start" as "start" | "attributes" | "associations"
   );
-  const [pageProgress, setPageProgress] = useState(33);
+
+  const pageSteps = [
+    { title: "Start", description: "Basic information" },
+    { title: "Associations", description: "Relations" },
+    { title: "Attributes", description: "Specify metadata" },
+  ];
+  const { activeStep, setActiveStep } = useSteps({
+    index: 0,
+    count: pageSteps.length,
+  });
 
   const navigate = useNavigate();
   const toast = useToast();
@@ -195,10 +214,10 @@ const Entity = () => {
   const onPageNext = () => {
     if (_.isEqual("start", pageState)) {
       setPageState("associations");
-      setPageProgress(66);
+      setActiveStep(1);
     } else if (_.isEqual("associations", pageState)) {
       setPageState("attributes");
-      setPageProgress(100);
+      setActiveStep(2);
     } else if (_.isEqual("attributes", pageState)) {
       setIsSubmitting(true);
       postData(`/entities/create`, entityState)
@@ -223,10 +242,10 @@ const Entity = () => {
   const onPageBack = () => {
     if (_.isEqual("associations", pageState)) {
       setPageState("start");
-      setPageProgress(33);
+      setActiveStep(0);
     } else if (_.isEqual("attributes", pageState)) {
       setPageState("associations");
-      setPageProgress(66);
+      setActiveStep(1);
     }
   };
 
@@ -282,8 +301,27 @@ const Entity = () => {
         </Flex>
 
         {/* Main pages */}
-        {/* Progress bar */}
-        <Progress value={pageProgress} hasStripe isAnimated rounded={"md"} />
+        {/* Stepper progress indicator */}
+        <Stepper index={activeStep}>
+          {pageSteps.map((step, index) => (
+            <Step key={index}>
+              <StepIndicator>
+                <StepStatus
+                  complete={<StepIcon />}
+                  incomplete={<StepNumber />}
+                  active={<StepNumber />}
+                />
+              </StepIndicator>
+
+              <Box flexShrink={"0"}>
+                <StepTitle>{step.title}</StepTitle>
+                <StepDescription>{step.description}</StepDescription>
+              </Box>
+
+              <StepSeparator />
+            </Step>
+          ))}
+        </Stepper>
 
         {/* "Start" page */}
         {_.isEqual("start", pageState) && (
@@ -690,7 +728,7 @@ const Entity = () => {
               )
             }
             onClick={onPageNext}
-            disabled={!isValidInput()}
+            isDisabled={!isValidInput()}
             isLoading={isSubmitting}
           >
             {_.isEqual("attributes", pageState) ? "Finish" : "Next"}

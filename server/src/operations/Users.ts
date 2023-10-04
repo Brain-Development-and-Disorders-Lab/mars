@@ -20,7 +20,9 @@ export class Users {
    * @param {string} orcid the ORCiD to validate
    * @return {Promise<{ status: "success" | "error", user?: UserModel }>}
    */
-  static get = (orcid: string): Promise<{ status: "success" | "error", user?: UserModel }> => {
+  static get = (
+    orcid: string
+  ): Promise<{ status: "success" | "error"; user?: UserModel }> => {
     consola.start("Finding user", orcid);
 
     // Retrieve a token
@@ -39,30 +41,39 @@ export class Users {
     });
   };
 
-  static validate = (orcid: string, resourceId: string, resourceType: "entity" | "project" | "attribute"): Promise<boolean> => {
+  static validate = (
+    orcid: string,
+    resourceId: string,
+    resourceType: "entity" | "project" | "attribute"
+  ): Promise<boolean> => {
     return new Promise((resolve, reject) => {
-      this.get(orcid).then(({ status }) => {
-        if (_.isEqual(status, "success")) {
-          switch (resourceType) {
-            case "entity": {
-              Entities.getOne(resourceId).then((entity: EntityModel) => {
-                resolve(_.isEqual(entity.owner, orcid));
-              });
-              break;
+      this.get(orcid)
+        .then(({ status }) => {
+          if (_.isEqual(status, "success")) {
+            switch (resourceType) {
+              case "entity": {
+                Entities.getOne(resourceId).then((entity: EntityModel) => {
+                  resolve(_.isEqual(entity.owner, orcid));
+                });
+                break;
+              }
+              case "project": {
+                Projects.getOne(resourceId).then((project: ProjectModel) => {
+                  resolve(
+                    _.isEqual(project.owner, orcid) ||
+                      _.includes(project.shared, orcid)
+                  );
+                });
+                break;
+              }
             }
-            case "project": {
-              Projects.getOne(resourceId).then((project: ProjectModel) => {
-                resolve(_.isEqual(project.owner, orcid) || _.includes(project.shared, orcid));
-              });
-              break;
-            }
+          } else {
+            reject("Invalid permissions");
           }
-        } else {
+        })
+        .catch((_error) => {
           reject("Invalid permissions");
-        }
-      }).catch((_error) => {
-        reject("Invalid permissions");
-      });
+        });
     });
   };
 }

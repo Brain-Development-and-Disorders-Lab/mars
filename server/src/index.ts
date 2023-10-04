@@ -24,7 +24,9 @@ import AuthenticationRoute from "./routes/Authentication";
 import UsersRoute from "./routes/Users";
 
 // Set logging level
-consola.level = _.isEqual(process.env.NODE_ENV, "development") ? LogLevels.verbose : LogLevels.error;
+consola.level = _.isEqual(process.env.NODE_ENV, "development")
+  ? LogLevels.verbose
+  : LogLevels.error;
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -42,7 +44,7 @@ app.use(
   ProjectsRoute,
   SearchRoute,
   SystemRoute,
-  UsersRoute,
+  UsersRoute
 );
 
 const wrapper = express();

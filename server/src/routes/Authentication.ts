@@ -30,21 +30,19 @@ AuthenticationRoute.route("/login").post(
 );
 
 // Route: Validate "id_token"
-AuthenticationRoute.route("/validate").post(
-  (request: any, response: any) => {
-    Authentication.validate(request.headers["id_token"])
-      .then((isValid: boolean) => {
-        response.json({
-          valid: isValid,
-        });
-      })
-      .catch((error) => {
-        response.json({
-          status: "error",
-          message: error,
-        });
+AuthenticationRoute.route("/validate").post((request: any, response: any) => {
+  Authentication.validate(request.headers["id_token"])
+    .then((isValid: boolean) => {
+      response.json({
+        valid: isValid,
       });
-  }
-);
+    })
+    .catch((error) => {
+      response.json({
+        status: "error",
+        message: error,
+      });
+    });
+});
 
 export default AuthenticationRoute;
