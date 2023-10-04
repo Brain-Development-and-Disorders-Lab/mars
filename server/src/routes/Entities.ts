@@ -13,21 +13,28 @@ import dayjs from "dayjs";
 const EntitiesRoute = express.Router();
 
 // View all Entities
-EntitiesRoute.route("/entities").get(authenticate, (_request: any, response: any) => {
-  Entities.getAll().then((entities: EntityModel[]) => {
-    response.json(entities);
-  });
-});
+EntitiesRoute.route("/entities").get(
+  authenticate,
+  (_request: any, response: any) => {
+    Entities.getAll().then((entities: EntityModel[]) => {
+      response.json(entities);
+    });
+  }
+);
 
 // View specific Entity
-EntitiesRoute.route("/entities/:id").get(authenticate, (request: any, response: any) => {
-  Entities.getOne(request.params.id).then((entity: EntityModel) => {
-    response.json(entity);
-  });
-});
+EntitiesRoute.route("/entities/:id").get(
+  authenticate,
+  (request: any, response: any) => {
+    Entities.getOne(request.params.id).then((entity: EntityModel) => {
+      response.json(entity);
+    });
+  }
+);
 
 // Lock specific entity
-EntitiesRoute.route("/entities/lock/:id").post(authenticate,
+EntitiesRoute.route("/entities/lock/:id").post(
+  authenticate,
   (
     request: {
       body: { entity: { name: string; id: string }; lockState: boolean };
@@ -43,7 +50,8 @@ EntitiesRoute.route("/entities/lock/:id").post(authenticate,
 );
 
 // Get formatted data of one Entity
-EntitiesRoute.route("/entities/export/:id").post(authenticate,
+EntitiesRoute.route("/entities/export/:id").post(
+  authenticate,
   (
     request: {
       params: { id: string };
@@ -62,10 +70,11 @@ EntitiesRoute.route("/entities/export/:id").post(authenticate,
 );
 
 // Get formatted data of multiple Entities
-EntitiesRoute.route("/entities/export").post(authenticate,
+EntitiesRoute.route("/entities/export").post(
+  authenticate,
   (
     request: {
-      body: { entities: string[]; };
+      body: { entities: string[] };
     },
     response: any
   ) => {
@@ -80,7 +89,8 @@ EntitiesRoute.route("/entities/export").post(authenticate,
 );
 
 // Create a new Entity, expects Entity data
-EntitiesRoute.route("/entities/create").post(authenticate,
+EntitiesRoute.route("/entities/create").post(
+  authenticate,
   (request: { body: IEntity }, response: any) => {
     Entities.create(request.body).then((entity: EntityModel) => {
       response.json({
@@ -93,7 +103,8 @@ EntitiesRoute.route("/entities/create").post(authenticate,
 );
 
 // Update an Entity
-EntitiesRoute.route("/entities/update").post(authenticate,
+EntitiesRoute.route("/entities/update").post(
+  authenticate,
   (request: { body: EntityModel }, response: any) => {
     Entities.update(request.body).then((updatedEntity: EntityModel) => {
       response.json({
@@ -106,7 +117,8 @@ EntitiesRoute.route("/entities/update").post(authenticate,
 );
 
 // Delete an Entity
-EntitiesRoute.route("/entities/:id").delete(authenticate,
+EntitiesRoute.route("/entities/:id").delete(
+  authenticate,
   (request: { params: { id: string } }, response: any) => {
     Entities.delete(request.params.id).then((entity) => {
       response.json({

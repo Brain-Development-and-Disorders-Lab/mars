@@ -677,7 +677,10 @@ const Entity = () => {
     }),
     attributeTableColumnHelper.accessor("values", {
       cell: (info) => {
-        const tooltipLabelValue: string = `${info.row.original.values.slice(0, 5).map((value) => value.name).join(", ")}${info.row.original.values.length > 5 ? "..." : ""}`;
+        const tooltipLabelValue: string = `${info.row.original.values
+          .slice(0, 5)
+          .map((value) => value.name)
+          .join(", ")}${info.row.original.values.length > 5 ? "..." : ""}`;
         return (
           <Tooltip label={tooltipLabelValue}>
             <Tag colorScheme={"purple"}>{info.row.original.values.length}</Tag>
@@ -705,7 +708,8 @@ const Entity = () => {
       header: "",
     }),
   ];
-  const [visibleAttributeTableColumns, setVisibleAttributeTableColumns] = useState({});
+  const [visibleAttributeTableColumns, setVisibleAttributeTableColumns] =
+    useState({});
 
   // Effect to adjust column visibility
   useEffect(() => {
@@ -743,11 +747,13 @@ const Entity = () => {
     {
       id: (info: any) => `type_${info.row.original.name}`,
       cell: (info: any) => {
-        let fileExtension = _.upperCase(_.last(info.row.original.name.split(".")));
-        const fileColorScheme = _.isEqual(fileExtension, "PDF") ? "red" : "yellow";
-        return (
-          <Tag colorScheme={fileColorScheme}>{fileExtension}</Tag>
+        let fileExtension = _.upperCase(
+          _.last(info.row.original.name.split("."))
         );
+        const fileColorScheme = _.isEqual(fileExtension, "PDF")
+          ? "red"
+          : "yellow";
+        return <Tag colorScheme={fileColorScheme}>{fileExtension}</Tag>;
       },
       header: "Type",
     },
@@ -1191,11 +1197,7 @@ const Entity = () => {
           </Flex>
 
           {/* Buttons */}
-          <Flex
-            direction={"row"}
-            gap={"4"}
-            wrap={"wrap"}
-          >
+          <Flex direction={"row"} gap={"4"} wrap={"wrap"}>
             {editing && (
               <Popover>
                 <PopoverTrigger>
@@ -1250,11 +1252,7 @@ const Entity = () => {
                     onClick={handleEditClick}
                     colorScheme={editing ? "green" : "blue"}
                     rightIcon={
-                      editing ? (
-                        <Icon name={"check"} />
-                      ) : (
-                        <Icon name={"edit"} />
-                      )
+                      editing ? <Icon name={"check"} /> : <Icon name={"edit"} />
                     }
                     isDisabled={entityData.locked}
                     loadingText={"Saving..."}
@@ -1268,7 +1266,11 @@ const Entity = () => {
 
             {/* Actions Menu */}
             <Menu>
-              <MenuButton as={Button} colorScheme={"blue"} rightIcon={<Icon name={"c_down"} />}>
+              <MenuButton
+                as={Button}
+                colorScheme={"blue"}
+                rightIcon={<Icon name={"c_down"} />}
+              >
                 Actions
               </MenuButton>
               <MenuList>
@@ -1307,12 +1309,7 @@ const Entity = () => {
             rounded={"md"}
           >
             {/* Entity Overview */}
-            <Flex
-              direction={"column"}
-              p={"4"}
-              bg={"gray.50"}
-              rounded={"md"}
-            >
+            <Flex direction={"column"} p={"4"} bg={"gray.50"} rounded={"md"}>
               <Flex gap={"4"} direction={"column"}>
                 <Heading fontWeight={"semibold"} size={"md"} pt={"2"} pb={"2"}>
                   Entity Overview
@@ -1358,8 +1355,14 @@ const Entity = () => {
               border={"1px"}
               borderColor={"gray.100"}
             >
-              <Flex direction={"row"} justify={"space-between"} align={"center"}>
-                <Heading fontWeight={"semibold"} size={"md"} pt={"2"} pb={"2"}>Entity Projects</Heading>
+              <Flex
+                direction={"row"}
+                justify={"space-between"}
+                align={"center"}
+              >
+                <Heading fontWeight={"semibold"} size={"md"} pt={"2"} pb={"2"}>
+                  Entity Projects
+                </Heading>
                 {editing ? (
                   <Button
                     colorScheme={"green"}
@@ -1404,8 +1407,14 @@ const Entity = () => {
               border={"1px"}
               borderColor={"gray.100"}
             >
-              <Flex direction={"row"} justify={"space-between"} align={"center"}>
-                <Heading fontWeight={"semibold"} size={"md"} pt={"2"} pb={"2"}>Entity Attributes</Heading>
+              <Flex
+                direction={"row"}
+                justify={"space-between"}
+                align={"center"}
+              >
+                <Heading fontWeight={"semibold"} size={"md"} pt={"2"} pb={"2"}>
+                  Entity Attributes
+                </Heading>
                 {editing ? (
                   <Button
                     colorScheme={"green"}
@@ -1467,7 +1476,9 @@ const Entity = () => {
                       rightIcon={<Icon name={"add"} />}
                       isDisabled={!editing}
                       onClick={() => {
-                        _.isEqual(relationsIndex, 0) ? onAddOriginsOpen() : onAddProductsOpen();
+                        _.isEqual(relationsIndex, 0)
+                          ? onAddOriginsOpen()
+                          : onAddProductsOpen();
                       }}
                     >
                       Add
@@ -1528,8 +1539,19 @@ const Entity = () => {
               borderColor={"gray.100"}
             >
               <Flex gap={"2"} direction={"column"} minH={"32"}>
-                <Flex direction={"row"} justify={"space-between"} align={"center"}>
-                  <Heading fontWeight={"semibold"} size={"md"} pt={"2"} pb={"2"}>Attachments</Heading>
+                <Flex
+                  direction={"row"}
+                  justify={"space-between"}
+                  align={"center"}
+                >
+                  <Heading
+                    fontWeight={"semibold"}
+                    size={"md"}
+                    pt={"2"}
+                    pb={"2"}
+                  >
+                    Attachments
+                  </Heading>
                   <Button
                     colorScheme={"green"}
                     rightIcon={<Icon name={"upload"} />}
@@ -1564,7 +1586,7 @@ const Entity = () => {
           size={"4xl"}
           isCentered
         >
-          <ModalOverlay  />
+          <ModalOverlay />
           <ModalContent p={"2"} gap={"4"}>
             <ModalHeader p={"2"}>Add Attribute</ModalHeader>
             <ModalCloseButton />

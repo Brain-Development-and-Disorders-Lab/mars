@@ -466,7 +466,11 @@ const Values = (props: {
         >
           <Popover>
             <PopoverTrigger>
-              <Button variant={"solid"} colorScheme={"green"} rightIcon={<Icon name={"add"} />}>
+              <Button
+                variant={"solid"}
+                colorScheme={"green"}
+                rightIcon={<Icon name={"add"} />}
+              >
                 Add
               </Button>
             </PopoverTrigger>

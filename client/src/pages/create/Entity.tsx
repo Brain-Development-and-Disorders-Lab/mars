@@ -76,7 +76,10 @@ const Entity = () => {
     { title: "Associations", description: "Relations" },
     { title: "Attributes", description: "Specify metadata" },
   ];
-  const { activeStep, setActiveStep } = useSteps({ index: 0, count: pageSteps.length });
+  const { activeStep, setActiveStep } = useSteps({
+    index: 0,
+    count: pageSteps.length,
+  });
 
   const navigate = useNavigate();
   const toast = useToast();

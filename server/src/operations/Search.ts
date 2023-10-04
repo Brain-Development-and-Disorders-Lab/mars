@@ -89,13 +89,19 @@ export class Search {
                 expressions.push({ [parameter]: { $ne: component.value } });
               } else if (_.isEqual(qualifier, "contains")) {
                 expressions.push({
-                  [parameter]: { $regex: new RegExp(`${component.value}`, "gi") },
+                  [parameter]: {
+                    $regex: new RegExp(`${component.value}`, "gi"),
+                  },
                 });
               } else if (_.isEqual(qualifier, "does not contain")) {
                 expressions.push({
-                  $nor: [ {
-                    [parameter]: { $regex: new RegExp(`${component.value}`, "gi") },
-                  } ]
+                  $nor: [
+                    {
+                      [parameter]: {
+                        $regex: new RegExp(`${component.value}`, "gi"),
+                      },
+                    },
+                  ],
                 });
               }
             } else if (_.isEqual(parameter, "projects")) {
@@ -103,7 +109,9 @@ export class Search {
               if (_.isEqual(qualifier, "contains")) {
                 expressions.push({ [parameter]: { $in: [component.key] } });
               } else if (_.isEqual(qualifier, "does not contain")) {
-                expressions.push({ $nor: [ { [parameter]: { $in: [component.key] } } ] });
+                expressions.push({
+                  $nor: [{ [parameter]: { $in: [component.key] } }],
+                });
               }
             } else if (_.includes(["origins", "products"], parameter)) {
               // Parameters: origins, products
@@ -115,9 +123,13 @@ export class Search {
                 });
               } else if (_.isEqual(qualifier, "does not contain")) {
                 expressions.push({
-                  $nor: [ { [`associations.${parameter}`]: {
-                    $elemMatch: { id: { $in: [component.key] } },
-                  } } ],
+                  $nor: [
+                    {
+                      [`associations.${parameter}`]: {
+                        $elemMatch: { id: { $in: [component.key] } },
+                      },
+                    },
+                  ],
                 });
               }
             } else if (_.isEqual(parameter, "attributes")) {
@@ -132,20 +144,34 @@ export class Search {
                   });
                 } else {
                   // General fuzzy match
-                  expressions.push({ [`attributes.values.data`]: { $regex: new RegExp(`^${component.key}*`, "gi") } });
+                  expressions.push({
+                    [`attributes.values.data`]: {
+                      $regex: new RegExp(`^${component.key}*`, "gi"),
+                    },
+                  });
                 }
               } else if (_.isEqual(qualifier, "does not contain")) {
                 if (_.isEqual(subQualifier, "entity")) {
                   // Check exact match for "Entity"
                   expressions.push({
-                    $nor: [ { [`attributes.values.data`]: {
-                      $in: [component.key],
-                    } } ],
+                    $nor: [
+                      {
+                        [`attributes.values.data`]: {
+                          $in: [component.key],
+                        },
+                      },
+                    ],
                   });
                 } else {
                   // General fuzzy match
                   expressions.push({
-                    $nor: [ { [`attributes.values.data`]: { $regex: new RegExp(`^${component.key}*`, "gi") } } ]
+                    $nor: [
+                      {
+                        [`attributes.values.data`]: {
+                          $regex: new RegExp(`^${component.key}*`, "gi"),
+                        },
+                      },
+                    ],
                   });
                 }
               }
@@ -201,11 +227,17 @@ export class Search {
             } else if (_.isEqual(parameter, "attributes")) {
               // Parameters: attributes
               if (_.isEqual(qualifier, "contains")) {
-                expressions.push({ [`attributes.values.data`]: { $regex: new RegExp(component.value, "gi") } });
+                expressions.push({
+                  [`attributes.values.data`]: {
+                    $regex: new RegExp(component.value, "gi"),
+                  },
+                });
               } else if (_.isEqual(qualifier, "does not contain")) {
-                expressions.push({ [`attributes.values.data`]: {
-                  $regex: new RegExp(`^((?!${component.value}).)*$`, "gi"),
-                } });
+                expressions.push({
+                  [`attributes.values.data`]: {
+                    $regex: new RegExp(`^((?!${component.value}).)*$`, "gi"),
+                  },
+                });
               }
             }
           }

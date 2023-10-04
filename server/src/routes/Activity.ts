@@ -12,14 +12,18 @@ import { ActivityModel, IActivity } from "@types";
 const ActivityRoute = express.Router();
 
 // Route: View all Activity
-ActivityRoute.route("/activity").get(authenticate, (_request: any, response: any) => {
-  Activity.getAll().then((activity: ActivityModel[]) => {
-    response.json(activity);
-  });
-});
+ActivityRoute.route("/activity").get(
+  authenticate,
+  (_request: any, response: any) => {
+    Activity.getAll().then((activity: ActivityModel[]) => {
+      response.json(activity);
+    });
+  }
+);
 
 // Route: Create new Activity
-ActivityRoute.route("/activity/create").post(authenticate,
+ActivityRoute.route("/activity/create").post(
+  authenticate,
   (request: { body: IActivity }, response: any) => {
     Activity.create(request.body).then((activity: IActivity) => {
       response.json({

@@ -406,7 +406,9 @@ const Search = () => {
                         w={"auto"}
                         value={queryQualifier}
                         onChange={(event) =>
-                          setQueryQualifier(event.target.value as QueryQualifier)
+                          setQueryQualifier(
+                            event.target.value as QueryQualifier
+                          )
                         }
                       >
                         <option>Contains</option>
@@ -549,8 +551,9 @@ const Search = () => {
                               onChange={(event) => {
                                 setQueryKey(event.target.value);
                                 setQueryValue(
-                                  event.target.options[event.target.selectedIndex]
-                                    .innerText
+                                  event.target.options[
+                                    event.target.selectedIndex
+                                  ].innerText
                                 );
                               }}
                             >

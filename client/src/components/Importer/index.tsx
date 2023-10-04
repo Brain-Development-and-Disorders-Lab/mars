@@ -91,7 +91,10 @@ const Importer = (props: {
     { title: "Start", description: "Basic information" },
     { title: "Attributes", description: "Mapping fields to Attributes" },
   ];
-  const { activeStep, setActiveStep } = useSteps({ index: 0, count: pageSteps.length });
+  const { activeStep, setActiveStep } = useSteps({
+    index: 0,
+    count: pageSteps.length,
+  });
 
   const [spreadsheetData, setSpreadsheetData] = useState([] as any[]);
   const [columns, setColumns] = useState([] as string[]);
@@ -362,7 +365,12 @@ const Importer = (props: {
         <Error />
       ) : (
         <>
-          <Modal isOpen={props.isOpen} onClose={props.onClose} isCentered size={"3xl"}>
+          <Modal
+            isOpen={props.isOpen}
+            onClose={props.onClose}
+            isCentered
+            size={"3xl"}
+          >
             <ModalOverlay />
             <ModalContent p={"2"} gap={"2"}>
               <ModalHeader p={"2"}>Import Data</ModalHeader>

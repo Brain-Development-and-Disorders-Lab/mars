@@ -42,10 +42,19 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
 
   return (
     <Flex gap={"2"}>
-      <IconButton aria-label={"View attribute"} icon={<Icon name={isEditing ? "edit" : "view"} />} onClick={onOpen} />
-      {isEditing &&
-        <IconButton aria-label={"Delete attribute"} colorScheme={"red"} icon={<Icon name={"delete"} />} onClick={props.removeCallback} />
-      }
+      <IconButton
+        aria-label={"View attribute"}
+        icon={<Icon name={isEditing ? "edit" : "view"} />}
+        onClick={onOpen}
+      />
+      {isEditing && (
+        <IconButton
+          aria-label={"Delete attribute"}
+          colorScheme={"red"}
+          icon={<Icon name={"delete"} />}
+          onClick={props.removeCallback}
+        />
+      )}
 
       <Modal
         onEsc={onClose}
@@ -89,7 +98,9 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
               direction={"column"}
               bg={"gray.50"}
             >
-              <Text size={"md"} fontWeight={"semibold"}>Description</Text>
+              <Text size={"md"} fontWeight={"semibold"}>
+                Description
+              </Text>
               <Textarea
                 value={description}
                 onChange={(event) => setDescription(event.target.value)}
@@ -128,7 +139,12 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
             </Flex>
 
             {isEditing && (
-              <Flex direction={"row"} justify={"space-between"} gap={"4"} mt={"4"}>
+              <Flex
+                direction={"row"}
+                justify={"space-between"}
+                gap={"4"}
+                mt={"4"}
+              >
                 <Button
                   colorScheme={"red"}
                   variant={"outline"}

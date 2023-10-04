@@ -470,11 +470,7 @@ const Project = () => {
           </Flex>
 
           {/* Buttons */}
-          <Flex
-            direction={"row"}
-            gap={"4"}
-            wrap={"wrap"}
-          >
+          <Flex direction={"row"} gap={"4"} wrap={"wrap"}>
             {editing && (
               <Popover>
                 <PopoverTrigger>
@@ -519,7 +515,11 @@ const Project = () => {
 
             {/* Actions Menu */}
             <Menu>
-              <MenuButton as={Button} colorScheme={"blue"} rightIcon={<Icon name={"c_down"} />}>
+              <MenuButton
+                as={Button}
+                colorScheme={"blue"}
+                rightIcon={<Icon name={"c_down"} />}
+              >
                 Actions
               </MenuButton>
               <MenuList>
@@ -611,7 +611,11 @@ const Project = () => {
               border={"1px"}
               borderColor={"gray.100"}
             >
-              <Flex direction={"row"} justify={"space-between"} align={"center"}>
+              <Flex
+                direction={"row"}
+                justify={"space-between"}
+                align={"center"}
+              >
                 {/* Entities in the Project */}
                 <Heading fontWeight={"semibold"} size={"md"} pt={"2"} pb={"2"}>
                   Project Entities
