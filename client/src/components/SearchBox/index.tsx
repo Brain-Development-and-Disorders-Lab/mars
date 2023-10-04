@@ -22,6 +22,9 @@ import {
   PopoverFooter,
   IconButton,
   Tooltip,
+  Spinner,
+  Stack,
+  Skeleton,
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 
@@ -35,6 +38,9 @@ import { useNavigate } from "react-router-dom";
 import { getData, postData } from "@database/functions";
 import { connectScanner } from "src/devices/Scanner";
 import _ from "lodash";
+
+// Limit the number of results shown
+const MAX_RESULTS = 5;
 
 const SearchBox = () => {
   const [query, setQuery] = useState("");
@@ -218,12 +224,18 @@ const SearchBox = () => {
           <PopoverArrow />
           <PopoverCloseButton />
           <PopoverHeader>
-            {results.length} results for "{query}"
+            <Flex align={"center"} gap={"2"}>
+              {isSearching ? <Spinner size={"sm"} /> : results.length} results for "{query}"
+            </Flex>
           </PopoverHeader>
           <PopoverBody>
             <Flex gap={"2"} p={"2"}>
               {isSearching ? (
-                <Flex>Searching</Flex>
+                <Stack w={"100%"}>
+                  <Skeleton height={"30px"} />
+                  <Skeleton height={"30px"} />
+                  <Skeleton height={"30px"} />
+                </Stack>
               ) : (
                 hasSearched &&
                 !isError && (
@@ -232,7 +244,7 @@ const SearchBox = () => {
                     divider={<StackDivider borderColor={"gray.200"} />}
                     w={"100%"}
                   >
-                    {results.slice(0, 5).map((result) => {
+                    {results.slice(0, MAX_RESULTS).map((result) => {
                       return (
                         <Flex
                           key={result._id}
