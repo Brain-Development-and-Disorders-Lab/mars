@@ -3,6 +3,7 @@ import { getDatabase } from "../database/connection";
 import consola from "consola";
 
 import { ActivityModel, IActivity } from "@types";
+import _ from "lodash";
 
 // Constants
 const ACTIVITY = "activity";
@@ -30,9 +31,11 @@ export class Activity {
 
   /**
    * Retrieve all Activity
+   * @param limit {number} optional parameter to limit the number
+   * of results returned
    * @return {Promise<ActivityModel[]>}
    */
-  static getAll = (): Promise<ActivityModel[]> => {
+  static getAll = (limit?: number): Promise<ActivityModel[]> => {
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ACTIVITY)
@@ -42,8 +45,12 @@ export class Activity {
             throw error;
           }
 
-          consola.success("Retrieved all Activity");
-          resolve(result as ActivityModel[]);
+          // Reverse the result, and slice to limit if provided
+          let returned: ActivityModel[] = _.reverse(result);
+          returned = _.slice(returned, 0, limit);
+
+          consola.success("Retrieved Activity");
+          resolve(returned);
         });
     });
   };

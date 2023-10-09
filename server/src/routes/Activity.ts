@@ -14,8 +14,9 @@ const ActivityRoute = express.Router();
 // Route: View all Activity
 ActivityRoute.route("/activity").get(
   authenticate,
-  (_request: any, response: any) => {
-    Activity.getAll().then((activity: ActivityModel[]) => {
+  (request: { query: { limit?: number } }, response: any) => {
+    console.log(request)
+    Activity.getAll(request.query.limit).then((activity: ActivityModel[]) => {
       response.json(activity);
     });
   }

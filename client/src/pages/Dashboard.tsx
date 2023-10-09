@@ -112,9 +112,9 @@ const Dashboard = () => {
 
   // Get all Updates
   useEffect(() => {
-    getData(`/activity`)
+    getData(`/activity`, { params: { limit: 10 } })
       .then((value) => {
-        setActivityData(value.reverse());
+        setActivityData(value);
         setIsLoaded(true);
       })
       .catch((_error) => {
@@ -362,7 +362,7 @@ const Dashboard = () => {
           {/* Activity list */}
           {activityData.length > 0 ? (
             <List>
-              {activityData.slice(0, 10).map((activity) => {
+              {activityData.map((activity) => {
                 // Configure the badge
                 let operationIcon: IconNames = "entity";
                 let operationIconColor = "white";
