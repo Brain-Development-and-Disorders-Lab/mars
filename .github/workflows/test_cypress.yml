@@ -40,6 +40,24 @@ jobs:
       run: |
         yarn install
         yarn build
+    # Start the client
+    - name: Start Client
+      working-directory: ./client
+      run: yarn start &
+
+    # Start the server
+    - name: Build
+      working-directory: ./server
+      run: |
+        yarn
+        yarn build
+    
+    - name: Start Server
+      working-directory: ./server
+      run: yarn start &
+    # Wait for the client and server to be up and running
+    - name: Wait for Client
+      run: sleep 10  # Adjust the sleep duration as necessary
 
     - name: Test
       run: |
