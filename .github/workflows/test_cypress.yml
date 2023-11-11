@@ -1,4 +1,4 @@
-name: Test MARS Server
+name: Test MARS Cypress
 
 on:
   push:
@@ -31,8 +31,9 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
 
+    - name: Install Dependencies
+      run: yarn install
+
     - name: Test
-      working-directory: ./server
       run: |
-        yarn
-        yarn test
+        yarn cypress run
