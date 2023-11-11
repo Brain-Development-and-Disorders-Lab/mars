@@ -34,6 +34,13 @@ jobs:
     - name: Install Dependencies
       run: yarn install
 
+    # Install and build the client
+    - name: Install and Build Client
+      working-directory: ./client
+      run: |
+        yarn install
+        yarn build
+
     - name: Test
       run: |
         yarn cypress run
