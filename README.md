@@ -76,3 +76,8 @@ This command will build all required containers before starting the containers r
 ### Starting the interface and server
 
 To start the reusable interface, run `yarn start` in the `/client` directory. Start the MARS server by running `yarn build` and `yarn start` in the `/server` directory. Both the client and server should be running alongside the Docker containers before attempting to access MARS at `localhost:8080`.
+
+
+### Testing
+
+To start Cypress test, run `yarn cypress run` in the root (client and server needs to be running)
