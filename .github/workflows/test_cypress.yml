@@ -48,8 +48,12 @@ jobs:
     - name: Download Client Build Artifacts
       uses: actions/download-artifact@v3
       with:
-        name: build-artifacts
+        name: build-client-artifacts
         path: ./client/dist
+
+    - name: Display structure of downloaded files
+      run: ls -R
+      working-directory: ./client/dist
     # Start the client
     - name: Start Client
       working-directory: ./client
@@ -64,8 +68,12 @@ jobs:
     - name: Download Server Build Artifacts
       uses: actions/download-artifact@v3
       with:
-        name: build-artifacts
+        name: build-server-artifacts
         path: ./server/dist
+
+    - name: Display structure of downloaded files
+      run: ls -R
+      working-directory: ./server/dist
     
     - name: Start Server
       working-directory: ./server
