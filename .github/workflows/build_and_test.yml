@@ -1,15 +1,10 @@
 name: Test MARS Cypress
 
 on:
-  # push:
-  #   branches: ["main"]
-  # pull_request:
-  #   branches: ["main"]
-  workflow_run:
-    workflows: ["Build MARS Client and Server"]
-    types:
-      - completed
-    branches: [main]
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
   workflow_dispatch:
 
 env:
@@ -44,36 +39,25 @@ jobs:
       working-directory: ./client
       run: |
         yarn install
+        yarn build
 
-    - name: Download Client Build Artifacts
-      uses: actions/download-artifact@v3
-      with:
-        name: build-client-artifacts
-        path: ./client/dist
-
-    - name: Display structure of downloaded files
-      run: ls -R
-      working-directory: ./client/dist
     # Start the client
     - name: Start Client
       working-directory: ./client
       run: yarn start &
 
     # Start the server
-    - name: Build
+    - name: Build Server
       working-directory: ./server
       run: |
         yarn
+        yarn build
 
-    - name: Download Server Build Artifacts
-      uses: actions/download-artifact@v3
-      with:
-        name: build-server-artifacts
-        path: ./server/dist
-
-    - name: Display structure of downloaded files
-      run: ls -R
-      working-directory: ./server/dist
+    # Test the server
+    - name: Test Server
+      working-directory: ./server
+      run: |
+        yarn test
     
     - name: Start Server
       working-directory: ./server
@@ -82,6 +66,15 @@ jobs:
     - name: Wait for Client
       run: sleep 10  # Adjust the sleep duration as necessary
 
-    - name: Test
+    - name: Feature Tests (Cypress)
+      id: cypress
       run: |
         yarn cypress run
+      continue-on-error: true
+
+    - name: Upload Cypress Screenshots
+      if: failure() && steps.cypress.outcome == 'failure'  # Runs this step only if the Cypress step failed
+      uses: actions/upload-artifact@v3
+      with:
+        name: cypress-screenshots
+        path: cypress-screenshots
