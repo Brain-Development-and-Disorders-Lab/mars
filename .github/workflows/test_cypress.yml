@@ -1,10 +1,15 @@
 name: Test MARS Cypress
 
 on:
-  push:
-    branches: ["main"]
-  pull_request:
-    branches: ["main"]
+  # push:
+  #   branches: ["main"]
+  # pull_request:
+  #   branches: ["main"]
+  workflow_run:
+    workflows: ["Build MARS Client and Server"]
+    types:
+      - completed
+    branches: [main]
   workflow_dispatch:
 
 env:
@@ -39,7 +44,12 @@ jobs:
       working-directory: ./client
       run: |
         yarn install
-        yarn build
+
+    - name: Download Client Build Artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: build-artifacts
+        path: ./client/dist
     # Start the client
     - name: Start Client
       working-directory: ./client
@@ -50,7 +60,12 @@ jobs:
       working-directory: ./server
       run: |
         yarn
-        yarn build
+
+    - name: Download Server Build Artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: build-artifacts
+        path: ./server/dist
     
     - name: Start Server
       working-directory: ./server

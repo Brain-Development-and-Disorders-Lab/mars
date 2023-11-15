@@ -29,6 +29,12 @@ jobs:
         yarn
         yarn build
 
+    - name: Upload Client Build Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: build-artifacts
+        path: ./client/dist
+
   server:
     runs-on: ubuntu-latest
 
@@ -49,3 +55,9 @@ jobs:
       run: |
         yarn
         yarn build
+
+    - name: Upload Server Build Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: build-artifacts
+        path: ./server/dist
