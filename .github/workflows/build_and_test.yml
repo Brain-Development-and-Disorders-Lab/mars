@@ -40,17 +40,22 @@ jobs:
       run: |
         yarn install
         yarn build
-
-    # Start the client
-    - name: Start Client
-      working-directory: ./client
-      run: yarn start &
-
-    # Start the server
+      
+        # Create .env file
+    - name: Create .env file
+      working-directory: server
+      run: |
+        touch .env
+        echo "CONNECTION_STRING=${{ env.CONNECTION_STRING }}" >> .env
+        echo "PORT=8000" >> .env
+        echo "NODE_ENV=development" >> .env
+        echo "CLIENT_ID=${{ secrets.CLIENT_ID }}" >> .env
+        echo "CLIENT_SECRET=${{ secrets.CLIENT_SECRET }}" >> .env
+    
     - name: Build Server
       working-directory: ./server
       run: |
-        yarn
+        yarn install
         yarn build
 
     # Test the server
@@ -58,23 +63,24 @@ jobs:
       working-directory: ./server
       run: |
         yarn test
-    
-    - name: Start Server
-      working-directory: ./server
-      run: yarn start &
-    # Wait for the client and server to be up and running
-    - name: Wait for Client
-      run: sleep 10  # Adjust the sleep duration as necessary
 
-    - name: Feature Tests (Cypress)
-      id: cypress
-      run: |
-        yarn cypress run
-      continue-on-error: true
+    - name: Start Client
+      working-directory: ./client
+      run: yarn start &
+
+    - name: Wait for Client
+      run: sleep 15  # Adjust the sleep duration as necessary
+
+    - name: Cypress run
+      uses: cypress-io/github-action@v6
+      with:
+        wait-on: 'http://localhost:8080'
+        start: yarn start
+
 
     - name: Upload Cypress Screenshots
-      if: failure() && steps.cypress.outcome == 'failure'  # Runs this step only if the Cypress step failed
+      if: failure() # Runs this step only if the Cypress step failed
       uses: actions/upload-artifact@v3
       with:
         name: cypress-screenshots
-        path: cypress-screenshots
+        path: cypress/screenshots

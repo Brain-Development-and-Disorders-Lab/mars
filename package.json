@@ -5,6 +5,9 @@
   "repository": "https://github.com/Brain-Development-and-Disorders-Lab/mars.git",
   "author": "Henry Burgess <henryjburg@gmail.com>",
   "license": "MIT",
+  "scripts": {
+    "start": "cd server && node dist/index.js"
+  },
   "devDependencies": {
     "cypress": "^13.4.0",
     "typescript": "^5.2.2"
