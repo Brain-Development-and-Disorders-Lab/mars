@@ -69,7 +69,7 @@ jobs:
       run: yarn start &
 
     - name: Wait for Client
-      run: sleep 15  # Adjust the sleep duration as necessary
+      run: sleep 10 # seconds
 
     - name: Cypress run
       uses: cypress-io/github-action@v6
