@@ -35,13 +35,14 @@ jobs:
       run: yarn install
 
     # Install and build the client
-    - name: Install and Build Client
+    - name: Install and Build and test Client
       working-directory: ./client
       run: |
         yarn install
         yarn build
+        yarn test
       
-        # Create .env file
+    # Create .env file
     - name: Create .env file
       working-directory: server
       run: |
