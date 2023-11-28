@@ -463,7 +463,7 @@ export class Projects {
                 // "entity" data fields
                 entities.push(
                   Entities.getOne(_.split(field, "_")[1]).then((entity) => {
-                    return entity.name;
+                    return entity?.name ?? "";
                   })
                 );
               }
