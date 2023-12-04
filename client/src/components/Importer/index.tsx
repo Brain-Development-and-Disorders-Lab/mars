@@ -200,6 +200,7 @@ const Importer = (props: {
         setAttributes(results[2]);
         setIsLoaded(true);
         onMappingOpen();
+        setProjectField(results[1][0]._id);
       })
       .catch((_error) => {
         toast({
@@ -281,7 +282,7 @@ const Importer = (props: {
     return (
       <Select
         placeholder={"Select Project"}
-        value={value}
+        value={value || (projects.length > 0 ? projects[0]._id : '')}
         onChange={(event) => setValue(event.target.value)}
       >
         {projects.map((project) => {
