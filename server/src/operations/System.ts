@@ -303,8 +303,8 @@ export class System {
           description: row[entityFields.description],
           projects: [],
           associations: {
-            origins: [],
-            products: [],
+            origins: row?.Origins ? [{ name: row.Origins }] : null,
+            products: row?.Products ? [{ name: row.Products }] : null,
           },
           attributes: attributes,
           attachments: [],

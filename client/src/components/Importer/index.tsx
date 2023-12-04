@@ -104,8 +104,8 @@ const Importer = (props: {
   const [projects, setProjects] = useState([] as ProjectModel[]);
 
   // Fields to be assigned to columns
-  const [nameField, setNameField] = useState("");
-  const [descriptionField, setDescriptionField] = useState("");
+  const [nameField, setNameField] = useState("Name");
+  const [descriptionField, setDescriptionField] = useState("Description");
   const [ownerField, _setOwnerField] = useState(token.orcid);
   const [projectField, setProjectField] = useState("");
   const [selectedOrigin, setSelectedOrigin] = useState(

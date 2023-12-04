@@ -1487,7 +1487,7 @@ const Entity = () => {
                 </TabList>
                 <TabPanels>
                   <TabPanel>
-                    {entityOrigins.length === 0 ? (
+                    {(entityOrigins?.length ?? 0) === 0 ? (
                       <Text>No Origins.</Text>
                     ) : (
                       <DataTable
@@ -1502,7 +1502,7 @@ const Entity = () => {
                     )}
                   </TabPanel>
                   <TabPanel>
-                    {entityProducts.length === 0 ? (
+                    {(entityProducts?.length ?? 0 ) === 0 ? (
                       <Text>No Products.</Text>
                     ) : (
                       <DataTable
@@ -2162,7 +2162,7 @@ const Entity = () => {
                 <Flex direction={"column"} gap={"2"}>
                   <FormControl>
                     <FormLabel>Associations: Origins</FormLabel>
-                    {isLoaded && entityOrigins.length > 0 ? (
+                    {isLoaded && entityOrigins?.length > 0 ? (
                       <Stack spacing={2} direction={"column"}>
                         {entityOrigins.map((origin) => {
                           allExportFields.push(`origin_${origin.id}`);
@@ -2191,7 +2191,7 @@ const Entity = () => {
                   </FormControl>
                   <FormControl>
                     <FormLabel>Associations: Products</FormLabel>
-                    {isLoaded && entityProducts.length > 0 ? (
+                    {isLoaded && entityProducts?.length > 0 ? (
                       <Stack spacing={2} direction={"column"}>
                         {entityProducts.map((product) => {
                           allExportFields.push(`product_${product.id}`);
