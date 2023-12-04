@@ -592,7 +592,7 @@ export class Entities {
             throw error;
           }
           let updatedProducts = result?.associations?.products ?? [];
-          const existingProductIndex = updatedProducts.findIndex(o => o.name === product.name);
+          const existingProductIndex = updatedProducts.findIndex((o: { name: string; id: string }) => o.name === product.name);
 
           if (existingProductIndex > -1) {
             // Update existing origin if new ID is provided
@@ -765,7 +765,7 @@ export class Entities {
           }
 
           let updatedOrigins = result?.associations?.origins ?? [];
-          const existingOriginIndex = updatedOrigins.findIndex(o => o.name === origin.name);
+          const existingOriginIndex = updatedOrigins.findIndex((o: { name: string; id: string }) => o.name === origin.name);
   
           if (existingOriginIndex > -1) {
             // Update existing origin if new ID is provided
