@@ -529,10 +529,11 @@ const Project = () => {
                 >
                   History
                 </MenuItem>
+                {/* disabled project export as this feature is not ready yet */}
                 <MenuItem
                   onClick={handleExportClick}
                   icon={<Icon name={"download"} />}
-                  isDisabled={editing}
+                  isDisabled={true || editing}
                 >
                   Export
                 </MenuItem>

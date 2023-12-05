@@ -30,6 +30,7 @@ describe('CSV Import Test', () => {
       cy.get('.css-15vhhhd > .css-h211ee').click({force: true}); // go to importe step 2
       cy.get('.css-15vhhhd > .css-h211ee').click({force: true}); //  finalize import
 
+      cy.get('#0_entities').should('not.have.text', '0');
     });
   });
 });
