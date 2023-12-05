@@ -533,6 +533,7 @@ const Project = () => {
                 <MenuItem
                   onClick={handleExportClick}
                   icon={<Icon name={"download"} />}
+                  title="disabled project export as this feature is not ready yet"
                   isDisabled={true || editing}
                 >
                   Export
