@@ -51,6 +51,31 @@ export class Entities {
   };
 
   /**
+   * Find an Entity by its name
+   * @param {string} name the name of the Entity to find
+   * @return {Promise<EntityModel | null>}
+   */
+  static findEntityByName = (name: string): Promise<EntityModel | null> => {
+    consola.start("Searching for Entity with name:", name);
+    return new Promise((resolve, reject) => {
+      getDatabase()
+        .collection(ENTITIES)
+        .findOne({ name: name, deleted: false }, (error: any, result: any) => {
+          if (error) {
+            consola.error("Error occurred while searching for Entity:", name);
+            reject(error);
+          } else if (result) {
+            resolve(result as EntityModel);
+          } else {
+            consola.warn("No Entity found with name:", name);
+            resolve(null);
+          }
+        });
+    });
+  };
+
+
+  /**
    * Create a new Entity
    * @param {any} entity all data associated with the new Entity
    * @return {Promise<EntityModel>}
@@ -65,7 +90,7 @@ export class Entities {
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES)
-        .insertOne(entity as any, (error: any, _result: any) => {
+        .insertOne(entity as any, async (error: any, _result: any) => {
           if (error) {
             throw error;
           }
@@ -73,32 +98,42 @@ export class Entities {
           // Database operations to perform outside of creating a new Entity
           const operations: Promise<any>[] = [];
 
-          if (entity.associations.origins.length > 0) {
+          if (entity?.associations?.origins?.length > 0) {
             // If this Entity has an origin, add this Entity as a product of that origin Entity
-            entity.associations.origins.forEach(
-              (origin: { name: string; id: string }) => {
-                operations.push(
-                  Entities.addProduct(origin, {
-                    name: entity.name,
-                    id: entity._id,
-                  })
-                );
+            for (const origin of entity.associations.origins) {
+              if (!origin.id) {
+                // If the origin Entity does not have an ID, create it
+                const originEntity = await Entities.findEntityByName(origin.name);
+                if (originEntity) {
+                  origin.id = originEntity._id;
+                }
               }
-            );
+              operations.push(
+                Entities.addProduct(origin, {
+                  name: entity.name,
+                  id: entity._id,
+                })
+              );
+            };
           }
 
-          if (entity.associations.products.length > 0) {
+          if (entity?.associations?.products?.length > 0) {
             // If this Entity has products, set this Entity as the origin of each product Entity-
-            entity.associations.products.forEach(
-              (product: { name: string; id: string }) => {
-                operations.push(
-                  Entities.addOrigin(product, {
-                    name: entity.name,
-                    id: entity._id,
-                  })
-                );
+            for (const product of entity.associations.products) {
+              if (!product.id) {
+                // If the origin Entity does not have an ID, create it
+                const productEntity = await Entities.findEntityByName(product.name);
+                if (productEntity) {
+                  product.id = productEntity._id;
+                }
               }
-            );
+              operations.push(
+                Entities.addOrigin(product, {
+                  name: entity.name,
+                  id: entity._id,
+                })
+              );
+            };
           }
 
           if (entity.projects.length > 0) {
@@ -556,15 +591,28 @@ export class Entities {
           if (error) {
             throw error;
           }
+          let updatedProducts = result?.associations?.products ?? [];
+          const existingProductIndex = updatedProducts.findIndex((o: { name: string; id: string }) => o.name === product.name);
+
+          if (existingProductIndex > -1) {
+            // Update existing origin if new ID is provided
+            if (product.id) {
+              updatedProducts[existingProductIndex].id = product.id;
+            }
+          } else {
+            // Add new origin
+            updatedProducts = [
+              ...updatedProducts,
+              { name: product.name, id: product.id },
+            ];
+          }
 
           // Update the collection of Products associated with the Entity to include this extra product
           const updates = {
             $set: {
               associations: {
-                origins: result.associations.origins,
-                products: _.uniq(
-                  _.concat(result.associations.products, product)
-                ),
+                origins: result?.associations?.origins,
+                products: updatedProducts,
               },
             },
           };
@@ -716,18 +764,28 @@ export class Entities {
             throw error;
           }
 
+          let updatedOrigins = result?.associations?.origins ?? [];
+          const existingOriginIndex = updatedOrigins.findIndex((o: { name: string; id: string }) => o.name === origin.name);
+  
+          if (existingOriginIndex > -1) {
+            // Update existing origin if new ID is provided
+            if (origin.id) {
+              updatedOrigins[existingOriginIndex].id = origin.id;
+            }
+          } else {
+            // Add new origin
+            updatedOrigins = [
+              ...updatedOrigins,
+              { name: origin.name, id: origin.id },
+            ];
+          }
+
           // Add the Origin to this Entity
           const updates = {
             $set: {
               associations: {
-                origins: [
-                  ...result.associations.origins,
-                  {
-                    name: origin.name,
-                    id: origin.id,
-                  },
-                ],
-                products: result.associations.products,
+                origins: updatedOrigins,
+                products: result?.associations.products,
               },
             },
           };
@@ -1595,6 +1653,7 @@ export class Entities {
                 Name: entity.name,
                 Owner: entity.owner,
                 Created: entity.created,
+                Description: entity?.description,
                 Projects: "",
                 Products: "",
                 Origins: "",
@@ -1613,27 +1672,27 @@ export class Entities {
                       return project.name;
                     }
                   );
-                  if (formattedProjects.length > 0) {
+                  if (formattedProjects?.length > 0) {
                     exportEntityRow.Projects = formattedProjects.join(" ");
                   }
                 })
                 .then(() => {
                   // Collate Products and Origins
-                  const formattedProducts = entity.associations.products.map(
+                  const formattedProducts = entity?.associations?.products?.map(
                     (product) => {
                       return product.name;
                     }
                   );
-                  if (formattedProducts.length > 0) {
+                  if (formattedProducts?.length > 0) {
                     exportEntityRow.Products = formattedProducts.join(" ");
                   }
 
-                  const formattedOrigins = entity.associations.origins.map(
+                  const formattedOrigins = entity?.associations?.origins?.map(
                     (origin) => {
                       return origin.name;
                     }
                   );
-                  if (formattedOrigins.length > 0) {
+                  if (formattedOrigins?.length > 0) {
                     exportEntityRow.Origins = formattedOrigins.join(" ");
                   }
                 })

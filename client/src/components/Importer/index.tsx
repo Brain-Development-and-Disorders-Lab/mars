@@ -104,8 +104,8 @@ const Importer = (props: {
   const [projects, setProjects] = useState([] as ProjectModel[]);
 
   // Fields to be assigned to columns
-  const [nameField, setNameField] = useState("");
-  const [descriptionField, setDescriptionField] = useState("");
+  const [nameField, setNameField] = useState("Name");
+  const [descriptionField, setDescriptionField] = useState("Description");
   const [ownerField, _setOwnerField] = useState(token.orcid);
   const [projectField, setProjectField] = useState("");
   const [selectedOrigin, setSelectedOrigin] = useState(
@@ -200,6 +200,7 @@ const Importer = (props: {
         setAttributes(results[2]);
         setIsLoaded(true);
         onMappingOpen();
+        setProjectField(results[1][0]._id);
       })
       .catch((_error) => {
         toast({
@@ -281,7 +282,7 @@ const Importer = (props: {
     return (
       <Select
         placeholder={"Select Project"}
-        value={value}
+        value={value || (projects.length > 0 ? projects[0]._id : '')}
         onChange={(event) => setValue(event.target.value)}
       >
         {projects.map((project) => {
