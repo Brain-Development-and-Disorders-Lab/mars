@@ -52,6 +52,49 @@ export class Search {
     });
   };
 
+  static getBuiltQuery = (data: { query: string }): Promise<any[]> => {
+    consola.start("Search:", data.query);
+    return new Promise((resolve, reject) => {
+      try {
+        // Parse the query string into a MongoDB query object
+        const queryObject = JSON.parse(data.query);
+        
+        // Construct MongoDB query
+        let mongoQuery = {};
+        if (_.isArray(queryObject)) {
+          // If the query is an array, assume it's an array of query conditions
+          mongoQuery = { $and: queryObject };
+        } else {
+          // If it's not an array, use the query object directly
+          mongoQuery = queryObject;
+        }
+
+        // Perform the MongoDB query
+        getDatabase()
+          .collection(ENTITIES)
+          .find(mongoQuery)
+          .toArray((error, content) => {
+            if (error) {
+              reject(error);
+              return;
+            }
+
+            // Reset to empty array if undefined
+            if (_.isUndefined(content)) {
+              content = [];
+            }
+
+            consola.success("Searched with Built Query:", data.query);
+            resolve(content);
+          });
+      } catch (error) {
+        consola.error("Error parsing or executing query:", error);
+        reject(error);
+      }
+    });
+  };
+
+
   static getQuery = (data: { query: string }): Promise<any[]> => {
     return new Promise((resolve, reject) => {
       const queryComponents = JSON.parse(data.query) as QueryComponent[];
