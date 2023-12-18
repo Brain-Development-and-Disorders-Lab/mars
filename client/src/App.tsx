@@ -3,6 +3,8 @@ import React, { ReactElement, useEffect, useState } from "react";
 
 // Styling to be applied across the application
 import "./styles/styles.css";
+import 'react-querybuilder/dist/query-builder.css';
+
 import "@fontsource/roboto";
 
 // Chakra provider component

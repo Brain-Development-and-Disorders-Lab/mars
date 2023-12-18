@@ -19,6 +19,16 @@ SearchRoute.route("/search/query").post(
   }
 );
 
+// Route: Execute a built query across the colleciton of Entities
+SearchRoute.route("/search/query_built").post(
+  authenticate,
+  async (request: any, response: any) => {
+    Search.getBuiltQuery(request.body).then((results) => {
+      response.json(results);
+    });
+  }
+);
+
 // Route: Search for a specific string in the colleciton of Entities
 SearchRoute.route("/search").post(
   authenticate,
