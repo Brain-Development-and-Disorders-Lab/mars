@@ -68,8 +68,6 @@ const QueryBuilderTab: React.FC<QueryBuilderTabProps> = ({
     postData(`/search/query_built`, { query: query })
       .then((value) => {
         setResults(value);
-        console.log("query_built results:");
-        console.log(value);
       })
       .catch((_error) => {
         toast({
@@ -370,7 +368,7 @@ const QueryBuilderTab: React.FC<QueryBuilderTabProps> = ({
           </Flex>
 
           <VStack p={"2"} gap={"4"} align={"start"}>
-            {queryComponents.map((component: any, index: any) => {
+            {queryComponents?.map((component: any, index: any) => {
               return (
                 <Flex
                   key={`qc_${index}`}
@@ -502,7 +500,7 @@ const QueryBuilderTab: React.FC<QueryBuilderTabProps> = ({
         <Flex direction={"row"} w={"100%"} gap={"4"} justify={"right"}>
           <Button
             rightIcon={<Icon name={"rewind"} />}
-            isDisabled={queryComponents.length === 0}
+            isDisabled={queryComponents?.length === 0}
             onClick={() => {
               setQueryComponents([]);
               setHasSearched(false);
@@ -515,7 +513,7 @@ const QueryBuilderTab: React.FC<QueryBuilderTabProps> = ({
             aria-label={"Search"}
             colorScheme={"green"}
             icon={<Icon name={"search"} />}
-            isDisabled={queryComponents.length === 0}
+            isDisabled={queryComponents?.length === 0}
             onClick={() => runQuerySearch()}
           />
         </Flex>
