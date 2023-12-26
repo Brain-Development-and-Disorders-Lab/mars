@@ -2435,7 +2435,7 @@ const Entity = () => {
                               <Text fontWeight={"bold"}>Origins:</Text>
                               <Tag key={`v_o_${entityVersion.timestamp}`}>
                                 <TagLabel>
-                                  {entityVersion.associations.origins.length}
+                                  {entityVersion?.associations?.origins?.length}
                                 </TagLabel>
                               </Tag>
                             </Flex>
@@ -2443,7 +2443,7 @@ const Entity = () => {
                               <Text fontWeight={"bold"}>Products:</Text>
                               <Tag key={`v_o_${entityVersion.timestamp}`}>
                                 <TagLabel>
-                                  {entityVersion.associations.products.length}
+                                  {entityVersion?.associations?.products?.length}
                                 </TagLabel>
                               </Tag>
                             </Flex>

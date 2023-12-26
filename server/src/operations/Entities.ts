@@ -192,10 +192,10 @@ export class Entities {
           const operations = [];
 
           // Projects
-          const projectsToKeep = currentEntity.projects.filter((project) =>
+          const projectsToKeep = currentEntity.projects?.filter((project) =>
             updatedEntity.projects.includes(project)
           );
-          const projectsToAdd = updatedEntity.projects.filter(
+          const projectsToAdd = updatedEntity.projects?.filter(
             (project) => !projectsToKeep.includes(project)
           );
           if (projectsToAdd.length > 0) {
@@ -205,7 +205,7 @@ export class Entities {
               })
             );
           }
-          const projectsToRemove = currentEntity.projects.filter(
+          const projectsToRemove = currentEntity.projects?.filter(
             (project) => !projectsToKeep.includes(project)
           );
           if (projectsToRemove.length > 0) {
@@ -217,17 +217,17 @@ export class Entities {
           }
 
           // Products
-          const productsToKeep = currentEntity.associations.products
-            .map((product) => product.id)
-            .filter((product) =>
-              updatedEntity.associations.products
+          const productsToKeep = currentEntity?.associations?.products
+            ?.map((product) => product.id)
+            ?.filter((product) =>
+              updatedEntity?.associations?.products
                 .map((product) => product.id)
                 .includes(product)
             );
-          const productsToAdd = updatedEntity.associations.products.filter(
+          const productsToAdd = updatedEntity?.associations?.products?.filter(
             (product) => !productsToKeep.includes(product.id)
           );
-          if (productsToAdd.length > 0) {
+          if (productsToAdd?.length > 0) {
             operations.push(
               productsToAdd.map((product: { id: string; name: string }) => {
                 Entities.addOrigin(product, {
@@ -241,12 +241,12 @@ export class Entities {
               })
             );
           }
-          const productsToRemove = currentEntity.associations.products.filter(
+          const productsToRemove = currentEntity?.associations?.products?.filter(
             (product) => !productsToKeep.includes(product.id)
           );
-          if (productsToRemove.length > 0) {
+          if (productsToRemove?.length > 0) {
             operations.push(
-              productsToRemove.map((product: { id: string; name: string }) => {
+              productsToRemove?.map((product: { id: string; name: string }) => {
                 Entities.removeOrigin(product, {
                   name: updatedEntity.name,
                   id: updatedEntity._id,
@@ -260,17 +260,17 @@ export class Entities {
           }
 
           // Origins
-          const originsToKeep = currentEntity.associations.origins
-            .map((origin) => origin.id)
-            .filter((origin) =>
-              updatedEntity.associations.origins
+          const originsToKeep = currentEntity?.associations?.origins
+            ?.map((origin) => origin.id)
+            ?.filter((origin) =>
+              updatedEntity?.associations?.origins
                 .map((origin) => origin.id)
                 .includes(origin)
             );
-          const originsToAdd = updatedEntity.associations.origins.filter(
+          const originsToAdd = updatedEntity?.associations?.origins?.filter(
             (origin) => !originsToKeep.includes(origin.id)
           );
-          if (originsToAdd.length > 0) {
+          if (originsToAdd?.length > 0) {
             operations.push(
               originsToAdd.map((origin: { id: string; name: string }) => {
                 Entities.addOrigin(
@@ -284,12 +284,12 @@ export class Entities {
               })
             );
           }
-          const originsToRemove = currentEntity.associations.origins.filter(
+          const originsToRemove = currentEntity?.associations?.origins?.filter(
             (origin) => !originsToKeep.includes(origin.id)
           );
-          if (originsToRemove.length > 0) {
+          if (originsToRemove?.length > 0) {
             operations.push(
-              originsToRemove.map((origin: { id: string; name: string }) => {
+              originsToRemove?.map((origin: { id: string; name: string }) => {
                 Entities.removeOrigin(
                   { name: updatedEntity.name, id: updatedEntity._id },
                   origin
@@ -303,22 +303,22 @@ export class Entities {
           }
 
           // Attributes
-          const attributesToKeep = currentEntity.attributes
-            .map((attribute) => attribute._id)
-            .filter((attribute) =>
+          const attributesToKeep = currentEntity?.attributes
+            ?.map((attribute) => attribute._id)
+            ?.filter((attribute) =>
               updatedEntity.attributes
                 .map((attribute) => attribute._id)
                 .includes(attribute)
             );
           operations.push(
             attributesToKeep.map((attribute: string) => {
-              const updatedAttribute = updatedEntity.attributes.filter(
+              const updatedAttribute = updatedEntity.attributes?.filter(
                 (updatedAttribute) => _.isEqual(attribute, updatedAttribute._id)
               )[0];
               Entities.updateAttribute(updatedEntity._id, updatedAttribute);
             })
           );
-          const attributesToAdd = updatedEntity.attributes.filter(
+          const attributesToAdd = updatedEntity.attributes?.filter(
             (attribute) => !attributesToKeep.includes(attribute._id)
           );
           if (attributesToAdd.length > 0) {
@@ -381,16 +381,16 @@ export class Entities {
                 projects: [...projectsToKeep, ...projectsToAdd],
                 associations: {
                   origins: [
-                    ...currentEntity.associations.origins.filter((origin) =>
+                    ...(currentEntity?.associations?.origins?.filter((origin) =>
                       originsToKeep.includes(origin.id)
-                    ),
-                    ...originsToAdd,
+                    )) || [],
+                    ...(originsToAdd || []),
                   ],
                   products: [
-                    ...currentEntity.associations.products.filter((product) =>
+                    ...(currentEntity?.associations?.products?.filter((product) =>
                       productsToKeep.includes(product.id)
-                    ),
-                    ...productsToAdd,
+                    ) || []),
+                    ...(productsToAdd || []),
                   ],
                 },
                 history: [
@@ -401,8 +401,8 @@ export class Entities {
                     description: currentEntity.description,
                     projects: currentEntity.projects,
                     associations: {
-                      origins: currentEntity.associations.origins,
-                      products: currentEntity.associations.products,
+                      origins: currentEntity?.associations?.origins,
+                      products: currentEntity?.associations?.products,
                     },
                     attributes: currentEntity.attributes,
                   },
@@ -542,7 +542,7 @@ export class Entities {
           const updates = {
             $set: {
               projects: [
-                ...(result as EntityModel).projects.filter(
+                ...(result as EntityModel).projects?.filter(
                   (content) => !_.isEqual(content, project)
                 ),
               ],
@@ -713,8 +713,8 @@ export class Entities {
           const updates = {
             $set: {
               associations: {
-                origins: (result as EntityModel).associations.origins,
-                products: (result as EntityModel).associations.products.filter(
+                origins: (result as EntityModel).associations?.origins,
+                products: (result as EntityModel).associations?.products?.filter(
                   (content) => !_.isEqual(product.id, content.id)
                 ),
               },
@@ -884,10 +884,10 @@ export class Entities {
           const updates = {
             $set: {
               associations: {
-                origins: (result as EntityModel).associations.origins.filter(
+                origins: (result as EntityModel).associations?.origins?.filter(
                   (content) => !_.isEqual(origin.id, content.id)
                 ),
-                products: (result as EntityModel).associations.products,
+                products: (result as EntityModel).associations?.products,
               },
             },
           };
@@ -987,7 +987,7 @@ export class Entities {
           const updates = {
             $set: {
               attributes: [
-                ...(result as EntityModel).attributes.filter(
+                ...(result as EntityModel).attributes?.filter(
                   (content) => !_.isEqual(content._id, attribute)
                 ),
               ],
@@ -1198,7 +1198,7 @@ export class Entities {
           const updates = {
             $set: {
               attachments: [
-                ...(result as EntityModel).attachments.filter(
+                ...(result as EntityModel).attachments?.filter(
                   (existing) => !_.isEqual(existing.id, attachment.id)
                 ),
               ],
