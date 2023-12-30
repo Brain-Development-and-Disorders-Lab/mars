@@ -1655,6 +1655,7 @@ const Entity = () => {
                         <FormLabel>Name</FormLabel>
                         <Input
                           placeholder={"Name"}
+                          id="formName"
                           value={attributeName}
                           onChange={(event) =>
                             setAttributeName(event.target.value)
@@ -1673,6 +1674,7 @@ const Entity = () => {
                         <Textarea
                           value={attributeDescription}
                           placeholder={"Attribute Description"}
+                          id="formDescription"
                           onChange={(event) =>
                             setAttributeDescription(event.target.value)
                           }
