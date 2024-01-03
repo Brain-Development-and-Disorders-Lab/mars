@@ -1655,6 +1655,7 @@ const Entity = () => {
                         <FormLabel>Name</FormLabel>
                         <Input
                           placeholder={"Name"}
+                          id="formName"
                           value={attributeName}
                           onChange={(event) =>
                             setAttributeName(event.target.value)
@@ -1673,6 +1674,7 @@ const Entity = () => {
                         <Textarea
                           value={attributeDescription}
                           placeholder={"Attribute Description"}
+                          id="formDescription"
                           onChange={(event) =>
                             setAttributeDescription(event.target.value)
                           }
@@ -2435,7 +2437,7 @@ const Entity = () => {
                               <Text fontWeight={"bold"}>Origins:</Text>
                               <Tag key={`v_o_${entityVersion.timestamp}`}>
                                 <TagLabel>
-                                  {entityVersion.associations.origins.length}
+                                  {entityVersion?.associations?.origins?.length}
                                 </TagLabel>
                               </Tag>
                             </Flex>
@@ -2443,7 +2445,7 @@ const Entity = () => {
                               <Text fontWeight={"bold"}>Products:</Text>
                               <Tag key={`v_o_${entityVersion.timestamp}`}>
                                 <TagLabel>
-                                  {entityVersion.associations.products.length}
+                                  {entityVersion?.associations?.products?.length}
                                 </TagLabel>
                               </Tag>
                             </Flex>
