@@ -149,8 +149,10 @@ const Importer = (props: {
               position: "bottom-right",
               isClosable: true,
             });
-            setSpreadsheetData(response.data);
-            setColumns(Object.keys(response.data[0]));
+            if (response.data?.length > 0) {
+              setSpreadsheetData(response.data);
+              setColumns(Object.keys(response.data[0]));
+            }
             setupMapping();
           } else {
             toast({
@@ -179,7 +181,7 @@ const Importer = (props: {
         toast({
           title: "Error",
           status: "error",
-          description: error.message,
+          description: error.message+ " Please try again.",
           duration: 4000,
           position: "bottom-right",
           isClosable: true,
@@ -396,7 +398,7 @@ const Importer = (props: {
                           _.isEqual(fileType, "backup")
                         }
                       >
-                        Spreadsheet
+                        Json import file
                       </Tab>
                       <Tab
                         isDisabled={
@@ -429,7 +431,7 @@ const Importer = (props: {
                                 align={"center"}
                               >
                                 <Text fontWeight={"semibold"}>
-                                  Drag spreadsheet here
+                                  Drag json file here
                                 </Text>
                                 <Text>or click to upload</Text>
                               </Flex>
@@ -457,12 +459,12 @@ const Importer = (props: {
                               event: ChangeEvent<HTMLInputElement>
                             ) => {
                               if (event.target.files) {
-                                // Only accept XLSX or CSV files
+                                // Only accept JSON or CSV files
                                 if (
                                   _.includes(
                                     [
-                                      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                                       "text/csv",
+                                      "application/json",
                                     ],
                                     event.target.files[0].type
                                   )
@@ -473,7 +475,7 @@ const Importer = (props: {
                                     title: "Warning",
                                     status: "warning",
                                     description:
-                                      "Please upload a XLSX or CSV file",
+                                      "Please upload a JSON or CSV file",
                                     duration: 4000,
                                     position: "bottom-right",
                                     isClosable: true,
