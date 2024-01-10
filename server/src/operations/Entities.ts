@@ -1,5 +1,5 @@
 // Utility libraries
-import _, { get, reject } from "lodash";
+import _, { reject } from "lodash";
 import consola from "consola";
 
 // Utility functions
@@ -1628,8 +1628,6 @@ export class Entities {
   };
 
   static async getDataMultipleJSON(entityIds: string[]) {
-    const util = require('util')
-
     try {
       const entities = await getDatabase()
         .collection(ENTITIES)
