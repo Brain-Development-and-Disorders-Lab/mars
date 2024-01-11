@@ -4,7 +4,7 @@ import { Entities } from "./Entities";
 import { Activity } from "./Activity";
 
 // Custom types
-import { ProjectModel, IProject, EntityModel } from "@types";
+import { ProjectModel, IProject } from "@types";
 
 // Utility libraries
 import _ from "lodash";
