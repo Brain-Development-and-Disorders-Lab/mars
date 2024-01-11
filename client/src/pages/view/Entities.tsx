@@ -137,7 +137,7 @@ const Entities = () => {
 
   const actions: DataTableAction[] = [
     {
-      label: "Export Entities",
+      label: "Export Entities CSV",
       icon: "download",
       action: (table, rows: any) => {
         // Export rows that have been selected
@@ -152,6 +152,30 @@ const Entities = () => {
               new Blob([response]),
               slugify(
                 `export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.csv`
+              )
+            );
+          }
+        );
+
+        table.resetRowSelection();
+      },
+    },
+    {
+      label: "Export Entities JSON",
+      icon: "download",
+      action: (table, rows: any) => {
+        // Export rows that have been selected
+        const toExport: string[] = [];
+        for (let rowIndex of Object.keys(rows)) {
+          toExport.push(table.getRow(rowIndex).original._id);
+        }
+
+        postData(`/entities/export`, { entities: toExport, format: "json" }).then(
+          (response) => {
+            FileSaver.saveAs(
+              new Blob([response]),
+              slugify(
+                `export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.json`
               )
             );
           }

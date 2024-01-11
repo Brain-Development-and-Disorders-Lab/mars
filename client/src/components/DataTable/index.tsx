@@ -204,7 +204,7 @@ const DataTable = (props: DataTableProps) => {
                   props.actions?.length === 0
                 }
               >
-                Bulk Actions
+                Actions
               </MenuButton>
               <MenuList>
                 {props.actions?.map((action) => {

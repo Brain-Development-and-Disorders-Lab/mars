@@ -74,17 +74,52 @@ EntitiesRoute.route("/entities/export").post(
   authenticate,
   (
     request: {
-      body: { entities: string[] };
+      body: { entities: string[], format: "json" | "csv" | "txt" };
     },
     response: any
   ) => {
-    Entities.getDataMultiple(request.body.entities).then((path: string) => {
-      response.setHeader("Content-Type", `application/csv`);
-      response.download(
-        path,
-        `export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.csv`
-      );
-    });
+    const tmp = require('tmp');
+    const fs = require('fs');
+    const dayjs = require('dayjs');
+
+    if (request.body?.format === "json") {
+      Entities.getDataMultipleJSON(request.body.entities).then((data: string) => {
+        // Create a temporary file and write the JSON data to it
+        tmp.file({ postfix: '.json' }, (err, path, fd) => {
+          if (err) {
+            return response.status(500).send("Error creating file");
+          }
+          fs.writeFile(path, JSON.stringify(data), (err) => {
+            if (err) {
+              return response.status(500).send("Error writing to file");
+            }
+
+            response.setHeader("Content-Type", `application/json`);
+            response.download(
+              path,
+              `export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.json`,
+              (err) => {
+                // cleanupCallback(); // Cleanup the temp file
+                if (err) {
+                  // Handle error, but don't re-throw if it's just the client aborting the download.
+                  if (!response.headersSent) {
+                    response.status(500).send("Error sending file");
+                  }
+                }
+              }
+            );
+          });
+        });
+      });
+    } else {
+      Entities.getDataMultiple(request.body.entities).then((path: string) => {
+        response.setHeader("Content-Type", `application/csv`);
+        response.download(
+          path,
+          `export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.csv`
+        );
+      });
+    }
   }
 );
 

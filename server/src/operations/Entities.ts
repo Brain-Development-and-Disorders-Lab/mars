@@ -766,7 +766,7 @@ export class Entities {
 
           let updatedOrigins = result?.associations?.origins ?? [];
           const existingOriginIndex = updatedOrigins.findIndex((o: { name: string; id: string }) => o.name === origin.name);
-  
+
           if (existingOriginIndex > -1) {
             // Update existing origin if new ID is provided
             if (origin.id) {
@@ -1627,6 +1627,28 @@ export class Entities {
     });
   };
 
+  static async getDataMultipleJSON(entityIds: string[]) {
+    try {
+      const entities = await getDatabase()
+        .collection(ENTITIES)
+        .find({ _id: { $in: entityIds } }).toArray();
+
+      // Remove 'history' property from each entity
+      let modifiedEntities = {
+        "entities": entities.map(entity => {
+          const plainEntity = JSON.parse(JSON.stringify(entity)); // Converts MongoDB types to plain objects
+          delete plainEntity.history;
+
+          return plainEntity;
+        })
+      }
+
+      return JSON.stringify(modifiedEntities, null, 4);
+    } catch (error) {
+      throw error;
+    }
+  }
+
   static getDataMultiple = (entities: string[]): Promise<string> => {
     consola.start("Generating data for", entities.length, "Entities...");
     return new Promise((resolve, reject) => {
@@ -1780,7 +1802,7 @@ export class Entities {
       if (files.file) {
         const receivedFile = files.file;
         const receivedFileData = receivedFile.data as Buffer;
-        consola.start("Received file:", receivedFile.name);
+        consola.start("Uploaded file:", receivedFile.name);
 
         // Access bucket and create open stream to write to storage
         const bucket = getAttachments();
