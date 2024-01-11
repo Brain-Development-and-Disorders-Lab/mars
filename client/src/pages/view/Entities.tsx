@@ -184,6 +184,30 @@ const Entities = () => {
         table.resetRowSelection();
       },
     },
+    {
+      label: "Export All Entities JSON",
+      icon: "download",
+      action: (table, rows: any) => {
+        // Export rows that have been selected
+        const toExport: string[] = [];
+        for (let rowIndex of Object.keys(rows)) {
+          toExport.push(table.getRow(rowIndex).original._id);
+        }
+
+        postData(`/entities/export_all`, { entities: toExport, format: "json" }).then(
+          (response) => {
+            FileSaver.saveAs(
+              new Blob([response]),
+              slugify(
+                `export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.json`
+              )
+            );
+          }
+        );
+
+        table.resetRowSelection();
+      },
+    },
   ];
 
   return (
