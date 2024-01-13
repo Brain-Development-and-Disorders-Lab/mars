@@ -127,10 +127,10 @@ EntitiesRoute.route("/entities/export").post(
 EntitiesRoute.route("/entities/export_all").post(
   authenticate,
   (
-    request,
+    request: { body?: { project: string } },
     response: any
   ) => {
-    request = request; // get warning to go away
+    const projectId = request?.body?.project; // get warning to go away
     const tmp = require('tmp');
     const fs = require('fs');
     const dayjs = require('dayjs');
@@ -142,8 +142,13 @@ EntitiesRoute.route("/entities/export_all").post(
           return response.status(500).send("Error creating file");
         }
 
+        let entities = data;
+        if (projectId) {
+          entities = entities.filter(entity => entity.projects.includes(projectId));
+        }
+
         let modifiedEntities = {
-          "entities": data.map(entity => {
+          "entities": entities.map(entity => {
             const plainEntity = JSON.parse(JSON.stringify(entity)); // Converts MongoDB types to plain objects
             delete plainEntity.history;
 
