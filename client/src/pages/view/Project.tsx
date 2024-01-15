@@ -323,6 +323,20 @@ const Project = () => {
     onExportOpen();
   };
 
+  // Handle clicking the "Export" button
+  const handleExportJsonClick = () => {
+    postData(`/entities/export_all`, { project: projectData._id }).then(
+      (response) => {
+        FileSaver.saveAs(
+          new Blob([response]),
+          slugify(
+            `export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.json`
+          )
+        );
+      }
+    );
+  };
+
   // A list of all fields that can be exported, generated when the interface is opened
   const allExportFields = ["name", "created", "owner", "description"];
 
@@ -533,10 +547,14 @@ const Project = () => {
                 <MenuItem
                   onClick={handleExportClick}
                   icon={<Icon name={"download"} />}
-                  title="disabled project export as this feature is not ready yet"
-                  isDisabled={true || editing}
                 >
                   Export
+                </MenuItem>
+                <MenuItem
+                  onClick={handleExportJsonClick}
+                  icon={<Icon name={"download"} />}
+                >
+                  Export Project Entities Json
                 </MenuItem>
               </MenuList>
             </Menu>

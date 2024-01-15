@@ -184,6 +184,24 @@ const Entities = () => {
         table.resetRowSelection();
       },
     },
+    {
+      label: "Export All Entities JSON",
+      icon: "download",
+      action: (table) => {
+        postData(`/entities/export_all`, { format: "json" }).then(
+          (response) => {
+            FileSaver.saveAs(
+              new Blob([response]),
+              slugify(
+                `export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.json`
+              )
+            );
+          }
+        );
+
+        table.resetRowSelection();
+      },
+    },
   ];
 
   return (

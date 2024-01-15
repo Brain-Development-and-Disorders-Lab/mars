@@ -123,6 +123,64 @@ EntitiesRoute.route("/entities/export").post(
   }
 );
 
+// Get formatted data of all Entities
+EntitiesRoute.route("/entities/export_all").post(
+  authenticate,
+  (
+    request: { body?: { project: string } },
+    response: any
+  ) => {
+    const projectId = request?.body?.project; // get warning to go away
+    const tmp = require('tmp');
+    const fs = require('fs');
+    const dayjs = require('dayjs');
+
+    Entities.getAll().then((data: EntityModel[]) => {
+      // Create a temporary file and write the JSON data to it
+      tmp.file({ postfix: '.json' }, (err, path, fd) => {
+        if (err) {
+          return response.status(500).send("Error creating file");
+        }
+
+        let entities = data;
+        if (projectId) {
+          entities = entities.filter(entity => entity.projects.includes(projectId));
+        }
+
+        let modifiedEntities = {
+          "entities": entities.map(entity => {
+            const plainEntity = JSON.parse(JSON.stringify(entity)); // Converts MongoDB types to plain objects
+            delete plainEntity.history;
+
+            return plainEntity;
+          })
+        }
+        const jsonData = JSON.stringify(modifiedEntities, null, 4);
+
+        fs.writeFile(path, JSON.stringify(jsonData), (err) => {
+          if (err) {
+            return response.status(500).send("Error writing to file");
+          }
+
+          response.setHeader("Content-Type", `application/json`);
+          response.download(
+            path,
+            `export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.json`,
+            (err) => {
+              if (err) {
+                if (!response.headersSent) {
+                  response.status(500).send("Error sending file");
+                }
+              }
+            }
+          );
+        });
+      });
+    });
+  }
+);
+
+
 // Create a new Entity, expects Entity data
 EntitiesRoute.route("/entities/create").post(
   authenticate,

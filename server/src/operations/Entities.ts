@@ -406,7 +406,7 @@ export class Entities {
                     },
                     attributes: currentEntity.attributes,
                   },
-                  ...currentEntity.history,
+                  ...(currentEntity.history || []),
                 ],
               },
             };

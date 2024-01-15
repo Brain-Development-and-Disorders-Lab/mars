@@ -383,19 +383,28 @@ export class Projects {
    * Get a single Project
    * @return {Promise<ProjectModel>}
    */
-  static getOne = (id: string): Promise<ProjectModel> => {
-    return new Promise((resolve, _reject) => {
-      getDatabase()
-        .collection(PROJECTS)
-        .findOne({ _id: id }, (error: any, result: any) => {
-          if (error) {
-            throw error;
-          }
+  static getOne = async (id: string): Promise<ProjectModel> => {
+    try {
+      const entities = await Entities.getAll();
+      const filteredEntities = entities
+        .filter((entity) => entity?.projects?.includes(id))
+        .map((entity) => entity._id);
 
-          consola.success("Retrieved Project (id):", id.toString());
-          resolve(result as ProjectModel);
-        });
-    });
+      const project = await getDatabase()
+        .collection(PROJECTS)
+        .findOne({ _id: id });
+
+      if (!project) {
+        throw new Error("Project not found");
+      }
+
+      project.entities = filteredEntities;
+
+      consola.success("Retrieved Project (id):", id.toString());
+      return project as unknown as ProjectModel;
+    } catch (error) {
+      throw error;
+    }
   };
 
   /**
