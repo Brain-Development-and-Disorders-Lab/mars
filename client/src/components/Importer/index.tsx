@@ -165,8 +165,12 @@ const Importer = (props: {
   };
 
   const updateJsonDataWithUserSelections = () => {
+    if (!jsonData) {
+      // No jsonData to update (if CSV file)
+      return;
+    }
     // Clone the jsonData to avoid direct state mutation
-    let updatedJsonData = _.cloneDeep(jsonData);
+    let updatedJsonData = _.cloneDeep(jsonData) as any;
     updatedJsonData = (updatedJsonData as any).entities;
     // Update the jsonData with user selections
     // This is a simplified example, you might need to adjust it based on your actual data structure
