@@ -83,8 +83,10 @@ export class Entities {
   static create = (entity: any): Promise<EntityModel> => {
     consola.start("Creating new Entity:", entity.name);
 
-    // Allocate a new identifier and join with Entity data
-    entity["_id"] = getIdentifier("entity");
+    if (!entity?._id) {
+      // Allocate a new identifier and join with Entity data
+      entity["_id"] = getIdentifier("entity");
+    }
 
     // Push data to database
     return new Promise((resolve, _reject) => {
@@ -170,6 +172,36 @@ export class Entities {
         });
     });
   };
+
+
+  /**
+   * Update an Entity or create if new, comparing a new version with the existing version
+   * @param {EntityModel} updatedEntity updated Entity
+   * @return {Promise<EntityModel>}
+   */
+  static upsert = async (entityData: EntityModel): Promise<EntityModel> => {
+    try {
+      // Check if the Entity exists by a unique identifier (e.g., _id or name)
+      const existingEntity = await getDatabase().collection(ENTITIES).findOne({
+        $or: [
+          { _id: entityData._id },  // Check by _id
+          { name: entityData.name } // Check by name
+        ]
+      });
+
+      if (existingEntity) {
+        // If the Entity exists, update it
+        return await Entities.update({ ...existingEntity, ...entityData });
+      } else {
+        // If the Entity does not exist, create a new one
+        return await Entities.create(entityData);
+      }
+    } catch (error) {
+      console.error("Error in upserting Entity:", error);
+      throw error; // Rethrow the error to be handled by the caller
+    }
+  };
+
 
   /**
    * Update an Entity, comparing a new version with the existing version
@@ -372,13 +404,17 @@ export class Entities {
             })
           );
 
+          // Ensure the list of projects is unique
+          const uniqueProjects = [...new Set([...projectsToKeep, ...projectsToAdd])];
+
           // Resolve all operations then resolve overall Promise
           Promise.all(operations).then((_result) => {
             const updates = {
               $set: {
                 deleted: updatedEntity.deleted,
                 description: updatedEntity.description,
-                projects: [...projectsToKeep, ...projectsToAdd],
+                name: updatedEntity.name,
+                projects: uniqueProjects,
                 associations: {
                   origins: [
                     ...(currentEntity?.associations?.origins?.filter((origin) =>

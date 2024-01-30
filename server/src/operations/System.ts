@@ -77,6 +77,43 @@ export class System {
     });
   };
 
+  static importJSON = async (importData: any): Promise<{ status: boolean; message: string; data?: any }> => {
+    try {
+      // Validate importData here (if necessary)
+      // ...
+  
+      // Iterate through the importData and update the database
+      for (const item of importData.entities) {
+        // Assuming 'Entities' is your Mongoose model and item._id is the identifier
+        // const entityId = item._id;
+        // delete item._id; // Remove the ID from the item if you don't want to replace it
+  
+        // Update or insert the item in the database
+        // You can use 'updateOne', 'findByIdAndUpdate', or similar methods based on your exact requirements
+        await Entities.upsert(
+           item// Option to insert a new document if the entity does not exist
+        );
+      }
+  
+      // If everything goes well, send a success response
+      return {
+        status: true,
+        message: 'JSON data successfully imported.',
+        data: null, // or include any relevant data here
+      };
+  
+    } catch (error) {
+      // Handle any errors that occur during the process
+      console.error('Error importing JSON data:', error);
+      return {
+        status: false,
+        message: 'Failed to import JSON data.',
+        data: null, // or include error details here
+      };
+    }
+  };
+  
+
   static import = (
     files: any,
     type: "backup" | "spreadsheet"
@@ -291,7 +328,7 @@ export class System {
         reject({ message: "Error importing file" });
       }
     });
-  };
+  };  
 
   static mapData = (
     entityFields: EntityImport,
@@ -354,6 +391,7 @@ export class System {
       Promise.all(
         entities.map((entity) => {
           // Create all Entities
+          console.log("EEEEEEEentity:", entity);
           return Entities.create(entity);
         })
       )
