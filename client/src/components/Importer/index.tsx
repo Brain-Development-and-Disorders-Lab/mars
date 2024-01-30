@@ -171,7 +171,7 @@ const Importer = (props: {
     }
     // Clone the jsonData to avoid direct state mutation
     let updatedJsonData = _.cloneDeep(jsonData) as any;
-    updatedJsonData = (updatedJsonData as any).entities;
+    updatedJsonData = (updatedJsonData as any)?.entities;
     // Update the jsonData with user selections
     // This is a simplified example, you might need to adjust it based on your actual data structure
     if (updatedJsonData && Array.isArray(updatedJsonData)) {
@@ -193,8 +193,9 @@ const Importer = (props: {
     }
 
     // Update the state with the modified jsonData
-    setJsonData({entities: updatedJsonData} as any);
-    console.log("updatedJsonData:", updatedJsonData);
+    if (updatedJsonData) {
+      setJsonData({ entities: updatedJsonData } as any);
+    }
   };
 
 
@@ -309,25 +310,25 @@ const Importer = (props: {
     };
 
     setIsMapping(true);
-    
-    postData(`/system/importJSON`, {jsonData: jsonData})
-    .then(() => {
-      onMappingClose();
-      navigate(0);
-    })
-    .catch((error: { message: string }) => {
-      toast({
-        title: "Error",
-        status: "error",
-        description: error.message,
-        duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
+
+    postData(`/system/importJSON`, { jsonData: jsonData })
+      .then(() => {
+        onMappingClose();
+        navigate(0);
+      })
+      .catch((error: { message: string }) => {
+        toast({
+          title: "Error",
+          status: "error",
+          description: error.message,
+          duration: 4000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+      })
+      .finally(() => {
+        setIsMapping(false);
       });
-    })
-    .finally(() => {
-      setIsMapping(false);
-    });
   };
 
   const performMapping = () => {
@@ -954,7 +955,7 @@ const Importer = (props: {
                     Cancel
                   </Button>
 
-                    {/* Back button will be enable after debugging */}
+                  {/* Back button will be enable after debugging */}
                   {/* <Button
                     colorScheme={"blue"}
                     rightIcon={<Icon name="check" />}
