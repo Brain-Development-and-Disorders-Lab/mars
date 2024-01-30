@@ -281,9 +281,12 @@ const Importer = (props: {
         setAttributes(results[2]);
         setIsLoaded(true);
         onMappingOpen();
-        setProjectField(results[1][0]._id);
+        if (results[1][0]?._id) {
+          setProjectField(results[1][0]._id);
+        }
       })
       .catch((_error) => {
+        console.log("_error:", _error);
         toast({
           title: "Error",
           status: "error",

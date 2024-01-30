@@ -1,6 +1,6 @@
 
 describe('JSON Import Test', () => {
-  it('should import a CSV file successfully', () => {
+  it('should import a JSON file successfully', () => {
     // Visit the page where you can import CSV files
     cy.clearLocalStorage()
 

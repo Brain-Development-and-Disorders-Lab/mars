@@ -334,7 +334,7 @@ export class Projects {
           // Update the collection to remove the Entity
           const updatedValues = {
             $set: {
-              entities: (result as ProjectModel).entities.filter(
+              entities: (result as ProjectModel)?.entities.filter(
                 (content) => !_.isEqual(content.toString(), entity.toString())
               ),
             },
