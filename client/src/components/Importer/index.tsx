@@ -748,7 +748,7 @@ const Importer = (props: {
                         );
                       })}
                     </Flex>
-                    <Flex direction={"row"} gap={"4"}>
+                    {!jsonData && <Flex direction={"row"} gap={"4"}>
                       <FormControl
                         isRequired
                         isInvalid={_.isEqual(nameField, "")}
@@ -763,7 +763,7 @@ const Importer = (props: {
                           setDescriptionField
                         )}
                       </FormControl>
-                    </Flex>
+                    </Flex>}
                     <Flex direction={"row"} gap={"4"}>
                       <FormControl>
                         <FormLabel>Owner</FormLabel>
