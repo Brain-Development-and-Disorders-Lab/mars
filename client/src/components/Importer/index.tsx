@@ -176,11 +176,11 @@ const Importer = (props: {
     // This is a simplified example, you might need to adjust it based on your actual data structure
     if (updatedJsonData && Array.isArray(updatedJsonData)) {
       (updatedJsonData as any).forEach((entity: any) => {
-        if (originsField.length > 0) {
+        if (originsField?.length > 0) {
           // Add or update the 'origins' field in the entity
           entity.associations.origins = _.unionBy(entity.associations.origins, originsField, 'id');
         }
-        if (productsField.length > 0) {
+        if (productsField?.length > 0) {
           // Add or update the 'products' field in the entity
           entity.associations.products = _.unionBy(entity.associations.products, productsField, 'id');;
         }
@@ -401,7 +401,7 @@ const Importer = (props: {
     return (
       <Select
         placeholder={"Select Project"}
-        value={value || (projects.length > 0 ? projects[0]._id : '')}
+        value={value || (projects?.length > 0 ? projects[0]._id : '')}
         onChange={(event) => setValue(event.target.value)}
       >
         {projects.map((project) => {

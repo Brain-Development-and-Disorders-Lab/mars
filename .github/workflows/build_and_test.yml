@@ -57,7 +57,7 @@ jobs:
       working-directory: ./server
       run: |
         yarn install
-        yarn build
+        yarn buildDebbug
 
     # Test the server
     - name: Test Server
@@ -76,7 +76,7 @@ jobs:
       uses: cypress-io/github-action@v6
       with:
         wait-on: 'http://localhost:8080'
-        start: yarn start
+        start: yarn startDev
 
 
     - name: Upload Cypress Screenshots

@@ -233,9 +233,10 @@ export class Projects {
         .collection(PROJECTS)
         .findOne({ _id: project }, (error: any, result: any) => {
           if (error) {
+            console.log("project findOne error:", error);
             throw error;
           }
-
+          console.log("project found:", result);
           // Update the collection to include the Entity
           const updatedValues = {
             $set: {
@@ -250,6 +251,7 @@ export class Projects {
               updatedValues,
               (error: any, _response: any) => {
                 if (error) {
+                  console.log("project updateOne error:", error);
                   throw error;
                 }
                 consola.success(

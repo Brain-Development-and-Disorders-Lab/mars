@@ -334,6 +334,7 @@ export class System {
     entityFields: EntityImport,
     spreadsheetData: any[]
   ): Promise<EntityModel[]> => {
+    consola.start("Mapping data to Entities:", entityFields, spreadsheetData);
     return new Promise((resolve, reject) => {
       // Extract Entities
       const entities = [] as IEntity[];
@@ -391,11 +392,12 @@ export class System {
       Promise.all(
         entities.map((entity) => {
           // Create all Entities
-          console.log("EEEEEEEentity:", entity);
+          console.log("entity:", entity);
           return Entities.create(entity);
         })
       )
         .then((entities: EntityModel[]) => {
+          console.log("entities:", entities);
           // Additional operations
           const operations = [] as Promise<any>[];
 

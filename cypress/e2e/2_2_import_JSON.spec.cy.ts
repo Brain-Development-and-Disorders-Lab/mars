@@ -24,6 +24,7 @@ describe('JSON Import Test', () => {
       cy.wait(500);
       cy.get('.css-15vhhhd > .css-h211ee').click({force: true}); // go to importe step 2
       cy.get('.css-15vhhhd > .css-h211ee').click({force: true}); //  finalize import
+      cy.reload();
 
       cy.contains('FROMJSON').should('exist');
     });
