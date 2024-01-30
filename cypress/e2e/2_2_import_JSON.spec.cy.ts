@@ -1,5 +1,5 @@
 
-describe('CSV Import Test', () => {
+describe('JSON Import Test', () => {
   it('should import a CSV file successfully', () => {
     // Visit the page where you can import CSV files
     cy.clearLocalStorage()
@@ -21,7 +21,7 @@ describe('CSV Import Test', () => {
 
       cy.wait(100);
       cy.get('.css-jut409').scrollIntoView().click();
-      cy.wait(100);
+      cy.wait(500);
       cy.get('.css-15vhhhd > .css-h211ee').click({force: true}); // go to importe step 2
       cy.get('.css-15vhhhd > .css-h211ee').click({force: true}); //  finalize import
 
