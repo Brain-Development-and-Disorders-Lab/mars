@@ -224,20 +224,20 @@ export class Entities {
           const operations = [];
 
           // Projects
-          const projectsToKeep = currentEntity.projects?.filter((project) =>
-            updatedEntity.projects.includes(project)
+          const projectsToKeep = currentEntity?.projects?.filter((project) =>
+            updatedEntity?.projects.includes(project)
           );
-          const projectsToAdd = updatedEntity.projects?.filter(
+          const projectsToAdd = updatedEntity?.projects?.filter(
             (project) => !projectsToKeep.includes(project)
           );
-          if (projectsToAdd.length > 0) {
+          if (projectsToAdd?.length > 0) {
             operations.push(
               projectsToAdd.map((project: string) => {
                 Projects.addEntity(project, updatedEntity._id);
               })
             );
           }
-          const projectsToRemove = currentEntity.projects?.filter(
+          const projectsToRemove = currentEntity?.projects?.filter(
             (project) => !projectsToKeep.includes(project)
           );
           if (projectsToRemove.length > 0) {
