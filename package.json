@@ -6,7 +6,8 @@
   "author": "Henry Burgess <henryjburg@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "start": "cd server && node dist/index.js"
+    "start": "cd server && node dist/index.js",
+    "startDev": "cd server && node --inspect dist/index.js"
   },
   "devDependencies": {
     "cypress": "^13.4.0",

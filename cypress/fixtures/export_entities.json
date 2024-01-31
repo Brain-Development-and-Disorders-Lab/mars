@@ -7,7 +7,7 @@
             "name": "mini box 1",
             "owner": "XXXX-1234-ABCD-0000",
             "created": "2023-12-27T20:12:43.686Z",
-            "description": "mini box that fit in another box FROMJSON",
+            "description": "mini box that fit in another box",
             "projects": [
                 "pBwj_re8"
             ],
@@ -90,6 +90,43 @@
                 ]
             },
             "attributes": [],
+            "attachments": []
+        },
+        {
+            "_id": "eDDyDMjQ",
+            "deleted": false,
+            "locked": false,
+            "name": "mini box 1 FROMJSON",
+            "owner": "XXXX-1234-ABCD-0000",
+            "created": "2023-12-27T20:12:43.686Z",
+            "description": "mini box that fit in another box FROMJSON",
+            "projects": [
+                "pBwj_re8"
+            ],
+            "associations": {
+                "origins": [
+                    {
+                        "name": "box 1",
+                        "id": "eqRN9NBH"
+                    }
+                ],
+                "products": []
+            },
+            "attributes": [
+                {
+                    "_id": "a-eDDyDMjQ-SLaiM7",
+                    "name": "AAAAAAAAAA",
+                    "description": "BBBBBB",
+                    "values": [
+                        {
+                            "identifier": "v_text_18399",
+                            "name": "ZZZZZZZZZZZ",
+                            "type": "text",
+                            "data": "XXXXXXXXXXXXX"
+                        }
+                    ]
+                }
+            ],
             "attachments": []
         }
     ]

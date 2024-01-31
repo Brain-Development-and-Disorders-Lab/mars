@@ -22,6 +22,24 @@ SystemRoute.route("/system/backup").get(
 );
 
 // Route: Import JSON file
+SystemRoute.route("/system/importJSON").post(
+  authenticate,
+  (request: any, response: any) => {
+    System.importJSON(request.body.jsonData)
+      .then((result: { status: boolean; message: string; data?: any }) => {
+        response.json({
+          status: result.status ? "success" : "error",
+          message: result.message,
+          data: _.isUndefined(result.data) ? "" : result.data,
+        });
+      })
+      .catch((reason: { message: string }) => {
+        response.json({ status: "error", message: reason.message });
+      });
+  }
+);
+
+// Route: Import CSV file
 SystemRoute.route("/system/import").post(
   authenticate,
   (request: any, response: any) => {
