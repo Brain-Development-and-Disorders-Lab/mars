@@ -191,9 +191,6 @@ export class Entities {
 
       if (existingEntity) {
         // If the Entity exists, update it
-        console.log("existingEntity:", existingEntity);
-        console.log("entityData:", entityData);
-        console.log("{ ...existingEntity, ...entityData,  }, updating:", { ...existingEntity, ...entityData,  });
         return await Entities.update({ ...existingEntity, ...entityData,  });
       } else {
         // If the Entity does not exist, create a new one
@@ -989,13 +986,6 @@ export class Entities {
             console.log("addAttribute findOne error:", error);
             throw error;
           }
-
-          // if (!result?.attributes?.length) {
-          //   console.log("addAttribute no attributes found:");
-          //   resolve(entity);
-          // }
-          console.log("addAttribute result:", result);
-          console.log("[...(result?.attributes || []), attribute] :", [...(result?.attributes || []), attribute]);
           
           // Update the collection of Attributes associated with the Entity to remove this Attribute
           const updates = {
