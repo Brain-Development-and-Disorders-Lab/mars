@@ -641,3 +641,58 @@ describe("POST /entities/update", () => {
       });
   });
 });
+
+describe("getDataMultipleRaw", () => {
+  it("should retrieve raw data for multiple entities", async () => {
+    // Arrange: Create multiple entities
+    const entity1 = await Entities.create({
+      name: "TestProductEntity",
+      created: new Date(Date.now()).toISOString(),
+      owner: "henry.burgess@wustl.edu",
+      description: "Test Product",
+      projects: [],
+      associations: {
+        origins: [],
+        products: [],
+      },
+      attributes: [],
+      attachments: [],
+      history: [],
+    });
+  
+    // Create the second Entity (Origin) that has the first Entity (Product)
+    const entity2 = await Entities.create({
+      name: "TestOriginEntity",
+      created: new Date(Date.now()).toISOString(),
+      owner: "henry.burgess@wustl.edu",
+      description: "Test Origin",
+      projects: [],
+      associations: {
+        origins: [],
+        products: [],
+      },
+      attributes: [],
+      attachments: [],
+      history: [],
+    });
+    // Act: Retrieve raw data for created entities
+    const rawData = await Entities.getDataMultipleRaw([entity1._id, entity2._id]);
+
+    // Assert: Raw data should include data for both entities
+    expect(rawData.length).toBe(2);
+    expect(rawData[0]._id.toString() == entity1._id).toBeTruthy();
+    expect(rawData[1]._id.toString() == entity2._id).toBeTruthy();
+  });
+
+  it("should handle non-existent entity IDs gracefully", async () => {
+    // Arrange: Non-existent entity IDs
+    const fakeIds = ["fakeId1", "fakeId2"];
+
+    // Act: Try to retrieve raw data for non-existent entities
+    const rawData = await Entities.getDataMultipleRaw(fakeIds);
+
+    // Assert: Function should return an empty array or appropriate response
+    expect(rawData.length).toBe(0);
+  });
+});
+
