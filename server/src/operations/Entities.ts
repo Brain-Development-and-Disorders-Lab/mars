@@ -210,7 +210,6 @@ export class Entities {
    */
   static update = (updatedEntity: EntityModel): Promise<EntityModel> => {
     consola.start("Updating Entity:", updatedEntity?.name);
-    consola.start("Updating Entity:", updatedEntity);
     if (!updatedEntity?._id) {
       console.log( "Entity ID is required to update an Entity" );
     }
@@ -1688,9 +1687,7 @@ export class Entities {
 
   static async getDataMultipleJSON(entityIds: string[]) {
     try {
-      const entities = await getDatabase()
-        .collection(ENTITIES)
-        .find({ _id: { $in: entityIds } }).toArray();
+      const entities = await Entities.getDataMultipleRaw(entityIds);
 
       // Remove 'history' property from each entity
       let modifiedEntities = {
@@ -1708,14 +1705,23 @@ export class Entities {
     }
   }
 
+  static async getDataMultipleRaw(entityIds: string[]) {
+    try {
+      const entities = await getDatabase()
+        .collection(ENTITIES)
+        .find({ _id: { $in: entityIds } }).toArray();
+
+      return entities;
+    } catch (error) {
+      throw error;
+    }
+  }
+
   static getDataMultiple = (entities: string[]): Promise<string> => {
     consola.start("Generating data for", entities?.length, "Entities...");
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       // Get the data for each Entity and store
-      const entityData: Promise<EntityModel>[] = [];
-      entities?.map((entityId: string) => {
-        entityData.push(Entities.getOne(entityId));
-      });
+      const entityData: any = await Entities.getDataMultipleRaw(entities);
 
       Promise.all(entityData).then((entities: EntityModel[]) => {
         // Find any common Attributes and append to headers

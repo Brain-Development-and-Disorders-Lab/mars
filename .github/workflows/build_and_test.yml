@@ -57,7 +57,7 @@ jobs:
       working-directory: ./server
       run: |
         yarn install
-        yarn buildDebbug
+        yarn buildDebug
 
     # Test the server
     - name: Test Server
