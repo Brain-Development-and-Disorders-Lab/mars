@@ -147,8 +147,6 @@ const Importer = (props: {
       try {
         const data = JSON.parse(e.target?.result as string);
         setJsonData(data); // Set your JSON data to state
-        console.log("json Data:", data);
-        console.log("json jsonData:", jsonData);
         setupMapping(); // Proceed to setup mapping after loading the JSON
       } catch (error) {
         toast({

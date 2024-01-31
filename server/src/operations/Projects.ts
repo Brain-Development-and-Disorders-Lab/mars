@@ -236,7 +236,6 @@ export class Projects {
             console.log("project findOne error:", error);
             throw error;
           }
-          console.log("project found:", result);
           // Update the collection to include the Entity
           const updatedValues = {
             $set: {

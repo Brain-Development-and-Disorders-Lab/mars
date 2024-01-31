@@ -392,12 +392,10 @@ export class System {
       Promise.all(
         entities.map((entity) => {
           // Create all Entities
-          console.log("entity:", entity);
           return Entities.create(entity);
         })
       )
         .then((entities: EntityModel[]) => {
-          console.log("entities:", entities);
           // Additional operations
           const operations = [] as Promise<any>[];
 
