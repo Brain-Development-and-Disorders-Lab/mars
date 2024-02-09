@@ -57,6 +57,7 @@ export const getToken = (tokenKey: string): any => {
     return JSON.parse(storedToken);
   }
 
+  // decomment if you want to use a dummy token
   if (_.isEqual(process.env.NODE_ENV, "development")) {
     // Return a dummy token
     return {

@@ -342,12 +342,13 @@ export type AuthToken = AuthInfo & {
 
 // User types
 export type IUser = {
-  name: string;
-  email: string;
+  name?: string;
+  email?: string;
 };
 
 export type UserModel = IUser & {
   _id: string;
+  id_token?: string;
 };
 
 // Device types

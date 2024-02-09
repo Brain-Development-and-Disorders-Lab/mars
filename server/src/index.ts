@@ -24,6 +24,7 @@ import SearchRoute from "./routes/Search";
 import SystemRoute from "./routes/System";
 import AuthenticationRoute from "./routes/Authentication";
 import UsersRoute from "./routes/Users";
+import authMiddleware from "./middleware/authMiddleware";
 
 
 // Set logging level
@@ -39,6 +40,9 @@ app.use(helmet());
 app.use(cors({ credentials: true, origin: true }));
 app.use(express.json({ limit: "50mb" }));
 app.use(fileUpload());
+if (!(process.env.NODE_ENV === "development")) {
+  app.use(authMiddleware);
+}
 app.use(
   ActivityRoute,
   AttributesRoute,

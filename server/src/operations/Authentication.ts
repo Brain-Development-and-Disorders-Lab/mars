@@ -14,8 +14,11 @@ import { verify } from "jsonwebtoken";
 const TOKEN_URL = "https://orcid.org/oauth/token";
 const CLIENT_ID = process.env.CLIENT_ID as string;
 const CLIENT_SECRET = process.env.CLIENT_SECRET as string;
-const REDIRECT_URI = "https://mars.reusable.bio";
+const REDIRECT_URI = _.isEqual(process.env.NODE_ENV, "test") ? "http://127.0.0.1:8080" : "https://mars.reusable.bio";
 
+/**
+ * Authentication operations
+ */
 export class Authentication {
   /**
    * Validate the ORCiD login submitted by the user
@@ -34,30 +37,47 @@ export class Authentication {
           "Content-Type": "application/x-www-form-urlencoded",
         },
       })
-        .then((response: AuthToken) => {
+        .then(async (response: AuthToken) => {
           consola.success("Valid token");
           consola.start("Checking access...");
-          Users.get(response.orcid)
-            .then(() => {
-              consola.info("id_token:", response.id_token);
-              resolve({
+
+          try {
+            let user = await Users.exists(response.orcid);
+            if (user) {
+              // If user exists, update the existing record with any new data
+              consola.info("User found for ORCiD:", response.orcid);
+              await Users.update(response.orcid, {
                 name: response.name,
-                orcid: response.orcid,
+                _id: response.orcid,
                 id_token: response.id_token,
               });
-            })
-            .catch((_error: any) => {
-              consola.error(
-                `ORCiD "${response.orcid}" does not have access. Please contact the administrator.`
-              );
-              reject(
-                `ORCiD "${response.orcid}" does not have access. Please contact the administrator.`
-              );
+              consola.info("User data updated for ORCiD:", response.orcid);
+            } else {
+              // If user does not exist, create a new record
+              consola.info("New user creation for ORCiD:", response.orcid);
+              await Users.create({
+                name: response.name,
+                _id: response.orcid,
+                id_token: response.id_token,
+              });
+              consola.info("New user created for ORCiD:", response.orcid);
+            }
+
+            // Resolve with updated or new user data
+            resolve({
+              name: response.name,
+              orcid: response.orcid,
+              id_token: response.id_token,
             });
-        })
+          } catch (error) {
+            consola.error(`Error processing ORCiD "${response.orcid}": ${JSON.stringify(error)}`);
+            reject(`Error processing ORCiD "${response.orcid}". Please contact the administrator.`);
+          }
+        }
+        )
         .catch((error: any) => {
-          consola.error(error.response.data.error_description);
-          reject(error.response.data.error_description);
+          consola.error(JSON.stringify(error));
+          reject(JSON.stringify(error));
         });
     });
   };
