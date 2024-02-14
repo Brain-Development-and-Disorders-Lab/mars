@@ -681,7 +681,7 @@ describe("getDataMultipleRaw", () => {
     // Assert: Raw data should include data for both entities
     expect(rawData.length).toBe(2);
     expect((rawData[0]._id.toString() == entity1._id) || (rawData[1]._id.toString() == entity1._id)).toBeTruthy();
-    expect((rawData[0]._id.toString() == entity2._id) || (rawData[1]._id.toString() == entity1._id)).toBeTruthy();
+    expect((rawData[0]._id.toString() == entity2._id) || (rawData[1]._id.toString() == entity2._id)).toBeTruthy();
   });
 
   it("should handle non-existent entity IDs gracefully", async () => {
