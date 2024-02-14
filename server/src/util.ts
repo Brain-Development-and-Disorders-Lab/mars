@@ -70,6 +70,7 @@ export const postData = async (
 };
 
 export const authenticate = (request: any, response: any, next: () => void) => {
+  // Bypass authentication in development mode
   if (_.isEqual(process.env.NODE_ENV, "development")) {
     // Bypass authentication in development mode
     next();
