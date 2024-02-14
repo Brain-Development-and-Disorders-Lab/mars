@@ -84,6 +84,11 @@ export class Authentication {
 
   static validate = (id_token: string): Promise<boolean> => {
     return new Promise((resolve, reject) => {
+
+      if (_.isEqual(process.env.NODE_ENV, "development")) {
+        resolve(true);
+      }
+
       const client = new JwksClient({
         jwksUri: "https://orcid.org/oauth/jwks",
         requestHeaders: {},
