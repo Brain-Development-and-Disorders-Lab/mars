@@ -97,4 +97,42 @@ describe('checkProjectOwnership', () => {
         expect(next).not.toHaveBeenCalled();
         expect(req.project).not.toBeDefined();
     });
+
+
+    it('should respond with 404 if the project is not found', async () => {
+        process.env.NODE_ENV = 'test';
+        (ProjectsModule.Projects.getOne as jest.Mock).mockResolvedValue(null as never); // Simulate project not found
+
+        await checkProjectOwnership(req, res, next);
+
+        expect(res.status).toHaveBeenCalledWith(404);
+        expect(res.json).toHaveBeenCalledWith({ message: 'Project not found.' });
+        expect(next).not.toHaveBeenCalled();
+    });
+
+    it('should respond with 400 if the user is not authenticated/provided', async () => {
+        req.user = undefined; // Simulate user not authenticated
+        process.env.NODE_ENV = 'test';
+        (AuthModule.Authentication.validate as jest.Mock).mockResolvedValue({} as never);
+
+
+        await checkProjectOwnership(req, res, next);
+
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith({ message: 'User not provided.' });
+        expect(next).not.toHaveBeenCalled();
+    });
+
+    it('should respond with 401 if token is invalid', async () => {
+        process.env.NODE_ENV = 'test';
+        req.user = undefined;
+        (req.headers as any).id_token = undefined;
+        (AuthModule.Authentication.validate as jest.Mock).mockResolvedValue(null as never); // Simulate invalid token
+
+        await checkProjectOwnership(req, res, next);
+
+        expect(res.status).toHaveBeenCalledWith(401);
+        expect(res.json).toHaveBeenCalledWith({ message: 'No token provided.' });
+        expect(next).not.toHaveBeenCalled();
+    });
 });
