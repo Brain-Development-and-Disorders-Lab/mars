@@ -101,10 +101,10 @@ export class Authentication {
             Users.get(orcid.toString()).then((result) => {
               if (_.isEqual(result.status, "success")) {
                 // User exists and is valid
-                resolve(true);
+                resolve(result?.user as any);
               } else {
                 // Invalid user
-                resolve(false);
+                resolve(result?.user as any);
               }
             });
           }

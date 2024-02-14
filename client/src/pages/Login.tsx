@@ -78,6 +78,7 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
           isClosable: true,
         });
         setIsLoading(false);
+        setAuthenticated(false);
       });
   }
 

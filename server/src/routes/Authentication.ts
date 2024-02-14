@@ -12,6 +12,7 @@ const AuthenticationRoute = express.Router();
 // Route: Login
 AuthenticationRoute.route("/login").post(
   (request: { body: { code: string } }, response: any) => {
+    console.log("Logging in: ", request.body.code);
     Authentication.login(request.body.code)
       .then((token: AuthInfo) => {
         response.json({
