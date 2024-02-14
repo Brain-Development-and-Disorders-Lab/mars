@@ -7,17 +7,16 @@ import { ProjectModel, IProject } from "@types";
 
 // Operations
 import { Projects } from "../operations/Projects";
-import { Authentication } from "src/operations/Authentication";
+import { Authentication } from "../operations/Authentication";
 
 // Utility functions and libraries
 // Middleware to check project ownership
-export const checkProjectOwnership = async (req, res, next) => {
+export const checkProjectOwnership = async (req: any, res: any, next: any) => {
   try {
     if (_.isEqual(process.env.NODE_ENV, "development")) {
       next();
       return;
     }
-    console.log("process.env:", process.env);
     console.log("Checking project ownership for user:");
     const projectId = req.params.id; // Assuming the project ID is passed as a URL parameter
     let userId = req?.user?._id; // Assuming the user's ID is attached to the request object
