@@ -15,6 +15,7 @@ export const checkProjectOwnership = async (req, res, next) => {
   try {
     if (_.isEqual(process.env.NODE_ENV, "development")) {
       next();
+      return;
     }
     console.log("Checking project ownership for user:");
     const projectId = req.params.id; // Assuming the project ID is passed as a URL parameter
