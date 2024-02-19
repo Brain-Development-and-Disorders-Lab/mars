@@ -81,7 +81,7 @@ export class Entities {
  */
   static entityByNameExist = (name: string): Promise<EntityModel | null> => {
     consola.start("Searching for Entity with name:", name);
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES)
         .findOne({ name: name, deleted: false }, (error: any, result: any) => {
