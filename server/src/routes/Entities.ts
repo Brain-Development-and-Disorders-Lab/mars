@@ -32,6 +32,16 @@ EntitiesRoute.route("/entities/:id").get(
   }
 );
 
+// View specific Entity
+EntitiesRoute.route("/entities/byName/:name").get(
+  authenticate,
+  (request: any, response: any) => {
+    Entities.entityByNameExist(request.params.name).then((entity: EntityModel | null) => {
+      response.json(entity);
+    });
+  }
+);
+
 // Lock specific entity
 EntitiesRoute.route("/entities/lock/:id").post(
   authenticate,

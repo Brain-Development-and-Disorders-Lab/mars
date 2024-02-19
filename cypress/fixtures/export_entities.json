@@ -38,6 +38,43 @@
             "attachments": []
         },
         {
+            "_id": "noID",
+            "deleted": false,
+            "locked": false,
+            "name": "mini box 1",
+            "owner": "XXXX-1234-ABCD-0000",
+            "created": "2023-12-27T20:12:43.686Z",
+            "description": "mini box that fit in another box updated by same name entity",
+            "projects": [
+                "pBwj_re8"
+            ],
+            "associations": {
+                "origins": [
+                    {
+                        "name": "box 1",
+                        "id": "eqRN9NBH"
+                    }
+                ],
+                "products": []
+            },
+            "attributes": [
+                {
+                    "_id": "a-eDDyDMjQ-SLaiM7",
+                    "name": "AAAAAAAAAA",
+                    "description": "BBBBBB",
+                    "values": [
+                        {
+                            "identifier": "v_text_18399",
+                            "name": "ZZZZZZZZZZZ",
+                            "type": "text",
+                            "data": "XXXXXXXXXXXXX"
+                        }
+                    ]
+                }
+            ],
+            "attachments": []
+        },
+        {
             "_id": "eOZ4E6Qw",
             "deleted": false,
             "locked": false,

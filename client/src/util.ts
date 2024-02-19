@@ -63,7 +63,6 @@ export const getToken = (tokenKey: string): any => {
 
   // decomment if you want to use a dummy token
   if (_.isEqual(process.env.NODE_ENV, "development")) {
-    console.log("Using dummy token");
     // Return a dummy token
     return {
       name: "Test User",
