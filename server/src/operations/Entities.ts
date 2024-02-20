@@ -74,6 +74,29 @@ export class Entities {
     });
   };
 
+  /**
+ * Find if Entity by its name existe
+ * @param {string} name the name of the Entity to find
+ * @return {Promise<EntityModel | null>}
+ */
+  static entityByNameExist = (name: string): Promise<EntityModel | null> => {
+    consola.start("Searching for Entity with name:", name);
+    return new Promise((resolve, _reject) => {
+      getDatabase()
+        .collection(ENTITIES)
+        .findOne({ name: name, deleted: false }, (error: any, result: any) => {
+          if (error) {
+            resolve(null);
+          } else if (result) {
+            resolve(result as EntityModel);
+          } else {
+            consola.warn("No Entity found with name:", name);
+            resolve(null);
+          }
+        });
+    });
+  };
+
 
   /**
    * Create a new Entity
@@ -182,7 +205,7 @@ export class Entities {
   static upsert = async (entityData: EntityModel): Promise<EntityModel> => {
     try {
       // Check if the Entity exists by a unique identifier (e.g., _id or name)
-      const existingEntity = await getDatabase().collection(ENTITIES).findOne({
+      let existingEntity = await getDatabase().collection(ENTITIES).findOne({
         $or: [
           { _id: entityData?._id },  // Check by _id
           // { name: entityData?.name } // Check by name
@@ -191,9 +214,21 @@ export class Entities {
 
       if (existingEntity) {
         // If the Entity exists, update it
-        return await Entities.update({ ...existingEntity, ...entityData,  });
+        return await Entities.update({ ...existingEntity, ...entityData, });
       } else {
         // If the Entity does not exist, create a new one
+        existingEntity = await getDatabase().collection(ENTITIES).findOne({
+          $or: [
+            { name: entityData?.name },  // Check by name
+          ]
+        });
+
+        if (existingEntity) {
+          // If the Entity exists, update it
+          entityData._id = existingEntity._id as any;
+          return await Entities.update({ ...existingEntity, ...entityData,  });
+        }
+
         return await Entities.create(entityData);
       }
     } catch (error) {
@@ -211,7 +246,7 @@ export class Entities {
   static update = (updatedEntity: EntityModel): Promise<EntityModel> => {
     consola.start("Updating Entity:", updatedEntity?.name);
     if (!updatedEntity?._id) {
-      console.log( "Entity ID is required to update an Entity" );
+      console.log("Entity ID is required to update an Entity");
     }
     return new Promise((resolve, _reject) => {
       getDatabase()
@@ -419,7 +454,7 @@ export class Entities {
               ...(projectsToAdd || []),
             ]),
           ];
-          
+
           // Resolve all operations then resolve overall Promise
           Promise.all(operations).then((_result) => {
             const updates = {
@@ -985,7 +1020,7 @@ export class Entities {
             console.log("addAttribute findOne error:", error);
             throw error;
           }
-          
+
           // Update the collection of Attributes associated with the Entity to remove this Attribute
           const updates = {
             $set: {
@@ -993,7 +1028,7 @@ export class Entities {
 
             },
           };
-          
+
           getDatabase()
             .collection(ENTITIES)
             .updateOne(
