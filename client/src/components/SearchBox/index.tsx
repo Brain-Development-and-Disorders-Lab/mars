@@ -19,7 +19,6 @@ import {
   Spacer,
   VStack,
   StackDivider,
-  PopoverFooter,
   IconButton,
   Tooltip,
   Spinner,
@@ -244,35 +243,34 @@ const SearchBox = () => {
                     divider={<StackDivider borderColor={"gray.200"} />}
                     w={"100%"}
                   >
-                    {results.slice(0, MAX_RESULTS).map((result) => {
-                      return (
-                        <Flex
-                          key={result._id}
-                          direction={"row"}
-                          gap={"4"}
-                          w={"100%"}
-                        >
-                          <Text as={"b"}>{result.name}</Text>
-                          <Spacer />
-                          <Link onClick={() => handleResultClick(result._id)}>
-                            <Flex gap={"1"} direction={"row"} align={"center"}>
-                              <Text>View</Text>
-                              <Icon name={"a_right"} />
-                            </Flex>
-                          </Link>
-                        </Flex>
-                      );
-                    })}
+                    {results.length > 0 ?
+                      results.slice(0, MAX_RESULTS).map((result) => {
+                        return (
+                          <Flex
+                            key={result._id}
+                            direction={"row"}
+                            gap={"4"}
+                            w={"100%"}
+                          >
+                            <Text as={"b"}>{result.name}</Text>
+                            <Spacer />
+                            <Link onClick={() => handleResultClick(result._id)}>
+                              <Flex gap={"1"} direction={"row"} align={"center"}>
+                                <Text>View</Text>
+                                <Icon name={"a_right"} />
+                              </Flex>
+                            </Link>
+                          </Flex>
+                        );
+                      })
+                    :
+                      <Flex m={"4"}>No results found.</Flex>
+                    }
                   </VStack>
                 )
               )}
             </Flex>
           </PopoverBody>
-          <PopoverFooter>
-            <Text>
-              For more complete results, use the dedicated Search page.
-            </Text>
-          </PopoverFooter>
         </PopoverContent>
       </Popover>
     </Flex>
