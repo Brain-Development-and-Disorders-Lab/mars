@@ -19,14 +19,20 @@ import { consola } from "consola";
 import dayjs from "dayjs";
 import fs from "fs";
 import { FindCursor, GridFSBucketReadStream, ObjectId } from "mongodb";
-import tmp from "tmp";
+import tmp, { file } from "tmp";
 import XLSX from "xlsx";
 
 // Database operations
 import { getAttachments, getSystem } from "src/database/connection";
+import { c } from "consola/dist/consola-10ce05ae";
 
 // Constants
 const DEVICES = "devices";
+
+function isJsonFile(filename: string) {
+  // Use a regular expression to test if the filename ends with '.json'
+  return filename.toLowerCase().endsWith('.json');
+}
 
 export class System {
   static backup = (): Promise<string> => {
@@ -49,7 +55,7 @@ export class System {
           // Create a temporary file, passing the filename as a response
           tmp.file((error, path: string, _fd: number) => {
             if (error) {
-              reject(error);
+              reject("Error create temporary file:", error);
               throw error;
             }
 
@@ -70,6 +76,43 @@ export class System {
       );
     });
   };
+
+  static importJSON = async (importData: any): Promise<{ status: boolean; message: string; data?: any }> => {
+    try {
+      // Validate importData here (if necessary)
+      // ...
+  
+      // Iterate through the importData and update the database
+      for (const item of importData.entities) {
+        // Assuming 'Entities' is your Mongoose model and item._id is the identifier
+        // const entityId = item._id;
+        // delete item._id; // Remove the ID from the item if you don't want to replace it
+  
+        // Update or insert the item in the database
+        // You can use 'updateOne', 'findByIdAndUpdate', or similar methods based on your exact requirements
+        await Entities.upsert(
+           item// Option to insert a new document if the entity does not exist
+        );
+      }
+  
+      // If everything goes well, send a success response
+      return {
+        status: true,
+        message: 'JSON data successfully imported.',
+        data: null, // or include any relevant data here
+      };
+  
+    } catch (error) {
+      // Handle any errors that occur during the process
+      console.error('Error importing JSON data:', error);
+      return {
+        status: false,
+        message: 'Failed to import JSON data.',
+        data: null, // or include error details here
+      };
+    }
+  };
+  
 
   static import = (
     files: any,
@@ -115,7 +158,7 @@ export class System {
         // Utility function to import Projects
         const importProjects = (parsedFileData: any) => {
           // Import Projects
-          consola.start("Importing Entities");
+          consola.start("Importing Projects");
           if (!_.isUndefined(parsedFileData["projects"])) {
             const importedProjects = parsedFileData[
               "projects"
@@ -232,19 +275,52 @@ export class System {
               reject({ message: "Error importing backup JSON file" });
             });
         } else if (_.isEqual(type, "spreadsheet")) {
-          const spreadsheet = XLSX.read(receivedFileData, { cellDates: true });
-          if (spreadsheet.SheetNames.length > 0) {
-            const primarySheet = spreadsheet.Sheets[spreadsheet.SheetNames[0]];
-            const parsedSheet = XLSX.utils.sheet_to_json(primarySheet, {
-              defval: "",
-            });
-            resolve({
-              status: true,
-              message: "Parsed spreadsheet successfully",
-              data: parsedSheet,
-            });
+
+          if (isJsonFile(files.file.name)) {
+            consola.start("loading json file:", files.file.name);
+            const parsedFileData = JSON.parse(receivedFileData.toString("utf-8"));
+            importEntities(parsedFileData);
+            importProjects(parsedFileData);
+            importAttribute(parsedFileData);
+
+            // Execute all import operations
+            Promise.all([
+              Promise.all(entityOperations),
+              Promise.all(projectsOperations),
+              Promise.all(attributeOperations),
+            ])
+              .then(
+                (results: [EntityModel[], ProjectModel[], AttributeModel[]]) => {
+                  consola.success("Imported", results[0].length, "Entities");
+                  consola.success("Imported", results[1].length, "Projects");
+                  consola.success("Imported", results[2].length, "Attributes");
+                  consola.success("Imported file:", receivedFile.name);
+                  resolve({
+                    status: true,
+                    message: "Successfuly imported JSON file",
+                  });
+                }
+              )
+              .catch((_error) => {
+                consola.error("Error importing backup JSON file");
+                reject({ message: "Error importing backup JSON file" });
+              });
+
           } else {
-            reject({ message: "No sheets in spreadsheet" });
+            const spreadsheet = XLSX.read(receivedFileData, { cellDates: true });
+            if (spreadsheet.SheetNames.length > 0) {
+              const primarySheet = spreadsheet.Sheets[spreadsheet.SheetNames[0]];
+              const parsedSheet = XLSX.utils.sheet_to_json(primarySheet, {
+                defval: "",
+              });
+              resolve({
+                status: true,
+                message: "Parsed spreadsheet successfully",
+                data: parsedSheet,
+              });
+            } else {
+              reject({ message: "No sheets in spreadsheet" });
+            }
           }
         }
       } else {
@@ -252,12 +328,13 @@ export class System {
         reject({ message: "Error importing file" });
       }
     });
-  };
+  };  
 
   static mapData = (
     entityFields: EntityImport,
     spreadsheetData: any[]
   ): Promise<EntityModel[]> => {
+    consola.start("Mapping data to Entities:", entityFields, spreadsheetData);
     return new Promise((resolve, reject) => {
       // Extract Entities
       const entities = [] as IEntity[];
@@ -303,8 +380,8 @@ export class System {
           description: row[entityFields.description],
           projects: [],
           associations: {
-            origins: [],
-            products: [],
+            origins: row?.Origins ? [{ name: row.Origins }] : null,
+            products: row?.Products ? [{ name: row.Products }] : null,
           },
           attributes: attributes,
           attachments: [],

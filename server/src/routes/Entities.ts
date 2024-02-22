@@ -32,6 +32,16 @@ EntitiesRoute.route("/entities/:id").get(
   }
 );
 
+// View specific Entity
+EntitiesRoute.route("/entities/byName/:name").get(
+  authenticate,
+  (request: any, response: any) => {
+    Entities.entityByNameExist(request.params.name).then((entity: EntityModel | null) => {
+      response.json(entity);
+    });
+  }
+);
+
 // Lock specific entity
 EntitiesRoute.route("/entities/lock/:id").post(
   authenticate,
@@ -74,19 +84,112 @@ EntitiesRoute.route("/entities/export").post(
   authenticate,
   (
     request: {
-      body: { entities: string[] };
+      body: { entities: string[], format: "json" | "csv" | "txt" };
     },
     response: any
   ) => {
-    Entities.getDataMultiple(request.body.entities).then((path: string) => {
-      response.setHeader("Content-Type", `application/csv`);
-      response.download(
-        path,
-        `export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.csv`
-      );
+    const tmp = require('tmp');
+    const fs = require('fs');
+    const dayjs = require('dayjs');
+
+    if (request.body?.format === "json") {
+      Entities.getDataMultipleJSON(request.body.entities).then((data: string) => {
+        // Create a temporary file and write the JSON data to it
+        tmp.file({ postfix: '.json' }, (err, path, fd) => {
+          if (err) {
+            return response.status(500).send("Error creating file");
+          }
+          fs.writeFile(path, JSON.stringify(data), (err) => {
+            if (err) {
+              return response.status(500).send("Error writing to file");
+            }
+
+            response.setHeader("Content-Type", `application/json`);
+            response.download(
+              path,
+              `export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.json`,
+              (err) => {
+                // cleanupCallback(); // Cleanup the temp file
+                if (err) {
+                  // Handle error, but don't re-throw if it's just the client aborting the download.
+                  if (!response.headersSent) {
+                    response.status(500).send("Error sending file");
+                  }
+                }
+              }
+            );
+          });
+        });
+      });
+    } else {
+      Entities.getDataMultiple(request.body.entities).then((path: string) => {
+        response.setHeader("Content-Type", `application/csv`);
+        response.download(
+          path,
+          `export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.csv`
+        );
+      });
+    }
+  }
+);
+
+// Get formatted data of all Entities
+EntitiesRoute.route("/entities/export_all").post(
+  authenticate,
+  (
+    request: { body?: { project: string } },
+    response: any
+  ) => {
+    const projectId = request?.body?.project; // get warning to go away
+    const tmp = require('tmp');
+    const fs = require('fs');
+    const dayjs = require('dayjs');
+
+    Entities.getAll().then((data: EntityModel[]) => {
+      // Create a temporary file and write the JSON data to it
+      tmp.file({ postfix: '.json' }, (err, path, fd) => {
+        if (err) {
+          return response.status(500).send("Error creating file");
+        }
+
+        let entities = data;
+        if (projectId) {
+          entities = entities.filter(entity => entity.projects.includes(projectId));
+        }
+
+        let modifiedEntities = {
+          "entities": entities.map(entity => {
+            const plainEntity = JSON.parse(JSON.stringify(entity)); // Converts MongoDB types to plain objects
+            delete plainEntity.history;
+
+            return plainEntity;
+          })
+        }
+        const jsonData = JSON.stringify(modifiedEntities, null, 4);
+
+        fs.writeFile(path, JSON.stringify(jsonData), (err) => {
+          if (err) {
+            return response.status(500).send("Error writing to file");
+          }
+
+          response.setHeader("Content-Type", `application/json`);
+          response.download(
+            path,
+            `export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.json`,
+            (err) => {
+              if (err) {
+                if (!response.headersSent) {
+                  response.status(500).send("Error sending file");
+                }
+              }
+            }
+          );
+        });
+      });
     });
   }
 );
+
 
 // Create a new Entity, expects Entity data
 EntitiesRoute.route("/entities/create").post(

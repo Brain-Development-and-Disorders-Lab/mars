@@ -8,6 +8,8 @@ import cors from "cors";
 import helmet from "helmet";
 import consola, { LogLevels } from "consola";
 
+import 'source-map-support/register';
+
 const fileUpload = require("express-fileupload");
 
 // Get the connection functions
@@ -23,8 +25,9 @@ import SystemRoute from "./routes/System";
 import AuthenticationRoute from "./routes/Authentication";
 import UsersRoute from "./routes/Users";
 
+
 // Set logging level
-consola.level = _.isEqual(process.env.NODE_ENV, "development")
+consola.level = (_.isEqual(process.env.NODE_ENV, "development") || _.isEqual(process.env.NODE_ENV, "test"))
   ? LogLevels.verbose
   : LogLevels.error;
 
@@ -36,16 +39,16 @@ app.use(helmet());
 app.use(cors({ credentials: true, origin: true }));
 app.use(express.json({ limit: "50mb" }));
 app.use(fileUpload());
-app.use(
-  ActivityRoute,
-  AttributesRoute,
-  AuthenticationRoute,
-  EntitiesRoute,
-  ProjectsRoute,
-  SearchRoute,
-  SystemRoute,
-  UsersRoute
-);
+ 
+// Use routes
+app.use(ProjectsRoute); // ProjectsRoute now has authMiddleware applied to it
+app.use(ActivityRoute);
+app.use(AttributesRoute);
+app.use(AuthenticationRoute);
+app.use(EntitiesRoute);
+app.use(SearchRoute);
+app.use(SystemRoute);
+app.use(UsersRoute);
 
 const wrapper = express();
 wrapper.use("/mars", app);

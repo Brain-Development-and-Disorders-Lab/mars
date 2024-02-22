@@ -470,6 +470,7 @@ const Values = (props: {
                 variant={"solid"}
                 colorScheme={"green"}
                 rightIcon={<Icon name={"add"} />}
+                className="add-value-button-form"
               >
                 Add
               </Button>
@@ -504,6 +505,7 @@ const Values = (props: {
                   </Button>
 
                   <Button
+                    id="add-value-button-text"
                     variant={"outline"}
                     bg={"blue.300"}
                     color={"white"}

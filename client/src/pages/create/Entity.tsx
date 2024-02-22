@@ -95,6 +95,7 @@ const Entity = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [name, setName] = useState("");
+  const [isNameUnique, setIsNameUnique] = useState(true);
   const [created, setCreated] = useState(
     dayjs(Date.now()).format("YYYY-MM-DDTHH:mm")
   );
@@ -134,6 +135,19 @@ const Entity = () => {
   const validDetails = !isNameError && !isDateError;
 
   const [validAttributes, setValidAttributes] = useState(false);
+
+  const checkEntityName = async (name: string) => {
+    try {
+      // Adjust the URL and HTTP client according to your setup
+      const response = await getData(`/entities/byName/${name}`);
+
+      setIsNameUnique(!response); // If data is null, the name is unique
+    } catch (error) {
+      console.error("Failed to check entity name:", error);
+      // Handle error appropriately
+    }
+  };
+
 
   useEffect(() => {
     // Get all Entities
@@ -326,18 +340,21 @@ const Entity = () => {
         {/* "Start" page */}
         {_.isEqual("start", pageState) && (
           <Flex direction={"column"} gap={"2"} grow={"1"}>
-            <FormControl isRequired isInvalid={isNameError}>
+            <FormControl isRequired isInvalid={isNameError || !isNameUnique}>
               <FormLabel>Entity Name</FormLabel>
               <Input
                 name={"name"}
                 value={name}
                 placeholder={"Name"}
                 w={["100%", "md"]}
-                onChange={(event) => setName(event.target.value)}
+                onChange={(event) => {
+                  setName(event.target.value);
+                  checkEntityName(event.target.value);
+                }}
               />
-              {isNameError && (
+              {(isNameError || !isNameUnique) && (
                 <FormErrorMessage>
-                  A name or ID must be specified.
+                  A name or ID must be specified and unique.
                 </FormErrorMessage>
               )}
             </FormControl>
@@ -728,7 +745,7 @@ const Entity = () => {
               )
             }
             onClick={onPageNext}
-            isDisabled={!isValidInput()}
+            isDisabled={!isValidInput() || !isNameUnique || isNameError}
             isLoading={isSubmitting}
           >
             {_.isEqual("attributes", pageState) ? "Finish" : "Next"}

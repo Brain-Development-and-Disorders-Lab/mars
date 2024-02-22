@@ -1487,7 +1487,7 @@ const Entity = () => {
                 </TabList>
                 <TabPanels>
                   <TabPanel>
-                    {entityOrigins.length === 0 ? (
+                    {(entityOrigins?.length ?? 0) === 0 ? (
                       <Text>No Origins.</Text>
                     ) : (
                       <DataTable
@@ -1502,7 +1502,7 @@ const Entity = () => {
                     )}
                   </TabPanel>
                   <TabPanel>
-                    {entityProducts.length === 0 ? (
+                    {(entityProducts?.length ?? 0 ) === 0 ? (
                       <Text>No Products.</Text>
                     ) : (
                       <DataTable
@@ -1655,6 +1655,7 @@ const Entity = () => {
                         <FormLabel>Name</FormLabel>
                         <Input
                           placeholder={"Name"}
+                          id="formName"
                           value={attributeName}
                           onChange={(event) =>
                             setAttributeName(event.target.value)
@@ -1673,6 +1674,7 @@ const Entity = () => {
                         <Textarea
                           value={attributeDescription}
                           placeholder={"Attribute Description"}
+                          id="formDescription"
                           onChange={(event) =>
                             setAttributeDescription(event.target.value)
                           }
@@ -2162,7 +2164,7 @@ const Entity = () => {
                 <Flex direction={"column"} gap={"2"}>
                   <FormControl>
                     <FormLabel>Associations: Origins</FormLabel>
-                    {isLoaded && entityOrigins.length > 0 ? (
+                    {isLoaded && entityOrigins?.length > 0 ? (
                       <Stack spacing={2} direction={"column"}>
                         {entityOrigins.map((origin) => {
                           allExportFields.push(`origin_${origin.id}`);
@@ -2191,7 +2193,7 @@ const Entity = () => {
                   </FormControl>
                   <FormControl>
                     <FormLabel>Associations: Products</FormLabel>
-                    {isLoaded && entityProducts.length > 0 ? (
+                    {isLoaded && entityProducts?.length > 0 ? (
                       <Stack spacing={2} direction={"column"}>
                         {entityProducts.map((product) => {
                           allExportFields.push(`product_${product.id}`);
@@ -2435,7 +2437,7 @@ const Entity = () => {
                               <Text fontWeight={"bold"}>Origins:</Text>
                               <Tag key={`v_o_${entityVersion.timestamp}`}>
                                 <TagLabel>
-                                  {entityVersion.associations.origins.length}
+                                  {entityVersion?.associations?.origins?.length}
                                 </TagLabel>
                               </Tag>
                             </Flex>
@@ -2443,7 +2445,7 @@ const Entity = () => {
                               <Text fontWeight={"bold"}>Products:</Text>
                               <Tag key={`v_o_${entityVersion.timestamp}`}>
                                 <TagLabel>
-                                  {entityVersion.associations.products.length}
+                                  {entityVersion?.associations?.products?.length}
                                 </TagLabel>
                               </Tag>
                             </Flex>

@@ -140,7 +140,7 @@ const Graph = (props: {
     const initialEdges = [] as Edge[];
 
     // Add the Origins
-    if (entityData.associations.origins.length > 0) {
+    if (entityData?.associations?.origins?.length > 0) {
       // Add nodes and edges
       for (let origin of entityData.associations.origins) {
         // Add node
@@ -166,7 +166,7 @@ const Graph = (props: {
     }
 
     // Add products
-    if (entityData.associations.products.length > 0) {
+    if (entityData?.associations?.products?.length > 0) {
       // Add nodes and edges
       for (let product of entityData.associations.products) {
         // Add node
@@ -194,13 +194,13 @@ const Graph = (props: {
     // Default assuming origin and products
     let currentType = "default";
     if (
-      entityData.associations.origins.length > 0 &&
-      entityData.associations.products.length === 0
+      entityData?.associations?.origins?.length > 0 &&
+      entityData?.associations?.products?.length === 0
     ) {
       currentType = "output";
     } else if (
-      entityData.associations.origins.length === 0 &&
-      entityData.associations.products.length > 0
+      entityData?.associations?.origins?.length === 0 &&
+      entityData?.associations?.products?.length > 0
     ) {
       currentType = "input";
     }
@@ -247,7 +247,7 @@ const Graph = (props: {
 
       getEntityData(node.id).then((entity) => {
         // Origins
-        if (entity.associations.origins.length > 0) {
+        if (entity?.associations?.origins?.length > 0) {
           for (let origin of entity.associations.origins) {
             if (containsNode(origin.id) === false) {
               // Firstly, update the current node type (if required)
@@ -300,7 +300,7 @@ const Graph = (props: {
         }
 
         // Products
-        if (entity.associations.products.length > 0) {
+        if (entity?.associations?.products?.length > 0) {
           for (let product of entity.associations.products) {
             if (containsNode(product.id) === false) {
               // Firstly, update the current node type (if required)

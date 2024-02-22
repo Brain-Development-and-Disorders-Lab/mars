@@ -16,3 +16,4 @@ db.createCollection("entities");
 db.createCollection("projects");
 db.createCollection("attributes");
 db.createCollection("updates");
+db.createCollection("users");

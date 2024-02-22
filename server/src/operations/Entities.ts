@@ -51,21 +51,71 @@ export class Entities {
   };
 
   /**
+   * Find an Entity by its name
+   * @param {string} name the name of the Entity to find
+   * @return {Promise<EntityModel | null>}
+   */
+  static findEntityByName = (name: string): Promise<EntityModel | null> => {
+    consola.start("Searching for Entity with name:", name);
+    return new Promise((resolve, reject) => {
+      getDatabase()
+        .collection(ENTITIES)
+        .findOne({ name: name, deleted: false }, (error: any, result: any) => {
+          if (error) {
+            consola.error("Error occurred while searching for Entity:", name);
+            reject(error);
+          } else if (result) {
+            resolve(result as EntityModel);
+          } else {
+            consola.warn("No Entity found with name:", name);
+            resolve(null);
+          }
+        });
+    });
+  };
+
+  /**
+ * Find if Entity by its name existe
+ * @param {string} name the name of the Entity to find
+ * @return {Promise<EntityModel | null>}
+ */
+  static entityByNameExist = (name: string): Promise<EntityModel | null> => {
+    consola.start("Searching for Entity with name:", name);
+    return new Promise((resolve, _reject) => {
+      getDatabase()
+        .collection(ENTITIES)
+        .findOne({ name: name, deleted: false }, (error: any, result: any) => {
+          if (error) {
+            resolve(null);
+          } else if (result) {
+            resolve(result as EntityModel);
+          } else {
+            consola.warn("No Entity found with name:", name);
+            resolve(null);
+          }
+        });
+    });
+  };
+
+
+  /**
    * Create a new Entity
    * @param {any} entity all data associated with the new Entity
    * @return {Promise<EntityModel>}
    */
   static create = (entity: any): Promise<EntityModel> => {
-    consola.start("Creating new Entity:", entity.name);
+    consola.start("Creating new Entity:", entity?.name);
 
-    // Allocate a new identifier and join with Entity data
-    entity["_id"] = getIdentifier("entity");
+    if (!entity?._id) {
+      // Allocate a new identifier and join with Entity data
+      entity["_id"] = getIdentifier("entity");
+    }
 
     // Push data to database
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES)
-        .insertOne(entity as any, (error: any, _result: any) => {
+        .insertOne(entity as any, async (error: any, _result: any) => {
           if (error) {
             throw error;
           }
@@ -73,38 +123,48 @@ export class Entities {
           // Database operations to perform outside of creating a new Entity
           const operations: Promise<any>[] = [];
 
-          if (entity.associations.origins.length > 0) {
+          if (entity?.associations?.origins?.length > 0) {
             // If this Entity has an origin, add this Entity as a product of that origin Entity
-            entity.associations.origins.forEach(
-              (origin: { name: string; id: string }) => {
-                operations.push(
-                  Entities.addProduct(origin, {
-                    name: entity.name,
-                    id: entity._id,
-                  })
-                );
+            for (const origin of entity.associations.origins) {
+              if (!origin.id) {
+                // If the origin Entity does not have an ID, create it
+                const originEntity = await Entities.findEntityByName(origin?.name);
+                if (originEntity?._id) {
+                  origin.id = originEntity?._id;
+                }
               }
-            );
+              operations.push(
+                Entities.addProduct(origin, {
+                  name: entity?.name,
+                  id: entity?._id,
+                })
+              );
+            };
           }
 
-          if (entity.associations.products.length > 0) {
+          if (entity?.associations?.products?.length > 0) {
             // If this Entity has products, set this Entity as the origin of each product Entity-
-            entity.associations.products.forEach(
-              (product: { name: string; id: string }) => {
-                operations.push(
-                  Entities.addOrigin(product, {
-                    name: entity.name,
-                    id: entity._id,
-                  })
-                );
+            for (const product of entity.associations.products) {
+              if (!product.id) {
+                // If the origin Entity does not have an ID, create it
+                const productEntity = await Entities.findEntityByName(product?.name);
+                if (productEntity?._id) {
+                  product.id = productEntity?._id;
+                }
               }
-            );
+              operations.push(
+                Entities.addOrigin(product, {
+                  name: entity?.name,
+                  id: entity?._id,
+                })
+              );
+            };
           }
 
-          if (entity.projects.length > 0) {
+          if (entity.projects?.length > 0) {
             // If this Entity has been added to Projects, add the Entity to each Project
             entity.projects.forEach((project: string) => {
-              operations.push(Projects.addEntity(project, entity._id));
+              operations.push(Projects.addEntity(project, entity?._id));
             });
           }
 
@@ -116,8 +176,8 @@ export class Entities {
               details: "Created new Entity",
               target: {
                 type: "entities",
-                id: entity._id,
-                name: entity.name,
+                id: entity?._id,
+                name: entity?.name,
               },
             })
           );
@@ -125,16 +185,58 @@ export class Entities {
           // Resolve all operations then resolve overall Promise
           Promise.all(operations)
             .then((_result) => {
-              consola.success("Created Entity:", entity._id, entity.name);
+              consola.success("Created Entity:", entity?._id, entity?.name);
               resolve(entity);
             })
             .catch((_error) => {
-              consola.error("Error creating Entity:", entity._id, entity.name);
+              consola.error("Error creating Entity:", entity?._id, entity?.name);
               reject("Error creating Entity");
             });
         });
     });
   };
+
+
+  /**
+   * Update an Entity or create if new, comparing a new version with the existing version
+   * @param {EntityModel} updatedEntity updated Entity
+   * @return {Promise<EntityModel>}
+   */
+  static upsert = async (entityData: EntityModel): Promise<EntityModel> => {
+    try {
+      // Check if the Entity exists by a unique identifier (e.g., _id or name)
+      let existingEntity = await getDatabase().collection(ENTITIES).findOne({
+        $or: [
+          { _id: entityData?._id },  // Check by _id
+          // { name: entityData?.name } // Check by name
+        ]
+      });
+
+      if (existingEntity) {
+        // If the Entity exists, update it
+        return await Entities.update({ ...existingEntity, ...entityData, });
+      } else {
+        // If the Entity does not exist, create a new one
+        existingEntity = await getDatabase().collection(ENTITIES).findOne({
+          $or: [
+            { name: entityData?.name },  // Check by name
+          ]
+        });
+
+        if (existingEntity) {
+          // If the Entity exists, update it
+          entityData._id = existingEntity._id as any;
+          return await Entities.update({ ...existingEntity, ...entityData,  });
+        }
+
+        return await Entities.create(entityData);
+      }
+    } catch (error) {
+      console.error("Error in upserting Entity:", error);
+      throw error; // Rethrow the error to be handled by the caller
+    }
+  };
+
 
   /**
    * Update an Entity, comparing a new version with the existing version
@@ -142,13 +244,21 @@ export class Entities {
    * @return {Promise<EntityModel>}
    */
   static update = (updatedEntity: EntityModel): Promise<EntityModel> => {
-    consola.start("Updating Entity:", updatedEntity.name);
+    consola.start("Updating Entity:", updatedEntity?.name);
+    if (!updatedEntity?._id) {
+      console.log("Entity ID is required to update an Entity");
+    }
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES)
-        .findOne({ _id: updatedEntity._id }, (error: any, result: any) => {
+        .findOne({ _id: updatedEntity?._id }, (error: any, result: any) => {
           if (error) {
+            consola.error("update findOne error:", error);
             throw error;
+          }
+          if (!result) {
+            consola.error("Entity not found:", updatedEntity?._id);
+            throw new Error("Entity not found");
           }
           // Cast and store current state of the Entity
           const currentEntity = result as EntityModel;
@@ -157,67 +267,67 @@ export class Entities {
           const operations = [];
 
           // Projects
-          const projectsToKeep = currentEntity.projects.filter((project) =>
-            updatedEntity.projects.includes(project)
+          const projectsToKeep = currentEntity?.projects?.filter((project) =>
+            updatedEntity?.projects?.includes(project)
           );
-          const projectsToAdd = updatedEntity.projects.filter(
-            (project) => !projectsToKeep.includes(project)
+          const projectsToAdd = updatedEntity?.projects?.filter(
+            (project) => !projectsToKeep?.includes(project)
           );
-          if (projectsToAdd.length > 0) {
+          if (projectsToAdd?.length > 0) {
             operations.push(
-              projectsToAdd.map((project: string) => {
-                Projects.addEntity(project, updatedEntity._id);
+              projectsToAdd?.map((project: string) => {
+                Projects.addEntity(project, updatedEntity?._id);
               })
             );
           }
-          const projectsToRemove = currentEntity.projects.filter(
-            (project) => !projectsToKeep.includes(project)
+          const projectsToRemove = currentEntity?.projects?.filter(
+            (project) => !projectsToKeep?.includes(project)
           );
-          if (projectsToRemove.length > 0) {
+          if (projectsToRemove?.length > 0) {
             operations.push(
-              projectsToRemove.map((project: string) => {
-                Projects.removeEntity(project, updatedEntity._id);
+              projectsToRemove?.map((project: string) => {
+                Projects.removeEntity(project, updatedEntity?._id);
               })
             );
           }
 
           // Products
-          const productsToKeep = currentEntity.associations.products
-            .map((product) => product.id)
-            .filter((product) =>
-              updatedEntity.associations.products
-                .map((product) => product.id)
+          const productsToKeep = currentEntity?.associations?.products
+            ?.map((product) => product.id)
+            ?.filter((product) =>
+              updatedEntity?.associations?.products
+                ?.map((product) => product.id)
                 .includes(product)
             );
-          const productsToAdd = updatedEntity.associations.products.filter(
-            (product) => !productsToKeep.includes(product.id)
+          const productsToAdd = updatedEntity?.associations?.products?.filter(
+            (product) => !productsToKeep?.includes(product.id)
           );
-          if (productsToAdd.length > 0) {
+          if (productsToAdd && productsToAdd?.length > 0) {
             operations.push(
-              productsToAdd.map((product: { id: string; name: string }) => {
+              productsToAdd?.map((product: { id: string; name: string }) => {
                 Entities.addOrigin(product, {
-                  name: updatedEntity.name,
-                  id: updatedEntity._id,
+                  name: updatedEntity?.name,
+                  id: updatedEntity?._id,
                 });
                 Entities.addProduct(
-                  { name: updatedEntity.name, id: updatedEntity._id },
+                  { name: updatedEntity?.name, id: updatedEntity?._id },
                   product
                 );
               })
             );
           }
-          const productsToRemove = currentEntity.associations.products.filter(
-            (product) => !productsToKeep.includes(product.id)
+          const productsToRemove = currentEntity?.associations?.products?.filter(
+            (product) => !productsToKeep?.includes(product.id)
           );
-          if (productsToRemove.length > 0) {
+          if (productsToRemove?.length > 0) {
             operations.push(
-              productsToRemove.map((product: { id: string; name: string }) => {
+              productsToRemove?.map((product: { id: string; name: string }) => {
                 Entities.removeOrigin(product, {
-                  name: updatedEntity.name,
-                  id: updatedEntity._id,
+                  name: updatedEntity?.name,
+                  id: updatedEntity?._id,
                 });
                 Entities.removeProduct(
-                  { name: updatedEntity.name, id: updatedEntity._id },
+                  { name: updatedEntity?.name, id: updatedEntity?._id },
                   product
                 );
               })
@@ -225,100 +335,100 @@ export class Entities {
           }
 
           // Origins
-          const originsToKeep = currentEntity.associations.origins
-            .map((origin) => origin.id)
-            .filter((origin) =>
-              updatedEntity.associations.origins
-                .map((origin) => origin.id)
+          const originsToKeep = currentEntity?.associations?.origins
+            ?.map((origin) => origin.id)
+            ?.filter((origin) =>
+              updatedEntity?.associations?.origins
+                ?.map((origin) => origin.id)
                 .includes(origin)
             );
-          const originsToAdd = updatedEntity.associations.origins.filter(
-            (origin) => !originsToKeep.includes(origin.id)
+          const originsToAdd = updatedEntity?.associations?.origins?.filter(
+            (origin) => !originsToKeep?.includes(origin.id)
           );
-          if (originsToAdd.length > 0) {
+          if (originsToAdd && originsToAdd?.length > 0) {
             operations.push(
-              originsToAdd.map((origin: { id: string; name: string }) => {
+              originsToAdd?.map((origin: { id: string; name: string }) => {
                 Entities.addOrigin(
-                  { name: updatedEntity.name, id: updatedEntity._id },
+                  { name: updatedEntity?.name, id: updatedEntity?._id },
                   origin
                 );
                 Entities.addProduct(origin, {
-                  name: updatedEntity.name,
-                  id: updatedEntity._id,
+                  name: updatedEntity?.name,
+                  id: updatedEntity?._id,
                 });
               })
             );
           }
-          const originsToRemove = currentEntity.associations.origins.filter(
-            (origin) => !originsToKeep.includes(origin.id)
+          const originsToRemove = currentEntity?.associations?.origins?.filter(
+            (origin) => !originsToKeep?.includes(origin.id)
           );
-          if (originsToRemove.length > 0) {
+          if (originsToRemove?.length > 0) {
             operations.push(
-              originsToRemove.map((origin: { id: string; name: string }) => {
+              originsToRemove?.map((origin: { id: string; name: string }) => {
                 Entities.removeOrigin(
-                  { name: updatedEntity.name, id: updatedEntity._id },
+                  { name: updatedEntity?.name, id: updatedEntity?._id },
                   origin
                 );
                 Entities.removeProduct(origin, {
-                  name: updatedEntity.name,
-                  id: updatedEntity._id,
+                  name: updatedEntity?.name,
+                  id: updatedEntity?._id,
                 });
               })
             );
           }
 
           // Attributes
-          const attributesToKeep = currentEntity.attributes
-            .map((attribute) => attribute._id)
-            .filter((attribute) =>
-              updatedEntity.attributes
-                .map((attribute) => attribute._id)
+          const attributesToKeep = currentEntity?.attributes
+            ?.map((attribute) => attribute?._id)
+            ?.filter((attribute) =>
+              updatedEntity?.attributes
+                ?.map((attribute) => attribute?._id)
                 .includes(attribute)
             );
           operations.push(
-            attributesToKeep.map((attribute: string) => {
-              const updatedAttribute = updatedEntity.attributes.filter(
-                (updatedAttribute) => _.isEqual(attribute, updatedAttribute._id)
+            attributesToKeep?.map((attribute: string) => {
+              const updatedAttribute = updatedEntity?.attributes?.filter(
+                (updatedAttribute) => _.isEqual(attribute, updatedAttribute?._id)
               )[0];
-              Entities.updateAttribute(updatedEntity._id, updatedAttribute);
+              Entities.updateAttribute(updatedEntity?._id, updatedAttribute);
             })
           );
-          const attributesToAdd = updatedEntity.attributes.filter(
-            (attribute) => !attributesToKeep.includes(attribute._id)
+          const attributesToAdd = updatedEntity?.attributes?.filter(
+            (attribute) => !attributesToKeep?.includes(attribute?._id)
           );
-          if (attributesToAdd.length > 0) {
+          if (attributesToAdd?.length > 0) {
             operations.push(
-              attributesToAdd.map((attribute: AttributeModel) => {
-                Entities.addAttribute(updatedEntity._id, attribute);
+              attributesToAdd?.map((attribute: AttributeModel) => {
+                Entities.addAttribute(updatedEntity?._id, attribute);
               })
             );
           }
-          const attributesToRemove = currentEntity.attributes.filter(
-            (attribute) => !attributesToKeep.includes(attribute._id)
+          const attributesToRemove = currentEntity?.attributes.filter(
+            (attribute) => !attributesToKeep?.includes(attribute?._id)
           );
-          if (attributesToRemove.length > 0) {
+          if (attributesToRemove?.length > 0) {
             operations.push(
-              attributesToRemove.map((attribute) => {
-                Entities.removeAttribute(updatedEntity._id, attribute._id);
+              attributesToRemove?.map((attribute) => {
+                Entities.removeAttribute(updatedEntity?._id, attribute?._id);
               })
             );
           }
 
           // Attachments
-          const attachmentsToKeep = currentEntity.attachments
-            .map((attachment) => attachment.id)
+          const attachmentsToKeep = currentEntity?.attachments
+            ?.map((attachment) => attachment.id)
             .filter((attachment) =>
-              updatedEntity.attachments
+              updatedEntity?.attachments
                 .map((attachment) => attachment.id)
                 .includes(attachment)
             );
-          const attachmentsToRemove = currentEntity.attachments.filter(
-            (attachment) => !attachmentsToKeep.includes(attachment.id)
+          const attachmentsToRemove = currentEntity?.attachments.filter(
+            (attachment) => !attachmentsToKeep?.includes(attachment.id)
           );
-          if (attachmentsToRemove.length > 0) {
+          if (attachmentsToRemove?.length > 0) {
             operations.push(
-              attachmentsToRemove.map((attachment) => {
-                Entities.removeAttachment(updatedEntity._id, attachment);
+              attachmentsToRemove?.map((attachment) => {
+                Entities.removeAttachment(updatedEntity?._id, attachment);
               })
             );
           }
@@ -331,11 +441,19 @@ export class Entities {
               details: "Updated Entity",
               target: {
                 type: "entities",
-                id: currentEntity._id,
-                name: currentEntity.name,
+                id: currentEntity?._id,
+                name: currentEntity?.name,
               },
             })
           );
+
+          // Ensure the list of projects is unique
+          const uniqueProjects = [
+            ...new Set([
+              ...(projectsToKeep || []),
+              ...(projectsToAdd || []),
+            ]),
+          ];
 
           // Resolve all operations then resolve overall Promise
           Promise.all(operations).then((_result) => {
@@ -343,35 +461,36 @@ export class Entities {
               $set: {
                 deleted: updatedEntity.deleted,
                 description: updatedEntity.description,
-                projects: [...projectsToKeep, ...projectsToAdd],
+                name: updatedEntity?.name,
+                projects: uniqueProjects,
                 associations: {
                   origins: [
-                    ...currentEntity.associations.origins.filter((origin) =>
-                      originsToKeep.includes(origin.id)
-                    ),
-                    ...originsToAdd,
+                    ...(currentEntity?.associations?.origins?.filter((origin) =>
+                      originsToKeep?.includes(origin.id)
+                    )) || [],
+                    ...(originsToAdd || []),
                   ],
                   products: [
-                    ...currentEntity.associations.products.filter((product) =>
-                      productsToKeep.includes(product.id)
-                    ),
-                    ...productsToAdd,
+                    ...(currentEntity?.associations?.products?.filter((product) =>
+                      productsToKeep?.includes(product.id)
+                    ) || []),
+                    ...(productsToAdd || []),
                   ],
                 },
                 history: [
                   {
                     timestamp: dayjs(Date.now()).toISOString(),
-                    deleted: currentEntity.deleted,
-                    owner: currentEntity.owner,
-                    description: currentEntity.description,
-                    projects: currentEntity.projects,
+                    deleted: currentEntity?.deleted,
+                    owner: currentEntity?.owner,
+                    description: currentEntity?.description,
+                    projects: currentEntity?.projects,
                     associations: {
-                      origins: currentEntity.associations.origins,
-                      products: currentEntity.associations.products,
+                      origins: currentEntity?.associations?.origins,
+                      products: currentEntity?.associations?.products,
                     },
-                    attributes: currentEntity.attributes,
+                    attributes: currentEntity?.attributes,
                   },
-                  ...currentEntity.history,
+                  ...(currentEntity.history || []),
                 ],
               },
             };
@@ -379,7 +498,7 @@ export class Entities {
             getDatabase()
               .collection(ENTITIES)
               .updateOne(
-                { _id: updatedEntity._id },
+                { _id: updatedEntity?._id },
                 updates,
                 (error: any, _response: any) => {
                   if (error) {
@@ -387,7 +506,7 @@ export class Entities {
                   }
 
                   // Resolve the Promise
-                  consola.success("Updated Entity:", updatedEntity.name);
+                  consola.success("Updated Entity:", updatedEntity?.name);
                   resolve(updatedEntity);
                 }
               );
@@ -402,7 +521,7 @@ export class Entities {
    * @return {Promise<EntityModel>}
    */
   static restore = (entity: EntityModel): Promise<EntityModel> => {
-    consola.start("Restoring Entity:", entity.name);
+    consola.start("Restoring Entity:", entity?.name);
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES)
@@ -422,8 +541,8 @@ export class Entities {
               details: "Restored Entity",
               target: {
                 type: "entities",
-                id: entity._id,
-                name: entity.name,
+                id: entity?._id,
+                name: entity?.name,
               },
             })
           );
@@ -431,11 +550,11 @@ export class Entities {
           // Resolve all operations then resolve overall Promise
           Promise.all(operations)
             .then((_result) => {
-              consola.success("Restored Entity:", entity._id, entity.name);
+              consola.success("Restored Entity:", entity?._id, entity?.name);
               resolve(entity);
             })
             .catch((_error) => {
-              consola.error("Error restoring Entity:", entity._id, entity.name);
+              consola.error("Error restoring Entity:", entity?._id, entity?.name);
               reject("Error restoring Entity");
             });
         });
@@ -454,13 +573,14 @@ export class Entities {
         .collection(ENTITIES)
         .findOne({ _id: entity }, (error: any, result: any) => {
           if (error) {
+            console.log("addProject findOne error:", error);
             throw error;
           }
 
           // Update the collection of Projects associated with the Entity to include this extra Project
           const updates = {
             $set: {
-              projects: [...(result as EntityModel).projects, project],
+              projects: [...(result?.projects) || [], project],
             },
           };
 
@@ -471,6 +591,7 @@ export class Entities {
               updates,
               (error: any, _response: any) => {
                 if (error) {
+                  console.log("addProject updateOne error:", error);
                   throw error;
                 }
 
@@ -507,7 +628,7 @@ export class Entities {
           const updates = {
             $set: {
               projects: [
-                ...(result as EntityModel).projects.filter(
+                ...(result as EntityModel).projects?.filter(
                   (content) => !_.isEqual(content, project)
                 ),
               ],
@@ -548,7 +669,7 @@ export class Entities {
     entity: { name: string; id: string },
     product: { name: string; id: string }
   ): Promise<{ name: string; id: string }> => {
-    consola.start("Adding Product", product.name, "to Entity", entity.name);
+    consola.start("Adding Product", product?.name, "to Entity", entity?.name);
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES)
@@ -556,15 +677,28 @@ export class Entities {
           if (error) {
             throw error;
           }
+          let updatedProducts = result?.associations?.products ?? [];
+          const existingProductIndex = updatedProducts.findIndex((o: { name: string; id: string }) => o?.name === product?.name);
+
+          if (existingProductIndex > -1) {
+            // Update existing origin if new ID is provided
+            if (product.id) {
+              updatedProducts[existingProductIndex].id = product.id;
+            }
+          } else {
+            // Add new origin
+            updatedProducts = [
+              ...updatedProducts,
+              { name: product?.name, id: product.id },
+            ];
+          }
 
           // Update the collection of Products associated with the Entity to include this extra product
           const updates = {
             $set: {
               associations: {
-                origins: result.associations.origins,
-                products: _.uniq(
-                  _.concat(result.associations.products, product)
-                ),
+                origins: result?.associations?.origins,
+                products: updatedProducts,
               },
             },
           };
@@ -582,9 +716,9 @@ export class Entities {
                 // Resolve the Promise
                 consola.success(
                   "Added Product",
-                  product.name,
+                  product?.name,
                   "to Entity",
-                  entity.name
+                  entity?.name
                 );
                 resolve(entity);
               }
@@ -603,7 +737,7 @@ export class Entities {
     entity: { name: string; id: string },
     products: { name: string; id: string }[]
   ): Promise<{ name: string; id: string }> => {
-    consola.start("Adding", products.length, "Products to Entity", entity.name);
+    consola.start("Adding", products?.length, "Products to Entity", entity?.name);
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES)
@@ -637,9 +771,9 @@ export class Entities {
                 // Resolve the Promise
                 consola.start(
                   "Added",
-                  products.length,
+                  products?.length,
                   "Products to Entity",
-                  entity.name
+                  entity?.name
                 );
                 resolve(entity);
               }
@@ -652,7 +786,7 @@ export class Entities {
     entity: { name: string; id: string },
     product: { name: string; id: string }
   ): Promise<{ name: string; id: string }> => {
-    consola.start("Removing Product", product.name, "from Entity", entity.name);
+    consola.start("Removing Product", product?.name, "from Entity", entity?.name);
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES)
@@ -665,8 +799,8 @@ export class Entities {
           const updates = {
             $set: {
               associations: {
-                origins: (result as EntityModel).associations.origins,
-                products: (result as EntityModel).associations.products.filter(
+                origins: (result as EntityModel).associations?.origins,
+                products: (result as EntityModel).associations?.products?.filter(
                   (content) => !_.isEqual(product.id, content.id)
                 ),
               },
@@ -686,9 +820,9 @@ export class Entities {
                 // Resolve the Promise
                 consola.info(
                   "Removed Product",
-                  product.name,
+                  product?.name,
                   "from Entity",
-                  entity.name
+                  entity?.name
                 );
                 resolve(entity);
               }
@@ -707,7 +841,7 @@ export class Entities {
     entity: { name: string; id: string },
     origin: { name: string; id: string }
   ): Promise<{ name: string; id: string }> => {
-    consola.start("Adding Origin", origin.name, "to Entity", entity.name);
+    consola.start("Adding Origin", origin?.name, "to Entity", entity?.name);
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES)
@@ -716,18 +850,28 @@ export class Entities {
             throw error;
           }
 
+          let updatedOrigins = result?.associations?.origins ?? [];
+          const existingOriginIndex = updatedOrigins.findIndex((o: { name: string; id: string }) => o?.name === origin?.name);
+
+          if (existingOriginIndex > -1) {
+            // Update existing origin if new ID is provided
+            if (origin.id) {
+              updatedOrigins[existingOriginIndex].id = origin.id;
+            }
+          } else {
+            // Add new origin
+            updatedOrigins = [
+              ...updatedOrigins,
+              { name: origin?.name, id: origin.id },
+            ];
+          }
+
           // Add the Origin to this Entity
           const updates = {
             $set: {
               associations: {
-                origins: [
-                  ...result.associations.origins,
-                  {
-                    name: origin.name,
-                    id: origin.id,
-                  },
-                ],
-                products: result.associations.products,
+                origins: updatedOrigins,
+                products: result?.associations.products,
               },
             },
           };
@@ -745,9 +889,9 @@ export class Entities {
                 // Resolve the Promise
                 consola.success(
                   "Added Origin",
-                  origin.name,
+                  origin?.name,
                   "to Entity",
-                  entity.name
+                  entity?.name
                 );
                 resolve(entity);
               }
@@ -766,7 +910,7 @@ export class Entities {
     entity: { name: string; id: string },
     origins: { name: string; id: string }[]
   ): Promise<{ name: string; id: string }> => {
-    consola.start("Adding", origins.length, "Origins to Entity", entity.name);
+    consola.start("Adding", origins?.length, "Origins to Entity", entity?.name);
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES)
@@ -798,9 +942,9 @@ export class Entities {
                 // Resolve the Promise
                 consola.success(
                   "Added",
-                  origins.length,
+                  origins?.length,
                   "Origins to Entity",
-                  entity.name
+                  entity?.name
                 );
                 resolve(entity);
               }
@@ -813,7 +957,7 @@ export class Entities {
     entity: { name: string; id: string },
     origin: { name: string; id: string }
   ): Promise<{ name: string; id: string }> => {
-    consola.start("Removing Origin", origin.name, "from Entity", entity.name);
+    consola.start("Removing Origin", origin?.name, "from Entity", entity?.name);
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES)
@@ -826,10 +970,10 @@ export class Entities {
           const updates = {
             $set: {
               associations: {
-                origins: (result as EntityModel).associations.origins.filter(
+                origins: (result as EntityModel).associations?.origins?.filter(
                   (content) => !_.isEqual(origin.id, content.id)
                 ),
-                products: (result as EntityModel).associations.products,
+                products: (result as EntityModel).associations?.products,
               },
             },
           };
@@ -847,9 +991,9 @@ export class Entities {
                 // Resolve the Promise
                 consola.success(
                   "Removed Origin",
-                  origin.name,
+                  origin?.name,
                   "from Entity",
-                  entity.name
+                  entity?.name
                 );
                 resolve(entity);
               }
@@ -864,7 +1008,7 @@ export class Entities {
   ): Promise<string> => {
     consola.start(
       "Adding Attribute:",
-      attribute.name.toString(),
+      attribute?.name.toString(),
       "to Entity (id):",
       entity.toString()
     );
@@ -873,13 +1017,15 @@ export class Entities {
         .collection(ENTITIES)
         .findOne({ _id: entity }, (error: any, result: any) => {
           if (error) {
+            console.log("addAttribute findOne error:", error);
             throw error;
           }
 
           // Update the collection of Attributes associated with the Entity to remove this Attribute
           const updates = {
             $set: {
-              attributes: [...(result as EntityModel).attributes, attribute],
+              attributes: [...(result?.attributes || []), attribute],
+
             },
           };
 
@@ -890,13 +1036,14 @@ export class Entities {
               updates,
               (error: any, _response: any) => {
                 if (error) {
+                  console.log("addAttribute updateOne error:", error);
                   throw error;
                 }
 
                 // Resolve the Promise
                 consola.success(
                   "Added Attribute:",
-                  attribute.name.toString(),
+                  attribute?.name.toString(),
                   "to Entity (id):",
                   entity.toString()
                 );
@@ -929,8 +1076,8 @@ export class Entities {
           const updates = {
             $set: {
               attributes: [
-                ...(result as EntityModel).attributes.filter(
-                  (content) => !_.isEqual(content._id, attribute)
+                ...(result as EntityModel)?.attributes?.filter(
+                  (content) => !_.isEqual(content?._id, attribute)
                 ),
               ],
             },
@@ -966,7 +1113,7 @@ export class Entities {
   ): Promise<string> => {
     consola.start(
       "Update Attribute (id):",
-      updatedAttribute._id.toString(),
+      updatedAttribute?._id.toString(),
       "from Entity (id):",
       entity.toString()
     );
@@ -978,9 +1125,9 @@ export class Entities {
             throw error;
           }
 
-          (result as EntityModel).attributes.forEach((attribute) => {
-            if (_.isEqual(updatedAttribute._id, attribute._id)) {
-              attribute.name = updatedAttribute.name;
+          (result as EntityModel)?.attributes.forEach((attribute) => {
+            if (_.isEqual(updatedAttribute?._id, attribute?._id)) {
+              attribute.name = updatedAttribute?.name;
               attribute.description = updatedAttribute.description;
               attribute.values = updatedAttribute.values;
             }
@@ -989,7 +1136,7 @@ export class Entities {
           // Update the collection of Attributes associated with the Entity to remove this Attribute
           const updates = {
             $set: {
-              attributes: [...(result as EntityModel).attributes],
+              attributes: [...(result as EntityModel)?.attributes],
             },
           };
 
@@ -1006,7 +1153,7 @@ export class Entities {
                 // Resolve the Promise
                 consola.success(
                   "Updated Attribute (id):",
-                  updatedAttribute._id.toString(),
+                  updatedAttribute?._id.toString(),
                   "from Entity (id):",
                   entity.toString()
                 );
@@ -1029,7 +1176,7 @@ export class Entities {
   ): Promise<{ name: string; id: string }> => {
     consola.start(
       "Setting description of Entity",
-      entity.name,
+      entity?.name,
       "to",
       description
     );
@@ -1061,7 +1208,7 @@ export class Entities {
                 // Resolve the Promise
                 consola.success(
                   "Set description of Entity",
-                  entity.name,
+                  entity?.name,
                   "to",
                   description
                 );
@@ -1076,12 +1223,13 @@ export class Entities {
     id: string,
     attachment: { name: string; id: string }
   ): Promise<{ name: string; id: string }> => {
-    consola.start("Adding Attachment", attachment.name, "to Entity (id):", id);
+    consola.start("Adding Attachment", attachment?.name, "to Entity (id):", id);
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES)
         .findOne({ _id: id }, (error: any, result: any) => {
           if (error) {
+            console.log("addAttachment findOne error:", error);
             throw error;
           }
 
@@ -1089,9 +1237,9 @@ export class Entities {
           const updates = {
             $set: {
               attachments: [
-                ...result.attachments,
+                ...result?.attachments,
                 {
-                  name: attachment.name,
+                  name: attachment?.name,
                   id: attachment.id,
                 },
               ],
@@ -1102,13 +1250,14 @@ export class Entities {
             .collection(ENTITIES)
             .updateOne({ _id: id }, updates, (error: any, _response: any) => {
               if (error) {
+                console.log("addAttachment updateOne error:", error);
                 throw error;
               }
 
               // Resolve the Promise
               consola.success(
                 "Added Attachment",
-                attachment.name,
+                attachment?.name,
                 "to Entity (id):",
                 id
               );
@@ -1124,7 +1273,7 @@ export class Entities {
   ): Promise<{ name: string; id: string }> => {
     consola.start(
       "Removing Attachment",
-      attachment.name,
+      attachment?.name,
       "from Entity (id):",
       id
     );
@@ -1140,7 +1289,7 @@ export class Entities {
           const updates = {
             $set: {
               attachments: [
-                ...(result as EntityModel).attachments.filter(
+                ...(result as EntityModel)?.attachments?.filter(
                   (existing) => !_.isEqual(existing.id, attachment.id)
                 ),
               ],
@@ -1157,7 +1306,7 @@ export class Entities {
               // Resolve the Promise
               consola.success(
                 "Removed Attachment",
-                attachment.name,
+                attachment?.name,
                 "from Entity (id):",
                 id
               );
@@ -1178,7 +1327,7 @@ export class Entities {
   }): Promise<{ name: string; id: string }> => {
     consola.start(
       "Setting lock state of Entity",
-      entityLockData.entity.name,
+      entityLockData.entity?.name,
       "to",
       entityLockData.lockState ? "locked" : "unlocked"
     );
@@ -1226,7 +1375,7 @@ export class Entities {
                   // Resolve the Promise
                   consola.success(
                     "Set lock state of Entity",
-                    entityLockData.entity.name,
+                    entityLockData.entity?.name,
                     "to",
                     entityLockData.lockState ? "locked" : "unlocked"
                   );
@@ -1251,6 +1400,7 @@ export class Entities {
         })
         .toArray((error: any, result: any) => {
           if (error) {
+            console.log("getAll find error:", error);
             throw error;
           }
 
@@ -1272,6 +1422,7 @@ export class Entities {
         .collection(ENTITIES)
         .findOne({ _id: id }, (error: any, result: any) => {
           if (error) {
+            console.log("getOne findOne error:", error);
             reject(error);
             throw error;
           }
@@ -1310,12 +1461,12 @@ export class Entities {
           if (_.isEqual(exportInfo.format, "csv")) {
             const headers = ["ID", "Name"];
             const row: Promise<string>[] = [
-              Promise.resolve(entity._id),
-              Promise.resolve(entity.name),
+              Promise.resolve(entity?._id),
+              Promise.resolve(entity?.name),
             ];
 
             // Iterate over fields and generate a CSV export file
-            exportInfo.fields.map((field) => {
+            exportInfo.fields?.map((field) => {
               if (_.isEqual(field, "created")) {
                 // "created" data field
                 headers.push("Created");
@@ -1336,25 +1487,25 @@ export class Entities {
                 // "origins" data field
                 row.push(
                   Entities.getOne(_.split(field, "_")[1]).then((entity) => {
-                    headers.push(`Origin (${entity.name})`);
-                    return entity.name;
+                    headers.push(`Origin (${entity?.name})`);
+                    return entity?.name;
                   })
                 );
               } else if (_.startsWith(field, "product_")) {
                 // "products" data field
                 row.push(
                   Entities.getOne(_.split(field, "_")[1]).then((entity) => {
-                    headers.push(`Product (${entity.name})`);
-                    return entity.name;
+                    headers.push(`Product (${entity?.name})`);
+                    return entity?.name;
                   })
                 );
               } else if (_.startsWith(field, "attribute_")) {
                 // "attributes" data field
                 const attributeId = field.split("_")[1];
-                entity.attributes.map((attribute) => {
-                  if (_.isEqual(attribute._id, attributeId)) {
+                entity?.attributes?.map((attribute) => {
+                  if (_.isEqual(attribute?._id, attributeId)) {
                     for (let value of attribute.values) {
-                      headers.push(`${value.name} (${attribute.name})`);
+                      headers.push(`${value?.name} (${attribute?.name})`);
                       row.push(Promise.resolve(`${value.data}`));
                     }
                   }
@@ -1385,8 +1536,8 @@ export class Entities {
           } else if (_.isEqual(exportInfo.format, "json")) {
             // JSON export
             const tempStructure = {
-              _id: entity._id,
-              name: entity.name,
+              _id: entity?._id,
+              name: entity?.name,
               created: "",
               owner: "",
               description: "",
@@ -1396,7 +1547,7 @@ export class Entities {
             } as { [key: string]: any };
             const exportOperations = [] as Promise<string>[];
 
-            exportInfo.fields.map((field) => {
+            exportInfo.fields?.map((field) => {
               if (_.isEqual(field, "created")) {
                 // "created" data field
                 tempStructure["created"] = dayjs(entity.created)
@@ -1413,8 +1564,8 @@ export class Entities {
                 tempStructure["projects"] = [];
                 exportOperations.push(
                   Projects.getOne(_.split(field, "_")[1]).then((project) => {
-                    tempStructure["projects"].push(project.name);
-                    return project.name;
+                    tempStructure["projects"].push(project?.name);
+                    return project?.name;
                   })
                 );
               } else if (_.startsWith(field, "origin_")) {
@@ -1422,8 +1573,8 @@ export class Entities {
                 tempStructure.associations["origins"] = [];
                 exportOperations.push(
                   Entities.getOne(_.split(field, "_")[1]).then((entity) => {
-                    tempStructure.associations["origins"].push(entity.name);
-                    return entity.name;
+                    tempStructure.associations["origins"].push(entity?.name);
+                    return entity?.name;
                   })
                 );
               } else if (_.startsWith(field, "product_")) {
@@ -1431,25 +1582,25 @@ export class Entities {
                 tempStructure.associations["products"] = [];
                 exportOperations.push(
                   Entities.getOne(_.split(field, "_")[1]).then((entity) => {
-                    tempStructure.associations["products"].push(entity.name);
-                    return entity.name;
+                    tempStructure.associations["products"].push(entity?.name);
+                    return entity?.name;
                   })
                 );
               } else if (_.startsWith(field, "attribute_")) {
                 // "attributes" data field
                 tempStructure["attributes"] = [];
                 const attributeId = field.split("_")[1];
-                entity.attributes.map((attribute) => {
-                  if (_.isEqual(attribute._id, attributeId)) {
+                entity?.attributes?.map((attribute) => {
+                  if (_.isEqual(attribute?._id, attributeId)) {
                     // Extract all values
                     const attributeStruct = {} as { [value: string]: any };
                     for (let value of attribute.values) {
-                      attributeStruct[value.name] = value.data;
+                      attributeStruct[value?.name] = value.data;
                     }
 
                     // Add the Attribute to the exported set
                     tempStructure["attributes"].push({
-                      [attribute.name]: attributeStruct,
+                      [attribute?.name]: attributeStruct,
                     });
                   }
                 });
@@ -1481,12 +1632,12 @@ export class Entities {
             const exportOperations = [] as Promise<string>[];
 
             // Structures to collate data
-            const textDetails = [`ID: ${entity._id}`, `Name: ${entity.name}`];
+            const textDetails = [`ID: ${entity?._id}`, `Name: ${entity?.name}`];
             const textOrigins = [] as string[];
             const textProducts = [] as string[];
             const textAttributes = [] as string[];
 
-            exportInfo.fields.map((field) => {
+            exportInfo.fields?.map((field) => {
               if (_.isEqual(field, "created")) {
                 // "created" data field
                 textDetails.push(
@@ -1504,32 +1655,32 @@ export class Entities {
                 // "origins" data field
                 exportOperations.push(
                   Entities.getOne(_.split(field, "_")[1]).then((entity) => {
-                    textOrigins.push(entity.name);
-                    return entity.name;
+                    textOrigins.push(entity?.name);
+                    return entity?.name;
                   })
                 );
               } else if (_.startsWith(field, "product_")) {
                 // "products" data field
                 exportOperations.push(
                   Entities.getOne(_.split(field, "_")[1]).then((entity) => {
-                    textProducts.push(entity.name);
-                    return entity.name;
+                    textProducts.push(entity?.name);
+                    return entity?.name;
                   })
                 );
               } else if (_.startsWith(field, "attribute_")) {
                 // "attributes" data field
                 const attributeId = field.split("_")[1];
-                entity.attributes.map((attribute) => {
-                  if (_.isEqual(attribute._id, attributeId)) {
+                entity?.attributes?.map((attribute) => {
+                  if (_.isEqual(attribute?._id, attributeId)) {
                     // Extract all values
                     const attributeValues = [];
                     for (let value of attribute.values) {
-                      attributeValues.push(`    ${value.name}: ${value.data}`);
+                      attributeValues.push(`    ${value?.name}: ${value.data}`);
                     }
 
                     // Add the Attribute to the exported set
                     textAttributes.push(
-                      `  ${attribute.name}:\n${attributeValues.join("\n")}`
+                      `  ${attribute?.name}:\n${attributeValues.join("\n")}`
                     );
                   }
                 });
@@ -1545,13 +1696,13 @@ export class Entities {
                   throw error;
                 }
 
-                if (textOrigins.length > 0) {
+                if (textOrigins?.length > 0) {
                   textDetails.push(`Origins: ${textOrigins.join(", ")}`);
                 }
-                if (textProducts.length > 0) {
+                if (textProducts?.length > 0) {
                   textDetails.push(`Products: ${textProducts.join(", ")}`);
                 }
-                if (textAttributes.length > 0) {
+                if (textAttributes?.length > 0) {
                   textDetails.push(`Attributes:`);
                   textDetails.push(...textAttributes);
                 }
@@ -1569,32 +1720,62 @@ export class Entities {
     });
   };
 
+  static async getDataMultipleJSON(entityIds: string[]) {
+    try {
+      const entities = await Entities.getDataMultipleRaw(entityIds);
+
+      // Remove 'history' property from each entity
+      let modifiedEntities = {
+        "entities": entities?.map(entity => {
+          const plainEntity = JSON.parse(JSON.stringify(entity)); // Converts MongoDB types to plain objects
+          delete plainEntity.history;
+
+          return plainEntity;
+        })
+      }
+
+      return JSON.stringify(modifiedEntities, null, 4);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  static async getDataMultipleRaw(entityIds: string[]) {
+    try {
+      const entities = await getDatabase()
+        .collection(ENTITIES)
+        .find({ _id: { $in: entityIds } }).toArray();
+
+      return entities;
+    } catch (error) {
+      throw error;
+    }
+  }
+
   static getDataMultiple = (entities: string[]): Promise<string> => {
-    consola.start("Generating data for", entities.length, "Entities...");
-    return new Promise((resolve, reject) => {
+    consola.start("Generating data for", entities?.length, "Entities...");
+    return new Promise(async (resolve, reject) => {
       // Get the data for each Entity and store
-      const entityData: Promise<EntityModel>[] = [];
-      entities.map((entityId: string) => {
-        entityData.push(Entities.getOne(entityId));
-      });
+      const entityData: any = await Entities.getDataMultipleRaw(entities);
 
       Promise.all(entityData).then((entities: EntityModel[]) => {
         // Find any common Attributes and append to headers
         const commonAttributes = _.uniqBy(
-          _.flatten(entities.map((entity) => entity.attributes)),
-          (attribute) => attribute.name
+          _.flatten(entities?.map((entity) => entity?.attributes)),
+          (attribute) => attribute?.name
         );
 
         // Once all Entity data has been retrieved, iterate and add to rows
-        const entityRowData = entities.map((entity: EntityModel) => {
+        const entityRowData = entities?.map((entity: EntityModel) => {
           return new Promise<{ [header: string]: string }>(
             (resolve, _reject) => {
               // Setup base data structure (later to be transformed into row)
               const exportEntityRow: { [header: string]: string } = {
-                ID: entity._id,
-                Name: entity.name,
+                ID: entity?._id,
+                Name: entity?.name,
                 Owner: entity.owner,
                 Created: entity.created,
+                Description: entity?.description,
                 Projects: "",
                 Products: "",
                 Origins: "",
@@ -1602,59 +1783,59 @@ export class Entities {
 
               // Get Projects
               const entityProjects: Promise<ProjectModel>[] = [];
-              entity.projects.map((projectId: string) => {
+              entity.projects?.map((projectId: string) => {
                 entityProjects.push(Projects.getOne(projectId));
               });
               Promise.all(entityProjects)
                 .then((projects: ProjectModel[]) => {
                   // Collate Projects
-                  const formattedProjects = projects.map(
+                  const formattedProjects = projects?.map(
                     (project: ProjectModel) => {
-                      return project.name;
+                      return project?.name;
                     }
                   );
-                  if (formattedProjects.length > 0) {
+                  if (formattedProjects?.length > 0) {
                     exportEntityRow.Projects = formattedProjects.join(" ");
                   }
                 })
                 .then(() => {
                   // Collate Products and Origins
-                  const formattedProducts = entity.associations.products.map(
+                  const formattedProducts = entity?.associations?.products?.map(
                     (product) => {
-                      return product.name;
+                      return product?.name;
                     }
                   );
-                  if (formattedProducts.length > 0) {
+                  if (formattedProducts?.length > 0) {
                     exportEntityRow.Products = formattedProducts.join(" ");
                   }
 
-                  const formattedOrigins = entity.associations.origins.map(
+                  const formattedOrigins = entity?.associations?.origins?.map(
                     (origin) => {
-                      return origin.name;
+                      return origin?.name;
                     }
                   );
-                  if (formattedOrigins.length > 0) {
+                  if (formattedOrigins?.length > 0) {
                     exportEntityRow.Origins = formattedOrigins.join(" ");
                   }
                 })
                 .then(() => {
                   // Add Attributes (if existing)
-                  entity.attributes.map((attribute: AttributeModel) => {
+                  entity?.attributes?.map((attribute: AttributeModel) => {
                     // If current Attribute is a common Attribute, add the information
                     if (
                       _.includes(
-                        commonAttributes.map(
-                          (commonAttribute) => commonAttribute.name
+                        commonAttributes?.map(
+                          (commonAttribute) => commonAttribute?.name
                         ),
-                        attribute.name
+                        attribute?.name
                       )
                     ) {
-                      attribute.values.map((value: IValue<any>) => {
+                      attribute.values?.map((value: IValue<any>) => {
                         if (_.isEqual(value.type, "select")) {
-                          exportEntityRow[`${attribute.name} (${value.name})`] =
+                          exportEntityRow[`${attribute?.name} (${value?.name})`] =
                             value.data.selected;
                         } else {
-                          exportEntityRow[`${attribute.name} (${value.name})`] =
+                          exportEntityRow[`${attribute?.name} (${value?.name})`] =
                             value.data;
                         }
                       });
@@ -1679,7 +1860,7 @@ export class Entities {
             rows.push(leadingRow);
 
             // Add all rows by extracting values
-            generatedRows.map((generatedRow: { [header: string]: string }) => {
+            generatedRows?.map((generatedRow: { [header: string]: string }) => {
               rows.push(Object.values(generatedRow));
             });
 
@@ -1696,7 +1877,7 @@ export class Entities {
               fs.writeFileSync(path, formattedOutput);
               consola.start(
                 "Generated data for",
-                entities.length,
+                entities?.length,
                 "Entities..."
               );
               resolve(path);
@@ -1721,14 +1902,14 @@ export class Entities {
       if (files.file) {
         const receivedFile = files.file;
         const receivedFileData = receivedFile.data as Buffer;
-        consola.start("Received file:", receivedFile.name);
+        consola.start("Uploaded file:", receivedFile?.name);
 
         // Access bucket and create open stream to write to storage
         const bucket = getAttachments();
 
         // Create stream from buffer
         const streamedFile = Readable.from(receivedFileData);
-        const uploadStream = bucket.openUploadStream(receivedFile.name, {
+        const uploadStream = bucket.openUploadStream(receivedFile?.name, {
           metadata: { type: receivedFile.mimetype },
         });
         streamedFile
@@ -1739,7 +1920,7 @@ export class Entities {
           .on("finish", () => {
             // Once the upload is finished, register attachment with Entity
             Entities.addAttachment(target, {
-              name: receivedFile.name,
+              name: receivedFile?.name,
               id: uploadStream.id.toString(),
             });
             resolve({ status: true, message: "Uploaded file" });
@@ -1770,8 +1951,8 @@ export class Entities {
               details: "Deleted Entity",
               target: {
                 type: "entities",
-                id: entity._id,
-                name: entity.name,
+                id: entity?._id,
+                name: entity?.name,
               },
             })
           );
@@ -1788,7 +1969,7 @@ export class Entities {
             getDatabase()
               .collection(ENTITIES)
               .updateOne(
-                { _id: entity._id },
+                { _id: entity?._id },
                 updates,
                 (error: any, _response: any) => {
                   if (error) {
@@ -1796,7 +1977,7 @@ export class Entities {
                   }
 
                   // Resolve the Promise
-                  consola.success("Deleted Entity:", entity.name);
+                  consola.success("Deleted Entity:", entity?.name);
                   resolve(entity);
                 }
               );

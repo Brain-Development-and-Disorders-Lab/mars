@@ -198,13 +198,8 @@ const DataTable = (props: DataTableProps) => {
               <MenuButton
                 as={Button}
                 rightIcon={<Icon name={"c_down"} />}
-                isDisabled={
-                  Object.keys(selectedRows).length === 0 ||
-                  _.isUndefined(props.actions) ||
-                  props.actions?.length === 0
-                }
               >
-                Bulk Actions
+                Actions
               </MenuButton>
               <MenuList>
                 {props.actions?.map((action) => {
@@ -215,6 +210,12 @@ const DataTable = (props: DataTableProps) => {
                       }}
                       icon={<Icon name={action.icon} />}
                       key={action.label}
+                      isDisabled={
+                        (action.label != "Export All Entities JSON") &&
+                        Object.keys(selectedRows).length === 0 ||
+                        _.isUndefined(props.actions) ||
+                        props.actions?.length === 0
+                      }
                     >
                       {action.label}
                     </MenuItem>

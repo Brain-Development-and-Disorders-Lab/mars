@@ -1,0 +1,87 @@
+name: Test MARS Cypress
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+
+env:
+  CONNECTION_STRING: mongodb://admin:metadataadmin@localhost:27017/
+  PORT: 8000
+
+jobs:
+  server:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x]
+        mongodb-version: ["6.0"]
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Start Docker containers
+      run: docker-compose -f "docker-compose.yml" up -d --build
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Install Dependencies
+      run: yarn install
+
+    # Install and build the client
+    - name: Install and Build and test Client
+      working-directory: ./client
+      run: |
+        yarn install
+        yarn build
+        yarn test
+      
+    # Create .env file
+    - name: Create .env file
+      working-directory: server
+      run: |
+        touch .env
+        echo "CONNECTION_STRING=${{ env.CONNECTION_STRING }}" >> .env
+        echo "PORT=8000" >> .env
+        echo "NODE_ENV=development" >> .env
+        echo "CLIENT_ID=${{ secrets.CLIENT_ID }}" >> .env
+        echo "CLIENT_SECRET=${{ secrets.CLIENT_SECRET }}" >> .env
+    
+    - name: Build Server
+      working-directory: ./server
+      run: |
+        yarn install
+        yarn buildDebug
+
+    # Test the server
+    - name: Test Server
+      working-directory: ./server
+      run: |
+        yarn test
+
+    - name: Start Client
+      working-directory: ./client
+      run: yarn start &
+
+    - name: Wait for Client
+      run: sleep 10 # seconds
+
+    - name: Cypress run
+      uses: cypress-io/github-action@v6
+      with:
+        wait-on: 'http://localhost:8080'
+        start: yarn startDev
+
+
+    - name: Upload Cypress Screenshots
+      if: failure() # Runs this step only if the Cypress step failed
+      uses: actions/upload-artifact@v3
+      with:
+        name: cypress-screenshots
+        path: cypress/screenshots
