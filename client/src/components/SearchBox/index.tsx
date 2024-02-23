@@ -35,7 +35,7 @@ import { useNavigate } from "react-router-dom";
 
 // Utility functions and libraries
 import { getData, postData } from "@database/functions";
-import { connectScanner } from "src/devices/Scanner";
+import { connectScanner } from "@devices/Scanner";
 import _ from "lodash";
 
 // Limit the number of results shown
