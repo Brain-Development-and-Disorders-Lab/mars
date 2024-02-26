@@ -6,7 +6,7 @@ import { UserModel } from "@types";
 
 import { Users } from "../operations/Users";
 
-import { authenticate } from "src/util";
+import { authenticate } from "../util";
 
 const UsersRoute = express.Router();
 

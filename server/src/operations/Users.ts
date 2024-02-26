@@ -10,7 +10,7 @@ import _ from "lodash";
 import consola from "consola";
 
 // Database
-import { getDatabase } from "src/database/connection";
+import { getDatabase } from "../database/connection";
 
 const USERS = "users";
 

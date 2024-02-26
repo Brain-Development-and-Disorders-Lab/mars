@@ -3,7 +3,7 @@ import express from "express";
 import _ from "lodash";
 
 // Utility functions
-import { authenticate } from "src/util";
+import { authenticate } from "../util";
 import { Activity } from "../operations/Activity";
 
 // Existing and custom types

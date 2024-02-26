@@ -1,9 +1,9 @@
 // src/middleware/authMiddleware.js
 
 import consola from 'consola';
-import { Authentication } from 'src/operations/Authentication';
+import { Authentication } from '../operations/Authentication';
 
-const authMiddleware = async (req, res, next) => {
+const authMiddleware = async (req: any, res: any, next: any) => {
   try {
     // Extract the token from the request header
     const token = req.headers['id_token']; // Bearer <token>

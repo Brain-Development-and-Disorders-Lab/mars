@@ -8,7 +8,7 @@ import { AttributeModel, IAttribute } from "@types";
 import { Attributes } from "../operations/Attributes";
 
 // Utility functions and libraries
-import { authenticate } from "src/util";
+import { authenticate } from "../util";
 
 const AttributesRoute = express.Router();
 

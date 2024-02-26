@@ -5,9 +5,9 @@
 import _ from "lodash";
 
 // URL of the API server, either local or remote depending on deployment status
-export const SERVER_URL = _.isEqual(process.env.NODE_ENV, "development")
-  ? "http://localhost:8000/mars"
-  : "https://api.reusable.bio/mars";
+export const SERVER_URL = _.isEqual(process.env.REACT_APP_NODE_ENV, "development")
+  ? "https://api.reusable.bio/mars"
+  : "http://localhost:8000/mars";
 
 // export const SERVER_URL = "http://localhost:8000/mars";
 

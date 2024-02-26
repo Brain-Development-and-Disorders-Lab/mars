@@ -19,12 +19,11 @@ import { consola } from "consola";
 import dayjs from "dayjs";
 import fs from "fs";
 import { FindCursor, GridFSBucketReadStream, ObjectId } from "mongodb";
-import tmp, { file } from "tmp";
+import tmp from "tmp";
 import XLSX from "xlsx";
 
 // Database operations
-import { getAttachments, getSystem } from "src/database/connection";
-import { c } from "consola/dist/consola-10ce05ae";
+import { getAttachments, getSystem } from "../database/connection";
 
 // Constants
 const DEVICES = "devices";
@@ -55,7 +54,7 @@ export class System {
           // Create a temporary file, passing the filename as a response
           tmp.file((error, path: string, _fd: number) => {
             if (error) {
-              reject("Error create temporary file:", error);
+              reject("Error create temporary file");
               throw error;
             }
 
@@ -380,8 +379,8 @@ export class System {
           description: row[entityFields.description],
           projects: [],
           associations: {
-            origins: row?.Origins ? [{ name: row.Origins }] : null,
-            products: row?.Products ? [{ name: row.Products }] : null,
+            origins: row?.Origins ? [{ name: row.Origins }] : null as any,
+            products: row?.Products ? [{ name: row.Products }] : null as any,
           },
           attributes: attributes,
           attachments: [],

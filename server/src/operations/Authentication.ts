@@ -5,7 +5,7 @@ import { AuthInfo, AuthToken } from "@types";
 import { Users } from "./Users";
 
 // Utility libraries
-import { postData } from "src/util";
+import { postData } from "../util";
 import _ from "lodash";
 import consola from "consola";
 import { JwksClient } from "jwks-rsa";
@@ -115,7 +115,8 @@ export class Authentication {
           }
         })
         .catch((error) => {
-          consola.error("Error validating token:", error);
+          consola.error("Error validating token error:", error);
+          consola.error("Token:", id_token);
           reject("Error validating token");
         });
     });

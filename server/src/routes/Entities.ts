@@ -7,24 +7,51 @@ import { EntityModel, IEntity } from "@types";
 
 // Utility functions and libraries
 import { Entities } from "../operations/Entities";
-import { authenticate } from "src/util";
-import dayjs from "dayjs";
+import authMiddleware from "../middleware/authMiddleware";
+
+
+// Middleware to check entity ownership
+export const checkEntitiesOwnership = async (req: any, res: any, next: any) => {
+  const userId = req.user?._id;
+  const entityId = req.params.id;
+
+  if (!userId) {
+      return res.status(401).json({ message: 'Authentication required' });
+  }
+
+  try {
+      const entity = await Entities.getOne(entityId);
+      if (!entity) {
+          return res.status(404).json({ message: 'Entity not found' });
+      }
+
+      if (entity.owner !== userId) {
+          return res.status(403).json({ message: 'User does not have permission to access this entity' });
+      }
+
+      req.entity = entity; // Optionally attach the entity to the request object for further use
+      next();
+  } catch (error) {
+      return res.status(500).json({ message: 'An error occurred while checking entity ownership' });
+  }
+};
 
 const EntitiesRoute = express.Router();
 
 // View all Entities
 EntitiesRoute.route("/entities").get(
-  authenticate,
+  authMiddleware,
   (_request: any, response: any) => {
     Entities.getAll().then((entities: EntityModel[]) => {
-      response.json(entities);
+      response.json(entities.filter((entity) => entity.owner === _request?.user?._id));
     });
   }
 );
 
 // View specific Entity
 EntitiesRoute.route("/entities/:id").get(
-  authenticate,
+  authMiddleware,
+  checkEntitiesOwnership,
   (request: any, response: any) => {
     Entities.getOne(request.params.id).then((entity: EntityModel) => {
       response.json(entity);
@@ -34,17 +61,18 @@ EntitiesRoute.route("/entities/:id").get(
 
 // View specific Entity
 EntitiesRoute.route("/entities/byName/:name").get(
-  authenticate,
+  authMiddleware,
   (request: any, response: any) => {
     Entities.entityByNameExist(request.params.name).then((entity: EntityModel | null) => {
-      response.json(entity);
+      response.json(entity && entity.owner === request?.user?._id);
     });
   }
 );
 
 // Lock specific entity
 EntitiesRoute.route("/entities/lock/:id").post(
-  authenticate,
+  authMiddleware,
+  checkEntitiesOwnership,
   (
     request: {
       body: { entity: { name: string; id: string }; lockState: boolean };
@@ -61,7 +89,8 @@ EntitiesRoute.route("/entities/lock/:id").post(
 
 // Get formatted data of one Entity
 EntitiesRoute.route("/entities/export/:id").post(
-  authenticate,
+  authMiddleware,
+  checkEntitiesOwnership,
   (
     request: {
       params: { id: string };
@@ -81,7 +110,7 @@ EntitiesRoute.route("/entities/export/:id").post(
 
 // Get formatted data of multiple Entities
 EntitiesRoute.route("/entities/export").post(
-  authenticate,
+  authMiddleware,
   (
     request: {
       body: { entities: string[], format: "json" | "csv" | "txt" };
@@ -95,11 +124,11 @@ EntitiesRoute.route("/entities/export").post(
     if (request.body?.format === "json") {
       Entities.getDataMultipleJSON(request.body.entities).then((data: string) => {
         // Create a temporary file and write the JSON data to it
-        tmp.file({ postfix: '.json' }, (err, path, fd) => {
+        tmp.file({ postfix: '.json' }, (err: any, path: any) => {
           if (err) {
             return response.status(500).send("Error creating file");
           }
-          fs.writeFile(path, JSON.stringify(data), (err) => {
+          fs.writeFile(path, JSON.stringify(data), (err: any) => {
             if (err) {
               return response.status(500).send("Error writing to file");
             }
@@ -108,7 +137,7 @@ EntitiesRoute.route("/entities/export").post(
             response.download(
               path,
               `export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.json`,
-              (err) => {
+              (err: any) => {
                 // cleanupCallback(); // Cleanup the temp file
                 if (err) {
                   // Handle error, but don't re-throw if it's just the client aborting the download.
@@ -135,7 +164,7 @@ EntitiesRoute.route("/entities/export").post(
 
 // Get formatted data of all Entities
 EntitiesRoute.route("/entities/export_all").post(
-  authenticate,
+  authMiddleware,
   (
     request: { body?: { project: string } },
     response: any
@@ -147,7 +176,7 @@ EntitiesRoute.route("/entities/export_all").post(
 
     Entities.getAll().then((data: EntityModel[]) => {
       // Create a temporary file and write the JSON data to it
-      tmp.file({ postfix: '.json' }, (err, path, fd) => {
+      tmp.file({ postfix: '.json' }, (err: any, path: any) => {
         if (err) {
           return response.status(500).send("Error creating file");
         }
@@ -167,7 +196,7 @@ EntitiesRoute.route("/entities/export_all").post(
         }
         const jsonData = JSON.stringify(modifiedEntities, null, 4);
 
-        fs.writeFile(path, JSON.stringify(jsonData), (err) => {
+        fs.writeFile(path, JSON.stringify(jsonData), (err: any) => {
           if (err) {
             return response.status(500).send("Error writing to file");
           }
@@ -176,7 +205,7 @@ EntitiesRoute.route("/entities/export_all").post(
           response.download(
             path,
             `export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.json`,
-            (err) => {
+            (err: any) => {
               if (err) {
                 if (!response.headersSent) {
                   response.status(500).send("Error sending file");
@@ -193,7 +222,7 @@ EntitiesRoute.route("/entities/export_all").post(
 
 // Create a new Entity, expects Entity data
 EntitiesRoute.route("/entities/create").post(
-  authenticate,
+  authMiddleware,
   (request: { body: IEntity }, response: any) => {
     Entities.create(request.body).then((entity: EntityModel) => {
       response.json({
@@ -207,7 +236,8 @@ EntitiesRoute.route("/entities/create").post(
 
 // Update an Entity
 EntitiesRoute.route("/entities/update").post(
-  authenticate,
+  authMiddleware,
+  checkEntitiesOwnership,
   (request: { body: EntityModel }, response: any) => {
     Entities.update(request.body).then((updatedEntity: EntityModel) => {
       response.json({
@@ -221,7 +251,7 @@ EntitiesRoute.route("/entities/update").post(
 
 // Delete an Entity
 EntitiesRoute.route("/entities/:id").delete(
-  authenticate,
+  authMiddleware,
   (request: { params: { id: string } }, response: any) => {
     Entities.delete(request.params.id).then((entity) => {
       response.json({

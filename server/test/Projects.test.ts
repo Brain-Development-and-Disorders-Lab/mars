@@ -1,8 +1,10 @@
 import { checkProjectOwnership } from '../src/routes/Projects';
+
 // Jest imports
 import { Request, Response, NextFunction } from 'express';
 import * as ProjectsModule from "../src/operations/Projects";
 import * as AuthModule from "../src/operations/Authentication";
+
 
 import {
     afterEach,
@@ -28,6 +30,8 @@ interface CustomRequest extends Request {
 jest.mock("../src/operations/Projects", () => ({
     Projects: {
         getOne: jest.fn(),
+        create: jest.fn(),
+        addEntity: jest.fn(),
     },
 }));
 jest.mock("../src/operations/Authentication", () => ({
@@ -135,4 +139,16 @@ describe('checkProjectOwnership', () => {
         expect(res.json).toHaveBeenCalledWith({ message: 'No token provided.' });
         expect(next).not.toHaveBeenCalled();
     });
+
+    it('should proceed with valid token and project ID from body', async () => {
+        req.user = undefined; // Simulate user not authenticated via req.user
+        req.body = { project: 'project-id-from-body' }; // Simulate passing project ID in the body
+        process.env.NODE_ENV = 'test';
+
+        await checkProjectOwnership(req, res, next);
+
+        expect(next).toHaveBeenCalled();
+        expect(req.project).toBeDefined();
+    });
+
 });

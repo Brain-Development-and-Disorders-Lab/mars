@@ -8,6 +8,7 @@ import { ProjectModel, IProject } from "@types";
 // Operations
 import { Projects } from "../operations/Projects";
 import { Authentication } from "../operations/Authentication";
+import authMiddleware from "../middleware/authMiddleware";
 
 // Utility functions and libraries
 // Middleware to check project ownership
@@ -18,7 +19,7 @@ export const checkProjectOwnership = async (req: any, res: any, next: any) => {
       return;
     }
     console.log("Checking project ownership for user:");
-    const projectId = req.params.id; // Assuming the project ID is passed as a URL parameter
+    const projectId = req.params.id || req?.body?.project || req?.body?._id; // Assuming the project ID is passed as a URL parameter
     let userId = req?.user?._id; // Assuming the user's ID is attached to the request object
     const token = req.headers['id_token']; // Bearer <token>
     console.log("userId:", userId);
@@ -37,6 +38,9 @@ export const checkProjectOwnership = async (req: any, res: any, next: any) => {
 
         return res.status(400).json({ message: "User not provided." });
       }
+    }
+    if (!projectId) {
+      return res.status(400).json({ message: "Project ID not provided." });
     }
     const project = await Projects.getOne(projectId); // Fetch the project details
 
@@ -61,10 +65,12 @@ const ProjectsRoute = express.Router();
 
 // View all Projects
 ProjectsRoute.route("/projects").get(
+  authMiddleware,
   (_request: any, response: any) => {
     console.log("Getting all projects");
     Projects.getAll().then((projects: ProjectModel[]) => {
-      response.json(projects);
+      console.log("_request?.user?._id):", _request?.user?._id);
+      response.json(projects.filter((project) => project.owner === _request?.user?._id));
     });
   }
 );
@@ -81,6 +87,7 @@ ProjectsRoute.route("/projects/:id").get(
 
 // Create a new Project, expects Project data
 ProjectsRoute.route("/projects/create").post(
+  authMiddleware,
   (request: { body: IProject }, response: any) => {
     Projects.create(request.body).then((project: ProjectModel) => {
       response.json({
@@ -94,6 +101,8 @@ ProjectsRoute.route("/projects/create").post(
 
 // Route: Add an Entity to a Project, expects Entity and Project ID data.
 ProjectsRoute.route("/projects/add").post(
+  authMiddleware,
+  checkProjectOwnership,
   (request: { body: { project: string; entity: string } }, response: any) => {
     Projects.addEntity(request.body.project, request.body.entity).then(
       (entity) => {
@@ -108,6 +117,8 @@ ProjectsRoute.route("/projects/add").post(
 
 // Route: Update a Project
 ProjectsRoute.route("/projects/update").post(
+  authMiddleware,
+  checkProjectOwnership,
   (request: { body: ProjectModel }, response: any) => {
     Projects.update(request.body).then((updatedProject: ProjectModel) => {
       response.json({
@@ -121,6 +132,7 @@ ProjectsRoute.route("/projects/update").post(
 
 // Get JSON-formatted data of the Entity
 ProjectsRoute.route("/projects/export").post(
+  authMiddleware,
   (
     request: {
       body: { id: string; fields: string[]; format: "json" | "csv" | "txt" };
@@ -139,6 +151,8 @@ ProjectsRoute.route("/projects/export").post(
 
 // Route: Remove an Entity from a Project, expects Entity and Project ID data.
 ProjectsRoute.route("/projects/remove").post(
+  authMiddleware,
+  checkProjectOwnership,
   (request: { body: { entity: string; project: string } }, response: any) => {
     Projects.removeEntity(request.body.project, request.body.entity).then(
       (project) => {
@@ -154,6 +168,8 @@ ProjectsRoute.route("/projects/remove").post(
 
 // Route: Remove a Project
 ProjectsRoute.route("/projects/:id").delete(
+  authMiddleware,
+  checkProjectOwnership,
   (request: { params: { id: any } }, response: any) => {
     Projects.delete(request.params.id).then((project) => {
       response.json({
