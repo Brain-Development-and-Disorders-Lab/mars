@@ -8,45 +8,99 @@ import { EntityModel, IEntity } from "@types";
 // Utility functions and libraries
 import { Entities } from "../operations/Entities";
 import authMiddleware from "../middleware/authMiddleware";
+import { Projects } from "../operations/Projects";
 
 
 // Middleware to check entity ownership
 export const checkEntitiesOwnership = async (req: any, res: any, next: any) => {
   const userId = req.user?._id;
   const entityId = req.params.id;
+  const entityName = req.params.name;
 
   if (!userId) {
-      return res.status(401).json({ message: 'Authentication required' });
+    return res.status(401).json({ message: 'Authentication required' });
   }
 
   try {
-      const entity = await Entities.getOne(entityId);
-      if (!entity) {
-          return res.status(404).json({ message: 'Entity not found' });
-      }
+    let entity: EntityModel | null = null;
+    if (entityId) {
+      entity = await Entities.getOne(entityId);
+    } else if (entityName) {
+      entity = await Entities.entityByNameExist(entityName);
+    }
 
-      if (entity.owner !== userId) {
-          return res.status(403).json({ message: 'User does not have permission to access this entity' });
-      }
+    if (!entity) {
+      return res.status(404).json({ message: 'Entity not found' });
+    }
 
-      req.entity = entity; // Optionally attach the entity to the request object for further use
-      next();
+    let isOwnerOrProjectOwner = entity.owner === userId;
+
+    // Check if the entity belongs to any project that the user owns
+    if (entity.projects && entity.projects.length > 0) {
+      for (const projectId of entity.projects) {
+        const project = await Projects.getOne(projectId);
+        if (project && project.owner === userId) {
+          isOwnerOrProjectOwner = true;
+          break; // Break the loop as soon as ownership is confirmed
+        }
+      }
+    }
+
+    if (!isOwnerOrProjectOwner) {
+      return res.status(403).json({ message: 'User does not have permission to access this entity' });
+    }
+
+    req.entity = entity; // Attach the entity to the request object for further use
+    next();
   } catch (error) {
-      return res.status(500).json({ message: 'An error occurred while checking entity ownership' });
+    console.error('Error checking entity ownership:', error);
+    return res.status(500).json({ message: 'An error occurred while checking entity ownership' });
   }
 };
+
 
 const EntitiesRoute = express.Router();
 
 // View all Entities
-EntitiesRoute.route("/entities").get(
-  authMiddleware,
-  (_request: any, response: any) => {
-    Entities.getAll().then((entities: EntityModel[]) => {
-      response.json(entities.filter((entity) => entity.owner === _request?.user?._id));
-    });
+EntitiesRoute.route("/entities").get(authMiddleware, async (_request: any, response: any) => {
+  try {
+    const userId = _request?.user?._id;
+    if (!userId) {
+      return response.status(401).json({ message: 'Authentication required' });
+    }
+
+    const entities = await Entities.getAll();
+    const filteredEntities = [];
+
+    for (let entity of entities) {
+      let isOwnerOrProjectOwner = entity.owner === userId;
+      if (isOwnerOrProjectOwner) {
+        filteredEntities.push(entity);
+        continue;
+      }
+
+      let isProjectOwned = false;
+      for (let projectId of entity.projects || []) {
+        const project = await Projects.getOne(projectId);
+        if (project && project.owner === userId) {
+          isProjectOwned = true;
+          break; // Exit the loop early if ownership is confirmed
+        }
+      }
+
+      // If the user is a project owner, include the entity
+      if (isProjectOwned) {
+        filteredEntities.push(entity);
+      }
+    }
+
+    response.json(filteredEntities);
+  } catch (error) {
+    console.error('Error fetching entities:', error);
+    response.status(500).json({ message: 'An error occurred while fetching entities' });
   }
-);
+});
+
 
 // View specific Entity
 EntitiesRoute.route("/entities/:id").get(
@@ -64,7 +118,7 @@ EntitiesRoute.route("/entities/byName/:name").get(
   authMiddleware,
   (request: any, response: any) => {
     Entities.entityByNameExist(request.params.name).then((entity: EntityModel | null) => {
-      response.json(entity && entity.owner === request?.user?._id);
+      response.json(!!entity);
     });
   }
 );
