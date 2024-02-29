@@ -14,12 +14,14 @@ import authMiddleware from "../middleware/authMiddleware";
 // Middleware to check project ownership
 export const checkProjectOwnership = async (req: any, res: any, next: any) => {
   try {
+    const projectId = req.params.id || req?.body?.project || req?.body?._id; // Assuming the project ID is passed as a URL parameter
+    let userId = req?.user?._id; // Assuming the user's ID is attached to the request object
+
     if (_.isEqual(process.env.NODE_ENV, "development")) {
+      userId = 'XXXX-1234-ABCD-0000';
       next();
       return;
     }
-    const projectId = req.params.id || req?.body?.project || req?.body?._id; // Assuming the project ID is passed as a URL parameter
-    let userId = req?.user?._id; // Assuming the user's ID is attached to the request object
     const token = req.headers['id_token']; // Bearer <token>
     console.log("userId:", userId);
 
@@ -68,6 +70,9 @@ ProjectsRoute.route("/projects").get(
   (_request: any, response: any) => {
     console.log("Getting all projects");
     Projects.getAll().then((projects: ProjectModel[]) => {
+      if (_.isEqual(process.env.NODE_ENV, "development")) {
+        _request.user = { _id: 'XXXX-1234-ABCD-0000' };
+      }
       console.log("_request?.user?._id):", _request?.user?._id);
       response.json(projects.filter((project) => project.owner === _request?.user?._id));
     });
