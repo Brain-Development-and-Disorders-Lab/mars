@@ -14,7 +14,7 @@ import { Projects } from "../operations/Projects";
 // Middleware to check entity ownership
 export const checkEntitiesOwnership = async (req: any, res: any, next: any) => {
   let userId = req.user?._id;
-  const entityId = req.params.id;
+  const entityId = req.params.id || req?.body?._id;
   const entityName = req.params.name;
 
   if (_.isEqual(process.env.NODE_ENV, "development")) {
