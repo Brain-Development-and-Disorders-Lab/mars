@@ -13,9 +13,13 @@ import { Projects } from "../operations/Projects";
 
 // Middleware to check entity ownership
 export const checkEntitiesOwnership = async (req: any, res: any, next: any) => {
-  const userId = req.user?._id;
+  let userId = req.user?._id;
   const entityId = req.params.id;
   const entityName = req.params.name;
+
+  if (_.isEqual(process.env.NODE_ENV, "development")) {
+    userId = 'XXXX-1234-ABCD-0000';
+  }
 
   if (!userId) {
     return res.status(401).json({ message: 'Authentication required' });
@@ -64,7 +68,10 @@ const EntitiesRoute = express.Router();
 // View all Entities
 EntitiesRoute.route("/entities").get(authMiddleware, async (_request: any, response: any) => {
   try {
-    const userId = _request?.user?._id;
+    let userId = _request?.user?._id;
+    if (_.isEqual(process.env.NODE_ENV, "development")) {
+      userId = 'XXXX-1234-ABCD-0000';
+    }
     if (!userId) {
       return response.status(401).json({ message: 'Authentication required' });
     }

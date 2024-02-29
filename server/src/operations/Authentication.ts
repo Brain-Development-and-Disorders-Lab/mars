@@ -115,6 +115,9 @@ export class Authentication {
           }
         })
         .catch((error) => {
+          if (_.isEqual(process.env.NODE_ENV, "development")) {
+            return resolve(true);
+          }
           consola.error("Error validating token error:", error);
           consola.error("Token:", id_token);
           reject("Error validating token");
