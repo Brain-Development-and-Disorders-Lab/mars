@@ -8,12 +8,12 @@ import { AttributeModel, IAttribute } from "@types";
 import { Attributes } from "../operations/Attributes";
 
 // Utility functions and libraries
-import authMiddleware from "src/middleware/authMiddleware";
+import authMiddleware from "../middleware/authMiddleware";
 import _ from "lodash";
 
 // Middleware to check attribute ownership
 export const checkAttributeOwnership = async (req: any, res: any, next: any) => {
-  let userId = req.user._id; // Assuming user info is attached to req.user
+  let userId = req?.user?._id; // Assuming user info is attached to req.user
   const attributeId = req.params.id || req.body._id; // Get attribute ID from route params or request body
 
   if (_.isEqual(process.env.NODE_ENV, "development")) {
