@@ -44,7 +44,7 @@ export class Attributes {
     consola.start("Creating new Attribute:", attribute.name);
     return new Promise((resolve, _reject) => {
       // Allocate a new identifier and join with Attribute data
-      attribute["_id"] = getIdentifier("attribute");
+      attribute["_id"] = getIdentifier("attribute");      
 
       // Push data to database
       getDatabase()

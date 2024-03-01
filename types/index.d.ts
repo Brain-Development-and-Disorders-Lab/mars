@@ -49,6 +49,7 @@ export type IAttribute = {
   name: string;
   description: string;
   values: IValue<any>[];
+  owner?: string;
 };
 
 // Database model of Attribute, including assigned ID

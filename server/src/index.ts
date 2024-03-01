@@ -25,8 +25,6 @@ import SearchRoute from "./routes/Search";
 import SystemRoute from "./routes/System";
 import AuthenticationRoute from "./routes/Authentication";
 import UsersRoute from "./routes/Users";
-// import authMiddleware from "./middleware/authMiddleware";
-
 
 // Set logging level
 consola.level = (_.isEqual(process.env.NODE_ENV, "development") || _.isEqual(process.env.NODE_ENV, "test"))
@@ -43,18 +41,6 @@ app.use(helmet());
 app.use(cors({ credentials: true, origin: true }));
 app.use(express.json({ limit: "50mb" }));
 app.use(fileUpload());
-
-// const secureRoutes = express.Router();
-// secureRoutes.use(authMiddleware); // Apply authentication middleware to all secure routes
-
-// // Add routes that require authentication to secureRoutes
-// secureRoutes.use(ProjectsRoute);
-// secureRoutes.use(ActivityRoute);
-// secureRoutes.use(AttributesRoute);
-// secureRoutes.use(EntitiesRoute);
-// secureRoutes.use(SearchRoute);
-// secureRoutes.use(SystemRoute);
-// secureRoutes.use(UsersRoute);
  
 // Use routes
 app.use(ProjectsRoute); // ProjectsRoute now has authMiddleware applied to it
