@@ -2,10 +2,10 @@
 import express from "express";
 
 // Operations
-import { Search } from "src/operations/Search";
+import { Search } from "../operations/Search";
 
 // Utility functions and libraries
-import { authenticate } from "src/util";
+import { authenticate } from "../util";
 
 const SearchRoute = express.Router();
 

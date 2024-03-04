@@ -4,8 +4,9 @@ import consola from "consola";
 import { QueryComponent } from "@types";
 
 // Utility functions and libraries
+// @ts-ignore
 import mquery from "mquery";
-import { getDatabase } from "src/database/connection";
+import { getDatabase } from "../database/connection";
 import _ from "lodash";
 
 const ENTITIES = "entities";

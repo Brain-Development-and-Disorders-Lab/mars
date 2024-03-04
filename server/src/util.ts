@@ -72,12 +72,14 @@ export const postData = async (
 export const authenticate = (request: any, response: any, next: () => void) => {
   // Bypass authentication in development mode
   if (_.isEqual(process.env.NODE_ENV, "development")) {
+    request.user = { _id: "XXXX-1234-ABCD-0000" };
     // Bypass authentication in development mode
     next();
   } else {
     Authentication.validate(request.headers["id_token"])
       .then((result) => {
         if (result) {
+          request.user = result;
           next();
         } else {
           response.status(403);

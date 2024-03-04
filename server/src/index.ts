@@ -5,6 +5,7 @@ import "dotenv/config";
 import _ from "lodash";
 import express from "express";
 import cors from "cors";
+// @ts-ignore
 import helmet from "helmet";
 import consola, { LogLevels } from "consola";
 
@@ -25,13 +26,14 @@ import SystemRoute from "./routes/System";
 import AuthenticationRoute from "./routes/Authentication";
 import UsersRoute from "./routes/Users";
 
-
 // Set logging level
 consola.level = (_.isEqual(process.env.NODE_ENV, "development") || _.isEqual(process.env.NODE_ENV, "test"))
   ? LogLevels.verbose
   : LogLevels.error;
 
-const app = express();
+consola.info(`Starting server in ${process.env.NODE_ENV} mode`);
+
+export const app = express();
 const port = process.env.PORT || 8000;
 
 // Configure Express, enable CORS middleware and routes

@@ -836,7 +836,7 @@ const Project = () => {
                 <Flex direction={"column"} gap={"2"}>
                   <FormControl>
                     <FormLabel>Entities</FormLabel>
-                    {isLoaded && projectEntities.length > 0 ? (
+                    {isLoaded && projectEntities?.length > 0 ? (
                       <Stack spacing={2} direction={"column"}>
                         {projectEntities.map((entity) => {
                           allExportFields.push(`entity_${entity}`);

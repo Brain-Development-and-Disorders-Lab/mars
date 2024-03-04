@@ -6,7 +6,7 @@ import { System } from "../operations/System";
 import dayjs from "dayjs";
 import { DeviceModel, EntityModel } from "@types";
 import { GridFSBucketReadStream } from "mongodb";
-import { authenticate } from "src/util";
+import { authenticate } from "../util";
 
 const SystemRoute = express.Router();
 

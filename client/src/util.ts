@@ -54,15 +54,15 @@ export const isValidAttributes = (attributes: IAttribute[]) => {
 export const getToken = (tokenKey: string): any => {
   const storedToken = sessionStorage.getItem(tokenKey);
   if (!_.isNull(storedToken) && !_.isUndefined(storedToken)) {
-    // if (JSON.parse(storedToken as string).name === "Test User") {
-    //   console.log("return undefined token");
-    //   return undefined;
-    // }
+    if (JSON.parse(storedToken as string).name === "Test User") {
+      console.log("return undefined token");
+      return undefined;
+    }
     return JSON.parse(storedToken);
   }
 
   // decomment if you want to use a dummy token
-  if (_.isEqual(process.env.NODE_ENV, "development")) {
+  if (_.isEqual(process.env.REACT_APP_NODE_ENV, "development")) {
     // Return a dummy token
     return {
       name: "Test User",
