@@ -53,7 +53,7 @@ import { useToken } from "src/authentication/useToken";
  */
 const App = (): ReactElement => {
   // Setup token authentication
-  console.log(process.env.REACT_APP_NODE_ENV);
+  console.log(process.env.NODE_ENV);
   const [token, _setToken] = useToken();
 
   const [authenticated, setAuthenticated] = useState(false);
