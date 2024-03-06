@@ -18,6 +18,7 @@ export const checkAttributeOwnership = async (req: any, res: any, next: any) => 
 
   if (_.isEqual(process.env.NODE_ENV, "development")) {
     userId = "XXXX-1234-ABCD-0000";
+    req.user = { _id: userId };
   }
 
   try {

@@ -86,7 +86,7 @@ export class Authentication {
     return new Promise((resolve, reject) => {
 
       if (_.isEqual(process.env.NODE_ENV, "development")) {
-        resolve(true);
+        resolve({ _id: "XXXX-1234-ABCD-0000" } as any);
       }
 
       const client = new JwksClient({
