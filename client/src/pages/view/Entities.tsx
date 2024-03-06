@@ -137,7 +137,7 @@ const Entities = () => {
 
   const actions: DataTableAction[] = [
     {
-      label: "Export Entities CSV",
+      label: "Export Selected (CSV)",
       icon: "download",
       action: (table, rows: any) => {
         // Export rows that have been selected
@@ -161,7 +161,7 @@ const Entities = () => {
       },
     },
     {
-      label: "Export Entities JSON",
+      label: "Export Selected (JSON)",
       icon: "download",
       action: (table, rows: any) => {
         // Export rows that have been selected
@@ -185,7 +185,7 @@ const Entities = () => {
       },
     },
     {
-      label: "Export All Entities JSON",
+      label: "Export All (JSON)",
       icon: "download",
       action: (table) => {
         postData(`/entities/export_all`, { format: "json" }).then(
@@ -201,6 +201,7 @@ const Entities = () => {
 
         table.resetRowSelection();
       },
+      alwaysEnabled: true,
     },
   ];
 
