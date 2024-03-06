@@ -164,9 +164,17 @@ const Importer = (props: {
       // No jsonData to update (if CSV file)
       return;
     }
+
     // Clone the jsonData to avoid direct state mutation
     let updatedJsonData = _.cloneDeep(jsonData) as any;
-    updatedJsonData = (updatedJsonData as any)?.entities;
+    if (updatedJsonData._id) {
+      // Single JSON document, update only one by placing in array
+      updatedJsonData = [updatedJsonData];
+    } else {
+      // Multiple exported JSON files
+      updatedJsonData = (updatedJsonData as any)?.entities;
+    }
+
     // Update the jsonData with user selections
     // This is a simplified example, you might need to adjust it based on your actual data structure
     if (updatedJsonData && Array.isArray(updatedJsonData)) {
@@ -214,11 +222,11 @@ const Importer = (props: {
           setFile({} as File);
           props.onClose();
 
-          if (_.isEqual(fileType, "application/csv")) {
+          if (_.isEqual(fileType, "text/csv")) {
             toast({
               title: "Success",
               status: "success",
-              description: "Successfully read CSV-formatted file.",
+              description: "Successfully parsed CSV-formatted file.",
               duration: 4000,
               position: "bottom-right",
               isClosable: true,
@@ -228,11 +236,11 @@ const Importer = (props: {
               setColumns(Object.keys(response.data[0]));
             }
             setupMapping();
-          } else {
+          } else if (_.isEqual(fileType, "application/json")) {
             toast({
               title: "Success",
               status: "success",
-              description: "Successfully imported file.",
+              description: "Successfully imported JSON file.",
               duration: 4000,
               position: "bottom-right",
               isClosable: true,
