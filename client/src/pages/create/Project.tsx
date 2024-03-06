@@ -110,19 +110,19 @@ const Project = () => {
             />
             {isNameError && (
               <FormErrorMessage>
-                A name or ID must be specified.
+                A name to identify the Project must be specified.
               </FormErrorMessage>
             )}
           </FormControl>
 
           <FormControl>
             <FormLabel htmlFor="date" fontWeight={"normal"}>
-              Created
+              Date Created or Started
             </FormLabel>
 
             <Input
               w={["100%", "md"]}
-              type={"date"}
+              type={"datetime-local"}
               value={created}
               onChange={(event) =>
                 setCreated(dayjs(event.target.value).format("YYYY-MM-DDTHH:mm"))
@@ -130,7 +130,7 @@ const Project = () => {
             />
 
             <FormHelperText>
-              Specify a timestamp most significant to the Project.
+              Specify a timestamp for the Project.
             </FormHelperText>
           </FormControl>
 
