@@ -95,7 +95,7 @@ const QueryBuilderTab: React.FC<QueryBuilderTabProps> = ({
         />
         <Flex direction={"row"} w={"100%"} gap={"4"} justify={"right"} mt={2}>
           <IconButton
-            aria-label={"Search"}
+            aria-label={"Search Query"}
             colorScheme={"green"}
             icon={<Icon name={"search"} />}
             onClick={() => onSearchBuiltQuery()}

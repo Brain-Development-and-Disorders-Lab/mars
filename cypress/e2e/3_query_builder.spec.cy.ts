@@ -10,7 +10,7 @@ describe('search query builder', () => {
     cy.get('[data-testid="operators"]').select('contains');
     cy.get('[data-testid="value-editor"]').type('box');
     // press search button
-    cy.get(':nth-child(1) > .css-1lt0o92 > .chakra-button').click();
+    cy.get('[aria-label="Search Query"]').click();
     // result array should exist
     cy.get('.css-1ofqig9 > .chakra-heading').should('contain.text', 'search results');
   });
