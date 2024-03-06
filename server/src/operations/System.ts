@@ -28,10 +28,11 @@ import { getAttachments, getSystem } from "../database/connection";
 // Constants
 const DEVICES = "devices";
 
-function isJsonFile(filename: string) {
-  // Use a regular expression to test if the filename ends with '.json'
-  return filename.toLowerCase().endsWith('.json');
-}
+// Note: Removed function since filetype is detected via input MIME-type
+// function isJsonFile(filename: string) {
+//   // Use a regular expression to test if the filename ends with '.json'
+//   return filename.toLowerCase().endsWith('.json');
+// }
 
 export class System {
   static backup = (): Promise<string> => {
@@ -80,27 +81,27 @@ export class System {
     try {
       // Validate importData here (if necessary)
       // ...
-  
+
       // Iterate through the importData and update the database
       for (const item of importData.entities) {
         // Assuming 'Entities' is your Mongoose model and item._id is the identifier
         // const entityId = item._id;
         // delete item._id; // Remove the ID from the item if you don't want to replace it
-  
+
         // Update or insert the item in the database
         // You can use 'updateOne', 'findByIdAndUpdate', or similar methods based on your exact requirements
         await Entities.upsert(
            item// Option to insert a new document if the entity does not exist
         );
       }
-  
+
       // If everything goes well, send a success response
       return {
         status: true,
         message: 'JSON data successfully imported.',
         data: null, // or include any relevant data here
       };
-  
+
     } catch (error) {
       // Handle any errors that occur during the process
       console.error('Error importing JSON data:', error);
@@ -111,11 +112,10 @@ export class System {
       };
     }
   };
-  
 
   static import = (
     files: any,
-    type: "backup" | "spreadsheet"
+    type: "text/csv" | "application/json",
   ): Promise<{ status: boolean; message: string; data?: any }> => {
     return new Promise((resolve, reject) => {
       if (files.file) {
@@ -194,59 +194,11 @@ export class System {
           }
         };
 
-        // Handle a backup file in JSON format
-        if (_.isEqual(type, "backup")) {
-          // Parse the JSON data
-          let parsedFileData;
-          try {
-            parsedFileData = JSON.parse(receivedFileData.toString("utf-8"));
-            consola.success("Parsed backup JSON file");
-          } catch (error) {
-            consola.error("Error parsing backup JSON file");
-            reject({
-              message: "Error importing file, could not parse JSON content",
-            });
-            return;
-          }
-
-          // Utility function to check if a file contains fields
-          const checkFields = (parsedFileData: any, fields: string[]) => {
-            for (let field of fields) {
-              if (_.isUndefined(parsedFileData[field])) {
-                return false;
-              }
-            }
-            return true;
-          };
-
-          // Check parsed data
-          if (_.isUndefined(parsedFileData)) {
-            reject({ message: "Error importing backup JSON file" });
-            return;
-          }
-
-          if (_.isEqual(type, "backup")) {
-            // Check that the backup file contains all required fields
-            if (
-              checkFields(parsedFileData, [
-                "timestamp",
-                "entities",
-                "projects",
-                "attributes",
-                "activity",
-              ])
-            ) {
-              consola.info("Importing backup JSON file");
-            } else {
-              consola.error("Missing fields in backup JSON file");
-              reject({ message: "Invalid backup JSON file, check contents" });
-              return;
-            }
-          }
-
-          // Import each part by checking if it exists, updating if so, otherwise creating
-          consola.start("Importing backup JSON file contents");
-
+        // Handle import depending on file format
+        if (_.isEqual(type, "application/json")) {
+          // JSON format
+          consola.start("Importing JSON file:", files.file.name);
+          const parsedFileData = JSON.parse(receivedFileData.toString("utf-8"));
           importEntities(parsedFileData);
           importProjects(parsedFileData);
           importAttribute(parsedFileData);
@@ -265,7 +217,7 @@ export class System {
                 consola.success("Imported file:", receivedFile.name);
                 resolve({
                   status: true,
-                  message: "Successfuly imported backup JSON file",
+                  message: "Successfuly imported JSON file",
                 });
               }
             )
@@ -273,61 +225,112 @@ export class System {
               consola.error("Error importing backup JSON file");
               reject({ message: "Error importing backup JSON file" });
             });
-        } else if (_.isEqual(type, "spreadsheet")) {
-
-          if (isJsonFile(files.file.name)) {
-            consola.start("loading json file:", files.file.name);
-            const parsedFileData = JSON.parse(receivedFileData.toString("utf-8"));
-            importEntities(parsedFileData);
-            importProjects(parsedFileData);
-            importAttribute(parsedFileData);
-
-            // Execute all import operations
-            Promise.all([
-              Promise.all(entityOperations),
-              Promise.all(projectsOperations),
-              Promise.all(attributeOperations),
-            ])
-              .then(
-                (results: [EntityModel[], ProjectModel[], AttributeModel[]]) => {
-                  consola.success("Imported", results[0].length, "Entities");
-                  consola.success("Imported", results[1].length, "Projects");
-                  consola.success("Imported", results[2].length, "Attributes");
-                  consola.success("Imported file:", receivedFile.name);
-                  resolve({
-                    status: true,
-                    message: "Successfuly imported JSON file",
-                  });
-                }
-              )
-              .catch((_error) => {
-                consola.error("Error importing backup JSON file");
-                reject({ message: "Error importing backup JSON file" });
-              });
-
+        } else if (_.isEqual(type, "text/csv")) {
+          // CSV format
+          const csvData = XLSX.read(receivedFileData, { cellDates: true });
+          if (csvData.SheetNames.length > 0) {
+            const primarySheet = csvData.Sheets[csvData.SheetNames[0]];
+            const parsedSheet = XLSX.utils.sheet_to_json(primarySheet, {
+              defval: "",
+            });
+            consola.success("Parsed CSV file:", files.file.name);
+            resolve({
+              status: true,
+              message: "Parsed CSV file successfully",
+              data: parsedSheet,
+            });
           } else {
-            const spreadsheet = XLSX.read(receivedFileData, { cellDates: true });
-            if (spreadsheet.SheetNames.length > 0) {
-              const primarySheet = spreadsheet.Sheets[spreadsheet.SheetNames[0]];
-              const parsedSheet = XLSX.utils.sheet_to_json(primarySheet, {
-                defval: "",
-              });
-              resolve({
-                status: true,
-                message: "Parsed spreadsheet successfully",
-                data: parsedSheet,
-              });
-            } else {
-              reject({ message: "No sheets in spreadsheet" });
-            }
+            reject({ message: "No sheets in spreadsheet" });
           }
         }
+
+        // Note: The following code is for importing a "backup"-style JSON file that
+        // contains a specific set of fields. Removed since we don't use this
+        // functionality on the frontend if this is a user-facing application.
+
+        // Parse the JSON data
+        // let parsedFileData;
+        // try {
+        //   parsedFileData = JSON.parse(receivedFileData.toString("utf-8"));
+        //   consola.success("Parsed backup JSON file");
+        // } catch (error) {
+        //   consola.error("Error parsing backup JSON file");
+        //   reject({
+        //     message: "Error importing file, could not parse JSON content",
+        //   });
+        //   return;
+        // }
+
+        // // Utility function to check if a file contains fields
+        // const checkFields = (parsedFileData: any, fields: string[]) => {
+        //   for (let field of fields) {
+        //     if (_.isUndefined(parsedFileData[field])) {
+        //       return false;
+        //     }
+        //   }
+        //   return true;
+        // };
+
+        // // Check parsed data
+        // if (_.isUndefined(parsedFileData)) {
+        //   reject({ message: "Error importing backup JSON file" });
+        //   return;
+        // }
+
+        // if (_.isEqual(type, "application/json")) {
+        //   // Check that the backup file contains all required fields
+        //   if (
+        //     checkFields(parsedFileData, [
+        //       "timestamp",
+        //       "entities",
+        //       "projects",
+        //       "attributes",
+        //       "activity",
+        //     ])
+        //   ) {
+        //     consola.info("Importing backup JSON file");
+        //   } else {
+        //     consola.error("Missing fields in backup JSON file");
+        //     reject({ message: "Invalid backup JSON file, check contents" });
+        //     return;
+        //   }
+        // }
+
+        // // Import each part by checking if it exists, updating if so, otherwise creating
+        // consola.start("Importing backup JSON file contents");
+
+        // importEntities(parsedFileData);
+        // importProjects(parsedFileData);
+        // importAttribute(parsedFileData);
+
+        // // Execute all import operations
+        // Promise.all([
+        //   Promise.all(entityOperations),
+        //   Promise.all(projectsOperations),
+        //   Promise.all(attributeOperations),
+        // ])
+        //   .then(
+        //     (results: [EntityModel[], ProjectModel[], AttributeModel[]]) => {
+        //       consola.success("Imported", results[0].length, "Entities");
+        //       consola.success("Imported", results[1].length, "Projects");
+        //       consola.success("Imported", results[2].length, "Attributes");
+        //       consola.success("Imported file:", receivedFile.name);
+        //       resolve({
+        //         status: true,
+        //         message: "Successfuly imported backup JSON file",
+        //       });
+        //     }
+        //   )
+        //   .catch((_error) => {
+        //     consola.error("Error importing backup JSON file");
+        //     reject({ message: "Error importing backup JSON file" });
+        //   });
       } else {
         consola.error("Error importing file");
         reject({ message: "Error importing file" });
       }
     });
-  };  
+  };
 
   static mapData = (
     entityFields: EntityImport,
