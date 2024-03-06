@@ -240,9 +240,10 @@ export type DataTableProps = {
 };
 
 export type DataTableAction = {
-  label: string;
-  icon: IconNames;
-  action: (table: any, rows: any) => void;
+  label: string; // Action label
+  icon: IconNames; // Icon
+  action: (table: any, rows: any) => void; // Action function acting on the provided the table and rows
+  alwaysEnabled?: boolean; // Enable the action at all times, regardless if any rows selected
 };
 
 // Icon component
