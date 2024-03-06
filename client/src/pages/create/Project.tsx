@@ -96,7 +96,7 @@ const Project = () => {
         <Flex direction={"column"} gap={"6"} p={"2"} h={"100%"}>
           <FormControl isRequired isInvalid={isNameError}>
             <FormLabel htmlFor={"name"} fontWeight={"normal"}>
-              Project Name
+              Name
             </FormLabel>
             <Input
               id={"name"}
@@ -201,11 +201,36 @@ const Project = () => {
           <ModalCloseButton />
           <ModalBody p={"2"}>
             <Flex direction={"column"} gap={"4"} p={"2"}>
-              <Heading size={"md"}>Overview</Heading>
               <Text>
-                Projects can be used to organize and share Entities. Any type of
-                Entity can be included in a Project. Entities can be added and
-                removed from a Project after it has been created.
+                Projects can be used to organize and share Entities.
+              </Text>
+              <Text>
+                Any type of Entity can be included in a Project. Entities can be
+                added and removed from a Project after it has been created.
+              </Text>
+
+              <Heading size={"sm"}>Name*</Heading>
+              <Text>
+                Specify the name of a Project. This should be unique and will
+                act as a searchable identifier.
+              </Text>
+
+              <Heading size={"sm"}>Date Created or Started</Heading>
+              <Text>
+                A timestamp assigned to the Project. For example, if this is a
+                set of Entities used in a specific experiment, this date could
+                represent when work on the experiment commenced. Otherwise,
+                this timestamp may simply represent when this Project was created
+                in MARS.
+              </Text>
+
+              <Heading size={"sm"}>Description*</Heading>
+              <Text>
+                A brief description of the Project contents.
+              </Text>
+
+              <Text>
+                <i>* Required field</i>
               </Text>
             </Flex>
           </ModalBody>
