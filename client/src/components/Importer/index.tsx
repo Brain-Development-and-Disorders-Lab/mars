@@ -233,7 +233,12 @@ const Importer = (props: {
             });
             if (response.data?.length > 0) {
               setSpreadsheetData(response.data);
-              setColumns(Object.keys(response.data[0]));
+
+              // Filter columns to exclude columns with no header ("__EMPTY...")
+              const filteredColumnSet = Object.keys(response.data[0]).filter((column) => {
+                return !_.startsWith(column, "__EMPTY");
+              })
+              setColumns(filteredColumnSet);
             }
             setupMapping();
           } else if (_.isEqual(fileType, "application/json")) {
@@ -613,7 +618,7 @@ const Importer = (props: {
           >
             <ModalOverlay />
             <ModalContent p={"2"} gap={"4"}>
-              <ModalHeader p={"2"}>Import Spreadsheet Data</ModalHeader>
+              <ModalHeader p={"2"}>Import</ModalHeader>
               <ModalBody p={"2"}>
                 {/* Stepper progress indicator */}
                 <Flex pb={"4"}>
@@ -848,6 +853,7 @@ const Importer = (props: {
                     rightIcon={<Icon name="cross" />}
                     variant={"outline"}
                     onClick={() => {
+                      setInterfacePage("start"); // Reset to "start"
                       onMappingClose();
                     }}
                   >
