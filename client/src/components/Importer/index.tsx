@@ -101,8 +101,8 @@ const Importer = (props: {
   const [projects, setProjects] = useState([] as ProjectModel[]);
 
   // Fields to be assigned to columns
-  const [nameField, setNameField] = useState("Name");
-  const [descriptionField, setDescriptionField] = useState("Description");
+  const [nameField, setNameField] = useState("");
+  const [descriptionField, setDescriptionField] = useState("");
   const [ownerField, _setOwnerField] = useState(token.orcid);
   const [projectField, setProjectField] = useState("");
   const [selectedOrigin, setSelectedOrigin] = useState(
@@ -903,7 +903,7 @@ const Importer = (props: {
                         }
                       }
                     }}
-                    isDisabled={_.isEqual(nameField, "")}
+                    isDisabled={_.isEqual(nameField, "") && !jsonData}
                     isLoading={isMapping}
                     loadingText={"Please wait..."}
                   >
