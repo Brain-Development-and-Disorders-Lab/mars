@@ -112,7 +112,7 @@ EntitiesRoute.route("/entities").get(
 
 EntitiesRoute.route("/entities/search").post(
   authMiddleware,
-  async (request: any, response) => {
+  async (request: any, response: any) => {
     const searchText = request.body.query;
     const userId = request.user?._id;
 
