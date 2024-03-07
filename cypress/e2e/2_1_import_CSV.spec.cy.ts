@@ -27,6 +27,7 @@ describe('CSV Import Test', () => {
       cy.wait(100);
       cy.get('.css-jut409').scrollIntoView().click();
       cy.wait(100);
+      cy.get('select').find('option[value="Name"]').first().parent().select('Name');
       cy.get('.css-15vhhhd > .css-h211ee').click({force: true}); // go to importe step 2
       cy.get('.css-15vhhhd > .css-h211ee').click({force: true}); //  finalize import
 
