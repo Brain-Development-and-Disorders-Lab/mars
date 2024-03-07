@@ -226,7 +226,7 @@ export class Entities {
         if (existingEntity) {
           // If the Entity exists, update it
           entityData._id = existingEntity._id as any;
-          return await Entities.update({ ...existingEntity, ...entityData,  });
+          return await Entities.update({ ...existingEntity, ...entityData, });
         }
 
         return await Entities.create(entityData);
@@ -1985,4 +1985,49 @@ export class Entities {
         });
     });
   };
+
+  static searchByText = async (userId: string, searchText: string) => {
+    const searchRegex = new RegExp(searchText, 'i'); // Case-insensitive regex search
+    const entities = await getDatabase().collection('entities').find({
+      $or: [
+        { name: { $regex: searchRegex } },
+        { description: { $regex: searchRegex } },
+        { "attributes.name": { $regex: searchRegex } },
+        { "attributes.description": { $regex: searchRegex } },
+        { "attributes.values.name": { $regex: searchRegex } },
+        { "attributes.values.data": { $regex: searchRegex } }
+      ],
+      // Additional query to ensure entity is not soft-deleted etc, if applicable
+    }).toArray();
+
+    const filteredEntities = [];
+
+    for (let entity of entities) {
+      let isOwnerOrProjectOwner = entity.owner === userId;
+      if (isOwnerOrProjectOwner) {
+        filteredEntities.push(entity);
+        continue;
+      }
+
+      let isProjectOwned = false;
+      for (let projectId of entity.projects || []) {
+        const project = await Projects.getOne(projectId);
+        if (project && project.owner === userId) {
+          isProjectOwned = true;
+          break; // Exit the loop early if ownership is confirmed
+        }
+      }
+
+      // If the user is a project owner, include the entity
+      if (isProjectOwned) {
+        filteredEntities.push(entity);
+      }
+    }
+
+    // Further filter entities based on user's permission here if needed
+    // For simplicity, this step is omitted but you should implement it based on your app's logic
+
+    return filteredEntities;
+  }
+
 }

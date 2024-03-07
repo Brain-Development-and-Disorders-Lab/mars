@@ -66,47 +66,69 @@ export const checkEntitiesOwnership = async (req: any, res: any, next: any) => {
 const EntitiesRoute = express.Router();
 
 // View all Entities
-EntitiesRoute.route("/entities").get(authMiddleware, async (_request: any, response: any) => {
-  try {
-    let userId = _request?.user?._id;
-    if (_.isEqual(process.env.NODE_ENV, "development")) {
-      userId = 'XXXX-1234-ABCD-0000';
-    }
-    if (!userId) {
-      return response.status(401).json({ message: 'Authentication required' });
-    }
-
-    const entities = await Entities.getAll();
-    const filteredEntities = [];
-
-    for (let entity of entities) {
-      let isOwnerOrProjectOwner = entity.owner === userId;
-      if (isOwnerOrProjectOwner) {
-        filteredEntities.push(entity);
-        continue;
+EntitiesRoute.route("/entities").get(
+  authMiddleware,
+  async (_request: any, response: any) => {
+    try {
+      let userId = _request?.user?._id;
+      if (_.isEqual(process.env.NODE_ENV, "development")) {
+        userId = 'XXXX-1234-ABCD-0000';
+      }
+      if (!userId) {
+        return response.status(401).json({ message: 'Authentication required' });
       }
 
-      let isProjectOwned = false;
-      for (let projectId of entity.projects || []) {
-        const project = await Projects.getOne(projectId);
-        if (project && project.owner === userId) {
-          isProjectOwned = true;
-          break; // Exit the loop early if ownership is confirmed
+      const entities = await Entities.getAll();
+      const filteredEntities = [];
+
+      for (let entity of entities) {
+        let isOwnerOrProjectOwner = entity.owner === userId;
+        if (isOwnerOrProjectOwner) {
+          filteredEntities.push(entity);
+          continue;
+        }
+
+        let isProjectOwned = false;
+        for (let projectId of entity.projects || []) {
+          const project = await Projects.getOne(projectId);
+          if (project && project.owner === userId) {
+            isProjectOwned = true;
+            break; // Exit the loop early if ownership is confirmed
+          }
+        }
+
+        // If the user is a project owner, include the entity
+        if (isProjectOwned) {
+          filteredEntities.push(entity);
         }
       }
 
-      // If the user is a project owner, include the entity
-      if (isProjectOwned) {
-        filteredEntities.push(entity);
-      }
+      response.json(filteredEntities);
+    } catch (error) {
+      console.error('Error fetching entities:', error);
+      response.status(500).json({ message: 'An error occurred while fetching entities' });
     }
+  });
 
-    response.json(filteredEntities);
-  } catch (error) {
-    console.error('Error fetching entities:', error);
-    response.status(500).json({ message: 'An error occurred while fetching entities' });
-  }
-});
+EntitiesRoute.route("/entities/search").post(
+  authMiddleware,
+  async (request: any, response) => {
+    const searchText = request.body.query;
+    const userId = request.user?._id;
+
+    try {
+      if (!searchText.trim()) {
+        return response.status(400).json({ message: "Search text is required." });
+      }
+
+      const entities = await Entities.searchByText(userId, searchText);
+      response.json(entities);
+    } catch (error) {
+      console.error('Error performing search:', error);
+      response.status(500).json({ message: 'An error occurred during the search' });
+    }
+  });
+
 
 
 // View specific Entity
