@@ -135,47 +135,42 @@ const Search = () => {
   }, []);
 
   const runSearch = () => {
-    // Check if an ID has been entered
-    getData(`/entities/${query}`)
-      .then((entity) => {
-        if (_.isNull(entity)) {
-          // Not an Entity ID
-          setIsSearching(true);
-          setHasSearched(true);
-
-          postData(`/search`, { query: query })
-            .then((value) => {
-              setResults(value);
-            })
-            .catch((_error) => {
-              toast({
-                title: "Error",
-                status: "error",
-                description: "Could not get search results.",
-                duration: 4000,
-                position: "bottom-right",
-                isClosable: true,
-              });
-              setIsError(true);
-            })
-            .finally(() => {
-              setIsSearching(false);
-            });
+    // Initial check if a specific ID search was not found
+    setIsSearching(true);
+    setHasSearched(true);
+    setResults([]);
+  
+    // Use the new search route for text-based search
+    postData(`/entities/search/`, { query: query}) // Assuming you pass user ID for permissions filtering
+      .then((results) => {
+        if (results && results.length > 0) {
+          // Update state with search results
+          setResults(results);
         } else {
-          // Entity with given ID exists
-          navigate(`/entities/${entity._id}`);
+          // Handle no results found scenario
+          toast({
+            title: "No results found",
+            status: "info",
+            duration: 4000,
+            position: "bottom-right",
+            isClosable: true,
+          });
         }
       })
-      .catch(() => {
+      .catch((error) => {
+        // Handle search error scenario
+        console.error("Search error:", error);
         toast({
-          title: "Error",
+          title: "Search Error",
+          description: "Could not perform search.",
           status: "error",
-          description: "Error occurred when searching for Entity.",
-          duration: 4000,
-          position: "bottom-right",
+          duration: 5000,
           isClosable: true,
+          position: "bottom-right",
         });
-        setIsError(true);
+      })
+      .finally(() => {
+        setIsSearching(false);
       });
   };
 
