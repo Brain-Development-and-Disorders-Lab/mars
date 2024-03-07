@@ -17,11 +17,6 @@ import {
   Input,
   ModalFooter,
   FormControl,
-  Tabs,
-  Tab,
-  TabPanels,
-  TabPanel,
-  TabList,
   Select,
   FormLabel,
   Tag,
@@ -66,15 +61,16 @@ const Importer = (props: {
   onOpen: () => void;
   onClose: () => void;
 }) => {
+  // File state
   const [file, setFile] = useState({} as File);
-  const [fileType, setFileType] = useState(
-    "spreadsheet" as "backup" | "spreadsheet"
-  );
+  const [fileType, setFileType] = useState("");
+  const [jsonData, setJsonData] = useState(null); // State to store parsed JSON data
+
+  // Page state
   const [isError, setIsError] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isMapping, setIsMapping] = useState(false);
-  const [jsonData, setJsonData] = useState(null); // State to store parsed JSON data
 
   const navigate = useNavigate();
   const toast = useToast();
@@ -105,8 +101,8 @@ const Importer = (props: {
   const [projects, setProjects] = useState([] as ProjectModel[]);
 
   // Fields to be assigned to columns
-  const [nameField, setNameField] = useState("Name");
-  const [descriptionField, setDescriptionField] = useState("Description");
+  const [nameField, setNameField] = useState("");
+  const [descriptionField, setDescriptionField] = useState("");
   const [ownerField, _setOwnerField] = useState(token.orcid);
   const [projectField, setProjectField] = useState("");
   const [selectedOrigin, setSelectedOrigin] = useState(
@@ -130,6 +126,7 @@ const Importer = (props: {
     // Use a regular expression to test if the filename ends with '.json'
     return filename.toLowerCase().endsWith('.json');
   }
+
   const handleJsonFile = (file: File) => {
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -167,9 +164,17 @@ const Importer = (props: {
       // No jsonData to update (if CSV file)
       return;
     }
+
     // Clone the jsonData to avoid direct state mutation
     let updatedJsonData = _.cloneDeep(jsonData) as any;
-    updatedJsonData = (updatedJsonData as any)?.entities;
+    if (updatedJsonData._id) {
+      // Single JSON document, update only one by placing in array
+      updatedJsonData = [updatedJsonData];
+    } else {
+      // Multiple exported JSON files
+      updatedJsonData = (updatedJsonData as any)?.entities;
+    }
+
     // Update the jsonData with user selections
     // This is a simplified example, you might need to adjust it based on your actual data structure
     if (updatedJsonData && Array.isArray(updatedJsonData)) {
@@ -217,25 +222,30 @@ const Importer = (props: {
           setFile({} as File);
           props.onClose();
 
-          if (_.isEqual(fileType, "spreadsheet")) {
+          if (_.isEqual(fileType, "text/csv")) {
             toast({
               title: "Success",
               status: "success",
-              description: "Successfully read file.",
+              description: "Successfully parsed CSV-formatted file.",
               duration: 4000,
               position: "bottom-right",
               isClosable: true,
             });
             if (response.data?.length > 0) {
               setSpreadsheetData(response.data);
-              setColumns(Object.keys(response.data[0]));
+
+              // Filter columns to exclude columns with no header ("__EMPTY...")
+              const filteredColumnSet = Object.keys(response.data[0]).filter((column) => {
+                return !_.startsWith(column, "__EMPTY");
+              })
+              setColumns(filteredColumnSet);
             }
             setupMapping();
-          } else {
+          } else if (_.isEqual(fileType, "application/json")) {
             toast({
               title: "Success",
               status: "success",
-              description: "Successfully imported file.",
+              description: "Successfully imported JSON file.",
               duration: 4000,
               position: "bottom-right",
               isClosable: true,
@@ -491,192 +501,84 @@ const Importer = (props: {
           >
             <ModalOverlay />
             <ModalContent p={"2"} gap={"2"}>
-              <ModalHeader p={"2"}>Import Data</ModalHeader>
+              <ModalHeader p={"2"}>Import</ModalHeader>
               <ModalCloseButton />
               <ModalBody p={"2"}>
-                <Flex w={"100%"} align={"center"} justify={"center"}>
-                  <Tabs
-                    variant={"soft-rounded"}
-                    w={"100%"}
-                    onChange={(index) => {
-                      if (_.isEqual(index, 0)) {
-                        setFileType("spreadsheet");
-                      } else {
-                        setFileType("backup");
-                      }
-                    }}
-                  >
-                    <TabList gap={"2"}>
-                      <Tab
-                        isDisabled={
-                          !_.isUndefined(file.name) &&
-                          _.isEqual(fileType, "backup")
-                        }
-                      >
-                        Json import file
-                      </Tab>
-                      <Tab
-                        isDisabled={
-                          !_.isUndefined(file.name) &&
-                          _.isEqual(fileType, "spreadsheet")
-                        }
-                      >
-                        System Backup
-                      </Tab>
-                    </TabList>
-                    <TabPanels>
-                      <TabPanel>
-                        <FormControl>
-                          <Flex
-                            direction={"column"}
-                            minH={"200px"}
-                            w={"100%"}
-                            align={"center"}
-                            justify={"center"}
-                            border={"2px"}
-                            borderStyle={"dashed"}
-                            borderColor={"gray.100"}
-                            rounded={"md"}
-                          >
-                            {_.isEqual(file, {}) ? (
-                              <Flex
-                                direction={"column"}
-                                w={"100%"}
-                                justify={"center"}
-                                align={"center"}
-                              >
-                                <Text fontWeight={"semibold"}>
-                                  Drag json file here
-                                </Text>
-                                <Text>or click to upload</Text>
-                              </Flex>
-                            ) : (
-                              <Flex
-                                direction={"column"}
-                                w={"100%"}
-                                justify={"center"}
-                                align={"center"}
-                              >
-                                <Text fontWeight={"semibold"}>{file.name}</Text>
-                              </Flex>
-                            )}
-                          </Flex>
-                          <Input
-                            type={"file"}
-                            h={"100%"}
-                            w={"100%"}
-                            position={"absolute"}
-                            top={"0"}
-                            left={"0"}
-                            opacity={"0"}
-                            aria-hidden={"true"}
-                            onChange={(
-                              event: ChangeEvent<HTMLInputElement>
-                            ) => {
-                              if (event.target.files) {
-                                // Only accept JSON or CSV files
-                                if (
-                                  _.includes(
-                                    [
-                                      "text/csv",
-                                      "application/json",
-                                    ],
-                                    event.target.files[0].type
-                                  )
-                                ) {
-                                  setFile(event.target.files[0]);
-                                } else {
-                                  toast({
-                                    title: "Warning",
-                                    status: "warning",
-                                    description:
-                                      "Please upload a JSON or CSV file",
-                                    duration: 4000,
-                                    position: "bottom-right",
-                                    isClosable: true,
-                                  });
-                                }
-                              }
-                            }}
-                          />
-                        </FormControl>
-                      </TabPanel>
+                <Flex w={"100%"} direction={"column"} align={"center"} justify={"center"}>
+                  <Flex w={"100%"} direction={"column"} mx={"4"} mb={"4"} gap={"2"}>
+                    <Text>
+                      MARS supports importing CSV-formatted files or JSON files.
+                    </Text>
+                  </Flex>
 
-                      <TabPanel>
-                        <FormControl>
-                          <Flex
-                            direction={"column"}
-                            minH={"200px"}
-                            w={"100%"}
-                            align={"center"}
-                            justify={"center"}
-                            border={"2px"}
-                            borderStyle={"dashed"}
-                            borderColor={"gray.100"}
-                            rounded={"md"}
-                          >
-                            {_.isEqual(file, {}) ? (
-                              <Flex
-                                direction={"column"}
-                                w={"100%"}
-                                justify={"center"}
-                                align={"center"}
-                              >
-                                <Text fontWeight={"semibold"}>
-                                  Drag backup file here
-                                </Text>
-                                <Text>or click to upload</Text>
-                              </Flex>
-                            ) : (
-                              <Flex
-                                direction={"column"}
-                                w={"100%"}
-                                justify={"center"}
-                                align={"center"}
-                              >
-                                <Text fontWeight={"semibold"}>{file.name}</Text>
-                              </Flex>
-                            )}
-                          </Flex>
-                          <Input
-                            type={"file"}
-                            h={"100%"}
-                            w={"100%"}
-                            position={"absolute"}
-                            top={"0"}
-                            left={"0"}
-                            opacity={"0"}
-                            aria-hidden={"true"}
-                            accept={"json/*"}
-                            onChange={(
-                              event: ChangeEvent<HTMLInputElement>
-                            ) => {
-                              if (event.target.files) {
-                                // Only accept JSON files
-                                if (
-                                  _.isEqual(
-                                    event.target.files[0].type,
-                                    "application/json"
-                                  )
-                                ) {
-                                  setFile(event.target.files[0]);
-                                } else {
-                                  toast({
-                                    title: "Warning",
-                                    status: "warning",
-                                    description: "Please upload a JSON file",
-                                    duration: 4000,
-                                    position: "bottom-right",
-                                    isClosable: true,
-                                  });
-                                }
-                              }
-                            }}
-                          />
-                        </FormControl>
-                      </TabPanel>
-                    </TabPanels>
-                  </Tabs>
+                  <FormControl>
+                    <Flex
+                      direction={"column"}
+                      minH={"200px"}
+                      w={"100%"}
+                      align={"center"}
+                      justify={"center"}
+                      border={"2px"}
+                      borderStyle={"dashed"}
+                      borderColor={"gray.100"}
+                      rounded={"md"}
+                      background={"gray.50"}
+                    >
+                      {_.isEqual(file, {}) ? (
+                        <Flex
+                          direction={"column"}
+                          w={"100%"}
+                          justify={"center"}
+                          align={"center"}
+                        >
+                          <Text fontWeight={"semibold"}>
+                            Drag file here
+                          </Text>
+                          <Text>or click to upload</Text>
+                        </Flex>
+                      ) : (
+                        <Flex
+                          direction={"column"}
+                          w={"100%"}
+                          justify={"center"}
+                          align={"center"}
+                        >
+                          <Text fontWeight={"semibold"}>{file.name}</Text>
+                        </Flex>
+                      )}
+                    </Flex>
+                    <Input
+                      type={"file"}
+                      h={"100%"}
+                      w={"100%"}
+                      position={"absolute"}
+                      top={"0"}
+                      left={"0"}
+                      opacity={"0"}
+                      aria-hidden={"true"}
+                      onChange={(
+                        event: ChangeEvent<HTMLInputElement>
+                      ) => {
+                        if (event.target.files) {
+                          // Only accept defined file types
+                          if (_.includes(["text/csv", "application/json"], event.target.files[0].type)) {
+                            setFileType(event.target.files[0].type);
+                            setFile(event.target.files[0]);
+                          } else {
+                            toast({
+                              title: "Warning",
+                              status: "warning",
+                              description:
+                                "Please upload a JSON or CSV file",
+                              duration: 4000,
+                              position: "bottom-right",
+                              isClosable: true,
+                            });
+                          }
+                        }
+                      }}
+                    />
+                  </FormControl>
                 </Flex>
               </ModalBody>
 
@@ -699,6 +601,7 @@ const Importer = (props: {
                     rightIcon={<Icon name={"upload"} />}
                     onClick={() => performImport()}
                     isLoading={isUploading}
+                    loadingText={"Processing..."}
                   >
                     Upload
                   </Button>
@@ -715,7 +618,7 @@ const Importer = (props: {
           >
             <ModalOverlay />
             <ModalContent p={"2"} gap={"4"}>
-              <ModalHeader p={"2"}>Import Spreadsheet Data</ModalHeader>
+              <ModalHeader p={"2"}>Import</ModalHeader>
               <ModalBody p={"2"}>
                 {/* Stepper progress indicator */}
                 <Flex pb={"4"}>
@@ -950,6 +853,7 @@ const Importer = (props: {
                     rightIcon={<Icon name="cross" />}
                     variant={"outline"}
                     onClick={() => {
+                      setInterfacePage("start"); // Reset to "start"
                       onMappingClose();
                     }}
                   >
@@ -999,7 +903,7 @@ const Importer = (props: {
                         }
                       }
                     }}
-                    isDisabled={_.isEqual(nameField, "")}
+                    isDisabled={_.isEqual(nameField, "") && !jsonData}
                     isLoading={isMapping}
                     loadingText={"Please wait..."}
                   >

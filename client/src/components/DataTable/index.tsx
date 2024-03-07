@@ -211,10 +211,10 @@ const DataTable = (props: DataTableProps) => {
                       icon={<Icon name={action.icon} />}
                       key={action.label}
                       isDisabled={
-                        (action.label != "Export All Entities JSON") &&
-                        Object.keys(selectedRows).length === 0 ||
+                        (Object.keys(selectedRows).length === 0 ||
                         _.isUndefined(props.actions) ||
-                        props.actions?.length === 0
+                        props.actions?.length === 0) &&
+                        action.alwaysEnabled !== true
                       }
                     >
                       {action.label}

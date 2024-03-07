@@ -1592,16 +1592,8 @@ export class Entities {
                 const attributeId = field.split("_")[1];
                 entity?.attributes?.map((attribute) => {
                   if (_.isEqual(attribute?._id, attributeId)) {
-                    // Extract all values
-                    const attributeStruct = {} as { [value: string]: any };
-                    for (let value of attribute.values) {
-                      attributeStruct[value?.name] = value.data;
-                    }
-
                     // Add the Attribute to the exported set
-                    tempStructure["attributes"].push({
-                      [attribute?.name]: attributeStruct,
-                    });
+                    tempStructure["attributes"].push(attribute);
                   }
                 });
               }

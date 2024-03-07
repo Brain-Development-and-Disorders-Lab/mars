@@ -223,7 +223,7 @@ const Entity = () => {
     onOpen: onExportOpen,
     onClose: onExportClose,
   } = useDisclosure();
-  const [exportFields, setExportFields] = useState([] as string[]);
+  const [exportFields, setExportFields] = useState(["owner"] as string[]);
 
   const {
     isOpen: isUploadOpen,
@@ -2094,12 +2094,8 @@ const Entity = () => {
                             {dayjs(entityData.created).format("DD MMM YYYY")}
                           </Checkbox>
                           <Checkbox
-                            isChecked={
-                              exportAll || _.includes(exportFields, "owner")
-                            }
-                            onChange={(event) =>
-                              handleExportCheck("owner", event.target.checked)
-                            }
+                            isChecked={true}
+                            isDisabled
                           >
                             Owner: {entityData.owner}
                           </Checkbox>
