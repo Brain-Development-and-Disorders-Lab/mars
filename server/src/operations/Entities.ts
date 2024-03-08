@@ -1486,7 +1486,7 @@ export class Entities {
               } else if (_.startsWith(field, "origin_")) {
                 // "origins" data field
                 row.push(
-                  Entities.getOne(_.split(field, "_")[1]).then((entity) => {
+                  Entities.getOne(field.slice(7)).then((entity) => {
                     headers.push(`Origin (${entity?.name})`);
                     return entity?.name;
                   })
@@ -1494,14 +1494,14 @@ export class Entities {
               } else if (_.startsWith(field, "product_")) {
                 // "products" data field
                 row.push(
-                  Entities.getOne(_.split(field, "_")[1]).then((entity) => {
+                  Entities.getOne(field.slice(8)).then((entity) => {
                     headers.push(`Product (${entity?.name})`);
                     return entity?.name;
                   })
                 );
               } else if (_.startsWith(field, "attribute_")) {
                 // "attributes" data field
-                const attributeId = field.split("_")[1];
+                const attributeId = field.slice(10);
                 entity?.attributes?.map((attribute) => {
                   if (_.isEqual(attribute?._id, attributeId)) {
                     for (let value of attribute.values) {
