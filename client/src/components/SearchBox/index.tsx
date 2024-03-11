@@ -226,8 +226,8 @@ const SearchBox = () => {
           <PopoverArrow />
           <PopoverCloseButton />
           <PopoverHeader>
-            <Flex align={"center"} gap={"2"}>
-              {isSearching ? <Spinner size={"sm"} /> : results.length} results for "{query}"
+            <Flex align={"center"} gap={"1"}>
+              {isSearching ? <Spinner size={"sm"} /> : <Text fontWeight={"bold"}>{results.length}</Text>} results for "{query}"
             </Flex>
           </PopoverHeader>
           <PopoverBody>
@@ -274,6 +274,20 @@ const SearchBox = () => {
               )}
             </Flex>
           </PopoverBody>
+          <PopoverFooter>
+            <Flex width={"100%"} gap={"1"}>
+              View more results using <Link onClick={() => {
+                // Close the popover and navigate to the `/search` route
+                onCloseWrapper();
+                navigate("/search");
+              }}>
+                <Flex gap={"1"} direction={"row"} align={"center"}>
+                  <Text>Search</Text>
+                  <Icon name={"a_right"} />
+                </Flex>
+              </Link>
+            </Flex>
+          </PopoverFooter>
         </PopoverContent>
       </Popover>
     </Flex>
