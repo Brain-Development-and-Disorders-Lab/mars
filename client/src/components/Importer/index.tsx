@@ -36,6 +36,7 @@ import {
 import Icon from "@components/Icon";
 import Error from "@components/Error";
 import Attribute from "@components/AttributeCard";
+import { Information } from "@components/Label";
 
 // Custom and existing types
 import {
@@ -61,12 +62,12 @@ const Importer = (props: {
   onOpen: () => void;
   onClose: () => void;
 }) => {
-  // File state
+  // File states
   const [file, setFile] = useState({} as File);
   const [fileType, setFileType] = useState("");
   const [jsonData, setJsonData] = useState(null); // State to store parsed JSON data
 
-  // Page state
+  // Page states
   const [isError, setIsError] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -755,7 +756,9 @@ const Importer = (props: {
 
                 {_.isEqual(interfacePage, "attributes") && (
                   <Flex w={"100%"} direction={"column"} gap={"4"}>
-                    <Text>Attributes</Text>
+                    <Flex w={"100%"} gap={"2"}>
+                      <Information text={"All dates must use \"MM/DD/YYYY\" format"} />
+                    </Flex>
                     <Flex
                       direction={"row"}
                       gap={"2"}

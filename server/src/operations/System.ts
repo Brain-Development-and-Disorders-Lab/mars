@@ -227,6 +227,7 @@ export class System {
             });
         } else if (_.isEqual(type, "text/csv")) {
           // CSV format
+          consola.start("Importing CSV file:", files.file.name);
           const csvData = XLSX.read(receivedFileData, { cellDates: true });
           if (csvData.SheetNames.length > 0) {
             const primarySheet = csvData.Sheets[csvData.SheetNames[0]];
