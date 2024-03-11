@@ -445,7 +445,7 @@ export class Projects {
             const projects: Promise<string>[] = [];
 
             // Iterate over fields and generate a CSV export file
-            projectExportData.fields.map((field) => {
+            projectExportData.fields.map((field: string) => {
               if (_.isEqual(field, "created")) {
                 // "created" data field
                 headers.push("Created");
@@ -465,14 +465,14 @@ export class Projects {
               } else if (_.startsWith(field, "project_")) {
                 // "project" data fields
                 projects.push(
-                  Projects.getOne(_.split(field, "_")[1]).then((project) => {
+                  Projects.getOne(field.slice(8)).then((project) => {
                     return project.name;
                   })
                 );
               } else if (_.startsWith(field, "entity_")) {
                 // "entity" data fields
                 entities.push(
-                  Entities.getOne(_.split(field, "_")[1]).then((entity) => {
+                  Entities.getOne(field.slice(7)).then((entity) => {
                     return entity?.name ?? "";
                   })
                 );
@@ -528,7 +528,7 @@ export class Projects {
             } as { [key: string]: any };
             const exportOperations = [] as Promise<string>[];
 
-            projectExportData.fields.map((field) => {
+            projectExportData.fields.map((field: string) => {
               if (_.isEqual(field, "created")) {
                 // "created" data field
                 tempStructure["created"] = dayjs(project.created)
@@ -540,11 +540,11 @@ export class Projects {
               } else if (_.isEqual(field, "description")) {
                 // "description" data field
                 tempStructure["description"] = project.description;
-              } else if (_.startsWith(field, "project")) {
+              } else if (_.startsWith(field, "project_")) {
                 // "project" data fields
                 tempStructure["projects"] = [];
                 exportOperations.push(
-                  Projects.getOne(_.split(field, "_")[1]).then((project) => {
+                  Projects.getOne(field.slice(8)).then((project) => {
                     tempStructure["projects"].push(project.name);
                     return project.name;
                   })
@@ -552,7 +552,7 @@ export class Projects {
               } else if (_.startsWith(field, "entity_")) {
                 // "entity" data fields
                 exportOperations.push(
-                  Entities.getOne(_.split(field, "_")[1]).then((entity) => {
+                  Entities.getOne(field.slice(7)).then((entity) => {
                     tempStructure["entities"].push(entity.name);
                     return entity.name;
                   })
@@ -589,7 +589,7 @@ export class Projects {
             const textProjects = [] as string[];
             const textEntities = [] as string[];
 
-            projectExportData.fields.map((field) => {
+            projectExportData.fields.map((field: string) => {
               if (_.isEqual(field, "created")) {
                 // "created" data field
                 textDetails.push(
@@ -606,7 +606,7 @@ export class Projects {
               } else if (_.startsWith(field, "project_")) {
                 // "project" data fields
                 exportOperations.push(
-                  Projects.getOne(_.split(field, "_")[1]).then((project) => {
+                  Projects.getOne(field.slice(8)).then((project) => {
                     textProjects.push(project.name);
                     return project.name;
                   })
@@ -614,7 +614,7 @@ export class Projects {
               } else if (_.startsWith(field, "entity_")) {
                 // "entity" data fields
                 exportOperations.push(
-                  Entities.getOne(_.split(field, "_")[1]).then((entity) => {
+                  Entities.getOne(field.slice(7)).then((entity) => {
                     textEntities.push(entity.name);
                     return entity.name;
                   })

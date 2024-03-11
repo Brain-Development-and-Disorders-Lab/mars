@@ -1547,7 +1547,7 @@ export class Entities {
             } as { [key: string]: any };
             const exportOperations = [] as Promise<string>[];
 
-            exportInfo.fields?.map((field) => {
+            exportInfo.fields?.map((field: string) => {
               if (_.isEqual(field, "created")) {
                 // "created" data field
                 tempStructure["created"] = dayjs(entity.created)
@@ -1559,11 +1559,11 @@ export class Entities {
               } else if (_.isEqual(field, "description")) {
                 // "description" data field
                 tempStructure["description"] = entity.description;
-              } else if (_.startsWith(field, "project")) {
+              } else if (_.startsWith(field, "project_")) {
                 // "projects" data field
                 tempStructure["projects"] = [];
                 exportOperations.push(
-                  Projects.getOne(_.split(field, "_")[1]).then((project) => {
+                  Projects.getOne(field.slice(8)).then((project) => {
                     tempStructure["projects"].push(project?.name);
                     return project?.name;
                   })
@@ -1572,7 +1572,7 @@ export class Entities {
                 // "origins" data field
                 tempStructure.associations["origins"] = [];
                 exportOperations.push(
-                  Entities.getOne(_.split(field, "_")[1]).then((entity) => {
+                  Entities.getOne(field.slice(7)).then((entity) => {
                     tempStructure.associations["origins"].push(entity?.name);
                     return entity?.name;
                   })
@@ -1581,7 +1581,7 @@ export class Entities {
                 // "products" data field
                 tempStructure.associations["products"] = [];
                 exportOperations.push(
-                  Entities.getOne(_.split(field, "_")[1]).then((entity) => {
+                  Entities.getOne(field.slice(8)).then((entity) => {
                     tempStructure.associations["products"].push(entity?.name);
                     return entity?.name;
                   })
@@ -1589,7 +1589,7 @@ export class Entities {
               } else if (_.startsWith(field, "attribute_")) {
                 // "attributes" data field
                 tempStructure["attributes"] = [];
-                const attributeId = field.split("_")[1];
+                const attributeId = field.slice(10);
                 entity?.attributes?.map((attribute) => {
                   if (_.isEqual(attribute?._id, attributeId)) {
                     // Add the Attribute to the exported set
@@ -1629,7 +1629,7 @@ export class Entities {
             const textProducts = [] as string[];
             const textAttributes = [] as string[];
 
-            exportInfo.fields?.map((field) => {
+            exportInfo.fields?.map((field: string) => {
               if (_.isEqual(field, "created")) {
                 // "created" data field
                 textDetails.push(
@@ -1646,7 +1646,7 @@ export class Entities {
               } else if (_.startsWith(field, "origin_")) {
                 // "origins" data field
                 exportOperations.push(
-                  Entities.getOne(_.split(field, "_")[1]).then((entity) => {
+                  Entities.getOne(field.slice(7)).then((entity) => {
                     textOrigins.push(entity?.name);
                     return entity?.name;
                   })
@@ -1654,14 +1654,14 @@ export class Entities {
               } else if (_.startsWith(field, "product_")) {
                 // "products" data field
                 exportOperations.push(
-                  Entities.getOne(_.split(field, "_")[1]).then((entity) => {
+                  Entities.getOne(field.slice(8)).then((entity) => {
                     textProducts.push(entity?.name);
                     return entity?.name;
                   })
                 );
               } else if (_.startsWith(field, "attribute_")) {
                 // "attributes" data field
-                const attributeId = field.split("_")[1];
+                const attributeId = field.slice(10);
                 entity?.attributes?.map((attribute) => {
                   if (_.isEqual(attribute?._id, attributeId)) {
                     // Extract all values
