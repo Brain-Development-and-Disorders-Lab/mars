@@ -48,6 +48,7 @@ const Linky = (props: LinkyProps) => {
       <Button
         variant={"link"}
         color={props.color ? props.color : "gray.700"}
+        justifyContent={props.justify ? props.justify: "center"}
         as={Link}
         onClick={onClickHandler}
       >
