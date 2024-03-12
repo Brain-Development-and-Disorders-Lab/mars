@@ -116,8 +116,8 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
               h={"fit-content"}
               bg={"white"}
               rounded={"md"}
-              border={"1px"}
-              borderColor={"gray.100"}
+              border={"2px"}
+              borderColor={"gray.200"}
             >
               <Heading size={"md"}>Values</Heading>
               <Flex

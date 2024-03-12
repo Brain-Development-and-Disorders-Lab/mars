@@ -341,7 +341,7 @@ const Entity = () => {
         {_.isEqual("start", pageState) && (
           <Flex direction={"column"} gap={"2"} grow={"1"}>
             <FormControl isRequired isInvalid={isNameError || !isNameUnique}>
-              <FormLabel>Entity Name</FormLabel>
+              <FormLabel>Name</FormLabel>
               <Input
                 name={"name"}
                 value={name}
@@ -376,7 +376,7 @@ const Entity = () => {
             </FormControl>
 
             <FormControl>
-              <FormLabel>Entity Description</FormLabel>
+              <FormLabel>Description</FormLabel>
               <Textarea
                 value={description}
                 placeholder={"Description"}
@@ -401,11 +401,11 @@ const Entity = () => {
                 p={"2"}
                 direction={"column"}
                 rounded={"md"}
-                border={"1px"}
-                borderColor={"gray.100"}
+                border={"2px"}
+                borderColor={"gray.200"}
               >
                 <FormControl>
-                  <FormLabel>Origin Entities</FormLabel>
+                  <FormLabel>Origins</FormLabel>
                   <Select
                     title="Select Entity"
                     placeholder={"Select Entity"}
@@ -490,11 +490,11 @@ const Entity = () => {
                 p={"2"}
                 direction={"column"}
                 rounded={"md"}
-                border={"1px"}
-                borderColor={"gray.100"}
+                border={"2px"}
+                borderColor={"gray.200"}
               >
                 <FormControl>
-                  <FormLabel>Product Entities</FormLabel>
+                  <FormLabel>Products</FormLabel>
                   <Select
                     title="Select Entity"
                     placeholder={"Select Entity"}
@@ -580,8 +580,8 @@ const Entity = () => {
               p={"2"}
               direction={"column"}
               rounded={"md"}
-              border={"1px"}
-              borderColor={"gray.100"}
+              border={"2px"}
+              borderColor={"gray.200"}
             >
               <FormControl>
                 <FormLabel>Projects</FormLabel>
@@ -606,7 +606,7 @@ const Entity = () => {
                 </CheckboxGroup>
                 <FormHelperText>
                   Specify the Projects that this new Entity should be included
-                  with. The Entity will then show up underneath the specified
+                  with. The Entity will then be contained within the specified
                   Projects.
                 </FormHelperText>
               </FormControl>

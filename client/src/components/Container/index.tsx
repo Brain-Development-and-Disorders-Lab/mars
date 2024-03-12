@@ -56,8 +56,7 @@ const Page: FC<PageProps> = ({ children }) => {
         p={"4"}
         justify={"center"}
         w={{ base: "100%", lg: "15%" }}
-        borderBottom={{ base: "1px", lg: "none" }}
-        borderColor={{ base: "gray.100", lg: "gray.100" }}
+        bgGradient={"linear(to-br, gray.300, gray.200)"}
       >
         <Navigation />
       </Flex>
@@ -65,8 +64,6 @@ const Page: FC<PageProps> = ({ children }) => {
       <Flex
         direction={"column"}
         w={{ base: "100%", lg: "85%" }}
-        borderLeft={{ base: "none", lg: "1px" }}
-        borderColor={{ base: "gray.100", lg: "gray.100" }}
       >
         {/* Search box component */}
         <Flex
@@ -76,7 +73,7 @@ const Page: FC<PageProps> = ({ children }) => {
           display={{ base: "none", lg: "flex" }}
           background={"white"}
           borderBottom={"1px"}
-          borderColor={"gray.100"}
+          borderColor={"gray.200"}
         >
           <Spacer />
           <SearchBox />

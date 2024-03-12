@@ -9,7 +9,7 @@ describe('In entity page, edit attribute', () => {
     cy.contains('button', 'Edit').click();
 
     // add attribute
-    cy.get(':nth-child(2) > .css-sdf56e > .css-1ialerq > .chakra-button').click();
+    cy.get(':nth-child(2) > .css-1acctax > .css-1ialerq > .chakra-button').click();
     cy.get('#formName').type('Attribute Name');
     cy.get('#formDescription').type('Attribute Description');
     cy.get('.add-value-button-form').click();
@@ -22,7 +22,7 @@ describe('In entity page, edit attribute', () => {
 
     cy.get('.chakra-modal__body')
     .get('button').eq(-1).click();
-    
+
     cy.contains('button', 'Done').click();
 
     cy.contains('No Attributes.').should('not.exist');
@@ -39,6 +39,5 @@ describe('In entity page, edit attribute', () => {
     cy.contains('No Attributes.').should('exist');
     cy.reload();
     cy.contains('No Attributes.').should('exist');
-
   });
 });

@@ -628,8 +628,8 @@ const Project = () => {
               h={"fit-content"}
               grow={"1"}
               rounded={"md"}
-              border={"1px"}
-              borderColor={"gray.100"}
+              border={"2px"}
+              borderColor={"gray.200"}
             >
               <Flex
                 direction={"row"}

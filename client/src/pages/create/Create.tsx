@@ -39,7 +39,7 @@ const Create = () => {
         wrap={"wrap"}
       >
         {/* Project card */}
-        <Card maxW={"sm"} h={"lg"} variant={"outline"}>
+        <Card maxW={"sm"} h={"lg"} variant={"outline"} border={"2px"} borderColor={"gray.200"}>
           <CardHeader>
             <Flex gap={"4"} w={"100%"} justify={"center"} align={"center"}>
               <Icon name={"project"} size={"lg"} />
@@ -48,17 +48,20 @@ const Create = () => {
           </CardHeader>
           <CardBody>
             <Stack divider={<StackDivider />} spacing={"2"}>
-              <Flex p={"2"} gap={"4"} align={"center"} direction={"column"}>
+              <Flex p={"2"} gap={"4"} direction={"column"}>
                 <Heading size={"xs"} textTransform={"uppercase"}>
                   Description
                 </Heading>
                 <Text>Create a Project to organize and share Entities.</Text>
               </Flex>
-              <Flex p={"2"} gap={"4"} align={"center"} direction={"column"}>
+              <Flex p={"2"} gap={"4"} direction={"column"}>
                 <Heading size={"xs"} textTransform={"uppercase"}>
                   Fields
                 </Heading>
-                <Flex gap={"2"}>
+                <Flex align={"center"} wrap={"wrap"} gap={"2"}>
+                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+                    Required
+                  </Text>
                   <Tag colorScheme={"red"}>Name</Tag>
                   <Tag colorScheme={"red"}>Description</Tag>
                 </Flex>
@@ -79,7 +82,7 @@ const Create = () => {
         </Card>
 
         {/* Entity card */}
-        <Card maxW={"sm"} h={"lg"} variant={"outline"}>
+        <Card maxW={"sm"} h={"lg"} variant={"outline"} border={"2px"} borderColor={"gray.200"}>
           <CardHeader>
             <Flex gap={"4"} w={"100%"} justify={"center"} align={"center"}>
               <Icon name={"entity"} size={"lg"} />
@@ -88,22 +91,31 @@ const Create = () => {
           </CardHeader>
           <CardBody>
             <Stack divider={<StackDivider />} spacing={"2"}>
-              <Flex p={"2"} gap={"4"} align={"center"} direction={"column"}>
+              <Flex p={"2"} gap={"4"} direction={"column"}>
                 <Heading size={"xs"} textTransform={"uppercase"}>
                   Description
                 </Heading>
                 <Text>
-                  Create an Entity to group metadata about a physical or digital
+                  Create an Entity to store metadata of a physical or digital
                   resource.
                 </Text>
               </Flex>
-              <Flex p={"2"} gap={"4"} align={"center"} direction={"column"}>
+              <Flex p={"2"} gap={"4"} direction={"column"}>
                 <Heading size={"xs"} textTransform={"uppercase"}>
                   Fields
                 </Heading>
-                <Flex gap={"2"} wrap={"wrap"}>
+                <Flex align={"center"} wrap={"wrap"} gap={"2"}>
+                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+                    Required
+                  </Text>
                   <Tag colorScheme={"red"}>Name</Tag>
                   <Tag colorScheme={"red"}>Created</Tag>
+                </Flex>
+
+                <Flex align={"center"} wrap={"wrap"} gap={"2"}>
+                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+                    Optional
+                  </Text>
                   <Tag colorScheme={"teal"}>Description</Tag>
                   <Tag colorScheme={"teal"}>Projects</Tag>
                   <Tag colorScheme={"teal"}>Origins</Tag>
@@ -127,7 +139,7 @@ const Create = () => {
         </Card>
 
         {/* Attribute card */}
-        <Card maxW={"sm"} h={"lg"} variant={"outline"}>
+        <Card maxW={"sm"} h={"lg"} variant={"outline"} border={"2px"} borderColor={"gray.200"}>
           <CardHeader>
             <Flex gap={"4"} w={"100%"} justify={"center"} align={"center"}>
               <Icon name={"attribute"} size={"lg"} />
@@ -136,20 +148,22 @@ const Create = () => {
           </CardHeader>
           <CardBody>
             <Stack divider={<StackDivider />} spacing={"2"}>
-              <Flex p={"2"} gap={"4"} align={"center"} direction={"column"}>
+              <Flex p={"2"} gap={"4"} direction={"column"}>
                 <Heading size={"xs"} textTransform={"uppercase"}>
                   Description
                 </Heading>
                 <Text>
-                  Create a template Attribute to standardize reusable components
-                  of metadata to be associated with Entities.
+                  Create template Attributes to reuse metadata structures across Entities.
                 </Text>
               </Flex>
-              <Flex p={"2"} gap={"4"} align={"center"} direction={"column"}>
+              <Flex p={"2"} gap={"4"} direction={"column"}>
                 <Heading size={"xs"} textTransform={"uppercase"}>
                   Fields
                 </Heading>
-                <Flex gap={"2"} wrap={"wrap"}>
+                <Flex align={"center"} wrap={"wrap"} gap={"2"}>
+                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+                    Required
+                  </Text>
                   <Tag colorScheme={"red"}>Name</Tag>
                   <Tag colorScheme={"red"}>Description</Tag>
                   <Tag colorScheme={"red"}>Values</Tag>

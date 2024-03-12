@@ -1312,7 +1312,7 @@ const Entity = () => {
             <Flex direction={"column"} p={"4"} bg={"gray.50"} rounded={"md"}>
               <Flex gap={"4"} direction={"column"}>
                 <Heading fontWeight={"semibold"} size={"md"} pt={"2"} pb={"2"}>
-                  Entity Overview
+                  Overview
                 </Heading>
                 <Flex gap={"2"} direction={"row"}>
                   {/* "Created" and "Owner" fields */}
@@ -1352,8 +1352,8 @@ const Entity = () => {
               direction={"column"}
               p={"4"}
               rounded={"md"}
-              border={"1px"}
-              borderColor={"gray.100"}
+              border={"2px"}
+              borderColor={"gray.200"}
             >
               <Flex
                 direction={"row"}
@@ -1361,7 +1361,7 @@ const Entity = () => {
                 align={"center"}
               >
                 <Heading fontWeight={"semibold"} size={"md"} pt={"2"} pb={"2"}>
-                  Entity Projects
+                  Projects
                 </Heading>
                 {editing ? (
                   <Button
@@ -1404,8 +1404,8 @@ const Entity = () => {
               direction={"column"}
               p={"4"}
               rounded={"md"}
-              border={"1px"}
-              borderColor={"gray.100"}
+              border={"2px"}
+              borderColor={"gray.200"}
             >
               <Flex
                 direction={"row"}
@@ -1413,7 +1413,7 @@ const Entity = () => {
                 align={"center"}
               >
                 <Heading fontWeight={"semibold"} size={"md"} pt={"2"} pb={"2"}>
-                  Entity Attributes
+                  Attributes
                 </Heading>
                 {editing ? (
                   <Button
@@ -1458,8 +1458,8 @@ const Entity = () => {
               direction={"column"}
               p={"4"}
               rounded={"md"}
-              border={"1px"}
-              borderColor={"gray.100"}
+              border={"2px"}
+              borderColor={"gray.200"}
             >
               <Tabs
                 variant={"soft-rounded"}
@@ -1467,8 +1467,8 @@ const Entity = () => {
                 onChange={(index) => setRelationsIndex(index)}
               >
                 <TabList>
-                  <Tab>Entity Origins</Tab>
-                  <Tab>Entity Products</Tab>
+                  <Tab>Origins</Tab>
+                  <Tab>Products</Tab>
                   <Spacer />
                   {editing ? (
                     <Button
@@ -1535,8 +1535,8 @@ const Entity = () => {
               direction={"column"}
               p={"4"}
               rounded={"md"}
-              border={"1px"}
-              borderColor={"gray.100"}
+              border={"2px"}
+              borderColor={"gray.200"}
             >
               <Flex gap={"2"} direction={"column"} minH={"32"}>
                 <Flex

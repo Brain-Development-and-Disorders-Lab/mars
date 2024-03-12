@@ -12,6 +12,6 @@ describe('search query builder', () => {
     // press search button
     cy.get('[aria-label="Search Query"]').click();
     // result array should exist
-    cy.get('.css-1ofqig9 > .chakra-heading').should('contain.text', 'search results');
+    cy.get('.css-aybym5 > .chakra-heading').should('contain.text', 'search results');
   });
 });

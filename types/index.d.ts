@@ -98,6 +98,7 @@ export type LinkyProps = {
   id: string;
   fallback?: string;
   color?: string;
+  justify?: string;
 };
 
 // Project types

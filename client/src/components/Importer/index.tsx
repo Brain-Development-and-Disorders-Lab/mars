@@ -521,7 +521,7 @@ const Importer = (props: {
                       justify={"center"}
                       border={"2px"}
                       borderStyle={"dashed"}
-                      borderColor={"gray.100"}
+                      borderColor={"gray.200"}
                       rounded={"md"}
                       background={"gray.50"}
                     >
