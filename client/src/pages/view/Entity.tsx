@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import {
   Button,
   Flex,
+  Link,
   Heading,
   Input,
   Text,
@@ -1502,7 +1503,7 @@ const Entity = () => {
                     )}
                   </TabPanel>
                   <TabPanel>
-                    {(entityProducts?.length ?? 0 ) === 0 ? (
+                    {(entityProducts?.length ?? 0) === 0 ? (
                       <Text>No Products.</Text>
                     ) : (
                       <DataTable
@@ -1611,7 +1612,7 @@ const Entity = () => {
                     </Text>
                   </Flex>
 
-                  <Flex>
+                  <Stack>
                     <Select
                       placeholder={"Use template Attribute"}
                       onChange={(event) => {
@@ -1642,7 +1643,14 @@ const Entity = () => {
                         })}
                       ;
                     </Select>
-                  </Flex>
+                    <Text fontSize="sm">
+                      Don't see the attribute you're looking for? You can
+                      <Link onClick={() => navigate("/create/attribute")} style={{ color: '#3182ce', marginLeft: '5px', marginRight: '5px', textDecoration: 'underline' }}>
+                        create a new attribute template
+                      </Link>
+                      here.
+                    </Text>
+                  </Stack>
 
                   <Flex
                     direction={"column"}
