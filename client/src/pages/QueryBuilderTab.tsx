@@ -108,8 +108,8 @@ const QueryBuilderTab: React.FC<QueryBuilderTabProps> = ({
             direction={"column"}
             p={"2"}
             rounded={"md"}
-            border={"1px"}
-            borderColor={"gray.100"}
+            border={"2px"}
+            borderColor={"gray.200"}
           >
             <Flex direction={"row"} p={"2"} gap={"4"} wrap={"wrap"}>
               {/* Query builder components */}

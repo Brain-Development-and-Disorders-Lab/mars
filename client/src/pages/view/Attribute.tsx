@@ -260,8 +260,8 @@ const Attribute = () => {
             basis={"50%"}
             h={"fit-content"}
             rounded={"md"}
-            border={"1px"}
-            borderColor={"gray.100"}
+            border={"2px"}
+            borderColor={"gray.200"}
           >
             <Heading fontWeight={"semibold"} size={"md"}>
               Values
