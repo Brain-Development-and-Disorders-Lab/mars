@@ -234,7 +234,7 @@ const Dashboard = () => {
             borderColor={"gray.200"}
           >
             {/* Projects heading */}
-            <Flex direction={"row"} align={"center"} gap={"2"}>
+            <Flex direction={"row"} align={"center"} gap={"4"}>
               <Icon name={"project"} size={"md"} />
               <Heading size={"lg"} fontWeight={"semibold"}>
                 Projects
@@ -291,7 +291,7 @@ const Dashboard = () => {
             borderColor={"gray.200"}
           >
             {/* Entities heading */}
-            <Flex direction={"row"} align={"center"} gap={"2"}>
+            <Flex direction={"row"} align={"center"} gap={"4"}>
               <Icon name={"entity"} size={"md"} />
               <Heading size={"lg"} fontWeight={"semibold"}>
                 Entities
@@ -352,7 +352,7 @@ const Dashboard = () => {
           borderColor={"gray.200"}
         >
           {/* Activity heading */}
-          <Flex align={"center"} gap={"2"} pb={"2"}>
+          <Flex align={"center"} gap={"4"}>
             <Icon name={"activity"} size={"md"} />
             <Heading size={"lg"} fontWeight={"semibold"}>
               Activity

@@ -139,7 +139,7 @@ const Search = () => {
     setIsSearching(true);
     setHasSearched(true);
     setResults([]);
-  
+
     // Use the new search route for text-based search
     postData(`/entities/search/`, { query: query}) // Assuming you pass user ID for permissions filtering
       .then((results) => {
@@ -407,7 +407,7 @@ const Search = () => {
             </Flex>
           ) : (
             hasSearched && (
-              <Flex direction={"column"} w={"100%"}>
+              <Flex direction={"column"} w={"100%"} gap={"4"}>
                 <Heading size={"md"} fontWeight={"semibold"}>
                   {results.length} search result
                   {results.length > 1 || results.length === 0 ? "s" : ""}

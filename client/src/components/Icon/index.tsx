@@ -35,7 +35,6 @@ import {
   BsGithub,
   BsGlobe,
   BsInfoCircleFill,
-  BsLightningFill,
   BsLink45Deg,
   BsList,
   BsLockFill,
@@ -53,6 +52,7 @@ import {
   BsZoomOut,
 } from "react-icons/bs";
 import { SiBox } from "react-icons/si";
+import { SlGraph } from "react-icons/sl";
 
 // Existing and custom types
 import { IconNames } from "@types";
@@ -73,7 +73,7 @@ const SYSTEM_ICONS: { [k: string]: IconType } = {
   attribute: BsTagFill,
 
   // Signal and action icons
-  activity: BsLightningFill,
+  activity: SlGraph,
   attachment: BsPaperclip,
   check: BsCheckCircleFill,
   info: BsInfoCircleFill,
