@@ -58,6 +58,7 @@ const Page: FC<PageProps> = ({ children }) => {
         w={{ base: "100%", lg: "15%" }}
         borderBottom={{ base: "1px", lg: "none" }}
         borderColor={{ base: "gray.100", lg: "gray.100" }}
+        bgGradient={"linear(to-br, gray.300, gray.200)"}
       >
         <Navigation />
       </Flex>
