@@ -72,7 +72,7 @@ const Page: FC<PageProps> = ({ children }) => {
           align={"center"}
           display={{ base: "none", lg: "flex" }}
           background={"white"}
-          borderBottom={"2px"}
+          borderBottom={"1px"}
           borderColor={"gray.200"}
         >
           <Spacer />
