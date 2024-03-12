@@ -1,8 +1,7 @@
 describe('checking app does launch ', () => {
-  it('checking Project and Entities box', () => {
+  it('checking Search and Projects box', () => {
     cy.visit('http://localhost:8080/');
-    cy.get(':nth-child(1) > .css-r4opcp > .chakra-heading').should('have.text', 'Projects');
-    cy.get(':nth-child(2) > .css-r4opcp > .chakra-heading').should('have.text', 'Entities');
+    cy.get('.css-50hugx > :nth-child(2) > button:nth-child(3)').should('have.text', 'Search');
+    cy.get('.css-50hugx > :nth-child(2) > button:nth-child(4)').should('have.text', 'Projects');
   })
-  
-})
+});
