@@ -8,10 +8,10 @@ import {
   Text,
   useToast,
   Spacer,
-  List,
-  ListItem,
   useBreakpoint,
   Tag,
+  VStack,
+  StackDivider,
 } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
 import { Content } from "@components/Container";
@@ -230,8 +230,8 @@ const Dashboard = () => {
             background={"white"}
             rounded={"md"}
             gap={"2"}
-            border={"1px"}
-            borderColor={"gray.100"}
+            border={"2px"}
+            borderColor={"gray.200"}
           >
             {/* Projects heading */}
             <Flex direction={"row"} align={"center"} gap={"2"}>
@@ -287,8 +287,8 @@ const Dashboard = () => {
             background={"white"}
             rounded={"md"}
             gap={"2"}
-            border={"1px"}
-            borderColor={"gray.100"}
+            border={"2px"}
+            borderColor={"gray.200"}
           >
             {/* Entities heading */}
             <Flex direction={"row"} align={"center"} gap={"2"}>
@@ -348,11 +348,11 @@ const Dashboard = () => {
           gap={"2"}
           grow={"1"}
           rounded={"md"}
-          border={"1px"}
-          borderColor={"gray.100"}
+          border={"2px"}
+          borderColor={"gray.200"}
         >
           {/* Activity heading */}
-          <Flex align={"center"} gap={"2"}>
+          <Flex align={"center"} gap={"2"} pb={"2"}>
             <Icon name={"activity"} size={"md"} />
             <Heading size={"lg"} fontWeight={"semibold"}>
               Activity
@@ -361,7 +361,10 @@ const Dashboard = () => {
 
           {/* Activity list */}
           {activityData.length > 0 ? (
-            <List>
+            <VStack
+              divider={<StackDivider borderColor={"gray.200"} />}
+              spacing={"2"}
+            >
               {activityData.slice(0, 10).map((activity) => {
                 // Configure the badge
                 let operationIcon: IconNames = "entity";
@@ -383,27 +386,21 @@ const Dashboard = () => {
                 }
 
                 return (
-                  <ListItem key={`activity-${activity._id}`}>
-                    <Flex
-                      direction={"row"}
-                      p={"2"}
-                      gap={"2"}
-                      mt={"2"}
-                      mb={"2"}
-                      align={"center"}
-                      rounded={"md"}
-                      background={"white"}
-                      border={"1px"}
-                      borderColor={"gray.100"}
-                    >
-                      <Flex rounded={"full"} bg={operationIconColor} p={"1"}>
-                        <Icon
-                          size={"xs"}
-                          name={operationIcon}
-                          color={"white"}
-                        />
-                      </Flex>
+                  <Flex
+                    direction={"row"}
+                    width={"100%"}
+                    gap={"2"}
+                    key={`activity-${activity._id}`}
+                  >
+                    <Flex rounded={"full"} p={"2"} mr={"2"} alignSelf={"center"}>
+                      <Icon
+                        size={"sm"}
+                        name={operationIcon}
+                        color={operationIconColor}
+                      />
+                    </Flex>
 
+                    <Flex direction="column" align={"baseline"}>
                       <Text display={{ base: "none", sm: "block" }}>
                         {activity.details}
                       </Text>
@@ -412,18 +409,19 @@ const Dashboard = () => {
                         id={activity.target.id}
                         type={activity.target.type}
                         fallback={activity.target.name}
+                        justify={"left"}
                       />
-
-                      <Spacer />
-
-                      <Text color={"gray.400"}>
-                        {dayjs(activity.timestamp).fromNow()}
-                      </Text>
                     </Flex>
-                  </ListItem>
+
+                    <Spacer />
+
+                    <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.500"}>
+                      {dayjs(activity.timestamp).fromNow()}
+                    </Text>
+                  </Flex>
                 );
               })}
-            </List>
+            </VStack>
           ) : (
             <Flex w={"100%"} justify={"center"}>
               <Text fontSize={"md"} fontWeight={"bold"}>
