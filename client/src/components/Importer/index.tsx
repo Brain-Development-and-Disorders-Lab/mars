@@ -5,7 +5,6 @@ import React, { ChangeEvent, useState } from "react";
 import {
   Flex,
   Button,
-  useDisclosure,
   Text,
   useToast,
   Modal,
@@ -77,17 +76,13 @@ const Importer = (props: {
   const toast = useToast();
   const [token, _setToken] = useToken();
 
-  const {
-    isOpen: isMappingOpen,
-    onOpen: onMappingOpen,
-    onClose: onMappingClose,
-  } = useDisclosure();
   const [interfacePage, setInterfacePage] = useState(
-    "start" as "start" | "attributes"
+    "upload" as "upload" | "details" | "mapping"
   );
   const pageSteps = [
-    { title: "Start", description: "Basic information" },
-    { title: "Attributes", description: "Mapping fields to Attributes" },
+    { title: "Upload", description: "Upload a file" },
+    { title: "Details", description: "Basic information" },
+    { title: "Mapping", description: "Mapping fields to Attributes" },
   ];
   const { activeStep, setActiveStep } = useSteps({
     index: 0,
@@ -123,11 +118,6 @@ const Importer = (props: {
     [] as AttributeModel[]
   );
 
-  const isJsonFile = (filename: string) => {
-    // Use a regular expression to test if the filename ends with '.json'
-    return filename.toLowerCase().endsWith('.json');
-  }
-
   const handleJsonFile = (file: File) => {
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -142,6 +132,7 @@ const Importer = (props: {
         });
         return;
       }
+
       try {
         const data = JSON.parse(e.target?.result as string);
         setJsonData(data); // Set your JSON data to state
@@ -157,6 +148,7 @@ const Importer = (props: {
         });
       }
     };
+
     reader.readAsText(file);
   };
 
@@ -168,6 +160,7 @@ const Importer = (props: {
 
     // Clone the jsonData to avoid direct state mutation
     let updatedJsonData = _.cloneDeep(jsonData) as any;
+
     if (updatedJsonData._id) {
       // Single JSON document, update only one by placing in array
       updatedJsonData = [updatedJsonData];
@@ -211,7 +204,7 @@ const Importer = (props: {
     formData.append("file", file);
     formData.append("type", fileType);
 
-    if (isJsonFile(file.name)) {
+    if (_.isEqual(fileType, "application/json")) {
       handleJsonFile(file);
       return;
     }
@@ -221,7 +214,6 @@ const Importer = (props: {
         if (_.isEqual(response.status, "success")) {
           // Reset file upload state
           setFile({} as File);
-          props.onClose();
 
           if (_.isEqual(fileType, "text/csv")) {
             toast({
@@ -289,7 +281,7 @@ const Importer = (props: {
         setProjects(results[1]);
         setAttributes(results[2]);
         setIsLoaded(true);
-        onMappingOpen();
+        setInterfacePage("details");
         if (results[1][0]?._id) {
           setProjectField(results[1][0]._id);
         }
@@ -325,7 +317,7 @@ const Importer = (props: {
 
     postData(`/system/importJSON`, { jsonData: jsonData })
       .then(() => {
-        onMappingClose();
+        props.onClose();
         navigate(0);
       })
       .catch((error: { message: string }) => {
@@ -364,7 +356,7 @@ const Importer = (props: {
 
     postData(`/system/import/mapping`, mappingData)
       .then((_response: { status: boolean; message: string; data?: any }) => {
-        onMappingClose();
+        props.onClose();
         navigate(0);
       })
       .catch((error: { message: string }) => {
@@ -493,18 +485,42 @@ const Importer = (props: {
       {isLoaded && isError ? (
         <Error />
       ) : (
-        <>
-          <Modal
-            isOpen={props.isOpen}
-            onClose={props.onClose}
-            isCentered
-            size={"3xl"}
-          >
-            <ModalOverlay />
-            <ModalContent p={"2"} gap={"2"}>
-              <ModalHeader p={"2"}>Import</ModalHeader>
-              <ModalCloseButton />
-              <ModalBody p={"2"}>
+        <Modal
+          isOpen={props.isOpen}
+          onClose={props.onClose}
+          isCentered
+          size={"3xl"}
+        >
+          <ModalOverlay />
+          <ModalContent p={"2"} gap={"2"}>
+            <ModalHeader p={"2"}>Import</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody p={"2"}>
+              {/* Stepper progress indicator */}
+              <Flex pb={"4"}>
+                <Stepper index={activeStep} w={"100%"}>
+                  {pageSteps.map((step, index) => (
+                    <Step key={index}>
+                      <StepIndicator>
+                        <StepStatus
+                          complete={<StepIcon />}
+                          incomplete={<StepNumber />}
+                          active={<StepNumber />}
+                        />
+                      </StepIndicator>
+
+                      <Box flexShrink={"0"}>
+                        <StepTitle>{step.title}</StepTitle>
+                        <StepDescription>{step.description}</StepDescription>
+                      </Box>
+
+                      <StepSeparator />
+                    </Step>
+                  ))}
+                </Stepper>
+              </Flex>
+
+              {_.isEqual(interfacePage, "upload") && (
                 <Flex w={"100%"} direction={"column"} align={"center"} justify={"center"}>
                   <Flex w={"100%"} direction={"column"} mx={"4"} mb={"4"} gap={"2"}>
                     <Text>
@@ -581,342 +597,299 @@ const Importer = (props: {
                     />
                   </FormControl>
                 </Flex>
-              </ModalBody>
+              )}
 
-              <ModalFooter p={"2"}>
-                <Flex direction={"row"} w={"100%"} justify={"space-between"}>
-                  <Button
-                    colorScheme={"red"}
-                    rightIcon={<Icon name="cross" />}
-                    variant={"outline"}
-                    onClick={() => {
-                      setFile({} as File);
-                      props.onClose();
-                    }}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    colorScheme={"blue"}
-                    isDisabled={_.isEqual(file, {}) || isUploading}
-                    rightIcon={<Icon name={"upload"} />}
-                    onClick={() => performImport()}
-                    isLoading={isUploading}
-                    loadingText={"Processing..."}
-                  >
-                    Upload
-                  </Button>
-                </Flex>
-              </ModalFooter>
-            </ModalContent>
-          </Modal>
-
-          <Modal
-            isOpen={isMappingOpen}
-            onClose={onMappingClose}
-            size={"4xl"}
-            isCentered
-          >
-            <ModalOverlay />
-            <ModalContent p={"2"} gap={"4"}>
-              <ModalHeader p={"2"}>Import</ModalHeader>
-              <ModalBody p={"2"}>
-                {/* Stepper progress indicator */}
-                <Flex pb={"4"}>
-                  <Stepper index={activeStep} w={"100%"}>
-                    {pageSteps.map((step, index) => (
-                      <Step key={index}>
-                        <StepIndicator>
-                          <StepStatus
-                            complete={<StepIcon />}
-                            incomplete={<StepNumber />}
-                            active={<StepNumber />}
-                          />
-                        </StepIndicator>
-
-                        <Box flexShrink={"0"}>
-                          <StepTitle>{step.title}</StepTitle>
-                          <StepDescription>{step.description}</StepDescription>
-                        </Box>
-
-                        <StepSeparator />
-                      </Step>
-                    ))}
-                  </Stepper>
-                </Flex>
-
-                {/* Page content */}
-                {_.isEqual(interfacePage, "start") && (
-                  <Flex w={"100%"} direction={"column"} gap={"4"}>
-                    <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
-                      <Text fontWeight={"semibold"}>Columns:</Text>
-                      {columns.map((column) => {
-                        return (
-                          <Tag key={column} colorScheme={"teal"}>
-                            {column}
-                          </Tag>
-                        );
-                      })}
-                    </Flex>
-                    {!jsonData && <Flex direction={"row"} gap={"4"}>
-                      <FormControl
-                        isRequired
-                        isInvalid={_.isEqual(nameField, "")}
-                      >
-                        <FormLabel>Name</FormLabel>
-                        {getSelectComponent(nameField, setNameField)}
-                      </FormControl>
-                      <FormControl>
-                        <FormLabel>Description</FormLabel>
-                        {getSelectComponent(
-                          descriptionField,
-                          setDescriptionField
-                        )}
-                      </FormControl>
-                    </Flex>}
-                    <Flex direction={"row"} gap={"4"}>
-                      <FormControl>
-                        <FormLabel>Owner</FormLabel>
-                        <Input value={ownerField} disabled />
-                      </FormControl>
-                      <FormControl>
-                        <FormLabel>Project</FormLabel>
-                        {getSelectProjectComponent(
-                          projectField,
-                          setProjectField
-                        )}
-                      </FormControl>
-                    </Flex>
-                    <Flex direction={"row"} gap={"4"}>
-                      <FormControl>
-                        <FormLabel>Origin</FormLabel>
-                        <Flex direction={"column"} gap={"4"}>
-                          {getSelectEntitiesComponent(
-                            selectedOrigin,
-                            setSelectedOrigin,
-                            originsField,
-                            setOriginsField
-                          )}
-                          <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
-                            {originsField.map((origin) => {
-                              return (
-                                <Tag key={origin.id}>
-                                  {origin.name}
-                                  <TagCloseButton
-                                    onClick={() => {
-                                      setOriginsField([
-                                        ...originsField.filter(
-                                          (existingOrigin) =>
-                                            !_.isEqual(
-                                              existingOrigin.id,
-                                              origin.id
-                                            )
-                                        ),
-                                      ]);
-                                    }}
-                                  />
-                                </Tag>
-                              );
-                            })}
-                          </Flex>
-                        </Flex>
-                      </FormControl>
-                      <FormControl>
-                        <FormLabel>Products</FormLabel>
-                        {getSelectEntitiesComponent(
-                          selectedProduct,
-                          setSelectedProduct,
-                          productsField,
-                          setProductsField
-                        )}
-                        {productsField.map((product) => {
-                          return (
-                            <Tag key={product.id}>
-                              {product.name}
-                              <TagCloseButton
-                                onClick={() => {
-                                  setProductsField([
-                                    ...productsField.filter(
-                                      (existingProduct) =>
-                                        !_.isEqual(
-                                          existingProduct.id,
-                                          product.id
-                                        )
-                                    ),
-                                  ]);
-                                }}
-                              />
-                            </Tag>
-                          );
-                        })}
-                      </FormControl>
-                    </Flex>
-                  </Flex>
-                )}
-
-                {_.isEqual(interfacePage, "attributes") && (
-                  <Flex w={"100%"} direction={"column"} gap={"4"}>
-                    <Flex w={"100%"} gap={"2"}>
-                      <Information text={"All dates must use \"MM/DD/YYYY\" format"} />
-                    </Flex>
-                    <Flex
-                      direction={"row"}
-                      gap={"2"}
-                      align={"center"}
-                      justify={"space-between"}
-                      wrap={["wrap", "nowrap"]}
-                    >
-                      {/* Drop-down to select template Attributes */}
-                      <FormControl maxW={"sm"}>
-                        <Select
-                          placeholder={"Use template Attribute"}
-                          onChange={(event) => {
-                            if (!_.isEqual(event.target.value.toString(), "")) {
-                              for (let attribute of attributes) {
-                                if (
-                                  _.isEqual(
-                                    event.target.value.toString(),
-                                    attribute._id
-                                  )
-                                ) {
-                                  setAttributesField([
-                                    ...attributesField,
-                                    {
-                                      _id: `a-${nanoid(6)}`,
-                                      name: attribute.name,
-                                      description: attribute.description,
-                                      values: attribute.values,
-                                    },
-                                  ]);
-                                  break;
-                                }
-                              }
-                            }
-                          }}
-                        >
-                          {isLoaded &&
-                            attributes.map((attribute) => {
-                              return (
-                                <option
-                                  key={attribute._id}
-                                  value={attribute._id}
-                                >
-                                  {attribute.name}
-                                </option>
-                              );
-                            })}
-                          ;
-                        </Select>
-                      </FormControl>
-
-                      <Button
-                        leftIcon={<Icon name={"add"} />}
-                        colorScheme={"green"}
-                        onClick={() => {
-                          // Create an 'empty' Attribute and add the data structure to 'selectedAttributes'
-                          setAttributesField([
-                            ...attributesField,
-                            {
-                              _id: `a-${nanoid(6)}`,
-                              name: "",
-                              description: "",
-                              values: [],
-                            },
-                          ]);
-                        }}
-                      >
-                        Create
-                      </Button>
-                    </Flex>
-
-                    {/* Display all Attributes */}
-                    {attributesField.map((attribute) => {
+              {_.isEqual(interfacePage, "details") && (
+                <Flex w={"100%"} direction={"column"} gap={"4"}>
+                  <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
+                    <Text fontWeight={"semibold"}>Columns:</Text>
+                    {columns.map((column) => {
                       return (
-                        <Attribute
-                          key={attribute._id}
-                          identifier={attribute._id}
-                          name={attribute.name}
-                          description={attribute.description}
-                          values={attribute.values}
-                          restrictDataValues={true}
-                          permittedDataValues={columns}
-                          onRemove={onRemoveAttribute}
-                          onUpdate={onUpdateAttribute}
-                        />
+                        <Tag key={column} colorScheme={"teal"}>
+                          {column}
+                        </Tag>
                       );
                     })}
                   </Flex>
-                )}
-              </ModalBody>
 
-              <ModalFooter p={"2"}>
-                <Flex direction={"row"} w={"100%"} justify={"space-between"}>
-                  <Button
-                    colorScheme={"red"}
-                    rightIcon={<Icon name="cross" />}
-                    variant={"outline"}
-                    onClick={() => {
-                      setInterfacePage("start"); // Reset to "start"
-                      onMappingClose();
-                    }}
-                  >
-                    Cancel
-                  </Button>
+                  {!jsonData && <Flex direction={"row"} gap={"4"}>
+                    <FormControl
+                      isRequired
+                      isInvalid={_.isEqual(nameField, "")}
+                    >
+                      <FormLabel>Name</FormLabel>
+                      {getSelectComponent(nameField, setNameField)}
+                    </FormControl>
+                    <FormControl>
+                      <FormLabel>Description</FormLabel>
+                      {getSelectComponent(
+                        descriptionField,
+                        setDescriptionField
+                      )}
+                    </FormControl>
+                  </Flex>}
 
-                  {/* Back button will be enable after debugging */}
-                  {/* <Button
-                    colorScheme={"blue"}
-                    rightIcon={<Icon name="check" />}
-                    variant={"solid"}
-                    onClick={() => {
-                      if (_.isEqual(interfacePage, "attributes")) {
-                        setInterfacePage("start");
-                      } else {
-                        props.onOpen();
-                        onMappingClose();
-                      }
-                    }}
-                    isDisabled={_.isEqual(nameField, "") || _.isEqual(nameField, "start")}
-                    isLoading={isMapping}
-                    loadingText={"Please wait..."}
-                  >
-                    Back
-                  </Button> */}
-
-                  <Button
-                    colorScheme={"green"}
-                    rightIcon={
-                      _.isEqual(interfacePage, "start") ? (
-                        <Icon name="c_right" />
-                      ) : (
-                        <Icon name="check" />
-                      )
-                    }
-                    variant={"solid"}
-                    onClick={() => {
-                      if (_.isEqual(interfacePage, "start")) {
-                        setActiveStep(1);
-                        setInterfacePage("attributes");
-                        updateJsonDataWithUserSelections();
-                      } else {
-                        if (jsonData) {
-                          performImportJson();
-                        } else {
-                          performMapping();
-                        }
-                      }
-                    }}
-                    isDisabled={_.isEqual(nameField, "") && !jsonData}
-                    isLoading={isMapping}
-                    loadingText={"Please wait..."}
-                  >
-                    {_.isEqual(interfacePage, "start") ? "Continue" : "Apply"}
-                  </Button>
+                  <Flex direction={"row"} gap={"4"}>
+                    <FormControl>
+                      <FormLabel>Owner</FormLabel>
+                      <Input value={ownerField} disabled />
+                    </FormControl>
+                    <FormControl>
+                      <FormLabel>Project</FormLabel>
+                      {getSelectProjectComponent(
+                        projectField,
+                        setProjectField
+                      )}
+                    </FormControl>
+                  </Flex>
+                  <Flex direction={"row"} gap={"4"}>
+                    <FormControl>
+                      <FormLabel>Origin</FormLabel>
+                      <Flex direction={"column"} gap={"4"}>
+                        {getSelectEntitiesComponent(
+                          selectedOrigin,
+                          setSelectedOrigin,
+                          originsField,
+                          setOriginsField
+                        )}
+                        <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
+                          {originsField.map((origin) => {
+                            return (
+                              <Tag key={origin.id}>
+                                {origin.name}
+                                <TagCloseButton
+                                  onClick={() => {
+                                    setOriginsField([
+                                      ...originsField.filter(
+                                        (existingOrigin) =>
+                                          !_.isEqual(
+                                            existingOrigin.id,
+                                            origin.id
+                                          )
+                                      ),
+                                    ]);
+                                  }}
+                                />
+                              </Tag>
+                            );
+                          })}
+                        </Flex>
+                      </Flex>
+                    </FormControl>
+                    <FormControl>
+                      <FormLabel>Products</FormLabel>
+                      {getSelectEntitiesComponent(
+                        selectedProduct,
+                        setSelectedProduct,
+                        productsField,
+                        setProductsField
+                      )}
+                      {productsField.map((product) => {
+                        return (
+                          <Tag key={product.id}>
+                            {product.name}
+                            <TagCloseButton
+                              onClick={() => {
+                                setProductsField([
+                                  ...productsField.filter(
+                                    (existingProduct) =>
+                                      !_.isEqual(
+                                        existingProduct.id,
+                                        product.id
+                                      )
+                                  ),
+                                ]);
+                              }}
+                            />
+                          </Tag>
+                        );
+                      })}
+                    </FormControl>
+                  </Flex>
                 </Flex>
-              </ModalFooter>
-            </ModalContent>
-          </Modal>
-        </>
+              )}
+
+              {_.isEqual(interfacePage, "mapping") && (
+                <Flex w={"100%"} direction={"column"} gap={"4"}>
+                  <Flex w={"100%"} gap={"2"}>
+                    <Information text={"All dates must use \"MM/DD/YYYY\" format"} />
+                  </Flex>
+                  <Flex
+                    direction={"row"}
+                    gap={"2"}
+                    align={"center"}
+                    justify={"space-between"}
+                    wrap={["wrap", "nowrap"]}
+                  >
+                    {/* Drop-down to select template Attributes */}
+                    <FormControl maxW={"sm"}>
+                      <Select
+                        placeholder={"Use template Attribute"}
+                        onChange={(event) => {
+                          if (!_.isEqual(event.target.value.toString(), "")) {
+                            for (let attribute of attributes) {
+                              if (
+                                _.isEqual(
+                                  event.target.value.toString(),
+                                  attribute._id
+                                )
+                              ) {
+                                setAttributesField([
+                                  ...attributesField,
+                                  {
+                                    _id: `a-${nanoid(6)}`,
+                                    name: attribute.name,
+                                    description: attribute.description,
+                                    values: attribute.values,
+                                  },
+                                ]);
+                                break;
+                              }
+                            }
+                          }
+                        }}
+                      >
+                        {isLoaded &&
+                          attributes.map((attribute) => {
+                            return (
+                              <option
+                                key={attribute._id}
+                                value={attribute._id}
+                              >
+                                {attribute.name}
+                              </option>
+                            );
+                          })}
+                        ;
+                      </Select>
+                    </FormControl>
+
+                    <Button
+                      leftIcon={<Icon name={"add"} />}
+                      colorScheme={"green"}
+                      onClick={() => {
+                        // Create an 'empty' Attribute and add the data structure to 'selectedAttributes'
+                        setAttributesField([
+                          ...attributesField,
+                          {
+                            _id: `a-${nanoid(6)}`,
+                            name: "",
+                            description: "",
+                            values: [],
+                          },
+                        ]);
+                      }}
+                    >
+                      Create
+                    </Button>
+                  </Flex>
+
+                  {/* Display all Attributes */}
+                  {attributesField.map((attribute) => {
+                    return (
+                      <Attribute
+                        key={attribute._id}
+                        identifier={attribute._id}
+                        name={attribute.name}
+                        description={attribute.description}
+                        values={attribute.values}
+                        restrictDataValues={true}
+                        permittedDataValues={columns}
+                        onRemove={onRemoveAttribute}
+                        onUpdate={onUpdateAttribute}
+                      />
+                    );
+                  })}
+                </Flex>
+              )}
+            </ModalBody>
+
+            <ModalFooter p={"2"}>
+              <Flex direction={"row"} w={"100%"} justify={"space-between"}>
+                <Button
+                  colorScheme={"red"}
+                  rightIcon={<Icon name="cross" />}
+                  variant={"outline"}
+                  onClick={() => {
+                    // Close importer modal
+                    props.onClose();
+
+                    // Reset state
+                    setInterfacePage("upload");
+                    setIsMapping(false);
+                    setIsUploading(false);
+                    setFile({} as File);
+                    setJsonData(null);
+                  }}
+                >
+                  Cancel
+                </Button>
+
+                {/* Back button will be enable after debugging */}
+                {/* <Button
+                  colorScheme={"blue"}
+                  rightIcon={<Icon name="check" />}
+                  variant={"solid"}
+                  onClick={() => {
+                    if (_.isEqual(interfacePage, "mapping")) {
+                      setInterfacePage("details");
+                    } else {
+                      props.onOpen();
+                      onMappingClose();
+                    }
+                  }}
+                  isDisabled={_.isEqual(nameField, "") || _.isEqual(nameField, "details")}
+                  isLoading={isMapping}
+                  loadingText={"Please wait..."}
+                >
+                  Back
+                </Button> */}
+
+                <Button
+                  colorScheme={"green"}
+                  rightIcon={
+                    _.isEqual(interfacePage, "details") ? (
+                      <Icon name="c_right" />
+                    ) : (
+                      <Icon name="check" />
+                    )
+                  }
+                  variant={"solid"}
+                  onClick={() => {
+                    if (_.isEqual(interfacePage, "upload")) {
+                      setActiveStep(1);
+                      performImport();
+                      if (_.isEqual(fileType, "application/json")) {
+                        updateJsonDataWithUserSelections();
+                      }
+                    } else if (_.isEqual(interfacePage, "details")) {
+                      setActiveStep(2);
+                      setInterfacePage("mapping");
+                    } else {
+                      if (jsonData) {
+                        performImportJson();
+                      } else {
+                        performMapping();
+                      }
+                    }
+                  }}
+                  isDisabled={
+                    isUploading || isMapping ||
+                    (_.isEqual(interfacePage, "upload") && _.isEqual(file, {})) ||
+                    (_.isEqual(interfacePage, "details") && _.isEqual(nameField, "") && !jsonData)
+                  }
+                  isLoading={
+                    (isUploading || isMapping) &&
+                    !(_.isEqual(interfacePage, "details") && jsonData)
+                  }
+                  loadingText={"Processing"}
+                >
+                  {_.isEqual(interfacePage, "details") ? "Continue" : "Apply"}
+                </Button>
+              </Flex>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
       )}
     </>
   );
