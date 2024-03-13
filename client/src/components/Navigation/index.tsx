@@ -151,7 +151,7 @@ const Navigation = () => {
               }
               onClick={() => navigate("/attributes")}
             >
-              Attributes
+              Templates
             </Button>
           </Flex>
 
