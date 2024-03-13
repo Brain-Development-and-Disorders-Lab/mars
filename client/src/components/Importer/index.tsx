@@ -150,14 +150,6 @@ const Importer = (props: {
     }
   }, [interfacePage]);
 
-  // Effect to trigger JSON import and mapping once state has been updated
-  useEffect(() => {
-    if (jsonData !== null && interfacePage !== "details") {
-      setupMapping();
-      updateJsonDataWithUserSelections();
-    }
-  }, [jsonData])
-
   /**
    * Read a JSON file and update `Importer` state, raising errors if invalid
    * @param {File} file JSON file instance
@@ -352,18 +344,14 @@ const Importer = (props: {
         setEntities(results[0]);
         setProjects(results[1]);
         setAttributes(results[2]);
-        setIsLoaded(true);
-        setInterfacePage("details");
 
         // Pre-populate the "Project" field
         if (results[1][0]?._id) {
           setProjectField(results[1][0]._id);
         }
 
-        // If JSON, enable "Continue" button
-        if (_.isEqual(fileType, "application/json")) {
-          setContinueDisabled(false);
-        }
+        // Update UI state
+        setIsLoaded(true);
       })
       .catch((_error) => {
         console.log("_error:", _error);
@@ -493,33 +481,6 @@ const Importer = (props: {
   };
 
   /**
-   * Factory-like pattern to generate `Select` components for selecting Projects
-   * @param {any} value Component value
-   * @param {React.SetStateAction<any>} setValue React `useState` function to set state
-   * @return {ReactElement}
-   */
-  const getSelectProjectComponent = (
-    value: string,
-    setValue: React.SetStateAction<any>
-  ) => {
-    return (
-      <Select
-        placeholder={"Select Project"}
-        value={value || (projects?.length > 0 ? projects[0]._id : '')}
-        onChange={(event) => setValue(event.target.value)}
-      >
-        {projects.map((project) => {
-          return (
-            <option key={project._id} value={project._id}>
-              {project.name}
-            </option>
-          );
-        })}
-      </Select>
-    );
-  };
-
-  /**
    * Factory-like pattern to generate `Select` components for selecting Entities
    * @param {any} value Component value
    * @param {React.SetStateAction<any>} setValue React `useState` function to set state
@@ -587,6 +548,39 @@ const Importer = (props: {
         return attribute;
       }),
     ]);
+  };
+
+  /**
+   * Callback function to handle any click events on the Continue button
+   */
+  const onContinueClick = () => {
+    if (_.isEqual(interfacePage, "upload")) {
+      setActiveStep(1);
+
+      // Run setup for import and mapping
+      performImport();
+      setupMapping();
+
+      // Proceed to the next page
+      setInterfacePage("details");
+    } else if (_.isEqual(interfacePage, "details")) {
+      setActiveStep(2);
+
+      if (_.isEqual(fileType, "application/json")) {
+        // If JSON, merge any specified details with the existing JSON data
+        updateJsonDataWithUserSelections();
+      }
+
+      // Proceed to the next page
+      setInterfacePage("mapping");
+    } else if (_.isEqual(interfacePage, "mapping")) {
+      // Run the final import function depending on file type
+      if (_.isEqual(fileType, "application/json")) {
+        performImportJson();
+      } else if (_.isEqual(fileType, "text/csv")) {
+        performMapping();
+      }
+    }
   };
 
   /**
@@ -781,10 +775,19 @@ const Importer = (props: {
                     </FormControl>
                     <FormControl>
                       <FormLabel>Project</FormLabel>
-                      {getSelectProjectComponent(
-                        projectField,
-                        setProjectField
-                      )}
+                      <Select
+                        placeholder={"Select Project"}
+                        value={projectField}
+                        onChange={(event) => setProjectField(event.target.value)}
+                      >
+                        {projects.map((project) => {
+                          return (
+                            <option key={project._id} value={project._id}>
+                              {project.name}
+                            </option>
+                          );
+                        })}
+                      </Select>
                       <FormHelperText>An existing Project to associate each Entity with</FormHelperText>
                     </FormControl>
                   </Flex>
@@ -1005,21 +1008,7 @@ const Importer = (props: {
                     )
                   }
                   variant={"solid"}
-                  onClick={() => {
-                    if (_.isEqual(interfacePage, "upload")) {
-                      setActiveStep(1);
-                      performImport();
-                    } else if (_.isEqual(interfacePage, "details")) {
-                      setActiveStep(2);
-                      setInterfacePage("mapping");
-                    } else {
-                      if (jsonData) {
-                        performImportJson();
-                      } else {
-                        performMapping();
-                      }
-                    }
-                  }}
+                  onClick={onContinueClick}
                   isDisabled={continueDisabled}
                   isLoading={continueLoading}
                   loadingText={"Processing"}
