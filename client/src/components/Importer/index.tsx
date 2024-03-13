@@ -762,6 +762,7 @@ const Importer = (props: {
 
               {_.isEqual(interfacePage, "mapping") && (
                 <Flex w={"100%"} direction={"column"} gap={"4"}>
+                  <Text>Columns can be assigned to Values within Attributes. When adding Values to an Attribute, select the column containing the data for each Value. Use an existing Template Attribute from the drop-down or create a new Attribute.</Text>
                   <Flex w={"100%"} gap={"2"}>
                     <Information text={"All dates must use \"MM/DD/YYYY\" format"} />
                   </Flex>
