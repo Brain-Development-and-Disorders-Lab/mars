@@ -221,7 +221,6 @@ const Dashboard = () => {
           gap={"4"}
           grow={"1"}
           basis={"60%"}
-          h={"100%"}
         >
           {/* Projects and Entities */}
           <Flex
@@ -350,6 +349,7 @@ const Dashboard = () => {
           rounded={"md"}
           border={"2px"}
           borderColor={"gray.200"}
+          maxH={"80vh"}
         >
           {/* Activity heading */}
           <Flex align={"center"} gap={"4"}>
@@ -361,69 +361,72 @@ const Dashboard = () => {
 
           {/* Activity list */}
           {activityData.length > 0 ? (
-            <VStack
-              divider={<StackDivider borderColor={"gray.200"} />}
-              spacing={"2"}
-            >
-              {activityData.slice(0, 10).map((activity) => {
-                // Configure the badge
-                let operationIcon: IconNames = "entity";
-                let operationIconColor = "white";
+            <Flex overflowY={"auto"} p={"0"} w={"100%"} h={"100%"}>
+              <VStack
+                divider={<StackDivider borderColor={"gray.200"} />}
+                spacing={"2"}
+                w={"95%"}
+              >
+                {activityData.slice(0, 20).map((activity) => {
+                  // Configure the badge
+                  let operationIcon: IconNames = "entity";
+                  let operationIconColor = "white";
 
-                switch (activity.type) {
-                  case "create":
-                    operationIcon = "add";
-                    operationIconColor = "green.400";
-                    break;
-                  case "update":
-                    operationIcon = "edit";
-                    operationIconColor = "blue.400";
-                    break;
-                  case "delete":
-                    operationIcon = "delete";
-                    operationIconColor = "red.400";
-                    break;
-                }
+                  switch (activity.type) {
+                    case "create":
+                      operationIcon = "add";
+                      operationIconColor = "green.400";
+                      break;
+                    case "update":
+                      operationIcon = "edit";
+                      operationIconColor = "blue.400";
+                      break;
+                    case "delete":
+                      operationIcon = "delete";
+                      operationIconColor = "red.400";
+                      break;
+                  }
 
-                return (
-                  <Flex
-                    direction={"row"}
-                    width={"100%"}
-                    gap={"2"}
-                    key={`activity-${activity._id}`}
-                  >
-                    <Flex rounded={"full"} p={"2"} mr={"2"} alignSelf={"center"}>
-                      <Icon
-                        size={"sm"}
-                        name={operationIcon}
-                        color={operationIconColor}
-                      />
-                    </Flex>
+                  return (
+                    <Flex
+                      direction={"row"}
+                      width={"100%"}
+                      gap={"2"}
+                      key={`activity-${activity._id}`}
+                    >
+                      <Flex rounded={"full"} p={"2"} mr={"2"} alignSelf={"center"}>
+                        <Icon
+                          size={"sm"}
+                          name={operationIcon}
+                          color={operationIconColor}
+                        />
+                      </Flex>
 
-                    <Flex direction="column" align={"baseline"}>
-                      <Text display={{ base: "none", sm: "block" }}>
-                        {activity.details}
+                      <Flex direction="column" align={"baseline"}>
+                        <Text display={{ base: "none", sm: "block" }}>
+                          {activity.details}
+                        </Text>
+
+                        <Linky
+                          id={activity.target.id}
+                          type={activity.target.type}
+                          fallback={activity.target.name}
+                          justify={"left"}
+                        />
+                      </Flex>
+
+                      <Spacer />
+
+                      <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.500"}>
+                        {dayjs(activity.timestamp).fromNow()}
                       </Text>
-
-                      <Linky
-                        id={activity.target.id}
-                        type={activity.target.type}
-                        fallback={activity.target.name}
-                        justify={"left"}
-                      />
                     </Flex>
-
-                    <Spacer />
-
-                    <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.500"}>
-                      {dayjs(activity.timestamp).fromNow()}
-                    </Text>
-                  </Flex>
-                );
-              })}
-            </VStack>
+                  );
+                })}
+              </VStack>
+            </Flex>
           ) : (
-            <Flex w={"100%"} justify={"center"}>
+            <Flex w={"100%"} h={"100%"} justify={"center"} align={"center"}>
               <Text fontSize={"md"} fontWeight={"bold"}>
                 No Activity yet
               </Text>
