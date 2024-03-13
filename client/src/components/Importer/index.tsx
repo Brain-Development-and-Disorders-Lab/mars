@@ -276,7 +276,7 @@ const Importer = (props: {
                 title: "Success",
                 status: "success",
                 description: "Successfully parsed CSV-formatted file.",
-                duration: 4000,
+                duration: 2000,
                 position: "bottom-right",
                 isClosable: true,
               });
@@ -298,7 +298,7 @@ const Importer = (props: {
                 title: "Success",
                 status: "success",
                 description: "Successfully imported JSON file.",
-                duration: 4000,
+                duration: 2000,
                 position: "bottom-right",
                 isClosable: true,
               });
@@ -720,7 +720,7 @@ const Importer = (props: {
                               status: "warning",
                               description:
                                 "Please upload a JSON or CSV file",
-                              duration: 4000,
+                              duration: 2000,
                               position: "bottom-right",
                               isClosable: true,
                             });
