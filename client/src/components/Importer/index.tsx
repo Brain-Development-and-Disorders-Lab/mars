@@ -641,16 +641,18 @@ const Importer = (props: {
 
               {_.isEqual(interfacePage, "details") && (
                 <Flex w={"100%"} direction={"column"} gap={"4"}>
-                  <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
-                    <Text fontWeight={"semibold"}>Columns:</Text>
-                    {columns.map((column) => {
-                      return (
-                        <Tag key={column} colorScheme={"teal"}>
-                          {column}
-                        </Tag>
-                      );
-                    })}
-                  </Flex>
+                  {columns.length > 0 &&
+                    <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
+                      <Text fontWeight={"semibold"} color={"gray.600"}>Columns:</Text>
+                      {columns.map((column) => {
+                        return (
+                          <Tag key={column} colorScheme={"teal"}>
+                            {column}
+                          </Tag>
+                        );
+                      })}
+                    </Flex>
+                  }
 
                   {!jsonData && <Flex direction={"row"} gap={"4"}>
                     <FormControl
