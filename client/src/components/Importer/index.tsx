@@ -79,9 +79,12 @@ const Importer = (props: {
   const toast = useToast();
   const [token, _setToken] = useToken();
 
+  // State management to generate and present different pages
   const [interfacePage, setInterfacePage] = useState(
     "upload" as "upload" | "details" | "mapping"
   );
+
+  // Used to generated numerical steps and a progress bar
   const pageSteps = [
     { title: "Upload", description: "Upload a file" },
     { title: "Entity", description: "Basic Entity information" },
@@ -92,6 +95,7 @@ const Importer = (props: {
     count: pageSteps.length,
   });
 
+  // Spreadsheet data state
   const [spreadsheetData, setSpreadsheetData] = useState([] as any[]);
   const [columns, setColumns] = useState([] as string[]);
 
@@ -153,6 +157,10 @@ const Importer = (props: {
     }
   }, [jsonData])
 
+  /**
+   * Read a JSON file and update `Importer` state, raising errors if invalid
+   * @param {File} file JSON file instance
+   */
   const handleJsonFile = (file: File) => {
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -168,6 +176,7 @@ const Importer = (props: {
         return;
       }
 
+      // Attempt to parse the JSON file
       try {
         const data = JSON.parse(e.target?.result as string);
         setJsonData(data); // Set your JSON data to state
@@ -186,9 +195,14 @@ const Importer = (props: {
     reader.readAsText(file);
   };
 
+  /**
+   * Utility function to access and assign existing JSON data with exisitng user selections. Loads existing Origin and
+   * Product Entities, and populates the existing Projects field.
+   * @return Short-circuit when function called without actual JSON data
+   */
   const updateJsonDataWithUserSelections = () => {
     if (!jsonData) {
-      // No jsonData to update (if CSV file)
+      // No JSON data to update (likely CSV file)
       return;
     }
 
@@ -223,25 +237,33 @@ const Importer = (props: {
       });
     }
 
-    // Update the state with the modified jsonData
+    // Update the JSON state with the modified jsonData
     if (updatedJsonData) {
       setJsonData({ entities: updatedJsonData } as any);
     }
   };
 
-
+  /**
+   * Utility function to perform the initial import operations. For CSV files, make POST request to `/system/import` to
+   * defer the data extraction to the server. For JSON files, trigger the `handleJsonFile` method to handle the file
+   * locally instead.
+   */
   const performImport = () => {
+    // Update state of continue button
     setContinueLoading(true);
     setContinueDisabled(true);
 
+    // Extract data from the form
     const formData = new FormData();
     formData.append("name", file.name);
     formData.append("file", file);
     formData.append("type", fileType);
 
     if (_.isEqual(fileType, "application/json")) {
+      // Handle JSON data separately
       handleJsonFile(file);
     } else if (_.isEqual(fileType, "text/csv")) {
+      // Make POST request with CSV file contents from the form
       postData(`/system/import`, formData)
         .then((response: { status: boolean; message: string; data?: any }) => {
           if (_.isEqual(response.status, "success")) {
@@ -258,6 +280,7 @@ const Importer = (props: {
                 isClosable: true,
               });
               if (response.data?.length > 0) {
+                // Update spreadsheet data state if valid rows
                 setSpreadsheetData(response.data);
 
                 // Filter columns to exclude columns with no header ("__EMPTY...")
@@ -266,6 +289,8 @@ const Importer = (props: {
                 })
                 setColumns(filteredColumnSet);
               }
+
+              // Setup the next stage of CSV import
               setupMapping();
             } else if (_.isEqual(fileType, "application/json")) {
               toast({
@@ -276,6 +301,8 @@ const Importer = (props: {
                 position: "bottom-right",
                 isClosable: true,
               });
+
+              // In the case of a JSON file, it has been uploaded and we can refresh
               navigate(0);
             }
           } else {
@@ -288,6 +315,8 @@ const Importer = (props: {
               isClosable: true,
             });
           }
+
+          // Reset the loading state, but preserve the disabled state
           setContinueLoading(false);
         })
         .catch((error: { message: string }) => {
@@ -299,18 +328,26 @@ const Importer = (props: {
             position: "bottom-right",
             isClosable: true,
           });
+
+          // Reset the loading state, but preserve the disabled state
           setContinueLoading(false);
         });
     }
   };
 
+  /**
+   * Utility function to populate fields required for the mapping stage of importing data. Loads all Entities, Projects,
+   * and Attributes.
+   */
   const setupMapping = () => {
+    // Load all Entities, Projects, and Attributes
     Promise.all([
       getData(`/entities`),
       getData(`/projects`),
       getData(`/attributes`),
     ])
       .then((results: [EntityModel[], ProjectModel[], AttributeModel[]]) => {
+        // Update states accordingly
         setEntities(results[0]);
         setProjects(results[1]);
         setAttributes(results[2]);
@@ -341,6 +378,10 @@ const Importer = (props: {
       });
   };
 
+  /**
+   * Perform import action for JSON data. Make POST request to server passing the JSON data.
+   * @return Short-circuit when function called without actual JSON data
+   */
   const performImportJson = () => {
     if (!jsonData) {
       toast({
@@ -354,11 +395,14 @@ const Importer = (props: {
       return;
     };
 
+    // Update button state to reflect loading state
     setContinueLoading(true);
 
     postData(`/system/importJSON`, { jsonData: jsonData })
       .then(() => {
+        // Close the `Importer` UI
         props.onClose();
+        resetState();
         navigate(0);
       })
       .catch((error: { message: string }) => {
@@ -376,6 +420,10 @@ const Importer = (props: {
       });
   };
 
+  /**
+   * Perform mapping action for CSV data. Collate the mapped columns and make a POST request passing this data to
+   * the server.
+   */
   const performMapping = () => {
     // Set the mapping status
     setContinueLoading(true);
@@ -398,6 +446,7 @@ const Importer = (props: {
     postData(`/system/import/mapping`, mappingData)
       .then((_response: { status: boolean; message: string; data?: any }) => {
         props.onClose();
+        resetState();
         navigate(0);
       })
       .catch((error: { message: string }) => {
@@ -415,6 +464,12 @@ const Importer = (props: {
       });
   };
 
+  /**
+   * Factory-like pattern to generate general `Select` components
+   * @param {any} value Component value
+   * @param {React.SetStateAction<any>} setValue React `useState` function to set state
+   * @return {ReactElement}
+   */
   const getSelectComponent = (
     value: any,
     setValue: React.SetStateAction<any>
@@ -436,6 +491,12 @@ const Importer = (props: {
     );
   };
 
+  /**
+   * Factory-like pattern to generate `Select` components for selecting Projects
+   * @param {any} value Component value
+   * @param {React.SetStateAction<any>} setValue React `useState` function to set state
+   * @return {ReactElement}
+   */
   const getSelectProjectComponent = (
     value: string,
     setValue: React.SetStateAction<any>
@@ -457,6 +518,12 @@ const Importer = (props: {
     );
   };
 
+  /**
+   * Factory-like pattern to generate `Select` components for selecting Entities
+   * @param {any} value Component value
+   * @param {React.SetStateAction<any>} setValue React `useState` function to set state
+   * @return {ReactElement}
+   */
   const getSelectEntitiesComponent = (
     value: { name: string; id: string },
     setValue: React.SetStateAction<any>,
@@ -519,6 +586,32 @@ const Importer = (props: {
         return attribute;
       }),
     ]);
+  };
+
+  /**
+   * Utility function to reset the entire `Importer` component state
+   */
+  const resetState = () => {
+    // Reset UI state
+    setActiveStep(0);
+    setInterfacePage("upload");
+    setContinueDisabled(true);
+    setContinueLoading(false);
+    setFile({} as File);
+    setJsonData(null);
+
+    // Reset data state
+    setSpreadsheetData([]);
+    setColumns([]);
+    setNameField("");
+    setDescriptionField("");
+    setProjectField("");
+    setSelectedOrigin({} as { name: string; id: string; });
+    setOriginsField([] as { name: string; id: string }[]);
+    setSelectedProduct({} as { name: string; id: string });
+    setProductsField([] as { name: string; id: string }[]);
+    setAttributes([]);
+    setAttributesField([]);
   };
 
   return (
@@ -865,27 +958,7 @@ const Importer = (props: {
                   onClick={() => {
                     // Close importer modal
                     props.onClose();
-
-                    // Reset UI state
-                    setActiveStep(0);
-                    setInterfacePage("upload");
-                    setContinueDisabled(true);
-                    setContinueLoading(false);
-                    setFile({} as File);
-                    setJsonData(null);
-
-                    // Reset data state
-                    setSpreadsheetData([]);
-                    setColumns([]);
-                    setNameField("");
-                    setDescriptionField("");
-                    setProjectField("");
-                    setSelectedOrigin({} as { name: string; id: string; });
-                    setOriginsField([] as { name: string; id: string }[]);
-                    setSelectedProduct({} as { name: string; id: string });
-                    setProductsField([] as { name: string; id: string }[]);
-                    setAttributes([]);
-                    setAttributesField([]);
+                    resetState();
                   }}
                 >
                   Cancel
