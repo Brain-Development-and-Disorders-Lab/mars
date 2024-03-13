@@ -31,6 +31,7 @@ import {
   StepTitle,
   StepDescription,
   StepSeparator,
+  FormHelperText,
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 import Error from "@components/Error";
@@ -83,8 +84,8 @@ const Importer = (props: {
   );
   const pageSteps = [
     { title: "Upload", description: "Upload a file" },
-    { title: "Details", description: "Basic information" },
-    { title: "Mapping", description: "Mapping fields to Attributes" },
+    { title: "Entity", description: "Basic Entity information" },
+    { title: "Attributes", description: "Specify Attributes" },
   ];
   const { activeStep, setActiveStep } = useSteps({
     index: 0,
@@ -529,11 +530,11 @@ const Importer = (props: {
           isOpen={props.isOpen}
           onClose={props.onClose}
           isCentered
-          size={"3xl"}
+          size={"4xl"}
         >
           <ModalOverlay />
           <ModalContent p={"2"} gap={"2"}>
-            <ModalHeader p={"2"}>Import</ModalHeader>
+            <ModalHeader p={"2"}>Import as Entities</ModalHeader>
             <ModalCloseButton />
             <ModalBody p={"2"}>
               {/* Stepper progress indicator */}
@@ -562,16 +563,13 @@ const Importer = (props: {
 
               {_.isEqual(interfacePage, "upload") && (
                 <Flex w={"100%"} direction={"column"} align={"center"} justify={"center"}>
-                  <Flex w={"100%"} direction={"column"} mx={"4"} mb={"4"} gap={"2"}>
-                    <Text>
-                      MARS supports importing CSV-formatted files or JSON files.
-                    </Text>
+                  <Flex w={"100%"} py={"2"} justify={"left"}>
+                    <Information text={"MARS supports CSV-formatted or JSON files."} />
                   </Flex>
-
                   <FormControl>
                     <Flex
                       direction={"column"}
-                      minH={"200px"}
+                      minH={"50vh"}
                       w={"100%"}
                       align={"center"}
                       justify={"center"}
@@ -642,15 +640,21 @@ const Importer = (props: {
               {_.isEqual(interfacePage, "details") && (
                 <Flex w={"100%"} direction={"column"} gap={"4"}>
                   {columns.length > 0 &&
-                    <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
-                      <Text fontWeight={"semibold"} color={"gray.600"}>Columns:</Text>
-                      {columns.map((column) => {
-                        return (
-                          <Tag key={column} colorScheme={"teal"}>
-                            {column}
-                          </Tag>
-                        );
-                      })}
+                    <Flex direction={"column"} gap={"2"} wrap={"wrap"}>
+                      <Flex w={"100%"} py={"2"} justify={"left"}>
+                        <Information text={`Found ${columns.length} columns.`} />
+                      </Flex>
+                      <Flex w={"100%"} py={"2"} gap={"2"} align={"center"} justify={"left"} wrap={"wrap"}>
+                        <Text fontWeight={"semibold"} size={"xs"} color={"gray.600"}>Columns:</Text>
+                        {columns.map((column) => {
+                          return (
+                            <Tag key={column} colorScheme={"green"}>
+                              {column}
+                            </Tag>
+                          );
+                        })}
+                      </Flex>
+                      <Text>Each row represents a new Entity that will be created. From the above columns, use each drop-down to select which column value to map that specific detail of the Entities that will be created.</Text>
                     </Flex>
                   }
 
@@ -661,6 +665,7 @@ const Importer = (props: {
                     >
                       <FormLabel>Name</FormLabel>
                       {getSelectComponent(nameField, setNameField)}
+                      <FormHelperText>Column containing Entity names</FormHelperText>
                     </FormControl>
                     <FormControl>
                       <FormLabel>Description</FormLabel>
@@ -668,6 +673,7 @@ const Importer = (props: {
                         descriptionField,
                         setDescriptionField
                       )}
+                      <FormHelperText>Column containing Entity descriptions</FormHelperText>
                     </FormControl>
                   </Flex>}
 
@@ -682,19 +688,20 @@ const Importer = (props: {
                         projectField,
                         setProjectField
                       )}
+                      <FormHelperText>An existing Project to associate each Entity with</FormHelperText>
                     </FormControl>
                   </Flex>
                   <Flex direction={"row"} gap={"4"}>
                     <FormControl>
                       <FormLabel>Origin</FormLabel>
-                      <Flex direction={"column"} gap={"4"}>
                         {getSelectEntitiesComponent(
                           selectedOrigin,
                           setSelectedOrigin,
                           originsField,
                           setOriginsField
                         )}
-                        <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
+                        <FormHelperText>Existing Origin Entities to associate each Entity with</FormHelperText>
+                        <Flex direction={"row"} wrap={"wrap"} gap={"2"} pt={"2"}>
                           {originsField.map((origin) => {
                             return (
                               <Tag key={origin.id}>
@@ -715,7 +722,6 @@ const Importer = (props: {
                               </Tag>
                             );
                           })}
-                        </Flex>
                       </Flex>
                     </FormControl>
                     <FormControl>
@@ -726,26 +732,29 @@ const Importer = (props: {
                         productsField,
                         setProductsField
                       )}
-                      {productsField.map((product) => {
-                        return (
-                          <Tag key={product.id}>
-                            {product.name}
-                            <TagCloseButton
-                              onClick={() => {
-                                setProductsField([
-                                  ...productsField.filter(
-                                    (existingProduct) =>
-                                      !_.isEqual(
-                                        existingProduct.id,
-                                        product.id
-                                      )
-                                  ),
-                                ]);
-                              }}
-                            />
-                          </Tag>
-                        );
-                      })}
+                      <FormHelperText>Existing Product Entities to associate each Entity with</FormHelperText>
+                      <Flex direction={"row"} wrap={"wrap"} gap={"2"} pt={"2"}>
+                        {productsField.map((product) => {
+                          return (
+                            <Tag key={product.id}>
+                              {product.name}
+                              <TagCloseButton
+                                onClick={() => {
+                                  setProductsField([
+                                    ...productsField.filter(
+                                      (existingProduct) =>
+                                        !_.isEqual(
+                                          existingProduct.id,
+                                          product.id
+                                        )
+                                    ),
+                                  ]);
+                                }}
+                              />
+                            </Tag>
+                          );
+                        })}
+                      </Flex>
                     </FormControl>
                   </Flex>
                 </Flex>
