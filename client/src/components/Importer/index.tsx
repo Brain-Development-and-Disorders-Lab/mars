@@ -1,5 +1,5 @@
 // React
-import React, { ChangeEvent, useState } from "react";
+import React, { ChangeEvent, useEffect, useState } from "react";
 
 // Existing and custom components
 import {
@@ -69,8 +69,10 @@ const Importer = (props: {
   // Page states
   const [isError, setIsError] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-  const [isMapping, setIsMapping] = useState(false);
+
+  // Button states
+  const [continueDisabled, setContinueDisabled] = useState(true);
+  const [continueLoading, setContinueLoading] = useState(false);
 
   const navigate = useNavigate();
   const toast = useToast();
@@ -118,6 +120,38 @@ const Importer = (props: {
     [] as AttributeModel[]
   );
 
+  // Effect to manipulate 'Continue' button state for 'upload' page
+  useEffect(() => {
+    if (_.isEqual(interfacePage, "upload") && fileType !== "") {
+      setContinueLoading(false);
+      setContinueDisabled(false);
+    }
+  }, [fileType]);
+
+  // Effect to manipulate 'Continue' button state when mapping fields from CSV file
+  useEffect(() => {
+    if (_.isEqual(interfacePage, "details") && nameField !== "" && fileType === "text/csv") {
+      setContinueLoading(false);
+      setContinueDisabled(false);
+    }
+  }, [nameField]);
+
+  // Effect to manipulate 'Continue' button state when importing JSON file
+  useEffect(() => {
+    if (_.isEqual(interfacePage, "details") && fileType === "application/json") {
+      setContinueLoading(false);
+      setContinueDisabled(false);
+    }
+  }, [interfacePage]);
+
+  // Effect to trigger JSON import and mapping once state has been updated
+  useEffect(() => {
+    if (jsonData !== null && interfacePage !== "details") {
+      setupMapping();
+      updateJsonDataWithUserSelections();
+    }
+  }, [jsonData])
+
   const handleJsonFile = (file: File) => {
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -136,7 +170,6 @@ const Importer = (props: {
       try {
         const data = JSON.parse(e.target?.result as string);
         setJsonData(data); // Set your JSON data to state
-        setupMapping(); // Proceed to setup mapping after loading the JSON
       } catch (error) {
         toast({
           title: "Error",
@@ -197,7 +230,8 @@ const Importer = (props: {
 
 
   const performImport = () => {
-    setIsUploading(true);
+    setContinueLoading(true);
+    setContinueDisabled(true);
 
     const formData = new FormData();
     formData.append("name", file.name);
@@ -206,68 +240,67 @@ const Importer = (props: {
 
     if (_.isEqual(fileType, "application/json")) {
       handleJsonFile(file);
-      return;
-    }
+    } else if (_.isEqual(fileType, "text/csv")) {
+      postData(`/system/import`, formData)
+        .then((response: { status: boolean; message: string; data?: any }) => {
+          if (_.isEqual(response.status, "success")) {
+            // Reset file upload state
+            setFile({} as File);
 
-    postData(`/system/import`, formData)
-      .then((response: { status: boolean; message: string; data?: any }) => {
-        if (_.isEqual(response.status, "success")) {
-          // Reset file upload state
-          setFile({} as File);
+            if (_.isEqual(fileType, "text/csv")) {
+              toast({
+                title: "Success",
+                status: "success",
+                description: "Successfully parsed CSV-formatted file.",
+                duration: 4000,
+                position: "bottom-right",
+                isClosable: true,
+              });
+              if (response.data?.length > 0) {
+                setSpreadsheetData(response.data);
 
-          if (_.isEqual(fileType, "text/csv")) {
-            toast({
-              title: "Success",
-              status: "success",
-              description: "Successfully parsed CSV-formatted file.",
-              duration: 4000,
-              position: "bottom-right",
-              isClosable: true,
-            });
-            if (response.data?.length > 0) {
-              setSpreadsheetData(response.data);
-
-              // Filter columns to exclude columns with no header ("__EMPTY...")
-              const filteredColumnSet = Object.keys(response.data[0]).filter((column) => {
-                return !_.startsWith(column, "__EMPTY");
-              })
-              setColumns(filteredColumnSet);
+                // Filter columns to exclude columns with no header ("__EMPTY...")
+                const filteredColumnSet = Object.keys(response.data[0]).filter((column) => {
+                  return !_.startsWith(column, "__EMPTY");
+                })
+                setColumns(filteredColumnSet);
+              }
+              setupMapping();
+            } else if (_.isEqual(fileType, "application/json")) {
+              toast({
+                title: "Success",
+                status: "success",
+                description: "Successfully imported JSON file.",
+                duration: 4000,
+                position: "bottom-right",
+                isClosable: true,
+              });
+              navigate(0);
             }
-            setupMapping();
-          } else if (_.isEqual(fileType, "application/json")) {
+          } else {
             toast({
-              title: "Success",
-              status: "success",
-              description: "Successfully imported JSON file.",
+              title: "Error",
+              status: "error",
+              description: response.message,
               duration: 4000,
               position: "bottom-right",
               isClosable: true,
             });
-            navigate(0);
           }
-        } else {
+          setContinueLoading(false);
+        })
+        .catch((error: { message: string }) => {
           toast({
             title: "Error",
             status: "error",
-            description: response.message,
+            description: error.message + " Please try again.",
             duration: 4000,
             position: "bottom-right",
             isClosable: true,
           });
-        }
-        setIsUploading(false);
-      })
-      .catch((error: { message: string }) => {
-        toast({
-          title: "Error",
-          status: "error",
-          description: error.message + " Please try again.",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
+          setContinueLoading(false);
         });
-        setIsUploading(false);
-      });
+    }
   };
 
   const setupMapping = () => {
@@ -282,8 +315,15 @@ const Importer = (props: {
         setAttributes(results[2]);
         setIsLoaded(true);
         setInterfacePage("details");
+
+        // Pre-populate the "Project" field
         if (results[1][0]?._id) {
           setProjectField(results[1][0]._id);
+        }
+
+        // If JSON, enable "Continue" button
+        if (_.isEqual(fileType, "application/json")) {
+          setContinueDisabled(false);
         }
       })
       .catch((_error) => {
@@ -313,7 +353,7 @@ const Importer = (props: {
       return;
     };
 
-    setIsMapping(true);
+    setContinueLoading(true);
 
     postData(`/system/importJSON`, { jsonData: jsonData })
       .then(() => {
@@ -331,13 +371,13 @@ const Importer = (props: {
         });
       })
       .finally(() => {
-        setIsMapping(false);
+        setContinueLoading(false);
       });
   };
 
   const performMapping = () => {
     // Set the mapping status
-    setIsMapping(true);
+    setContinueLoading(true);
 
     // Collate data to be mapped
     const mappingData: { fields: EntityImport; data: any[] } = {
@@ -370,7 +410,7 @@ const Importer = (props: {
         });
       })
       .finally(() => {
-        setIsMapping(false);
+        setContinueLoading(false);
       });
   };
 
@@ -814,12 +854,26 @@ const Importer = (props: {
                     // Close importer modal
                     props.onClose();
 
-                    // Reset state
+                    // Reset UI state
+                    setActiveStep(0);
                     setInterfacePage("upload");
-                    setIsMapping(false);
-                    setIsUploading(false);
+                    setContinueDisabled(true);
+                    setContinueLoading(false);
                     setFile({} as File);
                     setJsonData(null);
+
+                    // Reset data state
+                    setSpreadsheetData([]);
+                    setColumns([]);
+                    setNameField("");
+                    setDescriptionField("");
+                    setProjectField("");
+                    setSelectedOrigin({} as { name: string; id: string; });
+                    setOriginsField([] as { name: string; id: string }[]);
+                    setSelectedProduct({} as { name: string; id: string });
+                    setProductsField([] as { name: string; id: string }[]);
+                    setAttributes([]);
+                    setAttributesField([]);
                   }}
                 >
                   Cancel
@@ -846,12 +900,16 @@ const Importer = (props: {
                 </Button> */}
 
                 <Button
-                  colorScheme={"green"}
+                  colorScheme={_.isEqual(interfacePage, "mapping") ? "green" : "blue"}
                   rightIcon={
-                    _.isEqual(interfacePage, "details") ? (
-                      <Icon name="c_right" />
+                    _.isEqual(interfacePage, "upload") ? (
+                      <Icon name={"upload"} />
                     ) : (
-                      <Icon name="check" />
+                      _.isEqual(interfacePage, "details") ? (
+                        <Icon name={"c_right"} />
+                      ) : (
+                        <Icon name={"check"} />
+                      )
                     )
                   }
                   variant={"solid"}
@@ -859,9 +917,6 @@ const Importer = (props: {
                     if (_.isEqual(interfacePage, "upload")) {
                       setActiveStep(1);
                       performImport();
-                      if (_.isEqual(fileType, "application/json")) {
-                        updateJsonDataWithUserSelections();
-                      }
                     } else if (_.isEqual(interfacePage, "details")) {
                       setActiveStep(2);
                       setInterfacePage("mapping");
@@ -873,18 +928,13 @@ const Importer = (props: {
                       }
                     }
                   }}
-                  isDisabled={
-                    isUploading || isMapping ||
-                    (_.isEqual(interfacePage, "upload") && _.isEqual(file, {})) ||
-                    (_.isEqual(interfacePage, "details") && _.isEqual(nameField, "") && !jsonData)
-                  }
-                  isLoading={
-                    (isUploading || isMapping) &&
-                    !(_.isEqual(interfacePage, "details") && jsonData)
-                  }
+                  isDisabled={continueDisabled}
+                  isLoading={continueLoading}
                   loadingText={"Processing"}
                 >
-                  {_.isEqual(interfacePage, "details") ? "Continue" : "Apply"}
+                  {_.isEqual(interfacePage, "upload") && "Upload"}
+                  {_.isEqual(interfacePage, "details") && "Continue"}
+                  {_.isEqual(interfacePage, "mapping") && "Finish"}
                 </Button>
               </Flex>
             </ModalFooter>
