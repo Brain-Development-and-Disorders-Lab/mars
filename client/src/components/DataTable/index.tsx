@@ -58,33 +58,33 @@ const DataTable = (props: DataTableProps) => {
       // Checkbox select column
       ...(_.isEqual(props.showSelection, true)
         ? [
-            {
-              id: "select",
-              header: ({ table }: any) => (
-                <Checkbox
-                  {...{
-                    disabled: props.viewOnly,
-                    isChecked: table.getIsAllRowsSelected(),
-                    isIndeterminate: table.getIsSomeRowsSelected(),
-                    isInvalid: false,
-                    onChange: table.getToggleAllRowsSelectedHandler(),
-                  }}
-                />
-              ),
-              cell: ({ row }: any) => (
-                <Checkbox
-                  {...{
-                    id: `s_${Math.random().toString(16).slice(2)}`,
-                    isChecked: row.getIsSelected(),
-                    disabled: !row.getCanSelect() || props.viewOnly,
-                    isIndeterminate: row.getIsSomeSelected(),
-                    isInvalid: false,
-                    onChange: row.getToggleSelectedHandler(),
-                  }}
-                />
-              ),
-            },
-          ]
+          {
+            id: "select",
+            header: ({ table }: any) => (
+              <Checkbox
+                {...{
+                  disabled: props.viewOnly,
+                  isChecked: table.getIsAllRowsSelected(),
+                  isIndeterminate: table.getIsSomeRowsSelected(),
+                  isInvalid: false,
+                  onChange: table.getToggleAllRowsSelectedHandler(),
+                }}
+              />
+            ),
+            cell: ({ row }: any) => (
+              <Checkbox
+                {...{
+                  id: `s_${Math.random().toString(16).slice(2)}`,
+                  isChecked: row.getIsSelected(),
+                  disabled: !row.getCanSelect() || props.viewOnly,
+                  isIndeterminate: row.getIsSomeSelected(),
+                  isInvalid: false,
+                  onChange: row.getToggleSelectedHandler(),
+                }}
+              />
+            ),
+          },
+        ]
         : []),
       ...props.columns,
     ],
@@ -144,18 +144,17 @@ const DataTable = (props: DataTableProps) => {
                       isNumeric={meta?.isNumeric}
                       // Dynamically set the width for the checkboxes
                       w={_.isEqual(header.id, "select") ? "1" : "auto"}
+                      _hover={{ cursor: 'pointer', background: "blue.50" }}
+                      transition="background-color 0.3s ease-in-out, color 0.3s ease-in-out"
                     >
                       {flexRender(
                         header.column.columnDef.header,
                         header.getContext()
                       )}
-                      {header.column.getIsSorted() ? (
-                        header.column.getIsSorted() === "desc" ? (
-                          <Icon name={"c_down"} />
-                        ) : (
-                          <Icon name={"c_up"} />
-                        )
-                      ) : null}
+                      <Icon
+                        name={(header.column.getIsSorted() === 'desc' ? 'c_down' : 'c_up')}
+                        style={{ marginLeft: '4px', }}
+                      />
                     </Th>
                   );
                 })}
@@ -212,8 +211,8 @@ const DataTable = (props: DataTableProps) => {
                       key={action.label}
                       isDisabled={
                         (Object.keys(selectedRows).length === 0 ||
-                        _.isUndefined(props.actions) ||
-                        props.actions?.length === 0) &&
+                          _.isUndefined(props.actions) ||
+                          props.actions?.length === 0) &&
                         action.alwaysEnabled !== true
                       }
                     >
