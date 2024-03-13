@@ -32,6 +32,7 @@ import {
   StepDescription,
   StepSeparator,
   FormHelperText,
+  Tooltip,
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 import Error from "@components/Error";
@@ -598,6 +599,7 @@ const Importer = (props: {
     setContinueDisabled(true);
     setContinueLoading(false);
     setFile({} as File);
+    setFileType("");
     setJsonData(null);
 
     // Reset data state
@@ -707,7 +709,7 @@ const Importer = (props: {
                       onChange={(
                         event: ChangeEvent<HTMLInputElement>
                       ) => {
-                        if (event.target.files) {
+                        if (event.target.files && event.target.files.length > 0) {
                           // Only accept defined file types
                           if (_.includes(["text/csv", "application/json"], event.target.files[0].type)) {
                             setFileType(event.target.files[0].type);
@@ -868,45 +870,48 @@ const Importer = (props: {
                   >
                     {/* Drop-down to select template Attributes */}
                     <FormControl maxW={"sm"}>
-                      <Select
-                        placeholder={"Use template Attribute"}
-                        onChange={(event) => {
-                          if (!_.isEqual(event.target.value.toString(), "")) {
-                            for (let attribute of attributes) {
-                              if (
-                                _.isEqual(
-                                  event.target.value.toString(),
-                                  attribute._id
-                                )
-                              ) {
-                                setAttributesField([
-                                  ...attributesField,
-                                  {
-                                    _id: `a-${nanoid(6)}`,
-                                    name: attribute.name,
-                                    description: attribute.description,
-                                    values: attribute.values,
-                                  },
-                                ]);
-                                break;
+                      <Tooltip label={attributes.length > 0 ? "Select an existing Template Attribute" : "No Template Attributes exist yet"}>
+                        <Select
+                          placeholder={"Select Template Attribute"}
+                          isDisabled={attributes.length === 0}
+                          onChange={(event) => {
+                            if (!_.isEqual(event.target.value.toString(), "")) {
+                              for (let attribute of attributes) {
+                                if (
+                                  _.isEqual(
+                                    event.target.value.toString(),
+                                    attribute._id
+                                  )
+                                ) {
+                                  setAttributesField([
+                                    ...attributesField,
+                                    {
+                                      _id: `a-${nanoid(6)}`,
+                                      name: attribute.name,
+                                      description: attribute.description,
+                                      values: attribute.values,
+                                    },
+                                  ]);
+                                  break;
+                                }
                               }
                             }
-                          }
-                        }}
-                      >
-                        {isLoaded &&
-                          attributes.map((attribute) => {
-                            return (
-                              <option
-                                key={attribute._id}
-                                value={attribute._id}
-                              >
-                                {attribute.name}
-                              </option>
-                            );
-                          })}
-                        ;
-                      </Select>
+                          }}
+                        >
+                          {isLoaded &&
+                            attributes.map((attribute) => {
+                              return (
+                                <option
+                                  key={attribute._id}
+                                  value={attribute._id}
+                                >
+                                  {attribute.name}
+                                </option>
+                              );
+                            })}
+                          ;
+                        </Select>
+                      </Tooltip>
                     </FormControl>
 
                     <Button
