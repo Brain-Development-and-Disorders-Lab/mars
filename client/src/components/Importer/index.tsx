@@ -89,7 +89,7 @@ const Importer = (props: {
   const pageSteps = [
     { title: "Upload", description: "Upload a file" },
     { title: "Entity", description: "Basic Entity information" },
-    { title: "Attributes", description: "Specify Attributes" },
+    { title: "Templates", description: "Apply a Template" },
   ];
   const { activeStep, setActiveStep } = useSteps({
     index: 0,
@@ -775,7 +775,9 @@ const Importer = (props: {
                   <Flex direction={"row"} gap={"4"}>
                     <FormControl>
                       <FormLabel>Owner</FormLabel>
-                      <Input value={ownerField} disabled />
+                      <Tooltip label={"Initially, only you will have access to imported Entities"}>
+                        <Input value={ownerField} disabled />
+                      </Tooltip>
                     </FormControl>
                     <FormControl>
                       <FormLabel>Project</FormLabel>
