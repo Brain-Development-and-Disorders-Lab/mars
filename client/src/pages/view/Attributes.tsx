@@ -130,7 +130,7 @@ const Attributes = () => {
         >
           <Flex align={"center"} gap={"4"}>
             <Icon name={"attribute"} size={"lg"} />
-            <Heading fontWeight={"semibold"}>Attributes</Heading>
+            <Heading fontWeight={"semibold"}>Template Attributes</Heading>
           </Flex>
           <Spacer />
           <Button

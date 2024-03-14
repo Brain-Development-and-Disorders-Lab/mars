@@ -255,6 +255,7 @@ const Importer = (props: {
     if (_.isEqual(fileType, "application/json")) {
       // Handle JSON data separately
       handleJsonFile(file);
+      setIsUploading(false);
     } else if (_.isEqual(fileType, "text/csv")) {
       // Make POST request with CSV file contents from the form
       postData(`/system/import`, formData)
