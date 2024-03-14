@@ -225,6 +225,8 @@ const Entity = () => {
     onClose: onExportClose,
   } = useDisclosure();
   const [exportFields, setExportFields] = useState(["owner"] as string[]);
+  const [exportFormat, setExportFormat] = useState("json");
+  const validExportFormats = ["json", "csv", "txt"];
 
   const {
     isOpen: isUploadOpen,
@@ -916,50 +918,61 @@ const Entity = () => {
   };
 
   // Handle clicking the "Download" button
-  const handleDownloadClick = (format: "json" | "csv" | "txt") => {
-    // Send POST data to generate file
-    postData(`/entities/export/${id}`, {
-      fields: exportAll ? allExportFields : exportFields,
-      format: format,
-    })
-      .then((response) => {
-        let responseData = response;
-
-        // Clean the response data if required
-        if (_.isEqual(format, "json")) {
-          responseData = JSON.stringify(responseData, null, "  ");
-        }
-
-        FileSaver.saveAs(
-          new Blob([responseData]),
-          slugify(`${entityData.name.replace(" ", "")}_export.${format}`)
-        );
-
-        // Close the "Export" modal
-        onExportClose();
-
-        // Reset the export state
-        setExportFields([]);
-
-        toast({
-          title: "Info",
-          description: `Generated ${format.toUpperCase()} file.`,
-          status: "info",
-          duration: 2000,
-          position: "bottom-right",
-          isClosable: true,
-        });
+  const handleDownloadClick = (format: string) => {
+    if (_.includes(validExportFormats, format)) {
+      // Send POST data to generate file
+      postData(`/entities/export/${id}`, {
+        fields: exportAll ? allExportFields : exportFields,
+        format: format,
       })
-      .catch((_error) => {
-        toast({
-          title: "Error",
-          description: "An error occurred when exporting this Entity.",
-          status: "error",
-          duration: 2000,
-          position: "bottom-right",
-          isClosable: true,
+        .then((response) => {
+          let responseData = response;
+
+          // Clean the response data if required
+          if (_.isEqual(format, "json")) {
+            responseData = JSON.stringify(responseData, null, "  ");
+          }
+
+          FileSaver.saveAs(
+            new Blob([responseData]),
+            slugify(`${entityData.name.replace(" ", "")}_export.${format}`)
+          );
+
+          // Close the "Export" modal
+          onExportClose();
+
+          // Reset the export state
+          setExportFields([]);
+
+          toast({
+            title: "Info",
+            description: `Generated ${format.toUpperCase()} file.`,
+            status: "info",
+            duration: 2000,
+            position: "bottom-right",
+            isClosable: true,
+          });
+        })
+        .catch((_error) => {
+          toast({
+            title: "Error",
+            description: "An error occurred when exporting this Entity.",
+            status: "error",
+            duration: 2000,
+            position: "bottom-right",
+            isClosable: true,
+          });
         });
+    } else {
+      toast({
+        title: "Warning",
+        description: `Unsupported export format: ${format}`,
+        status: "warning",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
       });
+    }
   };
 
   // A list of all fields that can be exported, generated when the interface is opened
@@ -2283,8 +2296,20 @@ const Entity = () => {
             </ModalBody>
 
             <ModalFooter p={"2"}>
-              <Flex direction={"column"} w={"100%"} gap={"2"}>
-                {/* "Download" buttons */}
+              <Flex direction={"row"} w={"70%"} gap={"4"} align={"center"} justifySelf={"left"}>
+                <Icon name={"info"} />
+                {_.isEqual(exportFormat, "json") &&
+                  <Text>JSON files can be re-imported into MARS.</Text>
+                }
+                {_.isEqual(exportFormat, "csv") &&
+                  <Text>CSV spreadsheets can be used by other applications.</Text>
+                }
+                {_.isEqual(exportFormat, "txt") &&
+                  <Text>TXT files can be viewed and shared easily.</Text>
+                }
+              </Flex>
+              <Flex direction={"column"} w={"30%"} gap={"2"}>
+                {/* "Download" button */}
                 <Flex
                   direction={"row"}
                   w={"100%"}
@@ -2294,17 +2319,20 @@ const Entity = () => {
                 >
                   <Flex>
                     <FormControl>
-                      <Select>
-                        <option>JSON</option>
-                        <option>Spreadsheet (CSV)</option>
-                        <option>Plaintext (TXT)</option>
+                      <Select
+                        value={exportFormat}
+                        onChange={(event) => setExportFormat(event.target.value)}
+                      >
+                        <option key={"json"} value={"json"}>JSON</option>
+                        <option key={"csv"} value={"csv"}>CSV</option>
+                        <option key={"txt"} value={"txt"}>TXT</option>
                       </Select>
                     </FormControl>
                   </Flex>
                   <IconButton
                     colorScheme={"blue"}
                     aria-label={"Download"}
-                    onClick={() => handleDownloadClick(`json`)}
+                    onClick={() => handleDownloadClick(exportFormat)}
                     icon={<Icon name={"download"} />}
                   />
                 </Flex>
