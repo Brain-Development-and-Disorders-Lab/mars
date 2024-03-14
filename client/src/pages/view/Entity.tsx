@@ -1312,14 +1312,12 @@ const Entity = () => {
             {/* Entity Overview */}
             <Flex direction={"column"} p={"4"} bg={"gray.50"} rounded={"md"}>
               <Flex gap={"4"} direction={"column"}>
-                <Heading fontWeight={"semibold"} size={"md"} pt={"2"} pb={"2"}>
-                  Overview
-                </Heading>
                 <Flex gap={"2"} direction={"row"}>
                   {/* "Created" and "Owner" fields */}
                   <Flex gap={"2"} direction={"column"} basis={"40%"}>
                     <Text fontWeight={"semibold"}>Created</Text>
-                    <Flex>
+                    <Flex align={"center"} gap={"2"}>
+                      <Icon name={"v_date"} size={"sm"} />
                       <Text>
                         {dayjs(entityData.created).format("DD MMM YYYY")}
                       </Text>
@@ -1341,6 +1339,9 @@ const Entity = () => {
                           setEntityDescription(event.target.value || "");
                         }}
                         isReadOnly={!editing}
+                        border={"2px"}
+                        borderColor={"gray.200"}
+                        bg={"white"}
                       />
                     </Flex>
                   </Flex>
@@ -1361,7 +1362,7 @@ const Entity = () => {
                 justify={"space-between"}
                 align={"center"}
               >
-                <Heading fontWeight={"semibold"} size={"md"} pt={"2"} pb={"2"}>
+                <Heading fontWeight={"semibold"} size={"md"} py={"2"}>
                   Projects
                 </Heading>
                 {editing ? (
@@ -1375,20 +1376,21 @@ const Entity = () => {
                   </Button>
                 ) : null}
               </Flex>
-
-              {entityProjects.length === 0 ? (
-                <Text>No Projects.</Text>
-              ) : (
-                <DataTable
-                  data={entityProjects}
-                  columns={projectsTableColumns}
-                  visibleColumns={{}}
-                  viewOnly={!editing}
-                  showSelection={editing}
-                  actions={projectsTableActions}
-                  showPagination
-                />
-              )}
+              <Flex w={"100%"} justify={"center"} align={"center"} minH={"100px"}>
+                {entityProjects.length === 0 ? (
+                  <Text color={"gray.400"} fontWeight={"semibold"}>This Entity is not associated with any Projects.</Text>
+                ) : (
+                  <DataTable
+                    data={entityProjects}
+                    columns={projectsTableColumns}
+                    visibleColumns={{}}
+                    viewOnly={!editing}
+                    showSelection={editing}
+                    actions={projectsTableActions}
+                    showPagination
+                  />
+                )}
+              </Flex>
             </Flex>
           </Flex>
 
@@ -1413,7 +1415,7 @@ const Entity = () => {
                 justify={"space-between"}
                 align={"center"}
               >
-                <Heading fontWeight={"semibold"} size={"md"} pt={"2"} pb={"2"}>
+                <Heading fontWeight={"semibold"} size={"md"} py={"2"}>
                   Attributes
                 </Heading>
                 {editing ? (
@@ -1428,18 +1430,20 @@ const Entity = () => {
                 ) : null}
               </Flex>
 
-              {entityAttributes.length === 0 ? (
-                <Text>No Attributes.</Text>
-              ) : (
-                <DataTable
-                  data={entityAttributes}
-                  columns={attributeTableColumns}
-                  visibleColumns={visibleAttributeTableColumns}
-                  viewOnly={!editing}
-                  showSelection={editing}
-                  showPagination
-                />
-              )}
+              <Flex w={"100%"} justify={"center"} align={"center"} minH={"100px"}>
+                {entityAttributes.length === 0 ? (
+                  <Text color={"gray.400"} fontWeight={"semibold"}>This Entity does not have any Attributes.</Text>
+                ) : (
+                  <DataTable
+                    data={entityAttributes}
+                    columns={attributeTableColumns}
+                    visibleColumns={visibleAttributeTableColumns}
+                    viewOnly={!editing}
+                    showSelection={editing}
+                    showPagination
+                  />
+                )}
+              </Flex>
             </Flex>
           </Flex>
         </Flex>
@@ -1488,8 +1492,9 @@ const Entity = () => {
                 </TabList>
                 <TabPanels>
                   <TabPanel>
+                  <Flex w={"100%"} justify={"center"} align={"center"} minH={"100px"}>
                     {(entityOrigins?.length ?? 0) === 0 ? (
-                      <Text>No Origins.</Text>
+                      <Text color={"gray.400"} fontWeight={"semibold"}>This Entity does not have any Origins.</Text>
                     ) : (
                       <DataTable
                         data={entityOrigins}
@@ -1501,21 +1506,24 @@ const Entity = () => {
                         showPagination
                       />
                     )}
+                    </Flex>
                   </TabPanel>
                   <TabPanel>
-                    {(entityProducts?.length ?? 0) === 0 ? (
-                      <Text>No Products.</Text>
-                    ) : (
-                      <DataTable
-                        data={entityProducts}
-                        columns={productTableColumns}
-                        visibleColumns={{}}
-                        viewOnly={!editing}
-                        showSelection={editing}
-                        actions={productTableActions}
-                        showPagination
-                      />
-                    )}
+                    <Flex w={"100%"} justify={"center"} align={"center"} minH={"100px"}>
+                      {(entityProducts?.length ?? 0) === 0 ? (
+                        <Text color={"gray.400"} fontWeight={"semibold"}>This Entity does not have any Products.</Text>
+                      ) : (
+                        <DataTable
+                          data={entityProducts}
+                          columns={productTableColumns}
+                          visibleColumns={{}}
+                          viewOnly={!editing}
+                          showSelection={editing}
+                          actions={productTableActions}
+                          showPagination
+                        />
+                      )}
+                    </Flex>
                   </TabPanel>
                 </TabPanels>
               </Tabs>
@@ -1548,8 +1556,7 @@ const Entity = () => {
                   <Heading
                     fontWeight={"semibold"}
                     size={"md"}
-                    pt={"2"}
-                    pb={"2"}
+                    py={"2"}
                   >
                     Attachments
                   </Heading>
@@ -1562,19 +1569,21 @@ const Entity = () => {
                   </Button>
                 </Flex>
 
-                {entityAttachments.length === 0 ? (
-                  <Text>No Attachments.</Text>
-                ) : (
-                  <DataTable
-                    data={entityAttachments}
-                    columns={attachmentTableColumns}
-                    visibleColumns={{}}
-                    viewOnly={!editing}
-                    showSelection={editing}
-                    actions={attachmentTableActions}
-                    showPagination
-                  />
-                )}
+                <Flex w={"100%"} justify={"center"} align={"center"} minH={"100px"}>
+                  {entityAttachments.length === 0 ? (
+                    <Text color={"gray.400"} fontWeight={"semibold"}>This Entity does not have any Attachments.</Text>
+                  ) : (
+                    <DataTable
+                      data={entityAttachments}
+                      columns={attachmentTableColumns}
+                      visibleColumns={{}}
+                      viewOnly={!editing}
+                      showSelection={editing}
+                      actions={attachmentTableActions}
+                      showPagination
+                    />
+                  )}
+                </Flex>
               </Flex>
             </Flex>
           </Flex>
