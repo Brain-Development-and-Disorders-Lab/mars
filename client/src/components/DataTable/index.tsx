@@ -129,7 +129,7 @@ const DataTable = (props: DataTableProps) => {
 
   // Exclude columns that are not sortable, i.e. checkboxes and buttons
   const canSortColumn = (header: any) => {
-    return !_.isEqual(header.id, "select") && !_.isEqual(header.id, "_id");
+    return !_.isEqual(header.id, "select") && !_.isEqual(header.id, "_id") && !_.isEqual(header.id, "view");
   };
 
   // Utility function to get sorting handlers with correct behaviour
