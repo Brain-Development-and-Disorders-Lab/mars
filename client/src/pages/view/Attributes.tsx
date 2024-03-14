@@ -7,6 +7,7 @@ import {
   Flex,
   Heading,
   Spacer,
+  Text,
   useBreakpoint,
   useToast,
 } from "@chakra-ui/react";
@@ -142,12 +143,24 @@ const Attributes = () => {
           </Button>
         </Flex>
         <Flex direction={"column"} gap={"4"} w={"100%"}>
-          <DataTable
-            columns={columns}
-            data={data}
-            visibleColumns={visibleColumns}
-            showPagination
-          />
+          {data.length > 0 ?
+            <DataTable
+              columns={columns}
+              data={data}
+              visibleColumns={visibleColumns}
+              showPagination
+            />
+          :
+            <Flex
+              w={"100%"}
+              direction={"row"}
+              p={"4"}
+              justify={"center"}
+              align={"center"}
+            >
+              <Text color={"gray.400"} fontWeight={"semibold"}>You do not have any Templates.</Text>
+            </Flex>
+          }
         </Flex>
       </Flex>
     </Content>
