@@ -220,16 +220,19 @@ const Attribute = () => {
             p={"4"}
             h={"fit-content"}
             grow={"1"}
-            basis={"40%"}
+            width={"30%"}
             bg={"gray.50"}
             rounded={"md"}
           >
-            {/* Project Overview */}
-            <Flex gap={"4"} grow={"1"} direction={"column"} minH={"32"}>
+            {/* Attribute Overview */}
+            <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
               {/* Details */}
-              <Heading fontWeight={"semibold"} size={"md"}>
-                Template Details
-              </Heading>
+              <Text fontWeight={"semibold"}>Owner</Text>
+              <Flex>
+                <Tag colorScheme={"green"}>
+                  <TagLabel>{attributeData.owner}</TagLabel>
+                </Tag>
+              </Flex>
               <Text fontWeight={"semibold"}>Description</Text>
               {_.isEqual(attributeData.description, "") ? (
                 <Tag
@@ -247,6 +250,9 @@ const Attribute = () => {
                     setAttributeDescription(event.target.value);
                   }}
                   isReadOnly={!editing}
+                  bg={"white"}
+                  border={"2px"}
+                  borderColor={"gray.200"}
                 />
               )}
             </Flex>
@@ -257,7 +263,7 @@ const Attribute = () => {
             p={"4"}
             gap={"2"}
             grow={"1"}
-            basis={"50%"}
+            width={"65%"}
             h={"fit-content"}
             rounded={"md"}
             border={"2px"}
