@@ -213,6 +213,7 @@ const Importer = (props: {
 
     if (isJsonFile(file.name)) {
       handleJsonFile(file);
+      setIsUploading(false);
       return;
     }
 
