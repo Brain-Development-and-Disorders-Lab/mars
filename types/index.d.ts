@@ -309,7 +309,12 @@ export type IconNames =
   "c_right" |
   "c_double_right" |
   "c_up" |
-  "c_down";
+  "c_down" |
+
+  // Sorting
+  "sort" |
+  "sort_up" |
+  "sort_down";
 
 // Query types
 export type QueryOperator = "AND" | "OR";
