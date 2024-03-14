@@ -2073,14 +2073,30 @@ const Entity = () => {
           isCentered
         >
           <ModalOverlay />
-          <ModalContent p={"2"} gap={"4"} w={["lg", "xl", "2xl"]}>
+          <ModalContent p={"2"} w={["lg", "xl", "2xl"]}>
             {/* Heading and close button */}
             <ModalHeader p={"2"}>Export Entity</ModalHeader>
             <ModalCloseButton />
 
-            <ModalBody p={"2"}>
+            <ModalBody px={"2"}>
+              <Flex w={"100%"} direction={"column"} py={"1"} gap={"2"}>
+                <Text>Select the Entity information to include in the exported file.</Text>
+                <Checkbox
+                  onChange={(event) => setExportAll(event.target.checked)}
+                >
+                  Select All
+                </Checkbox>
+              </Flex>
+
               {/* Selection content */}
-              <Flex direction={"row"} gap={"4"}>
+              <Flex
+                direction={"row"}
+                p={"2"}
+                gap={"4"}
+                rounded={"md"}
+                border={"2px"}
+                borderColor={"gray.200"}
+              >
                 <Flex direction={"column"} gap={"2"}>
                   <FormControl>
                     <FormLabel>Details</FormLabel>
@@ -2267,44 +2283,31 @@ const Entity = () => {
             </ModalBody>
 
             <ModalFooter p={"2"}>
-              {/* "Download" buttons */}
-              <Flex
-                direction={"row"}
-                w={"100%"}
-                gap={"4"}
-                justify={"center"}
-                align={"center"}
-              >
-                <Checkbox
-                  onChange={(event) => setExportAll(event.target.checked)}
+              <Flex direction={"column"} w={"100%"} gap={"2"}>
+                {/* "Download" buttons */}
+                <Flex
+                  direction={"row"}
+                  w={"100%"}
+                  gap={"4"}
+                  justify={"right"}
+                  align={"center"}
                 >
-                  Select All
-                </Checkbox>
-
-                <Spacer />
-
-                <Text>Download as:</Text>
-                <Button
-                  colorScheme={"blue"}
-                  onClick={() => handleDownloadClick(`json`)}
-                  rightIcon={<Icon name={"download"} />}
-                >
-                  JSON
-                </Button>
-                <Button
-                  colorScheme={"blue"}
-                  onClick={() => handleDownloadClick(`csv`)}
-                  rightIcon={<Icon name={"download"} />}
-                >
-                  CSV
-                </Button>
-                <Button
-                  colorScheme={"blue"}
-                  onClick={() => handleDownloadClick(`txt`)}
-                  rightIcon={<Icon name={"download"} />}
-                >
-                  TXT
-                </Button>
+                  <Flex>
+                    <FormControl>
+                      <Select>
+                        <option>JSON</option>
+                        <option>Spreadsheet (CSV)</option>
+                        <option>Plaintext (TXT)</option>
+                      </Select>
+                    </FormControl>
+                  </Flex>
+                  <IconButton
+                    colorScheme={"blue"}
+                    aria-label={"Download"}
+                    onClick={() => handleDownloadClick(`json`)}
+                    icon={<Icon name={"download"} />}
+                  />
+                </Flex>
               </Flex>
             </ModalFooter>
           </ModalContent>
