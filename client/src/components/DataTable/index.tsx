@@ -127,8 +127,19 @@ const DataTable = (props: DataTableProps) => {
     setColumnVisibility(props.visibleColumns);
   }, [props.visibleColumns]);
 
+  // Exclude columns that are not sortable, i.e. checkboxes and buttons
+  const canSortColumn = (header: any) => {
+    return !_.isEqual(header.id, "select") && !_.isEqual(header.id, "_id");
+  };
+
+  // Utility function to get sorting handlers with correct behaviour
+  const getToggleSortingHandler = (header: any) => {
+    if (!canSortColumn(header)) return;
+    return header.column.getToggleSortingHandler();
+  };
+
   return (
-    <Flex direction={"column"}>
+    <Flex w={"100%"} direction={"column"}>
       <TableContainer>
         <Table variant={"simple"} size={"sm"}>
           {/* Table head */}
@@ -140,21 +151,26 @@ const DataTable = (props: DataTableProps) => {
                   return (
                     <Th
                       key={header.id}
-                      onClick={header.column.getToggleSortingHandler()}
+                      onClick={getToggleSortingHandler(header)}
                       isNumeric={meta?.isNumeric}
                       // Dynamically set the width for the checkboxes
                       w={_.isEqual(header.id, "select") ? "1" : "auto"}
-                      _hover={{ cursor: 'pointer', background: "blue.50" }}
-                      transition="background-color 0.3s ease-in-out, color 0.3s ease-in-out"
+                      _hover={canSortColumn(header) ? { cursor: "pointer", background: "gray.100" } : {}}
+                      transition={canSortColumn(header) ? "background-color 0.3s ease-in-out, color 0.3s ease-in-out" : ""}
                     >
                       {flexRender(
                         header.column.columnDef.header,
                         header.getContext()
                       )}
-                      <Icon
-                        name={(header.column.getIsSorted() === 'desc' ? 'c_down' : 'c_up')}
-                        style={{ marginLeft: '4px', }}
-                      />
+                      {canSortColumn(header) &&
+                        <Icon
+                          name={
+                            (header.column.getIsSorted() === "desc" ? "sort_up" :
+                              (header.column.getIsSorted() === "asc" ? "sort_down" : "sort"))
+                          }
+                          style={{ marginLeft: '4px', }}
+                        />
+                      }
                     </Th>
                   );
                 })}
