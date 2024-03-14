@@ -4,6 +4,7 @@ import React from "react";
 import {
   Avatar,
   Flex,
+  Link,
   Menu,
   MenuButton,
   MenuDivider,
@@ -73,24 +74,30 @@ const AccountMenu = () => {
         {/* List of drop-down menu items */}
         <MenuList ml={"2"} mr={"2"}>
           <MenuGroup>
-            <Flex p={"4"} pt={"2"} pb={"2"} gap={"4"} direction={"column"}>
+            <Flex p={"4"} py={"2"} gap={"2"} direction={"column"}>
               <Text fontWeight={"semibold"}>
-                Hello {token.name.split(" ")[0]}!
+                Hello, {token.name.split(" ")[0]}!
               </Text>
-              <Tag colorScheme={"green"}>{token.orcid}</Tag>
+
+              <Flex align={"center"} wrap={"wrap"} gap={"2"}>
+                <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.600"}>
+                  ORCiD:
+                </Text>
+                <Tag colorScheme={"green"}><Link href={`https://orcid.org/${token.orcid}`}>{token.orcid}</Link></Tag>
+              </Flex>
             </Flex>
           </MenuGroup>
           <MenuDivider />
 
           <MenuGroup title={"System"}>
             <MenuItem onClick={() => performBackup()}>
-              <Flex direction={"row"} align={"center"} gap={"4"} ml={"2"}>
+              <Flex direction={"row"} align={"center"} gap={"2"} ml={"2"}>
                 <Icon name={"download"} />
                 Backup
               </Flex>
             </MenuItem>
             <MenuItem onClick={() => navigate(`/settings`)}>
-              <Flex direction={"row"} align={"center"} gap={"4"} ml={"2"}>
+              <Flex direction={"row"} align={"center"} gap={"2"} ml={"2"}>
                 <Icon name={"settings"} />
                 Settings
               </Flex>
@@ -100,7 +107,7 @@ const AccountMenu = () => {
 
           <MenuGroup title={"Account"}>
             <MenuItem onClick={() => performLogout()}>
-              <Flex direction={"row"} align={"center"} gap={"4"} ml={"2"}>
+              <Flex direction={"row"} align={"center"} gap={"2"} ml={"2"}>
                 <Icon name={"exit"} />
                 Logout
               </Flex>

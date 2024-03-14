@@ -60,7 +60,7 @@ const Create = () => {
                 </Heading>
                 <Flex align={"center"} wrap={"wrap"} gap={"2"}>
                   <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
-                    Required
+                    Required:
                   </Text>
                   <Tag colorScheme={"red"}>Name</Tag>
                   <Tag colorScheme={"red"}>Description</Tag>
@@ -106,7 +106,7 @@ const Create = () => {
                 </Heading>
                 <Flex align={"center"} wrap={"wrap"} gap={"2"}>
                   <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
-                    Required
+                    Required:
                   </Text>
                   <Tag colorScheme={"red"}>Name</Tag>
                   <Tag colorScheme={"red"}>Created</Tag>
@@ -114,7 +114,7 @@ const Create = () => {
 
                 <Flex align={"center"} wrap={"wrap"} gap={"2"}>
                   <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
-                    Optional
+                    Optional:
                   </Text>
                   <Tag colorScheme={"teal"}>Description</Tag>
                   <Tag colorScheme={"teal"}>Projects</Tag>
@@ -162,7 +162,7 @@ const Create = () => {
                 </Heading>
                 <Flex align={"center"} wrap={"wrap"} gap={"2"}>
                   <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
-                    Required
+                    Required:
                   </Text>
                   <Tag colorScheme={"red"}>Name</Tag>
                   <Tag colorScheme={"red"}>Description</Tag>
