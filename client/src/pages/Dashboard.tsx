@@ -259,7 +259,7 @@ const Dashboard = () => {
                 justify={"center"}
                 align={"center"}
               >
-                <Text fontWeight={"bold"}>No Projects yet</Text>
+                <Text color={"gray.400"} fontWeight={"semibold"}>You do not have any Projects.</Text>
               </Flex>
             )}
 
@@ -318,7 +318,7 @@ const Dashboard = () => {
                 justify={"center"}
                 align={"center"}
               >
-                <Text fontWeight={"bold"}>No Entities yet</Text>
+                <Text color={"gray.400"} fontWeight={"semibold"}>You do not have any Entities.</Text>
               </Flex>
             )}
 
@@ -427,9 +427,7 @@ const Dashboard = () => {
             </Flex>
           ) : (
             <Flex w={"100%"} h={"100%"} justify={"center"} align={"center"}>
-              <Text fontSize={"md"} fontWeight={"bold"}>
-                No Activity yet
-              </Text>
+              <Text color={"gray.400"} fontWeight={"semibold"}>No Activity yet.</Text>
             </Flex>
           )}
         </Flex>
