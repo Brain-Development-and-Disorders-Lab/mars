@@ -582,12 +582,15 @@ const Project = () => {
             >
               {/* Project Overview */}
               <Flex gap={"4"} grow={"1"} direction={"column"} minH={"32"}>
-                <Heading fontWeight={"semibold"} size={"md"} pt={"2"} pb={"2"}>
-                  Project Overview
-                </Heading>
-
                 <Flex gap={"2"} direction={"row"}>
                   <Flex gap={"2"} direction={"column"} basis={"40%"}>
+                    <Text fontWeight={"semibold"}>Created</Text>
+                    <Flex align={"center"} gap={"2"}>
+                      <Icon name={"v_date"} size={"sm"} />
+                      <Text>
+                        {dayjs(projectData.created).format("DD MMM YYYY")}
+                      </Text>
+                    </Flex>
                     <Text fontWeight={"semibold"}>Owner</Text>
                     <Flex>
                       <Tag colorScheme={"green"}>
@@ -604,6 +607,9 @@ const Project = () => {
                         setProjectDescription(event.target.value);
                       }}
                       isReadOnly={!editing}
+                      bg={"white"}
+                      border={"2px"}
+                      borderColor={"gray.200"}
                     />
                   </Flex>
                 </Flex>
@@ -638,15 +644,15 @@ const Project = () => {
               >
                 {/* Entities in the Project */}
                 <Heading fontWeight={"semibold"} size={"md"} pt={"2"} pb={"2"}>
-                  Project Entities
+                  Entities
                 </Heading>
                 {editing && (
                   <Button
-                    leftIcon={<Icon name={"add"} />}
+                    rightIcon={<Icon name={"add"} />}
                     onClick={onEntitiesOpen}
                     colorScheme={"green"}
                   >
-                    Add Entity
+                    Add
                   </Button>
                 )}
               </Flex>
@@ -662,7 +668,9 @@ const Project = () => {
                     showPagination
                   />
                 ) : (
-                  <Text>This Project does not contain any Entities.</Text>
+                  <Flex w={"100%"} justify={"center"} align={"center"} minH={"100px"}>
+                    <Text color={"gray.400"} fontWeight={"semibold"}>This Project does not contain any Entities.</Text>
+                  </Flex>
                 )}
               </Flex>
             </Flex>
