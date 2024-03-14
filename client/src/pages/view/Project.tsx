@@ -47,6 +47,7 @@ import {
   TagLabel,
   Text,
   Textarea,
+  Tooltip,
   VStack,
   useDisclosure,
   useToast,
@@ -557,18 +558,24 @@ const Project = () => {
                   History
                 </MenuItem>
                 {/* disabled project export as this feature is not ready yet */}
-                <MenuItem
-                  onClick={handleExportClick}
-                  icon={<Icon name={"download"} />}
-                >
-                  Export
-                </MenuItem>
-                <MenuItem
-                  onClick={handleExportJsonClick}
-                  icon={<Icon name={"download"} />}
-                >
-                  Export Project Entities Json
-                </MenuItem>
+                <Tooltip label={"Feature Disabled"}>
+                  <MenuItem
+                    onClick={handleExportClick}
+                    icon={<Icon name={"download"} />}
+                    isDisabled
+                  >
+                    Export
+                  </MenuItem>
+                </Tooltip>
+                <Tooltip isDisabled={projectEntities.length > 0} label={"This Project does not contain any Entities."}>
+                  <MenuItem
+                    onClick={handleExportJsonClick}
+                    icon={<Icon name={"download"} />}
+                    isDisabled={projectEntities.length === 0}
+                  >
+                    Export Entities (JSON)
+                  </MenuItem>
+                </Tooltip>
               </MenuList>
             </Menu>
           </Flex>
