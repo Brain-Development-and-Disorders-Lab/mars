@@ -225,6 +225,8 @@ const Entity = () => {
     onClose: onExportClose,
   } = useDisclosure();
   const [exportFields, setExportFields] = useState(["owner"] as string[]);
+  const [exportFormat, setExportFormat] = useState("json");
+  const validExportFormats = ["json", "csv", "txt"];
 
   const {
     isOpen: isUploadOpen,
@@ -919,50 +921,61 @@ const Entity = () => {
   };
 
   // Handle clicking the "Download" button
-  const handleDownloadClick = (format: "json" | "csv" | "txt") => {
-    // Send POST data to generate file
-    postData(`/entities/export/${id}`, {
-      fields: exportAll ? allExportFields : exportFields,
-      format: format,
-    })
-      .then((response) => {
-        let responseData = response;
-
-        // Clean the response data if required
-        if (_.isEqual(format, "json")) {
-          responseData = JSON.stringify(responseData, null, "  ");
-        }
-
-        FileSaver.saveAs(
-          new Blob([responseData]),
-          slugify(`${entityData.name.replace(" ", "")}_export.${format}`)
-        );
-
-        // Close the "Export" modal
-        onExportClose();
-
-        // Reset the export state
-        setExportFields([]);
-
-        toast({
-          title: "Info",
-          description: `Generated ${format.toUpperCase()} file.`,
-          status: "info",
-          duration: 2000,
-          position: "bottom-right",
-          isClosable: true,
-        });
+  const handleDownloadClick = (format: string) => {
+    if (_.includes(validExportFormats, format)) {
+      // Send POST data to generate file
+      postData(`/entities/export/${id}`, {
+        fields: exportAll ? allExportFields : exportFields,
+        format: format,
       })
-      .catch((_error) => {
-        toast({
-          title: "Error",
-          description: "An error occurred when exporting this Entity.",
-          status: "error",
-          duration: 2000,
-          position: "bottom-right",
-          isClosable: true,
+        .then((response) => {
+          let responseData = response;
+
+          // Clean the response data if required
+          if (_.isEqual(format, "json")) {
+            responseData = JSON.stringify(responseData, null, "  ");
+          }
+
+          FileSaver.saveAs(
+            new Blob([responseData]),
+            slugify(`${entityData.name.replace(" ", "")}_export.${format}`)
+          );
+
+          // Close the "Export" modal
+          onExportClose();
+
+          // Reset the export state
+          setExportFields([]);
+
+          toast({
+            title: "Info",
+            description: `Generated ${format.toUpperCase()} file.`,
+            status: "info",
+            duration: 2000,
+            position: "bottom-right",
+            isClosable: true,
+          });
+        })
+        .catch((_error) => {
+          toast({
+            title: "Error",
+            description: "An error occurred when exporting this Entity.",
+            status: "error",
+            duration: 2000,
+            position: "bottom-right",
+            isClosable: true,
+          });
         });
+    } else {
+      toast({
+        title: "Warning",
+        description: `Unsupported export format: ${format}`,
+        status: "warning",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
       });
+    }
   };
 
   // A list of all fields that can be exported, generated when the interface is opened
@@ -2085,14 +2098,30 @@ const Entity = () => {
           isCentered
         >
           <ModalOverlay />
-          <ModalContent p={"2"} gap={"4"} w={["lg", "xl", "2xl"]}>
+          <ModalContent p={"2"} w={["lg", "xl", "2xl"]}>
             {/* Heading and close button */}
             <ModalHeader p={"2"}>Export Entity</ModalHeader>
             <ModalCloseButton />
 
-            <ModalBody p={"2"}>
+            <ModalBody px={"2"}>
+              <Flex w={"100%"} direction={"column"} py={"1"} gap={"2"}>
+                <Text>Select the Entity information to include in the exported file.</Text>
+                <Checkbox
+                  onChange={(event) => setExportAll(event.target.checked)}
+                >
+                  Select All
+                </Checkbox>
+              </Flex>
+
               {/* Selection content */}
-              <Flex direction={"row"} gap={"4"}>
+              <Flex
+                direction={"row"}
+                p={"2"}
+                gap={"4"}
+                rounded={"md"}
+                border={"2px"}
+                borderColor={"gray.200"}
+              >
                 <Flex direction={"column"} gap={"2"}>
                   <FormControl>
                     <FormLabel>Details</FormLabel>
@@ -2279,44 +2308,46 @@ const Entity = () => {
             </ModalBody>
 
             <ModalFooter p={"2"}>
-              {/* "Download" buttons */}
-              <Flex
-                direction={"row"}
-                w={"100%"}
-                gap={"4"}
-                justify={"center"}
-                align={"center"}
-              >
-                <Checkbox
-                  onChange={(event) => setExportAll(event.target.checked)}
+              <Flex direction={"row"} w={"70%"} gap={"4"} align={"center"} justifySelf={"left"}>
+                <Icon name={"info"} />
+                {_.isEqual(exportFormat, "json") &&
+                  <Text>JSON files can be re-imported into MARS.</Text>
+                }
+                {_.isEqual(exportFormat, "csv") &&
+                  <Text>CSV spreadsheets can be used by other applications.</Text>
+                }
+                {_.isEqual(exportFormat, "txt") &&
+                  <Text>TXT files can be viewed and shared easily.</Text>
+                }
+              </Flex>
+              <Flex direction={"column"} w={"30%"} gap={"2"}>
+                {/* "Download" button */}
+                <Flex
+                  direction={"row"}
+                  w={"100%"}
+                  gap={"4"}
+                  justify={"right"}
+                  align={"center"}
                 >
-                  Select All
-                </Checkbox>
-
-                <Spacer />
-
-                <Text>Download as:</Text>
-                <Button
-                  colorScheme={"blue"}
-                  onClick={() => handleDownloadClick(`json`)}
-                  rightIcon={<Icon name={"download"} />}
-                >
-                  JSON
-                </Button>
-                <Button
-                  colorScheme={"blue"}
-                  onClick={() => handleDownloadClick(`csv`)}
-                  rightIcon={<Icon name={"download"} />}
-                >
-                  CSV
-                </Button>
-                <Button
-                  colorScheme={"blue"}
-                  onClick={() => handleDownloadClick(`txt`)}
-                  rightIcon={<Icon name={"download"} />}
-                >
-                  TXT
-                </Button>
+                  <Flex>
+                    <FormControl>
+                      <Select
+                        value={exportFormat}
+                        onChange={(event) => setExportFormat(event.target.value)}
+                      >
+                        <option key={"json"} value={"json"}>JSON</option>
+                        <option key={"csv"} value={"csv"}>CSV</option>
+                        <option key={"txt"} value={"txt"}>TXT</option>
+                      </Select>
+                    </FormControl>
+                  </Flex>
+                  <IconButton
+                    colorScheme={"blue"}
+                    aria-label={"Download"}
+                    onClick={() => handleDownloadClick(exportFormat)}
+                    icon={<Icon name={"download"} />}
+                  />
+                </Flex>
               </Flex>
             </ModalFooter>
           </ModalContent>
