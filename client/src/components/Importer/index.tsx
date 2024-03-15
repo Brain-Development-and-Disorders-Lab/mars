@@ -37,7 +37,7 @@ import {
 import Icon from "@components/Icon";
 import Error from "@components/Error";
 import Attribute from "@components/AttributeCard";
-import { Information } from "@components/Label";
+import { Information, Warning } from "@components/Label";
 
 // Custom and existing types
 import {
@@ -220,7 +220,7 @@ const Importer = (props: {
         }
         if (productsField?.length > 0) {
           // Add or update the 'products' field in the entity
-          entity.associations.products = _.unionBy(entity.associations.products, productsField, 'id');;
+          entity.associations.products = _.unionBy(entity.associations.products, productsField, 'id');
         }
         if (projectField) {
           // Add or update the 'project' field in the entity
@@ -730,8 +730,11 @@ const Importer = (props: {
                 <Flex w={"100%"} direction={"column"} gap={"4"}>
                   {columns.length > 0 &&
                     <Flex direction={"column"} gap={"2"} wrap={"wrap"}>
-                      <Flex w={"100%"} py={"2"} justify={"left"}>
+                      <Flex w={"100%"} py={"2"} justify={"left"} gap={"2"}>
                         <Information text={`Found ${columns.length} columns.`} />
+                        {fileType === "text/csv" &&
+                          <Warning text={`Origins and Products cannot be imported from CSV files.`} />
+                        }
                       </Flex>
                       <Flex w={"100%"} py={"2"} gap={"2"} align={"center"} justify={"left"} wrap={"wrap"}>
                         <Text fontWeight={"semibold"} size={"xs"} color={"gray.600"}>Columns:</Text>

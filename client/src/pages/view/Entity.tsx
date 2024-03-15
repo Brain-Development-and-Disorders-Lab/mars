@@ -499,6 +499,7 @@ const Entity = () => {
                 rightIcon={<Icon name={"c_right"} />}
                 colorScheme={"gray"}
                 onClick={() => navigate(`/projects/${info.row.original}`)}
+                isDisabled={_.isUndefined(info.row.original)}
               >
                 View
               </Button>
@@ -562,6 +563,7 @@ const Entity = () => {
                 rightIcon={<Icon name={"c_right"} />}
                 colorScheme={"gray"}
                 onClick={() => navigate(`/entities/${info.row.original.id}`)}
+                isDisabled={_.isUndefined(info.row.original.id)}
               >
                 View
               </Button>
@@ -625,6 +627,7 @@ const Entity = () => {
                 rightIcon={<Icon name={"c_right"} />}
                 colorScheme={"gray"}
                 onClick={() => navigate(`/entities/${info.row.original.id}`)}
+                isDisabled={_.isUndefined(info.row.original.id)}
               >
                 View
               </Button>
