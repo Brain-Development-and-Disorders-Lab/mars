@@ -5,7 +5,7 @@ describe('In entity page, edit attribute', () => {
     cy.contains('button', 'Dashboard').click();
     cy.get('button').contains('View').eq(-1).click();
     cy.get('button').contains('View').eq(0).click();
-    cy.contains('No Attributes.').should('exist');
+    cy.contains('This Entity does not have any Attributes.').should('exist');
     cy.contains('button', 'Edit').click();
 
     // add attribute
@@ -25,10 +25,10 @@ describe('In entity page, edit attribute', () => {
 
     cy.contains('button', 'Done').click();
 
-    cy.contains('No Attributes.').should('not.exist');
+    cy.contains('This Entity does not have any Attributes.').should('not.exist');
     cy.reload();
     // check if attribute is added
-    cy.contains('No Attributes.').should('not.exist');
+    cy.contains('This Entity does not have any Attributes.').should('not.exist');
 
     // edit attribute
     cy.contains('button', 'Edit').click();
@@ -36,8 +36,8 @@ describe('In entity page, edit attribute', () => {
     cy.get('button[aria-label="Delete attribute"]').click();
     cy.contains('button', 'Done').click();
     // check if attribute is deleted
-    cy.contains('No Attributes.').should('exist');
+    cy.contains('This Entity does not have any Attributes.').should('exist');
     cy.reload();
-    cy.contains('No Attributes.').should('exist');
+    cy.contains('This Entity does not have any Attributes.').should('exist');
   });
 });

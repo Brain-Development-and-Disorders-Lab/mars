@@ -53,6 +53,7 @@ import {
 } from "react-icons/bs";
 import { SiBox } from "react-icons/si";
 import { SlGraph } from "react-icons/sl";
+import { FaSort, FaSortDown, FaSortUp } from "react-icons/fa";
 
 // Existing and custom types
 import { IconNames } from "@types";
@@ -124,6 +125,11 @@ const SYSTEM_ICONS: { [k: string]: IconType } = {
   c_double_right: BsChevronDoubleRight,
   c_up: BsChevronUp,
   c_down: BsChevronDown,
+
+  // Sort
+  sort: FaSort,
+  sort_up: FaSortUp,
+  sort_down: FaSortDown,
 };
 
 const Icon = (props: {

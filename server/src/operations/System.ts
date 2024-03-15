@@ -383,8 +383,10 @@ export class System {
           description: row[entityFields.description],
           projects: [],
           associations: {
-            origins: row?.Origins ? [{ name: row.Origins }] : null as any,
-            products: row?.Products ? [{ name: row.Products }] : null as any,
+            // origins: row?.Origins ? [{ name: row.Origins }] : null as any,
+            origins: [], // Clear Origins list
+            // products: row?.Products ? [{ name: row.Products }] : null as any,
+            products: [], // Clear Products list
           },
           attributes: attributes,
           attachments: [],

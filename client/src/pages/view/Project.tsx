@@ -47,6 +47,7 @@ import {
   TagLabel,
   Text,
   Textarea,
+  Tooltip,
   VStack,
   useDisclosure,
   useToast,
@@ -98,7 +99,6 @@ const Project = () => {
   const [isError, setIsError] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [exportAll, setExportAll] = useState(false);
 
   const [projectData, setProjectData] = useState({} as ProjectModel);
   const [projectEntities, setProjectEntities] = useState([] as string[]);
@@ -117,6 +117,9 @@ const Project = () => {
     onClose: onExportClose,
   } = useDisclosure();
   const [exportFields, setExportFields] = useState([] as string[]);
+  const [exportAll, setExportAll] = useState(false);
+  const [exportFormat, setExportFormat] = useState("json");
+  const validExportFormats = ["json", "csv", "txt"];
 
   useEffect(() => {
     // Populate Project data
@@ -341,51 +344,62 @@ const Project = () => {
   const allExportFields = ["name", "created", "owner", "description"];
 
   // Handle clicking the "Download" button
-  const handleDownloadClick = (format: "json" | "csv" | "txt") => {
-    // Send POST data to generate file
-    postData(`/projects/export`, {
-      id: id,
-      fields: exportAll ? allExportFields : exportFields,
-      format: format,
-    })
-      .then((response) => {
-        let responseData = response;
-
-        // Clean the response data if required
-        if (_.isEqual(format, "json")) {
-          responseData = JSON.stringify(responseData, null, "  ");
-        }
-
-        FileSaver.saveAs(
-          new Blob([responseData]),
-          slugify(`${projectData.name.replace(" ", "")}_export.${format}`)
-        );
-
-        // Close the "Export" modal
-        onExportClose();
-
-        // Reset the export state
-        setExportFields([]);
-
-        toast({
-          title: "Info",
-          description: `Generated ${format.toUpperCase()} file.`,
-          status: "info",
-          duration: 2000,
-          position: "bottom-right",
-          isClosable: true,
-        });
+  const handleDownloadClick = (format: string) => {
+    if (_.includes(validExportFormats, format)) {
+      // Send POST data to generate file
+      postData(`/projects/export`, {
+        id: id,
+        fields: exportAll ? allExportFields : exportFields,
+        format: format,
       })
-      .catch((_error) => {
-        toast({
-          title: "Error",
-          description: "An error occurred when exporting this Project.",
-          status: "error",
-          duration: 2000,
-          position: "bottom-right",
-          isClosable: true,
+        .then((response) => {
+          let responseData = response;
+
+          // Clean the response data if required
+          if (_.isEqual(format, "json")) {
+            responseData = JSON.stringify(responseData, null, "  ");
+          }
+
+          FileSaver.saveAs(
+            new Blob([responseData]),
+            slugify(`${projectData.name.replace(" ", "")}_export.${format}`)
+          );
+
+          // Close the "Export" modal
+          onExportClose();
+
+          // Reset the export state
+          setExportFields([]);
+
+          toast({
+            title: "Info",
+            description: `Generated ${format.toUpperCase()} file.`,
+            status: "info",
+            duration: 2000,
+            position: "bottom-right",
+            isClosable: true,
+          });
+        })
+        .catch((_error) => {
+          toast({
+            title: "Error",
+            description: "An error occurred when exporting this Project.",
+            status: "error",
+            duration: 2000,
+            position: "bottom-right",
+            isClosable: true,
+          });
         });
+    } else {
+      toast({
+        title: "Warning",
+        description: `Unsupported export format: ${format}`,
+        status: "warning",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
       });
+    }
   };
 
   // Handle checkbox selection on the export modal
@@ -544,18 +558,24 @@ const Project = () => {
                   History
                 </MenuItem>
                 {/* disabled project export as this feature is not ready yet */}
-                <MenuItem
-                  onClick={handleExportClick}
-                  icon={<Icon name={"download"} />}
-                >
-                  Export
-                </MenuItem>
-                <MenuItem
-                  onClick={handleExportJsonClick}
-                  icon={<Icon name={"download"} />}
-                >
-                  Export Project Entities Json
-                </MenuItem>
+                <Tooltip label={"Feature Disabled"}>
+                  <MenuItem
+                    onClick={handleExportClick}
+                    icon={<Icon name={"download"} />}
+                    isDisabled
+                  >
+                    Export
+                  </MenuItem>
+                </Tooltip>
+                <Tooltip isDisabled={projectEntities.length > 0} label={"This Project does not contain any Entities."}>
+                  <MenuItem
+                    onClick={handleExportJsonClick}
+                    icon={<Icon name={"download"} />}
+                    isDisabled={projectEntities.length === 0}
+                  >
+                    Export Entities (JSON)
+                  </MenuItem>
+                </Tooltip>
               </MenuList>
             </Menu>
           </Flex>
@@ -582,12 +602,15 @@ const Project = () => {
             >
               {/* Project Overview */}
               <Flex gap={"4"} grow={"1"} direction={"column"} minH={"32"}>
-                <Heading fontWeight={"semibold"} size={"md"} pt={"2"} pb={"2"}>
-                  Project Overview
-                </Heading>
-
                 <Flex gap={"2"} direction={"row"}>
                   <Flex gap={"2"} direction={"column"} basis={"40%"}>
+                    <Text fontWeight={"semibold"}>Created</Text>
+                    <Flex align={"center"} gap={"2"}>
+                      <Icon name={"v_date"} size={"sm"} />
+                      <Text>
+                        {dayjs(projectData.created).format("DD MMM YYYY")}
+                      </Text>
+                    </Flex>
                     <Text fontWeight={"semibold"}>Owner</Text>
                     <Flex>
                       <Tag colorScheme={"green"}>
@@ -604,6 +627,9 @@ const Project = () => {
                         setProjectDescription(event.target.value);
                       }}
                       isReadOnly={!editing}
+                      bg={"white"}
+                      border={"2px"}
+                      borderColor={"gray.200"}
                     />
                   </Flex>
                 </Flex>
@@ -638,15 +664,15 @@ const Project = () => {
               >
                 {/* Entities in the Project */}
                 <Heading fontWeight={"semibold"} size={"md"} pt={"2"} pb={"2"}>
-                  Project Entities
+                  Entities
                 </Heading>
                 {editing && (
                   <Button
-                    leftIcon={<Icon name={"add"} />}
+                    rightIcon={<Icon name={"add"} />}
                     onClick={onEntitiesOpen}
                     colorScheme={"green"}
                   >
-                    Add Entity
+                    Add
                   </Button>
                 )}
               </Flex>
@@ -662,7 +688,9 @@ const Project = () => {
                     showPagination
                   />
                 ) : (
-                  <Text>This Project does not contain any Entities.</Text>
+                  <Flex w={"100%"} justify={"center"} align={"center"} minH={"100px"}>
+                    <Text color={"gray.400"} fontWeight={"semibold"}>This Project does not contain any Entities.</Text>
+                  </Flex>
                 )}
               </Flex>
             </Flex>
@@ -767,14 +795,30 @@ const Project = () => {
           isCentered
         >
           <ModalOverlay />
-          <ModalContent p={"2"} gap={"4"} w={["lg", "xl", "2xl"]}>
+          <ModalContent p={"2"} w={["lg", "xl", "2xl"]}>
             {/* Heading and close button */}
             <ModalHeader p={"2"}>Export Project</ModalHeader>
             <ModalCloseButton />
 
-            <ModalBody p={"2"}>
+            <ModalBody px={"2"}>
+              <Flex w={"100%"} direction={"column"} py={"1"} gap={"2"}>
+                <Text>Select the Project information to include in the exported file.</Text>
+                <Checkbox
+                  onChange={(event) => setExportAll(event.target.checked)}
+                >
+                  Select All
+                </Checkbox>
+              </Flex>
+
               {/* Selection content */}
-              <Flex direction={"row"} gap={"4"}>
+              <Flex
+                direction={"row"}
+                p={"2"}
+                gap={"4"}
+                rounded={"md"}
+                border={"2px"}
+                borderColor={"gray.200"}
+              >
                 <Flex direction={"column"} gap={"2"}>
                   <FormControl>
                     <FormLabel>Details</FormLabel>
@@ -868,44 +912,46 @@ const Project = () => {
             </ModalBody>
 
             <ModalFooter p={"2"}>
-              {/* "Download" buttons */}
-              <Flex
-                direction={"row"}
-                w={"100%"}
-                gap={"4"}
-                justify={"center"}
-                align={"center"}
-              >
-                <Checkbox
-                  onChange={(event) => setExportAll(event.target.checked)}
+              <Flex direction={"row"} w={"70%"} gap={"4"} align={"center"} justifySelf={"left"}>
+                <Icon name={"info"} />
+                {_.isEqual(exportFormat, "json") &&
+                  <Text>JSON files can be re-imported into MARS.</Text>
+                }
+                {_.isEqual(exportFormat, "csv") &&
+                  <Text>CSV spreadsheets can be used by other applications.</Text>
+                }
+                {_.isEqual(exportFormat, "txt") &&
+                  <Text>TXT files can be viewed and shared easily.</Text>
+                }
+              </Flex>
+              <Flex direction={"column"} w={"30%"} gap={"2"}>
+                {/* "Download" button */}
+                <Flex
+                  direction={"row"}
+                  w={"100%"}
+                  gap={"4"}
+                  justify={"right"}
+                  align={"center"}
                 >
-                  Select All
-                </Checkbox>
-
-                <Spacer />
-
-                <Text>Download as:</Text>
-                <Button
-                  colorScheme={"blue"}
-                  onClick={() => handleDownloadClick(`json`)}
-                  rightIcon={<Icon name={"download"} />}
-                >
-                  JSON
-                </Button>
-                <Button
-                  colorScheme={"blue"}
-                  onClick={() => handleDownloadClick(`csv`)}
-                  rightIcon={<Icon name={"download"} />}
-                >
-                  CSV
-                </Button>
-                <Button
-                  colorScheme={"blue"}
-                  onClick={() => handleDownloadClick(`txt`)}
-                  rightIcon={<Icon name={"download"} />}
-                >
-                  TXT
-                </Button>
+                  <Flex>
+                    <FormControl>
+                      <Select
+                        value={exportFormat}
+                        onChange={(event) => setExportFormat(event.target.value)}
+                      >
+                        <option key={"json"} value={"json"}>JSON</option>
+                        <option key={"csv"} value={"csv"}>CSV</option>
+                        <option key={"txt"} value={"txt"}>TXT</option>
+                      </Select>
+                    </FormControl>
+                  </Flex>
+                  <IconButton
+                    colorScheme={"blue"}
+                    aria-label={"Download"}
+                    onClick={() => handleDownloadClick(exportFormat)}
+                    icon={<Icon name={"download"} />}
+                  />
+                </Flex>
               </Flex>
             </ModalFooter>
           </ModalContent>

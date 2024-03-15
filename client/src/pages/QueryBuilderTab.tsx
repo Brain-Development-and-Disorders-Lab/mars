@@ -1,5 +1,5 @@
 
-import { TabPanel, Flex, FormControl, FormLabel, Select, Input, Spacer, IconButton, VStack, Tag, Button, useToast } from '@chakra-ui/react';
+import { TabPanel, Flex, FormControl, FormLabel, Select, Input, Spacer, IconButton, VStack, Tag, Button, useToast, Box } from '@chakra-ui/react';
 import { QueryFocusType, QueryParameters, QueryQualifier, QuerySubQualifier, QueryOperator, EntityModel } from '@types';
 import Icon from "@components/Icon";
 import QueryBuilder, { formatQuery } from 'react-querybuilder';
@@ -55,7 +55,6 @@ const QueryBuilderTab: React.FC<QueryBuilderTabProps> = ({
 
   const toast = useToast();
 
-
   // Function to handle query changes
   const onQueryChange = (q: any) => {
     setQuery(formatQuery(q, 'mongodb'));
@@ -86,22 +85,24 @@ const QueryBuilderTab: React.FC<QueryBuilderTabProps> = ({
 
   return (
     <TabPanel>
-      <div>
+      <Box>
         <QueryBuilder
           fields={fields}
           onQueryChange={onQueryChange}
-
-        // You can add more props as needed
+          // You can add more props as needed
         />
         <Flex direction={"row"} w={"100%"} gap={"4"} justify={"right"} mt={2}>
-          <IconButton
-            aria-label={"Search Query"}
+          <Button
+            aria-label={"Run Query"}
             colorScheme={"green"}
-            icon={<Icon name={"search"} />}
+            rightIcon={<Icon name={"search"} />}
             onClick={() => onSearchBuiltQuery()}
-          />
+            isDisabled={_.isEqual(query, {})}
+          >
+            Run Query
+          </Button>
         </Flex>
-      </div>
+      </Box>
       {false && /* disableled Legacy Query builder components */
         <Flex w={"100%"} direction={"column"} gap={"4"}>
           <Flex
