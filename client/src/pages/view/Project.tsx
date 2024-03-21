@@ -567,11 +567,11 @@ const Project = () => {
                     Export
                   </MenuItem>
                 </Tooltip>
-                <Tooltip isDisabled={projectEntities.length > 0} label={"This Project does not contain any Entities."}>
+                <Tooltip isDisabled={projectEntities?.length > 0} label={"This Project does not contain any Entities."}>
                   <MenuItem
                     onClick={handleExportJsonClick}
                     icon={<Icon name={"download"} />}
-                    isDisabled={projectEntities.length === 0}
+                    isDisabled={projectEntities?.length === 0}
                   >
                     Export Entities (JSON)
                   </MenuItem>
