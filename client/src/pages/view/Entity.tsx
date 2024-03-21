@@ -20,7 +20,6 @@ import {
   useDisclosure,
   Container,
   Popover,
-  PopoverTrigger,
   PopoverContent,
   PopoverCloseButton,
   PopoverHeader,
@@ -62,6 +61,7 @@ import {
   Tab,
   TabPanel,
   TabPanels,
+  PopoverTrigger,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import DataTable from "@components/DataTable";
@@ -215,6 +215,11 @@ const Entity = () => {
   const [toUploadAttachments, setToUploadAttachments] = useState(
     [] as string[]
   );
+
+  const [isDeletePopoverOpen, setIsDeletePopoverOpen] = useState(false);
+  const handleDeletePopoverClose = () => setIsDeletePopoverOpen(false);
+  const handleDeletePopoverOpen = () => setIsDeletePopoverOpen(true);
+
 
   // Manage the tab index between "Entity Origins" and "Entity Products"
   const [relationsIndex, setRelationsIndex] = useState(0);
@@ -1215,27 +1220,26 @@ const Entity = () => {
 
           {/* Buttons */}
           <Flex direction={"row"} gap={"4"} wrap={"wrap"}>
-            {editing && (
-              <Popover>
+            {isDeletePopoverOpen && (
+              <Popover isOpen={isDeletePopoverOpen} onClose={handleDeletePopoverClose}
+              >
                 <PopoverTrigger>
-                  <Button
-                    colorScheme={"red"}
-                    rightIcon={<Icon name={"delete"} />}
-                  >
-                    Delete
-                  </Button>
+                <></>
                 </PopoverTrigger>
-                <PopoverContent>
+                <PopoverContent  width="auto">
                   <PopoverArrow />
                   <PopoverCloseButton />
                   <PopoverHeader>Confirmation</PopoverHeader>
-                  <PopoverBody>
+                  <PopoverBody  userSelect="none" whiteSpace="nowrap">
                     Are you sure you want to delete this Entity?
                     <Flex direction={"row"} p={"2"} justify={"center"}>
                       <Button
                         colorScheme={"green"}
                         rightIcon={<Icon name={"check"} />}
-                        onClick={handleDeleteClick}
+                        onClick={() => {
+                          handleDeleteClick(); // Assuming this function handles the delete logic
+                          handleDeletePopoverClose();
+                        }}
                       >
                         Confirm
                       </Button>
@@ -1243,6 +1247,16 @@ const Entity = () => {
                   </PopoverBody>
                 </PopoverContent>
               </Popover>
+
+            )}
+            {editing && (
+              <Button
+              onClick={()=>setEditing(false)}
+              colorScheme={"orange"}
+              rightIcon={<Icon name={"rewind"} />}
+            >
+              Back
+            </Button>
             )}
             {entityData.deleted ? (
               <Button
@@ -1281,6 +1295,7 @@ const Entity = () => {
               </Flex>
             )}
 
+
             {/* Actions Menu */}
             <Menu>
               <MenuButton
@@ -1310,6 +1325,12 @@ const Entity = () => {
                   isDisabled={editing || entityData.deleted}
                 >
                   Export
+                </MenuItem>
+                <MenuItem
+                  onClick={handleDeletePopoverOpen}
+                  icon={<Icon name={"delete"} />}
+                >
+                  Delete
                 </MenuItem>
               </MenuList>
             </Menu>
@@ -1508,20 +1529,20 @@ const Entity = () => {
                 </TabList>
                 <TabPanels>
                   <TabPanel>
-                  <Flex w={"100%"} justify={"center"} align={"center"} minH={"100px"}>
-                    {(entityOrigins?.length ?? 0) === 0 ? (
-                      <Text color={"gray.400"} fontWeight={"semibold"}>This Entity does not have any Origins.</Text>
-                    ) : (
-                      <DataTable
-                        data={entityOrigins}
-                        columns={originTableColumns}
-                        visibleColumns={{}}
-                        viewOnly={!editing}
-                        showSelection={editing}
-                        actions={originTableActions}
-                        showPagination
-                      />
-                    )}
+                    <Flex w={"100%"} justify={"center"} align={"center"} minH={"100px"}>
+                      {(entityOrigins?.length ?? 0) === 0 ? (
+                        <Text color={"gray.400"} fontWeight={"semibold"}>This Entity does not have any Origins.</Text>
+                      ) : (
+                        <DataTable
+                          data={entityOrigins}
+                          columns={originTableColumns}
+                          visibleColumns={{}}
+                          viewOnly={!editing}
+                          showSelection={editing}
+                          actions={originTableActions}
+                          showPagination
+                        />
+                      )}
                     </Flex>
                   </TabPanel>
                   <TabPanel>
