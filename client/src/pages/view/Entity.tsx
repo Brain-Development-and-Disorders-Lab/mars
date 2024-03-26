@@ -1671,7 +1671,7 @@ const Entity = () => {
 
                   <Stack>
                     <Select
-                      placeholder={"Use template Attribute"}
+                      placeholder={"Use template"}
                       onChange={(event) => {
                         if (!_.isEqual(event.target.value.toString(), "")) {
                           for (let attribute of attributes) {
