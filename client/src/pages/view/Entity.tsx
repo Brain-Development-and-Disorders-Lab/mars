@@ -79,6 +79,7 @@ import {
   DataTableAction,
   EntityHistory,
   EntityModel,
+  IAttribute,
   IValue,
   ProjectModel,
 } from "@types";
@@ -159,6 +160,37 @@ const Entity = () => {
     isAttributeValueError;
 
   const [attributes, setAttributes] = useState([] as AttributeModel[]);
+
+  const onSaveAsTemplate = () => {
+    const attributeData: IAttribute = {
+      name: attributeName,
+      description: attributeDescription,
+      values: attributeValues,
+    };
+
+    // Save the Entity as a template
+    postData(`/attributes/create`, attributeData)
+      .then((_response) => {
+        toast({
+          title: "Saved!",
+          status: "success",
+          duration: 2000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+        setAttributes(() => [ ...attributes, attributeData as AttributeModel]);
+      })
+      .catch(() => {
+        toast({
+          title: "Error",
+          description: "An error occurred when saving this Attribute as a template.",
+          status: "error",
+          duration: 2000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+      });
+  }
 
   useEffect(() => {
     // Get all Attributes
@@ -1660,7 +1692,7 @@ const Entity = () => {
 
                   <Stack>
                     <Select
-                      placeholder={"Use template Attribute"}
+                      placeholder={"Use template"}
                       onChange={(event) => {
                         if (!_.isEqual(event.target.value.toString(), "")) {
                           for (let attribute of attributes) {
@@ -1762,6 +1794,16 @@ const Entity = () => {
                       onClick={onAddAttributesClose}
                     >
                       Cancel
+                    </Button>
+
+                    <Button
+                      colorScheme={"blue"}
+                      variant={"outline"}
+                      rightIcon={<Icon name={"add"} />}
+                      onClick={onSaveAsTemplate}
+                      isDisabled={isAttributeError}
+                    >
+                      Save as Template
                     </Button>
 
                     <Button
