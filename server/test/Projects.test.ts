@@ -184,8 +184,6 @@ describe('checkProjectOwnership', () => {
 
         expect(next).not.toHaveBeenCalled();
         expect(res.status).toHaveBeenCalledWith(403);
-        expect(res.json).toHaveBeenCalledWith({ message: 'User does not have permission to access this project' });
+        expect(res.json).toHaveBeenCalledWith({ message: 'User is not the owner nor collaborator of this project.' });
     });
-
-
 });
