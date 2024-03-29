@@ -48,8 +48,7 @@ export const checkProjectOwnership = async (req: any, res: any, next: any) => {
     if (!project) {
       return res.status(404).json({ message: "Project not found." });
     }
-    console.log("project.collaborators:", project.collaborators);
-    console.log("project.owner:", project.owner);
+
     if (project.owner.toString() !== userId.toString() && !project?.collaborators?.includes(userId.toString())) {
       return res.status(403).json({ message: "User is not the owner nor collaborator of this project." });
     }

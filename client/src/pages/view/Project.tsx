@@ -215,9 +215,6 @@ const Project = () => {
         entities: projectEntities,
         history: projectHistory,
       };
-      console.log(updateData);
-      console.log(projectCollaborators);
-      console.log(newCollaborator);
 
       // Update data
       postData(`/projects/update`, updateData)
