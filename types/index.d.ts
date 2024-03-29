@@ -106,6 +106,7 @@ export type IProject = {
   name: string;
   created: string;
   owner: string;
+  collaborators?: string[];
   description: string;
   shared: string[];
   entities: string[];

@@ -127,6 +127,7 @@ export class Projects {
             $set: {
               description: updatedProject.description,
               entities: [...entitiesToKeep, ...entitiesToAdd],
+              collaborators: updatedProject?.collaborators || [],
               history: [
                 {
                   timestamp: dayjs(Date.now()).toISOString(),
