@@ -43,7 +43,7 @@ export const checkEntitiesOwnership = async (req: any, res: any, next: any) => {
     if (entity.projects && entity.projects.length > 0) {
       for (const projectId of entity.projects) {
         const project = await Projects.getOne(projectId);
-        if (project && project.owner === userId) {
+        if (project && (project.owner === userId || project?.collaborators?.includes(userId))) {
           isOwnerOrProjectOwner = true;
           break; // Break the loop as soon as ownership is confirmed
         }

@@ -21,6 +21,7 @@ import {
   FormLabel,
   Heading,
   IconButton,
+  Input,
   Menu,
   MenuButton,
   MenuItem,
@@ -104,6 +105,9 @@ const Project = () => {
   const [projectEntities, setProjectEntities] = useState([] as string[]);
   const [projectDescription, setProjectDescription] = useState("");
   const [projectHistory, setProjectHistory] = useState([] as ProjectHistory[]);
+  const [projectCollaborators, setProjectCollaborators] = useState([] as string[]);
+  const [newCollaborator, setNewCollaborator] = useState("");
+
 
   // Entities that can be added
   const [allEntities, setAllEntities] = useState(
@@ -126,9 +130,11 @@ const Project = () => {
     getData(`/projects/${id}`)
       .then((response) => {
         setProjectData(response);
-        setProjectDescription(response.description);
-        setProjectEntities(response.entities);
-        setProjectHistory(response.history);
+        setProjectDescription(response?.description);
+        setProjectEntities(response?.entities);
+        setProjectHistory(response?.history);
+        setProjectCollaborators(response?.collaborators || []);
+
       })
       .catch(() => {
         toast({
@@ -203,6 +209,7 @@ const Project = () => {
         name: projectData.name,
         description: projectDescription,
         owner: projectData.owner,
+        collaborators: projectCollaborators || [],
         shared: projectData.shared,
         created: projectData.created,
         entities: projectEntities,
@@ -278,6 +285,7 @@ const Project = () => {
       name: projectData.name,
       created: projectData.created,
       owner: projectData.owner,
+      collaborators: projectData.collaborators || [],
       shared: projectData.shared,
       description: projectVersion.description,
       entities: projectVersion.entities,
@@ -316,6 +324,7 @@ const Project = () => {
         setProjectDescription(updateData.description);
         setProjectEntities(updateData.entities);
         setProjectHistory(updateData.history);
+        setProjectCollaborators(updateData?.collaborators || []);
         setIsLoaded(true);
       });
   };
@@ -341,7 +350,7 @@ const Project = () => {
   };
 
   // A list of all fields that can be exported, generated when the interface is opened
-  const allExportFields = ["name", "created", "owner", "description"];
+  const allExportFields = ["name", "created", "owner", "collaborators", "description"];
 
   // Handle clicking the "Download" button
   const handleDownloadClick = (format: string) => {
@@ -695,6 +704,64 @@ const Project = () => {
               </Flex>
             </Flex>
           </Flex>
+          <Flex
+            direction={"column"}
+            p={"4"}
+            gap={"4"}
+            grow={"1"}
+            w={"50%"}
+            maxW={"50%"}
+            minW={"420px"}
+            h={"fit-content"}
+            bg={"gray.50"}
+            ml={"4"}
+            rounded={"md"}>
+            {/* Collaborators display */}
+            <Flex direction="column">
+              <Heading size="md" mb="2">Collaborators</Heading>
+              {projectCollaborators?.length > 0 ? (
+                <VStack align="start">
+                  {projectCollaborators.map((collaborator, index) => (
+                    <Flex key={index} align="center">
+                      <Text mr="4">{collaborator}</Text>
+                      {editing && (
+                        <IconButton
+                          aria-label="Remove collaborator"
+                          icon={<Icon name="delete" />}
+                          onClick={() => setProjectCollaborators((collaborators) => collaborators.filter((c) => c !== collaborator))}
+                        />)}
+                    </Flex>
+                  ))}
+                </VStack>
+              ) : (
+                <Text>No collaborators added yet.</Text>
+              )}
+            </Flex>
+
+            {/* Add collaborator input */}
+            <Flex mt="4" direction="column">
+              <FormControl>
+                <FormLabel>Add Collaborator</FormLabel>
+                <Input
+                  disabled={!editing}
+                  placeholder="Collaborator ORCiD"
+                  value={newCollaborator}
+                  onChange={(e) => setNewCollaborator(e.target.value)}
+                />
+              </FormControl>
+              <Button mt="2"
+                disabled={!editing}
+                onClick={() => {
+                  // Prevent adding empty or duplicate collaborator
+                  if (newCollaborator && !projectCollaborators.includes(newCollaborator)) {
+                    setProjectCollaborators(collaborators => [...collaborators, newCollaborator]);
+                    setNewCollaborator(''); // Clear the input after adding
+                  }
+                }}
+                colorScheme={editing ? "blue" : "gray"}>Add Collaborator</Button>
+            </Flex>
+          </Flex>
+
         </Flex>
 
         {/* Modal to add Entities */}

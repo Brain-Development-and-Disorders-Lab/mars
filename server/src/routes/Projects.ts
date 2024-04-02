@@ -49,8 +49,8 @@ export const checkProjectOwnership = async (req: any, res: any, next: any) => {
       return res.status(404).json({ message: "Project not found." });
     }
 
-    if (project.owner.toString() !== userId.toString()) {
-      return res.status(403).json({ message: "User is not the owner of this project." });
+    if (project.owner.toString() !== userId.toString() && !project?.collaborators?.includes(userId.toString())) {
+      return res.status(403).json({ message: "User is not the owner nor collaborator of this project." });
     }
 
     // If checks pass, attach project to request and proceed
@@ -74,7 +74,8 @@ ProjectsRoute.route("/projects").get(
         _request.user = { _id: 'XXXX-1234-ABCD-0000' };
       }
       console.log("_request?.user?._id):", _request?.user?._id);
-      response.json(projects.filter((project) => project.owner === _request?.user?._id));
+      response.json(projects.filter((project) => (project.owner === _request?.user?._id)
+      || (project?.collaborators?.includes(_request?.user?._id))));
     });
   }
 );

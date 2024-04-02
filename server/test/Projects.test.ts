@@ -151,4 +151,39 @@ describe('checkProjectOwnership', () => {
         expect(req.project).toBeDefined();
     });
 
+    it('should allow access for a collaborator', async () => {
+        process.env.NODE_ENV = 'test';
+        const collaboratorId = 'collaborator-id';
+        req.user = { _id: collaboratorId };
+
+        // Mock project with collaborator
+        (ProjectsModule.Projects.getOne as jest.Mock).mockResolvedValue({ 
+            _id: 'project-id', 
+            owner: 'user-id', 
+            collaborators: [collaboratorId] 
+        } as never);
+
+        await checkProjectOwnership(req, res, next);
+
+        expect(next).toHaveBeenCalled();
+        expect(req.project).toBeDefined();
+    });
+
+    it('should deny access for non-collaborators and non-owners', async () => {
+        process.env.NODE_ENV = 'test';
+        req.user = { _id: 'non-collaborator-id' };
+
+        // Mock project without the non-collaborator
+        (ProjectsModule.Projects.getOne as jest.Mock).mockResolvedValue({ 
+            _id: 'project-id', 
+            owner: 'user-id', 
+            collaborators: ['collaborator-id'] 
+        } as never);
+
+        await checkProjectOwnership(req, res, next);
+
+        expect(next).not.toHaveBeenCalled();
+        expect(res.status).toHaveBeenCalledWith(403);
+        expect(res.json).toHaveBeenCalledWith({ message: 'User is not the owner nor collaborator of this project.' });
+    });
 });
