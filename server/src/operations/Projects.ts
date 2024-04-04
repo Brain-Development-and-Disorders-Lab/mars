@@ -223,6 +223,14 @@ export class Projects {
   };
 
   static addEntity = (project: string, entity: string): Promise<string> => {
+    if (!entity) {
+      consola.warn("No Entity provided to add to Project");
+      return Promise.resolve(project);
+    }
+    if (!project) {
+      consola.warn("No Entity provided to add to Project");
+      return Promise.resolve("");
+    }
     consola.start(
       "Adding Entity",
       entity.toString(),
