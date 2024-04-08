@@ -68,6 +68,7 @@ describe("POST /entities/create", () => {
     });
 
     expect(result.name).toBe("TestEntity");
+    expect(result.timestamp).toBeDefined();
   });
 
   it("should create an association between two Entities when an Origin is specified in a Product", async () => {

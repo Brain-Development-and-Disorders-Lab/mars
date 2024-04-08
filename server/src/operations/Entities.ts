@@ -111,6 +111,8 @@ export class Entities {
       entity["_id"] = getIdentifier("entity");
     }
 
+    entity["timestamp"] = new Date().toISOString();
+
     // Push data to database
     return new Promise((resolve, _reject) => {
       getDatabase()

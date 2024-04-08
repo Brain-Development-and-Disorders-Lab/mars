@@ -105,6 +105,7 @@ export type LinkyProps = {
 export type IProject = {
   name: string;
   created: string;
+  timestamp?: string;
   owner: string;
   collaborators?: string[];
   description: string;
