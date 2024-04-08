@@ -128,6 +128,7 @@ export type ProjectHistory = {
 export type IEntity = {
   name: string;
   created: string;
+  timestamp?: string;
   deleted: boolean;
   locked: boolean;
   owner: string;
