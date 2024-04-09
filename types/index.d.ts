@@ -105,6 +105,7 @@ export type LinkyProps = {
 export type IProject = {
   name: string;
   created: string;
+  timestamp?: string;
   owner: string;
   collaborators?: string[];
   description: string;
@@ -127,6 +128,7 @@ export type ProjectHistory = {
 export type IEntity = {
   name: string;
   created: string;
+  timestamp?: string;
   deleted: boolean;
   locked: boolean;
   owner: string;

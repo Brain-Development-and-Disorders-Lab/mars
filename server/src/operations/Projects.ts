@@ -138,7 +138,7 @@ export class Projects {
                   description: currentProject.description,
                   entities: currentProject.entities,
                 },
-                ...currentProject.history,
+                ...(currentProject.history || []),
               ],
             },
           };
