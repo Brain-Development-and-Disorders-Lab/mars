@@ -75,6 +75,39 @@ export class Entities {
   };
 
   /**
+   * Find an Entity by search term for typeahead
+   * @param {string} name the name of the Entity to find
+   * @return {Promise<EntityModel | null>}
+   */
+  static async searchByTerm(userId: string, searchText: string, limit: number = 5) {
+    const searchRegex = new RegExp(searchText, 'i'); // Case-insensitive regex search
+    const query = {
+      $or: [
+        { name: { $regex: searchRegex } },
+        { description: { $regex: searchRegex } },
+        { "attributes.values.data": { $regex: searchRegex } }  // Assuming searchable content within attributes
+      ],
+      $and: [
+        { $or: [{ owner: userId }, { collaborators: userId }] } // Ensure user is owner or collaborator
+      ]
+    };
+
+    const options = {
+      limit: limit,
+      projection: { name: 1, description: 1 } // Limit the fields returned for efficiency
+    };
+
+    try {
+      const entities = await getDatabase().collection(ENTITIES).find(query, options).toArray();
+      return entities;
+    } catch (error) {
+      console.error('Error searching entities:', error);
+      throw error;
+    }
+  }
+
+
+  /**
  * Find if Entity by its name existe
  * @param {string} name the name of the Entity to find
  * @return {Promise<EntityModel | null>}

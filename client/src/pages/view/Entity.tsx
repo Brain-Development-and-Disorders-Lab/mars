@@ -87,7 +87,7 @@ import {
 // Utility functions and libraries
 import { deleteData, getData, postData } from "src/database/functions";
 import { isValidValues } from "src/util";
-import _ from "lodash";
+import _, { debounce } from "lodash";
 import dayjs from "dayjs";
 import FileSaver from "file-saver";
 import slugify from "slugify";
@@ -160,6 +160,30 @@ const Entity = () => {
     isAttributeValueError;
 
   const [attributes, setAttributes] = useState([] as AttributeModel[]);
+  const [inputValue, setInputValue] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+
+  // Debounced fetch function
+  const fetchEntities = debounce((query) => {
+    postData(`/entities/searchByTerm`, { query: query })
+      .then(response => {
+        setSearchResults(response);
+      })
+      .catch(error => {
+        console.error("Failed to fetch entities:", error);
+        setSearchResults([]);
+      });
+  }, 150);
+
+  const handleInputChange = (event: any) => {
+    const value = event.target.value;
+    setInputValue(value);
+    if (value.length > 2) {
+      fetchEntities(value);
+    } else {
+      setSearchResults([]);
+    }
+  };
 
   const onSaveAsTemplate = () => {
     const attributeData: IAttribute = {
@@ -178,7 +202,7 @@ const Entity = () => {
           position: "bottom-right",
           isClosable: true,
         });
-        setAttributes(() => [ ...attributes, attributeData as AttributeModel]);
+        setAttributes(() => [...attributes, attributeData as AttributeModel]);
       })
       .catch(() => {
         toast({
@@ -1256,13 +1280,13 @@ const Entity = () => {
               <Popover isOpen={isDeletePopoverOpen} onClose={handleDeletePopoverClose}
               >
                 <PopoverTrigger>
-                <></>
+                  <></>
                 </PopoverTrigger>
-                <PopoverContent  width="auto">
+                <PopoverContent width="auto">
                   <PopoverArrow />
                   <PopoverCloseButton />
                   <PopoverHeader>Confirmation</PopoverHeader>
-                  <PopoverBody  userSelect="none" whiteSpace="nowrap">
+                  <PopoverBody userSelect="none" whiteSpace="nowrap">
                     Are you sure you want to delete this Entity?
                     <Flex direction={"row"} p={"2"} justify={"center"}>
                       <Button
@@ -1283,12 +1307,12 @@ const Entity = () => {
             )}
             {editing && (
               <Button
-              onClick={()=>setEditing(false)}
-              colorScheme={"orange"}
-              rightIcon={<Icon name={"rewind"} />}
-            >
-              Back
-            </Button>
+                onClick={() => setEditing(false)}
+                colorScheme={"orange"}
+                rightIcon={<Icon name={"rewind"} />}
+              >
+                Back
+              </Button>
             )}
             {entityData.deleted ? (
               <Button
@@ -1940,8 +1964,26 @@ const Entity = () => {
             <ModalCloseButton />
 
             <ModalBody p={"2"}>
+              <Input
+                placeholder="Search for Origins"
+                value={inputValue}
+                onChange={handleInputChange}
+              />
+              {searchResults.map((entity: EntityModel) => (
+                <Button
+                  key={entity._id}
+                  onClick={() => {
+                    addProducts([entity._id]);
+                    setInputValue("");
+                    setSearchResults([]);
+                  }}
+                  variant="ghost"
+                >
+                  {entity.name}
+                </Button>
+              ))}
               {/* Select component for Entities */}
-              <Flex direction={"column"} gap={"2"}>
+              {/* <Flex direction={"column"} gap={"2"}>
                 <FormControl>
                   <FormLabel>Add Products</FormLabel>
                   <Select
@@ -2005,7 +2047,7 @@ const Entity = () => {
                     }
                   })}
                 </Flex>
-              </Flex>
+              </Flex> */}
             </ModalBody>
 
             <ModalFooter p={"2"}>
@@ -2046,8 +2088,26 @@ const Entity = () => {
             <ModalCloseButton />
 
             <ModalBody p={"2"}>
+              <Input
+                placeholder="Search for Origins"
+                value={inputValue}
+                onChange={handleInputChange}
+              />
+              {searchResults.map((entity: EntityModel) => (
+                <Button
+                  key={entity._id}
+                  onClick={() => {
+                    addOrigins([entity._id]);
+                    setInputValue("");
+                    setSearchResults([]);
+                  }}
+                  variant="ghost"
+                >
+                  {entity.name}
+                </Button>
+              ))}
               {/* Select component for Entities */}
-              <Flex direction={"column"} gap={"2"}>
+              {/* <Flex direction={"column"} gap={"2"}>
                 <FormControl>
                   <FormLabel>Add Origins</FormLabel>
                   <Select
@@ -2111,7 +2171,7 @@ const Entity = () => {
                     }
                   })}
                 </Flex>
-              </Flex>
+              </Flex> */}
             </ModalBody>
 
             <ModalFooter p={"2"}>
