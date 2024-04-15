@@ -1958,7 +1958,7 @@ const Entity = () => {
           isCentered
         >
           <ModalOverlay />
-          <ModalContent p={"2"} gap={"4"} w={["lg", "xl", "2xl"]}>
+          <ModalContent maxW={"4xl"} p={"2"} gap={"4"} w={["lg", "xl", "2xl"]}>
             {/* Heading and close button */}
             <ModalHeader p={"2"}>Add Products</ModalHeader>
             <ModalCloseButton />
@@ -2082,7 +2082,7 @@ const Entity = () => {
         {/* Add Origins modal */}
         <Modal isOpen={isAddOriginsOpen} onClose={onAddOriginsClose} isCentered>
           <ModalOverlay />
-          <ModalContent p={"2"} gap={"4"} w={["lg", "xl", "2xl"]}>
+          <ModalContent maxW={"4xl"} p={"2"} gap={"4"} w={["lg", "xl", "2xl"]}>
             {/* Heading and close button */}
             <ModalHeader p={"2"}>Add Origins</ModalHeader>
             <ModalCloseButton />
