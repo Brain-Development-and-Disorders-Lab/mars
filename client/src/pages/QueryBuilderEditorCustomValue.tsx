@@ -24,10 +24,6 @@ const QueryBuilderEditorCustomValue = ({ field, value, handleOnChange }: ValueEd
   }, 300);
 
   useEffect(() => {
-    console.log('inputValue:', inputValue);
-    console.log('field:', field);
-    console.log('searchResults:', searchResults);
-
     if (inputValue.length > 2 && (field === 'origin' || field === 'product')) {
       fetchEntities(inputValue);
     } else {
@@ -53,6 +49,7 @@ const QueryBuilderEditorCustomValue = ({ field, value, handleOnChange }: ValueEd
         onChange={handleInputChange}
         minW={'300px'}
         backgroundColor={'white'}
+        data-testid="value-editor"
       />
       {searchResults.length > 0 && (
         <VStack
