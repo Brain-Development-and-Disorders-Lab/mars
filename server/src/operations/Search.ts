@@ -8,6 +8,7 @@ import { QueryComponent } from "@types";
 import mquery from "mquery";
 import { getDatabase } from "../database/connection";
 import _ from "lodash";
+import { Entities } from "./Entities";
 
 const ENTITIES = "entities";
 
@@ -55,13 +56,36 @@ export class Search {
 
   static getBuiltQuery = (data: { query: string }): Promise<any[]> => {
     consola.start("Search:", data.query);
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       try {
         // Parse the query string into a MongoDB query object
         const queryObject = JSON.parse(data.query);
-        
+
         // Construct MongoDB query
         let mongoQuery = {};
+
+        if (queryObject.origin) {
+          console.log("Querying for origin:", queryObject.origin);
+          let originEntity = await Entities.getOne(queryObject.origin);
+          delete queryObject.origin;
+          if (originEntity) {
+            queryObject['associations.origins'] = {
+              $elemMatch: { id: (originEntity._id).toString() }
+            }
+
+          }
+        }
+        if (queryObject.product) {
+          let productEntity = await Entities.getOne(queryObject.product);
+          delete queryObject.product;
+          if (productEntity) {
+            queryObject['associations.products'] = {
+              $elemMatch: { id: (productEntity._id).toString() }
+            }
+
+          }
+        }
+
         if (_.isArray(queryObject)) {
           // If the query is an array, assume it's an array of query conditions
           mongoQuery = { $and: queryObject };

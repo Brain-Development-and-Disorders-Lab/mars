@@ -80,7 +80,15 @@ export class Entities {
    * @return {Promise<EntityModel | null>}
    */
   static async searchByTerm(userId: string, searchText: string, limit: number = 5) {
-    const searchRegex = new RegExp(searchText, 'i'); // Case-insensitive regex search
+    let searchRegex;
+    try {
+      searchRegex = new RegExp(searchText, 'i');
+    } catch (error) {
+      console.error('Invalid regex:', error);
+      // Fallback to plain text search if regex fails to compile
+      searchText = searchText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');  // Escape special regex characters
+      searchRegex = new RegExp(searchText, 'i'); // Safe regex with escaped characters
+    }
     const query = {
       $or: [
         { name: { $regex: searchRegex } },
@@ -88,6 +96,7 @@ export class Entities {
         { "attributes.values.data": { $regex: searchRegex } }  // Assuming searchable content within attributes
       ],
       $and: [
+        { deleted: false },
         { $or: [{ owner: userId }, { collaborators: userId }] } // Ensure user is owner or collaborator
       ]
     };

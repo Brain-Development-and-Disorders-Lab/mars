@@ -8,6 +8,7 @@ import QueryBuilder, { formatQuery } from 'react-querybuilder';
 import _ from 'lodash';
 import React, { useState } from 'react';
 import { postData } from '@database/functions';
+import QueryBuilderEditorCustomValue from './QueryBuilderEditorCustomValue';
 
 
 interface QueryBuilderTabProps {
@@ -89,6 +90,7 @@ const QueryBuilderTab: React.FC<QueryBuilderTabProps> = ({
         <QueryBuilder
           fields={fields}
           onQueryChange={onQueryChange}
+          controlElements={{ valueEditor: QueryBuilderEditorCustomValue }}
           // You can add more props as needed
         />
         <Flex direction={"row"} w={"100%"} gap={"4"} justify={"right"} mt={2}>
