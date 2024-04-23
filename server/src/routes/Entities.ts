@@ -346,4 +346,24 @@ EntitiesRoute.route("/entities/:id").delete(
   }
 );
 
+EntitiesRoute.route("/entities/searchByTerm").post(
+  authMiddleware,
+  async (request: any, response: any) => {
+    const searchText = request.body.query;
+    const userId = request.user?._id;
+
+    if (!searchText.trim()) {
+      return response.status(400).json({ message: "Search text is required." });
+    }
+
+    try {
+      const entities = await Entities.searchByTerm(userId, searchText);
+      response.json(entities || []);
+    } catch (error) {
+      console.error('Error performing search:', error);
+      response.status(500).json({ message: 'An error occurred during the search' });
+    }
+  }
+);
+
 export default EntitiesRoute;
