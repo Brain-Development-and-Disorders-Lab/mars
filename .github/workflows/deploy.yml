@@ -32,6 +32,7 @@ jobs:
           output_location: "/dist" # Built app content directory
 
   build_server:
+    name: Build server
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
@@ -52,18 +53,19 @@ jobs:
         echo "CLIENT_SECRET=${{ secrets.CLIENT_SECRET }}" >> .env
 
     - name: Build Server
-      working-directory: ./server
+      working-directory: server
       run: |
         yarn install
         yarn buildDebug
 
     - name: Upload artifact for deployment job
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: mars-server
         path: ./server/dist
 
   deploy_server:
+    name: Deploy server
     runs-on: ubuntu-latest
     needs: build_server
     environment:
@@ -75,6 +77,8 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: mars-server
+    - name: Display structure of downloaded files
+      run: ls -R
 
     - name: 'Deploy to Azure WebApp'
       id: deploy-to-webapp
