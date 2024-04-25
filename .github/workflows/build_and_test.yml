@@ -1,4 +1,4 @@
-name: Test MARS Cypress
+name: Test client and server
 
 on:
   push:
@@ -7,6 +7,7 @@ on:
     branches: ["main"]
   workflow_dispatch:
 
+# Note: Environment variables used for server testing
 env:
   CONNECTION_STRING: mongodb://admin:metadataadmin@localhost:27017/
   PORT: 8000
@@ -21,8 +22,9 @@ jobs:
         mongodb-version: ["6.0"]
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
+    # Setup for client and server
     - name: Start Docker containers
       run: docker-compose -f "docker-compose.yml" up -d --build
 
@@ -31,18 +33,18 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
 
-    - name: Install Dependencies
+    - name: Install dependencies
       run: yarn install
 
-    # Install and build the client
-    - name: Install and Build and test Client
+    # Install, build, and test the frontend
+    - name: Install, build, and test client
       working-directory: ./client
       run: |
         yarn install
         yarn build
         yarn test
-      
-    # Create .env file
+
+    # Create .env file for server and build server
     - name: Create .env file
       working-directory: server
       run: |
@@ -52,35 +54,37 @@ jobs:
         echo "NODE_ENV=development" >> .env
         echo "CLIENT_ID=${{ secrets.CLIENT_ID }}" >> .env
         echo "CLIENT_SECRET=${{ secrets.CLIENT_SECRET }}" >> .env
-    
-    - name: Build Server
-      working-directory: ./server
+
+    - name: Build server
+      working-directory: server
       run: |
         yarn install
         yarn buildDebug
 
-    # Test the server
+    # Run the server unit tests
     - name: Test Server
-      working-directory: ./server
+      working-directory: server
       run: |
         yarn test
 
-    - name: Start Client
-      working-directory: ./client
+    # Start the client
+    - name: Start client
+      working-directory: client
       run: yarn start &
 
-    - name: Wait for Client
+    - name: Wait for client start
       run: sleep 10 # seconds
 
-    - name: Cypress run
+    # Run the Cypress tests
+    - name: Run Cypress tests
       uses: cypress-io/github-action@v6
       with:
         wait-on: 'http://localhost:8080'
         start: yarn startDev
 
-
-    - name: Upload Cypress Screenshots
-      if: failure() # Runs this step only if the Cypress step failed
+    # Run this step only if the Cypress testing failed
+    - name: Upload Cypress screenshots
+      if: failure()
       uses: actions/upload-artifact@v3
       with:
         name: cypress-screenshots
