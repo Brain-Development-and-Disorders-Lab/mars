@@ -7,7 +7,6 @@ on:
 
 # Note: Environment variables used for server deployment only
 env:
-  CONNECTION_STRING: mongodb://admin:metadataadmin@localhost:27017/
   AZURE_WEBAPP_NAME: mars-server
   AZURE_WEBAPP_PACKAGE_PATH: './server'
   NODE_VERSION: '18.x'
