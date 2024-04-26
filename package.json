@@ -8,6 +8,7 @@
   "scripts": {
     "start": "cd server && node dist/index.js",
     "startDev": "cd server && node --inspect dist/index.js",
+    "lint": "prettier . --check",
     "prepare": "husky"
   },
   "devDependencies": {
@@ -16,5 +17,8 @@
     "lint-staged": "^15.2.2",
     "prettier": "3.2.5",
     "typescript": "^5.2.2"
+  },
+  "lint-staged": {
+    "*.ts": "prettier --check"
   }
 }
