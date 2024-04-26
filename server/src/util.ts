@@ -12,7 +12,7 @@ import { Authentication } from "./operations/Authentication";
  */
 export const getData = (
   url: string,
-  options?: AxiosRequestConfig
+  options?: AxiosRequestConfig,
 ): Promise<any> => {
   return new Promise((resolve, reject) => {
     axios
@@ -43,7 +43,7 @@ export const getData = (
 export const postData = async (
   url: string,
   data: any,
-  options?: AxiosRequestConfig
+  options?: AxiosRequestConfig,
 ): Promise<any> => {
   return new Promise((resolve, reject) => {
     axios
@@ -51,7 +51,7 @@ export const postData = async (
       .then((response) => {
         const contentType = response.headers["content-type"];
         if (_.isNull(contentType)) {
-          reject(`"content-type" is null`);
+          reject('"content-type" is null');
         } else if (_.startsWith(contentType, "application/json")) {
           if (!_.isEqual(response.statusText, "OK")) {
             reject(`Response status: ${response.statusText}`);

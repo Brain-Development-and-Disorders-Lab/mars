@@ -8,7 +8,8 @@
   "scripts": {
     "start": "cd server && node dist/index.js",
     "startDev": "cd server && node --inspect dist/index.js",
-    "lint": "prettier . --check",
+    "lint:check": "prettier . --check",
+    "lint:fix": "prettier . --write",
     "prepare": "husky"
   },
   "devDependencies": {
