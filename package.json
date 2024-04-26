@@ -7,10 +7,12 @@
   "license": "MIT",
   "scripts": {
     "start": "cd server && node dist/index.js",
-    "startDev": "cd server && node --inspect dist/index.js"
+    "startDev": "cd server && node --inspect dist/index.js",
+    "prepare": "husky"
   },
   "devDependencies": {
     "cypress": "^13.4.0",
+    "husky": "^9.0.11",
     "typescript": "^5.2.2"
   }
 }

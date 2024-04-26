@@ -1,0 +1,2 @@
+cd client
+yarn test
