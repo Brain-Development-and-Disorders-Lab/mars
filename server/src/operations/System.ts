@@ -28,15 +28,12 @@ import { getAttachments, getSystem } from "../database/connection";
 // Constants
 const DEVICES = "devices";
 
-// Note: Removed function since filetype is detected via input MIME-type
-// function isJsonFile(filename: string) {
-//   // Use a regular expression to test if the filename ends with '.json'
-//   return filename.toLowerCase().endsWith('.json');
-// }
-
 export class System {
+  /**
+   * Generate a complete system backup in JSON format
+   * @returns {Promise<string>}
+   */
   static backup = (): Promise<string> => {
-    consola.start("Starting system backup");
     return new Promise((resolve, reject) => {
       Promise.all([
         Activity.getAll(),
@@ -49,13 +46,17 @@ export class System {
             ActivityModel[],
             AttributeModel[],
             ProjectModel[],
-            EntityModel[]
-          ]
+            EntityModel[],
+          ],
         ) => {
           // Create a temporary file, passing the filename as a response
           tmp.file((error, path: string, _fd: number) => {
             if (error) {
-              reject("Error create temporary file");
+              consola.error(
+                "Error while creating temporary file for backup:",
+                error,
+              );
+              reject("Error creating temporary file");
               throw error;
             }
 
@@ -67,21 +68,27 @@ export class System {
                 attributes: data[1],
                 projects: data[2],
                 entities: data[3],
-              })
+              }),
             );
-            consola.success("Generated system backup");
+            consola.debug("Generated system backup");
             resolve(path);
           });
-        }
+        },
       );
     });
   };
 
-  static importJSON = async (importData: any): Promise<{ status: boolean; message: string; data?: any }> => {
+  /**
+   * Import JSON data
+   * @param {any} importData Data to import
+   * @returns {Promise<{ status: boolean; message: string; data?: any }>}
+   */
+  static importJSON = async (
+    importData: any,
+  ): Promise<{ status: boolean; message: string; data?: any }> => {
     try {
       // Validate importData here (if necessary)
       // ...
-
       // Iterate through the importData and update the database
       for (const item of importData.entities) {
         // Assuming 'Entities' is your Mongoose model and item._id is the identifier
@@ -91,28 +98,33 @@ export class System {
         // Update or insert the item in the database
         // You can use 'updateOne', 'findByIdAndUpdate', or similar methods based on your exact requirements
         await Entities.upsert(
-           item// Option to insert a new document if the entity does not exist
+          item, // Option to insert a new document if the entity does not exist
         );
       }
 
       // If everything goes well, send a success response
       return {
         status: true,
-        message: 'JSON data successfully imported.',
+        message: "JSON data successfully imported.",
         data: null, // or include any relevant data here
       };
-
     } catch (error) {
       // Handle any errors that occur during the process
-      console.error('Error importing JSON data:', error);
+      consola.error("Error importing JSON data:", error);
       return {
         status: false,
-        message: 'Failed to import JSON data.',
+        message: "Failed to import JSON data.",
         data: null, // or include error details here
       };
     }
   };
 
+  /**
+   * Import file by MIME type
+   * @param {any} files Object containing file data
+   * @param {string} type MIME type of the file being uploaded
+   * @returns {Promise<{ status: boolean; message: string; data?: any }>}
+   */
   static import = (
     files: any,
     type: "text/csv" | "application/json",
@@ -121,7 +133,7 @@ export class System {
       if (files.file) {
         const receivedFile = files.file;
         const receivedFileData = receivedFile.data as Buffer;
-        consola.start("Received file:", receivedFile.name);
+        consola.debug("Received file:", receivedFile.name);
 
         const entityOperations = [] as Promise<EntityModel>[];
         const projectsOperations = [] as Promise<ProjectModel>[];
@@ -130,7 +142,6 @@ export class System {
         // Utility function to import Entities
         const importEntities = (parsedFileData: any) => {
           // Import Entities
-          consola.start("Importing Entities");
           if (parsedFileData["entities"]) {
             // Run differently if a backup file
             const importedEntities = parsedFileData[
@@ -157,7 +168,6 @@ export class System {
         // Utility function to import Projects
         const importProjects = (parsedFileData: any) => {
           // Import Projects
-          consola.start("Importing Projects");
           if (!_.isUndefined(parsedFileData["projects"])) {
             const importedProjects = parsedFileData[
               "projects"
@@ -177,7 +187,6 @@ export class System {
         // Utility function to import Attributes
         const importAttribute = (parsedFileData: any) => {
           // Import Attributes
-          consola.start("Importing Attributes");
           if (!_.isUndefined(parsedFileData["attributes"])) {
             const importedAttributes = parsedFileData[
               "attributes"
@@ -197,7 +206,7 @@ export class System {
         // Handle import depending on file format
         if (_.isEqual(type, "application/json")) {
           // JSON format
-          consola.start("Importing JSON file:", files.file.name);
+          consola.debug("Importing JSON file:", files.file.name);
           const parsedFileData = JSON.parse(receivedFileData.toString("utf-8"));
           importEntities(parsedFileData);
           importProjects(parsedFileData);
@@ -211,36 +220,37 @@ export class System {
           ])
             .then(
               (results: [EntityModel[], ProjectModel[], AttributeModel[]]) => {
-                consola.success("Imported", results[0].length, "Entities");
-                consola.success("Imported", results[1].length, "Projects");
-                consola.success("Imported", results[2].length, "Attributes");
-                consola.success("Imported file:", receivedFile.name);
+                consola.debug("Imported", results[0].length, "Entities");
+                consola.debug("Imported", results[1].length, "Projects");
+                consola.debug("Imported", results[2].length, "Attributes");
+                consola.debug("Imported file:", receivedFile.name);
                 resolve({
                   status: true,
                   message: "Successfuly imported JSON file",
                 });
-              }
+              },
             )
-            .catch((_error) => {
-              consola.error("Error importing backup JSON file");
-              reject({ message: "Error importing backup JSON file" });
+            .catch((error) => {
+              consola.error("Error importing JSON file:", error);
+              reject({ message: "Error importing JSON file" });
             });
         } else if (_.isEqual(type, "text/csv")) {
           // CSV format
-          consola.start("Importing CSV file:", files.file.name);
+          consola.debug("Importing CSV file:", files.file.name);
           const csvData = XLSX.read(receivedFileData, { cellDates: true });
           if (csvData.SheetNames.length > 0) {
             const primarySheet = csvData.Sheets[csvData.SheetNames[0]];
             const parsedSheet = XLSX.utils.sheet_to_json(primarySheet, {
               defval: "",
             });
-            consola.success("Parsed CSV file:", files.file.name);
+            consola.debug("Parsed CSV file:", files.file.name);
             resolve({
               status: true,
               message: "Parsed CSV file successfully",
               data: parsedSheet,
             });
           } else {
+            consola.warn("No data contained in CSV file");
             reject({ message: "No sheets in spreadsheet" });
           }
         }
@@ -333,11 +343,17 @@ export class System {
     });
   };
 
+  /**
+   * Asynchronously maps spreadsheet data to Entities based on specified Entity fields.
+   * @param {EntityImport} entityFields The import configuration specifying Entity fields.
+   * @param {any[]} spreadsheetData An array of data rows from a spreadsheet to map to Entities.
+   * @returns {Promise<EntityModel[]>} Resolves with an array of created Entity models.
+   * @throws {Error} Throws an error if there are issues during the mapping or creation process.
+   */
   static mapData = (
     entityFields: EntityImport,
-    spreadsheetData: any[]
+    spreadsheetData: any[],
   ): Promise<EntityModel[]> => {
-    consola.start("Mapping data to Entities:", entityFields, spreadsheetData);
     return new Promise((resolve, reject) => {
       // Extract Entities
       const entities = [] as IEntity[];
@@ -383,9 +399,7 @@ export class System {
           description: row[entityFields.description],
           projects: [],
           associations: {
-            // origins: row?.Origins ? [{ name: row.Origins }] : null as any,
             origins: [], // Clear Origins list
-            // products: row?.Products ? [{ name: row.Products }] : null as any,
             products: [], // Clear Products list
           },
           attributes: attributes,
@@ -398,7 +412,7 @@ export class System {
         entities.map((entity) => {
           // Create all Entities
           return Entities.create(entity);
-        })
+        }),
       )
         .then((entities: EntityModel[]) => {
           // Additional operations
@@ -409,14 +423,14 @@ export class System {
             operations.push(
               Projects.addEntities(
                 entityFields.projects,
-                entities.map((entity) => entity._id)
-              )
+                entities.map((entity) => entity._id),
+              ),
             );
 
             // Add Project to each Entity
             entities.map((entity) => {
               operations.push(
-                Entities.addProject(entity._id, entityFields.projects)
+                Entities.addProject(entity._id, entityFields.projects),
               );
             });
           }
@@ -435,7 +449,7 @@ export class System {
             // Add all Origins to each Product
             minimalEntities.map((entity) => {
               operations.push(
-                Entities.addOrigins(entity, entityFields.origins)
+                Entities.addOrigins(entity, entityFields.origins),
               );
             });
           }
@@ -446,13 +460,13 @@ export class System {
             entityFields.products.map(
               (product: { id: string; name: string }) => {
                 operations.push(Entities.addOrigins(product, minimalEntities));
-              }
+              },
             );
 
             // Add all Products to each Origin
             minimalEntities.map((entity) => {
               operations.push(
-                Entities.addProducts(entity, entityFields.products)
+                Entities.addProducts(entity, entityFields.products),
               );
             });
           }
@@ -461,23 +475,34 @@ export class System {
             resolve(entities);
           });
         })
-        .catch((reason) => {
-          reject(reason);
+        .catch((error) => {
+          consola.error("Error while mapping imported data:", error);
+          reject(error);
         });
     });
   };
 
+  /**
+   * Wrapper function to add an attachment to an Entity
+   * @param files Attachment data
+   * @param target Target Entity to add attachment
+   * @returns {Promise<{ status: boolean; message: string; data?: any }>}
+   */
   static upload = (
     files: any,
-    target: string
+    target: string,
   ): Promise<{ status: boolean; message: string; data?: any }> => {
     return Entities.upload(files, target);
   };
 
+  /**
+   * Download a file stored in MongoDB
+   * @param id Identifier of file to download
+   * @returns {Promise<{ status: boolean; stream: GridFSBucketReadStream }>}
+   */
   static download = (
-    id: string
+    id: string,
   ): Promise<{ status: boolean; stream: GridFSBucketReadStream }> => {
-    consola.start("Retrieving file (id):", id.toString());
     return new Promise((resolve, _reject) => {
       // Access bucket and create open stream to write to storage
       const bucket = getAttachments();
@@ -485,15 +510,19 @@ export class System {
       // Create stream from buffer
       const downloadStream = bucket.openDownloadStream(new ObjectId(id));
 
-      consola.success("Retrieved file (id):", id.toString());
+      consola.debug("Retrieved file:", id.toString());
       resolve({ status: true, stream: downloadStream });
     });
   };
 
+  /**
+   * Retrieve information about a specific file stored in MongoDB
+   * @param id File identifier
+   * @returns {Promise<{ status: boolean; data: any[] }>}
+   */
   static getFileInformation = (
-    id: string
+    id: string,
   ): Promise<{ status: boolean; data: any[] }> => {
-    consola.start("Retrieving file information (id):", id.toString());
     return new Promise((resolve, _reject) => {
       // Access bucket and create open stream to write to storage
       const bucket = getAttachments();
@@ -502,42 +531,51 @@ export class System {
       const result: FindCursor = bucket.find({ _id: new ObjectId(id) });
 
       result.toArray().then((file) => {
-        consola.success("Retrieved file information (id):", id.toString());
+        consola.debug("Retrieved information for file:", id.toString());
         resolve({ status: true, data: file });
       });
     });
   };
 
+  /**
+   * Retrieve information about a device associated with the system
+   * @param id Target device identifier
+   * @returns {Promise<DeviceModel>}
+   */
   static getDevice = (id: string): Promise<DeviceModel> => {
-    consola.start("Retrieving Device (id):", id.toString());
     return new Promise((resolve, reject) => {
       getSystem()
         .collection(DEVICES)
         .findOne({ _id: id }, (error: any, result: any) => {
           if (error) {
+            consola.error("Error while retrieving device:", error);
             reject(error);
             throw error;
           }
 
-          consola.success("Retrieved Device (id):", id.toString());
+          consola.debug("Retrieved device:", id.toString());
           resolve(result as DeviceModel);
         });
     });
   };
 
+  /**
+   * Retrieve a collection of all devices associated with the system
+   * @returns {Promise<DeviceModel[]>}
+   */
   static getDevices = (): Promise<DeviceModel[]> => {
-    consola.start("Retrieving Devices");
     return new Promise((resolve, reject) => {
       getSystem()
         .collection(DEVICES)
         .find({})
         .toArray((error: any, result: any) => {
           if (error) {
+            consola.error("Error while retrieving devices:", error);
             reject(error);
             throw error;
           }
 
-          consola.success("Retrieved", result.length, "Devices");
+          consola.debug("Retrieved", result.length, "devices");
           resolve(result as DeviceModel[]);
         });
     });
