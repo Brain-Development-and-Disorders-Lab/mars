@@ -8,7 +8,7 @@ import { nanoid } from "nanoid";
 const CONNECTION_STRING = process.env.CONNECTION_STRING as string;
 if (_.isUndefined(CONNECTION_STRING)) {
   consola.error(
-    "Connection string is not defined, see README.md for instructions to specify environment variables prior to starting server"
+    "Connection string is not defined, see README.md for instructions to specify environment variables prior to starting server",
   );
   throw new Error("Connection string is not defined");
 }
@@ -18,25 +18,21 @@ const client: MongoClient = new MongoClient(CONNECTION_STRING, {});
 let database: Db;
 let storage: Db;
 let system: Db;
-
 let attachments: GridFSBucket;
 
 /**
  * Connect to the primary database storing metadata
+ * @returns {Promise<Db>}
  */
 export const connectPrimary = (): Promise<Db> => {
   return new Promise((resolve, _reject) => {
     client.connect().then((result) => {
       database = result.db("metadata");
-      consola.success("Connected to metadata database");
-
+      consola.success("Connected to database:", "metadata");
       storage = result.db("storage");
-      consola.success("Connected to storage database");
-
-      consola.start('Accessing "attachments" storage bucket');
+      consola.success("Connected to database:", "storage");
       attachments = new GridFSBucket(storage, { bucketName: "attachments" });
-      consola.success('Created "attachments" storage bucket');
-
+      consola.success("Connected to database:", "attachments");
       resolve(database);
     });
   });
@@ -44,12 +40,13 @@ export const connectPrimary = (): Promise<Db> => {
 
 /**
  * Connect to the system database storing system data
+ * @returns {Promise<Db>}
  */
 export const connectSystem = (): Promise<Db> => {
   return new Promise((resolve, _reject) => {
     client.connect().then((result) => {
       system = result.db("system");
-      consola.success("Connected to MongoDB system database");
+      consola.success("Connected to database:", "system");
       resolve(system);
     });
   });
@@ -57,6 +54,7 @@ export const connectSystem = (): Promise<Db> => {
 
 /**
  * Disconnect from MongoDB instance
+ * @returns {Promise<void>}
  */
 export const disconnect = (): Promise<void> => {
   return client.close();
@@ -64,7 +62,7 @@ export const disconnect = (): Promise<void> => {
 
 /**
  * Get the MongoDB primary database object
- * @return {Db}
+ * @returns {Db}
  */
 export const getDatabase = (): Db => {
   return database;
@@ -72,7 +70,7 @@ export const getDatabase = (): Db => {
 
 /**
  * Get the MongoDB system database object
- * @return {Db}
+ * @returns {Db}
  */
 export const getSystem = (): Db => {
   return system;
@@ -80,7 +78,7 @@ export const getSystem = (): Db => {
 
 /**
  * Get the MongoDB database for storage
- * @return {Db}
+ * @returns {Db}
  */
 export const getStorage = (): Db => {
   return storage;
@@ -88,7 +86,7 @@ export const getStorage = (): Db => {
 
 /**
  * Get the MongoDB storage buckets for attachments
- * @return {GridFSBucket}
+ * @returns {GridFSBucket}
  */
 export const getAttachments = (): GridFSBucket => {
   return attachments;
@@ -99,10 +97,10 @@ export const getAttachments = (): GridFSBucket => {
  * new items for storage in the MongoDB database, in place of default
  * identifier
  * @param type identifier to be assigned an Entity, Attribute, or Project
- * @return {string}
+ * @returns {string}
  */
 export const getIdentifier = (
-  type: "entity" | "attribute" | "project"
+  type: "entity" | "attribute" | "project",
 ): string => {
   return `${type.slice(0, 1)}${nanoid(7)}`;
 };
