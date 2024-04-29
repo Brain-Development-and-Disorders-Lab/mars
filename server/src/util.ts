@@ -8,7 +8,7 @@ import { Authentication } from "./operations/Authentication";
 /**
  * Get data from an API using the JavaScript `fetch` function
  * @param {string} url exact URL to GET data from
- * @return {Promise<any>} an object containing the resource response
+ * @returns {Promise<any>} an object containing the resource response
  */
 export const getData = (
   url: string,
@@ -23,7 +23,6 @@ export const getData = (
           consola.error("GET:", url);
           reject("Invalid response from resource");
         }
-
         // Resolve with the response data
         resolve(response.data);
       })
@@ -38,7 +37,7 @@ export const getData = (
  * Post data from an API using the JavaScript `fetch` function
  * @param {string} url exact URL to POST data to
  * @param {any} data the data to include in the request body
- * @return {Promise<any>} an object containing the resource response
+ * @returns {Promise<any>} an object containing the resource response
  */
 export const postData = async (
   url: string,
@@ -69,6 +68,12 @@ export const postData = async (
   });
 };
 
+/**
+ * Perform authentication operation. Authentication can only be bypassed in development mode.
+ * @param {any} request Request for authentication
+ * @param {any} response Response object
+ * @param {function(): void} next Function to execute upon valid authentication
+ */
 export const authenticate = (request: any, response: any, next: () => void) => {
   // Bypass authentication in development mode
   if (_.isEqual(process.env.NODE_ENV, "development")) {

@@ -9,7 +9,7 @@ import cors from "cors";
 import helmet from "helmet";
 import consola, { LogLevels } from "consola";
 
-import 'source-map-support/register';
+import "source-map-support/register";
 
 const fileUpload = require("express-fileupload");
 
@@ -27,11 +27,13 @@ import AuthenticationRoute from "./routes/Authentication";
 import UsersRoute from "./routes/Users";
 
 // Set logging level
-consola.level = (_.isEqual(process.env.NODE_ENV, "development") || _.isEqual(process.env.NODE_ENV, "test"))
-  ? LogLevels.verbose
-  : LogLevels.error;
+consola.level =
+  _.isEqual(process.env.NODE_ENV, "development") ||
+  _.isEqual(process.env.NODE_ENV, "test")
+    ? LogLevels.trace
+    : LogLevels.info;
 
-consola.info(`Starting server in ${process.env.NODE_ENV} mode`);
+consola.info(`Running server in ${process.env.NODE_ENV} mode`);
 
 export const app = express();
 const port = process.env.PORT || 8000;
@@ -41,7 +43,7 @@ app.use(helmet());
 app.use(cors({ credentials: true, origin: true }));
 app.use(express.json({ limit: "50mb" }));
 app.use(fileUpload());
- 
+
 // Use routes
 app.use(ProjectsRoute); // ProjectsRoute now has authMiddleware applied to it
 app.use(ActivityRoute);
@@ -61,7 +63,7 @@ wrapper.listen(port, () => {
   connectPrimary().then(() => {
     // Connect to the system database
     connectSystem().then(() => {
-      consola.info(`Server is running on port: ${port}`);
+      consola.success(`Server is running on port: ${port}`);
     });
   });
 });
