@@ -19,11 +19,10 @@ const PROJECTS = "projects";
 export class Projects {
   /**
    * Check if a Project exists in the system
-   * @param id the Project identifier
-   * @return {boolean}
+   * @param {string} id the Project identifier
+   * @returns {boolean}
    */
   static exists = (id: string): Promise<boolean> => {
-    consola.start("Checking if Project (id):", id.toString(), "exists");
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(PROJECTS)
@@ -33,7 +32,7 @@ export class Projects {
             resolve(false);
           }
 
-          consola.success("Project (id):", id.toString(), "exists");
+          consola.debug("Project (id):", id.toString(), "exists");
           resolve(true);
         });
     });
@@ -42,11 +41,9 @@ export class Projects {
   /**
    * Create a new Project
    * @param {any} project all data associated with the new Project
-   * @return {Promise<ProjectModel>}
+   * @returns {Promise<ProjectModel>}
    */
   static create = (project: any): Promise<ProjectModel> => {
-    consola.start("Creating new Project:", project.name);
-
     // Allocate a new identifier and join with Project data
     project["_id"] = getIdentifier("project");
 
@@ -56,6 +53,7 @@ export class Projects {
         .collection(PROJECTS)
         .insertOne(project, (error: any, result: any) => {
           if (error) {
+            consola.error("Error creating Project:", error);
             throw error;
           }
 
@@ -78,25 +76,34 @@ export class Projects {
                 id: project._id,
                 name: project.name,
               },
-            })
+            }),
           );
 
           // Resolve all operations then resolve overall Promise
           Promise.all(operations).then((_result) => {
-            consola.success("Created new Project:", project._id, project.name);
+            consola.debug("Created new Project:", project._id, project.name);
             resolve(project as ProjectModel);
           });
         });
     });
   };
 
+  /**
+   * Asynchronously updates a Project with new information.
+   * @param {ProjectModel} updatedProject The updated Project model containing the changes.
+   * @returns {Promise<ProjectModel>} Resolves with the updated Project model.
+   * @throws {Error} Throws an error if there are issues with the database operation or update process.
+   */
   static update = (updatedProject: ProjectModel): Promise<ProjectModel> => {
-    consola.start("Updating Project:", updatedProject.name);
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(PROJECTS)
         .findOne({ _id: updatedProject._id }, (error: any, result: any) => {
           if (error) {
+            consola.error(
+              `Error while finding Project "${updatedProject.name}"`,
+              error,
+            );
             throw error;
           }
 
@@ -108,16 +115,16 @@ export class Projects {
 
           // Entities
           const entitiesToKeep = currentProject.entities.filter((entity) =>
-            updatedProject.entities.includes(entity)
+            updatedProject.entities.includes(entity),
           );
           const entitiesToAdd = updatedProject.entities.filter(
-            (entity) => !currentProject.entities.includes(entity)
+            (entity) => !currentProject.entities.includes(entity),
           );
           entitiesToAdd.map((entity: string) => {
             operations.push(Entities.addProject(entity, currentProject._id));
           });
           const entitiesToRemove = currentProject.entities.filter(
-            (entity) => !entitiesToKeep.includes(entity)
+            (entity) => !entitiesToKeep.includes(entity),
           );
           entitiesToRemove.map((entity: string) => {
             operations.push(Entities.removeProject(entity, currentProject._id));
@@ -154,7 +161,7 @@ export class Projects {
                 id: updatedProject._id,
                 name: updatedProject.name,
               },
-            })
+            }),
           );
 
           getDatabase()
@@ -164,17 +171,21 @@ export class Projects {
               updates,
               (error: any, _response: any) => {
                 if (error) {
+                  consola.error(
+                    `Error while updating Project "${updatedProject.name}"`,
+                    error,
+                  );
                   throw error;
                 }
 
                 // Resolve all operations then resolve overall Promise
                 Promise.all(operations).then((_result) => {
-                  consola.success("Updated Project:", updatedProject.name);
+                  consola.debug("Updated Project:", updatedProject.name);
 
                   // Resolve the Promise
                   resolve(updatedProject);
                 });
-              }
+              },
             );
         });
     });
@@ -182,17 +193,17 @@ export class Projects {
 
   /**
    * Create a new Project
-   * @param {any} project all data associated with the new Project
-   * @return {Promise<ProjectModel>}
+   * @param {any} project Data associated with the new Project
+   * @returns {Promise<ProjectModel>}
    */
   static restore = (project: any): Promise<ProjectModel> => {
-    consola.start("Restoring Project:", project.name);
     // Push data to database
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(PROJECTS)
         .insertOne(project, (error: any, _result: any) => {
           if (error) {
+            consola.error("Error while restoring Project:", error);
             throw error;
           }
 
@@ -210,39 +221,31 @@ export class Projects {
                 id: project._id,
                 name: project.name,
               },
-            })
+            }),
           );
 
           // Resolve all operations then resolve overall Promise
           Promise.all(operations).then((_result) => {
-            consola.success("Restored Project:", project._id, project.name);
+            consola.debug("Restored Project:", project._id, project.name);
             resolve(project as ProjectModel);
           });
         });
     });
   };
 
+  /**
+   * Add an Entity to a Project
+   * @param {string} project Target Project identifier
+   * @param {string} entity Entity identifier to add to target Project
+   * @returns {Promise<string>}
+   */
   static addEntity = (project: string, entity: string): Promise<string> => {
-    if (!entity) {
-      consola.warn("No Entity provided to add to Project");
-      return Promise.resolve(project);
-    }
-    if (!project) {
-      consola.warn("No Entity provided to add to Project");
-      return Promise.resolve("");
-    }
-    consola.start(
-      "Adding Entity",
-      entity.toString(),
-      "to Project",
-      project.toString()
-    );
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(PROJECTS)
         .findOne({ _id: project }, (error: any, result: any) => {
           if (error) {
-            console.log("project findOne error:", error);
+            consola.error("Error while finding Project:", error);
             throw error;
           }
           // Update the collection to include the Entity
@@ -259,39 +262,43 @@ export class Projects {
               updatedValues,
               (error: any, _response: any) => {
                 if (error) {
-                  console.log("project updateOne error:", error);
+                  consola.error(
+                    "Error while updating Project Entities:",
+                    error,
+                  );
                   throw error;
                 }
-                consola.success(
+                consola.debug(
                   "Added Entity",
                   entity.toString(),
                   "to Project",
-                  result.name
+                  result.name,
                 );
 
                 // Resolve the Promise
                 resolve(result._id);
-              }
+              },
             );
         });
     });
   };
 
+  /**
+   * Add multiple Entities to a Project
+   * @param project Target Project identifier
+   * @param entities List of Entity identifiers to add to the Project
+   * @returns {Promise<string>}
+   */
   static addEntities = (
     project: string,
-    entities: string[]
+    entities: string[],
   ): Promise<string> => {
-    consola.start(
-      "Adding",
-      entities.length,
-      "Entities to Project",
-      project.toString()
-    );
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(PROJECTS)
         .findOne({ _id: project }, (error: any, result: any) => {
           if (error) {
+            consola.error("Error while finding Project:", error);
             throw error;
           }
 
@@ -309,35 +316,40 @@ export class Projects {
               updatedValues,
               (error: any, _response: any) => {
                 if (error) {
+                  consola.error(
+                    "Error while adding multiple Entites to Project:",
+                    error,
+                  );
                   throw error;
                 }
-                consola.start(
+                consola.debug(
                   "Added",
                   entities.length,
                   "Entities to Project",
-                  project.toString()
+                  project.toString(),
                 );
 
                 // Resolve the Promise
                 resolve(result._id);
-              }
+              },
             );
         });
     });
   };
 
+  /**
+   * Remove an Entity from a Project
+   * @param project Target Project identifier
+   * @param entity Entity identifier to remove from Project
+   * @returns {Promise<string>}
+   */
   static removeEntity = (project: string, entity: string): Promise<string> => {
-    consola.start(
-      "Removing Entity",
-      entity.toString(),
-      "from Project",
-      project.toString()
-    );
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(PROJECTS)
         .findOne({ _id: project }, (error: any, result: any) => {
           if (error) {
+            consola.error("Error while finding Project:", error);
             throw error;
           }
 
@@ -345,7 +357,7 @@ export class Projects {
           const updatedValues = {
             $set: {
               entities: (result as ProjectModel)?.entities.filter(
-                (content) => !_.isEqual(content.toString(), entity.toString())
+                (content) => !_.isEqual(content.toString(), entity.toString()),
               ),
             },
           };
@@ -357,23 +369,31 @@ export class Projects {
               updatedValues,
               (error: any, _response: any) => {
                 if (error) {
+                  consola.error(
+                    "Error while removing Entity from Project:",
+                    error,
+                  );
                   throw error;
                 }
-                consola.success(
+                consola.debug(
                   "Removed Entity",
                   entity.toString(),
                   "from Project",
-                  project.toString()
+                  project.toString(),
                 );
 
                 // Resolve the Promise
                 resolve(project);
-              }
+              },
             );
         });
     });
   };
 
+  /**
+   * Retrieve a collection of all Projects
+   * @returns {Promise<ProjectModel>}
+   */
   static getAll = (): Promise<ProjectModel[]> => {
     return new Promise((resolve, _reject) => {
       getDatabase()
@@ -381,9 +401,10 @@ export class Projects {
         .find({})
         .toArray((error: any, result: any) => {
           if (error) {
+            consola.error("Error retrieving all Projects:", error);
             throw error;
           }
-          consola.success("Retrieved all Projects");
+          consola.debug("Retrieved all Projects");
           resolve(result as ProjectModel[]);
         });
     });
@@ -391,7 +412,8 @@ export class Projects {
 
   /**
    * Get a single Project
-   * @return {Promise<ProjectModel>}
+   * @param {string} id Target Project identifier
+   * @returns {Promise<ProjectModel>}
    */
   static getOne = async (id: string): Promise<ProjectModel> => {
     try {
@@ -405,14 +427,16 @@ export class Projects {
         .findOne({ _id: id });
 
       if (!project) {
+        consola.error("Project not found");
         throw new Error("Project not found");
       }
 
       project.entities = filteredEntities;
 
-      consola.success("Retrieved Project (id):", id.toString());
+      consola.debug("Retrieved Project (id):", id.toString());
       return project as unknown as ProjectModel;
     } catch (error) {
+      consola.error("Error while retrieving Project:", error);
       throw error;
     }
   };
@@ -421,22 +445,19 @@ export class Projects {
    * Collate and generate a data string containing all data pertaining to
    * a Project
    * @param {{ id: string, fields: string[] }} projectExportData the export data of the Project
-   * @return {Promise<string>}
+   * @returns {Promise<string>}
    */
   static getData = (projectExportData: {
     id: string;
     fields: string[];
     format: "json" | "csv" | "txt";
   }): Promise<string> => {
-    consola.start(
-      "Generating data for Project (id):",
-      projectExportData.id.toString()
-    );
     return new Promise((resolve, reject) => {
       getDatabase()
         .collection(PROJECTS)
         .findOne({ _id: projectExportData.id }, (error: any, result: any) => {
           if (error) {
+            consola.error("Error while finding Project for export:", error);
             reject(error);
             throw error;
           }
@@ -460,8 +481,8 @@ export class Projects {
                 headers.push("Created");
                 row.push(
                   Promise.resolve(
-                    dayjs(project.created).format("DD MMM YYYY").toString()
-                  )
+                    dayjs(project.created).format("DD MMM YYYY").toString(),
+                  ),
                 );
               } else if (_.isEqual(field, "owner")) {
                 // "owner" data field
@@ -476,14 +497,14 @@ export class Projects {
                 projects.push(
                   Projects.getOne(field.slice(8)).then((project) => {
                     return project.name;
-                  })
+                  }),
                 );
               } else if (_.startsWith(field, "entity_")) {
                 // "entity" data fields
                 entities.push(
                   Entities.getOne(field.slice(7)).then((entity) => {
                     return entity?.name ?? "";
-                  })
+                  }),
                 );
               }
             });
@@ -515,14 +536,14 @@ export class Projects {
                     }
 
                     fs.writeFileSync(path, formattedOutput);
-                    consola.success(
+                    consola.debug(
                       "Generated CSV data for  Project (id):",
-                      projectExportData.id.toString()
+                      projectExportData.id.toString(),
                     );
                     resolve(path);
                   });
                 });
-              }
+              },
             );
           } else if (_.isEqual(projectExportData.format, "json")) {
             // JSON export
@@ -556,7 +577,7 @@ export class Projects {
                   Projects.getOne(field.slice(8)).then((project) => {
                     tempStructure["projects"].push(project.name);
                     return project.name;
-                  })
+                  }),
                 );
               } else if (_.startsWith(field, "entity_")) {
                 // "entity" data fields
@@ -564,7 +585,7 @@ export class Projects {
                   Entities.getOne(field.slice(7)).then((entity) => {
                     tempStructure["entities"].push(entity.name);
                     return entity.name;
-                  })
+                  }),
                 );
               }
             });
@@ -574,17 +595,21 @@ export class Projects {
               // Create a temporary file, passing the filename as a response
               tmp.file((error, path: string, _fd: number) => {
                 if (error) {
+                  consola.error(
+                    "Error while generating temporary file for Project export:",
+                    error,
+                  );
                   reject(error);
                   throw error;
                 }
 
                 fs.writeFileSync(
                   path,
-                  JSON.stringify(tempStructure, null, "  ")
+                  JSON.stringify(tempStructure, null, "  "),
                 );
-                consola.success(
+                consola.debug(
                   "Generated JSON data for Project (id):",
-                  projectExportData.id.toString()
+                  projectExportData.id.toString(),
                 );
                 resolve(path);
               });
@@ -604,7 +629,7 @@ export class Projects {
                 textDetails.push(
                   `Created: ${dayjs(project.created)
                     .format("DD MMM YYYY")
-                    .toString()}`
+                    .toString()}`,
                 );
               } else if (_.isEqual(field, "owner")) {
                 // "owner" data field
@@ -618,7 +643,7 @@ export class Projects {
                   Projects.getOne(field.slice(8)).then((project) => {
                     textProjects.push(project.name);
                     return project.name;
-                  })
+                  }),
                 );
               } else if (_.startsWith(field, "entity_")) {
                 // "entity" data fields
@@ -626,7 +651,7 @@ export class Projects {
                   Entities.getOne(field.slice(7)).then((entity) => {
                     textEntities.push(entity.name);
                     return entity.name;
-                  })
+                  }),
                 );
               }
             });
@@ -636,6 +661,10 @@ export class Projects {
               // Create a temporary file, passing the filename as a response
               tmp.file((error, path: string, _fd: number) => {
                 if (error) {
+                  consola.error(
+                    "Error while generating file for Project export:",
+                    error,
+                  );
                   reject(error);
                   throw error;
                 }
@@ -648,9 +677,9 @@ export class Projects {
                 }
 
                 fs.writeFileSync(path, textDetails.join("\n"));
-                consola.success(
+                consola.debug(
                   "Generated text data for  Entity (id):",
-                  projectExportData.id.toString()
+                  projectExportData.id.toString(),
                 );
                 resolve(path);
               });
@@ -660,13 +689,18 @@ export class Projects {
     });
   };
 
+  /**
+   * Delete a Project, also removing Entities from Project
+   * @param id Target Project identifier
+   * @returns {Promise<ProjectModel>}
+   */
   static delete = (id: string): Promise<ProjectModel> => {
-    consola.start("Deleting Project (id):", id.toString());
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(PROJECTS)
         .findOne({ _id: id }, (error: any, result: any) => {
           if (error) {
+            consola.error("Error while finding Project for deletion:", error);
             throw error;
           }
           // Store the Project data
@@ -690,7 +724,7 @@ export class Projects {
                 id: project._id,
                 name: project.name,
               },
-            })
+            }),
           );
 
           // Resolve all operations then resolve overall Promise
@@ -700,10 +734,11 @@ export class Projects {
               .collection(PROJECTS)
               .deleteOne({ _id: id }, (error: any, _content: any) => {
                 if (error) {
+                  consola.error("Error while deleting Project:", error);
                   throw error;
                 }
 
-                consola.success("Deleted Project (id):", id.toString());
+                consola.debug("Deleted Project (id):", id.toString());
                 resolve(result);
               });
           });
