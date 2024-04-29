@@ -194,7 +194,7 @@ export class Authentication {
   /**
    * Validate the ORCiD login submitted by the user
    * @param {string} code authentication code provided by ORCiD
-   * @return {Promise<AuthInfo>}
+   * @returns {Promise<AuthInfo>}
    */
   static login = (code: string): Promise<AuthInfo> => {
     // Retrieve a token
@@ -257,7 +257,7 @@ export class Authentication {
   /**
    * Validate a login token
    * @param id_token ID token contents
-   * @return {Promise<boolean>}
+   * @returns {Promise<boolean>}
    */
   static validate = (id_token: string): Promise<boolean> => {
     return new Promise((resolve, reject) => {

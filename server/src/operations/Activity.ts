@@ -11,7 +11,7 @@ export class Activity {
   /**
    * Create a new Update to record in the database
    * @param {IActivity} activity data related to the Update
-   * @return {Promise<IActivity>}
+   * @returns {Promise<IActivity>}
    */
   static create = (activity: IActivity): Promise<IActivity> => {
     return new Promise((resolve, _reject) => {
@@ -30,7 +30,7 @@ export class Activity {
 
   /**
    * Retrieve all Activity
-   * @return {Promise<ActivityModel[]>}
+   * @returns {Promise<ActivityModel[]>}
    */
   static getAll = (): Promise<ActivityModel[]> => {
     return new Promise((resolve, _reject) => {

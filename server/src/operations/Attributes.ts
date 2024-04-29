@@ -16,7 +16,7 @@ export class Attributes {
   /**
    * Check if an Attribute exists in the system
    * @param {string} id the Attribute identifier
-   * @return {Promise<Boolean>}
+   * @returns {Promise<Boolean>}
    */
   static exists = (id: string): Promise<boolean> => {
     return new Promise((resolve, _reject) => {
@@ -37,7 +37,7 @@ export class Attributes {
   /**
    * Create a new Attribute
    * @param {any} attribute all data associated with the new Attribute
-   * @return {Promise<AttributeModel>}
+   * @returns {Promise<AttributeModel>}
    */
   static create = (attribute: any): Promise<AttributeModel> => {
     return new Promise((resolve, _reject) => {
@@ -82,7 +82,7 @@ export class Attributes {
   /**
    * Update an existing Attribute
    * @param {AttributeModel} updatedAttribute Object containing updated data for Attribute
-   * @return {Promise<AttributeModel>}
+   * @returns {Promise<AttributeModel>}
    */
   static update = (
     updatedAttribute: AttributeModel,
@@ -156,7 +156,7 @@ export class Attributes {
   /**
    * Restore an Attribute that previously existed
    * @param {any} attribute Object containing data for the restored Attribute
-   * @return {Promise<AttributeModel>}
+   * @returns {Promise<AttributeModel>}
    */
   static restore = (attribute: any): Promise<AttributeModel> => {
     return new Promise((resolve, _reject) => {
@@ -198,7 +198,7 @@ export class Attributes {
   /**
    * Get a single Attribute
    * @param {string} id Attribute identifier
-   * @return {Promise<AttributeModel>}
+   * @returns {Promise<AttributeModel>}
    */
   static getOne = (id: string): Promise<AttributeModel> => {
     return new Promise((resolve, _reject) => {
@@ -218,7 +218,7 @@ export class Attributes {
 
   /**
    * Get the collection of all Attributes
-   * @return {Promise<AttributeModel[]>}
+   * @returns {Promise<AttributeModel[]>}
    */
   static getAll = (): Promise<AttributeModel[]> => {
     return new Promise((resolve, _reject) => {
@@ -239,7 +239,7 @@ export class Attributes {
   /**
    * Delete an Attribute from the system
    * @param id Attribute identifier to delete
-   * @return {Promise<AttributeModel>}
+   * @returns {Promise<AttributeModel>}
    */
   static delete = (id: string): Promise<AttributeModel> => {
     return new Promise((resolve, _reject) => {
