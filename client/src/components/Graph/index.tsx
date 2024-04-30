@@ -60,7 +60,7 @@ const Graph = (props: {
    * Utility function to determine membership of a Node
    * in the graph
    * @param {string} id Node ID
-   * @return {boolean}
+   * @returns {boolean}
    */
   const containsNode = (id: string): boolean => {
     for (let node of nodes) {
@@ -74,7 +74,7 @@ const Graph = (props: {
   /**
    * Utility function to determine membership of an Edge in the graph
    * @param {string} id Edge ID
-   * @return {boolean}
+   * @returns {boolean}
    */
   const containsEdge = (id: string): boolean => {
     for (let edge of edges) {

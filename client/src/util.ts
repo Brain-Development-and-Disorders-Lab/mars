@@ -1,12 +1,13 @@
-// Utility functions
+// Utility imports
 import _ from "lodash";
+import consola from "consola";
 
 // Custom types
 import { IAttribute, IValue } from "@types";
 
 export const isValidValues = (
   values: IValue<any>[],
-  allowEmptyValues = false
+  allowEmptyValues = false,
 ) => {
   if (values.length === 0) {
     return false;
@@ -49,13 +50,13 @@ export const isValidAttributes = (attributes: IAttribute[]) => {
 /**
  * Retrieve an authentication token from session storage
  * @param {string} tokenKey the key of the token in storage
- * @return {any}
+ * @returns {any}
  */
 export const getToken = (tokenKey: string): any => {
   const storedToken = sessionStorage.getItem(tokenKey);
   if (!_.isNull(storedToken) && !_.isUndefined(storedToken)) {
     if (JSON.parse(storedToken as string).name === "Test User") {
-      console.log("return undefined token");
+      consola.debug("Returning token as undefined");
       return undefined;
     }
     return JSON.parse(storedToken);

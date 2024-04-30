@@ -33,10 +33,11 @@ consola.level =
     ? LogLevels.trace
     : LogLevels.info;
 
-consola.info(`Running server in ${process.env.NODE_ENV} mode`);
+consola.info("Server mode:", process.env.NODE_ENV);
 
 export const app = express();
 const port = process.env.PORT || 8000;
+const endpoint = "/mars";
 
 // Configure Express, enable CORS middleware and routes
 app.use(helmet());
@@ -55,7 +56,7 @@ app.use(SystemRoute);
 app.use(UsersRoute);
 
 const wrapper = express();
-wrapper.use("/mars", app);
+wrapper.use(endpoint, app);
 
 // Start the Express server
 wrapper.listen(port, () => {
@@ -63,7 +64,8 @@ wrapper.listen(port, () => {
   connectPrimary().then(() => {
     // Connect to the system database
     connectSystem().then(() => {
-      consola.success(`Server is running on port: ${port}`);
+      consola.success("Server port:", port);
+      consola.success("Server endpoint:", endpoint);
     });
   });
 });

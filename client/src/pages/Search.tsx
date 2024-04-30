@@ -46,6 +46,7 @@ import {
 // Utility functions and libraries
 import { getData, postData } from "@database/functions";
 import _ from "lodash";
+import consola from "consola";
 import { createColumnHelper } from "@tanstack/react-table";
 
 // Routing and navigation
@@ -73,18 +74,18 @@ const Search = () => {
   const [projects, setProjects] = useState([] as ProjectModel[]);
 
   const [queryComponents, setQueryComponents] = useState(
-    [] as QueryComponent[]
+    [] as QueryComponent[],
   );
   const [queryOperator, setQueryOperator] = useState("AND" as QueryOperator);
   const [queryType, setQueryType] = useState("Entity" as QueryFocusType);
   const [queryParameter, setQueryParameter] = useState(
-    "Name" as QueryParameters
+    "Name" as QueryParameters,
   );
   const [queryQualifier, setQueryQualifier] = useState(
-    "Contains" as QueryQualifier
+    "Contains" as QueryQualifier,
   );
   const [querySubQualifier, setQuerySubQualifier] = useState(
-    "Date" as QuerySubQualifier
+    "Date" as QuerySubQualifier,
   );
   const [queryKey, setQueryKey] = useState("");
   const [queryValue, setQueryValue] = useState("");
@@ -141,7 +142,7 @@ const Search = () => {
     setResults([]);
 
     // Use the new search route for text-based search
-    postData(`/entities/search/`, { query: query}) // Assuming you pass user ID for permissions filtering
+    postData(`/entities/search/`, { query: query }) // Assuming you pass user ID for permissions filtering
       .then((results) => {
         if (results && results.length > 0) {
           // Update state with search results
@@ -159,7 +160,7 @@ const Search = () => {
       })
       .catch((error) => {
         // Handle search error scenario
-        console.error("Search error:", error);
+        consola.error("Error performing search:", error);
         toast({
           title: "Search Error",
           description: "Could not perform search.",
@@ -263,10 +264,10 @@ const Search = () => {
             FileSaver.saveAs(
               new Blob([response]),
               slugify(
-                `export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.csv`
-              )
+                `export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.csv`,
+              ),
             );
-          }
+          },
         );
 
         table.resetRowSelection();
@@ -282,21 +283,21 @@ const Search = () => {
           toExport.push(table.getRow(rowIndex).original._id);
         }
 
-        postData(`/entities/export`, { entities: toExport, format: "json" }).then(
-          (response) => {
-            FileSaver.saveAs(
-              new Blob([response]),
-              slugify(
-                `export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.json`
-              )
-            );
-          }
-        );
+        postData(`/entities/export`, {
+          entities: toExport,
+          format: "json",
+        }).then((response) => {
+          FileSaver.saveAs(
+            new Blob([response]),
+            slugify(
+              `export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.json`,
+            ),
+          );
+        });
 
         table.resetRowSelection();
       },
     },
-
   ];
 
   return (

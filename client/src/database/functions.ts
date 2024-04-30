@@ -12,11 +12,11 @@ import { getToken } from "src/util";
 /**
  * Get data from the Lab API using the JavaScript `fetch` API
  * @param {string} path exact API path to get data from
- * @return {Promise<any>} an object containing information from the database
+ * @returns {Promise<any>} an object containing information from the database
  */
 export const getData = (
   path: string,
-  options?: AxiosRequestConfig
+  options?: AxiosRequestConfig,
 ): Promise<any> => {
   // Configure authorization
   const requestOptions: AxiosRequestConfig = {
@@ -58,7 +58,7 @@ export const getData = (
 export const postData = async (
   path: string,
   data: any,
-  options?: AxiosRequestConfig
+  options?: AxiosRequestConfig,
 ): Promise<any> => {
   // Configure authorization
   const requestOptions: AxiosRequestConfig = {
@@ -102,7 +102,7 @@ export const postData = async (
  */
 export const deleteData = async (
   path: string,
-  options?: AxiosRequestConfig
+  options?: AxiosRequestConfig,
 ): Promise<any> => {
   // Configure authorization
   const requestOptions: AxiosRequestConfig = {
@@ -139,11 +139,11 @@ export const deleteData = async (
  * Check if an Entity, Project, or Attribute still exists in MARS
  * @param {string} id Identifier of the Entity, Project, or Attribute
  * @param {"entities" | "projects" | "attributes"} type Specify whether an Entity, Project, or Attribute is being checked
- * @return {Promise<boolean>}
+ * @returns {Promise<boolean>}
  */
 export const doesExist = async (
   id: string,
-  type: "entities" | "projects" | "attributes"
+  type: "entities" | "projects" | "attributes",
 ): Promise<boolean> => {
   return new Promise((resolve, _reject) => {
     getData(`/${type}/${id}`).then((result) => {
