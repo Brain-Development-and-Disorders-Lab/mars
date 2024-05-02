@@ -13,5 +13,6 @@ export const typedefs = `#graphql
   # Define query types
   type Query {
     users: [User]
+    user(_id: String): User
   }
 `;
