@@ -4,10 +4,11 @@ export const UsersResolvers = {
   Query: {
     // Retrieve all Users
     users: async () => await Users.all(),
+
     // Retrieve one User by _id
-    user: async (_: any, { _id }: any) => {
+    user: async (_parent: any, args: { _id: string }) => {
       const users = await Users.all();
-      return users.find((u) => u._id === _id);
+      return users.find((user) => user._id.toString() === args._id);
     },
   }
 }
