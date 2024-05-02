@@ -23,7 +23,7 @@ import tmp from "tmp";
 import XLSX from "xlsx";
 
 // Database operations
-import { getAttachments, getSystem } from "../database/connection";
+import { getAttachments, getSystem } from "../connectors/database";
 
 // Constants
 const DEVICES = "devices";

@@ -14,7 +14,7 @@ import 'source-map-support/register';
 const fileUpload = require("express-fileupload");
 
 // Get the connection functions
-import { connectPrimary, connectSystem } from "./database/connection";
+import { connectPrimary, connectSystem } from "./connectors/database";
 
 // Routes
 import ActivityRoute from "./routes/Activity";
@@ -25,6 +25,12 @@ import SearchRoute from "./routes/Search";
 import SystemRoute from "./routes/System";
 import AuthenticationRoute from "./routes/Authentication";
 import UsersRoute from "./routes/Users";
+
+// GraphQL
+import { ApolloServer } from "@apollo/server";
+import { typedefs } from "./typedefs";
+import { UsersResolvers } from "./resolvers/Users";
+import { startStandaloneServer } from '@apollo/server/standalone';
 
 // Set logging level
 consola.level = (_.isEqual(process.env.NODE_ENV, "development") || _.isEqual(process.env.NODE_ENV, "test"))
@@ -41,7 +47,7 @@ app.use(helmet());
 app.use(cors({ credentials: true, origin: true }));
 app.use(express.json({ limit: "50mb" }));
 app.use(fileUpload());
- 
+
 // Use routes
 app.use(ProjectsRoute); // ProjectsRoute now has authMiddleware applied to it
 app.use(ActivityRoute);
@@ -65,3 +71,18 @@ wrapper.listen(port, () => {
     });
   });
 });
+
+const startServer = async () => {
+  const server = new ApolloServer({
+    typeDefs: typedefs,
+    resolvers: [UsersResolvers],
+  });
+
+  const { url } = await startStandaloneServer(server, {
+    listen: { port: 4000 },
+  });
+
+  consola.info(`GraphQL server is running at: ${url}`);
+};
+
+startServer();

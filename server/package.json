@@ -18,6 +18,7 @@
     "lint": "prettier --write ."
   },
   "dependencies": {
+    "@apollo/server": "^4.10.4",
     "axios": "^1.6.0",
     "consola": "^3.0.2",
     "cors": "^2.8.5",
@@ -26,6 +27,7 @@
     "esbuild": "^0.17.14",
     "express": "^4.19.2",
     "express-fileupload": "^1.4.0",
+    "graphql": "^16.8.1",
     "helmet": "^7.0.0",
     "jsonwebtoken": "^9.0.1",
     "jwks-rsa": "^3.0.1",

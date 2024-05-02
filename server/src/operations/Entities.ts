@@ -6,10 +6,10 @@ import consola from "consola";
 import {
   getAttachments,
   getDatabase,
-  getIdentifier,
-} from "../database/connection";
+} from "../connectors/database";
 import { Activity } from "./Activity";
 import { Projects } from "./Projects";
+import { getIdentifier } from "src/util";
 
 // File generation
 import fs from "fs";

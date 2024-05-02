@@ -21,7 +21,7 @@ import {
   connectPrimary,
   disconnect,
   getDatabase,
-} from "../src/database/connection";
+} from "../src/connectors/connection";
 
 // Connect to the database before each test
 beforeEach(() => {
@@ -135,7 +135,7 @@ describe("POST /entities/create", () => {
       attachments: [],
       history: [],
     });
-  
+
     // Create the second Entity (Origin) that has the first Entity (Product)
     const originEntity = await Entities.create({
       name: "TestOriginEntity",
@@ -151,22 +151,22 @@ describe("POST /entities/create", () => {
       attachments: [],
       history: [],
     });
-  
+
     // Confirm Origin Entity creation
     expect(originEntity.name).toBe("TestOriginEntity");
     expect(originEntity.associations.products.length).toBe(1);
-  
+
     // Retrieve the Product Entity associated with the Origin Entity
     const retrievedProductEntity = await Entities.getOne(originEntity.associations.products[0].id);
-  
+
     // Check the Product of the Origin
     expect(originEntity.associations.products[0].id).toStrictEqual(productEntity._id);
-  
+
     // Check the Origin of the Product
     expect(retrievedProductEntity.associations.origins.length).toBe(1);
     expect(retrievedProductEntity.associations.origins[0].id).toStrictEqual(originEntity._id);
   });
-  
+
 
   it("should create an association between two Entities when a Product is specified in an Origin", async () => {
     // Create the first Entity (Product)
@@ -184,7 +184,7 @@ describe("POST /entities/create", () => {
       attachments: [],
       history: [],
     });
-  
+
     // Create the second Entity (Origin) that has the first Entity (Product)
     const originEntity = await Entities.create({
       name: "TestOriginEntity",
@@ -200,22 +200,22 @@ describe("POST /entities/create", () => {
       attachments: [],
       history: [],
     });
-  
+
     // Confirm Origin Entity creation
     expect(originEntity.name).toBe("TestOriginEntity");
     expect(originEntity.associations.products.length).toBe(1);
-  
+
     // Retrieve the Product Entity associated with the Origin Entity
     const retrievedProductEntity = await Entities.getOne(originEntity.associations.products[0].id);
-  
+
     // Check the Product of the Origin
     expect(originEntity.associations.products[0].id).toStrictEqual(productEntity._id);
-  
+
     // Check the Origin of the Product
     expect(retrievedProductEntity.associations.origins.length).toBe(1);
     expect(retrievedProductEntity.associations.origins[0].id).toStrictEqual(originEntity._id);
   });
-  
+
   it("should create an Attribute", async () => {
     // Start by creating an Entities
     return Entities.create({
@@ -660,7 +660,7 @@ describe("getDataMultipleRaw", () => {
       attachments: [],
       history: [],
     });
-  
+
     // Create the second Entity (Origin) that has the first Entity (Product)
     const entity2 = await Entities.create({
       name: "TestOriginEntity",

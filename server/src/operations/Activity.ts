@@ -1,5 +1,5 @@
 // Utility functions
-import { getDatabase } from "../database/connection";
+import { getDatabase } from "../connectors/database";
 import consola from "consola";
 
 import { ActivityModel, IActivity } from "@types";
