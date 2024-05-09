@@ -28,10 +28,11 @@ import UsersRoute from "./routes/Users";
 
 // GraphQL
 import { ApolloServer } from "@apollo/server";
-import { typedefs } from "./typedefs";
+import { startStandaloneServer } from '@apollo/server/standalone';
 import { UsersResolvers } from "./resolvers/Users";
 import { ProjectsResolvers } from "./resolvers/Projects";
-import { startStandaloneServer } from '@apollo/server/standalone';
+import { EntitiesResolvers } from "./resolvers/Entities";
+import { typedefs } from "./typedefs";
 
 // Set logging level
 consola.level = (_.isEqual(process.env.NODE_ENV, "development") || _.isEqual(process.env.NODE_ENV, "test"))
@@ -77,7 +78,7 @@ wrapper.listen(port, () => {
 const startServer = async () => {
   const server = new ApolloServer({
     typeDefs: typedefs,
-    resolvers: [UsersResolvers, ProjectsResolvers],
+    resolvers: [UsersResolvers, ProjectsResolvers, EntitiesResolvers],
   });
 
   const { url } = await startStandaloneServer(server, {

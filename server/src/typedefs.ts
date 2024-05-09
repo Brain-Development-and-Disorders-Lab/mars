@@ -55,5 +55,8 @@ export const typedefs = `#graphql
     # Project queries
     projects: [Project]
     project(_id: String): Project
+    # Entity queries
+    entities: [Entity]
+    entity(_id: String): Entity
   }
 `;
