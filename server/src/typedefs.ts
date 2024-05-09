@@ -2,14 +2,14 @@
  * GraphQL type definitions
  */
 export const typedefs = `#graphql
-  # "Item" type containing minimal data shared with many stored records
-  type Item {
+  # "Item" interface containing minimal data shared with many stored records
+  interface Item {
     _id: String
     name: String
   }
 
   # "User" type
-  type User {
+  type User implements Item {
     _id: String
     name: String
     email: String
@@ -17,7 +17,7 @@ export const typedefs = `#graphql
   }
 
   # "Project" type
-  type Project {
+  type Project implements Item {
     _id: String
     name: String
     description: String
@@ -29,7 +29,7 @@ export const typedefs = `#graphql
   }
 
   # "Value" type
-  type Value {
+  type Value implements Item {
     _id: String
     name: String
     type: String
@@ -37,15 +37,21 @@ export const typedefs = `#graphql
   }
 
   # "Attribute" type
-  type Attribute {
+  type Attribute implements Item {
     _id: String
     name: String
     description: String
     values: [Value]
   }
 
+  # Representation of Origins and Products
+  type Associations {
+    origins: [Item]
+    products: [Item]
+  }
+
   # "Entity" type
-  type Entity {
+  type Entity implements Item {
     _id: String
     name: String
     created: String
@@ -58,13 +64,18 @@ export const typedefs = `#graphql
     associations: Associations
     attachments: [Item]
     attributes: [Attribute]
-    # To-Do: History, Attributes
+    history: [EntityHistory]
   }
 
-  # Representation of Origins and Products
-  type Associations {
-    origins: [Item]
-    products: [Item]
+  # "EntityHistory" type storing iterations of an Entity
+  type EntityHistory {
+    timestamp: String
+    deleted: Boolean
+    owner: String
+    description: String
+    projects: [String]
+    associations: Associations
+    attributes: [Attribute]
   }
 
   # Define query types
@@ -72,11 +83,17 @@ export const typedefs = `#graphql
     # User queries
     users: [User]
     user(_id: String): User
+
     # Project queries
     projects(limit: Int): [Project]
     project(_id: String): Project
+
     # Entity queries
     entities(limit: Int): [Entity]
     entity(_id: String): Entity
+
+    # Attribute queries
+    attributes(limit: Int): [Attribute]
+    attribute(_id: String): Attribute
   }
 `;

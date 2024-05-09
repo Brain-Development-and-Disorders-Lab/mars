@@ -282,7 +282,7 @@ const Entity = () => {
     onClose: onPreviewClose,
   } = useDisclosure();
 
-  // Query
+  // Queries
   const GET_ENTITY = gql`
     query GetEntity($_id: String) {
       entity(_id: $_id) {
@@ -316,6 +316,34 @@ const Entity = () => {
           _id
           name
         }
+        history {
+          timestamp
+          deleted
+          owner
+          description
+          projects
+          associations {
+            origins {
+              _id
+              name
+            }
+            products {
+              _id
+              name
+            }
+          }
+          attributes {
+            _id
+            name
+            description
+            values {
+              _id
+              name
+              type
+              data
+            }
+          }
+        }
       }
       entities {
         _id
@@ -324,6 +352,17 @@ const Entity = () => {
       projects {
         _id
         name
+      }
+      attributes {
+        _id
+        name
+        description
+        values {
+          _id
+          name
+          type
+          data
+        }
       }
     }
   `;
@@ -362,22 +401,6 @@ const Entity = () => {
       refetch();
     }
   }, []);
-
-  useEffect(() => {
-    // Get all Attributes
-    getData(`/attributes`)
-      .then((response) => {
-        setAttributes(response);
-      });
-  }, []);
-
-  useEffect(() => {
-    getData(`/entities/${id}`)
-      .then((response) => {
-        // Store all received data and assign to specific fields
-        setEntityAttachments(response.attachments);
-      });
-  }, [toUploadAttachments]);
 
   // Toggle editing status
   const handleEditClick = () => {
@@ -1191,8 +1214,7 @@ const Entity = () => {
     setEntityAttributes([
       ...entityAttributes.map((attribute) => {
         if (_.isEqual(attribute._id, updated._id)) {
-          attribute.description = updated.description;
-          attribute.values = _.cloneDeep(updated.values);
+          return _.cloneDeep(updated);
         }
         return attribute;
       }),
