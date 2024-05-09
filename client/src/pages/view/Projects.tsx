@@ -63,8 +63,9 @@ const Projects = () => {
 
   // Execute GraphQL query both on page load and navigation
   const { loading, error, data, refetch } = useQuery(GET_PROJECTS);
+
+  // Check to see if data currently exists and refetch if so
   useEffect(() => {
-    // Check to see if data currently exists and refetch if so
     if (data && refetch) {
       refetch();
     }

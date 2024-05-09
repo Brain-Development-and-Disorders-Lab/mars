@@ -135,8 +135,8 @@ const Project = () => {
   }, [isLoaded]);
 
   // Queries
-  const GET_PROJECT = gql`
-    query GetProject($_id: String) {
+  const GET_PROJECT_WITH_ENTITIES = gql`
+    query GetProjectWithEntities($_id: String) {
       project(_id: $_id) {
         _id
         name
@@ -144,10 +144,6 @@ const Project = () => {
         owner
         entities
       }
-    }
-  `;
-  const GET_ENTITIES = gql`
-    query GetEntities {
       entities {
         _id
         name
@@ -156,92 +152,57 @@ const Project = () => {
   `;
 
   // Execute GraphQL query both on page load and navigation
-  const {
-    loading: projectLoading,
-    error: projectError,
-    data: projectData,
-    refetch: projectRefetch
-  } = useQuery(GET_PROJECT, {
+  const { loading, error, data, refetch } = useQuery(GET_PROJECT_WITH_ENTITIES, {
     variables: {
       _id: id
     }
   });
-  const {
-    loading: entitiesLoading,
-    error: entitiesError,
-    data: entitiesData,
-    refetch: entitiesRefetch
-  } = useQuery(GET_ENTITIES);
+
+  // Manage data once retrieved
   useEffect(() => {
-    // Manage data once retrieved
-    if (projectData?.project) {
-      setProject(projectData?.project);
-      setProjectDescription(projectData?.project?.description);
-      setProjectEntities(projectData?.project?.entities);
-      setProjectHistory(projectData?.project?.history);
-      setProjectCollaborators(projectData?.project?.collaborators || []);
+    if (data?.project) {
+      setProject(data?.project);
+      setProjectDescription(data?.project?.description);
+      setProjectEntities(data?.project?.entities);
+      setProjectHistory(data?.project?.history);
+      setProjectCollaborators(data?.project?.collaborators || []);
     }
-    if (entitiesData?.entities) {
-      setAllEntities(entitiesData.entities);
+    if (data?.entities) {
+      setAllEntities(data.entities);
     }
-  }, [projectData, entitiesData]);
+  }, [data]);
+
+  // Check to see if data currently exists and refetch if so
   useEffect(() => {
-    // Check to see if data currently exists and refetch if so
-    if (projectData && projectRefetch) {
-      projectRefetch();
-    }
-    if (entitiesData && entitiesData) {
-      entitiesRefetch();
+    if (data && refetch) {
+      refetch();
     }
   }, []);
 
   // Display error messages from GraphQL usage
   useEffect(() => {
-    if (!projectLoading && _.isUndefined(projectData)) {
+    if (!loading && _.isUndefined(data)) {
       // Raised if invalid query
       toast({
         title: "Error",
-        description: "Could not retrieve Project data.",
+        description: "Could not retrieve data.",
         status: "error",
         duration: 4000,
         position: "bottom-right",
         isClosable: true,
       });
-    } else if (projectError) {
+    } else if (error) {
       // Raised GraphQL error
       toast({
         title: "Error",
-        description: projectError.message,
+        description: error.message,
         status: "error",
         duration: 4000,
         position: "bottom-right",
         isClosable: true,
       });
     }
-  }, [projectLoading, projectError]);
-  useEffect(() => {
-    if (!entitiesLoading && _.isUndefined(entitiesData)) {
-      // Raised if invalid query
-      toast({
-        title: "Error",
-        description: "Could not retrieve Entities data.",
-        status: "error",
-        duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
-      });
-    } else if (entitiesError) {
-      // Raised GraphQL error
-      toast({
-        title: "Error",
-        description: entitiesError.message,
-        status: "error",
-        duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
-      });
-    }
-  }, [entitiesLoading, entitiesError]);
+  }, [loading, error]);
 
   /**
    * Callback function to add Entities to a Project
@@ -545,7 +506,7 @@ const Project = () => {
   ];
 
   return (
-    <Content isError={!_.isUndefined(projectError)} isLoaded={!projectLoading}>
+    <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
       <Flex direction={"column"} gap={"4"}>
         <Flex
           gap={"4"}
@@ -859,7 +820,7 @@ const Project = () => {
                       }
                     }}
                   >
-                    {!entitiesLoading &&
+                    {!loading &&
                       allEntities.map((entity) => {
                         return (
                           <option key={entity._id} value={entity._id}>
