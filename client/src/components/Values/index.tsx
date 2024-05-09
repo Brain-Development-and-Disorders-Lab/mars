@@ -144,7 +144,7 @@ const Values = (props: {
             <InputGroup>
               <InputLeftAddon children={valueIcon} bgColor={"white"} />
               <Input
-                id={`i_${original.identifier}_name`}
+                id={`i_${original._id}_name`}
                 value={value}
                 isReadOnly={props.viewOnly}
                 onChange={onChange}
@@ -200,7 +200,7 @@ const Values = (props: {
               case "number": {
                 return (
                   <Input
-                    id={`i_${original.identifier}_data`}
+                    id={`i_${original._id}_data`}
                     type={"number"}
                     value={value}
                     w={"2xs"}
@@ -216,7 +216,7 @@ const Values = (props: {
               case "text": {
                 return (
                   <Input
-                    id={`i_${original.identifier}_data`}
+                    id={`i_${original._id}_data`}
                     value={value}
                     w={"2xs"}
                     isReadOnly={props.viewOnly}
@@ -232,7 +232,7 @@ const Values = (props: {
                 if (_.isEqual(props.viewOnly, false)) {
                   return (
                     <Input
-                      id={`i_${original.identifier}_data`}
+                      id={`i_${original._id}_data`}
                       value={value}
                       w={"2xs"}
                       isReadOnly={props.viewOnly}
@@ -311,7 +311,7 @@ const Values = (props: {
               case "date": {
                 return (
                   <Input
-                    id={`i_${original.identifier}_data`}
+                    id={`i_${original._id}_data`}
                     type={"date"}
                     value={value}
                     w={"2xs"}
@@ -329,7 +329,7 @@ const Values = (props: {
                   return (
                     <Select
                       title="Select Entity"
-                      id={`s_${original.identifier}_data`}
+                      id={`s_${original._id}_data`}
                       value={value}
                       placeholder={"Entity"}
                       w={"2xs"}
@@ -354,7 +354,7 @@ const Values = (props: {
                 return (
                   <Select
                     title="Select Option"
-                    id={`s_${original.identifier}_data`}
+                    id={`s_${original._id}_data`}
                     value={value.selected}
                     w={"2xs"}
                     isDisabled={props.viewOnly}
@@ -381,7 +381,7 @@ const Values = (props: {
             return (
               <Select
                 title="Select Column"
-                id={`s_${original.identifier}_data`}
+                id={`s_${original._id}_data`}
                 value={value}
                 placeholder={"Column"}
                 w={"2xs"}
@@ -416,7 +416,7 @@ const Values = (props: {
     props.setValues([
       ...props.values,
       {
-        identifier: `p_select_${Math.round(performance.now())}`,
+        _id: `p_select_${Math.round(performance.now())}`,
         name: "",
         type: "select",
         data: {
@@ -493,7 +493,7 @@ const Values = (props: {
                       props.setValues([
                         ...props.values,
                         {
-                          identifier: `v_date_${Math.round(performance.now())}`,
+                          _id: `v_date_${Math.round(performance.now())}`,
                           name: "",
                           type: "date",
                           data: dayjs(new Date()).toISOString(),
@@ -516,7 +516,7 @@ const Values = (props: {
                       props.setValues([
                         ...props.values,
                         {
-                          identifier: `v_text_${Math.round(performance.now())}`,
+                          _id: `v_text_${Math.round(performance.now())}`,
                           name: "",
                           type: "text",
                           data: "",
@@ -538,7 +538,7 @@ const Values = (props: {
                       props.setValues([
                         ...props.values,
                         {
-                          identifier: `v_number_${Math.round(
+                          _id: `v_number_${Math.round(
                             performance.now()
                           )}`,
                           name: "",
@@ -562,7 +562,7 @@ const Values = (props: {
                       props.setValues([
                         ...props.values,
                         {
-                          identifier: `v_url_${Math.round(performance.now())}`,
+                          _id: `v_url_${Math.round(performance.now())}`,
                           name: "",
                           type: "url",
                           data: "",
@@ -584,7 +584,7 @@ const Values = (props: {
                       props.setValues([
                         ...props.values,
                         {
-                          identifier: `p_entity_${Math.round(
+                          _id: `p_entity_${Math.round(
                             performance.now()
                           )}`,
                           name: "",

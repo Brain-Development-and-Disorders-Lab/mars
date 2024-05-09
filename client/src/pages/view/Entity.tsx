@@ -71,6 +71,7 @@ import Linky from "@components/Linky";
 import Uploader from "@components/Uploader";
 import Values from "@components/Values";
 import Preview from "@components/Preview";
+import AttributeViewButton from "@components/AttributeViewButton";
 import { createColumnHelper } from "@tanstack/react-table";
 
 // Existing and custom types
@@ -93,9 +94,11 @@ import FileSaver from "file-saver";
 import slugify from "slugify";
 import { nanoid } from "nanoid";
 
+// Apollo client imports
+import { useQuery, gql } from '@apollo/client';
+
 // Routing and navigation
 import { useParams, useNavigate } from "react-router-dom";
-import AttributeViewButton from "@components/AttributeViewButton";
 
 const Entity = () => {
   const { id } = useParams();
@@ -118,7 +121,7 @@ const Entity = () => {
   const [selectedProjects, setSelectedProjects] = useState([] as string[]);
 
   const [allEntities, setAllEntities] = useState(
-    [] as { name: string; id: string }[]
+    [] as { name: string; _id: string }[]
   );
 
   const {
@@ -217,36 +220,12 @@ const Entity = () => {
   }
 
   useEffect(() => {
-    // Get all Attributes
-    getData(`/attributes`)
-      .then((response) => {
-        setAttributes(response);
-      })
-      .catch((_error) => {
-        toast({
-          title: "Error",
-          status: "error",
-          description: "Could not retrieve Attributes data.",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-        setIsError(true);
-      })
-      .finally(() => {
-        setIsLoaded(true);
-      });
-  }, []);
-
-  useEffect(() => {
     setIsAttributeValueError(
       !isValidValues(attributeValues) || attributeValues.length === 0
     );
   }, [attributeValues]);
 
   // Toggles
-  const [isError, setIsError] = useState(false);
-  const [isLoaded, setIsLoaded] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [editing, setEditing] = useState(false);
   const [exportAll, setExportAll] = useState(false);
@@ -256,17 +235,17 @@ const Entity = () => {
   const [entityDescription, setEntityDescription] = useState("");
   const [entityProjects, setEntityProjects] = useState([] as string[]);
   const [entityOrigins, setEntityOrigins] = useState(
-    [] as { name: string; id: string }[]
+    [] as { name: string; _id: string }[]
   );
   const [entityProducts, setEntityProducts] = useState(
-    [] as { name: string; id: string }[]
+    [] as { name: string; _id: string }[]
   );
   const [entityAttributes, setEntityAttributes] = useState(
     [] as AttributeModel[]
   );
   const [entityHistory, setEntityHistory] = useState([] as EntityHistory[]);
   const [entityAttachments, setEntityAttachments] = useState(
-    [] as { name: string; id: string }[]
+    [] as { name: string; _id: string }[]
   );
   const [toUploadAttachments, setToUploadAttachments] = useState(
     [] as string[]
@@ -275,7 +254,6 @@ const Entity = () => {
   const [isDeletePopoverOpen, setIsDeletePopoverOpen] = useState(false);
   const handleDeletePopoverClose = () => setIsDeletePopoverOpen(false);
   const handleDeletePopoverOpen = () => setIsDeletePopoverOpen(true);
-
 
   // Manage the tab index between "Entity Origins" and "Entity Products"
   const [relationsIndex, setRelationsIndex] = useState(0);
@@ -304,100 +282,100 @@ const Entity = () => {
     onClose: onPreviewClose,
   } = useDisclosure();
 
+  // Query
+  const GET_ENTITY = gql`
+    query GetEntity($_id: String) {
+      entity(_id: $_id) {
+        _id
+        name
+        owner
+        description
+        projects
+        associations {
+          origins {
+            _id
+            name
+          }
+          products {
+            _id
+            name
+          }
+        }
+        attributes {
+          _id
+          name
+          description
+          values {
+            _id
+            name
+            type
+            data
+          }
+        }
+        attachments {
+          _id
+          name
+        }
+      }
+      entities {
+        _id
+        name
+      }
+      projects {
+        _id
+        name
+      }
+    }
+  `;
+
+  // Execute GraphQL query both on page load and navigation
+  const { loading, error, data, refetch } = useQuery(GET_ENTITY, {
+    variables: {
+      _id: id
+    }
+  });
+
+  // Manage data once retrieved
+  useEffect(() => {
+    if (data?.entity) {
+      // Unpack all the Entity data
+      setEntityData(data.entity);
+      setEntityDescription(data.entity.description || "");
+      setEntityProjects(data.entity.projects);
+      setEntityOrigins(data.entity.associations.origins);
+      setEntityProducts(data.entity.associations.products);
+      setEntityAttributes(data.entity.attributes || []);
+      setEntityAttachments(data.entity.attachments);
+      setEntityHistory(data.entity.history || []);
+    }
+    if (data?.entities) {
+      setAllEntities(data.entities.filter((entity: EntityModel) => !_.isEqual(entityData._id, entity._id)));
+    }
+    if (data?.projects) {
+      setProjectData(data.projects);
+    }
+  }, [data]);
+
+  // Check to see if data currently exists and refetch if so
+  useEffect(() => {
+    if (data && refetch) {
+      refetch();
+    }
+  }, []);
+
+  useEffect(() => {
+    // Get all Attributes
+    getData(`/attributes`)
+      .then((response) => {
+        setAttributes(response);
+      });
+  }, []);
+
   useEffect(() => {
     getData(`/entities/${id}`)
       .then((response) => {
         // Store all received data and assign to specific fields
-        setEntityData(response);
-        setEntityDescription(response.description || "");
-        setEntityProjects(response.projects);
-        setEntityOrigins(response.associations.origins);
-        setEntityProducts(response.associations.products);
-        setEntityAttributes(response.attributes);
         setEntityAttachments(response.attachments);
-        setEntityHistory(response.history);
-      })
-      .catch(() => {
-        toast({
-          title: "Error",
-          description: "Could not retrieve Entity data.",
-          status: "error",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-        setIsError(true);
-      })
-      .finally(() => {
-        setIsLoaded(true);
-      });
-
-    // Populate Project data
-    getData(`/projects`)
-      .then((response) => {
-        setProjectData(response);
-      })
-      .catch(() => {
-        toast({
-          title: "Error",
-          description: "Could not retrieve Project data.",
-          status: "error",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-        setIsError(true);
-      })
-      .finally(() => {
-        setIsLoaded(true);
-      });
-
-    // Populate Entities data
-    getData(`/entities`)
-      .then((response) => {
-        setAllEntities(
-          (response as EntityModel[])
-            .filter((entity) => !_.isEqual(entityData._id, entity._id))
-            .map((entity) => {
-              return { id: entity._id, name: entity.name };
-            })
-        );
-      })
-      .catch(() => {
-        toast({
-          title: "Error",
-          description: "Could not retrieve Entities data.",
-          status: "error",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-        setIsError(true);
-      })
-      .finally(() => {
-        setIsLoaded(true);
-      });
-  }, [id]);
-
-  useEffect(() => {
-    getData(`/entities/${id}`)
-      .then((response) => {
-        // Store all received data and assign to specific fields
-        setEntityAttachments(response.attachments);
-      })
-      .catch(() => {
-        toast({
-          title: "Error",
-          description: "Could not retrieve updated Entity attachments.",
-          status: "error",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-        setIsError(true);
-      })
-      .finally(() => {
-        setIsLoaded(true);
       });
   }, [toUploadAttachments]);
 
@@ -449,8 +427,8 @@ const Entity = () => {
         .finally(() => {
           postData(`/entities/lock/${id}`, {
             entity: {
+              _id: entityData._id,
               name: entityData.name,
-              id: entityData._id,
             },
             lockState: false,
           }).then((_response) => {
@@ -461,8 +439,8 @@ const Entity = () => {
     } else {
       postData(`/entities/lock/${id}`, {
         entity: {
+          _id: entityData._id,
           name: entityData.name,
-          id: entityData._id,
         },
         lockState: true,
       }).then((_response) => {
@@ -494,8 +472,6 @@ const Entity = () => {
       history: entityData.history,
     };
 
-    setIsLoaded(false);
-
     // Update data
     postData(`/entities/update`, updateData)
       .then((_response) => {
@@ -526,7 +502,6 @@ const Entity = () => {
         setEntityProducts(updateData.associations.products);
         setEntityAttributes(updateData.attributes);
         setEntityHistory(updateData.history);
-        setIsLoaded(true);
       });
   };
 
@@ -589,7 +564,7 @@ const Entity = () => {
 
   // Configure origins table columns and data
   const originTableColumnHelper = createColumnHelper<{
-    id: string;
+    _id: string;
     name: string;
   }>();
   const originTableColumns = [
@@ -607,7 +582,7 @@ const Entity = () => {
       },
       header: "Name",
     }),
-    originTableColumnHelper.accessor("id", {
+    originTableColumnHelper.accessor("_id", {
       cell: (info) => {
         return (
           <Flex w={"100%"} justify={"end"}>
@@ -617,16 +592,16 @@ const Entity = () => {
                 aria-label={"Remove origin"}
                 colorScheme={"red"}
                 onClick={() => {
-                  removeOrigin(info.row.original.id);
+                  removeOrigin(info.row.original._id);
                 }}
               />
             ) : (
               <Button
-                key={`view-${info.row.original.id}`}
+                key={`view-${info.row.original._id}`}
                 rightIcon={<Icon name={"c_right"} />}
                 colorScheme={"gray"}
-                onClick={() => navigate(`/entities/${info.row.original.id}`)}
-                isDisabled={_.isUndefined(info.row.original.id)}
+                onClick={() => navigate(`/entities/${info.row.original._id}`)}
+                isDisabled={_.isUndefined(info.row.original._id)}
               >
                 View
               </Button>
@@ -644,7 +619,7 @@ const Entity = () => {
       action(table, rows) {
         const originsToRemove: string[] = [];
         for (let rowIndex of Object.keys(rows)) {
-          originsToRemove.push(table.getRow(rowIndex).original.id);
+          originsToRemove.push(table.getRow(rowIndex).original._id);
         }
         removeOrigins(originsToRemove);
       },
@@ -653,7 +628,7 @@ const Entity = () => {
 
   // Configure products table columns and data
   const productTableColumnHelper = createColumnHelper<{
-    id: string;
+    _id: string;
     name: string;
   }>();
   const productTableColumns = [
@@ -671,7 +646,7 @@ const Entity = () => {
       },
       header: "Name",
     }),
-    productTableColumnHelper.accessor("id", {
+    productTableColumnHelper.accessor("_id", {
       cell: (info) => {
         return (
           <Flex w={"100%"} justify={"end"}>
@@ -681,16 +656,16 @@ const Entity = () => {
                 aria-label={"Remove product"}
                 colorScheme={"red"}
                 onClick={() => {
-                  removeProduct(info.row.original.id);
+                  removeProduct(info.row.original._id);
                 }}
               />
             ) : (
               <Button
-                key={`view-${info.row.original.id}`}
+                key={`view-${info.row.original._id}`}
                 rightIcon={<Icon name={"c_right"} />}
                 colorScheme={"gray"}
-                onClick={() => navigate(`/entities/${info.row.original.id}`)}
-                isDisabled={_.isUndefined(info.row.original.id)}
+                onClick={() => navigate(`/entities/${info.row.original._id}`)}
+                isDisabled={_.isUndefined(info.row.original._id)}
               >
                 View
               </Button>
@@ -708,7 +683,7 @@ const Entity = () => {
       action(table, rows) {
         const productsToRemove: string[] = [];
         for (let rowIndex of Object.keys(rows)) {
-          productsToRemove.push(table.getRow(rowIndex).original.id);
+          productsToRemove.push(table.getRow(rowIndex).original._id);
         }
         removeProducts(productsToRemove);
       },
@@ -793,7 +768,7 @@ const Entity = () => {
 
   // Configure attachment table columns and data
   const attachmentTableColumnHelper = createColumnHelper<{
-    id: string;
+    _id: string;
     name: string;
   }>();
   const attachmentTableColumns = [
@@ -824,7 +799,7 @@ const Entity = () => {
       },
       header: "Type",
     },
-    attachmentTableColumnHelper.accessor("id", {
+    attachmentTableColumnHelper.accessor("_id", {
       cell: (info) => {
         const handleDownload = () => {
           getData(`/system/download/${info.getValue()}`, {
@@ -906,7 +881,7 @@ const Entity = () => {
       action(table, rows) {
         const attachmentsToRemove: string[] = [];
         for (let rowIndex of Object.keys(rows)) {
-          attachmentsToRemove.push(table.getRow(rowIndex).original.id);
+          attachmentsToRemove.push(table.getRow(rowIndex).original._id);
         }
         removeAttachments(attachmentsToRemove);
       },
@@ -935,8 +910,6 @@ const Entity = () => {
       attachments: entityVersion.attachments,
       history: entityData.history,
     };
-
-    setIsLoaded(false);
 
     // Update data
     postData(`/entities/update`, updateData)
@@ -971,7 +944,6 @@ const Entity = () => {
         setEntityProducts(updateData.associations.products);
         setEntityAttributes(updateData.attributes);
         setEntityHistory(updateData.history);
-        setIsLoaded(true);
       });
   };
 
@@ -1101,7 +1073,7 @@ const Entity = () => {
   const addProducts = (products: string[]): void => {
     setEntityProducts([
       ...entityProducts,
-      ...allEntities.filter((entity) => products.includes(entity.id)),
+      ...allEntities.filter((entity) => products.includes(entity._id)),
     ]);
     setSelectedProducts([]);
     onAddProductsClose();
@@ -1111,7 +1083,7 @@ const Entity = () => {
   const removeProduct = (id: string) => {
     setEntityProducts(
       entityProducts.filter((product) => {
-        return product.id !== id;
+        return product._id !== id;
       })
     );
   };
@@ -1119,7 +1091,7 @@ const Entity = () => {
   const removeProducts = (ids: string[]) => {
     setEntityProducts(
       entityProducts.filter((product) => {
-        return !_.includes(ids, product.id);
+        return !_.includes(ids, product._id);
       })
     );
   };
@@ -1128,7 +1100,7 @@ const Entity = () => {
   const addOrigins = (origins: string[]): void => {
     setEntityOrigins([
       ...entityOrigins,
-      ...allEntities.filter((entity) => origins.includes(entity.id)),
+      ...allEntities.filter((entity) => origins.includes(entity._id)),
     ]);
     setSelectedOrigins([]);
     onAddOriginsClose();
@@ -1138,7 +1110,7 @@ const Entity = () => {
   const removeOrigin = (id: string) => {
     setEntityOrigins(
       entityOrigins.filter((origin) => {
-        return origin.id !== id;
+        return origin._id !== id;
       })
     );
   };
@@ -1146,7 +1118,7 @@ const Entity = () => {
   const removeOrigins = (ids: string[]) => {
     setEntityOrigins(
       entityOrigins.filter((origin) => {
-        return !_.includes(ids, origin.id);
+        return !_.includes(ids, origin._id);
       })
     );
   };
@@ -1172,7 +1144,7 @@ const Entity = () => {
   const removeAttachment = (id: string) => {
     setEntityAttachments(
       entityAttachments.filter((attachment) => {
-        return attachment.id !== id;
+        return attachment._id !== id;
       })
     );
   };
@@ -1180,7 +1152,7 @@ const Entity = () => {
   const removeAttachments = (ids: string[]) => {
     setEntityAttachments(
       entityAttachments.filter((attachment) => {
-        return !_.includes(ids, attachment.id);
+        return !_.includes(ids, attachment._id);
       })
     );
   };
@@ -1251,7 +1223,7 @@ const Entity = () => {
   };
 
   return (
-    <Content isError={isError} isLoaded={isLoaded}>
+    <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
       <Flex direction={"column"}>
         <Flex
           gap={"4"}
@@ -1735,7 +1707,7 @@ const Entity = () => {
                         }
                       }}
                     >
-                      {isLoaded &&
+                      {!loading &&
                         attributes.map((attribute) => {
                           return (
                             <option key={attribute._id} value={attribute._id}>
@@ -1886,7 +1858,7 @@ const Entity = () => {
                       }
                     }}
                   >
-                    {isLoaded &&
+                    {!loading &&
                       projectData.map((project) => {
                         return (
                           <option key={project._id} value={project._id}>
@@ -2248,7 +2220,7 @@ const Entity = () => {
                 <Flex direction={"column"} gap={"2"}>
                   <FormControl>
                     <FormLabel>Details</FormLabel>
-                    {isLoaded ? (
+                    {!loading ? (
                       <CheckboxGroup>
                         <Stack spacing={2} direction={"column"}>
                           <Checkbox disabled defaultChecked>
@@ -2299,7 +2271,7 @@ const Entity = () => {
                   </FormControl>
                   <FormControl>
                     <FormLabel>Projects</FormLabel>
-                    {isLoaded && entityProjects.length > 0 ? (
+                    {!loading && entityProjects.length > 0 ? (
                       <Stack spacing={2} direction={"column"}>
                         {entityProjects.map((project) => {
                           allExportFields.push(`project_${project}`);
@@ -2332,20 +2304,20 @@ const Entity = () => {
                 <Flex direction={"column"} gap={"2"}>
                   <FormControl>
                     <FormLabel>Associations: Origins</FormLabel>
-                    {isLoaded && entityOrigins?.length > 0 ? (
+                    {!loading && entityOrigins?.length > 0 ? (
                       <Stack spacing={2} direction={"column"}>
                         {entityOrigins.map((origin) => {
-                          allExportFields.push(`origin_${origin.id}`);
+                          allExportFields.push(`origin_${origin._id}`);
                           return (
                             <Checkbox
-                              key={origin.id}
+                              key={origin._id}
                               isChecked={
                                 exportAll ||
-                                _.includes(exportFields, `origin_${origin.id}`)
+                                _.includes(exportFields, `origin_${origin._id}`)
                               }
                               onChange={(event) =>
                                 handleExportCheck(
-                                  `origin_${origin.id}`,
+                                  `origin_${origin._id}`,
                                   event.target.checked
                                 )
                               }
@@ -2361,23 +2333,23 @@ const Entity = () => {
                   </FormControl>
                   <FormControl>
                     <FormLabel>Associations: Products</FormLabel>
-                    {isLoaded && entityProducts?.length > 0 ? (
+                    {!loading && entityProducts?.length > 0 ? (
                       <Stack spacing={2} direction={"column"}>
                         {entityProducts.map((product) => {
-                          allExportFields.push(`product_${product.id}`);
+                          allExportFields.push(`product_${product._id}`);
                           return (
                             <Checkbox
-                              key={product.id}
+                              key={product._id}
                               isChecked={
                                 exportAll ||
                                 _.includes(
                                   exportFields,
-                                  `product_${product.id}`
+                                  `product_${product._id}`
                                 )
                               }
                               onChange={(event) =>
                                 handleExportCheck(
-                                  `product_${product.id}`,
+                                  `product_${product._id}`,
                                   event.target.checked
                                 )
                               }
@@ -2396,7 +2368,7 @@ const Entity = () => {
                 <Flex direction={"column"} gap={"2"}>
                   <FormControl>
                     <FormLabel>Attributes</FormLabel>
-                    {isLoaded && entityAttributes.length > 0 ? (
+                    {!loading && entityAttributes.length > 0 ? (
                       <Stack spacing={2} direction={"column"}>
                         {entityAttributes.map((attribute) => {
                           allExportFields.push(`attribute_${attribute._id}`);

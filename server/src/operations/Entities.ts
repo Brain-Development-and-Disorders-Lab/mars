@@ -180,7 +180,7 @@ export class Entities {
               operations.push(
                 Entities.addProduct(origin, {
                   name: entity?.name,
-                  id: entity?._id,
+                  _id: entity?._id,
                 })
               );
             };
@@ -199,7 +199,7 @@ export class Entities {
               operations.push(
                 Entities.addOrigin(product, {
                   name: entity?.name,
-                  id: entity?._id,
+                  _id: entity?._id,
                 })
               );
             };
@@ -337,41 +337,41 @@ export class Entities {
 
           // Products
           const productsToKeep = currentEntity?.associations?.products
-            ?.map((product) => product.id)
+            ?.map((product) => product._id)
             ?.filter((product) =>
               updatedEntity?.associations?.products
-                ?.map((product) => product.id)
+                ?.map((product) => product._id)
                 .includes(product)
             );
           const productsToAdd = updatedEntity?.associations?.products?.filter(
-            (product) => !productsToKeep?.includes(product.id)
+            (product) => !productsToKeep?.includes(product._id)
           );
           if (productsToAdd && productsToAdd?.length > 0) {
             operations.push(
-              productsToAdd?.map((product: { id: string; name: string }) => {
+              productsToAdd?.map((product: { _id: string; name: string }) => {
                 Entities.addOrigin(product, {
                   name: updatedEntity?.name,
-                  id: updatedEntity?._id,
+                  _id: updatedEntity?._id,
                 });
                 Entities.addProduct(
-                  { name: updatedEntity?.name, id: updatedEntity?._id },
+                  { name: updatedEntity?.name, _id: updatedEntity?._id },
                   product
                 );
               })
             );
           }
           const productsToRemove = currentEntity?.associations?.products?.filter(
-            (product) => !productsToKeep?.includes(product.id)
+            (product) => !productsToKeep?.includes(product._id)
           );
           if (productsToRemove?.length > 0) {
             operations.push(
-              productsToRemove?.map((product: { id: string; name: string }) => {
+              productsToRemove?.map((product: { _id: string; name: string }) => {
                 Entities.removeOrigin(product, {
                   name: updatedEntity?.name,
-                  id: updatedEntity?._id,
+                  _id: updatedEntity?._id,
                 });
                 Entities.removeProduct(
-                  { name: updatedEntity?.name, id: updatedEntity?._id },
+                  { name: updatedEntity?.name, _id: updatedEntity?._id },
                   product
                 );
               })
@@ -380,42 +380,42 @@ export class Entities {
 
           // Origins
           const originsToKeep = currentEntity?.associations?.origins
-            ?.map((origin) => origin.id)
+            ?.map((origin) => origin._id)
             ?.filter((origin) =>
               updatedEntity?.associations?.origins
-                ?.map((origin) => origin.id)
+                ?.map((origin) => origin._id)
                 .includes(origin)
             );
           const originsToAdd = updatedEntity?.associations?.origins?.filter(
-            (origin) => !originsToKeep?.includes(origin.id)
+            (origin) => !originsToKeep?.includes(origin._id)
           );
           if (originsToAdd && originsToAdd?.length > 0) {
             operations.push(
-              originsToAdd?.map((origin: { id: string; name: string }) => {
+              originsToAdd?.map((origin: { _id: string; name: string }) => {
                 Entities.addOrigin(
-                  { name: updatedEntity?.name, id: updatedEntity?._id },
+                  { name: updatedEntity?.name, _id: updatedEntity?._id },
                   origin
                 );
                 Entities.addProduct(origin, {
                   name: updatedEntity?.name,
-                  id: updatedEntity?._id,
+                  _id: updatedEntity?._id,
                 });
               })
             );
           }
           const originsToRemove = currentEntity?.associations?.origins?.filter(
-            (origin) => !originsToKeep?.includes(origin.id)
+            (origin) => !originsToKeep?.includes(origin._id)
           );
           if (originsToRemove?.length > 0) {
             operations.push(
-              originsToRemove?.map((origin: { id: string; name: string }) => {
+              originsToRemove?.map((origin: { _id: string; name: string }) => {
                 Entities.removeOrigin(
-                  { name: updatedEntity?.name, id: updatedEntity?._id },
+                  { name: updatedEntity?.name, _id: updatedEntity?._id },
                   origin
                 );
                 Entities.removeProduct(origin, {
                   name: updatedEntity?.name,
-                  id: updatedEntity?._id,
+                  _id: updatedEntity?._id,
                 });
               })
             );
@@ -460,14 +460,14 @@ export class Entities {
 
           // Attachments
           const attachmentsToKeep = currentEntity?.attachments
-            ?.map((attachment) => attachment.id)
+            ?.map((attachment) => attachment._id)
             .filter((attachment) =>
               updatedEntity?.attachments
-                .map((attachment) => attachment.id)
+                .map((attachment) => attachment._id)
                 .includes(attachment)
             );
           const attachmentsToRemove = currentEntity?.attachments.filter(
-            (attachment) => !attachmentsToKeep?.includes(attachment.id)
+            (attachment) => !attachmentsToKeep?.includes(attachment._id)
           );
           if (attachmentsToRemove?.length > 0) {
             operations.push(
@@ -510,13 +510,13 @@ export class Entities {
                 associations: {
                   origins: [
                     ...(currentEntity?.associations?.origins?.filter((origin) =>
-                      originsToKeep?.includes(origin.id)
+                      originsToKeep?.includes(origin._id)
                     )) || [],
                     ...(originsToAdd || []),
                   ],
                   products: [
                     ...(currentEntity?.associations?.products?.filter((product) =>
-                      productsToKeep?.includes(product.id)
+                      productsToKeep?.includes(product._id)
                     ) || []),
                     ...(productsToAdd || []),
                   ],
@@ -705,19 +705,19 @@ export class Entities {
 
   /**
    * Add another Entity to a collection of "product" associations
-   * @param {{ name: string, id: string }} entity the Entity of interest
-   * @param {{ name: string, id: string }} product an Entity to add as a "product" association
-   * @return {Promise<{ name: string, id: string }>}
+   * @param {{ name: string, _id: string }} entity the Entity of interest
+   * @param {{ name: string, _id: string }} product an Entity to add as a "product" association
+   * @return {Promise<{ name: string, _id: string }>}
    */
   static addProduct = (
-    entity: { name: string; id: string },
-    product: { name: string; id: string }
-  ): Promise<{ name: string; id: string }> => {
+    entity: { name: string; _id: string },
+    product: { name: string; _id: string }
+  ): Promise<{ name: string; _id: string }> => {
     consola.start("Adding Product", product?.name, "to Entity", entity?.name);
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES)
-        .findOne({ _id: entity.id }, (error: any, result: any) => {
+        .findOne({ _id: entity._id }, (error: any, result: any) => {
           if (error) {
             throw error;
           }
@@ -726,14 +726,14 @@ export class Entities {
 
           if (existingProductIndex > -1) {
             // Update existing origin if new ID is provided
-            if (product.id) {
-              updatedProducts[existingProductIndex].id = product.id;
+            if (product._id) {
+              updatedProducts[existingProductIndex].id = product._id;
             }
           } else {
             // Add new origin
             updatedProducts = [
               ...updatedProducts,
-              { name: product?.name, id: product.id },
+              { name: product?.name, id: product._id },
             ];
           }
 
@@ -750,7 +750,7 @@ export class Entities {
           getDatabase()
             .collection(ENTITIES)
             .updateOne(
-              { _id: entity.id },
+              { _id: entity._id },
               updates,
               (error: any, _response: any) => {
                 if (error) {
@@ -773,19 +773,19 @@ export class Entities {
 
   /**
    * Add another Entity to a collection of "product" associations
-   * @param {{ name: string, id: string }} entity the Entity of interest
-   * @param {{ name: string, id: string }[]} products Entities to add as a "product" association
-   * @return {Promise<{ name: string, id: string }[]>}
+   * @param {{ name: string, _id: string }} entity the Entity of interest
+   * @param {{ name: string, _id: string }[]} products Entities to add as a "product" association
+   * @return {Promise<{ name: string, _id: string }[]>}
    */
   static addProducts = (
-    entity: { name: string; id: string },
-    products: { name: string; id: string }[]
-  ): Promise<{ name: string; id: string }> => {
+    entity: { name: string; _id: string },
+    products: { name: string; _id: string }[]
+  ): Promise<{ name: string; _id: string }> => {
     consola.start("Adding", products?.length, "Products to Entity", entity?.name);
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES)
-        .findOne({ _id: entity.id }, (error: any, result: any) => {
+        .findOne({ _id: entity._id }, (error: any, result: any) => {
           if (error) {
             throw error;
           }
@@ -805,7 +805,7 @@ export class Entities {
           getDatabase()
             .collection(ENTITIES)
             .updateOne(
-              { _id: entity.id },
+              { _id: entity._id },
               updates,
               (error: any, _response: any) => {
                 if (error) {
@@ -827,14 +827,14 @@ export class Entities {
   };
 
   static removeProduct = (
-    entity: { name: string; id: string },
-    product: { name: string; id: string }
-  ): Promise<{ name: string; id: string }> => {
+    entity: { name: string; _id: string },
+    product: { name: string; _id: string }
+  ): Promise<{ name: string; _id: string }> => {
     consola.start("Removing Product", product?.name, "from Entity", entity?.name);
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES)
-        .findOne({ _id: entity.id }, (error: any, result: any) => {
+        .findOne({ _id: entity._id }, (error: any, result: any) => {
           if (error) {
             throw error;
           }
@@ -845,7 +845,7 @@ export class Entities {
               associations: {
                 origins: (result as EntityModel).associations?.origins,
                 products: (result as EntityModel).associations?.products?.filter(
-                  (content) => !_.isEqual(product.id, content.id)
+                  (content) => !_.isEqual(product._id, content._id)
                 ),
               },
             },
@@ -854,7 +854,7 @@ export class Entities {
           getDatabase()
             .collection(ENTITIES)
             .updateOne(
-              { _id: entity.id },
+              { _id: entity._id },
               updates,
               (error: any, _response: any) => {
                 if (error) {
@@ -877,19 +877,19 @@ export class Entities {
 
   /**
    * Specify an Entity acting as an Origin
-   * @param {{ name: string, id: string }} entity the Entity of interest
-   * @param {{ name: string, id: string }} origin an Entity to add as an "origin" association
-   * @return {Promise<{ name: string, id: string }>}
+   * @param {{ name: string, _id: string }} entity the Entity of interest
+   * @param {{ name: string, _id: string }} origin an Entity to add as an "origin" association
+   * @return {Promise<{ name: string, _id: string }>}
    */
   static addOrigin = (
-    entity: { name: string; id: string },
-    origin: { name: string; id: string }
-  ): Promise<{ name: string; id: string }> => {
+    entity: { name: string; _id: string },
+    origin: { name: string; _id: string }
+  ): Promise<{ name: string; _id: string }> => {
     consola.start("Adding Origin", origin?.name, "to Entity", entity?.name);
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES)
-        .findOne({ _id: entity.id }, (error: any, result: any) => {
+        .findOne({ _id: entity._id }, (error: any, result: any) => {
           if (error) {
             throw error;
           }
@@ -899,14 +899,14 @@ export class Entities {
 
           if (existingOriginIndex > -1) {
             // Update existing origin if new ID is provided
-            if (origin.id) {
-              updatedOrigins[existingOriginIndex].id = origin.id;
+            if (origin._id) {
+              updatedOrigins[existingOriginIndex]._id = origin._id;
             }
           } else {
             // Add new origin
             updatedOrigins = [
               ...updatedOrigins,
-              { name: origin?.name, id: origin.id },
+              { name: origin?.name, _id: origin._id },
             ];
           }
 
@@ -923,7 +923,7 @@ export class Entities {
           getDatabase()
             .collection(ENTITIES)
             .updateOne(
-              { _id: entity.id },
+              { _id: entity._id },
               updates,
               (error: any, _response: any) => {
                 if (error) {
@@ -946,19 +946,19 @@ export class Entities {
 
   /**
    * Specify an Entity acting as an Origin
-   * @param {{ name: string, id: string }} entity the Entity of interest
-   * @param {{ name: string, id: string }[]} origins Entities to add as "origin" associations
-   * @return {Promise<{ name: string, id: string }[]>}
+   * @param {{ name: string, _id: string }} entity the Entity of interest
+   * @param {{ name: string, _id: string }[]} origins Entities to add as "origin" associations
+   * @return {Promise<{ name: string, _id: string }[]>}
    */
   static addOrigins = (
-    entity: { name: string; id: string },
-    origins: { name: string; id: string }[]
-  ): Promise<{ name: string; id: string }> => {
+    entity: { name: string; _id: string },
+    origins: { name: string; _id: string }[]
+  ): Promise<{ name: string; _id: string }> => {
     consola.start("Adding", origins?.length, "Origins to Entity", entity?.name);
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES)
-        .findOne({ _id: entity.id }, (error: any, result: any) => {
+        .findOne({ _id: entity._id }, (error: any, result: any) => {
           if (error) {
             throw error;
           }
@@ -976,7 +976,7 @@ export class Entities {
           getDatabase()
             .collection(ENTITIES)
             .updateOne(
-              { _id: entity.id },
+              { _id: entity._id },
               updates,
               (error: any, _response: any) => {
                 if (error) {
@@ -998,14 +998,14 @@ export class Entities {
   };
 
   static removeOrigin = (
-    entity: { name: string; id: string },
-    origin: { name: string; id: string }
-  ): Promise<{ name: string; id: string }> => {
+    entity: { name: string; _id: string },
+    origin: { name: string; _id: string }
+  ): Promise<{ name: string; _id: string }> => {
     consola.start("Removing Origin", origin?.name, "from Entity", entity?.name);
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES)
-        .findOne({ _id: entity.id }, (error: any, result: any) => {
+        .findOne({ _id: entity._id }, (error: any, result: any) => {
           if (error) {
             throw error;
           }
@@ -1015,7 +1015,7 @@ export class Entities {
             $set: {
               associations: {
                 origins: (result as EntityModel).associations?.origins?.filter(
-                  (content) => !_.isEqual(origin.id, content.id)
+                  (content) => !_.isEqual(origin._id, content._id)
                 ),
                 products: (result as EntityModel).associations?.products,
               },
@@ -1025,7 +1025,7 @@ export class Entities {
           getDatabase()
             .collection(ENTITIES)
             .updateOne(
-              { _id: entity.id },
+              { _id: entity._id },
               updates,
               (error: any, _response: any) => {
                 if (error) {
@@ -1265,8 +1265,8 @@ export class Entities {
 
   static addAttachment = (
     id: string,
-    attachment: { name: string; id: string }
-  ): Promise<{ name: string; id: string }> => {
+    attachment: { name: string; _id: string }
+  ): Promise<{ name: string; _id: string }> => {
     consola.start("Adding Attachment", attachment?.name, "to Entity (id):", id);
     return new Promise((resolve, _reject) => {
       getDatabase()
@@ -1284,7 +1284,7 @@ export class Entities {
                 ...result?.attachments,
                 {
                   name: attachment?.name,
-                  id: attachment.id,
+                  _id: attachment._id,
                 },
               ],
             },
@@ -1313,8 +1313,8 @@ export class Entities {
 
   static removeAttachment = (
     id: string,
-    attachment: { name: string; id: string }
-  ): Promise<{ name: string; id: string }> => {
+    attachment: { name: string; _id: string }
+  ): Promise<{ name: string; _id: string }> => {
     consola.start(
       "Removing Attachment",
       attachment?.name,
@@ -1334,7 +1334,7 @@ export class Entities {
             $set: {
               attachments: [
                 ...(result as EntityModel)?.attachments?.filter(
-                  (existing) => !_.isEqual(existing.id, attachment.id)
+                  (existing) => !_.isEqual(existing._id, attachment._id)
                 ),
               ],
             },
@@ -1957,7 +1957,7 @@ export class Entities {
             // Once the upload is finished, register attachment with Entity
             Entities.addAttachment(target, {
               name: receivedFile?.name,
-              id: uploadStream.id.toString(),
+              _id: uploadStream.id.toString(),
             });
             resolve({ status: true, message: "Uploaded file" });
           });

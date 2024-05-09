@@ -60,11 +60,11 @@ export type AttributeModel = IAttribute & {
 export type AttributeCardActions = {
   showRemove?: boolean;
   onUpdate?: (data: AttributeCardProps) => void;
-  onRemove?: (identifier: string) => void;
+  onRemove?: (id: string) => void;
 };
 
 export type AttributeCardProps = IAttribute & AttributeCardActions & {
-  identifier: string;
+  _id: string;
   restrictDataValues: boolean;
   permittedDataValues?: string[];
 };
@@ -83,13 +83,13 @@ export type AttributeViewButtonProps = {
 
 // Values
 export interface IValue<D> {
-  identifier: string;
+  _id: string;
   name: string;
   type: "number" | "text" | "url" | "date" | "entity" | "select";
   data: D;
   disabled?: boolean;
   showRemove?: boolean;
-  onRemove?: (identifier: string) => void;
+  onRemove?: (id: string) => void;
   onUpdate?: (data: D) => void;
 }
 
@@ -135,11 +135,11 @@ export type IEntity = {
   description: string;
   projects: string[];
   associations: {
-    origins: { name: string; id: string }[];
-    products: { name: string; id: string }[];
+    origins: { name: string; _id: string }[];
+    products: { name: string; _id: string }[];
   };
   attributes: AttributeModel[];
-  attachments: { name: string; id: string }[];
+  attachments: { name: string; _id: string }[];
   history: EntityHistory[];
 };
 
@@ -154,11 +154,11 @@ export type EntityHistory = {
   description: string;
   projects: string[];
   associations: {
-    origins: { name: string; id: string }[];
-    products: { name: string; id: string }[];
+    origins: { name: string; _id: string }[];
+    products: { name: string; _id: string }[];
   };
   attributes: AttributeModel[];
-  attachments: { name: string; id: string }[];
+  attachments: { name: string; _id: string }[];
 };
 
 export type EntityExport = {
@@ -182,8 +182,8 @@ export type EntityImport = {
   owner: string;
   description: string;
   projects: string;
-  origins: {id: string, name: string}[];
-  products: {id: string, name: string}[];
+  origins: {_id: string, name: string}[];
+  products: {_id: string, name: string}[];
   attributes: AttributeModel[];
 };
 

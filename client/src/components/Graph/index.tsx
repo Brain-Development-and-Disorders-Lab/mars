@@ -145,18 +145,18 @@ const Graph = (props: {
       for (let origin of entityData.associations.origins) {
         // Add node
         initialNodes.push({
-          id: origin.id,
+          id: origin._id,
           type: "input",
           data: {
-            label: generateLabel({ id: origin.id, name: origin.name }),
+            label: generateLabel({ id: origin._id, name: origin.name }),
           },
           position: { x: 250, y: 0 },
         });
 
         // Create edge
         initialEdges.push({
-          id: origin.id,
-          source: origin.id,
+          id: origin._id,
+          source: origin._id,
           target: entityData._id,
           markerEnd: {
             type: MarkerType.ArrowClosed,
@@ -171,19 +171,19 @@ const Graph = (props: {
       for (let product of entityData.associations.products) {
         // Add node
         initialNodes.push({
-          id: product.id,
+          id: product._id,
           type: "output",
           data: {
-            label: generateLabel({ id: product.id, name: product.name }),
+            label: generateLabel({ id: product._id, name: product.name }),
           },
           position: { x: 100, y: 200 },
         });
 
         // Create edge
         initialEdges.push({
-          id: `edge_${entityData._id}_${product.id}`,
+          id: `edge_${entityData._id}_${product._id}`,
           source: entityData._id,
-          target: product.id,
+          target: product._id,
           markerEnd: {
             type: MarkerType.ArrowClosed,
           },
@@ -249,7 +249,7 @@ const Graph = (props: {
         // Origins
         if (entity?.associations?.origins?.length > 0) {
           for (let origin of entity.associations.origins) {
-            if (containsNode(origin.id) === false) {
+            if (containsNode(origin._id) === false) {
               // Firstly, update the current node type (if required)
               updatedNodes = [
                 ...updatedNodes.map((node) => {
@@ -272,23 +272,23 @@ const Graph = (props: {
               updatedNodes = [
                 ...updatedNodes,
                 {
-                  id: origin.id,
+                  id: origin._id,
                   type: "input",
                   data: {
-                    label: generateLabel({ id: origin.id, name: origin.name }),
+                    label: generateLabel({ id: origin._id, name: origin.name }),
                   },
                   position: { x: 100, y: 200 },
                 },
               ];
             }
 
-            if (containsEdge(`edge_${origin.id}_${node.id}`) === false) {
+            if (containsEdge(`edge_${origin._id}_${node.id}`) === false) {
               // Create edge
               updatedEdges = [
                 ...updatedEdges,
                 {
-                  id: `edge_${origin.id}_${node.id}`,
-                  source: origin.id,
+                  id: `edge_${origin._id}_${node.id}`,
+                  source: origin._id,
                   target: node.id,
                   markerEnd: {
                     type: MarkerType.ArrowClosed,
@@ -302,7 +302,7 @@ const Graph = (props: {
         // Products
         if (entity?.associations?.products?.length > 0) {
           for (let product of entity.associations.products) {
-            if (containsNode(product.id) === false) {
+            if (containsNode(product._id) === false) {
               // Firstly, update the current node type (if required)
               updatedNodes = [
                 ...updatedNodes.map((node) => {
@@ -325,11 +325,11 @@ const Graph = (props: {
               updatedNodes = [
                 ...updatedNodes,
                 {
-                  id: product.id,
+                  id: product._id,
                   type: "output",
                   data: {
                     label: generateLabel({
-                      id: product.id,
+                      id: product._id,
                       name: product.name,
                     }),
                   },
@@ -338,14 +338,14 @@ const Graph = (props: {
               ];
             }
 
-            if (containsEdge(`edge_${node.id}_${product.id}`) === false) {
+            if (containsEdge(`edge_${node.id}_${product._id}`) === false) {
               // Create edge
               updatedEdges = [
                 ...updatedEdges,
                 {
-                  id: `edge_${node.id}_${product.id}`,
+                  id: `edge_${node.id}_${product._id}`,
                   source: node.id,
-                  target: product.id,
+                  target: product._id,
                   markerEnd: {
                     type: MarkerType.ArrowClosed,
                   },

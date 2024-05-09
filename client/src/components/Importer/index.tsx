@@ -110,16 +110,16 @@ const Importer = (props: {
   const [ownerField, _setOwnerField] = useState(token.orcid);
   const [projectField, setProjectField] = useState("");
   const [selectedOrigin, setSelectedOrigin] = useState(
-    {} as { name: string; id: string }
+    {} as { name: string; _id: string }
   );
   const [originsField, setOriginsField] = useState(
-    [] as { name: string; id: string }[]
+    [] as { name: string; _id: string }[]
   );
   const [selectedProduct, setSelectedProduct] = useState(
-    {} as { name: string; id: string }
+    {} as { name: string; _id: string }
   );
   const [productsField, setProductsField] = useState(
-    [] as { name: string; id: string }[]
+    [] as { name: string; _id: string }[]
   );
   const [attributes, setAttributes] = useState([] as AttributeModel[]);
   const [attributesField, setAttributesField] = useState(
@@ -487,26 +487,26 @@ const Importer = (props: {
    * @return {ReactElement}
    */
   const getSelectEntitiesComponent = (
-    value: { name: string; id: string },
+    value: { name: string; _id: string },
     setValue: React.SetStateAction<any>,
-    selected: { name: string; id: string }[],
+    selected: { name: string; _id: string }[],
     setSelected: React.SetStateAction<any>,
     disabled?: boolean
   ) => {
     return (
       <Select
         placeholder={"Select Entity"}
-        value={value.id}
+        value={value._id}
         onChange={(event) => {
           const selection = {
-            id: event.target.value,
+            _id: event.target.value,
             name: event.target.options[event.target.selectedIndex].label,
           };
           setValue(selection);
           if (
             !_.includes(
-              selected.map((entity) => entity.id),
-              selection.id
+              selected.map((entity) => entity._id),
+              selection._id
             )
           ) {
             setSelected([...selected, selection]);
@@ -537,9 +537,9 @@ const Importer = (props: {
   const onUpdateAttribute = (data: AttributeCardProps) => {
     setAttributesField([
       ...attributesField.map((attribute) => {
-        if (_.isEqual(attribute._id, data.identifier)) {
+        if (_.isEqual(attribute._id, data._id)) {
           return {
-            _id: data.identifier,
+            _id: data._id,
             name: data.name,
             description: data.description,
             values: data.values,
@@ -602,10 +602,10 @@ const Importer = (props: {
     setNameField("");
     setDescriptionField("");
     setProjectField("");
-    setSelectedOrigin({} as { name: string; id: string; });
-    setOriginsField([] as { name: string; id: string }[]);
-    setSelectedProduct({} as { name: string; id: string });
-    setProductsField([] as { name: string; id: string }[]);
+    setSelectedOrigin({} as { name: string; _id: string; });
+    setOriginsField([] as { name: string; _id: string }[]);
+    setSelectedProduct({} as { name: string; _id: string });
+    setProductsField([] as { name: string; _id: string }[]);
     setAttributes([]);
     setAttributesField([]);
   };
@@ -807,7 +807,7 @@ const Importer = (props: {
                         <Flex direction={"row"} wrap={"wrap"} gap={"2"} pt={"2"}>
                           {originsField.map((origin) => {
                             return (
-                              <Tag key={origin.id}>
+                              <Tag key={origin._id}>
                                 {origin.name}
                                 <TagCloseButton
                                   onClick={() => {
@@ -815,8 +815,8 @@ const Importer = (props: {
                                       ...originsField.filter(
                                         (existingOrigin) =>
                                           !_.isEqual(
-                                            existingOrigin.id,
-                                            origin.id
+                                            existingOrigin._id,
+                                            origin._id
                                           )
                                       ),
                                     ]);
@@ -839,7 +839,7 @@ const Importer = (props: {
                       <Flex direction={"row"} wrap={"wrap"} gap={"2"} pt={"2"}>
                         {productsField.map((product) => {
                           return (
-                            <Tag key={product.id}>
+                            <Tag key={product._id}>
                               {product.name}
                               <TagCloseButton
                                 onClick={() => {
@@ -847,8 +847,8 @@ const Importer = (props: {
                                     ...productsField.filter(
                                       (existingProduct) =>
                                         !_.isEqual(
-                                          existingProduct.id,
-                                          product.id
+                                          existingProduct._id,
+                                          product._id
                                         )
                                     ),
                                   ]);
@@ -946,8 +946,8 @@ const Importer = (props: {
                   {attributesField.map((attribute) => {
                     return (
                       <Attribute
+                        _id={attribute._id}
                         key={attribute._id}
-                        identifier={attribute._id}
                         name={attribute.name}
                         description={attribute.description}
                         values={attribute.values}

@@ -103,10 +103,10 @@ const Entity = () => {
   const [description, setDescription] = useState("");
   const [selectedProjects, setSelectedProjects] = useState([] as string[]);
   const [selectedOrigins, setSelectedOrigins] = useState(
-    [] as { name: string; id: string }[]
+    [] as { name: string; _id: string }[]
   );
   const [selectedProducts, setSelectedProducts] = useState(
-    [] as { name: string; id: string }[]
+    [] as { name: string; _id: string }[]
   );
   const [selectedAttributes, setSelectedAttributes] = useState(
     [] as AttributeModel[]
@@ -275,9 +275,9 @@ const Entity = () => {
   const onUpdateAttributeCard = (data: AttributeCardProps) => {
     setSelectedAttributes([
       ...selectedAttributes.map((attribute) => {
-        if (_.isEqual(attribute._id, data.identifier)) {
+        if (_.isEqual(attribute._id, data._id)) {
           return {
-            _id: data.identifier,
+            _id: data._id,
             name: data.name,
             description: data.description,
             values: data.values,
@@ -412,7 +412,7 @@ const Entity = () => {
                     onChange={(event) => {
                       if (
                         _.find(selectedOrigins, (product) => {
-                          return _.isEqual(product.id, event.target.value);
+                          return _.isEqual(product._id, event.target.value);
                         })
                       ) {
                         toast({
@@ -429,7 +429,7 @@ const Entity = () => {
                         setSelectedOrigins([
                           ...selectedOrigins,
                           {
-                            id: event.target.value.toString(),
+                            _id: event.target.value.toString(),
                             name: event.target.options[
                               event.target.selectedIndex
                             ].text,
@@ -464,13 +464,13 @@ const Entity = () => {
                 >
                   {selectedOrigins.map((product) => {
                     return (
-                      <Tag key={`tag-${product.id}`}>
-                        <Linky id={product.id} type={"entities"} />
+                      <Tag key={`tag-${product._id}`}>
+                        <Linky id={product._id} type={"entities"} />
                         <TagCloseButton
                           onClick={() => {
                             setSelectedOrigins(
                               selectedOrigins.filter((selected) => {
-                                return !_.isEqual(product.id, selected.id);
+                                return !_.isEqual(product._id, selected._id);
                               })
                             );
                           }}
@@ -501,7 +501,7 @@ const Entity = () => {
                     onChange={(event) => {
                       if (
                         _.find(selectedProducts, (product) => {
-                          return _.isEqual(product.id, event.target.value);
+                          return _.isEqual(product._id, event.target.value);
                         })
                       ) {
                         toast({
@@ -518,7 +518,7 @@ const Entity = () => {
                         setSelectedProducts([
                           ...selectedProducts,
                           {
-                            id: event.target.value.toString(),
+                            _id: event.target.value.toString(),
                             name: event.target.options[
                               event.target.selectedIndex
                             ].text,
@@ -553,13 +553,13 @@ const Entity = () => {
                 >
                   {selectedProducts.map((product) => {
                     return (
-                      <Tag key={`tag-${product.id}`}>
-                        <Linky id={product.id} type={"entities"} />
+                      <Tag key={`tag-${product._id}`}>
+                        <Linky id={product._id} type={"entities"} />
                         <TagCloseButton
                           onClick={() => {
                             setSelectedProducts(
                               selectedProducts.filter((selected) => {
-                                return !_.isEqual(product.id, selected.id);
+                                return !_.isEqual(product._id, selected._id);
                               })
                             );
                           }}
@@ -688,8 +688,8 @@ const Entity = () => {
               {selectedAttributes.map((attribute) => {
                 return (
                   <AttributeCard
+                    _id={attribute._id}
                     key={attribute._id}
-                    identifier={attribute._id}
                     name={attribute.name}
                     description={attribute.description}
                     values={attribute.values}
