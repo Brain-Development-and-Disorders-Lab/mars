@@ -19,51 +19,36 @@ import Icon from "@components/Icon";
 import { ProjectModel } from "@types";
 
 // Utility functions and types
-import { getData } from "@database/functions";
 import _ from "lodash";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
 
+// Apollo client imports
+import { useQuery, gql } from '@apollo/client';
+
+// Queries
+const GET_PROJECTS = gql`
+  query GetProjects {
+    projects {
+      _id
+      name
+      description
+      owner
+      entities
+    }
+  }
+`;
+
 const Projects = () => {
   const toast = useToast();
   const navigate = useNavigate();
 
-  // Page state
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [isError, setIsError] = useState(false);
-
-  const [projectsData, setProjectsData] = useState([] as ProjectModel[]);
-
-  useEffect(() => {
-    getData(`/projects`)
-      .then((value: ProjectModel[]) => {
-        setProjectsData(value);
-      })
-      .catch((_error) => {
-        toast({
-          title: "Error",
-          status: "error",
-          description: "Could not retrieve Project data.",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-        setIsError(true);
-      })
-      .finally(() => {
-        setIsLoaded(true);
-      });
-  }, []);
-
+  // Effect to adjust column visibility
   const breakpoint = useBreakpoint();
   const [visibleColumns, setVisibleColumns] = useState({});
-
-  // Effect to adjust column visibility
   useEffect(() => {
-    if (
-      _.isEqual(breakpoint, "sm") ||
-      _.isEqual(breakpoint, "base") ||
+    if (_.includes(["sm", "base"], breakpoint) ||
       _.isUndefined(breakpoint)
     ) {
       setVisibleColumns({
@@ -76,8 +61,41 @@ const Projects = () => {
     }
   }, [breakpoint]);
 
-  // Configure table columns and data
-  const data: ProjectModel[] = projectsData;
+  // Execute GraphQL query both on page load and navigation
+  const { loading, error, data, refetch } = useQuery(GET_PROJECTS);
+  useEffect(() => {
+    // Check to see if data currently exists and refetch if so
+    if (data && refetch) {
+      refetch();
+    }
+  }, []);
+
+  // Display error messages from GraphQL usage
+  useEffect(() => {
+    if (!loading && _.isUndefined(data)) {
+      // Raised if invalid query
+      toast({
+        title: "Error",
+        description: "Could not retrieve Project data.",
+        status: "error",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    } else if (error) {
+      // Raised GraphQL error
+      toast({
+        title: "Error",
+        description: error.message,
+        status: "error",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
+  }, [error, loading]);
+
+  // Setup table view
   const columnHelper = createColumnHelper<ProjectModel>();
   const columns = [
     columnHelper.accessor("name", {
@@ -119,7 +137,7 @@ const Projects = () => {
   ];
 
   return (
-    <Content isError={isError} isLoaded={isLoaded}>
+    <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
       <Flex
         direction={"row"}
         p={"4"}
@@ -150,10 +168,10 @@ const Projects = () => {
           </Flex>
         </Flex>
         <Flex direction={"column"} gap={"4"} w={"100%"}>
-          {data.length > 0 ?
+          {data && data.projects.length > 0 ?
             <DataTable
               columns={columns}
-              data={data}
+              data={data.projects}
               visibleColumns={visibleColumns}
               showPagination
             />
