@@ -61,15 +61,17 @@ import Linky from "@components/Linky";
 import {
   ProjectHistory,
   ProjectModel,
-  EntityModel,
   DataTableAction,
 } from "@types";
+
+// Apollo client imports
+import { useQuery, gql } from '@apollo/client';
 
 // Routing and navigation
 import { useParams, useNavigate } from "react-router-dom";
 
 // Utility functions and libraries
-import { deleteData, getData, postData } from "@database/functions";
+import { deleteData, postData } from "@database/functions";
 import _ from "lodash";
 import dayjs from "dayjs";
 import DataTable from "@components/DataTable";
@@ -97,24 +99,24 @@ const Project = () => {
 
   // Page state
   const [editing, setEditing] = useState(false);
-  const [isError, setIsError] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
 
-  const [projectData, setProjectData] = useState({} as ProjectModel);
+  // Project state
+  const [project, setProject] = useState({} as ProjectModel);
   const [projectEntities, setProjectEntities] = useState([] as string[]);
   const [projectDescription, setProjectDescription] = useState("");
   const [projectHistory, setProjectHistory] = useState([] as ProjectHistory[]);
   const [projectCollaborators, setProjectCollaborators] = useState([] as string[]);
   const [newCollaborator, setNewCollaborator] = useState("");
 
-
   // Entities that can be added
   const [allEntities, setAllEntities] = useState(
-    [] as { name: string; id: string }[]
+    [] as { name: string; _id: string }[]
   );
   const [selectedEntities, setSelectedEntities] = useState([] as string[]);
 
+  // Export modal state and data
   const {
     isOpen: isExportOpen,
     onOpen: onExportOpen,
@@ -126,62 +128,120 @@ const Project = () => {
   const validExportFormats = ["json", "csv", "txt"];
 
   useEffect(() => {
-    // Populate Project data
-    getData(`/projects/${id}`)
-      .then((response) => {
-        setProjectData(response);
-        setProjectDescription(response?.description);
-        setProjectEntities(response?.entities);
-        setProjectHistory(response?.history);
-        setProjectCollaborators(response?.collaborators || []);
-
-      })
-      .catch(() => {
-        toast({
-          title: "Error",
-          description: "Could not retrieve Project data.",
-          status: "error",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-        setIsError(true);
-      })
-      .finally(() => {
-        setIsLoaded(true);
-      });
-
-    // Populate Entity data
-    getData(`/entities`)
-      .then((response) => {
-        setAllEntities(
-          response.map((e: EntityModel) => {
-            return { name: e.name, id: e._id };
-          })
-        );
-      })
-      .catch(() => {
-        toast({
-          title: "Error",
-          description: "Could not retrieve Entity data.",
-          status: "error",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-        setIsError(true);
-      })
-      .finally(() => {
-        setIsLoaded(true);
-      });
-  }, [id, isLoaded]);
-
-  useEffect(() => {
     if (isLoaded) {
       // Update the state of editable data fields
-      setProjectEntities(projectData.entities);
+      setProjectEntities(project.entities);
     }
   }, [isLoaded]);
+
+  // Queries
+  const GET_PROJECT = gql`
+    query GetProject($_id: String) {
+      project(_id: $_id) {
+        _id
+        name
+        description
+        owner
+        entities
+      }
+    }
+  `;
+  const GET_ENTITIES = gql`
+    query GetEntities {
+      entities {
+        _id
+        name
+      }
+    }
+  `;
+
+  // Execute GraphQL query both on page load and navigation
+  const {
+    loading: projectLoading,
+    error: projectError,
+    data: projectData,
+    refetch: projectRefetch
+  } = useQuery(GET_PROJECT, {
+    variables: {
+      _id: id
+    }
+  });
+  const {
+    loading: entitiesLoading,
+    error: entitiesError,
+    data: entitiesData,
+    refetch: entitiesRefetch
+  } = useQuery(GET_ENTITIES);
+  useEffect(() => {
+    // Manage data once retrieved
+    if (projectData?.project) {
+      setProject(projectData?.project);
+      setProjectDescription(projectData?.project?.description);
+      setProjectEntities(projectData?.project?.entities);
+      setProjectHistory(projectData?.project?.history);
+      setProjectCollaborators(projectData?.project?.collaborators || []);
+    }
+    if (entitiesData?.entities) {
+      setAllEntities(entitiesData.entities);
+    }
+  }, [projectData, entitiesData]);
+  useEffect(() => {
+    // Check to see if data currently exists and refetch if so
+    if (projectData && projectRefetch) {
+      projectRefetch();
+    }
+    if (entitiesData && entitiesData) {
+      entitiesRefetch();
+    }
+  }, []);
+
+  // Display error messages from GraphQL usage
+  useEffect(() => {
+    if (!projectLoading && _.isUndefined(projectData)) {
+      // Raised if invalid query
+      toast({
+        title: "Error",
+        description: "Could not retrieve Project data.",
+        status: "error",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    } else if (projectError) {
+      // Raised GraphQL error
+      toast({
+        title: "Error",
+        description: projectError.message,
+        status: "error",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
+  }, [projectLoading, projectError]);
+  useEffect(() => {
+    if (!entitiesLoading && _.isUndefined(entitiesData)) {
+      // Raised if invalid query
+      toast({
+        title: "Error",
+        description: "Could not retrieve Entities data.",
+        status: "error",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    } else if (entitiesError) {
+      // Raised GraphQL error
+      toast({
+        title: "Error",
+        description: entitiesError.message,
+        status: "error",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
+  }, [entitiesLoading, entitiesError]);
 
   /**
    * Callback function to add Entities to a Project
@@ -205,13 +265,13 @@ const Project = () => {
 
       // Collate update data
       const updateData: ProjectModel = {
-        _id: projectData._id,
-        name: projectData.name,
+        _id: project._id,
+        name: project.name,
         description: projectDescription,
-        owner: projectData.owner,
+        owner: project.owner,
         collaborators: projectCollaborators || [],
-        shared: projectData.shared,
-        created: projectData.created,
+        shared: project.shared,
+        created: project.created,
         entities: projectEntities,
         history: projectHistory,
       };
@@ -262,7 +322,7 @@ const Project = () => {
       .catch(() => {
         toast({
           title: "Error",
-          description: `An error occurred when deleting Project "${projectData.name}".`,
+          description: `An error occurred when deleting Project "${project.name}".`,
           status: "error",
           duration: 2000,
           position: "bottom-right",
@@ -281,15 +341,15 @@ const Project = () => {
    */
   const handleRestoreFromHistoryClick = (projectVersion: ProjectHistory) => {
     const updateData: ProjectModel = {
-      _id: projectData._id,
-      name: projectData.name,
-      created: projectData.created,
-      owner: projectData.owner,
-      collaborators: projectData.collaborators || [],
-      shared: projectData.shared,
+      _id: project._id,
+      name: project.name,
+      created: project.created,
+      owner: project.owner,
+      collaborators: project.collaborators || [],
+      shared: project.shared,
       description: projectVersion.description,
       entities: projectVersion.entities,
-      history: projectData.history,
+      history: project.history,
     };
 
     setIsLoaded(false);
@@ -320,7 +380,7 @@ const Project = () => {
         onHistoryClose();
 
         // Apply updated state
-        setProjectData(updateData);
+        setProject(updateData);
         setProjectDescription(updateData.description);
         setProjectEntities(updateData.entities);
         setProjectHistory(updateData.history);
@@ -331,13 +391,13 @@ const Project = () => {
 
   // Handle clicking the "Export" button
   const handleExportClick = () => {
-    setProjectData(projectData);
+    setProject(project);
     onExportOpen();
   };
 
   // Handle clicking the "Export" button
   const handleExportJsonClick = () => {
-    postData(`/entities/export_all`, { project: projectData._id }).then(
+    postData(`/entities/export_all`, { project: project._id }).then(
       (response) => {
         FileSaver.saveAs(
           new Blob([response]),
@@ -371,7 +431,7 @@ const Project = () => {
 
           FileSaver.saveAs(
             new Blob([responseData]),
-            slugify(`${projectData.name.replace(" ", "")}_export.${format}`)
+            slugify(`${project.name.replace(" ", "")}_export.${format}`)
           );
 
           // Close the "Export" modal
@@ -485,7 +545,7 @@ const Project = () => {
   ];
 
   return (
-    <Content isError={isError} isLoaded={isLoaded}>
+    <Content isError={!_.isUndefined(projectError)} isLoaded={!projectLoading}>
       <Flex direction={"column"} gap={"4"}>
         <Flex
           gap={"4"}
@@ -503,7 +563,7 @@ const Project = () => {
             rounded={"md"}
           >
             <Icon name={"project"} size={"lg"} />
-            <Heading fontWeight={"semibold"}>{projectData.name}</Heading>
+            <Heading fontWeight={"semibold"}>{project.name}</Heading>
           </Flex>
 
           {/* Buttons */}
@@ -617,13 +677,13 @@ const Project = () => {
                     <Flex align={"center"} gap={"2"}>
                       <Icon name={"v_date"} size={"sm"} />
                       <Text>
-                        {dayjs(projectData.created).format("DD MMM YYYY")}
+                        {dayjs(project.created).format("DD MMM YYYY")}
                       </Text>
                     </Flex>
                     <Text fontWeight={"semibold"}>Owner</Text>
                     <Flex>
                       <Tag colorScheme={"green"}>
-                        <TagLabel>{projectData.owner}</TagLabel>
+                        <TagLabel>{project.owner}</TagLabel>
                       </Tag>
                     </Flex>
                   </Flex>
@@ -799,10 +859,10 @@ const Project = () => {
                       }
                     }}
                   >
-                    {isLoaded &&
+                    {!entitiesLoading &&
                       allEntities.map((entity) => {
                         return (
-                          <option key={entity.id} value={entity.id}>
+                          <option key={entity._id} value={entity._id}>
                             {entity.name}
                           </option>
                         );
@@ -893,7 +953,7 @@ const Project = () => {
                       <CheckboxGroup>
                         <Stack spacing={2} direction={"column"}>
                           <Checkbox disabled defaultChecked>
-                            Name: {projectData.name}
+                            Name: {project.name}
                           </Checkbox>
                           <Checkbox
                             isChecked={
@@ -904,7 +964,7 @@ const Project = () => {
                             }
                           >
                             Created:{" "}
-                            {dayjs(projectData.created).format("DD MMM YYYY")}
+                            {dayjs(project.created).format("DD MMM YYYY")}
                           </Checkbox>
                           <Checkbox
                             isChecked={
@@ -914,7 +974,7 @@ const Project = () => {
                               handleExportCheck("owner", event.target.checked)
                             }
                           >
-                            Owner: {projectData.owner}
+                            Owner: {project.owner}
                           </Checkbox>
                           <Checkbox
                             isChecked={
