@@ -30,6 +30,7 @@ import UsersRoute from "./routes/Users";
 import { ApolloServer } from "@apollo/server";
 import { typedefs } from "./typedefs";
 import { UsersResolvers } from "./resolvers/Users";
+import { ProjectsResolvers } from "./resolvers/Projects";
 import { startStandaloneServer } from '@apollo/server/standalone';
 
 // Set logging level
@@ -72,10 +73,11 @@ wrapper.listen(port, () => {
   });
 });
 
+// Start the GraphQL server
 const startServer = async () => {
   const server = new ApolloServer({
     typeDefs: typedefs,
-    resolvers: [UsersResolvers],
+    resolvers: [UsersResolvers, ProjectsResolvers],
   });
 
   const { url } = await startStandaloneServer(server, {
