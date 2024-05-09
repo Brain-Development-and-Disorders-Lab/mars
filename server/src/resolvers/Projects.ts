@@ -3,7 +3,10 @@ import { Projects } from "src/models/Projects"
 export const ProjectsResolvers = {
   Query: {
     // Retrieve all Projects
-    projects: async () => await Projects.all(),
+    projects: async (_parent: any, args: { limit: 100 }) => {
+      const projects = await Projects.all();
+      return projects.slice(0, args.limit);
+    },
 
     // Retrieve one Project by _id
     project: async (_parent: any, args: { _id: string }) => {

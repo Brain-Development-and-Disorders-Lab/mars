@@ -53,10 +53,10 @@ export const typedefs = `#graphql
     users: [User]
     user(_id: String): User
     # Project queries
-    projects: [Project]
+    projects(limit: Int): [Project]
     project(_id: String): Project
     # Entity queries
-    entities: [Entity]
+    entities(limit: Int): [Entity]
     entity(_id: String): Entity
   }
 `;
