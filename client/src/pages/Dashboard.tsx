@@ -18,7 +18,6 @@ import { Content } from "@components/Container";
 import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
-import Loading from "@components/Loading";
 
 // Existing and custom types
 import { ProjectModel, EntityModel, ActivityModel, IconNames } from "@types";
@@ -33,6 +32,26 @@ import _ from "lodash";
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
 
+// Apollo client imports
+import { useQuery, gql } from '@apollo/client';
+
+// Queries
+const GET_DASHBOARD = gql`
+  query GetDashboard($limit: Int) {
+    projects(limit: $limit) {
+      _id
+      name
+      description
+    }
+    entities(limit: $limit) {
+      _id
+      deleted
+      name
+      description
+    }
+  }
+`;
+
 const Dashboard = () => {
   // Enable navigation
   const navigate = useNavigate();
@@ -40,19 +59,63 @@ const Dashboard = () => {
   // Toast to show errors
   const toast = useToast();
 
-  // Page state
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [isError, setIsError] = useState(false);
-  const breakpoint = useBreakpoint({ ssr: false });
-
   // Page data
-  const [entityData, setEntityData] = useState([] as EntityModel[]);
-  const [projectData, setProjectData] = useState([] as ProjectModel[]);
+  const [entityData, setEntityData] = useState([] as { _id: string, deleted: boolean, name: string, description: string }[]);
+  const [projectData, setProjectData] = useState([] as { _id: string, name: string, description: string }[]);
   const [activityData, setActivityData] = useState([] as ActivityModel[]);
 
-  const [visibleColumns, setVisibleColumns] = useState({});
+  // Execute GraphQL query both on page load and navigation
+  const { loading, error, data, refetch } = useQuery(GET_DASHBOARD, {
+    variables: {
+      limit: 5,
+    }
+  });
+
+  // Assign data
+  useEffect(() => {
+    if (data?.entities) {
+      setEntityData(data.entities);
+    }
+    if (data?.projects) {
+      setProjectData(data.projects);
+    }
+  }, [data]);
+
+  // Check to see if data currently exists and refetch if so
+  useEffect(() => {
+    if (data && refetch) {
+      refetch();
+    }
+  }, []);
+
+  // Display error messages from GraphQL usage
+  useEffect(() => {
+    if (!loading && _.isUndefined(data)) {
+      // Raised if invalid query
+      toast({
+        title: "Error",
+        description: "Could not retrieve data.",
+        status: "error",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    } else if (error) {
+      // Raised GraphQL error
+      toast({
+        title: "Error",
+        description: error.message,
+        status: "error",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
+  }, [error, loading]);
 
   // Effect to adjust column visibility
+  const breakpoint = useBreakpoint({ ssr: false });
+  const [visibleColumns, setVisibleColumns] = useState({});
   useEffect(() => {
     if (
       _.isEqual(breakpoint, "sm") ||
@@ -65,57 +128,11 @@ const Dashboard = () => {
     }
   }, [breakpoint]);
 
-  // Get all Entities
-  useEffect(() => {
-    getData(`/entities`)
-      .then((result) => {
-        setEntityData(result.reverse());
-      })
-      .catch((_error) => {
-        toast({
-          title: "Error",
-          status: "error",
-          description: "Could not retrieve Entities data.",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-        setIsError(true);
-      })
-      .finally(() => {
-        setIsLoaded(true);
-      });
-  }, []);
-
-  // Get all Projects
-  useEffect(() => {
-    getData(`/projects`)
-      .then((value) => {
-        setProjectData(value.reverse());
-        setIsLoaded(true);
-      })
-      .catch((_error) => {
-        toast({
-          title: "Error",
-          status: "error",
-          description: "Could not retrieve Projects data.",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-        setIsError(true);
-      })
-      .finally(() => {
-        setIsLoaded(true);
-      });
-  }, []);
-
   // Get all Updates
   useEffect(() => {
     getData(`/activity`)
       .then((value) => {
         setActivityData(value.reverse());
-        setIsLoaded(true);
       })
       .catch((_error) => {
         toast({
@@ -126,15 +143,13 @@ const Dashboard = () => {
           position: "bottom-right",
           isClosable: true,
         });
-        setIsError(true);
       })
       .finally(() => {
-        setIsLoaded(true);
       });
   }, []);
 
   // Configure Entity table
-  const entityTableData: EntityModel[] = entityData;
+  const entityTableData: { _id: string, deleted: boolean, name: string, description: string }[] = entityData;
   const entityTableColumnHelper = createColumnHelper<EntityModel>();
   const entityTableColumns = [
     entityTableColumnHelper.accessor("name", {
@@ -177,7 +192,7 @@ const Dashboard = () => {
   ];
 
   // Configure Projects table
-  const projectTableData: ProjectModel[] = projectData;
+  const projectTableData: { _id: string, name: string, description: string }[] = projectData;
   const projectTableColumnHelper = createColumnHelper<ProjectModel>();
   const projectTableColumns = [
     projectTableColumnHelper.accessor("name", {
@@ -214,7 +229,7 @@ const Dashboard = () => {
   ];
 
   return (
-    <Content isError={isError} isLoaded={isLoaded}>
+    <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
       <Flex direction={"row"} wrap={"wrap"} gap={"4"} p={"4"}>
         <Flex
           direction={"column"}
@@ -242,7 +257,7 @@ const Dashboard = () => {
 
             {/* Projects table */}
             {/* Condition: Loaded and content present */}
-            {isLoaded && projectData.length > 0 && (
+            {!loading && projectData.length > 0 && (
               <DataTable
                 columns={projectTableColumns}
                 data={projectTableData}
@@ -251,7 +266,7 @@ const Dashboard = () => {
             )}
 
             {/* Condition: Loaded and no content present */}
-            {isLoaded && _.isEmpty(projectData) && (
+            {!loading && _.isEmpty(projectData) && (
               <Flex
                 w={"100%"}
                 direction={"row"}
@@ -262,9 +277,6 @@ const Dashboard = () => {
                 <Text color={"gray.400"} fontWeight={"semibold"}>You do not have any Projects.</Text>
               </Flex>
             )}
-
-            {/* Condition: Not loaded */}
-            {!isLoaded && <Loading />}
 
             <Spacer />
 
@@ -299,7 +311,7 @@ const Dashboard = () => {
 
             {/* Entities table */}
             {/* Condition: Loaded and content present */}
-            {isLoaded && entityData.length > 0 && (
+            {!loading && entityData.length > 0 && (
               <DataTable
                 columns={entityTableColumns}
                 data={entityTableData.filter((entity) =>
@@ -310,7 +322,7 @@ const Dashboard = () => {
             )}
 
             {/* Condition: Loaded and no content present */}
-            {isLoaded && _.isEmpty(entityData) && (
+            {!loading && _.isEmpty(entityData) && (
               <Flex
                 w={"100%"}
                 direction={"row"}
@@ -321,9 +333,6 @@ const Dashboard = () => {
                 <Text color={"gray.400"} fontWeight={"semibold"}>You do not have any Entities.</Text>
               </Flex>
             )}
-
-            {/* Condition: Not loaded */}
-            {!isLoaded && <Loading />}
 
             <Spacer />
 

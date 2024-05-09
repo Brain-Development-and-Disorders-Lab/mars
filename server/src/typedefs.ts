@@ -2,6 +2,12 @@
  * GraphQL type definitions
  */
 export const typedefs = `#graphql
+  # "Item" type containing minimal data shared with many stored records
+  type Item {
+    _id: String
+    name: String
+  }
+
   # "User" type
   type User {
     _id: String
@@ -19,8 +25,23 @@ export const typedefs = `#graphql
     shared: [String]
     created: String
     entities: [String]
-    # To-Do: Entities
     # To-Do: History
+  }
+
+  # "Value" type
+  type Value {
+    _id: String
+    name: String
+    type: String
+    data: String
+  }
+
+  # "Attribute" type
+  type Attribute {
+    _id: String
+    name: String
+    description: String
+    values: [Value]
   }
 
   # "Entity" type
@@ -28,23 +49,22 @@ export const typedefs = `#graphql
     _id: String
     name: String
     created: String
+    timestamp: String
     deleted: Boolean
     locked: Boolean
     owner: String
     description: String
+    projects: [String]
     associations: Associations
+    attachments: [Item]
+    attributes: [Attribute]
+    # To-Do: History, Attributes
   }
 
   # Representation of Origins and Products
   type Associations {
-    origins: [AssociationEntity]
-    products: [AssociationEntity]
-  }
-
-  # Abridged type of minimal
-  type AssociationEntity {
-    id: String
-    name: String
+    origins: [Item]
+    products: [Item]
   }
 
   # Define query types
