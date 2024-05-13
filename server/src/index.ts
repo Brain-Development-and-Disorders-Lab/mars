@@ -41,7 +41,7 @@ app.use(helmet());
 app.use(cors({ credentials: true, origin: true }));
 app.use(express.json({ limit: "50mb" }));
 app.use(fileUpload());
- 
+
 // Use routes
 app.use(ProjectsRoute); // ProjectsRoute now has authMiddleware applied to it
 app.use(ActivityRoute);
