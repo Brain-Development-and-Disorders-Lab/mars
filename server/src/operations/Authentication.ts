@@ -166,26 +166,28 @@ export class Authentication {
    * @return {Promise<AuthInfo>}
    */
   static login = (code: string): Promise<AuthInfo> => {
-    consola.start("Performing login...");
-
     // Retrieve a token
     return new Promise((resolve, reject) => {
-      const tokenRequestData = `client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}&grant_type=authorization_code&code=${code}&redirect_uri=${REDIRECT_URI}`;
-      postData(TOKEN_URL, tokenRequestData, {
+      // const tokenRequestData = `client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}&grant_type=authorization_code&code=${code}&redirect_uri=${REDIRECT_URI}`;
+      const loginData = JSON.stringify({
+        "client_id": CLIENT_ID,
+        "client_secret": CLIENT_SECRET,
+        "grant_type": "authorization_code",
+        "code": code,
+        "redirect_uri": REDIRECT_URI,
+      });
+      postData(TOKEN_URL, loginData, {
         headers: {
           Accept: "application/json",
           "Content-Type": "application/x-www-form-urlencoded",
         },
       })
         .then(async (response: AuthToken) => {
-          consola.success("Valid token");
-          consola.start("Checking access...");
-
           try {
             let user = await Users.exists(response.orcid);
             if (user) {
               // If user exists, update the existing record with any new data
-              consola.info("User found for ORCiD:", response.orcid);
+              consola.info("User found with ORCiD:", response.orcid);
               await Users.update(response.orcid, {
                 name: response.name,
                 _id: response.orcid,
