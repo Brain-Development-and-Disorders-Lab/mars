@@ -30,6 +30,8 @@ export const getData = (
     };
   }
 
+  consola.info("GET request:", path);
+
   return new Promise((resolve, reject) => {
     axios
       .get(`${SERVER_URL}${path}`, requestOptions)
@@ -71,6 +73,8 @@ export const postData = async (
       ...requestOptions.headers,
     };
   }
+
+  consola.info("POST request:", path, data);
 
   return new Promise((resolve, reject) => {
     axios
