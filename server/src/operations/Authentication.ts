@@ -168,14 +168,13 @@ export class Authentication {
   static login = (code: string): Promise<AuthInfo> => {
     // Retrieve a token
     return new Promise((resolve, reject) => {
-      // const tokenRequestData = `client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}&grant_type=authorization_code&code=${code}&redirect_uri=${REDIRECT_URI}`;
-      const loginData = JSON.stringify({
+      const loginData = new URLSearchParams({
         "client_id": CLIENT_ID,
         "client_secret": CLIENT_SECRET,
         "grant_type": "authorization_code",
         "code": code,
         "redirect_uri": REDIRECT_URI,
-      });
+      }).toString();
       postData(TOKEN_URL, loginData, {
         headers: {
           Accept: "application/json",
@@ -214,13 +213,13 @@ export class Authentication {
             });
           } catch (error) {
             consola.error(`Error processing ORCiD "${response.orcid}": ${JSON.stringify(error)}`);
-            reject(`Error processing ORCiD "${response.orcid}". Please contact the administrator.`);
+            reject(`Error processing ORCiD "${response.orcid}": ${JSON.stringify(error)}`);
           }
         }
         )
         .catch((error: any) => {
           consola.error(JSON.stringify(error));
-          reject(`${JSON.stringify(error)}, ${tokenRequestData}`);
+          reject(JSON.stringify(error));
         });
     });
   };
