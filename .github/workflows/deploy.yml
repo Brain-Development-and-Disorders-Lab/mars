@@ -8,7 +8,7 @@ on:
 # Note: Environment variables used for server deployment only
 env:
   AZURE_WEBAPP_NAME: mars-server
-  AZURE_WEBAPP_PACKAGE_PATH: './server'
+  AZURE_WEBAPP_PACKAGE_PATH: './'
   NODE_VERSION: '18.x'
 
 jobs:
