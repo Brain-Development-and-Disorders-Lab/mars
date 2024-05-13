@@ -46,7 +46,6 @@ export const postData = async (
   options?: AxiosRequestConfig
 ): Promise<any> => {
   return new Promise((resolve, reject) => {
-    consola.info("Request data:", data);
     axios
       .post(url, data, options)
       .then((response) => {

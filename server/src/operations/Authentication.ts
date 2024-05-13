@@ -168,6 +168,7 @@ export class Authentication {
   static login = (code: string): Promise<AuthInfo> => {
     // Retrieve a token
     return new Promise((resolve, reject) => {
+      // Format login data for POST request
       const loginData = new URLSearchParams({
         "client_id": CLIENT_ID,
         "client_secret": CLIENT_SECRET,
@@ -175,6 +176,7 @@ export class Authentication {
         "code": code,
         "redirect_uri": REDIRECT_URI,
       }).toString();
+
       postData(TOKEN_URL, loginData, {
         headers: {
           Accept: "application/json",
