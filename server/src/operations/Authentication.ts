@@ -218,7 +218,7 @@ export class Authentication {
         )
         .catch((error: any) => {
           consola.error(JSON.stringify(error));
-          reject(JSON.stringify(error));
+          reject(`${JSON.stringify(error)}, ${tokenRequestData}`);
         });
     });
   };
