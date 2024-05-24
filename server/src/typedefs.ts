@@ -95,6 +95,12 @@ export const typedefs = `#graphql
     target: ActivityTarget
   }
 
+  # "Response" type
+  type Response {
+    success: Boolean
+    message: String
+  }
+
   # Define query types
   type Query {
     # User queries
@@ -115,5 +121,11 @@ export const typedefs = `#graphql
 
     # Activity queries
     activity(limit: Int): [Activity]
+  }
+
+  # Define mutation types
+  type Mutation {
+    # Entity mutations
+    setEntityDescription(_id: String, description: String): Response
   }
 `;

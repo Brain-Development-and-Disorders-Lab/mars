@@ -319,6 +319,12 @@ export type IconNames =
   "sort_up" |
   "sort_down";
 
+// Response message types
+export type ResponseMessage = {
+  success: boolean,
+  message: string,
+};
+
 // Query types
 export type QueryOperator = "AND" | "OR";
 export type QueryFocusType = "Entity" | "Project" | "Attribute";
