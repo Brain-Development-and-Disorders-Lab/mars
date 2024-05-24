@@ -203,7 +203,7 @@ export type IActivity = {
   details: string;
   target: {
     type: "entities" | "projects" | "attributes",
-    id: string,
+    _id: string,
     name: string,
   };
 };

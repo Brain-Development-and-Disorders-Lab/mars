@@ -365,7 +365,7 @@ export class System {
                 };
               }
               return {
-                identifier: value.identifier,
+                _id: value._id,
                 name: value.name,
                 type: value.type,
                 data: valueData,
@@ -422,13 +422,13 @@ export class System {
           }
 
           const minimalEntities = entities.map((entity) => {
-            return { id: entity._id, name: entity.name };
+            return { _id: entity._id, name: entity.name };
           });
 
           // Add Products to Entities (if Origins specified)
           if (!_.isEmpty(entityFields.origins)) {
             // Add all Products to each Origin
-            entityFields.origins.map((origin: { id: string; name: string }) => {
+            entityFields.origins.map((origin: { _id: string; name: string }) => {
               operations.push(Entities.addProducts(origin, minimalEntities));
             });
 
@@ -444,7 +444,7 @@ export class System {
           if (!_.isEmpty(entityFields.products)) {
             // Add all Origins to each Product
             entityFields.products.map(
-              (product: { id: string; name: string }) => {
+              (product: { _id: string; name: string }) => {
                 operations.push(Entities.addOrigins(product, minimalEntities));
               }
             );

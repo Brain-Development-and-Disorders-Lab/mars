@@ -66,7 +66,7 @@ export class Attributes {
               details: "Created new Attribute",
               target: {
                 type: "attributes",
-                id: attribute._id,
+                _id: attribute._id,
                 name: attribute.name,
               },
             })
@@ -118,7 +118,7 @@ export class Attributes {
               details: "Updated Attribute",
               target: {
                 type: "attributes",
-                id: updatedAttribute._id,
+                _id: updatedAttribute._id,
                 name: updatedAttribute.name,
               },
             })
@@ -174,7 +174,7 @@ export class Attributes {
               details: "Restored Attribute",
               target: {
                 type: "attributes",
-                id: attribute._id,
+                _id: attribute._id,
                 name: attribute.name,
               },
             })
@@ -249,7 +249,7 @@ export class Attributes {
               details: "Deleted Attribute",
               target: {
                 type: "attributes",
-                id: attribute._id,
+                _id: attribute._id,
                 name: attribute.name,
               },
             })

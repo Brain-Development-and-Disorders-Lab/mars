@@ -220,7 +220,7 @@ export class Entities {
               details: "Created new Entity",
               target: {
                 type: "entities",
-                id: entity?._id,
+                _id: entity?._id,
                 name: entity?.name,
               },
             })
@@ -485,7 +485,7 @@ export class Entities {
               details: "Updated Entity",
               target: {
                 type: "entities",
-                id: currentEntity?._id,
+                _id: currentEntity?._id,
                 name: currentEntity?.name,
               },
             })
@@ -585,7 +585,7 @@ export class Entities {
               details: "Restored Entity",
               target: {
                 type: "entities",
-                id: entity?._id,
+                _id: entity?._id,
                 name: entity?.name,
               },
             })
@@ -1987,7 +1987,7 @@ export class Entities {
               details: "Deleted Entity",
               target: {
                 type: "entities",
-                id: entity?._id,
+                _id: entity?._id,
                 name: entity?.name,
               },
             })
