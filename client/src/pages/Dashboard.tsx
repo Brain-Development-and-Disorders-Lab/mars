@@ -23,7 +23,6 @@ import Linky from "@components/Linky";
 import { ProjectModel, EntityModel, ActivityModel, IconNames } from "@types";
 
 // Utility functions and libraries
-import { getData } from "src/database/functions";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 dayjs.extend(relativeTime);
@@ -37,17 +36,28 @@ import { useQuery, gql } from '@apollo/client';
 
 // Queries
 const GET_DASHBOARD = gql`
-  query GetDashboard($limit: Int) {
-    projects(limit: $limit) {
+  query GetDashboard($projects: Int, $entities: Int, $activity: Int) {
+    projects(limit: $projects) {
       _id
       name
       description
     }
-    entities(limit: $limit) {
+    entities(limit: $entities) {
       _id
       deleted
       name
       description
+    }
+    activity(limit: $activity)
+    {
+      _id
+      timestamp
+      type
+      target {
+        _id
+        name
+        type
+      }
     }
   }
 `;
@@ -67,7 +77,9 @@ const Dashboard = () => {
   // Execute GraphQL query both on page load and navigation
   const { loading, error, data, refetch } = useQuery(GET_DASHBOARD, {
     variables: {
-      limit: 5,
+      projects: 5,
+      entities: 5,
+      activity: 10,
     }
   });
 
@@ -78,6 +90,9 @@ const Dashboard = () => {
     }
     if (data?.projects) {
       setProjectData(data.projects);
+    }
+    if (data?.activity) {
+      setActivityData(data.activity);
     }
   }, [data]);
 
@@ -127,26 +142,6 @@ const Dashboard = () => {
       setVisibleColumns({});
     }
   }, [breakpoint]);
-
-  // Get all Updates
-  useEffect(() => {
-    getData(`/activity`)
-      .then((value) => {
-        setActivityData(value.reverse());
-      })
-      .catch((_error) => {
-        toast({
-          title: "Error",
-          status: "error",
-          description: "Could not retrieve Updates data.",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-      })
-      .finally(() => {
-      });
-  }, []);
 
   // Configure Entity table
   const entityTableData: { _id: string, deleted: boolean, name: string, description: string }[] = entityData;
@@ -417,7 +412,7 @@ const Dashboard = () => {
                         </Text>
 
                         <Linky
-                          id={activity.target.id}
+                          id={activity.target._id}
                           type={activity.target.type}
                           fallback={activity.target.name}
                           justify={"left"}

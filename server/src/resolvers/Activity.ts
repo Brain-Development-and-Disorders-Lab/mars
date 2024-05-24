@@ -5,7 +5,7 @@ export const ActivityResolvers = {
     // Retrieve all Activity
     activity: async (_parent: any, args: { limit: 100 }) => {
       const allActivity = await Activity.all();
-      return allActivity.slice(0, args.limit);
+      return allActivity.slice(0, args.limit).reverse();
     },
   }
 }
