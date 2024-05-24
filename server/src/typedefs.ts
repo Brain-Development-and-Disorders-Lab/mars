@@ -2,6 +2,8 @@
  * GraphQL type definitions
  */
 export const typedefs = `#graphql
+  scalar Date
+
   # "Item" interface containing minimal data shared with many stored records
   interface Item {
     _id: String
@@ -78,6 +80,21 @@ export const typedefs = `#graphql
     attributes: [Attribute]
   }
 
+  # "ActivityTarget" type
+  type ActivityTarget implements Item {
+    _id: String
+    name: String
+    type: String
+  }
+
+  # "Activity" type
+  type Activity {
+    _id: String
+    timestamp: Date
+    type: String
+    target: ActivityTarget
+  }
+
   # Define query types
   type Query {
     # User queries
@@ -95,5 +112,8 @@ export const typedefs = `#graphql
     # Attribute queries
     attributes(limit: Int): [Attribute]
     attribute(_id: String): Attribute
+
+    # Activity queries
+    activity(limit: Int): [Activity]
   }
 `;

@@ -30,6 +30,8 @@ import UsersRoute from "./routes/Users";
 import { ApolloServer } from "@apollo/server";
 import { startStandaloneServer } from '@apollo/server/standalone';
 import { AttributesResolvers } from "./resolvers/Attributes";
+import { ActivityResolvers } from "./resolvers/Activity";
+import { DateResolver } from "./resolvers/Date";
 import { EntitiesResolvers } from "./resolvers/Entities";
 import { ProjectsResolvers } from "./resolvers/Projects";
 import { UsersResolvers } from "./resolvers/Users";
@@ -79,7 +81,14 @@ wrapper.listen(port, () => {
 const startServer = async () => {
   const server = new ApolloServer({
     typeDefs: typedefs,
-    resolvers: [UsersResolvers, ProjectsResolvers, EntitiesResolvers, AttributesResolvers],
+    resolvers: [
+      DateResolver,
+      UsersResolvers,
+      ProjectsResolvers,
+      EntitiesResolvers,
+      AttributesResolvers,
+      ActivityResolvers
+    ],
   });
 
   const { url } = await startStandaloneServer(server, {
