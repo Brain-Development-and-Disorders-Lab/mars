@@ -310,7 +310,7 @@ const Dashboard = () => {
               <DataTable
                 columns={entityTableColumns}
                 data={entityTableData.filter((entity) =>
-                  _.isEqual(entity.deleted, false)
+                  _.isEqual(entity.deleted, false) || _.isEqual(entity.deleted, null)
                 )}
                 visibleColumns={visibleColumns}
               />
