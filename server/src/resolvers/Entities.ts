@@ -1,3 +1,4 @@
+import { ResponseMessage } from "@types";
 import { Entities } from "src/models/Entities"
 
 export const EntitiesResolvers = {
@@ -10,8 +11,12 @@ export const EntitiesResolvers = {
 
     // Retrieve one Entity by _id
     entity: async (_parent: any, args: { _id: string }) => {
-      const entities = await Entities.all();
-      return entities.find((entity) => entity._id.toString() === args._id);
+      return await Entities.getOne(args._id);
     },
+  },
+  Mutation: {
+    setEntityDescription: async (_parent: any, args: { _id: string, description: string }): Promise<ResponseMessage> => {
+      return await Entities.setDescription(args._id, args.description);;
+    }
   }
 }

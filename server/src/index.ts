@@ -5,7 +5,6 @@ import "dotenv/config";
 import _ from "lodash";
 import express from "express";
 import cors from "cors";
-// @ts-ignore
 import helmet from "helmet";
 import consola, { LogLevels } from "consola";
 
@@ -29,13 +28,15 @@ import UsersRoute from "./routes/Users";
 // GraphQL
 import { ApolloServer } from "@apollo/server";
 import { startStandaloneServer } from '@apollo/server/standalone';
+import { typedefs } from "./typedefs";
+
+// GraphQL - resolvers
 import { AttributesResolvers } from "./resolvers/Attributes";
 import { ActivityResolvers } from "./resolvers/Activity";
 import { DateResolver } from "./resolvers/Date";
 import { EntitiesResolvers } from "./resolvers/Entities";
 import { ProjectsResolvers } from "./resolvers/Projects";
 import { UsersResolvers } from "./resolvers/Users";
-import { typedefs } from "./typedefs";
 
 // Set logging level
 consola.level = (_.isEqual(process.env.NODE_ENV, "development") || _.isEqual(process.env.NODE_ENV, "test"))
