@@ -1,4 +1,4 @@
-import { ResponseMessage } from "@types";
+import { IEntity, ResponseMessage } from "@types";
 import { Entities } from "src/models/Entities"
 
 export const EntitiesResolvers = {
@@ -16,7 +16,10 @@ export const EntitiesResolvers = {
   },
   Mutation: {
     setEntityDescription: async (_parent: any, args: { _id: string, description: string }): Promise<ResponseMessage> => {
-      return await Entities.setDescription(args._id, args.description);;
+      return await Entities.setDescription(args._id, args.description);
+    },
+    createEntity: async (_parent: any, args: { entity: IEntity }): Promise<ResponseMessage> => {
+      return await Entities.create(args.entity);
     }
   }
 }
