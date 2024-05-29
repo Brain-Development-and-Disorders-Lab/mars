@@ -20,6 +20,12 @@ export const EntitiesResolvers = {
     },
     createEntity: async (_parent: any, args: { entity: IEntity }): Promise<ResponseMessage> => {
       return await Entities.create(args.entity);
+    },
+    addEntityProject: async (_parent: any, args: { _id: string, project_id: string }): Promise<ResponseMessage> => {
+      return await Entities.addProject(args._id, args.project_id);
+    },
+    removeEntityProject: async (_parent: any, args: { _id: string, project_id: string }): Promise<ResponseMessage> => {
+      return await Entities.removeProject(args._id, args.project_id);
     }
   }
 }

@@ -99,6 +99,50 @@ export class Entities {
   };
 
   /**
+   * Remove a Project from an Entity
+   * @param _id Target Entity identifier
+   * @param project_id Project identifier to remove from Entity
+   * @returns {Promise<ResponseMessage>}
+   */
+  static removeProject = async (_id: string, project_id: string): Promise<ResponseMessage> => {
+    const entity = await this.getOne(_id);
+
+    if (_.isNull(entity)) {
+      return {
+        success: false,
+        message: "Entity not found",
+      };
+    }
+
+    const projectCollection = entity.projects;
+    if (!_.includes(projectCollection, project_id)) {
+      return {
+        success: false,
+        message: "Entity not associated with Project",
+      };
+    }
+    _.remove(projectCollection, project_id);
+
+    // To-Do: Need to invoke corresponding function for Project, removing Entity from Project
+
+    const update = {
+      $set: {
+        projects: projectCollection,
+      },
+    };
+
+    const response = await getDatabase()
+      .collection<EntityModel>(ENTITIES_COLLECTION)
+      .updateOne({ _id: _id }, update);
+    const successStatus = response.modifiedCount == 1;
+
+    return {
+      success: successStatus,
+      message: successStatus ? "Removed Project successfully" : "Unable to remove Project",
+    };
+  };
+
+  /**
    * Update the Entity description
    * @param {string} _id Entity identifier
    * @param {string} description Update Entity description
@@ -123,9 +167,6 @@ export class Entities {
   };
 
   // Existing functions:
-  // * create (Entity)
-  // * addProject (id, id)
-  // * removeProject (id, id)
   // * addProduct (id, id)
   // * addProducts (id, [id])
   // * removeProduct (id, id)
