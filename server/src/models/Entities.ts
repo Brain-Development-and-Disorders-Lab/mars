@@ -1,4 +1,4 @@
-import { EntityModel, IEntity, IGenericItem, ResponseMessage } from "@types";
+import { AttributeModel, EntityModel, IEntity, IGenericItem, ResponseMessage } from "@types";
 import _ from "lodash";
 import { getDatabase } from "src/connectors/database";
 import { getIdentifier } from "src/util";
@@ -70,7 +70,7 @@ export class Entities {
       };
     }
 
-    const projectCollection = entity.projects;
+    const projectCollection = _.cloneDeep(entity.projects);
     if (_.includes(projectCollection, project_id)) {
       return {
         success: false,
@@ -114,7 +114,7 @@ export class Entities {
       };
     }
 
-    const projectCollection = entity.projects;
+    const projectCollection = _.cloneDeep(entity.projects);
     if (!_.includes(projectCollection, project_id)) {
       return {
         success: false,
@@ -182,7 +182,7 @@ export class Entities {
       };
     }
 
-    const productCollection = entity.associations.products;
+    const productCollection = _.cloneDeep(entity.associations.products);
     if (_.includes(productCollection, product)) {
       return {
         success: false,
@@ -270,7 +270,7 @@ export class Entities {
       };
     }
 
-    const productCollection = entity.associations.products;
+    const productCollection = _.cloneDeep(entity.associations.products);
     if (_.includes(productCollection, product)) {
       return {
         success: false,
@@ -317,7 +317,7 @@ export class Entities {
       };
     }
 
-    const originCollection = entity.associations.origins;
+    const originCollection = _.cloneDeep(entity.associations.origins);
     if (_.includes(originCollection, origin)) {
       return {
         success: false,
@@ -405,7 +405,7 @@ export class Entities {
       };
     }
 
-    const originCollection = entity.associations.origins;
+    const originCollection = _.cloneDeep(entity.associations.origins);
     if (_.includes(originCollection, origin)) {
       return {
         success: false,
@@ -436,10 +436,110 @@ export class Entities {
     };
   };
 
+  static addAttribute = async (_id: string, attribute: AttributeModel): Promise<ResponseMessage> => {
+    const entity = await this.getOne(_id);
+
+    if (_.isNull(entity)) {
+      return {
+        success: false,
+        message: "Entity not found",
+      };
+    }
+
+    const attributeCollection = _.cloneDeep(entity.attributes);
+    attributeCollection.push(attribute);
+
+    const update = {
+      $set: {
+        attributes: attributeCollection,
+      }
+    };
+
+    const response = await getDatabase()
+      .collection<EntityModel>(ENTITIES_COLLECTION)
+      .updateOne({ _id: _id }, update);
+    const successStatus = response.modifiedCount == 1;
+
+    return {
+      success: successStatus,
+      message: successStatus ? "Added Attribute successfully" : "Unable to add Attribute",
+    };
+  };
+
+  static removeAttribute = async (_id: string, attribute: string): Promise<ResponseMessage> => {
+    const entity = await this.getOne(_id);
+
+    if (_.isNull(entity)) {
+      return {
+        success: false,
+        message: "Entity not found",
+      };
+    }
+
+    // Exclude the Attribute identifier
+    const attributeCollection = _.cloneDeep(entity.attributes).filter((a) => a._id != attribute);
+    if (attributeCollection.length === entity.attributes.length) {
+      return {
+        success: false,
+        message: "Entity does not have Attribute to remove",
+      };
+    }
+
+    const update = {
+      $set: {
+        attributes: attributeCollection,
+      }
+    };
+
+    const response = await getDatabase()
+      .collection<EntityModel>(ENTITIES_COLLECTION)
+      .updateOne({ _id: _id }, update);
+    const successStatus = response.modifiedCount == 1;
+
+    return {
+      success: successStatus,
+      message: successStatus ? "Removed Attribute successfully" : "Unable to remove Attribute",
+    };
+  };
+
+  static updateAttribute = async (_id: string, attribute: AttributeModel): Promise<ResponseMessage> => {
+    const entity = await this.getOne(_id);
+
+    if (_.isNull(entity)) {
+      return {
+        success: false,
+        message: "Entity not found",
+      };
+    }
+
+    if (!_.findIndex(entity.attributes, { _id: attribute._id })) {
+      return {
+        success: false,
+        message: "Attribute to update is not associated with Entity",
+      };
+    }
+
+    // Create new collection of Attributes, subsituting the original Attribute with the updated Attribute
+    const attributeCollection = _.map(_.cloneDeep(entity.attributes), (a) => _.isEqual(a._id, attribute._id) ? attribute : a);
+
+    const update = {
+      $set: {
+        attributes: attributeCollection,
+      },
+    };
+
+    const response = await getDatabase()
+      .collection<EntityModel>(ENTITIES_COLLECTION)
+      .updateOne({ _id: _id }, update);
+    const successStatus = response.modifiedCount == 1;
+
+    return {
+      success: successStatus,
+      message: successStatus ? "Updated Attribute successfully" : "Unable to update Attribute",
+    };
+  };
+
   // Existing functions:
-  // * addAttribute (id, id)
-  // * removeAttribute (id, id)
-  // * updateAttribute (id, Attribute)
   // * addAttachment (id, id)
   // * removeAttachment (id, id)
   // * update (Entity)
