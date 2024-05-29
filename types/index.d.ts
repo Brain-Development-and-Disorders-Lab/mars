@@ -23,8 +23,8 @@ export namespace State.Entity {
   type Associations = Start & {
     projects: string[];
     associations: {
-      origins: { name: string; id: string };
-      products: { name: string; id: string }[];
+      origins: IGenericItem[];
+      products: IGenericItem[];
     };
   };
 
@@ -122,7 +122,13 @@ export type ProjectHistory = {
   timestamp: string;
   description: string;
   entities: string[];
-}
+};
+
+// Utility type used across other types, typically in a list
+export type IGenericItem = {
+  _id: string;
+  name: string;
+};
 
 // Entity types
 export type IEntity = {
@@ -135,11 +141,11 @@ export type IEntity = {
   description: string;
   projects: string[];
   associations: {
-    origins: { name: string; _id: string }[];
-    products: { name: string; _id: string }[];
+    origins: IGenericItem[];
+    products: IGenericItem[];
   };
   attributes: AttributeModel[];
-  attachments: { name: string; _id: string }[];
+  attachments: IGenericItem[];
   history: EntityHistory[];
 };
 
@@ -154,11 +160,11 @@ export type EntityHistory = {
   description: string;
   projects: string[];
   associations: {
-    origins: { name: string; _id: string }[];
-    products: { name: string; _id: string }[];
+    origins: IGenericItem[];
+    products: IGenericItem[];
   };
   attributes: AttributeModel[];
-  attachments: { name: string; _id: string }[];
+  attachments: IGenericItem[];
 };
 
 export type EntityExport = {
@@ -182,8 +188,8 @@ export type EntityImport = {
   owner: string;
   description: string;
   projects: string;
-  origins: {_id: string, name: string}[];
-  products: {_id: string, name: string}[];
+  origins: IGenericItem[];
+  products: IGenericItem[];
   attributes: AttributeModel[];
 };
 

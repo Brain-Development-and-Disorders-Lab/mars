@@ -4,8 +4,8 @@
 export const typedefs = `#graphql
   scalar Date
 
-  # "Item" interface containing minimal data shared with many stored records
-  interface Item {
+  # "Item" type containing minimal data shared with many stored records
+  type Item {
     _id: String!
     name: String!
   }
@@ -17,7 +17,7 @@ export const typedefs = `#graphql
   }
 
   # "User" type
-  type User implements Item {
+  type User {
     _id: String!
     name: String!
     email: String
@@ -25,7 +25,7 @@ export const typedefs = `#graphql
   }
 
   # "Project" type
-  type Project implements Item {
+  type Project {
     _id: String!
     name: String!
     description: String
@@ -37,7 +37,7 @@ export const typedefs = `#graphql
   }
 
   # "Value" type
-  type Value implements Item {
+  type Value {
     _id: String!
     name: String!
     type: String
@@ -53,7 +53,7 @@ export const typedefs = `#graphql
   }
 
   # "Attribute" type
-  type Attribute implements Item {
+  type Attribute {
     _id: String!
     name: String!
     description: String
@@ -81,7 +81,7 @@ export const typedefs = `#graphql
   }
 
   # "Entity" type
-  type Entity implements Item {
+  type Entity {
     _id: String!
     name: String!
     created: String
@@ -124,7 +124,7 @@ export const typedefs = `#graphql
   }
 
   # "ActivityTarget" type
-  type ActivityTarget implements Item {
+  type ActivityTarget {
     _id: String!
     name: String!
     type: String
@@ -173,5 +173,11 @@ export const typedefs = `#graphql
     createEntity(entity: EntityInput): Response
     addEntityProject(_id: String, project_id: String): Response
     removeEntityProject(_id: String, project_id: String): Response
+    addEntityProduct(_id: String, product: ItemInput): Response
+    addEntityProducts(_id: String, products: [ItemInput]): Response
+    removeEntityProduct(_id: String, product: ItemInput): Response
+    addEntityOrigin(_id: String, origin: ItemInput): Response
+    addEntityOrigins(_id: String, origins: [ItemInput]): Response
+    removeEntityOrigin(_id: String, origin: ItemInput): Response
   }
 `;

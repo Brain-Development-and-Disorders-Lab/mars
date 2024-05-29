@@ -81,6 +81,7 @@ import {
   EntityHistory,
   EntityModel,
   IAttribute,
+  IGenericItem,
   IValue,
   ProjectModel,
 } from "@types";
@@ -120,9 +121,7 @@ const Entity = () => {
   const [projectData, setProjectData] = useState([] as ProjectModel[]);
   const [selectedProjects, setSelectedProjects] = useState([] as string[]);
 
-  const [allEntities, setAllEntities] = useState(
-    [] as { name: string; _id: string }[]
-  );
+  const [allEntities, setAllEntities] = useState([] as IGenericItem[]);
 
   const {
     isOpen: isAddProductsOpen,
@@ -234,18 +233,14 @@ const Entity = () => {
   const [entityData, setEntityData] = useState({} as EntityModel);
   const [entityDescription, setEntityDescription] = useState("");
   const [entityProjects, setEntityProjects] = useState([] as string[]);
-  const [entityOrigins, setEntityOrigins] = useState(
-    [] as { name: string; _id: string }[]
-  );
-  const [entityProducts, setEntityProducts] = useState(
-    [] as { name: string; _id: string }[]
-  );
+  const [entityOrigins, setEntityOrigins] = useState([] as IGenericItem[]);
+  const [entityProducts, setEntityProducts] = useState([] as IGenericItem[]);
   const [entityAttributes, setEntityAttributes] = useState(
     [] as AttributeModel[]
   );
   const [entityHistory, setEntityHistory] = useState([] as EntityHistory[]);
   const [entityAttachments, setEntityAttachments] = useState(
-    [] as { name: string; _id: string }[]
+    [] as IGenericItem[]
   );
   const [toUploadAttachments, setToUploadAttachments] = useState(
     [] as string[]
@@ -586,10 +581,7 @@ const Entity = () => {
   ];
 
   // Configure origins table columns and data
-  const originTableColumnHelper = createColumnHelper<{
-    _id: string;
-    name: string;
-  }>();
+  const originTableColumnHelper = createColumnHelper<IGenericItem>();
   const originTableColumns = [
     originTableColumnHelper.accessor("name", {
       cell: (info) => {
@@ -650,10 +642,7 @@ const Entity = () => {
   ];
 
   // Configure products table columns and data
-  const productTableColumnHelper = createColumnHelper<{
-    _id: string;
-    name: string;
-  }>();
+  const productTableColumnHelper = createColumnHelper<IGenericItem>();
   const productTableColumns = [
     productTableColumnHelper.accessor("name", {
       cell: (info) => {

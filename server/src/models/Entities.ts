@@ -1,4 +1,4 @@
-import { EntityModel, IEntity, ResponseMessage } from "@types";
+import { EntityModel, IEntity, IGenericItem, ResponseMessage } from "@types";
 import _ from "lodash";
 import { getDatabase } from "src/connectors/database";
 import { getIdentifier } from "src/util";
@@ -166,13 +166,277 @@ export class Entities {
     };
   };
 
+  /**
+   * Add a Product association to an Entity
+   * @param _id Target Entity identifier
+   * @param product Generic format for Product to associate with Entity
+   * @returns {Promise<ResponseMessage>}
+   */
+  static addProduct = async (_id: string, product: IGenericItem): Promise<ResponseMessage> => {
+    const entity = await this.getOne(_id);
+
+    if (_.isNull(entity)) {
+      return {
+        success: false,
+        message: "Entity not found",
+      };
+    }
+
+    const productCollection = entity.associations.products;
+    if (_.includes(productCollection, product)) {
+      return {
+        success: false,
+        message: "Entity already associated with Product",
+      };
+    }
+    productCollection.push(product);
+
+    // To-Do: Need to invoke corresponding function for Entity, adding Entity as Product Origin
+
+    const update = {
+      $set: {
+        associations: {
+          origins: entity.associations.origins,
+          products: productCollection,
+        },
+      },
+    };
+
+    const response = await getDatabase()
+      .collection<EntityModel>(ENTITIES_COLLECTION)
+      .updateOne({ _id: _id }, update);
+    const successStatus = response.modifiedCount == 1;
+
+    return {
+      success: successStatus,
+      message: successStatus ? "Added Product successfully" : "Unable to add Product",
+    };
+  };
+
+  /**
+   * Add multiple Product associations to an Entity
+   * @param _id Target Entity identifier
+   * @param products Set of Products to associate with Entity
+   * @returns {Promise<ResponseMessage>}
+   */
+  static addProducts = async (_id: string, products: IGenericItem[]): Promise<ResponseMessage> => {
+    const entity = await this.getOne(_id);
+
+    if (_.isNull(entity)) {
+      return {
+        success: false,
+        message: "Entity not found",
+      };
+    }
+
+    // Create a union set from the existing set of products and the set of products to add
+    const updatedProductCollection = _.union(entity.associations.products, products);
+
+    // To-Do: Need to invoke corresponding function for each Product Entity, adding this Entity as Product Origin
+
+    const update = {
+      $set: {
+        associations: {
+          origins: entity.associations.origins,
+          products: updatedProductCollection,
+        },
+      },
+    };
+
+    const response = await getDatabase()
+      .collection<EntityModel>(ENTITIES_COLLECTION)
+      .updateOne({ _id: _id }, update);
+    const successStatus = response.modifiedCount == 1;
+
+    return {
+      success: successStatus,
+      message: successStatus ? "Added Products successfully" : "Unable to add Products",
+    };
+  };
+
+  /**
+   * Remove a Product association from an Entity
+   * @param _id Target Entity identifier
+   * @param product Generic format for Product to associate with Entity
+   * @returns {Promise<ResponseMessage>}
+   */
+  static removeProduct = async (_id: string, product: IGenericItem): Promise<ResponseMessage> => {
+    const entity = await this.getOne(_id);
+
+    if (_.isNull(entity)) {
+      return {
+        success: false,
+        message: "Entity not found",
+      };
+    }
+
+    const productCollection = entity.associations.products;
+    if (_.includes(productCollection, product)) {
+      return {
+        success: false,
+        message: "Entity already associated with Product",
+      };
+    }
+    productCollection.push(product);
+
+    // To-Do: Need to invoke corresponding function for Entity, adding Entity as Product Origin
+
+    const update = {
+      $set: {
+        associations: {
+          origins: entity.associations.origins,
+          products: productCollection,
+        },
+      },
+    };
+
+    const response = await getDatabase()
+      .collection<EntityModel>(ENTITIES_COLLECTION)
+      .updateOne({ _id: _id }, update);
+    const successStatus = response.modifiedCount == 1;
+
+    return {
+      success: successStatus,
+      message: successStatus ? "Removed Product successfully" : "Unable to remove Product",
+    };
+  };
+
+  /**
+   * Add a Origin association to an Entity
+   * @param _id Target Entity identifier
+   * @param origin Generic format for Origin to associate with Entity
+   * @returns {Promise<ResponseMessage>}
+   */
+  static addOrigin = async (_id: string, origin: IGenericItem): Promise<ResponseMessage> => {
+    const entity = await this.getOne(_id);
+
+    if (_.isNull(entity)) {
+      return {
+        success: false,
+        message: "Entity not found",
+      };
+    }
+
+    const originCollection = entity.associations.origins;
+    if (_.includes(originCollection, origin)) {
+      return {
+        success: false,
+        message: "Entity already associated with Origin",
+      };
+    }
+    originCollection.push(origin);
+
+    // To-Do: Need to invoke corresponding function for Entity, adding Entity as Origin Product
+
+    const update = {
+      $set: {
+        associations: {
+          origins: originCollection,
+          products: entity.associations.products,
+        },
+      },
+    };
+
+    const response = await getDatabase()
+      .collection<EntityModel>(ENTITIES_COLLECTION)
+      .updateOne({ _id: _id }, update);
+    const successStatus = response.modifiedCount == 1;
+
+    return {
+      success: successStatus,
+      message: successStatus ? "Added Origin successfully" : "Unable to add Origin",
+    };
+  };
+
+  /**
+   * Add multiple Origin associations to an Entity
+   * @param _id Target Entity identifier
+   * @param origins Set of Origins to associate with Entity
+   * @returns {Promise<ResponseMessage>}
+   */
+  static addOrigins = async (_id: string, origins: IGenericItem[]): Promise<ResponseMessage> => {
+    const entity = await this.getOne(_id);
+
+    if (_.isNull(entity)) {
+      return {
+        success: false,
+        message: "Entity not found",
+      };
+    }
+
+    // Create a union set from the existing set of Origins and the set of Origins to add
+    const updatedOriginCollection = _.union(entity.associations.origins, origins);
+
+    // To-Do: Need to invoke corresponding function for each Origin Entity, adding this Entity as Origin Product
+
+    const update = {
+      $set: {
+        associations: {
+          origins: updatedOriginCollection,
+          products: entity.associations.products,
+        },
+      },
+    };
+
+    const response = await getDatabase()
+      .collection<EntityModel>(ENTITIES_COLLECTION)
+      .updateOne({ _id: _id }, update);
+    const successStatus = response.modifiedCount == 1;
+
+    return {
+      success: successStatus,
+      message: successStatus ? "Added Origins successfully" : "Unable to add Origins",
+    };
+  };
+
+  /**
+   * Remove an Origin association from an Entity
+   * @param _id Target Entity identifier
+   * @param origin Generic format for Origin to associate with Entity
+   * @returns {Promise<ResponseMessage>}
+   */
+  static removeOrigin = async (_id: string, origin: IGenericItem): Promise<ResponseMessage> => {
+    const entity = await this.getOne(_id);
+
+    if (_.isNull(entity)) {
+      return {
+        success: false,
+        message: "Entity not found",
+      };
+    }
+
+    const originCollection = entity.associations.origins;
+    if (_.includes(originCollection, origin)) {
+      return {
+        success: false,
+        message: "Entity already associated with Origin",
+      };
+    }
+    originCollection.push(origin);
+
+    // To-Do: Need to invoke corresponding function for Entity, adding Entity as Origin Product
+
+    const update = {
+      $set: {
+        associations: {
+          origins: originCollection,
+          products: entity.associations.products,
+        },
+      },
+    };
+
+    const response = await getDatabase()
+      .collection<EntityModel>(ENTITIES_COLLECTION)
+      .updateOne({ _id: _id }, update);
+    const successStatus = response.modifiedCount == 1;
+
+    return {
+      success: successStatus,
+      message: successStatus ? "Removed Origin successfully" : "Unable to remove Origin",
+    };
+  };
+
   // Existing functions:
-  // * addProduct (id, id)
-  // * addProducts (id, [id])
-  // * removeProduct (id, id)
-  // * addOrigin (id, id)
-  // * addOrigins (id, [id])
-  // * removeOrigin (id, id)
   // * addAttribute (id, id)
   // * removeAttribute (id, id)
   // * updateAttribute (id, Attribute)
