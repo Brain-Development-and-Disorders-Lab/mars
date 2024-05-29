@@ -179,5 +179,8 @@ export const typedefs = `#graphql
     addEntityOrigin(_id: String, origin: ItemInput): Response
     addEntityOrigins(_id: String, origins: [ItemInput]): Response
     removeEntityOrigin(_id: String, origin: ItemInput): Response
+    addEntityAttribute(_id: String, attribute: AttributeInput): Response
+    removeEntityAttribute(_id: String, attribute: String): Response
+    updateEntityAttribute(_id: String, attribute: AttributeInput): Response
   }
 `;

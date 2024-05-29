@@ -1,4 +1,4 @@
-import { IEntity, IGenericItem, ResponseMessage } from "@types";
+import { AttributeModel, IEntity, IGenericItem, ResponseMessage } from "@types";
 import { Entities } from "src/models/Entities"
 
 export const EntitiesResolvers = {
@@ -47,6 +47,16 @@ export const EntitiesResolvers = {
     },
     removeEntityOrigin: async (_parent: any, args: { _id: string, origin: IGenericItem }): Promise<ResponseMessage> => {
       return await Entities.removeOrigin(args._id, args.origin);
+    },
+    // Attributes
+    addEntityAttribute: async (_parent: any, args: { _id: string, attribute: AttributeModel }): Promise<ResponseMessage> => {
+      return await Entities.addAttribute(args._id, args.attribute);
+    },
+    removeEntityAttribute: async (_parent: any, args: { _id: string, attribute: string }): Promise<ResponseMessage> => {
+      return await Entities.removeAttribute(args._id, args.attribute);
+    },
+    updateEntityAttribute: async (_parent: any, args: { _id: string, attribute: AttributeModel }): Promise<ResponseMessage> => {
+      return await Entities.updateAttribute(args._id, args.attribute);
     }
   }
 }

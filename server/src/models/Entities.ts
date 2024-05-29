@@ -191,7 +191,8 @@ export class Entities {
     }
     productCollection.push(product);
 
-    // To-Do: Need to invoke corresponding function for Entity, adding Entity as Product Origin
+    // Invoke corresponding function for Entity, adding target Entity as Origin
+    await this.addOrigin(product._id, { _id: entity._id, name: entity.name });
 
     const update = {
       $set: {
@@ -229,16 +230,17 @@ export class Entities {
       };
     }
 
+    // Invoke corresponding function for each Product Entity, adding target Entity as an Origin
+    for (let product of products) {
+      await this.addOrigin(product._id, { _id: entity._id, name: entity.name });
+    }
+
     // Create a union set from the existing set of products and the set of products to add
-    const updatedProductCollection = _.union(entity.associations.products, products);
-
-    // To-Do: Need to invoke corresponding function for each Product Entity, adding this Entity as Product Origin
-
     const update = {
       $set: {
         associations: {
           origins: entity.associations.origins,
-          products: updatedProductCollection,
+          products: _.union(entity.associations.products, products),
         },
       },
     };
@@ -271,15 +273,16 @@ export class Entities {
     }
 
     const productCollection = _.cloneDeep(entity.associations.products);
-    if (_.includes(productCollection, product)) {
+    if (!_.includes(productCollection, product)) {
       return {
         success: false,
-        message: "Entity already associated with Product",
+        message: "Entity is not associated with Product to be removed",
       };
     }
-    productCollection.push(product);
+    _.remove(productCollection, product);
 
-    // To-Do: Need to invoke corresponding function for Entity, adding Entity as Product Origin
+    // Invoke corresponding function for Entity, removing target Entity as Origin
+    await this.removeOrigin(product._id, { _id: entity._id, name: entity.name });
 
     const update = {
       $set: {
@@ -406,15 +409,16 @@ export class Entities {
     }
 
     const originCollection = _.cloneDeep(entity.associations.origins);
-    if (_.includes(originCollection, origin)) {
+    if (!_.includes(originCollection, origin)) {
       return {
         success: false,
-        message: "Entity already associated with Origin",
+        message: "Entity is not associated with Origin to be removed",
       };
     }
-    originCollection.push(origin);
+    _.remove(originCollection, origin);
 
-    // To-Do: Need to invoke corresponding function for Entity, adding Entity as Origin Product
+    // Invoke corresponding function for Entity, removing target Entity as product
+    await this.removeProduct(origin._id, { _id: entity._id, name: entity.name });
 
     const update = {
       $set: {
@@ -436,6 +440,12 @@ export class Entities {
     };
   };
 
+  /**
+   * Add an Attibute to an Entity
+   * @param _id Target Entity identifier
+   * @param attribute Attribute data
+   * @returns {Promise<ResponseMessage>}
+   */
   static addAttribute = async (_id: string, attribute: AttributeModel): Promise<ResponseMessage> => {
     const entity = await this.getOne(_id);
 
@@ -466,6 +476,12 @@ export class Entities {
     };
   };
 
+  /**
+   * Remove an Attribute from an Entity by the Attribute identifier
+   * @param _id Target Entity identifier
+   * @param attribute Attribute identifier to remove
+   * @returns {Promise<ResponseMessage>}
+   */
   static removeAttribute = async (_id: string, attribute: string): Promise<ResponseMessage> => {
     const entity = await this.getOne(_id);
 
@@ -502,6 +518,12 @@ export class Entities {
     };
   };
 
+  /**
+   * Update an Attribute associated with an Entity
+   * @param _id Target Entity identifier
+   * @param attribute Updated Attribute
+   * @returns {Promise<ResponseMessage>}
+   */
   static updateAttribute = async (_id: string, attribute: AttributeModel): Promise<ResponseMessage> => {
     const entity = await this.getOne(_id);
 
@@ -515,7 +537,7 @@ export class Entities {
     if (!_.findIndex(entity.attributes, { _id: attribute._id })) {
       return {
         success: false,
-        message: "Attribute to update is not associated with Entity",
+        message: "Entity does not contain Attribute to update",
       };
     }
 
