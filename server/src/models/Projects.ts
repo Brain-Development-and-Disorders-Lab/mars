@@ -53,24 +53,28 @@ export class Projects {
       };
     }
 
-    // Entities to add and remove
-    const toAdd = _.difference(updated.entities, project.entities);
-    for (let entity in toAdd) {
-      await Entities.removeProject(entity, project._id);
-    }
-    const toRemove = _.difference(project.entities, updated.entities);
-    for (let entity in toRemove) {
-      await Entities.addProject(entity, project._id);
-    }
-
-    const update: { $set: Partial<IProject> } = {
+    const update: { $set: IProject } = {
       $set: {
-        name: updated.name,
-        owner: updated.owner,
-        description: updated.description,
-        entities: updated.entities,
+        ...project
       },
     };
+
+    if (updated.description) {
+      update.$set.description = updated.description;
+    }
+
+    // Entities to add and remove
+    if (updated.entities) {
+      const toAdd = _.difference(updated.entities, project.entities);
+      for (let entity of toAdd) {
+        await Entities.addProject(entity, project._id);
+      }
+      const toRemove = _.difference(project.entities, updated.entities);
+      for (let entity of toRemove) {
+        await Entities.removeProject(entity, project._id);
+      }
+      update.$set.entities = updated.entities;
+    }
 
     const response = await getDatabase()
       .collection<ProjectModel>(PROJECTS_COLLECTION)

@@ -55,6 +55,77 @@ export class Entities {
     };
   };
 
+  static update = async (updated: EntityModel): Promise<ResponseMessage> => {
+    const entity = await this.getOne(updated._id);
+
+    if (_.isNull(entity)) {
+      return {
+        success: false,
+        message: "Entity not found",
+      };
+    }
+
+    const update: { $set: IEntity } = {
+      $set: {
+        ...entity,
+      }
+    };
+
+    // Description
+    if (updated.description) {
+      update.$set.description = updated.description;
+    }
+
+    // Projects
+    if (updated.projects) {
+      const addProjects = _.difference(updated.projects, entity.projects);
+      for (let project in addProjects) {
+        this.addProject(updated._id, project);
+      }
+      const removeProjects = _.difference(entity.projects, updated.projects);
+      for (let project in removeProjects) {
+        this.removeProject(updated._id, project);
+      }
+      update.$set.projects = updated.projects;
+    }
+
+    // Origins
+    if (updated.associations && updated.associations.origins) {
+      const addOrigins = _.difference(updated.associations.origins, entity.associations.origins);
+      for (let origin of addOrigins) {
+        this.addOrigin(updated._id, origin);
+      }
+      const removeOrigins = _.difference(entity.associations.origins, updated.associations.origins);
+      for (let origin of removeOrigins) {
+        this.removeOrigin(updated._id, origin);
+      }
+      update.$set.associations.origins = updated.associations.origins;
+    }
+
+    // Products
+    if (updated.associations && updated.associations.products) {
+      const addProducts = _.difference(updated.associations.products, entity.associations.products);
+      for (let product of addProducts) {
+        this.addProduct(updated._id, product);
+      }
+      const removeProducts = _.difference(entity.associations.products, updated.associations.products);
+      for (let product of removeProducts) {
+        this.removeProduct(updated._id, product);
+      }
+      update.$set.associations.products = updated.associations.products;
+    }
+
+    const response = await getDatabase()
+      .collection<EntityModel>(ENTITIES_COLLECTION)
+      .updateOne({ _id: updated._id }, update);
+    const successStatus = response.modifiedCount == 1;
+
+    return {
+      success: successStatus,
+      message: successStatus ? "Updated Entity": "Could not update Entity",
+    };
+  };
+
   /**
    * Add a Project to an Entity
    * @param _id Target Entity identifier

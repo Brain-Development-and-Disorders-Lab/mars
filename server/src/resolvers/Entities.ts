@@ -1,4 +1,4 @@
-import { AttributeModel, IEntity, IGenericItem, ResponseMessage } from "@types";
+import { AttributeModel, EntityModel, IEntity, IGenericItem, ResponseMessage } from "@types";
 import { Entities } from "src/models/Entities"
 
 export const EntitiesResolvers = {
@@ -20,6 +20,9 @@ export const EntitiesResolvers = {
     },
     createEntity: async (_parent: any, args: { entity: IEntity }): Promise<ResponseMessage> => {
       return await Entities.create(args.entity);
+    },
+    updateEntity: async (_parent: any, args: { entity: EntityModel }): Promise<ResponseMessage> => {
+      return await Entities.update(args.entity);
     },
     // Projects
     addEntityProject: async (_parent: any, args: { _id: string, project: string }): Promise<ResponseMessage> => {

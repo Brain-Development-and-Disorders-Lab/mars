@@ -7,7 +7,7 @@ export const typedefs = `#graphql
   # "Item" type containing minimal data shared with many stored records
   type Item {
     _id: String!
-    name: String!
+    name: String
   }
 
   # "ItemInput" input
@@ -19,7 +19,7 @@ export const typedefs = `#graphql
   # "User" type
   type User {
     _id: String!
-    name: String!
+    name: String
     email: String
     id_token: String
   }
@@ -27,7 +27,7 @@ export const typedefs = `#graphql
   # "Project" type
   type Project {
     _id: String!
-    name: String!
+    name: String
     description: String
     owner: String
     shared: [String]
@@ -38,19 +38,19 @@ export const typedefs = `#graphql
 
   # "ProjectCreateInput" type
   input ProjectCreateInput {
-    name: String
-    description: String
-    owner: String
-    shared: [String]
-    created: String
-    entities: [String]
+    name: String!
+    description: String!
+    owner: String!
+    shared: [String]!
+    created: String!
+    entities: [String]!
     # To-Do: History
   }
 
   # "ProjectUpdateInput" type
   input ProjectUpdateInput {
     _id: String!
-    name: String!
+    name: String
     description: String
     owner: String
     shared: [String]
@@ -62,7 +62,7 @@ export const typedefs = `#graphql
   # "Value" type
   type Value {
     _id: String!
-    name: String!
+    name: String
     type: String
     data: String
   }
@@ -70,7 +70,7 @@ export const typedefs = `#graphql
   # "ValueInput" input
   input ValueInput {
     _id: String!
-    name: String!
+    name: String
     type: String
     data: String
   }
@@ -78,7 +78,7 @@ export const typedefs = `#graphql
   # "Attribute" type
   type Attribute {
     _id: String!
-    name: String!
+    name: String
     description: String
     values: [Value]
   }
@@ -86,7 +86,7 @@ export const typedefs = `#graphql
   # "AttributeInput" type
   input AttributeInput {
     _id: String!
-    name: String!
+    name: String
     description: String
     values: [ValueInput]
   }
@@ -106,7 +106,7 @@ export const typedefs = `#graphql
   # "Entity" type
   type Entity {
     _id: String!
-    name: String!
+    name: String
     created: String
     timestamp: String
     deleted: Boolean
@@ -120,9 +120,25 @@ export const typedefs = `#graphql
     history: [EntityHistory]
   }
 
-  # "EntityInput" input, includes -"Input" types
-  input EntityInput {
+  # "EntityCreateInput" input, includes -"Input" types
+  input EntityCreateInput {
     name: String!
+    created: String!
+    timestamp: String!
+    deleted: Boolean!
+    locked: Boolean!
+    owner: String!
+    description: String!
+    projects: [String]!
+    associations: AssociationsInput!
+    attachments: [ItemInput]!
+    attributes: [AttributeInput]!
+  }
+
+  # "EntityUpdateInput"
+  input EntityUpdateInput {
+    _id: String!
+    name: String
     created: String
     timestamp: String
     deleted: Boolean
@@ -149,7 +165,7 @@ export const typedefs = `#graphql
   # "ActivityTarget" type
   type ActivityTarget {
     _id: String!
-    name: String!
+    name: String
     type: String
   }
 
@@ -193,7 +209,8 @@ export const typedefs = `#graphql
   type Mutation {
     # Entity mutations
     setEntityDescription(_id: String, description: String): Response
-    createEntity(entity: EntityInput): Response
+    createEntity(entity: EntityCreateInput): Response
+    updateEntity(entity: EntityUpdateInput): Response
     addEntityProject(_id: String, project_id: String): Response
     removeEntityProject(_id: String, project_id: String): Response
     addEntityProduct(_id: String, product: ItemInput): Response
