@@ -380,26 +380,7 @@ const Entity = () => {
   });
 
   // Mutation to update Entity
-  const [updateEntity, { loading: isUpdateLoading }] = useMutation(UPDATE_ENTITY, {
-    variables: {
-      entity: {
-        _id: entityData._id,
-        name: entityData.name,
-        created: entityData.created,
-        deleted: entityData.deleted,
-        locked: entityData.locked,
-        owner: entityData.owner,
-        description: entityDescription,
-        projects: entityProjects,
-        associations: {
-          origins: entityOrigins,
-          products: entityProducts,
-        },
-        attributes: entityAttributes,
-        attachments: entityAttachments,
-      },
-    }
-  });
+  const [updateEntity, { loading: isUpdateLoading }] = useMutation(UPDATE_ENTITY);
 
   // Manage data once retrieved
   useEffect(() => {
@@ -407,9 +388,9 @@ const Entity = () => {
       // Unpack all the Entity data
       setEntityData(data.entity);
       setEntityDescription(data.entity.description || "");
-      setEntityProjects(data.entity.projects);
-      setEntityOrigins(data.entity.associations.origins);
-      setEntityProducts(data.entity.associations.products);
+      setEntityProjects(data.entity.projects || []);
+      setEntityOrigins(data.entity.associations.origins || []);
+      setEntityProducts(data.entity.associations.products || []);
       setEntityAttributes(data.entity.attributes || []);
       setEntityAttachments(data.entity.attachments);
       setEntityHistory(data.entity.history || []);
@@ -434,7 +415,26 @@ const Entity = () => {
     if (editing) {
       setIsUpdating(isUpdateLoading);
       try {
-        await updateEntity();
+        await updateEntity({
+          variables: {
+            entity: {
+              _id: entityData._id,
+              name: entityData.name,
+              created: entityData.created,
+              deleted: entityData.deleted,
+              locked: entityData.locked,
+              owner: entityData.owner,
+              description: entityDescription,
+              projects: entityProjects,
+              associations: {
+                origins: entityOrigins,
+                products: entityProducts,
+              },
+              attributes: entityAttributes,
+              attachments: entityAttachments,
+            },
+          }
+        });
         toast({
           title: "Updated Successfully",
           status: "success",
@@ -462,57 +462,45 @@ const Entity = () => {
   /**
    * Restore an Entity from a deleted status
    */
-  const handleRestoreFromDeleteClick = () => {
-    // Collate data for updating
-    const updateData: EntityModel = {
-      _id: entityData._id,
-      name: entityData.name,
-      created: entityData.created,
-      deleted: false,
-      locked: false,
-      owner: entityData.owner,
-      description: entityDescription,
-      projects: entityProjects,
-      associations: {
-        origins: entityOrigins,
-        products: entityProducts,
-      },
-      attributes: entityAttributes,
-      attachments: entityAttachments,
-      history: entityData.history,
-    };
-
-    // Update data
-    postData(`/entities/update`, updateData)
-      .then((_response) => {
-        toast({
-          title: "Restored!",
-          status: "success",
-          duration: 2000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-      })
-      .catch(() => {
-        toast({
-          title: "Error",
-          description: "An error occurred when restoring this Entity.",
-          status: "error",
-          duration: 2000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-      })
-      .finally(() => {
-        // Apply updated state
-        setEntityData(updateData);
-        setEntityDescription(updateData.description || "");
-        setEntityProjects(updateData.projects);
-        setEntityOrigins(updateData.associations.origins);
-        setEntityProducts(updateData.associations.products);
-        setEntityAttributes(updateData.attributes);
-        setEntityHistory(updateData.history);
+  const handleRestoreFromDeleteClick = async () => {
+    try {
+      await updateEntity({
+        variables: {
+          entity: {
+            _id: entityData._id,
+            name: entityData.name,
+            created: entityData.created,
+            deleted: false,
+            locked: false,
+            owner: entityData.owner,
+            description: entityDescription,
+            projects: entityProjects,
+            associations: {
+              origins: entityOrigins,
+              products: entityProducts,
+            },
+            attributes: entityAttributes,
+            attachments: entityAttachments,
+          },
+        }
       });
+      toast({
+        title: "Restored Successfully",
+        status: "success",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    } catch(error: any) {
+      toast({
+        title: "Error",
+        description: `Entity could not be restored`,
+        status: "error",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
   };
 
   const truncateTableText =
@@ -896,59 +884,56 @@ const Entity = () => {
    * Restore an Entity from an earlier point in time
    * @param {EntityHistory} entityVersion historical Entity data to restore
    */
-  const handleRestoreFromHistoryClick = (entityVersion: EntityHistory) => {
-    const updateData: EntityModel = {
-      _id: entityData._id,
-      name: entityData.name,
-      created: entityData.created,
-      deleted: entityVersion.deleted,
-      locked: entityData.locked,
-      owner: entityVersion.owner,
-      description: entityVersion.description,
-      projects: entityVersion.projects,
-      associations: {
-        origins: entityVersion.associations.origins,
-        products: entityVersion.associations.products,
-      },
-      attributes: entityVersion.attributes,
-      attachments: entityVersion.attachments,
-      history: entityData.history,
-    };
-
-    // Update data
-    postData(`/entities/update`, updateData)
-      .then((_response) => {
-        toast({
-          title: "Saved!",
-          status: "success",
-          duration: 2000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-      })
-      .catch(() => {
-        toast({
-          title: "Error",
-          description: "An error occurred when saving updates.",
-          status: "error",
-          duration: 2000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-      })
-      .finally(() => {
-        // Close the drawer
-        onHistoryClose();
-
-        // Apply updated state
-        setEntityData(updateData);
-        setEntityDescription(updateData.description || "");
-        setEntityProjects(updateData.projects);
-        setEntityOrigins(updateData.associations.origins);
-        setEntityProducts(updateData.associations.products);
-        setEntityAttributes(updateData.attributes);
-        setEntityHistory(updateData.history);
+  const handleRestoreFromHistoryClick = async (entityVersion: EntityHistory) => {
+    try {
+      await updateEntity({
+        variables: {
+          entity: {
+            _id: entityData._id,
+            name: entityData.name,
+            created: entityData.created,
+            deleted: entityVersion.deleted,
+            locked: entityData.locked,
+            owner: entityVersion.owner,
+            description: entityVersion.description || "",
+            projects: entityVersion.projects || [],
+            associations: {
+              origins: entityVersion.associations.origins || [],
+              products: entityVersion.associations.products || [],
+            },
+            attributes: entityVersion.attributes || [],
+            attachments: entityVersion.attachments || [],
+          },
+        }
       });
+      toast({
+        title: "Restored Successfully",
+        status: "success",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+
+      // Update the state (safely)
+      setEntityDescription(entityVersion.description || "");
+      setEntityProjects(entityVersion.projects || []);
+      setEntityOrigins(entityVersion.associations.origins || []);
+      setEntityProducts(entityVersion.associations.products || []);
+      setEntityAttributes(entityVersion.attributes || []);
+      setEntityAttachments(entityVersion.attachments || []);
+
+      // Close the sidebar
+      onHistoryClose();
+    } catch(error: any) {
+      toast({
+        title: "Error",
+        description: `Entity could not be restored`,
+        status: "error",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
   };
 
   // Handle clicking the "Export" button
@@ -1252,8 +1237,7 @@ const Entity = () => {
           {/* Buttons */}
           <Flex direction={"row"} gap={"4"} wrap={"wrap"}>
             {isDeletePopoverOpen && (
-              <Popover isOpen={isDeletePopoverOpen} onClose={handleDeletePopoverClose}
-              >
+              <Popover isOpen={isDeletePopoverOpen} onClose={handleDeletePopoverClose}>
                 <PopoverTrigger>
                   <></>
                 </PopoverTrigger>
