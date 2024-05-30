@@ -96,7 +96,7 @@ import slugify from "slugify";
 import { nanoid } from "nanoid";
 
 // Apollo client imports
-import { useQuery, gql } from '@apollo/client';
+import { useQuery, gql, useMutation } from '@apollo/client';
 
 // Routing and navigation
 import { useParams, useNavigate } from "react-router-dom";
@@ -278,8 +278,8 @@ const Entity = () => {
   } = useDisclosure();
 
   // Queries
-  const GET_ENTITY = gql`
-    query GetEntity($_id: String) {
+  const GET_ENTITY_DATA = gql`
+    query GetEntityData($_id: String) {
       entity(_id: $_id) {
         _id
         name
@@ -362,10 +362,42 @@ const Entity = () => {
     }
   `;
 
-  // Execute GraphQL query both on page load and navigation
-  const { loading, error, data, refetch } = useQuery(GET_ENTITY, {
+  // Mutations
+  const UPDATE_ENTITY = gql`
+    mutation UpdateEntity($entity: EntityUpdateInput) {
+      updateEntity(entity: $entity) {
+        success
+        message
+      }
+    }
+  `;
+
+  // Query to retrieve Entity data and associated data for editing
+  const { loading, error, data, refetch } = useQuery(GET_ENTITY_DATA, {
     variables: {
       _id: id
+    }
+  });
+
+  // Mutation to update Entity
+  const [updateEntity, { loading: isUpdateLoading }] = useMutation(UPDATE_ENTITY, {
+    variables: {
+      entity: {
+        _id: entityData._id,
+        name: entityData.name,
+        created: entityData.created,
+        deleted: entityData.deleted,
+        locked: entityData.locked,
+        owner: entityData.owner,
+        description: entityDescription,
+        projects: entityProjects,
+        associations: {
+          origins: entityOrigins,
+          products: entityProducts,
+        },
+        attributes: entityAttributes,
+        attachments: entityAttachments,
+      },
     }
   });
 
@@ -398,72 +430,32 @@ const Entity = () => {
   }, []);
 
   // Toggle editing status
-  const handleEditClick = () => {
+  const handleEditClick = async () => {
     if (editing) {
-      setIsUpdating(true);
-
-      // Collate Entity update data
-      const updateData: EntityModel = {
-        _id: entityData._id,
-        name: entityData.name,
-        created: entityData.created,
-        deleted: entityData.deleted,
-        locked: entityData.locked,
-        owner: entityData.owner,
-        description: entityDescription,
-        projects: entityProjects,
-        associations: {
-          origins: entityOrigins,
-          products: entityProducts,
-        },
-        attributes: entityAttributes,
-        attachments: entityAttachments,
-        history: entityHistory,
-      };
-
-      // Update data
-      postData(`/entities/update`, updateData)
-        .then((_response) => {
-          toast({
-            title: "Saved!",
-            status: "success",
-            duration: 2000,
-            position: "bottom-right",
-            isClosable: true,
-          });
-        })
-        .catch(() => {
-          toast({
-            title: "Error",
-            description: "An error occurred when saving updates.",
-            status: "error",
-            duration: 2000,
-            position: "bottom-right",
-            isClosable: true,
-          });
-        })
-        .finally(() => {
-          postData(`/entities/lock/${id}`, {
-            entity: {
-              _id: entityData._id,
-              name: entityData.name,
-            },
-            lockState: false,
-          }).then((_response) => {
-            setEditing(false);
-          });
-          setIsUpdating(false);
+      setIsUpdating(isUpdateLoading);
+      try {
+        await updateEntity();
+        toast({
+          title: "Updated Successfully",
+          status: "success",
+          duration: 2000,
+          position: "bottom-right",
+          isClosable: true,
         });
+      } catch(error: any) {
+        toast({
+          title: "Error",
+          description: `Entity could not be updated`,
+          status: "error",
+          duration: 2000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+      }
+      setEditing(false);
+      setIsUpdating(isUpdateLoading);
     } else {
-      postData(`/entities/lock/${id}`, {
-        entity: {
-          _id: entityData._id,
-          name: entityData.name,
-        },
-        lockState: true,
-      }).then((_response) => {
-        setEditing(true);
-      });
+      setEditing(true);
     }
   };
 

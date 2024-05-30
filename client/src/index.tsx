@@ -15,7 +15,7 @@ import App from "./App";
 // Setup Apollo client
 const client = new ApolloClient({
   uri: "http://localhost:4000/graphql",
-  cache: new InMemoryCache(),
+  cache: new InMemoryCache({ addTypename: false }),
 });
 
 // Render the application

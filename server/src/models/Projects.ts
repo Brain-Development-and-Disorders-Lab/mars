@@ -154,12 +154,9 @@ export class Projects {
       };
     }
 
-    const entityCollection = project.entities;
-    _.remove(entityCollection, entity);
-
     const update = {
       $set: {
-        entities: entityCollection,
+        entities: project.entities.filter((e) => e !== entity),
       },
     };
 

@@ -79,12 +79,14 @@ export class Entities {
     // Projects
     if (updated.projects) {
       const addProjects = _.difference(updated.projects, entity.projects);
-      for (let project in addProjects) {
-        this.addProject(updated._id, project);
+      for (let project of addProjects) {
+        await this.addProject(updated._id, project);
+        await Projects.addEntity(project, updated._id);
       }
       const removeProjects = _.difference(entity.projects, updated.projects);
-      for (let project in removeProjects) {
-        this.removeProject(updated._id, project);
+      for (let project of removeProjects) {
+        await this.removeProject(updated._id, project);
+        await Projects.removeEntity(project, updated._id);
       }
       update.$set.projects = updated.projects;
     }
@@ -93,11 +95,13 @@ export class Entities {
     if (updated.associations && updated.associations.origins) {
       const addOrigins = _.difference(updated.associations.origins, entity.associations.origins);
       for (let origin of addOrigins) {
-        this.addOrigin(updated._id, origin);
+        await this.addOrigin(updated._id, origin);
+        await this.addProduct(origin._id, { _id: updated._id, name: updated.name });
       }
       const removeOrigins = _.difference(entity.associations.origins, updated.associations.origins);
       for (let origin of removeOrigins) {
-        this.removeOrigin(updated._id, origin);
+        await this.removeOrigin(updated._id, origin);
+        await this.removeProduct(origin._id, { _id: updated._id, name: updated.name });
       }
       update.$set.associations.origins = updated.associations.origins;
     }
@@ -106,11 +110,13 @@ export class Entities {
     if (updated.associations && updated.associations.products) {
       const addProducts = _.difference(updated.associations.products, entity.associations.products);
       for (let product of addProducts) {
-        this.addProduct(updated._id, product);
+        await this.addProduct(updated._id, product);
+        await this.addOrigin(product._id, { _id: updated._id, name: updated.name });
       }
       const removeProducts = _.difference(entity.associations.products, updated.associations.products);
       for (let product of removeProducts) {
-        this.removeProduct(updated._id, product);
+        await this.removeProduct(updated._id, product);
+        await this.removeOrigin(product._id, { _id: updated._id, name: updated.name });
       }
       update.$set.associations.products = updated.associations.products;
     }
@@ -118,11 +124,10 @@ export class Entities {
     const response = await getDatabase()
       .collection<EntityModel>(ENTITIES_COLLECTION)
       .updateOne({ _id: updated._id }, update);
-    const successStatus = response.modifiedCount == 1;
 
     return {
-      success: successStatus,
-      message: successStatus ? "Updated Entity": "Could not update Entity",
+      success: true,
+      message: response.modifiedCount == 1 ? "Updated Entity": "No changes made to Entity",
     };
   };
 
@@ -150,9 +155,6 @@ export class Entities {
       };
     }
     projectCollection.push(project_id);
-
-    // Invoke corresponding function for Project, adding Entity to Project
-    await Projects.addEntity(project_id, entity._id);
 
     const update = {
       $set: {
@@ -194,14 +196,10 @@ export class Entities {
         message: "Entity not associated with Project",
       };
     }
-    _.remove(projectCollection, project_id);
-
-    // Invoke corresponding function for Project, removing Entity from Project
-    await Projects.removeEntity(project_id, entity._id);
 
     const update = {
       $set: {
-        projects: projectCollection,
+        projects: projectCollection.filter((p) => !_.isEqual(p, project_id)),
       },
     };
 
@@ -265,9 +263,6 @@ export class Entities {
     }
     productCollection.push(product);
 
-    // Invoke corresponding function for Entity, adding target Entity as Origin
-    await this.addOrigin(product._id, { _id: entity._id, name: entity.name });
-
     const update = {
       $set: {
         associations: {
@@ -302,11 +297,6 @@ export class Entities {
         success: false,
         message: "Entity not found",
       };
-    }
-
-    // Invoke corresponding function for each Product Entity, adding target Entity as an Origin
-    for (let product of products) {
-      await this.addOrigin(product._id, { _id: entity._id, name: entity.name });
     }
 
     // Create a union set from the existing set of products and the set of products to add
@@ -353,16 +343,12 @@ export class Entities {
         message: "Entity is not associated with Product to be removed",
       };
     }
-    _.remove(productCollection, product);
-
-    // Invoke corresponding function for Entity, removing target Entity as Origin
-    await this.removeOrigin(product._id, { _id: entity._id, name: entity.name });
 
     const update = {
       $set: {
         associations: {
           origins: entity.associations.origins,
-          products: productCollection,
+          products: productCollection.filter((p) => !_.isEqual(p._id, product._id)),
         },
       },
     };
@@ -403,8 +389,6 @@ export class Entities {
     }
     originCollection.push(origin);
 
-    // To-Do: Need to invoke corresponding function for Entity, adding Entity as Origin Product
-
     const update = {
       $set: {
         associations: {
@@ -443,8 +427,6 @@ export class Entities {
 
     // Create a union set from the existing set of Origins and the set of Origins to add
     const updatedOriginCollection = _.union(entity.associations.origins, origins);
-
-    // To-Do: Need to invoke corresponding function for each Origin Entity, adding this Entity as Origin Product
 
     const update = {
       $set: {
@@ -489,15 +471,11 @@ export class Entities {
         message: "Entity is not associated with Origin to be removed",
       };
     }
-    _.remove(originCollection, origin);
-
-    // Invoke corresponding function for Entity, removing target Entity as product
-    await this.removeProduct(origin._id, { _id: entity._id, name: entity.name });
 
     const update = {
       $set: {
         associations: {
-          origins: originCollection,
+          origins: originCollection.filter((o) => !_.isEqual(o._id, origin._id)),
           products: entity.associations.products,
         },
       },
