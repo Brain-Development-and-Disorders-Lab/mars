@@ -121,6 +121,19 @@ export class Entities {
       update.$set.associations.products = updated.associations.products;
     }
 
+    // Attributes
+    if (updated.attributes) {
+      const addAttributes = _.difference(updated.attributes, entity.attributes);
+      for (let attribute of addAttributes) {
+        await this.addAttribute(updated._id, attribute);
+      }
+      const removeAttributes = _.difference(entity.attributes, updated.attributes);
+      for (let attribute of removeAttributes) {
+        await this.removeAttribute(updated._id, attribute._id);
+      }
+      update.$set.attributes = updated.attributes;
+    }
+
     const response = await getDatabase()
       .collection<EntityModel>(ENTITIES_COLLECTION)
       .updateOne({ _id: updated._id }, update);
@@ -148,7 +161,7 @@ export class Entities {
     }
 
     const projectCollection = _.cloneDeep(entity.projects);
-    if (_.includes(projectCollection, project_id)) {
+    if (projectCollection.filter((p) => _.isEqual(p, project_id)).length > 0) {
       return {
         success: false,
         message: "Entity already associated with Project",
@@ -190,13 +203,6 @@ export class Entities {
     }
 
     const projectCollection = _.cloneDeep(entity.projects);
-    if (!_.includes(projectCollection, project_id)) {
-      return {
-        success: false,
-        message: "Entity not associated with Project",
-      };
-    }
-
     const update = {
       $set: {
         projects: projectCollection.filter((p) => !_.isEqual(p, project_id)),
@@ -255,7 +261,7 @@ export class Entities {
     }
 
     const productCollection = _.cloneDeep(entity.associations.products);
-    if (_.includes(productCollection, product)) {
+    if (productCollection.filter((p) => _.isEqual(p._id, product._id)).length > 0) {
       return {
         success: false,
         message: "Entity already associated with Product",
@@ -337,13 +343,6 @@ export class Entities {
     }
 
     const productCollection = _.cloneDeep(entity.associations.products);
-    if (!_.includes(productCollection, product)) {
-      return {
-        success: false,
-        message: "Entity is not associated with Product to be removed",
-      };
-    }
-
     const update = {
       $set: {
         associations: {
@@ -381,7 +380,7 @@ export class Entities {
     }
 
     const originCollection = _.cloneDeep(entity.associations.origins);
-    if (_.includes(originCollection, origin)) {
+    if (originCollection.filter((o) => _.isEqual(o._id, origin._id)).length > 0) {
       return {
         success: false,
         message: "Entity already associated with Origin",
@@ -465,13 +464,6 @@ export class Entities {
     }
 
     const originCollection = _.cloneDeep(entity.associations.origins);
-    if (!_.includes(originCollection, origin)) {
-      return {
-        success: false,
-        message: "Entity is not associated with Origin to be removed",
-      };
-    }
-
     const update = {
       $set: {
         associations: {
