@@ -13,6 +13,11 @@ export const EntitiesResolvers = {
     entity: async (_parent: any, args: { _id: string }) => {
       return await Entities.getOne(args._id);
     },
+
+    // Export one Entity by _id
+    exportEntity: async (_parent: any, args: { _id: string, format: "json" | "csv" }) => {
+      return await Entities.export(args._id, args.format);
+    },
   },
   Mutation: {
     setEntityDescription: async (_parent: any, args: { _id: string, description: string }): Promise<ResponseMessage> => {
