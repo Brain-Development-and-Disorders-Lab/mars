@@ -2,6 +2,7 @@ import { AttributeModel, EntityModel, IEntity, IGenericItem, ResponseMessage } f
 import _ from "lodash";
 import { getDatabase } from "src/connectors/database";
 import { getIdentifier } from "src/util";
+import { Projects } from "./Projects";
 
 const ENTITIES_COLLECTION = "entities"; // Collection name
 
@@ -79,7 +80,8 @@ export class Entities {
     }
     projectCollection.push(project_id);
 
-    // To-Do: Need to invoke corresponding function for Project, adding Entity to Project
+    // Invoke corresponding function for Project, adding Entity to Project
+    await Projects.addEntity(project_id, entity._id);
 
     const update = {
       $set: {
@@ -123,7 +125,8 @@ export class Entities {
     }
     _.remove(projectCollection, project_id);
 
-    // To-Do: Need to invoke corresponding function for Project, removing Entity from Project
+    // Invoke corresponding function for Project, removing Entity from Project
+    await Projects.removeEntity(project_id, entity._id);
 
     const update = {
       $set: {
