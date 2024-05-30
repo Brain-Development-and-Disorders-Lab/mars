@@ -36,6 +36,29 @@ export const typedefs = `#graphql
     # To-Do: History
   }
 
+  # "ProjectCreateInput" type
+  input ProjectCreateInput {
+    name: String
+    description: String
+    owner: String
+    shared: [String]
+    created: String
+    entities: [String]
+    # To-Do: History
+  }
+
+  # "ProjectUpdateInput" type
+  input ProjectUpdateInput {
+    _id: String!
+    name: String!
+    description: String
+    owner: String
+    shared: [String]
+    created: String
+    entities: [String]
+    # To-Do: History
+  }
+
   # "Value" type
   type Value {
     _id: String!
@@ -182,5 +205,11 @@ export const typedefs = `#graphql
     addEntityAttribute(_id: String, attribute: AttributeInput): Response
     removeEntityAttribute(_id: String, attribute: String): Response
     updateEntityAttribute(_id: String, attribute: AttributeInput): Response
+    # Project mutations
+    createProject(project: ProjectCreateInput): Response
+    updateProject(project: ProjectUpdateInput): Response
+    addProjectEntity(_id: String, entity: String): Response
+    addProjectEntities(_id: String, entities: [String]): Response
+    removeProjectEntity(_id: String, entity: String): Response
   }
 `;
