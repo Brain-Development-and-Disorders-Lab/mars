@@ -605,8 +605,33 @@ export class Entities {
     };
   };
 
-  // Existing functions:
+  /**
+   * Generate export data for the Entity
+   * @param _id Entity identifier
+   * @returns {Promise<string>}
+   */
+  static export = async (_id: string, format: "json" | "csv"): Promise<string> => {
+    const entity = await this.getOne(_id);
+
+    if (_.isNull(entity)) {
+      return "";
+    }
+
+    // Remove `history` field
+    delete (entity as any)["history"];
+
+    if (_.isEqual(format, "json")) {
+      // Handle JSON format
+      return JSON.stringify(entity);
+    } else if (_.isEqual(format, "csv")) {
+      // Handle CSV format
+      return "csv";
+    } else {
+      return "Invalid format";
+    }
+  };
+
+  // Remaining functions:
   // * addAttachment (id, id)
   // * removeAttachment (id, id)
-  // * update (Entity)
 };
