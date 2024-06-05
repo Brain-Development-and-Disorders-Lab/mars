@@ -15,8 +15,8 @@ export const EntitiesResolvers = {
     },
 
     // Export one Entity by _id
-    exportEntity: async (_parent: any, args: { _id: string, format: "json" | "csv" }) => {
-      return await Entities.export(args._id, args.format);
+    exportEntity: async (_parent: any, args: { _id: string, format: "json" | "csv", fields?: string[] }) => {
+      return await Entities.export(args._id, args.format, args.fields);
     },
   },
   Mutation: {

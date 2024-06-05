@@ -3,8 +3,18 @@ import _ from "lodash";
 import { getDatabase } from "src/connectors/database";
 import { getIdentifier } from "src/util";
 import { Projects } from "./Projects";
+import consola from "consola";
+import dayjs from "dayjs";
+import Papa from "papaparse";
+import * as tmp from "tmp";
+import * as fs from "fs";
 
 const ENTITIES_COLLECTION = "entities"; // Collection name
+
+// Constants for parsing strings
+const ORIGIN_PREFIX_LENGTH = 7;
+const PRODUCT_PREFIX_LENGTH = 8;
+const ATTRIBUTE_PREFIX_LENGTH = 10;
 
 export class Entities {
   /**
@@ -610,7 +620,7 @@ export class Entities {
    * @param _id Entity identifier
    * @returns {Promise<string>}
    */
-  static export = async (_id: string, format: "json" | "csv"): Promise<string> => {
+  static export = async (_id: string, format: "json" | "csv", fields?: string[]): Promise<string> => {
     const entity = await this.getOne(_id);
 
     if (_.isNull(entity)) {
@@ -624,7 +634,92 @@ export class Entities {
       // Handle JSON format
       return JSON.stringify(entity);
     } else if (_.isEqual(format, "csv")) {
+      let exportFields = fields;
+
       // Handle CSV format
+      const headers: string[] = ["ID", "Name"]; // Headers for CSV file
+      const row: string[] = [entity._id, entity.name]; // First row containing export data
+
+      // Default behavior is to export all fields
+      if (_.isUndefined(exportFields)) {
+        // Add standard string fields
+        exportFields = ["created", "owner", "description"];
+
+        // Iterate and generate fields for Origins, Products, Projects, and Attributes
+        for (let origin of entity.associations.origins) {
+          exportFields.push(`origin_${origin._id}`);
+        }
+        for (let product of entity.associations.products) {
+          exportFields.push(`product_${product._id}`);
+        }
+        for (let project of entity.projects) {
+          exportFields.push(`project_${project}`);
+        }
+        for (let attribute of entity.attributes) {
+          exportFields.push(`attribute_${attribute._id}`);
+        }
+      }
+
+      // Iterate through the list of "fields" and create row representation
+      for (let field of exportFields) {
+        console.info("Generating information for field:", field);
+        if (_.isEqual(field, "created")) {
+          headers.push("Created");
+          row.push(dayjs(entity.created).format("DD MMM YYYY").toString());
+        } else if (_.isEqual(field, "owner")) {
+          headers.push("Owner");
+          row.push(entity.owner);
+        } else if (_.isEqual(field, "description")) {
+          // "description" data field
+          headers.push("Description");
+          row.push(entity.description);
+        } else if (_.startsWith(field, "origin_")) {
+          // "origins" data field
+          const origin = await Entities.getOne(field.slice(ORIGIN_PREFIX_LENGTH));
+          if (!_.isNull(origin)) {
+            headers.push(`Origin (${origin.name})`);
+            row.push(origin.name);
+          }
+        } else if (_.startsWith(field, "product_")) {
+          // "products" data field
+          const product = await Entities.getOne(field.slice(PRODUCT_PREFIX_LENGTH));
+          if (!_.isNull(product)) {
+            headers.push(`Product (${product.name})`);
+            row.push(product.name);
+          }
+        } else if (_.startsWith(field, "attribute_")) {
+          // "attributes" data field
+          const attributeId = field.slice(ATTRIBUTE_PREFIX_LENGTH);
+          entity.attributes.map((attribute) => {
+            if (_.isEqual(attribute._id, attributeId)) {
+              for (let value of attribute.values) {
+                headers.push(`${value?.name} (${attribute?.name})`);
+                row.push(value.data);
+              }
+            }
+          });
+        }
+      }
+
+      // Collate and format data as a CSV string
+      const collated = [headers, row];
+      const formatted = Papa.unparse(collated);
+
+      // Create a temporary file, passing the filename as a response
+      tmp.file((error, path: string, _fd: number) => {
+        if (error) {
+          throw error;
+        }
+
+        fs.writeFileSync(path, formatted);
+        consola.success(
+          "Generated CSV data for  Entity (id):",
+          entity._id
+        );
+
+        consola.info("File path:", path);
+        consola.info("Formatted:", formatted);
+      });
       return "csv";
     } else {
       return "Invalid format";

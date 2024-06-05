@@ -205,7 +205,7 @@ export const typedefs = `#graphql
     activity(limit: Int): [Activity]
 
     # Export queries
-    exportEntity(_id: String, format: String): String
+    exportEntity(_id: String, format: String, fields: [String]): String
   }
 
   # Define mutation types
