@@ -201,11 +201,11 @@ export class Authentication {
     return new Promise((resolve, reject) => {
       // Format login data for POST request
       const loginData = new URLSearchParams({
-        "client_id": CLIENT_ID,
-        "client_secret": CLIENT_SECRET,
-        "grant_type": "authorization_code",
-        "code": code,
-        "redirect_uri": REDIRECT_URI,
+        client_id: CLIENT_ID,
+        client_secret: CLIENT_SECRET,
+        grant_type: "authorization_code",
+        code: code,
+        redirect_uri: REDIRECT_URI,
       }).toString();
 
       postData(TOKEN_URL, loginData, {
