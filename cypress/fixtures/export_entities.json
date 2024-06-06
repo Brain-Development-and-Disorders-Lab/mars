@@ -1,170 +1,160 @@
 {
-    "entities": [
-        {
-            "_id": "eDDyDMjQ",
-            "deleted": false,
-            "locked": false,
-            "name": "mini box 1 FROMJSON",
-            "owner": "XXXX-1234-ABCD-0000",
-            "created": "2023-12-27T20:12:43.686Z",
-            "description": "mini box that fit in another box",
-            "projects": [
-                "pBwj_re8"
-            ],
-            "associations": {
-                "origins": [
-                    {
-                        "name": "box 1",
-                        "id": "eqRN9NBH"
-                    }
-                ],
-                "products": []
-            },
-            "attributes": [
-                {
-                    "_id": "a-eDDyDMjQ-SLaiM7",
-                    "name": "AAAAAAAAAA",
-                    "description": "BBBBBB",
-                    "values": [
-                        {
-                            "identifier": "v_text_18399",
-                            "name": "ZZZZZZZZZZZ",
-                            "type": "text",
-                            "data": "XXXXXXXXXXXXX"
-                        }
-                    ]
-                }
-            ],
-            "attachments": []
-        },
-        {
-            "_id": "noID",
-            "deleted": false,
-            "locked": false,
-            "name": "mini box 1",
-            "owner": "XXXX-1234-ABCD-0000",
-            "created": "2023-12-27T20:12:43.686Z",
-            "description": "mini box that fit in another box updated by same name entity",
-            "projects": [
-                "pBwj_re8"
-            ],
-            "associations": {
-                "origins": [
-                    {
-                        "name": "box 1",
-                        "id": "eqRN9NBH"
-                    }
-                ],
-                "products": []
-            },
-            "attributes": [
-                {
-                    "_id": "a-eDDyDMjQ-SLaiM7",
-                    "name": "AAAAAAAAAA",
-                    "description": "BBBBBB",
-                    "values": [
-                        {
-                            "identifier": "v_text_18399",
-                            "name": "ZZZZZZZZZZZ",
-                            "type": "text",
-                            "data": "XXXXXXXXXXXXX"
-                        }
-                    ]
-                }
-            ],
-            "attachments": []
-        },
-        {
-            "_id": "eOZ4E6Qw",
-            "deleted": false,
-            "locked": false,
-            "name": "box2",
-            "owner": "XXXX-1234-ABCD-0000",
-            "created": "2023-12-27T20:12:43.686Z",
-            "description": "mock box 2 ",
-            "projects": [
-                "pBwj_re8"
-            ],
-            "associations": {
-                "origins": [],
-                "products": []
-            },
-            "attributes": [
-                {
-                    "_id": "a-eOZ4E6Qw-0EmAiB",
-                    "name": "asdvasdvsadv",
-                    "description": "qwervqewvqew",
-                    "values": [
-                        {
-                            "identifier": "v_text_11077",
-                            "name": "wqefqwef",
-                            "type": "text",
-                            "data": "qwefqwef"
-                        }
-                    ]
-                }
-            ],
-            "attachments": []
-        },
-        {
-            "_id": "eqRN9NBH",
-            "deleted": false,
-            "locked": false,
+  "entities": [
+    {
+      "_id": "eDDyDMjQ",
+      "deleted": false,
+      "locked": false,
+      "name": "mini box 1 FROMJSON",
+      "owner": "XXXX-1234-ABCD-0000",
+      "created": "2023-12-27T20:12:43.686Z",
+      "description": "mini box that fit in another box",
+      "projects": ["pBwj_re8"],
+      "associations": {
+        "origins": [
+          {
             "name": "box 1",
-            "owner": "XXXX-1234-ABCD-0000",
-            "created": "2023-12-27T20:12:43.686Z",
-            "description": "mock box 1",
-            "projects": [
-                "pBwj_re8"
-            ],
-            "associations": {
-                "origins": [],
-                "products": [
-                    {
-                        "name": "mini box 1",
-                        "id": "eDDyDMjQ"
-                    }
-                ]
-            },
-            "attributes": [],
-            "attachments": []
-        },
+            "id": "eqRN9NBH"
+          }
+        ],
+        "products": []
+      },
+      "attributes": [
         {
-            "_id": "eDDyDMjQ",
-            "deleted": false,
-            "locked": false,
-            "name": "mini box 1 FROMJSON",
-            "owner": "XXXX-1234-ABCD-0000",
-            "created": "2023-12-27T20:12:43.686Z",
-            "description": "mini box that fit in another box FROMJSON",
-            "projects": [
-                "pBwj_re8"
-            ],
-            "associations": {
-                "origins": [
-                    {
-                        "name": "box 1",
-                        "id": "eqRN9NBH"
-                    }
-                ],
-                "products": []
-            },
-            "attributes": [
-                {
-                    "_id": "a-eDDyDMjQ-SLaiM7",
-                    "name": "AAAAAAAAAA",
-                    "description": "BBBBBB",
-                    "values": [
-                        {
-                            "identifier": "v_text_18399",
-                            "name": "ZZZZZZZZZZZ",
-                            "type": "text",
-                            "data": "XXXXXXXXXXXXX"
-                        }
-                    ]
-                }
-            ],
-            "attachments": []
+          "_id": "a-eDDyDMjQ-SLaiM7",
+          "name": "AAAAAAAAAA",
+          "description": "BBBBBB",
+          "values": [
+            {
+              "identifier": "v_text_18399",
+              "name": "ZZZZZZZZZZZ",
+              "type": "text",
+              "data": "XXXXXXXXXXXXX"
+            }
+          ]
         }
-    ]
+      ],
+      "attachments": []
+    },
+    {
+      "_id": "noID",
+      "deleted": false,
+      "locked": false,
+      "name": "mini box 1",
+      "owner": "XXXX-1234-ABCD-0000",
+      "created": "2023-12-27T20:12:43.686Z",
+      "description": "mini box that fit in another box updated by same name entity",
+      "projects": ["pBwj_re8"],
+      "associations": {
+        "origins": [
+          {
+            "name": "box 1",
+            "id": "eqRN9NBH"
+          }
+        ],
+        "products": []
+      },
+      "attributes": [
+        {
+          "_id": "a-eDDyDMjQ-SLaiM7",
+          "name": "AAAAAAAAAA",
+          "description": "BBBBBB",
+          "values": [
+            {
+              "identifier": "v_text_18399",
+              "name": "ZZZZZZZZZZZ",
+              "type": "text",
+              "data": "XXXXXXXXXXXXX"
+            }
+          ]
+        }
+      ],
+      "attachments": []
+    },
+    {
+      "_id": "eOZ4E6Qw",
+      "deleted": false,
+      "locked": false,
+      "name": "box2",
+      "owner": "XXXX-1234-ABCD-0000",
+      "created": "2023-12-27T20:12:43.686Z",
+      "description": "mock box 2 ",
+      "projects": ["pBwj_re8"],
+      "associations": {
+        "origins": [],
+        "products": []
+      },
+      "attributes": [
+        {
+          "_id": "a-eOZ4E6Qw-0EmAiB",
+          "name": "asdvasdvsadv",
+          "description": "qwervqewvqew",
+          "values": [
+            {
+              "identifier": "v_text_11077",
+              "name": "wqefqwef",
+              "type": "text",
+              "data": "qwefqwef"
+            }
+          ]
+        }
+      ],
+      "attachments": []
+    },
+    {
+      "_id": "eqRN9NBH",
+      "deleted": false,
+      "locked": false,
+      "name": "box 1",
+      "owner": "XXXX-1234-ABCD-0000",
+      "created": "2023-12-27T20:12:43.686Z",
+      "description": "mock box 1",
+      "projects": ["pBwj_re8"],
+      "associations": {
+        "origins": [],
+        "products": [
+          {
+            "name": "mini box 1",
+            "id": "eDDyDMjQ"
+          }
+        ]
+      },
+      "attributes": [],
+      "attachments": []
+    },
+    {
+      "_id": "eDDyDMjQ",
+      "deleted": false,
+      "locked": false,
+      "name": "mini box 1 FROMJSON",
+      "owner": "XXXX-1234-ABCD-0000",
+      "created": "2023-12-27T20:12:43.686Z",
+      "description": "mini box that fit in another box FROMJSON",
+      "projects": ["pBwj_re8"],
+      "associations": {
+        "origins": [
+          {
+            "name": "box 1",
+            "id": "eqRN9NBH"
+          }
+        ],
+        "products": []
+      },
+      "attributes": [
+        {
+          "_id": "a-eDDyDMjQ-SLaiM7",
+          "name": "AAAAAAAAAA",
+          "description": "BBBBBB",
+          "values": [
+            {
+              "identifier": "v_text_18399",
+              "name": "ZZZZZZZZZZZ",
+              "type": "text",
+              "data": "XXXXXXXXXXXXX"
+            }
+          ]
+        }
+      ],
+      "attachments": []
+    }
+  ]
 }
