@@ -240,7 +240,9 @@ export class Authentication {
             });
           } catch (error) {
             consola.error(
-              `Error processing ORCiD "${response.orcid}": ${JSON.stringify(error)}`,
+              `Error processing ORCiD "${response.orcid}": ${JSON.stringify(
+                error,
+              )}`,
             );
             reject(
               `Error processing ORCiD "${response.orcid}". Please contact the administrator.`,

@@ -18,7 +18,7 @@ SystemRoute.route("/system/backup").get(
       response.setHeader("Content-Type", "application/json");
       response.download(path, `backup_${dayjs(Date.now()).toJSON()}.json`);
     });
-  }
+  },
 );
 
 // Route: Import JSON file
@@ -36,7 +36,7 @@ SystemRoute.route("/system/importJSON").post(
       .catch((reason: { message: string }) => {
         response.json({ status: "error", message: reason.message });
       });
-  }
+  },
 );
 
 // Route: Import CSV file
@@ -54,7 +54,7 @@ SystemRoute.route("/system/import").post(
       .catch((reason: { message: string }) => {
         response.json({ status: "error", message: reason.message });
       });
-  }
+  },
 );
 
 // Route: Import mappings
@@ -71,7 +71,7 @@ SystemRoute.route("/system/import/mapping").post(
       .catch((reason: { message: string }) => {
         response.json({ status: "error", message: reason.message });
       });
-  }
+  },
 );
 
 // Route: Upload image
@@ -89,7 +89,7 @@ SystemRoute.route("/system/upload").post(
       .catch((reason: { message: string }) => {
         response.json({ status: "error", message: reason.message });
       });
-  }
+  },
 );
 
 // Route: Download file
@@ -113,7 +113,7 @@ SystemRoute.route("/system/download/:id").get(
       .catch((reason: { message: string }) => {
         response.json({ status: "error", message: reason.message });
       });
-  }
+  },
 );
 
 // Route: Get file information
@@ -127,7 +127,7 @@ SystemRoute.route("/system/file/:id").get(
       .catch((reason: { message: string }) => {
         response.json({ status: "error", message: reason.message });
       });
-  }
+  },
 );
 
 // Route: Get all Devices
@@ -137,7 +137,7 @@ SystemRoute.route("/system/devices").get(
     System.getDevices().then((devices: DeviceModel[]) => {
       response.json(devices);
     });
-  }
+  },
 );
 
 // Route: Get specific Device
@@ -147,7 +147,7 @@ SystemRoute.route("/system/devices/:id").get(
     System.getDevice(request.params.id).then((device: DeviceModel) => {
       response.json(device);
     });
-  }
+  },
 );
 
 export default SystemRoute;
