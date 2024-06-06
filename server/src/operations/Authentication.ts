@@ -199,16 +199,22 @@ export class Authentication {
   static login = (code: string): Promise<AuthInfo> => {
     // Retrieve a token
     return new Promise((resolve, reject) => {
-      const tokenRequestData = `client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}&grant_type=authorization_code&code=${code}&redirect_uri=${REDIRECT_URI}`;
-      postData(TOKEN_URL, tokenRequestData, {
+      // Format login data for POST request
+      const loginData = new URLSearchParams({
+        "client_id": CLIENT_ID,
+        "client_secret": CLIENT_SECRET,
+        "grant_type": "authorization_code",
+        "code": code,
+        "redirect_uri": REDIRECT_URI,
+      }).toString();
+
+      postData(TOKEN_URL, loginData, {
         headers: {
           Accept: "application/json",
           "Content-Type": "application/x-www-form-urlencoded",
         },
       })
         .then(async (response: AuthToken) => {
-          consola.debug("Checking access...");
-
           try {
             let user = await Users.exists(response.orcid);
             if (user) {

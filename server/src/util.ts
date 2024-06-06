@@ -52,18 +52,17 @@ export const postData = async (
         if (_.isNull(contentType)) {
           reject('"content-type" is null');
         } else if (_.startsWith(contentType, "application/json")) {
-          if (!_.isEqual(response.statusText, "OK")) {
-            reject(`Response status: ${response.statusText}`);
-          } else {
+          if (_.isEqual(response.status, 200)) {
             resolve(response.data);
+          } else {
+            reject(`Response: ${response.status}`);
           }
         } else {
           resolve(response.data);
         }
       })
       .catch((error) => {
-        consola.error("POST:", url);
-        reject(`Unknown error: ${error}`);
+        reject(`Error: ${error}`);
       });
   });
 };
