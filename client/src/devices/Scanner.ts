@@ -7,7 +7,7 @@ import { consola } from "consola";
 import _ from "lodash";
 
 export const connectScanner = (
-  setScannerStatus: React.Dispatch<React.SetStateAction<ScannerStatus>>
+  setScannerStatus: React.Dispatch<React.SetStateAction<ScannerStatus>>,
 ): Promise<any> => {
   return new Promise((resolve, reject) => {
     getData(`/system/devices`).then((devices: DeviceModel[]) => {

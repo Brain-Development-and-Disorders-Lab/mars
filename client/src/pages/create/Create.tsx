@@ -39,7 +39,13 @@ const Create = () => {
         wrap={"wrap"}
       >
         {/* Project card */}
-        <Card maxW={"sm"} h={"lg"} variant={"outline"} border={"2px"} borderColor={"gray.200"}>
+        <Card
+          maxW={"sm"}
+          h={"lg"}
+          variant={"outline"}
+          border={"2px"}
+          borderColor={"gray.200"}
+        >
           <CardHeader>
             <Flex gap={"4"} w={"100%"} justify={"center"} align={"center"}>
               <Icon name={"project"} size={"lg"} />
@@ -59,7 +65,11 @@ const Create = () => {
                   Fields
                 </Heading>
                 <Flex align={"center"} wrap={"wrap"} gap={"2"}>
-                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+                  <Text
+                    fontSize={"xs"}
+                    fontWeight={"semibold"}
+                    color={"gray.600"}
+                  >
                     Required:
                   </Text>
                   <Tag colorScheme={"red"}>Name</Tag>
@@ -82,7 +92,13 @@ const Create = () => {
         </Card>
 
         {/* Entity card */}
-        <Card maxW={"sm"} h={"lg"} variant={"outline"} border={"2px"} borderColor={"gray.200"}>
+        <Card
+          maxW={"sm"}
+          h={"lg"}
+          variant={"outline"}
+          border={"2px"}
+          borderColor={"gray.200"}
+        >
           <CardHeader>
             <Flex gap={"4"} w={"100%"} justify={"center"} align={"center"}>
               <Icon name={"entity"} size={"lg"} />
@@ -105,7 +121,11 @@ const Create = () => {
                   Fields
                 </Heading>
                 <Flex align={"center"} wrap={"wrap"} gap={"2"}>
-                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+                  <Text
+                    fontSize={"xs"}
+                    fontWeight={"semibold"}
+                    color={"gray.600"}
+                  >
                     Required:
                   </Text>
                   <Tag colorScheme={"red"}>Name</Tag>
@@ -113,7 +133,11 @@ const Create = () => {
                 </Flex>
 
                 <Flex align={"center"} wrap={"wrap"} gap={"2"}>
-                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+                  <Text
+                    fontSize={"xs"}
+                    fontWeight={"semibold"}
+                    color={"gray.600"}
+                  >
                     Optional:
                   </Text>
                   <Tag colorScheme={"teal"}>Description</Tag>
@@ -139,7 +163,13 @@ const Create = () => {
         </Card>
 
         {/* Attribute card */}
-        <Card maxW={"sm"} h={"lg"} variant={"outline"} border={"2px"} borderColor={"gray.200"}>
+        <Card
+          maxW={"sm"}
+          h={"lg"}
+          variant={"outline"}
+          border={"2px"}
+          borderColor={"gray.200"}
+        >
           <CardHeader>
             <Flex gap={"4"} w={"100%"} justify={"center"} align={"center"}>
               <Icon name={"attribute"} size={"lg"} />
@@ -153,7 +183,8 @@ const Create = () => {
                   Description
                 </Heading>
                 <Text>
-                  Create template Attributes to reuse metadata structures across Entities.
+                  Create template Attributes to reuse metadata structures across
+                  Entities.
                 </Text>
               </Flex>
               <Flex p={"2"} gap={"4"} direction={"column"}>
@@ -161,7 +192,11 @@ const Create = () => {
                   Fields
                 </Heading>
                 <Flex align={"center"} wrap={"wrap"} gap={"2"}>
-                  <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.600"}>
+                  <Text
+                    fontSize={"xs"}
+                    fontWeight={"semibold"}
+                    color={"gray.600"}
+                  >
                     Required:
                   </Text>
                   <Tag colorScheme={"red"}>Name</Tag>

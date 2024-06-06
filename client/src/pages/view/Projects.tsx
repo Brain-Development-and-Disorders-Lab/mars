@@ -150,14 +150,14 @@ const Projects = () => {
           </Flex>
         </Flex>
         <Flex direction={"column"} gap={"4"} w={"100%"}>
-          {data.length > 0 ?
+          {data.length > 0 ? (
             <DataTable
               columns={columns}
               data={data}
               visibleColumns={visibleColumns}
               showPagination
             />
-          :
+          ) : (
             <Flex
               w={"100%"}
               direction={"row"}
@@ -165,9 +165,11 @@ const Projects = () => {
               justify={"center"}
               align={"center"}
             >
-              <Text color={"gray.400"} fontWeight={"semibold"}>You do not have any Projects.</Text>
+              <Text color={"gray.400"} fontWeight={"semibold"}>
+                You do not have any Projects.
+              </Text>
             </Flex>
-          }
+          )}
         </Flex>
       </Flex>
     </Content>

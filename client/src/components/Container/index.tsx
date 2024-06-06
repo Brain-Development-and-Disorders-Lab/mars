@@ -61,10 +61,7 @@ const Page: FC<PageProps> = ({ children }) => {
         <Navigation />
       </Flex>
 
-      <Flex
-        direction={"column"}
-        w={{ base: "100%", lg: "85%" }}
-      >
+      <Flex direction={"column"} w={{ base: "100%", lg: "85%" }}>
         {/* Search box component */}
         <Flex
           w={"100%"}

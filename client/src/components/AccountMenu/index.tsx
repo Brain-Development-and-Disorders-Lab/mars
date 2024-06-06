@@ -36,7 +36,7 @@ const AccountMenu = () => {
     getData(`/system/backup`).then((response) => {
       FileSaver.saveAs(
         new Blob([JSON.stringify(response, null, "  ")]),
-        slugify(`backup_${dayjs(Date.now()).toJSON()}.json`)
+        slugify(`backup_${dayjs(Date.now()).toJSON()}.json`),
       );
     });
   };
@@ -80,10 +80,18 @@ const AccountMenu = () => {
               </Text>
 
               <Flex align={"center"} wrap={"wrap"} gap={"2"}>
-                <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.600"}>
+                <Text
+                  fontSize={"sm"}
+                  fontWeight={"semibold"}
+                  color={"gray.600"}
+                >
                   ORCiD:
                 </Text>
-                <Tag colorScheme={"green"}><Link href={`https://orcid.org/${token.orcid}`}>{token.orcid}</Link></Tag>
+                <Tag colorScheme={"green"}>
+                  <Link href={`https://orcid.org/${token.orcid}`}>
+                    {token.orcid}
+                  </Link>
+                </Tag>
               </Flex>
             </Flex>
           </MenuGroup>

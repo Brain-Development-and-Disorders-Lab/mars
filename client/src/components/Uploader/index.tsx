@@ -156,7 +156,7 @@ const Uploader = (props: {
                           if (
                             _.includes(
                               ["image/jpeg", "image/png", "application/pdf"],
-                              event.target.files[0].type
+                              event.target.files[0].type,
                             )
                           ) {
                             setFile(event.target.files[0]);

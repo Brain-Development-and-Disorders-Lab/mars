@@ -151,10 +151,10 @@ const Entities = () => {
             FileSaver.saveAs(
               new Blob([response]),
               slugify(
-                `export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.csv`
-              )
+                `export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.csv`,
+              ),
             );
-          }
+          },
         );
 
         table.resetRowSelection();
@@ -170,16 +170,17 @@ const Entities = () => {
           toExport.push(table.getRow(rowIndex).original._id);
         }
 
-        postData(`/entities/export`, { entities: toExport, format: "json" }).then(
-          (response) => {
-            FileSaver.saveAs(
-              new Blob([response]),
-              slugify(
-                `export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.json`
-              )
-            );
-          }
-        );
+        postData(`/entities/export`, {
+          entities: toExport,
+          format: "json",
+        }).then((response) => {
+          FileSaver.saveAs(
+            new Blob([response]),
+            slugify(
+              `export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.json`,
+            ),
+          );
+        });
 
         table.resetRowSelection();
       },
@@ -193,10 +194,10 @@ const Entities = () => {
             FileSaver.saveAs(
               new Blob([response]),
               slugify(
-                `export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.json`
-              )
+                `export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.json`,
+              ),
             );
-          }
+          },
         );
 
         table.resetRowSelection();
@@ -236,7 +237,8 @@ const Entities = () => {
           </Flex>
         </Flex>
         <Flex direction={"column"} gap={"4"} w={"100%"}>
-          {data.filter((entity) => _.isEqual(entity.deleted, false)).length > 0 ?
+          {data.filter((entity) => _.isEqual(entity.deleted, false)).length >
+          0 ? (
             <DataTable
               columns={columns}
               data={data.filter((entity) => _.isEqual(entity.deleted, false))}
@@ -245,7 +247,7 @@ const Entities = () => {
               showSelection
               showPagination
             />
-          :
+          ) : (
             <Flex
               w={"100%"}
               direction={"row"}
@@ -253,9 +255,11 @@ const Entities = () => {
               justify={"center"}
               align={"center"}
             >
-              <Text color={"gray.400"} fontWeight={"semibold"}>You do not have any Entities.</Text>
+              <Text color={"gray.400"} fontWeight={"semibold"}>
+                You do not have any Entities.
+              </Text>
             </Flex>
-          }
+          )}
         </Flex>
       </Flex>
     </Content>

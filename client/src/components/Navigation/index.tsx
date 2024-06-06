@@ -65,32 +65,36 @@ const Navigation = () => {
         {/* Menu items */}
         <Flex direction={"column"} align={"self-start"} gap={"6"}>
           <Flex direction={"column"} gap={"2"} width={"100%"}>
-            <Text fontSize={"xs"} fontWeight={"bold"} color={"gray.600"}>Actions</Text>
+            <Text fontSize={"xs"} fontWeight={"bold"} color={"gray.600"}>
+              Actions
+            </Text>
             <Button
-                key={"create"}
-                w={"100%"}
-                colorScheme={"green"}
-                variant={"solid"}
-                leftIcon={<Icon name={"add"} />}
-                onClick={() => navigate("/create")}
+              key={"create"}
+              w={"100%"}
+              colorScheme={"green"}
+              variant={"solid"}
+              leftIcon={<Icon name={"add"} />}
+              onClick={() => navigate("/create")}
             >
               <Flex pr={"4"}>Create</Flex>
             </Button>
 
             <Button
-                key={"import"}
-                w={"100%"}
-                colorScheme={"blue"}
-                variant={"solid"}
-                leftIcon={<Icon name={"upload"} />}
-                onClick={() => onImportOpen()}
+              key={"import"}
+              w={"100%"}
+              colorScheme={"blue"}
+              variant={"solid"}
+              leftIcon={<Icon name={"upload"} />}
+              onClick={() => onImportOpen()}
             >
               <Flex pr={"4"}>Import</Flex>
             </Button>
           </Flex>
 
           <Flex direction={"column"} gap={"2"} width={"100%"}>
-            <Text fontSize={"xs"} fontWeight={"bold"} color={"gray.600"}>Menu</Text>
+            <Text fontSize={"xs"} fontWeight={"bold"} color={"gray.600"}>
+              Menu
+            </Text>
             <Button
               key={"dashboard"}
               w={"100%"}
@@ -181,7 +185,9 @@ const Navigation = () => {
           w={"100%"}
         >
           <Flex direction={"column"} gap={"2"} width={"100%"}>
-            <Text fontSize={"xs"} fontWeight={"bold"} color={"gray.600"}>Actions</Text>
+            <Text fontSize={"xs"} fontWeight={"bold"} color={"gray.600"}>
+              Actions
+            </Text>
             <Button
               key={"create"}
               w={"100%"}
@@ -195,7 +201,9 @@ const Navigation = () => {
           </Flex>
 
           <Flex direction={"column"} gap={"2"} width={"100%"}>
-            <Text fontSize={"xs"} fontWeight={"bold"} color={"gray.600"}>Menu</Text>
+            <Text fontSize={"xs"} fontWeight={"bold"} color={"gray.600"}>
+              Menu
+            </Text>
             <Button
               key={"dashboard"}
               w={"100%"}
@@ -253,7 +261,9 @@ const Navigation = () => {
               w={"100%"}
               justifyContent={"left"}
               variant={
-                _.startsWith(location.pathname, "/attributes") ? "solid" : "ghost"
+                _.startsWith(location.pathname, "/attributes")
+                  ? "solid"
+                  : "ghost"
               }
               onClick={() => responsiveNavigate("/attributes")}
             >
