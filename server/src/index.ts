@@ -9,7 +9,7 @@ import cors from "cors";
 import helmet from "helmet";
 import consola, { LogLevels } from "consola";
 
-import 'source-map-support/register';
+import "source-map-support/register";
 
 const fileUpload = require("express-fileupload");
 
@@ -27,14 +27,17 @@ import AuthenticationRoute from "./routes/Authentication";
 import UsersRoute from "./routes/Users";
 
 // Set logging level
-consola.level = (_.isEqual(process.env.NODE_ENV, "development") || _.isEqual(process.env.NODE_ENV, "test"))
-  ? LogLevels.verbose
-  : LogLevels.error;
+consola.level =
+  _.isEqual(process.env.NODE_ENV, "development") ||
+  _.isEqual(process.env.NODE_ENV, "test")
+    ? LogLevels.trace
+    : LogLevels.info;
 
-consola.info(`Starting server in ${process.env.NODE_ENV} mode`);
+consola.info("Server mode:", process.env.NODE_ENV);
 
 export const app = express();
 const port = process.env.PORT || 8000;
+const endpoint = "/mars";
 
 // Configure Express, enable CORS middleware and routes
 app.use(helmet());
@@ -53,7 +56,7 @@ app.use(SystemRoute);
 app.use(UsersRoute);
 
 const wrapper = express();
-wrapper.use("/mars", app);
+wrapper.use(endpoint, app);
 
 // Start the Express server
 wrapper.listen(port, () => {
@@ -61,7 +64,8 @@ wrapper.listen(port, () => {
   connectPrimary().then(() => {
     // Connect to the system database
     connectSystem().then(() => {
-      consola.info(`Server is running on port: ${port}`);
+      consola.success("Server port:", port);
+      consola.success("Server endpoint:", endpoint);
     });
   });
 });

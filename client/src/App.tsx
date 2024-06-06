@@ -3,7 +3,7 @@ import React, { ReactElement, useEffect, useState } from "react";
 
 // Styling to be applied across the application
 import "./styles/styles.css";
-import 'react-querybuilder/dist/query-builder.css';
+import "react-querybuilder/dist/query-builder.css";
 
 import "@fontsource/roboto";
 
@@ -13,8 +13,9 @@ import { ChakraProvider } from "@chakra-ui/react";
 // Routing and navigation
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
-// Utility functions
+// Utility imports
 import _ from "lodash";
+import consola from "consola";
 
 // Custom components
 import { Page } from "@components/Container";
@@ -34,7 +35,7 @@ import CreateAttribute from "@pages/create/Attribute";
 import CreateEntity from "@pages/create/Entity";
 import CreateProject from "@pages/create/Project";
 
-// Page type - Unique
+// Page type - Other
 import Search from "@pages/Search";
 import Settings from "@pages/Settings";
 import Dashboard from "@pages/Dashboard";
@@ -49,13 +50,15 @@ import { useToken } from "src/authentication/useToken";
 
 /**
  * Base App component containing the page layout and page routing components
- * @return {ReactElement}
+ * @returns {ReactElement}
  */
 const App = (): ReactElement => {
-  // Setup token authentication
-  console.log(process.env.NODE_ENV);
-  const [token, _setToken] = useToken();
+  if (_.isEqual(process.env.NODE_ENV, "development")) {
+    consola.debug("Running client in development mode");
+  }
 
+  // Setup token authentication
+  const [token, _setToken] = useToken();
   const [authenticated, setAuthenticated] = useState(false);
 
   useEffect(() => {

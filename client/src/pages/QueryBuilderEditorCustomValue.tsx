@@ -1,30 +1,37 @@
-import React, { useState, useEffect } from 'react';
-import { Input, Box, Button, VStack } from '@chakra-ui/react';
-import { debounce } from 'lodash';
-import { postData } from '@database/functions';  // Adjust this import based on your project structure.
-import { ValueEditorProps } from 'react-querybuilder';
+import React, { useState, useEffect } from "react";
+import { Input, Box, Button, VStack } from "@chakra-ui/react";
 
-const QueryBuilderEditorCustomValue = ({ field, value, handleOnChange }: ValueEditorProps) => {
-  const [inputValue, setInputValue] = useState(value || '');
+// Utility imports
+import consola from "consola";
+import { debounce } from "lodash";
+import { postData } from "@database/functions"; // Adjust this import based on your project structure.
+import { ValueEditorProps } from "react-querybuilder";
+
+const QueryBuilderEditorCustomValue = ({
+  field,
+  value,
+  handleOnChange,
+}: ValueEditorProps) => {
+  const [inputValue, setInputValue] = useState(value || "");
   const [searchResults, setSearchResults] = useState([]);
 
   // Function to fetch entities based on the search term
   const fetchEntities = debounce((query) => {
-    if (field === 'origin' || field === 'product') {
+    if (field === "origin" || field === "product") {
       postData(`/entities/searchByTerm`, { query })
-        .then(response => {
-          console.log('response:', response);
+        .then((response) => {
+          consola.debug("Search response:", response);
           setSearchResults(response || []);
         })
-        .catch(error => {
-          console.error("Failed to fetch entities:", error);
+        .catch((error) => {
+          consola.error("Error fetching Entities after search:", error);
           setSearchResults([]);
         });
     }
   }, 300);
 
   useEffect(() => {
-    if (inputValue.length > 2 && (field === 'origin' || field === 'product')) {
+    if (inputValue.length > 2 && (field === "origin" || field === "product")) {
       fetchEntities(inputValue);
     } else {
       setSearchResults([]);
@@ -47,8 +54,8 @@ const QueryBuilderEditorCustomValue = ({ field, value, handleOnChange }: ValueEd
         placeholder={`Search for ${field}`}
         value={inputValue}
         onChange={handleInputChange}
-        minW={'300px'}
-        backgroundColor={'white'}
+        minW={"300px"}
+        backgroundColor={"white"}
         data-testid="value-editor"
       />
       {searchResults.length > 0 && (
@@ -70,7 +77,7 @@ const QueryBuilderEditorCustomValue = ({ field, value, handleOnChange }: ValueEd
               variant="ghost"
               justifyContent="start" // Aligns text to the left
               width="full" // Button takes full width of its container
-              _hover={{ bg: 'gray.100' }} // Changes background on hover for better interaction
+              _hover={{ bg: "gray.100" }} // Changes background on hover for better interaction
             >
               {entity.name}
             </Button>
@@ -78,7 +85,6 @@ const QueryBuilderEditorCustomValue = ({ field, value, handleOnChange }: ValueEd
         </VStack>
       )}
     </Box>
-
   );
 };
 

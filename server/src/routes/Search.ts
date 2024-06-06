@@ -16,7 +16,7 @@ SearchRoute.route("/search/query").post(
     Search.getQuery(request.body).then((results) => {
       response.json(results);
     });
-  }
+  },
 );
 
 // Route: Execute a built query across the colleciton of Entities
@@ -26,7 +26,7 @@ SearchRoute.route("/search/query_built").post(
     Search.getBuiltQuery(request.body).then((results) => {
       response.json(results);
     });
-  }
+  },
 );
 
 // Route: Search for a specific string in the colleciton of Entities
@@ -36,7 +36,7 @@ SearchRoute.route("/search").post(
     Search.get(request.body).then((results) => {
       response.json(results);
     });
-  }
+  },
 );
 
 export default SearchRoute;

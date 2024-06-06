@@ -57,6 +57,7 @@ import { useToken } from "src/authentication/useToken";
 import _ from "lodash";
 import dayjs from "dayjs";
 import { nanoid } from "nanoid";
+import consola from "consola";
 
 const Importer = (props: {
   isOpen: boolean;
@@ -82,7 +83,7 @@ const Importer = (props: {
 
   // State management to generate and present different pages
   const [interfacePage, setInterfacePage] = useState(
-    "upload" as "upload" | "details" | "mapping"
+    "upload" as "upload" | "details" | "mapping",
   );
 
   // Used to generated numerical steps and a progress bar
@@ -110,20 +111,20 @@ const Importer = (props: {
   const [ownerField, _setOwnerField] = useState(token.orcid);
   const [projectField, setProjectField] = useState("");
   const [selectedOrigin, setSelectedOrigin] = useState(
-    {} as { name: string; id: string }
+    {} as { name: string; id: string },
   );
   const [originsField, setOriginsField] = useState(
-    [] as { name: string; id: string }[]
+    [] as { name: string; id: string }[],
   );
   const [selectedProduct, setSelectedProduct] = useState(
-    {} as { name: string; id: string }
+    {} as { name: string; id: string },
   );
   const [productsField, setProductsField] = useState(
-    [] as { name: string; id: string }[]
+    [] as { name: string; id: string }[],
   );
   const [attributes, setAttributes] = useState([] as AttributeModel[]);
   const [attributesField, setAttributesField] = useState(
-    [] as AttributeModel[]
+    [] as AttributeModel[],
   );
 
   // Effect to manipulate 'Continue' button state for 'upload' page
@@ -136,7 +137,11 @@ const Importer = (props: {
 
   // Effect to manipulate 'Continue' button state when mapping fields from CSV file
   useEffect(() => {
-    if (_.isEqual(interfacePage, "details") && nameField !== "" && fileType === "text/csv") {
+    if (
+      _.isEqual(interfacePage, "details") &&
+      nameField !== "" &&
+      fileType === "text/csv"
+    ) {
       setContinueLoading(false);
       setContinueDisabled(false);
     }
@@ -144,7 +149,10 @@ const Importer = (props: {
 
   // Effect to manipulate 'Continue' button state when importing JSON file
   useEffect(() => {
-    if (_.isEqual(interfacePage, "details") && fileType === "application/json") {
+    if (
+      _.isEqual(interfacePage, "details") &&
+      fileType === "application/json"
+    ) {
       setContinueLoading(false);
       setContinueDisabled(false);
     }
@@ -191,7 +199,7 @@ const Importer = (props: {
   /**
    * Utility function to access and assign existing JSON data with exisitng user selections. Loads existing Origin and
    * Product Entities, and populates the existing Projects field.
-   * @return Short-circuit when function called without actual JSON data
+   * @returns Short-circuit when function called without actual JSON data
    */
   const updateJsonDataWithUserSelections = () => {
     if (!jsonData) {
@@ -216,11 +224,19 @@ const Importer = (props: {
       (updatedJsonData as any).forEach((entity: any) => {
         if (originsField?.length > 0) {
           // Add or update the 'origins' field in the entity
-          entity.associations.origins = _.unionBy(entity.associations.origins, originsField, 'id');
+          entity.associations.origins = _.unionBy(
+            entity.associations.origins,
+            originsField,
+            "id",
+          );
         }
         if (productsField?.length > 0) {
           // Add or update the 'products' field in the entity
-          entity.associations.products = _.unionBy(entity.associations.products, productsField, 'id');
+          entity.associations.products = _.unionBy(
+            entity.associations.products,
+            productsField,
+            "id",
+          );
         }
         if (projectField) {
           // Add or update the 'project' field in the entity
@@ -277,9 +293,11 @@ const Importer = (props: {
                 setSpreadsheetData(response.data);
 
                 // Filter columns to exclude columns with no header ("__EMPTY...")
-                const filteredColumnSet = Object.keys(response.data[0]).filter((column) => {
-                  return !_.startsWith(column, "__EMPTY");
-                })
+                const filteredColumnSet = Object.keys(response.data[0]).filter(
+                  (column) => {
+                    return !_.startsWith(column, "__EMPTY");
+                  },
+                );
                 setColumns(filteredColumnSet);
               }
 
@@ -354,7 +372,7 @@ const Importer = (props: {
         setIsLoaded(true);
       })
       .catch((_error) => {
-        console.log("_error:", _error);
+        consola.error("Error retrieving Entities data:", _error);
         toast({
           title: "Error",
           status: "error",
@@ -369,7 +387,7 @@ const Importer = (props: {
 
   /**
    * Perform import action for JSON data. Make POST request to server passing the JSON data.
-   * @return Short-circuit when function called without actual JSON data
+   * @returns Short-circuit when function called without actual JSON data
    */
   const performImportJson = () => {
     if (!jsonData) {
@@ -382,7 +400,7 @@ const Importer = (props: {
         isClosable: true,
       });
       return;
-    };
+    }
 
     // Update button state to reflect loading state
     setContinueLoading(true);
@@ -457,11 +475,11 @@ const Importer = (props: {
    * Factory-like pattern to generate general `Select` components
    * @param {any} value Component value
    * @param {React.SetStateAction<any>} setValue React `useState` function to set state
-   * @return {ReactElement}
+   * @returns {ReactElement}
    */
   const getSelectComponent = (
     value: any,
-    setValue: React.SetStateAction<any>
+    setValue: React.SetStateAction<any>,
   ) => {
     return (
       <Select
@@ -484,14 +502,14 @@ const Importer = (props: {
    * Factory-like pattern to generate `Select` components for selecting Entities
    * @param {any} value Component value
    * @param {React.SetStateAction<any>} setValue React `useState` function to set state
-   * @return {ReactElement}
+   * @returns {ReactElement}
    */
   const getSelectEntitiesComponent = (
     value: { name: string; id: string },
     setValue: React.SetStateAction<any>,
     selected: { name: string; id: string }[],
     setSelected: React.SetStateAction<any>,
-    disabled?: boolean
+    disabled?: boolean,
   ) => {
     return (
       <Select
@@ -506,7 +524,7 @@ const Importer = (props: {
           if (
             !_.includes(
               selected.map((entity) => entity.id),
-              selection.id
+              selection.id,
             )
           ) {
             setSelected([...selected, selection]);
@@ -529,7 +547,7 @@ const Importer = (props: {
   const onRemoveAttribute = (identifier: string) => {
     // We need to filter the removed attribute
     setAttributesField(
-      attributesField.filter((attribute) => attribute._id !== identifier)
+      attributesField.filter((attribute) => attribute._id !== identifier),
     );
   };
 
@@ -602,7 +620,7 @@ const Importer = (props: {
     setNameField("");
     setDescriptionField("");
     setProjectField("");
-    setSelectedOrigin({} as { name: string; id: string; });
+    setSelectedOrigin({} as { name: string; id: string });
     setOriginsField([] as { name: string; id: string }[]);
     setSelectedProduct({} as { name: string; id: string });
     setProductsField([] as { name: string; id: string }[]);
@@ -651,9 +669,16 @@ const Importer = (props: {
               </Flex>
 
               {_.isEqual(interfacePage, "upload") && (
-                <Flex w={"100%"} direction={"column"} align={"center"} justify={"center"}>
+                <Flex
+                  w={"100%"}
+                  direction={"column"}
+                  align={"center"}
+                  justify={"center"}
+                >
                   <Flex w={"100%"} py={"2"} justify={"left"}>
-                    <Information text={"MARS supports CSV-formatted or JSON files."} />
+                    <Information
+                      text={"MARS supports CSV-formatted or JSON files."}
+                    />
                   </Flex>
                   <FormControl>
                     <Flex
@@ -675,9 +700,7 @@ const Importer = (props: {
                           justify={"center"}
                           align={"center"}
                         >
-                          <Text fontWeight={"semibold"}>
-                            Drag file here
-                          </Text>
+                          <Text fontWeight={"semibold"}>Drag file here</Text>
                           <Text>or click to upload</Text>
                         </Flex>
                       ) : (
@@ -700,20 +723,25 @@ const Importer = (props: {
                       left={"0"}
                       opacity={"0"}
                       aria-hidden={"true"}
-                      onChange={(
-                        event: ChangeEvent<HTMLInputElement>
-                      ) => {
-                        if (event.target.files && event.target.files.length > 0) {
+                      onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                        if (
+                          event.target.files &&
+                          event.target.files.length > 0
+                        ) {
                           // Only accept defined file types
-                          if (_.includes(["text/csv", "application/json"], event.target.files[0].type)) {
+                          if (
+                            _.includes(
+                              ["text/csv", "application/json"],
+                              event.target.files[0].type,
+                            )
+                          ) {
                             setFileType(event.target.files[0].type);
                             setFile(event.target.files[0]);
                           } else {
                             toast({
                               title: "Warning",
                               status: "warning",
-                              description:
-                                "Please upload a JSON or CSV file",
+                              description: "Please upload a JSON or CSV file",
                               duration: 2000,
                               position: "bottom-right",
                               isClosable: true,
@@ -728,16 +756,33 @@ const Importer = (props: {
 
               {_.isEqual(interfacePage, "details") && (
                 <Flex w={"100%"} direction={"column"} gap={"4"}>
-                  {columns.length > 0 &&
+                  {columns.length > 0 && (
                     <Flex direction={"column"} gap={"2"} wrap={"wrap"}>
                       <Flex w={"100%"} py={"2"} justify={"left"} gap={"2"}>
-                        <Information text={`Found ${columns.length} columns.`} />
-                        {fileType === "text/csv" &&
-                          <Warning text={`Origins and Products cannot be imported from CSV files.`} />
-                        }
+                        <Information
+                          text={`Found ${columns.length} columns.`}
+                        />
+                        {fileType === "text/csv" && (
+                          <Warning
+                            text={`Origins and Products cannot be imported from CSV files.`}
+                          />
+                        )}
                       </Flex>
-                      <Flex w={"100%"} py={"2"} gap={"2"} align={"center"} justify={"left"} wrap={"wrap"}>
-                        <Text fontWeight={"semibold"} size={"xs"} color={"gray.600"}>Columns:</Text>
+                      <Flex
+                        w={"100%"}
+                        py={"2"}
+                        gap={"2"}
+                        align={"center"}
+                        justify={"left"}
+                        wrap={"wrap"}
+                      >
+                        <Text
+                          fontWeight={"semibold"}
+                          size={"xs"}
+                          color={"gray.600"}
+                        >
+                          Columns:
+                        </Text>
                         {columns.map((column) => {
                           return (
                             <Tag key={column} colorScheme={"green"}>
@@ -746,33 +791,48 @@ const Importer = (props: {
                           );
                         })}
                       </Flex>
-                      <Text>Each row represents a new Entity that will be created. From the above columns, use each drop-down to select which column value to map that specific detail of the Entities that will be created.</Text>
+                      <Text>
+                        Each row represents a new Entity that will be created.
+                        From the above columns, use each drop-down to select
+                        which column value to map that specific detail of the
+                        Entities that will be created.
+                      </Text>
                     </Flex>
-                  }
+                  )}
 
-                  {!jsonData && <Flex direction={"row"} gap={"4"}>
-                    <FormControl
-                      isRequired
-                      isInvalid={_.isEqual(nameField, "")}
-                    >
-                      <FormLabel>Name</FormLabel>
-                      {getSelectComponent(nameField, setNameField)}
-                      <FormHelperText>Column containing Entity names</FormHelperText>
-                    </FormControl>
-                    <FormControl>
-                      <FormLabel>Description</FormLabel>
-                      {getSelectComponent(
-                        descriptionField,
-                        setDescriptionField
-                      )}
-                      <FormHelperText>Column containing Entity descriptions</FormHelperText>
-                    </FormControl>
-                  </Flex>}
+                  {!jsonData && (
+                    <Flex direction={"row"} gap={"4"}>
+                      <FormControl
+                        isRequired
+                        isInvalid={_.isEqual(nameField, "")}
+                      >
+                        <FormLabel>Name</FormLabel>
+                        {getSelectComponent(nameField, setNameField)}
+                        <FormHelperText>
+                          Column containing Entity names
+                        </FormHelperText>
+                      </FormControl>
+                      <FormControl>
+                        <FormLabel>Description</FormLabel>
+                        {getSelectComponent(
+                          descriptionField,
+                          setDescriptionField,
+                        )}
+                        <FormHelperText>
+                          Column containing Entity descriptions
+                        </FormHelperText>
+                      </FormControl>
+                    </Flex>
+                  )}
 
                   <Flex direction={"row"} gap={"4"}>
                     <FormControl>
                       <FormLabel>Owner</FormLabel>
-                      <Tooltip label={"Initially, only you will have access to imported Entities"}>
+                      <Tooltip
+                        label={
+                          "Initially, only you will have access to imported Entities"
+                        }
+                      >
                         <Input value={ownerField} disabled />
                       </Tooltip>
                     </FormControl>
@@ -781,7 +841,9 @@ const Importer = (props: {
                       <Select
                         placeholder={"Select Project"}
                         value={projectField}
-                        onChange={(event) => setProjectField(event.target.value)}
+                        onChange={(event) =>
+                          setProjectField(event.target.value)
+                        }
                       >
                         {projects.map((project) => {
                           return (
@@ -791,40 +853,44 @@ const Importer = (props: {
                           );
                         })}
                       </Select>
-                      <FormHelperText>An existing Project to associate each Entity with</FormHelperText>
+                      <FormHelperText>
+                        An existing Project to associate each Entity with
+                      </FormHelperText>
                     </FormControl>
                   </Flex>
                   <Flex direction={"row"} gap={"4"}>
                     <FormControl>
                       <FormLabel>Origin</FormLabel>
-                        {getSelectEntitiesComponent(
-                          selectedOrigin,
-                          setSelectedOrigin,
-                          originsField,
-                          setOriginsField
-                        )}
-                        <FormHelperText>Existing Origin Entities to associate each Entity with</FormHelperText>
-                        <Flex direction={"row"} wrap={"wrap"} gap={"2"} pt={"2"}>
-                          {originsField.map((origin) => {
-                            return (
-                              <Tag key={origin.id}>
-                                {origin.name}
-                                <TagCloseButton
-                                  onClick={() => {
-                                    setOriginsField([
-                                      ...originsField.filter(
-                                        (existingOrigin) =>
-                                          !_.isEqual(
-                                            existingOrigin.id,
-                                            origin.id
-                                          )
-                                      ),
-                                    ]);
-                                  }}
-                                />
-                              </Tag>
-                            );
-                          })}
+                      {getSelectEntitiesComponent(
+                        selectedOrigin,
+                        setSelectedOrigin,
+                        originsField,
+                        setOriginsField,
+                      )}
+                      <FormHelperText>
+                        Existing Origin Entities to associate each Entity with
+                      </FormHelperText>
+                      <Flex direction={"row"} wrap={"wrap"} gap={"2"} pt={"2"}>
+                        {originsField.map((origin) => {
+                          return (
+                            <Tag key={origin.id}>
+                              {origin.name}
+                              <TagCloseButton
+                                onClick={() => {
+                                  setOriginsField([
+                                    ...originsField.filter(
+                                      (existingOrigin) =>
+                                        !_.isEqual(
+                                          existingOrigin.id,
+                                          origin.id,
+                                        ),
+                                    ),
+                                  ]);
+                                }}
+                              />
+                            </Tag>
+                          );
+                        })}
                       </Flex>
                     </FormControl>
                     <FormControl>
@@ -833,9 +899,11 @@ const Importer = (props: {
                         selectedProduct,
                         setSelectedProduct,
                         productsField,
-                        setProductsField
+                        setProductsField,
                       )}
-                      <FormHelperText>Existing Product Entities to associate each Entity with</FormHelperText>
+                      <FormHelperText>
+                        Existing Product Entities to associate each Entity with
+                      </FormHelperText>
                       <Flex direction={"row"} wrap={"wrap"} gap={"2"} pt={"2"}>
                         {productsField.map((product) => {
                           return (
@@ -848,8 +916,8 @@ const Importer = (props: {
                                       (existingProduct) =>
                                         !_.isEqual(
                                           existingProduct.id,
-                                          product.id
-                                        )
+                                          product.id,
+                                        ),
                                     ),
                                   ]);
                                 }}
@@ -865,9 +933,16 @@ const Importer = (props: {
 
               {_.isEqual(interfacePage, "mapping") && (
                 <Flex w={"100%"} direction={"column"} gap={"4"}>
-                  <Text>Columns can be assigned to Values within Attributes. When adding Values to an Attribute, select the column containing the data for each Value. Use an existing Template Attribute from the drop-down or create a new Attribute.</Text>
+                  <Text>
+                    Columns can be assigned to Values within Attributes. When
+                    adding Values to an Attribute, select the column containing
+                    the data for each Value. Use an existing Template Attribute
+                    from the drop-down or create a new Attribute.
+                  </Text>
                   <Flex w={"100%"} gap={"2"}>
-                    <Information text={"All dates must use \"MM/DD/YYYY\" format"} />
+                    <Information
+                      text={'All dates must use "MM/DD/YYYY" format'}
+                    />
                   </Flex>
                   <Flex
                     direction={"row"}
@@ -878,7 +953,13 @@ const Importer = (props: {
                   >
                     {/* Drop-down to select template Attributes */}
                     <FormControl maxW={"sm"}>
-                      <Tooltip label={attributes.length > 0 ? "Select an existing Template Attribute" : "No Template Attributes exist yet"}>
+                      <Tooltip
+                        label={
+                          attributes.length > 0
+                            ? "Select an existing Template Attribute"
+                            : "No Template Attributes exist yet"
+                        }
+                      >
                         <Select
                           placeholder={"Select Template Attribute"}
                           isDisabled={attributes.length === 0}
@@ -888,7 +969,7 @@ const Importer = (props: {
                                 if (
                                   _.isEqual(
                                     event.target.value.toString(),
-                                    attribute._id
+                                    attribute._id,
                                   )
                                 ) {
                                   setAttributesField([
@@ -998,16 +1079,16 @@ const Importer = (props: {
                 </Button> */}
 
                 <Button
-                  colorScheme={_.isEqual(interfacePage, "mapping") ? "green" : "blue"}
+                  colorScheme={
+                    _.isEqual(interfacePage, "mapping") ? "green" : "blue"
+                  }
                   rightIcon={
                     _.isEqual(interfacePage, "upload") ? (
                       <Icon name={"upload"} />
+                    ) : _.isEqual(interfacePage, "details") ? (
+                      <Icon name={"c_right"} />
                     ) : (
-                      _.isEqual(interfacePage, "details") ? (
-                        <Icon name={"c_right"} />
-                      ) : (
-                        <Icon name={"check"} />
-                      )
+                      <Icon name={"check"} />
                     )
                   }
                   variant={"solid"}

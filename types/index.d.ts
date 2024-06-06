@@ -1,11 +1,11 @@
 declare global {
   interface Navigator {
-      usb: {
-          getDevices(): any;
-          requestDevice({}): any;
-          addEventListener(event: string, handler: (event: any) => void): any;
-          onconnect({}): any;
-      }
+    usb: {
+      getDevices(): any;
+      requestDevice({}): any;
+      addEventListener(event: string, handler: (event: any) => void): any;
+      onconnect({}): any;
+    };
   }
 }
 
@@ -63,11 +63,12 @@ export type AttributeCardActions = {
   onRemove?: (identifier: string) => void;
 };
 
-export type AttributeCardProps = IAttribute & AttributeCardActions & {
-  identifier: string;
-  restrictDataValues: boolean;
-  permittedDataValues?: string[];
-};
+export type AttributeCardProps = IAttribute &
+  AttributeCardActions & {
+    identifier: string;
+    restrictDataValues: boolean;
+    permittedDataValues?: string[];
+  };
 
 export type AttributeGroupProps = AttributeCardActions & {
   attributes: AttributeModel[];
@@ -122,7 +123,7 @@ export type ProjectHistory = {
   timestamp: string;
   description: string;
   entities: string[];
-}
+};
 
 // Entity types
 export type IEntity = {
@@ -182,8 +183,8 @@ export type EntityImport = {
   owner: string;
   description: string;
   projects: string;
-  origins: {id: string, name: string}[];
-  products: {id: string, name: string}[];
+  origins: { id: string; name: string }[];
+  products: { id: string; name: string }[];
   attributes: AttributeModel[];
 };
 
@@ -202,9 +203,9 @@ export type IActivity = {
   type: "create" | "update" | "delete";
   details: string;
   target: {
-    type: "entities" | "projects" | "attributes",
-    id: string,
-    name: string,
+    type: "entities" | "projects" | "attributes";
+    id: string;
+    name: string;
   };
 };
 
@@ -253,81 +254,93 @@ export type DataTableAction = {
 // Icon component
 export type IconNames =
   // Default
-  "unknown" |
+  | "unknown"
 
   // Locations
-  "dashboard" |
-  "entity" |
-  "attribute" |
-  "project" |
+  | "dashboard"
+  | "entity"
+  | "attribute"
+  | "project"
 
   // Signal and action icons
-  "activity" |
-  "attachment" |
-  "check" |
-  "info" |
-  "search" |
-  "bell" |
-  "add" |
-  "edit" |
-  "delete" |
-  "download" |
-  "upload" |
-  "cross" |
-  "list" |
-  "warning" |
-  "exclamation" |
-  "reload" |
-  "graph" |
-  "clock" |
-  "rewind" |
-  "link" |
-  "scan" |
-  "lock" |
-  "exit" |
-  "settings" |
-  "view" |
-  "zoom_in" |
-  "zoom_out" |
+  | "activity"
+  | "attachment"
+  | "check"
+  | "info"
+  | "search"
+  | "bell"
+  | "add"
+  | "edit"
+  | "delete"
+  | "download"
+  | "upload"
+  | "cross"
+  | "list"
+  | "warning"
+  | "exclamation"
+  | "reload"
+  | "graph"
+  | "clock"
+  | "rewind"
+  | "link"
+  | "scan"
+  | "lock"
+  | "exit"
+  | "settings"
+  | "view"
+  | "zoom_in"
+  | "zoom_out"
 
   // Logos
-  "l_box" |
-  "l_labArchives" |
-  "l_globus" |
-  "l_github" |
+  | "l_box"
+  | "l_labArchives"
+  | "l_globus"
+  | "l_github"
 
   // Values
-  "v_date" |
-  "v_text" |
-  "v_number" |
-  "v_url" |
-  "v_select" |
+  | "v_date"
+  | "v_text"
+  | "v_number"
+  | "v_url"
+  | "v_select"
 
   // Arrows
-  "a_right" |
+  | "a_right"
 
   // Chevrons
-  "c_left" |
-  "c_double_left" |
-  "c_right" |
-  "c_double_right" |
-  "c_up" |
-  "c_down" |
+  | "c_left"
+  | "c_double_left"
+  | "c_right"
+  | "c_double_right"
+  | "c_up"
+  | "c_down"
 
   // Sorting
-  "sort" |
-  "sort_up" |
-  "sort_down";
+  | "sort"
+  | "sort_up"
+  | "sort_down";
 
 // Query types
 export type QueryOperator = "AND" | "OR";
 export type QueryFocusType = "Entity" | "Project" | "Attribute";
-export type QueryParameters = "Name" | "Owner" | "Description" | "Projects" | "Origins" | "Products";
+export type QueryParameters =
+  | "Name"
+  | "Owner"
+  | "Description"
+  | "Projects"
+  | "Origins"
+  | "Products";
 export type QueryQualifier = "Contains" | "Does Not Contain" | "Is" | "Is Not";
-export type QuerySubQualifier = "Date" | "Text" | "Number" | "URL" | "Entity" | "Select";
+export type QuerySubQualifier =
+  | "Date"
+  | "Text"
+  | "Number"
+  | "URL"
+  | "Entity"
+  | "Select";
 
 export type QueryComponent = {
-  operator? :QueryOperator;
+  operator?: QueryOperator;
   focus: QueryFocusType;
   parameter: QueryParameters;
   qualifier: QueryQualifier;

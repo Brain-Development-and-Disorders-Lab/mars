@@ -11,7 +11,7 @@ export class Activity {
   /**
    * Create a new Update to record in the database
    * @param {IActivity} activity data related to the Update
-   * @return {Promise<Update>}
+   * @returns {Promise<IActivity>}
    */
   static create = (activity: IActivity): Promise<IActivity> => {
     return new Promise((resolve, _reject) => {
@@ -22,7 +22,7 @@ export class Activity {
             throw error;
           }
 
-          consola.success("Activity:", activity.target.name);
+          consola.debug("Activity:", activity.target.name);
           resolve(result as IActivity);
         });
     });
@@ -30,7 +30,7 @@ export class Activity {
 
   /**
    * Retrieve all Activity
-   * @return {Promise<ActivityModel[]>}
+   * @returns {Promise<ActivityModel[]>}
    */
   static getAll = (): Promise<ActivityModel[]> => {
     return new Promise((resolve, _reject) => {
@@ -42,7 +42,7 @@ export class Activity {
             throw error;
           }
 
-          consola.success("Retrieved all Activity");
+          consola.debug("Retrieved all Activity");
           resolve(result as ActivityModel[]);
         });
     });

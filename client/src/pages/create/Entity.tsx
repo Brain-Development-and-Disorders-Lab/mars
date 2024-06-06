@@ -61,6 +61,7 @@ import { isValidAttributes } from "src/util";
 import _ from "lodash";
 import dayjs from "dayjs";
 import { nanoid } from "nanoid";
+import consola from "consola";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
@@ -68,7 +69,7 @@ import { useNavigate } from "react-router-dom";
 const Entity = () => {
   // Used to manage what detail inputs are presented
   const [pageState, setPageState] = useState(
-    "start" as "start" | "attributes" | "associations"
+    "start" as "start" | "attributes" | "associations",
   );
 
   const pageSteps = [
@@ -97,19 +98,19 @@ const Entity = () => {
   const [name, setName] = useState("");
   const [isNameUnique, setIsNameUnique] = useState(true);
   const [created, setCreated] = useState(
-    dayjs(Date.now()).format("YYYY-MM-DDTHH:mm")
+    dayjs(Date.now()).format("YYYY-MM-DDTHH:mm"),
   );
   const [owner, _setOwner] = useState(token.orcid);
   const [description, setDescription] = useState("");
   const [selectedProjects, setSelectedProjects] = useState([] as string[]);
   const [selectedOrigins, setSelectedOrigins] = useState(
-    [] as { name: string; id: string }[]
+    [] as { name: string; id: string }[],
   );
   const [selectedProducts, setSelectedProducts] = useState(
-    [] as { name: string; id: string }[]
+    [] as { name: string; id: string }[],
   );
   const [selectedAttributes, setSelectedAttributes] = useState(
-    [] as AttributeModel[]
+    [] as AttributeModel[],
   );
 
   const entityState: IEntity = {
@@ -143,11 +144,10 @@ const Entity = () => {
 
       setIsNameUnique(!response); // If data is null, the name is unique
     } catch (error) {
-      console.error("Failed to check entity name:", error);
+      consola.error("Failed to check entity name:", error);
       // Handle error appropriately
     }
   };
-
 
   useEffect(() => {
     // Get all Entities
@@ -267,7 +267,7 @@ const Entity = () => {
   const onRemoveAttributeCard = (identifier: string) => {
     // We need to filter the removed attribute
     setSelectedAttributes(
-      selectedAttributes.filter((attribute) => attribute._id !== identifier)
+      selectedAttributes.filter((attribute) => attribute._id !== identifier),
     );
   };
 
@@ -471,7 +471,7 @@ const Entity = () => {
                             setSelectedOrigins(
                               selectedOrigins.filter((selected) => {
                                 return !_.isEqual(product.id, selected.id);
-                              })
+                              }),
                             );
                           }}
                         />
@@ -560,7 +560,7 @@ const Entity = () => {
                             setSelectedProducts(
                               selectedProducts.filter((selected) => {
                                 return !_.isEqual(product.id, selected.id);
-                              })
+                              }),
                             );
                           }}
                         />
@@ -633,7 +633,7 @@ const Entity = () => {
                         if (
                           _.isEqual(
                             event.target.value.toString(),
-                            attribute._id
+                            attribute._id,
                           )
                         ) {
                           setSelectedAttributes([

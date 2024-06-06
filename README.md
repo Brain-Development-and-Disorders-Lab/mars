@@ -25,19 +25,19 @@ Everything is recognized as an "entity", from physical brain slices to antibodie
 
 Entities have the following components:
 
-- *Name*: This is an ID or general name for an Entity.
-- *Owner*: The creator of the Entity.
-- *Date*: The date that the Entity came into existence or was created.
-- *Description*: An entirely textual description of the Entity. Further metadata should be expressed later as Attributes.
-- *Projects*: Specify any existing Projects that the Entity belongs to.
-- *Origins*: If the Entity was created as a product of another Entity, then the other Entity is an Origin. The Origin Entities must already exist in the database.
-- *Products*: If the Entity being entered into the system generated subsequent Entities that already exist in the system, the generated Entities can be specified. The Product Entities must already exist in the database.
-- *Attributes*: This is a specific metadata component and is explained below (see below).
-- *Attachments*: Attach images or PDF files to an Entity.
+- _Name_: This is an ID or general name for an Entity.
+- _Owner_: The creator of the Entity.
+- _Date_: The date that the Entity came into existence or was created.
+- _Description_: An entirely textual description of the Entity. Further metadata should be expressed later as Attributes.
+- _Projects_: Specify any existing Projects that the Entity belongs to.
+- _Origins_: If the Entity was created as a product of another Entity, then the other Entity is an Origin. The Origin Entities must already exist in the database.
+- _Products_: If the Entity being entered into the system generated subsequent Entities that already exist in the system, the generated Entities can be specified. The Product Entities must already exist in the database.
+- _Attributes_: This is a specific metadata component and is explained below (see below).
+- _Attachments_: Attach images or PDF files to an Entity.
 
 ### Attributes ⚙️
 
-Attributes are the primary method of organizing metadata associated with Entities. Attributes contain types of metadata known as *Values*. Values can be any of the following:
+Attributes are the primary method of organizing metadata associated with Entities. Attributes contain types of metadata known as _Values_. Values can be any of the following:
 
 - `string`: A textual description of any length.
 - `number`: A numerical value.
@@ -76,7 +76,6 @@ This command will build all required containers before starting the containers r
 ### Starting the interface and server
 
 To start the reusable interface, run `yarn start` in the `/client` directory. Start the MARS server by running `yarn build` and `yarn start` in the `/server` directory. Both the client and server should be running alongside the Docker containers before attempting to access MARS at `localhost:8080`.
-
 
 ### Testing
 

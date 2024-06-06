@@ -17,70 +17,70 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    # Setup for client and server
-    - name: Start Docker containers
-      run: docker-compose -f "docker-compose.yml" up -d --build
+      # Setup for client and server
+      - name: Start Docker containers
+        run: docker-compose -f "docker-compose.yml" up -d --build
 
-    - name: Use Node.js 18.x
-      uses: actions/setup-node@v3
-      with:
-        node-version: 18.x
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
 
-    - name: Install dependencies
-      run: yarn install
+      - name: Install dependencies
+        run: yarn install
 
-    # Install, build, and test the frontend
-    - name: Install, build, and test client
-      working-directory: ./client
-      run: |
-        yarn install
-        yarn build
-        yarn test
+      # Install, build, and test the frontend
+      - name: Install, build, and test client
+        working-directory: ./client
+        run: |
+          yarn install
+          yarn build
+          yarn test
 
-    # Create .env file for server and build server
-    - name: Create .env file
-      working-directory: server
-      run: |
-        touch .env
-        echo "CONNECTION_STRING=${{ env.CONNECTION_STRING }}" >> .env
-        echo "PORT=8000" >> .env
-        echo "NODE_ENV=development" >> .env
-        echo "CLIENT_ID=${{ secrets.CLIENT_ID }}" >> .env
-        echo "CLIENT_SECRET=${{ secrets.CLIENT_SECRET }}" >> .env
+      # Create .env file for server and build server
+      - name: Create .env file
+        working-directory: server
+        run: |
+          touch .env
+          echo "CONNECTION_STRING=${{ env.CONNECTION_STRING }}" >> .env
+          echo "PORT=8000" >> .env
+          echo "NODE_ENV=development" >> .env
+          echo "CLIENT_ID=${{ secrets.CLIENT_ID }}" >> .env
+          echo "CLIENT_SECRET=${{ secrets.CLIENT_SECRET }}" >> .env
 
-    - name: Build server
-      working-directory: server
-      run: |
-        yarn install
-        yarn buildDebug
+      - name: Build server
+        working-directory: server
+        run: |
+          yarn install
+          yarn buildDebug
 
-    # Run the server unit tests
-    - name: Test Server
-      working-directory: server
-      run: |
-        yarn test
+      # Run the server unit tests
+      - name: Test Server
+        working-directory: server
+        run: |
+          yarn test
 
-    # Start the client
-    - name: Start client
-      working-directory: client
-      run: yarn start &
+      # Start the client
+      - name: Start client
+        working-directory: client
+        run: yarn start &
 
-    - name: Wait for client start
-      run: sleep 10 # seconds
+      - name: Wait for client start
+        run: sleep 10 # seconds
 
-    # Run the Cypress tests
-    - name: Run Cypress tests
-      uses: cypress-io/github-action@v6
-      with:
-        wait-on: 'http://localhost:8080'
-        start: yarn startDev
+      # Run the Cypress tests
+      - name: Run Cypress tests
+        uses: cypress-io/github-action@v6
+        with:
+          wait-on: "http://localhost:8080"
+          start: yarn startDev
 
-    # Run this step only if the Cypress testing failed
-    - name: Upload Cypress screenshots
-      if: failure()
-      uses: actions/upload-artifact@v3
-      with:
-        name: cypress-screenshots
-        path: cypress/screenshots
+      # Run this step only if the Cypress testing failed
+      - name: Upload Cypress screenshots
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots

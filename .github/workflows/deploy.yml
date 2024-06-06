@@ -8,29 +8,29 @@ on:
 # Note: Environment variables used for server deployment only
 env:
   AZURE_WEBAPP_NAME: mars-server
-  AZURE_WEBAPP_PACKAGE_PATH: './'
-  NODE_VERSION: '18.x'
+  AZURE_WEBAPP_PACKAGE_PATH: "./"
+  NODE_VERSION: "18.x"
 
 jobs:
   deploy_client:
     runs-on: ubuntu-latest
     name: Deploy client
     steps:
-    - uses: actions/checkout@v4
-      with:
-        submodules: true
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
 
-    # Run client deployment
-    - name: Deploy to Azure Static Web Apps
-      id: deploy-static-web-app
-      uses: Azure/static-web-apps-deploy@v1
-      with:
-        azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_RED_WAVE_02CDDA510 }}
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        action: "upload"
-        app_location: "/client"
-        api_location: "/server"
-        output_location: "/dist"
+      # Run client deployment
+      - name: Deploy to Azure Static Web Apps
+        id: deploy-static-web-app
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_RED_WAVE_02CDDA510 }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: "upload"
+          app_location: "/client"
+          api_location: "/server"
+          output_location: "/dist"
 
   build_server:
     name: Build server
@@ -68,7 +68,6 @@ jobs:
         with:
           name: node-app
           path: ./server/out.zip
-
 
   deploy_server:
     name: Deploy server

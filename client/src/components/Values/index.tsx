@@ -54,7 +54,7 @@ import dayjs from "dayjs";
  * Values component use to display a collection of Values and enable
  * creating and deleting Values. Displays collection as cards.
  * @param props collection of props to construct component
- * @return
+ * @returns
  */
 const Values = (props: {
   viewOnly: boolean;
@@ -408,7 +408,7 @@ const Values = (props: {
         header: "Data",
       }),
     ],
-    [props.viewOnly, entities]
+    [props.viewOnly, entities],
   );
 
   const addOptions = () => {
@@ -539,7 +539,7 @@ const Values = (props: {
                         ...props.values,
                         {
                           identifier: `v_number_${Math.round(
-                            performance.now()
+                            performance.now(),
                           )}`,
                           name: "",
                           type: "number",
@@ -585,7 +585,7 @@ const Values = (props: {
                         ...props.values,
                         {
                           identifier: `p_entity_${Math.round(
-                            performance.now()
+                            performance.now(),
                           )}`,
                           name: "",
                           type: "entity",
@@ -705,7 +705,7 @@ const Values = (props: {
                                 setOptions([
                                   ...options.filter(
                                     (currentOption) =>
-                                      !_.isEqual(currentOption, option)
+                                      !_.isEqual(currentOption, option),
                                   ),
                                 ]);
                               }}

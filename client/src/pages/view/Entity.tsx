@@ -92,6 +92,7 @@ import dayjs from "dayjs";
 import FileSaver from "file-saver";
 import slugify from "slugify";
 import { nanoid } from "nanoid";
+import consola from "consola";
 
 // Routing and navigation
 import { useParams, useNavigate } from "react-router-dom";
@@ -118,7 +119,7 @@ const Entity = () => {
   const [selectedProjects, setSelectedProjects] = useState([] as string[]);
 
   const [allEntities, setAllEntities] = useState(
-    [] as { name: string; id: string }[]
+    [] as { name: string; id: string }[],
   );
 
   const {
@@ -166,11 +167,11 @@ const Entity = () => {
   // Debounced fetch function
   const fetchEntities = debounce((query) => {
     postData(`/entities/searchByTerm`, { query: query })
-      .then(response => {
+      .then((response) => {
         setSearchResults(response);
       })
-      .catch(error => {
-        console.error("Failed to fetch entities:", error);
+      .catch((error) => {
+        consola.error("Failed to fetch entities:", error);
         setSearchResults([]);
       });
   }, 150);
@@ -207,14 +208,15 @@ const Entity = () => {
       .catch(() => {
         toast({
           title: "Error",
-          description: "An error occurred when saving this Attribute as a template.",
+          description:
+            "An error occurred when saving this Attribute as a template.",
           status: "error",
           duration: 2000,
           position: "bottom-right",
           isClosable: true,
         });
       });
-  }
+  };
 
   useEffect(() => {
     // Get all Attributes
@@ -240,7 +242,7 @@ const Entity = () => {
 
   useEffect(() => {
     setIsAttributeValueError(
-      !isValidValues(attributeValues) || attributeValues.length === 0
+      !isValidValues(attributeValues) || attributeValues.length === 0,
     );
   }, [attributeValues]);
 
@@ -256,26 +258,25 @@ const Entity = () => {
   const [entityDescription, setEntityDescription] = useState("");
   const [entityProjects, setEntityProjects] = useState([] as string[]);
   const [entityOrigins, setEntityOrigins] = useState(
-    [] as { name: string; id: string }[]
+    [] as { name: string; id: string }[],
   );
   const [entityProducts, setEntityProducts] = useState(
-    [] as { name: string; id: string }[]
+    [] as { name: string; id: string }[],
   );
   const [entityAttributes, setEntityAttributes] = useState(
-    [] as AttributeModel[]
+    [] as AttributeModel[],
   );
   const [entityHistory, setEntityHistory] = useState([] as EntityHistory[]);
   const [entityAttachments, setEntityAttachments] = useState(
-    [] as { name: string; id: string }[]
+    [] as { name: string; id: string }[],
   );
   const [toUploadAttachments, setToUploadAttachments] = useState(
-    [] as string[]
+    [] as string[],
   );
 
   const [isDeletePopoverOpen, setIsDeletePopoverOpen] = useState(false);
   const handleDeletePopoverClose = () => setIsDeletePopoverOpen(false);
   const handleDeletePopoverOpen = () => setIsDeletePopoverOpen(true);
-
 
   // Manage the tab index between "Entity Origins" and "Entity Products"
   const [relationsIndex, setRelationsIndex] = useState(0);
@@ -360,7 +361,7 @@ const Entity = () => {
             .filter((entity) => !_.isEqual(entityData._id, entity._id))
             .map((entity) => {
               return { id: entity._id, name: entity.name };
-            })
+            }),
         );
       })
       .catch(() => {
@@ -815,7 +816,7 @@ const Entity = () => {
       id: (info: any) => `type_${info.row.original.name}`,
       cell: (info: any) => {
         let fileExtension = _.upperCase(
-          _.last(info.row.original.name.split("."))
+          _.last(info.row.original.name.split(".")),
         );
         const fileColorScheme = _.isEqual(fileExtension, "PDF")
           ? "red"
@@ -833,11 +834,11 @@ const Entity = () => {
             .then((response) => {
               FileSaver.saveAs(
                 new Blob([response]),
-                slugify(info.row.original.name)
+                slugify(info.row.original.name),
               );
             })
             .catch((error) => {
-              console.error(error);
+              consola.error("Error creating blob for download:", error);
             });
         };
 
@@ -859,11 +860,11 @@ const Entity = () => {
                   setIsPreviewLoaded(true);
                 })
                 .catch((error) => {
-                  console.error(error);
+                  consola.error("Error getting preview data:", error);
                 });
             })
             .catch((error) => {
-              console.error(error);
+              consola.error("Error retrieving preview:", error);
             });
         };
 
@@ -999,7 +1000,7 @@ const Entity = () => {
 
           FileSaver.saveAs(
             new Blob([responseData]),
-            slugify(`${entityData.name.replace(" ", "")}_export.${format}`)
+            slugify(`${entityData.name.replace(" ", "")}_export.${format}`),
           );
 
           // Close the "Export" modal
@@ -1112,7 +1113,7 @@ const Entity = () => {
     setEntityProducts(
       entityProducts.filter((product) => {
         return product.id !== id;
-      })
+      }),
     );
   };
 
@@ -1120,7 +1121,7 @@ const Entity = () => {
     setEntityProducts(
       entityProducts.filter((product) => {
         return !_.includes(ids, product.id);
-      })
+      }),
     );
   };
 
@@ -1139,7 +1140,7 @@ const Entity = () => {
     setEntityOrigins(
       entityOrigins.filter((origin) => {
         return origin.id !== id;
-      })
+      }),
     );
   };
 
@@ -1147,7 +1148,7 @@ const Entity = () => {
     setEntityOrigins(
       entityOrigins.filter((origin) => {
         return !_.includes(ids, origin.id);
-      })
+      }),
     );
   };
 
@@ -1156,7 +1157,7 @@ const Entity = () => {
     setEntityProjects(
       entityProjects.filter((project) => {
         return project !== id;
-      })
+      }),
     );
   };
 
@@ -1164,7 +1165,7 @@ const Entity = () => {
     setEntityProjects(
       entityProjects.filter((project) => {
         return !_.includes(ids, project);
-      })
+      }),
     );
   };
 
@@ -1173,7 +1174,7 @@ const Entity = () => {
     setEntityAttachments(
       entityAttachments.filter((attachment) => {
         return attachment.id !== id;
-      })
+      }),
     );
   };
 
@@ -1181,7 +1182,7 @@ const Entity = () => {
     setEntityAttachments(
       entityAttachments.filter((attachment) => {
         return !_.includes(ids, attachment.id);
-      })
+      }),
     );
   };
 
@@ -1190,7 +1191,7 @@ const Entity = () => {
     setEntityAttributes(
       entityAttributes.filter((attribute) => {
         return attribute._id !== id;
-      })
+      }),
     );
   };
 
@@ -1277,7 +1278,9 @@ const Entity = () => {
           {/* Buttons */}
           <Flex direction={"row"} gap={"4"} wrap={"wrap"}>
             {isDeletePopoverOpen && (
-              <Popover isOpen={isDeletePopoverOpen} onClose={handleDeletePopoverClose}
+              <Popover
+                isOpen={isDeletePopoverOpen}
+                onClose={handleDeletePopoverClose}
               >
                 <PopoverTrigger>
                   <></>
@@ -1303,7 +1306,6 @@ const Entity = () => {
                   </PopoverBody>
                 </PopoverContent>
               </Popover>
-
             )}
             {editing && (
               <Button
@@ -1350,7 +1352,6 @@ const Entity = () => {
                 )}
               </Flex>
             )}
-
 
             {/* Actions Menu */}
             <Menu>
@@ -1469,9 +1470,16 @@ const Entity = () => {
                   </Button>
                 ) : null}
               </Flex>
-              <Flex w={"100%"} justify={"center"} align={"center"} minH={"100px"}>
+              <Flex
+                w={"100%"}
+                justify={"center"}
+                align={"center"}
+                minH={"100px"}
+              >
                 {entityProjects.length === 0 ? (
-                  <Text color={"gray.400"} fontWeight={"semibold"}>This Entity is not associated with any Projects.</Text>
+                  <Text color={"gray.400"} fontWeight={"semibold"}>
+                    This Entity is not associated with any Projects.
+                  </Text>
                 ) : (
                   <DataTable
                     data={entityProjects}
@@ -1523,9 +1531,16 @@ const Entity = () => {
                 ) : null}
               </Flex>
 
-              <Flex w={"100%"} justify={"center"} align={"center"} minH={"100px"}>
+              <Flex
+                w={"100%"}
+                justify={"center"}
+                align={"center"}
+                minH={"100px"}
+              >
                 {entityAttributes.length === 0 ? (
-                  <Text color={"gray.400"} fontWeight={"semibold"}>This Entity does not have any Attributes.</Text>
+                  <Text color={"gray.400"} fontWeight={"semibold"}>
+                    This Entity does not have any Attributes.
+                  </Text>
                 ) : (
                   <DataTable
                     data={entityAttributes}
@@ -1585,9 +1600,16 @@ const Entity = () => {
                 </TabList>
                 <TabPanels>
                   <TabPanel>
-                    <Flex w={"100%"} justify={"center"} align={"center"} minH={"100px"}>
+                    <Flex
+                      w={"100%"}
+                      justify={"center"}
+                      align={"center"}
+                      minH={"100px"}
+                    >
                       {(entityOrigins?.length ?? 0) === 0 ? (
-                        <Text color={"gray.400"} fontWeight={"semibold"}>This Entity does not have any Origins.</Text>
+                        <Text color={"gray.400"} fontWeight={"semibold"}>
+                          This Entity does not have any Origins.
+                        </Text>
                       ) : (
                         <DataTable
                           data={entityOrigins}
@@ -1602,9 +1624,16 @@ const Entity = () => {
                     </Flex>
                   </TabPanel>
                   <TabPanel>
-                    <Flex w={"100%"} justify={"center"} align={"center"} minH={"100px"}>
+                    <Flex
+                      w={"100%"}
+                      justify={"center"}
+                      align={"center"}
+                      minH={"100px"}
+                    >
                       {(entityProducts?.length ?? 0) === 0 ? (
-                        <Text color={"gray.400"} fontWeight={"semibold"}>This Entity does not have any Products.</Text>
+                        <Text color={"gray.400"} fontWeight={"semibold"}>
+                          This Entity does not have any Products.
+                        </Text>
                       ) : (
                         <DataTable
                           data={entityProducts}
@@ -1646,11 +1675,7 @@ const Entity = () => {
                   justify={"space-between"}
                   align={"center"}
                 >
-                  <Heading
-                    fontWeight={"semibold"}
-                    size={"md"}
-                    py={"2"}
-                  >
+                  <Heading fontWeight={"semibold"} size={"md"} py={"2"}>
                     Attachments
                   </Heading>
                   <Button
@@ -1662,9 +1687,16 @@ const Entity = () => {
                   </Button>
                 </Flex>
 
-                <Flex w={"100%"} justify={"center"} align={"center"} minH={"100px"}>
+                <Flex
+                  w={"100%"}
+                  justify={"center"}
+                  align={"center"}
+                  minH={"100px"}
+                >
                   {entityAttachments.length === 0 ? (
-                    <Text color={"gray.400"} fontWeight={"semibold"}>This Entity does not have any Attachments.</Text>
+                    <Text color={"gray.400"} fontWeight={"semibold"}>
+                      This Entity does not have any Attachments.
+                    </Text>
                   ) : (
                     <DataTable
                       data={entityAttachments}
@@ -1723,7 +1755,7 @@ const Entity = () => {
                             if (
                               _.isEqual(
                                 event.target.value.toString(),
-                                attribute._id
+                                attribute._id,
                               )
                             ) {
                               setAttributeName(attribute.name);
@@ -1747,7 +1779,15 @@ const Entity = () => {
                     </Select>
                     <Text fontSize="sm">
                       Don't see the attribute you're looking for? You can
-                      <Link onClick={() => navigate("/create/attribute")} style={{ color: '#3182ce', marginLeft: '5px', marginRight: '5px', textDecoration: 'underline' }}>
+                      <Link
+                        onClick={() => navigate("/create/attribute")}
+                        style={{
+                          color: "#3182ce",
+                          marginLeft: "5px",
+                          marginRight: "5px",
+                          textDecoration: "underline",
+                        }}
+                      >
                         create a new attribute template
                       </Link>
                       here.
@@ -1911,7 +1951,7 @@ const Entity = () => {
                               setSelectedProjects(
                                 selectedProjects.filter((selected) => {
                                   return !_.isEqual(project, selected);
-                                })
+                                }),
                               );
                             }}
                           />
@@ -2228,7 +2268,9 @@ const Entity = () => {
 
             <ModalBody px={"2"}>
               <Flex w={"100%"} direction={"column"} py={"1"} gap={"2"}>
-                <Text>Select the Entity information to include in the exported file.</Text>
+                <Text>
+                  Select the Entity information to include in the exported file.
+                </Text>
                 <Checkbox
                   onChange={(event) => setExportAll(event.target.checked)}
                 >
@@ -2265,10 +2307,7 @@ const Entity = () => {
                             Created:{" "}
                             {dayjs(entityData.created).format("DD MMM YYYY")}
                           </Checkbox>
-                          <Checkbox
-                            isChecked={true}
-                            isDisabled
-                          >
+                          <Checkbox isChecked={true} isDisabled>
                             Owner: {entityData.owner}
                           </Checkbox>
                           <Checkbox
@@ -2279,7 +2318,7 @@ const Entity = () => {
                             onChange={(event) =>
                               handleExportCheck(
                                 "description",
-                                event.target.checked
+                                event.target.checked,
                               )
                             }
                             isDisabled={_.isEqual(entityDescription, "")}
@@ -2313,7 +2352,7 @@ const Entity = () => {
                               onChange={(event) =>
                                 handleExportCheck(
                                   `project_${project}`,
-                                  event.target.checked
+                                  event.target.checked,
                                 )
                               }
                             >
@@ -2346,7 +2385,7 @@ const Entity = () => {
                               onChange={(event) =>
                                 handleExportCheck(
                                   `origin_${origin.id}`,
-                                  event.target.checked
+                                  event.target.checked,
                                 )
                               }
                             >
@@ -2372,13 +2411,13 @@ const Entity = () => {
                                 exportAll ||
                                 _.includes(
                                   exportFields,
-                                  `product_${product.id}`
+                                  `product_${product.id}`,
                                 )
                               }
                               onChange={(event) =>
                                 handleExportCheck(
                                   `product_${product.id}`,
-                                  event.target.checked
+                                  event.target.checked,
                                 )
                               }
                             >
@@ -2407,13 +2446,13 @@ const Entity = () => {
                                 exportAll ||
                                 _.includes(
                                   exportFields,
-                                  `attribute_${attribute._id}`
+                                  `attribute_${attribute._id}`,
                                 )
                               }
                               onChange={(event) =>
                                 handleExportCheck(
                                   `attribute_${attribute._id}`,
-                                  event.target.checked
+                                  event.target.checked,
                                 )
                               }
                             >
@@ -2431,17 +2470,25 @@ const Entity = () => {
             </ModalBody>
 
             <ModalFooter p={"2"}>
-              <Flex direction={"row"} w={"70%"} gap={"4"} align={"center"} justifySelf={"left"}>
+              <Flex
+                direction={"row"}
+                w={"70%"}
+                gap={"4"}
+                align={"center"}
+                justifySelf={"left"}
+              >
                 <Icon name={"info"} />
-                {_.isEqual(exportFormat, "json") &&
+                {_.isEqual(exportFormat, "json") && (
                   <Text>JSON files can be re-imported into MARS.</Text>
-                }
-                {_.isEqual(exportFormat, "csv") &&
-                  <Text>CSV spreadsheets can be used by other applications.</Text>
-                }
-                {_.isEqual(exportFormat, "txt") &&
+                )}
+                {_.isEqual(exportFormat, "csv") && (
+                  <Text>
+                    CSV spreadsheets can be used by other applications.
+                  </Text>
+                )}
+                {_.isEqual(exportFormat, "txt") && (
                   <Text>TXT files can be viewed and shared easily.</Text>
-                }
+                )}
               </Flex>
               <Flex direction={"column"} w={"30%"} gap={"2"}>
                 {/* "Download" button */}
@@ -2456,11 +2503,19 @@ const Entity = () => {
                     <FormControl>
                       <Select
                         value={exportFormat}
-                        onChange={(event) => setExportFormat(event.target.value)}
+                        onChange={(event) =>
+                          setExportFormat(event.target.value)
+                        }
                       >
-                        <option key={"json"} value={"json"}>JSON</option>
-                        <option key={"csv"} value={"csv"}>CSV</option>
-                        <option key={"txt"} value={"txt"}>TXT</option>
+                        <option key={"json"} value={"json"}>
+                          JSON
+                        </option>
+                        <option key={"csv"} value={"csv"}>
+                          CSV
+                        </option>
+                        <option key={"txt"} value={"txt"}>
+                          TXT
+                        </option>
                       </Select>
                     </FormControl>
                   </Flex>
@@ -2615,7 +2670,10 @@ const Entity = () => {
                               <Text fontWeight={"bold"}>Products:</Text>
                               <Tag key={`v_o_${entityVersion.timestamp}`}>
                                 <TagLabel>
-                                  {entityVersion?.associations?.products?.length}
+                                  {
+                                    entityVersion?.associations?.products
+                                      ?.length
+                                  }
                                 </TagLabel>
                               </Tag>
                             </Flex>

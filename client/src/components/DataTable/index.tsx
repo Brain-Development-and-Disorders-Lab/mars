@@ -46,7 +46,7 @@ import _ from "lodash";
 const DataTable = (props: DataTableProps) => {
   // Table visibility state
   const [columnVisibility, setColumnVisibility] = useState(
-    props.visibleColumns
+    props.visibleColumns,
   );
 
   // Table row selection state
@@ -58,33 +58,33 @@ const DataTable = (props: DataTableProps) => {
       // Checkbox select column
       ...(_.isEqual(props.showSelection, true)
         ? [
-          {
-            id: "select",
-            header: ({ table }: any) => (
-              <Checkbox
-                {...{
-                  disabled: props.viewOnly,
-                  isChecked: table.getIsAllRowsSelected(),
-                  isIndeterminate: table.getIsSomeRowsSelected(),
-                  isInvalid: false,
-                  onChange: table.getToggleAllRowsSelectedHandler(),
-                }}
-              />
-            ),
-            cell: ({ row }: any) => (
-              <Checkbox
-                {...{
-                  id: `s_${Math.random().toString(16).slice(2)}`,
-                  isChecked: row.getIsSelected(),
-                  disabled: !row.getCanSelect() || props.viewOnly,
-                  isIndeterminate: row.getIsSomeSelected(),
-                  isInvalid: false,
-                  onChange: row.getToggleSelectedHandler(),
-                }}
-              />
-            ),
-          },
-        ]
+            {
+              id: "select",
+              header: ({ table }: any) => (
+                <Checkbox
+                  {...{
+                    disabled: props.viewOnly,
+                    isChecked: table.getIsAllRowsSelected(),
+                    isIndeterminate: table.getIsSomeRowsSelected(),
+                    isInvalid: false,
+                    onChange: table.getToggleAllRowsSelectedHandler(),
+                  }}
+                />
+              ),
+              cell: ({ row }: any) => (
+                <Checkbox
+                  {...{
+                    id: `s_${Math.random().toString(16).slice(2)}`,
+                    isChecked: row.getIsSelected(),
+                    disabled: !row.getCanSelect() || props.viewOnly,
+                    isIndeterminate: row.getIsSomeSelected(),
+                    isInvalid: false,
+                    onChange: row.getToggleSelectedHandler(),
+                  }}
+                />
+              ),
+            },
+          ]
         : []),
       ...props.columns,
     ],
@@ -116,7 +116,7 @@ const DataTable = (props: DataTableProps) => {
                 };
               }
               return row;
-            })
+            }),
           );
       },
     },
@@ -160,22 +160,33 @@ const DataTable = (props: DataTableProps) => {
                       isNumeric={meta?.isNumeric}
                       // Dynamically set the width for the checkboxes
                       w={_.isEqual(header.id, "select") ? "1" : "auto"}
-                      _hover={canSortColumn(header) ? { cursor: "pointer", background: "gray.100" } : {}}
-                      transition={canSortColumn(header) ? "background-color 0.3s ease-in-out, color 0.3s ease-in-out" : ""}
+                      _hover={
+                        canSortColumn(header)
+                          ? { cursor: "pointer", background: "gray.100" }
+                          : {}
+                      }
+                      transition={
+                        canSortColumn(header)
+                          ? "background-color 0.3s ease-in-out, color 0.3s ease-in-out"
+                          : ""
+                      }
                     >
                       {flexRender(
                         header.column.columnDef.header,
-                        header.getContext()
+                        header.getContext(),
                       )}
-                      {canSortColumn(header) &&
+                      {canSortColumn(header) && (
                         <Icon
                           name={
-                            (header.column.getIsSorted() === "desc" ? "sort_up" :
-                              (header.column.getIsSorted() === "asc" ? "sort_down" : "sort"))
+                            header.column.getIsSorted() === "desc"
+                              ? "sort_up"
+                              : header.column.getIsSorted() === "asc"
+                                ? "sort_down"
+                                : "sort"
                           }
-                          style={{ marginLeft: '4px', }}
+                          style={{ marginLeft: "4px" }}
                         />
-                      }
+                      )}
                     </Th>
                   );
                 })}
@@ -193,7 +204,7 @@ const DataTable = (props: DataTableProps) => {
                     <Td id={cell.id} key={cell.id} isNumeric={meta?.isNumeric}>
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext()
+                        cell.getContext(),
                       )}
                     </Td>
                   );
@@ -215,10 +226,7 @@ const DataTable = (props: DataTableProps) => {
         {props.showSelection && (
           <Flex>
             <Menu>
-              <MenuButton
-                as={Button}
-                rightIcon={<Icon name={"c_down"} />}
-              >
+              <MenuButton as={Button} rightIcon={<Icon name={"c_down"} />}>
                 Actions
               </MenuButton>
               <MenuList>

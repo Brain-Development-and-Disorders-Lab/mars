@@ -109,14 +109,20 @@ describe("POST /entities/create", () => {
     expect(productEntity.associations.origins.length).toBe(1);
 
     // Retrieve the Origin Entity associated with the Product Entity
-    const retrievedOriginEntity = await Entities.getOne(productEntity.associations.origins[0].id);
+    const retrievedOriginEntity = await Entities.getOne(
+      productEntity.associations.origins[0].id,
+    );
 
     // Check the Origin of the Product
-    expect(productEntity.associations.origins[0].id).toStrictEqual(originEntity._id);
+    expect(productEntity.associations.origins[0].id).toStrictEqual(
+      originEntity._id,
+    );
 
     // Check the Product of the Origin
     expect(retrievedOriginEntity.associations.products.length).toBe(1);
-    expect(retrievedOriginEntity.associations.products[0].id).toStrictEqual(productEntity._id);
+    expect(retrievedOriginEntity.associations.products[0].id).toStrictEqual(
+      productEntity._id,
+    );
   });
 
   it("should create an association between two Entities when a Product is specified in an Origin", async () => {
@@ -135,7 +141,7 @@ describe("POST /entities/create", () => {
       attachments: [],
       history: [],
     });
-  
+
     // Create the second Entity (Origin) that has the first Entity (Product)
     const originEntity = await Entities.create({
       name: "TestOriginEntity",
@@ -151,22 +157,27 @@ describe("POST /entities/create", () => {
       attachments: [],
       history: [],
     });
-  
+
     // Confirm Origin Entity creation
     expect(originEntity.name).toBe("TestOriginEntity");
     expect(originEntity.associations.products.length).toBe(1);
-  
+
     // Retrieve the Product Entity associated with the Origin Entity
-    const retrievedProductEntity = await Entities.getOne(originEntity.associations.products[0].id);
-  
+    const retrievedProductEntity = await Entities.getOne(
+      originEntity.associations.products[0].id,
+    );
+
     // Check the Product of the Origin
-    expect(originEntity.associations.products[0].id).toStrictEqual(productEntity._id);
-  
+    expect(originEntity.associations.products[0].id).toStrictEqual(
+      productEntity._id,
+    );
+
     // Check the Origin of the Product
     expect(retrievedProductEntity.associations.origins.length).toBe(1);
-    expect(retrievedProductEntity.associations.origins[0].id).toStrictEqual(originEntity._id);
+    expect(retrievedProductEntity.associations.origins[0].id).toStrictEqual(
+      originEntity._id,
+    );
   });
-  
 
   it("should create an association between two Entities when a Product is specified in an Origin", async () => {
     // Create the first Entity (Product)
@@ -184,7 +195,7 @@ describe("POST /entities/create", () => {
       attachments: [],
       history: [],
     });
-  
+
     // Create the second Entity (Origin) that has the first Entity (Product)
     const originEntity = await Entities.create({
       name: "TestOriginEntity",
@@ -200,22 +211,28 @@ describe("POST /entities/create", () => {
       attachments: [],
       history: [],
     });
-  
+
     // Confirm Origin Entity creation
     expect(originEntity.name).toBe("TestOriginEntity");
     expect(originEntity.associations.products.length).toBe(1);
-  
+
     // Retrieve the Product Entity associated with the Origin Entity
-    const retrievedProductEntity = await Entities.getOne(originEntity.associations.products[0].id);
-  
+    const retrievedProductEntity = await Entities.getOne(
+      originEntity.associations.products[0].id,
+    );
+
     // Check the Product of the Origin
-    expect(originEntity.associations.products[0].id).toStrictEqual(productEntity._id);
-  
+    expect(originEntity.associations.products[0].id).toStrictEqual(
+      productEntity._id,
+    );
+
     // Check the Origin of the Product
     expect(retrievedProductEntity.associations.origins.length).toBe(1);
-    expect(retrievedProductEntity.associations.origins[0].id).toStrictEqual(originEntity._id);
+    expect(retrievedProductEntity.associations.origins[0].id).toStrictEqual(
+      originEntity._id,
+    );
   });
-  
+
   it("should create an Attribute", async () => {
     // Start by creating an Entities
     return Entities.create({
@@ -402,13 +419,13 @@ describe("POST /entities/update", () => {
         // Check that the Entity stores an Origin
         expect(result[0].associations.origins.length).toBe(1);
         expect(result[0].associations.origins[0].id).toStrictEqual(
-          result[1]._id
+          result[1]._id,
         );
 
         // Check that the Origin stores a Product
         expect(result[1].associations.products.length).toBe(1);
         expect(result[1].associations.products[0].id).toStrictEqual(
-          result[0]._id
+          result[0]._id,
         );
 
         return result;
@@ -490,13 +507,13 @@ describe("POST /entities/update", () => {
         // Check that the Entity stores a Product
         expect(result[0].associations.products.length).toBe(1);
         expect(result[0].associations.products[0].id).toStrictEqual(
-          result[1]._id
+          result[1]._id,
         );
 
         // Check that the Product stores an Origin
         expect(result[1].associations.origins.length).toBe(1);
         expect(result[1].associations.origins[0].id).toStrictEqual(
-          result[0]._id
+          result[0]._id,
         );
 
         return result;
@@ -660,7 +677,7 @@ describe("getDataMultipleRaw", () => {
       attachments: [],
       history: [],
     });
-  
+
     // Create the second Entity (Origin) that has the first Entity (Product)
     const entity2 = await Entities.create({
       name: "TestOriginEntity",
@@ -677,12 +694,21 @@ describe("getDataMultipleRaw", () => {
       history: [],
     });
     // Act: Retrieve raw data for created entities
-    const rawData = await Entities.getDataMultipleRaw([entity1._id, entity2._id]);
+    const rawData = await Entities.getDataMultipleRaw([
+      entity1._id,
+      entity2._id,
+    ]);
 
     // Assert: Raw data should include data for both entities
     expect(rawData.length).toBe(2);
-    expect((rawData[0]._id.toString() == entity1._id) || (rawData[1]._id.toString() == entity1._id)).toBeTruthy();
-    expect((rawData[0]._id.toString() == entity2._id) || (rawData[1]._id.toString() == entity2._id)).toBeTruthy();
+    expect(
+      rawData[0]._id.toString() == entity1._id ||
+        rawData[1]._id.toString() == entity1._id,
+    ).toBeTruthy();
+    expect(
+      rawData[0]._id.toString() == entity2._id ||
+        rawData[1]._id.toString() == entity2._id,
+    ).toBeTruthy();
   });
 
   it("should handle non-existent entity IDs gracefully", async () => {
@@ -696,4 +722,3 @@ describe("getDataMultipleRaw", () => {
     expect(rawData.length).toBe(0);
   });
 });
-

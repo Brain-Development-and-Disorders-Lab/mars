@@ -13,8 +13,12 @@ import { Entities } from "./Entities";
 const ENTITIES = "entities";
 
 export class Search {
+  /**
+   * Get a collection of Search results
+   * @param data Search query data
+   * @returns {Promise<any[]>}
+   */
   static get = (data: { query: string }): Promise<any[]> => {
-    consola.start("Search:", data.query);
     return new Promise((resolve, reject) => {
       // Sanitize database query
       data.query = data.query.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
@@ -40,6 +44,7 @@ export class Search {
         .toArray((error, content) => {
           // Check for errors
           if (error) {
+            consola.error("Error while searching:", error);
             reject(error);
           }
 
@@ -48,14 +53,18 @@ export class Search {
             content = [];
           }
 
-          consola.success("Searched:", data.query);
+          consola.debug("Searched:", data.query);
           resolve(content);
         });
     });
   };
 
+  /**
+   * Get a list of search results using a query generated from the query builder
+   * @param data Seach query built using query builder
+   * @returns {Promise<any[]>}
+   */
   static getBuiltQuery = (data: { query: string }): Promise<any[]> => {
-    consola.start("Search:", data.query);
     return new Promise(async (resolve, reject) => {
       try {
         // Parse the query string into a MongoDB query object
@@ -64,25 +73,25 @@ export class Search {
         // Construct MongoDB query
         let mongoQuery = {};
 
+        // Search for Origin
         if (queryObject.origin) {
-          console.log("Querying for origin:", queryObject.origin);
           let originEntity = await Entities.getOne(queryObject.origin);
           delete queryObject.origin;
           if (originEntity) {
-            queryObject['associations.origins'] = {
-              $elemMatch: { id: (originEntity._id).toString() }
-            }
-
+            queryObject["associations.origins"] = {
+              $elemMatch: { id: originEntity._id.toString() },
+            };
           }
         }
+
+        // Search for Product
         if (queryObject.product) {
           let productEntity = await Entities.getOne(queryObject.product);
           delete queryObject.product;
           if (productEntity) {
-            queryObject['associations.products'] = {
-              $elemMatch: { id: (productEntity._id).toString() }
-            }
-
+            queryObject["associations.products"] = {
+              $elemMatch: { id: productEntity._id.toString() },
+            };
           }
         }
 
@@ -100,6 +109,7 @@ export class Search {
           .find(mongoQuery)
           .toArray((error, content) => {
             if (error) {
+              consola.error("Error while performing search:", error);
               reject(error);
               return;
             }
@@ -109,7 +119,7 @@ export class Search {
               content = [];
             }
 
-            consola.success("Searched with Built Query:", data.query);
+            consola.debug("Searched with Built Query:", data.query);
             resolve(content);
           });
       } catch (error) {
@@ -119,11 +129,15 @@ export class Search {
     });
   };
 
-
+  /**
+   * @deprecated
+   * Legacy search query function using homebrewed search query builder
+   * @param data Search query data
+   * @returns {Promise<any[]>}
+   */
   static getQuery = (data: { query: string }): Promise<any[]> => {
     return new Promise((resolve, reject) => {
       const queryComponents = JSON.parse(data.query) as QueryComponent[];
-      consola.start("Searching:", queryComponents.length, "query components");
 
       if (queryComponents.length > 1) {
         queryComponents[0].operator = queryComponents[1].operator;
@@ -321,14 +335,15 @@ export class Search {
           .collection(collection)
           .exec()
           .then((result: any[]) => {
-            consola.success(
+            consola.debug(
               "Searched:",
               queryComponents.length,
-              "OR query components"
+              "OR query components",
             );
             resolve(result);
           })
           .catch((error: any) => {
+            consola.error("Error while searching for 'OR' components:", error);
             reject(error);
           });
       } else if (_.isEmpty(queryLogicalGroups.OR)) {
@@ -338,14 +353,15 @@ export class Search {
           .collection(collection)
           .exec()
           .then((result: any[]) => {
-            consola.success(
+            consola.debug(
               "Searched:",
               queryComponents.length,
-              "AND query components"
+              "AND query components",
             );
             resolve(result);
           })
           .catch((error: any) => {
+            consola.error("Error while searching for 'AND' components:", error);
             reject(error);
           });
       } else {
@@ -358,16 +374,20 @@ export class Search {
         ])
           .then(([resultAND, resultOR]) => {
             // Join the results
-            consola.success(
+            consola.debug(
               "Searched:",
               queryComponents.length,
-              "query components"
+              "query components",
             );
 
             // Resolve by unique results
             resolve(_.uniqBy([...resultAND, ...resultOR], "_id"));
           })
           .catch((error: any) => {
+            consola.error(
+              "Error while searching for both 'AND' and 'OR' components:",
+              error,
+            );
             reject(error);
           });
       }

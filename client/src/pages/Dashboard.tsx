@@ -216,12 +216,7 @@ const Dashboard = () => {
   return (
     <Content isError={isError} isLoaded={isLoaded}>
       <Flex direction={"row"} wrap={"wrap"} gap={"4"} p={"4"}>
-        <Flex
-          direction={"column"}
-          gap={"4"}
-          grow={"1"}
-          basis={"60%"}
-        >
+        <Flex direction={"column"} gap={"4"} grow={"1"} basis={"60%"}>
           {/* Projects and Entities */}
           <Flex
             direction={"column"}
@@ -259,7 +254,9 @@ const Dashboard = () => {
                 justify={"center"}
                 align={"center"}
               >
-                <Text color={"gray.400"} fontWeight={"semibold"}>You do not have any Projects.</Text>
+                <Text color={"gray.400"} fontWeight={"semibold"}>
+                  You do not have any Projects.
+                </Text>
               </Flex>
             )}
 
@@ -303,7 +300,7 @@ const Dashboard = () => {
               <DataTable
                 columns={entityTableColumns}
                 data={entityTableData.filter((entity) =>
-                  _.isEqual(entity.deleted, false)
+                  _.isEqual(entity.deleted, false),
                 )}
                 visibleColumns={visibleColumns}
               />
@@ -318,7 +315,9 @@ const Dashboard = () => {
                 justify={"center"}
                 align={"center"}
               >
-                <Text color={"gray.400"} fontWeight={"semibold"}>You do not have any Entities.</Text>
+                <Text color={"gray.400"} fontWeight={"semibold"}>
+                  You do not have any Entities.
+                </Text>
               </Flex>
             )}
 
@@ -394,7 +393,12 @@ const Dashboard = () => {
                       gap={"2"}
                       key={`activity-${activity._id}`}
                     >
-                      <Flex rounded={"full"} p={"2"} mr={"2"} alignSelf={"center"}>
+                      <Flex
+                        rounded={"full"}
+                        p={"2"}
+                        mr={"2"}
+                        alignSelf={"center"}
+                      >
                         <Icon
                           size={"sm"}
                           name={operationIcon}
@@ -417,7 +421,11 @@ const Dashboard = () => {
 
                       <Spacer />
 
-                      <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.500"}>
+                      <Text
+                        fontSize={"xs"}
+                        fontWeight={"semibold"}
+                        color={"gray.500"}
+                      >
                         {dayjs(activity.timestamp).fromNow()}
                       </Text>
                     </Flex>
@@ -427,7 +435,9 @@ const Dashboard = () => {
             </Flex>
           ) : (
             <Flex w={"100%"} h={"100%"} justify={"center"} align={"center"}>
-              <Text color={"gray.400"} fontWeight={"semibold"}>No Activity yet.</Text>
+              <Text color={"gray.400"} fontWeight={"semibold"}>
+                No Activity yet.
+              </Text>
             </Flex>
           )}
         </Flex>

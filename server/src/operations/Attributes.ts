@@ -15,21 +15,20 @@ const ATTRIBUTES = "attributes";
 export class Attributes {
   /**
    * Check if an Attribute exists in the system
-   * @param id the Attribute identifier
-   * @return {boolean}
+   * @param {string} id the Attribute identifier
+   * @returns {Promise<Boolean>}
    */
   static exists = (id: string): Promise<boolean> => {
-    consola.start("Checking if Attribute (id):", id.toString(), "exists");
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ATTRIBUTES)
         .findOne({ _id: id }, (_error: any, result: any) => {
           if (_.isNull(result)) {
-            consola.warn("Attribute (id):", id.toString(), "does not exist");
+            consola.warn(`Attribute "${id.toString()}" does not exist`);
             resolve(false);
           }
 
-          consola.success("Attribute (id):", id.toString(), "exists");
+          consola.debug(`Attribute "${id.toString()}" exists`);
           resolve(true);
         });
     });
@@ -38,19 +37,19 @@ export class Attributes {
   /**
    * Create a new Attribute
    * @param {any} attribute all data associated with the new Attribute
-   * @return {Promise<AttributeModel>}
+   * @returns {Promise<AttributeModel>}
    */
   static create = (attribute: any): Promise<AttributeModel> => {
-    consola.start("Creating new Attribute:", attribute.name);
     return new Promise((resolve, _reject) => {
-      // Allocate a new identifier and join with Attribute data
-      attribute["_id"] = getIdentifier("attribute");      
+      // Generate a new identifier and join with Attribute data
+      attribute["_id"] = getIdentifier("attribute");
 
       // Push data to database
       getDatabase()
         .collection(ATTRIBUTES)
         .insertOne(attribute, (error: any, _result: any) => {
           if (error) {
+            consola.error("Error creating new Attribute:", error);
             throw error;
           }
 
@@ -68,31 +67,35 @@ export class Attributes {
                 id: attribute._id,
                 name: attribute.name,
               },
-            })
+            }),
           );
 
           // Resolve all operations then resolve overall Promise
           Promise.all(operations).then((_result) => {
-            consola.success(
-              "Created new Attribute:",
-              attribute._id,
-              attribute.name
-            );
+            consola.debug("Created new Attribute:", attribute.name);
             resolve(attribute as AttributeModel);
           });
         });
     });
   };
 
+  /**
+   * Update an existing Attribute
+   * @param {AttributeModel} updatedAttribute Object containing updated data for Attribute
+   * @returns {Promise<AttributeModel>}
+   */
   static update = (
-    updatedAttribute: AttributeModel
+    updatedAttribute: AttributeModel,
   ): Promise<AttributeModel> => {
-    consola.start("Updating Attribute:", updatedAttribute.name);
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ATTRIBUTES)
         .findOne({ _id: updatedAttribute._id }, (error: any, result: any) => {
           if (error) {
+            consola.error(
+              `Error retrieving Attribute "${updatedAttribute._id}":`,
+              error,
+            );
             throw error;
           }
 
@@ -120,7 +123,7 @@ export class Attributes {
                 id: updatedAttribute._id,
                 name: updatedAttribute.name,
               },
-            })
+            }),
           );
 
           getDatabase()
@@ -130,35 +133,39 @@ export class Attributes {
               updates,
               (error: any, _response: any) => {
                 if (error) {
+                  consola.error(
+                    `Error updating Attribute "${updatedAttribute._id}":`,
+                    error,
+                  );
                   throw error;
                 }
 
                 // Resolve all operations then resolve overall Promise
                 Promise.all(operations).then((_result) => {
-                  consola.success("Updated Attribute:", updatedAttribute.name);
+                  consola.debug("Updated Attribute:", updatedAttribute.name);
 
                   // Resolve the Promise
                   resolve(updatedAttribute);
                 });
-              }
+              },
             );
         });
     });
   };
 
   /**
-   * Create a new Attribute
-   * @param {any} attribute all data associated with the new Attribute
-   * @return {Promise<AttributeModel>}
+   * Restore an Attribute that previously existed
+   * @param {any} attribute Object containing data for the restored Attribute
+   * @returns {Promise<AttributeModel>}
    */
   static restore = (attribute: any): Promise<AttributeModel> => {
-    consola.start("Restoring Attribute:", attribute.name);
     return new Promise((resolve, _reject) => {
       // Push data to database
       getDatabase()
         .collection(ATTRIBUTES)
         .insertOne(attribute, (error: any, _result: any) => {
           if (error) {
+            consola.error(`Error restoring Attribute ${attribute._id}:`, error);
             throw error;
           }
 
@@ -176,16 +183,12 @@ export class Attributes {
                 id: attribute._id,
                 name: attribute.name,
               },
-            })
+            }),
           );
 
           // Resolve all operations then resolve overall Promise
           Promise.all(operations).then((_result) => {
-            consola.success(
-              "Restored Attribute:",
-              attribute._id,
-              attribute.name
-            );
+            consola.debug("Restored Attribute:", attribute.name);
             resolve(attribute as AttributeModel);
           });
         });
@@ -194,7 +197,8 @@ export class Attributes {
 
   /**
    * Get a single Attribute
-   * @return {Promise<AttributeModel>}
+   * @param {string} id Attribute identifier
+   * @returns {Promise<AttributeModel>}
    */
   static getOne = (id: string): Promise<AttributeModel> => {
     return new Promise((resolve, _reject) => {
@@ -202,15 +206,20 @@ export class Attributes {
         .collection(ATTRIBUTES)
         .findOne({ _id: id }, (error: any, result: any) => {
           if (error) {
+            consola.error(`Error retrieving Attribute "${id}":`, error);
             throw error;
           }
 
-          consola.success("Retrieved Attribute (id):", id.toString());
+          consola.debug("Retrieved Attribute:", id.toString());
           resolve(result as AttributeModel);
         });
     });
   };
 
+  /**
+   * Get the collection of all Attributes
+   * @returns {Promise<AttributeModel[]>}
+   */
   static getAll = (): Promise<AttributeModel[]> => {
     return new Promise((resolve, _reject) => {
       getDatabase()
@@ -218,21 +227,27 @@ export class Attributes {
         .find({})
         .toArray((error: any, result: any) => {
           if (error) {
+            consola.error(`Error retrieving all Attributes:`, error);
             throw error;
           }
-          consola.success("Retrieved all Attributes");
+          consola.debug("Retrieved all Attributes");
           resolve(result as AttributeModel[]);
         });
     });
   };
 
+  /**
+   * Delete an Attribute from the system
+   * @param id Attribute identifier to delete
+   * @returns {Promise<AttributeModel>}
+   */
   static delete = (id: string): Promise<AttributeModel> => {
-    consola.start("Deleting Attribute (id):", id.toString());
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ATTRIBUTES)
         .findOne({ _id: id }, (error: any, result: any) => {
           if (error) {
+            consola.error(`Error retrieving Attribute "${id}":`, error);
             throw error;
           }
           // Store the Attribute data
@@ -251,7 +266,7 @@ export class Attributes {
                 id: attribute._id,
                 name: attribute.name,
               },
-            })
+            }),
           );
 
           // Resolve all operations then resolve overall Promise
@@ -261,10 +276,11 @@ export class Attributes {
               .collection(ATTRIBUTES)
               .deleteOne({ _id: id }, (error: any, _content: any) => {
                 if (error) {
+                  consola.error(`Error deleting Attribute "${id}":`, error);
                   throw error;
                 }
 
-                consola.success("Deleted Attribute (id):", id.toString());
+                consola.debug("Deleted Attribute:", id.toString());
                 resolve(result);
               });
           });

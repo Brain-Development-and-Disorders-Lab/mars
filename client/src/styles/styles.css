@@ -20,17 +20,26 @@ a:hover {
 .validateQuery .queryBuilder .ruleGroup.queryBuilder-invalid {
   background-color: rgba(102, 51, 153, 0.4);
 }
-.validateQuery .queryBuilder .ruleGroup.queryBuilder-invalid .ruleGroup-addRule {
+.validateQuery
+  .queryBuilder
+  .ruleGroup.queryBuilder-invalid
+  .ruleGroup-addRule {
   font-weight: bold !important;
 }
-.validateQuery .queryBuilder .ruleGroup.queryBuilder-invalid > .ruleGroup-header::after {
+.validateQuery
+  .queryBuilder
+  .ruleGroup.queryBuilder-invalid
+  > .ruleGroup-header::after {
   content: "Empty groups are considered invalid. Avoid them by using addRuleToNewGroups.";
   color: white;
 }
 .validateQuery .queryBuilder .rule.queryBuilder-invalid .rule-value {
   background-color: rgba(102, 51, 153, 0.4);
 }
-.validateQuery .queryBuilder .rule.queryBuilder-invalid .rule-value::placeholder {
+.validateQuery
+  .queryBuilder
+  .rule.queryBuilder-invalid
+  .rule-value::placeholder {
   color: #47246b;
 }
 
@@ -42,7 +51,10 @@ html[data-theme="dark"]
   color: #945ec9;
 }
 
-.justifiedLayout .queryBuilder .ruleGroup-addGroup + button.ruleGroup-cloneGroup,
+.justifiedLayout
+  .queryBuilder
+  .ruleGroup-addGroup
+  + button.ruleGroup-cloneGroup,
 .justifiedLayout .queryBuilder .ruleGroup-addGroup + button.ruleGroup-lock,
 .justifiedLayout .queryBuilder .ruleGroup-addGroup + button.ruleGroup-remove,
 .justifiedLayout .queryBuilder .rule-operators + button.rule-cloneRule,
@@ -56,8 +68,6 @@ html[data-theme="dark"]
 .justifiedLayout .queryBuilder .control + button.rule-remove,
 .justifiedLayout .queryBuilder .chakra-select__wrapper + button.rule-cloneRule,
 .justifiedLayout .queryBuilder .chakra-select__wrapper + button.rule-lock,
-
-
 .ruleGroup-body {
   display: grid;
   grid-template-columns: 1fr auto;
@@ -96,7 +106,8 @@ html[data-theme="dark"]
   transition: background-color 0.3s;
 }
 
-.queryBuilder .ruleGroup-remove, .queryBuilder .rule-remove {
+.queryBuilder .ruleGroup-remove,
+.queryBuilder .rule-remove {
   background-color: #e74c3c; /* Red color */
   color: white;
   border: none;
@@ -106,10 +117,10 @@ html[data-theme="dark"]
   transition: background-color 0.3s;
 }
 
-.queryBuilder .ruleGroup-remove:hover, .queryBuilder .rule-remove:hover {
+.queryBuilder .ruleGroup-remove:hover,
+.queryBuilder .rule-remove:hover {
   background-color: #c0392b; /* Darker shade for hover state */
 }
-
 
 .queryBuilder button:hover {
   background-color: #3b7dbb;
@@ -126,8 +137,6 @@ html[data-theme="dark"]
 .queryBuilder .rule-value {
   flex-grow: 1;
 }
-
-
 
 /* Responsive adjustments */
 @media (max-width: 600px) {
