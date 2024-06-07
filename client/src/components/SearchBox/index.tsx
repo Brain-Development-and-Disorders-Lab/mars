@@ -35,10 +35,9 @@ import { EntityModel, ScannerStatus } from "@types";
 import { useNavigate } from "react-router-dom";
 
 // Utility functions and libraries
-import { postData } from "@database/functions";
+import { request } from "@database/functions";
 import { connectScanner } from "@devices/Scanner";
 import _ from "lodash";
-import consola from "consola";
 
 // Limit the number of results shown
 const MAX_RESULTS = 5;
@@ -113,42 +112,39 @@ const SearchBox = () => {
   // Store results as a set of IDs
   const [results, setResults] = useState([] as EntityModel[]);
 
-  const runSearch = () => {
+  const runSearch = async () => {
     // Use the new search route for text-based search
     setIsSearching(true);
     setHasSearched(true);
-    postData(`/entities/search/`, { query: query }) // Assuming you pass user ID for permissions filtering
-      .then((results) => {
-        if (results && results.length > 0) {
-          // Update state with search results
-          setResults(results);
-        } else {
-          // Handle no results found scenario
-          toast({
-            title: "No results found",
-            status: "info",
-            duration: 4000,
-            position: "bottom-right",
-            isClosable: true,
-          });
-        }
-      })
-      .catch((error) => {
-        // Handle search error scenario
-        consola.error("Error while performing search:", error);
+
+    const response = await request<EntityModel[]>("POST", "/entities/search/", {
+      query: query,
+    });
+    if (response.success) {
+      if (response.data.length > 0) {
+        setResults(response.data);
+      } else {
+        // Handle no results found scenario
         toast({
-          title: "Search Error",
-          description: "Could not perform search.",
-          status: "error",
-          duration: 5000,
-          isClosable: true,
+          title: "No results found",
+          status: "info",
+          duration: 4000,
           position: "bottom-right",
+          isClosable: true,
         });
-        setIsError(true);
-      })
-      .finally(() => {
-        setIsSearching(false);
+      }
+    } else {
+      toast({
+        title: "Search Error",
+        description: "Could not perform search",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom-right",
       });
+      setIsError(true);
+    }
+    setIsSearching(false);
   };
 
   const onCloseWrapper = () => {

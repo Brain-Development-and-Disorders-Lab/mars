@@ -53,7 +53,7 @@ import {
 import { useNavigate } from "react-router-dom";
 
 // Utility functions and libraries
-import { postData, request } from "@database/functions";
+import { request } from "@database/functions";
 import { useToken } from "src/authentication/useToken";
 import _ from "lodash";
 import dayjs from "dayjs";
@@ -249,7 +249,7 @@ const Importer = (props: {
    * defer the data extraction to the server. For JSON files, trigger the `handleJsonFile` method to handle the file
    * locally instead.
    */
-  const performImport = () => {
+  const performImport = async () => {
     // Update state of continue button
     setContinueLoading(true);
     setContinueDisabled(true);
@@ -265,76 +265,60 @@ const Importer = (props: {
       handleJsonFile(file);
     } else if (_.isEqual(fileType, "text/csv")) {
       // Make POST request with CSV file contents from the form
-      postData(`/system/import`, formData)
-        .then((response: { status: boolean; message: string; data?: any }) => {
-          if (_.isEqual(response.status, "success")) {
-            // Reset file upload state
-            setFile({} as File);
+      const response = await request<any>("POST", "/system/import", formData);
+      if (response.success) {
+        // Reset file upload state
+        setFile({} as File);
 
-            if (_.isEqual(fileType, "text/csv")) {
-              toast({
-                title: "Success",
-                status: "success",
-                description: "Successfully parsed CSV-formatted file.",
-                duration: 2000,
-                position: "bottom-right",
-                isClosable: true,
-              });
-              if (response.data?.length > 0) {
-                // Update spreadsheet data state if valid rows
-                setSpreadsheetData(response.data);
+        if (_.isEqual(fileType, "text/csv")) {
+          toast({
+            title: "Success",
+            status: "success",
+            description: "Successfully parsed CSV-formatted file.",
+            duration: 2000,
+            position: "bottom-right",
+            isClosable: true,
+          });
+          if (response.data?.length > 0) {
+            // Update spreadsheet data state if valid rows
+            setSpreadsheetData(response.data);
 
-                // Filter columns to exclude columns with no header ("__EMPTY...")
-                const filteredColumnSet = Object.keys(response.data[0]).filter(
-                  (column) => {
-                    return !_.startsWith(column, "__EMPTY");
-                  },
-                );
-                setColumns(filteredColumnSet);
-              }
-
-              // Setup the next stage of CSV import
-              setupMapping();
-            } else if (_.isEqual(fileType, "application/json")) {
-              toast({
-                title: "Success",
-                status: "success",
-                description: "Successfully imported JSON file.",
-                duration: 2000,
-                position: "bottom-right",
-                isClosable: true,
-              });
-
-              // In the case of a JSON file, it has been uploaded and we can refresh
-              navigate(0);
-            }
-          } else {
-            toast({
-              title: "Error",
-              status: "error",
-              description: response.message,
-              duration: 4000,
-              position: "bottom-right",
-              isClosable: true,
-            });
+            // Filter columns to exclude columns with no header ("__EMPTY...")
+            const filteredColumnSet = Object.keys(response.data[0]).filter(
+              (column) => {
+                return !_.startsWith(column, "__EMPTY");
+              },
+            );
+            setColumns(filteredColumnSet);
           }
 
-          // Reset the loading state, but preserve the disabled state
-          setContinueLoading(false);
-        })
-        .catch((error: { message: string }) => {
+          // Setup the next stage of CSV import
+          setupMapping();
+        } else if (_.isEqual(fileType, "application/json")) {
           toast({
-            title: "Error",
-            status: "error",
-            description: error.message + " Please try again.",
-            duration: 4000,
+            title: "Success",
+            status: "success",
+            description: "Successfully imported JSON file.",
+            duration: 2000,
             position: "bottom-right",
             isClosable: true,
           });
 
-          // Reset the loading state, but preserve the disabled state
-          setContinueLoading(false);
-        });
+          // In the case of a JSON file, it has been uploaded and we can refresh
+          navigate(0);
+        } else {
+          toast({
+            title: "Import Error",
+            status: "error",
+            description: "Error while importing file",
+            duration: 4000,
+            position: "bottom-right",
+            isClosable: true,
+          });
+        }
+        // Reset the loading state, but preserve the disabled state
+        setContinueLoading(false);
+      }
     }
   };
 
@@ -342,7 +326,7 @@ const Importer = (props: {
    * Perform import action for JSON data. Make POST request to server passing the JSON data.
    * @returns Short-circuit when function called without actual JSON data
    */
-  const performImportJson = () => {
+  const performImportJson = async () => {
     if (!jsonData) {
       toast({
         title: "Error",
@@ -358,26 +342,25 @@ const Importer = (props: {
     // Update button state to reflect loading state
     setContinueLoading(true);
 
-    postData(`/system/importJSON`, { jsonData: jsonData })
-      .then(() => {
-        // Close the `Importer` UI
-        props.onClose();
-        resetState();
-        navigate(0);
-      })
-      .catch((error: { message: string }) => {
-        toast({
-          title: "Error",
-          status: "error",
-          description: error.message,
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-      })
-      .finally(() => {
-        setContinueLoading(false);
+    const response = await request<any>("POST", "/system/importJSON", {
+      jsonData: jsonData,
+    });
+    if (response.success) {
+      // Close the `Importer` UI
+      props.onClose();
+      resetState();
+      navigate(0);
+    } else {
+      toast({
+        title: "Import Error",
+        status: "error",
+        description: "Error while importing JSON file",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
       });
+    }
+    setContinueLoading(false);
   };
 
   /**
@@ -439,7 +422,7 @@ const Importer = (props: {
    * Perform mapping action for CSV data. Collate the mapped columns and make a POST request passing this data to
    * the server.
    */
-  const performMapping = () => {
+  const performMapping = async () => {
     // Set the mapping status
     setContinueLoading(true);
 
@@ -458,25 +441,26 @@ const Importer = (props: {
       data: spreadsheetData,
     };
 
-    postData(`/system/import/mapping`, mappingData)
-      .then((_response: { status: boolean; message: string; data?: any }) => {
-        props.onClose();
-        resetState();
-        navigate(0);
-      })
-      .catch((error: { message: string }) => {
-        toast({
-          title: "Error",
-          status: "error",
-          description: error.message,
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-      })
-      .finally(() => {
-        setContinueLoading(false);
+    const response = await request<any>(
+      "POST",
+      "/system/import/mapping",
+      mappingData,
+    );
+    if (response.success) {
+      props.onClose();
+      resetState();
+      navigate(0);
+    } else {
+      toast({
+        title: "Import Error",
+        status: "error",
+        description: "Error while mapping data",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
       });
+    }
+    setContinueLoading(false);
   };
 
   /**
