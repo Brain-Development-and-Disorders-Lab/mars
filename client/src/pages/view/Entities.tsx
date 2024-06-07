@@ -25,7 +25,7 @@ import { DataTableAction, EntityModel } from "@types";
 import { useNavigate } from "react-router-dom";
 
 // Utility functions and libraries
-import { getData, postData } from "@database/functions";
+import { postData, request } from "@database/functions";
 import _ from "lodash";
 import dayjs from "dayjs";
 import FileSaver from "file-saver";
@@ -57,25 +57,29 @@ const Entities = () => {
     }
   }, [breakpoint]);
 
-  useEffect(() => {
-    getData(`/entities`)
-      .then((value) => {
-        setEntityData(value);
-      })
-      .catch((_error) => {
-        toast({
-          title: "Error",
-          status: "error",
-          description: "Could not retrieve Entities data.",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-        setIsError(true);
-      })
-      .finally(() => {
-        setIsLoaded(true);
+  /**
+   * Utility function to retrieve all Entities
+   */
+  const getEntities = async () => {
+    const response = await request<EntityModel[]>("GET", "/entities");
+    if (response.success) {
+      setEntityData(response.data);
+    } else {
+      toast({
+        title: "Error",
+        status: "error",
+        description: "Could not retrieve Entities data.",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
       });
+      setIsError(true);
+    }
+    setIsLoaded(true);
+  };
+
+  useEffect(() => {
+    getEntities();
   }, []);
 
   // Configure table columns and data
