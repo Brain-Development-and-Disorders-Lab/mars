@@ -44,7 +44,7 @@ import {
 } from "@types";
 
 // Utility functions and libraries
-import { getData, postData } from "@database/functions";
+import { postData, request } from "@database/functions";
 import _ from "lodash";
 import consola from "consola";
 import { createColumnHelper } from "@tanstack/react-table";
@@ -93,46 +93,51 @@ const Search = () => {
   // Store results as a set of IDs
   const [results, setResults] = useState([] as EntityModel[]);
 
-  useEffect(() => {
-    // Get all Entities
-    getData(`/entities`)
-      .then((response) => {
-        setEntities(response);
-      })
-      .catch((_error) => {
-        toast({
-          title: "Error",
-          status: "error",
-          description: "Could not retrieve Entities data.",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-        setIsError(true);
-      })
-      .finally(() => {
-        setIsLoaded(true);
+  /**
+   * Utility function to retrieve all Entities
+   */
+  const getEntities = async () => {
+    const response = await request<EntityModel[]>("GET", "/entities");
+    if (response.success) {
+      setEntities(response.data);
+    } else {
+      toast({
+        title: "Error",
+        status: "error",
+        description: "Could not retrieve Entities",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
       });
+      setIsError(true);
+    }
+    setIsLoaded(true);
+  };
 
-    // Get all Projects
-    getData(`/projects`)
-      .then((response) => {
-        setProjects(response);
-      })
-      .catch((_error) => {
-        toast({
-          title: "Error",
-          status: "error",
-          description: "Could not retrieve Project data.",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-        setIsError(true);
-      })
-      .finally(() => {
-        setIsLoaded(true);
+  /**
+   * Utility function to retrieve all Projects
+   */
+  const getProjects = async () => {
+    const response = await request<ProjectModel[]>("GET", "/projects");
+    if (response.success) {
+      setProjects(response.data);
+    } else {
+      toast({
+        title: "Error",
+        status: "error",
+        description: "Could not retrieve Projects",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
       });
+      setIsError(true);
+    }
+    setIsLoaded(true);
+  };
+
+  useEffect(() => {
+    getEntities();
+    getProjects();
   }, []);
 
   const runSearch = () => {
