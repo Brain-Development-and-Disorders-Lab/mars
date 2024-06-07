@@ -4,7 +4,13 @@ import _ from "lodash";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 
 // Custom types
-import { RequestMethod, ServerResponse } from "@types";
+import {
+  AttributeModel,
+  EntityModel,
+  ProjectModel,
+  RequestMethod,
+  ServerResponse,
+} from "@types";
 
 // Get the URL of the database
 import { SERVER_URL, TOKEN_KEY } from "src/variables";
@@ -12,12 +18,12 @@ import { SERVER_URL, TOKEN_KEY } from "src/variables";
 // Token for request authorization
 import { getToken } from "src/util";
 
-export const request = async (
+export const request = async <T>(
   type: RequestMethod,
   path: string,
   data?: any,
   options?: AxiosRequestConfig,
-): Promise<ServerResponse> => {
+): Promise<ServerResponse<T>> => {
   // Merge in options if specified
   const requestOptions: AxiosRequestConfig = {
     ...options,
@@ -41,14 +47,14 @@ export const request = async (
         return {
           success: false,
           message: "Error while making request, check connectivity",
-          data: {},
+          data: {} as T,
         };
       }
       if (!response) {
         return {
           success: false,
           message: "No response received from server",
-          data: {},
+          data: {} as T,
         };
       }
       break;
@@ -64,7 +70,7 @@ export const request = async (
         return {
           success: false,
           message: "Error while making request, check connectivity",
-          data: {},
+          data: {} as T,
         };
       }
       const contentTypeHeader = response.headers["content-type"];
@@ -72,7 +78,7 @@ export const request = async (
         return {
           success: false,
           message: "Invalid response received from server",
-          data: {},
+          data: {} as T,
         };
       } else if (
         _.startsWith(contentTypeHeader, "application/json") &&
@@ -81,7 +87,7 @@ export const request = async (
         return {
           success: false,
           message: "Invalid JSON response received from server",
-          data: {},
+          data: {} as T,
         };
       }
       break;
@@ -93,47 +99,6 @@ export const request = async (
     message: "Recieved response from server",
     data: response.data,
   };
-};
-
-/**
- * Get data from the Lab API using the JavaScript `fetch` API
- * @param {string} path exact API path to get data from
- * @returns {Promise<any>} an object containing information from the database
- */
-export const getData = (
-  path: string,
-  options?: AxiosRequestConfig,
-): Promise<any> => {
-  // Configure authorization
-  const requestOptions: AxiosRequestConfig = {
-    ...options,
-  };
-
-  if (!_.isUndefined(getToken(TOKEN_KEY))) {
-    requestOptions.headers = {
-      id_token: getToken(TOKEN_KEY).id_token,
-      ...requestOptions.headers,
-    };
-  }
-
-  return new Promise((resolve, reject) => {
-    axios
-      .get(`${SERVER_URL}${path}`, requestOptions)
-      .then((response) => {
-        // Check response status
-        if (!response) {
-          consola.error("GET:", path);
-          reject("Invalid response");
-        }
-
-        // Resolve with the response data
-        resolve(response.data);
-      })
-      .catch((error) => {
-        consola.error("GET:", path);
-        reject(error);
-      });
-  });
 };
 
 /**
@@ -223,21 +188,17 @@ export const deleteData = async (
 
 /**
  * Check if an Entity, Project, or Attribute still exists in MARS
- * @param {string} id Identifier of the Entity, Project, or Attribute
+ * @param {string} _id Identifier of the Entity, Project, or Attribute
  * @param {"entities" | "projects" | "attributes"} type Specify whether an Entity, Project, or Attribute is being checked
  * @returns {Promise<boolean>}
  */
 export const doesExist = async (
-  id: string,
+  _id: string,
   type: "entities" | "projects" | "attributes",
 ): Promise<boolean> => {
-  return new Promise((resolve, _reject) => {
-    getData(`/${type}/${id}`).then((result) => {
-      if (result.status === "error") {
-        resolve(false);
-      } else {
-        resolve(true);
-      }
-    });
-  });
+  const response = await request<EntityModel | AttributeModel | ProjectModel>(
+    "GET",
+    `/${type}/${_id}`,
+  );
+  return response.success;
 };
