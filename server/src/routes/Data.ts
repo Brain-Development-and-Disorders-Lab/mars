@@ -117,7 +117,7 @@ DataRoute.route("/data/download/:id").get(
 );
 
 // Route: Get file information
-DataRoute.route("/system/file/:id").get(
+DataRoute.route("/data/file/:id").get(
   authenticate,
   (request: any, response: any) => {
     Data.getFileInformation(request.params.id)

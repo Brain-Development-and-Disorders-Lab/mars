@@ -18,12 +18,13 @@ import { connectPrimary, connectSystem } from "./database/connection";
 
 // Routes
 import ActivityRoute from "./routes/Activity";
+import AttributesRoute from "./routes/Attributes";
+import AuthenticationRoute from "./routes/Authentication";
+import DataRoute from "./routes/Data";
 import EntitiesRoute from "./routes/Entities";
 import ProjectsRoute from "./routes/Projects";
-import AttributesRoute from "./routes/Attributes";
 import SearchRoute from "./routes/Search";
 import SystemRoute from "./routes/System";
-import AuthenticationRoute from "./routes/Authentication";
 import UsersRoute from "./routes/Users";
 
 // Set logging level
@@ -50,6 +51,7 @@ app.use(ProjectsRoute); // ProjectsRoute now has authMiddleware applied to it
 app.use(ActivityRoute);
 app.use(AttributesRoute);
 app.use(AuthenticationRoute);
+app.use(DataRoute);
 app.use(EntitiesRoute);
 app.use(SearchRoute);
 app.use(SystemRoute);
