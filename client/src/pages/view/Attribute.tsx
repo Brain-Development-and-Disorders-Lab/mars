@@ -27,7 +27,7 @@ import Values from "@components/Values";
 import { AttributeModel, IValue } from "@types";
 
 // Utility functions and libraries
-import { deleteData, getData, postData } from "@database/functions";
+import { deleteData, postData, request } from "@database/functions";
 import _ from "lodash";
 
 // Routing and navigation
@@ -46,28 +46,28 @@ const Attribute = () => {
   const [attributeDescription, setAttributeDescription] = useState("");
   const [attributeValues, setAttributeValues] = useState([] as IValue<any>[]);
 
-  useEffect(() => {
-    // Populate Attribute data
-    getData(`/attributes/${id}`)
-      .then((response) => {
-        setAttributeData(response);
-        setAttributeDescription(response.description);
-        setAttributeValues(response.values);
-      })
-      .catch((_error) => {
-        toast({
-          title: "Error",
-          status: "error",
-          description: "Could not retrieve Attribute data.",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-        setIsError(true);
-      })
-      .finally(() => {
-        setIsLoaded(true);
+  const getAttribute = async () => {
+    const response = await request<AttributeModel>("GET", `/attributes/${id}`);
+    if (response.success) {
+      setAttributeData(response.data);
+      setAttributeDescription(response.data.description);
+      setAttributeValues(response.data.values);
+    } else {
+      toast({
+        title: "Error",
+        status: "error",
+        description: "Could not retrieve Attribute data.",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
       });
+      setIsError(true);
+    }
+    setIsLoaded(true);
+  };
+
+  useEffect(() => {
+    getAttribute();
   }, [id]);
 
   // Delete the Attribute when confirmed
