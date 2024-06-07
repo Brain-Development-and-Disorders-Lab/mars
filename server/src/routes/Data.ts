@@ -27,11 +27,7 @@ DataRoute.route("/data/importJSON").post(
   (request: any, response: any) => {
     Data.importJSON(request.body.jsonData)
       .then((result: { status: boolean; message: string; data?: any }) => {
-        response.json({
-          status: result.status ? "success" : "error",
-          message: result.message,
-          data: _.isUndefined(result.data) ? "" : result.data,
-        });
+        response.json(_.isUndefined(result.data) ? "" : result.data);
       })
       .catch((reason: { message: string }) => {
         response.json({ status: "error", message: reason.message });
@@ -45,11 +41,7 @@ DataRoute.route("/data/import").post(
   (request: any, response: any) => {
     Data.import(request.files, request.body.type)
       .then((result: { status: boolean; message: string; data?: any }) => {
-        response.json({
-          status: result.status ? "success" : "error",
-          message: result.message,
-          data: _.isUndefined(result.data) ? "" : result.data,
-        });
+        response.json(_.isUndefined(result.data) ? "" : result.data);
       })
       .catch((reason: { message: string }) => {
         response.json({ status: "error", message: reason.message });
@@ -63,10 +55,7 @@ DataRoute.route("/data/import/mapping").post(
   (request: any, response: any) => {
     Data.mapData(request.body.fields, request.body.data)
       .then((entities: EntityModel[]) => {
-        response.json({
-          status: "success",
-          message: `Imported ${entities.length} Entities`,
-        });
+        response.json(entities.length);
       })
       .catch((reason: { message: string }) => {
         response.json({ status: "error", message: reason.message });

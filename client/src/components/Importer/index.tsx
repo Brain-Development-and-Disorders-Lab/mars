@@ -279,7 +279,7 @@ const Importer = (props: {
             position: "bottom-right",
             isClosable: true,
           });
-          if (response.data?.length > 0) {
+          if (response.data.length > 0) {
             // Update spreadsheet data state if valid rows
             setSpreadsheetData(response.data);
 
@@ -293,7 +293,7 @@ const Importer = (props: {
           }
 
           // Setup the next stage of CSV import
-          setupMapping();
+          await setupMapping();
         } else if (_.isEqual(fileType, "application/json")) {
           toast({
             title: "Success",
@@ -563,13 +563,13 @@ const Importer = (props: {
   /**
    * Callback function to handle any click events on the Continue button
    */
-  const onContinueClick = () => {
+  const onContinueClick = async () => {
     if (_.isEqual(interfacePage, "upload")) {
       setActiveStep(1);
 
       // Run setup for import and mapping
-      performImport();
-      setupMapping();
+      await performImport();
+      await setupMapping();
 
       // Proceed to the next page
       setInterfacePage("details");
@@ -586,9 +586,9 @@ const Importer = (props: {
     } else if (_.isEqual(interfacePage, "mapping")) {
       // Run the final import function depending on file type
       if (_.isEqual(fileType, "application/json")) {
-        performImportJson();
+        await performImportJson();
       } else if (_.isEqual(fileType, "text/csv")) {
-        performMapping();
+        await performMapping();
       }
     }
   };
@@ -660,6 +660,7 @@ const Importer = (props: {
                 </Stepper>
               </Flex>
 
+              {/* Step 1: Upload */}
               {_.isEqual(interfacePage, "upload") && (
                 <Flex
                   w={"100%"}
@@ -746,6 +747,7 @@ const Importer = (props: {
                 </Flex>
               )}
 
+              {/* Step 2: Simple mapping, details */}
               {_.isEqual(interfacePage, "details") && (
                 <Flex w={"100%"} direction={"column"} gap={"4"}>
                   {columns.length > 0 && (
@@ -923,6 +925,7 @@ const Importer = (props: {
                 </Flex>
               )}
 
+              {/* Step 3: Advanced mapping */}
               {_.isEqual(interfacePage, "mapping") && (
                 <Flex w={"100%"} direction={"column"} gap={"4"}>
                   <Text>
