@@ -52,10 +52,11 @@ import {
   EntityModel,
   IEntity,
   ProjectModel,
+  Item,
 } from "@types";
 
 // Utility functions and libraries
-import { getData, postData } from "@database/functions";
+import { postData, request } from "@database/functions";
 import { useToken } from "src/authentication/useToken";
 import { isValidAttributes } from "src/util";
 import _ from "lodash";
@@ -103,12 +104,8 @@ const Entity = () => {
   const [owner, _setOwner] = useState(token.orcid);
   const [description, setDescription] = useState("");
   const [selectedProjects, setSelectedProjects] = useState([] as string[]);
-  const [selectedOrigins, setSelectedOrigins] = useState(
-    [] as { name: string; id: string }[],
-  );
-  const [selectedProducts, setSelectedProducts] = useState(
-    [] as { name: string; id: string }[],
-  );
+  const [selectedOrigins, setSelectedOrigins] = useState([] as Item[]);
+  const [selectedProducts, setSelectedProducts] = useState([] as Item[]);
   const [selectedAttributes, setSelectedAttributes] = useState(
     [] as AttributeModel[],
   );
@@ -140,72 +137,78 @@ const Entity = () => {
   const checkEntityName = async (name: string) => {
     try {
       // Adjust the URL and HTTP client according to your setup
-      const response = await getData(`/entities/byName/${name}`);
-
-      setIsNameUnique(!response); // If data is null, the name is unique
+      const response = await request("GET", `/entities/byName/${name}`);
+      setIsNameUnique(!response.data); // If data is null, the name is unique
     } catch (error) {
       consola.error("Failed to check entity name:", error);
       // Handle error appropriately
     }
   };
 
+  /**
+   * Utility function to retrieve all Entities
+   */
+  const getEntities = async () => {
+    const response = await request<EntityModel[]>("GET", "/entities");
+    if (response.success) {
+      setEntities(response.data);
+    } else {
+      toast({
+        title: "Error",
+        status: "error",
+        description: "Could not retrieve Entities",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
+    setIsLoaded(true);
+  };
+
+  /**
+   * Utility function to get all Projects
+   */
+  const getProjects = async () => {
+    const response = await request<ProjectModel[]>("GET", "/projects");
+    if (response.success) {
+      setProjects(response.data);
+    } else {
+      toast({
+        title: "Error",
+        status: "error",
+        description: "Could not retrieve Projects",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
+    setIsLoaded(true);
+  };
+
+  /**
+   * Utility function to get all Attributes
+   */
+  const getAttributes = async () => {
+    const response = await request<AttributeModel[]>("GET", "/attributes");
+    if (response.success) {
+      setAttributes(response.data);
+    } else {
+      toast({
+        title: "Error",
+        status: "error",
+        description: "Could not retrieve Attributes",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
+    setIsLoaded(true);
+  };
+
   useEffect(() => {
-    // Get all Entities
-    getData(`/entities`)
-      .then((response) => {
-        setEntities(response);
-      })
-      .catch((_error) => {
-        toast({
-          title: "Error",
-          status: "error",
-          description: "Could not retrieve Entities data.",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-      })
-      .finally(() => {
-        setIsLoaded(true);
-      });
-
-    // Get all Projects
-    getData(`/projects`)
-      .then((response) => {
-        setProjects(response);
-      })
-      .catch((_error) => {
-        toast({
-          title: "Error",
-          status: "error",
-          description: "Could not retrieve Project data.",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-      })
-      .finally(() => {
-        setIsLoaded(true);
-      });
-
-    // Get all Attributes
-    getData(`/attributes`)
-      .then((response) => {
-        setAttributes(response);
-      })
-      .catch((_error) => {
-        toast({
-          title: "Error",
-          status: "error",
-          description: "Could not retrieve Attributes data.",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-      })
-      .finally(() => {
-        setIsLoaded(true);
-      });
+    getEntities();
+    getProjects();
+    getAttributes();
   }, []);
 
   useEffect(() => {
@@ -412,7 +415,7 @@ const Entity = () => {
                     onChange={(event) => {
                       if (
                         _.find(selectedOrigins, (product) => {
-                          return _.isEqual(product.id, event.target.value);
+                          return _.isEqual(product._id, event.target.value);
                         })
                       ) {
                         toast({
@@ -429,7 +432,7 @@ const Entity = () => {
                         setSelectedOrigins([
                           ...selectedOrigins,
                           {
-                            id: event.target.value.toString(),
+                            _id: event.target.value.toString(),
                             name: event.target.options[
                               event.target.selectedIndex
                             ].text,
@@ -464,13 +467,13 @@ const Entity = () => {
                 >
                   {selectedOrigins.map((product) => {
                     return (
-                      <Tag key={`tag-${product.id}`}>
-                        <Linky id={product.id} type={"entities"} />
+                      <Tag key={`tag-${product._id}`}>
+                        <Linky id={product._id} type={"entities"} />
                         <TagCloseButton
                           onClick={() => {
                             setSelectedOrigins(
                               selectedOrigins.filter((selected) => {
-                                return !_.isEqual(product.id, selected.id);
+                                return !_.isEqual(product._id, selected._id);
                               }),
                             );
                           }}
@@ -501,7 +504,7 @@ const Entity = () => {
                     onChange={(event) => {
                       if (
                         _.find(selectedProducts, (product) => {
-                          return _.isEqual(product.id, event.target.value);
+                          return _.isEqual(product._id, event.target.value);
                         })
                       ) {
                         toast({
@@ -518,7 +521,7 @@ const Entity = () => {
                         setSelectedProducts([
                           ...selectedProducts,
                           {
-                            id: event.target.value.toString(),
+                            _id: event.target.value.toString(),
                             name: event.target.options[
                               event.target.selectedIndex
                             ].text,
@@ -553,13 +556,13 @@ const Entity = () => {
                 >
                   {selectedProducts.map((product) => {
                     return (
-                      <Tag key={`tag-${product.id}`}>
-                        <Linky id={product.id} type={"entities"} />
+                      <Tag key={`tag-${product._id}`}>
+                        <Linky id={product._id} type={"entities"} />
                         <TagCloseButton
                           onClick={() => {
                             setSelectedProducts(
                               selectedProducts.filter((selected) => {
-                                return !_.isEqual(product.id, selected.id);
+                                return !_.isEqual(product._id, selected._id);
                               }),
                             );
                           }}
