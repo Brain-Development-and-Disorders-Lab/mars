@@ -245,7 +245,7 @@ const Importer = (props: {
   };
 
   /**
-   * Utility function to perform the initial import operations. For CSV files, make POST request to `/system/import` to
+   * Utility function to perform the initial import operations. For CSV files, make POST request to `/data/import` to
    * defer the data extraction to the server. For JSON files, trigger the `handleJsonFile` method to handle the file
    * locally instead.
    */
@@ -265,7 +265,7 @@ const Importer = (props: {
       handleJsonFile(file);
     } else if (_.isEqual(fileType, "text/csv")) {
       // Make POST request with CSV file contents from the form
-      const response = await request<any>("POST", "/system/import", formData);
+      const response = await request<any>("POST", "/data/import", formData);
       if (response.success) {
         // Reset file upload state
         setFile({} as File);
@@ -342,7 +342,7 @@ const Importer = (props: {
     // Update button state to reflect loading state
     setContinueLoading(true);
 
-    const response = await request<any>("POST", "/system/importJSON", {
+    const response = await request<any>("POST", "/data/importJSON", {
       jsonData: jsonData,
     });
     if (response.success) {
@@ -443,7 +443,7 @@ const Importer = (props: {
 
     const response = await request<any>(
       "POST",
-      "/system/import/mapping",
+      "/data/import/mapping",
       mappingData,
     );
     if (response.success) {

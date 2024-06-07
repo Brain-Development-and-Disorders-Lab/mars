@@ -272,7 +272,7 @@ const Entity = () => {
   const getDownload = async (id: string, filename: string) => {
     const response = await request<any>(
       "GET",
-      `/system/download/${id}`,
+      `/data/download/${id}`,
       {},
       {
         responseType: "blob",
@@ -286,12 +286,12 @@ const Entity = () => {
   };
 
   const getAttachmentFile = async (id: string) => {
-    const response = await request<any[]>("GET", `/system/file/${id}`);
+    const response = await request<any[]>("GET", `/data/file/${id}`);
     if (response.success) {
       setPreviewType(response.data[0].metadata.type);
       const fileResponse = await request<any>(
         "GET",
-        `/system/download/${id}`,
+        `/data/download/${id}`,
         {},
         {
           responseType: "blob",

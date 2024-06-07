@@ -47,7 +47,7 @@ const Uploader = (props: {
     formData.append("file", file);
     formData.append("target", props.target);
 
-    const response = await request<any>("POST", "/system/upload", formData);
+    const response = await request<any>("POST", "/data/upload", formData);
     if (response.success) {
       // Add the upload to the existing list of uploads
       props.setUploads([...props.uploads, file.name]);
