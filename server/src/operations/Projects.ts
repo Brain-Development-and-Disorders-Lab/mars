@@ -73,7 +73,7 @@ export class Projects {
               details: "Created new Project",
               target: {
                 type: "projects",
-                id: project._id,
+                _id: project._id,
                 name: project.name,
               },
             }),
@@ -158,7 +158,7 @@ export class Projects {
               details: "Updated Project",
               target: {
                 type: "projects",
-                id: updatedProject._id,
+                _id: updatedProject._id,
                 name: updatedProject.name,
               },
             }),
@@ -218,7 +218,7 @@ export class Projects {
               details: "Created new Project",
               target: {
                 type: "projects",
-                id: project._id,
+                _id: project._id,
                 name: project.name,
               },
             }),
@@ -721,7 +721,7 @@ export class Projects {
               details: "Deleted Project",
               target: {
                 type: "projects",
-                id: project._id,
+                _id: project._id,
                 name: project.name,
               },
             }),

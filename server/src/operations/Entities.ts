@@ -18,7 +18,13 @@ import tmp from "tmp";
 import dayjs from "dayjs";
 
 // Custom types
-import { AttributeModel, EntityModel, IValue, ProjectModel } from "@types";
+import {
+  AttributeModel,
+  EntityModel,
+  IValue,
+  Item,
+  ProjectModel,
+} from "@types";
 
 // Constants
 const ENTITIES = "entities";
@@ -190,7 +196,7 @@ export class Entities {
               operations.push(
                 Entities.addProduct(origin, {
                   name: entity?.name,
-                  id: entity?._id,
+                  _id: entity?._id,
                 }),
               );
             }
@@ -211,7 +217,7 @@ export class Entities {
               operations.push(
                 Entities.addOrigin(product, {
                   name: entity?.name,
-                  id: entity?._id,
+                  _id: entity?._id,
                 }),
               );
             }
@@ -232,7 +238,7 @@ export class Entities {
               details: "Created new Entity",
               target: {
                 type: "entities",
-                id: entity?._id,
+                _id: entity?._id,
                 name: entity?.name,
               },
             }),
@@ -353,24 +359,24 @@ export class Entities {
 
           // Products
           const productsToKeep = currentEntity?.associations?.products
-            ?.map((product) => product.id)
+            ?.map((product) => product._id)
             ?.filter((product) =>
               updatedEntity?.associations?.products
-                ?.map((product) => product.id)
+                ?.map((product) => product._id)
                 .includes(product),
             );
           const productsToAdd = updatedEntity?.associations?.products?.filter(
-            (product) => !productsToKeep?.includes(product.id),
+            (product) => !productsToKeep?.includes(product._id),
           );
           if (productsToAdd && productsToAdd?.length > 0) {
             operations.push(
-              productsToAdd?.map((product: { id: string; name: string }) => {
+              productsToAdd?.map((product: Item) => {
                 Entities.addOrigin(product, {
                   name: updatedEntity?.name,
-                  id: updatedEntity?._id,
+                  _id: updatedEntity?._id,
                 });
                 Entities.addProduct(
-                  { name: updatedEntity?.name, id: updatedEntity?._id },
+                  { name: updatedEntity?.name, _id: updatedEntity?._id },
                   product,
                 );
               }),
@@ -378,17 +384,17 @@ export class Entities {
           }
           const productsToRemove =
             currentEntity?.associations?.products?.filter(
-              (product) => !productsToKeep?.includes(product.id),
+              (product) => !productsToKeep?.includes(product._id),
             );
           if (productsToRemove?.length > 0) {
             operations.push(
-              productsToRemove?.map((product: { id: string; name: string }) => {
+              productsToRemove?.map((product: Item) => {
                 Entities.removeOrigin(product, {
                   name: updatedEntity?.name,
-                  id: updatedEntity?._id,
+                  _id: updatedEntity?._id,
                 });
                 Entities.removeProduct(
-                  { name: updatedEntity?.name, id: updatedEntity?._id },
+                  { name: updatedEntity?.name, _id: updatedEntity?._id },
                   product,
                 );
               }),
@@ -397,42 +403,42 @@ export class Entities {
 
           // Origins
           const originsToKeep = currentEntity?.associations?.origins
-            ?.map((origin) => origin.id)
+            ?.map((origin) => origin._id)
             ?.filter((origin) =>
               updatedEntity?.associations?.origins
-                ?.map((origin) => origin.id)
+                ?.map((origin) => origin._id)
                 .includes(origin),
             );
           const originsToAdd = updatedEntity?.associations?.origins?.filter(
-            (origin) => !originsToKeep?.includes(origin.id),
+            (origin) => !originsToKeep?.includes(origin._id),
           );
           if (originsToAdd && originsToAdd?.length > 0) {
             operations.push(
-              originsToAdd?.map((origin: { id: string; name: string }) => {
+              originsToAdd?.map((origin: Item) => {
                 Entities.addOrigin(
-                  { name: updatedEntity?.name, id: updatedEntity?._id },
+                  { name: updatedEntity?.name, _id: updatedEntity?._id },
                   origin,
                 );
                 Entities.addProduct(origin, {
                   name: updatedEntity?.name,
-                  id: updatedEntity?._id,
+                  _id: updatedEntity?._id,
                 });
               }),
             );
           }
           const originsToRemove = currentEntity?.associations?.origins?.filter(
-            (origin) => !originsToKeep?.includes(origin.id),
+            (origin) => !originsToKeep?.includes(origin._id),
           );
           if (originsToRemove?.length > 0) {
             operations.push(
-              originsToRemove?.map((origin: { id: string; name: string }) => {
+              originsToRemove?.map((origin: Item) => {
                 Entities.removeOrigin(
-                  { name: updatedEntity?.name, id: updatedEntity?._id },
+                  { name: updatedEntity?.name, _id: updatedEntity?._id },
                   origin,
                 );
                 Entities.removeProduct(origin, {
                   name: updatedEntity?.name,
-                  id: updatedEntity?._id,
+                  _id: updatedEntity?._id,
                 });
               }),
             );
@@ -478,14 +484,14 @@ export class Entities {
 
           // Attachments
           const attachmentsToKeep = currentEntity?.attachments
-            ?.map((attachment) => attachment.id)
+            ?.map((attachment) => attachment._id)
             .filter((attachment) =>
               updatedEntity?.attachments
-                .map((attachment) => attachment.id)
+                .map((attachment) => attachment._id)
                 .includes(attachment),
             );
           const attachmentsToRemove = currentEntity?.attachments.filter(
-            (attachment) => !attachmentsToKeep?.includes(attachment.id),
+            (attachment) => !attachmentsToKeep?.includes(attachment._id),
           );
           if (attachmentsToRemove?.length > 0) {
             operations.push(
@@ -503,7 +509,7 @@ export class Entities {
               details: "Updated Entity",
               target: {
                 type: "entities",
-                id: currentEntity?._id,
+                _id: currentEntity?._id,
                 name: currentEntity?.name,
               },
             }),
@@ -525,13 +531,13 @@ export class Entities {
                 associations: {
                   origins: [
                     ...(currentEntity?.associations?.origins?.filter((origin) =>
-                      originsToKeep?.includes(origin.id),
+                      originsToKeep?.includes(origin._id),
                     ) || []),
                     ...(originsToAdd || []),
                   ],
                   products: [
                     ...(currentEntity?.associations?.products?.filter(
-                      (product) => productsToKeep?.includes(product.id),
+                      (product) => productsToKeep?.includes(product._id),
                     ) || []),
                     ...(productsToAdd || []),
                   ],
@@ -604,7 +610,7 @@ export class Entities {
               details: "Restored Entity",
               target: {
                 type: "entities",
-                id: entity?._id,
+                _id: entity?._id,
                 name: entity?.name,
               },
             }),
@@ -734,39 +740,36 @@ export class Entities {
 
   /**
    * Add another Entity to a collection of "product" associations
-   * @param {{ name: string, id: string }} entity Target Entity name and identifier
-   * @param {{ name: string, id: string }} product Entity name and identifier to add as a "product"-type association
-   * @returns {Promise<{ name: string, id: string }>}
+   * @param {Item} entity Target Entity name and identifier
+   * @param {Item} product Entity name and identifier to add as a "product"-type association
+   * @returns {Promise<Item>}
    */
-  static addProduct = (
-    entity: { name: string; id: string },
-    product: { name: string; id: string },
-  ): Promise<{ name: string; id: string }> => {
+  static addProduct = (entity: Item, product: Item): Promise<Item> => {
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES)
-        .findOne({ _id: entity.id }, (error: any, result: any) => {
+        .findOne({ _id: entity._id }, (error: any, result: any) => {
           if (error) {
             consola.error(
-              `Error retrieving Entity "${entity.id}" to add Product: ${error}`,
+              `Error retrieving Entity "${entity._id}" to add Product: ${error}`,
             );
             throw error;
           }
-          let updatedProducts = result?.associations?.products ?? [];
+          let updatedProducts: Item[] = result?.associations?.products ?? [];
           const existingProductIndex = updatedProducts.findIndex(
-            (o: { name: string; id: string }) => o?.name === product?.name,
+            (o: Item) => o?.name === product?.name,
           );
 
           if (existingProductIndex > -1) {
             // Update existing origin if new ID is provided
-            if (product.id) {
-              updatedProducts[existingProductIndex].id = product.id;
+            if (product._id) {
+              updatedProducts[existingProductIndex]._id = product._id;
             }
           } else {
             // Add new origin
             updatedProducts = [
               ...updatedProducts,
-              { name: product?.name, id: product.id },
+              { name: product?.name, _id: product._id },
             ];
           }
 
@@ -783,12 +786,12 @@ export class Entities {
           getDatabase()
             .collection(ENTITIES)
             .updateOne(
-              { _id: entity.id },
+              { _id: entity._id },
               updates,
               (error: any, _response: any) => {
                 if (error) {
                   consola.error(
-                    `Error updating Entity "${entity.id}" to add Product: ${error}`,
+                    `Error updating Entity "${entity._id}" to add Product: ${error}`,
                   );
                   throw error;
                 }
@@ -809,21 +812,18 @@ export class Entities {
 
   /**
    * Add another Entities as a collection of "product"-type associations
-   * @param {{ name: string, id: string }} entity Target Entity name and identifier
-   * @param {{ name: string, id: string }[]} products Entity names and identifiers to add as a "product"-type association
-   * @returns {Promise<{ name: string, id: string }[]>}
+   * @param {Item} entity Target Entity name and identifier
+   * @param {Item[]} products Entity names and identifiers to add as a "product"-type association
+   * @returns {Promise<Item[]>}
    */
-  static addProducts = (
-    entity: { name: string; id: string },
-    products: { name: string; id: string }[],
-  ): Promise<{ name: string; id: string }> => {
+  static addProducts = (entity: Item, products: Item[]): Promise<Item> => {
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES)
-        .findOne({ _id: entity.id }, (error: any, result: any) => {
+        .findOne({ _id: entity._id }, (error: any, result: any) => {
           if (error) {
             consola.error(
-              `Error retrieving Entity "${entity.id}" to add Products: ${error}`,
+              `Error retrieving Entity "${entity._id}" to add Products: ${error}`,
             );
             throw error;
           }
@@ -843,12 +843,12 @@ export class Entities {
           getDatabase()
             .collection(ENTITIES)
             .updateOne(
-              { _id: entity.id },
+              { _id: entity._id },
               updates,
               (error: any, _response: any) => {
                 if (error) {
                   consola.error(
-                    `Error updating Entity "${entity.id}" to add Products: ${error}`,
+                    `Error updating Entity "${entity._id}" to add Products: ${error}`,
                   );
                   throw error;
                 }
@@ -869,21 +869,18 @@ export class Entities {
 
   /**
    * Remove Entity as a "product"-type association
-   * @param {{ name: string, id: string }} entity Target Entity name and identifier
-   * @param {{ name: string, id: string }} product Entity name and identifier to remove as a "product"-type association
-   * @returns {Promise<{ name: string, id: string }[]>}
+   * @param {Item} entity Target Entity name and identifier
+   * @param {Item} product Entity name and identifier to remove as a "product"-type association
+   * @returns {Promise<Item[]>}
    */
-  static removeProduct = (
-    entity: { name: string; id: string },
-    product: { name: string; id: string },
-  ): Promise<{ name: string; id: string }> => {
+  static removeProduct = (entity: Item, product: Item): Promise<Item> => {
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES)
-        .findOne({ _id: entity.id }, (error: any, result: any) => {
+        .findOne({ _id: entity._id }, (error: any, result: any) => {
           if (error) {
             consola.error(
-              `Error retrieving Entity "${entity.id}" to remove Product: ${error}`,
+              `Error retrieving Entity "${entity._id}" to remove Product: ${error}`,
             );
             throw error;
           }
@@ -896,7 +893,7 @@ export class Entities {
                 products: (
                   result as EntityModel
                 ).associations?.products?.filter(
-                  (content) => !_.isEqual(product.id, content.id),
+                  (content) => !_.isEqual(product._id, content._id),
                 ),
               },
             },
@@ -905,12 +902,12 @@ export class Entities {
           getDatabase()
             .collection(ENTITIES)
             .updateOne(
-              { _id: entity.id },
+              { _id: entity._id },
               updates,
               (error: any, _response: any) => {
                 if (error) {
                   consola.error(
-                    `Error updating Entity "${entity.id}" to remove Product: ${error}`,
+                    `Error updating Entity "${entity._id}" to remove Product: ${error}`,
                   );
                   throw error;
                 }
@@ -931,40 +928,37 @@ export class Entities {
 
   /**
    * Specify an Entity acting as an Origin
-   * @param {{ name: string, id: string }} entity Target Entity name and identifier
-   * @param {{ name: string, id: string }} origin Entity name and identifier to add as an "origin"-type association
-   * @returns {Promise<{ name: string, id: string }>}
+   * @param {Item} entity Target Entity name and identifier
+   * @param {Item} origin Entity name and identifier to add as an "origin"-type association
+   * @returns {Promise<Item>}
    */
-  static addOrigin = (
-    entity: { name: string; id: string },
-    origin: { name: string; id: string },
-  ): Promise<{ name: string; id: string }> => {
+  static addOrigin = (entity: Item, origin: Item): Promise<Item> => {
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES)
-        .findOne({ _id: entity.id }, (error: any, result: any) => {
+        .findOne({ _id: entity._id }, (error: any, result: any) => {
           if (error) {
             consola.error(
-              `Error retrieving Entity "${entity.id}" to add Origin: ${error}`,
+              `Error retrieving Entity "${entity._id}" to add Origin: ${error}`,
             );
             throw error;
           }
 
-          let updatedOrigins = result?.associations?.origins ?? [];
+          let updatedOrigins: Item[] = result?.associations?.origins ?? [];
           const existingOriginIndex = updatedOrigins.findIndex(
-            (o: { name: string; id: string }) => o?.name === origin?.name,
+            (o: Item) => o?.name === origin?.name,
           );
 
           if (existingOriginIndex > -1) {
             // Update existing origin if new ID is provided
-            if (origin.id) {
-              updatedOrigins[existingOriginIndex].id = origin.id;
+            if (origin._id) {
+              updatedOrigins[existingOriginIndex]._id = origin._id;
             }
           } else {
             // Add new origin
             updatedOrigins = [
               ...updatedOrigins,
-              { name: origin?.name, id: origin.id },
+              { name: origin?.name, _id: origin._id },
             ];
           }
 
@@ -981,12 +975,12 @@ export class Entities {
           getDatabase()
             .collection(ENTITIES)
             .updateOne(
-              { _id: entity.id },
+              { _id: entity._id },
               updates,
               (error: any, _response: any) => {
                 if (error) {
                   consola.error(
-                    `Error updating Entity "${entity.id}" to add Origin: ${error}`,
+                    `Error updating Entity "${entity._id}" to add Origin: ${error}`,
                   );
                   throw error;
                 }
@@ -1007,21 +1001,18 @@ export class Entities {
 
   /**
    * Specify a collection of Entities acting as Origins
-   * @param {{ name: string, id: string }} entity Target Entity name and identifier
-   * @param {{ name: string, id: string }[]} origins Entities to add as "origin"-type associations
-   * @returns {Promise<{ name: string, id: string }[]>}
+   * @param {Item} entity Target Entity name and identifier
+   * @param {Item[]} origins Entities to add as "origin"-type associations
+   * @returns {Promise<Item[]>}
    */
-  static addOrigins = (
-    entity: { name: string; id: string },
-    origins: { name: string; id: string }[],
-  ): Promise<{ name: string; id: string }> => {
+  static addOrigins = (entity: Item, origins: Item[]): Promise<Item> => {
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES)
-        .findOne({ _id: entity.id }, (error: any, result: any) => {
+        .findOne({ _id: entity._id }, (error: any, result: any) => {
           if (error) {
             consola.error(
-              `Error retrieving Entity "${entity.id}" to add Origins: ${error}`,
+              `Error retrieving Entity "${entity._id}" to add Origins: ${error}`,
             );
             throw error;
           }
@@ -1039,12 +1030,12 @@ export class Entities {
           getDatabase()
             .collection(ENTITIES)
             .updateOne(
-              { _id: entity.id },
+              { _id: entity._id },
               updates,
               (error: any, _response: any) => {
                 if (error) {
                   consola.error(
-                    `Error updating Entity "${entity.id}" to add Origins: ${error}`,
+                    `Error updating Entity "${entity._id}" to add Origins: ${error}`,
                   );
                   throw error;
                 }
@@ -1071,20 +1062,17 @@ export class Entities {
    * @param {Object} origin The origin being removed.
    * @param {string} origin.name The name of the origin.
    * @param {string} origin.id The ID of the origin.
-   * @returns {Promise<{ name: string; id: string }>} Resolves with the updated entity after removing the origin.
+   * @returns {Promise<Item>} Resolves with the updated entity after removing the origin.
    * @throws {Error} Throws an error if there are issues with the database operation.
    */
-  static removeOrigin = (
-    entity: { name: string; id: string },
-    origin: { name: string; id: string },
-  ): Promise<{ name: string; id: string }> => {
+  static removeOrigin = (entity: Item, origin: Item): Promise<Item> => {
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES)
-        .findOne({ _id: entity.id }, (error: any, result: any) => {
+        .findOne({ _id: entity._id }, (error: any, result: any) => {
           if (error) {
             consola.error(
-              `Error retrieving Entity "${entity.id}" to remove Origin: ${error}`,
+              `Error retrieving Entity "${entity._id}" to remove Origin: ${error}`,
             );
             throw error;
           }
@@ -1094,7 +1082,7 @@ export class Entities {
             $set: {
               associations: {
                 origins: (result as EntityModel).associations?.origins?.filter(
-                  (content) => !_.isEqual(origin.id, content.id),
+                  (content) => !_.isEqual(origin._id, content._id),
                 ),
                 products: (result as EntityModel).associations?.products,
               },
@@ -1104,12 +1092,12 @@ export class Entities {
           getDatabase()
             .collection(ENTITIES)
             .updateOne(
-              { _id: entity.id },
+              { _id: entity._id },
               updates,
               (error: any, _response: any) => {
                 if (error) {
                   consola.error(
-                    `Error updating Entity "${entity.id}" to remove Origin: ${error}`,
+                    `Error updating Entity "${entity._id}" to remove Origin: ${error}`,
                   );
                   throw error;
                 }
@@ -1314,16 +1302,16 @@ export class Entities {
    * Update the description of an Entity
    * @param entity the Entity of interest
    * @param description an updated description
-   * @returns {Promise<{ name: string, id: string }>}
+   * @returns {Promise<Item>}
    */
   static setDescription = (
-    entity: { name: string; id: string },
+    entity: Item,
     description: string,
-  ): Promise<{ name: string; id: string }> => {
+  ): Promise<Item> => {
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES)
-        .findOne({ _id: entity.id }, (error: any, _result: any) => {
+        .findOne({ _id: entity._id }, (error: any, _result: any) => {
           if (error) {
             consola.error(
               `Error retrieving Entity "${entity}" to update description: ${error}`,
@@ -1341,7 +1329,7 @@ export class Entities {
           getDatabase()
             .collection(ENTITIES)
             .updateOne(
-              { _id: entity.id },
+              { _id: entity._id },
               updates,
               (error: any, _response: any) => {
                 if (error) {
@@ -1368,21 +1356,18 @@ export class Entities {
   /**
    * Asynchronously adds an attachment to the specified Entity.
    * @param {string} id The ID of the Entity to which the attachment is being added.
-   * @param {{ name: string; id: string }} attachment The attachment object to be added.
-   * @returns {Promise<{ name: string; id: string }>} Resolves with the added attachment object.
+   * @param {Item} attachment The attachment object to be added.
+   * @returns {Promise<Item>} Resolves with the added attachment object.
    * @throws {Error} Throws an error if there are issues with the database operation.
    */
-  static addAttachment = (
-    id: string,
-    attachment: { name: string; id: string },
-  ): Promise<{ name: string; id: string }> => {
+  static addAttachment = (_id: string, attachment: Item): Promise<Item> => {
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES)
-        .findOne({ _id: id }, (error: any, result: any) => {
+        .findOne({ _id: _id }, (error: any, result: any) => {
           if (error) {
             consola.error(
-              `Error retrieving Entity "${id}" to add Attachment: ${error}`,
+              `Error retrieving Entity "${_id}" to add Attachment: ${error}`,
             );
             throw error;
           }
@@ -1393,8 +1378,8 @@ export class Entities {
               attachments: [
                 ...result?.attachments,
                 {
+                  _id: attachment._id,
                   name: attachment?.name,
-                  id: attachment.id,
                 },
               ],
             },
@@ -1402,10 +1387,10 @@ export class Entities {
 
           getDatabase()
             .collection(ENTITIES)
-            .updateOne({ _id: id }, updates, (error: any, _response: any) => {
+            .updateOne({ _id: _id }, updates, (error: any, _response: any) => {
               if (error) {
                 consola.error(
-                  `Error updating Entity "${id}" to add Attachment: ${error}`,
+                  `Error updating Entity "${_id}" to add Attachment: ${error}`,
                 );
                 throw error;
               }
@@ -1415,7 +1400,7 @@ export class Entities {
                 "Added Attachment",
                 attachment?.name,
                 "to Entity (id):",
-                id,
+                _id,
               );
               resolve(attachment);
             });
@@ -1426,21 +1411,18 @@ export class Entities {
   /**
    * Asynchronously removes an attachment from the Entity entity.
    * @param {string} id The ID of the Entity from which the attachment is being removed.
-   * @param {{ name: string; id: string }} attachment The attachment object to be removed.
-   * @returns {Promise<{ name: string; id: string }>} Resolves with the removed attachment object.
+   * @param {Item} attachment The attachment object to be removed.
+   * @returns {Promise<Item>} Resolves with the removed attachment object.
    * @throws {Error} Throws an error if there are issues with the database operation.
    */
-  static removeAttachment = (
-    id: string,
-    attachment: { name: string; id: string },
-  ): Promise<{ name: string; id: string }> => {
+  static removeAttachment = (_id: string, attachment: Item): Promise<Item> => {
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES)
-        .findOne({ _id: id }, (error: any, result: any) => {
+        .findOne({ _id: _id }, (error: any, result: any) => {
           if (error) {
             consola.error(
-              `Error retrieving Entity "${id}" to remove Attachment: ${error}`,
+              `Error retrieving Entity "${_id}" to remove Attachment: ${error}`,
             );
             throw error;
           }
@@ -1450,7 +1432,7 @@ export class Entities {
             $set: {
               attachments: [
                 ...(result as EntityModel)?.attachments?.filter(
-                  (existing) => !_.isEqual(existing.id, attachment.id),
+                  (existing) => !_.isEqual(existing._id, attachment._id),
                 ),
               ],
             },
@@ -1458,10 +1440,10 @@ export class Entities {
 
           getDatabase()
             .collection(ENTITIES)
-            .updateOne({ _id: id }, updates, (error: any, _response: any) => {
+            .updateOne({ _id: _id }, updates, (error: any, _response: any) => {
               if (error) {
                 consola.error(
-                  `Error updating Entity "${id}" to remove Attachment: ${error}`,
+                  `Error updating Entity "${_id}" to remove Attachment: ${error}`,
                 );
                 throw error;
               }
@@ -1471,7 +1453,7 @@ export class Entities {
                 "Removed Attachment",
                 attachment?.name,
                 "from Entity (id):",
-                id,
+                _id,
               );
               resolve(attachment);
             });
@@ -1481,18 +1463,18 @@ export class Entities {
 
   /**
    * Update the lock state of an Entity
-   * @param {{ entity: { name: string; id: string }; lockState: boolean; }} entityLockData the Entity of interest and a flag if the Entity is "locked", or editable
-   * @returns {Promise<{ name: string, id: string }>}
+   * @param {{ entity: Item; lockState: boolean; }} entityLockData the Entity of interest and a flag if the Entity is "locked", or editable
+   * @returns {Promise<Item>}
    */
   static setLock = (entityLockData: {
-    entity: { name: string; id: string };
+    entity: Item;
     lockState: boolean;
-  }): Promise<{ name: string; id: string }> => {
+  }): Promise<Item> => {
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES)
         .findOne(
-          { _id: entityLockData.entity.id },
+          { _id: entityLockData.entity._id },
           (error: any, _result: any) => {
             if (error) {
               throw error;
@@ -1512,7 +1494,7 @@ export class Entities {
             getDatabase()
               .collection(ENTITIES)
               .updateOne(
-                { _id: entityLockData.entity.id },
+                { _id: entityLockData.entity._id },
                 updates,
                 (error: any, _response: any) => {
                   if (error) {
@@ -2110,8 +2092,8 @@ export class Entities {
           .on("finish", () => {
             // Once the upload is finished, register attachment with Entity
             Entities.addAttachment(target, {
+              _id: uploadStream.id.toString(),
               name: receivedFile?.name,
-              id: uploadStream.id.toString(),
             });
             consola.debug("Uploaded file:", receivedFile?.name);
             resolve({ status: true, message: "Uploaded file" });
@@ -2147,7 +2129,7 @@ export class Entities {
               details: "Deleted Entity",
               target: {
                 type: "entities",
-                id: entity?._id,
+                _id: entity?._id,
                 name: entity?.name,
               },
             }),

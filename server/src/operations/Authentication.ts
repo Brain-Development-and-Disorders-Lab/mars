@@ -174,12 +174,12 @@ async function bootstrapUserData(userId: string) {
     const entity1 = await Entities.getOne(entities[0]);
     const entity2 = await Entities.getOne(entities[1]);
     Entities.addProduct(
-      { name: entity1.name, id: entity1._id },
-      { name: entity2.name, id: entity2._id },
+      { name: entity1.name, _id: entity1._id },
+      { name: entity2.name, _id: entity2._id },
     );
     Entities.addOrigin(
-      { name: entity2.name, id: entity2._id },
-      { name: entity1.name, id: entity1._id },
+      { name: entity2.name, _id: entity2._id },
+      { name: entity1.name, _id: entity1._id },
     );
   }
   await createDefaultTemplatesForUser(userId);
