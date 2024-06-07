@@ -19,7 +19,7 @@ import Icon from "@components/Icon";
 import { ProjectModel } from "@types";
 
 // Utility functions and types
-import { getData } from "@database/functions";
+import { request } from "@database/functions";
 import _ from "lodash";
 
 // Routing and navigation
@@ -35,25 +35,26 @@ const Projects = () => {
 
   const [projectsData, setProjectsData] = useState([] as ProjectModel[]);
 
-  useEffect(() => {
-    getData(`/projects`)
-      .then((value: ProjectModel[]) => {
-        setProjectsData(value);
-      })
-      .catch((_error) => {
-        toast({
-          title: "Error",
-          status: "error",
-          description: "Could not retrieve Project data.",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-        setIsError(true);
-      })
-      .finally(() => {
-        setIsLoaded(true);
+  const getProjects = async () => {
+    const response = await request<ProjectModel[]>("GET", "/projects");
+    if (response.success) {
+      setProjectsData(response.data);
+    } else {
+      toast({
+        title: "Error",
+        status: "error",
+        description: "Could not retrieve Projects",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
       });
+      setIsError(true);
+    }
+    setIsLoaded(true);
+  };
+
+  useEffect(() => {
+    getProjects();
   }, []);
 
   const breakpoint = useBreakpoint();
