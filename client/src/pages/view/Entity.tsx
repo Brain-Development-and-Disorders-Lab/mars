@@ -208,6 +208,13 @@ const Entity = () => {
     const response = await request<EntityModel>("GET", `/entities/${id}`);
     if (response.success) {
       setEntityData(response.data);
+      setEntityDescription(response.data.description);
+      setEntityProjects(response.data.projects);
+      setEntityOrigins(response.data.associations.origins);
+      setEntityProducts(response.data.associations.products);
+      setEntityAttributes(response.data.attributes);
+      setEntityAttachments(response.data.attachments);
+      setEntityHistory(response.data.history);
     } else {
       toast({
         title: "Error",
@@ -489,6 +496,7 @@ const Entity = () => {
         },
         lockState: false,
       });
+      setEditing(false);
       setIsUpdating(false);
     } else {
       // Lock Entity
