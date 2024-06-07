@@ -63,13 +63,14 @@ import {
   ProjectModel,
   EntityModel,
   DataTableAction,
+  Item,
 } from "@types";
 
 // Routing and navigation
 import { useParams, useNavigate } from "react-router-dom";
 
 // Utility functions and libraries
-import { deleteData, getData, postData } from "@database/functions";
+import { deleteData, postData, request } from "@database/functions";
 import _ from "lodash";
 import dayjs from "dayjs";
 import DataTable from "@components/DataTable";
@@ -112,9 +113,7 @@ const Project = () => {
   const [newCollaborator, setNewCollaborator] = useState("");
 
   // Entities that can be added
-  const [allEntities, setAllEntities] = useState(
-    [] as { name: string; id: string }[],
-  );
+  const [minimalEntities, setMinimalEntities] = useState([] as Item[]);
   const [selectedEntities, setSelectedEntities] = useState([] as string[]);
 
   const {
@@ -127,54 +126,52 @@ const Project = () => {
   const [exportFormat, setExportFormat] = useState("json");
   const validExportFormats = ["json", "csv", "txt"];
 
-  useEffect(() => {
-    // Populate Project data
-    getData(`/projects/${id}`)
-      .then((response) => {
-        setProjectData(response);
-        setProjectDescription(response?.description);
-        setProjectEntities(response?.entities);
-        setProjectHistory(response?.history);
-        setProjectCollaborators(response?.collaborators || []);
-      })
-      .catch(() => {
-        toast({
-          title: "Error",
-          description: "Could not retrieve Project data.",
-          status: "error",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-        setIsError(true);
-      })
-      .finally(() => {
-        setIsLoaded(true);
+  const getProject = async () => {
+    const response = await request<ProjectModel>("GET", `/projects/${id}`);
+    if (response.success) {
+      setProjectData(response.data);
+      setProjectDescription(response.data.description);
+      setProjectEntities(response.data.entities);
+      setProjectHistory(response.data.history);
+      setProjectCollaborators(response.data.collaborators || []);
+    } else {
+      toast({
+        title: "Error",
+        description: "Could not retrieve Project",
+        status: "error",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
       });
+      setIsError(true);
+    }
+    setIsLoaded(true);
+  };
 
-    // Populate Entity data
-    getData(`/entities`)
-      .then((response) => {
-        setAllEntities(
-          response.map((e: EntityModel) => {
-            return { name: e.name, id: e._id };
-          }),
-        );
-      })
-      .catch(() => {
-        toast({
-          title: "Error",
-          description: "Could not retrieve Entity data.",
-          status: "error",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-        setIsError(true);
-      })
-      .finally(() => {
-        setIsLoaded(true);
+  const getEntities = async () => {
+    const response = await request<EntityModel[]>("GET", "/entities");
+    if (response.success) {
+      const minimizedEntities = response.data.map((entity) => {
+        return { _id: entity._id, name: entity.name };
       });
+      setMinimalEntities(minimizedEntities);
+    } else {
+      toast({
+        title: "Error",
+        description: "Could not retrieve Entities",
+        status: "error",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+      setIsError(true);
+    }
+    setIsLoaded(true);
+  };
+
+  useEffect(() => {
+    getProject();
+    getEntities();
   }, [id, isLoaded]);
 
   useEffect(() => {
@@ -838,9 +835,9 @@ const Project = () => {
                     }}
                   >
                     {isLoaded &&
-                      allEntities.map((entity) => {
+                      minimalEntities.map((entity) => {
                         return (
-                          <option key={entity.id} value={entity.id}>
+                          <option key={entity._id} value={entity._id}>
                             {entity.name}
                           </option>
                         );
