@@ -46,18 +46,18 @@ import {
   ProjectModel,
   EntityImport,
   EntityModel,
+  Item,
 } from "@types";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
 
 // Utility functions and libraries
-import { getData, postData } from "@database/functions";
+import { postData, request } from "@database/functions";
 import { useToken } from "src/authentication/useToken";
 import _ from "lodash";
 import dayjs from "dayjs";
 import { nanoid } from "nanoid";
-import consola from "consola";
 
 const Importer = (props: {
   isOpen: boolean;
@@ -110,18 +110,10 @@ const Importer = (props: {
   const [descriptionField, setDescriptionField] = useState("");
   const [ownerField, _setOwnerField] = useState(token.orcid);
   const [projectField, setProjectField] = useState("");
-  const [selectedOrigin, setSelectedOrigin] = useState(
-    {} as { name: string; id: string },
-  );
-  const [originsField, setOriginsField] = useState(
-    [] as { name: string; id: string }[],
-  );
-  const [selectedProduct, setSelectedProduct] = useState(
-    {} as { name: string; id: string },
-  );
-  const [productsField, setProductsField] = useState(
-    [] as { name: string; id: string }[],
-  );
+  const [selectedOrigin, setSelectedOrigin] = useState({} as Item);
+  const [originsField, setOriginsField] = useState([] as Item[]);
+  const [selectedProduct, setSelectedProduct] = useState({} as Item);
+  const [productsField, setProductsField] = useState([] as Item[]);
   const [attributes, setAttributes] = useState([] as AttributeModel[]);
   const [attributesField, setAttributesField] = useState(
     [] as AttributeModel[],
@@ -347,45 +339,6 @@ const Importer = (props: {
   };
 
   /**
-   * Utility function to populate fields required for the mapping stage of importing data. Loads all Entities, Projects,
-   * and Attributes.
-   */
-  const setupMapping = () => {
-    // Load all Entities, Projects, and Attributes
-    Promise.all([
-      getData(`/entities`),
-      getData(`/projects`),
-      getData(`/attributes`),
-    ])
-      .then((results: [EntityModel[], ProjectModel[], AttributeModel[]]) => {
-        // Update states accordingly
-        setEntities(results[0]);
-        setProjects(results[1]);
-        setAttributes(results[2]);
-
-        // Pre-populate the "Project" field
-        if (results[1][0]?._id) {
-          setProjectField(results[1][0]._id);
-        }
-
-        // Update UI state
-        setIsLoaded(true);
-      })
-      .catch((_error) => {
-        consola.error("Error retrieving Entities data:", _error);
-        toast({
-          title: "Error",
-          status: "error",
-          description: "Could not retrieve Entities data.",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-        setIsError(true);
-      });
-  };
-
-  /**
    * Perform import action for JSON data. Make POST request to server passing the JSON data.
    * @returns Short-circuit when function called without actual JSON data
    */
@@ -425,6 +378,61 @@ const Importer = (props: {
       .finally(() => {
         setContinueLoading(false);
       });
+  };
+
+  /**
+   * Utility function to populate fields required for the mapping stage of importing data. Loads all Entities, Projects,
+   * and Attributes.
+   */
+  const setupMapping = async () => {
+    // Load all Entities, Projects, and Attributes
+    const entities = await request<EntityModel[]>("GET", "/entities");
+    const projects = await request<ProjectModel[]>("GET", "/projects");
+    const attributes = await request<AttributeModel[]>("GET", "/attributes");
+
+    if (entities.success) {
+      setEntities(entities.data);
+    } else {
+      toast({
+        title: "Error",
+        status: "error",
+        description: "Could not retrieve Entities",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+      setIsError(true);
+    }
+
+    if (projects.success) {
+      setProjects(projects.data);
+    } else {
+      toast({
+        title: "Error",
+        status: "error",
+        description: "Could not retrieve Projects",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+      setIsError(true);
+    }
+
+    if (attributes.success) {
+      setAttributes(attributes.data);
+    } else {
+      toast({
+        title: "Error",
+        status: "error",
+        description: "Could not retrieve Attributes",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+      setIsError(true);
+    }
+
+    setIsLoaded(true);
   };
 
   /**
@@ -505,16 +513,16 @@ const Importer = (props: {
    * @returns {ReactElement}
    */
   const getSelectEntitiesComponent = (
-    value: { name: string; id: string },
+    value: Item,
     setValue: React.SetStateAction<any>,
-    selected: { name: string; id: string }[],
+    selected: Item[],
     setSelected: React.SetStateAction<any>,
     disabled?: boolean,
   ) => {
     return (
       <Select
         placeholder={"Select Entity"}
-        value={value.id}
+        value={value._id}
         onChange={(event) => {
           const selection = {
             id: event.target.value,
@@ -523,7 +531,7 @@ const Importer = (props: {
           setValue(selection);
           if (
             !_.includes(
-              selected.map((entity) => entity.id),
+              selected.map((entity) => entity._id),
               selection.id,
             )
           ) {
@@ -620,10 +628,10 @@ const Importer = (props: {
     setNameField("");
     setDescriptionField("");
     setProjectField("");
-    setSelectedOrigin({} as { name: string; id: string });
-    setOriginsField([] as { name: string; id: string }[]);
-    setSelectedProduct({} as { name: string; id: string });
-    setProductsField([] as { name: string; id: string }[]);
+    setSelectedOrigin({} as Item);
+    setOriginsField([] as Item[]);
+    setSelectedProduct({} as Item);
+    setProductsField([] as Item[]);
     setAttributes([]);
     setAttributesField([]);
   };
@@ -873,7 +881,7 @@ const Importer = (props: {
                       <Flex direction={"row"} wrap={"wrap"} gap={"2"} pt={"2"}>
                         {originsField.map((origin) => {
                           return (
-                            <Tag key={origin.id}>
+                            <Tag key={origin._id}>
                               {origin.name}
                               <TagCloseButton
                                 onClick={() => {
@@ -881,8 +889,8 @@ const Importer = (props: {
                                     ...originsField.filter(
                                       (existingOrigin) =>
                                         !_.isEqual(
-                                          existingOrigin.id,
-                                          origin.id,
+                                          existingOrigin._id,
+                                          origin._id,
                                         ),
                                     ),
                                   ]);
@@ -907,7 +915,7 @@ const Importer = (props: {
                       <Flex direction={"row"} wrap={"wrap"} gap={"2"} pt={"2"}>
                         {productsField.map((product) => {
                           return (
-                            <Tag key={product.id}>
+                            <Tag key={product._id}>
                               {product.name}
                               <TagCloseButton
                                 onClick={() => {
@@ -915,8 +923,8 @@ const Importer = (props: {
                                     ...productsField.filter(
                                       (existingProduct) =>
                                         !_.isEqual(
-                                          existingProduct.id,
-                                          product.id,
+                                          existingProduct._id,
+                                          product._id,
                                         ),
                                     ),
                                   ]);
