@@ -448,14 +448,14 @@ export class Projects {
    * @returns {Promise<string>}
    */
   static getData = (projectExportData: {
-    id: string;
+    _id: string;
     fields: string[];
     format: "json" | "csv" | "txt";
   }): Promise<string> => {
     return new Promise((resolve, reject) => {
       getDatabase()
         .collection(PROJECTS)
-        .findOne({ _id: projectExportData.id }, (error: any, result: any) => {
+        .findOne({ _id: projectExportData._id }, (error: any, result: any) => {
           if (error) {
             consola.error("Error while finding Project for export:", error);
             reject(error);
@@ -538,7 +538,7 @@ export class Projects {
                     fs.writeFileSync(path, formattedOutput);
                     consola.debug(
                       "Generated CSV data for  Project (id):",
-                      projectExportData.id.toString(),
+                      projectExportData._id.toString(),
                     );
                     resolve(path);
                   });
@@ -609,7 +609,7 @@ export class Projects {
                 );
                 consola.debug(
                   "Generated JSON data for Project (id):",
-                  projectExportData.id.toString(),
+                  projectExportData._id.toString(),
                 );
                 resolve(path);
               });
@@ -679,7 +679,7 @@ export class Projects {
                 fs.writeFileSync(path, textDetails.join("\n"));
                 consola.debug(
                   "Generated text data for  Entity (id):",
-                  projectExportData.id.toString(),
+                  projectExportData._id.toString(),
                 );
                 resolve(path);
               });

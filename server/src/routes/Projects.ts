@@ -149,7 +149,7 @@ ProjectsRoute.route("/projects/export").post(
   authMiddleware,
   (
     request: {
-      body: { id: string; fields: string[]; format: "json" | "csv" | "txt" };
+      body: { _id: string; fields: string[]; format: "json" | "csv" | "txt" };
     },
     response: any,
   ) => {
@@ -157,7 +157,7 @@ ProjectsRoute.route("/projects/export").post(
       response.setHeader("Content-Type", `application/${request.body.format}`);
       response.download(
         path,
-        `export_${request.body.id}.${request.body.format}`,
+        `export_${request.body._id}.${request.body.format}`,
       );
     });
   },
