@@ -44,9 +44,8 @@ import {
 } from "@types";
 
 // Utility functions and libraries
-import { postData, request } from "@database/functions";
+import { request } from "@database/functions";
 import _ from "lodash";
-import consola from "consola";
 import { createColumnHelper } from "@tanstack/react-table";
 
 // Routing and navigation
@@ -140,69 +139,64 @@ const Search = () => {
     getProjects();
   }, []);
 
-  const runSearch = () => {
+  const runSearch = async () => {
     // Initial check if a specific ID search was not found
     setIsSearching(true);
     setHasSearched(true);
     setResults([]);
 
     // Use the new search route for text-based search
-    postData(`/entities/search/`, { query: query }) // Assuming you pass user ID for permissions filtering
-      .then((results) => {
-        if (results && results.length > 0) {
-          // Update state with search results
-          setResults(results);
-        } else {
-          // Handle no results found scenario
-          toast({
-            title: "No results found",
-            status: "info",
-            duration: 4000,
-            position: "bottom-right",
-            isClosable: true,
-          });
-        }
-      })
-      .catch((error) => {
-        // Handle search error scenario
-        consola.error("Error performing search:", error);
+    const response = await request<EntityModel[]>("POST", "/entities/search", {
+      query: query,
+    });
+    if (response.success) {
+      if (response.data.length > 0) {
+        setResults(response.data);
+      } else {
+        // Handle no results found scenario
         toast({
-          title: "Search Error",
-          description: "Could not perform search.",
-          status: "error",
-          duration: 5000,
-          isClosable: true,
-          position: "bottom-right",
-        });
-      })
-      .finally(() => {
-        setIsSearching(false);
-      });
-  };
-
-  const runQuerySearch = () => {
-    // Update state
-    setIsSearching(true);
-    setHasSearched(true);
-
-    postData(`/search/query`, { query: JSON.stringify(queryComponents) })
-      .then((value) => {
-        setResults(value);
-      })
-      .catch((_error) => {
-        toast({
-          title: "Error",
-          status: "error",
-          description: "Could not get search results.",
+          title: "No results found",
+          status: "info",
           duration: 4000,
           position: "bottom-right",
           isClosable: true,
         });
-        setIsError(true);
-      })
-      .finally(() => {
-        setIsSearching(false);
+      }
+    } else {
+      toast({
+        title: "Search Error",
+        description: "Could not perform search",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom-right",
       });
+    }
+    setIsSearching(false);
+  };
+
+  const runQuerySearch = async () => {
+    // Update state
+    setIsSearching(true);
+    setHasSearched(true);
+
+    const response = await request<EntityModel[]>("POST", "/search/query", {
+      query: JSON.stringify(queryComponents),
+    });
+    if (response.success) {
+      setResults(response.data);
+    } else {
+      toast({
+        title: "Error",
+        status: "error",
+        description: "Could not get search results",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+      setIsError(true);
+    }
+    setIsSearching(false);
   };
 
   const onTabChange = () => {
@@ -257,23 +251,24 @@ const Search = () => {
     {
       label: "Export Entities CSV",
       icon: "download",
-      action(table, rows) {
+      action: async (table, rows) => {
         // Export rows that have been selected
         const toExport: string[] = [];
         for (let rowIndex of Object.keys(rows)) {
           toExport.push(table.getRow(rowIndex).original._id);
         }
 
-        postData(`/entities/export`, { entities: toExport }).then(
-          (response) => {
-            FileSaver.saveAs(
-              new Blob([response]),
-              slugify(
-                `export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.csv`,
-              ),
-            );
-          },
-        );
+        const response = await request<any>("POST", "/entities/export", {
+          entities: toExport,
+        });
+        if (response.success) {
+          FileSaver.saveAs(
+            new Blob([response.data]),
+            slugify(
+              `export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.csv`,
+            ),
+          );
+        }
 
         table.resetRowSelection();
       },
@@ -281,24 +276,25 @@ const Search = () => {
     {
       label: "Export Entities JSON",
       icon: "download",
-      action: (table, rows: any) => {
+      action: async (table, rows: any) => {
         // Export rows that have been selected
         const toExport: string[] = [];
         for (let rowIndex of Object.keys(rows)) {
           toExport.push(table.getRow(rowIndex).original._id);
         }
 
-        postData(`/entities/export`, {
+        const response = await request<any>("POST", "/entities/export", {
           entities: toExport,
           format: "json",
-        }).then((response) => {
+        });
+        if (response.success) {
           FileSaver.saveAs(
-            new Blob([response]),
+            new Blob([response.data]),
             slugify(
               `export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.json`,
             ),
           );
-        });
+        }
 
         table.resetRowSelection();
       },

@@ -70,7 +70,7 @@ import {
 import { useParams, useNavigate } from "react-router-dom";
 
 // Utility functions and libraries
-import { deleteData, postData, request } from "@database/functions";
+import { deleteData, request } from "@database/functions";
 import _ from "lodash";
 import dayjs from "dayjs";
 import DataTable from "@components/DataTable";
@@ -197,7 +197,7 @@ const Project = () => {
   /**
    * Handle the edit button being clicked
    */
-  const handleEditClick = () => {
+  const handleEditClick = async () => {
     if (editing) {
       setIsUpdating(true);
 
@@ -214,31 +214,31 @@ const Project = () => {
         history: projectHistory,
       };
 
-      // Update data
-      postData(`/projects/update`, updateData)
-        .then((_response) => {
-          toast({
-            title: "Saved!",
-            status: "success",
-            duration: 2000,
-            position: "bottom-right",
-            isClosable: true,
-          });
-        })
-        .catch(() => {
-          toast({
-            title: "Error",
-            description: "An error occurred when saving updates.",
-            status: "error",
-            duration: 2000,
-            position: "bottom-right",
-            isClosable: true,
-          });
-        })
-        .finally(() => {
-          setEditing(false);
-          setIsUpdating(false);
+      const response = await request<any>(
+        "POST",
+        "/projects/update",
+        updateData,
+      );
+      if (response.success) {
+        toast({
+          title: "Saved!",
+          status: "success",
+          duration: 2000,
+          position: "bottom-right",
+          isClosable: true,
         });
+      } else {
+        toast({
+          title: "Error",
+          description: "An error occurred when saving Project updates",
+          status: "error",
+          duration: 2000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+      }
+      setEditing(false);
+      setIsUpdating(false);
     } else {
       setEditing(true);
     }
@@ -277,7 +277,10 @@ const Project = () => {
    * Restore a Project from an earlier point in time
    * @param {ProjectHistory} projectVersion historical Project data to restore
    */
-  const handleRestoreFromHistoryClick = (projectVersion: ProjectHistory) => {
+  const handleRestoreFromHistoryClick = async (
+    projectVersion: ProjectHistory,
+  ) => {
+    // Reconstruct a `ProjectModel` instance from the prior version
     const updateData: ProjectModel = {
       _id: projectData._id,
       name: projectData.name,
@@ -289,42 +292,37 @@ const Project = () => {
       entities: projectVersion.entities,
       history: projectData.history,
     };
-
     setIsLoaded(false);
 
-    // Update data
-    postData(`/projects/update`, updateData)
-      .then((_response) => {
-        toast({
-          title: "Saved!",
-          status: "success",
-          duration: 2000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-      })
-      .catch(() => {
-        toast({
-          title: "Error",
-          description: "An error occurred when saving updates.",
-          status: "error",
-          duration: 2000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-      })
-      .finally(() => {
-        // Close the drawer
-        onHistoryClose();
-
-        // Apply updated state
-        setProjectData(updateData);
-        setProjectDescription(updateData.description);
-        setProjectEntities(updateData.entities);
-        setProjectHistory(updateData.history);
-        setProjectCollaborators(updateData?.collaborators || []);
-        setIsLoaded(true);
+    const response = await request<any>("POST", "/projects/update", updateData);
+    if (response.success) {
+      toast({
+        title: "Saved!",
+        status: "success",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
       });
+    } else {
+      toast({
+        title: "Error",
+        description: "An error occurred when saving Project updates",
+        status: "error",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
+    // Close the drawer
+    onHistoryClose();
+
+    // Apply updated state
+    setProjectData(updateData);
+    setProjectDescription(updateData.description);
+    setProjectEntities(updateData.entities);
+    setProjectHistory(updateData.history);
+    setProjectCollaborators(updateData?.collaborators || []);
+    setIsLoaded(true);
   };
 
   // Handle clicking the "Export" button
@@ -334,17 +332,18 @@ const Project = () => {
   };
 
   // Handle clicking the "Export" button
-  const handleExportJsonClick = () => {
-    postData(`/entities/export_all`, { project: projectData._id }).then(
-      (response) => {
-        FileSaver.saveAs(
-          new Blob([response]),
-          slugify(
-            `export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.json`,
-          ),
-        );
-      },
-    );
+  const handleExportJsonClick = async () => {
+    const response = await request<any>("POST", "/entities/export_all", {
+      project: projectData._id,
+    });
+    if (response.success) {
+      FileSaver.saveAs(
+        new Blob([response.data]),
+        slugify(
+          `export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.json`,
+        ),
+      );
+    }
   };
 
   // A list of all fields that can be exported, generated when the interface is opened
@@ -357,52 +356,51 @@ const Project = () => {
   ];
 
   // Handle clicking the "Download" button
-  const handleDownloadClick = (format: string) => {
+  const handleDownloadClick = async (format: string) => {
     if (_.includes(validExportFormats, format)) {
       // Send POST data to generate file
-      postData(`/projects/export`, {
-        id: id,
+      const response = await request<any>("POST", "/projects/export", {
+        _id: id,
         fields: exportAll ? allExportFields : exportFields,
         format: format,
-      })
-        .then((response) => {
-          let responseData = response;
+      });
+      if (response.success) {
+        let responseData = response.data;
 
-          // Clean the response data if required
-          if (_.isEqual(format, "json")) {
-            responseData = JSON.stringify(responseData, null, "  ");
-          }
+        // Clean the response data if required
+        if (_.isEqual(format, "json")) {
+          responseData = JSON.stringify(responseData, null, "  ");
+        }
 
-          FileSaver.saveAs(
-            new Blob([responseData]),
-            slugify(`${projectData.name.replace(" ", "")}_export.${format}`),
-          );
+        FileSaver.saveAs(
+          new Blob([responseData]),
+          slugify(`${projectData.name.replace(" ", "")}_export.${format}`),
+        );
 
-          // Close the "Export" modal
-          onExportClose();
+        // Close the "Export" modal
+        onExportClose();
 
-          // Reset the export state
-          setExportFields([]);
+        // Reset the export state
+        setExportFields([]);
 
-          toast({
-            title: "Info",
-            description: `Generated ${format.toUpperCase()} file.`,
-            status: "info",
-            duration: 2000,
-            position: "bottom-right",
-            isClosable: true,
-          });
-        })
-        .catch((_error) => {
-          toast({
-            title: "Error",
-            description: "An error occurred when exporting this Project.",
-            status: "error",
-            duration: 2000,
-            position: "bottom-right",
-            isClosable: true,
-          });
+        toast({
+          title: "Info",
+          description: `Generated ${format.toUpperCase()} file.`,
+          status: "info",
+          duration: 2000,
+          position: "bottom-right",
+          isClosable: true,
         });
+      } else {
+        toast({
+          title: "Error",
+          description: "An error occurred when exporting this Project",
+          status: "error",
+          duration: 2000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+      }
     } else {
       toast({
         title: "Warning",

@@ -2,10 +2,10 @@ import React, { useState, useEffect } from "react";
 import { Input, Box, Button, VStack } from "@chakra-ui/react";
 
 // Utility imports
-import consola from "consola";
 import { debounce } from "lodash";
-import { postData } from "@database/functions"; // Adjust this import based on your project structure.
+import { request } from "@database/functions"; // Adjust this import based on your project structure.
 import { ValueEditorProps } from "react-querybuilder";
+import { EntityModel } from "@types";
 
 const QueryBuilderEditorCustomValue = ({
   field,
@@ -13,20 +13,21 @@ const QueryBuilderEditorCustomValue = ({
   handleOnChange,
 }: ValueEditorProps) => {
   const [inputValue, setInputValue] = useState(value || "");
-  const [searchResults, setSearchResults] = useState([]);
+  const [searchResults, setSearchResults] = useState([] as EntityModel[]);
 
   // Function to fetch entities based on the search term
-  const fetchEntities = debounce((query) => {
+  const fetchEntities = debounce(async (query) => {
     if (field === "origin" || field === "product") {
-      postData(`/entities/searchByTerm`, { query })
-        .then((response) => {
-          consola.debug("Search response:", response);
-          setSearchResults(response || []);
-        })
-        .catch((error) => {
-          consola.error("Error fetching Entities after search:", error);
-          setSearchResults([]);
-        });
+      const response = await request<EntityModel[]>(
+        "POST",
+        "/entities/searchByTerm",
+        { query },
+      );
+      if (response.success) {
+        setSearchResults(response.data || []);
+      } else {
+        setSearchResults([]);
+      }
     }
   }, 300);
 
