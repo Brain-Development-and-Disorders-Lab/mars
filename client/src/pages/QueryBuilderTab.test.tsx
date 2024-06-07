@@ -3,7 +3,7 @@ import { shallow } from "enzyme";
 import QueryBuilderTab from "./QueryBuilderTab";
 
 jest.mock("@database/functions", () => ({
-  postData: jest.fn(),
+  request: jest.fn(),
 }));
 
 describe("QueryBuilder Component", () => {

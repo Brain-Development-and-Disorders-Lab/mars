@@ -25,7 +25,7 @@ import { DataTableAction, EntityModel } from "@types";
 import { useNavigate } from "react-router-dom";
 
 // Utility functions and libraries
-import { postData, request } from "@database/functions";
+import { request } from "@database/functions";
 import _ from "lodash";
 import dayjs from "dayjs";
 import FileSaver from "file-saver";
@@ -143,23 +143,24 @@ const Entities = () => {
     {
       label: "Export Selected (CSV)",
       icon: "download",
-      action: (table, rows: any) => {
+      action: async (table, rows: any) => {
         // Export rows that have been selected
         const toExport: string[] = [];
         for (let rowIndex of Object.keys(rows)) {
           toExport.push(table.getRow(rowIndex).original._id);
         }
 
-        postData(`/entities/export`, { entities: toExport }).then(
-          (response) => {
-            FileSaver.saveAs(
-              new Blob([response]),
-              slugify(
-                `export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.csv`,
-              ),
-            );
-          },
-        );
+        const response = await request<any>("POST", "/entities/export", {
+          entities: toExport,
+        });
+        if (response.success) {
+          FileSaver.saveAs(
+            new Blob([response.data]),
+            slugify(
+              `export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.csv`,
+            ),
+          );
+        }
 
         table.resetRowSelection();
       },
@@ -167,24 +168,25 @@ const Entities = () => {
     {
       label: "Export Selected (JSON)",
       icon: "download",
-      action: (table, rows: any) => {
+      action: async (table, rows: any) => {
         // Export rows that have been selected
         const toExport: string[] = [];
         for (let rowIndex of Object.keys(rows)) {
           toExport.push(table.getRow(rowIndex).original._id);
         }
 
-        postData(`/entities/export`, {
+        const response = await request<any>("POST", "/entities/export", {
           entities: toExport,
           format: "json",
-        }).then((response) => {
+        });
+        if (response.success) {
           FileSaver.saveAs(
-            new Blob([response]),
+            new Blob([response.data]),
             slugify(
               `export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.json`,
             ),
           );
-        });
+        }
 
         table.resetRowSelection();
       },
@@ -192,17 +194,18 @@ const Entities = () => {
     {
       label: "Export All (JSON)",
       icon: "download",
-      action: (table) => {
-        postData(`/entities/export_all`, { format: "json" }).then(
-          (response) => {
-            FileSaver.saveAs(
-              new Blob([response]),
-              slugify(
-                `export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.json`,
-              ),
-            );
-          },
-        );
+      action: async (table) => {
+        const response = await request<any>("POST", "/entities/export_all", {
+          format: "json",
+        });
+        if (response.success) {
+          FileSaver.saveAs(
+            new Blob([response.data]),
+            slugify(
+              `export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.json`,
+            ),
+          );
+        }
 
         table.resetRowSelection();
       },

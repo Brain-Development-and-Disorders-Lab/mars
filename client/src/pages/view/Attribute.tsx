@@ -27,7 +27,7 @@ import Values from "@components/Values";
 import { AttributeModel, IValue } from "@types";
 
 // Utility functions and libraries
-import { deleteData, postData, request } from "@database/functions";
+import { deleteData, request } from "@database/functions";
 import _ from "lodash";
 
 // Routing and navigation
@@ -102,7 +102,7 @@ const Attribute = () => {
   /**
    * Handle the edit button being clicked
    */
-  const handleEditClick = () => {
+  const handleEditClick = async () => {
     if (editing) {
       const updateData: AttributeModel = {
         _id: attributeData._id,
@@ -112,29 +112,30 @@ const Attribute = () => {
       };
 
       // Update data
-      postData(`/attributes/update`, updateData)
-        .then((_response) => {
-          toast({
-            title: "Saved!",
-            status: "success",
-            duration: 2000,
-            position: "bottom-right",
-            isClosable: true,
-          });
-        })
-        .catch(() => {
-          toast({
-            title: "Error",
-            description: "An error occurred when saving updates.",
-            status: "error",
-            duration: 2000,
-            position: "bottom-right",
-            isClosable: true,
-          });
-        })
-        .finally(() => {
-          setEditing(false);
+      const response = await request<any>(
+        "POST",
+        "/attributes/update",
+        updateData,
+      );
+      if (response.success) {
+        toast({
+          title: "Saved!",
+          status: "success",
+          duration: 2000,
+          position: "bottom-right",
+          isClosable: true,
         });
+      } else {
+        toast({
+          title: "Error",
+          description: "An error occurred when saving updates.",
+          status: "error",
+          duration: 2000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+      }
+      setEditing(false);
     } else {
       setEditing(true);
     }

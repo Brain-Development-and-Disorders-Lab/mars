@@ -86,7 +86,7 @@ import {
 } from "@types";
 
 // Utility functions and libraries
-import { deleteData, postData, request } from "src/database/functions";
+import { deleteData, request } from "src/database/functions";
 import { isValidValues } from "src/util";
 import _, { debounce } from "lodash";
 import dayjs from "dayjs";
@@ -161,18 +161,20 @@ const Entity = () => {
 
   const [attributes, setAttributes] = useState([] as AttributeModel[]);
   const [inputValue, setInputValue] = useState("");
-  const [searchResults, setSearchResults] = useState([]);
+  const [searchResults, setSearchResults] = useState([] as EntityModel[]);
 
   // Debounced fetch function
-  const fetchEntities = debounce((query) => {
-    postData(`/entities/searchByTerm`, { query: query })
-      .then((response) => {
-        setSearchResults(response);
-      })
-      .catch((error) => {
-        consola.error("Failed to fetch entities:", error);
-        setSearchResults([]);
-      });
+  const fetchEntities = debounce(async (query) => {
+    const response = await request<EntityModel[]>(
+      "POST",
+      "/entities/searchByTerm",
+      { query: query },
+    );
+    if (response.success) {
+      setSearchResults(response.data);
+    } else {
+      setSearchResults([]);
+    }
   }, 150);
 
   /**
@@ -337,36 +339,38 @@ const Entity = () => {
     }
   };
 
-  const onSaveAsTemplate = () => {
+  const onSaveAsTemplate = async () => {
     const attributeData: IAttribute = {
       name: attributeName,
       description: attributeDescription,
       values: attributeValues,
     };
 
-    // Save the Entity as a template
-    postData(`/attributes/create`, attributeData)
-      .then((_response) => {
-        toast({
-          title: "Saved!",
-          status: "success",
-          duration: 2000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-        setAttributes(() => [...attributes, attributeData as AttributeModel]);
-      })
-      .catch(() => {
-        toast({
-          title: "Error",
-          description:
-            "An error occurred when saving this Attribute as a template.",
-          status: "error",
-          duration: 2000,
-          position: "bottom-right",
-          isClosable: true,
-        });
+    const response = await request<any>(
+      "POST",
+      "/attributes/create",
+      attributeData,
+    );
+    if (response.success) {
+      toast({
+        title: "Saved!",
+        status: "success",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
       });
+      setAttributes(() => [...attributes, attributeData as AttributeModel]);
+    } else {
+      toast({
+        title: "Error",
+        description:
+          "An error occurred when saving this Attribute as a template",
+        status: "error",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
   };
 
   useEffect(() => {
@@ -429,7 +433,7 @@ const Entity = () => {
   } = useDisclosure();
 
   // Toggle editing status
-  const handleEditClick = () => {
+  const handleEditClick = async () => {
     if (editing) {
       setIsUpdating(true);
 
@@ -453,55 +457,56 @@ const Entity = () => {
       };
 
       // Update data
-      postData(`/entities/update`, updateData)
-        .then((_response) => {
-          toast({
-            title: "Saved!",
-            status: "success",
-            duration: 2000,
-            position: "bottom-right",
-            isClosable: true,
-          });
-        })
-        .catch(() => {
-          toast({
-            title: "Error",
-            description: "An error occurred when saving updates.",
-            status: "error",
-            duration: 2000,
-            position: "bottom-right",
-            isClosable: true,
-          });
-        })
-        .finally(() => {
-          postData(`/entities/lock/${id}`, {
-            entity: {
-              name: entityData.name,
-              id: entityData._id,
-            },
-            lockState: false,
-          }).then((_response) => {
-            setEditing(false);
-          });
-          setIsUpdating(false);
+      const response = await request<any>(
+        "POST",
+        "/entities/update",
+        updateData,
+      );
+      if (response.success) {
+        toast({
+          title: "Saved!",
+          status: "success",
+          duration: 2000,
+          position: "bottom-right",
+          isClosable: true,
         });
-    } else {
-      postData(`/entities/lock/${id}`, {
+      } else {
+        toast({
+          title: "Error",
+          description: "An error occurred when saving updates.",
+          status: "error",
+          duration: 2000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+      }
+
+      // Unlock Entity
+      await request<any>("POST", `/entities/lock/${id}`, {
         entity: {
+          _id: entityData._id,
           name: entityData.name,
-          id: entityData._id,
+        },
+        lockState: false,
+      });
+      setIsUpdating(false);
+    } else {
+      // Lock Entity
+      await request<any>("POST", `/entities/lock/${id}`, {
+        entity: {
+          _id: entityData._id,
+          name: entityData.name,
         },
         lockState: true,
-      }).then((_response) => {
-        setEditing(true);
       });
+      setEditing(true);
     }
   };
 
   /**
    * Restore an Entity from a deleted status
    */
-  const handleRestoreFromDeleteClick = () => {
+  const handleRestoreFromDeleteClick = async () => {
     // Collate data for updating
     const updateData: EntityModel = {
       _id: entityData._id,
@@ -524,37 +529,35 @@ const Entity = () => {
     setIsLoaded(false);
 
     // Update data
-    postData(`/entities/update`, updateData)
-      .then((_response) => {
-        toast({
-          title: "Restored!",
-          status: "success",
-          duration: 2000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-      })
-      .catch(() => {
-        toast({
-          title: "Error",
-          description: "An error occurred when restoring this Entity.",
-          status: "error",
-          duration: 2000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-      })
-      .finally(() => {
-        // Apply updated state
-        setEntityData(updateData);
-        setEntityDescription(updateData.description || "");
-        setEntityProjects(updateData.projects);
-        setEntityOrigins(updateData.associations.origins);
-        setEntityProducts(updateData.associations.products);
-        setEntityAttributes(updateData.attributes);
-        setEntityHistory(updateData.history);
-        setIsLoaded(true);
+    const response = await request<any>("POST", "/entities/update", updateData);
+    if (response.success) {
+      toast({
+        title: "Restored!",
+        status: "success",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
       });
+
+      // Apply updated state
+      setEntityData(updateData);
+      setEntityDescription(updateData.description || "");
+      setEntityProjects(updateData.projects);
+      setEntityOrigins(updateData.associations.origins);
+      setEntityProducts(updateData.associations.products);
+      setEntityAttributes(updateData.attributes);
+      setEntityHistory(updateData.history);
+    } else {
+      toast({
+        title: "Error",
+        description: "An error occurred when restoring this Entity.",
+        status: "error",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
+    setIsLoaded(true);
   };
 
   const truncateTableText =
@@ -906,7 +909,9 @@ const Entity = () => {
    * Restore an Entity from an earlier point in time
    * @param {EntityHistory} entityVersion historical Entity data to restore
    */
-  const handleRestoreFromHistoryClick = (entityVersion: EntityHistory) => {
+  const handleRestoreFromHistoryClick = async (
+    entityVersion: EntityHistory,
+  ) => {
     const updateData: EntityModel = {
       _id: entityData._id,
       name: entityData.name,
@@ -928,40 +933,36 @@ const Entity = () => {
     setIsLoaded(false);
 
     // Update data
-    postData(`/entities/update`, updateData)
-      .then((_response) => {
-        toast({
-          title: "Saved!",
-          status: "success",
-          duration: 2000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-      })
-      .catch(() => {
-        toast({
-          title: "Error",
-          description: "An error occurred when saving updates.",
-          status: "error",
-          duration: 2000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-      })
-      .finally(() => {
-        // Close the drawer
-        onHistoryClose();
-
-        // Apply updated state
-        setEntityData(updateData);
-        setEntityDescription(updateData.description || "");
-        setEntityProjects(updateData.projects);
-        setEntityOrigins(updateData.associations.origins);
-        setEntityProducts(updateData.associations.products);
-        setEntityAttributes(updateData.attributes);
-        setEntityHistory(updateData.history);
-        setIsLoaded(true);
+    const response = await request<any>("POST", "/entities/update", updateData);
+    if (response.success) {
+      toast({
+        title: "Saved!",
+        status: "success",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
       });
+
+      // Apply updated state
+      setEntityData(updateData);
+      setEntityDescription(updateData.description || "");
+      setEntityProjects(updateData.projects);
+      setEntityOrigins(updateData.associations.origins);
+      setEntityProducts(updateData.associations.products);
+      setEntityAttributes(updateData.attributes);
+      setEntityHistory(updateData.history);
+      setIsLoaded(true);
+    } else {
+      toast({
+        title: "Error",
+        description: "An error occurred when saving updates.",
+        status: "error",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
+    onHistoryClose();
   };
 
   // Handle clicking the "Export" button
@@ -971,51 +972,49 @@ const Entity = () => {
   };
 
   // Handle clicking the "Download" button
-  const handleDownloadClick = (format: string) => {
+  const handleDownloadClick = async (format: string) => {
     if (_.includes(validExportFormats, format)) {
       // Send POST data to generate file
-      postData(`/entities/export/${id}`, {
+      const response = await request<any>("POST", `/entities/export/${id}`, {
         fields: exportAll ? allExportFields : exportFields,
         format: format,
-      })
-        .then((response) => {
-          let responseData = response;
+      });
+      if (response.success) {
+        let responseData = response.data;
+        // Clean the response data if required
+        if (_.isEqual(format, "json")) {
+          responseData = JSON.stringify(responseData, null, "  ");
+        }
 
-          // Clean the response data if required
-          if (_.isEqual(format, "json")) {
-            responseData = JSON.stringify(responseData, null, "  ");
-          }
+        FileSaver.saveAs(
+          new Blob([responseData]),
+          slugify(`${entityData.name.replace(" ", "")}_export.${format}`),
+        );
 
-          FileSaver.saveAs(
-            new Blob([responseData]),
-            slugify(`${entityData.name.replace(" ", "")}_export.${format}`),
-          );
+        // Close the "Export" modal
+        onExportClose();
 
-          // Close the "Export" modal
-          onExportClose();
+        // Reset the export state
+        setExportFields([]);
 
-          // Reset the export state
-          setExportFields([]);
-
-          toast({
-            title: "Info",
-            description: `Generated ${format.toUpperCase()} file.`,
-            status: "info",
-            duration: 2000,
-            position: "bottom-right",
-            isClosable: true,
-          });
-        })
-        .catch((_error) => {
-          toast({
-            title: "Error",
-            description: "An error occurred when exporting this Entity.",
-            status: "error",
-            duration: 2000,
-            position: "bottom-right",
-            isClosable: true,
-          });
+        toast({
+          title: "Info",
+          description: `Generated ${format.toUpperCase()} file.`,
+          status: "info",
+          duration: 2000,
+          position: "bottom-right",
+          isClosable: true,
         });
+      } else {
+        toast({
+          title: "Error",
+          description: "An error occurred when exporting this Entity.",
+          status: "error",
+          duration: 2000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+      }
     } else {
       toast({
         title: "Warning",

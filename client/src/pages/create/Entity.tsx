@@ -56,7 +56,7 @@ import {
 } from "@types";
 
 // Utility functions and libraries
-import { postData, request } from "@database/functions";
+import { request } from "@database/functions";
 import { useToken } from "src/authentication/useToken";
 import { isValidAttributes } from "src/util";
 import _ from "lodash";
@@ -228,7 +228,7 @@ const Entity = () => {
   };
 
   // Handle clicking "Next"
-  const onPageNext = () => {
+  const onPageNext = async () => {
     if (_.isEqual("start", pageState)) {
       setPageState("associations");
       setActiveStep(1);
@@ -237,21 +237,24 @@ const Entity = () => {
       setActiveStep(2);
     } else if (_.isEqual("attributes", pageState)) {
       setIsSubmitting(true);
-      postData(`/entities/create`, entityState)
-        .then(() => {
-          setIsSubmitting(false);
-          navigate(`/entities`);
-        })
-        .catch((_error) => {
-          toast({
-            title: "Error",
-            status: "error",
-            description: "Could not create new Entity.",
-            duration: 4000,
-            position: "bottom-right",
-            isClosable: true,
-          });
+      const response = await request<any>(
+        "POST",
+        "/entities/create",
+        entityState,
+      );
+      if (response.success) {
+        setIsSubmitting(false);
+        navigate(`/entities`);
+      } else {
+        toast({
+          title: "Error",
+          status: "error",
+          description: "Could not create new Entity",
+          duration: 4000,
+          position: "bottom-right",
+          isClosable: true,
         });
+      }
     }
   };
 
