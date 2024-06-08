@@ -230,9 +230,12 @@ const Importer = (props: {
             "id",
           );
         }
-        if (projectField) {
+        if (!_.isEqual(projectField, "")) {
           // Add or update the 'project' field in the entity
           entity.projects = [projectField];
+        } else {
+          // Clear the `projects` field
+          entity.projects = [];
         }
         // ... add more updates as per your other fields
       });

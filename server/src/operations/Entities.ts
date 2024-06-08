@@ -184,13 +184,13 @@ export class Entities {
           if (entity?.associations?.origins?.length > 0) {
             // If this Entity has an origin, add this Entity as a product of that origin Entity
             for (const origin of entity.associations.origins) {
-              if (!origin.id) {
+              if (!origin._id) {
                 // If the origin Entity does not have an ID, create it
                 const originEntity = await Entities.findEntityByName(
                   origin?.name,
                 );
                 if (originEntity?._id) {
-                  origin.id = originEntity?._id;
+                  origin._id = originEntity?._id;
                 }
               }
               operations.push(
@@ -205,13 +205,13 @@ export class Entities {
           if (entity?.associations?.products?.length > 0) {
             // If this Entity has products, set this Entity as the origin of each product Entity-
             for (const product of entity.associations.products) {
-              if (!product.id) {
+              if (!product._id) {
                 // If the origin Entity does not have an ID, create it
                 const productEntity = await Entities.findEntityByName(
                   product?.name,
                 );
                 if (productEntity?._id) {
-                  product.id = productEntity?._id;
+                  product._id = productEntity?._id;
                 }
               }
               operations.push(
@@ -883,6 +883,11 @@ export class Entities {
               `Error retrieving Entity "${entity._id}" to remove Product: ${error}`,
             );
             throw error;
+          } else if (_.isNull(result)) {
+            consola.warn(
+              `Entity "${entity._id}" does not exist to remove Product: ${error}`,
+            );
+            resolve(entity);
           }
 
           // Update the collection of Products associated with the Entity to remove this Product
@@ -1058,10 +1063,10 @@ export class Entities {
    * Asynchronously removes an Origin from an Entity's associations.
    * @param {Object} entity The entity from which the origin is being removed.
    * @param {string} entity.name The name of the entity.
-   * @param {string} entity.id The ID of the entity.
+   * @param {string} entity._id The ID of the entity.
    * @param {Object} origin The origin being removed.
    * @param {string} origin.name The name of the origin.
-   * @param {string} origin.id The ID of the origin.
+   * @param {string} origin._id The ID of the origin.
    * @returns {Promise<Item>} Resolves with the updated entity after removing the origin.
    * @throws {Error} Throws an error if there are issues with the database operation.
    */
