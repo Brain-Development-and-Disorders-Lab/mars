@@ -470,11 +470,13 @@ const Importer = (props: {
    * @returns {ReactElement}
    */
   const getSelectComponent = (
+    id: string,
     value: any,
     setValue: React.SetStateAction<any>,
   ) => {
     return (
       <Select
+        id={id}
         placeholder={"Select Column"}
         value={value}
         onChange={(event) => setValue(event.target.value)}
@@ -497,6 +499,7 @@ const Importer = (props: {
    * @returns {ReactElement}
    */
   const getSelectEntitiesComponent = (
+    id: string,
     value: Item,
     setValue: React.SetStateAction<any>,
     selected: Item[],
@@ -505,6 +508,7 @@ const Importer = (props: {
   ) => {
     return (
       <Select
+        id={id}
         placeholder={"Select Entity"}
         value={value._id}
         onChange={(event) => {
@@ -801,7 +805,11 @@ const Importer = (props: {
                         isInvalid={_.isEqual(nameField, "")}
                       >
                         <FormLabel>Name</FormLabel>
-                        {getSelectComponent(nameField, setNameField)}
+                        {getSelectComponent(
+                          "import_name",
+                          nameField,
+                          setNameField,
+                        )}
                         <FormHelperText>
                           Column containing Entity names
                         </FormHelperText>
@@ -809,6 +817,7 @@ const Importer = (props: {
                       <FormControl>
                         <FormLabel>Description</FormLabel>
                         {getSelectComponent(
+                          "import_description",
                           descriptionField,
                           setDescriptionField,
                         )}
@@ -833,6 +842,7 @@ const Importer = (props: {
                     <FormControl>
                       <FormLabel>Project</FormLabel>
                       <Select
+                        id={"import_projects"}
                         placeholder={"Select Project"}
                         value={projectField}
                         onChange={(event) =>
@@ -856,6 +866,7 @@ const Importer = (props: {
                     <FormControl>
                       <FormLabel>Origin</FormLabel>
                       {getSelectEntitiesComponent(
+                        "import_origins",
                         selectedOrigin,
                         setSelectedOrigin,
                         originsField,
@@ -890,6 +901,7 @@ const Importer = (props: {
                     <FormControl>
                       <FormLabel>Products</FormLabel>
                       {getSelectEntitiesComponent(
+                        "import_products",
                         selectedProduct,
                         setSelectedProduct,
                         productsField,

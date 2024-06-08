@@ -30,12 +30,18 @@ describe("CSV Import Test", () => {
       cy.wait(3000); // Allow toast to disappear
       cy.get(".css-jut409").scrollIntoView().click();
       cy.wait(100);
-      cy.get("select")
+      cy.get("select#import_name")
         .find('option[value="Name"]')
         .first()
         .parent()
         .select("Name");
       cy.wait(3000); // Allow toast to disappear
+      cy.get("select#import_projects")
+        .find("option")
+        .first()
+        .parent()
+        .select("Test Mock Project")
+        .first();
       cy.get(".css-15vhhhd > .css-jut409").click({ force: true }); // Go to import step 2
       cy.get(".css-15vhhhd > .css-h211ee").click({ force: true }); // Finalize import
 
