@@ -27,7 +27,7 @@ import Values from "@components/Values";
 import { AttributeModel, IValue } from "@types";
 
 // Utility functions and libraries
-import { deleteData, request } from "@database/functions";
+import { request } from "@database/functions";
 import _ from "lodash";
 
 // Routing and navigation
@@ -71,32 +71,28 @@ const Attribute = () => {
   }, [id]);
 
   // Delete the Attribute when confirmed
-  const handleDeleteClick = () => {
-    // Update data
-    deleteData(`/attributes/${id}`)
-      .then((_response) => {
-        toast({
-          title: "Deleted!",
-          status: "success",
-          duration: 2000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-      })
-      .catch(() => {
-        toast({
-          title: "Error",
-          description: `An error occurred when deleting Attribute "${attributeData.name}".`,
-          status: "error",
-          duration: 2000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-      })
-      .finally(() => {
-        setEditing(false);
-        navigate("/attributes");
+  const handleDeleteClick = async () => {
+    const response = await request<any>("DELETE", `/attributes/${id}`);
+    if (response.success) {
+      toast({
+        title: "Deleted!",
+        status: "success",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
       });
+    } else {
+      toast({
+        title: "Error",
+        description: `An error occurred when deleting Attribute "${attributeData.name}".`,
+        status: "error",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
+    setEditing(false);
+    navigate("/attributes");
   };
 
   /**

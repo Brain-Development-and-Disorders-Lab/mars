@@ -70,7 +70,7 @@ import {
 import { useParams, useNavigate } from "react-router-dom";
 
 // Utility functions and libraries
-import { deleteData, request } from "@database/functions";
+import { request } from "@database/functions";
 import _ from "lodash";
 import dayjs from "dayjs";
 import DataTable from "@components/DataTable";
@@ -245,32 +245,28 @@ const Project = () => {
   };
 
   // Delete the Project when confirmed
-  const handleDeleteClick = () => {
-    // Update data
-    deleteData(`/projects/${id}`)
-      .then((_response) => {
-        toast({
-          title: "Deleted!",
-          status: "success",
-          duration: 2000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-      })
-      .catch(() => {
-        toast({
-          title: "Error",
-          description: `An error occurred when deleting Project "${projectData.name}".`,
-          status: "error",
-          duration: 2000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-      })
-      .finally(() => {
-        setEditing(false);
-        navigate("/projects");
+  const handleDeleteClick = async () => {
+    const response = await request<any>("DELETE", `/projects/${id}`);
+    if (response.success) {
+      toast({
+        title: "Deleted!",
+        status: "success",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
       });
+    } else {
+      toast({
+        title: "Error",
+        description: `An error occurred when deleting Project "${projectData.name}".`,
+        status: "error",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
+    setEditing(false);
+    navigate("/projects");
   };
 
   /**

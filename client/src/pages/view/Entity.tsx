@@ -86,7 +86,7 @@ import {
 } from "@types";
 
 // Utility functions and libraries
-import { deleteData, request } from "src/database/functions";
+import { request } from "src/database/functions";
 import { isValidValues } from "src/util";
 import _, { debounce } from "lodash";
 import dayjs from "dayjs";
@@ -1061,31 +1061,28 @@ const Entity = () => {
   };
 
   // Delete the Entity when confirmed
-  const handleDeleteClick = () => {
-    // Update data
-    deleteData(`/entities/${id}`)
-      .then((_response) => {
-        setEditing(false);
-        navigate("/entities");
-
-        toast({
-          title: "Deleted!",
-          status: "success",
-          duration: 2000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-      })
-      .catch(() => {
-        toast({
-          title: "Error",
-          description: `An error occurred when deleting Entity "${entityData.name}"`,
-          status: "error",
-          duration: 2000,
-          position: "bottom-right",
-          isClosable: true,
-        });
+  const handleDeleteClick = async () => {
+    const response = await request<any>("DELETE", `/entities/${id}`);
+    if (response.success) {
+      toast({
+        title: "Deleted!",
+        status: "success",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
       });
+    } else {
+      toast({
+        title: "Error",
+        description: `An error occurred when deleting Entity "${entityData.name}"`,
+        status: "error",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
+    setEditing(false);
+    navigate("/entities");
   };
 
   const handleEntityNodeClick = (id: string) => {
