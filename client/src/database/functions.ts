@@ -1,5 +1,4 @@
 // Utility functions and libraries
-import consola from "consola";
 import _ from "lodash";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 
@@ -91,6 +90,18 @@ export const request = async <T>(
         };
       }
       break;
+    case "DELETE":
+      // DELETE request
+      try {
+        response = await axios.delete(`${SERVER_URL}${path}`, requestOptions);
+      } catch {
+        return {
+          success: false,
+          message: "Error while making request, check connectivity",
+          data: {} as T,
+        };
+      }
+      break;
   }
 
   // Return an object containing the response data and status
@@ -99,45 +110,6 @@ export const request = async <T>(
     message: "Recieved response from server",
     data: response.data,
   };
-};
-
-/**
- * Delete data to the Lab API using the JavaScript `fetch` API
- * @param {string} path the path of the database objected to be deleted
- */
-export const deleteData = async (
-  path: string,
-  options?: AxiosRequestConfig,
-): Promise<any> => {
-  // Configure authorization
-  const requestOptions: AxiosRequestConfig = {
-    ...options,
-  };
-
-  if (!_.isUndefined(getToken(TOKEN_KEY))) {
-    requestOptions.headers = {
-      id_token: getToken(TOKEN_KEY).id_token,
-      ...requestOptions.headers,
-    };
-  }
-  return new Promise((resolve, reject) => {
-    axios
-      .delete(`${SERVER_URL}${path}`, requestOptions)
-      .then((response) => {
-        // Check response status
-        if (!response) {
-          consola.error("GET:", path);
-          reject("Invalid response");
-        }
-
-        // Resolve with the response data
-        resolve(response.data);
-      })
-      .catch((error) => {
-        consola.error("DELETE:", path);
-        reject(error);
-      });
-  });
 };
 
 /**

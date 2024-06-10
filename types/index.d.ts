@@ -13,6 +13,7 @@ declare global {
 declare enum Requests {
   POST,
   GET,
+  DELETE,
 }
 export type RequestMethod = keyof typeof Requests;
 
