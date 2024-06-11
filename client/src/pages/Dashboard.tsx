@@ -24,7 +24,7 @@ import Loading from "@components/Loading";
 import { ProjectModel, EntityModel, ActivityModel, IconNames } from "@types";
 
 // Utility functions and libraries
-import { getData } from "src/database/functions";
+import { request } from "src/database/functions";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 dayjs.extend(relativeTime);
@@ -65,72 +65,74 @@ const Dashboard = () => {
     }
   }, [breakpoint]);
 
-  // Get all Entities
-  useEffect(() => {
-    getData(`/entities`)
-      .then((result) => {
-        setEntityData(result.reverse());
-      })
-      .catch((_error) => {
-        toast({
-          title: "Error",
-          status: "error",
-          description: "Could not retrieve Entities data.",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-        setIsError(true);
-      })
-      .finally(() => {
-        setIsLoaded(true);
+  /**
+   * Utility function to retrieve all Entities
+   */
+  const getEntities = async () => {
+    const response = await request<EntityModel[]>("GET", "/entities");
+    if (response.success) {
+      setEntityData(response.data.reverse());
+      setIsLoaded(true);
+    } else {
+      toast({
+        title: "Network Error",
+        status: "error",
+        description: "Could not retrieve Entities.\n" + response.message,
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
       });
-  }, []);
+      setIsError(true);
+    }
+  };
 
-  // Get all Projects
-  useEffect(() => {
-    getData(`/projects`)
-      .then((value) => {
-        setProjectData(value.reverse());
-        setIsLoaded(true);
-      })
-      .catch((_error) => {
-        toast({
-          title: "Error",
-          status: "error",
-          description: "Could not retrieve Projects data.",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-        setIsError(true);
-      })
-      .finally(() => {
-        setIsLoaded(true);
+  /**
+   * Utility function to retrieve all Projects
+   */
+  const getProjects = async () => {
+    const response = await request<ProjectModel[]>("GET", "/projects");
+    if (response.success) {
+      setProjectData(response.data.reverse());
+      setIsLoaded(true);
+    } else {
+      toast({
+        title: "Network Error",
+        status: "error",
+        description: "Could not retrieve Projects.\n" + response.message,
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
       });
-  }, []);
+      setIsError(true);
+    }
+  };
 
-  // Get all Updates
-  useEffect(() => {
-    getData(`/activity`)
-      .then((value) => {
-        setActivityData(value.reverse());
-        setIsLoaded(true);
-      })
-      .catch((_error) => {
-        toast({
-          title: "Error",
-          status: "error",
-          description: "Could not retrieve Updates data.",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-        setIsError(true);
-      })
-      .finally(() => {
-        setIsLoaded(true);
+  /**
+   * Utility function to retrieve all Activity
+   */
+  const getActivity = async () => {
+    const response = await request<ActivityModel[]>("GET", "/activity");
+    if (response.success) {
+      setActivityData(response.data.reverse());
+      setIsLoaded(true);
+    } else {
+      toast({
+        title: "Network Error",
+        status: "error",
+        description: "Could not retrieve Activity.\n" + response.message,
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
       });
+      setIsError(true);
+    }
+  };
+
+  // Effect to retrieve all information required to render Dashboard
+  useEffect(() => {
+    getEntities();
+    getProjects();
+    getActivity();
   }, []);
 
   // Configure Entity table
@@ -412,7 +414,7 @@ const Dashboard = () => {
                         </Text>
 
                         <Linky
-                          id={activity.target.id}
+                          id={activity.target._id}
                           type={activity.target.type}
                           fallback={activity.target.name}
                           justify={"left"}

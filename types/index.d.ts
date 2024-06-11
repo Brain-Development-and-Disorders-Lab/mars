@@ -9,6 +9,21 @@ declare global {
   }
 }
 
+// Request types to the server
+declare enum Requests {
+  POST,
+  GET,
+  DELETE,
+}
+export type RequestMethod = keyof typeof Requests;
+
+// Utility type to standardize server response objects
+export type ServerResponse<T> = {
+  success: boolean;
+  message: string;
+  data: T;
+};
+
 export type ScannerStatus = "disconnected" | "connected" | "error";
 
 export namespace State.Entity {
@@ -23,8 +38,8 @@ export namespace State.Entity {
   type Associations = Start & {
     projects: string[];
     associations: {
-      origins: { name: string; id: string };
-      products: { name: string; id: string }[];
+      origins: Item;
+      products: Item[];
     };
   };
 
@@ -125,6 +140,12 @@ export type ProjectHistory = {
   entities: string[];
 };
 
+// Utility Item type
+export type Item = {
+  _id: string;
+  name: string;
+};
+
 // Entity types
 export type IEntity = {
   name: string;
@@ -136,11 +157,11 @@ export type IEntity = {
   description: string;
   projects: string[];
   associations: {
-    origins: { name: string; id: string }[];
-    products: { name: string; id: string }[];
+    origins: Item[];
+    products: Item[];
   };
   attributes: AttributeModel[];
-  attachments: { name: string; id: string }[];
+  attachments: Item[];
   history: EntityHistory[];
 };
 
@@ -155,11 +176,11 @@ export type EntityHistory = {
   description: string;
   projects: string[];
   associations: {
-    origins: { name: string; id: string }[];
-    products: { name: string; id: string }[];
+    origins: Item[];
+    products: Item[];
   };
   attributes: AttributeModel[];
-  attachments: { name: string; id: string }[];
+  attachments: Item[];
 };
 
 export type EntityExport = {
@@ -183,8 +204,8 @@ export type EntityImport = {
   owner: string;
   description: string;
   projects: string;
-  origins: { id: string; name: string }[];
-  products: { id: string; name: string }[];
+  origins: Item[];
+  products: Item[];
   attributes: AttributeModel[];
 };
 
@@ -204,7 +225,7 @@ export type IActivity = {
   details: string;
   target: {
     type: "entities" | "projects" | "attributes";
-    id: string;
+    _id: string;
     name: string;
   };
 };

@@ -3,7 +3,7 @@ import express from "express";
 import _ from "lodash";
 
 // Import types from the client to enforce structure
-import { EntityModel, IEntity } from "@types";
+import { EntityModel, IEntity, Item } from "@types";
 
 // Utility functions and libraries
 import { Entities } from "../operations/Entities";
@@ -173,15 +173,13 @@ EntitiesRoute.route("/entities/lock/:id").post(
   checkEntitiesOwnership,
   (
     request: {
-      body: { entity: { name: string; id: string }; lockState: boolean };
+      body: { entity: Item; lockState: boolean };
     },
     response: any,
   ) => {
-    Entities.setLock(request.body).then(
-      (entity: { name: string; id: string }) => {
-        response.json(entity);
-      },
-    );
+    Entities.setLock(request.body).then((entity: Item) => {
+      response.json(entity);
+    });
   },
 );
 

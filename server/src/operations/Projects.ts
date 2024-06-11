@@ -25,7 +25,7 @@ export class Projects {
   static exists = (id: string): Promise<boolean> => {
     return new Promise((resolve, _reject) => {
       getDatabase()
-        .collection(PROJECTS)
+        .collection<ProjectModel>(PROJECTS)
         .findOne({ _id: id }, (_error: any, result: any) => {
           if (_.isNull(result)) {
             consola.warn("Project (id):", id.toString(), "does not exist");
@@ -73,7 +73,7 @@ export class Projects {
               details: "Created new Project",
               target: {
                 type: "projects",
-                id: project._id,
+                _id: project._id,
                 name: project.name,
               },
             }),
@@ -158,7 +158,7 @@ export class Projects {
               details: "Updated Project",
               target: {
                 type: "projects",
-                id: updatedProject._id,
+                _id: updatedProject._id,
                 name: updatedProject.name,
               },
             }),
@@ -218,7 +218,7 @@ export class Projects {
               details: "Created new Project",
               target: {
                 type: "projects",
-                id: project._id,
+                _id: project._id,
                 name: project.name,
               },
             }),
@@ -245,40 +245,49 @@ export class Projects {
         .collection(PROJECTS)
         .findOne({ _id: project }, (error: any, result: any) => {
           if (error) {
+            // Error occuring during database request
             consola.error("Error while finding Project:", error);
             throw error;
-          }
-          // Update the collection to include the Entity
-          const updatedValues = {
-            $set: {
-              entities: _.concat(result.entities, entity),
-            },
-          };
-
-          getDatabase()
-            .collection(PROJECTS)
-            .updateOne(
-              { _id: project },
-              updatedValues,
-              (error: any, _response: any) => {
-                if (error) {
-                  consola.error(
-                    "Error while updating Project Entities:",
-                    error,
-                  );
-                  throw error;
-                }
-                consola.debug(
-                  "Added Entity",
-                  entity.toString(),
-                  "to Project",
-                  result.name,
-                );
-
-                // Resolve the Promise
-                resolve(result._id);
-              },
+          } else if (_.isNull(result)) {
+            // Project potentially does not exist
+            consola.warn(
+              "Provided Project identifier returns `null`:",
+              project,
             );
+            resolve(project);
+          } else {
+            // Update the collection to include the Entity
+            const updatedValues = {
+              $set: {
+                entities: _.concat(result.entities, entity),
+              },
+            };
+
+            getDatabase()
+              .collection(PROJECTS)
+              .updateOne(
+                { _id: project },
+                updatedValues,
+                (error: any, _response: any) => {
+                  if (error) {
+                    consola.error(
+                      "Error while updating Project Entities:",
+                      error,
+                    );
+                    throw error;
+                  }
+                  consola.debug(
+                    "Added Entity",
+                    entity.toString(),
+                    "to Project",
+                    result.name,
+                  );
+
+                  // Resolve the Promise
+                  resolve(result._id);
+                },
+              );
+          }
         });
     });
   };
@@ -300,39 +309,45 @@ export class Projects {
           if (error) {
             consola.error("Error while finding Project:", error);
             throw error;
-          }
-
-          // Update the collection to include the Entity
-          const updatedValues = {
-            $set: {
-              entities: _.uniq(_.concat(result.entities, entities)),
-            },
-          };
-
-          getDatabase()
-            .collection(PROJECTS)
-            .updateOne(
-              { _id: project },
-              updatedValues,
-              (error: any, _response: any) => {
-                if (error) {
-                  consola.error(
-                    "Error while adding multiple Entites to Project:",
-                    error,
-                  );
-                  throw error;
-                }
-                consola.debug(
-                  "Added",
-                  entities.length,
-                  "Entities to Project",
-                  project.toString(),
-                );
-
-                // Resolve the Promise
-                resolve(result._id);
-              },
+          } else if (_.isNull(result)) {
+            consola.warn(
+              "Provided Project identifier returns `null`:",
+              project,
             );
+            resolve(project);
+          } else {
+            // Update the collection to include the Entity
+            const updatedValues = {
+              $set: {
+                entities: _.uniq(_.concat(result.entities, entities)),
+              },
+            };
+
+            getDatabase()
+              .collection(PROJECTS)
+              .updateOne(
+                { _id: project },
+                updatedValues,
+                (error: any, _response: any) => {
+                  if (error) {
+                    consola.error(
+                      "Error while adding multiple Entites to Project:",
+                      error,
+                    );
+                    throw error;
+                  }
+                  consola.debug(
+                    "Added",
+                    entities.length,
+                    "Entities to Project",
+                    project.toString(),
+                  );
+
+                  // Resolve the Promise
+                  resolve(result._id);
+                },
+              );
+          }
         });
     });
   };
@@ -351,41 +366,48 @@ export class Projects {
           if (error) {
             consola.error("Error while finding Project:", error);
             throw error;
-          }
-
-          // Update the collection to remove the Entity
-          const updatedValues = {
-            $set: {
-              entities: (result as ProjectModel)?.entities.filter(
-                (content) => !_.isEqual(content.toString(), entity.toString()),
-              ),
-            },
-          };
-
-          getDatabase()
-            .collection(PROJECTS)
-            .updateOne(
-              { _id: project },
-              updatedValues,
-              (error: any, _response: any) => {
-                if (error) {
-                  consola.error(
-                    "Error while removing Entity from Project:",
-                    error,
-                  );
-                  throw error;
-                }
-                consola.debug(
-                  "Removed Entity",
-                  entity.toString(),
-                  "from Project",
-                  project.toString(),
-                );
-
-                // Resolve the Promise
-                resolve(project);
-              },
+          } else if (_.isNull(result)) {
+            consola.warn(
+              "Provided Project identifier returns `null`:",
+              project,
             );
+            resolve(project);
+          } else {
+            // Update the collection to remove the Entity
+            const updatedValues = {
+              $set: {
+                entities: (result as ProjectModel)?.entities.filter(
+                  (content) =>
+                    !_.isEqual(content.toString(), entity.toString()),
+                ),
+              },
+            };
+
+            getDatabase()
+              .collection(PROJECTS)
+              .updateOne(
+                { _id: project },
+                updatedValues,
+                (error: any, _response: any) => {
+                  if (error) {
+                    consola.error(
+                      "Error while removing Entity from Project:",
+                      error,
+                    );
+                    throw error;
+                  }
+                  consola.debug(
+                    "Removed Entity",
+                    entity.toString(),
+                    "from Project",
+                    project.toString(),
+                  );
+
+                  // Resolve the Promise
+                  resolve(project);
+                },
+              );
+          }
         });
     });
   };
@@ -448,14 +470,14 @@ export class Projects {
    * @returns {Promise<string>}
    */
   static getData = (projectExportData: {
-    id: string;
+    _id: string;
     fields: string[];
     format: "json" | "csv" | "txt";
   }): Promise<string> => {
     return new Promise((resolve, reject) => {
       getDatabase()
         .collection(PROJECTS)
-        .findOne({ _id: projectExportData.id }, (error: any, result: any) => {
+        .findOne({ _id: projectExportData._id }, (error: any, result: any) => {
           if (error) {
             consola.error("Error while finding Project for export:", error);
             reject(error);
@@ -538,7 +560,7 @@ export class Projects {
                     fs.writeFileSync(path, formattedOutput);
                     consola.debug(
                       "Generated CSV data for  Project (id):",
-                      projectExportData.id.toString(),
+                      projectExportData._id.toString(),
                     );
                     resolve(path);
                   });
@@ -609,7 +631,7 @@ export class Projects {
                 );
                 consola.debug(
                   "Generated JSON data for Project (id):",
-                  projectExportData.id.toString(),
+                  projectExportData._id.toString(),
                 );
                 resolve(path);
               });
@@ -679,7 +701,7 @@ export class Projects {
                 fs.writeFileSync(path, textDetails.join("\n"));
                 consola.debug(
                   "Generated text data for  Entity (id):",
-                  projectExportData.id.toString(),
+                  projectExportData._id.toString(),
                 );
                 resolve(path);
               });
@@ -721,7 +743,7 @@ export class Projects {
               details: "Deleted Project",
               target: {
                 type: "projects",
-                id: project._id,
+                _id: project._id,
                 name: project.name,
               },
             }),

@@ -46,7 +46,7 @@ import Linky from "@components/Linky";
 import { DataTableAction, EntityModel, IValue } from "@types";
 
 // Utility functions and libraries
-import { getData } from "@database/functions";
+import { request } from "@database/functions";
 import _ from "lodash";
 import dayjs from "dayjs";
 
@@ -72,24 +72,24 @@ const Values = (props: {
   const [entities, setEntities] = useState([] as EntityModel[]);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  useEffect(() => {
-    getData(`/entities`)
-      .then((value) => {
-        setEntities(value);
-      })
-      .catch((_error) => {
-        toast({
-          title: "Error",
-          description: "Could not retrieve Entities.",
-          status: "error",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-      })
-      .finally(() => {
-        setIsLoaded(true);
+  const getEntities = async () => {
+    const result = await request<EntityModel[]>("GET", `/entities`);
+    if (!result.success) {
+      toast({
+        title: "Error",
+        status: "error",
+        description: "Could not retrieve Entities",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
       });
+    }
+    setEntities(result.data);
+    setIsLoaded(true);
+  };
+
+  useEffect(() => {
+    getEntities();
   }, []);
 
   const columnHelper = createColumnHelper<IValue<any>>();

@@ -23,6 +23,7 @@ import {
   Text,
   Textarea,
   useDisclosure,
+  useToast,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
@@ -32,7 +33,7 @@ import Values from "@components/Values";
 import { IAttribute, IValue } from "@types";
 
 // Utility functions and libraries
-import { postData } from "@database/functions";
+import { request } from "@database/functions";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
@@ -41,6 +42,7 @@ import { isValidValues } from "src/util";
 const Attribute = () => {
   const navigate = useNavigate();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const toast = useToast();
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -67,14 +69,28 @@ const Attribute = () => {
   /**
    * Handle creation of a new Attribute
    */
-  const onSubmit = () => {
+  const onSubmit = async () => {
     setIsSubmitting(true);
 
     // Push the data
-    postData(`/attributes/create`, attributeData).then(() => {
+    const response = await request<any>(
+      "POST",
+      "/attributes/create",
+      attributeData,
+    );
+    if (response.success) {
       setIsSubmitting(false);
       navigate("/attributes");
-    });
+    } else {
+      toast({
+        title: "Error",
+        description: "An error occurred while creating a new Attribute",
+        status: "error",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
   };
 
   return (

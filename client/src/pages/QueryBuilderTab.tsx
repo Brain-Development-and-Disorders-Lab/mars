@@ -26,7 +26,7 @@ import QueryBuilder, { formatQuery } from "react-querybuilder";
 
 import _ from "lodash";
 import React, { useState } from "react";
-import { postData } from "@database/functions";
+import { request } from "@database/functions";
 import QueryBuilderEditorCustomValue from "./QueryBuilderEditorCustomValue";
 
 interface QueryBuilderTabProps {
@@ -78,27 +78,27 @@ const QueryBuilderTab: React.FC<QueryBuilderTabProps> = ({
     setQuery(formatQuery(q, "mongodb"));
   };
 
-  const onSearchBuiltQuery = () => {
+  const onSearchBuiltQuery = async () => {
     setIsSearching(true);
     setHasSearched(true);
 
-    postData(`/search/query_built`, { query: query })
-      .then((value) => {
-        setResults(value);
-      })
-      .catch((_error) => {
-        toast({
-          title: "Error",
-          status: "error",
-          description: "Could not get search results.",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-      })
-      .finally(() => {
-        setIsSearching(false);
+    const response = await request<any>("POST", "/search/query_built", {
+      query: query,
+    });
+    if (response.success) {
+      setResults(response.data);
+    } else {
+      toast({
+        title: "Error",
+        status: "error",
+        description: "Could not get search results.",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
       });
+    }
+
+    setIsSearching(false);
   };
 
   return (

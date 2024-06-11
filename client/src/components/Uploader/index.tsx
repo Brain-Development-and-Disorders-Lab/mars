@@ -21,7 +21,7 @@ import Icon from "@components/Icon";
 import Error from "@components/Error";
 
 // Utility functions and libraries
-import { postData } from "@database/functions";
+import { request } from "@database/functions";
 import _ from "lodash";
 
 const Uploader = (props: {
@@ -39,7 +39,7 @@ const Uploader = (props: {
 
   const toast = useToast();
 
-  const performUpload = () => {
+  const performUpload = async () => {
     setIsUploading(true);
 
     const formData = new FormData();
@@ -47,52 +47,39 @@ const Uploader = (props: {
     formData.append("file", file);
     formData.append("target", props.target);
 
-    postData(`/system/upload`, formData)
-      .then((response: { status: boolean; message: string; data?: any }) => {
-        if (_.isEqual(response.status, "success")) {
-          // Add the upload to the existing list of uploads
-          props.setUploads([...props.uploads, file.name]);
+    const response = await request<any>("POST", "/data/upload", formData);
+    if (response.success) {
+      // Add the upload to the existing list of uploads
+      props.setUploads([...props.uploads, file.name]);
 
-          // Reset file upload state
-          setFile({} as File);
-          props.onClose();
+      // Reset file upload state
+      setFile({} as File);
+      props.onClose();
 
-          // Update state
-          setIsError(false);
-          setIsLoaded(true);
+      // Update state
+      setIsError(false);
+      setIsLoaded(true);
 
-          toast({
-            title: "Success",
-            status: "success",
-            description: "Successfully uploaded file.",
-            duration: 4000,
-            position: "bottom-right",
-            isClosable: true,
-          });
-        } else {
-          toast({
-            title: "Error",
-            status: "error",
-            description: response.message,
-            duration: 4000,
-            position: "bottom-right",
-            isClosable: true,
-          });
-          setIsError(true);
-        }
-        setIsUploading(false);
-      })
-      .catch((error: { message: string }) => {
-        toast({
-          title: "Error",
-          status: "error",
-          description: error.message,
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-        setIsUploading(false);
+      toast({
+        title: "Success",
+        status: "success",
+        description: "Successfully uploaded file.",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
       });
+    } else {
+      toast({
+        title: "Upload Error",
+        status: "error",
+        description: "Error occurred while uploading file",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+      setIsError(true);
+    }
+    setIsUploading(false);
   };
 
   return (

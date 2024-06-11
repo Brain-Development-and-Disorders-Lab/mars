@@ -20,6 +20,7 @@ import {
   Text,
   Textarea,
   useDisclosure,
+  useToast,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
@@ -29,7 +30,7 @@ import { IProject } from "@types";
 
 // Utility functions and libraries
 import { useToken } from "src/authentication/useToken";
-import { postData } from "@database/functions";
+import { request } from "@database/functions";
 import dayjs from "dayjs";
 import _ from "lodash";
 
@@ -39,6 +40,7 @@ import { useNavigate } from "react-router-dom";
 const Project = () => {
   const navigate = useNavigate();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const toast = useToast();
   const [token, _useToken] = useToken();
 
   const [name, setName] = useState("");
@@ -178,13 +180,27 @@ const Project = () => {
           <Button
             colorScheme={"green"}
             rightIcon={<Icon name={"check"} />}
-            onClick={() => {
+            onClick={async () => {
               // Push the data
               setIsSubmitting(true);
-              postData(`/projects/create`, projectData).then(() => {
-                setIsSubmitting(false);
+              const response = await request<any>(
+                "POST",
+                "/projects/create",
+                projectData,
+              );
+              if (response.success) {
                 navigate("/projects");
-              });
+              } else {
+                toast({
+                  title: "Error",
+                  status: "error",
+                  description: "Could not create new Project",
+                  duration: 4000,
+                  position: "bottom-right",
+                  isClosable: true,
+                });
+              }
+              setIsSubmitting(false);
             }}
             isDisabled={isDetailsError && !isSubmitting}
           >

@@ -63,13 +63,14 @@ import {
   ProjectModel,
   EntityModel,
   DataTableAction,
+  Item,
 } from "@types";
 
 // Routing and navigation
 import { useParams, useNavigate } from "react-router-dom";
 
 // Utility functions and libraries
-import { deleteData, getData, postData } from "@database/functions";
+import { request } from "@database/functions";
 import _ from "lodash";
 import dayjs from "dayjs";
 import DataTable from "@components/DataTable";
@@ -112,9 +113,7 @@ const Project = () => {
   const [newCollaborator, setNewCollaborator] = useState("");
 
   // Entities that can be added
-  const [allEntities, setAllEntities] = useState(
-    [] as { name: string; id: string }[],
-  );
+  const [minimalEntities, setMinimalEntities] = useState([] as Item[]);
   const [selectedEntities, setSelectedEntities] = useState([] as string[]);
 
   const {
@@ -127,54 +126,52 @@ const Project = () => {
   const [exportFormat, setExportFormat] = useState("json");
   const validExportFormats = ["json", "csv", "txt"];
 
-  useEffect(() => {
-    // Populate Project data
-    getData(`/projects/${id}`)
-      .then((response) => {
-        setProjectData(response);
-        setProjectDescription(response?.description);
-        setProjectEntities(response?.entities);
-        setProjectHistory(response?.history);
-        setProjectCollaborators(response?.collaborators || []);
-      })
-      .catch(() => {
-        toast({
-          title: "Error",
-          description: "Could not retrieve Project data.",
-          status: "error",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-        setIsError(true);
-      })
-      .finally(() => {
-        setIsLoaded(true);
+  const getProject = async () => {
+    const response = await request<ProjectModel>("GET", `/projects/${id}`);
+    if (response.success) {
+      setProjectData(response.data);
+      setProjectDescription(response.data.description);
+      setProjectEntities(response.data.entities);
+      setProjectHistory(response.data.history);
+      setProjectCollaborators(response.data.collaborators || []);
+    } else {
+      toast({
+        title: "Error",
+        description: "Could not retrieve Project",
+        status: "error",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
       });
+      setIsError(true);
+    }
+    setIsLoaded(true);
+  };
 
-    // Populate Entity data
-    getData(`/entities`)
-      .then((response) => {
-        setAllEntities(
-          response.map((e: EntityModel) => {
-            return { name: e.name, id: e._id };
-          }),
-        );
-      })
-      .catch(() => {
-        toast({
-          title: "Error",
-          description: "Could not retrieve Entity data.",
-          status: "error",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-        setIsError(true);
-      })
-      .finally(() => {
-        setIsLoaded(true);
+  const getEntities = async () => {
+    const response = await request<EntityModel[]>("GET", "/entities");
+    if (response.success) {
+      const minimizedEntities = response.data.map((entity) => {
+        return { _id: entity._id, name: entity.name };
       });
+      setMinimalEntities(minimizedEntities);
+    } else {
+      toast({
+        title: "Error",
+        description: "Could not retrieve Entities",
+        status: "error",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+      setIsError(true);
+    }
+    setIsLoaded(true);
+  };
+
+  useEffect(() => {
+    getProject();
+    getEntities();
   }, [id, isLoaded]);
 
   useEffect(() => {
@@ -200,7 +197,7 @@ const Project = () => {
   /**
    * Handle the edit button being clicked
    */
-  const handleEditClick = () => {
+  const handleEditClick = async () => {
     if (editing) {
       setIsUpdating(true);
 
@@ -217,70 +214,69 @@ const Project = () => {
         history: projectHistory,
       };
 
-      // Update data
-      postData(`/projects/update`, updateData)
-        .then((_response) => {
-          toast({
-            title: "Saved!",
-            status: "success",
-            duration: 2000,
-            position: "bottom-right",
-            isClosable: true,
-          });
-        })
-        .catch(() => {
-          toast({
-            title: "Error",
-            description: "An error occurred when saving updates.",
-            status: "error",
-            duration: 2000,
-            position: "bottom-right",
-            isClosable: true,
-          });
-        })
-        .finally(() => {
-          setEditing(false);
-          setIsUpdating(false);
+      const response = await request<any>(
+        "POST",
+        "/projects/update",
+        updateData,
+      );
+      if (response.success) {
+        toast({
+          title: "Saved!",
+          status: "success",
+          duration: 2000,
+          position: "bottom-right",
+          isClosable: true,
         });
+      } else {
+        toast({
+          title: "Error",
+          description: "An error occurred when saving Project updates",
+          status: "error",
+          duration: 2000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+      }
+      setEditing(false);
+      setIsUpdating(false);
     } else {
       setEditing(true);
     }
   };
 
   // Delete the Project when confirmed
-  const handleDeleteClick = () => {
-    // Update data
-    deleteData(`/projects/${id}`)
-      .then((_response) => {
-        toast({
-          title: "Deleted!",
-          status: "success",
-          duration: 2000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-      })
-      .catch(() => {
-        toast({
-          title: "Error",
-          description: `An error occurred when deleting Project "${projectData.name}".`,
-          status: "error",
-          duration: 2000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-      })
-      .finally(() => {
-        setEditing(false);
-        navigate("/projects");
+  const handleDeleteClick = async () => {
+    const response = await request<any>("DELETE", `/projects/${id}`);
+    if (response.success) {
+      toast({
+        title: "Deleted!",
+        status: "success",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
       });
+    } else {
+      toast({
+        title: "Error",
+        description: `An error occurred when deleting Project "${projectData.name}".`,
+        status: "error",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
+    setEditing(false);
+    navigate("/projects");
   };
 
   /**
    * Restore a Project from an earlier point in time
    * @param {ProjectHistory} projectVersion historical Project data to restore
    */
-  const handleRestoreFromHistoryClick = (projectVersion: ProjectHistory) => {
+  const handleRestoreFromHistoryClick = async (
+    projectVersion: ProjectHistory,
+  ) => {
+    // Reconstruct a `ProjectModel` instance from the prior version
     const updateData: ProjectModel = {
       _id: projectData._id,
       name: projectData.name,
@@ -292,42 +288,37 @@ const Project = () => {
       entities: projectVersion.entities,
       history: projectData.history,
     };
-
     setIsLoaded(false);
 
-    // Update data
-    postData(`/projects/update`, updateData)
-      .then((_response) => {
-        toast({
-          title: "Saved!",
-          status: "success",
-          duration: 2000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-      })
-      .catch(() => {
-        toast({
-          title: "Error",
-          description: "An error occurred when saving updates.",
-          status: "error",
-          duration: 2000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-      })
-      .finally(() => {
-        // Close the drawer
-        onHistoryClose();
-
-        // Apply updated state
-        setProjectData(updateData);
-        setProjectDescription(updateData.description);
-        setProjectEntities(updateData.entities);
-        setProjectHistory(updateData.history);
-        setProjectCollaborators(updateData?.collaborators || []);
-        setIsLoaded(true);
+    const response = await request<any>("POST", "/projects/update", updateData);
+    if (response.success) {
+      toast({
+        title: "Saved!",
+        status: "success",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
       });
+    } else {
+      toast({
+        title: "Error",
+        description: "An error occurred when saving Project updates",
+        status: "error",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
+    // Close the drawer
+    onHistoryClose();
+
+    // Apply updated state
+    setProjectData(updateData);
+    setProjectDescription(updateData.description);
+    setProjectEntities(updateData.entities);
+    setProjectHistory(updateData.history);
+    setProjectCollaborators(updateData?.collaborators || []);
+    setIsLoaded(true);
   };
 
   // Handle clicking the "Export" button
@@ -337,17 +328,18 @@ const Project = () => {
   };
 
   // Handle clicking the "Export" button
-  const handleExportJsonClick = () => {
-    postData(`/entities/export_all`, { project: projectData._id }).then(
-      (response) => {
-        FileSaver.saveAs(
-          new Blob([response]),
-          slugify(
-            `export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.json`,
-          ),
-        );
-      },
-    );
+  const handleExportJsonClick = async () => {
+    const response = await request<any>("POST", "/entities/export_all", {
+      project: projectData._id,
+    });
+    if (response.success) {
+      FileSaver.saveAs(
+        new Blob([response.data]),
+        slugify(
+          `export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.json`,
+        ),
+      );
+    }
   };
 
   // A list of all fields that can be exported, generated when the interface is opened
@@ -360,52 +352,51 @@ const Project = () => {
   ];
 
   // Handle clicking the "Download" button
-  const handleDownloadClick = (format: string) => {
+  const handleDownloadClick = async (format: string) => {
     if (_.includes(validExportFormats, format)) {
       // Send POST data to generate file
-      postData(`/projects/export`, {
-        id: id,
+      const response = await request<any>("POST", "/projects/export", {
+        _id: id,
         fields: exportAll ? allExportFields : exportFields,
         format: format,
-      })
-        .then((response) => {
-          let responseData = response;
+      });
+      if (response.success) {
+        let responseData = response.data;
 
-          // Clean the response data if required
-          if (_.isEqual(format, "json")) {
-            responseData = JSON.stringify(responseData, null, "  ");
-          }
+        // Clean the response data if required
+        if (_.isEqual(format, "json")) {
+          responseData = JSON.stringify(responseData, null, "  ");
+        }
 
-          FileSaver.saveAs(
-            new Blob([responseData]),
-            slugify(`${projectData.name.replace(" ", "")}_export.${format}`),
-          );
+        FileSaver.saveAs(
+          new Blob([responseData]),
+          slugify(`${projectData.name.replace(" ", "")}_export.${format}`),
+        );
 
-          // Close the "Export" modal
-          onExportClose();
+        // Close the "Export" modal
+        onExportClose();
 
-          // Reset the export state
-          setExportFields([]);
+        // Reset the export state
+        setExportFields([]);
 
-          toast({
-            title: "Info",
-            description: `Generated ${format.toUpperCase()} file.`,
-            status: "info",
-            duration: 2000,
-            position: "bottom-right",
-            isClosable: true,
-          });
-        })
-        .catch((_error) => {
-          toast({
-            title: "Error",
-            description: "An error occurred when exporting this Project.",
-            status: "error",
-            duration: 2000,
-            position: "bottom-right",
-            isClosable: true,
-          });
+        toast({
+          title: "Info",
+          description: `Generated ${format.toUpperCase()} file.`,
+          status: "info",
+          duration: 2000,
+          position: "bottom-right",
+          isClosable: true,
         });
+      } else {
+        toast({
+          title: "Error",
+          description: "An error occurred when exporting this Project",
+          status: "error",
+          duration: 2000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+      }
     } else {
       toast({
         title: "Warning",
@@ -838,9 +829,9 @@ const Project = () => {
                     }}
                   >
                     {isLoaded &&
-                      allEntities.map((entity) => {
+                      minimalEntities.map((entity) => {
                         return (
-                          <option key={entity.id} value={entity.id}>
+                          <option key={entity._id} value={entity._id}>
                             {entity.name}
                           </option>
                         );
