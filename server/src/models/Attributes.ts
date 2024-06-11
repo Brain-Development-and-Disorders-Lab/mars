@@ -13,5 +13,5 @@ export class Attributes {
       .collection(ATTRIBUTES_COLLECTION)
       .find()
       .toArray();
-  }
-};
+  };
+}

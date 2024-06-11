@@ -46,7 +46,7 @@ import Linky from "@components/Linky";
 import { DataTableAction, EntityModel, IValue } from "@types";
 
 // Utility functions and libraries
-import { getData } from "@database/functions";
+import { request } from "@database/functions";
 import _ from "lodash";
 import dayjs from "dayjs";
 
@@ -54,7 +54,7 @@ import dayjs from "dayjs";
  * Values component use to display a collection of Values and enable
  * creating and deleting Values. Displays collection as cards.
  * @param props collection of props to construct component
- * @return
+ * @returns
  */
 const Values = (props: {
   viewOnly: boolean;
@@ -72,24 +72,24 @@ const Values = (props: {
   const [entities, setEntities] = useState([] as EntityModel[]);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  useEffect(() => {
-    getData(`/entities`)
-      .then((value) => {
-        setEntities(value);
-      })
-      .catch((_error) => {
-        toast({
-          title: "Error",
-          description: "Could not retrieve Entities.",
-          status: "error",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-      })
-      .finally(() => {
-        setIsLoaded(true);
+  const getEntities = async () => {
+    const result = await request<EntityModel[]>("GET", `/entities`);
+    if (!result.success) {
+      toast({
+        title: "Error",
+        status: "error",
+        description: "Could not retrieve Entities",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
       });
+    }
+    setEntities(result.data);
+    setIsLoaded(true);
+  };
+
+  useEffect(() => {
+    getEntities();
   }, []);
 
   const columnHelper = createColumnHelper<IValue<any>>();
@@ -408,7 +408,7 @@ const Values = (props: {
         header: "Data",
       }),
     ],
-    [props.viewOnly, entities]
+    [props.viewOnly, entities],
   );
 
   const addOptions = () => {
@@ -538,9 +538,7 @@ const Values = (props: {
                       props.setValues([
                         ...props.values,
                         {
-                          _id: `v_number_${Math.round(
-                            performance.now()
-                          )}`,
+                          _id: `v_number_${Math.round(performance.now())}`,
                           name: "",
                           type: "number",
                           data: 0,
@@ -584,9 +582,7 @@ const Values = (props: {
                       props.setValues([
                         ...props.values,
                         {
-                          _id: `p_entity_${Math.round(
-                            performance.now()
-                          )}`,
+                          _id: `p_entity_${Math.round(performance.now())}`,
                           name: "",
                           type: "entity",
                           data: "",
@@ -705,7 +701,7 @@ const Values = (props: {
                                 setOptions([
                                   ...options.filter(
                                     (currentOption) =>
-                                      !_.isEqual(currentOption, option)
+                                      !_.isEqual(currentOption, option),
                                   ),
                                 ]);
                               }}

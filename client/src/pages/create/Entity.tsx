@@ -52,15 +52,17 @@ import {
   EntityModel,
   IEntity,
   ProjectModel,
+  IGenericItem,
 } from "@types";
 
 // Utility functions and libraries
-import { getData, postData } from "@database/functions";
+import { request } from "@database/functions";
 import { useToken } from "src/authentication/useToken";
 import { isValidAttributes } from "src/util";
 import _ from "lodash";
 import dayjs from "dayjs";
 import { nanoid } from "nanoid";
+import consola from "consola";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
@@ -68,7 +70,7 @@ import { useNavigate } from "react-router-dom";
 const Entity = () => {
   // Used to manage what detail inputs are presented
   const [pageState, setPageState] = useState(
-    "start" as "start" | "attributes" | "associations"
+    "start" as "start" | "attributes" | "associations",
   );
 
   const pageSteps = [
@@ -97,19 +99,17 @@ const Entity = () => {
   const [name, setName] = useState("");
   const [isNameUnique, setIsNameUnique] = useState(true);
   const [created, setCreated] = useState(
-    dayjs(Date.now()).format("YYYY-MM-DDTHH:mm")
+    dayjs(Date.now()).format("YYYY-MM-DDTHH:mm"),
   );
   const [owner, _setOwner] = useState(token.orcid);
   const [description, setDescription] = useState("");
   const [selectedProjects, setSelectedProjects] = useState([] as string[]);
-  const [selectedOrigins, setSelectedOrigins] = useState(
-    [] as { name: string; _id: string }[]
-  );
+  const [selectedOrigins, setSelectedOrigins] = useState([] as IGenericItem[]);
   const [selectedProducts, setSelectedProducts] = useState(
-    [] as { name: string; _id: string }[]
+    [] as IGenericItem[],
   );
   const [selectedAttributes, setSelectedAttributes] = useState(
-    [] as AttributeModel[]
+    [] as AttributeModel[],
   );
 
   const entityState: IEntity = {
@@ -139,73 +139,78 @@ const Entity = () => {
   const checkEntityName = async (name: string) => {
     try {
       // Adjust the URL and HTTP client according to your setup
-      const response = await getData(`/entities/byName/${name}`);
-
-      setIsNameUnique(!response); // If data is null, the name is unique
+      const response = await request("GET", `/entities/byName/${name}`);
+      setIsNameUnique(!response.data); // If data is null, the name is unique
     } catch (error) {
-      console.error("Failed to check entity name:", error);
+      consola.error("Failed to check entity name:", error);
       // Handle error appropriately
     }
   };
 
+  /**
+   * Utility function to retrieve all Entities
+   */
+  const getEntities = async () => {
+    const response = await request<EntityModel[]>("GET", "/entities");
+    if (response.success) {
+      setEntities(response.data);
+    } else {
+      toast({
+        title: "Error",
+        status: "error",
+        description: "Could not retrieve Entities",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
+    setIsLoaded(true);
+  };
+
+  /**
+   * Utility function to get all Projects
+   */
+  const getProjects = async () => {
+    const response = await request<ProjectModel[]>("GET", "/projects");
+    if (response.success) {
+      setProjects(response.data);
+    } else {
+      toast({
+        title: "Error",
+        status: "error",
+        description: "Could not retrieve Projects",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
+    setIsLoaded(true);
+  };
+
+  /**
+   * Utility function to get all Attributes
+   */
+  const getAttributes = async () => {
+    const response = await request<AttributeModel[]>("GET", "/attributes");
+    if (response.success) {
+      setAttributes(response.data);
+    } else {
+      toast({
+        title: "Error",
+        status: "error",
+        description: "Could not retrieve Attributes",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
+    setIsLoaded(true);
+  };
 
   useEffect(() => {
-    // Get all Entities
-    getData(`/entities`)
-      .then((response) => {
-        setEntities(response);
-      })
-      .catch((_error) => {
-        toast({
-          title: "Error",
-          status: "error",
-          description: "Could not retrieve Entities data.",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-      })
-      .finally(() => {
-        setIsLoaded(true);
-      });
-
-    // Get all Projects
-    getData(`/projects`)
-      .then((response) => {
-        setProjects(response);
-      })
-      .catch((_error) => {
-        toast({
-          title: "Error",
-          status: "error",
-          description: "Could not retrieve Project data.",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-      })
-      .finally(() => {
-        setIsLoaded(true);
-      });
-
-    // Get all Attributes
-    getData(`/attributes`)
-      .then((response) => {
-        setAttributes(response);
-      })
-      .catch((_error) => {
-        toast({
-          title: "Error",
-          status: "error",
-          description: "Could not retrieve Attributes data.",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-      })
-      .finally(() => {
-        setIsLoaded(true);
-      });
+    getEntities();
+    getProjects();
+    getAttributes();
   }, []);
 
   useEffect(() => {
@@ -225,7 +230,7 @@ const Entity = () => {
   };
 
   // Handle clicking "Next"
-  const onPageNext = () => {
+  const onPageNext = async () => {
     if (_.isEqual("start", pageState)) {
       setPageState("associations");
       setActiveStep(1);
@@ -234,21 +239,24 @@ const Entity = () => {
       setActiveStep(2);
     } else if (_.isEqual("attributes", pageState)) {
       setIsSubmitting(true);
-      postData(`/entities/create`, entityState)
-        .then(() => {
-          setIsSubmitting(false);
-          navigate(`/entities`);
-        })
-        .catch((_error) => {
-          toast({
-            title: "Error",
-            status: "error",
-            description: "Could not create new Entity.",
-            duration: 4000,
-            position: "bottom-right",
-            isClosable: true,
-          });
+      const response = await request<any>(
+        "POST",
+        "/entities/create",
+        entityState,
+      );
+      if (response.success) {
+        setIsSubmitting(false);
+        navigate(`/entities`);
+      } else {
+        toast({
+          title: "Error",
+          status: "error",
+          description: "Could not create new Entity",
+          duration: 4000,
+          position: "bottom-right",
+          isClosable: true,
         });
+      }
     }
   };
 
@@ -267,7 +275,7 @@ const Entity = () => {
   const onRemoveAttributeCard = (identifier: string) => {
     // We need to filter the removed attribute
     setSelectedAttributes(
-      selectedAttributes.filter((attribute) => attribute._id !== identifier)
+      selectedAttributes.filter((attribute) => attribute._id !== identifier),
     );
   };
 
@@ -471,7 +479,7 @@ const Entity = () => {
                             setSelectedOrigins(
                               selectedOrigins.filter((selected) => {
                                 return !_.isEqual(product._id, selected._id);
-                              })
+                              }),
                             );
                           }}
                         />
@@ -560,7 +568,7 @@ const Entity = () => {
                             setSelectedProducts(
                               selectedProducts.filter((selected) => {
                                 return !_.isEqual(product._id, selected._id);
-                              })
+                              }),
                             );
                           }}
                         />
@@ -633,7 +641,7 @@ const Entity = () => {
                         if (
                           _.isEqual(
                             event.target.value.toString(),
-                            attribute._id
+                            attribute._id,
                           )
                         ) {
                           setSelectedAttributes([

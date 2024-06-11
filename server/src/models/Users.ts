@@ -9,9 +9,6 @@ export class Users {
    * @returns Collection of all User entries
    */
   static all = async () => {
-    return await getDatabase()
-      .collection(USERS_COLLECTION)
-      .find()
-      .toArray();
-  }
-};
+    return await getDatabase().collection(USERS_COLLECTION).find().toArray();
+  };
+}

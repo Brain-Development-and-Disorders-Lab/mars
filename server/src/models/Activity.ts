@@ -9,9 +9,6 @@ export class Activity {
    * @returns Collection of all Activity entries
    */
   static all = async () => {
-    return await getDatabase()
-      .collection(ACTIVITY_COLLECTION)
-      .find()
-      .toArray();
-  }
-};
+    return await getDatabase().collection(ACTIVITY_COLLECTION).find().toArray();
+  };
+}

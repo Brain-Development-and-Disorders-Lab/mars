@@ -17,15 +17,15 @@ export class Projects {
       .collection<ProjectModel>(PROJECTS_COLLECTION)
       .find()
       .toArray();
-  }
+  };
 
   static getOne = async (_id: string) => {
     return await getDatabase()
       .collection<ProjectModel>(PROJECTS_COLLECTION)
       .findOne({ _id: _id });
-  }
+  };
 
-  static create = async (project: IProject):  Promise<ResponseMessage> => {
+  static create = async (project: IProject): Promise<ResponseMessage> => {
     // Create a `ProjectModel` instance by adding an identifier and unpacking given Project data
     const projectModel: ProjectModel = {
       _id: getIdentifier("project"),
@@ -39,9 +39,11 @@ export class Projects {
 
     return {
       success: successStatus,
-      message: successStatus ? "Created new Project": "Could not create new Project",
+      message: successStatus
+        ? "Created new Project"
+        : "Could not create new Project",
     };
-  }
+  };
 
   static update = async (updated: ProjectModel): Promise<ResponseMessage> => {
     const project = await this.getOne(updated._id);
@@ -55,7 +57,7 @@ export class Projects {
 
     const update: { $set: IProject } = {
       $set: {
-        ...project
+        ...project,
       },
     };
 
@@ -83,11 +85,14 @@ export class Projects {
 
     return {
       success: successStatus,
-      message: successStatus ? "Updated Project": "Could not update Project",
+      message: successStatus ? "Updated Project" : "Could not update Project",
     };
   };
 
-  static addEntity = async (_id: string, entity: string): Promise<ResponseMessage> => {
+  static addEntity = async (
+    _id: string,
+    entity: string,
+  ): Promise<ResponseMessage> => {
     const project = await this.getOne(_id);
 
     if (_.isNull(project)) {
@@ -113,11 +118,16 @@ export class Projects {
 
     return {
       success: successStatus,
-      message: successStatus ? "Added Entity to Project" : "Could not add Entity to Project",
+      message: successStatus
+        ? "Added Entity to Project"
+        : "Could not add Entity to Project",
     };
-  }
+  };
 
-  static addEntities = async (_id: string, entities: string[]): Promise<ResponseMessage> => {
+  static addEntities = async (
+    _id: string,
+    entities: string[],
+  ): Promise<ResponseMessage> => {
     const project = await this.getOne(_id);
 
     if (_.isNull(project)) {
@@ -140,11 +150,16 @@ export class Projects {
 
     return {
       success: successStatus,
-      message: successStatus ? "Added Entities to Project" : "Could not add Entities to Project",
+      message: successStatus
+        ? "Added Entities to Project"
+        : "Could not add Entities to Project",
     };
-  }
+  };
 
-  static removeEntity = async (_id: string, entity: string): Promise<ResponseMessage> => {
+  static removeEntity = async (
+    _id: string,
+    entity: string,
+  ): Promise<ResponseMessage> => {
     const project = await this.getOne(_id);
 
     if (_.isNull(project)) {
@@ -167,7 +182,9 @@ export class Projects {
 
     return {
       success: successStatus,
-      message: successStatus ? "Removed Entity from Project" : "Could not remove Entity from Project",
+      message: successStatus
+        ? "Removed Entity from Project"
+        : "Could not remove Entity from Project",
     };
-  }
-};
+  };
+}

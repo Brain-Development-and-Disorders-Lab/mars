@@ -18,16 +18,14 @@ export class Users {
   /**
    * Check if a user exists in the database.
    * @param {string} orcid The ORCiD of the user to check.
-   * @return {Promise<UserModel | null>} The user if found, or null if not.
+   * @returns {Promise<UserModel | null>} The user if found, or null if not.
    */
   static async exists(orcid: string): Promise<UserModel | null> {
-    consola.start("Checking existence of user:", orcid);
-
     try {
       const database = getDatabase();
       const result = await database.collection(USERS).findOne({ _id: orcid });
       if (result) {
-        consola.success("User exists:", orcid);
+        consola.debug("User exists:", orcid);
         return result as unknown as UserModel;
       } else {
         consola.warn("User does not exist:", orcid);
@@ -39,22 +37,22 @@ export class Users {
     }
   }
 
-
   /**
- * Create a new user in the database.
- * @param {UserModel} userData The user data to create.
- * @return {Promise<UserModel>} The created user.
- */
+   * Create a new user in the database.
+   * @param {UserModel} userData The user data to create.
+   * @returns {Promise<UserModel>} The created user.
+   */
   static async create(userData: UserModel): Promise<UserModel> {
-    consola.start("Creating user:", userData?.name);
-
     try {
       const database = getDatabase();
-      const result = await database.collection(USERS).insertOne(userData as any);
+      const result = await database
+        .collection(USERS)
+        .insertOne(userData as any);
       if (result) {
-        consola.success("User created successfully:", userData._id);
+        consola.debug("User created successfully:", userData._id);
         return userData;
       } else {
+        consola.error("User creation not acknowledged by database");
         throw new Error("User creation not acknowledged by database");
       }
     } catch (error) {
@@ -67,23 +65,25 @@ export class Users {
    * Update an existing user in the database.
    * @param {string} orcid The ORCiD of the user to update.
    * @param {Partial<UserModel>} updateData The data to update.
-   * @return {Promise<UserModel>} The updated user.
+   * @returns {Promise<UserModel>} The updated user.
    */
-  static async update(orcid: string, updateData: Partial<UserModel>): Promise<{ status: "success" | "error"; user?: UserModel }> {
-    consola.start("Updating user:", orcid);
-
+  static async update(
+    orcid: string,
+    updateData: Partial<UserModel>,
+  ): Promise<{ status: "success" | "error"; user?: UserModel }> {
     try {
       const database = getDatabase();
       const result = await database.collection(USERS).findOneAndUpdate(
         { _id: orcid },
         { $set: updateData },
-        { returnDocument: "after" } // This option may vary depending on the MongoDB driver version
+        { returnDocument: "after" }, // This option may vary depending on the MongoDB driver version
       );
 
       if (result.ok && result.value) {
-        consola.success("User updated successfully:", orcid);
+        consola.debug("User updated successfully:", orcid);
         return { status: "success", user: result.value as any };
       } else {
+        consola.error("User update failed or user not found:", orcid);
         throw new Error(`User update failed or user not found: ${orcid}`);
       }
     } catch (error) {
@@ -92,37 +92,41 @@ export class Users {
     }
   }
 
-
   /**
    * Validate the ORCiD permissions of the user
    * @param {string} orcid the ORCiD to validate
-   * @return {Promise<{ status: "success" | "error", user?: UserModel }>}
+   * @returns {Promise<{ status: "success" | "error", user?: UserModel }>}
    */
   static get = (
-    orcid: string
+    orcid: string,
   ): Promise<{ status: "success" | "error"; user?: UserModel }> => {
-    consola.start("Finding user", orcid);
-
     // Retrieve a token
     return new Promise((resolve, reject) => {
       getDatabase()
         .collection(USERS)
         .findOne({ _id: orcid }, (_error: any, result: any) => {
           if (_.isNull(result)) {
-            consola.warn("User (ORCiD):", orcid.toString(), "does not exist");
+            consola.warn("User does not exist with ORCiD:", orcid.toString());
             reject({ status: "error" });
           }
 
-          consola.success("User (ORCiD):", orcid.toString(), "exists");
+          consola.debug("User exists with ORCiD:", orcid.toString());
           resolve({ status: "success", user: result });
         });
     });
   };
 
+  /**
+   * Validate the permissions of an ORCiD to access a specific resource
+   * @param orcid ORCiD identifier of a user
+   * @param resourceId Identifier of an Entity, Project, or Attribute
+   * @param resourceType The type of the resource (Entity, Project, Attribute)
+   * @returns {Promise<boolean>}
+   */
   static validate = (
     orcid: string,
     resourceId: string,
-    resourceType: "entity" | "project" | "attribute"
+    resourceType: "entity" | "project" | "attribute",
   ): Promise<boolean> => {
     return new Promise((resolve, reject) => {
       this.get(orcid)
@@ -139,17 +143,22 @@ export class Users {
                 Projects.getOne(resourceId).then((project: ProjectModel) => {
                   resolve(
                     _.isEqual(project.owner, orcid) ||
-                    _.includes(project.shared, orcid)
+                      _.includes(project.shared, orcid),
                   );
                 });
                 break;
               }
             }
           } else {
+            consola.warn(
+              `Invalid permissions for ORCiD "${orcid}" to access:`,
+              resourceId,
+            );
             reject("Invalid permissions");
           }
         })
-        .catch((_error) => {
+        .catch((error) => {
+          consola.warn(`Invalid permissions for ORCiD "${orcid}":`, error);
           reject("Invalid permissions");
         });
     });

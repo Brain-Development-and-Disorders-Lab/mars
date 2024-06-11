@@ -26,7 +26,7 @@ AuthenticationRoute.route("/login").post(
           message: error,
         });
       });
-  }
+  },
 );
 
 // Route: Validate "id_token"

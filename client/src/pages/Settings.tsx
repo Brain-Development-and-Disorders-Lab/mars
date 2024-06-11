@@ -23,7 +23,7 @@ import Icon from "@components/Icon";
 import { DeviceModel } from "@types";
 
 // Utility functions and libraries
-import { getData } from "@database/functions";
+import { request } from "@database/functions";
 import { useToken } from "src/authentication/useToken";
 import _ from "lodash";
 
@@ -38,26 +38,29 @@ const Settings = () => {
   // Token to access information about the user
   const [token, _setToken] = useToken();
 
-  useEffect(() => {
-    // Get all Devices
-    getData(`/system/devices`)
-      .then((response) => {
-        setDevices(response);
-      })
-      .catch((_error) => {
-        toast({
-          title: "Error",
-          status: "error",
-          description: "Could not retrieve Device data.",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-        setIsError(true);
-      })
-      .finally(() => {
-        setIsLoaded(true);
+  /**
+   * Utility function to get all Devices
+   */
+  const getDevices = async () => {
+    const response = await request<DeviceModel[]>("GET", "/system/devices");
+    if (response.success) {
+      setDevices(response.data);
+    } else {
+      toast({
+        title: "Error",
+        status: "error",
+        description: "Could not retrieve Device data.",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
       });
+      setIsError(true);
+    }
+    setIsLoaded(true);
+  };
+
+  useEffect(() => {
+    getDevices();
   }, []);
 
   return (

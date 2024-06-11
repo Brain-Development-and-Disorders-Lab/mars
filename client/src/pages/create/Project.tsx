@@ -20,6 +20,7 @@ import {
   Text,
   Textarea,
   useDisclosure,
+  useToast,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
@@ -29,7 +30,7 @@ import { IProject } from "@types";
 
 // Utility functions and libraries
 import { useToken } from "src/authentication/useToken";
-import { postData } from "@database/functions";
+import { request } from "@database/functions";
 import dayjs from "dayjs";
 import _ from "lodash";
 
@@ -39,11 +40,12 @@ import { useNavigate } from "react-router-dom";
 const Project = () => {
   const navigate = useNavigate();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const toast = useToast();
   const [token, _useToken] = useToken();
 
   const [name, setName] = useState("");
   const [created, setCreated] = useState(
-    dayjs(Date.now()).format("YYYY-MM-DDTHH:mm")
+    dayjs(Date.now()).format("YYYY-MM-DDTHH:mm"),
   );
   const [owner, _setOwner] = useState(token.orcid);
   const [description, setDescription] = useState("");
@@ -178,13 +180,27 @@ const Project = () => {
           <Button
             colorScheme={"green"}
             rightIcon={<Icon name={"check"} />}
-            onClick={() => {
+            onClick={async () => {
               // Push the data
               setIsSubmitting(true);
-              postData(`/projects/create`, projectData).then(() => {
-                setIsSubmitting(false);
+              const response = await request<any>(
+                "POST",
+                "/projects/create",
+                projectData,
+              );
+              if (response.success) {
                 navigate("/projects");
-              });
+              } else {
+                toast({
+                  title: "Error",
+                  status: "error",
+                  description: "Could not create new Project",
+                  duration: 4000,
+                  position: "bottom-right",
+                  isClosable: true,
+                });
+              }
+              setIsSubmitting(false);
             }}
             isDisabled={isDetailsError && !isSubmitting}
           >
@@ -201,9 +217,7 @@ const Project = () => {
           <ModalCloseButton />
           <ModalBody p={"2"}>
             <Flex direction={"column"} gap={"4"} p={"2"}>
-              <Text>
-                Projects can be used to organize and share Entities.
-              </Text>
+              <Text>Projects can be used to organize and share Entities.</Text>
               <Text>
                 Any type of Entity can be included in a Project. Entities can be
                 added and removed from a Project after it has been created.
@@ -219,15 +233,13 @@ const Project = () => {
               <Text>
                 A timestamp assigned to the Project. For example, if this is a
                 set of Entities used in a specific experiment, this date could
-                represent when work on the experiment commenced. Otherwise,
-                this timestamp may simply represent when this Project was created
-                in MARS.
+                represent when work on the experiment commenced. Otherwise, this
+                timestamp may simply represent when this Project was created in
+                MARS.
               </Text>
 
               <Heading size={"sm"}>Description*</Heading>
-              <Text>
-                A brief description of the Project contents.
-              </Text>
+              <Text>A brief description of the Project contents.</Text>
 
               <Text>
                 <i>* Required field</i>

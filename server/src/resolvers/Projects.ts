@@ -1,5 +1,5 @@
 import { IProject, ProjectModel } from "@types";
-import { Projects } from "src/models/Projects"
+import { Projects } from "src/models/Projects";
 
 export const ProjectsResolvers = {
   Query: {
@@ -16,19 +16,28 @@ export const ProjectsResolvers = {
   },
   Mutation: {
     createProject: async (_parent: any, args: { project: IProject }) => {
-      return await Projects.create(args.project)
+      return await Projects.create(args.project);
     },
     updateProject: async (_parent: any, args: { project: ProjectModel }) => {
-      return await Projects.update(args.project)
+      return await Projects.update(args.project);
     },
-    addProjectEntity: async (_parent: any, args: { _id: string, entity: string }) => {
+    addProjectEntity: async (
+      _parent: any,
+      args: { _id: string; entity: string },
+    ) => {
       return await Projects.addEntity(args._id, args.entity);
     },
-    addProjectEntities: async (_parent: any, args: { _id: string, entities: string[] }) => {
+    addProjectEntities: async (
+      _parent: any,
+      args: { _id: string; entities: string[] },
+    ) => {
       return await Projects.addEntities(args._id, args.entities);
     },
-    removeProjectEntity: async (_parent: any, args: { _id: string, entity: string }) => {
+    removeProjectEntity: async (
+      _parent: any,
+      args: { _id: string; entity: string },
+    ) => {
       return await Projects.removeEntity(args._id, args.entity);
-    }
-  }
-}
+    },
+  },
+};

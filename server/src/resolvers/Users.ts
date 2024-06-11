@@ -1,4 +1,4 @@
-import { Users } from "src/models/Users"
+import { Users } from "src/models/Users";
 
 export const UsersResolvers = {
   Query: {
@@ -10,5 +10,5 @@ export const UsersResolvers = {
       const users = await Users.all();
       return users.find((user) => user._id.toString() === args._id);
     },
-  }
-}
+  },
+};

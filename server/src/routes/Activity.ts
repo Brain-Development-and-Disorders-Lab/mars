@@ -18,7 +18,7 @@ ActivityRoute.route("/activity").get(
     Activity.getAll().then((activity: ActivityModel[]) => {
       response.json(activity);
     });
-  }
+  },
 );
 
 // Route: Create new Activity
@@ -27,12 +27,12 @@ ActivityRoute.route("/activity/create").post(
   (request: { body: IActivity }, response: any) => {
     Activity.create(request.body).then((activity: IActivity) => {
       response.json({
-        id: activity.target.id,
+        _id: activity.target._id,
         name: activity.target.name,
         status: "success",
       });
     });
-  }
+  },
 );
 
 export default ActivityRoute;

@@ -23,6 +23,7 @@ import Linky from "@components/Linky";
 import { ProjectModel, EntityModel, ActivityModel, IconNames } from "@types";
 
 // Utility functions and libraries
+import { request } from "src/database/functions";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 dayjs.extend(relativeTime);
@@ -32,7 +33,7 @@ import _ from "lodash";
 import { useNavigate } from "react-router-dom";
 
 // Apollo client imports
-import { useQuery, gql } from '@apollo/client';
+import { useQuery, gql } from "@apollo/client";
 
 // Queries
 const GET_DASHBOARD = gql`
@@ -48,8 +49,7 @@ const GET_DASHBOARD = gql`
       name
       description
     }
-    activity(limit: $activity)
-    {
+    activity(limit: $activity) {
       _id
       timestamp
       type
@@ -70,8 +70,17 @@ const Dashboard = () => {
   const toast = useToast();
 
   // Page data
-  const [entityData, setEntityData] = useState([] as { _id: string, deleted: boolean, name: string, description: string }[]);
-  const [projectData, setProjectData] = useState([] as { _id: string, name: string, description: string }[]);
+  const [entityData, setEntityData] = useState(
+    [] as {
+      _id: string;
+      deleted: boolean;
+      name: string;
+      description: string;
+    }[],
+  );
+  const [projectData, setProjectData] = useState(
+    [] as { _id: string; name: string; description: string }[],
+  );
   const [activityData, setActivityData] = useState([] as ActivityModel[]);
 
   // Execute GraphQL query both on page load and navigation
@@ -80,7 +89,7 @@ const Dashboard = () => {
       projects: 5,
       entities: 5,
       activity: 10,
-    }
+    },
   });
 
   // Assign data
@@ -143,8 +152,77 @@ const Dashboard = () => {
     }
   }, [breakpoint]);
 
+  /**
+   * Utility function to retrieve all Entities
+   */
+  const getEntities = async () => {
+    const response = await request<EntityModel[]>("GET", "/entities");
+    if (response.success) {
+      setEntityData(response.data.reverse());
+    } else {
+      toast({
+        title: "Network Error",
+        status: "error",
+        description: "Could not retrieve Entities.\n" + response.message,
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
+  };
+
+  /**
+   * Utility function to retrieve all Projects
+   */
+  const getProjects = async () => {
+    const response = await request<ProjectModel[]>("GET", "/projects");
+    if (response.success) {
+      setProjectData(response.data.reverse());
+    } else {
+      toast({
+        title: "Network Error",
+        status: "error",
+        description: "Could not retrieve Projects.\n" + response.message,
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
+  };
+
+  /**
+   * Utility function to retrieve all Activity
+   */
+  const getActivity = async () => {
+    const response = await request<ActivityModel[]>("GET", "/activity");
+    if (response.success) {
+      setActivityData(response.data.reverse());
+    } else {
+      toast({
+        title: "Network Error",
+        status: "error",
+        description: "Could not retrieve Activity.\n" + response.message,
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
+  };
+
+  // Effect to retrieve all information required to render Dashboard
+  useEffect(() => {
+    getEntities();
+    getProjects();
+    getActivity();
+  }, []);
+
   // Configure Entity table
-  const entityTableData: { _id: string, deleted: boolean, name: string, description: string }[] = entityData;
+  const entityTableData: {
+    _id: string;
+    deleted: boolean;
+    name: string;
+    description: string;
+  }[] = entityData;
   const entityTableColumnHelper = createColumnHelper<EntityModel>();
   const entityTableColumns = [
     entityTableColumnHelper.accessor("name", {
@@ -187,7 +265,8 @@ const Dashboard = () => {
   ];
 
   // Configure Projects table
-  const projectTableData: { _id: string, name: string, description: string }[] = projectData;
+  const projectTableData: { _id: string; name: string; description: string }[] =
+    projectData;
   const projectTableColumnHelper = createColumnHelper<ProjectModel>();
   const projectTableColumns = [
     projectTableColumnHelper.accessor("name", {
@@ -226,12 +305,7 @@ const Dashboard = () => {
   return (
     <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
       <Flex direction={"row"} wrap={"wrap"} gap={"4"} p={"4"}>
-        <Flex
-          direction={"column"}
-          gap={"4"}
-          grow={"1"}
-          basis={"60%"}
-        >
+        <Flex direction={"column"} gap={"4"} grow={"1"} basis={"60%"}>
           {/* Projects and Entities */}
           <Flex
             direction={"column"}
@@ -269,7 +343,9 @@ const Dashboard = () => {
                 justify={"center"}
                 align={"center"}
               >
-                <Text color={"gray.400"} fontWeight={"semibold"}>You do not have any Projects.</Text>
+                <Text color={"gray.400"} fontWeight={"semibold"}>
+                  You do not have any Projects.
+                </Text>
               </Flex>
             )}
 
@@ -309,8 +385,10 @@ const Dashboard = () => {
             {!loading && entityData.length > 0 && (
               <DataTable
                 columns={entityTableColumns}
-                data={entityTableData.filter((entity) =>
-                  _.isEqual(entity.deleted, false) || _.isEqual(entity.deleted, null)
+                data={entityTableData.filter(
+                  (entity) =>
+                    _.isEqual(entity.deleted, false) ||
+                    _.isEqual(entity.deleted, null),
                 )}
                 visibleColumns={visibleColumns}
               />
@@ -325,7 +403,9 @@ const Dashboard = () => {
                 justify={"center"}
                 align={"center"}
               >
-                <Text color={"gray.400"} fontWeight={"semibold"}>You do not have any Entities.</Text>
+                <Text color={"gray.400"} fontWeight={"semibold"}>
+                  You do not have any Entities.
+                </Text>
               </Flex>
             )}
 
@@ -398,7 +478,12 @@ const Dashboard = () => {
                       gap={"2"}
                       key={`activity-${activity._id}`}
                     >
-                      <Flex rounded={"full"} p={"2"} mr={"2"} alignSelf={"center"}>
+                      <Flex
+                        rounded={"full"}
+                        p={"2"}
+                        mr={"2"}
+                        alignSelf={"center"}
+                      >
                         <Icon
                           size={"sm"}
                           name={operationIcon}
@@ -421,7 +506,11 @@ const Dashboard = () => {
 
                       <Spacer />
 
-                      <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.500"}>
+                      <Text
+                        fontSize={"xs"}
+                        fontWeight={"semibold"}
+                        color={"gray.500"}
+                      >
                         {dayjs(activity.timestamp).fromNow()}
                       </Text>
                     </Flex>
@@ -431,7 +520,9 @@ const Dashboard = () => {
             </Flex>
           ) : (
             <Flex w={"100%"} h={"100%"} justify={"center"} align={"center"}>
-              <Text color={"gray.400"} fontWeight={"semibold"}>No Activity yet.</Text>
+              <Text color={"gray.400"} fontWeight={"semibold"}>
+                No Activity yet.
+              </Text>
             </Flex>
           )}
         </Flex>

@@ -20,7 +20,7 @@ import Icon from "@components/Icon";
 import { useNavigate } from "react-router-dom";
 
 // Utility functions and libraries
-import { getData } from "@database/functions";
+import { request } from "@database/functions";
 import { useToken } from "src/authentication/useToken";
 import dayjs from "dayjs";
 import FileSaver from "file-saver";
@@ -31,14 +31,13 @@ const AccountMenu = () => {
 
   const [token, setToken] = useToken();
 
-  const performBackup = () => {
+  const performBackup = async () => {
     // Retrieve all data stored in the system
-    getData(`/system/backup`).then((response) => {
-      FileSaver.saveAs(
-        new Blob([JSON.stringify(response, null, "  ")]),
-        slugify(`backup_${dayjs(Date.now()).toJSON()}.json`)
-      );
-    });
+    const response = request("GET", "/data/backup");
+    FileSaver.saveAs(
+      new Blob([JSON.stringify(response, null, "  ")]),
+      slugify(`backup_${dayjs(Date.now()).toJSON()}.json`),
+    );
   };
 
   const performLogout = () => {
@@ -80,10 +79,18 @@ const AccountMenu = () => {
               </Text>
 
               <Flex align={"center"} wrap={"wrap"} gap={"2"}>
-                <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.600"}>
+                <Text
+                  fontSize={"sm"}
+                  fontWeight={"semibold"}
+                  color={"gray.600"}
+                >
                   ORCiD:
                 </Text>
-                <Tag colorScheme={"green"}><Link href={`https://orcid.org/${token.orcid}`}>{token.orcid}</Link></Tag>
+                <Tag colorScheme={"green"}>
+                  <Link href={`https://orcid.org/${token.orcid}`}>
+                    {token.orcid}
+                  </Link>
+                </Tag>
               </Flex>
             </Flex>
           </MenuGroup>

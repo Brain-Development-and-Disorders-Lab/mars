@@ -1,15 +1,33 @@
-
-import { TabPanel, Flex, FormControl, FormLabel, Select, Input, Spacer, IconButton, VStack, Tag, Button, useToast, Box } from '@chakra-ui/react';
-import { QueryFocusType, QueryParameters, QueryQualifier, QuerySubQualifier, QueryOperator, EntityModel } from '@types';
+import {
+  TabPanel,
+  Flex,
+  FormControl,
+  FormLabel,
+  Select,
+  Input,
+  Spacer,
+  IconButton,
+  VStack,
+  Tag,
+  Button,
+  useToast,
+  Box,
+} from "@chakra-ui/react";
+import {
+  QueryFocusType,
+  QueryParameters,
+  QueryQualifier,
+  QuerySubQualifier,
+  QueryOperator,
+  EntityModel,
+} from "@types";
 import Icon from "@components/Icon";
-import QueryBuilder, { formatQuery } from 'react-querybuilder';
+import QueryBuilder, { formatQuery } from "react-querybuilder";
 
-
-import _ from 'lodash';
-import React, { useState } from 'react';
-import { postData } from '@database/functions';
-import QueryBuilderEditorCustomValue from './QueryBuilderEditorCustomValue';
-
+import _ from "lodash";
+import React, { useState } from "react";
+import { request } from "@database/functions";
+import QueryBuilderEditorCustomValue from "./QueryBuilderEditorCustomValue";
 
 interface QueryBuilderTabProps {
   [key: string]: any;
@@ -40,14 +58,13 @@ const QueryBuilderTab: React.FC<QueryBuilderTabProps> = ({
   runQuerySearch,
   setIsSearching,
 }: QueryBuilderTabProps) => {
-
   const fields = [
-    { name: 'name', label: 'Name' },
-    { name: 'description', label: 'Description' },
-    { name: 'project', label: 'Project' },
-    { name: 'origin', label: 'Origin' },
-    { name: 'product', label: 'Product' },
-    { name: 'attribute', label: 'Attribute' },
+    { name: "name", label: "Name" },
+    { name: "description", label: "Description" },
+    { name: "project", label: "Project" },
+    { name: "origin", label: "Origin" },
+    { name: "product", label: "Product" },
+    { name: "attribute", label: "Attribute" },
     // Add other fields as needed
   ];
 
@@ -58,30 +75,30 @@ const QueryBuilderTab: React.FC<QueryBuilderTabProps> = ({
 
   // Function to handle query changes
   const onQueryChange = (q: any) => {
-    setQuery(formatQuery(q, 'mongodb'));
+    setQuery(formatQuery(q, "mongodb"));
   };
 
-  const onSearchBuiltQuery = () => {
+  const onSearchBuiltQuery = async () => {
     setIsSearching(true);
     setHasSearched(true);
 
-    postData(`/search/query_built`, { query: query })
-      .then((value) => {
-        setResults(value);
-      })
-      .catch((_error) => {
-        toast({
-          title: "Error",
-          status: "error",
-          description: "Could not get search results.",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-      })
-      .finally(() => {
-        setIsSearching(false);
+    const response = await request<any>("POST", "/search/query_built", {
+      query: query,
+    });
+    if (response.success) {
+      setResults(response.data);
+    } else {
+      toast({
+        title: "Error",
+        status: "error",
+        description: "Could not get search results.",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
       });
+    }
+
+    setIsSearching(false);
   };
 
   return (
@@ -105,7 +122,7 @@ const QueryBuilderTab: React.FC<QueryBuilderTabProps> = ({
           </Button>
         </Flex>
       </Box>
-      {false && /* disableled Legacy Query builder components */
+      {false /* disableled Legacy Query builder components */ && (
         <Flex w={"100%"} direction={"column"} gap={"4"}>
           <Flex
             direction={"column"}
@@ -134,9 +151,7 @@ const QueryBuilderTab: React.FC<QueryBuilderTabProps> = ({
                   w={"auto"}
                   value={queryParameter}
                   onChange={(event) => {
-                    setQueryParameter(
-                      event.target.value as QueryParameters
-                    );
+                    setQueryParameter(event.target.value as QueryParameters);
                     // Set the query qualifier to prevent selection of disabled options
                     setQueryQualifier("Contains");
                   }}
@@ -156,9 +171,7 @@ const QueryBuilderTab: React.FC<QueryBuilderTabProps> = ({
                   w={"auto"}
                   value={queryQualifier}
                   onChange={(event) =>
-                    setQueryQualifier(
-                      event.target.value as QueryQualifier
-                    )
+                    setQueryQualifier(event.target.value as QueryQualifier)
                   }
                 >
                   <option>Contains</option>
@@ -198,7 +211,7 @@ const QueryBuilderTab: React.FC<QueryBuilderTabProps> = ({
                       setQueryKey(event.target.value);
                       setQueryValue(
                         event.target.options[event.target.selectedIndex]
-                          .innerText
+                          .innerText,
                       );
                     }}
                   >
@@ -223,7 +236,7 @@ const QueryBuilderTab: React.FC<QueryBuilderTabProps> = ({
                         setQueryKey(event.target.value);
                         setQueryValue(
                           event.target.options[event.target.selectedIndex]
-                            .innerText
+                            .innerText,
                         );
                       }}
                     >
@@ -258,7 +271,7 @@ const QueryBuilderTab: React.FC<QueryBuilderTabProps> = ({
                       value={querySubQualifier}
                       onChange={(event) => {
                         setQuerySubQualifier(
-                          event.target.value as QuerySubQualifier
+                          event.target.value as QuerySubQualifier,
                         );
                       }}
                     >
@@ -301,9 +314,8 @@ const QueryBuilderTab: React.FC<QueryBuilderTabProps> = ({
                         onChange={(event) => {
                           setQueryKey(event.target.value);
                           setQueryValue(
-                            event.target.options[
-                              event.target.selectedIndex
-                            ].innerText
+                            event.target.options[event.target.selectedIndex]
+                              .innerText,
                           );
                         }}
                       >
@@ -318,19 +330,19 @@ const QueryBuilderTab: React.FC<QueryBuilderTabProps> = ({
                     )}
                     {_.includes(
                       ["Text", "URL", "Select"],
-                      querySubQualifier
+                      querySubQualifier,
                     ) && (
-                        <Input
-                          w={"auto"}
-                          value={queryValue}
-                          placeholder={"Value"}
-                          type={"text"}
-                          onChange={(event) => {
-                            setQueryKey(event.target.value);
-                            setQueryValue(event.target.value);
-                          }}
-                        />
-                      )}
+                      <Input
+                        w={"auto"}
+                        value={queryValue}
+                        placeholder={"Value"}
+                        type={"text"}
+                        onChange={(event) => {
+                          setQueryKey(event.target.value);
+                          setQueryValue(event.target.value);
+                        }}
+                      />
+                    )}
                   </Flex>
                 )}
               </FormControl>
@@ -388,21 +400,17 @@ const QueryBuilderTab: React.FC<QueryBuilderTabProps> = ({
                     {index > 0 && (
                       <Select
                         w={"auto"}
-                        value={
-                          _.isEqual(index, 0) ? "" : component.operator
-                        }
+                        value={_.isEqual(index, 0) ? "" : component.operator}
                         onChange={(event) => {
                           // Update the component operator state
                           const updatedQueryComponents =
                             _.cloneDeep(queryComponents);
-                          updatedQueryComponents[index].operator = event
-                            .target.value as QueryOperator;
+                          updatedQueryComponents[index].operator = event.target
+                            .value as QueryOperator;
                           setQueryComponents(updatedQueryComponents);
 
                           // Update the operator state
-                          setQueryOperator(
-                            event.target.value as QueryOperator
-                          );
+                          setQueryOperator(event.target.value as QueryOperator);
                         }}
                       >
                         <option>AND</option>
@@ -412,12 +420,8 @@ const QueryBuilderTab: React.FC<QueryBuilderTabProps> = ({
 
                     <Flex direction={"row"} gap={"4"} h={"fit-content"}>
                       <Tag colorScheme={"blue"}>{component.focus}</Tag>
-                      <Tag colorScheme={"purple"}>
-                        {component.parameter}
-                      </Tag>
-                      <Tag colorScheme={"green"}>
-                        {component.qualifier}
-                      </Tag>
+                      <Tag colorScheme={"purple"}>{component.parameter}</Tag>
+                      <Tag colorScheme={"green"}>{component.qualifier}</Tag>
                       {_.isEqual("Attributes", component.parameter) && (
                         <Tag colorScheme={"yellow"}>
                           {component.subQualifier}
@@ -427,7 +431,7 @@ const QueryBuilderTab: React.FC<QueryBuilderTabProps> = ({
 
                     {_.includes(
                       ["Origins", "Products", "Projects"],
-                      component.parameter
+                      component.parameter,
                     ) &&
                       isLoaded && (
                         <Select
@@ -440,14 +444,14 @@ const QueryBuilderTab: React.FC<QueryBuilderTabProps> = ({
                       )}
                     {_.includes(
                       ["Name", "Description"],
-                      component.parameter
+                      component.parameter,
                     ) && (
-                        <Input
-                          w={"fit-content"}
-                          value={component.value}
-                          disabled
-                        />
-                      )}
+                      <Input
+                        w={"fit-content"}
+                        value={component.value}
+                        disabled
+                      />
+                    )}
                     {_.isEqual("Attributes", component.parameter) &&
                       _.isEqual(component.subQualifier, "Date") && (
                         <Input
@@ -460,7 +464,7 @@ const QueryBuilderTab: React.FC<QueryBuilderTabProps> = ({
                     {_.isEqual("Attributes", component.parameter) &&
                       _.includes(
                         ["Text", "Number", "URL", "Select"],
-                        component.subQualifier
+                        component.subQualifier,
                       ) && (
                         <Input
                           w={"fit-content"}
@@ -522,7 +526,7 @@ const QueryBuilderTab: React.FC<QueryBuilderTabProps> = ({
             />
           </Flex>
         </Flex>
-      }
+      )}
     </TabPanel>
   );
 };

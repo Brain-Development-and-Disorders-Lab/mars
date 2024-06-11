@@ -1,13 +1,12 @@
-import React from 'react';
-import { shallow } from 'enzyme';
-import QueryBuilderTab from './QueryBuilderTab';
+import React from "react";
+import { shallow } from "enzyme";
+import QueryBuilderTab from "./QueryBuilderTab";
 
-jest.mock('@database/functions', () => ({
-  postData: jest.fn(),
+jest.mock("@database/functions", () => ({
+  request: jest.fn(),
 }));
 
-
-describe('QueryBuilder Component', () => {
+describe("QueryBuilder Component", () => {
   let wrapper: any;
   let mockOnSearchBuiltQuery: any;
   let mockSetIsSearching: any;
@@ -35,11 +34,11 @@ describe('QueryBuilder Component', () => {
     wrapper = shallow(<QueryBuilderTab {...mockProps} />);
   });
 
-  it('renders', () => {
+  it("renders", () => {
     expect(wrapper.exists()).toBe(true);
   });
 
-  it('renders QueryBuilder', () => {
-    expect(wrapper.find('QueryBuilder').exists()).toBe(true);
+  it("renders QueryBuilder", () => {
+    expect(wrapper.find("QueryBuilder").exists()).toBe(true);
   });
 });

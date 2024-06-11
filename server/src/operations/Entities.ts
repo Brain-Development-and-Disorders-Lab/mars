@@ -1,12 +1,8 @@
-// Utility libraries
+// Utility imports
 import _, { reject } from "lodash";
 import consola from "consola";
-
-// Utility functions
-import {
-  getAttachments,
-  getDatabase,
-} from "../connectors/database";
+import { Document, WithId } from "mongodb";
+import { getAttachments, getDatabase } from "../connectors/database";
 import { Activity } from "./Activity";
 import { Projects } from "./Projects";
 import { getIdentifier } from "src/util";
@@ -19,7 +15,13 @@ import tmp from "tmp";
 import dayjs from "dayjs";
 
 // Custom types
-import { AttributeModel, EntityModel, IValue, ProjectModel } from "@types";
+import {
+  AttributeModel,
+  EntityModel,
+  IGenericItem,
+  IValue,
+  ProjectModel,
+} from "@types";
 
 // Constants
 const ENTITIES = "entities";
@@ -31,20 +33,19 @@ export class Entities {
   /**
    * Check if an Entity exists in the system
    * @param {string} id the Entity identifier
-   * @return {boolean}
+   * @returns {boolean}
    */
   static exists = (id: string): Promise<boolean> => {
-    consola.start("Checking if Entity (id):", id.toString(), "exists");
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES)
         .findOne({ _id: id }, (_error: any, result: any) => {
           if (_.isNull(result)) {
-            consola.warn("Entity (id):", id.toString(), "does not exist");
+            consola.warn(`Entity "${id.toString()}" does not exist`);
             resolve(false);
           }
 
-          consola.success("Entity (id):", id.toString(), "exists");
+          consola.debug(`Entity "${id.toString()}" exists`);
           resolve(true);
         });
     });
@@ -53,10 +54,9 @@ export class Entities {
   /**
    * Find an Entity by its name
    * @param {string} name the name of the Entity to find
-   * @return {Promise<EntityModel | null>}
+   * @returns {Promise<EntityModel | null>}
    */
   static findEntityByName = (name: string): Promise<EntityModel | null> => {
-    consola.start("Searching for Entity with name:", name);
     return new Promise((resolve, reject) => {
       getDatabase()
         .collection(ENTITIES)
@@ -65,6 +65,7 @@ export class Entities {
             consola.error("Error occurred while searching for Entity:", name);
             reject(error);
           } else if (result) {
+            consola.debug("Found Entity with name:", name);
             resolve(result as EntityModel);
           } else {
             consola.warn("No Entity found with name:", name);
@@ -76,83 +77,92 @@ export class Entities {
 
   /**
    * Find an Entity by search term for typeahead
-   * @param {string} name the name of the Entity to find
-   * @return {Promise<EntityModel | null>}
+   * @param userId User identifier, used to filter by ownership status
+   * @param searchText Raw search query
+   * @param limit Number of results to return (default 5)
+   * @returns {Promise<WithId<Document>[]>}
    */
-  static async searchByTerm(userId: string, searchText: string, limit: number = 5) {
+  static async searchByTerm(
+    userId: string,
+    searchText: string,
+    limit: number = 5,
+  ): Promise<WithId<Document>[]> {
     let searchRegex;
     try {
-      searchRegex = new RegExp(searchText, 'i');
+      searchRegex = new RegExp(searchText, "i");
     } catch (error) {
-      console.error('Invalid regex:', error);
+      consola.error("Invalid regex for search:", error);
+
       // Fallback to plain text search if regex fails to compile
-      searchText = searchText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');  // Escape special regex characters
-      searchRegex = new RegExp(searchText, 'i'); // Safe regex with escaped characters
+      searchText = searchText.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // Escape special regex characters
+      searchRegex = new RegExp(searchText, "i"); // Safe regex with escaped characters
     }
+
+    // Construct search query
     const query = {
       $or: [
         { name: { $regex: searchRegex } },
         { description: { $regex: searchRegex } },
-        { "attributes.values.data": { $regex: searchRegex } }  // Assuming searchable content within attributes
+        { "attributes.values.data": { $regex: searchRegex } }, // Assuming searchable content within attributes
       ],
       $and: [
         { deleted: false },
-        { $or: [{ owner: userId }, { collaborators: userId }] } // Ensure user is owner or collaborator
-      ]
+        { $or: [{ owner: userId }, { collaborators: userId }] }, // Ensure user is owner or collaborator
+      ],
     };
 
+    // Limit the fields returned for efficiency
     const options = {
       limit: limit,
-      projection: { name: 1, description: 1 } // Limit the fields returned for efficiency
+      projection: { name: 1, description: 1 },
     };
 
     try {
-      const entities = await getDatabase().collection(ENTITIES).find(query, options).toArray();
+      const entities = await getDatabase()
+        .collection(ENTITIES)
+        .find(query, options)
+        .toArray();
       return entities;
     } catch (error) {
-      console.error('Error searching entities:', error);
+      consola.error("Error searching Entities:", error);
       throw error;
     }
   }
 
-
   /**
- * Find if Entity by its name existe
- * @param {string} name the name of the Entity to find
- * @return {Promise<EntityModel | null>}
- */
+   * Find an Entity by name
+   * @param {string} name the name of the Entity
+   * @returns {Promise<EntityModel | null>}
+   */
   static entityByNameExist = (name: string): Promise<EntityModel | null> => {
-    consola.start("Searching for Entity with name:", name);
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES)
         .findOne({ name: name, deleted: false }, (error: any, result: any) => {
           if (error) {
+            consola.error(`Error finding Entity with name "${name}":`, error);
             resolve(null);
           } else if (result) {
+            consola.debug("Entity found with name:", name);
             resolve(result as EntityModel);
           } else {
-            consola.warn("No Entity found with name:", name);
+            consola.debug("No Entity found with name:", name);
             resolve(null);
           }
         });
     });
   };
 
-
   /**
    * Create a new Entity
    * @param {any} entity all data associated with the new Entity
-   * @return {Promise<EntityModel>}
+   * @returns {Promise<EntityModel>}
    */
   static create = (entity: any): Promise<EntityModel> => {
-    consola.start("Creating new Entity:", entity?.name);
-
     if (!entity?._id) {
-      // Allocate a new identifier and join with Entity data
+      // Generate a new identifier and join with Entity data
       entity["_id"] = getIdentifier("entity");
     }
-
     entity["timestamp"] = new Date().toISOString();
 
     // Push data to database
@@ -161,6 +171,7 @@ export class Entities {
         .collection(ENTITIES)
         .insertOne(entity as any, async (error: any, _result: any) => {
           if (error) {
+            consola.error("Error inserting new Entity:", error);
             throw error;
           }
 
@@ -170,39 +181,43 @@ export class Entities {
           if (entity?.associations?.origins?.length > 0) {
             // If this Entity has an origin, add this Entity as a product of that origin Entity
             for (const origin of entity.associations.origins) {
-              if (!origin.id) {
+              if (!origin._id) {
                 // If the origin Entity does not have an ID, create it
-                const originEntity = await Entities.findEntityByName(origin?.name);
+                const originEntity = await Entities.findEntityByName(
+                  origin?.name,
+                );
                 if (originEntity?._id) {
-                  origin.id = originEntity?._id;
+                  origin._id = originEntity?._id;
                 }
               }
               operations.push(
                 Entities.addProduct(origin, {
                   name: entity?.name,
                   _id: entity?._id,
-                })
+                }),
               );
-            };
+            }
           }
 
           if (entity?.associations?.products?.length > 0) {
             // If this Entity has products, set this Entity as the origin of each product Entity-
             for (const product of entity.associations.products) {
-              if (!product.id) {
+              if (!product._id) {
                 // If the origin Entity does not have an ID, create it
-                const productEntity = await Entities.findEntityByName(product?.name);
+                const productEntity = await Entities.findEntityByName(
+                  product?.name,
+                );
                 if (productEntity?._id) {
-                  product.id = productEntity?._id;
+                  product._id = productEntity?._id;
                 }
               }
               operations.push(
                 Entities.addOrigin(product, {
                   name: entity?.name,
                   _id: entity?._id,
-                })
+                }),
               );
-            };
+            }
           }
 
           if (entity.projects?.length > 0) {
@@ -223,81 +238,85 @@ export class Entities {
                 _id: entity?._id,
                 name: entity?.name,
               },
-            })
+            }),
           );
 
           // Resolve all operations then resolve overall Promise
           Promise.all(operations)
             .then((_result) => {
-              consola.success("Created Entity:", entity?._id, entity?.name);
+              consola.debug("Created Entity:", entity?.name);
               resolve(entity);
             })
-            .catch((_error) => {
-              consola.error("Error creating Entity:", entity?._id, entity?.name);
-              reject("Error creating Entity");
+            .catch((error) => {
+              consola.error(`Error creating Entity ${entity?._id}:`, error);
+              reject(`Error creating Entity ${entity?._id}`);
             });
         });
     });
   };
 
-
   /**
    * Update an Entity or create if new, comparing a new version with the existing version
-   * @param {EntityModel} updatedEntity updated Entity
-   * @return {Promise<EntityModel>}
+   * @param {EntityModel} entityData updated Entity
+   * @returns {Promise<EntityModel>}
    */
   static upsert = async (entityData: EntityModel): Promise<EntityModel> => {
     try {
       // Check if the Entity exists by a unique identifier (e.g., _id or name)
-      let existingEntity = await getDatabase().collection(ENTITIES).findOne({
-        $or: [
-          { _id: entityData?._id },  // Check by _id
-          // { name: entityData?.name } // Check by name
-        ]
-      });
+      let existingEntity = await getDatabase()
+        .collection(ENTITIES)
+        .findOne({
+          $or: [
+            { _id: entityData?._id }, // Check by _id
+            // { name: entityData?.name } // Check by name
+          ],
+        });
 
       if (existingEntity) {
         // If the Entity exists, update it
-        return await Entities.update({ ...existingEntity, ...entityData, });
+        return await Entities.update({ ...existingEntity, ...entityData });
       } else {
         // If the Entity does not exist, create a new one
-        existingEntity = await getDatabase().collection(ENTITIES).findOne({
-          $or: [
-            { name: entityData?.name },  // Check by name
-          ]
-        });
+        existingEntity = await getDatabase()
+          .collection(ENTITIES)
+          .findOne({
+            $or: [
+              { name: entityData?.name }, // Check by name
+            ],
+          });
 
         if (existingEntity) {
           // If the Entity exists, update it
           entityData._id = existingEntity._id as any;
-          return await Entities.update({ ...existingEntity, ...entityData, });
+          return await Entities.update({ ...existingEntity, ...entityData });
         }
 
         return await Entities.create(entityData);
       }
     } catch (error) {
-      console.error("Error in upserting Entity:", error);
+      consola.error(`Error in upserting Entity "${entityData?._id}":`, error);
       throw error; // Rethrow the error to be handled by the caller
     }
   };
 
-
   /**
    * Update an Entity, comparing a new version with the existing version
    * @param {EntityModel} updatedEntity updated Entity
-   * @return {Promise<EntityModel>}
+   * @returns {Promise<EntityModel>}
    */
   static update = (updatedEntity: EntityModel): Promise<EntityModel> => {
-    consola.start("Updating Entity:", updatedEntity?.name);
     if (!updatedEntity?._id) {
-      console.log("Entity ID is required to update an Entity");
+      consola.warn("Entity ID is required to update an Entity");
     }
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES)
         .findOne({ _id: updatedEntity?._id }, (error: any, result: any) => {
           if (error) {
-            consola.error("update findOne error:", error);
+            consola.error(
+              `Error finding Entity "${updatedEntity?._id}":`,
+              error,
+            );
             throw error;
           }
           if (!result) {
@@ -312,26 +331,26 @@ export class Entities {
 
           // Projects
           const projectsToKeep = currentEntity?.projects?.filter((project) =>
-            updatedEntity?.projects?.includes(project)
+            updatedEntity?.projects?.includes(project),
           );
           const projectsToAdd = updatedEntity?.projects?.filter(
-            (project) => !projectsToKeep?.includes(project)
+            (project) => !projectsToKeep?.includes(project),
           );
           if (projectsToAdd?.length > 0) {
             operations.push(
               projectsToAdd?.map((project: string) => {
                 Projects.addEntity(project, updatedEntity?._id);
-              })
+              }),
             );
           }
           const projectsToRemove = currentEntity?.projects?.filter(
-            (project) => !projectsToKeep?.includes(project)
+            (project) => !projectsToKeep?.includes(project),
           );
           if (projectsToRemove?.length > 0) {
             operations.push(
               projectsToRemove?.map((project: string) => {
                 Projects.removeEntity(project, updatedEntity?._id);
-              })
+              }),
             );
           }
 
@@ -341,40 +360,41 @@ export class Entities {
             ?.filter((product) =>
               updatedEntity?.associations?.products
                 ?.map((product) => product._id)
-                .includes(product)
+                .includes(product),
             );
           const productsToAdd = updatedEntity?.associations?.products?.filter(
-            (product) => !productsToKeep?.includes(product._id)
+            (product) => !productsToKeep?.includes(product._id),
           );
           if (productsToAdd && productsToAdd?.length > 0) {
             operations.push(
-              productsToAdd?.map((product: { _id: string; name: string }) => {
+              productsToAdd?.map((product: IGenericItem) => {
                 Entities.addOrigin(product, {
                   name: updatedEntity?.name,
                   _id: updatedEntity?._id,
                 });
                 Entities.addProduct(
                   { name: updatedEntity?.name, _id: updatedEntity?._id },
-                  product
+                  product,
                 );
-              })
+              }),
             );
           }
-          const productsToRemove = currentEntity?.associations?.products?.filter(
-            (product) => !productsToKeep?.includes(product._id)
-          );
+          const productsToRemove =
+            currentEntity?.associations?.products?.filter(
+              (product) => !productsToKeep?.includes(product._id),
+            );
           if (productsToRemove?.length > 0) {
             operations.push(
-              productsToRemove?.map((product: { _id: string; name: string }) => {
+              productsToRemove?.map((product: IGenericItem) => {
                 Entities.removeOrigin(product, {
                   name: updatedEntity?.name,
                   _id: updatedEntity?._id,
                 });
                 Entities.removeProduct(
                   { name: updatedEntity?.name, _id: updatedEntity?._id },
-                  product
+                  product,
                 );
-              })
+              }),
             );
           }
 
@@ -384,40 +404,40 @@ export class Entities {
             ?.filter((origin) =>
               updatedEntity?.associations?.origins
                 ?.map((origin) => origin._id)
-                .includes(origin)
+                .includes(origin),
             );
           const originsToAdd = updatedEntity?.associations?.origins?.filter(
-            (origin) => !originsToKeep?.includes(origin._id)
+            (origin) => !originsToKeep?.includes(origin._id),
           );
           if (originsToAdd && originsToAdd?.length > 0) {
             operations.push(
-              originsToAdd?.map((origin: { _id: string; name: string }) => {
+              originsToAdd?.map((origin: IGenericItem) => {
                 Entities.addOrigin(
                   { name: updatedEntity?.name, _id: updatedEntity?._id },
-                  origin
+                  origin,
                 );
                 Entities.addProduct(origin, {
                   name: updatedEntity?.name,
                   _id: updatedEntity?._id,
                 });
-              })
+              }),
             );
           }
           const originsToRemove = currentEntity?.associations?.origins?.filter(
-            (origin) => !originsToKeep?.includes(origin._id)
+            (origin) => !originsToKeep?.includes(origin._id),
           );
           if (originsToRemove?.length > 0) {
             operations.push(
-              originsToRemove?.map((origin: { _id: string; name: string }) => {
+              originsToRemove?.map((origin: IGenericItem) => {
                 Entities.removeOrigin(
                   { name: updatedEntity?.name, _id: updatedEntity?._id },
-                  origin
+                  origin,
                 );
                 Entities.removeProduct(origin, {
                   name: updatedEntity?.name,
                   _id: updatedEntity?._id,
                 });
-              })
+              }),
             );
           }
 
@@ -427,34 +447,35 @@ export class Entities {
             ?.filter((attribute) =>
               updatedEntity?.attributes
                 ?.map((attribute) => attribute?._id)
-                .includes(attribute)
+                .includes(attribute),
             );
           operations.push(
             attributesToKeep?.map((attribute: string) => {
               const updatedAttribute = updatedEntity?.attributes?.filter(
-                (updatedAttribute) => _.isEqual(attribute, updatedAttribute?._id)
+                (updatedAttribute) =>
+                  _.isEqual(attribute, updatedAttribute?._id),
               )[0];
               Entities.updateAttribute(updatedEntity?._id, updatedAttribute);
-            })
+            }),
           );
           const attributesToAdd = updatedEntity?.attributes?.filter(
-            (attribute) => !attributesToKeep?.includes(attribute?._id)
+            (attribute) => !attributesToKeep?.includes(attribute?._id),
           );
           if (attributesToAdd?.length > 0) {
             operations.push(
               attributesToAdd?.map((attribute: AttributeModel) => {
                 Entities.addAttribute(updatedEntity?._id, attribute);
-              })
+              }),
             );
           }
           const attributesToRemove = currentEntity?.attributes.filter(
-            (attribute) => !attributesToKeep?.includes(attribute?._id)
+            (attribute) => !attributesToKeep?.includes(attribute?._id),
           );
           if (attributesToRemove?.length > 0) {
             operations.push(
               attributesToRemove?.map((attribute) => {
                 Entities.removeAttribute(updatedEntity?._id, attribute?._id);
-              })
+              }),
             );
           }
 
@@ -464,16 +485,16 @@ export class Entities {
             .filter((attachment) =>
               updatedEntity?.attachments
                 .map((attachment) => attachment._id)
-                .includes(attachment)
+                .includes(attachment),
             );
           const attachmentsToRemove = currentEntity?.attachments.filter(
-            (attachment) => !attachmentsToKeep?.includes(attachment._id)
+            (attachment) => !attachmentsToKeep?.includes(attachment._id),
           );
           if (attachmentsToRemove?.length > 0) {
             operations.push(
               attachmentsToRemove?.map((attachment) => {
                 Entities.removeAttachment(updatedEntity?._id, attachment);
-              })
+              }),
             );
           }
 
@@ -488,15 +509,12 @@ export class Entities {
                 _id: currentEntity?._id,
                 name: currentEntity?.name,
               },
-            })
+            }),
           );
 
           // Ensure the list of projects is unique
           const uniqueProjects = [
-            ...new Set([
-              ...(projectsToKeep || []),
-              ...(projectsToAdd || []),
-            ]),
+            ...new Set([...(projectsToKeep || []), ...(projectsToAdd || [])]),
           ];
 
           // Resolve all operations then resolve overall Promise
@@ -510,13 +528,13 @@ export class Entities {
                 associations: {
                   origins: [
                     ...(currentEntity?.associations?.origins?.filter((origin) =>
-                      originsToKeep?.includes(origin._id)
-                    )) || [],
+                      originsToKeep?.includes(origin._id),
+                    ) || []),
                     ...(originsToAdd || []),
                   ],
                   products: [
-                    ...(currentEntity?.associations?.products?.filter((product) =>
-                      productsToKeep?.includes(product._id)
+                    ...(currentEntity?.associations?.products?.filter(
+                      (product) => productsToKeep?.includes(product._id),
                     ) || []),
                     ...(productsToAdd || []),
                   ],
@@ -546,13 +564,17 @@ export class Entities {
                 updates,
                 (error: any, _response: any) => {
                   if (error) {
+                    consola.debug(
+                      `Error updating Entity "${updatedEntity?._id}":`,
+                      error,
+                    );
                     throw error;
                   }
 
                   // Resolve the Promise
-                  consola.success("Updated Entity:", updatedEntity?.name);
+                  consola.debug("Updated Entity:", updatedEntity?.name);
                   resolve(updatedEntity);
-                }
+                },
               );
           });
         });
@@ -562,15 +584,15 @@ export class Entities {
   /**
    * Restore a version of an Entity
    * @param {EntityModel} entity the Entity data to restore
-   * @return {Promise<EntityModel>}
+   * @returns {Promise<EntityModel>}
    */
   static restore = (entity: EntityModel): Promise<EntityModel> => {
-    consola.start("Restoring Entity:", entity?.name);
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES)
         .insertOne(entity as any, (error: any, _result: any) => {
           if (error) {
+            consola.error(`Error restoring Entity "${entity?._id}":`, error);
             throw error;
           }
 
@@ -588,43 +610,45 @@ export class Entities {
                 _id: entity?._id,
                 name: entity?.name,
               },
-            })
+            }),
           );
 
           // Resolve all operations then resolve overall Promise
           Promise.all(operations)
             .then((_result) => {
-              consola.success("Restored Entity:", entity?._id, entity?.name);
+              consola.debug("Restored Entity:", entity?._id, entity?.name);
               resolve(entity);
             })
             .catch((_error) => {
-              consola.error("Error restoring Entity:", entity?._id, entity?.name);
+              consola.error(`Error restoring Entity "${entity?._id}":`, error);
               reject("Error restoring Entity");
             });
         });
     });
   };
 
+  /**
+   * Add a Project to an Entity
+   * @param {string} entity Target Entity identifier
+   * @param {string} project Project identifier to add
+   * @returns {Promise<string>}
+   */
   static addProject = (entity: string, project: string): Promise<string> => {
-    consola.start(
-      "Adding Entity (id):",
-      entity.toString(),
-      "to Project (id):",
-      project.toString()
-    );
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES)
         .findOne({ _id: entity }, (error: any, result: any) => {
           if (error) {
-            console.log("addProject findOne error:", error);
+            consola.error(
+              `Error retrieving Entity "${entity}" to add Project: ${error}`,
+            );
             throw error;
           }
 
           // Update the collection of Projects associated with the Entity to include this extra Project
           const updates = {
             $set: {
-              projects: [...(result?.projects) || [], project],
+              projects: [...(result?.projects || []), project],
             },
           };
 
@@ -635,36 +659,41 @@ export class Entities {
               updates,
               (error: any, _response: any) => {
                 if (error) {
-                  console.log("addProject updateOne error:", error);
+                  consola.error(
+                    `Error updating Entity "${entity}" to add Project: ${error}`,
+                  );
                   throw error;
                 }
 
                 // Resolve the Promise
-                consola.success(
+                consola.debug(
                   "Added Entity (id):",
                   entity.toString(),
                   "to Project (id):",
-                  project.toString()
+                  project.toString(),
                 );
                 resolve(entity);
-              }
+              },
             );
         });
     });
   };
 
+  /**
+   * Remove a Project from an Entity
+   * @param {string} entity Target Entity identifier
+   * @param {string} project Project identifier to remove
+   * @returns {Promise<string>}
+   */
   static removeProject = (entity: string, project: string): Promise<string> => {
-    consola.start(
-      "Removing Entity (id):",
-      entity.toString(),
-      "from Project (id):",
-      project.toString()
-    );
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES)
         .findOne({ _id: entity }, (error: any, result: any) => {
           if (error) {
+            consola.error(
+              `Error retrieving Entity "${entity}" to remove Project: ${error}`,
+            );
             throw error;
           }
 
@@ -673,7 +702,7 @@ export class Entities {
             $set: {
               projects: [
                 ...(result as EntityModel).projects?.filter(
-                  (content) => !_.isEqual(content, project)
+                  (content) => !_.isEqual(content, project),
                 ),
               ],
             },
@@ -686,18 +715,21 @@ export class Entities {
               updates,
               (error: any, _response: any) => {
                 if (error) {
+                  consola.error(
+                    `Error updating Entity "${entity}" to remove Project: ${error}`,
+                  );
                   throw error;
                 }
 
                 // Resolve the Promise
-                consola.success(
+                consola.debug(
                   "Removed Entity (id):",
                   entity.toString(),
                   "from Project (id):",
-                  project.toString()
+                  project.toString(),
                 );
                 resolve(entity);
-              }
+              },
             );
         });
     });
@@ -705,35 +737,40 @@ export class Entities {
 
   /**
    * Add another Entity to a collection of "product" associations
-   * @param {{ name: string, _id: string }} entity the Entity of interest
-   * @param {{ name: string, _id: string }} product an Entity to add as a "product" association
-   * @return {Promise<{ name: string, _id: string }>}
+   * @param {IGenericItem} entity Target Entity name and identifier
+   * @param {IGenericItem} product Entity name and identifier to add as a "product"-type association
+   * @returns {Promise<Item>}
    */
   static addProduct = (
-    entity: { name: string; _id: string },
-    product: { name: string; _id: string }
-  ): Promise<{ name: string; _id: string }> => {
-    consola.start("Adding Product", product?.name, "to Entity", entity?.name);
+    entity: IGenericItem,
+    product: IGenericItem,
+  ): Promise<IGenericItem> => {
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES)
         .findOne({ _id: entity._id }, (error: any, result: any) => {
           if (error) {
+            consola.error(
+              `Error retrieving Entity "${entity._id}" to add Product: ${error}`,
+            );
             throw error;
           }
-          let updatedProducts = result?.associations?.products ?? [];
-          const existingProductIndex = updatedProducts.findIndex((o: { name: string; id: string }) => o?.name === product?.name);
+          let updatedProducts: IGenericItem[] =
+            result?.associations?.products ?? [];
+          const existingProductIndex = updatedProducts.findIndex(
+            (o: IGenericItem) => o?.name === product?.name,
+          );
 
           if (existingProductIndex > -1) {
             // Update existing origin if new ID is provided
             if (product._id) {
-              updatedProducts[existingProductIndex].id = product._id;
+              updatedProducts[existingProductIndex]._id = product._id;
             }
           } else {
             // Add new origin
             updatedProducts = [
               ...updatedProducts,
-              { name: product?.name, id: product._id },
+              { name: product?.name, _id: product._id },
             ];
           }
 
@@ -754,39 +791,44 @@ export class Entities {
               updates,
               (error: any, _response: any) => {
                 if (error) {
+                  consola.error(
+                    `Error updating Entity "${entity._id}" to add Product: ${error}`,
+                  );
                   throw error;
                 }
 
                 // Resolve the Promise
-                consola.success(
+                consola.debug(
                   "Added Product",
                   product?.name,
                   "to Entity",
-                  entity?.name
+                  entity?.name,
                 );
                 resolve(entity);
-              }
+              },
             );
         });
     });
   };
 
   /**
-   * Add another Entity to a collection of "product" associations
-   * @param {{ name: string, _id: string }} entity the Entity of interest
-   * @param {{ name: string, _id: string }[]} products Entities to add as a "product" association
-   * @return {Promise<{ name: string, _id: string }[]>}
+   * Add another Entities as a collection of "product"-type associations
+   * @param {IGenericItem} entity Target Entity name and identifier
+   * @param {IGenericItem[]} products Entity names and identifiers to add as a "product"-type association
+   * @returns {Promise<IGenericItem[]>}
    */
   static addProducts = (
-    entity: { name: string; _id: string },
-    products: { name: string; _id: string }[]
-  ): Promise<{ name: string; _id: string }> => {
-    consola.start("Adding", products?.length, "Products to Entity", entity?.name);
+    entity: IGenericItem,
+    products: IGenericItem[],
+  ): Promise<IGenericItem> => {
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES)
         .findOne({ _id: entity._id }, (error: any, result: any) => {
           if (error) {
+            consola.error(
+              `Error retrieving Entity "${entity._id}" to add Products: ${error}`,
+            );
             throw error;
           }
 
@@ -796,7 +838,7 @@ export class Entities {
               associations: {
                 origins: result.associations.origins,
                 products: _.uniq(
-                  _.concat(result.associations.products, products)
+                  _.concat(result.associations.products, products),
                 ),
               },
             },
@@ -809,34 +851,50 @@ export class Entities {
               updates,
               (error: any, _response: any) => {
                 if (error) {
+                  consola.error(
+                    `Error updating Entity "${entity._id}" to add Products: ${error}`,
+                  );
                   throw error;
                 }
 
                 // Resolve the Promise
-                consola.start(
+                consola.debug(
                   "Added",
                   products?.length,
                   "Products to Entity",
-                  entity?.name
+                  entity?.name,
                 );
                 resolve(entity);
-              }
+              },
             );
         });
     });
   };
 
+  /**
+   * Remove Entity as a "product"-type association
+   * @param {IGenericItem} entity Target Entity name and identifier
+   * @param {IGenericItem} product Entity name and identifier to remove as a "product"-type association
+   * @returns {Promise<IGenericItem[]>}
+   */
   static removeProduct = (
-    entity: { name: string; _id: string },
-    product: { name: string; _id: string }
-  ): Promise<{ name: string; _id: string }> => {
-    consola.start("Removing Product", product?.name, "from Entity", entity?.name);
+    entity: IGenericItem,
+    product: IGenericItem,
+  ): Promise<IGenericItem> => {
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES)
         .findOne({ _id: entity._id }, (error: any, result: any) => {
           if (error) {
+            consola.error(
+              `Error retrieving Entity "${entity._id}" to remove Product: ${error}`,
+            );
             throw error;
+          } else if (_.isNull(result)) {
+            consola.warn(
+              `Entity "${entity._id}" does not exist to remove Product: ${error}`,
+            );
+            resolve(entity);
           }
 
           // Update the collection of Products associated with the Entity to remove this Product
@@ -844,8 +902,10 @@ export class Entities {
             $set: {
               associations: {
                 origins: (result as EntityModel).associations?.origins,
-                products: (result as EntityModel).associations?.products?.filter(
-                  (content) => !_.isEqual(product._id, content._id)
+                products: (
+                  result as EntityModel
+                ).associations?.products?.filter(
+                  (content) => !_.isEqual(product._id, content._id),
                 ),
               },
             },
@@ -858,18 +918,21 @@ export class Entities {
               updates,
               (error: any, _response: any) => {
                 if (error) {
+                  consola.error(
+                    `Error updating Entity "${entity._id}" to remove Product: ${error}`,
+                  );
                   throw error;
                 }
 
                 // Resolve the Promise
-                consola.info(
+                consola.debug(
                   "Removed Product",
                   product?.name,
                   "from Entity",
-                  entity?.name
+                  entity?.name,
                 );
                 resolve(entity);
-              }
+              },
             );
         });
     });
@@ -877,25 +940,30 @@ export class Entities {
 
   /**
    * Specify an Entity acting as an Origin
-   * @param {{ name: string, _id: string }} entity the Entity of interest
-   * @param {{ name: string, _id: string }} origin an Entity to add as an "origin" association
-   * @return {Promise<{ name: string, _id: string }>}
+   * @param {IGenericItem} entity Target Entity name and identifier
+   * @param {IGenericItem} origin Entity name and identifier to add as an "origin"-type association
+   * @returns {Promise<IGenericItem>}
    */
   static addOrigin = (
-    entity: { name: string; _id: string },
-    origin: { name: string; _id: string }
-  ): Promise<{ name: string; _id: string }> => {
-    consola.start("Adding Origin", origin?.name, "to Entity", entity?.name);
+    entity: IGenericItem,
+    origin: IGenericItem,
+  ): Promise<IGenericItem> => {
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES)
         .findOne({ _id: entity._id }, (error: any, result: any) => {
           if (error) {
+            consola.error(
+              `Error retrieving Entity "${entity._id}" to add Origin: ${error}`,
+            );
             throw error;
           }
 
-          let updatedOrigins = result?.associations?.origins ?? [];
-          const existingOriginIndex = updatedOrigins.findIndex((o: { name: string; id: string }) => o?.name === origin?.name);
+          let updatedOrigins: IGenericItem[] =
+            result?.associations?.origins ?? [];
+          const existingOriginIndex = updatedOrigins.findIndex(
+            (o: IGenericItem) => o?.name === origin?.name,
+          );
 
           if (existingOriginIndex > -1) {
             // Update existing origin if new ID is provided
@@ -927,43 +995,48 @@ export class Entities {
               updates,
               (error: any, _response: any) => {
                 if (error) {
+                  consola.error(
+                    `Error updating Entity "${entity._id}" to add Origin: ${error}`,
+                  );
                   throw error;
                 }
 
                 // Resolve the Promise
-                consola.success(
+                consola.debug(
                   "Added Origin",
                   origin?.name,
                   "to Entity",
-                  entity?.name
+                  entity?.name,
                 );
                 resolve(entity);
-              }
+              },
             );
         });
     });
   };
 
   /**
-   * Specify an Entity acting as an Origin
-   * @param {{ name: string, _id: string }} entity the Entity of interest
-   * @param {{ name: string, _id: string }[]} origins Entities to add as "origin" associations
-   * @return {Promise<{ name: string, _id: string }[]>}
+   * Specify a collection of Entities acting as Origins
+   * @param {IGenericItem} entity Target Entity name and identifier
+   * @param {IGenericItem[]} origins Entities to add as "origin"-type associations
+   * @returns {Promise<IGenericItem[]>}
    */
   static addOrigins = (
-    entity: { name: string; _id: string },
-    origins: { name: string; _id: string }[]
-  ): Promise<{ name: string; _id: string }> => {
-    consola.start("Adding", origins?.length, "Origins to Entity", entity?.name);
+    entity: IGenericItem,
+    origins: IGenericItem[],
+  ): Promise<IGenericItem> => {
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES)
         .findOne({ _id: entity._id }, (error: any, result: any) => {
           if (error) {
+            consola.error(
+              `Error retrieving Entity "${entity._id}" to add Origins: ${error}`,
+            );
             throw error;
           }
 
-          // Add the Origin to this Entity
+          // Add the Origins to this Entity
           const updates = {
             $set: {
               associations: {
@@ -980,33 +1053,49 @@ export class Entities {
               updates,
               (error: any, _response: any) => {
                 if (error) {
+                  consola.error(
+                    `Error updating Entity "${entity._id}" to add Origins: ${error}`,
+                  );
                   throw error;
                 }
 
                 // Resolve the Promise
-                consola.success(
+                consola.debug(
                   "Added",
                   origins?.length,
                   "Origins to Entity",
-                  entity?.name
+                  entity?.name,
                 );
                 resolve(entity);
-              }
+              },
             );
         });
     });
   };
 
+  /**
+   * Asynchronously removes an Origin from an Entity's associations.
+   * @param {Object} entity The entity from which the origin is being removed.
+   * @param {string} entity.name The name of the entity.
+   * @param {string} entity._id The ID of the entity.
+   * @param {Object} origin The origin being removed.
+   * @param {string} origin.name The name of the origin.
+   * @param {string} origin._id The ID of the origin.
+   * @returns {Promise<Item>} Resolves with the updated entity after removing the origin.
+   * @throws {Error} Throws an error if there are issues with the database operation.
+   */
   static removeOrigin = (
-    entity: { name: string; _id: string },
-    origin: { name: string; _id: string }
-  ): Promise<{ name: string; _id: string }> => {
-    consola.start("Removing Origin", origin?.name, "from Entity", entity?.name);
+    entity: IGenericItem,
+    origin: IGenericItem,
+  ): Promise<IGenericItem> => {
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES)
         .findOne({ _id: entity._id }, (error: any, result: any) => {
           if (error) {
+            consola.error(
+              `Error retrieving Entity "${entity._id}" to remove Origin: ${error}`,
+            );
             throw error;
           }
 
@@ -1015,7 +1104,7 @@ export class Entities {
             $set: {
               associations: {
                 origins: (result as EntityModel).associations?.origins?.filter(
-                  (content) => !_.isEqual(origin._id, content._id)
+                  (content) => !_.isEqual(origin._id, content._id),
                 ),
                 products: (result as EntityModel).associations?.products,
               },
@@ -1029,39 +1118,47 @@ export class Entities {
               updates,
               (error: any, _response: any) => {
                 if (error) {
+                  consola.error(
+                    `Error updating Entity "${entity._id}" to remove Origin: ${error}`,
+                  );
                   throw error;
                 }
 
                 // Resolve the Promise
-                consola.success(
+                consola.debug(
                   "Removed Origin",
                   origin?.name,
                   "from Entity",
-                  entity?.name
+                  entity?.name,
                 );
                 resolve(entity);
-              }
+              },
             );
         });
     });
   };
 
+  /**
+   * Asynchronously adds an Attribute to the specified Entity.
+   * @param {string} entity The ID of the Entity to which the Attribute is being added.
+   * @param {AttributeModel} attribute The Attribute object being added to the Entity.
+   * @param {string} attribute.name The name of the Attribute.
+   * @param {*} attribute Any additional properties associated with the Attribute.
+   * @returns {Promise<string>} Resolves with the ID of the Entity after adding the Attribute.
+   * @throws {Error} Throws an error if there are issues with the database operation.
+   */
   static addAttribute = (
     entity: string,
-    attribute: AttributeModel
+    attribute: AttributeModel,
   ): Promise<string> => {
-    consola.start(
-      "Adding Attribute:",
-      attribute?.name.toString(),
-      "to Entity (id):",
-      entity.toString()
-    );
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES)
         .findOne({ _id: entity }, (error: any, result: any) => {
           if (error) {
-            console.log("addAttribute findOne error:", error);
+            consola.error(
+              `Error retrieving Entity "${entity}" to add Attribute: ${error}`,
+            );
             throw error;
           }
 
@@ -1069,7 +1166,6 @@ export class Entities {
           const updates = {
             $set: {
               attributes: [...(result?.attributes || []), attribute],
-
             },
           };
 
@@ -1080,39 +1176,45 @@ export class Entities {
               updates,
               (error: any, _response: any) => {
                 if (error) {
-                  console.log("addAttribute updateOne error:", error);
+                  consola.error(
+                    `Error updating Entity "${entity}" to add Attribute: ${error}`,
+                  );
                   throw error;
                 }
 
                 // Resolve the Promise
-                consola.success(
+                consola.debug(
                   "Added Attribute:",
                   attribute?.name.toString(),
                   "to Entity (id):",
-                  entity.toString()
+                  entity.toString(),
                 );
                 resolve(entity);
-              }
+              },
             );
         });
     });
   };
 
+  /**
+   * Asynchronously removes an Attribute from the specified Entity.
+   * @param {string} entity The ID of the Entity from which the Attribute is being removed.
+   * @param {string} attribute The ID of the Attribute to be removed from the Entity.
+   * @returns {Promise<string>} Resolves with the ID of the Entity after removing the Attribute.
+   * @throws {Error} Throws an error if there are issues with the database operation.
+   */
   static removeAttribute = (
     entity: string,
-    attribute: string
+    attribute: string,
   ): Promise<string> => {
-    consola.start(
-      "Removing Attribute (id):",
-      attribute.toString(),
-      "from Entity (id):",
-      entity.toString()
-    );
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES)
         .findOne({ _id: entity }, (error: any, result: any) => {
           if (error) {
+            consola.error(
+              `Error retrieving Entity "${entity}" to remove Attribute: ${error}`,
+            );
             throw error;
           }
 
@@ -1121,7 +1223,7 @@ export class Entities {
             $set: {
               attributes: [
                 ...(result as EntityModel)?.attributes?.filter(
-                  (content) => !_.isEqual(content?._id, attribute)
+                  (content) => !_.isEqual(content?._id, attribute),
                 ),
               ],
             },
@@ -1134,38 +1236,45 @@ export class Entities {
               updates,
               (error: any, _response: any) => {
                 if (error) {
+                  consola.error(
+                    `Error updating Entity "${entity}" to remove Attribute: ${error}`,
+                  );
                   throw error;
                 }
 
                 // Resolve the Promise
-                consola.success(
+                consola.debug(
                   "Removed Attribute (id):",
                   attribute.toString(),
                   "from Entity (id):",
-                  entity.toString()
+                  entity.toString(),
                 );
                 resolve(entity);
-              }
+              },
             );
         });
     });
   };
 
+  /**
+   * Asynchronously updates an Attribute of the specified Entity.
+   * @param {string} entity The ID of the Entity whose Attribute is being updated.
+   * @param {AttributeModel} updatedAttribute The updated Attribute object.
+   * @returns {Promise<string>} Resolves with the ID of the Entity after updating the Attribute.
+   * @throws {Error} Throws an error if there are issues with the database operation.
+   */
   static updateAttribute = (
     entity: string,
-    updatedAttribute: AttributeModel
+    updatedAttribute: AttributeModel,
   ): Promise<string> => {
-    consola.start(
-      "Update Attribute (id):",
-      updatedAttribute?._id.toString(),
-      "from Entity (id):",
-      entity.toString()
-    );
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES)
         .findOne({ _id: entity }, (error: any, result: any) => {
           if (error) {
+            consola.error(
+              `Error retrieving Entity "${entity}" to update Attribute: ${error}`,
+            );
             throw error;
           }
 
@@ -1191,18 +1300,21 @@ export class Entities {
               updates,
               (error: any, _response: any) => {
                 if (error) {
+                  consola.error(
+                    `Error retrieving Entity "${entity}" to update Attribute: ${error}`,
+                  );
                   throw error;
                 }
 
                 // Resolve the Promise
-                consola.success(
+                consola.debug(
                   "Updated Attribute (id):",
                   updatedAttribute?._id.toString(),
                   "from Entity (id):",
-                  entity.toString()
+                  entity.toString(),
                 );
                 resolve(entity);
-              }
+              },
             );
         });
     });
@@ -1212,23 +1324,20 @@ export class Entities {
    * Update the description of an Entity
    * @param entity the Entity of interest
    * @param description an updated description
-   * @return {Promise<{ name: string, id: string }>}
+   * @returns {Promise<IGenericItem>}
    */
   static setDescription = (
-    entity: { name: string; id: string },
-    description: string
-  ): Promise<{ name: string; id: string }> => {
-    consola.start(
-      "Setting description of Entity",
-      entity?.name,
-      "to",
-      description
-    );
+    entity: IGenericItem,
+    description: string,
+  ): Promise<IGenericItem> => {
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES)
-        .findOne({ _id: entity.id }, (error: any, _result: any) => {
+        .findOne({ _id: entity._id }, (error: any, _result: any) => {
           if (error) {
+            consola.error(
+              `Error retrieving Entity "${entity}" to update description: ${error}`,
+            );
             throw error;
           }
 
@@ -1242,38 +1351,49 @@ export class Entities {
           getDatabase()
             .collection(ENTITIES)
             .updateOne(
-              { _id: entity.id },
+              { _id: entity._id },
               updates,
               (error: any, _response: any) => {
                 if (error) {
+                  consola.error(
+                    `Error updating Entity "${entity}" to update description: ${error}`,
+                  );
                   throw error;
                 }
 
                 // Resolve the Promise
-                consola.success(
+                consola.debug(
                   "Set description of Entity",
                   entity?.name,
                   "to",
-                  description
+                  description,
                 );
                 resolve(entity);
-              }
+              },
             );
         });
     });
   };
 
+  /**
+   * Asynchronously adds an attachment to the specified Entity.
+   * @param {string} _id The ID of the Entity to which the attachment is being added.
+   * @param {IGenericItem} attachment The attachment object to be added.
+   * @returns {Promise<IGenericItem>} Resolves with the added attachment object.
+   * @throws {Error} Throws an error if there are issues with the database operation.
+   */
   static addAttachment = (
-    id: string,
-    attachment: { name: string; _id: string }
-  ): Promise<{ name: string; _id: string }> => {
-    consola.start("Adding Attachment", attachment?.name, "to Entity (id):", id);
+    _id: string,
+    attachment: IGenericItem,
+  ): Promise<IGenericItem> => {
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES)
-        .findOne({ _id: id }, (error: any, result: any) => {
+        .findOne({ _id: _id }, (error: any, result: any) => {
           if (error) {
-            console.log("addAttachment findOne error:", error);
+            consola.error(
+              `Error retrieving Entity "${_id}" to add Attachment: ${error}`,
+            );
             throw error;
           }
 
@@ -1283,8 +1403,8 @@ export class Entities {
               attachments: [
                 ...result?.attachments,
                 {
-                  name: attachment?.name,
                   _id: attachment._id,
+                  name: attachment?.name,
                 },
               ],
             },
@@ -1292,18 +1412,20 @@ export class Entities {
 
           getDatabase()
             .collection(ENTITIES)
-            .updateOne({ _id: id }, updates, (error: any, _response: any) => {
+            .updateOne({ _id: _id }, updates, (error: any, _response: any) => {
               if (error) {
-                console.log("addAttachment updateOne error:", error);
+                consola.error(
+                  `Error updating Entity "${_id}" to add Attachment: ${error}`,
+                );
                 throw error;
               }
 
               // Resolve the Promise
-              consola.success(
+              consola.debug(
                 "Added Attachment",
                 attachment?.name,
                 "to Entity (id):",
-                id
+                _id,
               );
               resolve(attachment);
             });
@@ -1311,21 +1433,25 @@ export class Entities {
     });
   };
 
+  /**
+   * Asynchronously removes an attachment from the Entity entity.
+   * @param {string} _id The ID of the Entity from which the attachment is being removed.
+   * @param {IGenericItem} attachment The attachment object to be removed.
+   * @returns {Promise<IGenericItem>} Resolves with the removed attachment object.
+   * @throws {Error} Throws an error if there are issues with the database operation.
+   */
   static removeAttachment = (
-    id: string,
-    attachment: { name: string; _id: string }
-  ): Promise<{ name: string; _id: string }> => {
-    consola.start(
-      "Removing Attachment",
-      attachment?.name,
-      "from Entity (id):",
-      id
-    );
+    _id: string,
+    attachment: IGenericItem,
+  ): Promise<IGenericItem> => {
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES)
-        .findOne({ _id: id }, (error: any, result: any) => {
+        .findOne({ _id: _id }, (error: any, result: any) => {
           if (error) {
+            consola.error(
+              `Error retrieving Entity "${_id}" to remove Attachment: ${error}`,
+            );
             throw error;
           }
 
@@ -1334,7 +1460,7 @@ export class Entities {
             $set: {
               attachments: [
                 ...(result as EntityModel)?.attachments?.filter(
-                  (existing) => !_.isEqual(existing._id, attachment._id)
+                  (existing) => !_.isEqual(existing._id, attachment._id),
                 ),
               ],
             },
@@ -1342,17 +1468,20 @@ export class Entities {
 
           getDatabase()
             .collection(ENTITIES)
-            .updateOne({ _id: id }, updates, (error: any, _response: any) => {
+            .updateOne({ _id: _id }, updates, (error: any, _response: any) => {
               if (error) {
+                consola.error(
+                  `Error updating Entity "${_id}" to remove Attachment: ${error}`,
+                );
                 throw error;
               }
 
               // Resolve the Promise
-              consola.success(
+              consola.debug(
                 "Removed Attachment",
                 attachment?.name,
                 "from Entity (id):",
-                id
+                _id,
               );
               resolve(attachment);
             });
@@ -1362,24 +1491,18 @@ export class Entities {
 
   /**
    * Update the lock state of an Entity
-   * @param {{ entity: { name: string; id: string }; lockState: boolean; }} entityLockData the Entity of interest and a flag if the Entity is "locked", or editable
-   * @return {Promise<{ name: string, id: string }>}
+   * @param {{ entity: IGenericItem; lockState: boolean; }} entityLockData the Entity of interest and a flag if the Entity is "locked", or editable
+   * @returns {Promise<IGenericItem>}
    */
   static setLock = (entityLockData: {
-    entity: { name: string; id: string };
+    entity: IGenericItem;
     lockState: boolean;
-  }): Promise<{ name: string; id: string }> => {
-    consola.start(
-      "Setting lock state of Entity",
-      entityLockData.entity?.name,
-      "to",
-      entityLockData.lockState ? "locked" : "unlocked"
-    );
+  }): Promise<IGenericItem> => {
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES)
         .findOne(
-          { _id: entityLockData.entity.id },
+          { _id: entityLockData.entity._id },
           (error: any, _result: any) => {
             if (error) {
               throw error;
@@ -1399,7 +1522,7 @@ export class Entities {
             getDatabase()
               .collection(ENTITIES)
               .updateOne(
-                { _id: entityLockData.entity.id },
+                { _id: entityLockData.entity._id },
                 updates,
                 (error: any, _response: any) => {
                   if (error) {
@@ -1417,23 +1540,23 @@ export class Entities {
                   }
 
                   // Resolve the Promise
-                  consola.success(
+                  consola.debug(
                     "Set lock state of Entity",
                     entityLockData.entity?.name,
                     "to",
-                    entityLockData.lockState ? "locked" : "unlocked"
+                    entityLockData.lockState ? "locked" : "unlocked",
                   );
                   resolve(entityLockData.entity);
-                }
+                },
               );
-          }
+          },
         );
     });
   };
 
   /**
    * Retrieve all Entities
-   * @return {Promise<EntityModel[]>}
+   * @returns {Promise<EntityModel[]>}
    */
   static getAll = (): Promise<EntityModel[]> => {
     return new Promise((resolve, _reject) => {
@@ -1444,11 +1567,11 @@ export class Entities {
         })
         .toArray((error: any, result: any) => {
           if (error) {
-            console.log("getAll find error:", error);
+            consola.error("Error retrieving all Entities:", error);
             throw error;
           }
 
-          consola.success("Retrieved all Entities");
+          consola.debug("Retrieved all Entities");
           resolve(result as EntityModel[]);
         });
     });
@@ -1457,45 +1580,48 @@ export class Entities {
   /**
    * Get a single Entity
    * @param {string} id the Entity identifier
-   * @return {Promise<EntityModel>}
+   * @returns {Promise<EntityModel>}
    */
   static getOne = (id: string): Promise<EntityModel> => {
-    consola.start("Retrieving Entity (id):", id.toString());
     return new Promise((resolve, reject) => {
       getDatabase()
         .collection(ENTITIES)
         .findOne({ _id: id }, (error: any, result: any) => {
           if (error) {
-            console.log("getOne findOne error:", error);
+            consola.error(`Error retrieving Entity "${id}": ${error}`);
             reject(error);
             throw error;
           }
 
-          consola.success("Retrieved Entity (id):", id.toString());
+          consola.debug("Retrieved Entity (id):", id.toString());
           resolve(result as EntityModel);
         });
     });
   };
 
   /**
-   * Collate and generate a data string containing all data pertaining to
-   * an Entity
-   * @param {{ id: string, fields: string[] }} entityExportData the export data of the Entity
-   * @return {Promise<string>}
+   * Asynchronously retrieves data for exporting from the specified Entity.
+   * @param {string} entityId - The ID of the Entity from which data is being exported.
+   * @param {{ fields: string[]; format: "json" | "csv" | "txt"; }} exportInfo - Information about the data export.
+   * @returns {Promise<string>} Resolves with the path to the exported data file.
+   * @throws {Error} Throws an error if there are issues with the database operation or export process.
    */
   static getData = (
     entityId: string,
     exportInfo: {
       fields: string[];
       format: "json" | "csv" | "txt";
-    }
+    },
   ): Promise<string> => {
-    consola.start("Generating data for Entity (id):", entityId.toString());
     return new Promise((resolve, reject) => {
       getDatabase()
         .collection(ENTITIES)
         .findOne({ _id: entityId }, (error: any, result: any) => {
           if (error) {
+            consola.error(
+              `Error retrieving Entity "${entityId}" for export:`,
+              error,
+            );
             reject(error);
             throw error;
           }
@@ -1516,8 +1642,8 @@ export class Entities {
                 headers.push("Created");
                 row.push(
                   Promise.resolve(
-                    dayjs(entity.created).format("DD MMM YYYY").toString()
-                  )
+                    dayjs(entity.created).format("DD MMM YYYY").toString(),
+                  ),
                 );
               } else if (_.isEqual(field, "owner")) {
                 // "owner" data field
@@ -1533,7 +1659,7 @@ export class Entities {
                   Entities.getOne(field.slice(7)).then((entity) => {
                     headers.push(`Origin (${entity?.name})`);
                     return entity?.name;
-                  })
+                  }),
                 );
               } else if (_.startsWith(field, "product_")) {
                 // "products" data field
@@ -1541,7 +1667,7 @@ export class Entities {
                   Entities.getOne(field.slice(8)).then((entity) => {
                     headers.push(`Product (${entity?.name})`);
                     return entity?.name;
-                  })
+                  }),
                 );
               } else if (_.startsWith(field, "attribute_")) {
                 // "attributes" data field
@@ -1565,14 +1691,18 @@ export class Entities {
               // Create a temporary file, passing the filename as a response
               tmp.file((error, path: string, _fd: number) => {
                 if (error) {
+                  consola.error(
+                    "Error creating temporary file while exporting:",
+                    error,
+                  );
                   reject(error);
                   throw error;
                 }
 
                 fs.writeFileSync(path, formattedOutput);
-                consola.success(
-                  "Generated CSV data for  Entity (id):",
-                  entityId.toString()
+                consola.debug(
+                  "Generated CSV data for Entity (id):",
+                  entityId.toString(),
                 );
                 resolve(path);
               });
@@ -1610,7 +1740,7 @@ export class Entities {
                   Projects.getOne(field.slice(8)).then((project) => {
                     tempStructure["projects"].push(project?.name);
                     return project?.name;
-                  })
+                  }),
                 );
               } else if (_.startsWith(field, "origin_")) {
                 // "origins" data field
@@ -1619,7 +1749,7 @@ export class Entities {
                   Entities.getOne(field.slice(7)).then((entity) => {
                     tempStructure.associations["origins"].push(entity?.name);
                     return entity?.name;
-                  })
+                  }),
                 );
               } else if (_.startsWith(field, "product_")) {
                 // "products" data field
@@ -1628,7 +1758,7 @@ export class Entities {
                   Entities.getOne(field.slice(8)).then((entity) => {
                     tempStructure.associations["products"].push(entity?.name);
                     return entity?.name;
-                  })
+                  }),
                 );
               } else if (_.startsWith(field, "attribute_")) {
                 // "attributes" data field
@@ -1648,17 +1778,21 @@ export class Entities {
               // Create a temporary file, passing the filename as a response
               tmp.file((error, path: string, _fd: number) => {
                 if (error) {
+                  consola.error(
+                    "Error creating temporary file while exporting:",
+                    error,
+                  );
                   reject(error);
                   throw error;
                 }
 
                 fs.writeFileSync(
                   path,
-                  JSON.stringify(tempStructure, null, "  ")
+                  JSON.stringify(tempStructure, null, "  "),
                 );
-                consola.success(
-                  "Generated JSON data for  Entity (id):",
-                  entityId.toString()
+                consola.debug(
+                  "Generated JSON data for Entity (id):",
+                  entityId.toString(),
                 );
                 resolve(path);
               });
@@ -1679,7 +1813,7 @@ export class Entities {
                 textDetails.push(
                   `Created: ${dayjs(entity.created)
                     .format("DD MMM YYYY")
-                    .toString()}`
+                    .toString()}`,
                 );
               } else if (_.isEqual(field, "owner")) {
                 // "owner" data field
@@ -1693,7 +1827,7 @@ export class Entities {
                   Entities.getOne(field.slice(7)).then((entity) => {
                     textOrigins.push(entity?.name);
                     return entity?.name;
-                  })
+                  }),
                 );
               } else if (_.startsWith(field, "product_")) {
                 // "products" data field
@@ -1701,7 +1835,7 @@ export class Entities {
                   Entities.getOne(field.slice(8)).then((entity) => {
                     textProducts.push(entity?.name);
                     return entity?.name;
-                  })
+                  }),
                 );
               } else if (_.startsWith(field, "attribute_")) {
                 // "attributes" data field
@@ -1716,7 +1850,7 @@ export class Entities {
 
                     // Add the Attribute to the exported set
                     textAttributes.push(
-                      `  ${attribute?.name}:\n${attributeValues.join("\n")}`
+                      `  ${attribute?.name}:\n${attributeValues.join("\n")}`,
                     );
                   }
                 });
@@ -1728,6 +1862,10 @@ export class Entities {
               // Create a temporary file, passing the filename as a response
               tmp.file((error, path: string, _fd: number) => {
                 if (error) {
+                  consola.error(
+                    "Error creating temporary file while exporting:",
+                    error,
+                  );
                   reject(error);
                   throw error;
                 }
@@ -1744,9 +1882,9 @@ export class Entities {
                 }
 
                 fs.writeFileSync(path, textDetails.join("\n"));
-                consola.success(
-                  "Generated text data for  Entity (id):",
-                  entityId.toString()
+                consola.debug(
+                  "Generated text data for Entity (id):",
+                  entityId.toString(),
                 );
                 resolve(path);
               });
@@ -1756,40 +1894,64 @@ export class Entities {
     });
   };
 
-  static async getDataMultipleJSON(entityIds: string[]) {
+  /**
+   * Generate a JSON representation of multiple Entities
+   * @param entityIds Collection of Entity identifiers to retrieve
+   * @returns {Promise<string>}
+   */
+  static async getDataMultipleJSON(entityIds: string[]): Promise<string> {
     try {
       const entities = await Entities.getDataMultipleRaw(entityIds);
 
       // Remove 'history' property from each entity
       let modifiedEntities = {
-        "entities": entities?.map(entity => {
+        entities: entities?.map((entity) => {
           const plainEntity = JSON.parse(JSON.stringify(entity)); // Converts MongoDB types to plain objects
           delete plainEntity.history;
 
           return plainEntity;
-        })
-      }
+        }),
+      };
 
+      consola.debug("Generated JSON string for", entities.length, "Entities");
       return JSON.stringify(modifiedEntities, null, 4);
     } catch (error) {
+      consola.error(
+        "Error generating JSON string for multiple Entities:",
+        error,
+      );
       throw error;
     }
   }
 
-  static async getDataMultipleRaw(entityIds: string[]) {
+  /**
+   * Get the collection of complete Entity records for a set of identifiers
+   * @param entityIds Collection of Entity identifiers to retrieve
+   * @returns {Promise<WithId<Document>[]>}
+   */
+  static async getDataMultipleRaw(
+    entityIds: string[],
+  ): Promise<WithId<Document>[]> {
     try {
       const entities = await getDatabase()
         .collection(ENTITIES)
-        .find({ _id: { $in: entityIds } }).toArray();
+        .find({ _id: { $in: entityIds } })
+        .toArray();
 
+      consola.debug("Collated", entities.length, "Entities");
       return entities;
     } catch (error) {
+      consola.error("Error retrieving Entities");
       throw error;
     }
   }
 
+  /**
+   * Generate a CSV-formatted file containing data for multiple Entities
+   * @param entities Collection of Entity identifiers to retrieve
+   * @returns {Promise<string>} Path to temporary CSV file
+   */
   static getDataMultiple = (entities: string[]): Promise<string> => {
-    consola.start("Generating data for", entities?.length, "Entities...");
     return new Promise(async (resolve, reject) => {
       // Get the data for each Entity and store
       const entityData: any = await Entities.getDataMultipleRaw(entities);
@@ -1798,7 +1960,7 @@ export class Entities {
         // Find any common Attributes and append to headers
         const commonAttributes = _.uniqBy(
           _.flatten(entities?.map((entity) => entity?.attributes)),
-          (attribute) => attribute?.name
+          (attribute) => attribute?.name,
         );
 
         // Once all Entity data has been retrieved, iterate and add to rows
@@ -1828,7 +1990,7 @@ export class Entities {
                   const formattedProjects = projects?.map(
                     (project: ProjectModel) => {
                       return project?.name;
-                    }
+                    },
                   );
                   if (formattedProjects?.length > 0) {
                     exportEntityRow.Projects = formattedProjects.join(" ");
@@ -1839,7 +2001,7 @@ export class Entities {
                   const formattedProducts = entity?.associations?.products?.map(
                     (product) => {
                       return product?.name;
-                    }
+                    },
                   );
                   if (formattedProducts?.length > 0) {
                     exportEntityRow.Products = formattedProducts.join(" ");
@@ -1848,7 +2010,7 @@ export class Entities {
                   const formattedOrigins = entity?.associations?.origins?.map(
                     (origin) => {
                       return origin?.name;
-                    }
+                    },
                   );
                   if (formattedOrigins?.length > 0) {
                     exportEntityRow.Origins = formattedOrigins.join(" ");
@@ -1861,18 +2023,20 @@ export class Entities {
                     if (
                       _.includes(
                         commonAttributes?.map(
-                          (commonAttribute) => commonAttribute?.name
+                          (commonAttribute) => commonAttribute?.name,
                         ),
-                        attribute?.name
+                        attribute?.name,
                       )
                     ) {
                       attribute.values?.map((value: IValue<any>) => {
                         if (_.isEqual(value.type, "select")) {
-                          exportEntityRow[`${attribute?.name} (${value?.name})`] =
-                            value.data.selected;
+                          exportEntityRow[
+                            `${attribute?.name} (${value?.name})`
+                          ] = value.data.selected;
                         } else {
-                          exportEntityRow[`${attribute?.name} (${value?.name})`] =
-                            value.data;
+                          exportEntityRow[
+                            `${attribute?.name} (${value?.name})`
+                          ] = value.data;
                         }
                       });
                     }
@@ -1882,7 +2046,7 @@ export class Entities {
                   // Add row to the existing set of rows
                   resolve(exportEntityRow);
                 });
-            }
+            },
           );
         });
 
@@ -1906,19 +2070,19 @@ export class Entities {
             // Create a temporary file, passing the filename as a response
             tmp.file((error, path: string, _fd: number) => {
               if (error) {
+                consola.error(
+                  "Error creating temporary file while exporting:",
+                  error,
+                );
                 reject(error);
                 throw error;
               }
 
               fs.writeFileSync(path, formattedOutput);
-              consola.start(
-                "Generated data for",
-                entities?.length,
-                "Entities..."
-              );
+              consola.debug("Generated data for", entities?.length, "Entities");
               resolve(path);
             });
-          }
+          },
         );
       });
     });
@@ -1928,17 +2092,16 @@ export class Entities {
    * Handle uploading and assigning an attachment to an Entity
    * @param {any} files image to be attached to the Entity
    * @param {string} target Entity identifier to receive the image
-   * @return {Promise<{ status: boolean; message: string; data?: any }>}
+   * @returns {Promise<{ status: boolean; message: string; data?: any }>}
    */
   static upload = (
     files: any,
-    target: string
+    target: string,
   ): Promise<{ status: boolean; message: string; data?: any }> => {
     return new Promise((resolve, reject) => {
       if (files.file) {
         const receivedFile = files.file;
         const receivedFileData = receivedFile.data as Buffer;
-        consola.start("Uploaded file:", receivedFile?.name);
 
         // Access bucket and create open stream to write to storage
         const bucket = getAttachments();
@@ -1950,28 +2113,35 @@ export class Entities {
         });
         streamedFile
           .pipe(uploadStream)
-          .on("error", (_error: Error) => {
+          .on("error", (error: Error) => {
+            consola.error("Error uploading file:", error);
             reject("Error occurred uploading file");
           })
           .on("finish", () => {
             // Once the upload is finished, register attachment with Entity
             Entities.addAttachment(target, {
-              name: receivedFile?.name,
               _id: uploadStream.id.toString(),
+              name: receivedFile?.name,
             });
+            consola.debug("Uploaded file:", receivedFile?.name);
             resolve({ status: true, message: "Uploaded file" });
           });
       }
     });
   };
 
+  /**
+   * Delete an Entity by identifier
+   * @param id Entity identifier to delete
+   * @returns {Promise<EntityModel>}
+   */
   static delete = (id: string): Promise<EntityModel> => {
-    consola.start("Deleting Entity (id):", id.toString());
     return new Promise((resolve, _reject) => {
       getDatabase()
         .collection(ENTITIES)
         .findOne({ _id: id }, (error: any, result: any) => {
           if (error) {
+            consola.error(`Error retrieving Entity "${id}" to delete:`, error);
             throw error;
           }
           // Store the Entity data
@@ -1990,7 +2160,7 @@ export class Entities {
                 _id: entity?._id,
                 name: entity?.name,
               },
-            })
+            }),
           );
 
           // Resolve all operations then resolve overall Promise
@@ -2009,32 +2179,48 @@ export class Entities {
                 updates,
                 (error: any, _response: any) => {
                   if (error) {
+                    consola.error(
+                      `Error deleting Entity "${entity?._id}":`,
+                      error,
+                    );
                     throw error;
                   }
 
                   // Resolve the Promise
-                  consola.success("Deleted Entity:", entity?.name);
+                  consola.debug("Deleted Entity:", entity?.name);
                   resolve(entity);
-                }
+                },
               );
           });
         });
     });
   };
 
-  static searchByText = async (userId: string, searchText: string) => {
-    const searchRegex = new RegExp(searchText, 'i'); // Case-insensitive regex search
-    const entities = await getDatabase().collection('entities').find({
-      $or: [
-        { name: { $regex: searchRegex } },
-        { description: { $regex: searchRegex } },
-        { "attributes.name": { $regex: searchRegex } },
-        { "attributes.description": { $regex: searchRegex } },
-        { "attributes.values.name": { $regex: searchRegex } },
-        { "attributes.values.data": { $regex: searchRegex } }
-      ],
-      // Additional query to ensure entity is not soft-deleted etc, if applicable
-    }).toArray();
+  /**
+   * Search Entities using a regex expression, returning list of owned Entities
+   * @param userId User identifier, used to filter by Entity ownership
+   * @param searchText Raw search query
+   * @returns {Promise<WithId<Document>[]>}
+   */
+  static searchByText = async (
+    userId: string,
+    searchText: string,
+  ): Promise<WithId<Document>[]> => {
+    const searchRegex = new RegExp(searchText, "i"); // Case-insensitive regex search
+    const entities = await getDatabase()
+      .collection("entities")
+      .find({
+        $or: [
+          { name: { $regex: searchRegex } },
+          { description: { $regex: searchRegex } },
+          { "attributes.name": { $regex: searchRegex } },
+          { "attributes.description": { $regex: searchRegex } },
+          { "attributes.values.name": { $regex: searchRegex } },
+          { "attributes.values.data": { $regex: searchRegex } },
+        ],
+        // Additional query to ensure entity is not soft-deleted etc, if applicable
+      })
+      .toArray();
 
     const filteredEntities = [];
 
@@ -2063,7 +2249,9 @@ export class Entities {
     // Further filter entities based on user's permission here if needed
     // For simplicity, this step is omitted but you should implement it based on your app's logic
 
+    consola.debug(
+      `Searched and filtered yielding ${filteredEntities.length} Entities`,
+    );
     return filteredEntities;
-  }
-
+  };
 }

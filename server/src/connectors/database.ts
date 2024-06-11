@@ -7,7 +7,7 @@ import _ from "lodash";
 const CONNECTION_STRING = process.env.CONNECTION_STRING as string;
 if (_.isUndefined(CONNECTION_STRING)) {
   consola.error(
-    "Connection string is not defined, see README.md for instructions to specify environment variables prior to starting server"
+    "Connection string is not defined, see README.md for instructions to specify environment variables prior to starting server",
   );
   throw new Error("Connection string is not defined");
 }

@@ -27,7 +27,7 @@ import Values from "@components/Values";
 import { AttributeModel, IValue } from "@types";
 
 // Utility functions and libraries
-import { deleteData, getData, postData } from "@database/functions";
+import { request } from "@database/functions";
 import _ from "lodash";
 
 // Routing and navigation
@@ -46,63 +46,59 @@ const Attribute = () => {
   const [attributeDescription, setAttributeDescription] = useState("");
   const [attributeValues, setAttributeValues] = useState([] as IValue<any>[]);
 
-  useEffect(() => {
-    // Populate Attribute data
-    getData(`/attributes/${id}`)
-      .then((response) => {
-        setAttributeData(response);
-        setAttributeDescription(response.description);
-        setAttributeValues(response.values);
-      })
-      .catch((_error) => {
-        toast({
-          title: "Error",
-          status: "error",
-          description: "Could not retrieve Attribute data.",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-        setIsError(true);
-      })
-      .finally(() => {
-        setIsLoaded(true);
+  const getAttribute = async () => {
+    const response = await request<AttributeModel>("GET", `/attributes/${id}`);
+    if (response.success) {
+      setAttributeData(response.data);
+      setAttributeDescription(response.data.description);
+      setAttributeValues(response.data.values);
+    } else {
+      toast({
+        title: "Error",
+        status: "error",
+        description: "Could not retrieve Attribute data.",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
       });
+      setIsError(true);
+    }
+    setIsLoaded(true);
+  };
+
+  useEffect(() => {
+    getAttribute();
   }, [id]);
 
   // Delete the Attribute when confirmed
-  const handleDeleteClick = () => {
-    // Update data
-    deleteData(`/attributes/${id}`)
-      .then((_response) => {
-        toast({
-          title: "Deleted!",
-          status: "success",
-          duration: 2000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-      })
-      .catch(() => {
-        toast({
-          title: "Error",
-          description: `An error occurred when deleting Attribute "${attributeData.name}".`,
-          status: "error",
-          duration: 2000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-      })
-      .finally(() => {
-        setEditing(false);
-        navigate("/attributes");
+  const handleDeleteClick = async () => {
+    const response = await request<any>("DELETE", `/attributes/${id}`);
+    if (response.success) {
+      toast({
+        title: "Deleted!",
+        status: "success",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
       });
+    } else {
+      toast({
+        title: "Error",
+        description: `An error occurred when deleting Attribute "${attributeData.name}".`,
+        status: "error",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
+    setEditing(false);
+    navigate("/attributes");
   };
 
   /**
    * Handle the edit button being clicked
    */
-  const handleEditClick = () => {
+  const handleEditClick = async () => {
     if (editing) {
       const updateData: AttributeModel = {
         _id: attributeData._id,
@@ -112,29 +108,30 @@ const Attribute = () => {
       };
 
       // Update data
-      postData(`/attributes/update`, updateData)
-        .then((_response) => {
-          toast({
-            title: "Saved!",
-            status: "success",
-            duration: 2000,
-            position: "bottom-right",
-            isClosable: true,
-          });
-        })
-        .catch(() => {
-          toast({
-            title: "Error",
-            description: "An error occurred when saving updates.",
-            status: "error",
-            duration: 2000,
-            position: "bottom-right",
-            isClosable: true,
-          });
-        })
-        .finally(() => {
-          setEditing(false);
+      const response = await request<any>(
+        "POST",
+        "/attributes/update",
+        updateData,
+      );
+      if (response.success) {
+        toast({
+          title: "Saved!",
+          status: "success",
+          duration: 2000,
+          position: "bottom-right",
+          isClosable: true,
         });
+      } else {
+        toast({
+          title: "Error",
+          description: "An error occurred when saving updates.",
+          status: "error",
+          duration: 2000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+      }
+      setEditing(false);
     } else {
       setEditing(true);
     }

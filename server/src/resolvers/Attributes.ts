@@ -1,4 +1,4 @@
-import { Attributes } from "src/models/Attributes"
+import { Attributes } from "src/models/Attributes";
 
 export const AttributesResolvers = {
   Query: {
@@ -11,7 +11,9 @@ export const AttributesResolvers = {
     // Retrieve one Attribute by _id
     attribute: async (_parent: any, args: { _id: string }) => {
       const attributes = await Attributes.all();
-      return attributes.find((attribute) => attribute._id.toString() === args._id);
+      return attributes.find(
+        (attribute) => attribute._id.toString() === args._id,
+      );
     },
-  }
-}
+  },
+};

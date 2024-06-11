@@ -35,7 +35,7 @@ import { EntityModel, ScannerStatus } from "@types";
 import { useNavigate } from "react-router-dom";
 
 // Utility functions and libraries
-import { postData } from "@database/functions";
+import { request } from "@database/functions";
 import { connectScanner } from "@devices/Scanner";
 import _ from "lodash";
 
@@ -51,7 +51,7 @@ const SearchBox = () => {
 
   // Scanner status
   const [scannerStatus, setScannerStatus] = useState(
-    "disconnected" as ScannerStatus
+    "disconnected" as ScannerStatus,
   );
 
   const handleScannerConnection = () => {
@@ -112,42 +112,39 @@ const SearchBox = () => {
   // Store results as a set of IDs
   const [results, setResults] = useState([] as EntityModel[]);
 
-  const runSearch = () => {
+  const runSearch = async () => {
     // Use the new search route for text-based search
     setIsSearching(true);
     setHasSearched(true);
-    postData(`/entities/search/`, { query: query}) // Assuming you pass user ID for permissions filtering
-      .then((results) => {
-        if (results && results.length > 0) {
-          // Update state with search results
-          setResults(results);
-        } else {
-          // Handle no results found scenario
-          toast({
-            title: "No results found",
-            status: "info",
-            duration: 4000,
-            position: "bottom-right",
-            isClosable: true,
-          });
-        }
-      })
-      .catch((error) => {
-        // Handle search error scenario
-        console.error("Search error:", error);
+
+    const response = await request<EntityModel[]>("POST", "/entities/search/", {
+      query: query,
+    });
+    if (response.success) {
+      if (response.data.length > 0) {
+        setResults(response.data);
+      } else {
+        // Handle no results found scenario
         toast({
-          title: "Search Error",
-          description: "Could not perform search.",
-          status: "error",
-          duration: 5000,
-          isClosable: true,
+          title: "No results found",
+          status: "info",
+          duration: 4000,
           position: "bottom-right",
+          isClosable: true,
         });
-        setIsError(true);
-      })
-      .finally(() => {
-        setIsSearching(false);
+      }
+    } else {
+      toast({
+        title: "Search Error",
+        description: "Could not perform search",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom-right",
       });
+      setIsError(true);
+    }
+    setIsSearching(false);
   };
 
   const onCloseWrapper = () => {
@@ -227,7 +224,12 @@ const SearchBox = () => {
           <PopoverCloseButton />
           <PopoverHeader>
             <Flex align={"center"} gap={"1"}>
-              {isSearching ? <Spinner size={"sm"} /> : <Text fontWeight={"bold"}>{results.length}</Text>} results for "{query}"
+              {isSearching ? (
+                <Spinner size={"sm"} />
+              ) : (
+                <Text fontWeight={"bold"}>{results.length}</Text>
+              )}{" "}
+              results for "{query}"
             </Flex>
           </PopoverHeader>
           <PopoverBody>
@@ -246,7 +248,7 @@ const SearchBox = () => {
                     divider={<StackDivider borderColor={"gray.200"} />}
                     w={"100%"}
                   >
-                    {results.length > 0 ?
+                    {results.length > 0 ? (
                       results.slice(0, MAX_RESULTS).map((result) => {
                         return (
                           <Flex
@@ -258,7 +260,11 @@ const SearchBox = () => {
                             <Text as={"b"}>{result.name}</Text>
                             <Spacer />
                             <Link onClick={() => handleResultClick(result._id)}>
-                              <Flex gap={"1"} direction={"row"} align={"center"}>
+                              <Flex
+                                gap={"1"}
+                                direction={"row"}
+                                align={"center"}
+                              >
                                 <Text>View</Text>
                                 <Icon name={"a_right"} />
                               </Flex>
@@ -266,9 +272,9 @@ const SearchBox = () => {
                           </Flex>
                         );
                       })
-                    :
+                    ) : (
                       <Flex m={"4"}>No results found.</Flex>
-                    }
+                    )}
                   </VStack>
                 )
               )}
@@ -276,11 +282,14 @@ const SearchBox = () => {
           </PopoverBody>
           <PopoverFooter>
             <Flex width={"100%"} gap={"1"}>
-              View more results using <Link onClick={() => {
-                // Close the popover and navigate to the `/search` route
-                onCloseWrapper();
-                navigate("/search");
-              }}>
+              View more results using{" "}
+              <Link
+                onClick={() => {
+                  // Close the popover and navigate to the `/search` route
+                  onCloseWrapper();
+                  navigate("/search");
+                }}
+              >
                 <Flex gap={"1"} direction={"row"} align={"center"}>
                   <Text>Search</Text>
                   <Icon name={"a_right"} />

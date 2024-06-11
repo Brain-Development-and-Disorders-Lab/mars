@@ -20,7 +20,7 @@ import { Content } from "@components/Container";
 import { AttributeModel } from "@types";
 
 // Utility functions and libraries
-import { getData } from "@database/functions";
+import { request } from "@database/functions";
 import _ from "lodash";
 
 // Routing and navigation
@@ -36,27 +36,30 @@ const Attributes = () => {
 
   const [attributesData, setAttributesData] = useState([] as AttributeModel[]);
 
+  /**
+   * Utility function to retrieve all Attributes
+   */
+  const getAttributes = async () => {
+    const response = await request<AttributeModel[]>("GET", "/attributes");
+    if (response.success) {
+      setAttributesData(response.data);
+    } else {
+      toast({
+        title: "Error",
+        status: "error",
+        description: "Could not retrieve Attributes data.",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+      setIsError(true);
+    }
+    setIsLoaded(true);
+  };
+
   // Effect to load all Attribute data
   useEffect(() => {
-    getData(`/attributes`)
-      .then((value) => {
-        setAttributesData(value);
-        setIsLoaded(true);
-      })
-      .catch((_error) => {
-        toast({
-          title: "Error",
-          status: "error",
-          description: "Could not retrieve Attributes data.",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-        setIsError(true);
-      })
-      .finally(() => {
-        setIsLoaded(true);
-      });
+    getAttributes();
   }, []);
 
   const breakpoint = useBreakpoint();
@@ -143,14 +146,14 @@ const Attributes = () => {
           </Button>
         </Flex>
         <Flex direction={"column"} gap={"4"} w={"100%"}>
-          {data.length > 0 ?
+          {data.length > 0 ? (
             <DataTable
               columns={columns}
               data={data}
               visibleColumns={visibleColumns}
               showPagination
             />
-          :
+          ) : (
             <Flex
               w={"100%"}
               direction={"row"}
@@ -158,9 +161,11 @@ const Attributes = () => {
               justify={"center"}
               align={"center"}
             >
-              <Text color={"gray.400"} fontWeight={"semibold"}>You do not have any Templates.</Text>
+              <Text color={"gray.400"} fontWeight={"semibold"}>
+                You do not have any Templates.
+              </Text>
             </Flex>
-          }
+          )}
         </Flex>
       </Flex>
     </Content>

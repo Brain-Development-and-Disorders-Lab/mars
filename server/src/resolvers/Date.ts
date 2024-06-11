@@ -15,6 +15,6 @@ export const DateResolver = {
     serialize(value: any) {
       // Value sent to the client, formatted for JSON
       return value.toJSON();
-    }
+    },
   }),
 };

@@ -36,7 +36,7 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
 
   // State to store original values
   const [defaultDescription, _setDefaultDescription] = useState(
-    props.attribute.description
+    props.attribute.description,
   );
   const [defaultValues, _setDefaultValues] = useState(props.attribute.values);
 

@@ -21,7 +21,7 @@ UsersRoute.route("/users/:id").get(
       .catch((error) => {
         response.json({ status: "error", message: error.message });
       });
-  }
+  },
 );
 
 export default UsersRoute;

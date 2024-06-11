@@ -46,13 +46,14 @@ import {
   ProjectModel,
   EntityImport,
   EntityModel,
+  IGenericItem,
 } from "@types";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
 
 // Utility functions and libraries
-import { getData, postData } from "@database/functions";
+import { request } from "@database/functions";
 import { useToken } from "src/authentication/useToken";
 import _ from "lodash";
 import dayjs from "dayjs";
@@ -82,7 +83,7 @@ const Importer = (props: {
 
   // State management to generate and present different pages
   const [interfacePage, setInterfacePage] = useState(
-    "upload" as "upload" | "details" | "mapping"
+    "upload" as "upload" | "details" | "mapping",
   );
 
   // Used to generated numerical steps and a progress bar
@@ -109,21 +110,13 @@ const Importer = (props: {
   const [descriptionField, setDescriptionField] = useState("");
   const [ownerField, _setOwnerField] = useState(token.orcid);
   const [projectField, setProjectField] = useState("");
-  const [selectedOrigin, setSelectedOrigin] = useState(
-    {} as { name: string; _id: string }
-  );
-  const [originsField, setOriginsField] = useState(
-    [] as { name: string; _id: string }[]
-  );
-  const [selectedProduct, setSelectedProduct] = useState(
-    {} as { name: string; _id: string }
-  );
-  const [productsField, setProductsField] = useState(
-    [] as { name: string; _id: string }[]
-  );
+  const [selectedOrigin, setSelectedOrigin] = useState({} as IGenericItem);
+  const [originsField, setOriginsField] = useState([] as IGenericItem[]);
+  const [selectedProduct, setSelectedProduct] = useState({} as IGenericItem);
+  const [productsField, setProductsField] = useState([] as IGenericItem[]);
   const [attributes, setAttributes] = useState([] as AttributeModel[]);
   const [attributesField, setAttributesField] = useState(
-    [] as AttributeModel[]
+    [] as AttributeModel[],
   );
 
   // Effect to manipulate 'Continue' button state for 'upload' page
@@ -136,7 +129,11 @@ const Importer = (props: {
 
   // Effect to manipulate 'Continue' button state when mapping fields from CSV file
   useEffect(() => {
-    if (_.isEqual(interfacePage, "details") && nameField !== "" && fileType === "text/csv") {
+    if (
+      _.isEqual(interfacePage, "details") &&
+      nameField !== "" &&
+      fileType === "text/csv"
+    ) {
       setContinueLoading(false);
       setContinueDisabled(false);
     }
@@ -144,7 +141,10 @@ const Importer = (props: {
 
   // Effect to manipulate 'Continue' button state when importing JSON file
   useEffect(() => {
-    if (_.isEqual(interfacePage, "details") && fileType === "application/json") {
+    if (
+      _.isEqual(interfacePage, "details") &&
+      fileType === "application/json"
+    ) {
       setContinueLoading(false);
       setContinueDisabled(false);
     }
@@ -191,7 +191,7 @@ const Importer = (props: {
   /**
    * Utility function to access and assign existing JSON data with exisitng user selections. Loads existing Origin and
    * Product Entities, and populates the existing Projects field.
-   * @return Short-circuit when function called without actual JSON data
+   * @returns Short-circuit when function called without actual JSON data
    */
   const updateJsonDataWithUserSelections = () => {
     if (!jsonData) {
@@ -216,15 +216,26 @@ const Importer = (props: {
       (updatedJsonData as any).forEach((entity: any) => {
         if (originsField?.length > 0) {
           // Add or update the 'origins' field in the entity
-          entity.associations.origins = _.unionBy(entity.associations.origins, originsField, 'id');
+          entity.associations.origins = _.unionBy(
+            entity.associations.origins,
+            originsField,
+            "id",
+          );
         }
         if (productsField?.length > 0) {
           // Add or update the 'products' field in the entity
-          entity.associations.products = _.unionBy(entity.associations.products, productsField, 'id');
+          entity.associations.products = _.unionBy(
+            entity.associations.products,
+            productsField,
+            "id",
+          );
         }
-        if (projectField) {
+        if (!_.isEqual(projectField, "")) {
           // Add or update the 'project' field in the entity
           entity.projects = [projectField];
+        } else {
+          // Clear the `projects` field
+          entity.projects = [];
         }
         // ... add more updates as per your other fields
       });
@@ -237,11 +248,11 @@ const Importer = (props: {
   };
 
   /**
-   * Utility function to perform the initial import operations. For CSV files, make POST request to `/system/import` to
+   * Utility function to perform the initial import operations. For CSV files, make POST request to `/data/import` to
    * defer the data extraction to the server. For JSON files, trigger the `handleJsonFile` method to handle the file
    * locally instead.
    */
-  const performImport = () => {
+  const performImport = async () => {
     // Update state of continue button
     setContinueLoading(true);
     setContinueDisabled(true);
@@ -257,121 +268,68 @@ const Importer = (props: {
       handleJsonFile(file);
     } else if (_.isEqual(fileType, "text/csv")) {
       // Make POST request with CSV file contents from the form
-      postData(`/system/import`, formData)
-        .then((response: { status: boolean; message: string; data?: any }) => {
-          if (_.isEqual(response.status, "success")) {
-            // Reset file upload state
-            setFile({} as File);
+      const response = await request<any>("POST", "/data/import", formData);
+      if (response.success) {
+        // Reset file upload state
+        setFile({} as File);
 
-            if (_.isEqual(fileType, "text/csv")) {
-              toast({
-                title: "Success",
-                status: "success",
-                description: "Successfully parsed CSV-formatted file.",
-                duration: 2000,
-                position: "bottom-right",
-                isClosable: true,
-              });
-              if (response.data?.length > 0) {
-                // Update spreadsheet data state if valid rows
-                setSpreadsheetData(response.data);
+        if (_.isEqual(fileType, "text/csv")) {
+          toast({
+            title: "Success",
+            status: "success",
+            description: "Successfully parsed CSV-formatted file.",
+            duration: 2000,
+            position: "bottom-right",
+            isClosable: true,
+          });
+          if (response.data.length > 0) {
+            // Update spreadsheet data state if valid rows
+            setSpreadsheetData(response.data);
 
-                // Filter columns to exclude columns with no header ("__EMPTY...")
-                const filteredColumnSet = Object.keys(response.data[0]).filter((column) => {
-                  return !_.startsWith(column, "__EMPTY");
-                })
-                setColumns(filteredColumnSet);
-              }
-
-              // Setup the next stage of CSV import
-              setupMapping();
-            } else if (_.isEqual(fileType, "application/json")) {
-              toast({
-                title: "Success",
-                status: "success",
-                description: "Successfully imported JSON file.",
-                duration: 2000,
-                position: "bottom-right",
-                isClosable: true,
-              });
-
-              // In the case of a JSON file, it has been uploaded and we can refresh
-              navigate(0);
-            }
-          } else {
-            toast({
-              title: "Error",
-              status: "error",
-              description: response.message,
-              duration: 4000,
-              position: "bottom-right",
-              isClosable: true,
-            });
+            // Filter columns to exclude columns with no header ("__EMPTY...")
+            const filteredColumnSet = Object.keys(response.data[0]).filter(
+              (column) => {
+                return !_.startsWith(column, "__EMPTY");
+              },
+            );
+            setColumns(filteredColumnSet);
           }
 
-          // Reset the loading state, but preserve the disabled state
-          setContinueLoading(false);
-        })
-        .catch((error: { message: string }) => {
+          // Setup the next stage of CSV import
+          await setupMapping();
+        } else if (_.isEqual(fileType, "application/json")) {
           toast({
-            title: "Error",
-            status: "error",
-            description: error.message + " Please try again.",
-            duration: 4000,
+            title: "Success",
+            status: "success",
+            description: "Successfully imported JSON file.",
+            duration: 2000,
             position: "bottom-right",
             isClosable: true,
           });
 
-          // Reset the loading state, but preserve the disabled state
-          setContinueLoading(false);
-        });
+          // In the case of a JSON file, it has been uploaded and we can refresh
+          navigate(0);
+        } else {
+          toast({
+            title: "Import Error",
+            status: "error",
+            description: "Error while importing file",
+            duration: 4000,
+            position: "bottom-right",
+            isClosable: true,
+          });
+        }
+        // Reset the loading state, but preserve the disabled state
+        setContinueLoading(false);
+      }
     }
   };
 
   /**
-   * Utility function to populate fields required for the mapping stage of importing data. Loads all Entities, Projects,
-   * and Attributes.
-   */
-  const setupMapping = () => {
-    // Load all Entities, Projects, and Attributes
-    Promise.all([
-      getData(`/entities`),
-      getData(`/projects`),
-      getData(`/attributes`),
-    ])
-      .then((results: [EntityModel[], ProjectModel[], AttributeModel[]]) => {
-        // Update states accordingly
-        setEntities(results[0]);
-        setProjects(results[1]);
-        setAttributes(results[2]);
-
-        // Pre-populate the "Project" field
-        if (results[1][0]?._id) {
-          setProjectField(results[1][0]._id);
-        }
-
-        // Update UI state
-        setIsLoaded(true);
-      })
-      .catch((_error) => {
-        console.log("_error:", _error);
-        toast({
-          title: "Error",
-          status: "error",
-          description: "Could not retrieve Entities data.",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-        setIsError(true);
-      });
-  };
-
-  /**
    * Perform import action for JSON data. Make POST request to server passing the JSON data.
-   * @return Short-circuit when function called without actual JSON data
+   * @returns Short-circuit when function called without actual JSON data
    */
-  const performImportJson = () => {
+  const performImportJson = async () => {
     if (!jsonData) {
       toast({
         title: "Error",
@@ -382,38 +340,92 @@ const Importer = (props: {
         isClosable: true,
       });
       return;
-    };
+    }
 
     // Update button state to reflect loading state
     setContinueLoading(true);
 
-    postData(`/system/importJSON`, { jsonData: jsonData })
-      .then(() => {
-        // Close the `Importer` UI
-        props.onClose();
-        resetState();
-        navigate(0);
-      })
-      .catch((error: { message: string }) => {
-        toast({
-          title: "Error",
-          status: "error",
-          description: error.message,
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-      })
-      .finally(() => {
-        setContinueLoading(false);
+    const response = await request<any>("POST", "/data/importJSON", {
+      jsonData: jsonData,
+    });
+    if (response.success) {
+      // Close the `Importer` UI
+      props.onClose();
+      resetState();
+      navigate(0);
+    } else {
+      toast({
+        title: "Import Error",
+        status: "error",
+        description: "Error while importing JSON file",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
       });
+    }
+    setContinueLoading(false);
+  };
+
+  /**
+   * Utility function to populate fields required for the mapping stage of importing data. Loads all Entities, Projects,
+   * and Attributes.
+   */
+  const setupMapping = async () => {
+    // Load all Entities, Projects, and Attributes
+    const entities = await request<EntityModel[]>("GET", "/entities");
+    const projects = await request<ProjectModel[]>("GET", "/projects");
+    const attributes = await request<AttributeModel[]>("GET", "/attributes");
+
+    if (entities.success) {
+      setEntities(entities.data);
+    } else {
+      toast({
+        title: "Error",
+        status: "error",
+        description: "Could not retrieve Entities",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+      setIsError(true);
+    }
+
+    if (projects.success) {
+      setProjects(projects.data);
+    } else {
+      toast({
+        title: "Error",
+        status: "error",
+        description: "Could not retrieve Projects",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+      setIsError(true);
+    }
+
+    if (attributes.success) {
+      setAttributes(attributes.data);
+    } else {
+      toast({
+        title: "Error",
+        status: "error",
+        description: "Could not retrieve Attributes",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+      setIsError(true);
+    }
+
+    setIsLoaded(true);
   };
 
   /**
    * Perform mapping action for CSV data. Collate the mapped columns and make a POST request passing this data to
    * the server.
    */
-  const performMapping = () => {
+  const performMapping = async () => {
     // Set the mapping status
     setContinueLoading(true);
 
@@ -432,39 +444,42 @@ const Importer = (props: {
       data: spreadsheetData,
     };
 
-    postData(`/system/import/mapping`, mappingData)
-      .then((_response: { status: boolean; message: string; data?: any }) => {
-        props.onClose();
-        resetState();
-        navigate(0);
-      })
-      .catch((error: { message: string }) => {
-        toast({
-          title: "Error",
-          status: "error",
-          description: error.message,
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-      })
-      .finally(() => {
-        setContinueLoading(false);
+    const response = await request<any>(
+      "POST",
+      "/data/import/mapping",
+      mappingData,
+    );
+    if (response.success) {
+      props.onClose();
+      resetState();
+      navigate(0);
+    } else {
+      toast({
+        title: "Import Error",
+        status: "error",
+        description: "Error while mapping data",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
       });
+    }
+    setContinueLoading(false);
   };
 
   /**
    * Factory-like pattern to generate general `Select` components
    * @param {any} value Component value
    * @param {React.SetStateAction<any>} setValue React `useState` function to set state
-   * @return {ReactElement}
+   * @returns {ReactElement}
    */
   const getSelectComponent = (
+    id: string,
     value: any,
-    setValue: React.SetStateAction<any>
+    setValue: React.SetStateAction<any>,
   ) => {
     return (
       <Select
+        id={id}
         placeholder={"Select Column"}
         value={value}
         onChange={(event) => setValue(event.target.value)}
@@ -484,17 +499,19 @@ const Importer = (props: {
    * Factory-like pattern to generate `Select` components for selecting Entities
    * @param {any} value Component value
    * @param {React.SetStateAction<any>} setValue React `useState` function to set state
-   * @return {ReactElement}
+   * @returns {ReactElement}
    */
   const getSelectEntitiesComponent = (
-    value: { name: string; _id: string },
+    id: string,
+    value: IGenericItem,
     setValue: React.SetStateAction<any>,
-    selected: { name: string; _id: string }[],
+    selected: IGenericItem[],
     setSelected: React.SetStateAction<any>,
-    disabled?: boolean
+    disabled?: boolean,
   ) => {
     return (
       <Select
+        id={id}
         placeholder={"Select Entity"}
         value={value._id}
         onChange={(event) => {
@@ -506,7 +523,7 @@ const Importer = (props: {
           if (
             !_.includes(
               selected.map((entity) => entity._id),
-              selection._id
+              selection._id,
             )
           ) {
             setSelected([...selected, selection]);
@@ -529,7 +546,7 @@ const Importer = (props: {
   const onRemoveAttribute = (identifier: string) => {
     // We need to filter the removed attribute
     setAttributesField(
-      attributesField.filter((attribute) => attribute._id !== identifier)
+      attributesField.filter((attribute) => attribute._id !== identifier),
     );
   };
 
@@ -553,13 +570,13 @@ const Importer = (props: {
   /**
    * Callback function to handle any click events on the Continue button
    */
-  const onContinueClick = () => {
+  const onContinueClick = async () => {
     if (_.isEqual(interfacePage, "upload")) {
       setActiveStep(1);
 
       // Run setup for import and mapping
-      performImport();
-      setupMapping();
+      await performImport();
+      await setupMapping();
 
       // Proceed to the next page
       setInterfacePage("details");
@@ -576,9 +593,9 @@ const Importer = (props: {
     } else if (_.isEqual(interfacePage, "mapping")) {
       // Run the final import function depending on file type
       if (_.isEqual(fileType, "application/json")) {
-        performImportJson();
+        await performImportJson();
       } else if (_.isEqual(fileType, "text/csv")) {
-        performMapping();
+        await performMapping();
       }
     }
   };
@@ -602,10 +619,10 @@ const Importer = (props: {
     setNameField("");
     setDescriptionField("");
     setProjectField("");
-    setSelectedOrigin({} as { name: string; _id: string; });
-    setOriginsField([] as { name: string; _id: string }[]);
-    setSelectedProduct({} as { name: string; _id: string });
-    setProductsField([] as { name: string; _id: string }[]);
+    setSelectedOrigin({} as IGenericItem);
+    setOriginsField([] as IGenericItem[]);
+    setSelectedProduct({} as IGenericItem);
+    setProductsField([] as IGenericItem[]);
     setAttributes([]);
     setAttributesField([]);
   };
@@ -650,10 +667,18 @@ const Importer = (props: {
                 </Stepper>
               </Flex>
 
+              {/* Step 1: Upload */}
               {_.isEqual(interfacePage, "upload") && (
-                <Flex w={"100%"} direction={"column"} align={"center"} justify={"center"}>
+                <Flex
+                  w={"100%"}
+                  direction={"column"}
+                  align={"center"}
+                  justify={"center"}
+                >
                   <Flex w={"100%"} py={"2"} justify={"left"}>
-                    <Information text={"MARS supports CSV-formatted or JSON files."} />
+                    <Information
+                      text={"MARS supports CSV-formatted or JSON files."}
+                    />
                   </Flex>
                   <FormControl>
                     <Flex
@@ -675,9 +700,7 @@ const Importer = (props: {
                           justify={"center"}
                           align={"center"}
                         >
-                          <Text fontWeight={"semibold"}>
-                            Drag file here
-                          </Text>
+                          <Text fontWeight={"semibold"}>Drag file here</Text>
                           <Text>or click to upload</Text>
                         </Flex>
                       ) : (
@@ -700,20 +723,25 @@ const Importer = (props: {
                       left={"0"}
                       opacity={"0"}
                       aria-hidden={"true"}
-                      onChange={(
-                        event: ChangeEvent<HTMLInputElement>
-                      ) => {
-                        if (event.target.files && event.target.files.length > 0) {
+                      onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                        if (
+                          event.target.files &&
+                          event.target.files.length > 0
+                        ) {
                           // Only accept defined file types
-                          if (_.includes(["text/csv", "application/json"], event.target.files[0].type)) {
+                          if (
+                            _.includes(
+                              ["text/csv", "application/json"],
+                              event.target.files[0].type,
+                            )
+                          ) {
                             setFileType(event.target.files[0].type);
                             setFile(event.target.files[0]);
                           } else {
                             toast({
                               title: "Warning",
                               status: "warning",
-                              description:
-                                "Please upload a JSON or CSV file",
+                              description: "Please upload a JSON or CSV file",
                               duration: 2000,
                               position: "bottom-right",
                               isClosable: true,
@@ -726,18 +754,36 @@ const Importer = (props: {
                 </Flex>
               )}
 
+              {/* Step 2: Simple mapping, details */}
               {_.isEqual(interfacePage, "details") && (
                 <Flex w={"100%"} direction={"column"} gap={"4"}>
-                  {columns.length > 0 &&
+                  {columns.length > 0 && (
                     <Flex direction={"column"} gap={"2"} wrap={"wrap"}>
                       <Flex w={"100%"} py={"2"} justify={"left"} gap={"2"}>
-                        <Information text={`Found ${columns.length} columns.`} />
-                        {fileType === "text/csv" &&
-                          <Warning text={`Origins and Products cannot be imported from CSV files.`} />
-                        }
+                        <Information
+                          text={`Found ${columns.length} columns.`}
+                        />
+                        {fileType === "text/csv" && (
+                          <Warning
+                            text={`Origins and Products cannot be imported from CSV files.`}
+                          />
+                        )}
                       </Flex>
-                      <Flex w={"100%"} py={"2"} gap={"2"} align={"center"} justify={"left"} wrap={"wrap"}>
-                        <Text fontWeight={"semibold"} size={"xs"} color={"gray.600"}>Columns:</Text>
+                      <Flex
+                        w={"100%"}
+                        py={"2"}
+                        gap={"2"}
+                        align={"center"}
+                        justify={"left"}
+                        wrap={"wrap"}
+                      >
+                        <Text
+                          fontWeight={"semibold"}
+                          size={"xs"}
+                          color={"gray.600"}
+                        >
+                          Columns:
+                        </Text>
                         {columns.map((column) => {
                           return (
                             <Tag key={column} colorScheme={"green"}>
@@ -746,42 +792,65 @@ const Importer = (props: {
                           );
                         })}
                       </Flex>
-                      <Text>Each row represents a new Entity that will be created. From the above columns, use each drop-down to select which column value to map that specific detail of the Entities that will be created.</Text>
+                      <Text>
+                        Each row represents a new Entity that will be created.
+                        From the above columns, use each drop-down to select
+                        which column value to map that specific detail of the
+                        Entities that will be created.
+                      </Text>
                     </Flex>
-                  }
+                  )}
 
-                  {!jsonData && <Flex direction={"row"} gap={"4"}>
-                    <FormControl
-                      isRequired
-                      isInvalid={_.isEqual(nameField, "")}
-                    >
-                      <FormLabel>Name</FormLabel>
-                      {getSelectComponent(nameField, setNameField)}
-                      <FormHelperText>Column containing Entity names</FormHelperText>
-                    </FormControl>
-                    <FormControl>
-                      <FormLabel>Description</FormLabel>
-                      {getSelectComponent(
-                        descriptionField,
-                        setDescriptionField
-                      )}
-                      <FormHelperText>Column containing Entity descriptions</FormHelperText>
-                    </FormControl>
-                  </Flex>}
+                  {!jsonData && (
+                    <Flex direction={"row"} gap={"4"}>
+                      <FormControl
+                        isRequired
+                        isInvalid={_.isEqual(nameField, "")}
+                      >
+                        <FormLabel>Name</FormLabel>
+                        {getSelectComponent(
+                          "import_name",
+                          nameField,
+                          setNameField,
+                        )}
+                        <FormHelperText>
+                          Column containing Entity names
+                        </FormHelperText>
+                      </FormControl>
+                      <FormControl>
+                        <FormLabel>Description</FormLabel>
+                        {getSelectComponent(
+                          "import_description",
+                          descriptionField,
+                          setDescriptionField,
+                        )}
+                        <FormHelperText>
+                          Column containing Entity descriptions
+                        </FormHelperText>
+                      </FormControl>
+                    </Flex>
+                  )}
 
                   <Flex direction={"row"} gap={"4"}>
                     <FormControl>
                       <FormLabel>Owner</FormLabel>
-                      <Tooltip label={"Initially, only you will have access to imported Entities"}>
+                      <Tooltip
+                        label={
+                          "Initially, only you will have access to imported Entities"
+                        }
+                      >
                         <Input value={ownerField} disabled />
                       </Tooltip>
                     </FormControl>
                     <FormControl>
                       <FormLabel>Project</FormLabel>
                       <Select
+                        id={"import_projects"}
                         placeholder={"Select Project"}
                         value={projectField}
-                        onChange={(event) => setProjectField(event.target.value)}
+                        onChange={(event) =>
+                          setProjectField(event.target.value)
+                        }
                       >
                         {projects.map((project) => {
                           return (
@@ -791,51 +860,59 @@ const Importer = (props: {
                           );
                         })}
                       </Select>
-                      <FormHelperText>An existing Project to associate each Entity with</FormHelperText>
+                      <FormHelperText>
+                        An existing Project to associate each Entity with
+                      </FormHelperText>
                     </FormControl>
                   </Flex>
                   <Flex direction={"row"} gap={"4"}>
                     <FormControl>
                       <FormLabel>Origin</FormLabel>
-                        {getSelectEntitiesComponent(
-                          selectedOrigin,
-                          setSelectedOrigin,
-                          originsField,
-                          setOriginsField
-                        )}
-                        <FormHelperText>Existing Origin Entities to associate each Entity with</FormHelperText>
-                        <Flex direction={"row"} wrap={"wrap"} gap={"2"} pt={"2"}>
-                          {originsField.map((origin) => {
-                            return (
-                              <Tag key={origin._id}>
-                                {origin.name}
-                                <TagCloseButton
-                                  onClick={() => {
-                                    setOriginsField([
-                                      ...originsField.filter(
-                                        (existingOrigin) =>
-                                          !_.isEqual(
-                                            existingOrigin._id,
-                                            origin._id
-                                          )
-                                      ),
-                                    ]);
-                                  }}
-                                />
-                              </Tag>
-                            );
-                          })}
+                      {getSelectEntitiesComponent(
+                        "import_origins",
+                        selectedOrigin,
+                        setSelectedOrigin,
+                        originsField,
+                        setOriginsField,
+                      )}
+                      <FormHelperText>
+                        Existing Origin Entities to associate each Entity with
+                      </FormHelperText>
+                      <Flex direction={"row"} wrap={"wrap"} gap={"2"} pt={"2"}>
+                        {originsField.map((origin) => {
+                          return (
+                            <Tag key={origin._id}>
+                              {origin.name}
+                              <TagCloseButton
+                                onClick={() => {
+                                  setOriginsField([
+                                    ...originsField.filter(
+                                      (existingOrigin) =>
+                                        !_.isEqual(
+                                          existingOrigin._id,
+                                          origin._id,
+                                        ),
+                                    ),
+                                  ]);
+                                }}
+                              />
+                            </Tag>
+                          );
+                        })}
                       </Flex>
                     </FormControl>
                     <FormControl>
                       <FormLabel>Products</FormLabel>
                       {getSelectEntitiesComponent(
+                        "import_products",
                         selectedProduct,
                         setSelectedProduct,
                         productsField,
-                        setProductsField
+                        setProductsField,
                       )}
-                      <FormHelperText>Existing Product Entities to associate each Entity with</FormHelperText>
+                      <FormHelperText>
+                        Existing Product Entities to associate each Entity with
+                      </FormHelperText>
                       <Flex direction={"row"} wrap={"wrap"} gap={"2"} pt={"2"}>
                         {productsField.map((product) => {
                           return (
@@ -848,8 +925,8 @@ const Importer = (props: {
                                       (existingProduct) =>
                                         !_.isEqual(
                                           existingProduct._id,
-                                          product._id
-                                        )
+                                          product._id,
+                                        ),
                                     ),
                                   ]);
                                 }}
@@ -863,11 +940,19 @@ const Importer = (props: {
                 </Flex>
               )}
 
+              {/* Step 3: Advanced mapping */}
               {_.isEqual(interfacePage, "mapping") && (
                 <Flex w={"100%"} direction={"column"} gap={"4"}>
-                  <Text>Columns can be assigned to Values within Attributes. When adding Values to an Attribute, select the column containing the data for each Value. Use an existing Template Attribute from the drop-down or create a new Attribute.</Text>
+                  <Text>
+                    Columns can be assigned to Values within Attributes. When
+                    adding Values to an Attribute, select the column containing
+                    the data for each Value. Use an existing Template Attribute
+                    from the drop-down or create a new Attribute.
+                  </Text>
                   <Flex w={"100%"} gap={"2"}>
-                    <Information text={"All dates must use \"MM/DD/YYYY\" format"} />
+                    <Information
+                      text={'All dates must use "MM/DD/YYYY" format'}
+                    />
                   </Flex>
                   <Flex
                     direction={"row"}
@@ -878,7 +963,13 @@ const Importer = (props: {
                   >
                     {/* Drop-down to select template Attributes */}
                     <FormControl maxW={"sm"}>
-                      <Tooltip label={attributes.length > 0 ? "Select an existing Template Attribute" : "No Template Attributes exist yet"}>
+                      <Tooltip
+                        label={
+                          attributes.length > 0
+                            ? "Select an existing Template Attribute"
+                            : "No Template Attributes exist yet"
+                        }
+                      >
                         <Select
                           placeholder={"Select Template Attribute"}
                           isDisabled={attributes.length === 0}
@@ -888,7 +979,7 @@ const Importer = (props: {
                                 if (
                                   _.isEqual(
                                     event.target.value.toString(),
-                                    attribute._id
+                                    attribute._id,
                                   )
                                 ) {
                                   setAttributesField([
@@ -998,16 +1089,16 @@ const Importer = (props: {
                 </Button> */}
 
                 <Button
-                  colorScheme={_.isEqual(interfacePage, "mapping") ? "green" : "blue"}
+                  colorScheme={
+                    _.isEqual(interfacePage, "mapping") ? "green" : "blue"
+                  }
                   rightIcon={
                     _.isEqual(interfacePage, "upload") ? (
                       <Icon name={"upload"} />
+                    ) : _.isEqual(interfacePage, "details") ? (
+                      <Icon name={"c_right"} />
                     ) : (
-                      _.isEqual(interfacePage, "details") ? (
-                        <Icon name={"c_right"} />
-                      ) : (
-                        <Icon name={"check"} />
-                      )
+                      <Icon name={"check"} />
                     )
                   }
                   variant={"solid"}

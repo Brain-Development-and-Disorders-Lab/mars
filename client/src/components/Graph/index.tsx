@@ -22,7 +22,7 @@ import Icon from "@components/Icon";
 import { EntityModel } from "@types";
 
 // Utility functions and libraries
-import { getData } from "@database/functions";
+import { request } from "@database/functions";
 import _ from "lodash";
 import ELK, { ElkExtendedEdge, ElkNode } from "elkjs";
 
@@ -38,29 +38,27 @@ const Graph = (props: {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
-  const getEntityData = (id: string): Promise<EntityModel> => {
-    return getData(`/entities/${id}`)
-      .then((result) => {
-        return result;
-      })
-      .catch((_error) => {
-        toast({
-          title: "Error",
-          status: "error",
-          description: "Could not get Entity data.",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-        setIsError(true);
+  const getEntityData = async (id: string): Promise<EntityModel> => {
+    const result = await request<EntityModel>("GET", `/entities/${id}`);
+    if (!result.success) {
+      toast({
+        title: "Error",
+        status: "error",
+        description: "Could not get Entity data.",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
       });
+      setIsError(true);
+    }
+    return result.data;
   };
 
   /**
    * Utility function to determine membership of a Node
    * in the graph
    * @param {string} id Node ID
-   * @return {boolean}
+   * @returns {boolean}
    */
   const containsNode = (id: string): boolean => {
     for (let node of nodes) {
@@ -74,7 +72,7 @@ const Graph = (props: {
   /**
    * Utility function to determine membership of an Edge in the graph
    * @param {string} id Edge ID
-   * @return {boolean}
+   * @returns {boolean}
    */
   const containsEdge = (id: string): boolean => {
     for (let edge of edges) {

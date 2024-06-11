@@ -9,11 +9,11 @@ import { nanoid } from "nanoid";
 /**
  * Get data from an API using the JavaScript `fetch` function
  * @param {string} url exact URL to GET data from
- * @return {Promise<any>} an object containing the resource response
+ * @returns {Promise<any>} an object containing the resource response
  */
 export const getData = (
   url: string,
-  options?: AxiosRequestConfig
+  options?: AxiosRequestConfig,
 ): Promise<any> => {
   return new Promise((resolve, reject) => {
     axios
@@ -24,7 +24,6 @@ export const getData = (
           consola.error("GET:", url);
           reject("Invalid response from resource");
         }
-
         // Resolve with the response data
         resolve(response.data);
       })
@@ -39,12 +38,12 @@ export const getData = (
  * Post data from an API using the JavaScript `fetch` function
  * @param {string} url exact URL to POST data to
  * @param {any} data the data to include in the request body
- * @return {Promise<any>} an object containing the resource response
+ * @returns {Promise<any>} an object containing the resource response
  */
 export const postData = async (
   url: string,
   data: any,
-  options?: AxiosRequestConfig
+  options?: AxiosRequestConfig,
 ): Promise<any> => {
   return new Promise((resolve, reject) => {
     axios
@@ -52,7 +51,7 @@ export const postData = async (
       .then((response) => {
         const contentType = response.headers["content-type"];
         if (_.isNull(contentType)) {
-          reject(`"content-type" is null`);
+          reject('"content-type" is null');
         } else if (_.startsWith(contentType, "application/json")) {
           if (_.isEqual(response.status, 200)) {
             resolve(response.data);
@@ -69,6 +68,12 @@ export const postData = async (
   });
 };
 
+/**
+ * Perform authentication operation. Authentication can only be bypassed in development mode.
+ * @param {any} request Request for authentication
+ * @param {any} response Response object
+ * @param {function(): void} next Function to execute upon valid authentication
+ */
 export const authenticate = (request: any, response: any, next: () => void) => {
   // Bypass authentication in development mode
   if (_.isEqual(process.env.NODE_ENV, "development")) {
@@ -101,8 +106,7 @@ export const authenticate = (request: any, response: any, next: () => void) => {
  * @return {string}
  */
 export const getIdentifier = (
-  type: "entity" | "attribute" | "project"
+  type: "entity" | "attribute" | "project",
 ): string => {
   return `${type.slice(0, 1)}${nanoid(7)}`;
 };
-

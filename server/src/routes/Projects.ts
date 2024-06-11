@@ -1,6 +1,7 @@
 // Libraries
 import express from "express";
 import _ from "lodash";
+import consola from "consola";
 
 // Database connection
 import { ProjectModel, IProject } from "@types";
@@ -18,25 +19,24 @@ export const checkProjectOwnership = async (req: any, res: any, next: any) => {
     let userId = req?.user?._id; // Assuming the user's ID is attached to the request object
 
     if (_.isEqual(process.env.NODE_ENV, "development")) {
-      userId = 'XXXX-1234-ABCD-0000';
+      userId = "XXXX-1234-ABCD-0000";
       next();
       return;
     }
-    const token = req.headers['id_token']; // Bearer <token>
+    const token = req.headers["id_token"]; // Bearer <token>
     console.log("userId:", userId);
 
     if (!userId) {
       // Validate the token
       if (!token) {
-        return res.status(401).json({ message: 'No token provided.' });
+        return res.status(401).json({ message: "No token provided." });
       }
-      const isUser = await Authentication.validate(token) as any;
+      const isUser = (await Authentication.validate(token)) as any;
       if (!isUser) {
-        return res.status(401).json({ message: 'Invalid or expired token.' });
+        return res.status(401).json({ message: "Invalid or expired token." });
       }
       userId = isUser?._id;
       if (!userId) {
-
         return res.status(400).json({ message: "User not provided." });
       }
     }
@@ -49,8 +49,13 @@ export const checkProjectOwnership = async (req: any, res: any, next: any) => {
       return res.status(404).json({ message: "Project not found." });
     }
 
-    if (project.owner.toString() !== userId.toString() && !project?.collaborators?.includes(userId.toString())) {
-      return res.status(403).json({ message: "User is not the owner nor collaborator of this project." });
+    if (
+      project.owner.toString() !== userId.toString() &&
+      !project?.collaborators?.includes(userId.toString())
+    ) {
+      return res.status(403).json({
+        message: "User is not the owner nor collaborator of this project.",
+      });
     }
 
     // If checks pass, attach project to request and proceed
@@ -68,16 +73,20 @@ const ProjectsRoute = express.Router();
 ProjectsRoute.route("/projects").get(
   authMiddleware,
   (_request: any, response: any) => {
-    console.log("Getting all projects");
+    consola.debug("Getting all projects");
     Projects.getAll().then((projects: ProjectModel[]) => {
       if (_.isEqual(process.env.NODE_ENV, "development")) {
-        _request.user = { _id: 'XXXX-1234-ABCD-0000' };
+        _request.user = { _id: "XXXX-1234-ABCD-0000" };
       }
-      console.log("_request?.user?._id):", _request?.user?._id);
-      response.json(projects.filter((project) => (project.owner === _request?.user?._id)
-      || (project?.collaborators?.includes(_request?.user?._id))));
+      response.json(
+        projects.filter(
+          (project) =>
+            project.owner === _request?.user?._id ||
+            project?.collaborators?.includes(_request?.user?._id),
+        ),
+      );
     });
-  }
+  },
 );
 
 // View a specific Project
@@ -87,7 +96,7 @@ ProjectsRoute.route("/projects/:id").get(
     Projects.getOne(request.params.id).then((project: ProjectModel) => {
       response.json(project);
     });
-  }
+  },
 );
 
 // Create a new Project, expects Project data
@@ -101,7 +110,7 @@ ProjectsRoute.route("/projects/create").post(
         status: "success",
       });
     });
-  }
+  },
 );
 
 // Route: Add an Entity to a Project, expects Entity and Project ID data.
@@ -115,9 +124,9 @@ ProjectsRoute.route("/projects/add").post(
           id: entity,
           status: "success",
         });
-      }
+      },
     );
-  }
+  },
 );
 
 // Route: Update a Project
@@ -132,7 +141,7 @@ ProjectsRoute.route("/projects/update").post(
         status: "success",
       });
     });
-  }
+  },
 );
 
 // Get JSON-formatted data of the Entity
@@ -140,18 +149,18 @@ ProjectsRoute.route("/projects/export").post(
   authMiddleware,
   (
     request: {
-      body: { id: string; fields: string[]; format: "json" | "csv" | "txt" };
+      body: { _id: string; fields: string[]; format: "json" | "csv" | "txt" };
     },
-    response: any
+    response: any,
   ) => {
     Projects.getData(request.body).then((path: string) => {
       response.setHeader("Content-Type", `application/${request.body.format}`);
       response.download(
         path,
-        `export_${request.body.id}.${request.body.format}`
+        `export_${request.body._id}.${request.body.format}`,
       );
     });
-  }
+  },
 );
 
 // Route: Remove an Entity from a Project, expects Entity and Project ID data.
@@ -166,9 +175,9 @@ ProjectsRoute.route("/projects/remove").post(
           name: project,
           status: "success",
         });
-      }
+      },
     );
-  }
+  },
 );
 
 // Route: Remove a Project
@@ -183,7 +192,7 @@ ProjectsRoute.route("/projects/:id").delete(
         status: "success",
       });
     });
-  }
+  },
 );
 
 export default ProjectsRoute;

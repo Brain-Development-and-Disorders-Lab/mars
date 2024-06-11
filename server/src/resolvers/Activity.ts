@@ -1,4 +1,4 @@
-import { Activity } from "src/models/Activity"
+import { Activity } from "src/models/Activity";
 
 export const ActivityResolvers = {
   Query: {
@@ -7,5 +7,5 @@ export const ActivityResolvers = {
       const allActivity = await Activity.all();
       return allActivity.slice(0, args.limit).reverse();
     },
-  }
-}
+  },
+};

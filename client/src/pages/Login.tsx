@@ -1,5 +1,5 @@
 // React
-import React, { FC, useMemo, useState } from "react";
+import React, { FC, useEffect, useMemo, useState } from "react";
 
 // Existing and custom components
 import { Flex, Heading, Button, Image, Text, useToast } from "@chakra-ui/react";
@@ -14,7 +14,7 @@ import { LoginProps } from "@types";
 // Utility functions and libraries
 import { useToken } from "src/authentication/useToken";
 import _ from "lodash";
-import { postData } from "@database/functions";
+import { request } from "@database/functions";
 
 const useQuery = () => {
   // Get URL query parameters
@@ -47,45 +47,48 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
   // Loading state, dependent on "code"
   const [isLoading, setIsLoading] = useState(searchParams.has("code"));
 
-  // Check if token exists
-  if ((_.isUndefined(token) || _.isEqual(token.id_token, "")) && accessCode) {
-    // Now perform login and data retrieval via server, check if user permitted access
-    postData(`/login`, { code: accessCode })
-      .then((response) => {
-        if (_.isEqual(response.status, "error")) {
-          toast({
-            title: "Error authenticating with ORCiD",
-            status: "error",
-            description: response.message,
-            duration: 4000,
-            position: "bottom-right",
-            isClosable: true,
-          });
-          setIsLoading(false);
-        } else {
-          removeCode();
-          setToken(response.token);
-          setAuthenticated(true);
-        }
-      })
-      .catch((error) => {
-        toast({
-          title: "Error authenticating with ORCiD",
-          status: "error",
-          description: error.message,
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-        setIsLoading(false);
-        setAuthenticated(false);
+  /**
+   * Utility function to perform a Login operation
+   * @param code String returned by ORCID API for login
+   */
+  const getLogin = async (code: string) => {
+    // Perform login and data retrieval via server, check if user permitted access
+    const response = await request<{ token: any }>("POST", "/login", {
+      code: code,
+    });
+    if (response.success) {
+      removeCode();
+      setToken(response.data.token);
+      setAuthenticated(true);
+    } else {
+      toast({
+        title: "Login Error",
+        status: "error",
+        description: "Error authenticating with ORCiD",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
       });
-  }
+      setAuthenticated(false);
+    }
+    setIsLoading(false);
+  };
+
+  // Check if token exists
+  useEffect(() => {
+    if ((_.isUndefined(token) || _.isEqual(token.id_token, "")) && accessCode) {
+      getLogin(accessCode);
+    }
+  }, []);
 
   // Define login parameters
   const clientID = "APP-BBVHCTCNDUJ4CAXV";
-  const isLocalhost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-  const redirectURI = isLocalhost ? "http://127.0.0.1:8080" : "https://mars.reusable.bio";
+  const isLocalhost =
+    window.location.hostname === "localhost" ||
+    window.location.hostname === "127.0.0.1";
+  const redirectURI = isLocalhost
+    ? "http://127.0.0.1:8080"
+    : "https://mars.reusable.bio";
   const requestURI = `https://orcid.org/oauth/authorize?client_id=${clientID}&response_type=code&scope=openid&redirect_uri=${redirectURI}`;
 
   const onLoginClick = () => {

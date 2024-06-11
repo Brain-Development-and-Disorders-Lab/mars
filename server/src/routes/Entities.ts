@@ -3,13 +3,12 @@ import express from "express";
 import _ from "lodash";
 
 // Import types from the client to enforce structure
-import { EntityModel, IEntity } from "@types";
+import { EntityModel, IEntity, Item } from "@types";
 
 // Utility functions and libraries
 import { Entities } from "../operations/Entities";
 import authMiddleware from "../middleware/authMiddleware";
 import { Projects } from "../operations/Projects";
-
 
 // Middleware to check entity ownership
 export const checkEntitiesOwnership = async (req: any, res: any, next: any) => {
@@ -18,11 +17,11 @@ export const checkEntitiesOwnership = async (req: any, res: any, next: any) => {
   const entityName = req.params.name;
 
   if (_.isEqual(process.env.NODE_ENV, "development")) {
-    userId = 'XXXX-1234-ABCD-0000';
+    userId = "XXXX-1234-ABCD-0000";
   }
 
   if (!userId) {
-    return res.status(401).json({ message: 'Authentication required' });
+    return res.status(401).json({ message: "Authentication required" });
   }
 
   try {
@@ -34,7 +33,7 @@ export const checkEntitiesOwnership = async (req: any, res: any, next: any) => {
     }
 
     if (!entity) {
-      return res.status(404).json({ message: 'Entity not found' });
+      return res.status(404).json({ message: "Entity not found" });
     }
 
     let isOwnerOrProjectOwner = entity.owner === userId;
@@ -43,7 +42,10 @@ export const checkEntitiesOwnership = async (req: any, res: any, next: any) => {
     if (entity.projects && entity.projects.length > 0) {
       for (const projectId of entity.projects) {
         const project = await Projects.getOne(projectId);
-        if (project && (project.owner === userId || project?.collaborators?.includes(userId))) {
+        if (
+          project &&
+          (project.owner === userId || project?.collaborators?.includes(userId))
+        ) {
           isOwnerOrProjectOwner = true;
           break; // Break the loop as soon as ownership is confirmed
         }
@@ -51,17 +53,20 @@ export const checkEntitiesOwnership = async (req: any, res: any, next: any) => {
     }
 
     if (!isOwnerOrProjectOwner) {
-      return res.status(403).json({ message: 'User does not have permission to access this entity' });
+      return res.status(403).json({
+        message: "User does not have permission to access this entity",
+      });
     }
 
     req.entity = entity; // Attach the entity to the request object for further use
     next();
   } catch (error) {
-    console.error('Error checking entity ownership:', error);
-    return res.status(500).json({ message: 'An error occurred while checking entity ownership' });
+    console.error("Error checking entity ownership:", error);
+    return res
+      .status(500)
+      .json({ message: "An error occurred while checking entity ownership" });
   }
 };
-
 
 const EntitiesRoute = express.Router();
 
@@ -72,10 +77,12 @@ EntitiesRoute.route("/entities").get(
     try {
       let userId = _request?.user?._id;
       if (_.isEqual(process.env.NODE_ENV, "development")) {
-        userId = 'XXXX-1234-ABCD-0000';
+        userId = "XXXX-1234-ABCD-0000";
       }
       if (!userId) {
-        return response.status(401).json({ message: 'Authentication required' });
+        return response
+          .status(401)
+          .json({ message: "Authentication required" });
       }
 
       const entities = await Entities.getAll();
@@ -105,10 +112,13 @@ EntitiesRoute.route("/entities").get(
 
       response.json(filteredEntities);
     } catch (error) {
-      console.error('Error fetching entities:', error);
-      response.status(500).json({ message: 'An error occurred while fetching entities' });
+      console.error("Error fetching entities:", error);
+      response
+        .status(500)
+        .json({ message: "An error occurred while fetching entities" });
     }
-  });
+  },
+);
 
 EntitiesRoute.route("/entities/search").post(
   authMiddleware,
@@ -118,18 +128,21 @@ EntitiesRoute.route("/entities/search").post(
 
     try {
       if (!searchText.trim()) {
-        return response.status(400).json({ message: "Search text is required." });
+        return response
+          .status(400)
+          .json({ message: "Search text is required." });
       }
 
       const entities = await Entities.searchByText(userId, searchText);
       response.json(entities);
     } catch (error) {
-      console.error('Error performing search:', error);
-      response.status(500).json({ message: 'An error occurred during the search' });
+      console.error("Error performing search:", error);
+      response
+        .status(500)
+        .json({ message: "An error occurred during the search" });
     }
-  });
-
-
+  },
+);
 
 // View specific Entity
 EntitiesRoute.route("/entities/:id").get(
@@ -139,17 +152,19 @@ EntitiesRoute.route("/entities/:id").get(
     Entities.getOne(request.params.id).then((entity: EntityModel) => {
       response.json(entity);
     });
-  }
+  },
 );
 
 // View specific Entity
 EntitiesRoute.route("/entities/byName/:name").get(
   authMiddleware,
   (request: any, response: any) => {
-    Entities.entityByNameExist(request.params.name).then((entity: EntityModel | null) => {
-      response.json(!!entity);
-    });
-  }
+    Entities.entityByNameExist(request.params.name).then(
+      (entity: EntityModel | null) => {
+        response.json(!!entity);
+      },
+    );
+  },
 );
 
 // Lock specific entity
@@ -158,16 +173,14 @@ EntitiesRoute.route("/entities/lock/:id").post(
   checkEntitiesOwnership,
   (
     request: {
-      body: { entity: { name: string; id: string }; lockState: boolean };
+      body: { entity: Item; lockState: boolean };
     },
-    response: any
+    response: any,
   ) => {
-    Entities.setLock(request.body).then(
-      (entity: { name: string; id: string }) => {
-        response.json(entity);
-      }
-    );
-  }
+    Entities.setLock(request.body).then((entity: Item) => {
+      response.json(entity);
+    });
+  },
 );
 
 // Get formatted data of one Entity
@@ -179,16 +192,16 @@ EntitiesRoute.route("/entities/export/:id").post(
       params: { id: string };
       body: { fields: string[]; format: "json" | "csv" | "txt" };
     },
-    response: any
+    response: any,
   ) => {
     Entities.getData(request.params.id, request.body).then((path: string) => {
       response.setHeader("Content-Type", `application/${request.body.format}`);
       response.download(
         path,
-        `export_${request.params.id}.${request.body.format}`
+        `export_${request.params.id}.${request.body.format}`,
       );
     });
-  }
+  },
 );
 
 // Get formatted data of multiple Entities
@@ -196,87 +209,90 @@ EntitiesRoute.route("/entities/export").post(
   authMiddleware,
   (
     request: {
-      body: { entities: string[], format: "json" | "csv" | "txt" };
+      body: { entities: string[]; format: "json" | "csv" | "txt" };
     },
-    response: any
+    response: any,
   ) => {
-    const tmp = require('tmp');
-    const fs = require('fs');
-    const dayjs = require('dayjs');
+    const tmp = require("tmp");
+    const fs = require("fs");
+    const dayjs = require("dayjs");
 
     if (request.body?.format === "json") {
-      Entities.getDataMultipleJSON(request.body.entities).then((data: string) => {
-        // Create a temporary file and write the JSON data to it
-        tmp.file({ postfix: '.json' }, (err: any, path: any) => {
-          if (err) {
-            return response.status(500).send("Error creating file");
-          }
-          fs.writeFile(path, JSON.stringify(data), (err: any) => {
+      Entities.getDataMultipleJSON(request.body.entities).then(
+        (data: string) => {
+          // Create a temporary file and write the JSON data to it
+          tmp.file({ postfix: ".json" }, (err: any, path: any) => {
             if (err) {
-              return response.status(500).send("Error writing to file");
+              return response.status(500).send("Error creating file");
             }
-
-            response.setHeader("Content-Type", `application/json`);
-            response.download(
-              path,
-              `export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.json`,
-              (err: any) => {
-                // cleanupCallback(); // Cleanup the temp file
-                if (err) {
-                  // Handle error, but don't re-throw if it's just the client aborting the download.
-                  if (!response.headersSent) {
-                    response.status(500).send("Error sending file");
-                  }
-                }
+            fs.writeFile(path, JSON.stringify(data), (err: any) => {
+              if (err) {
+                return response.status(500).send("Error writing to file");
               }
-            );
+
+              response.setHeader("Content-Type", `application/json`);
+              response.download(
+                path,
+                `export_entities_${dayjs(Date.now()).format(
+                  "YYYY_MM_DD",
+                )}.json`,
+                (err: any) => {
+                  // cleanupCallback(); // Cleanup the temp file
+                  if (err) {
+                    // Handle error, but don't re-throw if it's just the client aborting the download.
+                    if (!response.headersSent) {
+                      response.status(500).send("Error sending file");
+                    }
+                  }
+                },
+              );
+            });
           });
-        });
-      });
+        },
+      );
     } else {
       Entities.getDataMultiple(request.body.entities).then((path: string) => {
         response.setHeader("Content-Type", `application/csv`);
         response.download(
           path,
-          `export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.csv`
+          `export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.csv`,
         );
       });
     }
-  }
+  },
 );
 
 // Get formatted data of all Entities
 EntitiesRoute.route("/entities/export_all").post(
   authMiddleware,
-  (
-    request: { body?: { project: string } },
-    response: any
-  ) => {
+  (request: { body?: { project: string } }, response: any) => {
     const projectId = request?.body?.project; // get warning to go away
-    const tmp = require('tmp');
-    const fs = require('fs');
-    const dayjs = require('dayjs');
+    const tmp = require("tmp");
+    const fs = require("fs");
+    const dayjs = require("dayjs");
 
     Entities.getAll().then((data: EntityModel[]) => {
       // Create a temporary file and write the JSON data to it
-      tmp.file({ postfix: '.json' }, (err: any, path: any) => {
+      tmp.file({ postfix: ".json" }, (err: any, path: any) => {
         if (err) {
           return response.status(500).send("Error creating file");
         }
 
         let entities = data;
         if (projectId) {
-          entities = entities.filter(entity => entity.projects.includes(projectId));
+          entities = entities.filter((entity) =>
+            entity.projects.includes(projectId),
+          );
         }
 
         let modifiedEntities = {
-          "entities": entities.map(entity => {
+          entities: entities.map((entity) => {
             const plainEntity = JSON.parse(JSON.stringify(entity)); // Converts MongoDB types to plain objects
             delete plainEntity.history;
 
             return plainEntity;
-          })
-        }
+          }),
+        };
         const jsonData = JSON.stringify(modifiedEntities, null, 4);
 
         fs.writeFile(path, JSON.stringify(jsonData), (err: any) => {
@@ -294,14 +310,13 @@ EntitiesRoute.route("/entities/export_all").post(
                   response.status(500).send("Error sending file");
                 }
               }
-            }
+            },
           );
         });
       });
     });
-  }
+  },
 );
-
 
 // Create a new Entity, expects Entity data
 EntitiesRoute.route("/entities/create").post(
@@ -314,7 +329,7 @@ EntitiesRoute.route("/entities/create").post(
         status: "success",
       });
     });
-  }
+  },
 );
 
 // Update an Entity
@@ -329,7 +344,7 @@ EntitiesRoute.route("/entities/update").post(
         status: "success",
       });
     });
-  }
+  },
 );
 
 // Delete an Entity
@@ -343,7 +358,7 @@ EntitiesRoute.route("/entities/:id").delete(
         status: "success",
       });
     });
-  }
+  },
 );
 
 EntitiesRoute.route("/entities/searchByTerm").post(
@@ -360,10 +375,12 @@ EntitiesRoute.route("/entities/searchByTerm").post(
       const entities = await Entities.searchByTerm(userId, searchText);
       response.json(entities || []);
     } catch (error) {
-      console.error('Error performing search:', error);
-      response.status(500).json({ message: 'An error occurred during the search' });
+      console.error("Error performing search:", error);
+      response
+        .status(500)
+        .json({ message: "An error occurred during the search" });
     }
-  }
+  },
 );
 
 export default EntitiesRoute;

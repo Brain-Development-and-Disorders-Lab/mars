@@ -95,7 +95,7 @@ describe("POST /attributes/update", () => {
           description: result.description,
           values: [
             {
-              identifier: "v_0",
+              _id: "v_0",
               name: "Value0",
               type: "text",
               data: "Test",

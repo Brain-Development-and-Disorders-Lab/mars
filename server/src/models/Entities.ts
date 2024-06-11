@@ -1,4 +1,10 @@
-import { AttributeModel, EntityModel, IEntity, IGenericItem, ResponseMessage } from "@types";
+import {
+  AttributeModel,
+  EntityModel,
+  IEntity,
+  IGenericItem,
+  ResponseMessage,
+} from "@types";
 import _ from "lodash";
 import { getDatabase } from "src/connectors/database";
 import { getIdentifier } from "src/util";
@@ -26,7 +32,7 @@ export class Entities {
       .collection<EntityModel>(ENTITIES_COLLECTION)
       .find()
       .toArray();
-  }
+  };
 
   /**
    * Get an Entity by identifier
@@ -49,7 +55,7 @@ export class Entities {
     const joinedEntity: EntityModel = {
       _id: getIdentifier("entity"), // Generate new identifier
       timestamp: new Date().toISOString(), // Add created timestamp
-      ...entity // Unpack existing IEntity fields
+      ...entity, // Unpack existing IEntity fields
     };
 
     // To-Do: Perform operations for origins, products, projects, and add Activity operation
@@ -61,7 +67,9 @@ export class Entities {
 
     return {
       success: successStatus,
-      message: successStatus ? "Created Entity successfully" : "Unable to create Entity",
+      message: successStatus
+        ? "Created Entity successfully"
+        : "Unable to create Entity",
     };
   };
 
@@ -78,7 +86,7 @@ export class Entities {
     const update: { $set: IEntity } = {
       $set: {
         ...entity,
-      }
+      },
     };
 
     // Description
@@ -103,30 +111,54 @@ export class Entities {
 
     // Origins
     if (updated.associations && updated.associations.origins) {
-      const addOrigins = _.difference(updated.associations.origins, entity.associations.origins);
+      const addOrigins = _.difference(
+        updated.associations.origins,
+        entity.associations.origins,
+      );
       for (let origin of addOrigins) {
         await this.addOrigin(updated._id, origin);
-        await this.addProduct(origin._id, { _id: updated._id, name: updated.name });
+        await this.addProduct(origin._id, {
+          _id: updated._id,
+          name: updated.name,
+        });
       }
-      const removeOrigins = _.difference(entity.associations.origins, updated.associations.origins);
+      const removeOrigins = _.difference(
+        entity.associations.origins,
+        updated.associations.origins,
+      );
       for (let origin of removeOrigins) {
         await this.removeOrigin(updated._id, origin);
-        await this.removeProduct(origin._id, { _id: updated._id, name: updated.name });
+        await this.removeProduct(origin._id, {
+          _id: updated._id,
+          name: updated.name,
+        });
       }
       update.$set.associations.origins = updated.associations.origins;
     }
 
     // Products
     if (updated.associations && updated.associations.products) {
-      const addProducts = _.difference(updated.associations.products, entity.associations.products);
+      const addProducts = _.difference(
+        updated.associations.products,
+        entity.associations.products,
+      );
       for (let product of addProducts) {
         await this.addProduct(updated._id, product);
-        await this.addOrigin(product._id, { _id: updated._id, name: updated.name });
+        await this.addOrigin(product._id, {
+          _id: updated._id,
+          name: updated.name,
+        });
       }
-      const removeProducts = _.difference(entity.associations.products, updated.associations.products);
+      const removeProducts = _.difference(
+        entity.associations.products,
+        updated.associations.products,
+      );
       for (let product of removeProducts) {
         await this.removeProduct(updated._id, product);
-        await this.removeOrigin(product._id, { _id: updated._id, name: updated.name });
+        await this.removeOrigin(product._id, {
+          _id: updated._id,
+          name: updated.name,
+        });
       }
       update.$set.associations.products = updated.associations.products;
     }
@@ -137,7 +169,10 @@ export class Entities {
       for (let attribute of addAttributes) {
         await this.addAttribute(updated._id, attribute);
       }
-      const removeAttributes = _.difference(entity.attributes, updated.attributes);
+      const removeAttributes = _.difference(
+        entity.attributes,
+        updated.attributes,
+      );
       for (let attribute of removeAttributes) {
         await this.removeAttribute(updated._id, attribute._id);
       }
@@ -150,7 +185,10 @@ export class Entities {
 
     return {
       success: true,
-      message: response.modifiedCount == 1 ? "Updated Entity": "No changes made to Entity",
+      message:
+        response.modifiedCount == 1
+          ? "Updated Entity"
+          : "No changes made to Entity",
     };
   };
 
@@ -160,7 +198,10 @@ export class Entities {
    * @param project_id Project identifier to associate with Entity
    * @returns {Promise<ResponseMessage>}
    */
-  static addProject = async (_id: string, project_id: string): Promise<ResponseMessage> => {
+  static addProject = async (
+    _id: string,
+    project_id: string,
+  ): Promise<ResponseMessage> => {
     const entity = await this.getOne(_id);
 
     if (_.isNull(entity)) {
@@ -192,7 +233,9 @@ export class Entities {
 
     return {
       success: successStatus,
-      message: successStatus ? "Added Project successfully" : "Unable to add Project",
+      message: successStatus
+        ? "Added Project successfully"
+        : "Unable to add Project",
     };
   };
 
@@ -202,7 +245,10 @@ export class Entities {
    * @param project_id Project identifier to remove from Entity
    * @returns {Promise<ResponseMessage>}
    */
-  static removeProject = async (_id: string, project_id: string): Promise<ResponseMessage> => {
+  static removeProject = async (
+    _id: string,
+    project_id: string,
+  ): Promise<ResponseMessage> => {
     const entity = await this.getOne(_id);
 
     if (_.isNull(entity)) {
@@ -226,7 +272,9 @@ export class Entities {
 
     return {
       success: successStatus,
-      message: successStatus ? "Removed Project successfully" : "Unable to remove Project",
+      message: successStatus
+        ? "Removed Project successfully"
+        : "Unable to remove Project",
     };
   };
 
@@ -236,11 +284,14 @@ export class Entities {
    * @param {string} description Update Entity description
    * @returns {ResponseMessage}
    */
-  static setDescription = async (_id: string, description: string): Promise<ResponseMessage> => {
+  static setDescription = async (
+    _id: string,
+    description: string,
+  ): Promise<ResponseMessage> => {
     const update = {
       $set: {
         description: description,
-      }
+      },
     };
 
     const response = await getDatabase()
@@ -250,7 +301,9 @@ export class Entities {
 
     return {
       success: successStatus,
-      message: successStatus ? "Set description successfully" : "Unable to set description",
+      message: successStatus
+        ? "Set description successfully"
+        : "Unable to set description",
     };
   };
 
@@ -260,7 +313,10 @@ export class Entities {
    * @param product Generic format for Product to associate with Entity
    * @returns {Promise<ResponseMessage>}
    */
-  static addProduct = async (_id: string, product: IGenericItem): Promise<ResponseMessage> => {
+  static addProduct = async (
+    _id: string,
+    product: IGenericItem,
+  ): Promise<ResponseMessage> => {
     const entity = await this.getOne(_id);
 
     if (_.isNull(entity)) {
@@ -271,7 +327,9 @@ export class Entities {
     }
 
     const productCollection = _.cloneDeep(entity.associations.products);
-    if (productCollection.filter((p) => _.isEqual(p._id, product._id)).length > 0) {
+    if (
+      productCollection.filter((p) => _.isEqual(p._id, product._id)).length > 0
+    ) {
       return {
         success: false,
         message: "Entity already associated with Product",
@@ -295,7 +353,9 @@ export class Entities {
 
     return {
       success: successStatus,
-      message: successStatus ? "Added Product successfully" : "Unable to add Product",
+      message: successStatus
+        ? "Added Product successfully"
+        : "Unable to add Product",
     };
   };
 
@@ -305,7 +365,10 @@ export class Entities {
    * @param products Set of Products to associate with Entity
    * @returns {Promise<ResponseMessage>}
    */
-  static addProducts = async (_id: string, products: IGenericItem[]): Promise<ResponseMessage> => {
+  static addProducts = async (
+    _id: string,
+    products: IGenericItem[],
+  ): Promise<ResponseMessage> => {
     const entity = await this.getOne(_id);
 
     if (_.isNull(entity)) {
@@ -332,7 +395,9 @@ export class Entities {
 
     return {
       success: successStatus,
-      message: successStatus ? "Added Products successfully" : "Unable to add Products",
+      message: successStatus
+        ? "Added Products successfully"
+        : "Unable to add Products",
     };
   };
 
@@ -342,7 +407,10 @@ export class Entities {
    * @param product Generic format for Product to associate with Entity
    * @returns {Promise<ResponseMessage>}
    */
-  static removeProduct = async (_id: string, product: IGenericItem): Promise<ResponseMessage> => {
+  static removeProduct = async (
+    _id: string,
+    product: IGenericItem,
+  ): Promise<ResponseMessage> => {
     const entity = await this.getOne(_id);
 
     if (_.isNull(entity)) {
@@ -357,7 +425,9 @@ export class Entities {
       $set: {
         associations: {
           origins: entity.associations.origins,
-          products: productCollection.filter((p) => !_.isEqual(p._id, product._id)),
+          products: productCollection.filter(
+            (p) => !_.isEqual(p._id, product._id),
+          ),
         },
       },
     };
@@ -369,7 +439,9 @@ export class Entities {
 
     return {
       success: successStatus,
-      message: successStatus ? "Removed Product successfully" : "Unable to remove Product",
+      message: successStatus
+        ? "Removed Product successfully"
+        : "Unable to remove Product",
     };
   };
 
@@ -379,7 +451,10 @@ export class Entities {
    * @param origin Generic format for Origin to associate with Entity
    * @returns {Promise<ResponseMessage>}
    */
-  static addOrigin = async (_id: string, origin: IGenericItem): Promise<ResponseMessage> => {
+  static addOrigin = async (
+    _id: string,
+    origin: IGenericItem,
+  ): Promise<ResponseMessage> => {
     const entity = await this.getOne(_id);
 
     if (_.isNull(entity)) {
@@ -390,7 +465,9 @@ export class Entities {
     }
 
     const originCollection = _.cloneDeep(entity.associations.origins);
-    if (originCollection.filter((o) => _.isEqual(o._id, origin._id)).length > 0) {
+    if (
+      originCollection.filter((o) => _.isEqual(o._id, origin._id)).length > 0
+    ) {
       return {
         success: false,
         message: "Entity already associated with Origin",
@@ -414,7 +491,9 @@ export class Entities {
 
     return {
       success: successStatus,
-      message: successStatus ? "Added Origin successfully" : "Unable to add Origin",
+      message: successStatus
+        ? "Added Origin successfully"
+        : "Unable to add Origin",
     };
   };
 
@@ -424,7 +503,10 @@ export class Entities {
    * @param origins Set of Origins to associate with Entity
    * @returns {Promise<ResponseMessage>}
    */
-  static addOrigins = async (_id: string, origins: IGenericItem[]): Promise<ResponseMessage> => {
+  static addOrigins = async (
+    _id: string,
+    origins: IGenericItem[],
+  ): Promise<ResponseMessage> => {
     const entity = await this.getOne(_id);
 
     if (_.isNull(entity)) {
@@ -435,7 +517,10 @@ export class Entities {
     }
 
     // Create a union set from the existing set of Origins and the set of Origins to add
-    const updatedOriginCollection = _.union(entity.associations.origins, origins);
+    const updatedOriginCollection = _.union(
+      entity.associations.origins,
+      origins,
+    );
 
     const update = {
       $set: {
@@ -453,7 +538,9 @@ export class Entities {
 
     return {
       success: successStatus,
-      message: successStatus ? "Added Origins successfully" : "Unable to add Origins",
+      message: successStatus
+        ? "Added Origins successfully"
+        : "Unable to add Origins",
     };
   };
 
@@ -463,7 +550,10 @@ export class Entities {
    * @param origin Generic format for Origin to associate with Entity
    * @returns {Promise<ResponseMessage>}
    */
-  static removeOrigin = async (_id: string, origin: IGenericItem): Promise<ResponseMessage> => {
+  static removeOrigin = async (
+    _id: string,
+    origin: IGenericItem,
+  ): Promise<ResponseMessage> => {
     const entity = await this.getOne(_id);
 
     if (_.isNull(entity)) {
@@ -477,7 +567,9 @@ export class Entities {
     const update = {
       $set: {
         associations: {
-          origins: originCollection.filter((o) => !_.isEqual(o._id, origin._id)),
+          origins: originCollection.filter(
+            (o) => !_.isEqual(o._id, origin._id),
+          ),
           products: entity.associations.products,
         },
       },
@@ -490,7 +582,9 @@ export class Entities {
 
     return {
       success: successStatus,
-      message: successStatus ? "Removed Origin successfully" : "Unable to remove Origin",
+      message: successStatus
+        ? "Removed Origin successfully"
+        : "Unable to remove Origin",
     };
   };
 
@@ -500,7 +594,10 @@ export class Entities {
    * @param attribute Attribute data
    * @returns {Promise<ResponseMessage>}
    */
-  static addAttribute = async (_id: string, attribute: AttributeModel): Promise<ResponseMessage> => {
+  static addAttribute = async (
+    _id: string,
+    attribute: AttributeModel,
+  ): Promise<ResponseMessage> => {
     const entity = await this.getOne(_id);
 
     if (_.isNull(entity)) {
@@ -516,7 +613,7 @@ export class Entities {
     const update = {
       $set: {
         attributes: attributeCollection,
-      }
+      },
     };
 
     const response = await getDatabase()
@@ -526,7 +623,9 @@ export class Entities {
 
     return {
       success: successStatus,
-      message: successStatus ? "Added Attribute successfully" : "Unable to add Attribute",
+      message: successStatus
+        ? "Added Attribute successfully"
+        : "Unable to add Attribute",
     };
   };
 
@@ -536,7 +635,10 @@ export class Entities {
    * @param attribute Attribute identifier to remove
    * @returns {Promise<ResponseMessage>}
    */
-  static removeAttribute = async (_id: string, attribute: string): Promise<ResponseMessage> => {
+  static removeAttribute = async (
+    _id: string,
+    attribute: string,
+  ): Promise<ResponseMessage> => {
     const entity = await this.getOne(_id);
 
     if (_.isNull(entity)) {
@@ -547,7 +649,9 @@ export class Entities {
     }
 
     // Exclude the Attribute identifier
-    const attributeCollection = _.cloneDeep(entity.attributes).filter((a) => a._id != attribute);
+    const attributeCollection = _.cloneDeep(entity.attributes).filter(
+      (a) => a._id != attribute,
+    );
     if (attributeCollection.length === entity.attributes.length) {
       return {
         success: false,
@@ -558,7 +662,7 @@ export class Entities {
     const update = {
       $set: {
         attributes: attributeCollection,
-      }
+      },
     };
 
     const response = await getDatabase()
@@ -568,7 +672,9 @@ export class Entities {
 
     return {
       success: successStatus,
-      message: successStatus ? "Removed Attribute successfully" : "Unable to remove Attribute",
+      message: successStatus
+        ? "Removed Attribute successfully"
+        : "Unable to remove Attribute",
     };
   };
 
@@ -578,7 +684,10 @@ export class Entities {
    * @param attribute Updated Attribute
    * @returns {Promise<ResponseMessage>}
    */
-  static updateAttribute = async (_id: string, attribute: AttributeModel): Promise<ResponseMessage> => {
+  static updateAttribute = async (
+    _id: string,
+    attribute: AttributeModel,
+  ): Promise<ResponseMessage> => {
     const entity = await this.getOne(_id);
 
     if (_.isNull(entity)) {
@@ -596,7 +705,9 @@ export class Entities {
     }
 
     // Create new collection of Attributes, subsituting the original Attribute with the updated Attribute
-    const attributeCollection = _.map(_.cloneDeep(entity.attributes), (a) => _.isEqual(a._id, attribute._id) ? attribute : a);
+    const attributeCollection = _.map(_.cloneDeep(entity.attributes), (a) =>
+      _.isEqual(a._id, attribute._id) ? attribute : a,
+    );
 
     const update = {
       $set: {
@@ -611,7 +722,9 @@ export class Entities {
 
     return {
       success: successStatus,
-      message: successStatus ? "Updated Attribute successfully" : "Unable to update Attribute",
+      message: successStatus
+        ? "Updated Attribute successfully"
+        : "Unable to update Attribute",
     };
   };
 
@@ -620,7 +733,11 @@ export class Entities {
    * @param _id Entity identifier
    * @returns {Promise<string>}
    */
-  static export = async (_id: string, format: "json" | "csv", fields?: string[]): Promise<string> => {
+  static export = async (
+    _id: string,
+    format: "json" | "csv",
+    fields?: string[],
+  ): Promise<string> => {
     const entity = await this.getOne(_id);
 
     if (_.isNull(entity)) {
@@ -675,14 +792,18 @@ export class Entities {
           row.push(entity.description);
         } else if (_.startsWith(field, "origin_")) {
           // "origins" data field
-          const origin = await Entities.getOne(field.slice(ORIGIN_PREFIX_LENGTH));
+          const origin = await Entities.getOne(
+            field.slice(ORIGIN_PREFIX_LENGTH),
+          );
           if (!_.isNull(origin)) {
             headers.push(`Origin (${origin.name})`);
             row.push(origin.name);
           }
         } else if (_.startsWith(field, "product_")) {
           // "products" data field
-          const product = await Entities.getOne(field.slice(PRODUCT_PREFIX_LENGTH));
+          const product = await Entities.getOne(
+            field.slice(PRODUCT_PREFIX_LENGTH),
+          );
           if (!_.isNull(product)) {
             headers.push(`Product (${product.name})`);
             row.push(product.name);
@@ -712,10 +833,7 @@ export class Entities {
         }
 
         fs.writeFileSync(path, formatted);
-        consola.success(
-          "Generated CSV data for  Entity (id):",
-          entity._id
-        );
+        consola.success("Generated CSV data for  Entity (id):", entity._id);
 
         consola.info("File path:", path);
         consola.info("Formatted:", formatted);
@@ -729,4 +847,4 @@ export class Entities {
   // Remaining functions:
   // * addAttachment (id, id)
   // * removeAttachment (id, id)
-};
+}
