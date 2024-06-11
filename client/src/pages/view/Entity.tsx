@@ -470,7 +470,7 @@ const Entity = () => {
     if (data?.projects) {
       setProjectData(data.projects);
     }
-  }, [data]);
+  }, [loading]);
 
   // Check to see if data currently exists and refetch if so
   useEffect(() => {
