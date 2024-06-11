@@ -169,6 +169,13 @@ export type EntityModel = IEntity & {
   _id: string;
 };
 
+export type EntityNode = IGenericItem & {
+  associations: {
+    origins: IGenericItem[];
+    products: IGenericItem[];
+  };
+};
+
 export type EntityHistory = {
   timestamp: string;
   deleted: boolean;
