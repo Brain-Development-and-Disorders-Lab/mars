@@ -387,7 +387,7 @@ export type QueryComponent = {
 export type AuthInfo = {
   name: string;
   orcid: string;
-  id_token: string;
+  token: string;
 };
 
 export type AuthToken = AuthInfo & {
@@ -400,13 +400,13 @@ export type AuthToken = AuthInfo & {
 
 // User types
 export type IUser = {
-  name?: string;
+  name: string;
   email?: string;
 };
 
 export type UserModel = IUser & {
   _id: string;
-  id_token?: string;
+  token: string;
 };
 
 // Device types

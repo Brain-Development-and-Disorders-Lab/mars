@@ -3,11 +3,11 @@ import express from "express";
 import _ from "lodash";
 
 // Import types from the client to enforce structure
-import { EntityModel, IEntity, Item } from "@types";
+import { EntityModel, IEntity, IGenericItem } from "@types";
 
 // Utility functions and libraries
 import { Entities } from "../operations/Entities";
-import authMiddleware from "../middleware/authMiddleware";
+import { restAuthenticationWrapper } from "../middleware/Authentication";
 import { Projects } from "../operations/Projects";
 
 // Middleware to check entity ownership
@@ -72,7 +72,7 @@ const EntitiesRoute = express.Router();
 
 // View all Entities
 EntitiesRoute.route("/entities").get(
-  authMiddleware,
+  restAuthenticationWrapper,
   async (_request: any, response: any) => {
     try {
       let userId = _request?.user?._id;
@@ -121,7 +121,7 @@ EntitiesRoute.route("/entities").get(
 );
 
 EntitiesRoute.route("/entities/search").post(
-  authMiddleware,
+  restAuthenticationWrapper,
   async (request: any, response: any) => {
     const searchText = request.body.query;
     const userId = request.user?._id;
@@ -146,7 +146,7 @@ EntitiesRoute.route("/entities/search").post(
 
 // View specific Entity
 EntitiesRoute.route("/entities/:id").get(
-  authMiddleware,
+  restAuthenticationWrapper,
   checkEntitiesOwnership,
   (request: any, response: any) => {
     Entities.getOne(request.params.id).then((entity: EntityModel) => {
@@ -157,7 +157,7 @@ EntitiesRoute.route("/entities/:id").get(
 
 // View specific Entity
 EntitiesRoute.route("/entities/byName/:name").get(
-  authMiddleware,
+  restAuthenticationWrapper,
   (request: any, response: any) => {
     Entities.entityByNameExist(request.params.name).then(
       (entity: EntityModel | null) => {
@@ -169,15 +169,15 @@ EntitiesRoute.route("/entities/byName/:name").get(
 
 // Lock specific entity
 EntitiesRoute.route("/entities/lock/:id").post(
-  authMiddleware,
+  restAuthenticationWrapper,
   checkEntitiesOwnership,
   (
     request: {
-      body: { entity: Item; lockState: boolean };
+      body: { entity: IGenericItem; lockState: boolean };
     },
     response: any,
   ) => {
-    Entities.setLock(request.body).then((entity: Item) => {
+    Entities.setLock(request.body).then((entity: IGenericItem) => {
       response.json(entity);
     });
   },
@@ -185,7 +185,7 @@ EntitiesRoute.route("/entities/lock/:id").post(
 
 // Get formatted data of one Entity
 EntitiesRoute.route("/entities/export/:id").post(
-  authMiddleware,
+  restAuthenticationWrapper,
   checkEntitiesOwnership,
   (
     request: {
@@ -206,7 +206,7 @@ EntitiesRoute.route("/entities/export/:id").post(
 
 // Get formatted data of multiple Entities
 EntitiesRoute.route("/entities/export").post(
-  authMiddleware,
+  restAuthenticationWrapper,
   (
     request: {
       body: { entities: string[]; format: "json" | "csv" | "txt" };
@@ -264,7 +264,7 @@ EntitiesRoute.route("/entities/export").post(
 
 // Get formatted data of all Entities
 EntitiesRoute.route("/entities/export_all").post(
-  authMiddleware,
+  restAuthenticationWrapper,
   (request: { body?: { project: string } }, response: any) => {
     const projectId = request?.body?.project; // get warning to go away
     const tmp = require("tmp");
@@ -320,7 +320,7 @@ EntitiesRoute.route("/entities/export_all").post(
 
 // Create a new Entity, expects Entity data
 EntitiesRoute.route("/entities/create").post(
-  authMiddleware,
+  restAuthenticationWrapper,
   (request: { body: IEntity }, response: any) => {
     Entities.create(request.body).then((entity: EntityModel) => {
       response.json({
@@ -334,7 +334,7 @@ EntitiesRoute.route("/entities/create").post(
 
 // Update an Entity
 EntitiesRoute.route("/entities/update").post(
-  authMiddleware,
+  restAuthenticationWrapper,
   checkEntitiesOwnership,
   (request: { body: EntityModel }, response: any) => {
     Entities.update(request.body).then((updatedEntity: EntityModel) => {
@@ -349,7 +349,7 @@ EntitiesRoute.route("/entities/update").post(
 
 // Delete an Entity
 EntitiesRoute.route("/entities/:id").delete(
-  authMiddleware,
+  restAuthenticationWrapper,
   (request: { params: { id: string } }, response: any) => {
     Entities.delete(request.params.id).then((entity) => {
       response.json({
@@ -362,7 +362,7 @@ EntitiesRoute.route("/entities/:id").delete(
 );
 
 EntitiesRoute.route("/entities/searchByTerm").post(
-  authMiddleware,
+  restAuthenticationWrapper,
   async (request: any, response: any) => {
     const searchText = request.body.query;
     const userId = request.user?._id;

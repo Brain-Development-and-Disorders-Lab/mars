@@ -1,5 +1,5 @@
 // Existing and custom types
-import { AuthInfo, AuthToken, ProjectModel } from "@types";
+import { AuthInfo, AuthToken, ProjectModel, UserModel } from "@types";
 
 // Operations
 import { Users } from "./Users";
@@ -208,6 +208,15 @@ export class Authentication {
         redirect_uri: REDIRECT_URI,
       }).toString();
 
+      // If non-production, resolve with test user
+      if (process.env.NODE_ENV !== "production") {
+        resolve({
+          orcid: "XXXX-0000-DEMO-1111",
+          name: "Test User",
+          token: "test_token_value",
+        });
+      }
+
       postData(TOKEN_URL, loginData, {
         headers: {
           Accept: "application/json",
@@ -221,18 +230,18 @@ export class Authentication {
               // If user exists, update the existing record with any new data
               consola.debug("User found for ORCiD:", response.orcid);
               await Users.update(response.orcid, {
-                name: response.name,
                 _id: response.orcid,
-                id_token: response.id_token,
+                name: response.name,
+                token: response.token,
               });
               consola.debug("User data updated for ORCiD:", response.orcid);
             } else {
               // If user does not exist, create a new record
               consola.debug("New user creation for ORCiD:", response.orcid);
               await Users.create({
-                name: response.name,
                 _id: response.orcid,
-                id_token: response.id_token,
+                name: response.name,
+                token: response.token,
               });
               consola.debug("New user created for ORCiD:", response.orcid);
               await bootstrapUserData(response.orcid); // Here we pass the ORCiD as the userId
@@ -242,7 +251,7 @@ export class Authentication {
             resolve({
               name: response.name,
               orcid: response.orcid,
-              id_token: response.id_token,
+              token: response.token,
             });
           } catch (error) {
             consola.error(
@@ -265,12 +274,17 @@ export class Authentication {
   /**
    * Validate a login token
    * @param id_token ID token contents
-   * @returns {Promise<boolean>}
+   * @returns {Promise<UserModel>}
    */
-  static validate = (id_token: string): Promise<boolean> => {
+  static validate = (id_token: string): Promise<UserModel> => {
     return new Promise((resolve, reject) => {
-      if (_.isEqual(process.env.NODE_ENV, "development")) {
-        resolve({ _id: "XXXX-1234-ABCD-0000" } as any);
+      if (process.env.NODE_ENV !== "production") {
+        resolve({
+          _id: "XXXX-0000-DEMO-1111",
+          name: "Test User",
+          email: "mars@reusable.bio",
+          token: "test_token_value",
+        });
       }
 
       const client = new JwksClient({
@@ -286,7 +300,7 @@ export class Authentication {
 
           if (_.isUndefined(orcid)) {
             consola.error("ORCiD could not be retrieved from login token");
-            resolve(false);
+            reject("ORCiD could not be retrieved from login token");
           } else {
             Users.get(orcid.toString()).then((result) => {
               if (_.isEqual(result.status, "success")) {
@@ -304,10 +318,13 @@ export class Authentication {
           }
         })
         .catch((error) => {
-          if (_.isEqual(process.env.NODE_ENV, "development")) {
-            // Development mode token validation bypass
-            consola.debug("Successfully validated login token");
-            return resolve(true);
+          if (process.env.NODE_ENV !== "production") {
+            resolve({
+              _id: "XXXX-0000-DEMO-1111",
+              name: "Test User",
+              email: "mars@reusable.bio",
+              token: "test_token_value",
+            });
           }
           consola.error(`Error validating login token "${id_token}":`, error);
           reject("Error validating login token");

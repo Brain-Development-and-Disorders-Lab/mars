@@ -9,7 +9,7 @@ import { ProjectModel, IProject } from "@types";
 // Operations
 import { Projects } from "../operations/Projects";
 import { Authentication } from "../operations/Authentication";
-import authMiddleware from "../middleware/authMiddleware";
+import { restAuthenticationWrapper } from "../middleware/Authentication";
 
 // Utility functions and libraries
 // Middleware to check project ownership
@@ -71,7 +71,7 @@ const ProjectsRoute = express.Router();
 
 // View all Projects
 ProjectsRoute.route("/projects").get(
-  authMiddleware,
+  restAuthenticationWrapper,
   (_request: any, response: any) => {
     consola.debug("Getting all projects");
     Projects.getAll().then((projects: ProjectModel[]) => {
@@ -101,7 +101,7 @@ ProjectsRoute.route("/projects/:id").get(
 
 // Create a new Project, expects Project data
 ProjectsRoute.route("/projects/create").post(
-  authMiddleware,
+  restAuthenticationWrapper,
   (request: { body: IProject }, response: any) => {
     Projects.create(request.body).then((project: ProjectModel) => {
       response.json({
@@ -115,7 +115,7 @@ ProjectsRoute.route("/projects/create").post(
 
 // Route: Add an Entity to a Project, expects Entity and Project ID data.
 ProjectsRoute.route("/projects/add").post(
-  authMiddleware,
+  restAuthenticationWrapper,
   checkProjectOwnership,
   (request: { body: { project: string; entity: string } }, response: any) => {
     Projects.addEntity(request.body.project, request.body.entity).then(
@@ -131,7 +131,7 @@ ProjectsRoute.route("/projects/add").post(
 
 // Route: Update a Project
 ProjectsRoute.route("/projects/update").post(
-  authMiddleware,
+  restAuthenticationWrapper,
   checkProjectOwnership,
   (request: { body: ProjectModel }, response: any) => {
     Projects.update(request.body).then((updatedProject: ProjectModel) => {
@@ -146,7 +146,7 @@ ProjectsRoute.route("/projects/update").post(
 
 // Get JSON-formatted data of the Entity
 ProjectsRoute.route("/projects/export").post(
-  authMiddleware,
+  restAuthenticationWrapper,
   (
     request: {
       body: { _id: string; fields: string[]; format: "json" | "csv" | "txt" };
@@ -165,7 +165,7 @@ ProjectsRoute.route("/projects/export").post(
 
 // Route: Remove an Entity from a Project, expects Entity and Project ID data.
 ProjectsRoute.route("/projects/remove").post(
-  authMiddleware,
+  restAuthenticationWrapper,
   checkProjectOwnership,
   (request: { body: { entity: string; project: string } }, response: any) => {
     Projects.removeEntity(request.body.project, request.body.entity).then(
@@ -182,7 +182,7 @@ ProjectsRoute.route("/projects/remove").post(
 
 // Route: Remove a Project
 ProjectsRoute.route("/projects/:id").delete(
-  authMiddleware,
+  restAuthenticationWrapper,
   checkProjectOwnership,
   (request: { params: { id: any } }, response: any) => {
     Projects.delete(request.params.id).then((project) => {

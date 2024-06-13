@@ -8,7 +8,7 @@ import { AttributeModel, IAttribute } from "@types";
 import { Attributes } from "../operations/Attributes";
 
 // Utility functions and libraries
-import authMiddleware from "../middleware/authMiddleware";
+import { restAuthenticationWrapper } from "../middleware/Authentication";
 import _ from "lodash";
 
 // Middleware to check attribute ownership
@@ -52,7 +52,7 @@ const AttributesRoute = express.Router();
 
 // Route: View all attributes
 AttributesRoute.route("/attributes").get(
-  authMiddleware,
+  restAuthenticationWrapper,
   (_request: any, response: any) => {
     Attributes.getAll().then((attributes: AttributeModel[]) => {
       response.json(
@@ -66,7 +66,7 @@ AttributesRoute.route("/attributes").get(
 
 // Route: View a specific attribute
 AttributesRoute.route("/attributes/:id").get(
-  authMiddleware,
+  restAuthenticationWrapper,
   checkAttributeOwnership,
   (request: any, response: any) => {
     Attributes.getOne(request.params.id).then((attribute: AttributeModel) => {
@@ -77,7 +77,7 @@ AttributesRoute.route("/attributes/:id").get(
 
 // Route: Create a new Attribute, expects Attribute data
 AttributesRoute.route("/attributes/create").post(
-  authMiddleware,
+  restAuthenticationWrapper,
   (request: { body: IAttribute; user: any }, response: any) => {
     if (!request?.user) {
       return response
@@ -98,7 +98,7 @@ AttributesRoute.route("/attributes/create").post(
 
 // Route: Update an Attribute
 AttributesRoute.route("/attributes/update").post(
-  authMiddleware,
+  restAuthenticationWrapper,
   checkAttributeOwnership,
   (request: { body: AttributeModel }, response: any) => {
     Attributes.update(request.body).then((updateAttribute: AttributeModel) => {
@@ -113,7 +113,7 @@ AttributesRoute.route("/attributes/update").post(
 
 // Route: Remove an Attribute
 AttributesRoute.route("/attributes/:id").delete(
-  authMiddleware,
+  restAuthenticationWrapper,
   checkAttributeOwnership,
   (request: any, response: { json: (content: any) => void }) => {
     Attributes.delete(request.params.id).then((attribute: AttributeModel) => {
