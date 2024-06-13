@@ -1,6 +1,5 @@
 // Utility imports
 import _ from "lodash";
-import consola from "consola";
 
 // Custom types
 import { IAttribute, IValue } from "@types";
@@ -55,22 +54,7 @@ export const isValidAttributes = (attributes: IAttribute[]) => {
 export const getToken = (tokenKey: string): any => {
   const storedToken = sessionStorage.getItem(tokenKey);
   if (!_.isNull(storedToken) && !_.isUndefined(storedToken)) {
-    if (JSON.parse(storedToken as string).name === "Test User") {
-      consola.debug("Returning token as undefined");
-      return undefined;
-    }
     return JSON.parse(storedToken);
   }
-
-  // decomment if you want to use a dummy token
-  if (_.isEqual(process.env.NODE_ENV, "development")) {
-    // Return a dummy token
-    return {
-      name: "Test User",
-      orcid: "XXXX-1234-ABCD-0000",
-      id_token: "ABCD1234",
-    };
-  } else {
-    return undefined;
-  }
+  return undefined;
 };

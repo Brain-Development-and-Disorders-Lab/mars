@@ -45,7 +45,7 @@ const AccountMenu = () => {
     setToken({
       name: token.name,
       orcid: token.orcid,
-      id_token: "",
+      token: "",
     });
     navigate(0);
   };

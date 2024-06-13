@@ -12,7 +12,7 @@ import {
 } from "@types";
 
 // Get the URL of the database
-import { SERVER_URL, TOKEN_KEY } from "src/variables";
+import { REST_URL, TOKEN_KEY } from "src/variables";
 
 // Token for request authorization
 import { getToken } from "src/util";
@@ -41,7 +41,7 @@ export const request = async <T>(
   switch (type) {
     case "GET":
       try {
-        response = await axios.get(`${SERVER_URL}${path}`, requestOptions);
+        response = await axios.get(`${REST_URL}${path}`, requestOptions);
       } catch {
         return {
           success: false,
@@ -60,11 +60,7 @@ export const request = async <T>(
     case "POST":
       // POST request
       try {
-        response = await axios.post(
-          `${SERVER_URL}${path}`,
-          data,
-          requestOptions,
-        );
+        response = await axios.post(`${REST_URL}${path}`, data, requestOptions);
       } catch {
         return {
           success: false,
@@ -93,7 +89,7 @@ export const request = async <T>(
     case "DELETE":
       // DELETE request
       try {
-        response = await axios.delete(`${SERVER_URL}${path}`, requestOptions);
+        response = await axios.delete(`${REST_URL}${path}`, requestOptions);
       } catch {
         return {
           success: false,

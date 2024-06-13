@@ -9,7 +9,7 @@ import { Content } from "@components/Container";
 import { useLocation, useSearchParams } from "react-router-dom";
 
 // Existing and custom types
-import { LoginProps } from "@types";
+import { AuthInfo, LoginProps } from "@types";
 
 // Utility functions and libraries
 import { useToken } from "src/authentication/useToken";
@@ -53,12 +53,10 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
    */
   const getLogin = async (code: string) => {
     // Perform login and data retrieval via server, check if user permitted access
-    const response = await request<{ token: any }>("POST", "/login", {
-      code: code,
-    });
+    const response = await request<AuthInfo>("POST", "/login", { code: code });
     if (response.success) {
       removeCode();
-      setToken(response.data.token);
+      setToken(response.data);
       setAuthenticated(true);
     } else {
       toast({
@@ -76,7 +74,7 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
 
   // Check if token exists
   useEffect(() => {
-    if ((_.isUndefined(token) || _.isEqual(token.id_token, "")) && accessCode) {
+    if ((_.isUndefined(token) || _.isEqual(token.token, "")) && accessCode) {
       getLogin(accessCode);
     }
   }, []);
@@ -91,8 +89,16 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
     : "https://mars.reusable.bio";
   const requestURI = `https://orcid.org/oauth/authorize?client_id=${clientID}&response_type=code&scope=openid&redirect_uri=${redirectURI}`;
 
-  const onLoginClick = () => {
-    window.location.href = requestURI;
+  /**
+   * Wrapper function to handle login flow
+   */
+  const onLoginClick = async () => {
+    if (process.env.NODE_ENV !== "production") {
+      // If in a development environment, bypass the ORCiD login
+      await getLogin("");
+    } else {
+      window.location.href = requestURI;
+    }
   };
 
   return (
