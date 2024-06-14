@@ -52,6 +52,7 @@ const GET_DASHBOARD = gql`
       _id
       timestamp
       type
+      details
       target {
         _id
         name

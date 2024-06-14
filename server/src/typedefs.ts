@@ -188,6 +188,7 @@ export const typedefs = `#graphql
     _id: String!
     timestamp: Date
     type: String
+    details: String
     target: ActivityTarget
   }
 
@@ -195,6 +196,7 @@ export const typedefs = `#graphql
   input ActivityCreateInput {
     timestamp: Date
     type: String
+    details: String
     target: ActivityTargetInput
   }
 

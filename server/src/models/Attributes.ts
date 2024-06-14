@@ -2,6 +2,8 @@ import { AttributeModel, IAttribute, ResponseMessage } from "@types";
 import _ from "lodash";
 import { getDatabase } from "src/connectors/database";
 import { getIdentifier } from "src/util";
+import { Activity } from "./Activity";
+import dayjs from "dayjs";
 
 // Collection name
 const ATTRIBUTES_COLLECTION = "attributes";
@@ -53,7 +55,16 @@ export class Attributes {
       .insertOne(joinedAttribute);
     const successStatus = _.isEqual(response.insertedId, joinedAttribute._id);
 
-    // To-Do: Create new Activity entry
+    await Activity.create({
+      timestamp: new Date(),
+      type: "create",
+      details: "Created new Attribute",
+      target: {
+        _id: joinedAttribute._id,
+        type: "attributes",
+        name: joinedAttribute.name,
+      },
+    });
 
     return {
       success: successStatus,
@@ -93,7 +104,16 @@ export class Attributes {
       .collection<AttributeModel>(ATTRIBUTES_COLLECTION)
       .updateOne({ _id: updated._id }, update);
 
-    // To-Do: Create Activity entry
+    await Activity.create({
+      timestamp: new Date(),
+      type: "update",
+      details: "Updated existing Attribute",
+      target: {
+        _id: updated._id,
+        type: "attributes",
+        name: updated.name,
+      },
+    });
 
     return {
       success: true,
@@ -110,11 +130,23 @@ export class Attributes {
    * @return {ResponseMessage}
    */
   static delete = async (_id: string): Promise<ResponseMessage> => {
+    const attribute = await Attributes.getOne(_id);
     const response = await getDatabase()
       .collection<AttributeModel>(ATTRIBUTES_COLLECTION)
       .deleteOne({ _id: _id });
 
-    // To-Do: Create new Activity entry
+    if (attribute && response.deletedCount > 0) {
+      await Activity.create({
+        timestamp: new Date(),
+        type: "delete",
+        details: "Deleted Attribute",
+        target: {
+          _id: attribute._id,
+          type: "attributes",
+          name: attribute.name,
+        },
+      });
+    }
 
     return {
       success: response.deletedCount > 0,

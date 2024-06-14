@@ -65,21 +65,37 @@ const Linky = (props: LinkyProps) => {
 
     if (props.type === "attributes") {
       const response = await getAttribute({ variables: { _id: props.id } });
-      data.name = response.data.attribute.name;
+      if (_.isNull(response.data.attribute)) {
+        setShowDeleted(true);
+      } else {
+        data.name = response.data.attribute.name;
+      }
     } else if (props.type === "entities") {
       const response = await getEntity({ variables: { _id: props.id } });
-      setShowDeleted(response.data.entity.deleted);
-      data.name = response.data.entity.name;
+      if (_.isNull(response.data.entity)) {
+        setShowDeleted(true);
+      } else {
+        data.name = response.data.entity.name;
+      }
     } else if (props.type === "projects") {
       const response = await getProject({ variables: { _id: props.id } });
-      data.name = response.data.project.name;
+      if (_.isNull(response.data.project)) {
+        setShowDeleted(true);
+      } else {
+        data.name = response.data.project.name;
+      }
     }
 
     setLinkLabel(data.name);
   };
 
   const onClickHandler = () => {
-    if (!loadingAttribute && !loadingEntity && !loadingProject) {
+    if (
+      !showDeleted &&
+      !loadingAttribute &&
+      !loadingEntity &&
+      !loadingProject
+    ) {
       navigate(`/${props.type}/${props.id}`);
     }
   };
