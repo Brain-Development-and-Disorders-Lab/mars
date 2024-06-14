@@ -6,7 +6,6 @@ import {
   Flex,
   Heading,
   Text,
-  useToast,
   Button,
   useBreakpoint,
   Tooltip,
@@ -26,6 +25,7 @@ import { useNavigate } from "react-router-dom";
 
 // Utility functions and libraries
 import { request } from "@database/functions";
+import { gql, useQuery } from "@apollo/client";
 import _ from "lodash";
 import dayjs from "dayjs";
 import FileSaver from "file-saver";
@@ -33,16 +33,47 @@ import slugify from "slugify";
 
 const Entities = () => {
   const navigate = useNavigate();
-  const toast = useToast();
-
-  // Page state
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [isError, setIsError] = useState(false);
 
   const [entityData, setEntityData] = useState([] as EntityModel[]);
 
   const breakpoint = useBreakpoint();
   const [visibleColumns, setVisibleColumns] = useState({});
+
+  // Queries
+  const GET_ENTITIES = gql`
+    query GetEntities($entities: Int) {
+      entities(limit: $entities) {
+        _id
+        deleted
+        name
+        description
+      }
+    }
+  `;
+
+  // Query to retrieve Entities
+  const { loading, error, data, refetch } = useQuery<{
+    entities: EntityModel[];
+  }>(GET_ENTITIES, {
+    variables: {
+      limit: 100,
+    },
+  });
+
+  // Manage data once retrieved
+  useEffect(() => {
+    if (data?.entities) {
+      // Unpack all the Entity data
+      setEntityData(data.entities);
+    }
+  }, [loading]);
+
+  // Check to see if data currently exists and refetch if so
+  useEffect(() => {
+    if (data && refetch) {
+      refetch();
+    }
+  }, []);
 
   // Effect to adjust column visibility
   useEffect(() => {
@@ -57,33 +88,7 @@ const Entities = () => {
     }
   }, [breakpoint]);
 
-  /**
-   * Utility function to retrieve all Entities
-   */
-  const getEntities = async () => {
-    const response = await request<EntityModel[]>("GET", "/entities");
-    if (response.success) {
-      setEntityData(response.data);
-    } else {
-      toast({
-        title: "Error",
-        status: "error",
-        description: "Could not retrieve Entities data.",
-        duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
-      });
-      setIsError(true);
-    }
-    setIsLoaded(true);
-  };
-
-  useEffect(() => {
-    getEntities();
-  }, []);
-
   // Configure table columns and data
-  const data: EntityModel[] = entityData;
   const columnHelper = createColumnHelper<EntityModel>();
   const columns = [
     columnHelper.accessor("name", {
@@ -214,7 +219,7 @@ const Entities = () => {
   ];
 
   return (
-    <Content isError={isError} isLoaded={isLoaded}>
+    <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
       <Flex
         direction={"row"}
         p={"4"}
@@ -244,11 +249,13 @@ const Entities = () => {
           </Flex>
         </Flex>
         <Flex direction={"column"} gap={"4"} w={"100%"}>
-          {data.filter((entity) => _.isEqual(entity.deleted, false)).length >
-          0 ? (
+          {entityData.filter((entity) => _.isEqual(entity.deleted, false))
+            .length > 0 ? (
             <DataTable
               columns={columns}
-              data={data.filter((entity) => _.isEqual(entity.deleted, false))}
+              data={entityData.filter((entity) =>
+                _.isEqual(entity.deleted, false),
+              )}
               visibleColumns={visibleColumns}
               actions={actions}
               showSelection

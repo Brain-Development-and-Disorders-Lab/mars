@@ -23,7 +23,6 @@ import Linky from "@components/Linky";
 import { ProjectModel, EntityModel, ActivityModel, IconNames } from "@types";
 
 // Utility functions and libraries
-import { request } from "src/database/functions";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 dayjs.extend(relativeTime);
@@ -151,70 +150,6 @@ const Dashboard = () => {
       setVisibleColumns({});
     }
   }, [breakpoint]);
-
-  /**
-   * Utility function to retrieve all Entities
-   */
-  const getEntities = async () => {
-    const response = await request<EntityModel[]>("GET", "/entities");
-    if (response.success) {
-      setEntityData(response.data.reverse());
-    } else {
-      toast({
-        title: "Network Error",
-        status: "error",
-        description: "Could not retrieve Entities.\n" + response.message,
-        duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
-      });
-    }
-  };
-
-  /**
-   * Utility function to retrieve all Projects
-   */
-  const getProjects = async () => {
-    const response = await request<ProjectModel[]>("GET", "/projects");
-    if (response.success) {
-      setProjectData(response.data.reverse());
-    } else {
-      toast({
-        title: "Network Error",
-        status: "error",
-        description: "Could not retrieve Projects.\n" + response.message,
-        duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
-      });
-    }
-  };
-
-  /**
-   * Utility function to retrieve all Activity
-   */
-  const getActivity = async () => {
-    const response = await request<ActivityModel[]>("GET", "/activity");
-    if (response.success) {
-      setActivityData(response.data.reverse());
-    } else {
-      toast({
-        title: "Network Error",
-        status: "error",
-        description: "Could not retrieve Activity.\n" + response.message,
-        duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
-      });
-    }
-  };
-
-  // Effect to retrieve all information required to render Dashboard
-  useEffect(() => {
-    getEntities();
-    getProjects();
-    getActivity();
-  }, []);
 
   // Configure Entity table
   const entityTableData: {

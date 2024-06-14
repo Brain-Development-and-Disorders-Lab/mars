@@ -342,7 +342,7 @@ const Entity = () => {
   } = useDisclosure();
 
   // Queries
-  const GET_ENTITY_DATA = gql`
+  const GET_ENTITY = gql`
     query GetEntityData($_id: String) {
       entity(_id: $_id) {
         _id
@@ -437,7 +437,7 @@ const Entity = () => {
   `;
 
   // Query to retrieve Entity data and associated data for editing
-  const { loading, error, data, refetch } = useQuery(GET_ENTITY_DATA, {
+  const { loading, error, data, refetch } = useQuery(GET_ENTITY, {
     variables: {
       _id: id,
     },
