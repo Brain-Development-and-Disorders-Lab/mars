@@ -375,7 +375,7 @@ const Dashboard = () => {
           <Flex align={"center"} gap={"4"}>
             <Icon name={"activity"} size={"md"} />
             <Heading size={"lg"} fontWeight={"semibold"}>
-              Activity
+              Workspace Activity
             </Heading>
           </Flex>
 

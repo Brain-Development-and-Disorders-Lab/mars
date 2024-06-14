@@ -14,6 +14,7 @@ import dayjs from "dayjs";
 import Papa from "papaparse";
 import * as tmp from "tmp";
 import * as fs from "fs";
+import { Activity } from "./Activity";
 
 const ENTITIES_COLLECTION = "entities"; // Collection name
 
@@ -148,6 +149,19 @@ export class Entities {
       .insertOne(joinedEntity);
     const successStatus = _.isEqual(response.insertedId, joinedEntity._id);
 
+    if (successStatus) {
+      await Activity.create({
+        timestamp: new Date(),
+        type: "create",
+        details: "Created new Entity",
+        target: {
+          _id: joinedEntity._id,
+          type: "entities",
+          name: joinedEntity.name,
+        },
+      });
+    }
+
     return {
       success: successStatus,
       message: successStatus
@@ -266,6 +280,17 @@ export class Entities {
       .collection<EntityModel>(ENTITIES_COLLECTION)
       .updateOne({ _id: updated._id }, update);
 
+    await Activity.create({
+      timestamp: new Date(),
+      type: "update",
+      details: "Updated existing Entity",
+      target: {
+        _id: updated._id,
+        type: "entities",
+        name: updated.name,
+      },
+    });
+
     return {
       success: true,
       message:
@@ -323,7 +348,18 @@ export class Entities {
       .collection<EntityModel>(ENTITIES_COLLECTION)
       .deleteOne({ _id: _id });
 
-    // To-Do: Create new Activity entry
+    if (entity) {
+      await Activity.create({
+        timestamp: new Date(),
+        type: "delete",
+        details: "Deleted Entity",
+        target: {
+          _id: entity._id,
+          type: "entities",
+          name: entity.name,
+        },
+      });
+    }
 
     return {
       success: response.deletedCount > 0,

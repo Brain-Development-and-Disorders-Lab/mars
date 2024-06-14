@@ -66,13 +66,12 @@ import {
 } from "@types";
 
 // Apollo client imports
-import { useQuery, gql, useMutation } from "@apollo/client";
+import { useQuery, gql, useMutation, useLazyQuery } from "@apollo/client";
 
 // Routing and navigation
 import { useParams, useNavigate } from "react-router-dom";
 
 // Utility functions and libraries
-import { request } from "@database/functions";
 import _ from "lodash";
 import dayjs from "dayjs";
 import DataTable from "@components/DataTable";
@@ -161,7 +160,39 @@ const Project = () => {
     },
   );
 
-  // Mutation to delete Entity
+  // Query to get Project Entities export contents
+  const GET_PROJECT_ENTITIES_EXPORT = gql`
+    query GetProjectEntitiesExport($_id: String, $format: String) {
+      exportProjectEntities(_id: $_id, format: $format)
+    }
+  `;
+  const [
+    exportProjectEntities,
+    { loading: exportEntitiesLoading, error: exportEntitiesError },
+  ] = useLazyQuery(GET_PROJECT_ENTITIES_EXPORT);
+
+  // Query to get Project Entities export contents
+  const GET_PROJECT_EXPORT = gql`
+    query GetProjectExport($_id: String, $format: String, $fields: [String]) {
+      exportProject(_id: $_id, format: $format, fields: $fields)
+    }
+  `;
+  const [exportProject, { loading: exportLoading, error: exportError }] =
+    useLazyQuery(GET_PROJECT_EXPORT);
+
+  // Mutation to update Project
+  const UPDATE_PROJECT = gql`
+    mutation UpdateProject($project: ProjectUpdateInput) {
+      updateProject(project: $project) {
+        success
+        message
+      }
+    }
+  `;
+  const [updateProject, { loading: updateLoading, error: updateError }] =
+    useMutation(UPDATE_PROJECT);
+
+  // Mutation to delete Project
   const DELETE_PROJECT = gql`
     mutation DeleteProject($_id: String) {
       deleteProject(_id: $_id) {
@@ -252,28 +283,30 @@ const Project = () => {
         history: projectHistory,
       };
 
-      const response = await request<any>(
-        "POST",
-        "/projects/update",
-        updateData,
-      );
-      if (response.success) {
+      try {
+        await updateProject({
+          variables: {
+            project: updateData,
+          },
+        });
         toast({
-          title: "Saved!",
+          title: "Updated Successfully",
           status: "success",
           duration: 2000,
           position: "bottom-right",
           isClosable: true,
         });
-      } else {
-        toast({
-          title: "Error",
-          description: "An error occurred when saving Project updates",
-          status: "error",
-          duration: 2000,
-          position: "bottom-right",
-          isClosable: true,
-        });
+      } catch {
+        if (updateError) {
+          toast({
+            title: "Error",
+            description: updateError.message,
+            status: "error",
+            duration: 2000,
+            position: "bottom-right",
+            isClosable: true,
+          });
+        }
       }
       setEditing(false);
       setIsUpdating(false);
@@ -332,25 +365,31 @@ const Project = () => {
     };
     setIsLoaded(false);
 
-    const response = await request<any>("POST", "/projects/update", updateData);
-    if (response.success) {
+    try {
+      await updateProject({
+        variables: {
+          project: updateData,
+        },
+      });
       toast({
-        title: "Saved!",
+        title: "Success",
+        description: "Restored Project successfully",
         status: "success",
         duration: 2000,
         position: "bottom-right",
         isClosable: true,
       });
-    } else {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "An error occurred when saving Project updates",
+        description: "Project could not be restored",
         status: "error",
         duration: 2000,
         position: "bottom-right",
         isClosable: true,
       });
     }
+
     // Close the drawer
     onHistoryClose();
 
@@ -370,17 +409,28 @@ const Project = () => {
   };
 
   // Handle clicking the "Export" button
-  const handleExportJsonClick = async () => {
-    const response = await request<any>("POST", "/entities/export_all", {
-      project: project._id,
+  const handleExportEntitiesClick = async () => {
+    const response = await exportProjectEntities({
+      variables: { _id: project._id, format: "json" },
     });
-    if (response.success) {
+    if (response.data.exportProjectEntities) {
       FileSaver.saveAs(
-        new Blob([response.data]),
+        new Blob([response.data.exportProjectEntities]),
         slugify(
-          `export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.json`,
+          `export_${project._id}_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.json`,
         ),
       );
+    }
+
+    if (exportEntitiesError) {
+      toast({
+        title: "Error",
+        description: "Project Entities could not be exported",
+        status: "error",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
     }
   };
 
@@ -397,21 +447,17 @@ const Project = () => {
   const handleDownloadClick = async (format: string) => {
     if (_.includes(validExportFormats, format)) {
       // Send POST data to generate file
-      const response = await request<any>("POST", "/projects/export", {
-        _id: id,
-        fields: exportAll ? allExportFields : exportFields,
-        format: format,
+      const response = await exportProject({
+        variables: {
+          _id: id,
+          fields: exportAll ? allExportFields : exportFields,
+          format: format,
+        },
       });
-      if (response.success) {
-        let responseData = response.data;
 
-        // Clean the response data if required
-        if (_.isEqual(format, "json")) {
-          responseData = JSON.stringify(responseData, null, "  ");
-        }
-
+      if (response.data.exportProject) {
         FileSaver.saveAs(
-          new Blob([responseData]),
+          new Blob([response.data.exportProject]),
           slugify(`${project.name.replace(" ", "")}_export.${format}`),
         );
 
@@ -423,16 +469,18 @@ const Project = () => {
 
         toast({
           title: "Info",
-          description: `Generated ${format.toUpperCase()} file.`,
+          description: `Generated ${format.toUpperCase()} file`,
           status: "info",
           duration: 2000,
           position: "bottom-right",
           isClosable: true,
         });
-      } else {
+      }
+
+      if (exportError) {
         toast({
           title: "Error",
-          description: "An error occurred when exporting this Project",
+          description: "An error occurred exporting this Project",
           status: "error",
           duration: 2000,
           position: "bottom-right",
@@ -531,7 +579,7 @@ const Project = () => {
   return (
     <Content
       isError={!_.isUndefined(error)}
-      isLoaded={!loading && !deleteLoading}
+      isLoaded={!loading && !deleteLoading && !updateLoading}
     >
       <Flex direction={"column"} gap={"4"}>
         <Flex
@@ -613,26 +661,25 @@ const Project = () => {
                 >
                   History
                 </MenuItem>
-                {/* disabled project export as this feature is not ready yet */}
-                <Tooltip label={"Feature Disabled"}>
-                  <MenuItem
-                    onClick={handleExportClick}
-                    icon={<Icon name={"download"} />}
-                    isDisabled
-                  >
-                    Export
-                  </MenuItem>
-                </Tooltip>
+                <MenuItem
+                  onClick={handleExportClick}
+                  icon={<Icon name={"download"} />}
+                  isDisabled={exportLoading}
+                >
+                  Export Project
+                </MenuItem>
                 <Tooltip
                   isDisabled={projectEntities?.length > 0}
                   label={"This Project does not contain any Entities."}
                 >
                   <MenuItem
-                    onClick={handleExportJsonClick}
+                    onClick={handleExportEntitiesClick}
                     icon={<Icon name={"download"} />}
-                    isDisabled={projectEntities?.length === 0}
+                    isDisabled={
+                      projectEntities?.length === 0 || exportEntitiesLoading
+                    }
                   >
-                    Export Entities (JSON)
+                    Export all Entities
                   </MenuItem>
                 </Tooltip>
               </MenuList>
@@ -966,7 +1013,7 @@ const Project = () => {
                 <Flex direction={"column"} gap={"2"}>
                   <FormControl>
                     <FormLabel>Details</FormLabel>
-                    {isLoaded ? (
+                    {!loading ? (
                       <CheckboxGroup>
                         <Stack spacing={2} direction={"column"}>
                           <Checkbox disabled defaultChecked>
@@ -1016,39 +1063,7 @@ const Project = () => {
                         </Stack>
                       </CheckboxGroup>
                     ) : (
-                      <Text>Loading details</Text>
-                    )}
-                  </FormControl>
-                </Flex>
-
-                <Flex direction={"column"} gap={"2"}>
-                  <FormControl>
-                    <FormLabel>Entities</FormLabel>
-                    {isLoaded && projectEntities?.length > 0 ? (
-                      <Stack spacing={2} direction={"column"}>
-                        {projectEntities.map((entity) => {
-                          allExportFields.push(`entity_${entity}`);
-                          return (
-                            <Checkbox
-                              key={entity}
-                              isChecked={
-                                exportAll ||
-                                _.includes(exportFields, `entity_${entity}`)
-                              }
-                              onChange={(event) =>
-                                handleExportCheck(
-                                  `entity_${entity}`,
-                                  event.target.checked,
-                                )
-                              }
-                            >
-                              Entity: <Linky type={"entities"} id={entity} />
-                            </Checkbox>
-                          );
-                        })}
-                      </Stack>
-                    ) : (
-                      <Text>No Entities.</Text>
+                      <Text>Loading details...</Text>
                     )}
                   </FormControl>
                 </Flex>
@@ -1071,9 +1086,6 @@ const Project = () => {
                   <Text>
                     CSV spreadsheets can be used by other applications.
                   </Text>
-                )}
-                {_.isEqual(exportFormat, "txt") && (
-                  <Text>TXT files can be viewed and shared easily.</Text>
                 )}
               </Flex>
               <Flex direction={"column"} w={"30%"} gap={"2"}>
@@ -1098,9 +1110,6 @@ const Project = () => {
                         </option>
                         <option key={"csv"} value={"csv"}>
                           CSV
-                        </option>
-                        <option key={"txt"} value={"txt"}>
-                          TXT
                         </option>
                       </Select>
                     </FormControl>

@@ -65,6 +65,34 @@ export const ProjectsResolvers = {
         );
       }
     },
+
+    exportProjectEntities: async (
+      _parent: any,
+      args: { _id: string; format: "json" },
+      context: Context,
+    ) => {
+      const project = await Projects.getOne(args._id);
+      if (_.isNull(project)) {
+        throw new GraphQLError("Project does not exist", {
+          extensions: {
+            code: "NON_EXIST",
+          },
+        });
+      }
+
+      if (project.owner === context.user) {
+        return await Projects.exportEntities(args._id, args.format);
+      } else {
+        throw new GraphQLError(
+          "You do not have permission to access this Project",
+          {
+            extensions: {
+              code: "UNAUTHORIZED",
+            },
+          },
+        );
+      }
+    },
   },
 
   Mutation: {

@@ -3,7 +3,6 @@ import _ from "lodash";
 import { getDatabase } from "src/connectors/database";
 import { getIdentifier } from "src/util";
 import { Activity } from "./Activity";
-import dayjs from "dayjs";
 
 // Collection name
 const ATTRIBUTES_COLLECTION = "attributes";

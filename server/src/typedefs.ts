@@ -3,6 +3,7 @@
  */
 export const typedefs = `#graphql
   scalar Date
+  scalar Upload
 
   # "Item" type containing minimal data shared with many stored records
   type Item {
@@ -30,7 +31,7 @@ export const typedefs = `#graphql
     name: String
     description: String
     owner: String
-    shared: [String]
+    collaborators: [String]
     created: String
     entities: [String]
     # To-Do: History
@@ -53,6 +54,7 @@ export const typedefs = `#graphql
     name: String
     description: String
     owner: String
+    collaborators: [String]
     shared: [String]
     created: String
     entities: [String]
@@ -241,6 +243,7 @@ export const typedefs = `#graphql
     # Export queries
     exportEntity(_id: String, format: String, fields: [String]): String
     exportProject(_id: String, format: String, fields: [String]): String
+    exportProjectEntities(_id: String, format: String): String
 
     # Authentication queries
     login(code: String): Auth

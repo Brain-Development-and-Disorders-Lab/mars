@@ -1,12 +1,11 @@
-import { IProject, ProjectModel, ResponseMessage } from "@types";
+import { EntityModel, IProject, ProjectModel, ResponseMessage } from "@types";
 import _ from "lodash";
 import { getDatabase } from "src/connectors/database";
 import { getIdentifier } from "src/util";
 import { Entities } from "./Entities";
 import dayjs from "dayjs";
 import Papa from "papaparse";
-import * as tmp from "tmp";
-import * as fs from "fs";
+import { Activity } from "./Activity";
 
 // Collection name
 const PROJECTS_COLLECTION = "projects";
@@ -45,6 +44,19 @@ export class Projects {
       .collection<ProjectModel>(PROJECTS_COLLECTION)
       .insertOne(projectModel);
     const successStatus = _.isEqual(response.insertedId, projectModel._id);
+
+    if (successStatus) {
+      await Activity.create({
+        timestamp: new Date(),
+        type: "create",
+        details: "Created new Project",
+        target: {
+          _id: projectModel._id,
+          type: "projects",
+          name: projectModel.name,
+        },
+      });
+    }
 
     return {
       success: successStatus,
@@ -92,6 +104,19 @@ export class Projects {
       .updateOne({ _id: project._id }, update);
     const successStatus = response.modifiedCount == 1;
 
+    if (successStatus) {
+      await Activity.create({
+        timestamp: new Date(),
+        type: "update",
+        details: "Updated existing Project",
+        target: {
+          _id: project._id,
+          type: "projects",
+          name: project.name,
+        },
+      });
+    }
+
     return {
       success: successStatus,
       message: successStatus ? "Updated Project" : "Could not update Project",
@@ -117,7 +142,18 @@ export class Projects {
       .collection<ProjectModel>(PROJECTS_COLLECTION)
       .deleteOne({ _id: _id });
 
-    // To-Do: Create new Activity entry
+    if (project && response.deletedCount > 0) {
+      await Activity.create({
+        timestamp: new Date(),
+        type: "delete",
+        details: "Deleted Project",
+        target: {
+          _id: project._id,
+          type: "projects",
+          name: project.name,
+        },
+      });
+    }
 
     return {
       success: response.deletedCount > 0,
@@ -246,10 +282,7 @@ export class Projects {
     // Remove `history` field
     delete (project as any)["history"];
 
-    if (_.isEqual(format, "json")) {
-      // Handle JSON format
-      return JSON.stringify(project);
-    } else if (_.isEqual(format, "csv")) {
+    if (_.isEqual(format, "csv")) {
       let exportFields = fields;
 
       // Handle CSV format
@@ -264,7 +297,6 @@ export class Projects {
 
       // Iterate through the list of "fields" and create row representation
       for (let field of exportFields) {
-        console.info("Generating information for field:", field);
         if (_.isEqual(field, "created")) {
           headers.push("Created");
           row.push(dayjs(project.created).format("DD MMM YYYY").toString());
@@ -275,28 +307,44 @@ export class Projects {
           // "description" data field
           headers.push("Description");
           row.push(project.description);
-        } else if (_.isEqual(field, "entities")) {
-          // "entities" data field
-          headers.push("Entities");
-          row.push(project.entities.join("_"));
         }
       }
 
       // Collate and format data as a CSV string
       const collated = [headers, row];
       const formatted = Papa.unparse(collated);
-
-      // Create a temporary file, passing the filename as a response
-      tmp.file((error, path: string, _fd: number) => {
-        if (error) {
-          throw error;
-        }
-
-        fs.writeFileSync(path, formatted);
-      });
-      return "csv";
+      return formatted;
     } else {
-      return "Invalid format";
+      return JSON.stringify(project, null, "  ");
     }
+  };
+
+  /**
+   * Generate an exported file containing details of all Entities in a Project
+   * @param _id Project identifier
+   * @param format Exported file format
+   * @return {Promise<string>}
+   */
+  static exportEntities = async (
+    _id: string,
+    format: "json",
+  ): Promise<string> => {
+    const project = await Projects.getOne(_id);
+
+    if (_.isNull(project)) {
+      return "";
+    }
+
+    const entityData = [];
+    for (let entity of project.entities) {
+      const result = await Entities.getOne(entity);
+
+      // Remove the history component
+      delete (result as EntityModel)["history"];
+
+      entityData.push(result);
+    }
+
+    return JSON.stringify(entityData, null, "  ");
   };
 }
