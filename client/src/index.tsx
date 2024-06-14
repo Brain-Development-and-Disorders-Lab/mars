@@ -15,7 +15,7 @@ import { setContext } from "@apollo/client/link/context";
 import _ from "lodash";
 
 // Variables
-import { GRAPHQL_URL } from "./variables";
+import { API_URL } from "./variables";
 
 // Application
 import App from "./App";
@@ -24,7 +24,7 @@ import { TOKEN_KEY } from "./variables";
 
 // Setup Apollo client
 const httpLink = createHttpLink({
-  uri: GRAPHQL_URL,
+  uri: API_URL,
 });
 
 const authLink = setContext((_, { headers }) => {
