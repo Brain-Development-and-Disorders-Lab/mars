@@ -66,7 +66,7 @@ import {
 } from "@types";
 
 // Apollo client imports
-import { useQuery, gql } from "@apollo/client";
+import { useQuery, gql, useMutation } from "@apollo/client";
 
 // Routing and navigation
 import { useParams, useNavigate } from "react-router-dom";
@@ -136,7 +136,7 @@ const Project = () => {
     }
   }, [isLoaded]);
 
-  // Queries
+  // Execute GraphQL query both on page load and navigation
   const GET_PROJECT_WITH_ENTITIES = gql`
     query GetProjectWithEntities($_id: String) {
       project(_id: $_id) {
@@ -152,8 +152,6 @@ const Project = () => {
       }
     }
   `;
-
-  // Execute GraphQL query both on page load and navigation
   const { loading, error, data, refetch } = useQuery(
     GET_PROJECT_WITH_ENTITIES,
     {
@@ -162,6 +160,18 @@ const Project = () => {
       },
     },
   );
+
+  // Mutation to delete Entity
+  const DELETE_PROJECT = gql`
+    mutation DeleteProject($_id: String) {
+      deleteProject(_id: $_id) {
+        success
+        message
+      }
+    }
+  `;
+  const [deleteProject, { loading: deleteLoading }] =
+    useMutation(DELETE_PROJECT);
 
   // Manage data once retrieved
   useEffect(() => {
@@ -274,19 +284,24 @@ const Project = () => {
 
   // Delete the Project when confirmed
   const handleDeleteClick = async () => {
-    const response = await request<any>("DELETE", `/projects/${id}`);
-    if (response.success) {
+    const response = await deleteProject({
+      variables: {
+        _id: project._id,
+      },
+    });
+    if (response.data.deleteProject.success) {
       toast({
-        title: "Deleted!",
+        title: "Deleted Successfully",
         status: "success",
         duration: 2000,
         position: "bottom-right",
         isClosable: true,
       });
+      navigate("/projects");
     } else {
       toast({
         title: "Error",
-        description: `An error occurred when deleting Project "${project.name}".`,
+        description: "An error occurred when deleting Project",
         status: "error",
         duration: 2000,
         position: "bottom-right",
@@ -294,7 +309,6 @@ const Project = () => {
       });
     }
     setEditing(false);
-    navigate("/projects");
   };
 
   /**
@@ -515,7 +529,10 @@ const Project = () => {
   ];
 
   return (
-    <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
+    <Content
+      isError={!_.isUndefined(error)}
+      isLoaded={!loading && !deleteLoading}
+    >
       <Flex direction={"column"} gap={"4"}>
         <Flex
           gap={"4"}

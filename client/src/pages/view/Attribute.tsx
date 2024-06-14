@@ -30,12 +30,13 @@ import { AttributeModel, IValue } from "@types";
 import _ from "lodash";
 
 // Routing and navigation
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { gql, useMutation, useQuery } from "@apollo/client";
 
 const Attribute = () => {
   const { id } = useParams();
   const toast = useToast();
+  const navigate = useNavigate();
 
   const [editing, setEditing] = useState(false);
 
@@ -77,6 +78,18 @@ const Attribute = () => {
   const [updateAttribute, { loading: updateLoading }] =
     useMutation(UPDATE_ATTRIBUTE);
 
+  // Mutation to delete Attribute
+  const DELETE_ATTRIBUTE = gql`
+    mutation DeleteAttribute($_id: String) {
+      deleteAttribute(_id: $_id) {
+        success
+        message
+      }
+    }
+  `;
+  const [deleteAttribute, { loading: deleteLoading }] =
+    useMutation(DELETE_ATTRIBUTE);
+
   // Manage data once retrieved
   useEffect(() => {
     if (data?.attribute) {
@@ -109,27 +122,31 @@ const Attribute = () => {
 
   // Delete the Attribute when confirmed
   const handleDeleteClick = async () => {
-    // const response = await request<any>("DELETE", `/attributes/${id}`);
-    // if (response.success) {
-    //   toast({
-    //     title: "Deleted!",
-    //     status: "success",
-    //     duration: 2000,
-    //     position: "bottom-right",
-    //     isClosable: true,
-    //   });
-    // } else {
-    //   toast({
-    //     title: "Error",
-    //     description: `An error occurred when deleting Attribute "${attributeData.name}".`,
-    //     status: "error",
-    //     duration: 2000,
-    //     position: "bottom-right",
-    //     isClosable: true,
-    //   });
-    // }
-    // setEditing(false);
-    // navigate("/attributes");
+    const response = await deleteAttribute({
+      variables: {
+        _id: attributeData._id,
+      },
+    });
+    if (response.data.deleteAttribute.success) {
+      toast({
+        title: "Deleted Successfully",
+        status: "success",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+      navigate("/attributes");
+    } else {
+      toast({
+        title: "Error",
+        description: "An error occurred when deleting Attribute",
+        status: "error",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
+    setEditing(false);
   };
 
   /**
@@ -174,7 +191,7 @@ const Attribute = () => {
   return (
     <Content
       isError={!_.isUndefined(error)}
-      isLoaded={!loading && !updateLoading}
+      isLoaded={!loading && !updateLoading && !deleteLoading}
     >
       <Flex direction={"column"} gap={"4"}>
         <Flex

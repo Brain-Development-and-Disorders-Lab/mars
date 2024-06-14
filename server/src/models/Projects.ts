@@ -98,6 +98,36 @@ export class Projects {
     };
   };
 
+  /**
+   * Delete a Project
+   * @param _id Project identifier to delete
+   * @return {ResponseMessage}
+   */
+  static delete = async (_id: string): Promise<ResponseMessage> => {
+    const project = await Projects.getOne(_id);
+    // Remove Entities from Project
+    if (project) {
+      for (let entity of project.entities) {
+        await Entities.removeProject(entity, project._id);
+      }
+    }
+
+    // Execute delete operation
+    const response = await getDatabase()
+      .collection<ProjectModel>(PROJECTS_COLLECTION)
+      .deleteOne({ _id: _id });
+
+    // To-Do: Create new Activity entry
+
+    return {
+      success: response.deletedCount > 0,
+      message:
+        response.deletedCount > 0
+          ? "Deleted Project successfully"
+          : "Unable to delete Project",
+    };
+  };
+
   static addEntity = async (
     _id: string,
     entity: string,

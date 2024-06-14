@@ -289,6 +289,52 @@ export class Entities {
   };
 
   /**
+   * Delete an Entity
+   * @param _id Entity identifier to delete
+   * @return {ResponseMessage}
+   */
+  static delete = async (_id: string): Promise<ResponseMessage> => {
+    const entity = await Entities.getOne(_id);
+    if (entity) {
+      // Remove Origins
+      for (let origin of entity.associations.origins) {
+        await Entities.removeProduct(origin._id, {
+          _id: entity._id,
+          name: entity.name,
+        });
+      }
+
+      // Remove Products
+      for (let product of entity.associations.products) {
+        await Entities.removeOrigin(product._id, {
+          _id: entity._id,
+          name: entity.name,
+        });
+      }
+
+      // Remove Projects
+      for (let project of entity.projects) {
+        await Projects.removeEntity(project, entity._id);
+      }
+    }
+
+    // Execute delete operation
+    const response = await getDatabase()
+      .collection<EntityModel>(ENTITIES_COLLECTION)
+      .deleteOne({ _id: _id });
+
+    // To-Do: Create new Activity entry
+
+    return {
+      success: response.deletedCount > 0,
+      message:
+        response.deletedCount > 0
+          ? "Deleted Entity successfully"
+          : "Unable to delete Entity",
+    };
+  };
+
+  /**
    * Add a Project to an Entity
    * @param _id Target Entity identifier
    * @param project_id Project identifier to associate with Entity

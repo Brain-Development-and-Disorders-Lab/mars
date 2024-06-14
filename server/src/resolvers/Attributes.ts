@@ -36,5 +36,10 @@ export const AttributesResolvers = {
     ) => {
       return await Attributes.update(args.attribute);
     },
+
+    // Delete an Attribute
+    deleteAttribute: async (_parent: any, args: { _id: string }) => {
+      return await Attributes.delete(args._id);
+    },
   },
 };

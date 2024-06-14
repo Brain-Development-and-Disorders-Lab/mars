@@ -163,6 +163,10 @@ export const EntitiesResolvers = {
       }
     },
 
+    deleteEntity: async (_parent: any, args: { _id: string }) => {
+      return await Entities.delete(args._id);
+    },
+
     // Set the Entity "lock" status
     setEntityLock: async (
       _parent: any,

@@ -341,7 +341,7 @@ const Entity = () => {
     onClose: onPreviewClose,
   } = useDisclosure();
 
-  // Queries
+  // Query to retrieve Entity data and associated data for editing
   const GET_ENTITY = gql`
     query GetEntityData($_id: String) {
       entity(_id: $_id) {
@@ -427,8 +427,13 @@ const Entity = () => {
       }
     }
   `;
+  const { loading, error, data, refetch } = useQuery(GET_ENTITY, {
+    variables: {
+      _id: id,
+    },
+  });
 
-  // Mutations
+  // Mutation to update Entity
   const UPDATE_ENTITY = gql`
     mutation UpdateEntity($entity: EntityUpdateInput) {
       updateEntity(entity: $entity) {
@@ -437,17 +442,18 @@ const Entity = () => {
       }
     }
   `;
+  const [updateEntity, { loading: updateLoading }] = useMutation(UPDATE_ENTITY);
 
-  // Query to retrieve Entity data and associated data for editing
-  const { loading, error, data, refetch } = useQuery(GET_ENTITY, {
-    variables: {
-      _id: id,
-    },
-  });
-
-  // Mutation to update Entity
-  const [updateEntity, { loading: isUpdateLoading }] =
-    useMutation(UPDATE_ENTITY);
+  // Mutation to delete Entity
+  const DELETE_ENTITY = gql`
+    mutation DeleteEntity($_id: String) {
+      deleteEntity(_id: $_id) {
+        success
+        message
+      }
+    }
+  `;
+  const [deleteEntity, { loading: deleteLoading }] = useMutation(DELETE_ENTITY);
 
   // Manage data once retrieved
   useEffect(() => {
@@ -497,7 +503,7 @@ const Entity = () => {
   // Toggle editing status
   const handleEditClick = async () => {
     if (editing) {
-      setIsUpdating(isUpdateLoading);
+      setIsUpdating(updateLoading);
       try {
         await updateEntity({
           variables: {
@@ -1096,19 +1102,24 @@ const Entity = () => {
 
   // Delete the Entity when confirmed
   const handleDeleteClick = async () => {
-    const response = await request<any>("DELETE", `/entities/${id}`);
-    if (response.success) {
+    const response = await deleteEntity({
+      variables: {
+        _id: entityData._id,
+      },
+    });
+    if (response.data.deleteEntity.success) {
       toast({
-        title: "Deleted!",
+        title: "Deleted Successfully",
         status: "success",
         duration: 2000,
         position: "bottom-right",
         isClosable: true,
       });
+      navigate("/entities");
     } else {
       toast({
         title: "Error",
-        description: `An error occurred when deleting Entity "${entityData.name}"`,
+        description: "An error occurred when deleting Entity",
         status: "error",
         duration: 2000,
         position: "bottom-right",
@@ -1116,7 +1127,6 @@ const Entity = () => {
       });
     }
     setEditing(false);
-    navigate("/entities");
   };
 
   const handleEntityNodeClick = (id: string) => {
@@ -1277,7 +1287,10 @@ const Entity = () => {
   };
 
   return (
-    <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
+    <Content
+      isError={!_.isUndefined(error)}
+      isLoaded={!loading && !deleteLoading}
+    >
       <Flex direction={"column"}>
         <Flex
           gap={"4"}

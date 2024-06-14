@@ -74,6 +74,9 @@ export const ProjectsResolvers = {
     updateProject: async (_parent: any, args: { project: ProjectModel }) => {
       return await Projects.update(args.project);
     },
+    deleteProject: async (_parent: any, args: { _id: string }) => {
+      return await Projects.delete(args._id);
+    },
     addProjectEntity: async (
       _parent: any,
       args: { _id: string; entity: string },
