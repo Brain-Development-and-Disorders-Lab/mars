@@ -398,6 +398,11 @@ export type Token = IAuth & {
   scope: string;
 };
 
+// Context passed through the request headers, includes the ORCID (user) of the user
+export type Context = {
+  user: string;
+};
+
 // User types
 export type IUser = {
   name: string;

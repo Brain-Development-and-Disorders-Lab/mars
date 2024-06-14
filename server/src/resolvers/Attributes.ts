@@ -1,3 +1,4 @@
+import { AttributeModel, IAttribute } from "@types";
 import { Attributes } from "src/models/Attributes";
 
 export const AttributesResolvers = {
@@ -14,6 +15,26 @@ export const AttributesResolvers = {
       return attributes.find(
         (attribute) => attribute._id.toString() === args._id,
       );
+    },
+
+    // Check if an Attribute exists
+    attributeExists: async (_parent: any, args: { _id: string }) => {
+      return await Attributes.exists(args._id);
+    },
+  },
+
+  Mutation: {
+    // Create a new Attribute
+    createAttribute: async (_parent: any, args: { attribute: IAttribute }) => {
+      return await Attributes.create(args.attribute);
+    },
+
+    // Update an existing Attribute
+    updateAttribute: async (
+      _parent: any,
+      args: { attribute: AttributeModel },
+    ) => {
+      return await Attributes.update(args.attribute);
     },
   },
 };

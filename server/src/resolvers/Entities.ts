@@ -1,52 +1,148 @@
 import {
   AttributeModel,
+  Context,
   EntityModel,
   IEntity,
   IGenericItem,
   ResponseMessage,
 } from "@types";
+import { GraphQLError } from "graphql";
+import _ from "lodash";
 import { Entities } from "src/models/Entities";
 
 export const EntitiesResolvers = {
   Query: {
     // Retrieve all Entities
-    entities: async (_parent: any, args: { limit: 100 }) => {
+    entities: async (_parent: any, args: { limit: 100 }, context: Context) => {
       const entities = await Entities.all();
-      return entities.slice(0, args.limit);
+      // Filter by ownership
+      return entities
+        .filter((e) => e.owner === context.user)
+        .slice(0, args.limit);
     },
 
     // Retrieve one Entity by _id
-    entity: async (_parent: any, args: { _id: string }) => {
-      return await Entities.getOne(args._id);
+    entity: async (
+      _parent: any,
+      args: { _id: string },
+      context: Context,
+    ): Promise<EntityModel> => {
+      const entity = await Entities.getOne(args._id);
+      if (_.isNull(entity)) {
+        throw new GraphQLError("Entity does not exist", {
+          extensions: {
+            code: "NON_EXIST",
+          },
+        });
+      }
+
+      if (entity.owner === context.user) {
+        return entity;
+      } else {
+        throw new GraphQLError(
+          "You do not have permission to access this Entity",
+          {
+            extensions: {
+              code: "UNAUTHORIZED",
+            },
+          },
+        );
+      }
     },
 
     // Export one Entity by _id
     exportEntity: async (
       _parent: any,
       args: { _id: string; format: "json" | "csv"; fields?: string[] },
+      context: Context,
     ) => {
-      return await Entities.export(args._id, args.format, args.fields);
+      const entity = await Entities.getOne(args._id);
+      if (_.isNull(entity)) {
+        throw new GraphQLError("Entity does not exist", {
+          extensions: {
+            code: "NON_EXIST",
+          },
+        });
+      }
+
+      if (entity.owner === context.user) {
+        return await Entities.export(args._id, args.format, args.fields);
+      } else {
+        throw new GraphQLError(
+          "You do not have permission to access this Entity",
+          {
+            extensions: {
+              code: "UNAUTHORIZED",
+            },
+          },
+        );
+      }
     },
   },
   Mutation: {
     setEntityDescription: async (
       _parent: any,
       args: { _id: string; description: string },
+      context: Context,
     ): Promise<ResponseMessage> => {
-      return await Entities.setDescription(args._id, args.description);
+      const entity = await Entities.getOne(args._id);
+      if (_.isNull(entity)) {
+        throw new GraphQLError("Entity does not exist", {
+          extensions: {
+            code: "NON_EXIST",
+          },
+        });
+      }
+
+      if (entity.owner === context.user) {
+        return await Entities.setDescription(args._id, args.description);
+      } else {
+        throw new GraphQLError(
+          "You do not have permission to modify this Entity",
+          {
+            extensions: {
+              code: "UNAUTHORIZED",
+            },
+          },
+        );
+      }
     },
+
     createEntity: async (
       _parent: any,
       args: { entity: IEntity },
     ): Promise<ResponseMessage> => {
       return await Entities.create(args.entity);
     },
+
     updateEntity: async (
       _parent: any,
       args: { entity: EntityModel },
+      context: Context,
     ): Promise<ResponseMessage> => {
-      return await Entities.update(args.entity);
+      const entity = await Entities.getOne(args.entity._id);
+      if (_.isNull(entity)) {
+        throw new GraphQLError("Entity does not exist", {
+          extensions: {
+            code: "NON_EXIST",
+          },
+        });
+      }
+
+      if (entity.owner === context.user) {
+        return await Entities.update(args.entity);
+      } else {
+        throw new GraphQLError(
+          "You do not have permission to modify this Entity",
+          {
+            extensions: {
+              code: "UNAUTHORIZED",
+            },
+          },
+        );
+      }
     },
+
     // Projects
     addEntityProject: async (
       _parent: any,

@@ -27,6 +27,7 @@ import { DateResolver } from "./resolvers/Date";
 import { EntitiesResolvers } from "./resolvers/Entities";
 import { ProjectsResolvers } from "./resolvers/Projects";
 import { UsersResolvers } from "./resolvers/Users";
+import { Context } from "@types";
 
 // Set logging level
 consola.level =
@@ -74,7 +75,11 @@ const startServer = async () => {
     cors<cors.CorsRequest>(),
     express.json({ limit: "50mb" }),
     expressMiddleware(server, {
-      context: async ({ req }) => ({ token: req.headers.token }),
+      context: async ({ req }): Promise<Context> => {
+        return {
+          user: req.headers.user as string,
+        };
+      },
     }),
     helmet(),
     fileUpload(),

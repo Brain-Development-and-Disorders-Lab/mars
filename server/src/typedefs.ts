@@ -83,6 +83,13 @@ export const typedefs = `#graphql
     values: [Value]
   }
 
+  # "AttributeCreateInput" input
+  input AttributeCreateInput {
+    name: String
+    description: String
+    values: [ValueInput]
+  }
+
   # "AttributeInput" type
   input AttributeInput {
     _id: String!
@@ -221,6 +228,7 @@ export const typedefs = `#graphql
     # Attribute queries
     attributes(limit: Int): [Attribute]
     attribute(_id: String): Attribute
+    attributeExists(_id: String): Boolean
 
     # Activity queries
     activity(limit: Int): [Activity]
@@ -257,5 +265,8 @@ export const typedefs = `#graphql
     removeProjectEntity(_id: String, entity: String): Response
     # Activity mutations
     createActivity(activity: ActivityCreateInput): Response
+    # Attribute mutations
+    createAttribute(attribute: AttributeCreateInput): Response
+    updateAttribute(attribute: AttributeInput): Response
   }
 `;
