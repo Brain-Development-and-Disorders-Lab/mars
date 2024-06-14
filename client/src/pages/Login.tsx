@@ -66,7 +66,7 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
     const response = await doLogin({ variables: { code: code } });
 
     // Perform login and data retrieval via server, check if user permitted access
-    if (response.data.login) {
+    if (response.data?.login) {
       removeCode();
       setToken(response.data.login);
       setAuthenticated(true);

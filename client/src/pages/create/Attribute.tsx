@@ -32,12 +32,11 @@ import Values from "@components/Values";
 // Existing and custom types
 import { IAttribute, IValue } from "@types";
 
-// Utility functions and libraries
-import { request } from "@database/functions";
-
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
 import { isValidValues } from "src/util";
+import { gql, useMutation } from "@apollo/client";
+import _ from "lodash";
 
 const Attribute = () => {
   const navigate = useNavigate();
@@ -66,35 +65,52 @@ const Attribute = () => {
     values: values,
   };
 
+  // GraphQL operations
+  const CREATE_ATTRIBUTE = gql`
+    mutation CreateAttribute($attribute: AttributeCreateInput) {
+      createAttribute(attribute: $attribute) {
+        success
+        message
+      }
+    }
+  `;
+
+  const [createAttribute, { loading, error }] = useMutation(CREATE_ATTRIBUTE);
+
   /**
    * Handle creation of a new Attribute
    */
   const onSubmit = async () => {
     setIsSubmitting(true);
 
-    // Push the data
-    const response = await request<any>(
-      "POST",
-      "/attributes/create",
-      attributeData,
-    );
-    if (response.success) {
+    // Execute the GraphQL mutation
+    const response = await createAttribute({
+      variables: {
+        attribute: attributeData,
+      },
+    });
+
+    if (response.data.createAttribute.success) {
       setIsSubmitting(false);
       navigate("/attributes");
-    } else {
+    }
+  };
+
+  useEffect(() => {
+    if (error) {
       toast({
         title: "Error",
-        description: "An error occurred while creating a new Attribute",
+        description: error.message,
         status: "error",
         duration: 2000,
         position: "bottom-right",
         isClosable: true,
       });
     }
-  };
+  }, [error]);
 
   return (
-    <Content>
+    <Content isLoaded={!loading}>
       <Flex
         direction={"column"}
         alignSelf={"center"}

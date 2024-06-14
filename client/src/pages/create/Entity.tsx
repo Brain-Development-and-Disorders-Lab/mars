@@ -49,14 +49,11 @@ import AttributeCard from "@components/AttributeCard";
 import {
   AttributeModel,
   AttributeCardProps,
-  EntityModel,
   IEntity,
-  ProjectModel,
   IGenericItem,
 } from "@types";
 
 // Utility functions and libraries
-import { request } from "@database/functions";
 import { useToken } from "src/authentication/useToken";
 import { isValidAttributes } from "src/util";
 import _ from "lodash";
@@ -66,6 +63,7 @@ import consola from "consola";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
+import { gql, useLazyQuery, useMutation, useQuery } from "@apollo/client";
 
 const Entity = () => {
   // Used to manage what detail inputs are presented
@@ -88,11 +86,9 @@ const Entity = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [token, _useToken] = useToken();
 
-  const [entities, setEntities] = useState([] as EntityModel[]);
-  const [projects, setProjects] = useState([] as ProjectModel[]);
+  const [entities, setEntities] = useState([] as IGenericItem[]);
+  const [projects, setProjects] = useState([] as IGenericItem[]);
   const [attributes, setAttributes] = useState([] as AttributeModel[]);
-
-  const [isLoaded, setIsLoaded] = useState(false);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -126,7 +122,6 @@ const Entity = () => {
     projects: selectedProjects,
     attributes: selectedAttributes,
     attachments: [],
-    history: [],
   };
 
   // Various validation error states
@@ -136,82 +131,97 @@ const Entity = () => {
 
   const [validAttributes, setValidAttributes] = useState(false);
 
+  // GraphQL operations
+  const CHECK_ENTITY_NAME = gql`
+    query CheckEntityName($name: String) {
+      entityNameExists(name: $name)
+    }
+  `;
+  const [entityNameExists, { error: entityNameError }] =
+    useLazyQuery(CHECK_ENTITY_NAME);
+
+  const GET_CREATE_ENTITIES_DATA = gql`
+    query GetCreateEntitiesData {
+      entities {
+        _id
+        name
+      }
+      projects {
+        _id
+        name
+        description
+      }
+      attributes {
+        _id
+        name
+        description
+        values {
+          _id
+          name
+          data
+          type
+        }
+      }
+    }
+  `;
+  const { loading, error, data, refetch } = useQuery(GET_CREATE_ENTITIES_DATA);
+
+  const CREATE_ENTITY = gql`
+    mutation CreateEntity($entity: EntityCreateInput) {
+      createEntity(entity: $entity) {
+        success
+        message
+      }
+    }
+  `;
+  const [createEntity, { loading: createLoading, error: createError }] =
+    useMutation(CREATE_ENTITY);
+
+  // Assign data
+  useEffect(() => {
+    if (data?.entities) {
+      setEntities(data.entities);
+    }
+    if (data?.projects) {
+      setProjects(data.projects);
+    }
+    if (data?.attributes) {
+      setAttributes(data.attributes);
+    }
+  }, [data]);
+
   const checkEntityName = async (name: string) => {
-    try {
-      // Adjust the URL and HTTP client according to your setup
-      const response = await request("GET", `/entities/byName/${name}`);
-      setIsNameUnique(!response.data); // If data is null, the name is unique
-    } catch (error) {
-      consola.error("Failed to check entity name:", error);
-      // Handle error appropriately
+    // Adjust the URL and HTTP client according to your setup
+    const response = await entityNameExists({
+      variables: {
+        name: name,
+      },
+    });
+    setIsNameUnique(!response.data.entityNameExists);
+    if (entityNameError) {
+      consola.error("Failed to check entity name:", entityNameError.cause);
     }
   };
 
-  /**
-   * Utility function to retrieve all Entities
-   */
-  const getEntities = async () => {
-    const response = await request<EntityModel[]>("GET", "/entities");
-    if (response.success) {
-      setEntities(response.data);
-    } else {
-      toast({
-        title: "Error",
-        status: "error",
-        description: "Could not retrieve Entities",
-        duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
-      });
+  // Check to see if data currently exists and refetch if so
+  useEffect(() => {
+    if (data && refetch) {
+      refetch();
     }
-    setIsLoaded(true);
-  };
-
-  /**
-   * Utility function to get all Projects
-   */
-  const getProjects = async () => {
-    const response = await request<ProjectModel[]>("GET", "/projects");
-    if (response.success) {
-      setProjects(response.data);
-    } else {
-      toast({
-        title: "Error",
-        status: "error",
-        description: "Could not retrieve Projects",
-        duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
-      });
-    }
-    setIsLoaded(true);
-  };
-
-  /**
-   * Utility function to get all Attributes
-   */
-  const getAttributes = async () => {
-    const response = await request<AttributeModel[]>("GET", "/attributes");
-    if (response.success) {
-      setAttributes(response.data);
-    } else {
-      toast({
-        title: "Error",
-        status: "error",
-        description: "Could not retrieve Attributes",
-        duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
-      });
-    }
-    setIsLoaded(true);
-  };
+  }, []);
 
   useEffect(() => {
-    getEntities();
-    getProjects();
-    getAttributes();
-  }, []);
+    if (error) {
+      toast({
+        title: "Error",
+        status: "error",
+        description: error.message,
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
+  }, [error]);
 
   useEffect(() => {
     setValidAttributes(isValidAttributes(selectedAttributes));
@@ -239,23 +249,18 @@ const Entity = () => {
       setActiveStep(2);
     } else if (_.isEqual("attributes", pageState)) {
       setIsSubmitting(true);
-      const response = await request<any>(
-        "POST",
-        "/entities/create",
-        entityState,
-      );
-      if (response.success) {
+      entityState.timestamp = dayjs(Date.now()).toISOString();
+
+      // Execute the GraphQL operation
+      const response = await createEntity({
+        variables: {
+          entity: entityState,
+        },
+      });
+
+      if (response.data.createEntity.success) {
         setIsSubmitting(false);
         navigate(`/entities`);
-      } else {
-        toast({
-          title: "Error",
-          status: "error",
-          description: "Could not create new Entity",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
       }
     }
   };
@@ -297,7 +302,10 @@ const Entity = () => {
   };
 
   return (
-    <Content>
+    <Content
+      isLoaded={!loading && !createLoading}
+      isError={!_.isUndefined(error) && !_.isUndefined(createError)}
+    >
       <Flex
         direction={"column"}
         alignSelf={"center"}
@@ -446,14 +454,13 @@ const Entity = () => {
                       }
                     }}
                   >
-                    {isLoaded &&
-                      entities.map((entity) => {
-                        return (
-                          <option key={entity._id} value={entity._id}>
-                            {entity.name}
-                          </option>
-                        );
-                      })}
+                    {entities.map((entity) => {
+                      return (
+                        <option key={entity._id} value={entity._id}>
+                          {entity.name}
+                        </option>
+                      );
+                    })}
                   </Select>
                   <FormHelperText>
                     If the sources of this Entity currently exist or did exist
@@ -535,15 +542,13 @@ const Entity = () => {
                       }
                     }}
                   >
-                    {isLoaded &&
-                      entities.map((entity) => {
-                        return (
-                          <option key={entity._id} value={entity._id}>
-                            {entity.name}
-                          </option>
-                        );
-                      })}
-                    ;
+                    {entities.map((entity) => {
+                      return (
+                        <option key={entity._id} value={entity._id}>
+                          {entity.name}
+                        </option>
+                      );
+                    })}
                   </Select>
                   <FormHelperText>
                     If this Entity has any derivatives or Entities that have
@@ -659,15 +664,13 @@ const Entity = () => {
                     }
                   }}
                 >
-                  {isLoaded &&
-                    attributes.map((attribute) => {
-                      return (
-                        <option key={attribute._id} value={attribute._id}>
-                          {attribute.name}
-                        </option>
-                      );
-                    })}
-                  ;
+                  {attributes.map((attribute) => {
+                    return (
+                      <option key={attribute._id} value={attribute._id}>
+                        {attribute.name}
+                      </option>
+                    );
+                  })}
                 </Select>
               </FormControl>
 
