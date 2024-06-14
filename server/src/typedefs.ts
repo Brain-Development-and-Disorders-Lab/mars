@@ -169,12 +169,26 @@ export const typedefs = `#graphql
     type: String
   }
 
+  # "ActivityTargetInput" input
+  input ActivityTargetInput {
+    _id: String!
+    name: String
+    type: String
+  }
+
   # "Activity" type
   type Activity {
     _id: String!
     timestamp: Date
     type: String
     target: ActivityTarget
+  }
+
+  # "ActivityCreateInput" input
+  input ActivityCreateInput {
+    timestamp: Date
+    type: String
+    target: ActivityTargetInput
   }
 
   # "Response" type
@@ -241,5 +255,7 @@ export const typedefs = `#graphql
     addProjectEntity(_id: String, entity: String): Response
     addProjectEntities(_id: String, entities: [String]): Response
     removeProjectEntity(_id: String, entity: String): Response
+    # Activity mutations
+    createActivity(activity: ActivityCreateInput): Response
   }
 `;
