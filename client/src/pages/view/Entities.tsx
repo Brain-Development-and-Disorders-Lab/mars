@@ -45,8 +45,10 @@ const Entities = () => {
       entities(limit: $entities) {
         _id
         deleted
+        owner
         name
         description
+        created
       }
     }
   `;

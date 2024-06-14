@@ -27,72 +27,109 @@ import Values from "@components/Values";
 import { AttributeModel, IValue } from "@types";
 
 // Utility functions and libraries
-import { request } from "@database/functions";
 import _ from "lodash";
 
 // Routing and navigation
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import { gql, useMutation, useQuery } from "@apollo/client";
 
 const Attribute = () => {
   const { id } = useParams();
   const toast = useToast();
-  const navigate = useNavigate();
 
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [isError, setIsError] = useState(false);
   const [editing, setEditing] = useState(false);
 
   const [attributeData, setAttributeData] = useState({} as AttributeModel);
   const [attributeDescription, setAttributeDescription] = useState("");
   const [attributeValues, setAttributeValues] = useState([] as IValue<any>[]);
 
-  const getAttribute = async () => {
-    const response = await request<AttributeModel>("GET", `/attributes/${id}`);
-    if (response.success) {
-      setAttributeData(response.data);
-      setAttributeDescription(response.data.description);
-      setAttributeValues(response.data.values);
-    } else {
+  // GraphQL operations
+  const GET_ATTRIBUTE = gql`
+    query GetAttribute($_id: String) {
+      attribute(_id: $_id) {
+        _id
+        name
+        description
+        values {
+          _id
+          name
+          type
+          data
+        }
+      }
+    }
+  `;
+  const { loading, error, data, refetch } = useQuery(GET_ATTRIBUTE, {
+    variables: {
+      _id: id,
+    },
+  });
+
+  // Mutation to update Attribute
+  const UPDATE_ATTRIBUTE = gql`
+    mutation UpdateAttribute($attribute: AttributeInput) {
+      updateAttribute(attribute: $attribute) {
+        success
+        message
+      }
+    }
+  `;
+  const [updateAttribute, { loading: updateLoading }] =
+    useMutation(UPDATE_ATTRIBUTE);
+
+  // Manage data once retrieved
+  useEffect(() => {
+    if (data?.attribute) {
+      // Unpack all the Entity data
+      setAttributeData(data.attribute);
+      setAttributeDescription(data.attribute.description || "");
+      setAttributeValues(data.attribute.values);
+    }
+  }, [loading]);
+
+  useEffect(() => {
+    if (error) {
       toast({
         title: "Error",
         status: "error",
-        description: "Could not retrieve Attribute data.",
+        description: error.message,
         duration: 4000,
         position: "bottom-right",
         isClosable: true,
       });
-      setIsError(true);
     }
-    setIsLoaded(true);
-  };
+  }, [error]);
 
+  // Check to see if data currently exists and refetch if so
   useEffect(() => {
-    getAttribute();
-  }, [id]);
+    if (data && refetch) {
+      refetch();
+    }
+  }, []);
 
   // Delete the Attribute when confirmed
   const handleDeleteClick = async () => {
-    const response = await request<any>("DELETE", `/attributes/${id}`);
-    if (response.success) {
-      toast({
-        title: "Deleted!",
-        status: "success",
-        duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
-      });
-    } else {
-      toast({
-        title: "Error",
-        description: `An error occurred when deleting Attribute "${attributeData.name}".`,
-        status: "error",
-        duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
-      });
-    }
-    setEditing(false);
-    navigate("/attributes");
+    // const response = await request<any>("DELETE", `/attributes/${id}`);
+    // if (response.success) {
+    //   toast({
+    //     title: "Deleted!",
+    //     status: "success",
+    //     duration: 2000,
+    //     position: "bottom-right",
+    //     isClosable: true,
+    //   });
+    // } else {
+    //   toast({
+    //     title: "Error",
+    //     description: `An error occurred when deleting Attribute "${attributeData.name}".`,
+    //     status: "error",
+    //     duration: 2000,
+    //     position: "bottom-right",
+    //     isClosable: true,
+    //   });
+    // }
+    // setEditing(false);
+    // navigate("/attributes");
   };
 
   /**
@@ -100,22 +137,19 @@ const Attribute = () => {
    */
   const handleEditClick = async () => {
     if (editing) {
-      const updateData: AttributeModel = {
-        _id: attributeData._id,
-        name: attributeData.name,
-        description: attributeDescription,
-        values: attributeValues,
-      };
-
-      // Update data
-      const response = await request<any>(
-        "POST",
-        "/attributes/update",
-        updateData,
-      );
-      if (response.success) {
+      const response = await updateAttribute({
+        variables: {
+          attribute: {
+            _id: attributeData._id,
+            name: attributeData.name,
+            description: attributeDescription,
+            values: attributeValues,
+          },
+        },
+      });
+      if (response.data.updateAttribute.success) {
         toast({
-          title: "Saved!",
+          title: "Updated Successfully",
           status: "success",
           duration: 2000,
           position: "bottom-right",
@@ -138,7 +172,10 @@ const Attribute = () => {
   };
 
   return (
-    <Content isError={isError} isLoaded={isLoaded}>
+    <Content
+      isError={!_.isUndefined(error)}
+      isLoaded={!loading && !updateLoading}
+    >
       <Flex direction={"column"} gap={"4"}>
         <Flex
           gap={"4"}
