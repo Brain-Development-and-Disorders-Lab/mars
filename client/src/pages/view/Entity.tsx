@@ -97,7 +97,7 @@ import { nanoid } from "nanoid";
 import consola from "consola";
 
 // Apollo client imports
-import { useQuery, gql, useMutation } from "@apollo/client";
+import { useQuery, gql, useMutation, useLazyQuery } from "@apollo/client";
 
 // Routing and navigation
 import { useParams, useNavigate } from "react-router-dom";
@@ -164,19 +164,200 @@ const Entity = () => {
 
   const [attributes, setAttributes] = useState([] as AttributeModel[]);
   const [inputValue, setInputValue] = useState("");
-  const [searchResults, setSearchResults] = useState([] as EntityModel[]);
+  const [searchResults, setSearchResults] = useState([] as IGenericItem[]);
+
+  // Query to retrieve Entity data and associated data for editing
+  const GET_ENTITY = gql`
+    query GetEntityData($_id: String) {
+      entity(_id: $_id) {
+        _id
+        name
+        owner
+        deleted
+        locked
+        description
+        projects
+        associations {
+          origins {
+            _id
+            name
+          }
+          products {
+            _id
+            name
+          }
+        }
+        attributes {
+          _id
+          name
+          description
+          values {
+            _id
+            name
+            type
+            data
+          }
+        }
+        attachments {
+          _id
+          name
+        }
+        history {
+          timestamp
+          deleted
+          owner
+          description
+          projects
+          associations {
+            origins {
+              _id
+              name
+            }
+            products {
+              _id
+              name
+            }
+          }
+          attributes {
+            _id
+            name
+            description
+            values {
+              _id
+              name
+              type
+              data
+            }
+          }
+        }
+      }
+      entities {
+        _id
+        name
+      }
+      projects {
+        _id
+        name
+      }
+      attributes {
+        _id
+        name
+        description
+        values {
+          _id
+          name
+          type
+          data
+        }
+      }
+    }
+  `;
+  const { loading, error, data, refetch } = useQuery(GET_ENTITY, {
+    variables: {
+      _id: id,
+    },
+  });
+
+  // Query to search Entities
+  const SEARCH_ENTITIES = gql`
+    query SearchEntities($search: String, $limit: Int) {
+      searchEntities(search: $search, limit: $limit) {
+        _id
+        name
+      }
+    }
+  `;
+  const [searchEntities, { loading: searchLoading, error: searchError }] =
+    useLazyQuery(SEARCH_ENTITIES);
+
+  // Mutation to update Entity
+  const UPDATE_ENTITY = gql`
+    mutation UpdateEntity($entity: EntityUpdateInput) {
+      updateEntity(entity: $entity) {
+        success
+        message
+      }
+    }
+  `;
+  const [updateEntity, { loading: updateLoading }] = useMutation(UPDATE_ENTITY);
+
+  // Mutation to delete Entity
+  const DELETE_ENTITY = gql`
+    mutation DeleteEntity($_id: String) {
+      deleteEntity(_id: $_id) {
+        success
+        message
+      }
+    }
+  `;
+  const [deleteEntity, { loading: deleteLoading }] = useMutation(DELETE_ENTITY);
+
+  // Manage data once retrieved
+  useEffect(() => {
+    if (data?.entity) {
+      // Unpack all the Entity data
+      setEntityData(data.entity);
+      setEntityDescription(data.entity.description || "");
+      setEntityProjects(data.entity.projects || []);
+      setEntityOrigins(data.entity.associations.origins || []);
+      setEntityProducts(data.entity.associations.products || []);
+      setEntityAttributes(data.entity.attributes || []);
+      setEntityAttachments(data.entity.attachments);
+      setEntityHistory(data.entity.history || []);
+    }
+    if (data?.entities) {
+      setMinimalEntities(
+        data.entities.filter(
+          (entity: EntityModel) => !_.isEqual(entityData._id, entity._id),
+        ),
+      );
+    }
+    if (data?.projects) {
+      setProjectData(data.projects);
+    }
+  }, [loading]);
+
+  // Display any GraphQL errors
+  useEffect(() => {
+    if (error) {
+      toast({
+        title: "Error",
+        description: error.message,
+        status: "error",
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
+  }, [error]);
+
+  // Check to see if data currently exists and refetch if so
+  useEffect(() => {
+    if (data && refetch) {
+      refetch();
+    }
+  }, []);
 
   // Debounced fetch function
   const fetchEntities = debounce(async (query) => {
-    const response = await request<EntityModel[]>(
-      "POST",
-      "/entities/searchByTerm",
-      { query: query },
-    );
-    if (response.success) {
-      setSearchResults(response.data);
-    } else {
-      setSearchResults([]);
+    const results = await searchEntities({
+      variables: {
+        search: query,
+        limit: 100,
+      },
+    });
+    if (results.data.searchEntities) {
+      setSearchResults(results.data.searchEntities);
+    }
+
+    if (searchError) {
+      toast({
+        title: "Error",
+        status: "error",
+        description: searchError.message,
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
     }
   }, 150);
 
@@ -340,165 +521,6 @@ const Entity = () => {
     onOpen: onPreviewOpen,
     onClose: onPreviewClose,
   } = useDisclosure();
-
-  // Query to retrieve Entity data and associated data for editing
-  const GET_ENTITY = gql`
-    query GetEntityData($_id: String) {
-      entity(_id: $_id) {
-        _id
-        name
-        owner
-        deleted
-        locked
-        description
-        projects
-        associations {
-          origins {
-            _id
-            name
-          }
-          products {
-            _id
-            name
-          }
-        }
-        attributes {
-          _id
-          name
-          description
-          values {
-            _id
-            name
-            type
-            data
-          }
-        }
-        attachments {
-          _id
-          name
-        }
-        history {
-          timestamp
-          deleted
-          owner
-          description
-          projects
-          associations {
-            origins {
-              _id
-              name
-            }
-            products {
-              _id
-              name
-            }
-          }
-          attributes {
-            _id
-            name
-            description
-            values {
-              _id
-              name
-              type
-              data
-            }
-          }
-        }
-      }
-      entities {
-        _id
-        name
-      }
-      projects {
-        _id
-        name
-      }
-      attributes {
-        _id
-        name
-        description
-        values {
-          _id
-          name
-          type
-          data
-        }
-      }
-    }
-  `;
-  const { loading, error, data, refetch } = useQuery(GET_ENTITY, {
-    variables: {
-      _id: id,
-    },
-  });
-
-  // Mutation to update Entity
-  const UPDATE_ENTITY = gql`
-    mutation UpdateEntity($entity: EntityUpdateInput) {
-      updateEntity(entity: $entity) {
-        success
-        message
-      }
-    }
-  `;
-  const [updateEntity, { loading: updateLoading }] = useMutation(UPDATE_ENTITY);
-
-  // Mutation to delete Entity
-  const DELETE_ENTITY = gql`
-    mutation DeleteEntity($_id: String) {
-      deleteEntity(_id: $_id) {
-        success
-        message
-      }
-    }
-  `;
-  const [deleteEntity, { loading: deleteLoading }] = useMutation(DELETE_ENTITY);
-
-  // Manage data once retrieved
-  useEffect(() => {
-    if (data?.entity) {
-      // Unpack all the Entity data
-      setEntityData(data.entity);
-      setEntityDescription(data.entity.description || "");
-      setEntityProjects(data.entity.projects || []);
-      setEntityOrigins(data.entity.associations.origins || []);
-      setEntityProducts(data.entity.associations.products || []);
-      setEntityAttributes(data.entity.attributes || []);
-      setEntityAttachments(data.entity.attachments);
-      setEntityHistory(data.entity.history || []);
-    }
-    if (data?.entities) {
-      setMinimalEntities(
-        data.entities.filter(
-          (entity: EntityModel) => !_.isEqual(entityData._id, entity._id),
-        ),
-      );
-    }
-    if (data?.projects) {
-      setProjectData(data.projects);
-    }
-  }, [loading]);
-
-  // Display any GraphQL errors
-  useEffect(() => {
-    if (error) {
-      toast({
-        title: "Error",
-        description: error.message,
-        status: "error",
-        position: "bottom-right",
-        isClosable: true,
-      });
-    }
-  }, [error]);
-
-  // Check to see if data currently exists and refetch if so
-  useEffect(() => {
-    if (data && refetch) {
-      refetch();
-    }
-  }, []);
 
   // Toggle editing status
   const handleEditClick = async () => {
@@ -2042,90 +2064,50 @@ const Entity = () => {
             <ModalCloseButton />
 
             <ModalBody p={"2"}>
-              <Input
-                placeholder="Search for Origins"
-                value={inputValue}
-                onChange={handleInputChange}
-              />
-              {searchResults.map((entity: EntityModel) => (
-                <Button
-                  key={entity._id}
-                  onClick={() => {
-                    addProducts([entity._id]);
-                    setInputValue("");
-                    setSearchResults([]);
-                  }}
-                  variant="ghost"
-                >
-                  {entity.name}
-                </Button>
-              ))}
-              {/* Select component for Entities */}
-              {/* <Flex direction={"column"} gap={"2"}>
-                <FormControl>
-                  <FormLabel>Add Products</FormLabel>
-                  <Select
-                    title="Select Products"
-                    placeholder={"Select Product"}
-                    onChange={(event) => {
-                      if (
-                        entityProducts
-                          .map((product) => product.id)
-                          .includes(event.target.value.toString())
-                      ) {
-                        toast({
-                          title: "Warning",
-                          description: "Product has already been selected.",
-                          status: "warning",
-                          duration: 2000,
-                          position: "bottom-right",
-                          isClosable: true,
-                        });
-                      } else {
-                        setSelectedProducts([
-                          ...selectedProducts,
-                          event.target.value.toString(),
-                        ]);
-                      }
-                    }}
-                  >
-                    {isLoaded &&
-                      allEntities.map((entity) => {
-                        return (
-                          <option key={entity.id} value={entity.id}>
-                            {entity.name}
-                          </option>
-                        );
-                      })}
-                    ;
-                  </Select>
-                </FormControl>
+              <FormControl isInvalid={inputValue.length < 3} mb={"2"}>
+                <Input
+                  placeholder="Search for Products"
+                  value={inputValue}
+                  onChange={handleInputChange}
+                />
+                <FormErrorMessage>Enter 3 or more characters.</FormErrorMessage>
+              </FormControl>
 
-                <Flex direction={"row"} p={"2"} gap={"2"}>
-                  {selectedProducts.map((entity) => {
-                    if (!_.isEqual(entity, "")) {
-                      return (
-                        <Tag key={`tag-${entity}`}>
-                          <TagLabel>
-                            <Linky id={entity} type={"entities"} />
-                          </TagLabel>
-                          <TagCloseButton
-                            onClick={() => {
-                              setSelectedProducts(
-                                selectedProducts.filter((selected) => {
-                                  return !_.isEqual(entity, selected);
-                                })
-                              );
-                            }}
-                          />
-                        </Tag>
-                      );
-                    } else {
-                      return null;
-                    }
-                  })}
+              <Flex direction={"column"} gap={"2"}>
+                {inputValue.length >= 3 && (
+                  <Text fontWeight={"semibold"}>Results:</Text>
+                )}
+                <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
+                  {searchResults.length > 0 &&
+                    searchResults.map((entity: IGenericItem) => (
+                      <Button
+                        key={entity._id}
+                        onClick={() => {
+                          addProducts([entity._id]);
+                          setInputValue("");
+                          setSearchResults([]);
+                        }}
+                        variant={"solid"}
+                      >
+                        {entity.name}
+                      </Button>
+                    ))}
+                  {searchLoading && (
+                    <Flex width={"100%"} justify={"center"}>
+                      <Spinner />
+                    </Flex>
+                  )}
+                  {inputValue.length >= 3 &&
+                    !searchLoading &&
+                    searchResults.length === 0 && (
+                      <Flex width={"100%"} justify={"center"}>
+                        <Text fontWeight={"semibold"} color={"gray.400"}>
+                          No Entities matching "{inputValue}"
+                        </Text>
+                      </Flex>
+                    )}
                 </Flex>
-              </Flex> */}
+              </Flex>
             </ModalBody>
 
             <ModalFooter p={"2"}>
@@ -2166,90 +2148,49 @@ const Entity = () => {
             <ModalCloseButton />
 
             <ModalBody p={"2"}>
-              <Input
-                placeholder="Search for Origins"
-                value={inputValue}
-                onChange={handleInputChange}
-              />
-              {searchResults.map((entity: EntityModel) => (
-                <Button
-                  key={entity._id}
-                  onClick={() => {
-                    addOrigins([entity._id]);
-                    setInputValue("");
-                    setSearchResults([]);
-                  }}
-                  variant="ghost"
-                >
-                  {entity.name}
-                </Button>
-              ))}
-              {/* Select component for Entities */}
-              {/* <Flex direction={"column"} gap={"2"}>
-                <FormControl>
-                  <FormLabel>Add Origins</FormLabel>
-                  <Select
-                    title="Select Origins"
-                    placeholder={"Select Origin"}
-                    onChange={(event) => {
-                      if (
-                        entityOrigins
-                          .map((origin) => origin.id)
-                          .includes(event.target.value.toString())
-                      ) {
-                        toast({
-                          title: "Warning",
-                          description: "Origin has already been selected.",
-                          status: "warning",
-                          duration: 2000,
-                          position: "bottom-right",
-                          isClosable: true,
-                        });
-                      } else {
-                        setSelectedOrigins([
-                          ...selectedOrigins,
-                          event.target.value.toString(),
-                        ]);
-                      }
-                    }}
-                  >
-                    {isLoaded &&
-                      allEntities.map((entity) => {
-                        return (
-                          <option key={entity.id} value={entity.id}>
-                            {entity.name}
-                          </option>
-                        );
-                      })}
-                    ;
-                  </Select>
-                </FormControl>
-
-                <Flex direction={"row"} p={"2"} gap={"2"}>
-                  {selectedOrigins.map((entity) => {
-                    if (!_.isEqual(entity, "")) {
-                      return (
-                        <Tag key={`tag-${entity}`}>
-                          <TagLabel>
-                            <Linky id={entity} type={"entities"} />
-                          </TagLabel>
-                          <TagCloseButton
-                            onClick={() => {
-                              setSelectedOrigins(
-                                selectedOrigins.filter((selected) => {
-                                  return !_.isEqual(entity, selected);
-                                })
-                              );
-                            }}
-                          />
-                        </Tag>
-                      );
-                    } else {
-                      return null;
-                    }
-                  })}
+              <FormControl isInvalid={inputValue.length < 3} mb={"2"}>
+                <Input
+                  placeholder="Search for Origins"
+                  value={inputValue}
+                  onChange={handleInputChange}
+                />
+                <FormErrorMessage>Enter 3 or more characters.</FormErrorMessage>
+              </FormControl>
+              <Flex direction={"column"} gap={"2"}>
+                {inputValue.length >= 3 && (
+                  <Text fontWeight={"semibold"}>Results:</Text>
+                )}
+                <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
+                  {searchResults.length > 0 &&
+                    searchResults.map((entity: IGenericItem) => (
+                      <Button
+                        key={entity._id}
+                        onClick={() => {
+                          addOrigins([entity._id]);
+                          setInputValue("");
+                          setSearchResults([]);
+                        }}
+                        variant={"solid"}
+                      >
+                        {entity.name}
+                      </Button>
+                    ))}
+                  {searchLoading && (
+                    <Flex width={"100%"} justify={"center"}>
+                      <Spinner />
+                    </Flex>
+                  )}
+                  {inputValue.length >= 3 &&
+                    !searchLoading &&
+                    searchResults.length === 0 && (
+                      <Flex width={"100%"} justify={"center"}>
+                        <Text fontWeight={"semibold"} color={"gray.400"}>
+                          No Entities matching "{inputValue}"
+                        </Text>
+                      </Flex>
+                    )}
                 </Flex>
-              </Flex> */}
+              </Flex>
             </ModalBody>
 
             <ModalFooter p={"2"}>

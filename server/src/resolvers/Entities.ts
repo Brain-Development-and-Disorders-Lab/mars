@@ -51,7 +51,7 @@ export const EntitiesResolvers = {
     },
 
     // Search owned Entities by a search string
-    searchEntity: async (
+    searchEntities: async (
       _parent: any,
       args: { search: string; limit: 100 },
       context: Context,

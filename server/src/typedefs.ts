@@ -230,7 +230,7 @@ export const typedefs = `#graphql
     entity(_id: String): Entity
     entityExists(_id: String): Boolean
     entityNameExists(name: String): Boolean
-    searchEntity(search: String, limit: Int): [Entity]
+    searchEntities(search: String, limit: Int): [Entity]
 
     # Attribute queries
     attributes(limit: Int): [Attribute]
