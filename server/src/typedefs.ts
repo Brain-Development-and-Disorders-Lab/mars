@@ -224,6 +224,9 @@ export const typedefs = `#graphql
     # Entity queries
     entities(limit: Int): [Entity]
     entity(_id: String): Entity
+    entityExists(_id: String): Boolean
+    entityNameExists(name: String): Boolean
+    searchEntity(search: String, limit: Int): [Entity]
 
     # Attribute queries
     attributes(limit: Int): [Attribute]
@@ -257,14 +260,18 @@ export const typedefs = `#graphql
     addEntityAttribute(_id: String, attribute: AttributeInput): Response
     removeEntityAttribute(_id: String, attribute: String): Response
     updateEntityAttribute(_id: String, attribute: AttributeInput): Response
+    setEntityLock(_id: String, lock: Boolean): Response
+
     # Project mutations
     createProject(project: ProjectCreateInput): Response
     updateProject(project: ProjectUpdateInput): Response
     addProjectEntity(_id: String, entity: String): Response
     addProjectEntities(_id: String, entities: [String]): Response
     removeProjectEntity(_id: String, entity: String): Response
+
     # Activity mutations
     createActivity(activity: ActivityCreateInput): Response
+
     # Attribute mutations
     createAttribute(attribute: AttributeCreateInput): Response
     updateAttribute(attribute: AttributeInput): Response

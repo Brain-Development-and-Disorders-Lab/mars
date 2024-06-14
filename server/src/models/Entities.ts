@@ -45,6 +45,69 @@ export class Entities {
       .findOne({ _id: _id });
   };
 
+  static exists = async (_id: string): Promise<boolean> => {
+    const entity = await getDatabase()
+      .collection<EntityModel>(ENTITIES_COLLECTION)
+      .findOne({ _id: _id });
+
+    return _.isNull(entity);
+  };
+
+  static existByName = async (name: string): Promise<boolean> => {
+    const entity = await getDatabase()
+      .collection<EntityModel>(ENTITIES_COLLECTION)
+      .findOne({ name: name, deleted: false });
+
+    return _.isNull(entity);
+  };
+
+  static getByName = async (name: string): Promise<EntityModel | null> => {
+    return await getDatabase()
+      .collection<EntityModel>(ENTITIES_COLLECTION)
+      .findOne({ name: name, deleted: false });
+  };
+
+  static search = async (
+    orcid: string,
+    search: string,
+    limit: number = 5,
+  ): Promise<EntityModel[]> => {
+    let searchRegex;
+    try {
+      searchRegex = new RegExp(search, "i");
+    } catch (error) {
+      consola.error("Invalid regex for search:", error);
+
+      // Fallback to plain text search if regex fails to compile
+      search = search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // Escape special regex characters
+      searchRegex = new RegExp(search, "i"); // Safe regex with escaped characters
+    }
+
+    // Construct search query
+    const query = {
+      $or: [
+        { name: { $regex: searchRegex } },
+        { description: { $regex: searchRegex } },
+        { "attributes.values.data": { $regex: searchRegex } }, // Assuming searchable content within attributes
+      ],
+      $and: [
+        { deleted: false },
+        { $or: [{ owner: orcid }, { collaborators: orcid }] }, // Ensure user is owner or collaborator
+      ],
+    };
+
+    // Limit the fields returned for efficiency
+    const options = {
+      limit: limit,
+      projection: { name: 1, description: 1 },
+    };
+
+    return await getDatabase()
+      .collection<EntityModel>(ENTITIES_COLLECTION)
+      .find(query, options)
+      .toArray();
+  };
+
   /**
    * Create a new Entity
    * @param {IEntity} entity Entity information
@@ -58,7 +121,27 @@ export class Entities {
       ...entity, // Unpack existing IEntity fields
     };
 
-    // To-Do: Perform operations for origins, products, projects, and add Activity operation
+    // To-Do: Add Activity operation
+    for (let origin of entity.associations.origins) {
+      // Add new Entity as a Product
+      await Entities.addProduct(origin._id, {
+        _id: joinedEntity._id,
+        name: joinedEntity.name,
+      });
+    }
+
+    for (let product of entity.associations.products) {
+      // Add new Entity as an Origin
+      await Entities.addOrigin(product._id, {
+        _id: joinedEntity._id,
+        name: joinedEntity.name,
+      });
+    }
+
+    for (let project of entity.projects) {
+      // Add Entity to Project
+      await Projects.addEntity(project, joinedEntity._id);
+    }
 
     const response = await getDatabase()
       .collection<EntityModel>(ENTITIES_COLLECTION)
@@ -189,6 +272,19 @@ export class Entities {
         response.modifiedCount == 1
           ? "Updated Entity"
           : "No changes made to Entity",
+    };
+  };
+
+  static upsert = async (upserted: EntityModel): Promise<ResponseMessage> => {
+    const exists = await Entities.exists(upserted._id);
+    if (exists) {
+      await Entities.update(upserted);
+    } else {
+      await Entities.create(upserted);
+    }
+    return {
+      success: true,
+      message: "Upserted Entity",
     };
   };
 
@@ -842,6 +938,29 @@ export class Entities {
     } else {
       return "Invalid format";
     }
+  };
+
+  static setLock = async (
+    _id: string,
+    locked: boolean,
+  ): Promise<ResponseMessage> => {
+    const update = {
+      $set: {
+        locked: locked,
+      },
+    };
+
+    const response = await getDatabase()
+      .collection<EntityModel>(ENTITIES_COLLECTION)
+      .updateOne({ _id: _id }, update);
+
+    return {
+      success: response.modifiedCount > 0,
+      message:
+        response.modifiedCount > 0
+          ? "Set lock status successfully"
+          : "Error setting lock status",
+    };
   };
 
   // Remaining functions:

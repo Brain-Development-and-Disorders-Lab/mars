@@ -50,6 +50,25 @@ export const EntitiesResolvers = {
       }
     },
 
+    // Search owned Entities by a search string
+    searchEntity: async (
+      _parent: any,
+      args: { search: string; limit: 100 },
+      context: Context,
+    ) => {
+      return await Entities.search(context.user, args.search, args.limit);
+    },
+
+    // Check if Entity exists by ID
+    entityExists: async (_parent: any, args: { _id: string }) => {
+      return await Entities.exists(args._id);
+    },
+
+    // Check if Entity exists by name
+    entityNameExists: async (_parent: any, args: { name: string }) => {
+      return await Entities.existByName(args.name);
+    },
+
     // Export one Entity by _id
     exportEntity: async (
       _parent: any,
@@ -79,6 +98,7 @@ export const EntitiesResolvers = {
       }
     },
   },
+
   Mutation: {
     setEntityDescription: async (
       _parent: any,
@@ -141,6 +161,14 @@ export const EntitiesResolvers = {
           },
         );
       }
+    },
+
+    // Set the Entity "lock" status
+    setEntityLock: async (
+      _parent: any,
+      args: { _id: string; lock: boolean },
+    ) => {
+      return await Entities.setLock(args._id, args.lock);
     },
 
     // Projects
