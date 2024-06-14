@@ -348,6 +348,8 @@ const Entity = () => {
         _id
         name
         owner
+        deleted
+        locked
         description
         projects
         associations {

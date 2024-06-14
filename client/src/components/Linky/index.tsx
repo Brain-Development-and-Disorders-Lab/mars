@@ -5,47 +5,83 @@ import React, { useEffect, useState } from "react";
 import { Button, Link, Skeleton, Text, Tooltip } from "@chakra-ui/react";
 
 // Existing and custom types
-import { AttributeModel, EntityModel, LinkyProps, ProjectModel } from "@types";
+import { IGenericItem, LinkyProps } from "@types";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
 
 // Utility functions and libraries
-import { request } from "@database/functions";
 import _ from "lodash";
+import { gql, useLazyQuery } from "@apollo/client";
 
 const Linky = (props: LinkyProps) => {
   const navigate = useNavigate();
 
   // Component state
-  const [isLoaded, setIsLoaded] = useState(false);
   const [linkLabel, setLinkLabel] = useState("Invalid");
   const [showDeleted, setShowDeleted] = useState(false);
+
+  // GraphQL operations
+  const GET_ENTITY = gql`
+    query GetEntity($_id: String) {
+      entity(_id: $_id) {
+        _id
+        name
+        deleted
+      }
+    }
+  `;
+  const [getEntity, { loading: loadingEntity }] = useLazyQuery(GET_ENTITY);
+
+  const GET_PROJECT = gql`
+    query GetProject($_id: String) {
+      project(_id: $_id) {
+        _id
+        name
+      }
+    }
+  `;
+  const [getProject, { loading: loadingProject }] = useLazyQuery(GET_PROJECT);
+
+  const GET_ATTRIBUTE = gql`
+    query GetAttribute($_id: String) {
+      attribute(_id: $_id) {
+        _id
+        name
+      }
+    }
+  `;
+  const [getAttribute, { loading: loadingAttribute }] =
+    useLazyQuery(GET_ATTRIBUTE);
 
   /**
    * Utility function to retrieve data of link target
    */
   const getLinkyData = async () => {
-    const response = await request<EntityModel | AttributeModel | ProjectModel>(
-      "GET",
-      `/${props.type}/${props.id}`,
-    );
-    if (response.success) {
-      setLinkLabel(response.data.name);
-      if (_.isEqual(props.type, "entities")) {
-        // We can be confident the response data `EntityModel`
-        setShowDeleted((response.data as EntityModel).deleted);
-      }
-    } else {
-      if (props.fallback) {
-        setLinkLabel(props.fallback);
-      }
+    let data: IGenericItem = {
+      _id: props.id,
+      name: props.fallback || "Invalid",
+    };
+
+    if (props.type === "attributes") {
+      const response = await getAttribute({ variables: { _id: props.id } });
+      data.name = response.data.attribute.name;
+    } else if (props.type === "entities") {
+      const response = await getEntity({ variables: { _id: props.id } });
+      setShowDeleted(response.data.entity.deleted);
+      data.name = response.data.entity.name;
+    } else if (props.type === "projects") {
+      const response = await getProject({ variables: { _id: props.id } });
+      data.name = response.data.project.name;
     }
-    setIsLoaded(true);
+
+    setLinkLabel(data.name);
   };
 
   const onClickHandler = () => {
-    if (isLoaded && !props.fallback) navigate(`/${props.type}/${props.id}`);
+    if (!loadingAttribute && !loadingEntity && !loadingProject) {
+      navigate(`/${props.type}/${props.id}`);
+    }
   };
 
   useEffect(() => {
@@ -61,7 +97,9 @@ const Linky = (props: LinkyProps) => {
         as={Link}
         onClick={onClickHandler}
       >
-        <Skeleton isLoaded={isLoaded}>
+        <Skeleton
+          isLoaded={!loadingAttribute && !loadingEntity && !loadingProject}
+        >
           <Text as={showDeleted ? "s" : "p"}>
             {_.truncate(linkLabel, { length: 20 })}
           </Text>
