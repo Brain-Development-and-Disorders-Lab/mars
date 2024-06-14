@@ -3,6 +3,10 @@ import _ from "lodash";
 import { getDatabase } from "src/connectors/database";
 import { getIdentifier } from "src/util";
 import { Entities } from "./Entities";
+import dayjs from "dayjs";
+import Papa from "papaparse";
+import * as tmp from "tmp";
+import * as fs from "fs";
 
 // Collection name
 const PROJECTS_COLLECTION = "projects";
@@ -23,6 +27,11 @@ export class Projects {
     return await getDatabase()
       .collection<ProjectModel>(PROJECTS_COLLECTION)
       .findOne({ _id: _id });
+  };
+
+  static exists = async (_id: string): Promise<boolean> => {
+    const project = await this.getOne(_id);
+    return _.isNull(project);
   };
 
   static create = async (project: IProject): Promise<ResponseMessage> => {
@@ -186,5 +195,78 @@ export class Projects {
         ? "Removed Entity from Project"
         : "Could not remove Entity from Project",
     };
+  };
+
+  /**
+   * Generate export data for the Project
+   * @param _id Project identifier
+   * @returns {Promise<string>}
+   */
+  static export = async (
+    _id: string,
+    format: "json" | "csv",
+    fields?: string[],
+  ): Promise<string> => {
+    const project = await this.getOne(_id);
+
+    if (_.isNull(project)) {
+      return "";
+    }
+
+    // Remove `history` field
+    delete (project as any)["history"];
+
+    if (_.isEqual(format, "json")) {
+      // Handle JSON format
+      return JSON.stringify(project);
+    } else if (_.isEqual(format, "csv")) {
+      let exportFields = fields;
+
+      // Handle CSV format
+      const headers: string[] = ["ID", "Name"]; // Headers for CSV file
+      const row: string[] = [project._id, project.name]; // First row containing export data
+
+      // Default behavior is to export all fields
+      if (_.isUndefined(exportFields)) {
+        // Add standard string fields
+        exportFields = ["created", "owner", "description"];
+      }
+
+      // Iterate through the list of "fields" and create row representation
+      for (let field of exportFields) {
+        console.info("Generating information for field:", field);
+        if (_.isEqual(field, "created")) {
+          headers.push("Created");
+          row.push(dayjs(project.created).format("DD MMM YYYY").toString());
+        } else if (_.isEqual(field, "owner")) {
+          headers.push("Owner");
+          row.push(project.owner);
+        } else if (_.isEqual(field, "description")) {
+          // "description" data field
+          headers.push("Description");
+          row.push(project.description);
+        } else if (_.isEqual(field, "entities")) {
+          // "entities" data field
+          headers.push("Entities");
+          row.push(project.entities.join("_"));
+        }
+      }
+
+      // Collate and format data as a CSV string
+      const collated = [headers, row];
+      const formatted = Papa.unparse(collated);
+
+      // Create a temporary file, passing the filename as a response
+      tmp.file((error, path: string, _fd: number) => {
+        if (error) {
+          throw error;
+        }
+
+        fs.writeFileSync(path, formatted);
+      });
+      return "csv";
+    } else {
+      return "Invalid format";
+    }
   };
 }

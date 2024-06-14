@@ -238,6 +238,7 @@ export const typedefs = `#graphql
 
     # Export queries
     exportEntity(_id: String, format: String, fields: [String]): String
+    exportProject(_id: String, format: String, fields: [String]): String
 
     # Authentication queries
     login(code: String): Auth
