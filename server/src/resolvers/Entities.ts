@@ -97,6 +97,25 @@ export const EntitiesResolvers = {
         );
       }
     },
+
+    // Export multiple Entities by _id
+    exportEntities: async (
+      _parent: any,
+      args: { entities: string[] },
+      context: Context,
+    ) => {
+      const authorizedEntities = [];
+
+      // Ensure only Entities the user is authorized to access are exported
+      for (let entity of args.entities) {
+        const result = await Entities.getOne(entity);
+        if (result && result.owner === context.user) {
+          authorizedEntities.push(entity);
+        }
+      }
+
+      return await Entities.exportMany(authorizedEntities);
+    },
   },
 
   Mutation: {

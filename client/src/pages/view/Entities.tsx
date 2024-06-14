@@ -24,8 +24,7 @@ import { DataTableAction, EntityModel } from "@types";
 import { useNavigate } from "react-router-dom";
 
 // Utility functions and libraries
-import { request } from "@database/functions";
-import { gql, useQuery } from "@apollo/client";
+import { gql, useLazyQuery, useQuery } from "@apollo/client";
 import _ from "lodash";
 import dayjs from "dayjs";
 import FileSaver from "file-saver";
@@ -39,10 +38,10 @@ const Entities = () => {
   const breakpoint = useBreakpoint();
   const [visibleColumns, setVisibleColumns] = useState({});
 
-  // Queries
+  // Query to retrieve Entities
   const GET_ENTITIES = gql`
-    query GetEntities($entities: Int) {
-      entities(limit: $entities) {
+    query GetEntities($limit: Int) {
+      entities(limit: $limit) {
         _id
         deleted
         owner
@@ -52,8 +51,6 @@ const Entities = () => {
       }
     }
   `;
-
-  // Query to retrieve Entities
   const { loading, error, data, refetch } = useQuery<{
     entities: EntityModel[];
   }>(GET_ENTITIES, {
@@ -61,6 +58,15 @@ const Entities = () => {
       limit: 100,
     },
   });
+
+  // Query to generate exported data
+  const GET_ENTITIES_EXPORT = gql`
+    query GetEntitiesExport($entities: [String]) {
+      exportEntities(entities: $entities)
+    }
+  `;
+  const [exportEntities, { loading: exportLoading, error: exportError }] =
+    useLazyQuery(GET_ENTITIES_EXPORT);
 
   // Manage data once retrieved
   useEffect(() => {
@@ -148,7 +154,7 @@ const Entities = () => {
 
   const actions: DataTableAction[] = [
     {
-      label: "Export Selected (CSV)",
+      label: `Export Selected`,
       icon: "download",
       action: async (table, rows: any) => {
         // Export rows that have been selected
@@ -157,38 +163,15 @@ const Entities = () => {
           toExport.push(table.getRow(rowIndex).original._id);
         }
 
-        const response = await request<any>("POST", "/entities/export", {
-          entities: toExport,
+        const response = await exportEntities({
+          variables: {
+            entities: toExport,
+          },
         });
-        if (response.success) {
-          FileSaver.saveAs(
-            new Blob([response.data]),
-            slugify(
-              `export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.csv`,
-            ),
-          );
-        }
 
-        table.resetRowSelection();
-      },
-    },
-    {
-      label: "Export Selected (JSON)",
-      icon: "download",
-      action: async (table, rows: any) => {
-        // Export rows that have been selected
-        const toExport: string[] = [];
-        for (let rowIndex of Object.keys(rows)) {
-          toExport.push(table.getRow(rowIndex).original._id);
-        }
-
-        const response = await request<any>("POST", "/entities/export", {
-          entities: toExport,
-          format: "json",
-        });
-        if (response.success) {
+        if (response.data.exportEntities) {
           FileSaver.saveAs(
-            new Blob([response.data]),
+            new Blob([response.data.exportEntities]),
             slugify(
               `export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.json`,
             ),
@@ -197,31 +180,14 @@ const Entities = () => {
 
         table.resetRowSelection();
       },
-    },
-    {
-      label: "Export All (JSON)",
-      icon: "download",
-      action: async (table) => {
-        const response = await request<any>("POST", "/entities/export_all", {
-          format: "json",
-        });
-        if (response.success) {
-          FileSaver.saveAs(
-            new Blob([response.data]),
-            slugify(
-              `export_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.json`,
-            ),
-          );
-        }
-
-        table.resetRowSelection();
-      },
-      alwaysEnabled: true,
     },
   ];
 
   return (
-    <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
+    <Content
+      isError={!_.isUndefined(error) && !_.isUndefined(exportError)}
+      isLoaded={!loading && !exportLoading}
+    >
       <Flex
         direction={"row"}
         p={"4"}

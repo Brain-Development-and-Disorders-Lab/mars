@@ -1022,6 +1022,23 @@ export class Entities {
     }
   };
 
+  /**
+   * Generate a JSON representation of multiple Entities for export
+   * @param entities Set of Entity identifiers for export
+   * @return {Promise<string>}
+   */
+  static exportMany = async (entities: string[]): Promise<string> => {
+    const collection = [];
+    for (let entity of entities) {
+      const result = await Entities.getOne(entity);
+      if (result) {
+        collection.push(result);
+      }
+    }
+
+    return JSON.stringify(collection, null, "  ");
+  };
+
   static setLock = async (
     _id: string,
     locked: boolean,
