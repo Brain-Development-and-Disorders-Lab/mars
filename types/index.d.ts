@@ -162,7 +162,7 @@ export type IEntity = {
   };
   attributes: AttributeModel[];
   attachments: IGenericItem[];
-  history: EntityHistory[];
+  history?: EntityHistory[];
 };
 
 export type EntityModel = IEntity & {
