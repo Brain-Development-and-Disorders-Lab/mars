@@ -1,6 +1,9 @@
-import { IAuth } from "@types";
+import { IAuth, UserModel } from "@types";
 import axios, { AxiosResponse } from "axios";
+import { verify } from "jsonwebtoken";
+import { JwksClient } from "jwks-rsa";
 import _ from "lodash";
+import { Users } from "./Users";
 
 // Variables
 const TOKEN_URL = "https://orcid.org/oauth/token";
@@ -42,64 +45,61 @@ export class Authentication {
       },
     });
 
-    if (response.status === 200) {
-      return response.data as IAuth;
-    } else {
-      throw new Error("Invlid");
+    if (response.status !== 200) {
+      throw new Error("Invalid");
     }
-    // return new Promise((resolve, reject) => {
 
-    //   postData(TOKEN_URL, loginData, {
-    //     headers: {
-    //       Accept: "application/json",
-    //       "Content-Type": "application/x-www-form-urlencoded",
-    //     },
-    //   })
-    //     .then(async (response: AuthToken) => {
-    //       try {
-    //         let user = await Users.exists(response.orcid);
-    //         if (user) {
-    //           // If user exists, update the existing record with any new data
-    //           consola.debug("User found for ORCiD:", response.orcid);
-    //           await Users.update(response.orcid, {
-    //             _id: response.orcid,
-    //             name: response.name,
-    //             token: response.token,
-    //           });
-    //           consola.debug("User data updated for ORCiD:", response.orcid);
-    //         } else {
-    //           // If user does not exist, create a new record
-    //           consola.debug("New user creation for ORCiD:", response.orcid);
-    //           await Users.create({
-    //             _id: response.orcid,
-    //             name: response.name,
-    //             token: response.token,
-    //           });
-    //           consola.debug("New user created for ORCiD:", response.orcid);
-    //           await bootstrapUserData(response.orcid); // Here we pass the ORCiD as the userId
-    //         }
+    const authenticationPayload: IAuth = response.data;
 
-    //         // Resolve with updated or new user data
-    //         resolve({
-    //           name: response.name,
-    //           orcid: response.orcid,
-    //           token: response.token,
-    //         });
-    //       } catch (error) {
-    //         consola.error(
-    //           `Error processing ORCiD "${response.orcid}": ${JSON.stringify(
-    //             error,
-    //           )}`,
-    //         );
-    //         reject(
-    //           `Error processing ORCiD "${response.orcid}". Please contact the administrator.`,
-    //         );
-    //       }
-    //     })
-    //     .catch((error: any) => {
-    //       consola.error("Error performing login:", JSON.stringify(error));
-    //       reject(JSON.stringify(error));
-    //     });
-    // });
+    const exists = await Users.exists(authenticationPayload.orcid);
+    if (exists) {
+      await Users.update({
+        _id: authenticationPayload.orcid,
+        name: authenticationPayload.name,
+        token: authenticationPayload.token,
+      });
+    } else {
+      await Users.create({
+        _id: authenticationPayload.orcid,
+        name: authenticationPayload.name,
+        token: authenticationPayload.token,
+      });
+      await Users.bootstrap(authenticationPayload.orcid);
+    }
+
+    return authenticationPayload;
+  };
+
+  static validate = async (token: string): Promise<UserModel> => {
+    if (process.env.NODE_ENV !== "production") {
+      return {
+        _id: "XXXX-0000-DEMO-1111",
+        name: "Test User",
+        email: "mars@reusable.bio",
+        token: "test_token_value",
+      };
+    }
+
+    const client = new JwksClient({
+      jwksUri: "https://orcid.org/oauth/jwks",
+      requestHeaders: {},
+      timeout: 30000,
+    });
+
+    const result = await client.getSigningKey(
+      "production-orcid-org-7hdmdswarosg3gjujo8agwtazgkp1ojs",
+    );
+    const orcid = verify(token, result.getPublicKey()).sub;
+
+    if (_.isUndefined(orcid)) {
+      throw new Error("ORCiD could not be retrieved from login token");
+    }
+
+    const user = await Users.getOne(orcid.toString());
+    if (user) {
+      return user;
+    }
+
+    throw new Error(`User not found with ORCID: ${orcid.toString()}`);
   };
 }
