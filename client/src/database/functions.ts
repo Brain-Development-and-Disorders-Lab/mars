@@ -31,7 +31,7 @@ export const request = async <T>(
   // Configure authorization
   if (!_.isUndefined(getToken(TOKEN_KEY))) {
     requestOptions.headers = {
-      id_token: getToken(TOKEN_KEY).id_token,
+      token: getToken(TOKEN_KEY)?.token,
       ...requestOptions.headers,
     };
   }

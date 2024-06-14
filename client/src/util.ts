@@ -2,7 +2,7 @@
 import _ from "lodash";
 
 // Custom types
-import { IAttribute, IValue } from "@types";
+import { IAttribute, IAuth, IValue } from "@types";
 
 export const isValidValues = (
   values: IValue<any>[],
@@ -51,10 +51,14 @@ export const isValidAttributes = (attributes: IAttribute[]) => {
  * @param {string} tokenKey the key of the token in storage
  * @returns {any}
  */
-export const getToken = (tokenKey: string): any => {
+export const getToken = (tokenKey: string): IAuth => {
   const storedToken = sessionStorage.getItem(tokenKey);
   if (!_.isNull(storedToken) && !_.isUndefined(storedToken)) {
     return JSON.parse(storedToken);
   }
-  return undefined;
+  return {
+    name: "",
+    orcid: "",
+    token: "",
+  };
 };

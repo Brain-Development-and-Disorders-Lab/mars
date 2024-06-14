@@ -472,6 +472,19 @@ const Entity = () => {
     }
   }, [loading]);
 
+  // Display any GraphQL errors
+  useEffect(() => {
+    if (error) {
+      toast({
+        title: "Error",
+        description: error.message,
+        status: "error",
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
+  }, [error]);
+
   // Check to see if data currently exists and refetch if so
   useEffect(() => {
     if (data && refetch) {

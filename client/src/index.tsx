@@ -31,7 +31,7 @@ const authLink = setContext((_, { headers }) => {
   return {
     headers: {
       ...headers,
-      token: getToken(TOKEN_KEY),
+      user: getToken(TOKEN_KEY).orcid,
     },
   };
 });
