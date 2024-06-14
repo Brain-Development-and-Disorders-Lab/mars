@@ -384,13 +384,13 @@ export type QueryComponent = {
 };
 
 // Authentication types
-export type AuthInfo = {
-  name: string;
+export type IAuth = {
   orcid: string;
+  name: string;
   token: string;
 };
 
-export type AuthToken = AuthInfo & {
+export type Token = IAuth & {
   access_token: string;
   token_type: string;
   refesh_token: string;

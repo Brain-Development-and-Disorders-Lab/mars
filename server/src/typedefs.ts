@@ -183,6 +183,13 @@ export const typedefs = `#graphql
     message: String
   }
 
+  # "Auth" type
+  type Auth {
+    orcid: String
+    name: String
+    token: String
+  }
+
   # Define query types
   type Query {
     # User queries
@@ -206,6 +213,9 @@ export const typedefs = `#graphql
 
     # Export queries
     exportEntity(_id: String, format: String, fields: [String]): String
+
+    # Authentication queries
+    login(code: String): Auth
   }
 
   # Define mutation types

@@ -1,5 +1,5 @@
 // Existing and custom types
-import { AuthInfo, AuthToken, ProjectModel, UserModel } from "@types";
+import { IAuth, Token, ProjectModel, UserModel } from "@types";
 
 // Operations
 import { Users } from "./Users";
@@ -194,9 +194,9 @@ export class Authentication {
   /**
    * Validate the ORCiD login submitted by the user
    * @param {string} code authentication code provided by ORCiD
-   * @returns {Promise<AuthInfo>}
+   * @returns {Promise<IAuth>}
    */
-  static login = (code: string): Promise<AuthInfo> => {
+  static login = (code: string): Promise<IAuth> => {
     // Retrieve a token
     return new Promise((resolve, reject) => {
       // Format login data for POST request
@@ -223,7 +223,7 @@ export class Authentication {
           "Content-Type": "application/x-www-form-urlencoded",
         },
       })
-        .then(async (response: AuthToken) => {
+        .then(async (response: Token) => {
           try {
             let user = await Users.exists(response.orcid);
             if (user) {

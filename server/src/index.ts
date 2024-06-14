@@ -3,10 +3,11 @@ import "dotenv/config";
 
 // Libraries
 import _ from "lodash";
-import express from "express";
-import cors from "cors";
-import helmet from "helmet";
 import consola, { LogLevels } from "consola";
+import cors from "cors";
+import express from "express";
+import helmet from "helmet";
+import http from "http";
 import "source-map-support/register";
 
 const fileUpload = require("express-fileupload");
@@ -14,102 +15,74 @@ const fileUpload = require("express-fileupload");
 // Get the connection functions
 import { connectPrimary, connectSystem } from "./connectors/database";
 
-// Routes
-import ActivityRoute from "./routes/Activity";
-import AttributesRoute from "./routes/Attributes";
-import AuthenticationRoute from "./routes/Authentication";
-import DataRoute from "./routes/Data";
-import EntitiesRoute from "./routes/Entities";
-import ProjectsRoute from "./routes/Projects";
-import SearchRoute from "./routes/Search";
-import SystemRoute from "./routes/System";
-import UsersRoute from "./routes/Users";
-
 // GraphQL
 import { ApolloServer } from "@apollo/server";
-import { startStandaloneServer } from "@apollo/server/standalone";
+import { expressMiddleware } from "@apollo/server/express4";
+import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
 import { typedefs } from "./typedefs";
-
-// GraphQL - resolvers
-import { AttributesResolvers } from "./resolvers/Attributes";
 import { ActivityResolvers } from "./resolvers/Activity";
+import { AttributesResolvers } from "./resolvers/Attributes";
+import { AuthenticationResolvers } from "./resolvers/Authentication";
 import { DateResolver } from "./resolvers/Date";
 import { EntitiesResolvers } from "./resolvers/Entities";
 import { ProjectsResolvers } from "./resolvers/Projects";
 import { UsersResolvers } from "./resolvers/Users";
 
-// GraphQL - authentication
-import { graphqlAuthenticationWrapper } from "./middleware/Authentication";
-
 // Set logging level
 consola.level =
   process.env.NODE_ENV !== "production" ? LogLevels.trace : LogLevels.info;
 
-consola.info("Server mode:", process.env.NODE_ENV);
-if (process.env.NODE_ENV !== "production") {
-  consola.warn("Server not secured!");
-}
-
-export const app = express();
-// Define the set of ports and REST API endpoint
-const ports = {
-  rest: process.env.REST_PORT ? parseInt(process.env.REST_PORT) : 8000,
-  graphql: process.env.GRAPHQL_PORT ? parseInt(process.env.GRAPHQL_PORT) : 8001,
-};
-const endpoint = "/mars";
-
-// Configure Express, enable CORS middleware and routes
-app.use(helmet());
-app.use(cors({ credentials: true, origin: true }));
-app.use(express.json({ limit: "50mb" }));
-app.use(fileUpload());
-
-// Use routes
-app.use(ProjectsRoute); // ProjectsRoute now has authenticationMiddleware applied to it
-app.use(ActivityRoute);
-app.use(AttributesRoute);
-app.use(AuthenticationRoute);
-app.use(DataRoute);
-app.use(EntitiesRoute);
-app.use(SearchRoute);
-app.use(SystemRoute);
-app.use(UsersRoute);
-
-const wrapper = express();
-wrapper.use(endpoint, app);
-
-// Start the Express REST API server
-wrapper.listen(ports.rest, () => {
-  // Connect to the primary database when the server starts
-  connectPrimary().then(() => {
-    // Connect to the system database
-    connectSystem().then(() => {
-      consola.success("REST endpoint:", endpoint, ports.rest);
-    });
-  });
-});
-
 // Start the GraphQL server
 const startServer = async () => {
+  consola.info("Server mode:", process.env.NODE_ENV);
+  if (process.env.NODE_ENV !== "production") {
+    consola.warn("Server not secured!");
+  }
+
+  const app = express();
+  const httpServer = http.createServer(app);
+
+  // Perform database connections
+  try {
+    await connectPrimary();
+    await connectSystem();
+  } catch {
+    consola.error("Error connecting to databases, aborting server start...");
+    return;
+  }
+
+  // Setup the GraphQL server
   const server = new ApolloServer({
     typeDefs: typedefs,
     resolvers: [
-      DateResolver,
-      UsersResolvers,
-      ProjectsResolvers,
-      EntitiesResolvers,
-      AttributesResolvers,
       ActivityResolvers,
+      AttributesResolvers,
+      AuthenticationResolvers,
+      DateResolver,
+      EntitiesResolvers,
+      ProjectsResolvers,
+      UsersResolvers,
     ],
     introspection: process.env.NODE_ENV !== "production",
+    plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
   });
+  await server.start();
 
-  const { url } = await startStandaloneServer(server, {
-    listen: { port: ports.graphql },
-    context: graphqlAuthenticationWrapper,
-  });
+  // Configure Express, enable CORS middleware
+  app.use(
+    "/mars",
+    cors<cors.CorsRequest>(),
+    express.json({ limit: "50mb" }),
+    expressMiddleware(server, {
+      context: async ({ req }) => ({ token: req.headers.token }),
+    }),
+    helmet(),
+    fileUpload(),
+  );
 
-  consola.success("GraphQL endpoint:", url);
+  // Start the server
+  httpServer.listen({ port: 8000 });
+  consola.success("Server running at http://localhost:8000/mars");
 };
 
 startServer();
