@@ -1,7 +1,7 @@
 // Utility functions
 import { getDatabase } from "../connectors/database";
 import { Activity } from "./Activity";
-import { getIdentifier } from "src/util";
+import { getIdentifier } from "../util";
 
 // Utility libraries
 import _ from "lodash";

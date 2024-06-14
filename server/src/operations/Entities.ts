@@ -5,7 +5,7 @@ import { Document, WithId } from "mongodb";
 import { getAttachments, getDatabase } from "../connectors/database";
 import { Activity } from "./Activity";
 import { Projects } from "./Projects";
-import { getIdentifier } from "src/util";
+import { getIdentifier } from "../util";
 
 // File generation
 import fs from "fs";

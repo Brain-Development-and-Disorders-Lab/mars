@@ -2,7 +2,7 @@
 import { getDatabase } from "../connectors/database";
 import { Entities } from "./Entities";
 import { Activity } from "./Activity";
-import { getIdentifier } from "src/util";
+import { getIdentifier } from "../util";
 
 // Custom types
 import { ProjectModel, IProject } from "@types";

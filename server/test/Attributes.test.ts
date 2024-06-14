@@ -20,7 +20,7 @@ import {
   connectPrimary,
   disconnect,
   getDatabase,
-} from "../src/connectors/connection";
+} from "../src/connectors/database";
 
 // Connect to the database before each test
 beforeEach(() => {
