@@ -3,7 +3,13 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 
 // Apollo imports
-import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client";
+import {
+  ApolloClient,
+  InMemoryCache,
+  ApolloProvider,
+  createHttpLink,
+} from "@apollo/client";
+import { setContext } from "@apollo/client/link/context";
 
 // Utility imports
 import _ from "lodash";
@@ -13,10 +19,25 @@ import { GRAPHQL_URL } from "./variables";
 
 // Application
 import App from "./App";
+import { getToken } from "./util";
+import { TOKEN_KEY } from "./variables";
 
 // Setup Apollo client
-const client = new ApolloClient({
+const httpLink = createHttpLink({
   uri: GRAPHQL_URL,
+});
+
+const authLink = setContext((_, { headers }) => {
+  return {
+    headers: {
+      ...headers,
+      token: getToken(TOKEN_KEY),
+    },
+  };
+});
+
+const client = new ApolloClient({
+  link: authLink.concat(httpLink),
   cache: new InMemoryCache({ addTypename: false }),
 });
 
