@@ -344,7 +344,7 @@ const Project = () => {
     setProject(updateData);
     setProjectDescription(updateData.description);
     setProjectEntities(updateData.entities);
-    setProjectHistory(updateData.history);
+    setProjectHistory(updateData?.history || []);
     setProjectCollaborators(updateData?.collaborators || []);
     setIsLoaded(true);
   };

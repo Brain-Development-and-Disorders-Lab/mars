@@ -127,7 +127,7 @@ export type IProject = {
   description: string;
   shared: string[];
   entities: string[];
-  history: ProjectHistory[];
+  history?: ProjectHistory[];
 };
 
 export type ProjectModel = IProject & {

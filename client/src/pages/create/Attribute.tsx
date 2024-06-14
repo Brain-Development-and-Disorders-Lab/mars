@@ -74,7 +74,6 @@ const Attribute = () => {
       }
     }
   `;
-
   const [createAttribute, { loading, error }] = useMutation(CREATE_ATTRIBUTE);
 
   /**
