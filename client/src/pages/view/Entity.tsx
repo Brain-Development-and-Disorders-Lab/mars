@@ -270,6 +270,20 @@ const Entity = () => {
   const [searchEntities, { loading: searchLoading, error: searchError }] =
     useLazyQuery(SEARCH_ENTITIES);
 
+  // Query to create a template Attribute
+  const CREATE_ATTRIBUTE = gql`
+    mutation CreateAttribute($attribute: AttributeCreateInput) {
+      createAttribute(attribute: $attribute) {
+        success
+        message
+      }
+    }
+  `;
+  const [
+    createAttribute,
+    { loading: loadingAttributeCreate, error: errorAttributeCreate },
+  ] = useMutation(CREATE_ATTRIBUTE);
+
   // Mutation to update Entity
   const UPDATE_ENTITY = gql`
     mutation UpdateEntity($entity: EntityUpdateInput) {
@@ -436,12 +450,14 @@ const Entity = () => {
       values: attributeValues,
     };
 
-    const response = await request<any>(
-      "POST",
-      "/attributes/create",
-      attributeData,
-    );
-    if (response.success) {
+    // Execute the GraphQL mutation
+    const response = await createAttribute({
+      variables: {
+        attribute: attributeData,
+      },
+    });
+
+    if (response.data.createAttribute.success) {
       toast({
         title: "Saved!",
         status: "success",
@@ -450,11 +466,12 @@ const Entity = () => {
         isClosable: true,
       });
       setAttributes(() => [...attributes, attributeData as AttributeModel]);
-    } else {
+    }
+
+    if (errorAttributeCreate) {
       toast({
         title: "Error",
-        description:
-          "An error occurred when saving this Attribute as a template",
+        description: errorAttributeCreate.message,
         status: "error",
         duration: 2000,
         position: "bottom-right",
@@ -1926,6 +1943,7 @@ const Entity = () => {
                       rightIcon={<Icon name={"add"} />}
                       onClick={onSaveAsTemplate}
                       isDisabled={isAttributeError}
+                      isLoading={loadingAttributeCreate}
                     >
                       Save as Template
                     </Button>
