@@ -1039,6 +1039,40 @@ export class Entities {
     return JSON.stringify(collection, null, "  ");
   };
 
+  static addAttachment = async (
+    _id: string,
+    attachment: IGenericItem,
+  ): Promise<ResponseMessage> => {
+    const entity = await Entities.getOne(_id);
+    if (_.isNull(entity)) {
+      return {
+        success: false,
+        message: "Entity not found",
+      };
+    }
+
+    const attachments = _.cloneDeep(entity.attachments);
+    if (!_.includes(attachments, attachment)) {
+      attachments.push(attachment);
+    }
+    const update = {
+      $set: {
+        attachments: attachments,
+      },
+    };
+    const response = await getDatabase()
+      .collection<EntityModel>(ENTITIES_COLLECTION)
+      .updateOne({ _id: _id }, update);
+
+    return {
+      success: response.modifiedCount > 0,
+      message:
+        response.modifiedCount > 0
+          ? "Added attachment successfully"
+          : "Error adding attachment",
+    };
+  };
+
   static setLock = async (
     _id: string,
     locked: boolean,

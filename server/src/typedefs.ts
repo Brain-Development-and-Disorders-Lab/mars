@@ -297,6 +297,6 @@ export const typedefs = `#graphql
     deleteAttribute(_id: String): Response
 
     # Data mutations
-    uploadFile(file: Upload!): File!
+    uploadFile(target: String, file: Upload!): Response
   }
 `;

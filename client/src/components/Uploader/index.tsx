@@ -39,8 +39,8 @@ const Uploader = (props: {
   const toast = useToast();
 
   const UPLOAD_FILE = gql`
-    mutation UploadFile($file: Upload!) {
-      uploadFile(file: $file) {
+    mutation UploadFile($target: String!, $file: Upload!) {
+      uploadFile(target: $target, file: $file) {
         mimetype
         filename
         encoding
@@ -52,7 +52,8 @@ const Uploader = (props: {
   const performUpload = async () => {
     const response = await uploadFile({
       variables: {
-        file,
+        target: props.target,
+        file: file,
       },
     });
 

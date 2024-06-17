@@ -1,6 +1,9 @@
 import { ObjectId } from "mongodb";
 import { getAttachments } from "src/connectors/database";
+import _ from "lodash";
 import * as fs from "fs";
+import { Entities } from "./Entities";
+import { ResponseMessage } from "@types";
 
 export class Data {
   static downloadFile = async (_id: string): Promise<string | null> => {
@@ -26,19 +29,37 @@ export class Data {
     return downloadURL;
   };
 
-  static uploadFile = async (file: any) => {
-    const { createReadStream, filename, mimetype, encoding } = await file;
+  static uploadFile = async (
+    target: string,
+    file: any,
+  ): Promise<ResponseMessage> => {
+    const { createReadStream, filename, mimetype } = await file;
 
-    // // Invoking the `createReadStream` will return a Readable Stream.
-    // // See https://nodejs.org/api/stream.html#stream_readable_streams
-    // const stream = createReadStream();
+    const bucket = getAttachments();
+    const stream: fs.ReadStream = createReadStream();
+    const uploadStream = bucket.openUploadStream(filename, {
+      metadata: { type: mimetype },
+    });
 
-    // // This is purely for demonstration purposes and will overwrite the
-    // // local-file-output.txt in the current working directory on EACH upload.
-    // const out = require('fs').createWriteStream('local-file-output.txt');
-    // stream.pipe(out);
-    // await finished(out);
+    stream
+      .pipe(uploadStream)
+      .on("error", (error: Error) => {
+        return {
+          success: false,
+          message: `Unable to upload file: ${error.message}`,
+        };
+      })
+      .on("finish", async () => {
+        // Once the upload is finished, register attachment with Entity
+        await Entities.addAttachment(target, {
+          _id: uploadStream.id.toString(),
+          name: filename,
+        });
+      });
 
-    return { filename, mimetype, encoding };
+    return {
+      success: true,
+      message: `Uploaded file "${filename}"`,
+    };
   };
 }
