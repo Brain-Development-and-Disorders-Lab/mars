@@ -7,9 +7,10 @@ import {
   ApolloClient,
   InMemoryCache,
   ApolloProvider,
-  createHttpLink,
+  ApolloLink,
 } from "@apollo/client";
 import { setContext } from "@apollo/client/link/context";
+import createUploadLink from "apollo-upload-client/createUploadLink.mjs";
 
 // Utility imports
 import _ from "lodash";
@@ -23,8 +24,11 @@ import { getToken } from "./util";
 import { TOKEN_KEY } from "./variables";
 
 // Setup Apollo client
-const httpLink = createHttpLink({
+const httpLink = createUploadLink({
   uri: API_URL,
+  headers: {
+    "Apollo-Require-Preflight": "true",
+  },
 });
 
 const authLink = setContext((_, { headers }) => {
@@ -37,7 +41,7 @@ const authLink = setContext((_, { headers }) => {
 });
 
 const client = new ApolloClient({
-  link: authLink.concat(httpLink),
+  link: ApolloLink.from([authLink, httpLink as unknown as ApolloLink]),
   cache: new InMemoryCache({ addTypename: false }),
 });
 

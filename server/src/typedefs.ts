@@ -215,6 +215,13 @@ export const typedefs = `#graphql
     token: String
   }
 
+  # "File" type
+  type File {
+    filename: String!
+    mimetype: String!
+    encoding: String!
+  }
+
   # Define query types
   type Query {
     # User queries
@@ -248,6 +255,9 @@ export const typedefs = `#graphql
 
     # Authentication queries
     login(code: String): Auth
+
+    # Data queries
+    downloadFile(_id: String): String
   }
 
   # Define mutation types
@@ -285,5 +295,8 @@ export const typedefs = `#graphql
     createAttribute(attribute: AttributeCreateInput): Response
     updateAttribute(attribute: AttributeInput): Response
     deleteAttribute(_id: String): Response
+
+    # Data mutations
+    uploadFile(file: Upload!): File!
   }
 `;

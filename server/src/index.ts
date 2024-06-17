@@ -8,9 +8,8 @@ import cors from "cors";
 import express from "express";
 import helmet from "helmet";
 import http from "http";
+import * as fs from "fs";
 import "source-map-support/register";
-
-const fileUpload = require("express-fileupload");
 
 // Get the connection functions
 import { connectPrimary, connectSystem } from "./connectors/database";
@@ -23,15 +22,23 @@ import { typedefs } from "./typedefs";
 import { ActivityResolvers } from "./resolvers/Activity";
 import { AttributesResolvers } from "./resolvers/Attributes";
 import { AuthenticationResolvers } from "./resolvers/Authentication";
+import { DataResolvers } from "./resolvers/Data";
 import { DateResolver } from "./resolvers/Date";
 import { EntitiesResolvers } from "./resolvers/Entities";
 import { ProjectsResolvers } from "./resolvers/Projects";
 import { UsersResolvers } from "./resolvers/Users";
 import { Context } from "@types";
 
+// GraphQL uploads
+import GraphQLUpload from "graphql-upload/GraphQLUpload.mjs";
+import graphqlUploadExpress from "graphql-upload/graphqlUploadExpress.mjs";
+
 // Set logging level
 consola.level =
   process.env.NODE_ENV !== "production" ? LogLevels.trace : LogLevels.info;
+
+const app = express();
+const httpServer = http.createServer(app);
 
 // Start the GraphQL server
 const startServer = async () => {
@@ -39,9 +46,6 @@ const startServer = async () => {
   if (process.env.NODE_ENV !== "production") {
     consola.warn("Server not secured!");
   }
-
-  const app = express();
-  const httpServer = http.createServer(app);
 
   // Perform database connections
   try {
@@ -52,19 +56,29 @@ const startServer = async () => {
     return;
   }
 
+  // Create folder for serving static files
+  if (!fs.existsSync("./static")) {
+    fs.mkdirSync("./static");
+  }
+
   // Setup the GraphQL server
   const server = new ApolloServer({
     typeDefs: typedefs,
     resolvers: [
+      {
+        Upload: GraphQLUpload,
+      },
       ActivityResolvers,
       AttributesResolvers,
       AuthenticationResolvers,
+      DataResolvers,
       DateResolver,
       EntitiesResolvers,
       ProjectsResolvers,
       UsersResolvers,
     ],
     introspection: process.env.NODE_ENV !== "production",
+    csrfPrevention: true,
     plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
   });
   await server.start();
@@ -74,6 +88,7 @@ const startServer = async () => {
     "/mars",
     cors<cors.CorsRequest>(),
     express.json({ limit: "50mb" }),
+    graphqlUploadExpress({ maxFileSize: 10000000, maxFiles: 10 }),
     expressMiddleware(server, {
       context: async ({ req }): Promise<Context> => {
         return {
@@ -82,7 +97,7 @@ const startServer = async () => {
       },
     }),
     helmet(),
-    fileUpload(),
+    express.static("./static"),
   );
 
   // Start the server

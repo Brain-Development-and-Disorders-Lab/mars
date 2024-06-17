@@ -40,6 +40,26 @@
     tslib "^2.3.0"
     zen-observable-ts "^1.2.5"
 
+"@apollo/client@^3.8.0":
+  version "3.10.5"
+  resolved "https://registry.yarnpkg.com/@apollo/client/-/client-3.10.5.tgz#7bc5d43b54b3d66b4fffdab6ad3cb207808041db"
+  integrity sha512-bZh5wLAT8b4KdEmqnqiQeDUttnR+NJ+gDYSN8T+U0uFGN++5LO5PTwySih6kIU5ErGGGw4NHI94YdSET3uLuBA==
+  dependencies:
+    "@graphql-typed-document-node/core" "^3.1.1"
+    "@wry/caches" "^1.0.0"
+    "@wry/equality" "^0.5.6"
+    "@wry/trie" "^0.5.0"
+    graphql-tag "^2.12.6"
+    hoist-non-react-statics "^3.3.2"
+    optimism "^0.18.0"
+    prop-types "^15.7.2"
+    rehackt "^0.1.0"
+    response-iterator "^0.2.6"
+    symbol-observable "^4.0.0"
+    ts-invariant "^0.10.3"
+    tslib "^2.3.0"
+    zen-observable-ts "^1.2.5"
+
 "@babel/code-frame@^7.0.0", "@babel/code-frame@^7.10.4", "@babel/code-frame@^7.12.13", "@babel/code-frame@^7.22.13", "@babel/code-frame@^7.23.5":
   version "7.23.5"
   resolved "https://registry.yarnpkg.com/@babel/code-frame/-/code-frame-7.23.5.tgz#9009b69a8c602293476ad598ff53e4562e15c244"
@@ -2520,6 +2540,15 @@
   resolved "https://registry.yarnpkg.com/@tootallnate/once/-/once-2.0.0.tgz#f544a148d3ab35801c1f633a7441fd87c2e484bf"
   integrity sha512-XCuKFP5PS55gnMVu3dty8KPatLqUoy/ZYzDzAGCQ8JNFCkLXzmI7vNHCR+XpbZaMWQK/vQubr7PkYq8g470J/A==
 
+"@types/apollo-upload-client@^18.0.0":
+  version "18.0.0"
+  resolved "https://registry.yarnpkg.com/@types/apollo-upload-client/-/apollo-upload-client-18.0.0.tgz#1f7e2ff0c0e6508bc1bd19b2340339c7abd117c3"
+  integrity sha512-cMgITNemktxasqvp6jiPj15dv84n3FTMvMoYBP1+xonDS+0l6JygIJrj2LJh85rShRzTOOkrElrAsCXXARa3KA==
+  dependencies:
+    "@apollo/client" "^3.8.0"
+    "@types/extract-files" "*"
+    graphql "14 - 16"
+
 "@types/aria-query@^5.0.1":
   version "5.0.4"
   resolved "https://registry.yarnpkg.com/@types/aria-query/-/aria-query-5.0.4.tgz#1a31c3d378850d2778dabb6374d036dcba4ba708"
@@ -2853,6 +2882,11 @@
     "@types/express-serve-static-core" "^4.17.33"
     "@types/qs" "*"
     "@types/serve-static" "*"
+
+"@types/extract-files@*":
+  version "13.0.1"
+  resolved "https://registry.yarnpkg.com/@types/extract-files/-/extract-files-13.0.1.tgz#3ec057a3fa25f778245a76a17271d23b71ee31d7"
+  integrity sha512-/fRbzc2lAd7jDJSSnxWiUyXWjdUZZ4HbISLJzVgt1AvrdOa7U49YRPcvuCUywkmURZ7uwJOheDjx19itbQ5KvA==
 
 "@types/file-saver@^2.0.5":
   version "2.0.7"
@@ -3548,6 +3582,13 @@ anymatch@^3.0.3, anymatch@~3.1.2:
   dependencies:
     normalize-path "^3.0.0"
     picomatch "^2.0.4"
+
+apollo-upload-client@^18.0.1:
+  version "18.0.1"
+  resolved "https://registry.yarnpkg.com/apollo-upload-client/-/apollo-upload-client-18.0.1.tgz#e3811f2f5a36bffef23954f796daf331be748dcb"
+  integrity sha512-OQvZg1rK05VNI79D658FUmMdoI2oB/KJKb6QGMa2Si25QXOaAvLMBFUEwJct7wf+19U8vk9ILhidBOU1ZWv6QA==
+  dependencies:
+    extract-files "^13.0.0"
 
 "aproba@^1.0.3 || ^2.0.0":
   version "2.0.0"
@@ -5129,6 +5170,13 @@ express@^4.17.3:
     utils-merge "1.0.1"
     vary "~1.1.2"
 
+extract-files@^13.0.0:
+  version "13.0.0"
+  resolved "https://registry.yarnpkg.com/extract-files/-/extract-files-13.0.0.tgz#9065073dedbcfb5e2ae8a90988cf609834b217ec"
+  integrity sha512-FXD+2Tsr8Iqtm3QZy1Zmwscca7Jx3mMC5Crr+sEP1I303Jy1CYMuYCm7hRTplFNg3XdUavErkxnTzpaqdSoi6g==
+  dependencies:
+    is-plain-obj "^4.1.0"
+
 fast-deep-equal@^3.1.1, fast-deep-equal@^3.1.3:
   version "3.1.3"
   resolved "https://registry.yarnpkg.com/fast-deep-equal/-/fast-deep-equal-3.1.3.tgz#3a7d56b559d6cbc3eb512325244e619a65c6c525"
@@ -5492,6 +5540,11 @@ graphql-tag@^2.12.6:
   integrity sha512-FdSNcu2QQcWnM2VNvSCCDCVS5PpPqpzgFT8+GXzqJuoDd0CBncxCY278u4mhRO7tMgo2JjgJA5aZ+nWSQ/Z+xg==
   dependencies:
     tslib "^2.1.0"
+
+"graphql@14 - 16":
+  version "16.8.2"
+  resolved "https://registry.yarnpkg.com/graphql/-/graphql-16.8.2.tgz#54771c7ff195da913f5e70af8044a026d32eca2a"
+  integrity sha512-cvVIBILwuoSyD54U4cF/UXDh5yAobhNV/tPygI4lZhgOIJQE/WLWC4waBRb4I6bDVYb3OVx3lfHbaQOEoUD5sg==
 
 graphql@^16.8.1:
   version "16.8.1"
@@ -5948,6 +6001,11 @@ is-plain-obj@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/is-plain-obj/-/is-plain-obj-3.0.0.tgz#af6f2ea14ac5a646183a5bbdb5baabbc156ad9d7"
   integrity sha512-gwsOE28k+23GP1B6vFl1oVh/WOzmawBrKwo5Ev6wMKzPkaXaCDIQKzLnvsA42DRlbVTWorkgTKIviAKCWkfUwA==
+
+is-plain-obj@^4.1.0:
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/is-plain-obj/-/is-plain-obj-4.1.0.tgz#d65025edec3657ce032fd7db63c97883eaed71f0"
+  integrity sha512-+Pgi+vMuUNkJyExiMBt5IlFoMyKnr5zhJ4Uspz58WOhBF5QoIZkFyNHIbBAtHwzVAgk5RtndVNsDRN61/mmDqg==
 
 is-plain-object@^2.0.4:
   version "2.0.4"

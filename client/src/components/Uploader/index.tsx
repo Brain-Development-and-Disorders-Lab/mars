@@ -21,8 +21,8 @@ import Icon from "@components/Icon";
 import Error from "@components/Error";
 
 // Utility functions and libraries
-import { request } from "@database/functions";
 import _ from "lodash";
+import { gql, useMutation } from "@apollo/client";
 
 const Uploader = (props: {
   isOpen: boolean;
@@ -35,20 +35,40 @@ const Uploader = (props: {
   const [file, setFile] = useState({} as File);
   const [isError, setIsError] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
 
   const toast = useToast();
 
+  const UPLOAD_FILE = gql`
+    mutation UploadFile($file: Upload!) {
+      uploadFile(file: $file) {
+        mimetype
+        filename
+        encoding
+      }
+    }
+  `;
+  const [uploadFile, { loading, error }] = useMutation(UPLOAD_FILE);
+
   const performUpload = async () => {
-    setIsUploading(true);
+    const response = await uploadFile({
+      variables: {
+        file,
+      },
+    });
 
-    const formData = new FormData();
-    formData.append("name", file.name);
-    formData.append("file", file);
-    formData.append("target", props.target);
+    if (error) {
+      toast({
+        title: "Upload Error",
+        status: "error",
+        description: "Error occurred while uploading file",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+      setIsError(true);
+    }
 
-    const response = await request<any>("POST", "/data/upload", formData);
-    if (response.success) {
+    if (response.data?.uploadFile) {
       // Add the upload to the existing list of uploads
       props.setUploads([...props.uploads, file.name]);
 
@@ -61,25 +81,14 @@ const Uploader = (props: {
       setIsLoaded(true);
 
       toast({
-        title: "Success",
+        title: "Uploaded",
         status: "success",
-        description: "Successfully uploaded file.",
+        description: `Uploaded file "${response.data.uploadFile.filename}"`,
         duration: 4000,
         position: "bottom-right",
         isClosable: true,
       });
-    } else {
-      toast({
-        title: "Upload Error",
-        status: "error",
-        description: "Error occurred while uploading file",
-        duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
-      });
-      setIsError(true);
     }
-    setIsUploading(false);
   };
 
   return (
@@ -180,10 +189,10 @@ const Uploader = (props: {
                   </Button>
                   <Button
                     colorScheme={"blue"}
-                    isDisabled={_.isEqual(file, {}) || isUploading}
+                    isDisabled={_.isEqual(file, {}) || loading}
                     rightIcon={<Icon name={"upload"} />}
                     onClick={() => performUpload()}
-                    isLoading={isUploading}
+                    isLoading={loading}
                   >
                     Upload
                   </Button>
