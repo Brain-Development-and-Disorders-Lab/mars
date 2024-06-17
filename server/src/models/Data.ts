@@ -10,23 +10,15 @@ export class Data {
     // Access bucket and create open stream to write to storage
     const bucket = getAttachments();
 
-    let downloadURL = null;
-    const setDownloadURL = (url: string) => {
-      downloadURL = url;
-    };
-
     // Create stream from buffer
     const stream = bucket
       .openDownloadStream(new ObjectId(_id))
       .on("error", () => {
         return null;
       });
+    stream.pipe(fs.createWriteStream(`./static/${_id}`));
 
-    stream.pipe(fs.createWriteStream(`./static/${_id}.txt`)).on("close", () => {
-      setDownloadURL(`/static/${_id}.txt`);
-    });
-
-    return downloadURL;
+    return `/${_id}`;
   };
 
   static uploadFile = async (

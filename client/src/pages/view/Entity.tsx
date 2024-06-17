@@ -87,7 +87,7 @@ import {
 } from "@types";
 
 // Utility functions and libraries
-import { request } from "src/database/functions";
+import { request, requestStatic } from "src/database/functions";
 import { isValidValues } from "src/util";
 import _, { debounce } from "lodash";
 import dayjs from "dayjs";
@@ -258,6 +258,14 @@ const Entity = () => {
     },
   });
 
+  const GET_FILE_URL = gql`
+    query GetFileURL($_id: String) {
+      downloadFile(_id: $_id)
+    }
+  `;
+  const [getFile, { loading: fileLoading, error: fileError }] =
+    useLazyQuery(GET_FILE_URL);
+
   // Query to search Entities
   const SEARCH_ENTITIES = gql`
     query SearchEntities($search: String, $limit: Int) {
@@ -396,25 +404,33 @@ const Entity = () => {
     }
   };
 
-  const getAttachmentFile = async (id: string) => {
-    const response = await request<any[]>("GET", `/data/file/${id}`);
-    if (response.success) {
-      setPreviewType(response.data[0].metadata.type);
-      const fileResponse = await request<any>(
-        "GET",
-        `/data/download/${id}`,
-        {},
+  const getAttachmentFile = async (_id: string, name: string) => {
+    const response = await getFile({
+      variables: {
+        _id: _id,
+      },
+    });
+
+    if (response.data?.downloadFile) {
+      const fileResponse = await requestStatic<any>(
+        response.data.downloadFile,
         {
           responseType: "blob",
         },
       );
+
       if (fileResponse.success) {
         setPreviewSource(URL.createObjectURL(fileResponse.data));
-      } else {
+        if (_.endsWith(name, ".pdf")) {
+          setPreviewType("application/pdf");
+        }
+      }
+
+      if (fileError) {
         toast({
           title: "Error",
           status: "error",
-          description: "Could not retrieve attachment preview",
+          description: fileError.message,
           duration: 4000,
           position: "bottom-right",
           isClosable: true,
@@ -945,7 +961,7 @@ const Entity = () => {
           onPreviewOpen();
 
           // Retrieve the attachment file from the serve
-          await getAttachmentFile(info.getValue());
+          await getAttachmentFile(info.getValue(), info.row.original.name);
         };
 
         return (
@@ -2564,7 +2580,7 @@ const Entity = () => {
                 align={"center"}
                 pb={"2"}
               >
-                {!isPreviewLoaded ? (
+                {!isPreviewLoaded || fileLoading ? (
                   <Spinner />
                 ) : _.isEqual("application/pdf", previewType) ? (
                   <Preview src={previewSource} type={"document"} />

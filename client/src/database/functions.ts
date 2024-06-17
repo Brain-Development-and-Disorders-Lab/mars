@@ -12,7 +12,7 @@ import {
 } from "@types";
 
 // Get the URL of the database
-import { API_URL, TOKEN_KEY } from "src/variables";
+import { API_URL, STATIC_URL, TOKEN_KEY } from "src/variables";
 
 // Token for request authorization
 import { getToken } from "src/util";
@@ -98,6 +98,51 @@ export const request = async <T>(
         };
       }
       break;
+  }
+
+  // Return an object containing the response data and status
+  return {
+    success: true,
+    message: "Recieved response from server",
+    data: response.data,
+  };
+};
+
+export const requestStatic = async <T>(
+  path: string,
+  options?: AxiosRequestConfig,
+): Promise<ServerResponse<T>> => {
+  // Merge in options if specified
+  const requestOptions: AxiosRequestConfig = {
+    ...options,
+  };
+
+  // Configure authorization
+  if (!_.isUndefined(getToken(TOKEN_KEY))) {
+    requestOptions.headers = {
+      token: getToken(TOKEN_KEY)?.token,
+      ...requestOptions.headers,
+    };
+  }
+
+  // Execute request and store response if successful
+  let response: AxiosResponse;
+  try {
+    response = await axios.get(`${STATIC_URL}${path}`, requestOptions);
+  } catch {
+    return {
+      success: false,
+      message: "Error while making request, check connectivity",
+      data: {} as T,
+    };
+  }
+
+  if (!response) {
+    return {
+      success: false,
+      message: "No response received from server",
+      data: {} as T,
+    };
   }
 
   // Return an object containing the response data and status

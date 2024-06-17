@@ -41,9 +41,8 @@ const Uploader = (props: {
   const UPLOAD_FILE = gql`
     mutation UploadFile($target: String!, $file: Upload!) {
       uploadFile(target: $target, file: $file) {
-        mimetype
-        filename
-        encoding
+        success
+        message
       }
     }
   `;
@@ -69,7 +68,7 @@ const Uploader = (props: {
       setIsError(true);
     }
 
-    if (response.data?.uploadFile) {
+    if (response.data.uploadFile.success) {
       // Add the upload to the existing list of uploads
       props.setUploads([...props.uploads, file.name]);
 
@@ -84,7 +83,7 @@ const Uploader = (props: {
       toast({
         title: "Uploaded",
         status: "success",
-        description: `Uploaded file "${response.data.uploadFile.filename}"`,
+        description: `Uploaded file successfully`,
         duration: 4000,
         position: "bottom-right",
         isClosable: true,

@@ -97,7 +97,14 @@ const startServer = async () => {
       },
     }),
     helmet(),
+  );
+
+  // Serve static resources
+  app.use(
+    "/static",
+    cors<cors.CorsRequest>(),
     express.static("./static"),
+    helmet(),
   );
 
   // Start the server
