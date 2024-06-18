@@ -701,6 +701,7 @@ const Entity = () => {
                 onClick={() => {
                   removeProject(info.row.original);
                 }}
+                size={"sm"}
               />
             ) : (
               <Button
@@ -709,6 +710,7 @@ const Entity = () => {
                 colorScheme={"gray"}
                 onClick={() => navigate(`/projects/${info.row.original}`)}
                 isDisabled={_.isUndefined(info.row.original)}
+                size={"sm"}
               >
                 View
               </Button>
@@ -753,10 +755,11 @@ const Entity = () => {
     originTableColumnHelper.accessor("_id", {
       cell: (info) => {
         return (
-          <Flex w={"100%"} justify={"end"}>
+          <Flex w={"100%"} justify={"end"} p={"0.5"}>
             {editing ? (
               <IconButton
                 icon={<Icon name={"delete"} />}
+                size={"sm"}
                 aria-label={"Remove origin"}
                 colorScheme={"red"}
                 onClick={() => {
@@ -766,6 +769,7 @@ const Entity = () => {
             ) : (
               <Button
                 key={`view-${info.row.original._id}`}
+                size={"sm"}
                 rightIcon={<Icon name={"c_right"} />}
                 colorScheme={"gray"}
                 onClick={() => navigate(`/entities/${info.row.original._id}`)}
@@ -818,6 +822,7 @@ const Entity = () => {
             {editing ? (
               <IconButton
                 icon={<Icon name={"delete"} />}
+                size={"sm"}
                 aria-label={"Remove product"}
                 colorScheme={"red"}
                 onClick={() => {
@@ -827,6 +832,7 @@ const Entity = () => {
             ) : (
               <Button
                 key={`view-${info.row.original._id}`}
+                size={"sm"}
                 rightIcon={<Icon name={"c_right"} />}
                 colorScheme={"gray"}
                 onClick={() => navigate(`/entities/${info.row.original._id}`)}
@@ -979,6 +985,7 @@ const Entity = () => {
           <Flex w={"100%"} justify={"end"} gap={"4"}>
             <IconButton
               aria-label={"Preview attachment"}
+              size={"sm"}
               key={`preview-file-${info.getValue()}`}
               colorScheme={"gray"}
               icon={<Icon name={"view"} />}
@@ -987,6 +994,7 @@ const Entity = () => {
             {editing ? (
               <IconButton
                 aria-label={"Delete attachment"}
+                size={"sm"}
                 key={`delete-file-${info.getValue()}`}
                 colorScheme={"red"}
                 icon={<Icon name={"delete"} />}
@@ -995,6 +1003,7 @@ const Entity = () => {
             ) : (
               <IconButton
                 aria-label={"Download attachment"}
+                size={"sm"}
                 key={`download-file-${info.getValue()}`}
                 colorScheme={"blue"}
                 icon={<Icon name={"download"} />}
@@ -1359,9 +1368,8 @@ const Entity = () => {
     >
       <Flex direction={"column"}>
         <Flex
-          gap={"4"}
-          p={"4"}
-          pb={"2"}
+          gap={"2"}
+          p={"2"}
           direction={"row"}
           justify={"space-between"}
           align={"center"}
@@ -1369,7 +1377,7 @@ const Entity = () => {
         >
           <Flex
             align={"center"}
-            gap={"4"}
+            gap={"2"}
             p={"2"}
             border={"2px"}
             rounded={"md"}
@@ -1380,7 +1388,7 @@ const Entity = () => {
           </Flex>
 
           {/* Buttons */}
-          <Flex direction={"row"} gap={"4"} wrap={"wrap"}>
+          <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
             {isDeletePopoverOpen && (
               <Popover
                 isOpen={isDeletePopoverOpen}
@@ -1398,6 +1406,7 @@ const Entity = () => {
                     <Flex direction={"row"} p={"2"} justify={"center"}>
                       <Button
                         colorScheme={"green"}
+                        size={"sm"}
                         rightIcon={<Icon name={"check"} />}
                         onClick={() => {
                           handleDeleteClick(); // Assuming this function handles the delete logic
@@ -1414,6 +1423,7 @@ const Entity = () => {
             {editing && (
               <Button
                 onClick={() => setEditing(false)}
+                size={"sm"}
                 colorScheme={"orange"}
                 rightIcon={<Icon name={"rewind"} />}
               >
@@ -1423,17 +1433,19 @@ const Entity = () => {
             {entityData.deleted ? (
               <Button
                 onClick={handleRestoreFromDeleteClick}
+                size={"sm"}
                 colorScheme={"orange"}
                 rightIcon={<Icon name={"rewind"} />}
               >
                 Restore
               </Button>
             ) : (
-              <Flex gap={"4"}>
+              <Flex gap={"2"}>
                 {entityData.locked ? (
                   <Tooltip label={"Currently being edited by another user"}>
                     <Button
                       colorScheme={"blue"}
+                      size={"sm"}
                       rightIcon={<Icon name={"lock"} />}
                       isDisabled={entityData.locked}
                     >
@@ -1443,6 +1455,7 @@ const Entity = () => {
                 ) : (
                   <Button
                     onClick={handleEditClick}
+                    size={"sm"}
                     colorScheme={editing ? "green" : "blue"}
                     rightIcon={
                       editing ? <Icon name={"check"} /> : <Icon name={"edit"} />
@@ -1461,6 +1474,7 @@ const Entity = () => {
             <Menu>
               <MenuButton
                 as={Button}
+                size={"sm"}
                 colorScheme={"blue"}
                 rightIcon={<Icon name={"c_down"} />}
               >
@@ -1498,18 +1512,19 @@ const Entity = () => {
           </Flex>
         </Flex>
 
-        <Flex direction={"row"} wrap={"wrap"}>
+        <Flex direction={"row"} gap={"0"} wrap={"wrap"}>
           <Flex
             direction={"column"}
-            p={"4"}
-            gap={"4"}
+            p={"2"}
+            pt={{ base: "0", lg: "2" }}
+            gap={"2"}
             grow={"1"}
             basis={"50%"}
             rounded={"md"}
           >
             {/* Entity Overview */}
-            <Flex direction={"column"} p={"4"} bg={"gray.50"} rounded={"md"}>
-              <Flex gap={"4"} direction={"column"}>
+            <Flex direction={"column"} p={"2"} bg={"gray.50"} rounded={"md"}>
+              <Flex gap={"2"} direction={"column"}>
                 <Flex gap={"2"} direction={"row"}>
                   {/* "Created" and "Owner" fields */}
                   <Flex gap={"2"} direction={"column"} basis={"40%"}>
@@ -1537,7 +1552,7 @@ const Entity = () => {
                           setEntityDescription(event.target.value || "");
                         }}
                         isReadOnly={!editing}
-                        border={"2px"}
+                        border={"1px"}
                         borderColor={"gray.200"}
                         bg={"white"}
                       />
@@ -1550,9 +1565,9 @@ const Entity = () => {
             {/* Projects */}
             <Flex
               direction={"column"}
-              p={"4"}
+              p={"2"}
               rounded={"md"}
-              border={"2px"}
+              border={"1px"}
               borderColor={"gray.200"}
             >
               <Flex
@@ -1560,12 +1575,13 @@ const Entity = () => {
                 justify={"space-between"}
                 align={"center"}
               >
-                <Heading fontWeight={"semibold"} size={"md"} py={"2"}>
+                <Heading fontWeight={"semibold"} size={"md"} mb={"2"}>
                   Projects
                 </Heading>
                 {editing ? (
                   <Button
                     colorScheme={"green"}
+                    size={"sm"}
                     rightIcon={<Icon name={"add"} />}
                     isDisabled={!editing}
                     onClick={onAddProjectsOpen}
@@ -1597,22 +1613,114 @@ const Entity = () => {
                 )}
               </Flex>
             </Flex>
+
+            {/* Origins and Products */}
+            <Tabs
+              variant={"enclosed"}
+              colorScheme={"gray"}
+              onChange={(index) => setRelationsIndex(index)}
+            >
+              <TabList>
+                <Tab>Origins</Tab>
+                <Tab>Products</Tab>
+                <Spacer />
+                {editing ? (
+                  <Button
+                    colorScheme={"green"}
+                    size={"sm"}
+                    rightIcon={<Icon name={"add"} />}
+                    isDisabled={!editing}
+                    onClick={() => {
+                      _.isEqual(relationsIndex, 0)
+                        ? onAddOriginsOpen()
+                        : onAddProductsOpen();
+                    }}
+                  >
+                    Add
+                  </Button>
+                ) : null}
+              </TabList>
+              <TabPanels>
+                <TabPanel
+                  borderLeft={"1px"}
+                  borderRight={"1px"}
+                  borderBottom={"1px"}
+                  borderColor={"gray.200"}
+                  roundedBottom={"md"}
+                >
+                  <Flex
+                    w={"100%"}
+                    justify={"center"}
+                    align={"center"}
+                    minH={"200px"}
+                  >
+                    {(entityOrigins?.length ?? 0) === 0 ? (
+                      <Text color={"gray.400"} fontWeight={"semibold"}>
+                        This Entity does not have any Origins.
+                      </Text>
+                    ) : (
+                      <DataTable
+                        data={entityOrigins}
+                        columns={originTableColumns}
+                        visibleColumns={{}}
+                        viewOnly={!editing}
+                        showSelection={editing}
+                        actions={originTableActions}
+                        showPagination
+                      />
+                    )}
+                  </Flex>
+                </TabPanel>
+                <TabPanel
+                  borderLeft={"1px"}
+                  borderRight={"1px"}
+                  borderBottom={"1px"}
+                  borderColor={"gray.200"}
+                  roundedBottom={"md"}
+                >
+                  <Flex
+                    w={"100%"}
+                    justify={"center"}
+                    align={"center"}
+                    minH={"200px"}
+                  >
+                    {(entityProducts?.length ?? 0) === 0 ? (
+                      <Text color={"gray.400"} fontWeight={"semibold"}>
+                        This Entity does not have any Products.
+                      </Text>
+                    ) : (
+                      <DataTable
+                        data={entityProducts}
+                        columns={productTableColumns}
+                        visibleColumns={{}}
+                        viewOnly={!editing}
+                        showSelection={editing}
+                        actions={productTableActions}
+                        showPagination
+                      />
+                    )}
+                  </Flex>
+                </TabPanel>
+              </TabPanels>
+            </Tabs>
           </Flex>
 
-          {/* Attributes */}
           <Flex
             direction={"column"}
-            p={"4"}
-            gap={"4"}
+            p={"2"}
+            pl={{ base: "2", lg: "0" }}
+            pt={{ base: "0", lg: "2" }}
+            gap={"2"}
             grow={"1"}
             basis={"50%"}
             rounded={"md"}
           >
+            {/* Attributes */}
             <Flex
               direction={"column"}
-              p={"4"}
+              p={"2"}
               rounded={"md"}
-              border={"2px"}
+              border={"1px"}
               borderColor={"gray.200"}
             >
               <Flex
@@ -1620,12 +1728,13 @@ const Entity = () => {
                 justify={"space-between"}
                 align={"center"}
               >
-                <Heading fontWeight={"semibold"} size={"md"} py={"2"}>
+                <Heading fontWeight={"semibold"} size={"md"} mb={"2"}>
                   Attributes
                 </Heading>
                 {editing ? (
                   <Button
                     colorScheme={"green"}
+                    size={"sm"}
                     rightIcon={<Icon name={"add"} />}
                     isDisabled={!editing}
                     onClick={onAddAttributesOpen}
@@ -1657,120 +1766,13 @@ const Entity = () => {
                 )}
               </Flex>
             </Flex>
-          </Flex>
-        </Flex>
 
-        <Flex direction={"row"} wrap={"wrap"}>
-          <Flex
-            direction={"column"}
-            p={"4"}
-            gap={"4"}
-            grow={"1"}
-            basis={"50%"}
-            bg={"white"}
-            rounded={"md"}
-          >
-            {/* Origins and Products */}
+            {/* Attachments */}
             <Flex
               direction={"column"}
-              p={"4"}
+              p={"2"}
               rounded={"md"}
-              border={"2px"}
-              borderColor={"gray.200"}
-            >
-              <Tabs
-                variant={"soft-rounded"}
-                colorScheme={"blue"}
-                onChange={(index) => setRelationsIndex(index)}
-              >
-                <TabList>
-                  <Tab>Origins</Tab>
-                  <Tab>Products</Tab>
-                  <Spacer />
-                  {editing ? (
-                    <Button
-                      colorScheme={"green"}
-                      rightIcon={<Icon name={"add"} />}
-                      isDisabled={!editing}
-                      onClick={() => {
-                        _.isEqual(relationsIndex, 0)
-                          ? onAddOriginsOpen()
-                          : onAddProductsOpen();
-                      }}
-                    >
-                      Add
-                    </Button>
-                  ) : null}
-                </TabList>
-                <TabPanels>
-                  <TabPanel>
-                    <Flex
-                      w={"100%"}
-                      justify={"center"}
-                      align={"center"}
-                      minH={"100px"}
-                    >
-                      {(entityOrigins?.length ?? 0) === 0 ? (
-                        <Text color={"gray.400"} fontWeight={"semibold"}>
-                          This Entity does not have any Origins.
-                        </Text>
-                      ) : (
-                        <DataTable
-                          data={entityOrigins}
-                          columns={originTableColumns}
-                          visibleColumns={{}}
-                          viewOnly={!editing}
-                          showSelection={editing}
-                          actions={originTableActions}
-                          showPagination
-                        />
-                      )}
-                    </Flex>
-                  </TabPanel>
-                  <TabPanel>
-                    <Flex
-                      w={"100%"}
-                      justify={"center"}
-                      align={"center"}
-                      minH={"100px"}
-                    >
-                      {(entityProducts?.length ?? 0) === 0 ? (
-                        <Text color={"gray.400"} fontWeight={"semibold"}>
-                          This Entity does not have any Products.
-                        </Text>
-                      ) : (
-                        <DataTable
-                          data={entityProducts}
-                          columns={productTableColumns}
-                          visibleColumns={{}}
-                          viewOnly={!editing}
-                          showSelection={editing}
-                          actions={productTableActions}
-                          showPagination
-                        />
-                      )}
-                    </Flex>
-                  </TabPanel>
-                </TabPanels>
-              </Tabs>
-            </Flex>
-          </Flex>
-
-          {/* Attachments */}
-          <Flex
-            direction={"column"}
-            p={"4"}
-            gap={"4"}
-            grow={"1"}
-            basis={"50%"}
-            bg={"white"}
-            rounded={"md"}
-          >
-            <Flex
-              direction={"column"}
-              p={"4"}
-              rounded={"md"}
-              border={"2px"}
+              border={"1px"}
               borderColor={"gray.200"}
             >
               <Flex gap={"2"} direction={"column"} minH={"32"}>
@@ -1779,11 +1781,12 @@ const Entity = () => {
                   justify={"space-between"}
                   align={"center"}
                 >
-                  <Heading fontWeight={"semibold"} size={"md"} py={"2"}>
+                  <Heading fontWeight={"semibold"} size={"md"} mb={"2"}>
                     Attachments
                   </Heading>
                   <Button
                     colorScheme={"green"}
+                    size={"sm"}
                     rightIcon={<Icon name={"upload"} />}
                     onClick={onUploadOpen}
                   >
@@ -1953,10 +1956,11 @@ const Entity = () => {
                     </Flex>
                   </Flex>
 
-                  {/* "Done" button */}
+                  {/* "Cancel" button */}
                   <Flex direction={"row"} p={"md"} justify={"center"} gap={"8"}>
                     <Button
                       colorScheme={"red"}
+                      size={"sm"}
                       variant={"outline"}
                       rightIcon={<Icon name={"cross"} />}
                       onClick={onAddAttributesClose}
@@ -1966,6 +1970,7 @@ const Entity = () => {
 
                     <Button
                       colorScheme={"blue"}
+                      size={"sm"}
                       variant={"outline"}
                       rightIcon={<Icon name={"add"} />}
                       onClick={onSaveAsTemplate}
@@ -1977,6 +1982,7 @@ const Entity = () => {
 
                     <Button
                       colorScheme={"green"}
+                      size={"sm"}
                       rightIcon={<Icon name={"check"} />}
                       isDisabled={isAttributeError}
                       onClick={() => {
@@ -2071,10 +2077,11 @@ const Entity = () => {
             </ModalBody>
 
             <ModalFooter p={"2"}>
-              {/* "Done" button */}
+              {/* "Cancel" button */}
               <Flex direction={"row"} gap={"8"} justify={"center"}>
                 <Button
                   colorScheme={"red"}
+                  size={"sm"}
                   variant={"outline"}
                   rightIcon={<Icon name={"cross"} />}
                   onClick={onAddProjectsClose}
@@ -2084,6 +2091,7 @@ const Entity = () => {
 
                 <Button
                   colorScheme={"green"}
+                  size={"sm"}
                   rightIcon={<Icon name={"check"} />}
                   onClick={() => {
                     addProjects(selectedProjects);
@@ -2127,6 +2135,7 @@ const Entity = () => {
                     searchResults.map((entity: IGenericItem) => (
                       <Button
                         key={entity._id}
+                        size={"sm"}
                         onClick={() => {
                           addProducts([entity._id]);
                           setInputValue("");
@@ -2160,6 +2169,7 @@ const Entity = () => {
               <Flex direction={"row"} gap={"8"} justify={"center"}>
                 <Button
                   colorScheme={"red"}
+                  size={"sm"}
                   variant={"outline"}
                   rightIcon={<Icon name={"cross"} />}
                   onClick={onAddProductsClose}
@@ -2169,6 +2179,7 @@ const Entity = () => {
 
                 <Button
                   colorScheme={"green"}
+                  size={"sm"}
                   rightIcon={<Icon name={"check"} />}
                   onClick={() => {
                     if (id) {
@@ -2210,6 +2221,7 @@ const Entity = () => {
                     searchResults.map((entity: IGenericItem) => (
                       <Button
                         key={entity._id}
+                        size={"sm"}
                         onClick={() => {
                           addOrigins([entity._id]);
                           setInputValue("");
@@ -2243,6 +2255,7 @@ const Entity = () => {
               <Flex direction={"row"} gap={"8"} justify={"center"}>
                 <Button
                   colorScheme={"red"}
+                  size={"sm"}
                   variant={"outline"}
                   rightIcon={<Icon name={"cross"} />}
                   onClick={onAddOriginsClose}
@@ -2252,6 +2265,7 @@ const Entity = () => {
 
                 <Button
                   colorScheme={"green"}
+                  size={"sm"}
                   rightIcon={<Icon name={"check"} />}
                   onClick={() => {
                     if (id) {
@@ -2306,9 +2320,9 @@ const Entity = () => {
               <Flex
                 direction={"row"}
                 p={"2"}
-                gap={"4"}
+                gap={"2"}
                 rounded={"md"}
-                border={"2px"}
+                border={"1px"}
                 borderColor={"gray.200"}
               >
                 <Flex direction={"column"} gap={"2"}>
@@ -2545,6 +2559,7 @@ const Entity = () => {
                   </Flex>
                   <IconButton
                     colorScheme={"blue"}
+                    size={"sm"}
                     aria-label={"Download"}
                     onClick={() => handleDownloadClick(exportFormat)}
                     icon={<Icon name={"download"} />}
@@ -2628,6 +2643,7 @@ const Entity = () => {
                             <Spacer />
                             <Button
                               colorScheme={"orange"}
+                              size={"sm"}
                               rightIcon={<Icon name={"rewind"} />}
                               onClick={() => {
                                 handleRestoreFromHistoryClick(entityVersion);
@@ -2715,6 +2731,7 @@ const Entity = () => {
             <DrawerFooter>
               <Button
                 colorScheme={"red"}
+                size={"sm"}
                 onClick={onHistoryClose}
                 rightIcon={<Icon name={"cross"} />}
               >

@@ -46,6 +46,7 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
         aria-label={"View attribute"}
         icon={<Icon name={isEditing ? "edit" : "view"} />}
         onClick={onOpen}
+        size={"sm"}
       />
       {isEditing && (
         <IconButton
@@ -53,6 +54,7 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
           colorScheme={"red"}
           icon={<Icon name={"delete"} />}
           onClick={props.removeCallback}
+          size={"sm"}
         />
       )}
 
@@ -147,6 +149,7 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
               >
                 <Button
                   colorScheme={"red"}
+                  size={"sm"}
                   variant={"outline"}
                   rightIcon={<Icon name={"cross"} />}
                   onClick={() => {
@@ -166,6 +169,7 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
 
                 <Button
                   colorScheme={"green"}
+                  size={"sm"}
                   rightIcon={<Icon name={"check"} />}
                   onClick={() => {
                     // Close the modal

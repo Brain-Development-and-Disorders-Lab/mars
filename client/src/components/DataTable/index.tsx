@@ -170,6 +170,8 @@ const DataTable = (props: DataTableProps) => {
                           ? "background-color 0.3s ease-in-out, color 0.3s ease-in-out"
                           : ""
                       }
+                      px={"0"}
+                      py={"1"}
                     >
                       {flexRender(
                         header.column.columnDef.header,
@@ -201,7 +203,13 @@ const DataTable = (props: DataTableProps) => {
                 {row.getVisibleCells().map((cell) => {
                   const meta: any = cell.column.columnDef.meta;
                   return (
-                    <Td id={cell.id} key={cell.id} isNumeric={meta?.isNumeric}>
+                    <Td
+                      id={cell.id}
+                      key={cell.id}
+                      isNumeric={meta?.isNumeric}
+                      px={"1"}
+                      py={"2"}
+                    >
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext(),
@@ -226,7 +234,11 @@ const DataTable = (props: DataTableProps) => {
         {props.showSelection && (
           <Flex>
             <Menu>
-              <MenuButton as={Button} rightIcon={<Icon name={"c_down"} />}>
+              <MenuButton
+                as={Button}
+                rightIcon={<Icon name={"c_down"} />}
+                size={"sm"}
+              >
                 Actions
               </MenuButton>
               <MenuList>
@@ -261,6 +273,8 @@ const DataTable = (props: DataTableProps) => {
             <Flex>
               <Select
                 id={"select-page-size"}
+                size={"sm"}
+                rounded={"md"}
                 value={table.getState().pagination.pageSize}
                 onChange={(event) => {
                   table.setPageSize(Number(event.target.value));
@@ -280,6 +294,7 @@ const DataTable = (props: DataTableProps) => {
             <Flex direction={"row"} gap={"4"} align={"center"}>
               <IconButton
                 variant={"outline"}
+                size={"sm"}
                 icon={<Icon name={"c_double_left"} />}
                 aria-label="first page"
                 onClick={() => table.setPageIndex(0)}
@@ -287,6 +302,7 @@ const DataTable = (props: DataTableProps) => {
               />
               <IconButton
                 variant={"outline"}
+                size={"sm"}
                 icon={<Icon name={"c_left"} />}
                 aria-label="previous page"
                 onClick={() => table.previousPage()}
@@ -300,6 +316,7 @@ const DataTable = (props: DataTableProps) => {
               )}
               <IconButton
                 variant={"outline"}
+                size={"sm"}
                 icon={<Icon name={"c_right"} />}
                 aria-label="next page"
                 onClick={() => table.nextPage()}
@@ -307,6 +324,7 @@ const DataTable = (props: DataTableProps) => {
               />
               <IconButton
                 variant={"outline"}
+                size={"sm"}
                 icon={<Icon name={"c_double_right"} />}
                 aria-label="last page"
                 onClick={() => table.setPageIndex(table.getPageCount() - 1)}
