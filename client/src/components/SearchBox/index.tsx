@@ -123,12 +123,13 @@ const SearchBox = () => {
       >
         <PopoverTrigger>
           <Flex w={"100%"} gap={"4"}>
-            <InputGroup>
+            <InputGroup size={"sm"}>
               <InputLeftElement pointerEvents={"none"}>
                 <Icon name={"search"} />
               </InputLeftElement>
               <Input
                 value={query}
+                rounded={"md"}
                 placeholder={"Quick Search"}
                 background={"white"}
                 onChange={(event) => setQuery(event.target.value)}

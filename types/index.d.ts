@@ -115,6 +115,7 @@ export type LinkyProps = {
   fallback?: string;
   color?: string;
   justify?: string;
+  size?: string;
 };
 
 // Project types
@@ -229,6 +230,10 @@ export type AttachmentData = {
 export type IActivity = {
   timestamp: Date;
   type: "create" | "update" | "delete";
+  actor: {
+    name: string;
+    _id: string;
+  };
   details: string;
   target: {
     type: "entities" | "projects" | "attributes";

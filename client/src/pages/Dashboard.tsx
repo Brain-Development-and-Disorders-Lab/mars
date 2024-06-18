@@ -11,7 +11,8 @@ import {
   useBreakpoint,
   Tag,
   VStack,
-  StackDivider,
+  Avatar,
+  Tooltip,
 } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
 import { Content } from "@components/Container";
@@ -52,6 +53,10 @@ const GET_DASHBOARD = gql`
       _id
       timestamp
       type
+      actor {
+        _id
+        name
+      }
       details
       target {
         _id
@@ -185,6 +190,7 @@ const Dashboard = () => {
           <Flex justifyContent={"right"}>
             <Button
               key={`view-entity-${info.getValue()}`}
+              size={"sm"}
               colorScheme={"gray"}
               rightIcon={<Icon name={"c_right"} />}
               onClick={() => navigate(`/entities/${info.getValue()}`)}
@@ -227,6 +233,7 @@ const Dashboard = () => {
           <Flex justifyContent={"right"}>
             <Button
               key={`view-entity-${info.getValue()}`}
+              size={"sm"}
               colorScheme={"gray"}
               rightIcon={<Icon name={"c_right"} />}
               onClick={() => navigate(`/projects/${info.getValue()}`)}
@@ -242,8 +249,8 @@ const Dashboard = () => {
 
   return (
     <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
-      <Flex gap={"2"} p={"2"} pb={"0"} w={"100%"}>
-        <Heading>Dashboard</Heading>
+      <Flex gap={"2"} p={"2"} pb={"0"} w={"100%"} my={"2"}>
+        <Heading size={"lg"}>Dashboard</Heading>
       </Flex>
       <Flex direction={"row"} wrap={"wrap"} gap={"2"} p={"2"}>
         <Flex direction={"column"} gap={"2"} grow={"1"} basis={"60%"}>
@@ -258,7 +265,7 @@ const Dashboard = () => {
             borderColor={"gray.200"}
           >
             {/* Projects heading */}
-            <Flex direction={"row"} align={"center"} gap={"2"}>
+            <Flex direction={"row"} align={"center"} gap={"2"} my={"2"}>
               <Icon name={"project"} size={"md"} />
               <Heading size={"md"} fontWeight={"bold"}>
                 Projects
@@ -290,11 +297,10 @@ const Dashboard = () => {
               </Flex>
             )}
 
-            <Spacer />
-
             <Flex justify={"right"}>
               <Button
                 key={`view-projects-all`}
+                size={"sm"}
                 colorScheme={"blue"}
                 rightIcon={<Icon name={"c_right"} />}
                 onClick={() => navigate(`/projects`)}
@@ -314,7 +320,7 @@ const Dashboard = () => {
             borderColor={"gray.200"}
           >
             {/* Entities heading */}
-            <Flex direction={"row"} align={"center"} gap={"2"}>
+            <Flex direction={"row"} align={"center"} gap={"2"} my={"2"}>
               <Icon name={"entity"} size={"md"} />
               <Heading size={"md"} fontWeight={"bold"}>
                 Entities
@@ -350,11 +356,10 @@ const Dashboard = () => {
               </Flex>
             )}
 
-            <Spacer />
-
             <Flex justify={"right"}>
               <Button
                 key={`view-entity-all`}
+                size={"sm"}
                 colorScheme={"blue"}
                 rightIcon={<Icon name={"c_right"} />}
                 onClick={() => navigate(`/entities`)}
@@ -377,7 +382,7 @@ const Dashboard = () => {
           maxH={"80vh"}
         >
           {/* Activity heading */}
-          <Flex align={"center"} gap={"2"}>
+          <Flex align={"center"} gap={"2"} my={"2"}>
             <Icon name={"activity"} size={"md"} />
             <Heading size={"md"} fontWeight={"semibold"} color={"gray.700"}>
               Activity
@@ -387,11 +392,7 @@ const Dashboard = () => {
           {/* Activity list */}
           {activityData.length > 0 ? (
             <Flex overflowY={"auto"} p={"0"} w={"100%"} h={"100%"}>
-              <VStack
-                divider={<StackDivider borderColor={"gray.200"} />}
-                spacing={"1"}
-                w={"95%"}
-              >
+              <VStack spacing={"2"} w={"95%"}>
                 {activityData.map((activity) => {
                   // Configure the badge
                   let action = "Created";
@@ -411,23 +412,34 @@ const Dashboard = () => {
                       width={"100%"}
                       gap={"2"}
                       key={`activity-${activity._id}`}
+                      align={"center"}
                     >
-                      <Flex
-                        direction={"row"}
-                        align={"baseline"}
-                        gap={"2"}
-                        p={"1"}
-                      >
-                        <Text display={{ base: "none", sm: "block" }}>
+                      <Tooltip>
+                        <Avatar
+                          name={
+                            activity.actor
+                              ? activity.actor.name
+                              : "Unknown User"
+                          }
+                          size={"sm"}
+                        />
+                      </Tooltip>
+                      <Flex direction={"column"}>
+                        <Text fontSize={"sm"} fontWeight={"semibold"}>
                           {action}
                         </Text>
-
-                        <Linky
-                          id={activity.target._id}
-                          type={activity.target.type}
-                          fallback={activity.target.name}
-                          justify={"left"}
-                        />
+                        <Flex direction={"row"} gap={"1"}>
+                          <Text fontSize={"sm"} color={"gray.500"}>
+                            {activity.details}
+                          </Text>
+                          <Linky
+                            id={activity.target._id}
+                            type={activity.target.type}
+                            fallback={activity.target.name}
+                            justify={"left"}
+                            size={"sm"}
+                          />
+                        </Flex>
                       </Flex>
 
                       <Spacer />

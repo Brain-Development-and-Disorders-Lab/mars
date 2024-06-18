@@ -67,6 +67,7 @@ const Navigation = () => {
             </Text>
             <Button
               key={"dashboard"}
+              size={"sm"}
               w={"100%"}
               justifyContent={"left"}
               variant={_.isEqual(location.pathname, "/") ? "solid" : "ghost"}
@@ -78,6 +79,7 @@ const Navigation = () => {
 
             <Button
               key={"search"}
+              size={"sm"}
               w={"100%"}
               justifyContent={"left"}
               variant={
@@ -91,6 +93,7 @@ const Navigation = () => {
 
             <Button
               leftIcon={<Icon name={"project"} />}
+              size={"sm"}
               w={"100%"}
               justifyContent={"left"}
               variant={
@@ -105,6 +108,7 @@ const Navigation = () => {
 
             <Button
               leftIcon={<Icon name={"entity"} />}
+              size={"sm"}
               w={"100%"}
               justifyContent={"left"}
               variant={
@@ -118,6 +122,7 @@ const Navigation = () => {
             </Button>
             <Button
               leftIcon={<Icon name={"attribute"} />}
+              size={"sm"}
               w={"100%"}
               justifyContent={"left"}
               variant={
@@ -135,6 +140,7 @@ const Navigation = () => {
             </Text>
             <Button
               key={"create"}
+              size={"sm"}
               w={"100%"}
               justifyContent={"left"}
               variant={
@@ -148,6 +154,7 @@ const Navigation = () => {
 
             <Button
               key={"import"}
+              size={"sm"}
               w={"100%"}
               justifyContent={"left"}
               variant={"ghost"}

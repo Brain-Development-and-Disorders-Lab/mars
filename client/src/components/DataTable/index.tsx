@@ -233,7 +233,7 @@ const DataTable = (props: DataTableProps) => {
       >
         {props.showSelection && (
           <Flex>
-            <Menu>
+            <Menu size={"sm"}>
               <MenuButton
                 as={Button}
                 rightIcon={<Icon name={"c_down"} />}

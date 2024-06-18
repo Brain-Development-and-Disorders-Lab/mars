@@ -1370,6 +1370,7 @@ const Entity = () => {
         <Flex
           gap={"2"}
           p={"2"}
+          pb={"0"}
           direction={"row"}
           justify={"space-between"}
           align={"center"}
@@ -1382,9 +1383,11 @@ const Entity = () => {
             border={"2px"}
             rounded={"md"}
           >
-            <Icon name={"entity"} size={"lg"} />
-            <Heading fontWeight={"semibold"}>{entityData.name}</Heading>
-            {entityData.deleted && <Icon name={"delete"} size={"lg"} />}
+            <Icon name={"entity"} size={"md"} />
+            <Heading fontWeight={"semibold"} size={"lg"}>
+              {entityData.name}
+            </Heading>
+            {entityData.deleted && <Icon name={"delete"} size={"md"} />}
           </Flex>
 
           {/* Buttons */}
@@ -1523,7 +1526,7 @@ const Entity = () => {
             rounded={"md"}
           >
             {/* Entity Overview */}
-            <Flex direction={"column"} p={"2"} bg={"gray.50"} rounded={"md"}>
+            <Flex direction={"column"} p={"2"} bg={"gray.100"} rounded={"md"}>
               <Flex gap={"2"} direction={"column"}>
                 <Flex gap={"2"} direction={"row"}>
                   {/* "Created" and "Owner" fields */}
@@ -1621,8 +1624,16 @@ const Entity = () => {
               onChange={(index) => setRelationsIndex(index)}
             >
               <TabList>
-                <Tab>Origins</Tab>
-                <Tab>Products</Tab>
+                <Tab>
+                  <Heading fontWeight={"semibold"} size={"sm"}>
+                    Origins
+                  </Heading>
+                </Tab>
+                <Tab>
+                  <Heading fontWeight={"semibold"} size={"sm"}>
+                    Products
+                  </Heading>
+                </Tab>
                 <Spacer />
                 {editing ? (
                   <Button

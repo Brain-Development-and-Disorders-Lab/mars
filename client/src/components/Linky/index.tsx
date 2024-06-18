@@ -116,7 +116,10 @@ const Linky = (props: LinkyProps) => {
         <Skeleton
           isLoaded={!loadingAttribute && !loadingEntity && !loadingProject}
         >
-          <Text as={showDeleted ? "s" : "p"}>
+          <Text
+            as={showDeleted ? "s" : "p"}
+            fontSize={props.size ? props.size : ""}
+          >
             {_.truncate(linkLabel, { length: 10 })}
           </Text>
         </Skeleton>
