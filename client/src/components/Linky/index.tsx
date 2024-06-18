@@ -117,7 +117,7 @@ const Linky = (props: LinkyProps) => {
           isLoaded={!loadingAttribute && !loadingEntity && !loadingProject}
         >
           <Text as={showDeleted ? "s" : "p"}>
-            {_.truncate(linkLabel, { length: 20 })}
+            {_.truncate(linkLabel, { length: 10 })}
           </Text>
         </Skeleton>
       </Button>

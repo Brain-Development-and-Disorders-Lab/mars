@@ -20,7 +20,7 @@ import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 
 // Existing and custom types
-import { ProjectModel, EntityModel, ActivityModel, IconNames } from "@types";
+import { ProjectModel, EntityModel, ActivityModel } from "@types";
 
 // Utility functions and libraries
 import dayjs from "dayjs";
@@ -88,7 +88,7 @@ const Dashboard = () => {
     variables: {
       projects: 5,
       entities: 5,
-      activity: 10,
+      activity: 20,
     },
   });
 
@@ -163,11 +163,9 @@ const Dashboard = () => {
   const entityTableColumns = [
     entityTableColumnHelper.accessor("name", {
       cell: (info) => (
-        <Linky
-          id={info.row.original._id}
-          type={"entities"}
-          fallback={info.row.original.name}
-        />
+        <Text noOfLines={1} fontWeight={"semibold"}>
+          {info.getValue()}
+        </Text>
       ),
       header: "Name",
     }),
@@ -206,7 +204,11 @@ const Dashboard = () => {
   const projectTableColumnHelper = createColumnHelper<ProjectModel>();
   const projectTableColumns = [
     projectTableColumnHelper.accessor("name", {
-      cell: (info) => info.getValue(),
+      cell: (info) => (
+        <Text noOfLines={1} fontWeight={"semibold"}>
+          {info.getValue()}
+        </Text>
+      ),
       header: "Name",
     }),
     projectTableColumnHelper.accessor("description", {
@@ -240,22 +242,25 @@ const Dashboard = () => {
 
   return (
     <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
-      <Flex direction={"row"} wrap={"wrap"} gap={"4"} p={"4"}>
-        <Flex direction={"column"} gap={"4"} grow={"1"} basis={"60%"}>
+      <Flex gap={"2"} p={"2"} pb={"0"} w={"100%"}>
+        <Heading>Dashboard</Heading>
+      </Flex>
+      <Flex direction={"row"} wrap={"wrap"} gap={"2"} p={"2"}>
+        <Flex direction={"column"} gap={"2"} grow={"1"} basis={"60%"}>
           {/* Projects and Entities */}
           <Flex
             direction={"column"}
-            p={"4"}
+            p={"2"}
             background={"white"}
             rounded={"md"}
             gap={"2"}
-            border={"2px"}
+            border={"1px"}
             borderColor={"gray.200"}
           >
             {/* Projects heading */}
-            <Flex direction={"row"} align={"center"} gap={"4"}>
+            <Flex direction={"row"} align={"center"} gap={"2"}>
               <Icon name={"project"} size={"md"} />
-              <Heading size={"lg"} fontWeight={"semibold"}>
+              <Heading size={"md"} fontWeight={"bold"}>
                 Projects
               </Heading>
             </Flex>
@@ -290,7 +295,7 @@ const Dashboard = () => {
             <Flex justify={"right"}>
               <Button
                 key={`view-projects-all`}
-                colorScheme={"teal"}
+                colorScheme={"blue"}
                 rightIcon={<Icon name={"c_right"} />}
                 onClick={() => navigate(`/projects`)}
               >
@@ -301,17 +306,17 @@ const Dashboard = () => {
 
           <Flex
             direction={"column"}
-            p={"4"}
+            p={"2"}
             background={"white"}
             rounded={"md"}
             gap={"2"}
-            border={"2px"}
+            border={"1px"}
             borderColor={"gray.200"}
           >
             {/* Entities heading */}
-            <Flex direction={"row"} align={"center"} gap={"4"}>
+            <Flex direction={"row"} align={"center"} gap={"2"}>
               <Icon name={"entity"} size={"md"} />
-              <Heading size={"lg"} fontWeight={"semibold"}>
+              <Heading size={"md"} fontWeight={"bold"}>
                 Entities
               </Heading>
             </Flex>
@@ -350,7 +355,7 @@ const Dashboard = () => {
             <Flex justify={"right"}>
               <Button
                 key={`view-entity-all`}
-                colorScheme={"teal"}
+                colorScheme={"blue"}
                 rightIcon={<Icon name={"c_right"} />}
                 onClick={() => navigate(`/entities`)}
               >
@@ -363,19 +368,19 @@ const Dashboard = () => {
         {/* Activity */}
         <Flex
           direction={"column"}
-          p={"4"}
+          p={"2"}
           gap={"2"}
           grow={"1"}
           rounded={"md"}
-          border={"2px"}
+          border={"1px"}
           borderColor={"gray.200"}
           maxH={"80vh"}
         >
           {/* Activity heading */}
-          <Flex align={"center"} gap={"4"}>
+          <Flex align={"center"} gap={"2"}>
             <Icon name={"activity"} size={"md"} />
-            <Heading size={"lg"} fontWeight={"semibold"}>
-              Workspace Activity
+            <Heading size={"md"} fontWeight={"semibold"} color={"gray.700"}>
+              Activity
             </Heading>
           </Flex>
 
@@ -384,26 +389,19 @@ const Dashboard = () => {
             <Flex overflowY={"auto"} p={"0"} w={"100%"} h={"100%"}>
               <VStack
                 divider={<StackDivider borderColor={"gray.200"} />}
-                spacing={"2"}
+                spacing={"1"}
                 w={"95%"}
               >
-                {activityData.slice(0, 20).map((activity) => {
+                {activityData.map((activity) => {
                   // Configure the badge
-                  let operationIcon: IconNames = "entity";
-                  let operationIconColor = "white";
+                  let action = "Created";
 
                   switch (activity.type) {
-                    case "create":
-                      operationIcon = "add";
-                      operationIconColor = "green.400";
-                      break;
                     case "update":
-                      operationIcon = "edit";
-                      operationIconColor = "blue.400";
+                      action = "Updated";
                       break;
                     case "delete":
-                      operationIcon = "delete";
-                      operationIconColor = "red.400";
+                      action = "Deleted";
                       break;
                   }
 
@@ -415,21 +413,13 @@ const Dashboard = () => {
                       key={`activity-${activity._id}`}
                     >
                       <Flex
-                        rounded={"full"}
-                        p={"2"}
-                        mr={"2"}
-                        alignSelf={"center"}
+                        direction={"row"}
+                        align={"baseline"}
+                        gap={"2"}
+                        p={"1"}
                       >
-                        <Icon
-                          size={"sm"}
-                          name={operationIcon}
-                          color={operationIconColor}
-                        />
-                      </Flex>
-
-                      <Flex direction="column" align={"baseline"}>
                         <Text display={{ base: "none", sm: "block" }}>
-                          {activity.details}
+                          {action}
                         </Text>
 
                         <Linky

@@ -2593,7 +2593,7 @@ const Entity = () => {
               >
                 {!isPreviewLoaded || fileLoading ? (
                   <Spinner />
-                ) : _.isEqual("application/pdf", previewType) ? (
+                ) : _.isEqual(previewType, "application/pdf") ? (
                   <Preview src={previewSource} type={"document"} />
                 ) : (
                   <Preview src={previewSource} type={"image"} />
