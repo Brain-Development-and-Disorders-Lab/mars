@@ -54,6 +54,7 @@ import FileSaver from "file-saver";
 import slugify from "slugify";
 import dayjs from "dayjs";
 import QueryBuilderTab from "./QueryBuilderTab";
+import { gql, useLazyQuery, useQuery } from "@apollo/client";
 
 const Search = () => {
   const [query, setQuery] = useState("");
@@ -68,7 +69,6 @@ const Search = () => {
   const navigate = useNavigate();
   const toast = useToast();
 
-  const [isLoaded, setIsLoaded] = useState(false);
   const [entities, setEntities] = useState([] as EntityModel[]);
   const [projects, setProjects] = useState([] as ProjectModel[]);
 
@@ -90,54 +90,128 @@ const Search = () => {
   const [queryValue, setQueryValue] = useState("");
 
   // Store results as a set of IDs
-  const [results, setResults] = useState([] as EntityModel[]);
+  const [results, setResults] = useState([] as Partial<EntityModel>[]);
 
-  /**
-   * Utility function to retrieve all Entities
-   */
-  const getEntities = async () => {
-    const response = await request<EntityModel[]>("GET", "/entities");
-    if (response.success) {
-      setEntities(response.data);
-    } else {
-      toast({
-        title: "Error",
-        status: "error",
-        description: "Could not retrieve Entities",
-        duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
-      });
-      setIsError(true);
+  const GET_ENTITY = gql`
+    query GetEntityData($_id: String) {
+      entities {
+        _id
+        name
+        owner
+        deleted
+        locked
+        description
+        projects
+        associations {
+          origins {
+            _id
+            name
+          }
+          products {
+            _id
+            name
+          }
+        }
+        attributes {
+          _id
+          name
+          description
+          values {
+            _id
+            name
+            type
+            data
+          }
+        }
+        attachments {
+          _id
+          name
+        }
+        history {
+          timestamp
+          deleted
+          owner
+          description
+          projects
+          associations {
+            origins {
+              _id
+              name
+            }
+            products {
+              _id
+              name
+            }
+          }
+          attributes {
+            _id
+            name
+            description
+            values {
+              _id
+              name
+              type
+              data
+            }
+          }
+        }
+      }
+      projects {
+        _id
+        name
+        created
+        description
+        owner
+        collaborators
+        entities
+      }
     }
-    setIsLoaded(true);
-  };
+  `;
+  const { loading, error, data, refetch } = useQuery(GET_ENTITY);
 
-  /**
-   * Utility function to retrieve all Projects
-   */
-  const getProjects = async () => {
-    const response = await request<ProjectModel[]>("GET", "/projects");
-    if (response.success) {
-      setProjects(response.data);
-    } else {
-      toast({
-        title: "Error",
-        status: "error",
-        description: "Could not retrieve Projects",
-        duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
-      });
-      setIsError(true);
-    }
-    setIsLoaded(true);
-  };
-
+  // Manage data once retrieved
   useEffect(() => {
-    getEntities();
-    getProjects();
+    if (data?.entities) {
+      // Unpack all the Entity data
+      setEntities(data.entities);
+    }
+    if (data?.projects) {
+      setProjects(data.projects);
+    }
+  }, [loading]);
+
+  // Display any GraphQL errors
+  useEffect(() => {
+    if (error) {
+      toast({
+        title: "Error",
+        description: error.message,
+        status: "error",
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
+  }, [error]);
+
+  // Check to see if data currently exists and refetch if so
+  useEffect(() => {
+    if (data && refetch) {
+      refetch();
+    }
   }, []);
+
+  // Query to search Entities
+  const SEARCH_ENTITIES = gql`
+    query SearchEntities($search: String, $limit: Int) {
+      searchEntities(search: $search, limit: $limit) {
+        _id
+        name
+        description
+      }
+    }
+  `;
+  const [searchEntities, { loading: searchLoading, error: searchError }] =
+    useLazyQuery(SEARCH_ENTITIES);
 
   const runSearch = async () => {
     // Initial check if a specific ID search was not found
@@ -145,14 +219,15 @@ const Search = () => {
     setHasSearched(true);
     setResults([]);
 
-    // Use the new search route for text-based search
-    const response = await request<EntityModel[]>("POST", "/entities/search", {
-      query: query,
+    const results = await searchEntities({
+      variables: {
+        search: query,
+        limit: 100,
+      },
     });
-    if (response.success) {
-      if (response.data.length > 0) {
-        setResults(response.data);
-      } else {
+    if (results.data.searchEntities) {
+      setResults(results.data.searchEntities);
+      if (results.data.searchEntities.length === 0) {
         // Handle no results found scenario
         toast({
           title: "No results found",
@@ -162,16 +237,19 @@ const Search = () => {
           isClosable: true,
         });
       }
-    } else {
+    }
+
+    if (searchError) {
       toast({
-        title: "Search Error",
-        description: "Could not perform search",
+        title: "Error",
         status: "error",
-        duration: 5000,
-        isClosable: true,
+        description: searchError.message,
+        duration: 4000,
         position: "bottom-right",
+        isClosable: true,
       });
     }
+
     setIsSearching(false);
   };
 
@@ -392,7 +470,7 @@ const Search = () => {
               setQueryComponents={setQueryComponents}
               setHasSearched={setHasSearched}
               setResults={setResults}
-              isLoaded={isLoaded}
+              isLoaded={!loading && !searchLoading}
               projects={projects}
               entities={entities}
               runQuerySearch={runQuerySearch}
