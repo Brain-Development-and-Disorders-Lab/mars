@@ -46,7 +46,7 @@ import {
   ProjectModel,
   EntityImport,
   EntityModel,
-  Item,
+  IGenericItem,
 } from "@types";
 
 // Routing and navigation
@@ -110,10 +110,10 @@ const Importer = (props: {
   const [descriptionField, setDescriptionField] = useState("");
   const [ownerField, _setOwnerField] = useState(token.orcid);
   const [projectField, setProjectField] = useState("");
-  const [selectedOrigin, setSelectedOrigin] = useState({} as Item);
-  const [originsField, setOriginsField] = useState([] as Item[]);
-  const [selectedProduct, setSelectedProduct] = useState({} as Item);
-  const [productsField, setProductsField] = useState([] as Item[]);
+  const [selectedOrigin, setSelectedOrigin] = useState({} as IGenericItem);
+  const [originsField, setOriginsField] = useState([] as IGenericItem[]);
+  const [selectedProduct, setSelectedProduct] = useState({} as IGenericItem);
+  const [productsField, setProductsField] = useState([] as IGenericItem[]);
   const [attributes, setAttributes] = useState([] as AttributeModel[]);
   const [attributesField, setAttributesField] = useState(
     [] as AttributeModel[],
@@ -503,9 +503,9 @@ const Importer = (props: {
    */
   const getSelectEntitiesComponent = (
     id: string,
-    value: Item,
+    value: IGenericItem,
     setValue: React.SetStateAction<any>,
-    selected: Item[],
+    selected: IGenericItem[],
     setSelected: React.SetStateAction<any>,
     disabled?: boolean,
   ) => {
@@ -516,14 +516,14 @@ const Importer = (props: {
         value={value._id}
         onChange={(event) => {
           const selection = {
-            id: event.target.value,
+            _id: event.target.value,
             name: event.target.options[event.target.selectedIndex].label,
           };
           setValue(selection);
           if (
             !_.includes(
               selected.map((entity) => entity._id),
-              selection.id,
+              selection._id,
             )
           ) {
             setSelected([...selected, selection]);
@@ -554,9 +554,9 @@ const Importer = (props: {
   const onUpdateAttribute = (data: AttributeCardProps) => {
     setAttributesField([
       ...attributesField.map((attribute) => {
-        if (_.isEqual(attribute._id, data.identifier)) {
+        if (_.isEqual(attribute._id, data._id)) {
           return {
-            _id: data.identifier,
+            _id: data._id,
             name: data.name,
             description: data.description,
             values: data.values,
@@ -619,10 +619,10 @@ const Importer = (props: {
     setNameField("");
     setDescriptionField("");
     setProjectField("");
-    setSelectedOrigin({} as Item);
-    setOriginsField([] as Item[]);
-    setSelectedProduct({} as Item);
-    setProductsField([] as Item[]);
+    setSelectedOrigin({} as IGenericItem);
+    setOriginsField([] as IGenericItem[]);
+    setSelectedProduct({} as IGenericItem);
+    setProductsField([] as IGenericItem[]);
     setAttributes([]);
     setAttributesField([]);
   };
@@ -1037,8 +1037,8 @@ const Importer = (props: {
                   {attributesField.map((attribute) => {
                     return (
                       <Attribute
+                        _id={attribute._id}
                         key={attribute._id}
-                        identifier={attribute._id}
                         name={attribute.name}
                         description={attribute.description}
                         values={attribute.values}

@@ -10,7 +10,7 @@ import {
   EntityModel,
   IEntity,
   IValue,
-  Item,
+  IGenericItem,
 } from "@types";
 
 // Utility functions and libraries
@@ -23,7 +23,7 @@ import tmp from "tmp";
 import XLSX from "xlsx";
 
 // Database operations
-import { getAttachments } from "../database/connection";
+import { getAttachments } from "../connectors/database";
 
 export class Data {
   /**
@@ -378,7 +378,7 @@ export class Data {
                 };
               }
               return {
-                identifier: value.identifier,
+                _id: value._id,
                 name: value.name,
                 type: value.type,
                 data: valueData,
@@ -439,7 +439,7 @@ export class Data {
           // Add Products to Entities (if Origins specified)
           if (!_.isEmpty(entityFields.origins)) {
             // Add all Products to each Origin
-            entityFields.origins.map((origin: Item) => {
+            entityFields.origins.map((origin: IGenericItem) => {
               operations.push(Entities.addProducts(origin, minimalEntities));
             });
 
@@ -454,7 +454,7 @@ export class Data {
           // Add Origins to Entities (if Products specified)
           if (!_.isEmpty(entityFields.products)) {
             // Add all Origins to each Product
-            entityFields.products.map((product: Item) => {
+            entityFields.products.map((product: IGenericItem) => {
               operations.push(Entities.addOrigins(product, minimalEntities));
             });
 

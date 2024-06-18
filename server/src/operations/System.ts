@@ -5,7 +5,7 @@ import _ from "lodash";
 import { consola } from "consola";
 
 // Database operations
-import { getSystem } from "../database/connection";
+import { getSystem } from "../connectors/database";
 
 // Constants
 const DEVICES = "devices";

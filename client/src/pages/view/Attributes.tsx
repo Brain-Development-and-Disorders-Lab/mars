@@ -20,46 +20,63 @@ import { Content } from "@components/Container";
 import { AttributeModel } from "@types";
 
 // Utility functions and libraries
-import { request } from "@database/functions";
 import _ from "lodash";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
+import { gql, useQuery } from "@apollo/client";
 
 const Attributes = () => {
   const navigate = useNavigate();
   const toast = useToast();
 
   // Page state
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [isError, setIsError] = useState(false);
-
   const [attributesData, setAttributesData] = useState([] as AttributeModel[]);
 
-  /**
-   * Utility function to retrieve all Attributes
-   */
-  const getAttributes = async () => {
-    const response = await request<AttributeModel[]>("GET", "/attributes");
-    if (response.success) {
-      setAttributesData(response.data);
-    } else {
+  // GraphQL operations
+  const GET_ATTRIBUTES = gql`
+    query GetAttribute {
+      attributes {
+        _id
+        name
+        description
+        values {
+          _id
+          name
+          type
+          data
+        }
+      }
+    }
+  `;
+  const { loading, error, data, refetch } = useQuery(GET_ATTRIBUTES);
+
+  // Manage data once retrieved
+  useEffect(() => {
+    if (data?.attributes) {
+      // Unpack all the Entity data
+      setAttributesData(data.attributes);
+    }
+  }, [loading]);
+
+  useEffect(() => {
+    if (error) {
       toast({
         title: "Error",
         status: "error",
-        description: "Could not retrieve Attributes data.",
+        description: error.message,
         duration: 4000,
         position: "bottom-right",
         isClosable: true,
       });
-      setIsError(true);
     }
-    setIsLoaded(true);
-  };
+  }, [error]);
 
-  // Effect to load all Attribute data
+  // Check to see if data currently exists and refetch if so
   useEffect(() => {
-    getAttributes();
+    if (data && refetch) {
+      refetch();
+    }
   }, []);
 
   const breakpoint = useBreakpoint();
@@ -79,7 +96,6 @@ const Attributes = () => {
   }, [breakpoint]);
 
   // Configure table columns and data
-  const data: AttributeModel[] = attributesData;
   const columnHelper = createColumnHelper<AttributeModel>();
   const columns = [
     columnHelper.accessor("name", {
@@ -115,7 +131,7 @@ const Attributes = () => {
   ];
 
   return (
-    <Content isError={isError} isLoaded={isLoaded}>
+    <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
       <Flex
         direction={"row"}
         p={"4"}
@@ -146,10 +162,10 @@ const Attributes = () => {
           </Button>
         </Flex>
         <Flex direction={"column"} gap={"4"} w={"100%"}>
-          {data.length > 0 ? (
+          {attributesData.length > 0 ? (
             <DataTable
               columns={columns}
-              data={data}
+              data={attributesData}
               visibleColumns={visibleColumns}
               showPagination
             />

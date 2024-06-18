@@ -2,23 +2,54 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
 
+// Apollo imports
+import {
+  ApolloClient,
+  InMemoryCache,
+  ApolloProvider,
+  ApolloLink,
+} from "@apollo/client";
+import { setContext } from "@apollo/client/link/context";
+import createUploadLink from "apollo-upload-client/createUploadLink.mjs";
+
 // Utility imports
 import _ from "lodash";
-import { LogLevels, consola } from "consola";
+
+// Variables
+import { API_URL } from "./variables";
 
 // Application
 import App from "./App";
+import { getToken } from "./util";
+import { TOKEN_KEY } from "./variables";
 
-// Configure logging
-consola.wrapConsole();
-if (_.isEqual(process.env.NODE_ENV, "development")) {
-  // Display all logs in development mode
-  consola.level = LogLevels.trace;
-} else {
-  consola.level = LogLevels.info;
-}
+// Setup Apollo client
+const httpLink = createUploadLink({
+  uri: API_URL,
+  headers: {
+    "Apollo-Require-Preflight": "true",
+  },
+});
+
+const authLink = setContext((_, { headers }) => {
+  return {
+    headers: {
+      ...headers,
+      user: getToken(TOKEN_KEY).orcid,
+    },
+  };
+});
+
+const client = new ApolloClient({
+  link: ApolloLink.from([authLink, httpLink as unknown as ApolloLink]),
+  cache: new InMemoryCache({ addTypename: false }),
+});
 
 // Render the application
 const container = document.getElementById("root");
 const root = createRoot(container!);
-root.render(<App />);
+root.render(
+  <ApolloProvider client={client}>
+    <App />
+  </ApolloProvider>,
+);

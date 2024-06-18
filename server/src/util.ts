@@ -4,6 +4,7 @@ import _ from "lodash";
 
 // Authentication methods
 import { Authentication } from "./operations/Authentication";
+import { nanoid } from "nanoid";
 
 /**
  * Get data from an API using the JavaScript `fetch` function
@@ -95,4 +96,17 @@ export const authenticate = (request: any, response: any, next: () => void) => {
         response.json("Invalid token");
       });
   }
+};
+
+/**
+ * Generate safe pseudo-random identifiers for allocation when creating
+ * new items for storage in the MongoDB database, in place of default
+ * identifier
+ * @param type identifier to be assigned an Entity, Attribute, or Project
+ * @return {string}
+ */
+export const getIdentifier = (
+  type: "entity" | "attribute" | "project",
+): string => {
+  return `${type.slice(0, 1)}${nanoid(7)}`;
 };
