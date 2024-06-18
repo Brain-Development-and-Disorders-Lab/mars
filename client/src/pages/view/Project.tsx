@@ -920,7 +920,7 @@ const Project = () => {
                       }
                     }}
                   >
-                    {isLoaded &&
+                    {!loading &&
                       minimalEntities.map((entity) => {
                         return (
                           <option key={entity._id} value={entity._id}>
