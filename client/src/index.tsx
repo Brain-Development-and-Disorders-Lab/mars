@@ -43,6 +43,9 @@ const authLink = setContext((_, { headers }) => {
 const client = new ApolloClient({
   link: ApolloLink.from([authLink, httpLink as unknown as ApolloLink]),
   cache: new InMemoryCache({ addTypename: false }),
+  headers: {
+    "Apollo-Require-Preflight": "true",
+  },
 });
 
 // Render the application
