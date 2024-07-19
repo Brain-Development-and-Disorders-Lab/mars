@@ -62,11 +62,8 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
    * @param code String returned by ORCID API for login
    */
   const getLogin = async (code: string) => {
-    console.info("Performing login, code:", code);
-    console.info('Running "doLogin"...');
     // Query to retrieve Entity data and associated data for editing
     const response = await doLogin({ variables: { code: code } });
-    console.info('"doLogin" response:', response);
 
     // Perform login and data retrieval via server, check if user permitted access
     if (response.data?.login) {
