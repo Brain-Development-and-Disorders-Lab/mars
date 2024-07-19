@@ -37,6 +37,7 @@ import graphqlUploadExpress from "graphql-upload/graphqlUploadExpress.mjs";
 consola.level =
   process.env.NODE_ENV !== "production" ? LogLevels.trace : LogLevels.info;
 
+const port = process.env.PORT || 8000;
 const app = express();
 const httpServer = http.createServer(app);
 
@@ -84,9 +85,13 @@ const startServer = async () => {
   await server.start();
 
   // Configure Express, enable CORS middleware
+  const origins =
+    process.env.NODE_ENV !== "production"
+      ? ["http://localhost:8080"]
+      : ["https://mars.reusable.bio"];
   app.use(
     "/mars",
-    cors<cors.CorsRequest>(),
+    cors<cors.CorsRequest>({ origin: origins }),
     express.json({ limit: "50mb" }),
     graphqlUploadExpress({ maxFileSize: 10000000, maxFiles: 10 }),
     expressMiddleware(server, {
@@ -108,8 +113,8 @@ const startServer = async () => {
   );
 
   // Start the server
-  httpServer.listen({ port: 8000 });
-  consola.success("Server running at http://localhost:8000/mars");
+  httpServer.listen({ port: port });
+  consola.success(`Server running at http://localhost:${port}/mars`);
 };
 
 startServer();

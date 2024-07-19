@@ -31,7 +31,7 @@ export class Users {
       .collection<UserModel>(USERS_COLLECTION)
       .findOne({ _id: orcid });
 
-    return _.isNull(result);
+    return !_.isNull(result);
   };
 
   static update = async (updated: UserModel): Promise<ResponseMessage> => {
