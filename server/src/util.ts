@@ -3,7 +3,7 @@ import { consola } from "consola";
 import _ from "lodash";
 
 // Authentication methods
-import { Authentication } from "./operations/Authentication";
+import { Authentication } from "./models/Authentication";
 import { nanoid } from "nanoid";
 
 /**
@@ -81,7 +81,7 @@ export const authenticate = (request: any, response: any, next: () => void) => {
     // Bypass authentication in development mode
     next();
   } else {
-    Authentication.validate(request.headers["id_token"])
+    Authentication.validate(request.headers["token"])
       .then((result) => {
         if (result) {
           request.user = result;
