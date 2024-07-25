@@ -106,8 +106,8 @@ const Settings = () => {
               <Flex p={"2"} w={"100%"} direction={"column"} gap={"4"}>
                 <Text>
                   A list of devices and scanners that have been registered with
-                  MARS. Registration is required for pairing an input device
-                  such as a scanner.
+                  Storacuity. Registration is required for pairing an input
+                  device such as a scanner.
                 </Text>
                 <Flex>
                   <Button

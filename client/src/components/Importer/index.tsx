@@ -677,7 +677,7 @@ const Importer = (props: {
                 >
                   <Flex w={"100%"} py={"2"} justify={"left"}>
                     <Information
-                      text={"MARS supports CSV-formatted or JSON files."}
+                      text={"Storacuity supports CSV-formatted or JSON files."}
                     />
                   </Flex>
                   <FormControl>

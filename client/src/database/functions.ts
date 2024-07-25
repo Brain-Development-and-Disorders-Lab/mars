@@ -154,7 +154,7 @@ export const requestStatic = async <T>(
 };
 
 /**
- * Check if an Entity, Project, or Attribute still exists in MARS
+ * Check if an Entity, Project, or Attribute still exists in database
  * @param {string} _id Identifier of the Entity, Project, or Attribute
  * @param {"entities" | "projects" | "attributes"} type Specify whether an Entity, Project, or Attribute is being checked
  * @returns {Promise<boolean>}

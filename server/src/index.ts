@@ -88,9 +88,9 @@ const startServer = async () => {
   const origins =
     process.env.NODE_ENV !== "production"
       ? ["http://localhost:8080"]
-      : ["https://mars.reusable.bio"];
+      : ["https://app.storacuity.com"];
   app.use(
-    "/mars",
+    "/",
     cors<cors.CorsRequest>({ origin: origins }),
     express.json({ limit: "50mb" }),
     graphqlUploadExpress({ maxFileSize: 10000000, maxFiles: 10 }),
@@ -114,7 +114,7 @@ const startServer = async () => {
 
   // Start the server
   httpServer.listen({ port: port });
-  consola.success(`Server running at http://localhost:${port}/mars`);
+  consola.success(`Server running at http://localhost:${port}/`);
 };
 
 startServer();

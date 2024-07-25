@@ -1080,7 +1080,7 @@ const Project = () => {
               >
                 <Icon name={"info"} />
                 {_.isEqual(exportFormat, "json") && (
-                  <Text>JSON files can be re-imported into MARS.</Text>
+                  <Text>JSON files can be re-imported into Storacuity.</Text>
                 )}
                 {_.isEqual(exportFormat, "csv") && (
                   <Text>

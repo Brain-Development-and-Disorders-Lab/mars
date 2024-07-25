@@ -1,12 +1,12 @@
-# MARS 🔬
+# Project MARS 🔬
 
-> Metadata Aggegator for Reusable / Reproducible Science
+> Metadata Aggegator enabling Reproducible Science
 
 An open-source and customizable workflow tool for organizing, tracking, and searching metadata generated from scientific experiments. Named after the underlying philosophy of the FAIR data principles, that data should ultimately be reusable.
 
 ![mars.png](mars.png)
 
-**⚠️ WARNING: MARS is still in early development and should be used with caution.**
+**⚠️ WARNING: Project MARS is still in early development and should be used with caution.**
 
 ## Features ✨
 

@@ -12,7 +12,7 @@ const CLIENT_SECRET = process.env.CLIENT_SECRET as string;
 const REDIRECT_URI =
   process.env.NODE_ENV !== "production"
     ? "http://127.0.0.1:8080"
-    : "https://mars.reusable.bio";
+    : "https://app.storacuity.com";
 
 export class Authentication {
   /**

@@ -52,7 +52,7 @@ const Navigation = () => {
           <Image src="/Favicon.png" boxSize={"36px"} />
           <Flex direction={"column"}>
             <Heading fontWeight={"semibold"} size={"md"}>
-              MARS
+              Storacuity
             </Heading>
           </Flex>
         </Flex>

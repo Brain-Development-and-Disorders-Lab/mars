@@ -8,7 +8,7 @@ import _ from "lodash";
 export const API_URL =
   process.env.NODE_ENV !== "production"
     ? "http://localhost:8000/mars"
-    : "https://api.reusable.bio/mars";
+    : "https://api.storacuity.bio";
 export const STATIC_URL =
   process.env.NODE_ENV !== "production"
     ? "http://localhost:8000/static"
