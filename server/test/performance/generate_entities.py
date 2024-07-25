@@ -1,6 +1,6 @@
 import requests
 
-URL = "http://localhost:8000/mars"
+URL = "http://localhost:8000/"
 CREATE_ENTITIES = "/entities/create"
 
 ENTITY_COUNT = 3
