@@ -68,7 +68,7 @@ export class Attributes {
     return {
       success: successStatus,
       message: successStatus
-        ? "Created Attribute successfully"
+        ? response.insertedId.toString()
         : "Unable to create Attribute",
     };
   };

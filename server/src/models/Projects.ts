@@ -61,7 +61,7 @@ export class Projects {
     return {
       success: successStatus,
       message: successStatus
-        ? "Created new Project"
+        ? response.insertedId
         : "Could not create new Project",
     };
   };

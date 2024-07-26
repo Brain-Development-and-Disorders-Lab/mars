@@ -29,7 +29,7 @@ export class Activity {
     return {
       success: response.acknowledged,
       message: response.acknowledged
-        ? "Created Activity successfully"
+        ? response.insertedId.toString()
         : "Unable to create Activity",
     };
   };

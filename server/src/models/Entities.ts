@@ -177,7 +177,7 @@ export class Entities {
     return {
       success: successStatus,
       message: successStatus
-        ? "Created Entity successfully"
+        ? response.insertedId.toString()
         : "Unable to create Entity",
     };
   };
