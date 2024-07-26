@@ -1,10 +1,15 @@
 describe("CSV Import Test", () => {
-  it("should import a CSV file successfully", () => {
-    // Visit the page where you can import CSV files
+  beforeEach(() => {
+    // Clear the localstorage
     cy.clearLocalStorage();
 
+    // Navigate the "Login" page
     cy.visit("http://localhost:8080/");
+    cy.get("button").click();
+  });
 
+  it("should import a CSV file successfully", () => {
+    // Visit the page where you can import CSV files
     cy.contains("div", "Create").click();
     cy.get(
       ":nth-child(1) > .chakra-card__footer > .css-ldo4d5 > .chakra-button",
@@ -15,7 +20,7 @@ describe("CSV Import Test", () => {
     cy.get(".css-h211ee").click({ force: true }); // click to finish creating project
     cy.wait(1000);
 
-    cy.contains("div", "Import").click(); // click to import CSV file
+    cy.contains("button", "Import").click(); // click to import CSV file
 
     cy.get("input[type=file]").first().selectFile(Cypress.Buffer.from("text"));
 
