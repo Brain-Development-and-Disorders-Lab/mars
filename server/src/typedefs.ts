@@ -310,5 +310,6 @@ export const typedefs = `#graphql
 
     # Data mutations
     uploadFile(target: String, file: Upload!): Response
+    importFile(type: String, file: [Upload]!): Response
   }
 `;
