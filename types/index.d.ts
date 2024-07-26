@@ -230,15 +230,15 @@ export type AttachmentData = {
 export type IActivity = {
   timestamp: Date;
   type: "create" | "update" | "delete";
-  actor: {
-    name: string;
-    _id: string;
-  };
   details: string;
   target: {
     type: "entities" | "projects" | "attributes";
     _id: string;
     name: string;
+  };
+  actor?: {
+    name: string;
+    _id: string;
   };
 };
 

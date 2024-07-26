@@ -6,8 +6,8 @@ import {
   ResponseMessage,
 } from "@types";
 import _ from "lodash";
-import { getDatabase } from "src/connectors/database";
-import { getIdentifier } from "src/util";
+import { getDatabase } from "../connectors/database";
+import { getIdentifier } from "../util";
 import { Projects } from "./Projects";
 import consola from "consola";
 import dayjs from "dayjs";
@@ -44,6 +44,18 @@ export class Entities {
     return await getDatabase()
       .collection<EntityModel>(ENTITIES_COLLECTION)
       .findOne({ _id: _id });
+  };
+
+  /**
+   * Get multiple Entities from identifiers
+   * @param entities Collection of Entity identifiers
+   * @return {Promise<EntityModel[]>}
+   */
+  static getMany = async (entities: string[]): Promise<EntityModel[]> => {
+    return await getDatabase()
+      .collection<EntityModel>(ENTITIES_COLLECTION)
+      .find({ _id: { $in: entities } })
+      .toArray();
   };
 
   static exists = async (_id: string): Promise<boolean> => {
@@ -875,7 +887,7 @@ export class Entities {
       };
     }
 
-    if (!_.findIndex(entity.attributes, { _id: attribute._id })) {
+    if (_.findIndex(entity.attributes, { _id: attribute._id }) == -1) {
       return {
         success: false,
         message: "Entity does not contain Attribute to update",
@@ -1097,6 +1109,5 @@ export class Entities {
   };
 
   // Remaining functions:
-  // * addAttachment (id, id)
   // * removeAttachment (id, id)
 }

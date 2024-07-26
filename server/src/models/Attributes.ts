@@ -1,7 +1,7 @@
 import { AttributeModel, IAttribute, ResponseMessage } from "@types";
 import _ from "lodash";
-import { getDatabase } from "src/connectors/database";
-import { getIdentifier } from "src/util";
+import { getDatabase } from "../connectors/database";
+import { getIdentifier } from "../util";
 import { Activity } from "./Activity";
 
 // Collection name
@@ -12,9 +12,9 @@ export class Attributes {
    * Get all Attribute entries from the Attributes collection
    * @returns Collection of all Attribute entries
    */
-  static all = async () => {
+  static all = async (): Promise<AttributeModel[]> => {
     return await getDatabase()
-      .collection(ATTRIBUTES_COLLECTION)
+      .collection<AttributeModel>(ATTRIBUTES_COLLECTION)
       .find()
       .toArray();
   };

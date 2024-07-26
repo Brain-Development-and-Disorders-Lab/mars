@@ -1,6 +1,6 @@
 import { ResponseMessage, UserModel } from "@types";
 import _ from "lodash";
-import { getDatabase } from "src/connectors/database";
+import { getDatabase } from "../connectors/database";
 import { Projects } from "./Projects";
 import dayjs from "dayjs";
 import { Entities } from "./Entities";

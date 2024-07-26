@@ -16,13 +16,12 @@ if (_.isUndefined(CONNECTION_STRING)) {
 const client: MongoClient = new MongoClient(CONNECTION_STRING, {});
 let database: Db;
 let storage: Db;
-let system: Db;
 let attachments: GridFSBucket;
 
 /**
  * Connect to the primary database storing metadata
  */
-export const connectPrimary = (): Promise<Db> => {
+export const connect = (): Promise<Db> => {
   return new Promise((resolve, _reject) => {
     client.connect().then((result) => {
       database = result.db("metadata");
@@ -40,19 +39,6 @@ export const connectPrimary = (): Promise<Db> => {
 };
 
 /**
- * Connect to the system database storing system data
- */
-export const connectSystem = (): Promise<Db> => {
-  return new Promise((resolve, _reject) => {
-    client.connect().then((result) => {
-      system = result.db("system");
-      consola.success("Connected to MongoDB system database");
-      resolve(system);
-    });
-  });
-};
-
-/**
  * Disconnect from MongoDB instance
  */
 export const disconnect = (): Promise<void> => {
@@ -65,14 +51,6 @@ export const disconnect = (): Promise<void> => {
  */
 export const getDatabase = (): Db => {
   return database;
-};
-
-/**
- * Get the MongoDB system database object
- * @return {Db}
- */
-export const getSystem = (): Db => {
-  return system;
 };
 
 /**

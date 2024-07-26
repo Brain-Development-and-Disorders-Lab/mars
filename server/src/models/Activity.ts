@@ -1,5 +1,5 @@
 import { ActivityModel, IActivity, ResponseMessage } from "@types";
-import { getDatabase } from "src/connectors/database";
+import { getDatabase } from "../connectors/database";
 
 // Collection name
 const ACTIVITY_COLLECTION = "activity";

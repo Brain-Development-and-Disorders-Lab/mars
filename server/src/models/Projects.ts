@@ -1,7 +1,7 @@
 import { EntityModel, IProject, ProjectModel, ResponseMessage } from "@types";
 import _ from "lodash";
-import { getDatabase } from "src/connectors/database";
-import { getIdentifier } from "src/util";
+import { getDatabase } from "../connectors/database";
+import { getIdentifier } from "../util";
 import { Entities } from "./Entities";
 import dayjs from "dayjs";
 import Papa from "papaparse";
@@ -330,6 +330,10 @@ export class Projects {
     format: "json",
   ): Promise<string> => {
     const project = await Projects.getOne(_id);
+
+    if (format !== "json") {
+      return "";
+    }
 
     if (_.isNull(project)) {
       return "";

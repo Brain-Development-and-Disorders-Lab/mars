@@ -12,7 +12,7 @@ import * as fs from "fs";
 import "source-map-support/register";
 
 // Get the connection functions
-import { connectPrimary, connectSystem } from "./connectors/database";
+import { connect } from "./connectors/database";
 
 // GraphQL
 import { ApolloServer } from "@apollo/server";
@@ -50,8 +50,7 @@ const startServer = async () => {
 
   // Perform database connections
   try {
-    await connectPrimary();
-    await connectSystem();
+    await connect();
   } catch {
     consola.error("Error connecting to databases, aborting server start...");
     return;

@@ -13,7 +13,7 @@
     "buildDev": "esbuild src/index.ts --platform=node --outdir=dist --bundle --sourcemap --watch",
     "buildDebug": "esbuild src/index.ts --platform=node --outdir=dist --bundle --sourcemap",
     "startDev": "node --inspect dist/index.js",
-    "test": "jest",
+    "test": "jest --run-in-band",
     "clean": "rm -rf dist",
     "lint": "prettier --write ."
   },

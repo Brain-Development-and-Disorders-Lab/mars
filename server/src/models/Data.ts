@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb";
-import { getAttachments } from "src/connectors/database";
+import { getAttachments } from "../connectors/database";
 import _ from "lodash";
 import * as fs from "fs";
 import { Entities } from "./Entities";
