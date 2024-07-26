@@ -29,5 +29,11 @@ export const DataResolvers = {
     ): Promise<ResponseMessage> => {
       return await Data.uploadFile(args.target, args.file);
     },
+    importFile: async (
+      _parent: any,
+      args: { file: any },
+    ): Promise<string[]> => {
+      return await Data.importFile(args.file);
+    },
   },
 };

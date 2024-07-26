@@ -52,6 +52,9 @@ import {
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
 
+// GraphQL
+import { gql, useMutation } from "@apollo/client";
+
 // Utility functions and libraries
 import { request } from "@database/functions";
 import { useToken } from "src/authentication/useToken";
@@ -70,7 +73,6 @@ const Importer = (props: {
   const [jsonData, setJsonData] = useState(null); // State to store parsed JSON data
 
   // Page states
-  const [isError, setIsError] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
 
   // Button states
@@ -97,8 +99,7 @@ const Importer = (props: {
     count: pageSteps.length,
   });
 
-  // Spreadsheet data state
-  const [spreadsheetData, setSpreadsheetData] = useState([] as any[]);
+  // Spreadsheet column state
   const [columns, setColumns] = useState([] as string[]);
 
   // Data to inform field assignment
@@ -118,6 +119,16 @@ const Importer = (props: {
   const [attributesField, setAttributesField] = useState(
     [] as AttributeModel[],
   );
+
+  // Queries
+  const IMPORT_FILE = gql`
+    mutation ImportFile($type: String, $file: [Upload]!) {
+      importFile(type: $type, file: $file)
+    }
+  `;
+
+  const [importFile, { loading: importLoading, error: importError }] =
+    useMutation(IMPORT_FILE);
 
   // Effect to manipulate 'Continue' button state for 'upload' page
   useEffect(() => {
@@ -267,9 +278,28 @@ const Importer = (props: {
       // Handle JSON data separately
       handleJsonFile(file);
     } else if (_.isEqual(fileType, "text/csv")) {
-      // Make POST request with CSV file contents from the form
-      const response = await request<any>("POST", "/data/import", formData);
-      if (response.success) {
+      // Mutation query with CSV file
+      setContinueLoading(importLoading);
+      const response = await importFile({
+        variables: {
+          type: "csv",
+          file: file,
+        },
+      });
+      setContinueLoading(importLoading);
+
+      if (importError) {
+        toast({
+          title: "Import Error",
+          status: "error",
+          description: "Error while importing file",
+          duration: 4000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+      }
+
+      if (response.data) {
         // Reset file upload state
         setFile({} as File);
 
@@ -282,13 +312,10 @@ const Importer = (props: {
             position: "bottom-right",
             isClosable: true,
           });
-          if (response.data.length > 0) {
-            // Update spreadsheet data state if valid rows
-            setSpreadsheetData(response.data);
-
+          if (response.data.importFile.length > 0) {
             // Filter columns to exclude columns with no header ("__EMPTY...")
-            const filteredColumnSet = Object.keys(response.data[0]).filter(
-              (column) => {
+            const filteredColumnSet = response.data.importFile.filter(
+              (column: string) => {
                 return !_.startsWith(column, "__EMPTY");
               },
             );
@@ -296,7 +323,7 @@ const Importer = (props: {
           }
 
           // Setup the next stage of CSV import
-          await setupMapping();
+          // await setupMapping();
         } else if (_.isEqual(fileType, "application/json")) {
           toast({
             title: "Success",
@@ -387,7 +414,6 @@ const Importer = (props: {
         position: "bottom-right",
         isClosable: true,
       });
-      setIsError(true);
     }
 
     if (projects.success) {
@@ -401,7 +427,6 @@ const Importer = (props: {
         position: "bottom-right",
         isClosable: true,
       });
-      setIsError(true);
     }
 
     if (attributes.success) {
@@ -415,7 +440,6 @@ const Importer = (props: {
         position: "bottom-right",
         isClosable: true,
       });
-      setIsError(true);
     }
 
     setIsLoaded(true);
@@ -430,7 +454,7 @@ const Importer = (props: {
     setContinueLoading(true);
 
     // Collate data to be mapped
-    const mappingData: { fields: EntityImport; data: any[] } = {
+    const mappingData: { fields: EntityImport } = {
       fields: {
         name: nameField,
         description: descriptionField,
@@ -441,7 +465,6 @@ const Importer = (props: {
         products: productsField,
         attributes: attributesField,
       },
-      data: spreadsheetData,
     };
 
     const response = await request<any>(
@@ -614,7 +637,6 @@ const Importer = (props: {
     setJsonData(null);
 
     // Reset data state
-    setSpreadsheetData([]);
     setColumns([]);
     setNameField("");
     setDescriptionField("");
@@ -629,7 +651,7 @@ const Importer = (props: {
 
   return (
     <>
-      {isLoaded && isError ? (
+      {isLoaded && importError ? (
         <Error />
       ) : (
         <Modal

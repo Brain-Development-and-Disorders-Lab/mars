@@ -7,7 +7,7 @@ import _ from "lodash";
 // URL of the API server, either local or remote depending on deployment status
 export const API_URL =
   process.env.NODE_ENV !== "production"
-    ? "http://localhost:8000/"
+    ? "http://localhost:8000"
     : "https://api.storacuity.com";
 export const STATIC_URL =
   process.env.NODE_ENV !== "production"
