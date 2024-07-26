@@ -4,6 +4,7 @@ import _ from "lodash";
 import * as fs from "fs";
 import { Entities } from "./Entities";
 import { ResponseMessage } from "@types";
+import XLSX from "xlsx";
 
 export class Data {
   static downloadFile = async (_id: string): Promise<string | null> => {
@@ -53,5 +54,45 @@ export class Data {
       success: true,
       message: `Uploaded file "${filename}"`,
     };
+  };
+
+  /**
+   * Helper function to receive data from a readable stream and concatenate
+   * @param stream ReadableStream instance with CSV contents
+   * @return {Promise<XLSX.WorkBook>}
+   */
+  static bufferHelper = async (stream: any): Promise<XLSX.WorkBook> =>
+    new Promise((resolve, _reject) => {
+      const buffers: Uint8Array[] = [];
+      stream.on("data", (data: any) => buffers.push(data));
+      stream.on("end", () => {
+        const buffer = Buffer.concat(buffers);
+        const workbook = XLSX.read(buffer, { cellDates: true });
+        resolve(workbook);
+      });
+    });
+
+  static importFile = async (file: any[]): Promise<string[]> => {
+    const { createReadStream, filename, mimetype } = await file[0];
+    console.info(createReadStream, filename, mimetype);
+
+    const stream = createReadStream();
+    const output = await Data.bufferHelper(stream);
+    if (output.SheetNames.length > 0) {
+      const primarySheet = output.Sheets[output.SheetNames[0]];
+      const parsedSheet = XLSX.utils.sheet_to_json<any>(primarySheet, {
+        defval: "",
+      });
+
+      // Check if no rows present
+      if (parsedSheet.length === 0) {
+        return [];
+      }
+
+      // Generate the column list from present keys
+      return Object.keys(parsedSheet.pop());
+    } else {
+      return [];
+    }
   };
 }
