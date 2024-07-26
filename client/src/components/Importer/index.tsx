@@ -43,9 +43,7 @@ import { Information, Warning } from "@components/Label";
 import {
   AttributeModel,
   AttributeCardProps,
-  ProjectModel,
   EntityImport,
-  EntityModel,
   IGenericItem,
 } from "@types";
 
@@ -53,7 +51,7 @@ import {
 import { useNavigate } from "react-router-dom";
 
 // GraphQL
-import { gql, useMutation } from "@apollo/client";
+import { gql, useLazyQuery, useMutation } from "@apollo/client";
 
 // Utility functions and libraries
 import { request } from "@database/functions";
@@ -103,8 +101,8 @@ const Importer = (props: {
   const [columns, setColumns] = useState([] as string[]);
 
   // Data to inform field assignment
-  const [entities, setEntities] = useState([] as EntityModel[]);
-  const [projects, setProjects] = useState([] as ProjectModel[]);
+  const [entities, setEntities] = useState([] as IGenericItem[]);
+  const [projects, setProjects] = useState([] as IGenericItem[]);
 
   // Fields to be assigned to columns
   const [nameField, setNameField] = useState("");
@@ -122,13 +120,40 @@ const Importer = (props: {
 
   // Queries
   const IMPORT_FILE = gql`
-    mutation ImportFile($type: String, $file: [Upload]!) {
-      importFile(type: $type, file: $file)
+    mutation ImportFile($file: [Upload]!) {
+      importFile(file: $file)
     }
   `;
-
   const [importFile, { loading: importLoading, error: importError }] =
     useMutation(IMPORT_FILE);
+
+  const GET_MAPPING_DATA = gql`
+    query GetMappingData {
+      entities {
+        _id
+        name
+      }
+      projects {
+        _id
+        name
+      }
+      attributes {
+        _id
+        name
+        description
+        values {
+          _id
+          data
+          name
+          type
+        }
+      }
+    }
+  `;
+  const [
+    getMappingData,
+    { loading: mappingDataLoading, error: mappingDataError },
+  ] = useLazyQuery(GET_MAPPING_DATA);
 
   // Effect to manipulate 'Continue' button state for 'upload' page
   useEffect(() => {
@@ -282,7 +307,6 @@ const Importer = (props: {
       setContinueLoading(importLoading);
       const response = await importFile({
         variables: {
-          type: "csv",
           file: file,
         },
       });
@@ -323,7 +347,7 @@ const Importer = (props: {
           }
 
           // Setup the next stage of CSV import
-          // await setupMapping();
+          await setupMapping();
         } else if (_.isEqual(fileType, "application/json")) {
           toast({
             title: "Success",
@@ -398,51 +422,31 @@ const Importer = (props: {
    * and Attributes.
    */
   const setupMapping = async () => {
-    // Load all Entities, Projects, and Attributes
-    const entities = await request<EntityModel[]>("GET", "/entities");
-    const projects = await request<ProjectModel[]>("GET", "/projects");
-    const attributes = await request<AttributeModel[]>("GET", "/attributes");
+    setIsLoaded(!mappingDataLoading);
+    const response = await getMappingData();
 
-    if (entities.success) {
-      setEntities(entities.data);
-    } else {
+    if (response.data?.entities) {
+      setEntities(response.data.entities);
+    }
+    if (response.data?.attributes) {
+      setProjects(response.data.attributes);
+    }
+    if (response.data?.projects) {
+      setProjects(response.data.projects);
+    }
+
+    if (mappingDataError) {
       toast({
         title: "Error",
         status: "error",
-        description: "Could not retrieve Entities",
+        description: "Could not retrieve data for mapping",
         duration: 4000,
         position: "bottom-right",
         isClosable: true,
       });
     }
 
-    if (projects.success) {
-      setProjects(projects.data);
-    } else {
-      toast({
-        title: "Error",
-        status: "error",
-        description: "Could not retrieve Projects",
-        duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
-      });
-    }
-
-    if (attributes.success) {
-      setAttributes(attributes.data);
-    } else {
-      toast({
-        title: "Error",
-        status: "error",
-        description: "Could not retrieve Attributes",
-        duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
-      });
-    }
-
-    setIsLoaded(true);
+    setIsLoaded(!mappingDataLoading);
   };
 
   /**

@@ -73,24 +73,27 @@ export class Data {
     });
 
   static importFile = async (file: any[]): Promise<string[]> => {
-    const { createReadStream, filename, mimetype } = await file[0];
-    console.info(createReadStream, filename, mimetype);
-
+    const { createReadStream, mimetype } = await file[0];
     const stream = createReadStream();
-    const output = await Data.bufferHelper(stream);
-    if (output.SheetNames.length > 0) {
-      const primarySheet = output.Sheets[output.SheetNames[0]];
-      const parsedSheet = XLSX.utils.sheet_to_json<any>(primarySheet, {
-        defval: "",
-      });
 
-      // Check if no rows present
-      if (parsedSheet.length === 0) {
+    if (_.isEqual(mimetype, "text/csv")) {
+      const output = await Data.bufferHelper(stream);
+      if (output.SheetNames.length > 0) {
+        const primarySheet = output.Sheets[output.SheetNames[0]];
+        const parsedSheet = XLSX.utils.sheet_to_json<any>(primarySheet, {
+          defval: "",
+        });
+
+        // Check if no rows present
+        if (parsedSheet.length === 0) {
+          return [];
+        }
+
+        // Generate the column list from present keys
+        return Object.keys(parsedSheet.pop());
+      } else {
         return [];
       }
-
-      // Generate the column list from present keys
-      return Object.keys(parsedSheet.pop());
     } else {
       return [];
     }
