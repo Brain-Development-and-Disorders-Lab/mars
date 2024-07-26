@@ -19,7 +19,6 @@ import {
   Select,
   FormLabel,
   Tag,
-  TagCloseButton,
   useSteps,
   Stepper,
   Step,
@@ -40,12 +39,7 @@ import Attribute from "@components/AttributeCard";
 import { Information, Warning } from "@components/Label";
 
 // Custom and existing types
-import {
-  AttributeModel,
-  AttributeCardProps,
-  EntityImport,
-  IGenericItem,
-} from "@types";
+import { AttributeModel, AttributeCardProps, IGenericItem } from "@types";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
@@ -100,8 +94,7 @@ const Importer = (props: {
   // Spreadsheet column state
   const [columns, setColumns] = useState([] as string[]);
 
-  // Data to inform field assignment
-  const [entities, setEntities] = useState([] as IGenericItem[]);
+  // Data used to assign for mapping
   const [projects, setProjects] = useState([] as IGenericItem[]);
 
   // Fields to be assigned to columns
@@ -109,10 +102,6 @@ const Importer = (props: {
   const [descriptionField, setDescriptionField] = useState("");
   const [ownerField, _setOwnerField] = useState(token.orcid);
   const [projectField, setProjectField] = useState("");
-  const [selectedOrigin, setSelectedOrigin] = useState({} as IGenericItem);
-  const [originsField, setOriginsField] = useState([] as IGenericItem[]);
-  const [selectedProduct, setSelectedProduct] = useState({} as IGenericItem);
-  const [productsField, setProductsField] = useState([] as IGenericItem[]);
   const [attributes, setAttributes] = useState([] as AttributeModel[]);
   const [attributesField, setAttributesField] = useState(
     [] as AttributeModel[],
@@ -129,10 +118,6 @@ const Importer = (props: {
 
   const GET_MAPPING_DATA = gql`
     query GetMappingData {
-      entities {
-        _id
-        name
-      }
       projects {
         _id
         name
@@ -154,6 +139,17 @@ const Importer = (props: {
     getMappingData,
     { loading: mappingDataLoading, error: mappingDataError },
   ] = useLazyQuery(GET_MAPPING_DATA);
+
+  const MAP_FILE = gql`
+    mutation MapFile($columnMapping: ColumnMappingInput, $file: [Upload]!) {
+      mapFile(columnMapping: $columnMapping, file: $file) {
+        message
+        success
+      }
+    }
+  `;
+  const [mapFile, { loading: mappingLoading, error: mappingError }] =
+    useMutation(MAP_FILE);
 
   // Effect to manipulate 'Continue' button state for 'upload' page
   useEffect(() => {
@@ -250,22 +246,6 @@ const Importer = (props: {
     // This is a simplified example, you might need to adjust it based on your actual data structure
     if (updatedJsonData && Array.isArray(updatedJsonData)) {
       (updatedJsonData as any).forEach((entity: any) => {
-        if (originsField?.length > 0) {
-          // Add or update the 'origins' field in the entity
-          entity.associations.origins = _.unionBy(
-            entity.associations.origins,
-            originsField,
-            "id",
-          );
-        }
-        if (productsField?.length > 0) {
-          // Add or update the 'products' field in the entity
-          entity.associations.products = _.unionBy(
-            entity.associations.products,
-            productsField,
-            "id",
-          );
-        }
         if (!_.isEqual(projectField, "")) {
           // Add or update the 'project' field in the entity
           entity.projects = [projectField];
@@ -273,7 +253,6 @@ const Importer = (props: {
           // Clear the `projects` field
           entity.projects = [];
         }
-        // ... add more updates as per your other fields
       });
     }
 
@@ -324,9 +303,6 @@ const Importer = (props: {
       }
 
       if (response.data) {
-        // Reset file upload state
-        setFile({} as File);
-
         if (_.isEqual(fileType, "text/csv")) {
           toast({
             title: "Success",
@@ -425,11 +401,8 @@ const Importer = (props: {
     setIsLoaded(!mappingDataLoading);
     const response = await getMappingData();
 
-    if (response.data?.entities) {
-      setEntities(response.data.entities);
-    }
     if (response.data?.attributes) {
-      setProjects(response.data.attributes);
+      setAttributes(response.data.attributes);
     }
     if (response.data?.projects) {
       setProjects(response.data.projects);
@@ -455,32 +428,29 @@ const Importer = (props: {
    */
   const performMapping = async () => {
     // Set the mapping status
-    setContinueLoading(true);
+    setContinueLoading(mappingLoading);
 
     // Collate data to be mapped
-    const mappingData: { fields: EntityImport } = {
-      fields: {
+    const mappingData: { columnMapping: any; file: any } = {
+      columnMapping: {
         name: nameField,
         description: descriptionField,
         created: dayjs(Date.now()).toISOString(),
         owner: token.orcid,
-        projects: projectField,
-        origins: originsField,
-        products: productsField,
+        project: projectField,
         attributes: attributesField,
       },
+      file: file,
     };
+    await mapFile({
+      variables: {
+        columnMapping: mappingData.columnMapping,
+        file: mappingData.file,
+      },
+    });
+    setContinueLoading(mappingLoading);
 
-    const response = await request<any>(
-      "POST",
-      "/data/import/mapping",
-      mappingData,
-    );
-    if (response.success) {
-      props.onClose();
-      resetState();
-      navigate(0);
-    } else {
+    if (mappingError) {
       toast({
         title: "Import Error",
         status: "error",
@@ -489,7 +459,12 @@ const Importer = (props: {
         position: "bottom-right",
         isClosable: true,
       });
+    } else {
+      props.onClose();
+      resetState();
+      navigate(0);
     }
+
     setContinueLoading(false);
   };
 
@@ -515,53 +490,6 @@ const Importer = (props: {
           return (
             <option key={column} value={column}>
               {column}
-            </option>
-          );
-        })}
-      </Select>
-    );
-  };
-
-  /**
-   * Factory-like pattern to generate `Select` components for selecting Entities
-   * @param {any} value Component value
-   * @param {React.SetStateAction<any>} setValue React `useState` function to set state
-   * @returns {ReactElement}
-   */
-  const getSelectEntitiesComponent = (
-    id: string,
-    value: IGenericItem,
-    setValue: React.SetStateAction<any>,
-    selected: IGenericItem[],
-    setSelected: React.SetStateAction<any>,
-    disabled?: boolean,
-  ) => {
-    return (
-      <Select
-        id={id}
-        placeholder={"Select Entity"}
-        value={value._id}
-        onChange={(event) => {
-          const selection = {
-            _id: event.target.value,
-            name: event.target.options[event.target.selectedIndex].label,
-          };
-          setValue(selection);
-          if (
-            !_.includes(
-              selected.map((entity) => entity._id),
-              selection._id,
-            )
-          ) {
-            setSelected([...selected, selection]);
-          }
-        }}
-        isDisabled={_.isUndefined(disabled) ? false : disabled}
-      >
-        {entities.map((entity) => {
-          return (
-            <option key={entity._id} value={entity._id}>
-              {entity.name}
             </option>
           );
         })}
@@ -645,10 +573,6 @@ const Importer = (props: {
     setNameField("");
     setDescriptionField("");
     setProjectField("");
-    setSelectedOrigin({} as IGenericItem);
-    setOriginsField([] as IGenericItem[]);
-    setSelectedProduct({} as IGenericItem);
-    setProductsField([] as IGenericItem[]);
     setAttributes([]);
     setAttributesField([]);
   };
@@ -889,78 +813,6 @@ const Importer = (props: {
                       <FormHelperText>
                         An existing Project to associate each Entity with
                       </FormHelperText>
-                    </FormControl>
-                  </Flex>
-                  <Flex direction={"row"} gap={"4"}>
-                    <FormControl>
-                      <FormLabel>Origin</FormLabel>
-                      {getSelectEntitiesComponent(
-                        "import_origins",
-                        selectedOrigin,
-                        setSelectedOrigin,
-                        originsField,
-                        setOriginsField,
-                      )}
-                      <FormHelperText>
-                        Existing Origin Entities to associate each Entity with
-                      </FormHelperText>
-                      <Flex direction={"row"} wrap={"wrap"} gap={"2"} pt={"2"}>
-                        {originsField.map((origin) => {
-                          return (
-                            <Tag key={origin._id}>
-                              {origin.name}
-                              <TagCloseButton
-                                onClick={() => {
-                                  setOriginsField([
-                                    ...originsField.filter(
-                                      (existingOrigin) =>
-                                        !_.isEqual(
-                                          existingOrigin._id,
-                                          origin._id,
-                                        ),
-                                    ),
-                                  ]);
-                                }}
-                              />
-                            </Tag>
-                          );
-                        })}
-                      </Flex>
-                    </FormControl>
-                    <FormControl>
-                      <FormLabel>Products</FormLabel>
-                      {getSelectEntitiesComponent(
-                        "import_products",
-                        selectedProduct,
-                        setSelectedProduct,
-                        productsField,
-                        setProductsField,
-                      )}
-                      <FormHelperText>
-                        Existing Product Entities to associate each Entity with
-                      </FormHelperText>
-                      <Flex direction={"row"} wrap={"wrap"} gap={"2"} pt={"2"}>
-                        {productsField.map((product) => {
-                          return (
-                            <Tag key={product._id}>
-                              {product.name}
-                              <TagCloseButton
-                                onClick={() => {
-                                  setProductsField([
-                                    ...productsField.filter(
-                                      (existingProduct) =>
-                                        !_.isEqual(
-                                          existingProduct._id,
-                                          product._id,
-                                        ),
-                                    ),
-                                  ]);
-                                }}
-                              />
-                            </Tag>
-                          );
-                        })}
-                      </Flex>
                     </FormControl>
                   </Flex>
                 </Flex>

@@ -214,6 +214,16 @@ export const typedefs = `#graphql
     target: ActivityTargetInput
   }
 
+  # "ColumnMappingInput" input
+  input ColumnMappingInput {
+    name: String
+    description: String
+    created: String
+    owner: String
+    project: String
+    attributes: [AttributeInput]
+  }
+
   # "Response" type
   type Response {
     success: Boolean
@@ -311,5 +321,6 @@ export const typedefs = `#graphql
     # Data mutations
     uploadFile(target: String, file: Upload!): Response
     importFile(file: [Upload]!): [String]
+    mapFile(columnMapping: ColumnMappingInput, file: [Upload]!): Response
   }
 `;

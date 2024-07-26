@@ -35,5 +35,11 @@ export const DataResolvers = {
     ): Promise<string[]> => {
       return await Data.importFile(args.file);
     },
+    mapFile: async (
+      _parent: any,
+      args: { columnMapping: { [column: string]: string }; file: any },
+    ): Promise<ResponseMessage> => {
+      return await Data.mapFile(args.columnMapping, args.file);
+    },
   },
 };
