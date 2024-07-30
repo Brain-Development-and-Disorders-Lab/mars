@@ -48,7 +48,6 @@ import { useNavigate } from "react-router-dom";
 import { gql, useLazyQuery, useMutation } from "@apollo/client";
 
 // Utility functions and libraries
-import { request } from "@database/functions";
 import { useToken } from "src/authentication/useToken";
 import _ from "lodash";
 import dayjs from "dayjs";
@@ -108,13 +107,15 @@ const Importer = (props: {
   );
 
   // Queries
-  const IMPORT_FILE = gql`
-    mutation ImportFile($file: [Upload]!) {
-      importFile(file: $file)
+  const PREPARE_COLUMNS = gql`
+    mutation PrepareColumns($file: [Upload]!) {
+      prepareColumns(file: $file)
     }
   `;
-  const [importFile, { loading: importLoading, error: importError }] =
-    useMutation(IMPORT_FILE);
+  const [
+    prepareColumns,
+    { loading: prepareColumnsLoading, error: prepareColumnsError },
+  ] = useMutation(PREPARE_COLUMNS);
 
   const GET_MAPPING_DATA = gql`
     query GetMappingData {
@@ -140,16 +141,27 @@ const Importer = (props: {
     { loading: mappingDataLoading, error: mappingDataError },
   ] = useLazyQuery(GET_MAPPING_DATA);
 
-  const MAP_FILE = gql`
-    mutation MapFile($columnMapping: ColumnMappingInput, $file: [Upload]!) {
-      mapFile(columnMapping: $columnMapping, file: $file) {
+  const MAP_COLUMNS = gql`
+    mutation MapColumns($columnMapping: ColumnMappingInput, $file: [Upload]!) {
+      mapColumns(columnMapping: $columnMapping, file: $file) {
+        success
+        message
+      }
+    }
+  `;
+  const [mapColumns, { loading: mappingLoading, error: mappingError }] =
+    useMutation(MAP_COLUMNS);
+
+  const IMPORT_OBJECTS = gql`
+    mutation ImportObjects($file: [Upload]!) {
+      importObjects(file: $file) {
         message
         success
       }
     }
   `;
-  const [mapFile, { loading: mappingLoading, error: mappingError }] =
-    useMutation(MAP_FILE);
+  const [importObjects, { loading: importLoading, error: importError }] =
+    useMutation(IMPORT_OBJECTS);
 
   // Effect to manipulate 'Continue' button state for 'upload' page
   useEffect(() => {
@@ -267,7 +279,7 @@ const Importer = (props: {
    * defer the data extraction to the server. For JSON files, trigger the `handleJsonFile` method to handle the file
    * locally instead.
    */
-  const performImport = async () => {
+  const setupImport = async () => {
     // Update state of continue button
     setContinueLoading(true);
     setContinueDisabled(true);
@@ -283,15 +295,15 @@ const Importer = (props: {
       handleJsonFile(file);
     } else if (_.isEqual(fileType, "text/csv")) {
       // Mutation query with CSV file
-      setContinueLoading(importLoading);
-      const response = await importFile({
+      setContinueLoading(prepareColumnsLoading);
+      const response = await prepareColumns({
         variables: {
           file: file,
         },
       });
-      setContinueLoading(importLoading);
+      setContinueLoading(prepareColumnsLoading);
 
-      if (importError) {
+      if (prepareColumnsError) {
         toast({
           title: "Import Error",
           status: "error",
@@ -312,9 +324,9 @@ const Importer = (props: {
             position: "bottom-right",
             isClosable: true,
           });
-          if (response.data.importFile.length > 0) {
+          if (response.data.prepareColumns.length > 0) {
             // Filter columns to exclude columns with no header ("__EMPTY...")
-            const filteredColumnSet = response.data.importFile.filter(
+            const filteredColumnSet = response.data.prepareColumns.filter(
               (column: string) => {
                 return !_.startsWith(column, "__EMPTY");
               },
@@ -350,47 +362,6 @@ const Importer = (props: {
         setContinueLoading(false);
       }
     }
-  };
-
-  /**
-   * Perform import action for JSON data. Make POST request to server passing the JSON data.
-   * @returns Short-circuit when function called without actual JSON data
-   */
-  const performImportJson = async () => {
-    if (!jsonData) {
-      toast({
-        title: "Error",
-        status: "error",
-        description: "Invalid JSON data",
-        duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
-      });
-      return;
-    }
-
-    // Update button state to reflect loading state
-    setContinueLoading(true);
-
-    const response = await request<any>("POST", "/data/importJSON", {
-      jsonData: jsonData,
-    });
-    if (response.success) {
-      // Close the `Importer` UI
-      props.onClose();
-      resetState();
-      navigate(0);
-    } else {
-      toast({
-        title: "Import Error",
-        status: "error",
-        description: "Error while importing JSON file",
-        duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
-      });
-    }
-    setContinueLoading(false);
   };
 
   /**
@@ -442,7 +413,7 @@ const Importer = (props: {
       },
       file: file,
     };
-    await mapFile({
+    await mapColumns({
       variables: {
         columnMapping: mappingData.columnMapping,
         file: mappingData.file,
@@ -530,7 +501,7 @@ const Importer = (props: {
       setActiveStep(1);
 
       // Run setup for import and mapping
-      await performImport();
+      await setupImport();
       await setupMapping();
 
       // Proceed to the next page
@@ -548,7 +519,31 @@ const Importer = (props: {
     } else if (_.isEqual(interfacePage, "mapping")) {
       // Run the final import function depending on file type
       if (_.isEqual(fileType, "application/json")) {
-        await performImportJson();
+        setContinueLoading(importLoading);
+        const response = await importObjects({
+          variables: {
+            file: file,
+          },
+        });
+        setContinueLoading(importLoading);
+
+        if (importError) {
+          toast({
+            title: "Import Error",
+            status: "error",
+            description: "Error while importing JSON file",
+            duration: 4000,
+            position: "bottom-right",
+            isClosable: true,
+          });
+        }
+
+        if (response.data.importObjects.success === true) {
+          // Close the `Importer` UI
+          props.onClose();
+          resetState();
+          navigate(0);
+        }
       } else if (_.isEqual(fileType, "text/csv")) {
         await performMapping();
       }

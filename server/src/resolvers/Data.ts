@@ -23,23 +23,32 @@ export const DataResolvers = {
   },
 
   Mutation: {
-    uploadFile: async (
+    // Upload a file to be attached to Entity with ID `target`
+    uploadAttachment: async (
       _parent: any,
       args: { target: string; file: any },
     ): Promise<ResponseMessage> => {
-      return await Data.uploadFile(args.target, args.file);
+      return await Data.uploadAttachment(args.target, args.file);
     },
-    importFile: async (
+    // Prepare a CSV file, returning the collection of column names (if present)
+    prepareColumns: async (
       _parent: any,
       args: { file: any },
     ): Promise<string[]> => {
-      return await Data.importFile(args.file);
+      return await Data.prepareColumns(args.file);
     },
-    mapFile: async (
+    // Map CSV file columns to Entity fields
+    mapColumns: async (
       _parent: any,
       args: { columnMapping: { [column: string]: string }; file: any },
     ): Promise<ResponseMessage> => {
-      return await Data.mapFile(args.columnMapping, args.file);
+      return await Data.mapColumns(args.columnMapping, args.file);
+    },
+    importObjects: async (
+      _parent: any,
+      args: { file: any },
+    ): Promise<ResponseMessage> => {
+      return await Data.importObjects(args.file);
     },
   },
 };

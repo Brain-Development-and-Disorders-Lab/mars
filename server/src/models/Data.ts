@@ -30,7 +30,7 @@ export class Data {
     return `/${_id}`;
   };
 
-  static uploadFile = async (
+  static uploadAttachment = async (
     target: string,
     file: any,
   ): Promise<ResponseMessage> => {
@@ -66,28 +66,34 @@ export class Data {
 
   /**
    * Helper function to receive data from a readable stream and concatenate
-   * @param stream ReadableStream instance with CSV contents
-   * @return {Promise<XLSX.WorkBook>}
+   * @param stream ReadableStream instance with file contents
+   * @return {Promise<Buffer>}
    */
-  static bufferHelper = async (stream: any): Promise<XLSX.WorkBook> =>
+  static bufferHelper = async (stream: any): Promise<Buffer> =>
     new Promise((resolve, _reject) => {
       const buffers: Uint8Array[] = [];
       stream.on("data", (data: any) => buffers.push(data));
       stream.on("end", () => {
         const buffer = Buffer.concat(buffers);
-        const workbook = XLSX.read(buffer, { cellDates: true });
-        resolve(workbook);
+        resolve(buffer);
       });
     });
 
-  static importFile = async (file: any[]): Promise<string[]> => {
+  /**
+   * Prepare a CSV file for import by extracting column names for mapping
+   * @param file File object
+   * @return {Promise<string[]>}
+   */
+  static prepareColumns = async (file: any[]): Promise<string[]> => {
     const { createReadStream, mimetype } = await file[0];
     const stream = createReadStream();
 
+    // Validate correct MIME type before continuing
     if (_.isEqual(mimetype, "text/csv")) {
       const output = await Data.bufferHelper(stream);
-      if (output.SheetNames.length > 0) {
-        const primarySheet = output.Sheets[output.SheetNames[0]];
+      const workbook = XLSX.read(output, { cellDates: true });
+      if (workbook.SheetNames.length > 0) {
+        const primarySheet = workbook.Sheets[workbook.SheetNames[0]];
         const parsedSheet = XLSX.utils.sheet_to_json<any>(primarySheet, {
           defval: "",
         });
@@ -107,7 +113,13 @@ export class Data {
     }
   };
 
-  static mapFile = async (
+  /**
+   * Map the set of columns as specified to Entity parameters
+   * @param columnMapping Collection of mapped values with their corresponding columns names
+   * @param file CSV file
+   * @return {Promise<ResponseMessage>}
+   */
+  static mapColumns = async (
     columnMapping: { [key: string]: any },
     file: any,
   ): Promise<ResponseMessage> => {
@@ -115,8 +127,9 @@ export class Data {
     const stream = createReadStream();
 
     const output = await Data.bufferHelper(stream);
-    if (output.SheetNames.length > 0) {
-      const primarySheet = output.Sheets[output.SheetNames[0]];
+    const workbook = XLSX.read(output, { cellDates: true });
+    if (workbook.SheetNames.length > 0) {
+      const primarySheet = workbook.Sheets[workbook.SheetNames[0]];
       const parsedSheet = XLSX.utils.sheet_to_json<any>(primarySheet, {
         defval: "",
       });
@@ -206,5 +219,26 @@ export class Data {
         message: "Default sheet is empty",
       };
     }
+  };
+
+  /**
+   * Import a JSON file or set of objects
+   * @param objectsData Set of Objects to import
+   * @return {Promise<ResponseMessage>}
+   */
+  static importObjects = async (file: any[]): Promise<ResponseMessage> => {
+    const { createReadStream, mimetype } = await file[0];
+    const stream = createReadStream();
+
+    // Validate correct MIME type before continuing
+    if (_.isEqual(mimetype, "application/json")) {
+      const output = await Data.bufferHelper(stream);
+      // To-Do: Parse JSON input
+    }
+
+    return {
+      success: true,
+      message: "Successfully imported set of objects",
+    };
   };
 }

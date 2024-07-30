@@ -319,8 +319,9 @@ export const typedefs = `#graphql
     deleteAttribute(_id: String): Response
 
     # Data mutations
-    uploadFile(target: String, file: Upload!): Response
-    importFile(file: [Upload]!): [String]
-    mapFile(columnMapping: ColumnMappingInput, file: [Upload]!): Response
+    uploadAttachment(target: String, file: Upload!): Response
+    prepareColumns(file: [Upload]!): [String]
+    mapColumns(columnMapping: ColumnMappingInput, file: [Upload]!): Response
+    importObjects(file: [Upload]!): Response
   }
 `;

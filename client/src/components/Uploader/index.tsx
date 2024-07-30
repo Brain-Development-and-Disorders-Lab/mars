@@ -38,18 +38,18 @@ const Uploader = (props: {
 
   const toast = useToast();
 
-  const UPLOAD_FILE = gql`
-    mutation UploadFile($target: String!, $file: Upload!) {
-      uploadFile(target: $target, file: $file) {
+  const UPLOAD_ATTACHMENT = gql`
+    mutation UploadAttachment($target: String!, $file: Upload!) {
+      uploadAttachment(target: $target, file: $file) {
         success
         message
       }
     }
   `;
-  const [uploadFile, { loading, error }] = useMutation(UPLOAD_FILE);
+  const [uploadAttachment, { loading, error }] = useMutation(UPLOAD_ATTACHMENT);
 
   const performUpload = async () => {
-    const response = await uploadFile({
+    const response = await uploadAttachment({
       variables: {
         target: props.target,
         file: file,
@@ -68,7 +68,7 @@ const Uploader = (props: {
       setIsError(true);
     }
 
-    if (response.data.uploadFile.success) {
+    if (response.data.uploadAttachment.success) {
       // Add the upload to the existing list of uploads
       props.setUploads([...props.uploads, file.name]);
 

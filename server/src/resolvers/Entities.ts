@@ -147,6 +147,7 @@ export const EntitiesResolvers = {
       }
     },
 
+    // Create a new Entity from IEntity data structure
     createEntity: async (
       _parent: any,
       args: { entity: IEntity },
@@ -154,6 +155,7 @@ export const EntitiesResolvers = {
       return await Entities.create(args.entity);
     },
 
+    // Update an existing Entity from EntityModel data structure
     updateEntity: async (
       _parent: any,
       args: { entity: EntityModel },
@@ -182,6 +184,7 @@ export const EntitiesResolvers = {
       }
     },
 
+    // Delete an Entity
     deleteEntity: async (_parent: any, args: { _id: string }) => {
       return await Entities.delete(args._id);
     },
@@ -194,13 +197,15 @@ export const EntitiesResolvers = {
       return await Entities.setLock(args._id, args.lock);
     },
 
-    // Projects
+    // Project mutations
+    // Add an Entity to a Project
     addEntityProject: async (
       _parent: any,
       args: { _id: string; project: string },
     ): Promise<ResponseMessage> => {
       return await Entities.addProject(args._id, args.project);
     },
+    // Remove an Entity from a Project
     removeEntityProject: async (
       _parent: any,
       args: { _id: string; project: string },
