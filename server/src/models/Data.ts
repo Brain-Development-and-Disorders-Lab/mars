@@ -226,14 +226,54 @@ export class Data {
    * @param objectsData Set of Objects to import
    * @return {Promise<ResponseMessage>}
    */
-  static importObjects = async (file: any[]): Promise<ResponseMessage> => {
+  static importObjects = async (
+    file: any[],
+    owner: string,
+    project: string,
+  ): Promise<ResponseMessage> => {
     const { createReadStream, mimetype } = await file[0];
     const stream = createReadStream();
 
     // Validate correct MIME type before continuing
     if (_.isEqual(mimetype, "application/json")) {
       const output = await Data.bufferHelper(stream);
-      // To-Do: Parse JSON input
+      const parsed = JSON.parse(output.toString());
+
+      // Check that JSON file contains required "entities" field
+      if (_.isUndefined(parsed["entities"])) {
+        return {
+          success: false,
+          message: 'JSON file does not contain "entities" field',
+        };
+      }
+
+      for (let entity of parsed.entities as EntityModel[]) {
+        // Splice in the owner and Project information
+        entity.owner = owner;
+        entity.projects = [project];
+
+        // Check if Entity exists and update or create as required
+        const exists = await Entities.exists(entity._id);
+        if (exists) {
+          // Update the Entity if it already exists
+          const result = await Entities.update(entity);
+          if (result.success === false) {
+            return {
+              success: false,
+              message: `Error updating existing Entity: "${entity.name}"`,
+            };
+          }
+        } else {
+          // Create a new Entity if it does not exist
+          const result = await Entities.create(entity);
+          if (result.success === false) {
+            return {
+              success: false,
+              message: `Error creating new Entity: "${entity.name}"`,
+            };
+          }
+        }
+      }
     }
 
     return {

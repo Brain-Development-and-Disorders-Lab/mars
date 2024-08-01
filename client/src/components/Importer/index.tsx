@@ -153,10 +153,10 @@ const Importer = (props: {
     useMutation(MAP_COLUMNS);
 
   const IMPORT_OBJECTS = gql`
-    mutation ImportObjects($file: [Upload]!) {
-      importObjects(file: $file) {
-        message
+    mutation ImportObjects($file: [Upload]!, $owner: String, $project: String) {
+      importObjects(file: $file, owner: $owner, project: $project) {
         success
+        message
       }
     }
   `;
@@ -523,6 +523,8 @@ const Importer = (props: {
         const response = await importObjects({
           variables: {
             file: file,
+            owner: ownerField,
+            project: projectField,
           },
         });
         setContinueLoading(importLoading);

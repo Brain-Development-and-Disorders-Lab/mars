@@ -46,9 +46,9 @@ export const DataResolvers = {
     },
     importObjects: async (
       _parent: any,
-      args: { file: any },
+      args: { file: any; owner: string; project: string },
     ): Promise<ResponseMessage> => {
-      return await Data.importObjects(args.file);
+      return await Data.importObjects(args.file, args.owner, args.project);
     },
   },
 };

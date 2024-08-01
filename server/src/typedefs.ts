@@ -322,6 +322,6 @@ export const typedefs = `#graphql
     uploadAttachment(target: String, file: Upload!): Response
     prepareColumns(file: [Upload]!): [String]
     mapColumns(columnMapping: ColumnMappingInput, file: [Upload]!): Response
-    importObjects(file: [Upload]!): Response
+    importObjects(file: [Upload]!, owner: String, project: String): Response
   }
 `;
