@@ -7,7 +7,6 @@ import {
   Heading,
   Text,
   useToast,
-  Spacer,
   useBreakpoint,
   Tag,
   VStack,
@@ -385,7 +384,7 @@ const Dashboard = () => {
           <Flex align={"center"} gap={"2"} my={"2"}>
             <Icon name={"activity"} size={"md"} />
             <Heading size={"md"} fontWeight={"semibold"} color={"gray.700"}>
-              Activity
+              Recent Activity
             </Heading>
           </Flex>
 
@@ -394,18 +393,6 @@ const Dashboard = () => {
             <Flex overflowY={"auto"} p={"0"} w={"100%"} h={"100%"}>
               <VStack spacing={"2"} w={"95%"}>
                 {activityData.map((activity) => {
-                  // Configure the badge
-                  let action = "Created";
-
-                  switch (activity.type) {
-                    case "update":
-                      action = "Updated";
-                      break;
-                    case "delete":
-                      action = "Deleted";
-                      break;
-                  }
-
                   return (
                     <Flex
                       direction={"row"}
@@ -414,7 +401,11 @@ const Dashboard = () => {
                       key={`activity-${activity._id}`}
                       align={"center"}
                     >
-                      <Tooltip>
+                      <Tooltip
+                        label={
+                          activity.actor ? activity.actor.name : "Unknown User"
+                        }
+                      >
                         <Avatar
                           name={
                             activity.actor
@@ -425,32 +416,25 @@ const Dashboard = () => {
                         />
                       </Tooltip>
                       <Flex direction={"column"}>
-                        <Text fontSize={"sm"} fontWeight={"semibold"}>
-                          {action}
-                        </Text>
                         <Flex direction={"row"} gap={"1"}>
-                          <Text fontSize={"sm"} color={"gray.500"}>
-                            {activity.details}
-                          </Text>
+                          <Text fontSize={"sm"}>{activity.details}</Text>
                           <Linky
                             id={activity.target._id}
                             type={activity.target.type}
                             fallback={activity.target.name}
                             justify={"left"}
                             size={"sm"}
+                            truncate={20}
                           />
                         </Flex>
+                        <Text
+                          fontSize={"xs"}
+                          fontWeight={"semibold"}
+                          color={"gray.500"}
+                        >
+                          {dayjs(activity.timestamp).fromNow()}
+                        </Text>
                       </Flex>
-
-                      <Spacer />
-
-                      <Text
-                        fontSize={"xs"}
-                        fontWeight={"semibold"}
-                        color={"gray.500"}
-                      >
-                        {dayjs(activity.timestamp).fromNow()}
-                      </Text>
                     </Flex>
                   );
                 })}
