@@ -5,47 +5,120 @@ import React, { useEffect, useState } from "react";
 import { Button, Link, Skeleton, Text, Tooltip } from "@chakra-ui/react";
 
 // Existing and custom types
-import { AttributeModel, EntityModel, LinkyProps, ProjectModel } from "@types";
+import { IGenericItem, LinkyProps } from "@types";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
 
 // Utility functions and libraries
-import { request } from "@database/functions";
 import _ from "lodash";
+import { gql, useLazyQuery } from "@apollo/client";
+
+const DEFAULT_LINKY_LABEL_LENGTH = 10; // Default number of shown characters
 
 const Linky = (props: LinkyProps) => {
   const navigate = useNavigate();
 
   // Component state
-  const [isLoaded, setIsLoaded] = useState(false);
   const [linkLabel, setLinkLabel] = useState("Invalid");
+  const [tooltipLabel, setTooltipLabel] = useState("Default");
   const [showDeleted, setShowDeleted] = useState(false);
+
+  // GraphQL operations
+  const GET_ENTITY = gql`
+    query GetEntity($_id: String) {
+      entity(_id: $_id) {
+        _id
+        name
+        deleted
+      }
+    }
+  `;
+  const [getEntity, { loading: loadingEntity }] = useLazyQuery(GET_ENTITY);
+
+  const GET_PROJECT = gql`
+    query GetProject($_id: String) {
+      project(_id: $_id) {
+        _id
+        name
+      }
+    }
+  `;
+  const [getProject, { loading: loadingProject }] = useLazyQuery(GET_PROJECT);
+
+  const GET_ATTRIBUTE = gql`
+    query GetAttribute($_id: String) {
+      attribute(_id: $_id) {
+        _id
+        name
+      }
+    }
+  `;
+  const [getAttribute, { loading: loadingAttribute }] =
+    useLazyQuery(GET_ATTRIBUTE);
 
   /**
    * Utility function to retrieve data of link target
    */
   const getLinkyData = async () => {
-    const response = await request<EntityModel | AttributeModel | ProjectModel>(
-      "GET",
-      `/${props.type}/${props.id}`,
-    );
-    if (response.success) {
-      setLinkLabel(response.data.name);
-      if (_.isEqual(props.type, "entities")) {
-        // We can be confident the response data `EntityModel`
-        setShowDeleted((response.data as EntityModel).deleted);
+    let data: IGenericItem = {
+      _id: props.id,
+      name: props.fallback || "Invalid",
+    };
+
+    if (props.type === "attributes") {
+      const response = await getAttribute({ variables: { _id: props.id } });
+      if (response.error) {
+        setShowDeleted(true);
+        setTooltipLabel("Deleted or Private");
+      } else {
+        data.name = response.data.attribute.name;
+        setTooltipLabel(data.name);
       }
-    } else {
-      if (props.fallback) {
-        setLinkLabel(props.fallback);
+    } else if (props.type === "entities") {
+      const response = await getEntity({ variables: { _id: props.id } });
+      if (response.error) {
+        setShowDeleted(true);
+        setTooltipLabel("Deleted or Private");
+      } else {
+        data.name = response.data.entity.name;
+        setTooltipLabel(data.name);
+      }
+    } else if (props.type === "projects") {
+      const response = await getProject({ variables: { _id: props.id } });
+      if (response.error) {
+        setShowDeleted(true);
+        setTooltipLabel("Deleted or Private");
+      } else {
+        data.name = response.data.project.name;
+        setTooltipLabel(data.name);
       }
     }
-    setIsLoaded(true);
+
+    // Set the label text and apply truncating where specified
+    if (props.truncate === false) {
+      // Do not truncate the label text
+      setLinkLabel(data.name);
+    } else if (_.isNumber(props.truncate)) {
+      // Truncate the label text to the specified length
+      setLinkLabel(_.truncate(data.name, { length: props.truncate }));
+    } else {
+      // Truncate the label text to a default length
+      setLinkLabel(
+        _.truncate(data.name, { length: DEFAULT_LINKY_LABEL_LENGTH }),
+      );
+    }
   };
 
   const onClickHandler = () => {
-    if (isLoaded && !props.fallback) navigate(`/${props.type}/${props.id}`);
+    if (
+      !showDeleted &&
+      !loadingAttribute &&
+      !loadingEntity &&
+      !loadingProject
+    ) {
+      navigate(`/${props.type}/${props.id}`);
+    }
   };
 
   useEffect(() => {
@@ -53,7 +126,7 @@ const Linky = (props: LinkyProps) => {
   }, [props.id]);
 
   return (
-    <Tooltip label={showDeleted ? "Deleted" : "View"}>
+    <Tooltip hasArrow label={tooltipLabel} bg={"gray.300"} color={"black"}>
       <Button
         variant={"link"}
         color={props.color ? props.color : "gray.700"}
@@ -61,9 +134,14 @@ const Linky = (props: LinkyProps) => {
         as={Link}
         onClick={onClickHandler}
       >
-        <Skeleton isLoaded={isLoaded}>
-          <Text as={showDeleted ? "s" : "p"}>
-            {_.truncate(linkLabel, { length: 20 })}
+        <Skeleton
+          isLoaded={!loadingAttribute && !loadingEntity && !loadingProject}
+        >
+          <Text
+            color={showDeleted ? "gray.400" : "black"}
+            fontSize={props.size ? props.size : ""}
+          >
+            {linkLabel}
           </Text>
         </Skeleton>
       </Button>

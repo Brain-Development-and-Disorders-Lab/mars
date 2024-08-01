@@ -71,6 +71,7 @@ import Linky from "@components/Linky";
 import Uploader from "@components/Uploader";
 import Values from "@components/Values";
 import Preview from "@components/Preview";
+import AttributeViewButton from "@components/AttributeViewButton";
 import { createColumnHelper } from "@tanstack/react-table";
 
 // Existing and custom types
@@ -80,24 +81,25 @@ import {
   EntityHistory,
   EntityModel,
   IAttribute,
+  IGenericItem,
   IValue,
-  Item,
   ProjectModel,
 } from "@types";
 
 // Utility functions and libraries
-import { request } from "src/database/functions";
+import { request, requestStatic } from "src/database/functions";
 import { isValidValues } from "src/util";
 import _, { debounce } from "lodash";
 import dayjs from "dayjs";
 import FileSaver from "file-saver";
 import slugify from "slugify";
 import { nanoid } from "nanoid";
-import consola from "consola";
+
+// Apollo client imports
+import { useQuery, gql, useMutation, useLazyQuery } from "@apollo/client";
 
 // Routing and navigation
 import { useParams, useNavigate } from "react-router-dom";
-import AttributeViewButton from "@components/AttributeViewButton";
 
 const Entity = () => {
   const { id } = useParams();
@@ -119,7 +121,7 @@ const Entity = () => {
   const [projectData, setProjectData] = useState([] as ProjectModel[]);
   const [selectedProjects, setSelectedProjects] = useState([] as string[]);
 
-  const [minimalEntities, setMinimalEntities] = useState([] as Item[]);
+  const [minimalEntities, setMinimalEntities] = useState([] as IGenericItem[]);
 
   const {
     isOpen: isAddProductsOpen,
@@ -161,156 +163,285 @@ const Entity = () => {
 
   const [attributes, setAttributes] = useState([] as AttributeModel[]);
   const [inputValue, setInputValue] = useState("");
-  const [searchResults, setSearchResults] = useState([] as EntityModel[]);
+  const [searchResults, setSearchResults] = useState([] as IGenericItem[]);
+
+  // Query to retrieve Entity data and associated data for editing
+  const GET_ENTITY = gql`
+    query GetEntityData($_id: String) {
+      entity(_id: $_id) {
+        _id
+        name
+        owner
+        deleted
+        locked
+        description
+        projects
+        associations {
+          origins {
+            _id
+            name
+          }
+          products {
+            _id
+            name
+          }
+        }
+        attributes {
+          _id
+          name
+          description
+          values {
+            _id
+            name
+            type
+            data
+          }
+        }
+        attachments {
+          _id
+          name
+        }
+        history {
+          timestamp
+          deleted
+          owner
+          description
+          projects
+          associations {
+            origins {
+              _id
+              name
+            }
+            products {
+              _id
+              name
+            }
+          }
+          attributes {
+            _id
+            name
+            description
+            values {
+              _id
+              name
+              type
+              data
+            }
+          }
+        }
+      }
+      entities {
+        _id
+        name
+      }
+      projects {
+        _id
+        name
+      }
+      attributes {
+        _id
+        name
+        description
+        values {
+          _id
+          name
+          type
+          data
+        }
+      }
+    }
+  `;
+  const { loading, error, data, refetch } = useQuery(GET_ENTITY, {
+    variables: {
+      _id: id,
+    },
+  });
+
+  const GET_FILE_URL = gql`
+    query GetFileURL($_id: String) {
+      downloadFile(_id: $_id)
+    }
+  `;
+  const [getFile, { loading: fileLoading, error: fileError }] =
+    useLazyQuery(GET_FILE_URL);
+
+  // Query to search Entities
+  const SEARCH_ENTITIES = gql`
+    query SearchEntities($search: String, $limit: Int) {
+      searchEntities(search: $search, limit: $limit) {
+        _id
+        name
+      }
+    }
+  `;
+  const [searchEntities, { loading: searchLoading, error: searchError }] =
+    useLazyQuery(SEARCH_ENTITIES);
+
+  // Query to create a template Attribute
+  const CREATE_ATTRIBUTE = gql`
+    mutation CreateAttribute($attribute: AttributeCreateInput) {
+      createAttribute(attribute: $attribute) {
+        success
+        message
+      }
+    }
+  `;
+  const [
+    createAttribute,
+    { loading: loadingAttributeCreate, error: errorAttributeCreate },
+  ] = useMutation(CREATE_ATTRIBUTE);
+
+  // Mutation to update Entity
+  const UPDATE_ENTITY = gql`
+    mutation UpdateEntity($entity: EntityUpdateInput) {
+      updateEntity(entity: $entity) {
+        success
+        message
+      }
+    }
+  `;
+  const [updateEntity, { loading: updateLoading }] = useMutation(UPDATE_ENTITY);
+
+  // Mutation to delete Entity
+  const DELETE_ENTITY = gql`
+    mutation DeleteEntity($_id: String) {
+      deleteEntity(_id: $_id) {
+        success
+        message
+      }
+    }
+  `;
+  const [deleteEntity, { loading: deleteLoading }] = useMutation(DELETE_ENTITY);
+
+  // Manage data once retrieved
+  useEffect(() => {
+    if (data?.entity) {
+      // Unpack all the Entity data
+      setEntityData(data.entity);
+      setEntityDescription(data.entity.description || "");
+      setEntityProjects(data.entity.projects || []);
+      setEntityOrigins(data.entity.associations.origins || []);
+      setEntityProducts(data.entity.associations.products || []);
+      setEntityAttributes(data.entity.attributes || []);
+      setEntityAttachments(data.entity.attachments);
+      setEntityHistory(data.entity.history || []);
+    }
+    if (data?.entities) {
+      setMinimalEntities(
+        data.entities.filter(
+          (entity: EntityModel) => !_.isEqual(entityData._id, entity._id),
+        ),
+      );
+    }
+    if (data?.projects) {
+      setProjectData(data.projects);
+    }
+  }, [loading]);
+
+  // Display any GraphQL errors
+  useEffect(() => {
+    if (error) {
+      toast({
+        title: "Error",
+        description: error.message,
+        status: "error",
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
+  }, [error]);
+
+  // Check to see if data currently exists and refetch if so
+  useEffect(() => {
+    if (data && refetch) {
+      refetch();
+    }
+  }, []);
 
   // Debounced fetch function
   const fetchEntities = debounce(async (query) => {
-    const response = await request<EntityModel[]>(
-      "POST",
-      "/entities/searchByTerm",
-      { query: query },
-    );
-    if (response.success) {
-      setSearchResults(response.data);
-    } else {
-      setSearchResults([]);
+    const results = await searchEntities({
+      variables: {
+        search: query,
+        limit: 100,
+      },
+    });
+    if (results.data.searchEntities) {
+      setSearchResults(results.data.searchEntities);
+    }
+
+    if (searchError) {
+      toast({
+        title: "Error",
+        status: "error",
+        description: searchError.message,
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
     }
   }, 150);
-
-  /**
-   * Utility function to retrieve all Entities
-   */
-  const getEntities = async () => {
-    const response = await request<EntityModel[]>("GET", "/entities");
-    if (response.success) {
-      const minimizedEntities: Item[] = response.data.map((entity) => {
-        return { _id: entity._id, name: entity.name };
-      });
-      setMinimalEntities(minimizedEntities);
-    } else {
-      toast({
-        title: "Error",
-        status: "error",
-        description: "Could not retrieve Entities",
-        duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
-      });
-      setIsError(true);
-    }
-    setIsLoaded(true);
-  };
-
-  /**
-   * Utility function to retrieve specific Entity
-   */
-  const getEntity = async () => {
-    const response = await request<EntityModel>("GET", `/entities/${id}`);
-    if (response.success) {
-      setEntityData(response.data);
-      setEntityDescription(response.data.description);
-      setEntityProjects(response.data.projects);
-      setEntityOrigins(response.data.associations.origins);
-      setEntityProducts(response.data.associations.products);
-      setEntityAttributes(response.data.attributes);
-      setEntityAttachments(response.data.attachments);
-      setEntityHistory(response.data.history);
-    } else {
-      toast({
-        title: "Error",
-        status: "error",
-        description: "Could not retrieve Entity",
-        duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
-      });
-      setIsError(true);
-    }
-    setIsLoaded(true);
-  };
-
-  /**
-   * Utility function to retrieve all Projects
-   */
-  const getProjects = async () => {
-    const response = await request<ProjectModel[]>("GET", "/projects");
-    if (response.success) {
-      setProjectData(response.data);
-    } else {
-      toast({
-        title: "Error",
-        status: "error",
-        description: "Could not retrieve Projects",
-        duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
-      });
-      setIsError(true);
-    }
-    setIsLoaded(true);
-  };
-
-  /**
-   * Utility function to retrieve all Attributes
-   */
-  const getAttributes = async () => {
-    const response = await request<AttributeModel[]>("GET", "/attributes");
-    if (response.success) {
-      setAttributes(response.data);
-    } else {
-      toast({
-        title: "Error",
-        status: "error",
-        description: "Could not retrieve Attributes",
-        duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
-      });
-      setIsError(true);
-    }
-    setIsLoaded(true);
-  };
 
   /**
    * Utility function to retrieve a file from the server for download
    * @param id File identifier, generated by server
    * @param filename Name of downloaded file, slugified prior to download
    */
-  const getDownload = async (id: string, filename: string) => {
-    const response = await request<any>(
-      "GET",
-      `/data/download/${id}`,
-      {},
-      {
-        responseType: "blob",
+  const getDownload = async (_id: string, filename: string) => {
+    // Get the static path to the resource for download
+    const response = await getFile({
+      variables: {
+        _id: _id,
       },
-    );
-    if (response.success) {
-      FileSaver.saveAs(new Blob([response.data]), slugify(filename));
+    });
+
+    // Perform the "GET" request to retrieve the data
+    const fileResponse = await requestStatic<any>(response.data.downloadFile, {
+      responseType: "blob",
+    });
+
+    // Attempt to download the received data
+    if (fileResponse.data) {
+      FileSaver.saveAs(new Blob([fileResponse.data]), slugify(filename));
     } else {
-      consola.error("Error creating blob for download:", id);
+      toast({
+        title: "Error",
+        status: "error",
+        description: `Error creating download for file "${filename}"`,
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
     }
   };
 
-  const getAttachmentFile = async (id: string) => {
-    const response = await request<any[]>("GET", `/data/file/${id}`);
-    if (response.success) {
-      setPreviewType(response.data[0].metadata.type);
-      const fileResponse = await request<any>(
-        "GET",
-        `/data/download/${id}`,
-        {},
+  const getAttachmentFile = async (_id: string, name: string) => {
+    const response = await getFile({
+      variables: {
+        _id: _id,
+      },
+    });
+
+    if (response.data?.downloadFile) {
+      const fileResponse = await requestStatic<any>(
+        response.data.downloadFile,
         {
           responseType: "blob",
         },
       );
+
       if (fileResponse.success) {
         setPreviewSource(URL.createObjectURL(fileResponse.data));
-      } else {
+        if (_.endsWith(name, ".pdf")) {
+          setPreviewType("application/pdf");
+        }
+      }
+
+      if (fileError) {
         toast({
           title: "Error",
           status: "error",
-          description: "Could not retrieve attachment preview",
+          description: fileError.message,
           duration: 4000,
           position: "bottom-right",
           isClosable: true,
@@ -329,13 +460,6 @@ const Entity = () => {
     }
   };
 
-  useEffect(() => {
-    getEntity();
-    getEntities();
-    getProjects();
-    getAttributes();
-  }, [id]);
-
   const handleInputChange = (event: any) => {
     const value = event.target.value;
     setInputValue(value);
@@ -353,12 +477,14 @@ const Entity = () => {
       values: attributeValues,
     };
 
-    const response = await request<any>(
-      "POST",
-      "/attributes/create",
-      attributeData,
-    );
-    if (response.success) {
+    // Execute the GraphQL mutation
+    const response = await createAttribute({
+      variables: {
+        attribute: attributeData,
+      },
+    });
+
+    if (response.data.createAttribute.success) {
       toast({
         title: "Saved!",
         status: "success",
@@ -367,11 +493,12 @@ const Entity = () => {
         isClosable: true,
       });
       setAttributes(() => [...attributes, attributeData as AttributeModel]);
-    } else {
+    }
+
+    if (errorAttributeCreate) {
       toast({
         title: "Error",
-        description:
-          "An error occurred when saving this Attribute as a template",
+        description: errorAttributeCreate.message,
         status: "error",
         duration: 2000,
         position: "bottom-right",
@@ -387,8 +514,6 @@ const Entity = () => {
   }, [attributeValues]);
 
   // Toggles
-  const [isError, setIsError] = useState(false);
-  const [isLoaded, setIsLoaded] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [editing, setEditing] = useState(false);
   const [exportAll, setExportAll] = useState(false);
@@ -397,13 +522,15 @@ const Entity = () => {
   const [entityData, setEntityData] = useState({} as EntityModel);
   const [entityDescription, setEntityDescription] = useState("");
   const [entityProjects, setEntityProjects] = useState([] as string[]);
-  const [entityOrigins, setEntityOrigins] = useState([] as Item[]);
-  const [entityProducts, setEntityProducts] = useState([] as Item[]);
+  const [entityOrigins, setEntityOrigins] = useState([] as IGenericItem[]);
+  const [entityProducts, setEntityProducts] = useState([] as IGenericItem[]);
   const [entityAttributes, setEntityAttributes] = useState(
     [] as AttributeModel[],
   );
   const [entityHistory, setEntityHistory] = useState([] as EntityHistory[]);
-  const [entityAttachments, setEntityAttachments] = useState([] as Item[]);
+  const [entityAttachments, setEntityAttachments] = useState(
+    [] as IGenericItem[],
+  );
   const [toUploadAttachments, setToUploadAttachments] = useState(
     [] as string[],
   );
@@ -442,45 +569,39 @@ const Entity = () => {
   // Toggle editing status
   const handleEditClick = async () => {
     if (editing) {
-      setIsUpdating(true);
-
-      // Collate Entity update data
-      const updateData: EntityModel = {
-        _id: entityData._id,
-        name: entityData.name,
-        created: entityData.created,
-        deleted: entityData.deleted,
-        locked: entityData.locked,
-        owner: entityData.owner,
-        description: entityDescription,
-        projects: entityProjects,
-        associations: {
-          origins: entityOrigins,
-          products: entityProducts,
-        },
-        attributes: entityAttributes,
-        attachments: entityAttachments,
-        history: entityHistory,
-      };
-
-      // Update data
-      const response = await request<any>(
-        "POST",
-        "/entities/update",
-        updateData,
-      );
-      if (response.success) {
+      setIsUpdating(updateLoading);
+      try {
+        await updateEntity({
+          variables: {
+            entity: {
+              _id: entityData._id,
+              name: entityData.name,
+              created: entityData.created,
+              deleted: entityData.deleted,
+              locked: entityData.locked,
+              owner: entityData.owner,
+              description: entityDescription,
+              projects: entityProjects,
+              associations: {
+                origins: entityOrigins,
+                products: entityProducts,
+              },
+              attributes: entityAttributes,
+              attachments: entityAttachments,
+            },
+          },
+        });
         toast({
-          title: "Saved!",
+          title: "Updated Successfully",
           status: "success",
           duration: 2000,
           position: "bottom-right",
           isClosable: true,
         });
-      } else {
+      } catch (error: any) {
         toast({
           title: "Error",
-          description: "An error occurred when saving updates.",
+          description: `Entity could not be updated`,
           status: "error",
           duration: 2000,
           position: "bottom-right",
@@ -515,57 +636,44 @@ const Entity = () => {
    * Restore an Entity from a deleted status
    */
   const handleRestoreFromDeleteClick = async () => {
-    // Collate data for updating
-    const updateData: EntityModel = {
-      _id: entityData._id,
-      name: entityData.name,
-      created: entityData.created,
-      deleted: false,
-      locked: false,
-      owner: entityData.owner,
-      description: entityDescription,
-      projects: entityProjects,
-      associations: {
-        origins: entityOrigins,
-        products: entityProducts,
-      },
-      attributes: entityAttributes,
-      attachments: entityAttachments,
-      history: entityData.history,
-    };
-
-    setIsLoaded(false);
-
-    // Update data
-    const response = await request<any>("POST", "/entities/update", updateData);
-    if (response.success) {
+    try {
+      await updateEntity({
+        variables: {
+          entity: {
+            _id: entityData._id,
+            name: entityData.name,
+            created: entityData.created,
+            deleted: false,
+            locked: false,
+            owner: entityData.owner,
+            description: entityDescription,
+            projects: entityProjects,
+            associations: {
+              origins: entityOrigins,
+              products: entityProducts,
+            },
+            attributes: entityAttributes,
+            attachments: entityAttachments,
+          },
+        },
+      });
       toast({
-        title: "Restored!",
+        title: "Restored Successfully",
         status: "success",
         duration: 2000,
         position: "bottom-right",
         isClosable: true,
       });
-
-      // Apply updated state
-      setEntityData(updateData);
-      setEntityDescription(updateData.description || "");
-      setEntityProjects(updateData.projects);
-      setEntityOrigins(updateData.associations.origins);
-      setEntityProducts(updateData.associations.products);
-      setEntityAttributes(updateData.attributes);
-      setEntityHistory(updateData.history);
-    } else {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "An error occurred when restoring this Entity.",
+        description: `Entity could not be restored`,
         status: "error",
         duration: 2000,
         position: "bottom-right",
         isClosable: true,
       });
     }
-    setIsLoaded(true);
   };
 
   const truncateTableText =
@@ -593,6 +701,7 @@ const Entity = () => {
                 onClick={() => {
                   removeProject(info.row.original);
                 }}
+                size={"sm"}
               />
             ) : (
               <Button
@@ -601,6 +710,7 @@ const Entity = () => {
                 colorScheme={"gray"}
                 onClick={() => navigate(`/projects/${info.row.original}`)}
                 isDisabled={_.isUndefined(info.row.original)}
+                size={"sm"}
               >
                 View
               </Button>
@@ -626,7 +736,7 @@ const Entity = () => {
   ];
 
   // Configure origins table columns and data
-  const originTableColumnHelper = createColumnHelper<Item>();
+  const originTableColumnHelper = createColumnHelper<IGenericItem>();
   const originTableColumns = [
     originTableColumnHelper.accessor("name", {
       cell: (info) => {
@@ -645,10 +755,11 @@ const Entity = () => {
     originTableColumnHelper.accessor("_id", {
       cell: (info) => {
         return (
-          <Flex w={"100%"} justify={"end"}>
+          <Flex w={"100%"} justify={"end"} p={"0.5"}>
             {editing ? (
               <IconButton
                 icon={<Icon name={"delete"} />}
+                size={"sm"}
                 aria-label={"Remove origin"}
                 colorScheme={"red"}
                 onClick={() => {
@@ -658,6 +769,7 @@ const Entity = () => {
             ) : (
               <Button
                 key={`view-${info.row.original._id}`}
+                size={"sm"}
                 rightIcon={<Icon name={"c_right"} />}
                 colorScheme={"gray"}
                 onClick={() => navigate(`/entities/${info.row.original._id}`)}
@@ -679,7 +791,7 @@ const Entity = () => {
       action(table, rows) {
         const originsToRemove: string[] = [];
         for (let rowIndex of Object.keys(rows)) {
-          originsToRemove.push(table.getRow(rowIndex).original.id);
+          originsToRemove.push(table.getRow(rowIndex).original._id);
         }
         removeOrigins(originsToRemove);
       },
@@ -687,7 +799,7 @@ const Entity = () => {
   ];
 
   // Configure products table columns and data
-  const productTableColumnHelper = createColumnHelper<Item>();
+  const productTableColumnHelper = createColumnHelper<IGenericItem>();
   const productTableColumns = [
     productTableColumnHelper.accessor("name", {
       cell: (info) => {
@@ -710,6 +822,7 @@ const Entity = () => {
             {editing ? (
               <IconButton
                 icon={<Icon name={"delete"} />}
+                size={"sm"}
                 aria-label={"Remove product"}
                 colorScheme={"red"}
                 onClick={() => {
@@ -719,6 +832,7 @@ const Entity = () => {
             ) : (
               <Button
                 key={`view-${info.row.original._id}`}
+                size={"sm"}
                 rightIcon={<Icon name={"c_right"} />}
                 colorScheme={"gray"}
                 onClick={() => navigate(`/entities/${info.row.original._id}`)}
@@ -740,7 +854,7 @@ const Entity = () => {
       action(table, rows) {
         const productsToRemove: string[] = [];
         for (let rowIndex of Object.keys(rows)) {
-          productsToRemove.push(table.getRow(rowIndex).original.id);
+          productsToRemove.push(table.getRow(rowIndex).original._id);
         }
         removeProducts(productsToRemove);
       },
@@ -824,7 +938,7 @@ const Entity = () => {
   }, [breakpoint]);
 
   // Configure attachment table columns and data
-  const attachmentTableColumnHelper = createColumnHelper<Item>();
+  const attachmentTableColumnHelper = createColumnHelper<IGenericItem>();
   const attachmentTableColumns = [
     attachmentTableColumnHelper.accessor("name", {
       cell: (info) => {
@@ -864,13 +978,14 @@ const Entity = () => {
           onPreviewOpen();
 
           // Retrieve the attachment file from the serve
-          await getAttachmentFile(info.getValue());
+          await getAttachmentFile(info.getValue(), info.row.original.name);
         };
 
         return (
           <Flex w={"100%"} justify={"end"} gap={"4"}>
             <IconButton
               aria-label={"Preview attachment"}
+              size={"sm"}
               key={`preview-file-${info.getValue()}`}
               colorScheme={"gray"}
               icon={<Icon name={"view"} />}
@@ -879,6 +994,7 @@ const Entity = () => {
             {editing ? (
               <IconButton
                 aria-label={"Delete attachment"}
+                size={"sm"}
                 key={`delete-file-${info.getValue()}`}
                 colorScheme={"red"}
                 icon={<Icon name={"delete"} />}
@@ -887,6 +1003,7 @@ const Entity = () => {
             ) : (
               <IconButton
                 aria-label={"Download attachment"}
+                size={"sm"}
                 key={`download-file-${info.getValue()}`}
                 colorScheme={"blue"}
                 icon={<Icon name={"download"} />}
@@ -906,7 +1023,7 @@ const Entity = () => {
       action(table, rows) {
         const attachmentsToRemove: string[] = [];
         for (let rowIndex of Object.keys(rows)) {
-          attachmentsToRemove.push(table.getRow(rowIndex).original.id);
+          attachmentsToRemove.push(table.getRow(rowIndex).original._id);
         }
         removeAttachments(attachmentsToRemove);
       },
@@ -920,57 +1037,55 @@ const Entity = () => {
   const handleRestoreFromHistoryClick = async (
     entityVersion: EntityHistory,
   ) => {
-    const updateData: EntityModel = {
-      _id: entityData._id,
-      name: entityData.name,
-      created: entityData.created,
-      deleted: entityVersion.deleted,
-      locked: entityData.locked,
-      owner: entityVersion.owner,
-      description: entityVersion.description,
-      projects: entityVersion.projects,
-      associations: {
-        origins: entityVersion.associations.origins,
-        products: entityVersion.associations.products,
-      },
-      attributes: entityVersion.attributes,
-      attachments: entityVersion.attachments,
-      history: entityData.history,
-    };
-
-    setIsLoaded(false);
-
-    // Update data
-    const response = await request<any>("POST", "/entities/update", updateData);
-    if (response.success) {
+    try {
+      await updateEntity({
+        variables: {
+          entity: {
+            _id: entityData._id,
+            name: entityData.name,
+            created: entityData.created,
+            deleted: entityVersion.deleted,
+            locked: entityData.locked,
+            owner: entityVersion.owner,
+            description: entityVersion.description || "",
+            projects: entityVersion.projects || [],
+            associations: {
+              origins: entityVersion.associations.origins || [],
+              products: entityVersion.associations.products || [],
+            },
+            attributes: entityVersion.attributes || [],
+            attachments: entityVersion.attachments || [],
+          },
+        },
+      });
       toast({
-        title: "Saved!",
+        title: "Restored Successfully",
         status: "success",
         duration: 2000,
         position: "bottom-right",
         isClosable: true,
       });
 
-      // Apply updated state
-      setEntityData(updateData);
-      setEntityDescription(updateData.description || "");
-      setEntityProjects(updateData.projects);
-      setEntityOrigins(updateData.associations.origins);
-      setEntityProducts(updateData.associations.products);
-      setEntityAttributes(updateData.attributes);
-      setEntityHistory(updateData.history);
-      setIsLoaded(true);
-    } else {
+      // Update the state (safely)
+      setEntityDescription(entityVersion.description || "");
+      setEntityProjects(entityVersion.projects || []);
+      setEntityOrigins(entityVersion.associations.origins || []);
+      setEntityProducts(entityVersion.associations.products || []);
+      setEntityAttributes(entityVersion.attributes || []);
+      setEntityAttachments(entityVersion.attachments || []);
+
+      // Close the sidebar
+      onHistoryClose();
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "An error occurred when saving updates.",
+        description: `Entity could not be restored`,
         status: "error",
         duration: 2000,
         position: "bottom-right",
         isClosable: true,
       });
     }
-    onHistoryClose();
   };
 
   // Handle clicking the "Export" button
@@ -1062,19 +1177,24 @@ const Entity = () => {
 
   // Delete the Entity when confirmed
   const handleDeleteClick = async () => {
-    const response = await request<any>("DELETE", `/entities/${id}`);
-    if (response.success) {
+    const response = await deleteEntity({
+      variables: {
+        _id: entityData._id,
+      },
+    });
+    if (response.data.deleteEntity.success) {
       toast({
-        title: "Deleted!",
+        title: "Deleted Successfully",
         status: "success",
         duration: 2000,
         position: "bottom-right",
         isClosable: true,
       });
+      navigate("/entities");
     } else {
       toast({
         title: "Error",
-        description: `An error occurred when deleting Entity "${entityData.name}"`,
+        description: "An error occurred when deleting Entity",
         status: "error",
         duration: 2000,
         position: "bottom-right",
@@ -1082,7 +1202,6 @@ const Entity = () => {
       });
     }
     setEditing(false);
-    navigate("/entities");
   };
 
   const handleEntityNodeClick = (id: string) => {
@@ -1212,8 +1331,7 @@ const Entity = () => {
     setEntityAttributes([
       ...entityAttributes.map((attribute) => {
         if (_.isEqual(attribute._id, updated._id)) {
-          attribute.description = updated.description;
-          attribute.values = _.cloneDeep(updated.values);
+          return _.cloneDeep(updated);
         }
         return attribute;
       }),
@@ -1244,12 +1362,15 @@ const Entity = () => {
   };
 
   return (
-    <Content isError={isError} isLoaded={isLoaded}>
+    <Content
+      isError={!_.isUndefined(error)}
+      isLoaded={!loading && !deleteLoading}
+    >
       <Flex direction={"column"}>
         <Flex
-          gap={"4"}
-          p={"4"}
-          pb={"2"}
+          gap={"2"}
+          p={"2"}
+          pb={"0"}
           direction={"row"}
           justify={"space-between"}
           align={"center"}
@@ -1257,18 +1378,20 @@ const Entity = () => {
         >
           <Flex
             align={"center"}
-            gap={"4"}
+            gap={"2"}
             p={"2"}
             border={"2px"}
             rounded={"md"}
           >
-            <Icon name={"entity"} size={"lg"} />
-            <Heading fontWeight={"semibold"}>{entityData.name}</Heading>
-            {entityData.deleted && <Icon name={"delete"} size={"lg"} />}
+            <Icon name={"entity"} size={"md"} />
+            <Heading fontWeight={"semibold"} size={"lg"}>
+              {entityData.name}
+            </Heading>
+            {entityData.deleted && <Icon name={"delete"} size={"md"} />}
           </Flex>
 
           {/* Buttons */}
-          <Flex direction={"row"} gap={"4"} wrap={"wrap"}>
+          <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
             {isDeletePopoverOpen && (
               <Popover
                 isOpen={isDeletePopoverOpen}
@@ -1286,6 +1409,7 @@ const Entity = () => {
                     <Flex direction={"row"} p={"2"} justify={"center"}>
                       <Button
                         colorScheme={"green"}
+                        size={"sm"}
                         rightIcon={<Icon name={"check"} />}
                         onClick={() => {
                           handleDeleteClick(); // Assuming this function handles the delete logic
@@ -1302,6 +1426,7 @@ const Entity = () => {
             {editing && (
               <Button
                 onClick={() => setEditing(false)}
+                size={"sm"}
                 colorScheme={"orange"}
                 rightIcon={<Icon name={"rewind"} />}
               >
@@ -1311,17 +1436,19 @@ const Entity = () => {
             {entityData.deleted ? (
               <Button
                 onClick={handleRestoreFromDeleteClick}
+                size={"sm"}
                 colorScheme={"orange"}
                 rightIcon={<Icon name={"rewind"} />}
               >
                 Restore
               </Button>
             ) : (
-              <Flex gap={"4"}>
+              <Flex gap={"2"}>
                 {entityData.locked ? (
                   <Tooltip label={"Currently being edited by another user"}>
                     <Button
                       colorScheme={"blue"}
+                      size={"sm"}
                       rightIcon={<Icon name={"lock"} />}
                       isDisabled={entityData.locked}
                     >
@@ -1331,6 +1458,7 @@ const Entity = () => {
                 ) : (
                   <Button
                     onClick={handleEditClick}
+                    size={"sm"}
                     colorScheme={editing ? "green" : "blue"}
                     rightIcon={
                       editing ? <Icon name={"check"} /> : <Icon name={"edit"} />
@@ -1349,6 +1477,7 @@ const Entity = () => {
             <Menu>
               <MenuButton
                 as={Button}
+                size={"sm"}
                 colorScheme={"blue"}
                 rightIcon={<Icon name={"c_down"} />}
               >
@@ -1386,18 +1515,19 @@ const Entity = () => {
           </Flex>
         </Flex>
 
-        <Flex direction={"row"} wrap={"wrap"}>
+        <Flex direction={"row"} gap={"0"} wrap={"wrap"}>
           <Flex
             direction={"column"}
-            p={"4"}
-            gap={"4"}
+            p={"2"}
+            pt={{ base: "0", lg: "2" }}
+            gap={"2"}
             grow={"1"}
             basis={"50%"}
             rounded={"md"}
           >
             {/* Entity Overview */}
-            <Flex direction={"column"} p={"4"} bg={"gray.50"} rounded={"md"}>
-              <Flex gap={"4"} direction={"column"}>
+            <Flex direction={"column"} p={"2"} bg={"gray.100"} rounded={"md"}>
+              <Flex gap={"2"} direction={"column"}>
                 <Flex gap={"2"} direction={"row"}>
                   {/* "Created" and "Owner" fields */}
                   <Flex gap={"2"} direction={"column"} basis={"40%"}>
@@ -1425,7 +1555,7 @@ const Entity = () => {
                           setEntityDescription(event.target.value || "");
                         }}
                         isReadOnly={!editing}
-                        border={"2px"}
+                        border={"1px"}
                         borderColor={"gray.200"}
                         bg={"white"}
                       />
@@ -1438,9 +1568,9 @@ const Entity = () => {
             {/* Projects */}
             <Flex
               direction={"column"}
-              p={"4"}
+              p={"2"}
               rounded={"md"}
-              border={"2px"}
+              border={"1px"}
               borderColor={"gray.200"}
             >
               <Flex
@@ -1448,12 +1578,13 @@ const Entity = () => {
                 justify={"space-between"}
                 align={"center"}
               >
-                <Heading fontWeight={"semibold"} size={"md"} py={"2"}>
+                <Heading fontWeight={"semibold"} size={"md"} mb={"2"}>
                   Projects
                 </Heading>
                 {editing ? (
                   <Button
                     colorScheme={"green"}
+                    size={"sm"}
                     rightIcon={<Icon name={"add"} />}
                     isDisabled={!editing}
                     onClick={onAddProjectsOpen}
@@ -1470,7 +1601,7 @@ const Entity = () => {
               >
                 {entityProjects.length === 0 ? (
                   <Text color={"gray.400"} fontWeight={"semibold"}>
-                    This Entity is not associated with any Projects.
+                    No Projects
                   </Text>
                 ) : (
                   <DataTable
@@ -1485,22 +1616,122 @@ const Entity = () => {
                 )}
               </Flex>
             </Flex>
+
+            {/* Origins and Products */}
+            <Tabs
+              variant={"enclosed"}
+              colorScheme={"gray"}
+              onChange={(index) => setRelationsIndex(index)}
+            >
+              <TabList>
+                <Tab>
+                  <Heading fontWeight={"semibold"} size={"sm"}>
+                    Origins
+                  </Heading>
+                </Tab>
+                <Tab>
+                  <Heading fontWeight={"semibold"} size={"sm"}>
+                    Products
+                  </Heading>
+                </Tab>
+                <Spacer />
+                {editing ? (
+                  <Button
+                    colorScheme={"green"}
+                    size={"sm"}
+                    rightIcon={<Icon name={"add"} />}
+                    isDisabled={!editing}
+                    onClick={() => {
+                      _.isEqual(relationsIndex, 0)
+                        ? onAddOriginsOpen()
+                        : onAddProductsOpen();
+                    }}
+                  >
+                    Add
+                  </Button>
+                ) : null}
+              </TabList>
+              <TabPanels>
+                <TabPanel
+                  borderLeft={"1px"}
+                  borderRight={"1px"}
+                  borderBottom={"1px"}
+                  borderColor={"gray.200"}
+                  roundedBottom={"md"}
+                >
+                  <Flex
+                    w={"100%"}
+                    justify={"center"}
+                    align={"center"}
+                    minH={"200px"}
+                  >
+                    {(entityOrigins?.length ?? 0) === 0 ? (
+                      <Text color={"gray.400"} fontWeight={"semibold"}>
+                        No Origins
+                      </Text>
+                    ) : (
+                      <DataTable
+                        data={entityOrigins}
+                        columns={originTableColumns}
+                        visibleColumns={{}}
+                        viewOnly={!editing}
+                        showSelection={editing}
+                        actions={originTableActions}
+                        showPagination
+                      />
+                    )}
+                  </Flex>
+                </TabPanel>
+                <TabPanel
+                  borderLeft={"1px"}
+                  borderRight={"1px"}
+                  borderBottom={"1px"}
+                  borderColor={"gray.200"}
+                  roundedBottom={"md"}
+                >
+                  <Flex
+                    w={"100%"}
+                    justify={"center"}
+                    align={"center"}
+                    minH={"200px"}
+                  >
+                    {(entityProducts?.length ?? 0) === 0 ? (
+                      <Text color={"gray.400"} fontWeight={"semibold"}>
+                        No Products
+                      </Text>
+                    ) : (
+                      <DataTable
+                        data={entityProducts}
+                        columns={productTableColumns}
+                        visibleColumns={{}}
+                        viewOnly={!editing}
+                        showSelection={editing}
+                        actions={productTableActions}
+                        showPagination
+                      />
+                    )}
+                  </Flex>
+                </TabPanel>
+              </TabPanels>
+            </Tabs>
           </Flex>
 
-          {/* Attributes */}
           <Flex
             direction={"column"}
-            p={"4"}
-            gap={"4"}
+            p={"2"}
+            pl={{ base: "2", lg: "0" }}
+            pt={{ base: "0", lg: "2" }}
+            gap={"2"}
             grow={"1"}
             basis={"50%"}
             rounded={"md"}
           >
+            {/* Attributes */}
             <Flex
               direction={"column"}
-              p={"4"}
+              p={"2"}
               rounded={"md"}
-              border={"2px"}
+              border={"1px"}
               borderColor={"gray.200"}
             >
               <Flex
@@ -1508,12 +1739,13 @@ const Entity = () => {
                 justify={"space-between"}
                 align={"center"}
               >
-                <Heading fontWeight={"semibold"} size={"md"} py={"2"}>
+                <Heading fontWeight={"semibold"} size={"md"} mb={"2"}>
                   Attributes
                 </Heading>
                 {editing ? (
                   <Button
                     colorScheme={"green"}
+                    size={"sm"}
                     rightIcon={<Icon name={"add"} />}
                     isDisabled={!editing}
                     onClick={onAddAttributesOpen}
@@ -1531,7 +1763,7 @@ const Entity = () => {
               >
                 {entityAttributes.length === 0 ? (
                   <Text color={"gray.400"} fontWeight={"semibold"}>
-                    This Entity does not have any Attributes.
+                    No Attributes
                   </Text>
                 ) : (
                   <DataTable
@@ -1545,120 +1777,13 @@ const Entity = () => {
                 )}
               </Flex>
             </Flex>
-          </Flex>
-        </Flex>
 
-        <Flex direction={"row"} wrap={"wrap"}>
-          <Flex
-            direction={"column"}
-            p={"4"}
-            gap={"4"}
-            grow={"1"}
-            basis={"50%"}
-            bg={"white"}
-            rounded={"md"}
-          >
-            {/* Origins and Products */}
+            {/* Attachments */}
             <Flex
               direction={"column"}
-              p={"4"}
+              p={"2"}
               rounded={"md"}
-              border={"2px"}
-              borderColor={"gray.200"}
-            >
-              <Tabs
-                variant={"soft-rounded"}
-                colorScheme={"blue"}
-                onChange={(index) => setRelationsIndex(index)}
-              >
-                <TabList>
-                  <Tab>Origins</Tab>
-                  <Tab>Products</Tab>
-                  <Spacer />
-                  {editing ? (
-                    <Button
-                      colorScheme={"green"}
-                      rightIcon={<Icon name={"add"} />}
-                      isDisabled={!editing}
-                      onClick={() => {
-                        _.isEqual(relationsIndex, 0)
-                          ? onAddOriginsOpen()
-                          : onAddProductsOpen();
-                      }}
-                    >
-                      Add
-                    </Button>
-                  ) : null}
-                </TabList>
-                <TabPanels>
-                  <TabPanel>
-                    <Flex
-                      w={"100%"}
-                      justify={"center"}
-                      align={"center"}
-                      minH={"100px"}
-                    >
-                      {(entityOrigins?.length ?? 0) === 0 ? (
-                        <Text color={"gray.400"} fontWeight={"semibold"}>
-                          This Entity does not have any Origins.
-                        </Text>
-                      ) : (
-                        <DataTable
-                          data={entityOrigins}
-                          columns={originTableColumns}
-                          visibleColumns={{}}
-                          viewOnly={!editing}
-                          showSelection={editing}
-                          actions={originTableActions}
-                          showPagination
-                        />
-                      )}
-                    </Flex>
-                  </TabPanel>
-                  <TabPanel>
-                    <Flex
-                      w={"100%"}
-                      justify={"center"}
-                      align={"center"}
-                      minH={"100px"}
-                    >
-                      {(entityProducts?.length ?? 0) === 0 ? (
-                        <Text color={"gray.400"} fontWeight={"semibold"}>
-                          This Entity does not have any Products.
-                        </Text>
-                      ) : (
-                        <DataTable
-                          data={entityProducts}
-                          columns={productTableColumns}
-                          visibleColumns={{}}
-                          viewOnly={!editing}
-                          showSelection={editing}
-                          actions={productTableActions}
-                          showPagination
-                        />
-                      )}
-                    </Flex>
-                  </TabPanel>
-                </TabPanels>
-              </Tabs>
-            </Flex>
-          </Flex>
-
-          {/* Attachments */}
-          <Flex
-            direction={"column"}
-            p={"4"}
-            gap={"4"}
-            grow={"1"}
-            basis={"50%"}
-            bg={"white"}
-            rounded={"md"}
-          >
-            <Flex
-              direction={"column"}
-              p={"4"}
-              rounded={"md"}
-              border={"2px"}
+              border={"1px"}
               borderColor={"gray.200"}
             >
               <Flex gap={"2"} direction={"column"} minH={"32"}>
@@ -1667,11 +1792,12 @@ const Entity = () => {
                   justify={"space-between"}
                   align={"center"}
                 >
-                  <Heading fontWeight={"semibold"} size={"md"} py={"2"}>
+                  <Heading fontWeight={"semibold"} size={"md"} mb={"2"}>
                     Attachments
                   </Heading>
                   <Button
                     colorScheme={"green"}
+                    size={"sm"}
                     rightIcon={<Icon name={"upload"} />}
                     onClick={onUploadOpen}
                   >
@@ -1687,7 +1813,7 @@ const Entity = () => {
                 >
                   {entityAttachments.length === 0 ? (
                     <Text color={"gray.400"} fontWeight={"semibold"}>
-                      This Entity does not have any Attachments.
+                      No Attachments
                     </Text>
                   ) : (
                     <DataTable
@@ -1759,7 +1885,7 @@ const Entity = () => {
                         }
                       }}
                     >
-                      {isLoaded &&
+                      {!loading &&
                         attributes.map((attribute) => {
                           return (
                             <option key={attribute._id} value={attribute._id}>
@@ -1841,10 +1967,11 @@ const Entity = () => {
                     </Flex>
                   </Flex>
 
-                  {/* "Done" button */}
+                  {/* "Cancel" button */}
                   <Flex direction={"row"} p={"md"} justify={"center"} gap={"8"}>
                     <Button
                       colorScheme={"red"}
+                      size={"sm"}
                       variant={"outline"}
                       rightIcon={<Icon name={"cross"} />}
                       onClick={onAddAttributesClose}
@@ -1854,16 +1981,19 @@ const Entity = () => {
 
                     <Button
                       colorScheme={"blue"}
+                      size={"sm"}
                       variant={"outline"}
                       rightIcon={<Icon name={"add"} />}
                       onClick={onSaveAsTemplate}
                       isDisabled={isAttributeError}
+                      isLoading={loadingAttributeCreate}
                     >
                       Save as Template
                     </Button>
 
                     <Button
                       colorScheme={"green"}
+                      size={"sm"}
                       rightIcon={<Icon name={"check"} />}
                       isDisabled={isAttributeError}
                       onClick={() => {
@@ -1918,7 +2048,7 @@ const Entity = () => {
                       }
                     }}
                   >
-                    {isLoaded &&
+                    {!loading &&
                       projectData.map((project) => {
                         return (
                           <option key={project._id} value={project._id}>
@@ -1958,10 +2088,11 @@ const Entity = () => {
             </ModalBody>
 
             <ModalFooter p={"2"}>
-              {/* "Done" button */}
+              {/* "Cancel" button */}
               <Flex direction={"row"} gap={"8"} justify={"center"}>
                 <Button
                   colorScheme={"red"}
+                  size={"sm"}
                   variant={"outline"}
                   rightIcon={<Icon name={"cross"} />}
                   onClick={onAddProjectsClose}
@@ -1971,6 +2102,7 @@ const Entity = () => {
 
                 <Button
                   colorScheme={"green"}
+                  size={"sm"}
                   rightIcon={<Icon name={"check"} />}
                   onClick={() => {
                     addProjects(selectedProjects);
@@ -1996,90 +2128,51 @@ const Entity = () => {
             <ModalCloseButton />
 
             <ModalBody p={"2"}>
-              <Input
-                placeholder="Search for Origins"
-                value={inputValue}
-                onChange={handleInputChange}
-              />
-              {searchResults.map((entity: EntityModel) => (
-                <Button
-                  key={entity._id}
-                  onClick={() => {
-                    addProducts([entity._id]);
-                    setInputValue("");
-                    setSearchResults([]);
-                  }}
-                  variant="ghost"
-                >
-                  {entity.name}
-                </Button>
-              ))}
-              {/* Select component for Entities */}
-              {/* <Flex direction={"column"} gap={"2"}>
-                <FormControl>
-                  <FormLabel>Add Products</FormLabel>
-                  <Select
-                    title="Select Products"
-                    placeholder={"Select Product"}
-                    onChange={(event) => {
-                      if (
-                        entityProducts
-                          .map((product) => product.id)
-                          .includes(event.target.value.toString())
-                      ) {
-                        toast({
-                          title: "Warning",
-                          description: "Product has already been selected.",
-                          status: "warning",
-                          duration: 2000,
-                          position: "bottom-right",
-                          isClosable: true,
-                        });
-                      } else {
-                        setSelectedProducts([
-                          ...selectedProducts,
-                          event.target.value.toString(),
-                        ]);
-                      }
-                    }}
-                  >
-                    {isLoaded &&
-                      allEntities.map((entity) => {
-                        return (
-                          <option key={entity.id} value={entity.id}>
-                            {entity.name}
-                          </option>
-                        );
-                      })}
-                    ;
-                  </Select>
-                </FormControl>
+              <FormControl isInvalid={inputValue.length < 3} mb={"2"}>
+                <Input
+                  placeholder="Search for Products"
+                  value={inputValue}
+                  onChange={handleInputChange}
+                />
+                <FormErrorMessage>Enter 3 or more characters.</FormErrorMessage>
+              </FormControl>
 
-                <Flex direction={"row"} p={"2"} gap={"2"}>
-                  {selectedProducts.map((entity) => {
-                    if (!_.isEqual(entity, "")) {
-                      return (
-                        <Tag key={`tag-${entity}`}>
-                          <TagLabel>
-                            <Linky id={entity} type={"entities"} />
-                          </TagLabel>
-                          <TagCloseButton
-                            onClick={() => {
-                              setSelectedProducts(
-                                selectedProducts.filter((selected) => {
-                                  return !_.isEqual(entity, selected);
-                                })
-                              );
-                            }}
-                          />
-                        </Tag>
-                      );
-                    } else {
-                      return null;
-                    }
-                  })}
+              <Flex direction={"column"} gap={"2"}>
+                {inputValue.length >= 3 && (
+                  <Text fontWeight={"semibold"}>Results:</Text>
+                )}
+                <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
+                  {searchResults.length > 0 &&
+                    searchResults.map((entity: IGenericItem) => (
+                      <Button
+                        key={entity._id}
+                        size={"sm"}
+                        onClick={() => {
+                          addProducts([entity._id]);
+                          setInputValue("");
+                          setSearchResults([]);
+                        }}
+                        variant={"solid"}
+                      >
+                        {entity.name}
+                      </Button>
+                    ))}
+                  {searchLoading && (
+                    <Flex width={"100%"} justify={"center"}>
+                      <Spinner />
+                    </Flex>
+                  )}
+                  {inputValue.length >= 3 &&
+                    !searchLoading &&
+                    searchResults.length === 0 && (
+                      <Flex width={"100%"} justify={"center"}>
+                        <Text fontWeight={"semibold"} color={"gray.400"}>
+                          No Entities matching "{inputValue}"
+                        </Text>
+                      </Flex>
+                    )}
                 </Flex>
-              </Flex> */}
+              </Flex>
             </ModalBody>
 
             <ModalFooter p={"2"}>
@@ -2087,6 +2180,7 @@ const Entity = () => {
               <Flex direction={"row"} gap={"8"} justify={"center"}>
                 <Button
                   colorScheme={"red"}
+                  size={"sm"}
                   variant={"outline"}
                   rightIcon={<Icon name={"cross"} />}
                   onClick={onAddProductsClose}
@@ -2096,6 +2190,7 @@ const Entity = () => {
 
                 <Button
                   colorScheme={"green"}
+                  size={"sm"}
                   rightIcon={<Icon name={"check"} />}
                   onClick={() => {
                     if (id) {
@@ -2120,90 +2215,50 @@ const Entity = () => {
             <ModalCloseButton />
 
             <ModalBody p={"2"}>
-              <Input
-                placeholder="Search for Origins"
-                value={inputValue}
-                onChange={handleInputChange}
-              />
-              {searchResults.map((entity: EntityModel) => (
-                <Button
-                  key={entity._id}
-                  onClick={() => {
-                    addOrigins([entity._id]);
-                    setInputValue("");
-                    setSearchResults([]);
-                  }}
-                  variant="ghost"
-                >
-                  {entity.name}
-                </Button>
-              ))}
-              {/* Select component for Entities */}
-              {/* <Flex direction={"column"} gap={"2"}>
-                <FormControl>
-                  <FormLabel>Add Origins</FormLabel>
-                  <Select
-                    title="Select Origins"
-                    placeholder={"Select Origin"}
-                    onChange={(event) => {
-                      if (
-                        entityOrigins
-                          .map((origin) => origin.id)
-                          .includes(event.target.value.toString())
-                      ) {
-                        toast({
-                          title: "Warning",
-                          description: "Origin has already been selected.",
-                          status: "warning",
-                          duration: 2000,
-                          position: "bottom-right",
-                          isClosable: true,
-                        });
-                      } else {
-                        setSelectedOrigins([
-                          ...selectedOrigins,
-                          event.target.value.toString(),
-                        ]);
-                      }
-                    }}
-                  >
-                    {isLoaded &&
-                      allEntities.map((entity) => {
-                        return (
-                          <option key={entity.id} value={entity.id}>
-                            {entity.name}
-                          </option>
-                        );
-                      })}
-                    ;
-                  </Select>
-                </FormControl>
-
-                <Flex direction={"row"} p={"2"} gap={"2"}>
-                  {selectedOrigins.map((entity) => {
-                    if (!_.isEqual(entity, "")) {
-                      return (
-                        <Tag key={`tag-${entity}`}>
-                          <TagLabel>
-                            <Linky id={entity} type={"entities"} />
-                          </TagLabel>
-                          <TagCloseButton
-                            onClick={() => {
-                              setSelectedOrigins(
-                                selectedOrigins.filter((selected) => {
-                                  return !_.isEqual(entity, selected);
-                                })
-                              );
-                            }}
-                          />
-                        </Tag>
-                      );
-                    } else {
-                      return null;
-                    }
-                  })}
+              <FormControl isInvalid={inputValue.length < 3} mb={"2"}>
+                <Input
+                  placeholder="Search for Origins"
+                  value={inputValue}
+                  onChange={handleInputChange}
+                />
+                <FormErrorMessage>Enter 3 or more characters.</FormErrorMessage>
+              </FormControl>
+              <Flex direction={"column"} gap={"2"}>
+                {inputValue.length >= 3 && (
+                  <Text fontWeight={"semibold"}>Results:</Text>
+                )}
+                <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
+                  {searchResults.length > 0 &&
+                    searchResults.map((entity: IGenericItem) => (
+                      <Button
+                        key={entity._id}
+                        size={"sm"}
+                        onClick={() => {
+                          addOrigins([entity._id]);
+                          setInputValue("");
+                          setSearchResults([]);
+                        }}
+                        variant={"solid"}
+                      >
+                        {entity.name}
+                      </Button>
+                    ))}
+                  {searchLoading && (
+                    <Flex width={"100%"} justify={"center"}>
+                      <Spinner />
+                    </Flex>
+                  )}
+                  {inputValue.length >= 3 &&
+                    !searchLoading &&
+                    searchResults.length === 0 && (
+                      <Flex width={"100%"} justify={"center"}>
+                        <Text fontWeight={"semibold"} color={"gray.400"}>
+                          No Entities matching "{inputValue}"
+                        </Text>
+                      </Flex>
+                    )}
                 </Flex>
-              </Flex> */}
+              </Flex>
             </ModalBody>
 
             <ModalFooter p={"2"}>
@@ -2211,6 +2266,7 @@ const Entity = () => {
               <Flex direction={"row"} gap={"8"} justify={"center"}>
                 <Button
                   colorScheme={"red"}
+                  size={"sm"}
                   variant={"outline"}
                   rightIcon={<Icon name={"cross"} />}
                   onClick={onAddOriginsClose}
@@ -2220,6 +2276,7 @@ const Entity = () => {
 
                 <Button
                   colorScheme={"green"}
+                  size={"sm"}
                   rightIcon={<Icon name={"check"} />}
                   onClick={() => {
                     if (id) {
@@ -2274,15 +2331,15 @@ const Entity = () => {
               <Flex
                 direction={"row"}
                 p={"2"}
-                gap={"4"}
+                gap={"2"}
                 rounded={"md"}
-                border={"2px"}
+                border={"1px"}
                 borderColor={"gray.200"}
               >
                 <Flex direction={"column"} gap={"2"}>
                   <FormControl>
                     <FormLabel>Details</FormLabel>
-                    {isLoaded ? (
+                    {!loading ? (
                       <CheckboxGroup>
                         <Stack spacing={2} direction={"column"}>
                           <Checkbox disabled defaultChecked>
@@ -2330,7 +2387,7 @@ const Entity = () => {
                   </FormControl>
                   <FormControl>
                     <FormLabel>Projects</FormLabel>
-                    {isLoaded && entityProjects.length > 0 ? (
+                    {!loading && entityProjects.length > 0 ? (
                       <Stack spacing={2} direction={"column"}>
                         {entityProjects.map((project) => {
                           allExportFields.push(`project_${project}`);
@@ -2363,7 +2420,7 @@ const Entity = () => {
                 <Flex direction={"column"} gap={"2"}>
                   <FormControl>
                     <FormLabel>Associations: Origins</FormLabel>
-                    {isLoaded && entityOrigins?.length > 0 ? (
+                    {!loading && entityOrigins?.length > 0 ? (
                       <Stack spacing={2} direction={"column"}>
                         {entityOrigins.map((origin) => {
                           allExportFields.push(`origin_${origin._id}`);
@@ -2392,7 +2449,7 @@ const Entity = () => {
                   </FormControl>
                   <FormControl>
                     <FormLabel>Associations: Products</FormLabel>
-                    {isLoaded && entityProducts?.length > 0 ? (
+                    {!loading && entityProducts?.length > 0 ? (
                       <Stack spacing={2} direction={"column"}>
                         {entityProducts.map((product) => {
                           allExportFields.push(`product_${product._id}`);
@@ -2427,7 +2484,7 @@ const Entity = () => {
                 <Flex direction={"column"} gap={"2"}>
                   <FormControl>
                     <FormLabel>Attributes</FormLabel>
-                    {isLoaded && entityAttributes.length > 0 ? (
+                    {!loading && entityAttributes.length > 0 ? (
                       <Stack spacing={2} direction={"column"}>
                         {entityAttributes.map((attribute) => {
                           allExportFields.push(`attribute_${attribute._id}`);
@@ -2471,7 +2528,7 @@ const Entity = () => {
               >
                 <Icon name={"info"} />
                 {_.isEqual(exportFormat, "json") && (
-                  <Text>JSON files can be re-imported into MARS.</Text>
+                  <Text>JSON files can be re-imported into Storacuity.</Text>
                 )}
                 {_.isEqual(exportFormat, "csv") && (
                   <Text>
@@ -2513,6 +2570,7 @@ const Entity = () => {
                   </Flex>
                   <IconButton
                     colorScheme={"blue"}
+                    size={"sm"}
                     aria-label={"Download"}
                     onClick={() => handleDownloadClick(exportFormat)}
                     icon={<Icon name={"download"} />}
@@ -2532,7 +2590,7 @@ const Entity = () => {
         >
           <ModalOverlay />
           <ModalContent>
-            <ModalHeader>Relations: {entityData.name}</ModalHeader>
+            <ModalHeader>Visualize: {entityData.name}</ModalHeader>
             <ModalCloseButton />
             <ModalBody>
               <Container h={"90vh"} minW={"90vw"}>
@@ -2559,9 +2617,9 @@ const Entity = () => {
                 align={"center"}
                 pb={"2"}
               >
-                {!isPreviewLoaded ? (
+                {!isPreviewLoaded || fileLoading ? (
                   <Spinner />
-                ) : _.isEqual("application/pdf", previewType) ? (
+                ) : _.isEqual(previewType, "application/pdf") ? (
                   <Preview src={previewSource} type={"document"} />
                 ) : (
                   <Preview src={previewSource} type={"image"} />
@@ -2596,6 +2654,7 @@ const Entity = () => {
                             <Spacer />
                             <Button
                               colorScheme={"orange"}
+                              size={"sm"}
                               rightIcon={<Icon name={"rewind"} />}
                               onClick={() => {
                                 handleRestoreFromHistoryClick(entityVersion);
@@ -2683,6 +2742,7 @@ const Entity = () => {
             <DrawerFooter>
               <Button
                 colorScheme={"red"}
+                size={"sm"}
                 onClick={onHistoryClose}
                 rightIcon={<Icon name={"cross"} />}
               >

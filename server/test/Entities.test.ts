@@ -2,59 +2,45 @@
 import "dotenv/config";
 
 // Jest imports
-import {
-  afterAll,
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-} from "@jest/globals";
+import { afterEach, beforeEach, describe, expect, it } from "@jest/globals";
 
-// Entity operations and types
-import { ProjectModel, EntityModel } from "../../types";
-import { Entities } from "../src/operations/Entities";
-import { Projects } from "../src/operations/Projects";
+// Entities model and types
+import { EntityModel } from "../../types";
+import { Entities } from "../src/models/Entities";
+import { Projects } from "../src/models/Projects";
 
 // Database connectivity
-import {
-  connectPrimary,
-  disconnect,
-  getDatabase,
-} from "../src/database/connection";
+import { connect, disconnect } from "../src/connectors/database";
+import { clearDatabase } from "./util";
+import { isNull } from "lodash";
 
-// Connect to the database before each test
-beforeEach(() => {
-  return connectPrimary();
-});
+describe("Entity model", () => {
+  beforeEach(async () => {
+    // Connect to the database
+    await connect();
 
-// Clear the database after each test
-afterEach(() => {
-  return Promise.all([
-    getDatabase().collection("attributes").deleteMany({}),
-    getDatabase().collection("projects").deleteMany({}),
-    getDatabase().collection("entities").deleteMany({}),
-    getDatabase().collection("activity").deleteMany({}),
-  ]);
-});
+    // Clear the database prior to running tests
+    await clearDatabase();
+  });
 
-// Close the database connection after all tests
-afterAll(() => {
-  return disconnect();
-});
+  // Teardown after each test
+  afterEach(async () => {
+    // Clear the database after each test
+    await clearDatabase();
+    await disconnect();
+  });
 
-describe("GET /entities", () => {
   it("should return 0 Entities with an empty database", async () => {
-    const result: EntityModel[] = await Entities.getAll();
+    const result = await Entities.all();
     expect(result.length).toBe(0);
   });
-});
 
-describe("POST /entities/create", () => {
-  it("should create 1 basic Entity", async () => {
-    const result: EntityModel = await Entities.create({
+  it("should create a basic Entity", async () => {
+    const result = await Entities.create({
       name: "TestEntity",
-      created: new Date(Date.now()),
+      created: new Date(Date.now()).toISOString(),
+      deleted: false,
+      locked: false,
       owner: "henry.burgess@wustl.edu",
       description: "Test",
       projects: [],
@@ -66,16 +52,19 @@ describe("POST /entities/create", () => {
       attachments: [],
       history: [],
     });
+    expect(result.success).toBeTruthy();
 
-    expect(result.name).toBe("TestEntity");
-    expect(result.timestamp).toBeDefined();
+    const entity: EntityModel | null = await Entities.getByName("TestEntity");
+    expect(entity).not.toBeNull();
   });
 
   it("should create an association between two Entities when an Origin is specified in a Product", async () => {
     // Create the first Entity
-    const originEntity: EntityModel = await Entities.create({
+    await Entities.create({
       name: "TestOriginEntity",
       created: new Date(Date.now()).toISOString(),
+      deleted: false,
+      locked: false,
       owner: "henry.burgess@wustl.edu",
       description: "Test Origin",
       projects: [],
@@ -88,15 +77,22 @@ describe("POST /entities/create", () => {
       history: [],
     });
 
+    // Confirm Origin Entity creation
+    let originEntity: EntityModel | null =
+      await Entities.getByName("TestOriginEntity");
+    if (isNull(originEntity)) throw new Error();
+
     // Create the second Entity (Product) that has the first Entity (Origin)
-    const productEntity: EntityModel = await Entities.create({
+    await Entities.create({
       name: "TestProductEntity",
       created: new Date(Date.now()).toISOString(),
+      deleted: false,
+      locked: false,
       owner: "henry.burgess@wustl.edu",
       description: "Test Product",
       projects: [],
       associations: {
-        origins: [{ name: originEntity.name, _id: originEntity._id }],
+        origins: [{ name: "TestOriginEntity", _id: originEntity._id }],
         products: [],
       },
       attributes: [],
@@ -105,31 +101,34 @@ describe("POST /entities/create", () => {
     });
 
     // Confirm Product Entity creation
-    expect(productEntity.name).toBe("TestProductEntity");
-    expect(productEntity.associations.origins.length).toBe(1);
+    const productEntity: EntityModel | null =
+      await Entities.getByName("TestProductEntity");
+    if (isNull(productEntity)) throw new Error();
 
-    // Retrieve the Origin Entity associated with the Product Entity
-    const retrievedOriginEntity = await Entities.getOne(
-      productEntity.associations.origins[0]._id,
-    );
+    // Refresh Origin Entity
+    originEntity = await Entities.getByName("TestOriginEntity");
+    if (isNull(originEntity)) throw new Error();
 
     // Check the Origin of the Product
+    expect(productEntity.associations.origins.length).toBe(1);
     expect(productEntity.associations.origins[0]._id).toStrictEqual(
       originEntity._id,
     );
 
     // Check the Product of the Origin
-    expect(retrievedOriginEntity.associations.products.length).toBe(1);
-    expect(retrievedOriginEntity.associations.products[0]._id).toStrictEqual(
+    expect(originEntity.associations.products.length).toBe(1);
+    expect(originEntity.associations.products[0]._id).toStrictEqual(
       productEntity._id,
     );
   });
 
   it("should create an association between two Entities when a Product is specified in an Origin", async () => {
     // Create the first Entity (Product)
-    const productEntity: EntityModel = await Entities.create({
+    await Entities.create({
       name: "TestProductEntity",
       created: new Date(Date.now()).toISOString(),
+      deleted: false,
+      locked: false,
       owner: "henry.burgess@wustl.edu",
       description: "Test Product",
       projects: [],
@@ -142,32 +141,40 @@ describe("POST /entities/create", () => {
       history: [],
     });
 
+    const productEntity: EntityModel | null =
+      await Entities.getByName("TestProductEntity");
+    if (isNull(productEntity)) throw new Error();
+
     // Create the second Entity (Origin) that has the first Entity (Product)
-    const originEntity: EntityModel = await Entities.create({
+    await Entities.create({
       name: "TestOriginEntity",
       created: new Date(Date.now()).toISOString(),
+      deleted: false,
+      locked: false,
       owner: "henry.burgess@wustl.edu",
       description: "Test Origin",
       projects: [],
       associations: {
         origins: [],
-        products: [{ name: productEntity.name, _id: productEntity._id }],
+        products: [{ name: "TestProductEntity", _id: productEntity._id }],
       },
       attributes: [],
       attachments: [],
       history: [],
     });
 
-    // Confirm Origin Entity creation
-    expect(originEntity.name).toBe("TestOriginEntity");
-    expect(originEntity.associations.products.length).toBe(1);
+    const originEntity: EntityModel | null =
+      await Entities.getByName("TestOriginEntity");
+    if (isNull(originEntity)) throw new Error();
 
     // Retrieve the Product Entity associated with the Origin Entity
     const retrievedProductEntity = await Entities.getOne(
       originEntity.associations.products[0]._id,
     );
+    if (isNull(retrievedProductEntity)) throw new Error();
 
     // Check the Product of the Origin
+    expect(originEntity.associations.products.length).toBe(1);
     expect(originEntity.associations.products[0]._id).toStrictEqual(
       productEntity._id,
     );
@@ -181,9 +188,11 @@ describe("POST /entities/create", () => {
 
   it("should create an association between two Entities when a Product is specified in an Origin", async () => {
     // Create the first Entity (Product)
-    const productEntity: EntityModel = await Entities.create({
+    await Entities.create({
       name: "TestProductEntity",
       created: new Date(Date.now()).toISOString(),
+      deleted: false,
+      locked: false,
       owner: "henry.burgess@wustl.edu",
       description: "Test Product",
       projects: [],
@@ -196,10 +205,16 @@ describe("POST /entities/create", () => {
       history: [],
     });
 
+    const productEntity: EntityModel | null =
+      await Entities.getByName("TestProductEntity");
+    if (isNull(productEntity)) throw new Error();
+
     // Create the second Entity (Origin) that has the first Entity (Product)
-    const originEntity: EntityModel = await Entities.create({
+    await Entities.create({
       name: "TestOriginEntity",
       created: new Date(Date.now()).toISOString(),
+      deleted: false,
+      locked: false,
       owner: "henry.burgess@wustl.edu",
       description: "Test Origin",
       projects: [],
@@ -212,14 +227,16 @@ describe("POST /entities/create", () => {
       history: [],
     });
 
-    // Confirm Origin Entity creation
-    expect(originEntity.name).toBe("TestOriginEntity");
+    const originEntity: EntityModel | null =
+      await Entities.getByName("TestOriginEntity");
+    if (isNull(originEntity)) throw new Error();
     expect(originEntity.associations.products.length).toBe(1);
 
     // Retrieve the Product Entity associated with the Origin Entity
-    const retrievedProductEntity: EntityModel = await Entities.getOne(
+    const retrievedProductEntity: EntityModel | null = await Entities.getOne(
       originEntity.associations.products[0]._id,
     );
+    if (isNull(retrievedProductEntity)) throw new Error();
 
     // Check the Product of the Origin
     expect(originEntity.associations.products[0]._id).toStrictEqual(
@@ -234,10 +251,12 @@ describe("POST /entities/create", () => {
   });
 
   it("should create an Attribute", async () => {
-    // Start by creating an Entities
-    return Entities.create({
+    // Start by creating an Entity
+    await Entities.create({
       name: "TestEntity",
-      created: new Date(Date.now()),
+      created: new Date(Date.now()).toISOString(),
+      deleted: false,
+      locked: false,
       owner: "henry.burgess@wustl.edu",
       description: "Test",
       projects: [],
@@ -255,19 +274,22 @@ describe("POST /entities/create", () => {
       ],
       attachments: [],
       history: [],
-    }).then((result: EntityModel) => {
-      // Check that an Attribute exists and it has the correct ID
-      expect(result.attributes.length).toBe(1);
-      expect(result.attributes[0]._id).toBe("TestAttribute");
     });
-  });
-});
 
-describe("POST /entities/update", () => {
+    const entity: EntityModel | null = await Entities.getByName("TestEntity");
+    if (isNull(entity)) throw new Error();
+
+    // Check that an Attribute exists and it has the correct ID
+    expect(entity.attributes.length).toBe(1);
+    expect(entity.attributes[0]._id).toBe("TestAttribute");
+  });
+
   it("should update the description", async () => {
-    return Entities.create({
+    await Entities.create({
       name: "TestEntity",
       created: new Date(Date.now()).toISOString(),
+      deleted: false,
+      locked: false,
       owner: "henry.burgess@wustl.edu",
       description: "Test",
       projects: [],
@@ -278,22 +300,26 @@ describe("POST /entities/update", () => {
       attributes: [],
       attachments: [],
       history: [],
-    })
-      .then((result: EntityModel) => {
-        // Update the description
-        result.description = "Updated";
+    });
 
-        return Entities.update(result);
-      })
-      .then((result: EntityModel) => {
-        expect(result.description).toBe("Updated");
-      });
+    const entity: EntityModel | null = await Entities.getByName("TestEntity");
+    if (isNull(entity)) throw new Error();
+
+    entity.description = "Updated";
+    await Entities.update(entity);
+
+    const updated: EntityModel | null = await Entities.getByName("TestEntity");
+    if (isNull(updated)) throw new Error();
+
+    expect(updated.description).toBe("Updated");
   });
 
   it("should update Project membership", async () => {
-    return Entities.create({
+    await Entities.create({
       name: "TestEntity",
       created: new Date(Date.now()).toISOString(),
+      deleted: false,
+      locked: false,
       owner: "henry.burgess@wustl.edu",
       description: "Test",
       projects: [],
@@ -304,70 +330,57 @@ describe("POST /entities/update", () => {
       attributes: [],
       attachments: [],
       history: [],
-    })
-      .then((result: EntityModel) => {
-        // Create a Project
-        return Promise.all([
-          result,
-          Projects.create({
-            name: "TestProject",
-            created: new Date(Date.now()).toISOString(),
-            owner: "henry.burgess@wustl.edu",
-            description: "Test Project",
-            entities: [],
-          }),
-        ]);
-      })
-      .then((result: [EntityModel, ProjectModel]) => {
-        // Update Entity to include Project
-        result[0].projects.push(result[1]._id);
+    });
 
-        return Promise.all([Entities.update(result[0]), result[1]]);
-      })
-      .then((result: [EntityModel, ProjectModel]) => {
-        // Retrieve both the Entity and Project
-        return Promise.all([
-          Entities.getOne(result[0]._id),
-          Projects.getOne(result[1]._id),
-        ]);
-      })
-      .then((result: [EntityModel, ProjectModel]) => {
-        // Check that the Entity stores membership to the Project
-        expect(result[0].projects.length).toBe(1);
-        expect(result[0].projects[0]).toStrictEqual(result[1]._id);
+    let entity = await Entities.getByName("TestEntity");
+    if (isNull(entity)) throw new Error();
 
-        // Check that the Project stores membership of the Entity
-        // expect(result[1].entities.length).toBe(1);
-        // expect(result[1].entities[0]).toStrictEqual(result[0]._id);
+    // Create a Project
+    await Projects.create({
+      name: "TestProject",
+      created: new Date(Date.now()).toISOString(),
+      owner: "henry.burgess@wustl.edu",
+      description: "Test Project",
+      entities: [],
+      shared: [],
+    });
 
-        return result;
-      })
-      .then((result: [EntityModel, ProjectModel]) => {
-        // Update Entity to remove Project
-        result[0].projects = [];
+    let project = (await Projects.all())[0];
+    if (isNull(project)) throw new Error();
 
-        return Promise.all([Entities.update(result[0]), result[1]]);
-      })
-      .then((result: [EntityModel, ProjectModel]) => {
-        // Retrieve both the Entity and Project
-        return Promise.all([
-          Entities.getOne(result[0]._id),
-          Projects.getOne(result[1]._id),
-        ]);
-      })
-      .then((result: [EntityModel, ProjectModel]) => {
-        // Check that the Entity has no membership to the Project
-        expect(result[0].projects.length).toBe(0);
+    // Add the Entity to the Project
+    await Entities.addProject(entity._id, project._id);
+    await Projects.addEntity(project._id, entity._id);
 
-        // Check that the Project has no membership of the Entity
-        expect(result[1].entities.length).toBe(0);
-      });
+    // Validate the Entity has the Project
+    entity = await Entities.getByName("TestEntity");
+    if (isNull(entity)) throw new Error();
+    expect(entity.projects.length).toBe(1);
+
+    project = (await Projects.all())[0];
+    if (isNull(project)) throw new Error();
+    expect(project.entities.length).toBe(1);
+
+    // Remove the Project from the Entity
+    await Entities.removeProject(entity._id, project._id);
+    await Projects.removeEntity(project._id, entity._id);
+
+    // Validate the Entity no longer has the project
+    entity = await Entities.getByName("TestEntity");
+    if (isNull(entity)) throw new Error();
+    expect(entity.projects.length).toBe(0);
+
+    project = (await Projects.all())[0];
+    if (isNull(project)) throw new Error();
+    expect(project.entities.length).toBe(0);
   });
 
   it("should update Origin associations", async () => {
-    return Entities.create({
+    await Entities.create({
       name: "TestEntity",
       created: new Date(Date.now()).toISOString(),
+      deleted: false,
+      locked: false,
       owner: "henry.burgess@wustl.edu",
       description: "Test",
       projects: [],
@@ -378,84 +391,69 @@ describe("POST /entities/update", () => {
       attributes: [],
       attachments: [],
       history: [],
-    })
-      .then((result: EntityModel) => {
-        // Create an Origin
-        return Promise.all([
-          result,
-          Entities.create({
-            name: "OriginEntity",
-            created: new Date(Date.now()).toISOString(),
-            owner: "henry.burgess@wustl.edu",
-            description: "Test",
-            projects: [],
-            associations: {
-              origins: [],
-              products: [],
-            },
-            attributes: [],
-            attachments: [],
-            history: [],
-          }),
-        ]);
-      })
-      .then((result: [EntityModel, EntityModel]) => {
-        // Update Entity to include Origin
-        result[0].associations.origins.push({
-          _id: result[1]._id,
-          name: result[1].name,
-        });
+    });
 
-        return Promise.all([Entities.update(result[0]), result[1]]);
-      })
-      .then((result: [EntityModel, EntityModel]) => {
-        // Retrieve both the Entity and Origin
-        return Promise.all([
-          Entities.getOne(result[0]._id),
-          Entities.getOne(result[1]._id),
-        ]);
-      })
-      .then((result: [EntityModel, EntityModel]) => {
-        // Check that the Entity stores an Origin
-        expect(result[0].associations.origins.length).toBe(1);
-        expect(result[0].associations.origins[0]._id).toStrictEqual(
-          result[1]._id,
-        );
+    let entity = await Entities.getByName("TestEntity");
+    if (isNull(entity)) throw new Error();
 
-        // Check that the Origin stores a Product
-        expect(result[1].associations.products.length).toBe(1);
-        expect(result[1].associations.products[0]._id).toStrictEqual(
-          result[0]._id,
-        );
+    // Create an Origin
+    await Entities.create({
+      name: "OriginEntity",
+      created: new Date(Date.now()).toISOString(),
+      deleted: false,
+      locked: false,
+      owner: "henry.burgess@wustl.edu",
+      description: "Test",
+      projects: [],
+      associations: {
+        origins: [],
+        products: [],
+      },
+      attributes: [],
+      attachments: [],
+      history: [],
+    });
 
-        return result;
-      })
-      .then((result: [EntityModel, EntityModel]) => {
-        // Update Entity to remove Origin
-        result[0].associations.origins = [];
+    let originEntity = await Entities.getByName("OriginEntity");
+    if (isNull(originEntity)) throw new Error();
 
-        return Promise.all([Entities.update(result[0]), result[1]]);
-      })
-      .then((result: [EntityModel, EntityModel]) => {
-        // Retrieve both the Entity and Project
-        return Promise.all([
-          Entities.getOne(result[0]._id),
-          Entities.getOne(result[1]._id),
-        ]);
-      })
-      .then((result: [EntityModel, EntityModel]) => {
-        // Check that the Entity has no Origin
-        expect(result[0].associations.origins.length).toBe(0);
+    // Add the Origin
+    entity.associations.origins.push({
+      _id: originEntity._id,
+      name: originEntity.name,
+    });
+    await Entities.update(entity);
 
-        // Check that the Origin has no Product
-        expect(result[1].associations.products.length).toBe(0);
-      });
+    // Validate Entities
+    entity = await Entities.getByName("TestEntity");
+    if (isNull(entity)) throw new Error();
+
+    originEntity = await Entities.getByName("OriginEntity");
+    if (isNull(originEntity)) throw new Error();
+
+    expect(entity.associations.origins.length).toBe(1);
+    expect(originEntity.associations.products.length).toBe(1);
+
+    // Remove the Origin
+    entity.associations.origins = [];
+    await Entities.update(entity);
+
+    // Validate Entities
+    entity = await Entities.getByName("TestEntity");
+    if (isNull(entity)) throw new Error();
+    expect(entity.associations.origins.length).toBe(0);
+
+    originEntity = await Entities.getByName("OriginEntity");
+    if (isNull(originEntity)) throw new Error();
+    expect(originEntity.associations.products.length).toBe(0);
   });
 
   it("should update Product associations", async () => {
-    return Entities.create({
+    await Entities.create({
       name: "TestEntity",
       created: new Date(Date.now()).toISOString(),
+      deleted: false,
+      locked: false,
       owner: "henry.burgess@wustl.edu",
       description: "Test",
       projects: [],
@@ -466,85 +464,70 @@ describe("POST /entities/update", () => {
       attributes: [],
       attachments: [],
       history: [],
-    })
-      .then((result: EntityModel) => {
-        // Create a Product
-        return Promise.all([
-          result,
-          Entities.create({
-            name: "ProductEntity",
-            created: new Date(Date.now()).toISOString(),
-            owner: "henry.burgess@wustl.edu",
-            description: "Test",
-            projects: [],
-            associations: {
-              origins: [],
-              products: [],
-            },
-            attributes: [],
-            attachments: [],
-            history: [],
-          }),
-        ]);
-      })
-      .then((result: [EntityModel, EntityModel]) => {
-        // Update Entity to include a Product
-        result[0].associations.products.push({
-          _id: result[1]._id,
-          name: result[1].name,
-        });
+    });
 
-        return Promise.all([Entities.update(result[0]), result[1]]);
-      })
-      .then((result: [EntityModel, EntityModel]) => {
-        // Retrieve both the Entity and Project
-        return Promise.all([
-          Entities.getOne(result[0]._id),
-          Entities.getOne(result[1]._id),
-        ]);
-      })
-      .then((result: [EntityModel, EntityModel]) => {
-        // Check that the Entity stores a Product
-        expect(result[0].associations.products.length).toBe(1);
-        expect(result[0].associations.products[0]._id).toStrictEqual(
-          result[1]._id,
-        );
+    let entity: EntityModel | null = await Entities.getByName("TestEntity");
+    if (isNull(entity)) throw new Error();
 
-        // Check that the Product stores an Origin
-        expect(result[1].associations.origins.length).toBe(1);
-        expect(result[1].associations.origins[0]._id).toStrictEqual(
-          result[0]._id,
-        );
+    // Create a Product
+    await Entities.create({
+      name: "ProductEntity",
+      created: new Date(Date.now()).toISOString(),
+      deleted: false,
+      locked: false,
+      owner: "henry.burgess@wustl.edu",
+      description: "Test",
+      projects: [],
+      associations: {
+        origins: [],
+        products: [],
+      },
+      attributes: [],
+      attachments: [],
+      history: [],
+    });
 
-        return result;
-      })
-      .then((result: [EntityModel, EntityModel]) => {
-        // Update Entity to remove Product
-        result[0].associations.products = [];
+    let productEntity: EntityModel | null =
+      await Entities.getByName("ProductEntity");
+    if (isNull(productEntity)) throw new Error();
 
-        return Promise.all([Entities.update(result[0]), result[1]]);
-      })
-      .then((result: [EntityModel, EntityModel]) => {
-        // Retrieve both the Entity and Product
-        return Promise.all([
-          Entities.getOne(result[0]._id),
-          Entities.getOne(result[1]._id),
-        ]);
-      })
-      .then((result: [EntityModel, EntityModel]) => {
-        // Check that the Entity has no Product
-        expect(result[0].associations.products.length).toBe(0);
+    // Add the Product
+    entity.associations.products.push({
+      _id: productEntity._id,
+      name: productEntity.name,
+    });
+    await Entities.update(entity);
 
-        // Check that the Product has no Origin
-        expect(result[1].associations.origins.length).toBe(0);
-      });
+    // Validate Entities
+    entity = await Entities.getByName("TestEntity");
+    if (isNull(entity)) throw new Error();
+    expect(entity.associations.products.length).toBe(1);
+
+    productEntity = await Entities.getByName("ProductEntity");
+    if (isNull(productEntity)) throw new Error();
+    expect(productEntity.associations.origins.length).toBe(1);
+
+    // Remove the Origin
+    entity.associations.products = [];
+    await Entities.update(entity);
+
+    // Validate Entities
+    entity = await Entities.getByName("TestEntity");
+    if (isNull(entity)) throw new Error();
+    expect(entity.associations.products.length).toBe(0);
+
+    productEntity = await Entities.getByName("ProductEntity");
+    if (isNull(productEntity)) throw new Error();
+    expect(productEntity.associations.origins.length).toBe(0);
   });
 
   it("should add an Attribute", async () => {
     // Start by creating an Entities
-    return Entities.create({
+    await Entities.create({
       name: "TestEntity",
-      created: new Date(Date.now()),
+      created: new Date(Date.now()).toISOString(),
+      deleted: false,
+      locked: false,
       owner: "henry.burgess@wustl.edu",
       description: "Test",
       projects: [],
@@ -555,32 +538,33 @@ describe("POST /entities/update", () => {
       attributes: [],
       attachments: [],
       history: [],
-    })
-      .then((result: EntityModel) => {
-        // Update Entity to add an Attribute
-        return Entities.addAttribute(result._id, {
-          _id: "TestAttribute",
-          name: "Attribute_1",
-          description: "Test Attribute description",
-          values: [],
-        });
-      })
-      .then((result: string) => {
-        // Get the updated Entity
-        return Entities.getOne(result);
-      })
-      .then((result: EntityModel) => {
-        // Check that an Attribute exists and it has the correct ID
-        expect(result.attributes.length).toBe(1);
-        expect(result.attributes[0]._id).toBe("TestAttribute");
-      });
+    });
+
+    let entity: EntityModel | null = await Entities.getByName("TestEntity");
+    if (isNull(entity)) throw new Error();
+
+    await Entities.addAttribute(entity._id, {
+      _id: "TestAttribute",
+      name: "Attribute_1",
+      description: "Test Attribute description",
+      values: [],
+    });
+
+    entity = await Entities.getByName("TestEntity");
+    if (isNull(entity)) throw new Error();
+
+    // Check that an Attribute exists and it has the correct ID
+    expect(entity.attributes.length).toBe(1);
+    expect(entity.attributes[0]._id).toBe("TestAttribute");
   });
 
   it("should remove an Attribute", async () => {
     // Start by creating an Entities
-    return Entities.create({
+    await Entities.create({
       name: "TestEntity",
-      created: new Date(Date.now()),
+      created: new Date(Date.now()).toISOString(),
+      deleted: false,
+      locked: false,
       owner: "henry.burgess@wustl.edu",
       description: "Test",
       projects: [],
@@ -598,26 +582,26 @@ describe("POST /entities/update", () => {
       ],
       attachments: [],
       history: [],
-    })
-      .then((result: EntityModel) => {
-        // Update Entity to remove an Attribute
-        return Entities.removeAttribute(result._id, "TestAttribute");
-      })
-      .then((result: string) => {
-        // Get the updated Entity
-        return Entities.getOne(result);
-      })
-      .then((result: EntityModel) => {
-        // Check that an Attribute has been removed
-        expect(result.attributes.length).toBe(0);
-      });
+    });
+
+    let entity: EntityModel | null = await Entities.getByName("TestEntity");
+    if (isNull(entity)) throw new Error();
+
+    // Remove the Attribute from the Entity
+    await Entities.removeAttribute(entity._id, "TestAttribute");
+
+    entity = await Entities.getByName("TestEntity");
+    if (isNull(entity)) throw new Error();
+    expect(entity.attributes.length).toBe(0);
   });
 
   it("should update an Attribute", async () => {
     // Start by creating an Entities
-    return Entities.create({
+    await Entities.create({
       name: "TestEntity",
-      created: new Date(Date.now()),
+      created: new Date(Date.now()).toISOString(),
+      deleted: false,
+      locked: false,
       owner: "henry.burgess@wustl.edu",
       description: "Test",
       projects: [],
@@ -635,37 +619,36 @@ describe("POST /entities/update", () => {
       ],
       attachments: [],
       history: [],
-    })
-      .then((result: EntityModel) => {
-        // Update Entity to remove an Attribute
-        return Entities.updateAttribute(result._id, {
-          _id: "TestAttribute",
-          name: "Attribute_2",
-          description: "Test Attribute updated",
-          values: [],
-        });
-      })
-      .then((result: string) => {
-        // Get the updated Entity
-        return Entities.getOne(result);
-      })
-      .then((result: EntityModel) => {
-        // Check that an Attribute has been preserved
-        expect(result.attributes.length).toBe(1);
+    });
 
-        // Check that the Attribute has been updated
-        expect(result.attributes[0].name).toBe("Attribute_2");
-        expect(result.attributes[0].description).toBe("Test Attribute updated");
-      });
+    let entity: EntityModel | null = await Entities.getByName("TestEntity");
+    if (isNull(entity)) throw new Error();
+
+    await Entities.updateAttribute(entity._id, {
+      _id: "TestAttribute",
+      name: "Attribute_2",
+      description: "Test Attribute updated",
+      values: [],
+    });
+
+    entity = await Entities.getByName("TestEntity");
+    if (isNull(entity)) throw new Error();
+
+    // Check that an Attribute has been preserved
+    expect(entity.attributes.length).toBe(1);
+
+    // Check that the Attribute has been updated
+    expect(entity.attributes[0].name).toBe("Attribute_2");
+    expect(entity.attributes[0].description).toBe("Test Attribute updated");
   });
-});
 
-describe("getDataMultipleRaw", () => {
   it("should retrieve raw data for multiple entities", async () => {
     // Arrange: Create multiple entities
-    const entity1 = await Entities.create({
+    await Entities.create({
       name: "TestProductEntity",
       created: new Date(Date.now()).toISOString(),
+      deleted: false,
+      locked: false,
       owner: "henry.burgess@wustl.edu",
       description: "Test Product",
       projects: [],
@@ -679,9 +662,11 @@ describe("getDataMultipleRaw", () => {
     });
 
     // Create the second Entity (Origin) that has the first Entity (Product)
-    const entity2 = await Entities.create({
+    await Entities.create({
       name: "TestOriginEntity",
       created: new Date(Date.now()).toISOString(),
+      deleted: false,
+      locked: false,
       owner: "henry.burgess@wustl.edu",
       description: "Test Origin",
       projects: [],
@@ -693,21 +678,19 @@ describe("getDataMultipleRaw", () => {
       attachments: [],
       history: [],
     });
+
     // Act: Retrieve raw data for created entities
-    const rawData = await Entities.getDataMultipleRaw([
-      entity1._id,
-      entity2._id,
-    ]);
+    const rawData = await Entities.all();
 
     // Assert: Raw data should include data for both entities
     expect(rawData.length).toBe(2);
     expect(
-      rawData[0]._id.toString() == entity1._id ||
-        rawData[1]._id.toString() == entity1._id,
+      rawData[0].name.toString() == "TestProductEntity" ||
+        rawData[1].name.toString() == "TestProductEntity",
     ).toBeTruthy();
     expect(
-      rawData[0]._id.toString() == entity2._id ||
-        rawData[1]._id.toString() == entity2._id,
+      rawData[0].name.toString() == "TestOriginEntity" ||
+        rawData[1].name.toString() == "TestOriginEntity",
     ).toBeTruthy();
   });
 
@@ -716,7 +699,7 @@ describe("getDataMultipleRaw", () => {
     const fakeIds = ["fakeId1", "fakeId2"];
 
     // Act: Try to retrieve raw data for non-existent entities
-    const rawData = await Entities.getDataMultipleRaw(fakeIds);
+    const rawData = await Entities.getMany(fakeIds);
 
     // Assert: Function should return an empty array or appropriate response
     expect(rawData.length).toBe(0);

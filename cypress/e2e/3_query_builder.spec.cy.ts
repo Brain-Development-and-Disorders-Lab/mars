@@ -1,6 +1,14 @@
 describe("search query builder", () => {
-  it("should go to search page and test query builder", () => {
+  beforeEach(() => {
+    // Clear the localstorage
+    cy.clearLocalStorage();
+
+    // Navigate the "Login" page
     cy.visit("http://localhost:8080/");
+    cy.get("button").click();
+  });
+
+  it("should go to search page and test query builder", () => {
     cy.contains("button", "Search").click();
     cy.contains("button", "Query Builder").click();
     // result array should be empty/not exist

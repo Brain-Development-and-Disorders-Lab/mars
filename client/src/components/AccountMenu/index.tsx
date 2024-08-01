@@ -45,33 +45,40 @@ const AccountMenu = () => {
     setToken({
       name: token.name,
       orcid: token.orcid,
-      id_token: "",
+      token: "",
     });
     navigate(0);
   };
 
   return (
-    <Flex gap={"4"} align={"center"} h={"100%"}>
+    <Flex gap={"4"} justify={"center"} w={"100%"}>
       <Menu>
-        <MenuButton h={"100%"} _hover={{ bg: "gray.200" }}>
+        <MenuButton
+          h={"100%"}
+          w={"100%"}
+          rounded={"md"}
+          border={"1px"}
+          _hover={{ bg: "gray.300" }}
+          borderColor={"gray.200"}
+        >
           <Flex
             direction={"row"}
             align={"center"}
             gap={"2"}
-            p={"1"}
+            p={"2"}
             ml={"2"}
             mr={"2"}
           >
             <Avatar name={token.name} size={"sm"} />
-            <Text size={"xs"} fontWeight={"semibold"}>
-              {token.name}
+            <Text size={"xs"} fontWeight={"semibold"} w={"100%"} align={"left"}>
+              {token.name.split(" ").pop()}
             </Text>
             <Icon name={"c_down"} />
           </Flex>
         </MenuButton>
 
         {/* List of drop-down menu items */}
-        <MenuList ml={"2"} mr={"2"}>
+        <MenuList bg={"white"}>
           <MenuGroup>
             <Flex p={"4"} py={"2"} gap={"2"} direction={"column"}>
               <Text fontWeight={"semibold"}>

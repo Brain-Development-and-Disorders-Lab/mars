@@ -2,112 +2,96 @@
 import "dotenv/config";
 
 // Jest imports
-import {
-  afterAll,
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-} from "@jest/globals";
+import { afterEach, beforeEach, describe, expect, it } from "@jest/globals";
 
-// Attribute operations and types
-import { AttributeModel } from "../../types";
-import { Attributes } from "../src/operations/Attributes";
+// Attributes model and types
+import { Attributes } from "../src/models/Attributes";
 
 // Database connectivity
-import {
-  connectPrimary,
-  disconnect,
-  getDatabase,
-} from "../src/database/connection";
+import { connect, disconnect } from "../src/connectors/database";
+import { clearDatabase } from "./util";
 
-// Connect to the database before each test
-beforeEach(() => {
-  return connectPrimary();
-});
+describe("Attributes model", () => {
+  beforeEach(async () => {
+    // Connect to the database
+    await connect();
 
-// Clear the database after each test
-afterEach(() => {
-  return Promise.all([
-    getDatabase().collection("attributes").deleteMany({}),
-    getDatabase().collection("collections").deleteMany({}),
-    getDatabase().collection("entities").deleteMany({}),
-    getDatabase().collection("activity").deleteMany({}),
-  ]);
-});
+    // Clear the database prior to running tests
+    await clearDatabase();
+  });
 
-// Close the database connection after all tests
-afterAll(() => {
-  return disconnect();
-});
+  // Teardown after each test
+  afterEach(async () => {
+    // Clear the database after each test
+    await clearDatabase();
+    await disconnect();
+  });
 
-describe("GET /attributes", () => {
   it("should return 0 Attributes with an empty database", async () => {
-    return Attributes.getAll().then((result) => {
-      expect(result.length).toBe(0);
-    });
+    const result = await Attributes.all();
+    expect(result.length).toBe(0);
   });
-});
 
-describe("POST /attributes/create", () => {
-  it("should create 1 basic Attribute", async () => {
-    return Attributes.create({
+  it("should create an Attribute", async () => {
+    await Attributes.create({
       name: "TestAttribute",
       description: "Attribute description",
       values: [],
-    }).then((result: AttributeModel) => {
-      expect(result.name).toBe("TestAttribute");
     });
-  });
-});
 
-describe("POST /attributes/update", () => {
+    const attributes = await Attributes.all();
+    expect(attributes.length).toBe(1);
+  });
+
   it("should update the description", async () => {
-    return Attributes.create({
+    await Attributes.create({
       name: "TestAttribute",
       description: "Attribute description",
       values: [],
-    })
-      .then((result: AttributeModel) => {
-        return Attributes.update({
-          _id: result._id,
-          name: result.name,
-          description: "Updated Attribute description",
-          values: result.values,
-        });
-      })
-      .then((result: AttributeModel) => {
-        expect(result.description).toBe("Updated Attribute description");
-      });
+    });
+    let attributes = await Attributes.all();
+    expect(attributes.length).toBe(1);
+
+    await Attributes.update({
+      _id: attributes[0]._id,
+      name: attributes[0].name,
+      description: "Updated Attribute description",
+      values: attributes[0].values,
+    });
+    attributes = await Attributes.all();
+
+    expect(attributes.length).toBe(1);
+    expect(attributes[0].description).toBe("Updated Attribute description");
   });
 
   it("should update the values", async () => {
-    return Attributes.create({
+    const create = await Attributes.create({
       name: "TestAttribute",
       description: "Attribute description",
       values: [],
-    })
-      .then((result: AttributeModel) => {
-        return Attributes.update({
-          _id: result._id,
-          name: result.name,
-          description: result.description,
-          values: [
-            {
-              identifier: "v_0",
-              name: "Value0",
-              type: "text",
-              data: "Test",
-            },
-          ],
-        });
-      })
-      .then((result: AttributeModel) => {
-        expect(result.values.length).toBe(1);
-        expect(result.values[0].name).toBe("Value0");
-        expect(result.values[0].type).toBe("text");
-        expect(result.values[0].data).toBe("Test");
-      });
+    });
+    expect(create.success).toBeTruthy();
+    let attributes = await Attributes.all();
+
+    const update = await Attributes.update({
+      _id: attributes[0]._id,
+      name: attributes[0].name,
+      description: attributes[0].description,
+      values: [
+        {
+          _id: "v_0",
+          name: "Value0",
+          type: "text",
+          data: "Test",
+        },
+      ],
+    });
+    expect(update.success).toBeTruthy();
+    attributes = await Attributes.all();
+
+    expect(attributes[0].values.length).toBe(1);
+    expect(attributes[0].values[0].name).toBe("Value0");
+    expect(attributes[0].values[0].type).toBe("text");
+    expect(attributes[0].values[0].data).toBe("Test");
   });
 });

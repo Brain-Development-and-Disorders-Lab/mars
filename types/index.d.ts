@@ -38,8 +38,8 @@ export namespace State.Entity {
   type Associations = Start & {
     projects: string[];
     associations: {
-      origins: Item;
-      products: Item[];
+      origins: IGenericItem[];
+      products: IGenericItem[];
     };
   };
 
@@ -75,12 +75,12 @@ export type AttributeModel = IAttribute & {
 export type AttributeCardActions = {
   showRemove?: boolean;
   onUpdate?: (data: AttributeCardProps) => void;
-  onRemove?: (identifier: string) => void;
+  onRemove?: (id: string) => void;
 };
 
 export type AttributeCardProps = IAttribute &
   AttributeCardActions & {
-    identifier: string;
+    _id: string;
     restrictDataValues: boolean;
     permittedDataValues?: string[];
   };
@@ -99,13 +99,13 @@ export type AttributeViewButtonProps = {
 
 // Values
 export interface IValue<D> {
-  identifier: string;
+  _id: string;
   name: string;
   type: "number" | "text" | "url" | "date" | "entity" | "select";
   data: D;
   disabled?: boolean;
   showRemove?: boolean;
-  onRemove?: (identifier: string) => void;
+  onRemove?: (id: string) => void;
   onUpdate?: (data: D) => void;
 }
 
@@ -115,6 +115,8 @@ export type LinkyProps = {
   fallback?: string;
   color?: string;
   justify?: string;
+  size?: string;
+  truncate?: boolean | number;
 };
 
 // Project types
@@ -127,7 +129,7 @@ export type IProject = {
   description: string;
   shared: string[];
   entities: string[];
-  history: ProjectHistory[];
+  history?: ProjectHistory[];
 };
 
 export type ProjectModel = IProject & {
@@ -140,8 +142,8 @@ export type ProjectHistory = {
   entities: string[];
 };
 
-// Utility Item type
-export type Item = {
+// Utility type used across other types, typically in a list
+export type IGenericItem = {
   _id: string;
   name: string;
 };
@@ -157,16 +159,23 @@ export type IEntity = {
   description: string;
   projects: string[];
   associations: {
-    origins: Item[];
-    products: Item[];
+    origins: IGenericItem[];
+    products: IGenericItem[];
   };
   attributes: AttributeModel[];
-  attachments: Item[];
-  history: EntityHistory[];
+  attachments: IGenericItem[];
+  history?: EntityHistory[];
 };
 
 export type EntityModel = IEntity & {
   _id: string;
+};
+
+export type EntityNode = IGenericItem & {
+  associations: {
+    origins: IGenericItem[];
+    products: IGenericItem[];
+  };
 };
 
 export type EntityHistory = {
@@ -176,11 +185,11 @@ export type EntityHistory = {
   description: string;
   projects: string[];
   associations: {
-    origins: Item[];
-    products: Item[];
+    origins: IGenericItem[];
+    products: IGenericItem[];
   };
   attributes: AttributeModel[];
-  attachments: Item[];
+  attachments: IGenericItem[];
 };
 
 export type EntityExport = {
@@ -204,8 +213,8 @@ export type EntityImport = {
   owner: string;
   description: string;
   projects: string;
-  origins: Item[];
-  products: Item[];
+  origins: IGenericItem[];
+  products: IGenericItem[];
   attributes: AttributeModel[];
 };
 
@@ -227,6 +236,10 @@ export type IActivity = {
     type: "entities" | "projects" | "attributes";
     _id: string;
     name: string;
+  };
+  actor?: {
+    name: string;
+    _id: string;
   };
 };
 
@@ -341,6 +354,12 @@ export type IconNames =
   | "sort_up"
   | "sort_down";
 
+// Response message types
+export type ResponseMessage = {
+  success: boolean;
+  message: string;
+};
+
 // Query types
 export type QueryOperator = "AND" | "OR";
 export type QueryFocusType = "Entity" | "Project" | "Attribute";
@@ -371,13 +390,13 @@ export type QueryComponent = {
 };
 
 // Authentication types
-export type AuthInfo = {
-  name: string;
+export type IAuth = {
   orcid: string;
-  id_token: string;
+  name: string;
+  token: string;
 };
 
-export type AuthToken = AuthInfo & {
+export type Token = IAuth & {
   access_token: string;
   token_type: string;
   refesh_token: string;
@@ -385,15 +404,20 @@ export type AuthToken = AuthInfo & {
   scope: string;
 };
 
+// Context passed through the request headers, includes the ORCID (user) of the user
+export type Context = {
+  user: string;
+};
+
 // User types
 export type IUser = {
-  name?: string;
+  name: string;
   email?: string;
 };
 
 export type UserModel = IUser & {
   _id: string;
-  id_token?: string;
+  token: string;
 };
 
 // Device types

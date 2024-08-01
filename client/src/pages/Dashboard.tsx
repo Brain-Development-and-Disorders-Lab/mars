@@ -7,24 +7,22 @@ import {
   Heading,
   Text,
   useToast,
-  Spacer,
   useBreakpoint,
   Tag,
   VStack,
-  StackDivider,
+  Avatar,
+  Tooltip,
 } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
 import { Content } from "@components/Container";
 import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
-import Loading from "@components/Loading";
 
 // Existing and custom types
-import { ProjectModel, EntityModel, ActivityModel, IconNames } from "@types";
+import { ProjectModel, EntityModel, ActivityModel } from "@types";
 
 // Utility functions and libraries
-import { request } from "src/database/functions";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 dayjs.extend(relativeTime);
@@ -33,6 +31,41 @@ import _ from "lodash";
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
 
+// Apollo client imports
+import { useQuery, gql } from "@apollo/client";
+
+// Queries
+const GET_DASHBOARD = gql`
+  query GetDashboard($projects: Int, $entities: Int, $activity: Int) {
+    projects(limit: $projects) {
+      _id
+      name
+      description
+    }
+    entities(limit: $entities) {
+      _id
+      deleted
+      name
+      description
+    }
+    activity(limit: $activity) {
+      _id
+      timestamp
+      type
+      actor {
+        _id
+        name
+      }
+      details
+      target {
+        _id
+        name
+        type
+      }
+    }
+  }
+`;
+
 const Dashboard = () => {
   // Enable navigation
   const navigate = useNavigate();
@@ -40,19 +73,77 @@ const Dashboard = () => {
   // Toast to show errors
   const toast = useToast();
 
-  // Page state
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [isError, setIsError] = useState(false);
-  const breakpoint = useBreakpoint({ ssr: false });
-
   // Page data
-  const [entityData, setEntityData] = useState([] as EntityModel[]);
-  const [projectData, setProjectData] = useState([] as ProjectModel[]);
+  const [entityData, setEntityData] = useState(
+    [] as {
+      _id: string;
+      deleted: boolean;
+      name: string;
+      description: string;
+    }[],
+  );
+  const [projectData, setProjectData] = useState(
+    [] as { _id: string; name: string; description: string }[],
+  );
   const [activityData, setActivityData] = useState([] as ActivityModel[]);
 
-  const [visibleColumns, setVisibleColumns] = useState({});
+  // Execute GraphQL query both on page load and navigation
+  const { loading, error, data, refetch } = useQuery(GET_DASHBOARD, {
+    variables: {
+      projects: 5,
+      entities: 5,
+      activity: 20,
+    },
+  });
+
+  // Assign data
+  useEffect(() => {
+    if (data?.entities) {
+      setEntityData(data.entities);
+    }
+    if (data?.projects) {
+      setProjectData(data.projects);
+    }
+    if (data?.activity) {
+      setActivityData(data.activity);
+    }
+  }, [data]);
+
+  // Check to see if data currently exists and refetch if so
+  useEffect(() => {
+    if (data && refetch) {
+      refetch();
+    }
+  }, []);
+
+  // Display error messages from GraphQL usage
+  useEffect(() => {
+    if (!loading && _.isUndefined(data)) {
+      // Raised if invalid query
+      toast({
+        title: "Error",
+        description: "Could not retrieve data.",
+        status: "error",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    } else if (error) {
+      // Raised GraphQL error
+      toast({
+        title: "Error",
+        description: error.message,
+        status: "error",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
+  }, [error, loading]);
 
   // Effect to adjust column visibility
+  const breakpoint = useBreakpoint({ ssr: false });
+  const [visibleColumns, setVisibleColumns] = useState({});
   useEffect(() => {
     if (
       _.isEqual(breakpoint, "sm") ||
@@ -65,94 +156,27 @@ const Dashboard = () => {
     }
   }, [breakpoint]);
 
-  /**
-   * Utility function to retrieve all Entities
-   */
-  const getEntities = async () => {
-    const response = await request<EntityModel[]>("GET", "/entities");
-    if (response.success) {
-      setEntityData(response.data.reverse());
-      setIsLoaded(true);
-    } else {
-      toast({
-        title: "Network Error",
-        status: "error",
-        description: "Could not retrieve Entities.\n" + response.message,
-        duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
-      });
-      setIsError(true);
-    }
-  };
-
-  /**
-   * Utility function to retrieve all Projects
-   */
-  const getProjects = async () => {
-    const response = await request<ProjectModel[]>("GET", "/projects");
-    if (response.success) {
-      setProjectData(response.data.reverse());
-      setIsLoaded(true);
-    } else {
-      toast({
-        title: "Network Error",
-        status: "error",
-        description: "Could not retrieve Projects.\n" + response.message,
-        duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
-      });
-      setIsError(true);
-    }
-  };
-
-  /**
-   * Utility function to retrieve all Activity
-   */
-  const getActivity = async () => {
-    const response = await request<ActivityModel[]>("GET", "/activity");
-    if (response.success) {
-      setActivityData(response.data.reverse());
-      setIsLoaded(true);
-    } else {
-      toast({
-        title: "Network Error",
-        status: "error",
-        description: "Could not retrieve Activity.\n" + response.message,
-        duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
-      });
-      setIsError(true);
-    }
-  };
-
-  // Effect to retrieve all information required to render Dashboard
-  useEffect(() => {
-    getEntities();
-    getProjects();
-    getActivity();
-  }, []);
-
   // Configure Entity table
-  const entityTableData: EntityModel[] = entityData;
+  const entityTableData: {
+    _id: string;
+    deleted: boolean;
+    name: string;
+    description: string;
+  }[] = entityData;
   const entityTableColumnHelper = createColumnHelper<EntityModel>();
   const entityTableColumns = [
     entityTableColumnHelper.accessor("name", {
       cell: (info) => (
-        <Linky
-          id={info.row.original._id}
-          type={"entities"}
-          fallback={info.row.original.name}
-        />
+        <Text noOfLines={1} fontWeight={"semibold"}>
+          {info.getValue()}
+        </Text>
       ),
       header: "Name",
     }),
     entityTableColumnHelper.accessor("description", {
       cell: (info) => {
         if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
-          return <Tag colorScheme={"orange"}>Empty</Tag>;
+          return <Tag colorScheme={"orange"}>No Description</Tag>;
         }
         return <Text noOfLines={1}>{info.getValue()}</Text>;
       },
@@ -165,6 +189,7 @@ const Dashboard = () => {
           <Flex justifyContent={"right"}>
             <Button
               key={`view-entity-${info.getValue()}`}
+              size={"sm"}
               colorScheme={"gray"}
               rightIcon={<Icon name={"c_right"} />}
               onClick={() => navigate(`/entities/${info.getValue()}`)}
@@ -179,17 +204,22 @@ const Dashboard = () => {
   ];
 
   // Configure Projects table
-  const projectTableData: ProjectModel[] = projectData;
+  const projectTableData: { _id: string; name: string; description: string }[] =
+    projectData;
   const projectTableColumnHelper = createColumnHelper<ProjectModel>();
   const projectTableColumns = [
     projectTableColumnHelper.accessor("name", {
-      cell: (info) => info.getValue(),
+      cell: (info) => (
+        <Text noOfLines={1} fontWeight={"semibold"}>
+          {info.getValue()}
+        </Text>
+      ),
       header: "Name",
     }),
     projectTableColumnHelper.accessor("description", {
       cell: (info) => {
         if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
-          return <Tag colorScheme={"orange"}>Empty</Tag>;
+          return <Tag colorScheme={"orange"}>No Description</Tag>;
         }
         return <Text noOfLines={1}>{info.getValue()}</Text>;
       },
@@ -202,6 +232,7 @@ const Dashboard = () => {
           <Flex justifyContent={"right"}>
             <Button
               key={`view-entity-${info.getValue()}`}
+              size={"sm"}
               colorScheme={"gray"}
               rightIcon={<Icon name={"c_right"} />}
               onClick={() => navigate(`/projects/${info.getValue()}`)}
@@ -216,30 +247,30 @@ const Dashboard = () => {
   ];
 
   return (
-    <Content isError={isError} isLoaded={isLoaded}>
-      <Flex direction={"row"} wrap={"wrap"} gap={"4"} p={"4"}>
-        <Flex direction={"column"} gap={"4"} grow={"1"} basis={"60%"}>
+    <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
+      <Flex direction={"row"} wrap={"wrap"} gap={"2"} p={"2"}>
+        <Flex direction={"column"} gap={"2"} grow={"1"} basis={"60%"}>
           {/* Projects and Entities */}
           <Flex
             direction={"column"}
-            p={"4"}
+            p={"2"}
             background={"white"}
             rounded={"md"}
             gap={"2"}
-            border={"2px"}
+            border={"1px"}
             borderColor={"gray.200"}
           >
             {/* Projects heading */}
-            <Flex direction={"row"} align={"center"} gap={"4"}>
+            <Flex direction={"row"} align={"center"} gap={"2"} my={"2"}>
               <Icon name={"project"} size={"md"} />
-              <Heading size={"lg"} fontWeight={"semibold"}>
+              <Heading size={"md"} fontWeight={"bold"}>
                 Projects
               </Heading>
             </Flex>
 
             {/* Projects table */}
             {/* Condition: Loaded and content present */}
-            {isLoaded && projectData.length > 0 && (
+            {!loading && projectData.length > 0 && (
               <DataTable
                 columns={projectTableColumns}
                 data={projectTableData}
@@ -248,7 +279,7 @@ const Dashboard = () => {
             )}
 
             {/* Condition: Loaded and no content present */}
-            {isLoaded && _.isEmpty(projectData) && (
+            {!loading && _.isEmpty(projectData) && (
               <Flex
                 w={"100%"}
                 direction={"row"}
@@ -262,15 +293,11 @@ const Dashboard = () => {
               </Flex>
             )}
 
-            {/* Condition: Not loaded */}
-            {!isLoaded && <Loading />}
-
-            <Spacer />
-
             <Flex justify={"right"}>
               <Button
                 key={`view-projects-all`}
-                colorScheme={"teal"}
+                size={"sm"}
+                colorScheme={"blue"}
                 rightIcon={<Icon name={"c_right"} />}
                 onClick={() => navigate(`/projects`)}
               >
@@ -281,35 +308,37 @@ const Dashboard = () => {
 
           <Flex
             direction={"column"}
-            p={"4"}
+            p={"2"}
             background={"white"}
             rounded={"md"}
             gap={"2"}
-            border={"2px"}
+            border={"1px"}
             borderColor={"gray.200"}
           >
             {/* Entities heading */}
-            <Flex direction={"row"} align={"center"} gap={"4"}>
+            <Flex direction={"row"} align={"center"} gap={"2"} my={"2"}>
               <Icon name={"entity"} size={"md"} />
-              <Heading size={"lg"} fontWeight={"semibold"}>
+              <Heading size={"md"} fontWeight={"bold"}>
                 Entities
               </Heading>
             </Flex>
 
             {/* Entities table */}
             {/* Condition: Loaded and content present */}
-            {isLoaded && entityData.length > 0 && (
+            {!loading && entityData.length > 0 && (
               <DataTable
                 columns={entityTableColumns}
-                data={entityTableData.filter((entity) =>
-                  _.isEqual(entity.deleted, false),
+                data={entityTableData.filter(
+                  (entity) =>
+                    _.isEqual(entity.deleted, false) ||
+                    _.isEqual(entity.deleted, null),
                 )}
                 visibleColumns={visibleColumns}
               />
             )}
 
             {/* Condition: Loaded and no content present */}
-            {isLoaded && _.isEmpty(entityData) && (
+            {!loading && _.isEmpty(entityData) && (
               <Flex
                 w={"100%"}
                 direction={"row"}
@@ -323,15 +352,11 @@ const Dashboard = () => {
               </Flex>
             )}
 
-            {/* Condition: Not loaded */}
-            {!isLoaded && <Loading />}
-
-            <Spacer />
-
             <Flex justify={"right"}>
               <Button
                 key={`view-entity-all`}
-                colorScheme={"teal"}
+                size={"sm"}
+                colorScheme={"blue"}
                 rightIcon={<Icon name={"c_right"} />}
                 onClick={() => navigate(`/entities`)}
               >
@@ -344,92 +369,69 @@ const Dashboard = () => {
         {/* Activity */}
         <Flex
           direction={"column"}
-          p={"4"}
+          p={"2"}
           gap={"2"}
           grow={"1"}
           rounded={"md"}
-          border={"2px"}
+          border={"1px"}
           borderColor={"gray.200"}
-          maxH={"80vh"}
+          maxH={"97vh"}
         >
           {/* Activity heading */}
-          <Flex align={"center"} gap={"4"}>
+          <Flex align={"center"} gap={"2"} my={"2"}>
             <Icon name={"activity"} size={"md"} />
-            <Heading size={"lg"} fontWeight={"semibold"}>
-              Activity
+            <Heading size={"md"} fontWeight={"semibold"} color={"gray.700"}>
+              Recent Activity
             </Heading>
           </Flex>
 
           {/* Activity list */}
           {activityData.length > 0 ? (
             <Flex overflowY={"auto"} p={"0"} w={"100%"} h={"100%"}>
-              <VStack
-                divider={<StackDivider borderColor={"gray.200"} />}
-                spacing={"2"}
-                w={"95%"}
-              >
-                {activityData.slice(0, 20).map((activity) => {
-                  // Configure the badge
-                  let operationIcon: IconNames = "entity";
-                  let operationIconColor = "white";
-
-                  switch (activity.type) {
-                    case "create":
-                      operationIcon = "add";
-                      operationIconColor = "green.400";
-                      break;
-                    case "update":
-                      operationIcon = "edit";
-                      operationIconColor = "blue.400";
-                      break;
-                    case "delete":
-                      operationIcon = "delete";
-                      operationIconColor = "red.400";
-                      break;
-                  }
-
+              <VStack spacing={"2"} w={"95%"}>
+                {activityData.map((activity) => {
                   return (
                     <Flex
                       direction={"row"}
                       width={"100%"}
                       gap={"2"}
                       key={`activity-${activity._id}`}
+                      align={"center"}
                     >
-                      <Flex
-                        rounded={"full"}
-                        p={"2"}
-                        mr={"2"}
-                        alignSelf={"center"}
+                      <Tooltip
+                        label={
+                          activity.actor ? activity.actor.name : "Unknown User"
+                        }
                       >
-                        <Icon
+                        <Avatar
+                          name={
+                            activity.actor
+                              ? activity.actor.name
+                              : "Unknown User"
+                          }
                           size={"sm"}
-                          name={operationIcon}
-                          color={operationIconColor}
                         />
-                      </Flex>
-
-                      <Flex direction="column" align={"baseline"}>
-                        <Text display={{ base: "none", sm: "block" }}>
-                          {activity.details}
+                      </Tooltip>
+                      <Flex direction={"column"}>
+                        <Flex direction={"row"} gap={"1"}>
+                          <Text fontSize={"sm"}>{activity.details}</Text>
+                          <Linky
+                            id={activity.target._id}
+                            type={activity.target.type}
+                            fallback={activity.target.name}
+                            justify={"left"}
+                            size={"sm"}
+                            truncate={20}
+                          />
+                        </Flex>
+                        <Text
+                          fontSize={"xs"}
+                          fontWeight={"semibold"}
+                          color={"gray.500"}
+                        >
+                          {dayjs(activity.timestamp).fromNow()}
                         </Text>
-
-                        <Linky
-                          id={activity.target._id}
-                          type={activity.target.type}
-                          fallback={activity.target.name}
-                          justify={"left"}
-                        />
                       </Flex>
-
-                      <Spacer />
-
-                      <Text
-                        fontSize={"xs"}
-                        fontWeight={"semibold"}
-                        color={"gray.500"}
-                      >
-                        {dayjs(activity.timestamp).fromNow()}
-                      </Text>
                     </Flex>
                   );
                 })}

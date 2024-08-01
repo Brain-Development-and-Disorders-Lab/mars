@@ -1,12 +1,12 @@
-# MARS 🔬
+# Project MARS 🔬
 
-> Metadata Aggegator for Reusable / Reproducible Science
+> Project MARS (Metadata Aggegator enabling Reproducible Science)
 
 An open-source and customizable workflow tool for organizing, tracking, and searching metadata generated from scientific experiments. Named after the underlying philosophy of the FAIR data principles, that data should ultimately be reusable.
 
-![mars.png](mars.png)
+![screenshot.png](screenshot.png)
 
-**⚠️ WARNING: MARS is still in early development and should be used with caution.**
+**⚠️ WARNING: Project MARS is still in early development and should be used with caution.**
 
 ## Features ✨
 
@@ -71,11 +71,11 @@ docker compose up --build
 
 This command will build all required containers before starting the containers required to run the system. The system can then be viewed in the browser at `localhost:8080`, and the MongoDB database can be browsed using the `mongo-express` interface accessible at `localhost:8081`.
 
-**⚠️ Note: Currently, only the MongoDB instance and `mongo-express` interface are started. See the below instructions to start the MARS interface and server.**
+**⚠️ Note: Currently, only the MongoDB instance and `mongo-express` interface are started. See the below instructions to start the interface and server.**
 
 ### Starting the interface and server
 
-To start the reusable interface, run `yarn start` in the `/client` directory. Start the MARS server by running `yarn build` and `yarn start` in the `/server` directory. Both the client and server should be running alongside the Docker containers before attempting to access MARS at `localhost:8080`.
+To start the reusable interface, run `yarn start` in the `/client` directory. Start the server by running `yarn build` and `yarn start` in the `/server` directory. Both the client and server should be running alongside the Docker containers before attempting to access the interface at `localhost:8080`.
 
 ### Testing
 

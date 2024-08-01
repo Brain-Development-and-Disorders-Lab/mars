@@ -6,8 +6,8 @@ import { QueryComponent } from "@types";
 // Utility functions and libraries
 // @ts-ignore
 import mquery from "mquery";
-import { getDatabase } from "../database/connection";
 import _ from "lodash";
+import { getDatabase } from "../connectors/database";
 import { Entities } from "./Entities";
 
 const ENTITIES = "entities";

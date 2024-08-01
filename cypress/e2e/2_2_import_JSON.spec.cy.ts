@@ -1,11 +1,16 @@
 describe("JSON Import Test", () => {
-  it("should import a JSON file successfully", () => {
-    // Visit the page where you can import CSV files
+  beforeEach(() => {
+    // Clear the localstorage
     cy.clearLocalStorage();
 
+    // Navigate the "Login" page
     cy.visit("http://localhost:8080/");
+    cy.get("button").click();
+  });
 
-    cy.contains("div", "Import").click(); // click to import JSON file
+  it("should import a JSON file successfully", () => {
+    // Visit the page where you can import CSV files
+    cy.contains("button", "Import").click(); // click to import CSV file
 
     // cy.get('input[type=file]').first().selectFile(Cypress.Buffer.from('text'));
 

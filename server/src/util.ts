@@ -1,71 +1,8 @@
-import axios, { AxiosRequestConfig } from "axios";
-import { consola } from "consola";
 import _ from "lodash";
 
 // Authentication methods
-import { Authentication } from "./operations/Authentication";
-
-/**
- * Get data from an API using the JavaScript `fetch` function
- * @param {string} url exact URL to GET data from
- * @returns {Promise<any>} an object containing the resource response
- */
-export const getData = (
-  url: string,
-  options?: AxiosRequestConfig,
-): Promise<any> => {
-  return new Promise((resolve, reject) => {
-    axios
-      .get(url, options)
-      .then((response) => {
-        // Check response status
-        if (!response) {
-          consola.error("GET:", url);
-          reject("Invalid response from resource");
-        }
-        // Resolve with the response data
-        resolve(response.data);
-      })
-      .catch((error) => {
-        consola.error("GET:", url);
-        reject(error);
-      });
-  });
-};
-
-/**
- * Post data from an API using the JavaScript `fetch` function
- * @param {string} url exact URL to POST data to
- * @param {any} data the data to include in the request body
- * @returns {Promise<any>} an object containing the resource response
- */
-export const postData = async (
-  url: string,
-  data: any,
-  options?: AxiosRequestConfig,
-): Promise<any> => {
-  return new Promise((resolve, reject) => {
-    axios
-      .post(url, data, options)
-      .then((response) => {
-        const contentType = response.headers["content-type"];
-        if (_.isNull(contentType)) {
-          reject('"content-type" is null');
-        } else if (_.startsWith(contentType, "application/json")) {
-          if (_.isEqual(response.status, 200)) {
-            resolve(response.data);
-          } else {
-            reject(`Response: ${response.status}`);
-          }
-        } else {
-          resolve(response.data);
-        }
-      })
-      .catch((error) => {
-        reject(`Error: ${error}`);
-      });
-  });
-};
+import { Authentication } from "./models/Authentication";
+import { nanoid } from "nanoid";
 
 /**
  * Perform authentication operation. Authentication can only be bypassed in development mode.
@@ -80,7 +17,7 @@ export const authenticate = (request: any, response: any, next: () => void) => {
     // Bypass authentication in development mode
     next();
   } else {
-    Authentication.validate(request.headers["id_token"])
+    Authentication.validate(request.headers["token"])
       .then((result) => {
         if (result) {
           request.user = result;
@@ -95,4 +32,17 @@ export const authenticate = (request: any, response: any, next: () => void) => {
         response.json("Invalid token");
       });
   }
+};
+
+/**
+ * Generate safe pseudo-random identifiers for allocation when creating
+ * new items for storage in the MongoDB database, in place of default
+ * identifier
+ * @param type identifier to be assigned an Entity, Attribute, or Project
+ * @return {string}
+ */
+export const getIdentifier = (
+  type: "entity" | "attribute" | "project",
+): string => {
+  return `${type.slice(0, 1)}${nanoid(7)}`;
 };

@@ -1,16 +1,22 @@
 describe("In entity page, edit attribute", () => {
-  it("should be able to add and edit attribute", () => {
+  beforeEach(() => {
+    // Clear the localstorage
+    cy.clearLocalStorage();
+
+    // Navigate the "Login" page
     cy.visit("http://localhost:8080/");
+    cy.get("button").click();
+  });
+
+  it("should be able to add and edit attribute", () => {
     cy.contains("button", "Dashboard").click();
     cy.get("button").contains("View").eq(-1).click();
     cy.get("button").contains("View").eq(0).click();
-    cy.contains("This Entity does not have any Attributes.").should("exist");
+    cy.contains("No Attributes").should("exist");
     cy.contains("button", "Edit").click();
 
     // add attribute
-    cy.get(
-      ":nth-child(2) > .css-1acctax > .css-1ialerq > .chakra-button",
-    ).click();
+    cy.get("div:nth-child(1) > div.css-1ialerq > button").first().click();
     cy.get("#formName").type("Attribute Name");
     cy.get("#formDescription").type("Attribute Description");
     cy.get(".add-value-button-form").click();
@@ -25,14 +31,10 @@ describe("In entity page, edit attribute", () => {
 
     cy.contains("button", "Done").click();
 
-    cy.contains("This Entity does not have any Attributes.").should(
-      "not.exist",
-    );
+    cy.contains("No Attributes").should("not.exist");
     cy.reload();
     // check if attribute is added
-    cy.contains("This Entity does not have any Attributes.").should(
-      "not.exist",
-    );
+    cy.contains("No Attributes").should("not.exist");
 
     // edit attribute
     cy.contains("button", "Edit").click();
@@ -40,8 +42,8 @@ describe("In entity page, edit attribute", () => {
     cy.get('button[aria-label="Delete attribute"]').click();
     cy.contains("button", "Done").click();
     // check if attribute is deleted
-    cy.contains("This Entity does not have any Attributes.").should("exist");
+    cy.contains("No Attributes").should("exist");
     cy.reload();
-    cy.contains("This Entity does not have any Attributes.").should("exist");
+    cy.contains("No Attributes").should("exist");
   });
 });

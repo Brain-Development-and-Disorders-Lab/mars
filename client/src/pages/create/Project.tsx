@@ -1,5 +1,5 @@
 // React
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 // Existing and custom components
 import {
@@ -30,12 +30,12 @@ import { IProject } from "@types";
 
 // Utility functions and libraries
 import { useToken } from "src/authentication/useToken";
-import { request } from "@database/functions";
 import dayjs from "dayjs";
 import _ from "lodash";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
+import { gql, useMutation } from "@apollo/client";
 
 const Project = () => {
   const navigate = useNavigate();
@@ -52,6 +52,30 @@ const Project = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // GraphQL operations
+  const CREATE_PROJECT = gql`
+    mutation CreateProject($project: ProjectCreateInput) {
+      createProject(project: $project) {
+        success
+        message
+      }
+    }
+  `;
+  const [createProject, { loading, error }] = useMutation(CREATE_PROJECT);
+
+  useEffect(() => {
+    if (error) {
+      toast({
+        title: "Error",
+        description: error.message,
+        status: "error",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
+  }, [error]);
+
   // Form validation
   const isNameError = name === "";
   const isOwnerError = owner === "";
@@ -65,11 +89,10 @@ const Project = () => {
     shared: [],
     created: created,
     entities: [],
-    history: [],
   };
 
   return (
-    <Content>
+    <Content isLoaded={!loading}>
       <Flex
         direction={"column"}
         alignSelf={"center"}
@@ -183,22 +206,16 @@ const Project = () => {
             onClick={async () => {
               // Push the data
               setIsSubmitting(true);
-              const response = await request<any>(
-                "POST",
-                "/projects/create",
-                projectData,
-              );
-              if (response.success) {
+              // Execute the GraphQL mutation
+              const response = await createProject({
+                variables: {
+                  project: projectData,
+                },
+              });
+
+              if (response.data.createProject.success) {
+                setIsSubmitting(false);
                 navigate("/projects");
-              } else {
-                toast({
-                  title: "Error",
-                  status: "error",
-                  description: "Could not create new Project",
-                  duration: 4000,
-                  position: "bottom-right",
-                  isClosable: true,
-                });
               }
               setIsSubmitting(false);
             }}
@@ -235,7 +252,7 @@ const Project = () => {
                 set of Entities used in a specific experiment, this date could
                 represent when work on the experiment commenced. Otherwise, this
                 timestamp may simply represent when this Project was created in
-                MARS.
+                Storacuity.
               </Text>
 
               <Heading size={"sm"}>Description*</Heading>

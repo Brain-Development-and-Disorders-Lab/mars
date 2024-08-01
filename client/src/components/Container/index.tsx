@@ -2,12 +2,10 @@
 import React, { FC } from "react";
 
 // Existing and custom components
-import { Flex, Spacer } from "@chakra-ui/react";
+import { Flex } from "@chakra-ui/react";
 import Navigation from "@components/Navigation";
-import SearchBox from "@components/SearchBox";
 import Error from "@components/Error";
 import Loading from "@components/Loading";
-import AccountMenu from "@components/AccountMenu";
 
 // Existing and custom types
 import { ContentProps, PageProps } from "@types";
@@ -26,7 +24,7 @@ const Content: FC<ContentProps> = ({ children, isError, isLoaded }) => {
       direction={"column"}
       w={"100%"}
       h={"100%"}
-      maxH={{ base: "100%", lg: "92vh" }}
+      maxH={{ base: "100%" }}
       overflowY={"auto"}
     >
       {/* Present an error screen */}
@@ -53,31 +51,26 @@ const Page: FC<PageProps> = ({ children }) => {
     >
       {/* Navigation component */}
       <Flex
-        p={"4"}
         justify={"center"}
-        w={{ base: "100%", lg: "15%" }}
-        bgGradient={"linear(to-br, gray.300, gray.200)"}
+        w={{ base: "100%", lg: "18vw" }}
+        maxW={{ lg: "200px" }}
+        h={{ base: "8vh", lg: "100%" }}
+        position={"fixed"}
+        borderRight={"1px"}
+        borderBottom={"1px"}
+        borderColor={"gray.200"}
+        bg={"white"}
+        zIndex={2}
       >
         <Navigation />
       </Flex>
 
-      <Flex direction={"column"} w={{ base: "100%", lg: "85%" }}>
-        {/* Search box component */}
-        <Flex
-          w={"100%"}
-          h={"8vh"}
-          align={"center"}
-          display={{ base: "none", lg: "flex" }}
-          background={"white"}
-          borderBottom={"1px"}
-          borderColor={"gray.200"}
-        >
-          <Spacer />
-          <SearchBox />
-          <Spacer />
-          <AccountMenu />
-        </Flex>
-
+      <Flex
+        direction={"column"}
+        w={"100%"}
+        ml={{ base: "0", lg: "200px" }}
+        mt={{ base: "8vh", lg: "0" }}
+      >
         {/* Main content components */}
         {children}
       </Flex>

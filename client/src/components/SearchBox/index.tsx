@@ -10,7 +10,6 @@ import {
   Popover,
   PopoverTrigger,
   PopoverContent,
-  PopoverArrow,
   PopoverCloseButton,
   PopoverHeader,
   PopoverBody,
@@ -19,24 +18,23 @@ import {
   Spacer,
   VStack,
   StackDivider,
-  IconButton,
-  Tooltip,
   Spinner,
   Stack,
   Skeleton,
   PopoverFooter,
+  InputGroup,
+  InputLeftElement,
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 
 // Existing and custom types
-import { EntityModel, ScannerStatus } from "@types";
+import { EntityModel } from "@types";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
 
 // Utility functions and libraries
 import { request } from "@database/functions";
-import { connectScanner } from "@devices/Scanner";
 import _ from "lodash";
 
 // Limit the number of results shown
@@ -48,61 +46,6 @@ const SearchBox = () => {
 
   const { isOpen, onToggle, onClose } = useDisclosure();
   const [query, setQuery] = useState("");
-
-  // Scanner status
-  const [scannerStatus, setScannerStatus] = useState(
-    "disconnected" as ScannerStatus,
-  );
-
-  const handleScannerConnection = () => {
-    if (_.isEqual(scannerStatus, "disconnected")) {
-      // Connect to the scanner if not currently connected
-      connectScanner(setScannerStatus).then((device) => {
-        if (_.isNull(device)) {
-          toast({
-            title: "No device selected",
-            status: "warning",
-            duration: 2000,
-            position: "bottom-right",
-            isClosable: true,
-          });
-        } else {
-          // Event listener for connect event
-          navigator.usb.addEventListener("connect", (_event) => {
-            setScannerStatus("connected");
-            toast({
-              title: "Scanner connected",
-              status: "success",
-              duration: 2000,
-              position: "bottom-right",
-              isClosable: true,
-            });
-          });
-
-          // Event listener for disconnect event
-          navigator.usb.addEventListener("disconnect", (_event) => {
-            setScannerStatus("disconnected");
-            toast({
-              title: "Scanner disconnected",
-              status: "info",
-              duration: 2000,
-              position: "bottom-right",
-              isClosable: true,
-            });
-          });
-
-          // Notify of a successful connection
-          toast({
-            title: "Scanner connected",
-            status: "success",
-            duration: 2000,
-            position: "bottom-right",
-            isClosable: true,
-          });
-        }
-      });
-    }
-  };
 
   // Search status
   const [hasSearched, setHasSearched] = useState(false);
@@ -170,57 +113,36 @@ const SearchBox = () => {
   };
 
   return (
-    <Flex w={"100%"} maxW={"xl"} p={"1"}>
+    <Flex w={"100%"} p={"1"}>
       <Popover
         isOpen={isOpen}
         onClose={onCloseWrapper}
-        placement={"bottom"}
-        matchWidth
+        placement={"bottom-end"}
       >
         <PopoverTrigger>
           <Flex w={"100%"} gap={"4"}>
-            <Tooltip
-              label={
-                _.isEqual(scannerStatus, "connected")
-                  ? "Scanner connected"
-                  : "Scanner not connected"
-              }
-            >
-              <IconButton
-                aria-label={"Scanner status"}
-                icon={<Icon name={"scan"} />}
-                colorScheme={
-                  _.isEqual(scannerStatus, "connected") ? "green" : "gray"
-                }
-                onClick={() => handleScannerConnection()}
-                isDisabled={_.isEqual(scannerStatus, "connected")}
+            <InputGroup size={"sm"}>
+              <InputLeftElement pointerEvents={"none"}>
+                <Icon name={"search"} />
+              </InputLeftElement>
+              <Input
+                value={query}
+                rounded={"md"}
+                placeholder={"Quick Search"}
+                background={"white"}
+                onChange={(event) => setQuery(event.target.value)}
+                onKeyUp={(event) => {
+                  // Listen for "Enter" key when entering a query
+                  if (event.key === "Enter" && query !== "") {
+                    handleClick();
+                  }
+                }}
               />
-            </Tooltip>
-            <Input
-              value={query}
-              placeholder={"Quick Search"}
-              background={"white"}
-              onChange={(event) => setQuery(event.target.value)}
-              onKeyUp={(event) => {
-                // Listen for "Enter" key when entering a query
-                if (event.key === "Enter" && query !== "") {
-                  handleClick();
-                }
-              }}
-            />
-
-            <IconButton
-              aria-label={"Search"}
-              icon={<Icon name={"search"} />}
-              colorScheme={"green"}
-              isDisabled={query === ""}
-              onClick={handleClick}
-            />
+            </InputGroup>
           </Flex>
         </PopoverTrigger>
 
         <PopoverContent w={"100%"}>
-          <PopoverArrow />
           <PopoverCloseButton />
           <PopoverHeader>
             <Flex align={"center"} gap={"1"}>

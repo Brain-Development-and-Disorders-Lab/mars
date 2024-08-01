@@ -1,5 +1,5 @@
 // React
-import React, { FC, useEffect, useMemo, useState } from "react";
+import React, { FC, useEffect, useMemo } from "react";
 
 // Existing and custom components
 import { Flex, Heading, Button, Image, Text, useToast } from "@chakra-ui/react";
@@ -8,13 +8,13 @@ import { Content } from "@components/Container";
 // Routing and navigation
 import { useLocation, useSearchParams } from "react-router-dom";
 
-// Existing and custom types
-import { LoginProps } from "@types";
-
 // Utility functions and libraries
+import { gql, useLazyQuery } from "@apollo/client";
 import { useToken } from "src/authentication/useToken";
 import _ from "lodash";
-import { request } from "@database/functions";
+
+// Existing and custom types
+import { LoginProps } from "@types";
 
 const useQuery = () => {
   // Get URL query parameters
@@ -44,23 +44,33 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
     }
   };
 
-  // Loading state, dependent on "code"
-  const [isLoading, setIsLoading] = useState(searchParams.has("code"));
+  // Queries
+  const LOGIN_DATA = gql`
+    query PerformLogin($code: String) {
+      login(code: $code) {
+        orcid
+        name
+        token
+      }
+    }
+  `;
+
+  const [doLogin, { loading, error }] = useLazyQuery(LOGIN_DATA);
 
   /**
    * Utility function to perform a Login operation
    * @param code String returned by ORCID API for login
    */
   const getLogin = async (code: string) => {
+    // Query to retrieve Entity data and associated data for editing
+    const response = await doLogin({ variables: { code: code } });
+
     // Perform login and data retrieval via server, check if user permitted access
-    const response = await request<{ token: any }>("POST", "/login", {
-      code: code,
-    });
-    if (response.success) {
+    if (response.data?.login) {
       removeCode();
-      setToken(response.data.token);
+      setToken(response.data.login);
       setAuthenticated(true);
-    } else {
+    } else if (error) {
       toast({
         title: "Login Error",
         status: "error",
@@ -71,12 +81,11 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
       });
       setAuthenticated(false);
     }
-    setIsLoading(false);
   };
 
   // Check if token exists
   useEffect(() => {
-    if ((_.isUndefined(token) || _.isEqual(token.id_token, "")) && accessCode) {
+    if ((_.isUndefined(token) || _.isEqual(token.token, "")) && accessCode) {
       getLogin(accessCode);
     }
   }, []);
@@ -88,11 +97,19 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
     window.location.hostname === "127.0.0.1";
   const redirectURI = isLocalhost
     ? "http://127.0.0.1:8080"
-    : "https://mars.reusable.bio";
+    : "https://app.storacuity.com";
   const requestURI = `https://orcid.org/oauth/authorize?client_id=${clientID}&response_type=code&scope=openid&redirect_uri=${redirectURI}`;
 
-  const onLoginClick = () => {
-    window.location.href = requestURI;
+  /**
+   * Wrapper function to handle login flow
+   */
+  const onLoginClick = async () => {
+    if (process.env.NODE_ENV !== "production") {
+      // If in a development environment, bypass the ORCiD login
+      await getLogin("");
+    } else {
+      window.location.href = requestURI;
+    }
   };
 
   return (
@@ -115,40 +132,37 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
           h={"md"}
           bg={"white"}
           rounded={"lg"}
-          border={"2px"}
-          borderColor={"gray.300"}
+          border={"1px"}
+          borderColor={"gray.200"}
           align={"center"}
           justify={"center"}
         >
-          <Flex align={"center"} gap={"4"} justify={"center"}>
-            <Image src="/Favicon.png" boxSize={"72px"} />
-            <Heading fontWeight={"semibold"}>Login</Heading>
-          </Flex>
-
           <Flex
             direction={"column"}
             justify={"center"}
             align={"center"}
-            gap={"8"}
+            gap={"4"}
           >
+            <Heading fontWeight={"semibold"}>Storacuity</Heading>
             <Text align={"center"}>
               Log in or create an account with your ORCID iD.
             </Text>
-            <Button
-              colorScheme={"gray"}
-              gap={"4"}
-              onClick={onLoginClick}
-              isLoading={isLoading}
-              loadingText={"Logging in..."}
-            >
-              <Image
-                src={
-                  "https://orcid.org/sites/default/files/images/orcid_16x16.png"
-                }
-              />
-              Connect your ORCID iD
-            </Button>
           </Flex>
+
+          <Button
+            colorScheme={"gray"}
+            gap={"4"}
+            onClick={onLoginClick}
+            isLoading={loading}
+            loadingText={"Logging in..."}
+          >
+            <Image
+              src={
+                "https://orcid.org/sites/default/files/images/orcid_16x16.png"
+              }
+            />
+            Connect ORCID
+          </Button>
         </Flex>
       </Flex>
     </Content>

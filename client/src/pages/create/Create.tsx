@@ -34,22 +34,22 @@ const Create = () => {
         h={"100%"}
         align={"center"}
         justify={"center"}
-        gap={"6"}
+        gap={"2"}
         p={"2"}
         wrap={"wrap"}
       >
         {/* Project card */}
         <Card
           maxW={"sm"}
-          h={"lg"}
+          h={"md"}
           variant={"outline"}
-          border={"2px"}
+          border={"1px"}
           borderColor={"gray.200"}
         >
           <CardHeader>
-            <Flex gap={"4"} w={"100%"} justify={"center"} align={"center"}>
-              <Icon name={"project"} size={"lg"} />
-              <Heading size={"lg"}>Project</Heading>
+            <Flex gap={"2"} w={"100%"} justify={"center"} align={"center"}>
+              <Icon name={"project"} size={"md"} />
+              <Heading size={"md"}>Project</Heading>
             </Flex>
           </CardHeader>
           <CardBody>
@@ -58,7 +58,9 @@ const Create = () => {
                 <Heading size={"xs"} textTransform={"uppercase"}>
                   Description
                 </Heading>
-                <Text>Create a Project to organize and share Entities.</Text>
+                <Text fontSize={"sm"}>
+                  Create a Project to organize and share Entities.
+                </Text>
               </Flex>
               <Flex p={"2"} gap={"4"} direction={"column"}>
                 <Heading size={"xs"} textTransform={"uppercase"}>
@@ -66,14 +68,14 @@ const Create = () => {
                 </Heading>
                 <Flex align={"center"} wrap={"wrap"} gap={"2"}>
                   <Text
-                    fontSize={"xs"}
+                    fontSize={"sm"}
                     fontWeight={"semibold"}
                     color={"gray.600"}
                   >
                     Required:
                   </Text>
-                  <Tag colorScheme={"red"}>Name</Tag>
-                  <Tag colorScheme={"red"}>Description</Tag>
+                  <Tag>Name</Tag>
+                  <Tag>Description</Tag>
                 </Flex>
               </Flex>
             </Stack>
@@ -94,15 +96,15 @@ const Create = () => {
         {/* Entity card */}
         <Card
           maxW={"sm"}
-          h={"lg"}
+          h={"md"}
           variant={"outline"}
-          border={"2px"}
+          border={"1px"}
           borderColor={"gray.200"}
         >
           <CardHeader>
-            <Flex gap={"4"} w={"100%"} justify={"center"} align={"center"}>
-              <Icon name={"entity"} size={"lg"} />
-              <Heading size={"lg"}>Entity</Heading>
+            <Flex gap={"2"} w={"100%"} justify={"center"} align={"center"}>
+              <Icon name={"entity"} size={"md"} />
+              <Heading size={"md"}>Entity</Heading>
             </Flex>
           </CardHeader>
           <CardBody>
@@ -111,7 +113,7 @@ const Create = () => {
                 <Heading size={"xs"} textTransform={"uppercase"}>
                   Description
                 </Heading>
-                <Text>
+                <Text fontSize={"sm"}>
                   Create an Entity to store metadata of a physical or digital
                   resource.
                 </Text>
@@ -122,29 +124,29 @@ const Create = () => {
                 </Heading>
                 <Flex align={"center"} wrap={"wrap"} gap={"2"}>
                   <Text
-                    fontSize={"xs"}
+                    fontSize={"sm"}
                     fontWeight={"semibold"}
                     color={"gray.600"}
                   >
                     Required:
                   </Text>
-                  <Tag colorScheme={"red"}>Name</Tag>
-                  <Tag colorScheme={"red"}>Created</Tag>
+                  <Tag>Name</Tag>
+                  <Tag>Created</Tag>
                 </Flex>
 
                 <Flex align={"center"} wrap={"wrap"} gap={"2"}>
                   <Text
-                    fontSize={"xs"}
+                    fontSize={"sm"}
                     fontWeight={"semibold"}
                     color={"gray.600"}
                   >
                     Optional:
                   </Text>
-                  <Tag colorScheme={"teal"}>Description</Tag>
-                  <Tag colorScheme={"teal"}>Projects</Tag>
-                  <Tag colorScheme={"teal"}>Origins</Tag>
-                  <Tag colorScheme={"teal"}>Products</Tag>
-                  <Tag colorScheme={"teal"}>Attributes</Tag>
+                  <Tag>Description</Tag>
+                  <Tag>Projects</Tag>
+                  <Tag>Origins</Tag>
+                  <Tag>Products</Tag>
+                  <Tag>Attributes</Tag>
                 </Flex>
               </Flex>
             </Stack>
@@ -165,15 +167,15 @@ const Create = () => {
         {/* Attribute card */}
         <Card
           maxW={"sm"}
-          h={"lg"}
+          h={"md"}
           variant={"outline"}
-          border={"2px"}
+          border={"1px"}
           borderColor={"gray.200"}
         >
           <CardHeader>
             <Flex gap={"4"} w={"100%"} justify={"center"} align={"center"}>
-              <Icon name={"attribute"} size={"lg"} />
-              <Heading size={"lg"}>Template Attribute</Heading>
+              <Icon name={"attribute"} size={"md"} />
+              <Heading size={"md"}>Template</Heading>
             </Flex>
           </CardHeader>
           <CardBody>
@@ -182,7 +184,7 @@ const Create = () => {
                 <Heading size={"xs"} textTransform={"uppercase"}>
                   Description
                 </Heading>
-                <Text>
+                <Text fontSize={"sm"}>
                   Create template Attributes to reuse metadata structures across
                   Entities.
                 </Text>
@@ -193,15 +195,15 @@ const Create = () => {
                 </Heading>
                 <Flex align={"center"} wrap={"wrap"} gap={"2"}>
                   <Text
-                    fontSize={"xs"}
+                    fontSize={"sm"}
                     fontWeight={"semibold"}
                     color={"gray.600"}
                   >
                     Required:
                   </Text>
-                  <Tag colorScheme={"red"}>Name</Tag>
-                  <Tag colorScheme={"red"}>Description</Tag>
-                  <Tag colorScheme={"red"}>Values</Tag>
+                  <Tag>Name</Tag>
+                  <Tag>Description</Tag>
+                  <Tag>Values</Tag>
                 </Flex>
               </Flex>
             </Stack>

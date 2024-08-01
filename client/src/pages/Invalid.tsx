@@ -2,7 +2,7 @@
 import React from "react";
 
 // Existing and custom components
-import { Button, Flex, Heading, Image, Link, Text } from "@chakra-ui/react";
+import { Button, Flex, Heading, Link, Text } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 
 // Utility functions and libraries
@@ -26,13 +26,12 @@ const Invalid = () => {
         h={["sm", "md"]}
         wrap={"wrap"}
       >
-        <Image src="/Favicon.png" boxSize={"120px"} />
         <Flex direction={"column"} align={"center"} gap={"4"}>
           <Heading fontWeight={"semibold"}>Oops!</Heading>
           <Text>We can't find that right now.</Text>
         </Flex>
         <Button as={Link} onClick={() => navigate("/")}>
-          Home
+          Dashboard
         </Button>
       </Flex>
     </Content>

@@ -40,7 +40,7 @@ const AttributeCard = (props: AttributeCardProps) => {
   }, [values]);
 
   const attributeCardData: AttributeCardProps = {
-    identifier: props.identifier,
+    _id: props._id,
     name: name,
     description: description,
     values: values,
@@ -101,7 +101,7 @@ const AttributeCard = (props: AttributeCardProps) => {
             colorScheme={"red"}
             onClick={() => {
               if (props.onRemove) {
-                props.onRemove(props.identifier);
+                props.onRemove(props._id);
               }
             }}
             rightIcon={<Icon name={"delete"} />}
