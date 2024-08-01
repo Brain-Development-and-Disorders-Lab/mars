@@ -10,7 +10,7 @@ describe("JSON Import Test", () => {
 
   it("should import a JSON file successfully", () => {
     // Visit the page where you can import CSV files
-    cy.contains("div", "Import").click(); // click to import JSON file
+    cy.contains("button", "Import").click(); // click to import CSV file
 
     // cy.get('input[type=file]').first().selectFile(Cypress.Buffer.from('text'));
 

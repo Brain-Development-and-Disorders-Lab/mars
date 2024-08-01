@@ -1,4 +1,4 @@
-describe("checking app does launch ", () => {
+describe("Interface launches", () => {
   beforeEach(() => {
     // Clear the localstorage
     cy.clearLocalStorage();
@@ -8,7 +8,7 @@ describe("checking app does launch ", () => {
     cy.get("button").click();
   });
 
-  it("checking Search and Projects box", () => {
+  it("Search and Projects box are visible", () => {
     cy.get(".css-50hugx > :nth-child(2) > button:nth-child(3)").should(
       "have.text",
       "Search",
