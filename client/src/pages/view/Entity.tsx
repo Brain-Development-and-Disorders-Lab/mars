@@ -1601,7 +1601,7 @@ const Entity = () => {
               >
                 {entityProjects.length === 0 ? (
                   <Text color={"gray.400"} fontWeight={"semibold"}>
-                    This Entity is not associated with any Projects.
+                    No Projects
                   </Text>
                 ) : (
                   <DataTable
@@ -1667,7 +1667,7 @@ const Entity = () => {
                   >
                     {(entityOrigins?.length ?? 0) === 0 ? (
                       <Text color={"gray.400"} fontWeight={"semibold"}>
-                        This Entity does not have any Origins.
+                        No Origins
                       </Text>
                     ) : (
                       <DataTable
@@ -1697,7 +1697,7 @@ const Entity = () => {
                   >
                     {(entityProducts?.length ?? 0) === 0 ? (
                       <Text color={"gray.400"} fontWeight={"semibold"}>
-                        This Entity does not have any Products.
+                        No Products
                       </Text>
                     ) : (
                       <DataTable
@@ -1763,7 +1763,7 @@ const Entity = () => {
               >
                 {entityAttributes.length === 0 ? (
                   <Text color={"gray.400"} fontWeight={"semibold"}>
-                    This Entity does not have any Attributes.
+                    No Attributes
                   </Text>
                 ) : (
                   <DataTable
@@ -1813,7 +1813,7 @@ const Entity = () => {
                 >
                   {entityAttachments.length === 0 ? (
                     <Text color={"gray.400"} fontWeight={"semibold"}>
-                      This Entity does not have any Attachments.
+                      No Attachments
                     </Text>
                   ) : (
                     <DataTable
@@ -2590,7 +2590,7 @@ const Entity = () => {
         >
           <ModalOverlay />
           <ModalContent>
-            <ModalHeader>Relations: {entityData.name}</ModalHeader>
+            <ModalHeader>Visualize: {entityData.name}</ModalHeader>
             <ModalCloseButton />
             <ModalBody>
               <Container h={"90vh"} minW={"90vw"}>

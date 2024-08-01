@@ -132,40 +132,37 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
           h={"md"}
           bg={"white"}
           rounded={"lg"}
-          border={"2px"}
-          borderColor={"gray.300"}
+          border={"1px"}
+          borderColor={"gray.200"}
           align={"center"}
           justify={"center"}
         >
-          <Flex align={"center"} gap={"4"} justify={"center"}>
-            <Image src="/Favicon.png" boxSize={"72px"} />
-            <Heading fontWeight={"semibold"}>Login</Heading>
-          </Flex>
-
           <Flex
             direction={"column"}
             justify={"center"}
             align={"center"}
-            gap={"8"}
+            gap={"4"}
           >
+            <Heading fontWeight={"semibold"}>Storacuity</Heading>
             <Text align={"center"}>
               Log in or create an account with your ORCID iD.
             </Text>
-            <Button
-              colorScheme={"gray"}
-              gap={"4"}
-              onClick={onLoginClick}
-              isLoading={loading}
-              loadingText={"Logging in..."}
-            >
-              <Image
-                src={
-                  "https://orcid.org/sites/default/files/images/orcid_16x16.png"
-                }
-              />
-              Connect your ORCID iD
-            </Button>
           </Flex>
+
+          <Button
+            colorScheme={"gray"}
+            gap={"4"}
+            onClick={onLoginClick}
+            isLoading={loading}
+            loadingText={"Logging in..."}
+          >
+            <Image
+              src={
+                "https://orcid.org/sites/default/files/images/orcid_16x16.png"
+              }
+            />
+            Connect ORCID
+          </Button>
         </Flex>
       </Flex>
     </Content>

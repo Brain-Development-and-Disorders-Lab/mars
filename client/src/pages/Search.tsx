@@ -300,7 +300,7 @@ const Search = () => {
     searchResultColumnHelper.accessor("description", {
       cell: (info) => {
         if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
-          return <Tag colorScheme={"orange"}>Empty</Tag>;
+          return <Tag colorScheme={"orange"}>No Description</Tag>;
         }
         return <Text noOfLines={1}>{info.getValue()}</Text>;
       },
