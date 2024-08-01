@@ -5,6 +5,7 @@ import React from "react";
 import {
   Flex,
   IconButton,
+  Image,
   Button,
   useDisclosure,
   Heading,
@@ -47,7 +48,15 @@ const Navigation = () => {
         w={"100%"}
       >
         {/* Heading */}
-        <Flex direction={"row"} gap={"2"} p={"1"} mt={"2"} align={"center"}>
+        <Flex
+          direction={"row"}
+          gap={"2"}
+          p={"1"}
+          mt={"2"}
+          align={"center"}
+          justify={"center"}
+        >
+          <Image src="/Favicon.png" boxSize={"36px"} />
           <Heading fontWeight={"semibold"} size={"md"}>
             Storacuity
           </Heading>

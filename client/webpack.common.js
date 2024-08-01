@@ -7,6 +7,7 @@ module.exports = {
     new HtmlWebpackPlugin({
       title: "Storacuity",
       template: "src/index.html",
+      favicon: "src/img/Favicon.png",
     }),
   ],
   module: {

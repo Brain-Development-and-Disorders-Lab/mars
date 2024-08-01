@@ -143,6 +143,7 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
             align={"center"}
             gap={"4"}
           >
+            <Image src="/Favicon.png" boxSize={"72px"} />
             <Heading fontWeight={"semibold"}>Storacuity</Heading>
             <Text align={"center"}>
               Log in or create an account with your ORCID iD.
