@@ -125,6 +125,7 @@ const Projects = () => {
               colorScheme={"gray"}
               rightIcon={<Icon name={"c_right"} />}
               onClick={() => navigate(`/projects/${info.getValue()}`)}
+              size={"sm"}
             >
               View
             </Button>
@@ -148,19 +149,21 @@ const Projects = () => {
       >
         <Flex
           w={"100%"}
-          p={"4"}
           direction={"row"}
           justify={"space-between"}
           align={"center"}
         >
-          <Flex align={"center"} gap={"4"} w={"100%"}>
-            <Icon name={"project"} size={"lg"} />
-            <Heading fontWeight={"semibold"}>Projects</Heading>
+          <Flex align={"center"} gap={"2"} w={"100%"}>
+            <Icon name={"project"} size={"md"} />
+            <Heading fontWeight={"bold"} size={"md"}>
+              Projects
+            </Heading>
             <Spacer />
             <Button
               leftIcon={<Icon name={"add"} />}
               colorScheme={"green"}
               onClick={() => navigate("/create/project")}
+              size={"sm"}
             >
               Create
             </Button>
