@@ -95,7 +95,7 @@ const DataTable = (props: DataTableProps) => {
     autoResetPageIndex: false,
     initialState: {
       pagination: {
-        pageSize: 5,
+        pageSize: 10,
       },
     },
     state: {
@@ -170,7 +170,7 @@ const DataTable = (props: DataTableProps) => {
                           ? "background-color 0.3s ease-in-out, color 0.3s ease-in-out"
                           : ""
                       }
-                      px={"0"}
+                      px={"1"}
                       py={"1"}
                     >
                       {flexRender(
@@ -281,7 +281,7 @@ const DataTable = (props: DataTableProps) => {
                 }}
                 isInvalid={false}
               >
-                {[5, 10, 20].map((size) => {
+                {[10, 20, 50].map((size) => {
                   return (
                     <option key={size} value={size}>
                       Show {size}

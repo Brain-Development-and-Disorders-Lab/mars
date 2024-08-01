@@ -543,6 +543,7 @@ const Project = () => {
                     "Removing Entities from a Project has not been implemented!",
                   );
                 }}
+                size={"sm"}
               />
             ) : (
               <Button
@@ -550,6 +551,7 @@ const Project = () => {
                 colorScheme={"gray"}
                 rightIcon={<Icon name={"c_right"} />}
                 onClick={() => navigate(`/entities/${info.row.original}`)}
+                size={"sm"}
               >
                 View
               </Button>
@@ -581,10 +583,11 @@ const Project = () => {
       isError={!_.isUndefined(error)}
       isLoaded={!loading && !deleteLoading && !updateLoading}
     >
-      <Flex direction={"column"} gap={"4"}>
+      <Flex direction={"column"}>
         <Flex
-          gap={"4"}
-          p={"4"}
+          gap={"2"}
+          p={"2"}
+          pb={"0"}
           direction={"row"}
           justify={"space-between"}
           align={"center"}
@@ -592,17 +595,19 @@ const Project = () => {
         >
           <Flex
             align={"center"}
-            gap={"4"}
+            gap={"2"}
             p={"2"}
             border={"2px"}
             rounded={"md"}
           >
-            <Icon name={"project"} size={"lg"} />
-            <Heading fontWeight={"semibold"}>{project.name}</Heading>
+            <Icon name={"project"} size={"md"} />
+            <Heading fontWeight={"semibold"} size={"lg"}>
+              {project.name}
+            </Heading>
           </Flex>
 
           {/* Buttons */}
-          <Flex direction={"row"} gap={"4"} wrap={"wrap"}>
+          <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
             {editing && (
               <Popover>
                 <PopoverTrigger>
@@ -610,6 +615,7 @@ const Project = () => {
                     colorScheme={"red"}
                     rightIcon={<Icon name={"delete"} />}
                     isDisabled={isUpdating}
+                    size={"sm"}
                   >
                     Delete
                   </Button>
@@ -625,6 +631,7 @@ const Project = () => {
                         colorScheme={"green"}
                         rightIcon={<Icon name={"check"} />}
                         onClick={handleDeleteClick}
+                        size={"sm"}
                       >
                         Confirm
                       </Button>
@@ -641,6 +648,7 @@ const Project = () => {
               onClick={handleEditClick}
               loadingText={"Saving..."}
               isLoading={isUpdating}
+              size={"sm"}
             >
               {editing ? "Done" : "Edit"}
             </Button>
@@ -651,6 +659,7 @@ const Project = () => {
                 as={Button}
                 colorScheme={"blue"}
                 rightIcon={<Icon name={"c_down"} />}
+                size={"sm"}
               >
                 Actions
               </MenuButton>
@@ -687,37 +696,29 @@ const Project = () => {
           </Flex>
         </Flex>
 
-        <Flex direction={"row"} wrap={"wrap"}>
+        <Flex direction={"row"} gap={"0"} wrap={"wrap"}>
           <Flex
             direction={"column"}
-            p={"4"}
-            gap={"4"}
+            p={"2"}
+            pt={{ base: "0", lg: "2" }}
+            gap={"2"}
             grow={"1"}
             basis={"50%"}
-            h={"fit-content"}
-            bg={"white"}
             rounded={"md"}
           >
-            <Flex
-              direction={"column"}
-              p={"4"}
-              h={"fit-content"}
-              grow={"1"}
-              bg={"gray.50"}
-              rounded={"md"}
-            >
+            <Flex direction={"column"} p={"2"} bg={"gray.100"} rounded={"md"}>
               {/* Project Overview */}
               <Flex gap={"4"} grow={"1"} direction={"column"} minH={"32"}>
                 <Flex gap={"2"} direction={"row"}>
                   <Flex gap={"2"} direction={"column"} basis={"40%"}>
-                    <Text fontWeight={"semibold"}>Created</Text>
+                    <Text fontWeight={"bold"}>Created</Text>
                     <Flex align={"center"} gap={"2"}>
                       <Icon name={"v_date"} size={"sm"} />
                       <Text>
                         {dayjs(project.created).format("DD MMM YYYY")}
                       </Text>
                     </Flex>
-                    <Text fontWeight={"semibold"}>Owner</Text>
+                    <Text fontWeight={"bold"}>Owner</Text>
                     <Flex>
                       <Tag colorScheme={"green"}>
                         <TagLabel>{project.owner}</TagLabel>
@@ -726,7 +727,7 @@ const Project = () => {
                   </Flex>
 
                   <Flex gap={"2"} direction={"column"} basis={"60%"}>
-                    <Text fontWeight={"semibold"}>Description</Text>
+                    <Text fontWeight={"bold"}>Description</Text>
                     <Textarea
                       value={projectDescription}
                       onChange={(event) => {
@@ -741,26 +742,13 @@ const Project = () => {
                 </Flex>
               </Flex>
             </Flex>
-          </Flex>
 
-          {/* Display Entities and Projects */}
-          <Flex
-            direction={"column"}
-            p={"4"}
-            gap={"4"}
-            grow={"1"}
-            basis={"50%"}
-            h={"fit-content"}
-            bg={"white"}
-            rounded={"md"}
-          >
+            {/* Display Entities */}
             <Flex
               direction={"column"}
-              p={"4"}
-              h={"fit-content"}
-              grow={"1"}
+              p={"2"}
               rounded={"md"}
-              border={"2px"}
+              border={"1px"}
               borderColor={"gray.200"}
             >
               <Flex
@@ -769,7 +757,7 @@ const Project = () => {
                 align={"center"}
               >
                 {/* Entities in the Project */}
-                <Heading fontWeight={"semibold"} size={"md"} pt={"2"} pb={"2"}>
+                <Heading size={"md"} mb={"2"}>
                   Entities
                 </Heading>
                 {editing && (
@@ -777,12 +765,19 @@ const Project = () => {
                     rightIcon={<Icon name={"add"} />}
                     onClick={onEntitiesOpen}
                     colorScheme={"green"}
+                    size={"sm"}
                   >
                     Add
                   </Button>
                 )}
               </Flex>
-              <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
+
+              <Flex
+                w={"100%"}
+                justify={"center"}
+                align={"center"}
+                minH={"100px"}
+              >
                 {projectEntities && projectEntities.length > 0 ? (
                   <DataTable
                     data={projectEntities}
@@ -808,79 +803,95 @@ const Project = () => {
               </Flex>
             </Flex>
           </Flex>
+
           <Flex
             direction={"column"}
-            p={"4"}
-            gap={"4"}
+            p={"2"}
+            pl={{ base: "2", lg: "0" }}
+            pt={{ base: "0", lg: "2" }}
+            gap={"2"}
             grow={"1"}
-            w={"50%"}
-            maxW={"50%"}
-            minW={"420px"}
-            h={"fit-content"}
-            bg={"gray.50"}
-            ml={"4"}
+            basis={"50%"}
             rounded={"md"}
           >
-            {/* Collaborators display */}
-            <Flex direction="column">
-              <Heading size="md" mb="2">
-                Collaborators
-              </Heading>
-              {projectCollaborators?.length > 0 ? (
-                <VStack align="start">
-                  {projectCollaborators.map((collaborator, index) => (
-                    <Flex key={index} align="center">
-                      <Text mr="4">{collaborator}</Text>
-                      {editing && (
-                        <IconButton
-                          aria-label="Remove collaborator"
-                          icon={<Icon name="delete" />}
-                          onClick={() =>
-                            setProjectCollaborators((collaborators) =>
-                              collaborators.filter((c) => c !== collaborator),
-                            )
-                          }
-                        />
-                      )}
-                    </Flex>
-                  ))}
-                </VStack>
-              ) : (
-                <Text>No collaborators added yet.</Text>
-              )}
-            </Flex>
+            <Flex
+              direction={"column"}
+              gap={"2"}
+              p={"2"}
+              rounded={"md"}
+              border={"1px"}
+              borderColor={"gray.200"}
+            >
+              {/* Collaborators display */}
+              <Flex direction={"column"}>
+                <Heading size={"md"} mb={"2"}>
+                  Collaborators
+                </Heading>
+                <Flex
+                  w={"100%"}
+                  justify={"center"}
+                  align={"center"}
+                  minH={"100px"}
+                >
+                  {projectCollaborators.length === 0 ? (
+                    <Text color={"gray.400"} fontWeight={"semibold"}>
+                      No Collaborators
+                    </Text>
+                  ) : (
+                    <VStack align="start">
+                      {projectCollaborators.map((collaborator, index) => (
+                        <Flex key={index} align="center">
+                          <Text mr="4">{collaborator}</Text>
+                          {editing && (
+                            <IconButton
+                              aria-label="Remove collaborator"
+                              icon={<Icon name="delete" />}
+                              onClick={() =>
+                                setProjectCollaborators((collaborators) =>
+                                  collaborators.filter(
+                                    (c) => c !== collaborator,
+                                  ),
+                                )
+                              }
+                            />
+                          )}
+                        </Flex>
+                      ))}
+                    </VStack>
+                  )}
+                </Flex>
+              </Flex>
 
-            {/* Add collaborator input */}
-            <Flex mt="4" direction="column">
-              <FormControl>
-                <FormLabel>Add Collaborator</FormLabel>
-                <Input
-                  disabled={!editing}
-                  placeholder="Collaborator ORCiD"
-                  value={newCollaborator}
-                  onChange={(e) => setNewCollaborator(e.target.value)}
-                />
-              </FormControl>
-              <Button
-                mt="2"
-                disabled={!editing}
-                onClick={() => {
-                  // Prevent adding empty or duplicate collaborator
-                  if (
-                    newCollaborator &&
-                    !projectCollaborators.includes(newCollaborator)
-                  ) {
-                    setProjectCollaborators((collaborators) => [
-                      ...collaborators,
-                      newCollaborator,
-                    ]);
-                    setNewCollaborator(""); // Clear the input after adding
-                  }
-                }}
-                colorScheme={editing ? "blue" : "gray"}
-              >
-                Add Collaborator
-              </Button>
+              {editing && (
+                <Flex direction={"row"} gap={"2"} align={"center"}>
+                  <FormControl maxW={"md"}>
+                    <Input
+                      placeholder="Collaborator ORCiD"
+                      value={newCollaborator}
+                      onChange={(e) => setNewCollaborator(e.target.value)}
+                    />
+                  </FormControl>
+                  <Spacer />
+                  <Button
+                    colorScheme={"green"}
+                    onClick={() => {
+                      // Prevent adding empty or duplicate collaborator
+                      if (
+                        newCollaborator &&
+                        !projectCollaborators.includes(newCollaborator)
+                      ) {
+                        setProjectCollaborators((collaborators) => [
+                          ...collaborators,
+                          newCollaborator,
+                        ]);
+                        setNewCollaborator(""); // Clear the input after adding
+                      }
+                    }}
+                  >
+                    Add Collaborator
+                  </Button>
+                </Flex>
+              )}
             </Flex>
           </Flex>
         </Flex>

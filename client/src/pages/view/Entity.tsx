@@ -1531,14 +1531,14 @@ const Entity = () => {
                 <Flex gap={"2"} direction={"row"}>
                   {/* "Created" and "Owner" fields */}
                   <Flex gap={"2"} direction={"column"} basis={"40%"}>
-                    <Text fontWeight={"semibold"}>Created</Text>
+                    <Text fontWeight={"bold"}>Created</Text>
                     <Flex align={"center"} gap={"2"}>
                       <Icon name={"v_date"} size={"sm"} />
                       <Text>
                         {dayjs(entityData.created).format("DD MMM YYYY")}
                       </Text>
                     </Flex>
-                    <Text fontWeight={"semibold"}>Owner</Text>
+                    <Text fontWeight={"bold"}>Owner</Text>
                     <Flex>
                       <Tag colorScheme={"green"}>
                         <TagLabel>{entityData.owner}</TagLabel>
@@ -1547,7 +1547,7 @@ const Entity = () => {
                   </Flex>
                   {/* "Description" field */}
                   <Flex gap={"2"} direction={"column"} basis={"60%"}>
-                    <Text fontWeight={"semibold"}>Description</Text>
+                    <Text fontWeight={"bold"}>Description</Text>
                     <Flex>
                       <Textarea
                         value={entityDescription}
@@ -1578,7 +1578,7 @@ const Entity = () => {
                 justify={"space-between"}
                 align={"center"}
               >
-                <Heading fontWeight={"semibold"} size={"md"} mb={"2"}>
+                <Heading size={"md"} mb={"2"}>
                   Projects
                 </Heading>
                 {editing ? (
@@ -1739,7 +1739,7 @@ const Entity = () => {
                 justify={"space-between"}
                 align={"center"}
               >
-                <Heading fontWeight={"semibold"} size={"md"} mb={"2"}>
+                <Heading size={"md"} mb={"2"}>
                   Attributes
                 </Heading>
                 {editing ? (
@@ -1792,7 +1792,7 @@ const Entity = () => {
                   justify={"space-between"}
                   align={"center"}
                 >
-                  <Heading fontWeight={"semibold"} size={"md"} mb={"2"}>
+                  <Heading size={"md"} mb={"2"}>
                     Attachments
                   </Heading>
                   <Button
