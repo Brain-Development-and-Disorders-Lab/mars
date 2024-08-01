@@ -55,6 +55,7 @@ const AccountMenu = () => {
       <Menu>
         <MenuButton
           h={"100%"}
+          w={"100%"}
           rounded={"md"}
           border={"1px"}
           _hover={{ bg: "gray.300" }}
@@ -69,8 +70,8 @@ const AccountMenu = () => {
             mr={"2"}
           >
             <Avatar name={token.name} size={"sm"} />
-            <Text size={"xs"} fontWeight={"semibold"}>
-              {token.name}
+            <Text size={"xs"} fontWeight={"semibold"} w={"100%"} align={"left"}>
+              {token.name.split(" ").pop()}
             </Text>
             <Icon name={"c_down"} />
           </Flex>

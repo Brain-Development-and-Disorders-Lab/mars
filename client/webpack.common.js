@@ -5,7 +5,6 @@ module.exports = {
   entry: "./src/index.tsx",
   plugins: [
     new HtmlWebpackPlugin({
-      favicon: "img/Favicon.png",
       title: "Storacuity",
       template: "src/index.html",
     }),

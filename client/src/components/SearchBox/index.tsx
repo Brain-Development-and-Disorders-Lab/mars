@@ -10,7 +10,6 @@ import {
   Popover,
   PopoverTrigger,
   PopoverContent,
-  PopoverArrow,
   PopoverCloseButton,
   PopoverHeader,
   PopoverBody,
@@ -114,12 +113,11 @@ const SearchBox = () => {
   };
 
   return (
-    <Flex w={"100%"} maxW={"xl"} p={"1"}>
+    <Flex w={"100%"} p={"1"}>
       <Popover
         isOpen={isOpen}
         onClose={onCloseWrapper}
-        placement={"bottom"}
-        matchWidth
+        placement={"bottom-end"}
       >
         <PopoverTrigger>
           <Flex w={"100%"} gap={"4"}>
@@ -145,7 +143,6 @@ const SearchBox = () => {
         </PopoverTrigger>
 
         <PopoverContent w={"100%"}>
-          <PopoverArrow />
           <PopoverCloseButton />
           <PopoverHeader>
             <Flex align={"center"} gap={"1"}>

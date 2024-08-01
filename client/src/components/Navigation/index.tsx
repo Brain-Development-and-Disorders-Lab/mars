@@ -7,7 +7,6 @@ import {
   IconButton,
   Button,
   useDisclosure,
-  Image,
   Heading,
   Text,
   Spacer,
@@ -39,7 +38,7 @@ const Navigation = () => {
   } = useDisclosure();
 
   return (
-    <Flex w={"100%"} p={"2"}>
+    <Flex w={"100%"} p={"2"} bg={"#fafafa"}>
       {/* Main navigation group */}
       <Flex
         direction={"column"}
@@ -47,14 +46,11 @@ const Navigation = () => {
         gap={"6"}
         w={"100%"}
       >
-        {/* Icon */}
-        <Flex direction={"row"} gap={"2"} p={"1"} mt={"1"} align={"center"}>
-          <Image src="/Favicon.png" boxSize={"36px"} />
-          <Flex direction={"column"}>
-            <Heading fontWeight={"semibold"} size={"md"}>
-              Storacuity
-            </Heading>
-          </Flex>
+        {/* Heading */}
+        <Flex direction={"row"} gap={"2"} p={"1"} mt={"2"} align={"center"}>
+          <Heading fontWeight={"semibold"} size={"md"}>
+            Storacuity
+          </Heading>
         </Flex>
 
         {/* Menu items */}

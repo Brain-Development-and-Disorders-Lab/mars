@@ -248,9 +248,6 @@ const Dashboard = () => {
 
   return (
     <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
-      <Flex gap={"2"} p={"2"} pb={"0"} w={"100%"} my={"2"}>
-        <Heading size={"lg"}>Dashboard</Heading>
-      </Flex>
       <Flex direction={"row"} wrap={"wrap"} gap={"2"} p={"2"}>
         <Flex direction={"column"} gap={"2"} grow={"1"} basis={"60%"}>
           {/* Projects and Entities */}
@@ -378,7 +375,7 @@ const Dashboard = () => {
           rounded={"md"}
           border={"1px"}
           borderColor={"gray.200"}
-          maxH={"80vh"}
+          maxH={"97vh"}
         >
           {/* Activity heading */}
           <Flex align={"center"} gap={"2"} my={"2"}>

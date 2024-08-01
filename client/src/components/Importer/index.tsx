@@ -585,7 +585,7 @@ const Importer = (props: {
         >
           <ModalOverlay />
           <ModalContent p={"2"} gap={"2"}>
-            <ModalHeader p={"2"}>Import as Entities</ModalHeader>
+            <ModalHeader p={"2"}>Import Entities</ModalHeader>
             <ModalCloseButton />
             <ModalBody p={"2"}>
               {/* Stepper progress indicator */}
