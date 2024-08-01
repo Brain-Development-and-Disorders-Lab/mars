@@ -14,11 +14,14 @@ import { useNavigate } from "react-router-dom";
 import _ from "lodash";
 import { gql, useLazyQuery } from "@apollo/client";
 
+const DEFAULT_LINKY_LABEL_LENGTH = 10; // Default number of shown characters
+
 const Linky = (props: LinkyProps) => {
   const navigate = useNavigate();
 
   // Component state
   const [linkLabel, setLinkLabel] = useState("Invalid");
+  const [tooltipLabel, setTooltipLabel] = useState("Default");
   const [showDeleted, setShowDeleted] = useState(false);
 
   // GraphQL operations
@@ -65,28 +68,46 @@ const Linky = (props: LinkyProps) => {
 
     if (props.type === "attributes") {
       const response = await getAttribute({ variables: { _id: props.id } });
-      if (_.isNull(response.data.attribute)) {
+      if (response.error) {
         setShowDeleted(true);
+        setTooltipLabel("Deleted or Private");
       } else {
         data.name = response.data.attribute.name;
+        setTooltipLabel(data.name);
       }
     } else if (props.type === "entities") {
       const response = await getEntity({ variables: { _id: props.id } });
-      if (_.isNull(response.data.entity)) {
+      if (response.error) {
         setShowDeleted(true);
+        setTooltipLabel("Deleted or Private");
       } else {
         data.name = response.data.entity.name;
+        setTooltipLabel(data.name);
       }
     } else if (props.type === "projects") {
       const response = await getProject({ variables: { _id: props.id } });
-      if (_.isNull(response.data.project)) {
+      if (response.error) {
         setShowDeleted(true);
+        setTooltipLabel("Deleted or Private");
       } else {
         data.name = response.data.project.name;
+        setTooltipLabel(data.name);
       }
     }
 
-    setLinkLabel(data.name);
+    // Set the label text and apply truncating where specified
+    if (props.truncate === false) {
+      // Do not truncate the label text
+      setLinkLabel(data.name);
+    } else if (_.isNumber(props.truncate)) {
+      // Truncate the label text to the specified length
+      setLinkLabel(_.truncate(data.name, { length: props.truncate }));
+    } else {
+      // Truncate the label text to a default length
+      setLinkLabel(
+        _.truncate(data.name, { length: DEFAULT_LINKY_LABEL_LENGTH }),
+      );
+    }
   };
 
   const onClickHandler = () => {
@@ -105,7 +126,7 @@ const Linky = (props: LinkyProps) => {
   }, [props.id]);
 
   return (
-    <Tooltip label={showDeleted ? "Deleted" : "View"}>
+    <Tooltip hasArrow label={tooltipLabel} bg={"gray.300"} color={"black"}>
       <Button
         variant={"link"}
         color={props.color ? props.color : "gray.700"}
@@ -117,10 +138,10 @@ const Linky = (props: LinkyProps) => {
           isLoaded={!loadingAttribute && !loadingEntity && !loadingProject}
         >
           <Text
-            as={showDeleted ? "s" : "p"}
+            color={showDeleted ? "gray.400" : "black"}
             fontSize={props.size ? props.size : ""}
           >
-            {_.truncate(linkLabel, { length: 10 })}
+            {linkLabel}
           </Text>
         </Skeleton>
       </Button>
