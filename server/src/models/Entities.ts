@@ -63,7 +63,7 @@ export class Entities {
       .collection<EntityModel>(ENTITIES_COLLECTION)
       .findOne({ _id: _id });
 
-    return _.isNull(entity);
+    return !_.isNull(entity);
   };
 
   static existByName = async (name: string): Promise<boolean> => {
@@ -71,7 +71,7 @@ export class Entities {
       .collection<EntityModel>(ENTITIES_COLLECTION)
       .findOne({ name: name, deleted: false });
 
-    return _.isNull(entity);
+    return !_.isNull(entity);
   };
 
   static getByName = async (name: string): Promise<EntityModel | null> => {

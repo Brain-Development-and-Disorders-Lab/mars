@@ -116,6 +116,7 @@ export type LinkyProps = {
   color?: string;
   justify?: string;
   size?: string;
+  truncate?: boolean | number;
 };
 
 // Project types
