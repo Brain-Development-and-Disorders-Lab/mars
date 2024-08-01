@@ -4,6 +4,7 @@ import React from "react";
 // Existing components and icons
 import { Icon as ChakraIcon } from "@chakra-ui/react";
 import {
+  BsActivity,
   BsArrowClockwise,
   BsArrowCounterclockwise,
   BsArrowRight,
@@ -52,7 +53,6 @@ import {
   BsZoomOut,
 } from "react-icons/bs";
 import { SiBox } from "react-icons/si";
-import { SlGraph } from "react-icons/sl";
 import { FaSort, FaSortDown, FaSortUp } from "react-icons/fa";
 
 // Existing and custom types
@@ -74,7 +74,7 @@ const SYSTEM_ICONS: { [k: string]: IconType } = {
   attribute: BsTagFill,
 
   // Signal and action icons
-  activity: SlGraph,
+  activity: BsActivity,
   attachment: BsPaperclip,
   check: BsCheckCircleFill,
   info: BsInfoCircleFill,
