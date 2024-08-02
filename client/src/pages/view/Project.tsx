@@ -207,11 +207,11 @@ const Project = () => {
   // Manage data once retrieved
   useEffect(() => {
     if (data?.project) {
-      setProject(data?.project);
-      setProjectDescription(data?.project?.description);
-      setProjectEntities(data?.project?.entities);
-      setProjectHistory(data?.project?.history);
-      setProjectCollaborators(data?.project?.collaborators || []);
+      setProject(data.project);
+      setProjectDescription(data.project?.description);
+      setProjectEntities(data.project?.entities);
+      setProjectHistory(data.project?.history);
+      setProjectCollaborators(data.project?.collaborators || []);
     }
     if (data?.entities) {
       setMinimalEntities(data.entities);
