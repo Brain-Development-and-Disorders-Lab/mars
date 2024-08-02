@@ -30,7 +30,7 @@ export class Projects {
 
   static exists = async (_id: string): Promise<boolean> => {
     const project = await this.getOne(_id);
-    return _.isNull(project);
+    return !_.isNull(project);
   };
 
   static create = async (project: IProject): Promise<ResponseMessage> => {
@@ -82,12 +82,12 @@ export class Projects {
       },
     };
 
-    if (updated.description) {
+    if (!_.isUndefined(updated.description)) {
       update.$set.description = updated.description;
     }
 
     // Entities to add and remove
-    if (updated.entities) {
+    if (!_.isUndefined(updated.entities)) {
       const toAdd = _.difference(updated.entities, project.entities);
       for (let entity of toAdd) {
         await Entities.addProject(entity, project._id);

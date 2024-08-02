@@ -247,10 +247,13 @@ export class Data {
         };
       }
 
+      // Check that the specified Project exists
+      const projectExists = await Projects.exists(project);
+
       for (let entity of parsed.entities as EntityModel[]) {
         // Splice in the owner and Project information
         entity.owner = owner;
-        entity.projects = [project];
+        entity.projects = projectExists ? [project] : [];
 
         // Check if Entity exists and update or create as required
         const exists = await Entities.exists(entity._id);

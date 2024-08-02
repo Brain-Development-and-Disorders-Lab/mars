@@ -34,7 +34,7 @@ export class Attributes {
     const response = await getDatabase()
       .collection<AttributeModel>(ATTRIBUTES_COLLECTION)
       .findOne({ _id: _id });
-    return _.isNull(response);
+    return !_.isNull(response);
   };
 
   /**
@@ -90,12 +90,12 @@ export class Attributes {
     };
 
     // Description
-    if (updated.description) {
+    if (!_.isUndefined(updated.description)) {
       update.$set.description = updated.description;
     }
 
     // Values
-    if (updated.values) {
+    if (!_.isUndefined(updated.values)) {
       update.$set.values = updated.values;
     }
 
