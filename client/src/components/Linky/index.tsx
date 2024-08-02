@@ -68,7 +68,7 @@ const Linky = (props: LinkyProps) => {
 
     if (props.type === "attributes") {
       const response = await getAttribute({ variables: { _id: props.id } });
-      if (response.error) {
+      if (response.error || _.isUndefined(response.data)) {
         setShowDeleted(true);
         setTooltipLabel("Deleted or Private");
       } else {
@@ -77,7 +77,7 @@ const Linky = (props: LinkyProps) => {
       }
     } else if (props.type === "entities") {
       const response = await getEntity({ variables: { _id: props.id } });
-      if (response.error) {
+      if (response.error || _.isUndefined(response.data)) {
         setShowDeleted(true);
         setTooltipLabel("Deleted or Private");
       } else {
@@ -86,7 +86,7 @@ const Linky = (props: LinkyProps) => {
       }
     } else if (props.type === "projects") {
       const response = await getProject({ variables: { _id: props.id } });
-      if (response.error) {
+      if (response.error || _.isUndefined(response.data)) {
         setShowDeleted(true);
         setTooltipLabel("Deleted or Private");
       } else {
