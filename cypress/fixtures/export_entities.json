@@ -25,7 +25,7 @@
           "description": "BBBBBB",
           "values": [
             {
-              "identifier": "v_text_18399",
+              "_id": "v_text_18399",
               "name": "ZZZZZZZZZZZ",
               "type": "text",
               "data": "XXXXXXXXXXXXX"
@@ -60,7 +60,7 @@
           "description": "BBBBBB",
           "values": [
             {
-              "identifier": "v_text_18399",
+              "_id": "v_text_18399",
               "name": "ZZZZZZZZZZZ",
               "type": "text",
               "data": "XXXXXXXXXXXXX"
@@ -90,7 +90,7 @@
           "description": "qwervqewvqew",
           "values": [
             {
-              "identifier": "v_text_11077",
+              "_id": "v_text_11077",
               "name": "wqefqwef",
               "type": "text",
               "data": "qwefqwef"
@@ -146,7 +146,7 @@
           "description": "BBBBBB",
           "values": [
             {
-              "identifier": "v_text_18399",
+              "_id": "v_text_18399",
               "name": "ZZZZZZZZZZZ",
               "type": "text",
               "data": "XXXXXXXXXXXXX"
