@@ -12,6 +12,8 @@ import {
   Box,
   Button,
   Flex,
+  Heading,
+  IconButton,
   Input,
   InputGroup,
   InputLeftAddon,
@@ -20,6 +22,7 @@ import {
   ModalBody,
   ModalCloseButton,
   ModalContent,
+  ModalFooter,
   ModalHeader,
   ModalOverlay,
   Popover,
@@ -31,6 +34,7 @@ import {
   PopoverTrigger,
   ScaleFade,
   Select,
+  Spacer,
   Text,
   Tooltip,
   VStack,
@@ -141,7 +145,7 @@ const Values = (props: {
           }
 
           return (
-            <InputGroup>
+            <InputGroup size={"sm"}>
               <InputLeftAddon children={valueIcon} bgColor={"white"} />
               <Input
                 id={`i_${original._id}_name`}
@@ -203,6 +207,7 @@ const Values = (props: {
                     id={`i_${original._id}_data`}
                     type={"number"}
                     value={value}
+                    size={"sm"}
                     w={"2xs"}
                     isReadOnly={props.viewOnly}
                     onChange={onChange}
@@ -218,6 +223,7 @@ const Values = (props: {
                   <Input
                     id={`i_${original._id}_data`}
                     value={value}
+                    size={"sm"}
                     w={"2xs"}
                     isReadOnly={props.viewOnly}
                     onChange={onChange}
@@ -234,6 +240,7 @@ const Values = (props: {
                     <Input
                       id={`i_${original._id}_data`}
                       value={value}
+                      size={"sm"}
                       w={"2xs"}
                       isReadOnly={props.viewOnly}
                       onChange={onChange}
@@ -245,53 +252,65 @@ const Values = (props: {
                     />
                   );
                 } else {
-                  const domain = new URL(value);
-                  const hostname = domain.hostname.replace("www", "");
-                  let shortenedUrl = value.toString();
-                  shortenedUrl = shortenedUrl.replace("https://", "");
-                  shortenedUrl = shortenedUrl.replace("http://", "");
-                  shortenedUrl = shortenedUrl.substring(0, 18);
-                  shortenedUrl = shortenedUrl.concat("...");
-
                   // Setup Link display depending on destination URL
                   let linkTextColor = "black";
                   let linkBgColor = "gray.100";
                   let linkLogo = null;
-                  if (
-                    _.isEqual(hostname, "wustl.box.com") ||
-                    _.isEqual(hostname, "wustl.app.box.com")
-                  ) {
-                    // Link to Box
-                    linkTextColor = "white";
-                    linkBgColor = "blue.400";
-                    linkLogo = <Icon name={"l_box"} size={[5, 5]} />;
-                  } else if (
-                    _.isEqual(hostname, "mynotebook.labarchives.com")
-                  ) {
-                    // Link to LabArchives
-                    linkTextColor = "white";
-                    linkBgColor = "purple.400";
-                    linkLogo = <Icon name={"l_labArchives"} size={[5, 5]} />;
-                  } else if (_.isEqual(hostname, "app.globus.org")) {
-                    // Link to Globus
-                    linkTextColor = "white";
-                    linkBgColor = "blue.600";
-                    linkLogo = <Icon name={"l_globus"} size={[5, 5]} />;
-                  } else if (_.isEqual(hostname, "github.com")) {
-                    // Link to GitHub
-                    linkTextColor = "white";
-                    linkBgColor = "black";
-                    linkLogo = <Icon name={"l_github"} size={[5, 5]} />;
+                  let shortenedUrl = value.toString();
+                  let tooltipText = value.toString();
+                  let validLink = false;
+
+                  try {
+                    const domain = new URL(value);
+                    const hostname = domain.hostname.replace("www", "");
+                    shortenedUrl = shortenedUrl.replace("https://", "");
+                    shortenedUrl = shortenedUrl.replace("http://", "");
+                    shortenedUrl = shortenedUrl.substring(0, 18);
+                    shortenedUrl = shortenedUrl.concat("...");
+                    if (
+                      _.isEqual(hostname, "wustl.box.com") ||
+                      _.isEqual(hostname, "wustl.app.box.com")
+                    ) {
+                      // Link to Box
+                      linkTextColor = "white";
+                      linkBgColor = "blue.400";
+                      linkLogo = <Icon name={"l_box"} size={[5, 5]} />;
+                    } else if (
+                      _.isEqual(hostname, "mynotebook.labarchives.com")
+                    ) {
+                      // Link to LabArchives
+                      linkTextColor = "white";
+                      linkBgColor = "purple.400";
+                      linkLogo = <Icon name={"l_labArchives"} size={[5, 5]} />;
+                    } else if (_.isEqual(hostname, "app.globus.org")) {
+                      // Link to Globus
+                      linkTextColor = "white";
+                      linkBgColor = "blue.600";
+                      linkLogo = <Icon name={"l_globus"} size={[5, 5]} />;
+                    } else if (_.isEqual(hostname, "github.com")) {
+                      // Link to GitHub
+                      linkTextColor = "white";
+                      linkBgColor = "black";
+                      linkLogo = <Icon name={"l_github"} size={[5, 5]} />;
+                    }
+                    validLink = true;
+                  } catch (error) {
+                    linkTextColor = "orange.700";
+                    linkBgColor = "orange.300";
+                    linkLogo = <Icon name={"warning"} />;
+                    shortenedUrl = _.truncate(shortenedUrl, { length: 10 });
+                    tooltipText = "Possible invalid URL: " + value.toString();
                   }
 
                   return (
-                    <Tooltip label={value}>
+                    <Tooltip label={tooltipText}>
                       <Flex
                         direction={"row"}
                         align={"center"}
                         p={"2"}
                         pl={"4"}
                         pr={"4"}
+                        w={"fit-content"}
                         rounded={"full"}
                         gap={"2"}
                         bg={linkBgColor}
@@ -299,9 +318,13 @@ const Values = (props: {
                         justify={"space-between"}
                       >
                         {linkLogo}
-                        <Link href={value} isExternal noOfLines={1}>
+                        {validLink ? (
+                          <Link href={value} isExternal noOfLines={1}>
+                            <Text>{shortenedUrl}</Text>
+                          </Link>
+                        ) : (
                           <Text>{shortenedUrl}</Text>
-                        </Link>
+                        )}
                         <Icon name={"link"} />
                       </Flex>
                     </Tooltip>
@@ -314,6 +337,7 @@ const Values = (props: {
                     id={`i_${original._id}_data`}
                     type={"date"}
                     value={value}
+                    size={"sm"}
                     w={"2xs"}
                     isReadOnly={props.viewOnly}
                     onChange={onChange}
@@ -332,6 +356,7 @@ const Values = (props: {
                       id={`s_${original._id}_data`}
                       value={value}
                       placeholder={"Entity"}
+                      size={"sm"}
                       w={"2xs"}
                       isDisabled={props.viewOnly}
                       onChange={onChange}
@@ -356,6 +381,7 @@ const Values = (props: {
                     title="Select Option"
                     id={`s_${original._id}_data`}
                     value={value.selected}
+                    size={"sm"}
                     w={"2xs"}
                     isDisabled={props.viewOnly}
                     onChange={onSelectChange}
@@ -384,6 +410,7 @@ const Values = (props: {
                 id={`s_${original._id}_data`}
                 value={value}
                 placeholder={"Column"}
+                size={"sm"}
                 w={"2xs"}
                 isDisabled={props.viewOnly}
                 onChange={onChange}
@@ -455,164 +482,171 @@ const Values = (props: {
   ];
 
   return (
-    <Flex p={["1", "2"]} direction={"column"} gap={"1"} w={"100%"}>
-      {!props.viewOnly && (
-        <Flex
-          direction={"row"}
-          gap={"2"}
-          flexWrap={"wrap"}
-          justify={"right"}
-          align={"center"}
-        >
-          <Popover>
-            <PopoverTrigger>
-              <Button
-                variant={"solid"}
-                colorScheme={"green"}
-                rightIcon={<Icon name={"add"} />}
-                className="add-value-button-form"
-              >
-                Add
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent>
-              <PopoverArrow />
-              <PopoverCloseButton />
-              <PopoverHeader>Value Type</PopoverHeader>
-              <PopoverBody>
-                <Flex gap={"4"} wrap={"wrap"}>
-                  {/* Buttons to add Values */}
-                  <Button
-                    variant={"outline"}
-                    bg={"orange.300"}
-                    color={"white"}
-                    borderColor={"orange.300"}
-                    _hover={{ bg: "orange.400" }}
-                    leftIcon={<Icon name={"v_date"} />}
-                    onClick={() => {
-                      props.setValues([
-                        ...props.values,
-                        {
-                          _id: `v_date_${Math.round(performance.now())}`,
-                          name: "",
-                          type: "date",
-                          data: dayjs(new Date()).toISOString(),
-                        },
-                      ]);
-                    }}
-                  >
-                    Date
-                  </Button>
+    <Flex direction={"column"} gap={"2"} w={"100%"}>
+      <Flex
+        direction={"row"}
+        gap={"2"}
+        flexWrap={"wrap"}
+        justify={"space-between"}
+        align={"center"}
+      >
+        <Heading size={"sm"}>Values</Heading>
+        <Popover>
+          <PopoverTrigger>
+            <Button
+              variant={"solid"}
+              colorScheme={"green"}
+              rightIcon={<Icon name={"add"} />}
+              className={"add-value-button-form"}
+              isDisabled={props.viewOnly}
+              size={"sm"}
+            >
+              Add
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent>
+            <PopoverArrow />
+            <PopoverCloseButton />
+            <PopoverHeader>Value Type</PopoverHeader>
+            <PopoverBody>
+              <Flex gap={"4"} wrap={"wrap"}>
+                {/* Buttons to add Values */}
+                <Button
+                  variant={"outline"}
+                  bg={"orange.300"}
+                  size={"sm"}
+                  color={"white"}
+                  borderColor={"orange.300"}
+                  _hover={{ bg: "orange.400" }}
+                  leftIcon={<Icon name={"v_date"} />}
+                  onClick={() => {
+                    props.setValues([
+                      ...props.values,
+                      {
+                        _id: `v_date_${Math.round(performance.now())}`,
+                        name: "",
+                        type: "date",
+                        data: dayjs(new Date()).toISOString(),
+                      },
+                    ]);
+                  }}
+                >
+                  Date
+                </Button>
 
-                  <Button
-                    id="add-value-button-text"
-                    variant={"outline"}
-                    bg={"blue.300"}
-                    color={"white"}
-                    borderColor={"blue.300"}
-                    _hover={{ bg: "blue.400" }}
-                    leftIcon={<Icon name={"v_text"} />}
-                    onClick={() => {
-                      props.setValues([
-                        ...props.values,
-                        {
-                          _id: `v_text_${Math.round(performance.now())}`,
-                          name: "",
-                          type: "text",
-                          data: "",
-                        },
-                      ]);
-                    }}
-                  >
-                    Text
-                  </Button>
+                <Button
+                  id="add-value-button-text"
+                  variant={"outline"}
+                  bg={"blue.300"}
+                  size={"sm"}
+                  color={"white"}
+                  borderColor={"blue.300"}
+                  _hover={{ bg: "blue.400" }}
+                  leftIcon={<Icon name={"v_text"} />}
+                  onClick={() => {
+                    props.setValues([
+                      ...props.values,
+                      {
+                        _id: `v_text_${Math.round(performance.now())}`,
+                        name: "",
+                        type: "text",
+                        data: "",
+                      },
+                    ]);
+                  }}
+                >
+                  Text
+                </Button>
 
-                  <Button
-                    variant={"outline"}
-                    bg={"green.300"}
-                    color={"white"}
-                    borderColor={"green.300"}
-                    _hover={{ bg: "green.400" }}
-                    leftIcon={<Icon name={"v_number"} />}
-                    onClick={() => {
-                      props.setValues([
-                        ...props.values,
-                        {
-                          _id: `v_number_${Math.round(performance.now())}`,
-                          name: "",
-                          type: "number",
-                          data: 0,
-                        },
-                      ]);
-                    }}
-                  >
-                    Number
-                  </Button>
+                <Button
+                  variant={"outline"}
+                  bg={"green.300"}
+                  size={"sm"}
+                  color={"white"}
+                  borderColor={"green.300"}
+                  _hover={{ bg: "green.400" }}
+                  leftIcon={<Icon name={"v_number"} />}
+                  onClick={() => {
+                    props.setValues([
+                      ...props.values,
+                      {
+                        _id: `v_number_${Math.round(performance.now())}`,
+                        name: "",
+                        type: "number",
+                        data: 0,
+                      },
+                    ]);
+                  }}
+                >
+                  Number
+                </Button>
 
-                  <Button
-                    variant={"outline"}
-                    bg={"yellow.300"}
-                    color={"white"}
-                    borderColor={"yellow.300"}
-                    _hover={{ bg: "yellow.400" }}
-                    leftIcon={<Icon name={"v_url"} />}
-                    onClick={() => {
-                      props.setValues([
-                        ...props.values,
-                        {
-                          _id: `v_url_${Math.round(performance.now())}`,
-                          name: "",
-                          type: "url",
-                          data: "",
-                        },
-                      ]);
-                    }}
-                  >
-                    URL
-                  </Button>
+                <Button
+                  variant={"outline"}
+                  bg={"yellow.300"}
+                  size={"sm"}
+                  color={"white"}
+                  borderColor={"yellow.300"}
+                  _hover={{ bg: "yellow.400" }}
+                  leftIcon={<Icon name={"v_url"} />}
+                  onClick={() => {
+                    props.setValues([
+                      ...props.values,
+                      {
+                        _id: `v_url_${Math.round(performance.now())}`,
+                        name: "",
+                        type: "url",
+                        data: "",
+                      },
+                    ]);
+                  }}
+                >
+                  URL
+                </Button>
 
-                  <Button
-                    variant={"outline"}
-                    bg={"purple.300"}
-                    color={"white"}
-                    borderColor={"purple.300"}
-                    _hover={{ bg: "purple.400" }}
-                    leftIcon={<Icon name={"entity"} />}
-                    onClick={() => {
-                      props.setValues([
-                        ...props.values,
-                        {
-                          _id: `p_entity_${Math.round(performance.now())}`,
-                          name: "",
-                          type: "entity",
-                          data: "",
-                        },
-                      ]);
-                    }}
-                  >
-                    Entity
-                  </Button>
+                <Button
+                  variant={"outline"}
+                  bg={"purple.300"}
+                  size={"sm"}
+                  color={"white"}
+                  borderColor={"purple.300"}
+                  _hover={{ bg: "purple.400" }}
+                  leftIcon={<Icon name={"entity"} />}
+                  onClick={() => {
+                    props.setValues([
+                      ...props.values,
+                      {
+                        _id: `p_entity_${Math.round(performance.now())}`,
+                        name: "",
+                        type: "entity",
+                        data: "",
+                      },
+                    ]);
+                  }}
+                >
+                  Entity
+                </Button>
 
-                  <Button
-                    variant={"outline"}
-                    bg={"teal.300"}
-                    color={"white"}
-                    borderColor={"teal.300"}
-                    _hover={{ bg: "teal.400" }}
-                    leftIcon={<Icon name={"v_select"} />}
-                    isDisabled={!_.isUndefined(props.permittedValues)}
-                    onClick={() => {
-                      onOpen();
-                    }}
-                  >
-                    Select
-                  </Button>
-                </Flex>
-              </PopoverBody>
-            </PopoverContent>
-          </Popover>
-        </Flex>
-      )}
+                <Button
+                  variant={"outline"}
+                  bg={"teal.300"}
+                  size={"sm"}
+                  color={"white"}
+                  borderColor={"teal.300"}
+                  _hover={{ bg: "teal.400" }}
+                  leftIcon={<Icon name={"v_select"} />}
+                  isDisabled={!_.isUndefined(props.permittedValues)}
+                  onClick={() => {
+                    onOpen();
+                  }}
+                >
+                  Select
+                </Button>
+              </Flex>
+            </PopoverBody>
+          </PopoverContent>
+        </Popover>
+      </Flex>
 
       <Box overflowX={"auto"} maxW={"80vw"}>
         <DataTable
@@ -621,9 +655,9 @@ const Values = (props: {
           data={props.values}
           setData={props.setValues}
           viewOnly={props.viewOnly}
-          showPagination
-          showSelection={!props.viewOnly}
           actions={actions}
+          showPagination
+          showSelection
         />
       </Box>
 
@@ -636,26 +670,31 @@ const Values = (props: {
           isCentered
         >
           <ModalOverlay />
-          <ModalContent p={"2"} m={"2"}>
-            <ModalHeader>Add Options</ModalHeader>
+          <ModalContent>
+            <ModalHeader p={"4"}>Add Options</ModalHeader>
             <ModalCloseButton />
-            <ModalBody gap={"4"}>
+            <ModalBody px={"4"} gap={"4"}>
               <Flex direction={"column"} gap={"4"}>
                 <Text>
                   For a Select value, set the options to be displayed.
-                  Duplicates are not permitted. Name the option, then click
-                  "Add" to add it to the collection of options associated with
-                  this Select value. Click "Continue" to add this Select value
-                  to the Attribute.
+                  Duplicates are not permitted.
+                </Text>
+                <Text>
+                  Name the option, then click "Add" to add it to the collection
+                  of options associated with this Select value. Click "Continue"
+                  to add this Select value to the Attribute.
                 </Text>
                 <Flex direction={"row"} gap={"4"}>
                   <Input
+                    size={"sm"}
+                    rounded={"md"}
                     placeholder={"Option Value"}
                     value={option}
                     onChange={(event) => setOption(event.target.value)}
                   />
                   <Button
                     colorScheme={"green"}
+                    size={"sm"}
                     rightIcon={<Icon name={"add"} />}
                     onClick={() => {
                       if (!_.includes(options, option)) {
@@ -681,7 +720,7 @@ const Values = (props: {
                 <Flex direction={"column"} gap={"2"}>
                   <VStack gap={"2"}>
                     {options.length > 0 &&
-                      options.map((option) => {
+                      options.map((option, index) => {
                         return (
                           <Flex
                             direction={"row"}
@@ -694,9 +733,11 @@ const Values = (props: {
                               <Text fontWeight={"semibold"}>Option:</Text>
                               <Text>{option}</Text>
                             </Flex>
-                            <Button
+                            <IconButton
+                              aria-label={`remove_${index}`}
+                              size={"sm"}
                               colorScheme={"red"}
-                              rightIcon={<Icon name={"delete"} />}
+                              icon={<Icon name={"delete"} />}
                               onClick={() => {
                                 setOptions([
                                   ...options.filter(
@@ -705,40 +746,40 @@ const Values = (props: {
                                   ),
                                 ]);
                               }}
-                            >
-                              Remove
-                            </Button>
+                            />
                           </Flex>
                         );
                       })}
                   </VStack>
                 </Flex>
-
-                <Flex gap={"4"} justify={"center"}>
-                  <Button
-                    colorScheme={"red"}
-                    rightIcon={<Icon name={"cross"} />}
-                    onClick={() => {
-                      // Reset the list of options
-                      setOptions([]);
-
-                      // Close the modal
-                      onClose();
-                    }}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    colorScheme={"green"}
-                    rightIcon={<Icon name={"check"} />}
-                    onClick={addOptions}
-                    isDisabled={_.isEqual(options.length, 0)}
-                  >
-                    Continue
-                  </Button>
-                </Flex>
               </Flex>
             </ModalBody>
+            <ModalFooter px={"4"}>
+              <Button
+                size={"sm"}
+                colorScheme={"red"}
+                rightIcon={<Icon name={"cross"} />}
+                onClick={() => {
+                  // Reset the list of options
+                  setOptions([]);
+
+                  // Close the modal
+                  onClose();
+                }}
+              >
+                Cancel
+              </Button>
+              <Spacer />
+              <Button
+                size={"sm"}
+                colorScheme={"green"}
+                rightIcon={<Icon name={"c_right"} />}
+                onClick={addOptions}
+                isDisabled={_.isEqual(options.length, 0)}
+              >
+                Continue
+              </Button>
+            </ModalFooter>
           </ModalContent>
         </Modal>
       </ScaleFade>
