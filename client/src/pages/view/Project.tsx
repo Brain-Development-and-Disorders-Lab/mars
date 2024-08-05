@@ -603,7 +603,7 @@ const Project = () => {
             rounded={"md"}
           >
             <Icon name={"project"} size={"md"} />
-            <Heading fontWeight={"semibold"} size={"lg"}>
+            <Heading fontWeight={"semibold"} size={"md"}>
               {project.name}
             </Heading>
           </Flex>

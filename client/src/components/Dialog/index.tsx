@@ -42,7 +42,7 @@ const Dialog = (props: DialogProps) => {
       <AlertDialogOverlay />
       <AlertDialogContent>
         <AlertDialogHeader p={"4"}>{header}</AlertDialogHeader>
-        <AlertDialogCloseButton p={"4"} />
+        <AlertDialogCloseButton />
         <AlertDialogBody px={"4"}>{props.children}</AlertDialogBody>
         <AlertDialogFooter px={"4"}>
           <Button

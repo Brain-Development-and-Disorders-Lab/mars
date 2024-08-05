@@ -1383,7 +1383,7 @@ const Entity = () => {
             rounded={"md"}
           >
             <Icon name={"entity"} size={"md"} />
-            <Heading fontWeight={"semibold"} size={"lg"}>
+            <Heading fontWeight={"semibold"} size={"md"}>
               {entityData.name}
             </Heading>
             {entityData.deleted && <Icon name={"delete"} size={"md"} />}
