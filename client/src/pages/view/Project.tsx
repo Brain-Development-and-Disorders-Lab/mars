@@ -697,9 +697,15 @@ const Project = () => {
             basis={"50%"}
             rounded={"md"}
           >
-            <Flex direction={"column"} p={"2"} bg={"gray.100"} rounded={"md"}>
+            <Flex
+              direction={"column"}
+              p={"2"}
+              border={"1px"}
+              borderColor={"gray.200"}
+              rounded={"md"}
+            >
               {/* Project Overview */}
-              <Flex gap={"4"} grow={"1"} direction={"column"} minH={"32"}>
+              <Flex gap={"4"} grow={"1"} direction={"column"}>
                 <Flex gap={"2"} direction={"row"}>
                   <Flex gap={"2"} direction={"column"} basis={"40%"}>
                     <Text fontWeight={"bold"}>Created</Text>
@@ -726,7 +732,7 @@ const Project = () => {
                       }}
                       isReadOnly={!editing}
                       bg={"white"}
-                      border={"2px"}
+                      border={"1px"}
                       borderColor={"gray.200"}
                     />
                   </Flex>
@@ -738,6 +744,7 @@ const Project = () => {
             <Flex
               direction={"column"}
               p={"2"}
+              gap={"2"}
               rounded={"md"}
               border={"1px"}
               borderColor={"gray.200"}
@@ -748,26 +755,21 @@ const Project = () => {
                 align={"center"}
               >
                 {/* Entities in the Project */}
-                <Heading size={"md"} mb={"2"}>
-                  Entities
-                </Heading>
-                {editing && (
-                  <Button
-                    rightIcon={<Icon name={"add"} />}
-                    onClick={onEntitiesOpen}
-                    colorScheme={"green"}
-                    size={"sm"}
-                  >
-                    Add
-                  </Button>
-                )}
+                <Heading size={"sm"}>Entities</Heading>
+                <Button
+                  rightIcon={<Icon name={"add"} />}
+                  onClick={onEntitiesOpen}
+                  size={"sm"}
+                  isDisabled={!editing}
+                >
+                  Add
+                </Button>
               </Flex>
-
               <Flex
                 w={"100%"}
                 justify={"center"}
                 align={"center"}
-                minH={"100px"}
+                minH={projectEntities.length > 0 ? "fit-content" : "200px"}
               >
                 {projectEntities && projectEntities.length > 0 ? (
                   <DataTable
@@ -775,17 +777,12 @@ const Project = () => {
                     columns={entitiesColumns}
                     visibleColumns={{}}
                     viewOnly={!editing}
-                    showSelection={editing}
+                    showSelection={true}
                     actions={entitiesTableActions}
                     showPagination
                   />
                 ) : (
-                  <Flex
-                    w={"100%"}
-                    justify={"center"}
-                    align={"center"}
-                    minH={"100px"}
-                  >
+                  <Flex w={"100%"} justify={"center"} align={"center"}>
                     <Text color={"gray.400"} fontWeight={"semibold"}>
                       This Project does not contain any Entities.
                     </Text>
@@ -815,14 +812,50 @@ const Project = () => {
             >
               {/* Collaborators display */}
               <Flex direction={"column"}>
-                <Heading size={"md"} mb={"2"}>
+                <Heading size={"sm"} mb={"2"}>
                   Collaborators
                 </Heading>
+                <Flex direction={"row"} gap={"2"} align={"center"}>
+                  <FormControl>
+                    <Input
+                      placeholder={"ORCiD"}
+                      rounded={"md"}
+                      size={"sm"}
+                      value={newCollaborator}
+                      onChange={(e) => setNewCollaborator(e.target.value)}
+                      isDisabled={!editing}
+                    />
+                  </FormControl>
+                  <Spacer />
+                  <Button
+                    colorScheme={"green"}
+                    rightIcon={<Icon name={"add"} />}
+                    size={"sm"}
+                    isDisabled={!editing}
+                    onClick={() => {
+                      // Prevent adding empty or duplicate collaborator
+                      if (
+                        newCollaborator &&
+                        !projectCollaborators.includes(newCollaborator)
+                      ) {
+                        setProjectCollaborators((collaborators) => [
+                          ...collaborators,
+                          newCollaborator,
+                        ]);
+                        setNewCollaborator(""); // Clear the input after adding
+                      }
+                    }}
+                  >
+                    Add
+                  </Button>
+                </Flex>
                 <Flex
                   w={"100%"}
                   justify={"center"}
                   align={"center"}
-                  minH={"100px"}
+                  minH={
+                    projectCollaborators.length > 0 ? "fit-content" : "200px"
+                  }
                 >
                   {projectCollaborators.length === 0 ? (
                     <Text color={"gray.400"} fontWeight={"semibold"}>
@@ -852,37 +885,6 @@ const Project = () => {
                   )}
                 </Flex>
               </Flex>
-
-              {editing && (
-                <Flex direction={"row"} gap={"2"} align={"center"}>
-                  <FormControl maxW={"md"}>
-                    <Input
-                      placeholder="Collaborator ORCiD"
-                      value={newCollaborator}
-                      onChange={(e) => setNewCollaborator(e.target.value)}
-                    />
-                  </FormControl>
-                  <Spacer />
-                  <Button
-                    colorScheme={"green"}
-                    onClick={() => {
-                      // Prevent adding empty or duplicate collaborator
-                      if (
-                        newCollaborator &&
-                        !projectCollaborators.includes(newCollaborator)
-                      ) {
-                        setProjectCollaborators((collaborators) => [
-                          ...collaborators,
-                          newCollaborator,
-                        ]);
-                        setNewCollaborator(""); // Clear the input after adding
-                      }
-                    }}
-                  >
-                    Add Collaborator
-                  </Button>
-                </Flex>
-              )}
             </Flex>
           </Flex>
         </Flex>

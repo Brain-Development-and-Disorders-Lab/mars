@@ -240,6 +240,9 @@ const DataTable = (props: DataTableProps) => {
                 as={Button}
                 rightIcon={<Icon name={"c_down"} />}
                 size={"sm"}
+                isDisabled={
+                  _.isUndefined(props.actions) || props.actions?.length === 0
+                }
               >
                 Actions
               </MenuButton>

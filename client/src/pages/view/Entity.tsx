@@ -1565,6 +1565,7 @@ const Entity = () => {
             <Flex
               direction={"column"}
               p={"2"}
+              gap={"2"}
               rounded={"md"}
               border={"1px"}
               borderColor={"gray.200"}
@@ -1574,9 +1575,7 @@ const Entity = () => {
                 justify={"space-between"}
                 align={"center"}
               >
-                <Heading size={"sm"} mb={"2"}>
-                  Projects
-                </Heading>
+                <Heading size={"sm"}>Projects</Heading>
                 <Button
                   size={"sm"}
                   rightIcon={<Icon name={"add"} />}
@@ -1602,9 +1601,9 @@ const Entity = () => {
                     columns={projectsTableColumns}
                     visibleColumns={{}}
                     viewOnly={!editing}
-                    showSelection={editing}
                     actions={projectsTableActions}
                     showPagination
+                    showSelection
                   />
                 )}
               </Flex>
@@ -1614,6 +1613,7 @@ const Entity = () => {
             <Flex
               direction={"column"}
               p={"2"}
+              gap={"2"}
               rounded={"md"}
               border={"1px"}
               borderColor={"gray.200"}
@@ -1624,9 +1624,7 @@ const Entity = () => {
                   justify={"space-between"}
                   align={"center"}
                 >
-                  <Heading size={"sm"} mb={"2"}>
-                    Attachments
-                  </Heading>
+                  <Heading size={"sm"}>Attachments</Heading>
                   <Button
                     size={"sm"}
                     rightIcon={<Icon name={"upload"} />}
@@ -1652,9 +1650,9 @@ const Entity = () => {
                       columns={attachmentTableColumns}
                       visibleColumns={{}}
                       viewOnly={!editing}
-                      showSelection={editing}
                       actions={attachmentTableActions}
                       showPagination
+                      showSelection
                     />
                   )}
                 </Flex>
@@ -1720,9 +1718,9 @@ const Entity = () => {
                         columns={originTableColumns}
                         visibleColumns={{}}
                         viewOnly={!editing}
-                        showSelection={editing}
                         actions={originTableActions}
                         showPagination
+                        showSelection
                       />
                     ) : (
                       <Text color={"gray.400"} fontWeight={"semibold"}>
@@ -1751,9 +1749,9 @@ const Entity = () => {
                         columns={productTableColumns}
                         visibleColumns={{}}
                         viewOnly={!editing}
-                        showSelection={editing}
                         actions={productTableActions}
                         showPagination
+                        showSelection
                       />
                     ) : (
                       <Text color={"gray.400"} fontWeight={"semibold"}>
@@ -1769,6 +1767,7 @@ const Entity = () => {
             <Flex
               direction={"column"}
               p={"2"}
+              gap={"2"}
               rounded={"md"}
               border={"1px"}
               borderColor={"gray.200"}
@@ -1778,9 +1777,7 @@ const Entity = () => {
                 justify={"space-between"}
                 align={"center"}
               >
-                <Heading size={"sm"} mb={"2"}>
-                  Attributes
-                </Heading>
+                <Heading size={"sm"}>Attributes</Heading>
                 <Button
                   size={"sm"}
                   rightIcon={<Icon name={"add"} />}
@@ -1807,8 +1804,8 @@ const Entity = () => {
                     columns={attributeTableColumns}
                     visibleColumns={visibleAttributeTableColumns}
                     viewOnly={!editing}
-                    showSelection={editing}
                     showPagination
+                    showSelection
                   />
                 )}
               </Flex>

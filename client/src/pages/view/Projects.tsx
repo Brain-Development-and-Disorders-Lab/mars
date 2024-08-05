@@ -176,6 +176,7 @@ const Projects = () => {
               data={data.projects}
               visibleColumns={visibleColumns}
               showPagination
+              showSelection
             />
           ) : (
             <Flex
