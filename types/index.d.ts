@@ -249,19 +249,38 @@ export type ActivityModel = IActivity & {
 
 // Content component
 export type ContentProps = {
-  children: React.ReactChild | React.ReactChild[];
+  children: React.ReactElement | React.ReactElement[];
   isError?: boolean;
   isLoaded?: boolean;
 };
 
 // Page component
 export type PageProps = {
-  children: React.ReactChild | React.ReactChild[];
+  children: React.ReactElement | React.ReactElement[];
 };
 
 // Login component
 export type LoginProps = {
   setAuthenticated: React.Dispatch<React.SetStateAction<boolean>>;
+};
+
+// Dialog component
+export type DialogProps = {
+  // Ref for placement
+  ref: React.MutableRefObject<any>;
+  header: string;
+  children: React.ReactElement | React.ReactElement[];
+  // Dialog actions and state
+  isOpen: boolean;
+  onOpen: () => void;
+  onClose: () => void;
+  // Left and right buttons
+  leftButtonLabel?: string;
+  leftButtonColor?: string;
+  leftButtonAction?: () => void;
+  rightButtonLabel?: string;
+  rightButtonColor?: string;
+  rightButtonAction?: () => void;
 };
 
 // DataTable component
