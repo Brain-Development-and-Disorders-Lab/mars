@@ -238,7 +238,7 @@ const Attribute = () => {
 
             {/* Delete Dialog */}
             <Dialog
-              ref={deleteDialogRef}
+              dialogRef={deleteDialogRef}
               header={"Delete Entity"}
               rightButtonAction={handleDeleteClick}
               isOpen={isDeleteDialogOpen}

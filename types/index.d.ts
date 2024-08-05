@@ -267,7 +267,7 @@ export type LoginProps = {
 // Dialog component
 export type DialogProps = {
   // Ref for placement
-  ref: React.MutableRefObject<any>;
+  dialogRef: React.MutableRefObject<any>;
   header: string;
   children: React.ReactElement | React.ReactElement[];
   // Dialog actions and state

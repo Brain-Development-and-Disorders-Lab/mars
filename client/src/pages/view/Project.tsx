@@ -1,5 +1,5 @@
 // React
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 // Existing and custom components
 import {
@@ -33,13 +33,6 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  Popover,
-  PopoverArrow,
-  PopoverBody,
-  PopoverCloseButton,
-  PopoverContent,
-  PopoverHeader,
-  PopoverTrigger,
   Select,
   Spacer,
   Stack,
@@ -56,6 +49,7 @@ import {
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
+import Dialog from "@components/Dialog";
 
 // Existing and custom types
 import {
@@ -89,6 +83,14 @@ const Project = () => {
     isOpen: isEntitiesOpen,
     onOpen: onEntitiesOpen,
     onClose: onEntitiesClose,
+  } = useDisclosure();
+
+  // State for dialog confirming if user should delete
+  const deleteDialogRef = useRef();
+  const {
+    isOpen: isDeleteDialogOpen,
+    onOpen: onDeleteDialogOpen,
+    onClose: onDeleteDialogClose,
   } = useDisclosure();
 
   // History drawer
@@ -608,38 +610,6 @@ const Project = () => {
 
           {/* Buttons */}
           <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
-            {editing && (
-              <Popover>
-                <PopoverTrigger>
-                  <Button
-                    colorScheme={"red"}
-                    rightIcon={<Icon name={"delete"} />}
-                    isDisabled={isUpdating}
-                    size={"sm"}
-                  >
-                    Delete
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent>
-                  <PopoverArrow />
-                  <PopoverCloseButton />
-                  <PopoverHeader>Confirmation</PopoverHeader>
-                  <PopoverBody>
-                    Are you sure you want to delete this Project?
-                    <Flex direction={"row"} p={"2"} justify={"center"}>
-                      <Button
-                        colorScheme={"green"}
-                        rightIcon={<Icon name={"check"} />}
-                        onClick={handleDeleteClick}
-                        size={"sm"}
-                      >
-                        Confirm
-                      </Button>
-                    </Flex>
-                  </PopoverBody>
-                </PopoverContent>
-              </Popover>
-            )}
             <Button
               colorScheme={editing ? "green" : "blue"}
               rightIcon={
@@ -652,6 +622,21 @@ const Project = () => {
             >
               {editing ? "Done" : "Edit"}
             </Button>
+
+            {/* Delete Dialog */}
+            <Dialog
+              dialogRef={deleteDialogRef}
+              header={"Delete Project"}
+              rightButtonAction={handleDeleteClick}
+              isOpen={isDeleteDialogOpen}
+              onOpen={onDeleteDialogOpen}
+              onClose={onDeleteDialogClose}
+            >
+              <Text>
+                Are you sure you want to delete this Project? No Entities will
+                be deleted.
+              </Text>
+            </Dialog>
 
             {/* Actions Menu */}
             <Menu>
@@ -688,9 +673,15 @@ const Project = () => {
                       projectEntities?.length === 0 || exportEntitiesLoading
                     }
                   >
-                    Export all Entities
+                    Export Entities
                   </MenuItem>
                 </Tooltip>
+                <MenuItem
+                  icon={<Icon name={"delete"} />}
+                  onClick={onDeleteDialogOpen}
+                >
+                  Delete
+                </MenuItem>
               </MenuList>
             </Menu>
           </Flex>

@@ -34,7 +34,7 @@ const Dialog = (props: DialogProps) => {
 
   return (
     <AlertDialog
-      leastDestructiveRef={props.ref}
+      leastDestructiveRef={props.dialogRef}
       onClose={props.onClose}
       isOpen={props.isOpen}
       isCentered
@@ -50,7 +50,7 @@ const Dialog = (props: DialogProps) => {
             variant={"outline"}
             rightIcon={<Icon name={"cross"} />}
             colorScheme={leftButtonColor}
-            ref={props.ref}
+            ref={props.dialogRef}
             onClick={leftButtonAction}
           >
             {leftButtonLabel}
