@@ -1,27 +1,22 @@
 // React
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 // Existing and custom components
 import {
   Button,
   Flex,
   Heading,
-  Popover,
-  PopoverArrow,
-  PopoverBody,
-  PopoverCloseButton,
-  PopoverContent,
-  PopoverHeader,
-  PopoverTrigger,
   Tag,
   TagLabel,
   Text,
   Textarea,
+  useDisclosure,
   useToast,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 import Values from "@components/Values";
+import Dialog from "@components/Dialog";
 
 // Existing and custom types
 import { AttributeModel, IValue } from "@types";
@@ -43,6 +38,14 @@ const Attribute = () => {
   const [attributeData, setAttributeData] = useState({} as AttributeModel);
   const [attributeDescription, setAttributeDescription] = useState("");
   const [attributeValues, setAttributeValues] = useState([] as IValue<any>[]);
+
+  // State for dialog confirming if user should delete
+  const deleteDialogRef = useRef();
+  const {
+    isOpen: isDeleteDialogOpen,
+    onOpen: onDeleteDialogOpen,
+    onClose: onDeleteDialogClose,
+  } = useDisclosure();
 
   // GraphQL operations
   const GET_ATTRIBUTE = gql`
@@ -223,36 +226,6 @@ const Attribute = () => {
             p={"4"}
             rounded={"md"}
           >
-            {editing && (
-              <Popover>
-                <PopoverTrigger>
-                  <Button
-                    colorScheme={"red"}
-                    rightIcon={<Icon name={"delete"} />}
-                  >
-                    Delete
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent>
-                  <PopoverArrow />
-                  <PopoverCloseButton />
-                  <PopoverHeader>Confirmation</PopoverHeader>
-                  <PopoverBody>
-                    Are you sure you want to delete this Attribute? It will not
-                    be removed from any existing Entities.
-                    <Flex direction={"row"} p={"2"} justify={"center"}>
-                      <Button
-                        colorScheme={"green"}
-                        rightIcon={<Icon name={"check"} />}
-                        onClick={handleDeleteClick}
-                      >
-                        Confirm
-                      </Button>
-                    </Flex>
-                  </PopoverBody>
-                </PopoverContent>
-              </Popover>
-            )}
             <Button
               colorScheme={editing ? "green" : "blue"}
               rightIcon={
@@ -262,6 +235,21 @@ const Attribute = () => {
             >
               {editing ? "Done" : "Edit"}
             </Button>
+
+            {/* Delete Dialog */}
+            <Dialog
+              ref={deleteDialogRef}
+              header={"Delete Entity"}
+              rightButtonAction={handleDeleteClick}
+              isOpen={isDeleteDialogOpen}
+              onOpen={onDeleteDialogOpen}
+              onClose={onDeleteDialogClose}
+            >
+              <Text>
+                Are you sure you want to delete this Attribute? It will not be
+                removed from any existing Entities
+              </Text>
+            </Dialog>
           </Flex>
         </Flex>
 

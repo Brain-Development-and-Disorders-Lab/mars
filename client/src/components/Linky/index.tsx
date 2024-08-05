@@ -14,7 +14,7 @@ import { useNavigate } from "react-router-dom";
 import _ from "lodash";
 import { gql, useLazyQuery } from "@apollo/client";
 
-const DEFAULT_LINKY_LABEL_LENGTH = 10; // Default number of shown characters
+const DEFAULT_LINKY_LABEL_LENGTH = 20; // Default number of shown characters
 
 const Linky = (props: LinkyProps) => {
   const navigate = useNavigate();

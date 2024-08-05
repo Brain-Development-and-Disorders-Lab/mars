@@ -64,6 +64,7 @@ const DataTable = (props: DataTableProps) => {
                 <Checkbox
                   {...{
                     disabled: props.viewOnly,
+                    pl: "1",
                     isChecked: table.getIsAllRowsSelected(),
                     isIndeterminate: table.getIsSomeRowsSelected(),
                     isInvalid: false,
@@ -75,6 +76,7 @@ const DataTable = (props: DataTableProps) => {
                 <Checkbox
                   {...{
                     id: `s_${Math.random().toString(16).slice(2)}`,
+                    pl: "1",
                     isChecked: row.getIsSelected(),
                     disabled: !row.getCanSelect() || props.viewOnly,
                     isIndeterminate: row.getIsSomeSelected(),
@@ -148,7 +150,7 @@ const DataTable = (props: DataTableProps) => {
       <TableContainer>
         <Table variant={"simple"} size={"sm"}>
           {/* Table head */}
-          <Thead>
+          <Thead bg={"gray.50"}>
             {table.getHeaderGroups().map((headerGroup) => (
               <Tr key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
@@ -161,9 +163,7 @@ const DataTable = (props: DataTableProps) => {
                       // Dynamically set the width for the checkboxes
                       w={_.isEqual(header.id, "select") ? "1" : "auto"}
                       _hover={
-                        canSortColumn(header)
-                          ? { cursor: "pointer", background: "gray.100" }
-                          : {}
+                        canSortColumn(header) ? { cursor: "pointer" } : {}
                       }
                       transition={
                         canSortColumn(header)
@@ -173,22 +173,24 @@ const DataTable = (props: DataTableProps) => {
                       px={"1"}
                       py={"1"}
                     >
-                      {flexRender(
-                        header.column.columnDef.header,
-                        header.getContext(),
-                      )}
-                      {canSortColumn(header) && (
-                        <Icon
-                          name={
-                            header.column.getIsSorted() === "desc"
-                              ? "sort_up"
-                              : header.column.getIsSorted() === "asc"
-                                ? "sort_down"
-                                : "sort"
-                          }
-                          style={{ marginLeft: "4px" }}
-                        />
-                      )}
+                      <Flex align={"center"} py={"2"}>
+                        {flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
+                        {canSortColumn(header) && (
+                          <Icon
+                            name={
+                              header.column.getIsSorted() === "desc"
+                                ? "sort_up"
+                                : header.column.getIsSorted() === "asc"
+                                  ? "sort_down"
+                                  : "sort"
+                            }
+                            style={{ marginLeft: "4px" }}
+                          />
+                        )}
+                      </Flex>
                     </Th>
                   );
                 })}
@@ -270,7 +272,8 @@ const DataTable = (props: DataTableProps) => {
 
         {props.showPagination && (
           <Flex gap={"4"} wrap={"wrap"}>
-            <Flex>
+            <Flex gap={"2"} align={"center"}>
+              <Text fontSize={"sm"}>Show</Text>
               <Select
                 id={"select-page-size"}
                 size={"sm"}
@@ -284,7 +287,7 @@ const DataTable = (props: DataTableProps) => {
                 {[10, 20, 50].map((size) => {
                   return (
                     <option key={size} value={size}>
-                      Show {size}
+                      {size}
                     </option>
                   );
                 })}
@@ -309,10 +312,13 @@ const DataTable = (props: DataTableProps) => {
                 isDisabled={!table.getCanPreviousPage()}
               />
               {table.getPageCount() > 0 && (
-                <Text as={"b"}>
-                  {table.getState().pagination.pageIndex + 1} of{" "}
-                  {table.getPageCount()}
-                </Text>
+                <Flex gap={"1"}>
+                  <Text fontWeight={"semibold"}>
+                    {table.getState().pagination.pageIndex + 1}
+                  </Text>
+                  <Text> of </Text>
+                  <Text fontWeight={"semibold"}>{table.getPageCount()}</Text>
+                </Flex>
               )}
               <IconButton
                 variant={"outline"}

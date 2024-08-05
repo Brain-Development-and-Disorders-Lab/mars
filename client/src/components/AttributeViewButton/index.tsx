@@ -67,8 +67,8 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
       >
         <ModalOverlay />
 
-        <ModalContent p={"2"} gap={"4"}>
-          <ModalHeader>
+        <ModalContent>
+          <ModalHeader pb={"0"} pt={"2"} px={"2"}>
             <Flex
               direction={"row"}
               justify={"space-between"}
@@ -82,20 +82,18 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
                 border={"2px"}
                 rounded={"md"}
               >
-                <Icon name={"attribute"} size={"lg"} />
-                <Heading fontWeight={"semibold"} size={"md"}>
-                  {props.attribute.name}
-                </Heading>
+                <Icon name={"attribute"} size={"md"} />
+                <Heading size={"sm"}>{props.attribute.name}</Heading>
               </Flex>
             </Flex>
             <ModalCloseButton />
           </ModalHeader>
 
-          <ModalBody gap={"4"}>
+          <ModalBody p={"2"} gap={"2"}>
             <Flex
               mb={"4"}
               gap={"2"}
-              p={"4"}
+              p={"2"}
               rounded={"md"}
               direction={"column"}
               bg={"gray.50"}
@@ -112,13 +110,13 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
 
             <Flex
               direction={"column"}
-              gap={"4"}
-              p={"4"}
+              gap={"2"}
+              p={"2"}
               grow={"1"}
               h={"fit-content"}
               bg={"white"}
               rounded={"md"}
-              border={"2px"}
+              border={"1px"}
               borderColor={"gray.200"}
             >
               <Heading size={"md"}>Values</Heading>
