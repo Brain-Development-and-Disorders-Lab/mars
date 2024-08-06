@@ -36,7 +36,7 @@ import {
 import Icon from "@components/Icon";
 import Error from "@components/Error";
 import Attribute from "@components/AttributeCard";
-import { Information, Warning } from "@components/Label";
+import { Warning } from "@components/Label";
 
 // Custom and existing types
 import { AttributeModel, AttributeCardProps, IGenericItem } from "@types";
@@ -387,6 +387,7 @@ const Importer = (props: {
     return (
       <Select
         id={id}
+        size={"sm"}
         placeholder={"Select Column"}
         value={value}
         onChange={(event) => setValue(event.target.value)}
@@ -513,10 +514,10 @@ const Importer = (props: {
           size={"4xl"}
         >
           <ModalOverlay />
-          <ModalContent p={"2"} gap={"2"}>
+          <ModalContent p={"2"} gap={"0"}>
             <ModalHeader p={"2"}>Import Entities</ModalHeader>
             <ModalCloseButton />
-            <ModalBody p={"2"}>
+            <ModalBody px={"2"}>
               {/* Stepper progress indicator */}
               <Flex pb={"4"}>
                 <Stepper index={activeStep} w={"100%"}>
@@ -549,10 +550,10 @@ const Importer = (props: {
                   align={"center"}
                   justify={"center"}
                 >
-                  <Flex w={"100%"} py={"2"} justify={"left"}>
-                    <Information
-                      text={"Storacuity supports CSV-formatted or JSON files."}
-                    />
+                  <Flex w={"100%"} py={"2"} justify={"left"} gap={"1"}>
+                    <Text>Supported file formats:</Text>
+                    <Tag colorScheme={"green"}>CSV</Tag>
+                    <Tag colorScheme={"green"}>JSON</Tag>
                   </Flex>
                   <FormControl>
                     <Flex
@@ -630,13 +631,10 @@ const Importer = (props: {
 
               {/* Step 2: Simple mapping, details */}
               {_.isEqual(interfacePage, "details") && (
-                <Flex w={"100%"} direction={"column"} gap={"4"}>
+                <Flex w={"100%"} direction={"column"} gap={"2"}>
                   {columns.length > 0 && (
                     <Flex direction={"column"} gap={"2"} wrap={"wrap"}>
-                      <Flex w={"100%"} py={"2"} justify={"left"} gap={"2"}>
-                        <Information
-                          text={`Found ${columns.length} columns.`}
-                        />
+                      <Flex w={"100%"} justify={"left"} gap={"2"}>
                         {fileType === "text/csv" && (
                           <Warning
                             text={`Origins and Products cannot be imported from CSV files.`}
@@ -645,7 +643,6 @@ const Importer = (props: {
                       </Flex>
                       <Flex
                         w={"100%"}
-                        py={"2"}
                         gap={"2"}
                         align={"center"}
                         justify={"left"}
@@ -653,7 +650,7 @@ const Importer = (props: {
                       >
                         <Text
                           fontWeight={"semibold"}
-                          size={"xs"}
+                          fontSize={"sm"}
                           color={"gray.600"}
                         >
                           Columns:
@@ -676,7 +673,7 @@ const Importer = (props: {
                   )}
 
                   {!objectData && (
-                    <Flex direction={"row"} gap={"4"}>
+                    <Flex direction={"row"} gap={"2"}>
                       <FormControl
                         isRequired
                         isInvalid={_.isEqual(nameField, "")}
@@ -705,7 +702,7 @@ const Importer = (props: {
                     </Flex>
                   )}
 
-                  <Flex direction={"row"} gap={"4"}>
+                  <Flex direction={"row"} gap={"2"}>
                     <FormControl>
                       <FormLabel>Owner</FormLabel>
                       <Tooltip
@@ -713,13 +710,14 @@ const Importer = (props: {
                           "Initially, only you will have access to imported Entities"
                         }
                       >
-                        <Input value={ownerField} disabled />
+                        <Input value={ownerField} size={"sm"} disabled />
                       </Tooltip>
                     </FormControl>
                     <FormControl>
                       <FormLabel>Project</FormLabel>
                       <Select
                         id={"import_projects"}
+                        size={"sm"}
                         placeholder={"Select Project"}
                         value={projectField}
                         onChange={(event) =>
@@ -744,18 +742,13 @@ const Importer = (props: {
 
               {/* Step 3: Advanced mapping */}
               {_.isEqual(interfacePage, "mapping") && (
-                <Flex w={"100%"} direction={"column"} gap={"4"}>
+                <Flex w={"100%"} direction={"column"} gap={"2"}>
                   <Text>
                     Columns can be assigned to Values within Attributes. When
                     adding Values to an Attribute, select the column containing
                     the data for each Value. Use an existing Template Attribute
                     from the drop-down or create a new Attribute.
                   </Text>
-                  <Flex w={"100%"} gap={"2"}>
-                    <Information
-                      text={'All dates must use "MM/DD/YYYY" format'}
-                    />
-                  </Flex>
                   <Flex
                     direction={"row"}
                     gap={"2"}
@@ -773,6 +766,7 @@ const Importer = (props: {
                         }
                       >
                         <Select
+                          size={"sm"}
                           placeholder={"Select Template Attribute"}
                           isDisabled={attributes.length === 0}
                           onChange={(event) => {
@@ -816,6 +810,7 @@ const Importer = (props: {
                     </FormControl>
 
                     <Button
+                      size={"sm"}
                       leftIcon={<Icon name={"add"} />}
                       colorScheme={"green"}
                       onClick={() => {
@@ -858,6 +853,7 @@ const Importer = (props: {
             <ModalFooter p={"2"}>
               <Flex direction={"row"} w={"100%"} justify={"space-between"}>
                 <Button
+                  size={"sm"}
                   colorScheme={"red"}
                   rightIcon={<Icon name="cross" />}
                   variant={"outline"}
@@ -891,12 +887,13 @@ const Importer = (props: {
                 </Button> */}
 
                 <Button
+                  size={"sm"}
                   colorScheme={
                     _.isEqual(interfacePage, "mapping") ? "green" : "blue"
                   }
                   rightIcon={
                     _.isEqual(interfacePage, "upload") ? (
-                      <Icon name={"upload"} />
+                      <Icon name={"c_right"} />
                     ) : _.isEqual(interfacePage, "details") ? (
                       <Icon name={"c_right"} />
                     ) : (
@@ -909,7 +906,7 @@ const Importer = (props: {
                   isLoading={continueLoading}
                   loadingText={"Processing"}
                 >
-                  {_.isEqual(interfacePage, "upload") && "Upload"}
+                  {_.isEqual(interfacePage, "upload") && "Continue"}
                   {_.isEqual(interfacePage, "details") && "Continue"}
                   {_.isEqual(interfacePage, "mapping") && "Finish"}
                 </Button>

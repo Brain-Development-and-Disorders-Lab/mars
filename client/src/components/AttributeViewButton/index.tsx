@@ -125,6 +125,7 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
                 gap={"2"}
                 align={"center"}
                 justify={"center"}
+                minH={values.length > 0 ? "fit-content" : "200px"}
               >
                 {values && values.length > 0 ? (
                   <Values
@@ -133,7 +134,9 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
                     setValues={setValues}
                   />
                 ) : (
-                  <Text>No values.</Text>
+                  <Text color={"gray.400"} fontWeight={"semibold"}>
+                    No Values
+                  </Text>
                 )}
               </Flex>
             </Flex>
