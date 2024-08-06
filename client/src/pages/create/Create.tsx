@@ -83,6 +83,7 @@ const Create = () => {
           <CardFooter>
             <Flex w={"100%"} justify={"center"}>
               <Button
+                size={"sm"}
                 colorScheme={"green"}
                 rightIcon={<Icon name={"add"} />}
                 onClick={() => navigate("/create/project")}
@@ -154,6 +155,7 @@ const Create = () => {
           <CardFooter>
             <Flex w={"100%"} justify={"center"}>
               <Button
+                size={"sm"}
                 colorScheme={"green"}
                 rightIcon={<Icon name={"add"} />}
                 onClick={() => navigate("/create/entity")}
@@ -211,6 +213,7 @@ const Create = () => {
           <CardFooter>
             <Flex w={"100%"} justify={"center"}>
               <Button
+                size={"sm"}
                 colorScheme={"green"}
                 rightIcon={<Icon name={"add"} />}
                 onClick={() => navigate("/create/attribute")}
