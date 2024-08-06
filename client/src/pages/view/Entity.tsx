@@ -1369,7 +1369,7 @@ const Entity = () => {
         <Flex
           gap={"2"}
           p={"2"}
-          pb={"0"}
+          pb={{ base: "2", lg: "0" }}
           direction={"row"}
           justify={"space-between"}
           align={"center"}

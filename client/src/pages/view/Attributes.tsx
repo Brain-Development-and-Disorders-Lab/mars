@@ -117,7 +117,7 @@ const Attributes = () => {
           <Flex w={"100%"} justify={"end"}>
             <Button
               key={`view-entity-${info.getValue()}`}
-              colorScheme={"gray"}
+              size={"sm"}
               rightIcon={<Icon name={"c_right"} />}
               onClick={() => navigate(`/attributes/${info.getValue()}`)}
             >
@@ -139,27 +139,26 @@ const Attributes = () => {
         bg={"white"}
         wrap={"wrap"}
         gap={"6"}
-        justify={"center"}
       >
         <Flex
           w={"100%"}
-          p={"4"}
           direction={"row"}
           justify={"space-between"}
           align={"center"}
         >
-          <Flex align={"center"} gap={"4"}>
-            <Icon name={"attribute"} size={"lg"} />
-            <Heading fontWeight={"semibold"}>Template Attributes</Heading>
+          <Flex align={"center"} gap={"2"} w={"100%"}>
+            <Icon name={"attribute"} size={"md"} />
+            <Heading size={"md"}>Templates</Heading>
+            <Spacer />
+            <Button
+              leftIcon={<Icon name={"add"} />}
+              colorScheme={"green"}
+              onClick={() => navigate("/create/attribute")}
+              size={"sm"}
+            >
+              Create
+            </Button>
           </Flex>
-          <Spacer />
-          <Button
-            leftIcon={<Icon name={"add"} />}
-            colorScheme={"green"}
-            onClick={() => navigate("/create/attribute")}
-          >
-            Create
-          </Button>
         </Flex>
         <Flex direction={"column"} gap={"4"} w={"100%"}>
           {attributesData.length > 0 ? (
@@ -168,6 +167,7 @@ const Attributes = () => {
               data={attributesData}
               visibleColumns={visibleColumns}
               showPagination
+              showSelection
             />
           ) : (
             <Flex

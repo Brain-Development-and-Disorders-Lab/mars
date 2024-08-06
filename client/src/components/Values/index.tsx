@@ -9,14 +9,11 @@ import React, {
 
 // Existing and custom components
 import {
-  Box,
   Button,
   Flex,
   Heading,
   IconButton,
   Input,
-  InputGroup,
-  InputLeftAddon,
   Link,
   Modal,
   ModalBody,
@@ -121,42 +118,18 @@ const Values = (props: {
             table.options.meta?.updateData(index, id, value);
           };
 
-          // Set the icon attached to the name field
-          let valueIcon = <Icon name={"unknown"} />;
-          switch (original.type) {
-            case "date":
-              valueIcon = <Icon name={"v_date"} color={"orange.300"} />;
-              break;
-            case "number":
-              valueIcon = <Icon name={"v_number"} color={"green.300"} />;
-              break;
-            case "text":
-              valueIcon = <Icon name={"v_text"} color={"blue.300"} />;
-              break;
-            case "url":
-              valueIcon = <Icon name={"v_url"} color={"yellow.300"} />;
-              break;
-            case "entity":
-              valueIcon = <Icon name={"entity"} color={"purple.300"} />;
-              break;
-            case "select":
-              valueIcon = <Icon name={"v_select"} color={"cyan.300"} />;
-              break;
-          }
-
           return (
-            <InputGroup size={"sm"}>
-              <InputLeftAddon children={valueIcon} bgColor={"white"} />
+            <Flex>
               <Input
                 id={`i_${original._id}_name`}
                 value={value}
                 isReadOnly={props.viewOnly}
                 onChange={onChange}
                 onBlur={onBlur}
-                minW={"2xs"}
+                size={"sm"}
                 isInvalid={_.isEqual(value, "")}
               />
-            </InputGroup>
+            </Flex>
           );
         },
         header: "Name",
@@ -199,16 +172,20 @@ const Values = (props: {
             table.options.meta?.updateData(index, id, value);
           };
 
+          let dataInput: React.ReactElement;
+          let typeIcon: React.ReactElement;
           if (_.isUndefined(props.permittedValues)) {
             switch (original.type) {
               case "number": {
-                return (
+                typeIcon = (
+                  <Icon size={"sm"} name={"v_number"} color={"green.300"} />
+                );
+                dataInput = (
                   <Input
                     id={`i_${original._id}_data`}
                     type={"number"}
                     value={value}
                     size={"sm"}
-                    w={"2xs"}
                     isReadOnly={props.viewOnly}
                     onChange={onChange}
                     onBlur={onBlur}
@@ -217,14 +194,17 @@ const Values = (props: {
                     }
                   />
                 );
+                break;
               }
               case "text": {
-                return (
+                typeIcon = (
+                  <Icon size={"sm"} name={"v_text"} color={"blue.300"} />
+                );
+                dataInput = (
                   <Input
                     id={`i_${original._id}_data`}
                     value={value}
                     size={"sm"}
-                    w={"2xs"}
                     isReadOnly={props.viewOnly}
                     onChange={onChange}
                     onBlur={onBlur}
@@ -233,15 +213,18 @@ const Values = (props: {
                     }
                   />
                 );
+                break;
               }
               case "url": {
+                typeIcon = (
+                  <Icon size={"sm"} name={"v_url"} color={"yellow.300"} />
+                );
                 if (_.isEqual(props.viewOnly, false)) {
-                  return (
+                  dataInput = (
                     <Input
                       id={`i_${original._id}_data`}
                       value={value}
                       size={"sm"}
-                      w={"2xs"}
                       isReadOnly={props.viewOnly}
                       onChange={onChange}
                       onBlur={onBlur}
@@ -302,7 +285,7 @@ const Values = (props: {
                     tooltipText = "Possible invalid URL: " + value.toString();
                   }
 
-                  return (
+                  dataInput = (
                     <Tooltip label={tooltipText}>
                       <Flex
                         direction={"row"}
@@ -330,15 +313,18 @@ const Values = (props: {
                     </Tooltip>
                   );
                 }
+                break;
               }
               case "date": {
-                return (
+                typeIcon = (
+                  <Icon size={"sm"} name={"v_date"} color={"orange.300"} />
+                );
+                dataInput = (
                   <Input
                     id={`i_${original._id}_data`}
                     type={"date"}
                     value={value}
                     size={"sm"}
-                    w={"2xs"}
                     isReadOnly={props.viewOnly}
                     onChange={onChange}
                     onBlur={onBlur}
@@ -347,17 +333,20 @@ const Values = (props: {
                     }
                   />
                 );
+                break;
               }
               case "entity": {
+                typeIcon = (
+                  <Icon size={"sm"} name={"entity"} color={"purple.300"} />
+                );
                 if (_.isEqual(props.viewOnly, false)) {
-                  return (
+                  dataInput = (
                     <Select
                       title="Select Entity"
                       id={`s_${original._id}_data`}
                       value={value}
                       placeholder={"Entity"}
                       size={"sm"}
-                      w={"2xs"}
                       isDisabled={props.viewOnly}
                       onChange={onChange}
                       onBlur={onBlur}
@@ -372,17 +361,20 @@ const Values = (props: {
                     </Select>
                   );
                 } else {
-                  return <Linky type={"entities"} id={value} />;
+                  dataInput = <Linky type={"entities"} id={value} />;
                 }
+                break;
               }
               case "select": {
-                return (
+                typeIcon = (
+                  <Icon size={"sm"} name={"v_select"} color={"cyan.300"} />
+                );
+                dataInput = (
                   <Select
                     title="Select Option"
                     id={`s_${original._id}_data`}
                     value={value.selected}
                     size={"sm"}
-                    w={"2xs"}
                     isDisabled={props.viewOnly}
                     onChange={onSelectChange}
                     onBlur={onBlur}
@@ -401,17 +393,20 @@ const Values = (props: {
                       })}
                   </Select>
                 );
+                break;
               }
             }
           } else {
-            return (
+            typeIcon = (
+              <Icon size={"sm"} name={"v_select"} color={"cyan.300"} />
+            );
+            dataInput = (
               <Select
                 title="Select Column"
                 id={`s_${original._id}_data`}
                 value={value}
                 placeholder={"Column"}
                 size={"sm"}
-                w={"2xs"}
                 isDisabled={props.viewOnly}
                 onChange={onChange}
                 onBlur={onBlur}
@@ -431,6 +426,15 @@ const Values = (props: {
               </Select>
             );
           }
+
+          return (
+            <Flex align={"center"} justify={"left"} gap={"2"} w={"100%"}>
+              <Tooltip label={_.capitalize(original.type)}>
+                <Flex>{typeIcon}</Flex>
+              </Tooltip>
+              <Flex w={"100%"}>{dataInput}</Flex>
+            </Flex>
+          );
         },
         header: "Data",
       }),
@@ -507,7 +511,13 @@ const Values = (props: {
           <PopoverContent>
             <PopoverArrow />
             <PopoverCloseButton />
-            <PopoverHeader>Value Type</PopoverHeader>
+            <PopoverHeader>
+              <Flex>
+                <Heading fontWeight={"semibold"} size={"xs"}>
+                  Value Type
+                </Heading>
+              </Flex>
+            </PopoverHeader>
             <PopoverBody>
               <Flex gap={"4"} wrap={"wrap"}>
                 {/* Buttons to add Values */}
@@ -648,7 +658,7 @@ const Values = (props: {
         </Popover>
       </Flex>
 
-      <Box overflowX={"auto"} maxW={"80vw"}>
+      <Flex overflowX={"auto"}>
         <DataTable
           columns={columns}
           visibleColumns={{}}
@@ -659,7 +669,7 @@ const Values = (props: {
           showPagination
           showSelection
         />
-      </Box>
+      </Flex>
 
       <ScaleFade initialScale={0.9} in={isOpen}>
         <Modal

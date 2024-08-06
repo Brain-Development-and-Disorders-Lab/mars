@@ -196,10 +196,11 @@ const Attribute = () => {
       isError={!_.isUndefined(error)}
       isLoaded={!loading && !updateLoading && !deleteLoading}
     >
-      <Flex direction={"column"} gap={"4"}>
+      <Flex direction={"column"}>
         <Flex
-          gap={"4"}
-          p={"4"}
+          gap={"2"}
+          p={"2"}
+          pb={{ base: "2", lg: "0" }}
           direction={"row"}
           justify={"space-between"}
           align={"center"}
@@ -207,26 +208,21 @@ const Attribute = () => {
         >
           <Flex
             align={"center"}
-            gap={"4"}
+            gap={"2"}
             p={"2"}
             border={"2px"}
             rounded={"md"}
           >
-            <Icon name={"attribute"} size={"lg"} />
-            <Heading fontWeight={"semibold"}>
-              Attribute: {attributeData.name}
+            <Icon name={"attribute"} size={"md"} />
+            <Heading fontWeight={"semibold"} size={"md"}>
+              {attributeData.name}
             </Heading>
           </Flex>
 
           {/* Buttons */}
-          <Flex
-            direction={"row"}
-            gap={"4"}
-            wrap={"wrap"}
-            p={"4"}
-            rounded={"md"}
-          >
+          <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
             <Button
+              size={"sm"}
               colorScheme={editing ? "green" : "blue"}
               rightIcon={
                 editing ? <Icon name={"check"} /> : <Icon name={"edit"} />
@@ -253,72 +249,76 @@ const Attribute = () => {
           </Flex>
         </Flex>
 
-        <Flex direction={"row"} gap={"4"} p={"4"} wrap={"wrap"}>
+        <Flex direction={"row"} gap={"0"} wrap={"wrap"}>
           <Flex
             direction={"column"}
-            p={"4"}
-            h={"fit-content"}
+            p={"2"}
+            pt={{ base: "0", lg: "2" }}
+            gap={"2"}
             grow={"1"}
-            width={"30%"}
-            bg={"gray.50"}
             rounded={"md"}
           >
-            {/* Attribute Overview */}
-            <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
-              {/* Details */}
-              <Text fontWeight={"semibold"}>Owner</Text>
-              <Flex>
-                <Tag colorScheme={"green"}>
-                  <TagLabel>{attributeData.owner}</TagLabel>
-                </Tag>
+            <Flex
+              direction={"column"}
+              p={"2"}
+              border={"1px"}
+              borderColor={"gray.200"}
+              rounded={"md"}
+            >
+              {/* Attribute Overview */}
+              <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
+                {/* Details */}
+                <Flex direction={"row"} gap={"2"}>
+                  <Text fontWeight={"semibold"}>Value Count</Text>
+                  <Tag colorScheme={"purple"}>
+                    <TagLabel>{attributeValues.length}</TagLabel>
+                  </Tag>
+                </Flex>
+                <Text fontWeight={"semibold"}>Description</Text>
+                {_.isEqual(attributeData.description, "") ? (
+                  <Tag
+                    size={"md"}
+                    key={`warn-${attributeData._id}`}
+                    colorScheme={"orange"}
+                  >
+                    <TagLabel>Not Specified</TagLabel>
+                    <Icon name={"warning"} />
+                  </Tag>
+                ) : (
+                  <Textarea
+                    value={attributeDescription}
+                    onChange={(event) => {
+                      setAttributeDescription(event.target.value);
+                    }}
+                    isReadOnly={!editing}
+                    bg={"white"}
+                    border={"1px"}
+                    borderColor={"gray.200"}
+                  />
+                )}
               </Flex>
-              <Text fontWeight={"semibold"}>Description</Text>
-              {_.isEqual(attributeData.description, "") ? (
-                <Tag
-                  size={"md"}
-                  key={`warn-${attributeData._id}`}
-                  colorScheme={"orange"}
-                >
-                  <TagLabel>Not Specified</TagLabel>
-                  <Icon name={"warning"} />
-                </Tag>
-              ) : (
-                <Textarea
-                  value={attributeDescription}
-                  onChange={(event) => {
-                    setAttributeDescription(event.target.value);
-                  }}
-                  isReadOnly={!editing}
-                  bg={"white"}
-                  border={"2px"}
-                  borderColor={"gray.200"}
-                />
-              )}
             </Flex>
           </Flex>
 
           <Flex
             direction={"column"}
-            p={"4"}
+            p={"2"}
+            pt={{ base: "0", lg: "2" }}
             gap={"2"}
             grow={"1"}
-            width={"65%"}
-            h={"fit-content"}
-            rounded={"md"}
-            border={"2px"}
-            borderColor={"gray.200"}
           >
-            <Heading fontWeight={"semibold"} size={"md"}>
-              Values
-            </Heading>
-
-            {attributeData.values && (
+            <Flex
+              p={"2"}
+              rounded={"md"}
+              border={"1px"}
+              borderColor={"gray.200"}
+            >
               <Values
                 viewOnly={!editing}
                 values={attributeValues}
                 setValues={setAttributeValues}
               />
-            )}
+            </Flex>
           </Flex>
         </Flex>
       </Flex>
