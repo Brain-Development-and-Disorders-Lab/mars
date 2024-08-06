@@ -133,6 +133,7 @@ const DataTable = (props: DataTableProps) => {
   const canSortColumn = (header: any) => {
     return (
       !_.isEqual(header.id, "select") &&
+      !_.isEqual(header.id, "type") &&
       !_.isEqual(header.id, "view") &&
       !_.isEqual(header.id, "_id") &&
       !_.isEqual(header.id, "id")

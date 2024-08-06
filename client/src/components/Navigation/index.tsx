@@ -178,20 +178,19 @@ const Navigation = () => {
 
       {/* Icon to show menu in responsive context */}
       <Flex
-        p={"1"}
         display={{ lg: "none" }}
         justify={"left"}
         alignContent={"center"}
-        h={"6vh"}
+        h={"5vh"}
         w={"100%"}
-        bg={"white"}
+        bg={"#fafafa"}
       >
         <Menu>
           <MenuButton
             as={IconButton}
             aria-label={"Open Menu"}
             display={{ base: "flex", lg: "none" }}
-            size={"md"}
+            size={"sm"}
             justifyContent={"center"}
             icon={<Icon name={"list"} />}
           />
@@ -223,9 +222,9 @@ const Navigation = () => {
               </MenuItem>
               <MenuItem
                 icon={<Icon name={"attribute"} />}
-                onClick={() => navigate("/attribute")}
+                onClick={() => navigate("/attributes")}
               >
-                Attribute
+                Attributes
               </MenuItem>
             </MenuGroup>
             <MenuGroup title={"Tools"}>
