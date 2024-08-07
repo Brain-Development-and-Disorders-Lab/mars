@@ -52,8 +52,8 @@ const Page: FC<PageProps> = ({ children }) => {
       {/* Navigation component */}
       <Flex
         justify={"center"}
-        w={{ base: "100%", lg: "18vw" }}
-        maxW={{ lg: "200px" }}
+        w={{ base: "100%", lg: "200px" }}
+        minW={{ lg: "200px" }}
         h={{ base: "8vh", lg: "100%" }}
         position={"fixed"}
         borderRight={"1px"}

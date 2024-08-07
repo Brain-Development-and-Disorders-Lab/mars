@@ -86,9 +86,7 @@ const AccountMenu = () => {
         <MenuList bg={"white"}>
           <MenuGroup>
             <Flex p={"4"} py={"2"} gap={"2"} direction={"column"}>
-              <Text fontWeight={"semibold"}>
-                Hello, {token.name.split(" ")[0]}!
-              </Text>
+              <Text fontWeight={"semibold"}>{token.name}</Text>
 
               <Flex align={"center"} wrap={"wrap"} gap={"2"}>
                 <Text
