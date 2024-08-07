@@ -102,7 +102,10 @@ const Navigation = () => {
               w={"100%"}
               justifyContent={"left"}
               variant={
-                _.includes(location.pathname, "/project") ? "solid" : "ghost"
+                _.includes(location.pathname, "/project") &&
+                !_.includes(location.pathname, "/create")
+                  ? "solid"
+                  : "ghost"
               }
               onClick={() => navigate("/projects")}
             >
@@ -117,7 +120,10 @@ const Navigation = () => {
               w={"100%"}
               justifyContent={"left"}
               variant={
-                _.includes(location.pathname, "/entit") ? "solid" : "ghost"
+                _.includes(location.pathname, "/entit") &&
+                !_.includes(location.pathname, "/create")
+                  ? "solid"
+                  : "ghost"
               }
               onClick={() => navigate("/entities")}
             >
@@ -131,7 +137,10 @@ const Navigation = () => {
               w={"100%"}
               justifyContent={"left"}
               variant={
-                _.includes(location.pathname, "/attribute") ? "solid" : "ghost"
+                _.includes(location.pathname, "/attribute") &&
+                !_.includes(location.pathname, "/create")
+                  ? "solid"
+                  : "ghost"
               }
               onClick={() => navigate("/attributes")}
             >

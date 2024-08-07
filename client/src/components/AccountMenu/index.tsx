@@ -70,7 +70,12 @@ const AccountMenu = () => {
             mr={"2"}
           >
             <Avatar name={token.name} size={"sm"} />
-            <Text size={"xs"} fontWeight={"semibold"} w={"100%"} align={"left"}>
+            <Text
+              size={"xs"}
+              fontWeight={"semibold"}
+              w={"100%"}
+              align={"center"}
+            >
               {token.name.split(" ").pop()}
             </Text>
             <Icon name={"c_down"} />
