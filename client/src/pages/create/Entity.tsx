@@ -332,7 +332,7 @@ const Entity = () => {
 
         {/* Main pages */}
         {/* Stepper progress indicator */}
-        <Stepper index={activeStep} p={"2"}>
+        <Stepper index={activeStep} p={"2"} size={"sm"}>
           {pageSteps.map((step, index) => (
             <Step key={index}>
               <StepIndicator>
@@ -368,6 +368,7 @@ const Entity = () => {
               <Flex
                 direction={"column"}
                 p={"2"}
+                gap={"2"}
                 border={"1px"}
                 borderColor={"gray.200"}
                 rounded={"md"}
@@ -376,9 +377,7 @@ const Entity = () => {
                   isRequired
                   isInvalid={isNameError || !isNameUnique}
                 >
-                  <FormLabel fontWeight={"normal"} fontSize={"sm"}>
-                    Name
-                  </FormLabel>
+                  <FormLabel fontSize={"sm"}>Name</FormLabel>
                   <Input
                     name={"name"}
                     value={name}
@@ -397,9 +396,7 @@ const Entity = () => {
                 </FormControl>
 
                 <FormControl isInvalid={isDateError}>
-                  <FormLabel fontWeight={"normal"} fontSize={"sm"}>
-                    Created
-                  </FormLabel>
+                  <FormLabel fontSize={"sm"}>Created</FormLabel>
                   <Input
                     placeholder={"Select Date and Time"}
                     size={"sm"}
@@ -436,9 +433,7 @@ const Entity = () => {
               >
                 {/* Description */}
                 <FormControl>
-                  <FormLabel fontWeight={"normal"} fontSize={"sm"}>
-                    Description
-                  </FormLabel>
+                  <FormLabel fontSize={"sm"}>Description</FormLabel>
                   <Textarea
                     value={description}
                     placeholder={"Description"}
@@ -474,7 +469,7 @@ const Entity = () => {
                 borderColor={"gray.200"}
               >
                 <FormControl>
-                  <FormLabel>Origins</FormLabel>
+                  <FormLabel fontSize={"sm"}>Origins</FormLabel>
                   <Select
                     size={"sm"}
                     title={"Select Entity"}
@@ -516,7 +511,7 @@ const Entity = () => {
                       );
                     })}
                   </Select>
-                  <FormHelperText>
+                  <FormHelperText fontSize={"sm"}>
                     If the sources of this Entity currently exist or did exist
                     in this system, specify those associations here by selecting
                     the origin Entities.
@@ -536,7 +531,7 @@ const Entity = () => {
                   {selectedOrigins.map((product) => {
                     return (
                       <Tag key={`tag-${product._id}`}>
-                        <Linky id={product._id} type={"entities"} />
+                        <Linky id={product._id} type={"entities"} size={"sm"} />
                         <TagCloseButton
                           onClick={() => {
                             setSelectedOrigins(
@@ -571,7 +566,7 @@ const Entity = () => {
                 borderColor={"gray.200"}
               >
                 <FormControl>
-                  <FormLabel>Products</FormLabel>
+                  <FormLabel fontSize={"sm"}>Products</FormLabel>
                   <Select
                     title="Select Entity"
                     placeholder={"Select Entity"}
@@ -633,7 +628,7 @@ const Entity = () => {
                   {selectedProducts.map((product) => {
                     return (
                       <Tag key={`tag-${product._id}`}>
-                        <Linky id={product._id} type={"entities"} />
+                        <Linky id={product._id} type={"entities"} size={"sm"} />
                         <TagCloseButton
                           onClick={() => {
                             setSelectedProducts(
@@ -679,8 +674,9 @@ const Entity = () => {
                 borderColor={"gray.200"}
               >
                 <FormControl>
-                  <FormLabel>Projects</FormLabel>
+                  <FormLabel fontSize={"sm"}>Projects</FormLabel>
                   <CheckboxGroup
+                    size={"sm"}
                     value={selectedProjects}
                     onChange={(event: string[]) => {
                       if (event) {
@@ -699,7 +695,7 @@ const Entity = () => {
                       {projects.length === 0 && <Text>No Projects.</Text>}
                     </Stack>
                   </CheckboxGroup>
-                  <FormHelperText>
+                  <FormHelperText fontSize={"sm"}>
                     Specify the Projects that this new Entity should be included
                     with. The Entity will then be contained within the specified
                     Projects.

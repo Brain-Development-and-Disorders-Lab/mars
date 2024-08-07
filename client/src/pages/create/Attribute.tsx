@@ -151,9 +151,8 @@ const Attribute = () => {
               rounded={"md"}
             >
               <FormControl isRequired>
-                <FormLabel>Template Name</FormLabel>
+                <FormLabel fontSize={"sm"}>Template Name</FormLabel>
                 <Input
-                  w={["100%", "md"]}
                   placeholder={"Name"}
                   value={name}
                   onChange={(event) => setName(event.target.value)}
@@ -192,7 +191,6 @@ const Attribute = () => {
               <FormControl isRequired>
                 <FormLabel>Template Description</FormLabel>
                 <Textarea
-                  w={["100%", "lg"]}
                   value={description}
                   placeholder={"Description"}
                   onChange={(event) => setDescription(event.target.value)}

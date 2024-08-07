@@ -94,9 +94,14 @@ const Project = () => {
 
   return (
     <Content isLoaded={!loading}>
-      <Flex direction={"column"} gap={"2"} w={"100%"} h={"100%"} p={"2"}>
+      <Flex direction={"column"}>
         {/* Page header */}
-        <Flex direction={"row"} align={"center"} justify={"space-between"}>
+        <Flex
+          direction={"row"}
+          p={"2"}
+          align={"center"}
+          justify={"space-between"}
+        >
           <Flex align={"center"} gap={"2"} w={"100%"}>
             <Icon name={"project"} size={"md"} />
             <Heading size={"md"}>Create Project</Heading>
@@ -112,13 +117,14 @@ const Project = () => {
           </Flex>
         </Flex>
 
-        <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
+        <Flex direction={"row"} gap={"0"} wrap={"wrap"}>
           <Flex
             direction={"column"}
-            p={"0"}
+            p={"2"}
             pt={{ base: "0", lg: "2" }}
             gap={"2"}
             grow={"1"}
+            basis={"50%"}
             rounded={"md"}
           >
             <Flex
@@ -130,18 +136,13 @@ const Project = () => {
               borderColor={"gray.200"}
             >
               <FormControl isRequired isInvalid={isNameError}>
-                <FormLabel
-                  htmlFor={"name"}
-                  fontWeight={"normal"}
-                  fontSize={"sm"}
-                >
+                <FormLabel htmlFor={"name"} fontSize={"sm"}>
                   Name
                 </FormLabel>
                 <Input
                   id={"name"}
                   name={"name"}
                   size={"sm"}
-                  w={["100%", "md"]}
                   placeholder={"Name"}
                   borderColor={"gray.300"}
                   focusBorderColor={"black"}
@@ -167,7 +168,6 @@ const Project = () => {
                   id={"owner"}
                   name={"owner"}
                   size={"sm"}
-                  w={["100%", "md"]}
                   placeholder={"Owner"}
                   borderColor={"gray.300"}
                   focusBorderColor={"black"}
@@ -181,7 +181,6 @@ const Project = () => {
                   Created
                 </FormLabel>
                 <Input
-                  w={["100%", "md"]}
                   size={"sm"}
                   type={"datetime-local"}
                   value={created}
@@ -200,11 +199,12 @@ const Project = () => {
 
           <Flex
             direction={"column"}
-            p={"0"}
+            p={"2"}
             pl={{ base: "2", lg: "0" }}
             pt={{ base: "0", lg: "2" }}
             gap={"2"}
             grow={"1"}
+            basis={"50%"}
             rounded={"md"}
           >
             <Flex
@@ -217,14 +217,13 @@ const Project = () => {
             >
               {/* Project description */}
               <FormControl isRequired isInvalid={isDescriptionError}>
-                <FormLabel htmlFor="description" fontWeight={"normal"}>
+                <FormLabel htmlFor="description" fontSize={"sm"}>
                   Description
                 </FormLabel>
                 <Textarea
                   id={"description"}
                   name={"description"}
                   size={"sm"}
-                  w={["100%", "lg"]}
                   value={description}
                   onChange={(event) => setDescription(event.target.value)}
                 />
@@ -233,15 +232,12 @@ const Project = () => {
                     A description must be provided.
                   </FormErrorMessage>
                 )}
-                <FormHelperText>
-                  Describe the Project and its contents.
-                </FormHelperText>
               </FormControl>
             </Flex>
           </Flex>
         </Flex>
 
-        <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
+        <Flex direction={"row"} px={"2"} gap={"2"} wrap={"wrap"}>
           <Flex
             direction={"column"}
             p={"2"}
@@ -259,55 +255,54 @@ const Project = () => {
             </Text>
           </Flex>
         </Flex>
+      </Flex>
 
-        {/* Place the action buttons at the bottom of the screen on desktop */}
-        <Spacer />
+      {/* Place the action buttons at the bottom of the screen on desktop */}
+      <Spacer />
 
-        {/* Action buttons */}
-        <Flex
-          direction={"row"}
-          wrap={"wrap"}
-          gap={"6"}
-          justify={"space-between"}
-          alignSelf={"center"}
-          w={"100%"}
-          p={"0"}
+      {/* Action buttons */}
+      <Flex
+        direction={"row"}
+        wrap={"wrap"}
+        gap={"6"}
+        justify={"space-between"}
+        w={"100%"}
+        p={"2"}
+      >
+        <Button
+          size={"sm"}
+          colorScheme={"red"}
+          rightIcon={<Icon name={"cross"} />}
+          variant={"outline"}
+          onClick={() => navigate("/projects")}
         >
-          <Button
-            size={"sm"}
-            colorScheme={"red"}
-            rightIcon={<Icon name={"cross"} />}
-            variant={"outline"}
-            onClick={() => navigate("/projects")}
-          >
-            Cancel
-          </Button>
+          Cancel
+        </Button>
 
-          <Button
-            size={"sm"}
-            colorScheme={"green"}
-            rightIcon={<Icon name={"check"} />}
-            onClick={async () => {
-              // Push the data
-              setIsSubmitting(true);
-              // Execute the GraphQL mutation
-              const response = await createProject({
-                variables: {
-                  project: projectData,
-                },
-              });
+        <Button
+          size={"sm"}
+          colorScheme={"green"}
+          rightIcon={<Icon name={"check"} />}
+          onClick={async () => {
+            // Push the data
+            setIsSubmitting(true);
+            // Execute the GraphQL mutation
+            const response = await createProject({
+              variables: {
+                project: projectData,
+              },
+            });
 
-              if (response.data.createProject.success) {
-                setIsSubmitting(false);
-                navigate("/projects");
-              }
+            if (response.data.createProject.success) {
               setIsSubmitting(false);
-            }}
-            isDisabled={isDetailsError && !isSubmitting}
-          >
-            Finish
-          </Button>
-        </Flex>
+              navigate("/projects");
+            }
+            setIsSubmitting(false);
+          }}
+          isDisabled={isDetailsError && !isSubmitting}
+        >
+          Finish
+        </Button>
       </Flex>
 
       {/* Information modal */}
