@@ -94,14 +94,7 @@ const Project = () => {
 
   return (
     <Content isLoaded={!loading}>
-      <Flex
-        direction={"column"}
-        gap={"2"}
-        w={"100%"}
-        h={"100%"}
-        p={"2"}
-        bg={"white"}
-      >
+      <Flex direction={"column"} gap={"2"} w={"100%"} h={"100%"} p={"2"}>
         {/* Page header */}
         <Flex direction={"row"} align={"center"} justify={"space-between"}>
           <Flex align={"center"} gap={"2"} w={"100%"}>
@@ -266,6 +259,9 @@ const Project = () => {
             </Text>
           </Flex>
         </Flex>
+
+        {/* Place the action buttons at the bottom of the screen on desktop */}
+        <Spacer />
 
         {/* Action buttons */}
         <Flex
