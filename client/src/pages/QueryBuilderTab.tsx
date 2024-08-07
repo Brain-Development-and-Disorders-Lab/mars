@@ -114,6 +114,7 @@ const QueryBuilderTab: React.FC<QueryBuilderTabProps> = ({
           <Button
             aria-label={"Run Query"}
             colorScheme={"green"}
+            size={"sm"}
             rightIcon={<Icon name={"search"} />}
             onClick={() => onSearchBuiltQuery()}
             isDisabled={_.isEqual(query, {})}
