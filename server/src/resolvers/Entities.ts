@@ -50,15 +50,6 @@ export const EntitiesResolvers = {
       }
     },
 
-    // Search owned Entities by a search string
-    searchEntities: async (
-      _parent: any,
-      args: { search: string; limit: 100 },
-      context: Context,
-    ) => {
-      return await Entities.search(context.user, args.search, args.limit);
-    },
-
     // Check if Entity exists by ID
     entityExists: async (_parent: any, args: { _id: string }) => {
       return await Entities.exists(args._id);

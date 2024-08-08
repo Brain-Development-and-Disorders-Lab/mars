@@ -25,14 +25,15 @@ import { AuthenticationResolvers } from "./resolvers/Authentication";
 import { DataResolvers } from "./resolvers/Data";
 import { DateResolver } from "./resolvers/Date";
 import { EntitiesResolvers } from "./resolvers/Entities";
+import { ObjectResolver } from "./resolvers/Object";
 import { ProjectsResolvers } from "./resolvers/Projects";
+import { SearchResolvers } from "./resolvers/Search";
 import { UsersResolvers } from "./resolvers/Users";
 import { Context } from "@types";
 
 // GraphQL uploads
 import GraphQLUpload from "graphql-upload/GraphQLUpload.mjs";
 import graphqlUploadExpress from "graphql-upload/graphqlUploadExpress.mjs";
-import { ObjectResolver } from "./resolvers/Object";
 
 // Set logging level
 consola.level =
@@ -77,6 +78,7 @@ const startServer = async () => {
       EntitiesResolvers,
       ObjectResolver,
       ProjectsResolvers,
+      SearchResolvers,
       UsersResolvers,
     ],
     introspection: process.env.NODE_ENV !== "production",

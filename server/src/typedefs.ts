@@ -260,7 +260,6 @@ export const typedefs = `#graphql
     entity(_id: String): Entity
     entityExists(_id: String): Boolean
     entityNameExists(name: String): Boolean
-    searchEntities(search: String, limit: Int): [Entity]
 
     # Attribute queries
     attributes(limit: Int): [Attribute]
@@ -281,6 +280,9 @@ export const typedefs = `#graphql
 
     # Data queries
     downloadFile(_id: String): String
+
+    # Search queries
+    search(query: String, isBuilder: Boolean, limit: Int): [Entity]
   }
 
   # Define mutation types
