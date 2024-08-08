@@ -54,7 +54,7 @@ import { useNavigate } from "react-router-dom";
 import FileSaver from "file-saver";
 import slugify from "slugify";
 import dayjs from "dayjs";
-import QueryBuilderTab from "./QueryBuilderTab";
+import QueryBuilderTab from "./SearchQueryBuilder";
 import { gql, useLazyQuery, useQuery } from "@apollo/client";
 
 const Search = () => {

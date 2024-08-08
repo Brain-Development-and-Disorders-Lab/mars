@@ -7,7 +7,7 @@ import { request } from "@database/functions"; // Adjust this import based on yo
 import { ValueEditorProps } from "react-querybuilder";
 import { EntityModel } from "@types";
 
-const QueryBuilderEditorCustomValue = ({
+const SearchQueryValue = ({
   field,
   value,
   handleOnChange,
@@ -88,4 +88,4 @@ const QueryBuilderEditorCustomValue = ({
   );
 };
 
-export default QueryBuilderEditorCustomValue;
+export default SearchQueryValue;

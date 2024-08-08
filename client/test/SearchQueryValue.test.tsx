@@ -1,6 +1,6 @@
 import React from "react";
 import { shallow } from "enzyme";
-import QueryBuilderTab from "./QueryBuilderTab";
+import SearchQueryValue from "../src/pages/search/SearchQueryValue";
 
 jest.mock("@database/functions", () => ({
   request: jest.fn(),
@@ -31,7 +31,7 @@ describe("QueryBuilder Component", () => {
       // ... other mock props
     };
 
-    wrapper = shallow(<QueryBuilderTab {...mockProps} />);
+    wrapper = shallow(<SearchQueryValue {...mockProps} />);
   });
 
   it("renders", () => {

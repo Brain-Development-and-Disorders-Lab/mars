@@ -4,7 +4,7 @@ import Icon from "@components/Icon";
 import QueryBuilder, { formatQuery, RuleGroupType } from "react-querybuilder";
 import { QueryBuilderChakra } from "@react-querybuilder/chakra";
 
-import QueryBuilderEditorCustomValue from "./QueryBuilderEditorCustomValue";
+import SearchQueryValue from "./SearchQueryValue";
 import { request } from "@database/functions";
 
 import _ from "lodash";
@@ -13,7 +13,7 @@ interface QueryBuilderTabProps {
   [key: string]: any;
 }
 
-const QueryBuilderTab: React.FC<QueryBuilderTabProps> = ({
+const SearchQueryBuilder: React.FC<QueryBuilderTabProps> = ({
   setHasSearched,
   setResults,
   setIsSearching,
@@ -70,7 +70,7 @@ const QueryBuilderTab: React.FC<QueryBuilderTabProps> = ({
           <QueryBuilder
             fields={fields}
             onQueryChange={setQuery}
-            controlElements={{ valueEditor: QueryBuilderEditorCustomValue }}
+            controlElements={{ valueEditor: SearchQueryValue }}
             showCloneButtons
             showNotToggle
           />
@@ -92,4 +92,4 @@ const QueryBuilderTab: React.FC<QueryBuilderTabProps> = ({
   );
 };
 
-export default QueryBuilderTab;
+export default SearchQueryBuilder;
