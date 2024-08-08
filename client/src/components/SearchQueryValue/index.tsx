@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { Input, Button, VStack, Flex } from "@chakra-ui/react";
 
+import { EntityModel } from "@types";
+
 // Utility imports
 import { debounce } from "lodash";
-import { request } from "@database/functions"; // Adjust this import based on your project structure.
+import { request } from "@database/functions";
 import { ValueEditorProps } from "react-querybuilder";
-import { EntityModel } from "@types";
+import _ from "lodash";
 
 const SearchQueryValue = ({
   field,
@@ -17,7 +19,7 @@ const SearchQueryValue = ({
 
   // Function to fetch entities based on the search term
   const fetchEntities = debounce(async (query) => {
-    if (field === "origin" || field === "product") {
+    if (field === "origins" || field === "products") {
       const response = await request<EntityModel[]>(
         "POST",
         "/entities/searchByTerm",
@@ -32,7 +34,11 @@ const SearchQueryValue = ({
   }, 300);
 
   useEffect(() => {
-    if (inputValue.length > 2 && (field === "origin" || field === "product")) {
+    // useEffect hook for handling `origin` and `product` fields
+    if (
+      (field === "origins" || field === "products") &&
+      inputValue.length > 2
+    ) {
       fetchEntities(inputValue);
     } else {
       setSearchResults([]);
@@ -41,6 +47,11 @@ const SearchQueryValue = ({
 
   const handleInputChange = (event: any) => {
     setInputValue(event.target.value);
+
+    // If this is a standard text input, ensure `handleOnChange` is called
+    if (field !== "origins" && field !== "products") {
+      handleOnChange(event.target.value);
+    }
   };
 
   const handleSelectEntity = (entity: any) => {
@@ -52,7 +63,7 @@ const SearchQueryValue = ({
   return (
     <Flex>
       <Input
-        placeholder={`Search for ${field}`}
+        placeholder={_.capitalize(field)}
         value={inputValue}
         onChange={handleInputChange}
         minW={"300px"}

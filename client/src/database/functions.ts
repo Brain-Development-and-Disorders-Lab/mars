@@ -3,13 +3,7 @@ import _ from "lodash";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 
 // Custom types
-import {
-  AttributeModel,
-  EntityModel,
-  ProjectModel,
-  RequestMethod,
-  ServerResponse,
-} from "@types";
+import { RequestMethod, ServerResponse } from "@types";
 
 // Get the URL of the database
 import { API_URL, STATIC_URL, TOKEN_KEY } from "src/variables";
@@ -151,21 +145,4 @@ export const requestStatic = async <T>(
     message: "Recieved response from server",
     data: response.data,
   };
-};
-
-/**
- * Check if an Entity, Project, or Attribute still exists in database
- * @param {string} _id Identifier of the Entity, Project, or Attribute
- * @param {"entities" | "projects" | "attributes"} type Specify whether an Entity, Project, or Attribute is being checked
- * @returns {Promise<boolean>}
- */
-export const doesExist = async (
-  _id: string,
-  type: "entities" | "projects" | "attributes",
-): Promise<boolean> => {
-  const response = await request<EntityModel | AttributeModel | ProjectModel>(
-    "GET",
-    `/${type}/${_id}`,
-  );
-  return response.success;
 };

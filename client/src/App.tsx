@@ -36,7 +36,7 @@ import CreateEntity from "@pages/create/Entity";
 import CreateProject from "@pages/create/Project";
 
 // Page type - Other
-import Search from "@pages/search/Search";
+import Search from "@pages/Search";
 import Settings from "@pages/Settings";
 import Dashboard from "@pages/Dashboard";
 import Login from "@pages/Login";
