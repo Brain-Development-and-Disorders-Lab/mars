@@ -1,7 +1,6 @@
 // SearchBox.test.tsx
-
 import React from "react";
-import SearchBox from "./index";
+import SearchBox from "../src/components/SearchBox";
 import { shallow } from "enzyme";
 
 jest.mock("@devices/Scanner", () => ({
