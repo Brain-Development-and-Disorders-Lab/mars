@@ -16,6 +16,7 @@ import {
   Input,
   ModalFooter,
   FormControl,
+  Tag,
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 import Error from "@components/Error";
@@ -97,86 +98,106 @@ const Uploader = (props: {
         <Error />
       ) : (
         <>
-          <Modal isOpen={props.isOpen} onClose={props.onClose} isCentered>
+          <Modal
+            isOpen={props.isOpen}
+            onClose={props.onClose}
+            isCentered
+            size={"4xl"}
+          >
             <ModalOverlay />
-            <ModalContent p={"2"} gap={"4"} w={["lg", "xl", "2xl"]}>
-              <ModalHeader p={"2"}>Upload Attachment</ModalHeader>
+            <ModalContent p={"2"} gap={"0"}>
+              <ModalHeader px={"2"}>Upload Attachment</ModalHeader>
               <ModalCloseButton />
-              <ModalBody p={"2"}>
-                <Flex w={"100%"} align={"center"} justify={"center"}>
-                  <FormControl>
-                    <Flex
-                      direction={"column"}
-                      minH={"200px"}
-                      w={"100%"}
-                      align={"center"}
-                      justify={"center"}
-                      border={"2px"}
-                      borderStyle={"dashed"}
-                      borderColor={"gray.200"}
-                      rounded={"md"}
-                    >
-                      {_.isEqual(file, {}) ? (
-                        <Flex
-                          direction={"column"}
-                          w={"100%"}
-                          justify={"center"}
-                          align={"center"}
-                        >
-                          <Text fontWeight={"semibold"}>Drag file here</Text>
-                          <Text>or click to upload</Text>
-                        </Flex>
-                      ) : (
-                        <Flex
-                          direction={"column"}
-                          w={"100%"}
-                          justify={"center"}
-                          align={"center"}
-                        >
-                          <Text fontWeight={"semibold"}>{file.name}</Text>
-                        </Flex>
-                      )}
-                    </Flex>
-                    <Input
-                      type={"file"}
-                      h={"100%"}
-                      w={"100%"}
-                      position={"absolute"}
-                      top={"0"}
-                      left={"0"}
-                      opacity={"0"}
-                      aria-hidden={"true"}
-                      onChange={(event: ChangeEvent<HTMLInputElement>) => {
-                        if (event.target.files) {
-                          // Only accept image or PDF files
-                          if (
-                            _.includes(
-                              ["image/jpeg", "image/png", "application/pdf"],
-                              event.target.files[0].type,
-                            )
-                          ) {
-                            setFile(event.target.files[0]);
-                          } else {
-                            toast({
-                              title: "Warning",
-                              status: "warning",
-                              description:
-                                "Please upload an image (JPEG, PNG) or PDF file",
-                              duration: 4000,
-                              position: "bottom-right",
-                              isClosable: true,
-                            });
+              <ModalBody px={"2"}>
+                <Flex gap={"2"} direction={"column"}>
+                  <Flex gap={"1"} direction={"row"} align={"center"}>
+                    <Text>Supported file formats:</Text>
+                    <Tag colorScheme={"green"} size={"sm"}>
+                      PDF
+                    </Tag>
+                    <Tag colorScheme={"green"} size={"sm"}>
+                      JPEG
+                    </Tag>
+                    <Tag colorScheme={"green"} size={"sm"}>
+                      PNG
+                    </Tag>
+                  </Flex>
+                  <Flex w={"100%"} align={"center"} justify={"center"}>
+                    <FormControl>
+                      <Flex
+                        direction={"column"}
+                        minH={"50vh"}
+                        w={"100%"}
+                        align={"center"}
+                        justify={"center"}
+                        border={"2px"}
+                        borderStyle={"dashed"}
+                        borderColor={"gray.200"}
+                        bg={"gray.50"}
+                        rounded={"md"}
+                      >
+                        {_.isEqual(file, {}) ? (
+                          <Flex
+                            direction={"column"}
+                            w={"100%"}
+                            justify={"center"}
+                            align={"center"}
+                          >
+                            <Text fontWeight={"semibold"}>Drag file here</Text>
+                            <Text>or click to upload</Text>
+                          </Flex>
+                        ) : (
+                          <Flex
+                            direction={"column"}
+                            w={"100%"}
+                            justify={"center"}
+                            align={"center"}
+                          >
+                            <Text fontWeight={"semibold"}>{file.name}</Text>
+                          </Flex>
+                        )}
+                      </Flex>
+                      <Input
+                        type={"file"}
+                        h={"100%"}
+                        w={"100%"}
+                        position={"absolute"}
+                        top={"0"}
+                        left={"0"}
+                        opacity={"0"}
+                        aria-hidden={"true"}
+                        onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                          if (event.target.files) {
+                            // Only accept image or PDF files
+                            if (
+                              _.includes(
+                                ["image/jpeg", "image/png", "application/pdf"],
+                                event.target.files[0].type,
+                              )
+                            ) {
+                              setFile(event.target.files[0]);
+                            } else {
+                              toast({
+                                title: "Warning",
+                                status: "warning",
+                                description:
+                                  "Please upload an image (JPEG, PNG) or PDF file",
+                                duration: 4000,
+                                position: "bottom-right",
+                                isClosable: true,
+                              });
+                            }
                           }
-                        }
-                      }}
-                    />
-                  </FormControl>
+                        }}
+                      />
+                    </FormControl>
+                  </Flex>
                 </Flex>
               </ModalBody>
-
               <ModalFooter p={"2"}>
                 <Flex direction={"row"} w={"100%"} justify={"space-between"}>
                   <Button
+                    size={"sm"}
                     colorScheme={"red"}
                     rightIcon={<Icon name="cross" />}
                     variant={"outline"}
@@ -188,7 +209,8 @@ const Uploader = (props: {
                     Cancel
                   </Button>
                   <Button
-                    colorScheme={"blue"}
+                    size={"sm"}
+                    colorScheme={"green"}
                     isDisabled={_.isEqual(file, {}) || loading}
                     rightIcon={<Icon name={"upload"} />}
                     onClick={() => performUpload()}

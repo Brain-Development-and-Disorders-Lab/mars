@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Input, Box, Button, VStack } from "@chakra-ui/react";
+import { Input, Button, VStack, Flex } from "@chakra-ui/react";
 
 // Utility imports
 import { debounce } from "lodash";
@@ -7,7 +7,7 @@ import { request } from "@database/functions"; // Adjust this import based on yo
 import { ValueEditorProps } from "react-querybuilder";
 import { EntityModel } from "@types";
 
-const QueryBuilderEditorCustomValue = ({
+const SearchQueryValue = ({
   field,
   value,
   handleOnChange,
@@ -50,7 +50,7 @@ const QueryBuilderEditorCustomValue = ({
   };
 
   return (
-    <Box>
+    <Flex>
       <Input
         placeholder={`Search for ${field}`}
         value={inputValue}
@@ -61,22 +61,21 @@ const QueryBuilderEditorCustomValue = ({
       />
       {searchResults.length > 0 && (
         <VStack
-          spacing={2}
+          gap={2}
+          w={"100%"} // Ensures the stack takes full width of the parent
           p={2} // Adds padding around the stack for better spacing
-          bg="gray.50" // Sets a light background for the list
-          borderRadius="md" // Rounds the corners
-          shadow="sm" // Adds a subtle shadow for depth
-          width="100%" // Ensures the stack takes full width of the parent
+          bg={"gray.50"} // Sets a light background for the list
+          borderRadius={"md"} // Rounds the corners
         >
-          <Box width="full" p={2} textAlign="center" color="gray.600">
-            Please select an entity:
-          </Box>
+          <Flex w={"full"} p={2} textAlign={"center"} color={"gray.600"}>
+            Please select an Entity:
+          </Flex>
           {searchResults.map((entity: any) => (
             <Button
               key={entity._id}
               onClick={() => handleSelectEntity(entity)}
-              variant="ghost"
-              justifyContent="start" // Aligns text to the left
+              variant={"ghost"}
+              justifyContent={"start"} // Aligns text to the left
               width="full" // Button takes full width of its container
               _hover={{ bg: "gray.100" }} // Changes background on hover for better interaction
             >
@@ -85,8 +84,8 @@ const QueryBuilderEditorCustomValue = ({
           ))}
         </VStack>
       )}
-    </Box>
+    </Flex>
   );
 };
 
-export default QueryBuilderEditorCustomValue;
+export default SearchQueryValue;

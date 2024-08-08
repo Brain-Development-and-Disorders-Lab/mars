@@ -142,6 +142,7 @@ const Entities = () => {
               colorScheme={"gray"}
               rightIcon={<Icon name={"c_right"} />}
               onClick={() => navigate(`/entities/${info.getValue()}`)}
+              size={"sm"}
             >
               View
             </Button>
@@ -198,19 +199,19 @@ const Entities = () => {
       >
         <Flex
           w={"100%"}
-          p={"4"}
           direction={"row"}
           justify={"space-between"}
           align={"center"}
         >
-          <Flex align={"center"} gap={"4"} w={"100%"}>
-            <Icon name={"entity"} size={"lg"} />
-            <Heading fontWeight={"semibold"}>Entities</Heading>
+          <Flex align={"center"} gap={"2"} w={"100%"}>
+            <Icon name={"entity"} size={"md"} />
+            <Heading size={"md"}>Entities</Heading>
             <Spacer />
             <Button
               leftIcon={<Icon name={"add"} />}
               colorScheme={"green"}
               onClick={() => navigate("/create/entity")}
+              size={"sm"}
             >
               Create
             </Button>

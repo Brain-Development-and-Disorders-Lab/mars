@@ -70,7 +70,12 @@ const AccountMenu = () => {
             mr={"2"}
           >
             <Avatar name={token.name} size={"sm"} />
-            <Text size={"xs"} fontWeight={"semibold"} w={"100%"} align={"left"}>
+            <Text
+              size={"xs"}
+              fontWeight={"semibold"}
+              w={"100%"}
+              align={"center"}
+            >
               {token.name.split(" ").pop()}
             </Text>
             <Icon name={"c_down"} />
@@ -81,9 +86,7 @@ const AccountMenu = () => {
         <MenuList bg={"white"}>
           <MenuGroup>
             <Flex p={"4"} py={"2"} gap={"2"} direction={"column"}>
-              <Text fontWeight={"semibold"}>
-                Hello, {token.name.split(" ")[0]}!
-              </Text>
+              <Text fontWeight={"semibold"}>{token.name}</Text>
 
               <Flex align={"center"} wrap={"wrap"} gap={"2"}>
                 <Text

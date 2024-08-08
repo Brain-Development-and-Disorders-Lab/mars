@@ -14,6 +14,7 @@ import {
   ModalContent,
   ModalHeader,
   ModalOverlay,
+  Spacer,
   Tab,
   TabList,
   TabPanel,
@@ -53,7 +54,7 @@ import { useNavigate } from "react-router-dom";
 import FileSaver from "file-saver";
 import slugify from "slugify";
 import dayjs from "dayjs";
-import QueryBuilderTab from "./QueryBuilderTab";
+import QueryBuilderTab from "./SearchQueryBuilder";
 import { gql, useLazyQuery, useQuery } from "@apollo/client";
 
 const Search = () => {
@@ -225,6 +226,7 @@ const Search = () => {
         limit: 100,
       },
     });
+
     if (results.data.searchEntities) {
       setResults(results.data.searchEntities);
       if (results.data.searchEntities.length === 0) {
@@ -292,6 +294,7 @@ const Search = () => {
         <Linky
           id={info.row.original._id}
           type={"entities"}
+          size={"sm"}
           fallback={info.row.original.name}
         />
       ),
@@ -313,6 +316,7 @@ const Search = () => {
           <Flex justifyContent={"right"}>
             <Button
               key={`view-entity-${info.getValue()}`}
+              size={"sm"}
               colorScheme={"gray"}
               rightIcon={<Icon name={"c_right"} />}
               onClick={() => navigate(`/entities/${info.getValue()}`)}
@@ -381,41 +385,35 @@ const Search = () => {
 
   return (
     <Content isError={isError}>
-      <Flex
-        direction={"row"}
-        p={"4"}
-        rounded={"md"}
-        bg={"white"}
-        wrap={"wrap"}
-        gap={"6"}
-        justify={"center"}
-      >
+      <Flex direction={"column"}>
+        {/* Page header */}
         <Flex
-          w={"100%"}
-          p={"4"}
           direction={"row"}
-          justify={"space-between"}
+          p={"2"}
           align={"center"}
+          justify={"space-between"}
         >
-          {/* Page header */}
-          <Flex align={"center"} gap={"4"}>
-            <Icon name={"search"} size={"lg"} />
-            <Heading fontWeight={"semibold"}>Search</Heading>
+          <Flex align={"center"} gap={"2"} w={"100%"}>
+            <Icon name={"search"} size={"md"} />
+            <Heading size={"md"}>Search</Heading>
+            <Spacer />
+            <Button
+              size={"sm"}
+              rightIcon={<Icon name={"info"} />}
+              variant={"outline"}
+              onClick={onOpen}
+            >
+              Info
+            </Button>
           </Flex>
-          <Button
-            rightIcon={<Icon name={"info"} />}
-            variant={"outline"}
-            onClick={onOpen}
-          >
-            Info
-          </Button>
         </Flex>
 
         {/* Search components */}
         <Tabs
           w={"100%"}
+          size={"sm"}
+          colorScheme={"gray"}
           variant={"soft-rounded"}
-          colorScheme={"blue"}
           onChange={onTabChange}
         >
           <TabList p={"2"} gap={"2"}>
@@ -424,29 +422,29 @@ const Search = () => {
           </TabList>
           <TabPanels>
             {/* Text search */}
-            <TabPanel>
-              <Flex w={"100%"} direction={"column"} gap={"4"}>
-                <Flex direction={"row"} align={"center"} gap={"2"}>
-                  <Input
-                    value={query}
-                    placeholder={"Search..."}
-                    onChange={(event) => setQuery(event.target.value)}
-                    onKeyUp={(event) => {
-                      // Listen for "Enter" key when entering a query
-                      if (event.key === "Enter" && query !== "") {
-                        runSearch();
-                      }
-                    }}
-                  />
+            <TabPanel p={"2"}>
+              <Flex w={"100%"} direction={"row"} gap={"2"}>
+                <Input
+                  size={"sm"}
+                  value={query}
+                  placeholder={"Search..."}
+                  onChange={(event) => setQuery(event.target.value)}
+                  onKeyUp={(event) => {
+                    // Listen for "Enter" key when entering a query
+                    if (event.key === "Enter" && query !== "") {
+                      runSearch();
+                    }
+                  }}
+                />
 
-                  <IconButton
-                    aria-label={"Search"}
-                    icon={<Icon name={"search"} />}
-                    colorScheme={"green"}
-                    isDisabled={query === ""}
-                    onClick={() => runSearch()}
-                  />
-                </Flex>
+                <IconButton
+                  aria-label={"Search"}
+                  size={"sm"}
+                  icon={<Icon name={"search"} />}
+                  colorScheme={"green"}
+                  isDisabled={query === ""}
+                  onClick={() => runSearch()}
+                />
               </Flex>
             </TabPanel>
 
@@ -480,7 +478,7 @@ const Search = () => {
         </Tabs>
 
         {/* Search Results */}
-        <Flex gap={"4"} p={"4"} w={"100%"}>
+        <Flex gap={"2"} p={"2"} w={"100%"}>
           {isSearching ? (
             <Flex w={"full"} align={"center"} justify={"center"}>
               <Loading />
@@ -488,8 +486,8 @@ const Search = () => {
           ) : (
             hasSearched && (
               <Flex direction={"column"} w={"100%"} gap={"4"}>
-                <Heading size={"md"} fontWeight={"semibold"}>
-                  {results.length} search result
+                <Heading size={"sm"} fontWeight={"semibold"}>
+                  {results.length} result
                   {results.length > 1 || results.length === 0 ? "s" : ""}
                 </Heading>
                 <DataTable

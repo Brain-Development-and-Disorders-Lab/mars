@@ -15,8 +15,10 @@ describe("In entity page, edit attribute", () => {
     cy.contains("No Attributes").should("exist");
     cy.contains("button", "Edit").click();
 
-    // add attribute
-    cy.get("div:nth-child(1) > div.css-1ialerq > button").first().click();
+    // Add Attribute
+    cy.get(
+      "#root > div > div.css-17rivg8 > div > div > div.css-4u5rvs > div.css-i2bh61 > div.css-pon32a > div.css-1ialerq > button",
+    ).click();
     cy.get("#formName").type("Attribute Name");
     cy.get("#formDescription").type("Attribute Description");
     cy.get(".add-value-button-form").click();
@@ -33,15 +35,18 @@ describe("In entity page, edit attribute", () => {
 
     cy.contains("No Attributes").should("not.exist");
     cy.reload();
-    // check if attribute is added
+
+    // Check that Attribute is added
     cy.contains("No Attributes").should("not.exist");
 
-    // edit attribute
+    // Edit Attribute
     cy.contains("button", "Edit").click();
 
+    // Delete the Attribute
     cy.get('button[aria-label="Delete attribute"]').click();
     cy.contains("button", "Done").click();
-    // check if attribute is deleted
+
+    // Check that Attribute is deleted
     cy.contains("No Attributes").should("exist");
     cy.reload();
     cy.contains("No Attributes").should("exist");

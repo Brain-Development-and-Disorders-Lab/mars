@@ -141,9 +141,14 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
             direction={"column"}
             justify={"center"}
             align={"center"}
-            gap={"4"}
+            gap={"6"}
           >
-            <Heading fontWeight={"semibold"}>Storacuity</Heading>
+            <Flex direction={"row"} gap={"2"} align={"center"}>
+              <Image src="/Favicon.png" boxSize={"64px"} />
+              <Heading size={"lg"} fontWeight={"semibold"}>
+                Storacuity
+              </Heading>
+            </Flex>
             <Text align={"center"}>
               Log in or create an account with your ORCID iD.
             </Text>

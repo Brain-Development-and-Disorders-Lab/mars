@@ -110,100 +110,110 @@ const Attribute = () => {
 
   return (
     <Content isLoaded={!loading}>
-      <Flex
-        direction={"column"}
-        alignSelf={"center"}
-        gap={"6"}
-        w={"100%"}
-        h={"100%"}
-        p={"4"}
-        bg={"white"}
-        maxW={"4xl"}
-      >
+      <Flex direction={"column"}>
         {/* Page header */}
-        <Flex direction={"row"} align={"center"} justify={"space-between"}>
-          <Heading fontWeight={"semibold"} size={"lg"}>
-            Create a new template Attribute
-          </Heading>
-          <Button
-            rightIcon={<Icon name={"info"} />}
-            variant={"outline"}
-            onClick={onOpen}
-          >
-            Info
-          </Button>
+        <Flex
+          direction={"row"}
+          p={"2"}
+          align={"center"}
+          justify={"space-between"}
+        >
+          <Flex align={"center"} gap={"2"} w={"100%"}>
+            <Icon name={"attribute"} size={"md"} />
+            <Heading size={"md"}>Create Template</Heading>
+            <Spacer />
+            <Button
+              size={"sm"}
+              rightIcon={<Icon name={"info"} />}
+              variant={"outline"}
+              onClick={onOpen}
+            >
+              Info
+            </Button>
+          </Flex>
         </Flex>
 
-        <Flex direction={"column"} gap={"4"}>
-          <FormControl isRequired>
-            <FormLabel>Attribute Name</FormLabel>
-            <Input
-              w={["100%", "md"]}
-              placeholder={"Name"}
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              required
-            />
-            {isNameError && (
-              <FormErrorMessage>
-                A name must be specified for the Attribute.
-              </FormErrorMessage>
-            )}
-            <FormHelperText>
-              Provide a concise and descriptive name for the template Attribute.
-            </FormHelperText>
-          </FormControl>
+        <Flex direction={"row"} gap={"0"} wrap={"wrap"}>
+          <Flex
+            direction={"column"}
+            p={"2"}
+            pt={{ base: "0", lg: "2" }}
+            gap={"2"}
+            grow={"1"}
+            basis={"50%"}
+            rounded={"md"}
+          >
+            <Flex
+              direction={"column"}
+              p={"2"}
+              border={"1px"}
+              borderColor={"gray.200"}
+              rounded={"md"}
+            >
+              <FormControl isRequired>
+                <FormLabel fontSize={"sm"}>Template Name</FormLabel>
+                <Input
+                  placeholder={"Name"}
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                  required
+                />
+                {isNameError && (
+                  <FormErrorMessage>
+                    A name must be specified for the Template.
+                  </FormErrorMessage>
+                )}
+                <FormHelperText>
+                  Provide a concise and descriptive name for the Template.
+                </FormHelperText>
+              </FormControl>
+            </Flex>
+          </Flex>
 
-          <FormControl isRequired>
-            <FormLabel>Attribute Description</FormLabel>
-            <Textarea
-              w={["100%", "lg"]}
-              value={description}
-              placeholder={"Description"}
-              onChange={(event) => setDescription(event.target.value)}
-            />
-            {isDescriptionError && (
-              <FormErrorMessage>
-                A description should be provided for the Attribute.
-              </FormErrorMessage>
-            )}
-            <FormHelperText>
-              Describe the purpose and contents of this template Attribute.
-            </FormHelperText>
-          </FormControl>
+          <Flex
+            direction={"column"}
+            p={"2"}
+            pl={{ base: "2", lg: "0" }}
+            pt={{ base: "0", lg: "2" }}
+            gap={"2"}
+            grow={"1"}
+            basis={"50%"}
+            rounded={"md"}
+          >
+            <Flex
+              direction={"column"}
+              p={"2"}
+              gap={"2"}
+              rounded={"md"}
+              border={"1px"}
+              borderColor={"gray.200"}
+            >
+              <FormControl isRequired>
+                <FormLabel>Template Description</FormLabel>
+                <Textarea
+                  value={description}
+                  placeholder={"Description"}
+                  onChange={(event) => setDescription(event.target.value)}
+                />
+                {isDescriptionError && (
+                  <FormErrorMessage>
+                    A description should be provided for the Template.
+                  </FormErrorMessage>
+                )}
+                <FormHelperText>
+                  Describe the purpose and contents of this Template.
+                </FormHelperText>
+              </FormControl>
+            </Flex>
+          </Flex>
         </Flex>
 
-        <Flex w={"100%"} h={"100%"}>
-          <FormControl>
-            <FormLabel>Values</FormLabel>
-            <Values viewOnly={false} values={values} setValues={setValues} />
-            <FormHelperText>
-              Add Values to the template Attribute. Values must be named, but
-              they are not required to have data associated with them. Data can
-              be specified if desired.
-            </FormHelperText>
-          </FormControl>
-        </Flex>
-
-        {/* Action buttons */}
-        <Flex direction={"row"} wrap={"wrap"} gap={"6"} p={"4"}>
-          <Button
-            colorScheme={"red"}
-            variant={"outline"}
-            rightIcon={<Icon name={"cross"} />}
-            onClick={() => navigate("/attributes")}
-          >
-            Cancel
-          </Button>
-          <Spacer />
-          <Button
-            colorScheme={"green"}
-            rightIcon={<Icon name={"check"} />}
-            onClick={onSubmit}
-            isDisabled={isDetailsError || isValueError || isSubmitting}
-          >
-            Finish
-          </Button>
+        <Flex w={"100%"} p={"2"} gap={"2"} direction={"column"}>
+          <Text>
+            Add Values to the Template. Values must be named, but they are not
+            required to have data specified.
+          </Text>
+          <Values viewOnly={false} values={values} setValues={setValues} />
         </Flex>
       </Flex>
 
@@ -287,6 +297,32 @@ const Attribute = () => {
           </ModalBody>
         </ModalContent>
       </Modal>
+
+      {/* Place the action buttons at the bottom of the screen on desktop */}
+      <Spacer />
+
+      {/* Action buttons */}
+      <Flex direction={"row"} wrap={"wrap"} p={"2"}>
+        <Button
+          size={"sm"}
+          colorScheme={"red"}
+          variant={"outline"}
+          rightIcon={<Icon name={"cross"} />}
+          onClick={() => navigate("/attributes")}
+        >
+          Cancel
+        </Button>
+        <Spacer />
+        <Button
+          size={"sm"}
+          colorScheme={"green"}
+          rightIcon={<Icon name={"check"} />}
+          onClick={onSubmit}
+          isDisabled={isDetailsError || isValueError || isSubmitting}
+        >
+          Finish
+        </Button>
+      </Flex>
     </Content>
   );
 };

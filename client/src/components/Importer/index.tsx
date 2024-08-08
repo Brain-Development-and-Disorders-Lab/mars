@@ -36,7 +36,7 @@ import {
 import Icon from "@components/Icon";
 import Error from "@components/Error";
 import Attribute from "@components/AttributeCard";
-import { Information, Warning } from "@components/Label";
+import { Warning } from "@components/Label";
 
 // Custom and existing types
 import { AttributeModel, AttributeCardProps, IGenericItem } from "@types";
@@ -61,7 +61,7 @@ const Importer = (props: {
   // File states
   const [file, setFile] = useState({} as File);
   const [fileType, setFileType] = useState("");
-  const [jsonData, setJsonData] = useState(null); // State to store parsed JSON data
+  const [objectData, setObjectData] = useState(null); // State to store parsed JSON data
 
   // Page states
   const [isLoaded, setIsLoaded] = useState(false);
@@ -198,10 +198,10 @@ const Importer = (props: {
    * Read a JSON file and update `Importer` state, raising errors if invalid
    * @param {File} file JSON file instance
    */
-  const handleJsonFile = (file: File) => {
+  const validObjectFile = async (file: File) => {
     const reader = new FileReader();
-    reader.onload = (e) => {
-      if (_.isNull(e.target?.result)) {
+    reader.onload = (event) => {
+      if (_.isNull(event.target)) {
         toast({
           title: "Error",
           status: "error",
@@ -213,15 +213,15 @@ const Importer = (props: {
         return;
       }
 
-      // Attempt to parse the JSON file
       try {
-        const data = JSON.parse(e.target?.result as string);
-        setJsonData(data); // Set your JSON data to state
+        // Attempt to parse the JSON file
+        const data = JSON.parse(event.target.result as string);
+        setObjectData(data); // Set your JSON data to state
       } catch (error) {
         toast({
           title: "Error",
           status: "error",
-          description: "Invalid JSON file",
+          description: "Error while parsing JSON file",
           duration: 4000,
           position: "bottom-right",
           isClosable: true,
@@ -230,48 +230,6 @@ const Importer = (props: {
     };
 
     reader.readAsText(file);
-  };
-
-  /**
-   * Utility function to access and assign existing JSON data with exisitng user selections. Loads existing Origin and
-   * Product Entities, and populates the existing Projects field.
-   * @returns Short-circuit when function called without actual JSON data
-   */
-  const updateJsonDataWithUserSelections = () => {
-    if (!jsonData) {
-      // No JSON data to update (likely CSV file)
-      return;
-    }
-
-    // Clone the jsonData to avoid direct state mutation
-    let updatedJsonData = _.cloneDeep(jsonData) as any;
-
-    if (updatedJsonData._id) {
-      // Single JSON document, update only one by placing in array
-      updatedJsonData = [updatedJsonData];
-    } else {
-      // Multiple exported JSON files
-      updatedJsonData = (updatedJsonData as any)?.entities;
-    }
-
-    // Update the jsonData with user selections
-    // This is a simplified example, you might need to adjust it based on your actual data structure
-    if (updatedJsonData && Array.isArray(updatedJsonData)) {
-      (updatedJsonData as any).forEach((entity: any) => {
-        if (!_.isEqual(projectField, "")) {
-          // Add or update the 'project' field in the entity
-          entity.projects = [projectField];
-        } else {
-          // Clear the `projects` field
-          entity.projects = [];
-        }
-      });
-    }
-
-    // Update the JSON state with the modified jsonData
-    if (updatedJsonData) {
-      setJsonData({ entities: updatedJsonData } as any);
-    }
   };
 
   /**
@@ -292,7 +250,7 @@ const Importer = (props: {
 
     if (_.isEqual(fileType, "application/json")) {
       // Handle JSON data separately
-      handleJsonFile(file);
+      await validObjectFile(file);
     } else if (_.isEqual(fileType, "text/csv")) {
       // Mutation query with CSV file
       setContinueLoading(prepareColumnsLoading);
@@ -303,7 +261,7 @@ const Importer = (props: {
       });
       setContinueLoading(prepareColumnsLoading);
 
-      if (prepareColumnsError) {
+      if (prepareColumnsError || _.isUndefined(response.data)) {
         toast({
           title: "Import Error",
           status: "error",
@@ -315,51 +273,27 @@ const Importer = (props: {
       }
 
       if (response.data) {
-        if (_.isEqual(fileType, "text/csv")) {
-          toast({
-            title: "Success",
-            status: "success",
-            description: "Successfully parsed CSV-formatted file.",
-            duration: 2000,
-            position: "bottom-right",
-            isClosable: true,
-          });
-          if (response.data.prepareColumns.length > 0) {
-            // Filter columns to exclude columns with no header ("__EMPTY...")
-            const filteredColumnSet = response.data.prepareColumns.filter(
-              (column: string) => {
-                return !_.startsWith(column, "__EMPTY");
-              },
-            );
-            setColumns(filteredColumnSet);
-          }
+        toast({
+          title: "Success",
+          status: "success",
+          description: "Successfully parsed CSV-formatted file.",
+          duration: 2000,
+          position: "bottom-right",
+          isClosable: true,
+        });
 
-          // Setup the next stage of CSV import
-          await setupMapping();
-        } else if (_.isEqual(fileType, "application/json")) {
-          toast({
-            title: "Success",
-            status: "success",
-            description: "Successfully imported JSON file.",
-            duration: 2000,
-            position: "bottom-right",
-            isClosable: true,
-          });
-
-          // In the case of a JSON file, it has been uploaded and we can refresh
-          navigate(0);
-        } else {
-          toast({
-            title: "Import Error",
-            status: "error",
-            description: "Error while importing file",
-            duration: 4000,
-            position: "bottom-right",
-            isClosable: true,
-          });
+        if (response.data.prepareColumns.length > 0) {
+          // Filter columns to exclude columns with no header ("__EMPTY...")
+          const filteredColumnSet = response.data.prepareColumns.filter(
+            (column: string) => {
+              return !_.startsWith(column, "__EMPTY");
+            },
+          );
+          setColumns(filteredColumnSet);
         }
-        // Reset the loading state, but preserve the disabled state
-        setContinueLoading(false);
+
+        // Setup the next stage of CSV import
+        await setupMapping();
       }
     }
   };
@@ -453,6 +387,7 @@ const Importer = (props: {
     return (
       <Select
         id={id}
+        size={"sm"}
         placeholder={"Select Column"}
         value={value}
         onChange={(event) => setValue(event.target.value)}
@@ -498,23 +433,16 @@ const Importer = (props: {
    */
   const onContinueClick = async () => {
     if (_.isEqual(interfacePage, "upload")) {
-      setActiveStep(1);
-
       // Run setup for import and mapping
       await setupImport();
       await setupMapping();
 
       // Proceed to the next page
+      setActiveStep(1);
       setInterfacePage("details");
     } else if (_.isEqual(interfacePage, "details")) {
-      setActiveStep(2);
-
-      if (_.isEqual(fileType, "application/json")) {
-        // If JSON, merge any specified details with the existing JSON data
-        updateJsonDataWithUserSelections();
-      }
-
       // Proceed to the next page
+      setActiveStep(2);
       setInterfacePage("mapping");
     } else if (_.isEqual(interfacePage, "mapping")) {
       // Run the final import function depending on file type
@@ -563,7 +491,7 @@ const Importer = (props: {
     setContinueLoading(false);
     setFile({} as File);
     setFileType("");
-    setJsonData(null);
+    setObjectData(null);
 
     // Reset data state
     setColumns([]);
@@ -586,10 +514,10 @@ const Importer = (props: {
           size={"4xl"}
         >
           <ModalOverlay />
-          <ModalContent p={"2"} gap={"2"}>
+          <ModalContent p={"2"} gap={"0"}>
             <ModalHeader p={"2"}>Import Entities</ModalHeader>
             <ModalCloseButton />
-            <ModalBody p={"2"}>
+            <ModalBody px={"2"}>
               {/* Stepper progress indicator */}
               <Flex pb={"4"}>
                 <Stepper index={activeStep} w={"100%"}>
@@ -622,10 +550,10 @@ const Importer = (props: {
                   align={"center"}
                   justify={"center"}
                 >
-                  <Flex w={"100%"} py={"2"} justify={"left"}>
-                    <Information
-                      text={"Storacuity supports CSV-formatted or JSON files."}
-                    />
+                  <Flex w={"100%"} py={"2"} justify={"left"} gap={"1"}>
+                    <Text>Supported file formats:</Text>
+                    <Tag colorScheme={"green"}>CSV</Tag>
+                    <Tag colorScheme={"green"}>JSON</Tag>
                   </Flex>
                   <FormControl>
                     <Flex
@@ -703,13 +631,10 @@ const Importer = (props: {
 
               {/* Step 2: Simple mapping, details */}
               {_.isEqual(interfacePage, "details") && (
-                <Flex w={"100%"} direction={"column"} gap={"4"}>
+                <Flex w={"100%"} direction={"column"} gap={"2"}>
                   {columns.length > 0 && (
                     <Flex direction={"column"} gap={"2"} wrap={"wrap"}>
-                      <Flex w={"100%"} py={"2"} justify={"left"} gap={"2"}>
-                        <Information
-                          text={`Found ${columns.length} columns.`}
-                        />
+                      <Flex w={"100%"} justify={"left"} gap={"2"}>
                         {fileType === "text/csv" && (
                           <Warning
                             text={`Origins and Products cannot be imported from CSV files.`}
@@ -718,7 +643,6 @@ const Importer = (props: {
                       </Flex>
                       <Flex
                         w={"100%"}
-                        py={"2"}
                         gap={"2"}
                         align={"center"}
                         justify={"left"}
@@ -726,7 +650,7 @@ const Importer = (props: {
                       >
                         <Text
                           fontWeight={"semibold"}
-                          size={"xs"}
+                          fontSize={"sm"}
                           color={"gray.600"}
                         >
                           Columns:
@@ -748,8 +672,8 @@ const Importer = (props: {
                     </Flex>
                   )}
 
-                  {!jsonData && (
-                    <Flex direction={"row"} gap={"4"}>
+                  {!objectData && (
+                    <Flex direction={"row"} gap={"2"}>
                       <FormControl
                         isRequired
                         isInvalid={_.isEqual(nameField, "")}
@@ -778,7 +702,7 @@ const Importer = (props: {
                     </Flex>
                   )}
 
-                  <Flex direction={"row"} gap={"4"}>
+                  <Flex direction={"row"} gap={"2"}>
                     <FormControl>
                       <FormLabel>Owner</FormLabel>
                       <Tooltip
@@ -786,13 +710,14 @@ const Importer = (props: {
                           "Initially, only you will have access to imported Entities"
                         }
                       >
-                        <Input value={ownerField} disabled />
+                        <Input value={ownerField} size={"sm"} disabled />
                       </Tooltip>
                     </FormControl>
                     <FormControl>
                       <FormLabel>Project</FormLabel>
                       <Select
                         id={"import_projects"}
+                        size={"sm"}
                         placeholder={"Select Project"}
                         value={projectField}
                         onChange={(event) =>
@@ -817,18 +742,13 @@ const Importer = (props: {
 
               {/* Step 3: Advanced mapping */}
               {_.isEqual(interfacePage, "mapping") && (
-                <Flex w={"100%"} direction={"column"} gap={"4"}>
+                <Flex w={"100%"} direction={"column"} gap={"2"}>
                   <Text>
                     Columns can be assigned to Values within Attributes. When
                     adding Values to an Attribute, select the column containing
                     the data for each Value. Use an existing Template Attribute
                     from the drop-down or create a new Attribute.
                   </Text>
-                  <Flex w={"100%"} gap={"2"}>
-                    <Information
-                      text={'All dates must use "MM/DD/YYYY" format'}
-                    />
-                  </Flex>
                   <Flex
                     direction={"row"}
                     gap={"2"}
@@ -846,6 +766,7 @@ const Importer = (props: {
                         }
                       >
                         <Select
+                          size={"sm"}
                           placeholder={"Select Template Attribute"}
                           isDisabled={attributes.length === 0}
                           onChange={(event) => {
@@ -889,6 +810,7 @@ const Importer = (props: {
                     </FormControl>
 
                     <Button
+                      size={"sm"}
                       leftIcon={<Icon name={"add"} />}
                       colorScheme={"green"}
                       onClick={() => {
@@ -931,6 +853,7 @@ const Importer = (props: {
             <ModalFooter p={"2"}>
               <Flex direction={"row"} w={"100%"} justify={"space-between"}>
                 <Button
+                  size={"sm"}
                   colorScheme={"red"}
                   rightIcon={<Icon name="cross" />}
                   variant={"outline"}
@@ -964,12 +887,13 @@ const Importer = (props: {
                 </Button> */}
 
                 <Button
+                  size={"sm"}
                   colorScheme={
                     _.isEqual(interfacePage, "mapping") ? "green" : "blue"
                   }
                   rightIcon={
                     _.isEqual(interfacePage, "upload") ? (
-                      <Icon name={"upload"} />
+                      <Icon name={"c_right"} />
                     ) : _.isEqual(interfacePage, "details") ? (
                       <Icon name={"c_right"} />
                     ) : (
@@ -982,7 +906,7 @@ const Importer = (props: {
                   isLoading={continueLoading}
                   loadingText={"Processing"}
                 >
-                  {_.isEqual(interfacePage, "upload") && "Upload"}
+                  {_.isEqual(interfacePage, "upload") && "Continue"}
                   {_.isEqual(interfacePage, "details") && "Continue"}
                   {_.isEqual(interfacePage, "mapping") && "Finish"}
                 </Button>

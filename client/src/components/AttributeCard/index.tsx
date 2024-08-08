@@ -11,6 +11,7 @@ import {
   FormControl,
   FormLabel,
   Input,
+  Spacer,
   Textarea,
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
@@ -48,17 +49,17 @@ const AttributeCard = (props: AttributeCardProps) => {
   };
 
   return (
-    <Card variant={"outline"} p={"2"} w={"100%"}>
+    <Card variant={"outline"} w={"100%"}>
       <CardBody p={"2"}>
-        <Flex direction={"column"}>
-          <Flex direction={"row"} gap={"4"} wrap={["wrap", "nowrap"]}>
+        <Flex direction={"column"} gap={"2"}>
+          <Flex direction={"row"} gap={"2"} wrap={["wrap", "nowrap"]}>
             <FormControl isRequired isInvalid={isNameError}>
               <FormLabel>Attribute Name</FormLabel>
               <Input
+                size={"sm"}
                 placeholder={"Name"}
                 value={name}
                 isDisabled={finished}
-                w={"xs"}
                 onChange={(event) => setName(event.target.value)}
               />
             </FormControl>
@@ -66,6 +67,7 @@ const AttributeCard = (props: AttributeCardProps) => {
             <FormControl isRequired isInvalid={isDescriptionError}>
               <FormLabel>Attribute Description</FormLabel>
               <Textarea
+                size={"sm"}
                 value={description}
                 placeholder={"Description"}
                 isDisabled={finished}
@@ -95,34 +97,36 @@ const AttributeCard = (props: AttributeCardProps) => {
         </Flex>
       </CardBody>
 
-      <CardFooter>
-        <Flex direction={"row"} gap={"2"} grow={"1"} justify={"right"}>
-          <Button
-            colorScheme={"red"}
-            onClick={() => {
-              if (props.onRemove) {
-                props.onRemove(props._id);
-              }
-            }}
-            rightIcon={<Icon name={"delete"} />}
-          >
-            Remove
-          </Button>
+      <CardFooter p={"2"}>
+        <Button
+          size={"sm"}
+          colorScheme={"red"}
+          onClick={() => {
+            if (props.onRemove) {
+              props.onRemove(props._id);
+            }
+          }}
+          rightIcon={<Icon name={"delete"} />}
+        >
+          Remove
+        </Button>
 
-          <Button
-            rightIcon={<Icon name={"check"} />}
-            colorScheme={"green"}
-            onClick={() => {
-              setFinished(true);
-              if (props.onUpdate) {
-                props.onUpdate(attributeCardData);
-              }
-            }}
-            isDisabled={finished || !validAttributes}
-          >
-            Save
-          </Button>
-        </Flex>
+        <Spacer />
+
+        <Button
+          size={"sm"}
+          rightIcon={<Icon name={"check"} />}
+          colorScheme={"green"}
+          onClick={() => {
+            setFinished(true);
+            if (props.onUpdate) {
+              props.onUpdate(attributeCardData);
+            }
+          }}
+          isDisabled={finished || !validAttributes}
+        >
+          Save
+        </Button>
       </CardFooter>
     </Card>
   );

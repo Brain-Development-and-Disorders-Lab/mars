@@ -14,7 +14,7 @@ import { useNavigate } from "react-router-dom";
 import _ from "lodash";
 import { gql, useLazyQuery } from "@apollo/client";
 
-const DEFAULT_LINKY_LABEL_LENGTH = 10; // Default number of shown characters
+const DEFAULT_LINKY_LABEL_LENGTH = 20; // Default number of shown characters
 
 const Linky = (props: LinkyProps) => {
   const navigate = useNavigate();
@@ -68,7 +68,7 @@ const Linky = (props: LinkyProps) => {
 
     if (props.type === "attributes") {
       const response = await getAttribute({ variables: { _id: props.id } });
-      if (response.error) {
+      if (response.error || _.isUndefined(response.data)) {
         setShowDeleted(true);
         setTooltipLabel("Deleted or Private");
       } else {
@@ -77,7 +77,7 @@ const Linky = (props: LinkyProps) => {
       }
     } else if (props.type === "entities") {
       const response = await getEntity({ variables: { _id: props.id } });
-      if (response.error) {
+      if (response.error || _.isUndefined(response.data)) {
         setShowDeleted(true);
         setTooltipLabel("Deleted or Private");
       } else {
@@ -86,7 +86,7 @@ const Linky = (props: LinkyProps) => {
       }
     } else if (props.type === "projects") {
       const response = await getProject({ variables: { _id: props.id } });
-      if (response.error) {
+      if (response.error || _.isUndefined(response.data)) {
         setShowDeleted(true);
         setTooltipLabel("Deleted or Private");
       } else {

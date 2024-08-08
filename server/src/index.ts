@@ -32,6 +32,7 @@ import { Context } from "@types";
 // GraphQL uploads
 import GraphQLUpload from "graphql-upload/GraphQLUpload.mjs";
 import graphqlUploadExpress from "graphql-upload/graphqlUploadExpress.mjs";
+import { ObjectResolver } from "./resolvers/Object";
 
 // Set logging level
 consola.level =
@@ -74,6 +75,7 @@ const startServer = async () => {
       DataResolvers,
       DateResolver,
       EntitiesResolvers,
+      ObjectResolver,
       ProjectsResolvers,
       UsersResolvers,
     ],

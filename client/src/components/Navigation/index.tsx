@@ -5,6 +5,7 @@ import React from "react";
 import {
   Flex,
   IconButton,
+  Image,
   Button,
   useDisclosure,
   Heading,
@@ -47,7 +48,15 @@ const Navigation = () => {
         w={"100%"}
       >
         {/* Heading */}
-        <Flex direction={"row"} gap={"2"} p={"1"} mt={"2"} align={"center"}>
+        <Flex
+          direction={"row"}
+          gap={"2"}
+          p={"1"}
+          mt={"2"}
+          align={"center"}
+          justify={"center"}
+        >
+          <Image src="/Favicon.png" boxSize={"36px"} />
           <Heading fontWeight={"semibold"} size={"md"}>
             Storacuity
           </Heading>
@@ -93,7 +102,10 @@ const Navigation = () => {
               w={"100%"}
               justifyContent={"left"}
               variant={
-                _.includes(location.pathname, "/project") ? "solid" : "ghost"
+                _.includes(location.pathname, "/project") &&
+                !_.includes(location.pathname, "/create")
+                  ? "solid"
+                  : "ghost"
               }
               onClick={() => navigate("/projects")}
             >
@@ -108,7 +120,10 @@ const Navigation = () => {
               w={"100%"}
               justifyContent={"left"}
               variant={
-                _.includes(location.pathname, "/entit") ? "solid" : "ghost"
+                _.includes(location.pathname, "/entit") &&
+                !_.includes(location.pathname, "/create")
+                  ? "solid"
+                  : "ghost"
               }
               onClick={() => navigate("/entities")}
             >
@@ -122,7 +137,10 @@ const Navigation = () => {
               w={"100%"}
               justifyContent={"left"}
               variant={
-                _.includes(location.pathname, "/attribute") ? "solid" : "ghost"
+                _.includes(location.pathname, "/attribute") &&
+                !_.includes(location.pathname, "/create")
+                  ? "solid"
+                  : "ghost"
               }
               onClick={() => navigate("/attributes")}
             >
@@ -169,20 +187,19 @@ const Navigation = () => {
 
       {/* Icon to show menu in responsive context */}
       <Flex
-        p={"1"}
         display={{ lg: "none" }}
         justify={"left"}
         alignContent={"center"}
-        h={"6vh"}
+        h={"5vh"}
         w={"100%"}
-        bg={"white"}
+        bg={"#fafafa"}
       >
         <Menu>
           <MenuButton
             as={IconButton}
             aria-label={"Open Menu"}
             display={{ base: "flex", lg: "none" }}
-            size={"md"}
+            size={"sm"}
             justifyContent={"center"}
             icon={<Icon name={"list"} />}
           />
@@ -214,9 +231,9 @@ const Navigation = () => {
               </MenuItem>
               <MenuItem
                 icon={<Icon name={"attribute"} />}
-                onClick={() => navigate("/attribute")}
+                onClick={() => navigate("/attributes")}
               >
-                Attribute
+                Attributes
               </MenuItem>
             </MenuGroup>
             <MenuGroup title={"Tools"}>

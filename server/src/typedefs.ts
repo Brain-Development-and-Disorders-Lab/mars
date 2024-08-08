@@ -3,6 +3,7 @@
  */
 export const typedefs = `#graphql
   scalar Date
+  scalar Object
   scalar Upload
 
   # "Item" type containing minimal data shared with many stored records
@@ -66,7 +67,7 @@ export const typedefs = `#graphql
     _id: String!
     name: String
     type: String
-    data: String
+    data: Object
   }
 
   # "ValueInput" input
@@ -74,7 +75,7 @@ export const typedefs = `#graphql
     _id: String!
     name: String
     type: String
-    data: String
+    data: Object
   }
 
   # "Attribute" type

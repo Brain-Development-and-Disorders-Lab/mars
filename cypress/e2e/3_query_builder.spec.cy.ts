@@ -13,15 +13,12 @@ describe("search query builder", () => {
     cy.contains("button", "Query Builder").click();
     // result array should be empty/not exist
     cy.get(".css-1ofqig9 > .chakra-heading").should("not.exist");
-    cy.contains("button", "+Rule").click();
-    cy.get('[data-testid="operators"]').select("contains");
+    cy.contains("button", "Rule").click();
+    cy.get(".rule-operators").select("contains");
     cy.get('[data-testid="value-editor"]').type("box");
     // press search button
     cy.get('[aria-label="Run Query"]').click();
     // result array should exist
-    cy.get(".css-aybym5 > .chakra-heading").should(
-      "contain.text",
-      "search results",
-    );
+    cy.get(".css-aybym5 > .chakra-heading").should("contain.text", "0 results");
   });
 });

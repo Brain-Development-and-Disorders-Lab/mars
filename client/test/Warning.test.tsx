@@ -1,8 +1,5 @@
-// Warning.test.tsx
-
 import React from "react";
-// import { render, screen } from '@testing-library/react';
-import { Warning } from "./index";
+import { Warning } from "../src/components/Label";
 import { shallow } from "enzyme";
 
 describe("Warning Component", () => {

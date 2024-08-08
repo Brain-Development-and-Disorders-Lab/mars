@@ -199,12 +199,12 @@ export class Entities {
     };
 
     // Description
-    if (updated.description) {
+    if (!_.isUndefined(updated.description)) {
       update.$set.description = updated.description;
     }
 
     // Projects
-    if (updated.projects) {
+    if (!_.isUndefined(updated.projects)) {
       const addProjects = _.difference(updated.projects, entity.projects);
       for (let project of addProjects) {
         await this.addProject(updated._id, project);
@@ -219,7 +219,10 @@ export class Entities {
     }
 
     // Origins
-    if (updated.associations && updated.associations.origins) {
+    if (
+      !_.isUndefined(updated.associations) &&
+      !_.isUndefined(updated.associations.origins)
+    ) {
       const addOrigins = _.difference(
         updated.associations.origins,
         entity.associations.origins,
@@ -246,7 +249,10 @@ export class Entities {
     }
 
     // Products
-    if (updated.associations && updated.associations.products) {
+    if (
+      !_.isUndefined(updated.associations) &&
+      !_.isUndefined(updated.associations.products)
+    ) {
       const addProducts = _.difference(
         updated.associations.products,
         entity.associations.products,
@@ -273,7 +279,7 @@ export class Entities {
     }
 
     // Attributes
-    if (updated.attributes) {
+    if (!_.isUndefined(updated.attributes)) {
       const addAttributes = _.difference(updated.attributes, entity.attributes);
       for (let attribute of addAttributes) {
         await this.addAttribute(updated._id, attribute);

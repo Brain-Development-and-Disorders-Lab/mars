@@ -7,14 +7,97 @@ a:hover {
   text-decoration: underline;
 }
 
-/* react-query default css */
-
+/* CSS for React Query Builder */
 .svg-font-color svg > path {
   fill: var(--ifm-font-color-base);
 }
 
 .queryBuilder {
+  display: flex;
   min-width: 420px;
+  padding: var(--chakra-space-2);
+  border-radius: var(--chakra-radii-md);
+  border: var(--chakra-borders-1px);
+  border-color: var(--chakra-colors-gray-200);
+}
+
+.queryBuilder {
+  select,
+  input {
+    height: var(--input-height);
+    --input-font-size: var(--chakra-fontSizes-sm);
+    --input-border-radius: var(--chakra-radii-sm);
+    --input-height: var(--chakra-sizes-8);
+    background: var(--chakra-colors-white);
+  }
+  button {
+    display: inline-flex;
+    font-size: var(--chakra-fontSizes-sm);
+    height: var(--chakra-sizes-8);
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.ruleGroup {
+  display: flex;
+  width: 100%;
+  gap: var(--chakra-space-2);
+  flex-direction: column;
+}
+
+.ruleGroup-header {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: var(--chakra-space-2);
+
+  .ruleGroup-notToggle {
+    gap: var(--chakra-space-2);
+  }
+
+  .ruleGroup-addRule,
+  .ruleGroup-addGroup {
+    background: var(--chakra-colors-blue-500);
+    color: var(--chakra-colors-white);
+    svg {
+      color: var(--chakra-colors-white);
+    }
+  }
+  .ruleGroup-addRule:hover,
+  .ruleGroup-addGroup:hover {
+    background: var(--chakra-colors-blue-600);
+  }
+}
+
+.ruleGroup-body {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: var(--chakra-space-2);
+
+  .rule-remove {
+    background: var(--chakra-colors-red-500);
+    svg {
+      color: var(--chakra-colors-white);
+    }
+  }
+  .rule-remove:hover {
+    background: var(--chakra-colors-red-600);
+  }
+
+  .rule {
+    display: flex;
+    gap: var(--chakra-space-2);
+    margin-left: var(--chakra-space-4);
+
+    .rule-cloneRule {
+      background: var(--chakra-colors-gray-400);
+    }
+    .rule-cloneRule:hover {
+      background: var(--chakra-colors-gray-500);
+    }
+  }
 }
 
 .validateQuery .queryBuilder .ruleGroup.queryBuilder-invalid {
@@ -56,7 +139,9 @@ html[data-theme="dark"]
   .ruleGroup-addGroup
   + button.ruleGroup-cloneGroup,
 .justifiedLayout .queryBuilder .ruleGroup-addGroup + button.ruleGroup-lock,
-.justifiedLayout .queryBuilder .ruleGroup-addGroup + button.ruleGroup-remove,
+.justifiedLayout .queryBuilder .ruleGroup-addGroup + button.ruleGroup-remove {
+  margin-left: auto !important;
+}
 .justifiedLayout .queryBuilder .rule-operators + button.rule-cloneRule,
 .justifiedLayout .queryBuilder .rule-operators + button.rule-lock,
 .justifiedLayout .queryBuilder .rule-operators + button.rule-remove,
@@ -68,86 +153,6 @@ html[data-theme="dark"]
 .justifiedLayout .queryBuilder .control + button.rule-remove,
 .justifiedLayout .queryBuilder .chakra-select__wrapper + button.rule-cloneRule,
 .justifiedLayout .queryBuilder .chakra-select__wrapper + button.rule-lock,
-.ruleGroup-body {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: left;
-}
-.queryBuilder {
-  min-width: 420px;
-  background: #f9f9f9;
-  padding: 10px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.queryBuilder .ruleGroup {
-  border: 1px solid #e1e1e1;
-  padding: 10px;
-  margin-top: 10px;
-  background: rgba(54, 82, 190, 0.2);
-  border-radius: 6px;
-}
-
-.queryBuilder .ruleGroup-header,
-.queryBuilder .rule {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.queryBuilder button {
-  background-color: #4a90e2;
-  color: white;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.queryBuilder .ruleGroup-remove,
-.queryBuilder .rule-remove {
-  background-color: #e74c3c; /* Red color */
-  color: white;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.queryBuilder .ruleGroup-remove:hover,
-.queryBuilder .rule-remove:hover {
-  background-color: #c0392b; /* Darker shade for hover state */
-}
-
-.queryBuilder button:hover {
-  background-color: #3b7dbb;
-}
-
-.queryBuilder select,
-.queryBuilder input {
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  padding: 8px;
-  width: 100%;
-}
-
-.queryBuilder .rule-value {
-  flex-grow: 1;
-}
-
-/* Responsive adjustments */
-@media (max-width: 600px) {
-  .queryBuilder {
-    min-width: auto;
-    padding: 5px;
-  }
-
-  .queryBuilder .ruleGroup-header,
-  .queryBuilder .rule {
-    flex-direction: column;
-    align-items: stretch;
-  }
+.justifiedLayout .queryBuilder .chakra-select__wrapper + button.rule-remove {
+  margin-left: auto !important;
 }

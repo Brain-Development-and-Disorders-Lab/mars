@@ -7,7 +7,7 @@ import Icon from "@components/Icon";
 
 const Information = (props: { text: string }) => {
   return (
-    <Tag size={"md"} colorScheme={"teal"} gap={"2"}>
+    <Tag size={"md"} colorScheme={"teal"} gap={"2"} w={"fit-content"}>
       <Icon name={"info"} />
       <TagLabel>{props.text}</TagLabel>
     </Tag>
@@ -16,7 +16,7 @@ const Information = (props: { text: string }) => {
 
 const Warning = (props: { text: string }) => {
   return (
-    <Tag size={"md"} colorScheme={"orange"} gap={"2"}>
+    <Tag size={"md"} colorScheme={"orange"} gap={"2"} w={"fit-content"}>
       <Icon name={"warning"} />
       <TagLabel>{props.text}</TagLabel>
     </Tag>

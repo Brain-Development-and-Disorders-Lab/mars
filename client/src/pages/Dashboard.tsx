@@ -263,9 +263,7 @@ const Dashboard = () => {
             {/* Projects heading */}
             <Flex direction={"row"} align={"center"} gap={"2"} my={"2"}>
               <Icon name={"project"} size={"md"} />
-              <Heading size={"md"} fontWeight={"bold"}>
-                Projects
-              </Heading>
+              <Heading size={"md"}>Projects</Heading>
             </Flex>
 
             {/* Projects table */}
@@ -318,9 +316,7 @@ const Dashboard = () => {
             {/* Entities heading */}
             <Flex direction={"row"} align={"center"} gap={"2"} my={"2"}>
               <Icon name={"entity"} size={"md"} />
-              <Heading size={"md"} fontWeight={"bold"}>
-                Entities
-              </Heading>
+              <Heading size={"md"}>Entities</Heading>
             </Flex>
 
             {/* Entities table */}
@@ -380,7 +376,7 @@ const Dashboard = () => {
           {/* Activity heading */}
           <Flex align={"center"} gap={"2"} my={"2"}>
             <Icon name={"activity"} size={"md"} />
-            <Heading size={"md"} fontWeight={"semibold"} color={"gray.700"}>
+            <Heading size={"md"} color={"gray.700"}>
               Recent Activity
             </Heading>
           </Flex>
