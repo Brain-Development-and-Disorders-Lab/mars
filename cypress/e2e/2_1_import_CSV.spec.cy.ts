@@ -17,7 +17,7 @@ describe("CSV Import Test", () => {
     cy.get("#name").type("Test Mock Project");
     cy.get("#description").type("Test Mock Project Description");
 
-    cy.get(".css-h211ee").click({ force: true }); // click to finish creating project
+    cy.get(".css-lgnrpw").click({ force: true }); // click to finish creating project
     cy.wait(1000);
 
     cy.contains("button", "Import").click(); // click to import CSV file
@@ -33,7 +33,7 @@ describe("CSV Import Test", () => {
           contents: Cypress.Buffer.from(fileContent),
         });
       cy.wait(3000); // Allow toast to disappear
-      cy.get(".css-jut409").scrollIntoView().click();
+      cy.get(".css-hipoo1").scrollIntoView().click();
       cy.wait(100);
       cy.get("select#import_name")
         .find('option[value="Name"]')
@@ -47,8 +47,8 @@ describe("CSV Import Test", () => {
         .parent()
         .select("Test Mock Project")
         .first();
-      cy.get(".css-15vhhhd > .css-jut409").click({ force: true }); // Go to import step 2
-      cy.get(".css-15vhhhd > .css-h211ee").click({ force: true }); // Finalize import
+      cy.get(".css-15vhhhd > .css-hipoo1").click({ force: true }); // Go to import step 2
+      cy.get(".css-15vhhhd > .css-lgnrpw").click({ force: true }); // Finalize import
 
       cy.get("#0_entities").should("not.have.text", "0");
     });

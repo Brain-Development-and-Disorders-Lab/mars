@@ -23,10 +23,10 @@ describe("JSON Import Test", () => {
       });
 
       cy.wait(100);
-      cy.get(".css-jut409").scrollIntoView().click();
+      cy.get(".css-15vhhhd > .css-hipoo1").scrollIntoView().click();
       cy.wait(500);
-      cy.get(".css-15vhhhd > .css-jut409").click({ force: true }); // Go to import step 2
-      cy.get(".css-15vhhhd > .css-h211ee").click({ force: true }); // Finalize import
+      cy.get(".css-15vhhhd > .css-hipoo1").click({ force: true }); // Go to import step 2
+      cy.get(".css-15vhhhd > .css-lgnrpw").click({ force: true }); // Finalize import
       cy.reload();
 
       cy.contains("FROMJSON").should("exist");
