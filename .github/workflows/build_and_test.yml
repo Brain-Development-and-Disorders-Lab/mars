@@ -57,7 +57,7 @@ jobs:
           yarn buildDebug
 
       # Run the server unit tests
-      - name: Test Server
+      - name: Test server
         working-directory: server
         run: |
           yarn test

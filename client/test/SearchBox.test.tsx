@@ -1,4 +1,3 @@
-// SearchBox.test.tsx
 import React from "react";
 import SearchBox from "../src/components/SearchBox";
 import { shallow } from "enzyme";
