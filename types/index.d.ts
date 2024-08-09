@@ -385,6 +385,7 @@ export type SearchQueryBuilderProps = {
 export type SearchSelectProps = {
   selected: IGenericItem;
   setSelected: React.Dispatch<React.SetStateAction<IGenericItem>>;
+  onChange?: () => void;
 };
 
 // Response message types

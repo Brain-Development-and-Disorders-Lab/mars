@@ -44,10 +44,9 @@ import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 
 // Existing and custom types
-import { DataTableAction, EntityModel, IValue } from "@types";
+import { DataTableAction, IGenericItem, IValue } from "@types";
 
 // Utility functions and libraries
-import { request } from "@database/functions";
 import _ from "lodash";
 import dayjs from "dayjs";
 import SearchSelect from "@components/SearchSelect";
@@ -70,29 +69,6 @@ const Values = (props: {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [option, setOption] = useState("");
   const [options, setOptions] = useState([] as string[]);
-
-  const [entities, setEntities] = useState([] as EntityModel[]);
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  const getEntities = async () => {
-    const result = await request<EntityModel[]>("GET", `/entities`);
-    if (!result.success) {
-      toast({
-        title: "Error",
-        status: "error",
-        description: "Could not retrieve Entities",
-        duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
-      });
-    }
-    setEntities(result.data);
-    setIsLoaded(true);
-  };
-
-  useEffect(() => {
-    getEntities();
-  }, []);
 
   const columnHelper = createColumnHelper<IValue<any>>();
   const columns = useMemo(
@@ -213,6 +189,18 @@ const Values = (props: {
           useEffect(() => {
             setValue(initialValue);
           }, [initialValue]);
+
+          const [selectedEntity, setSelectedEntity] = useState(
+            {} as IGenericItem,
+          );
+          useEffect(() => {
+            if (
+              original.type === "entity" &&
+              !_.isUndefined(selectedEntity._id)
+            ) {
+              setValue(selectedEntity);
+            }
+          }, [selectedEntity, value]);
 
           /**
            * Handle a standard Input change event
@@ -390,10 +378,18 @@ const Values = (props: {
               case "entity": {
                 if (_.isEqual(props.viewOnly, false)) {
                   dataInput = (
-                    <SearchSelect selected={value} setSelected={setValue} />
+                    <SearchSelect
+                      selected={selectedEntity}
+                      setSelected={setSelectedEntity}
+                      onChange={onBlur}
+                    />
                   );
                 } else {
-                  dataInput = <Linky type={"entities"} id={value} />;
+                  dataInput = (
+                    <Flex px={"2"}>
+                      <Linky type={"entities"} id={value} size={"sm"} />
+                    </Flex>
+                  );
                 }
                 break;
               }
@@ -411,8 +407,7 @@ const Values = (props: {
                       _.isEqual(value, "") && _.isEqual(props.requireData, true)
                     }
                   >
-                    {isLoaded &&
-                      value.options &&
+                    {value.options &&
                       value.options.map((value: string) => {
                         return (
                           <option key={value} value={value}>
@@ -440,15 +435,13 @@ const Values = (props: {
                   _.isEqual(value, "") && _.isEqual(props.requireData, true)
                 }
               >
-                {isLoaded &&
-                  props.permittedValues.map((value) => {
-                    return (
-                      <option key={value} value={value}>
-                        {value}
-                      </option>
-                    );
-                  })}
-                ;
+                {props.permittedValues.map((value) => {
+                  return (
+                    <option key={value} value={value}>
+                      {value}
+                    </option>
+                  );
+                })}
               </Select>
             );
           }
@@ -462,7 +455,7 @@ const Values = (props: {
         header: "Data",
       }),
     ],
-    [props.viewOnly, entities],
+    [props.viewOnly],
   );
 
   const addOptions = () => {

@@ -66,6 +66,10 @@ const SearchSelect = (props: SearchSelectProps) => {
     }
   }, 200);
 
+  /**
+   * Handle search text input
+   * @param event Input event
+   */
   const handleInputChange = (event: any) => {
     setInputValue(event.target.value);
     if (inputValue.length > 2) {
@@ -73,11 +77,18 @@ const SearchSelect = (props: SearchSelectProps) => {
     }
   };
 
+  /**
+   * Handle selecting an Entity from the search results
+   * @param entity Selected Entity
+   */
   const handleSelectEntity = (entity: IGenericItem) => {
     props.setSelected({ _id: entity._id, name: entity.name });
     setInputValue("");
     setResults([]);
     setShowResults(false);
+
+    // Invoke the `onChange` callback if specified
+    props.onChange?.();
   };
 
   return (
@@ -85,7 +96,7 @@ const SearchSelect = (props: SearchSelectProps) => {
       <InputGroup size={"sm"} onClick={() => setShowResults(!showResults)}>
         <Input
           placeholder={"Select Entity"}
-          value={props.selected.name || ""}
+          value={props.selected?.name || ""}
           backgroundColor={"white"}
           data-testid={"value-editor"}
           size={"sm"}
