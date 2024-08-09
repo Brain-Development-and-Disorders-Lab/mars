@@ -5,29 +5,29 @@ import Icon from "@components/Icon";
 // `react-querybuilder` imports
 import QueryBuilder, {
   defaultOperators,
+  defaultRuleProcessorMongoDB,
   Field,
   formatQuery,
   RuleGroupType,
+  RuleProcessor,
+  RuleType,
 } from "react-querybuilder";
 import { QueryBuilderChakra } from "@react-querybuilder/chakra";
 
 // SearchQueryValue component for searching Origins, Products, and Projects
 import SearchQueryValue from "@components/SearchQueryValue";
+import { SearchQueryBuilderProps } from "@types";
 
 // GraphQL
 import { gql, useLazyQuery } from "@apollo/client";
 
 import _ from "lodash";
 
-interface QueryBuilderTabProps {
-  [key: string]: any;
-}
-
-const SearchQueryBuilder: React.FC<QueryBuilderTabProps> = ({
+const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
   setHasSearched,
   setResults,
   setIsSearching,
-}: QueryBuilderTabProps) => {
+}) => {
   const fields: Field[] = [
     {
       name: "name",
@@ -83,6 +83,61 @@ const SearchQueryBuilder: React.FC<QueryBuilderTabProps> = ({
     rules: [],
   };
 
+  /**
+   * Custom function for processing specific fields within a search query,
+   * specifically `origins` and `products`
+   * @param {RuleType} rule Rule for processing value
+   * @return {String}
+   */
+  const ruleProcessor: RuleProcessor = (rule: RuleType): String => {
+    if (rule.field === "origins") {
+      // Handle `origins` field
+      if (rule.operator === "doesNotContain") {
+        // If `doesNotContain`, include `$not`
+        return JSON.stringify({
+          "associations.origins": {
+            $not: {
+              $elemMatch: {
+                _id: rule.value,
+              },
+            },
+          },
+        });
+      }
+      return JSON.stringify({
+        "associations.origins": {
+          $elemMatch: {
+            _id: rule.value,
+          },
+        },
+      });
+    } else if (rule.field === "products") {
+      // Handle `products` field
+      if (rule.operator === "doesNotContain") {
+        // If `doesNotContain`, include `$not`
+        return JSON.stringify({
+          "associations.products": {
+            $not: {
+              $elemMatch: {
+                _id: rule.value,
+              },
+            },
+          },
+        });
+      }
+      return JSON.stringify({
+        "associations.products": {
+          $elemMatch: {
+            _id: rule.value,
+          },
+        },
+      });
+    }
+
+    // Default rule applied
+    return defaultRuleProcessorMongoDB(rule);
+  };
+
   // Query to search by text value
   const SEARCH_TEXT = gql`
     query Search($query: String, $isBuilder: Boolean, $limit: Int) {
@@ -107,10 +162,14 @@ const SearchQueryBuilder: React.FC<QueryBuilderTabProps> = ({
     // Format the query in `mongodb` format before sending
     const results = await searchText({
       variables: {
-        query: formatQuery(query, "mongodb"),
+        query: formatQuery(query, {
+          format: "mongodb",
+          ruleProcessor: ruleProcessor,
+        }),
         isBuilder: true,
         limit: 100,
       },
+      fetchPolicy: "network-only",
     });
 
     if (results.data.search) {

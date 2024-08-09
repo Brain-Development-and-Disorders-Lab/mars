@@ -1,6 +1,5 @@
 import { EntityModel } from "@types";
 import { getDatabase } from "../connectors/database";
-import { Entities } from "./Entities";
 import _ from "lodash";
 
 // Collection name
@@ -63,28 +62,6 @@ export class Search {
     // Construct MongoDB query
     let mongoQuery = {};
 
-    // Search for Origin
-    if (parsedQuery.origin) {
-      let originEntity = await Entities.getOne(parsedQuery.origin);
-      delete parsedQuery.origin;
-      if (originEntity) {
-        parsedQuery["associations.origins"] = {
-          $elemMatch: { _id: originEntity._id.toString() },
-        };
-      }
-    }
-
-    // Search for Product
-    if (parsedQuery.product) {
-      let productEntity = await Entities.getOne(parsedQuery.product);
-      delete parsedQuery.product;
-      if (productEntity) {
-        parsedQuery["associations.products"] = {
-          $elemMatch: { _id: productEntity._id.toString() },
-        };
-      }
-    }
-
     if (_.isArray(parsedQuery)) {
       // If the query is an array, assume it's an array of query conditions
       mongoQuery = { $and: parsedQuery };
@@ -97,8 +74,6 @@ export class Search {
     const options = {
       limit: limit,
     };
-
-    console.info("Query:", mongoQuery);
 
     // To-Do: Ensure we restrict by user
 
