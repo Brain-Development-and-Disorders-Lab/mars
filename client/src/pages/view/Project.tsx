@@ -159,6 +159,7 @@ const Project = () => {
       variables: {
         _id: id,
       },
+      fetchPolicy: "network-only",
     },
   );
 
@@ -344,6 +345,21 @@ const Project = () => {
       });
     }
     setEditing(false);
+  };
+
+  const handleCancelClick = () => {
+    // Disable editing
+    setEditing(false);
+
+    // Reset Project state values
+    setProject(project);
+    setProjectDescription(projectDescription);
+    setProjectEntities(projectEntities);
+    setProjectHistory(projectHistory);
+    setProjectCollaborators(projectCollaborators);
+
+    // Reload the page for maximum effect
+    window.location.reload();
   };
 
   /**
@@ -610,6 +626,16 @@ const Project = () => {
 
           {/* Buttons */}
           <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
+            {editing && (
+              <Button
+                onClick={handleCancelClick}
+                size={"sm"}
+                colorScheme={"red"}
+                rightIcon={<Icon name={"cross"} />}
+              >
+                Cancel
+              </Button>
+            )}
             <Button
               colorScheme={editing ? "green" : "blue"}
               rightIcon={

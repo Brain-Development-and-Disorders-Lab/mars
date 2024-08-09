@@ -108,6 +108,7 @@ const SearchSelect = (props: SearchSelectProps) => {
           borderRadius={"sm"}
           shadow={"md"}
           position={"absolute"}
+          zIndex={"2"}
         >
           <Text fontSize={"sm"} fontWeight={"semibold"}>
             Results: {results.length}
