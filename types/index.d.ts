@@ -373,6 +373,19 @@ export type IconNames =
   | "sort_up"
   | "sort_down";
 
+// SearchQueryBuilder props
+export type SearchQueryBuilderProps = {
+  setHasSearched: React.Dispatch<React.SetStateAction<boolean>>;
+  setResults: React.Dispatch<Partial<EntityModel>[]>;
+  setIsSearching: React.Dispatch<React.SetStateAction<boolean>>;
+};
+
+// SearchSelect props
+export type SearchSelectProps = {
+  selected: IGenericItem;
+  setSelected: React.Dispatch<React.SetStateAction<IGenericItem>>;
+};
+
 // Response message types
 export type ResponseMessage = {
   success: boolean;
