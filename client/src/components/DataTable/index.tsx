@@ -148,21 +148,30 @@ const DataTable = (props: DataTableProps) => {
 
   return (
     <Flex w={"100%"} direction={"column"}>
-      <TableContainer>
-        <Table variant={"simple"} size={"sm"}>
+      <TableContainer overflowX={"visible"} overflowY={"visible"}>
+        <Table variant={"simple"} size={"sm"} w={"100%"}>
           {/* Table head */}
           <Thead bg={"gray.50"}>
             {table.getHeaderGroups().map((headerGroup) => (
               <Tr key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   const meta: any = header.column.columnDef.meta;
+
+                  // Customize the column widths depending on data contents
+                  let width = "auto";
+                  if (_.isEqual(header.id, "select")) {
+                    // Dynamically set the width for the checkboxes
+                    width = "30px";
+                  } else if (_.isEqual(header.id, "type")) {
+                    width = "100px";
+                  }
+
                   return (
                     <Th
                       key={header.id}
                       onClick={getToggleSortingHandler(header)}
                       isNumeric={meta?.isNumeric}
-                      // Dynamically set the width for the checkboxes
-                      w={_.isEqual(header.id, "select") ? "1" : "auto"}
+                      w={width}
                       _hover={
                         canSortColumn(header) ? { cursor: "pointer" } : {}
                       }
@@ -228,7 +237,7 @@ const DataTable = (props: DataTableProps) => {
 
       <Flex
         direction={"row"}
-        pt={"4"}
+        pt={props.showSelection || props.showPagination ? "2" : ""}
         gap={"4"}
         justify={"space-between"}
         w={"100%"}

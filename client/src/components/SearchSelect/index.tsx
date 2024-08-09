@@ -81,7 +81,7 @@ const SearchSelect = (props: SearchSelectProps) => {
   };
 
   return (
-    <Flex pos={"relative"} minW={"300px"}>
+    <Flex pos={"relative"} w={"100%"}>
       <InputGroup size={"sm"} onClick={() => setShowResults(!showResults)}>
         <Input
           placeholder={"Select Entity"}
