@@ -340,6 +340,7 @@ export type IconNames =
   | "lock"
   | "exit"
   | "settings"
+  | "print"
   | "view"
   | "zoom_in"
   | "zoom_out"

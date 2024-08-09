@@ -94,6 +94,7 @@ const Dashboard = () => {
       entities: 5,
       activity: 20,
     },
+    fetchPolicy: "network-only",
   });
 
   // Assign data

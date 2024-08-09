@@ -67,6 +67,7 @@ const Attribute = () => {
     variables: {
       _id: id,
     },
+    fetchPolicy: "network-only",
   });
 
   // Mutation to update Attribute
