@@ -917,8 +917,8 @@ const Project = () => {
 
             <ModalBody p={"2"}>
               <SearchSelect
-                selected={selectedEntity}
-                setSelected={setSelectedEntity}
+                value={selectedEntity}
+                onChange={setSelectedEntity}
               />
             </ModalBody>
 
