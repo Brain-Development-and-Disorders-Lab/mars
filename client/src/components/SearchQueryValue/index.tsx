@@ -28,10 +28,7 @@ const SearchQueryValue = ({
   return (
     <Flex>
       {field === "origins" || field === "products" ? (
-        <SearchSelect
-          selected={selectedEntity}
-          setSelected={setSelectedEntity}
-        />
+        <SearchSelect value={selectedEntity} onChange={setSelectedEntity} />
       ) : (
         <Input
           placeholder={_.capitalize(field)}

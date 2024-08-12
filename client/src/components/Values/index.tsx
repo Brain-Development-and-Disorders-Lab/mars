@@ -42,6 +42,7 @@ import { createColumnHelper } from "@tanstack/react-table";
 import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
+import SearchSelect from "@components/SearchSelect";
 
 // Existing and custom types
 import { DataTableAction, IGenericItem, IValue } from "@types";
@@ -49,7 +50,6 @@ import { DataTableAction, IGenericItem, IValue } from "@types";
 // Utility functions and libraries
 import _ from "lodash";
 import dayjs from "dayjs";
-import SearchSelect from "@components/SearchSelect";
 
 /**
  * Values component use to display a collection of Values and enable
@@ -190,18 +190,6 @@ const Values = (props: {
             setValue(initialValue);
           }, [initialValue]);
 
-          const [selectedEntity, setSelectedEntity] = useState(
-            {} as IGenericItem,
-          );
-          useEffect(() => {
-            if (
-              original.type === "entity" &&
-              !_.isUndefined(selectedEntity._id)
-            ) {
-              setValue(selectedEntity);
-            }
-          }, [selectedEntity, value]);
-
           /**
            * Handle a standard Input change event
            * @param event change event data
@@ -219,6 +207,17 @@ const Values = (props: {
               selected: event.target.value,
               options: initialValue.options,
             });
+          };
+
+          /**
+           * Handle a `SearchSelect` component change event
+           * @param entity change event Entity
+           */
+          const onSearchSelectChange = (entity: IGenericItem) => {
+            setValue(entity);
+
+            // Need to update the table data in order to update overall state
+            table.options.meta?.updateData(index, id, entity);
           };
 
           const onBlur = () => {
@@ -379,15 +378,16 @@ const Values = (props: {
                 if (_.isEqual(props.viewOnly, false)) {
                   dataInput = (
                     <SearchSelect
-                      selected={selectedEntity}
-                      setSelected={setSelectedEntity}
-                      onChange={onBlur}
+                      placeholder={"Select"}
+                      value={value}
+                      onChange={onSearchSelectChange}
+                      isDisabled={props.viewOnly}
                     />
                   );
                 } else {
                   dataInput = (
                     <Flex px={"2"}>
-                      <Linky type={"entities"} id={value} size={"sm"} />
+                      <Linky type={"entities"} id={value._id} size={"sm"} />
                     </Flex>
                   );
                 }
