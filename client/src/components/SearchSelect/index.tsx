@@ -67,6 +67,15 @@ const SearchSelect = (props: SearchSelectProps) => {
   }, 200);
 
   /**
+   * Handle clicking the `Input` componet dropdown
+   */
+  const onInputClick = () => {
+    if (props?.isDisabled !== true) {
+      setShowResults(!showResults);
+    }
+  };
+
+  /**
    * Handle search text input
    * @param event Input event
    */
@@ -82,24 +91,24 @@ const SearchSelect = (props: SearchSelectProps) => {
    * @param entity Selected Entity
    */
   const handleSelectEntity = (entity: IGenericItem) => {
-    props.setSelected({ _id: entity._id, name: entity.name });
     setInputValue("");
     setResults([]);
     setShowResults(false);
 
     // Invoke the `onChange` callback if specified
-    props.onChange?.();
+    props.onChange?.(entity);
   };
 
   return (
     <Flex pos={"relative"} w={"100%"}>
-      <InputGroup size={"sm"} onClick={() => setShowResults(!showResults)}>
+      <InputGroup size={"sm"} onClick={onInputClick}>
         <Input
-          placeholder={"Select Entity"}
-          value={props.selected?.name || ""}
+          placeholder={props?.placeholder || "Select Entity"}
+          value={props.value?.name || ""}
           backgroundColor={"white"}
           data-testid={"value-editor"}
           size={"sm"}
+          isDisabled={props?.isDisabled || false}
           isReadOnly
         />
         <InputRightElement>

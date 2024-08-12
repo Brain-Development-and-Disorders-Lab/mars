@@ -383,9 +383,10 @@ export type SearchQueryBuilderProps = {
 
 // SearchSelect props
 export type SearchSelectProps = {
-  selected: IGenericItem;
-  setSelected: React.Dispatch<React.SetStateAction<IGenericItem>>;
-  onChange?: () => void;
+  value: IGenericItem;
+  placeholder?: string;
+  onChange?: (value: any) => void;
+  isDisabled?: boolean;
 };
 
 // Response message types
