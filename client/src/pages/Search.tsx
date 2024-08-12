@@ -1,5 +1,5 @@
 // React
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 
 // Existing and custom components
 import {
@@ -30,19 +30,10 @@ import DataTable from "@components/DataTable";
 import Linky from "@components/Linky";
 import Icon from "@components/Icon";
 import Loading from "@components/Loading";
+import SearchQueryBuilder from "@components/SearchQueryBuilder";
 
 // Existing and custom types
-import {
-  ProjectModel,
-  EntityModel,
-  QueryComponent,
-  QueryFocusType,
-  QueryOperator,
-  QueryParameters,
-  QueryQualifier,
-  QuerySubQualifier,
-  DataTableAction,
-} from "@types";
+import { EntityModel, DataTableAction } from "@types";
 
 // Utility functions and libraries
 import { request } from "@database/functions";
@@ -54,8 +45,7 @@ import { useNavigate } from "react-router-dom";
 import FileSaver from "file-saver";
 import slugify from "slugify";
 import dayjs from "dayjs";
-import QueryBuilderTab from "./SearchQueryBuilder";
-import { gql, useLazyQuery, useQuery } from "@apollo/client";
+import { gql, useLazyQuery } from "@apollo/client";
 
 const Search = () => {
   const [query, setQuery] = useState("");
@@ -70,219 +60,57 @@ const Search = () => {
   const navigate = useNavigate();
   const toast = useToast();
 
-  const [entities, setEntities] = useState([] as EntityModel[]);
-  const [projects, setProjects] = useState([] as ProjectModel[]);
-
-  const [queryComponents, setQueryComponents] = useState(
-    [] as QueryComponent[],
-  );
-  const [queryOperator, setQueryOperator] = useState("AND" as QueryOperator);
-  const [queryType, setQueryType] = useState("Entity" as QueryFocusType);
-  const [queryParameter, setQueryParameter] = useState(
-    "Name" as QueryParameters,
-  );
-  const [queryQualifier, setQueryQualifier] = useState(
-    "Contains" as QueryQualifier,
-  );
-  const [querySubQualifier, setQuerySubQualifier] = useState(
-    "Date" as QuerySubQualifier,
-  );
-  const [queryKey, setQueryKey] = useState("");
-  const [queryValue, setQueryValue] = useState("");
-
   // Store results as a set of IDs
   const [results, setResults] = useState([] as Partial<EntityModel>[]);
 
-  const GET_ENTITY = gql`
-    query GetEntityData($_id: String) {
-      entities {
-        _id
-        name
-        owner
-        deleted
-        locked
-        description
-        projects
-        associations {
-          origins {
-            _id
-            name
-          }
-          products {
-            _id
-            name
-          }
-        }
-        attributes {
-          _id
-          name
-          description
-          values {
-            _id
-            name
-            type
-            data
-          }
-        }
-        attachments {
-          _id
-          name
-        }
-        history {
-          timestamp
-          deleted
-          owner
-          description
-          projects
-          associations {
-            origins {
-              _id
-              name
-            }
-            products {
-              _id
-              name
-            }
-          }
-          attributes {
-            _id
-            name
-            description
-            values {
-              _id
-              name
-              type
-              data
-            }
-          }
-        }
-      }
-      projects {
-        _id
-        name
-        created
-        description
-        owner
-        collaborators
-        entities
-      }
-    }
-  `;
-  const { loading, error, data, refetch } = useQuery(GET_ENTITY);
-
-  // Manage data once retrieved
-  useEffect(() => {
-    if (data?.entities) {
-      // Unpack all the Entity data
-      setEntities(data.entities);
-    }
-    if (data?.projects) {
-      setProjects(data.projects);
-    }
-  }, [loading]);
-
-  // Display any GraphQL errors
-  useEffect(() => {
-    if (error) {
-      toast({
-        title: "Error",
-        description: error.message,
-        status: "error",
-        position: "bottom-right",
-        isClosable: true,
-      });
-    }
-  }, [error]);
-
-  // Check to see if data currently exists and refetch if so
-  useEffect(() => {
-    if (data && refetch) {
-      refetch();
-    }
-  }, []);
-
-  // Query to search Entities
-  const SEARCH_ENTITIES = gql`
-    query SearchEntities($search: String, $limit: Int) {
-      searchEntities(search: $search, limit: $limit) {
+  // Query to search by text value
+  const SEARCH_TEXT = gql`
+    query Search($query: String, $isBuilder: Boolean, $limit: Int) {
+      search(query: $query, isBuilder: $isBuilder, limit: $limit) {
         _id
         name
         description
       }
     }
   `;
-  const [searchEntities, { loading: searchLoading, error: searchError }] =
-    useLazyQuery(SEARCH_ENTITIES);
+  const [searchText, { loading, error }] = useLazyQuery(SEARCH_TEXT);
 
   const runSearch = async () => {
     // Initial check if a specific ID search was not found
-    setIsSearching(true);
+    setIsSearching(loading);
     setHasSearched(true);
     setResults([]);
 
-    const results = await searchEntities({
+    const results = await searchText({
       variables: {
-        search: query,
+        query: query,
+        isBuilder: false,
         limit: 100,
       },
     });
 
-    if (results.data.searchEntities) {
-      setResults(results.data.searchEntities);
-      if (results.data.searchEntities.length === 0) {
-        // Handle no results found scenario
-        toast({
-          title: "No results found",
-          status: "info",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-      }
+    if (results.data.search) {
+      setResults(results.data.search);
     }
 
-    if (searchError) {
-      toast({
-        title: "Error",
-        status: "error",
-        description: searchError.message,
-        duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
-      });
-    }
-
-    setIsSearching(false);
-  };
-
-  const runQuerySearch = async () => {
-    // Update state
-    setIsSearching(true);
-    setHasSearched(true);
-
-    const response = await request<EntityModel[]>("POST", "/search/query", {
-      query: JSON.stringify(queryComponents),
-    });
-    if (response.success) {
-      setResults(response.data);
-    } else {
-      toast({
-        title: "Error",
-        status: "error",
-        description: "Could not get search results",
-        duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
-      });
+    if (error) {
       setIsError(true);
+      toast({
+        title: "Error",
+        status: "error",
+        description: error.message,
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
     }
-    setIsSearching(false);
+
+    setIsSearching(loading);
   };
 
   const onTabChange = () => {
     // Reset search state
     setQuery("");
-    setQueryComponents([]);
     setHasSearched(false);
     setResults([]);
   };
@@ -449,29 +277,9 @@ const Search = () => {
             </TabPanel>
 
             {/* Query builder */}
-            <QueryBuilderTab
-              queryType={queryType}
-              setQueryType={setQueryType}
-              queryParameter={queryParameter}
-              setQueryParameter={setQueryParameter}
-              queryQualifier={queryQualifier}
-              setQueryQualifier={setQueryQualifier}
-              querySubQualifier={querySubQualifier}
-              setQuerySubQualifier={setQuerySubQualifier}
-              queryOperator={queryOperator}
-              setQueryOperator={setQueryOperator}
-              queryKey={queryKey}
-              setQueryKey={setQueryKey}
-              queryValue={queryValue}
-              setQueryValue={setQueryValue}
-              queryComponents={queryComponents}
-              setQueryComponents={setQueryComponents}
+            <SearchQueryBuilder
               setHasSearched={setHasSearched}
               setResults={setResults}
-              isLoaded={!loading && !searchLoading}
-              projects={projects}
-              entities={entities}
-              runQuerySearch={runQuerySearch}
               setIsSearching={setIsSearching}
             />
           </TabPanels>
@@ -484,7 +292,8 @@ const Search = () => {
               <Loading />
             </Flex>
           ) : (
-            hasSearched && (
+            hasSearched &&
+            !isSearching && (
               <Flex direction={"column"} w={"100%"} gap={"4"}>
                 <Heading size={"sm"} fontWeight={"semibold"}>
                   {results.length} result
@@ -506,17 +315,17 @@ const Search = () => {
         {/* Information modal */}
         <Modal isOpen={isOpen} onClose={onClose} isCentered>
           <ModalOverlay />
-          <ModalContent p={"2"} gap={"4"} w={["lg", "xl", "2xl"]}>
-            <ModalHeader p={"2"}>Search</ModalHeader>
+          <ModalContent p={"2"} gap={"2"} w={["lg", "xl", "2xl"]}>
+            <ModalHeader px={"2"}>Search</ModalHeader>
             <ModalCloseButton />
-            <ModalBody p={"2"}>
-              <Flex direction={"column"} gap={"4"} p={"2"}>
-                <Text>
+            <ModalBody px={"2"}>
+              <Flex direction={"column"} gap={"2"} p={"2"}>
+                <Text fontSize={"sm"}>
                   Use the <b>Text Search</b> tab to search for text across all
                   Entity fields.
                 </Text>
-                <Text>
-                  The <b>Advanced Queries</b> tab allows search queries to be
+                <Text fontSize={"sm"}>
+                  The <b>Query Builder</b> tab allows search queries to be
                   constructed to target specific fields and values. Queries can
                   be built using AND and OR logical components.
                 </Text>

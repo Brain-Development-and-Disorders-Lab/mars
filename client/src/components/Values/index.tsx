@@ -44,12 +44,12 @@ import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 
 // Existing and custom types
-import { DataTableAction, EntityModel, IValue } from "@types";
+import { DataTableAction, IGenericItem, IValue } from "@types";
 
 // Utility functions and libraries
-import { request } from "@database/functions";
 import _ from "lodash";
 import dayjs from "dayjs";
+import SearchSelect from "@components/SearchSelect";
 
 /**
  * Values component use to display a collection of Values and enable
@@ -70,33 +70,76 @@ const Values = (props: {
   const [option, setOption] = useState("");
   const [options, setOptions] = useState([] as string[]);
 
-  const [entities, setEntities] = useState([] as EntityModel[]);
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  const getEntities = async () => {
-    const result = await request<EntityModel[]>("GET", `/entities`);
-    if (!result.success) {
-      toast({
-        title: "Error",
-        status: "error",
-        description: "Could not retrieve Entities",
-        duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
-      });
-    }
-    setEntities(result.data);
-    setIsLoaded(true);
-  };
-
-  useEffect(() => {
-    getEntities();
-  }, []);
-
   const columnHelper = createColumnHelper<IValue<any>>();
   const columns = useMemo(
     () => [
-      // Value name column
+      // Value `type` column
+      columnHelper.accessor("type", {
+        cell: ({ getValue }) => {
+          let valueType: string = getValue();
+
+          // Setup icon for value type
+          let typeIcon: React.ReactElement;
+          switch (valueType) {
+            case "number": {
+              typeIcon = (
+                <Icon size={"sm"} name={"v_number"} color={"green.300"} />
+              );
+              break;
+            }
+            case "text": {
+              typeIcon = (
+                <Icon size={"sm"} name={"v_text"} color={"blue.300"} />
+              );
+              break;
+            }
+            case "url": {
+              typeIcon = (
+                <Icon size={"sm"} name={"v_url"} color={"yellow.300"} />
+              );
+              break;
+            }
+            case "date": {
+              typeIcon = (
+                <Icon size={"sm"} name={"v_date"} color={"orange.300"} />
+              );
+              break;
+            }
+            case "select": {
+              typeIcon = (
+                <Icon size={"sm"} name={"v_select"} color={"cyan.300"} />
+              );
+              break;
+            }
+            case "entity":
+            default: {
+              typeIcon = (
+                <Icon size={"sm"} name={"entity"} color={"purple.300"} />
+              );
+              break;
+            }
+          }
+
+          // Apply casing
+          if (valueType === "url") {
+            valueType = _.upperCase(valueType);
+          } else {
+            valueType = _.capitalize(valueType);
+          }
+
+          return (
+            <Flex align={"center"} justify={"left"} gap={"2"} w={"100%"}>
+              <Flex>{typeIcon}</Flex>
+              <Text fontWeight={"semibold"} color={"gray.500"}>
+                {valueType}
+              </Text>
+            </Flex>
+          );
+        },
+        header: "Type",
+      }),
+
+      // Value `name` column
       columnHelper.accessor("name", {
         cell: ({
           getValue,
@@ -119,23 +162,21 @@ const Values = (props: {
           };
 
           return (
-            <Flex>
-              <Input
-                id={`i_${original._id}_name`}
-                value={value}
-                isReadOnly={props.viewOnly}
-                onChange={onChange}
-                onBlur={onBlur}
-                size={"sm"}
-                isInvalid={_.isEqual(value, "")}
-              />
-            </Flex>
+            <Input
+              id={`i_${original._id}_name`}
+              value={value}
+              isReadOnly={props.viewOnly}
+              onChange={onChange}
+              onBlur={onBlur}
+              size={"sm"}
+              isInvalid={_.isEqual(value, "")}
+            />
           );
         },
         header: "Name",
       }),
 
-      // Value data column
+      // Value `data` column
       columnHelper.accessor("data", {
         cell: ({
           getValue,
@@ -148,6 +189,18 @@ const Values = (props: {
           useEffect(() => {
             setValue(initialValue);
           }, [initialValue]);
+
+          const [selectedEntity, setSelectedEntity] = useState(
+            {} as IGenericItem,
+          );
+          useEffect(() => {
+            if (
+              original.type === "entity" &&
+              !_.isUndefined(selectedEntity._id)
+            ) {
+              setValue(selectedEntity);
+            }
+          }, [selectedEntity, value]);
 
           /**
            * Handle a standard Input change event
@@ -173,13 +226,9 @@ const Values = (props: {
           };
 
           let dataInput: React.ReactElement;
-          let typeIcon: React.ReactElement;
           if (_.isUndefined(props.permittedValues)) {
             switch (original.type) {
               case "number": {
-                typeIcon = (
-                  <Icon size={"sm"} name={"v_number"} color={"green.300"} />
-                );
                 dataInput = (
                   <Input
                     id={`i_${original._id}_data`}
@@ -197,9 +246,6 @@ const Values = (props: {
                 break;
               }
               case "text": {
-                typeIcon = (
-                  <Icon size={"sm"} name={"v_text"} color={"blue.300"} />
-                );
                 dataInput = (
                   <Input
                     id={`i_${original._id}_data`}
@@ -216,9 +262,6 @@ const Values = (props: {
                 break;
               }
               case "url": {
-                typeIcon = (
-                  <Icon size={"sm"} name={"v_url"} color={"yellow.300"} />
-                );
                 if (_.isEqual(props.viewOnly, false)) {
                   dataInput = (
                     <Input
@@ -316,9 +359,6 @@ const Values = (props: {
                 break;
               }
               case "date": {
-                typeIcon = (
-                  <Icon size={"sm"} name={"v_date"} color={"orange.300"} />
-                );
                 dataInput = (
                   <Input
                     id={`i_${original._id}_data`}
@@ -336,39 +376,24 @@ const Values = (props: {
                 break;
               }
               case "entity": {
-                typeIcon = (
-                  <Icon size={"sm"} name={"entity"} color={"purple.300"} />
-                );
                 if (_.isEqual(props.viewOnly, false)) {
                   dataInput = (
-                    <Select
-                      title="Select Entity"
-                      id={`s_${original._id}_data`}
-                      value={value}
-                      placeholder={"Entity"}
-                      size={"sm"}
-                      isDisabled={props.viewOnly}
-                      onChange={onChange}
-                      onBlur={onBlur}
-                    >
-                      {entities.map((entity) => {
-                        return (
-                          <option key={entity._id} value={entity._id}>
-                            {entity.name}
-                          </option>
-                        );
-                      })}
-                    </Select>
+                    <SearchSelect
+                      selected={selectedEntity}
+                      setSelected={setSelectedEntity}
+                      onChange={onBlur}
+                    />
                   );
                 } else {
-                  dataInput = <Linky type={"entities"} id={value} />;
+                  dataInput = (
+                    <Flex px={"2"}>
+                      <Linky type={"entities"} id={value} size={"sm"} />
+                    </Flex>
+                  );
                 }
                 break;
               }
               case "select": {
-                typeIcon = (
-                  <Icon size={"sm"} name={"v_select"} color={"cyan.300"} />
-                );
                 dataInput = (
                   <Select
                     title="Select Option"
@@ -382,8 +407,7 @@ const Values = (props: {
                       _.isEqual(value, "") && _.isEqual(props.requireData, true)
                     }
                   >
-                    {isLoaded &&
-                      value.options &&
+                    {value.options &&
                       value.options.map((value: string) => {
                         return (
                           <option key={value} value={value}>
@@ -397,9 +421,6 @@ const Values = (props: {
               }
             }
           } else {
-            typeIcon = (
-              <Icon size={"sm"} name={"v_select"} color={"cyan.300"} />
-            );
             dataInput = (
               <Select
                 title="Select Column"
@@ -414,32 +435,27 @@ const Values = (props: {
                   _.isEqual(value, "") && _.isEqual(props.requireData, true)
                 }
               >
-                {isLoaded &&
-                  props.permittedValues.map((value) => {
-                    return (
-                      <option key={value} value={value}>
-                        {value}
-                      </option>
-                    );
-                  })}
-                ;
+                {props.permittedValues.map((value) => {
+                  return (
+                    <option key={value} value={value}>
+                      {value}
+                    </option>
+                  );
+                })}
               </Select>
             );
           }
 
           return (
-            <Flex align={"center"} justify={"left"} gap={"2"} w={"100%"}>
-              <Tooltip label={_.capitalize(original.type)}>
-                <Flex>{typeIcon}</Flex>
-              </Tooltip>
-              <Flex w={"100%"}>{dataInput}</Flex>
+            <Flex align={"center"} justify={"left"} gap={"2"}>
+              {dataInput}
             </Flex>
           );
         },
         header: "Data",
       }),
     ],
-    [props.viewOnly, entities],
+    [props.viewOnly],
   );
 
   const addOptions = () => {
@@ -658,18 +674,16 @@ const Values = (props: {
         </Popover>
       </Flex>
 
-      <Flex overflowX={"auto"}>
-        <DataTable
-          columns={columns}
-          visibleColumns={{}}
-          data={props.values}
-          setData={props.setValues}
-          viewOnly={props.viewOnly}
-          actions={actions}
-          showPagination
-          showSelection
-        />
-      </Flex>
+      <DataTable
+        columns={columns}
+        visibleColumns={{}}
+        data={props.values}
+        setData={props.setValues}
+        viewOnly={props.viewOnly}
+        actions={actions}
+        showPagination
+        showSelection
+      />
 
       <ScaleFade initialScale={0.9} in={isOpen}>
         <Modal

@@ -153,17 +153,18 @@ const Attribute = () => {
               <FormControl isRequired>
                 <FormLabel fontSize={"sm"}>Template Name</FormLabel>
                 <Input
+                  size={"sm"}
                   placeholder={"Name"}
                   value={name}
                   onChange={(event) => setName(event.target.value)}
                   required
                 />
                 {isNameError && (
-                  <FormErrorMessage>
+                  <FormErrorMessage fontSize={"sm"}>
                     A name must be specified for the Template.
                   </FormErrorMessage>
                 )}
-                <FormHelperText>
+                <FormHelperText fontSize={"sm"}>
                   Provide a concise and descriptive name for the Template.
                 </FormHelperText>
               </FormControl>
@@ -189,18 +190,19 @@ const Attribute = () => {
               borderColor={"gray.200"}
             >
               <FormControl isRequired>
-                <FormLabel>Template Description</FormLabel>
+                <FormLabel fontSize={"sm"}>Template Description</FormLabel>
                 <Textarea
+                  size={"sm"}
                   value={description}
                   placeholder={"Description"}
                   onChange={(event) => setDescription(event.target.value)}
                 />
                 {isDescriptionError && (
-                  <FormErrorMessage>
+                  <FormErrorMessage fontSize={"sm"}>
                     A description should be provided for the Template.
                   </FormErrorMessage>
                 )}
-                <FormHelperText>
+                <FormHelperText fontSize={"sm"}>
                   Describe the purpose and contents of this Template.
                 </FormHelperText>
               </FormControl>

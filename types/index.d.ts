@@ -340,6 +340,7 @@ export type IconNames =
   | "lock"
   | "exit"
   | "settings"
+  | "print"
   | "view"
   | "zoom_in"
   | "zoom_out"
@@ -373,39 +374,24 @@ export type IconNames =
   | "sort_up"
   | "sort_down";
 
+// SearchQueryBuilder props
+export type SearchQueryBuilderProps = {
+  setHasSearched: React.Dispatch<React.SetStateAction<boolean>>;
+  setResults: React.Dispatch<Partial<EntityModel>[]>;
+  setIsSearching: React.Dispatch<React.SetStateAction<boolean>>;
+};
+
+// SearchSelect props
+export type SearchSelectProps = {
+  selected: IGenericItem;
+  setSelected: React.Dispatch<React.SetStateAction<IGenericItem>>;
+  onChange?: () => void;
+};
+
 // Response message types
 export type ResponseMessage = {
   success: boolean;
   message: string;
-};
-
-// Query types
-export type QueryOperator = "AND" | "OR";
-export type QueryFocusType = "Entity" | "Project" | "Attribute";
-export type QueryParameters =
-  | "Name"
-  | "Owner"
-  | "Description"
-  | "Projects"
-  | "Origins"
-  | "Products";
-export type QueryQualifier = "Contains" | "Does Not Contain" | "Is" | "Is Not";
-export type QuerySubQualifier =
-  | "Date"
-  | "Text"
-  | "Number"
-  | "URL"
-  | "Entity"
-  | "Select";
-
-export type QueryComponent = {
-  operator?: QueryOperator;
-  focus: QueryFocusType;
-  parameter: QueryParameters;
-  qualifier: QueryQualifier;
-  subQualifier?: QuerySubQualifier;
-  value: string;
-  key: string;
 };
 
 // Authentication types

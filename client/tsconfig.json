@@ -1,5 +1,5 @@
 {
-  "include": ["src", "test/SearchQueryValue.test.tsx"],
+  "include": ["src", "test"],
   "compilerOptions": {
     "module": "esnext",
     "lib": ["dom", "esnext"],
@@ -14,7 +14,7 @@
       "@pages/*": ["src/pages/*"],
       "@types": ["../types"]
     },
-    "rootDirs": ["src", "test"],
+    "rootDirs": ["src"],
     "strict": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,

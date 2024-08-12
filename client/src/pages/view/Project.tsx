@@ -37,7 +37,6 @@ import {
   Spacer,
   Stack,
   Tag,
-  TagCloseButton,
   TagLabel,
   Text,
   Textarea,
@@ -50,6 +49,7 @@ import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 import Dialog from "@components/Dialog";
+import SearchSelect from "@components/SearchSelect";
 
 // Existing and custom types
 import {
@@ -116,8 +116,7 @@ const Project = () => {
   const [newCollaborator, setNewCollaborator] = useState("");
 
   // Entities that can be added
-  const [minimalEntities, setMinimalEntities] = useState([] as IGenericItem[]);
-  const [selectedEntities, setSelectedEntities] = useState([] as string[]);
+  const [selectedEntity, setSelectedEntity] = useState({} as IGenericItem);
 
   // Export modal state and data
   const {
@@ -159,6 +158,7 @@ const Project = () => {
       variables: {
         _id: id,
       },
+      fetchPolicy: "network-only",
     },
   );
 
@@ -215,9 +215,6 @@ const Project = () => {
       setProjectHistory(data.project?.history);
       setProjectCollaborators(data.project?.collaborators || []);
     }
-    if (data?.entities) {
-      setMinimalEntities(data.entities);
-    }
   }, [data]);
 
   // Check to see if data currently exists and refetch if so
@@ -254,14 +251,10 @@ const Project = () => {
 
   /**
    * Callback function to add Entities to a Project
-   * @param {string[]} entities List of Entities to add
+   * @param {IGenericItem} entity Entity to add
    */
-  const addEntities = (entities: string[]): void => {
-    setProjectEntities([
-      ...projectEntities,
-      ...entities.filter((entity) => !_.isEqual("", entity)),
-    ]);
-    setSelectedEntities([]);
+  const addEntities = (entity: IGenericItem): void => {
+    setProjectEntities([...projectEntities, entity._id]);
     onEntitiesClose();
   };
 
@@ -344,6 +337,21 @@ const Project = () => {
       });
     }
     setEditing(false);
+  };
+
+  const handleCancelClick = () => {
+    // Disable editing
+    setEditing(false);
+
+    // Reset Project state values
+    setProject(project);
+    setProjectDescription(projectDescription);
+    setProjectEntities(projectEntities);
+    setProjectHistory(projectHistory);
+    setProjectCollaborators(projectCollaborators);
+
+    // Reload the page for maximum effect
+    window.location.reload();
   };
 
   /**
@@ -610,6 +618,16 @@ const Project = () => {
 
           {/* Buttons */}
           <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
+            {editing && (
+              <Button
+                onClick={handleCancelClick}
+                size={"sm"}
+                colorScheme={"red"}
+                rightIcon={<Icon name={"cross"} />}
+              >
+                Cancel
+              </Button>
+            )}
             <Button
               colorScheme={editing ? "green" : "blue"}
               rightIcon={
@@ -892,90 +910,44 @@ const Project = () => {
         {/* Modal to add Entities */}
         <Modal isOpen={isEntitiesOpen} onClose={onEntitiesClose} isCentered>
           <ModalOverlay />
-          <ModalContent p={"2"} gap={"4"} w={["lg", "xl", "2xl"]}>
+          <ModalContent p={"2"} gap={"0"} w={["md", "lg", "xl"]}>
             {/* Heading and close button */}
-            <ModalHeader p={"2"}>Add Entities</ModalHeader>
+            <ModalHeader p={"2"}>Add Entity</ModalHeader>
             <ModalCloseButton />
 
             <ModalBody p={"2"}>
-              {/* Select component for Entities */}
-              <Flex direction={"column"} p={"4"} gap={"2"}>
-                <FormControl>
-                  <FormLabel>Add Entities</FormLabel>
-                  <Select
-                    title="Select Entity"
-                    placeholder={"Select Entity"}
-                    onChange={(event) => {
-                      const selectedEntity = event.target.value.toString();
-                      if (selectedEntities.includes(selectedEntity)) {
-                        toast({
-                          title: "Warning",
-                          description: "Entity has already been selected.",
-                          status: "warning",
-                          duration: 2000,
-                          position: "bottom-right",
-                          isClosable: true,
-                        });
-                      } else {
-                        setSelectedEntities((selectedEntities) => [
-                          ...selectedEntities,
-                          selectedEntity,
-                        ]);
-                      }
-                    }}
-                  >
-                    {!loading &&
-                      minimalEntities.map((entity) => {
-                        return (
-                          <option key={entity._id} value={entity._id}>
-                            {entity.name}
-                          </option>
-                        );
-                      })}
-                    ;
-                  </Select>
-                </FormControl>
-
-                <Flex direction={"row"} p={"2"} gap={"2"}>
-                  {selectedEntities.map((entity) => {
-                    if (!_.isEqual(entity, "")) {
-                      return (
-                        <Tag key={`tag-${entity}`}>
-                          <Linky id={entity} type={"entities"} />
-                          <TagCloseButton
-                            onClick={() => {
-                              setSelectedEntities(
-                                selectedEntities.filter((selected) => {
-                                  return !_.isEqual(entity, selected);
-                                }),
-                              );
-                            }}
-                          />
-                        </Tag>
-                      );
-                    } else {
-                      return null;
-                    }
-                  })}
-                </Flex>
-              </Flex>
+              <SearchSelect
+                selected={selectedEntity}
+                setSelected={setSelectedEntity}
+              />
             </ModalBody>
 
             <ModalFooter p={"2"}>
-              {/* "Done" button */}
-              <Flex direction={"row"} p={"md"} justify={"center"}>
-                <Button
-                  colorScheme={"green"}
-                  onClick={() => {
-                    if (id) {
-                      // Add the Entities to the Project
-                      addEntities(selectedEntities);
-                    }
-                  }}
-                >
-                  Done
-                </Button>
-              </Flex>
+              <Button
+                colorScheme={"red"}
+                size={"sm"}
+                variant={"outline"}
+                rightIcon={<Icon name={"cross"} />}
+                onClick={onEntitiesClose}
+              >
+                Cancel
+              </Button>
+
+              <Spacer />
+
+              <Button
+                colorScheme={"green"}
+                size={"sm"}
+                rightIcon={<Icon name={"check"} />}
+                onClick={() => {
+                  if (id) {
+                    // Add the Origin to the Entity
+                    addEntities(selectedEntity);
+                  }
+                }}
+              >
+                Done
+              </Button>
             </ModalFooter>
           </ModalContent>
         </Modal>
