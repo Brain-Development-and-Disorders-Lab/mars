@@ -138,6 +138,7 @@ const SearchSelect = (props: SearchSelectProps) => {
             placeholder={"Search"}
             value={inputValue}
             onChange={handleInputChange}
+            autoFocus
           />
           <Flex
             direction={"column"}
