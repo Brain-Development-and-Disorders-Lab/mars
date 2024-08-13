@@ -276,6 +276,15 @@ const Entity = () => {
   const [getFile, { loading: fileLoading, error: fileError }] =
     useLazyQuery(GET_FILE_URL);
 
+  // Query to export an Entity, returning the string contents of a file for download
+  const EXPORT_ENTITY = gql`
+    query ExportEntity($_id: String, $format: String, $fields: [String]) {
+      exportEntity(_id: $_id, format: $format, fields: $fields)
+    }
+  `;
+  const [exportEntity, { loading: exportLoading, error: exportError }] =
+    useLazyQuery(EXPORT_ENTITY);
+
   // Query to create a template Attribute
   const CREATE_ATTRIBUTE = gql`
     mutation CreateAttribute($attribute: AttributeCreateInput) {
@@ -481,7 +490,6 @@ const Entity = () => {
   // Toggles
   const [isUpdating, setIsUpdating] = useState(false);
   const [editing, setEditing] = useState(false);
-  const [exportAll, setExportAll] = useState(false);
 
   // Break up entity data into editable fields
   const [entityData, setEntityData] = useState({} as EntityModel);
@@ -518,7 +526,6 @@ const Entity = () => {
   } = useDisclosure();
   const [exportFields, setExportFields] = useState(["owner"] as string[]);
   const [exportFormat, setExportFormat] = useState("json");
-  const validExportFormats = ["json", "csv"];
 
   const {
     isOpen: isUploadOpen,
@@ -675,7 +682,9 @@ const Entity = () => {
   const projectsTableColumns = [
     {
       id: (info: any) => info.row.original,
-      cell: (info: any) => <Linky id={info.row.original} type={"projects"} />,
+      cell: (info: any) => (
+        <Linky id={info.row.original} type={"projects"} size={"sm"} />
+      ),
       header: "Name",
     },
     {
@@ -1086,53 +1095,48 @@ const Entity = () => {
 
   // Handle clicking the "Download" button
   const handleDownloadClick = async (format: string) => {
-    if (_.includes(validExportFormats, format)) {
-      // Send POST data to generate file
-      const response = await request<any>("POST", `/entities/export/${id}`, {
-        fields: exportAll ? allExportFields : exportFields,
+    // Execute query to export the Entity
+    const response = await exportEntity({
+      variables: {
+        _id: id,
         format: format,
-      });
-      if (response.success) {
-        let responseData = response.data;
-        // Clean the response data if required
-        if (_.isEqual(format, "json")) {
-          responseData = JSON.stringify(responseData, null, "  ");
-        }
+        fields: exportFields,
+      },
+    });
 
-        FileSaver.saveAs(
-          new Blob([responseData]),
-          slugify(`${entityData.name.replace(" ", "")}_export.${format}`),
-        );
-
-        // Close the "Export" modal
-        onExportClose();
-
-        // Reset the export state
-        setExportFields([]);
-
-        toast({
-          title: "Info",
-          description: `Generated ${format.toUpperCase()} file`,
-          status: "info",
-          duration: 2000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-      } else {
-        toast({
-          title: "Error",
-          description: "An error occurred when exporting this Entity",
-          status: "error",
-          duration: 2000,
-          position: "bottom-right",
-          isClosable: true,
-        });
+    if (response.data) {
+      let exportData = response.data.exportEntity;
+      // Clean the response data if required
+      if (_.isEqual(format, "json")) {
+        exportData = JSON.stringify(JSON.parse(exportData), null, "  ");
       }
-    } else {
+
+      FileSaver.saveAs(
+        new Blob([exportData]),
+        slugify(`${entityData.name.replace(" ", "")}_export.${format}`),
+      );
+
+      // Close the "Export" modal
+      onExportClose();
+
+      // Reset the export state
+      setExportFields([]);
+
       toast({
-        title: "Warning",
-        description: `Unsupported export format: ${format}`,
-        status: "warning",
+        title: "Info",
+        description: `Generated ${format.toUpperCase()} file`,
+        status: "info",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
+
+    if (exportError) {
+      toast({
+        title: "Error",
+        description: "An error occurred when exporting this Entity",
+        status: "error",
         duration: 2000,
         position: "bottom-right",
         isClosable: true,
@@ -2041,7 +2045,7 @@ const Entity = () => {
                       return (
                         <Tag key={`tag-${project}`}>
                           <TagLabel>
-                            <Linky id={project} type={"projects"} />
+                            <Linky id={project} type={"projects"} size={"sm"} />
                           </TagLabel>
                           <TagCloseButton
                             onClick={() => {
@@ -2212,12 +2216,6 @@ const Entity = () => {
                 <Text fontSize={"sm"}>
                   Select the Entity information to include in the exported file.
                 </Text>
-                <Checkbox
-                  size={"sm"}
-                  onChange={(event) => setExportAll(event.target.checked)}
-                >
-                  Select All
-                </Checkbox>
               </Flex>
 
               {/* Selection content */}
@@ -2239,9 +2237,7 @@ const Entity = () => {
                             Name: {entityData.name}
                           </Checkbox>
                           <Checkbox
-                            isChecked={
-                              exportAll || _.includes(exportFields, "created")
-                            }
+                            isChecked={_.includes(exportFields, "created")}
                             onChange={(event) =>
                               handleExportCheck("created", event.target.checked)
                             }
@@ -2253,10 +2249,7 @@ const Entity = () => {
                             Owner: {entityData.owner}
                           </Checkbox>
                           <Checkbox
-                            isChecked={
-                              exportAll ||
-                              _.includes(exportFields, "description")
-                            }
+                            isChecked={_.includes(exportFields, "description")}
                             onChange={(event) =>
                               handleExportCheck(
                                 "description",
@@ -2288,10 +2281,10 @@ const Entity = () => {
                             <Checkbox
                               size={"sm"}
                               key={project}
-                              isChecked={
-                                exportAll ||
-                                _.includes(exportFields, `project_${project}`)
-                              }
+                              isChecked={_.includes(
+                                exportFields,
+                                `project_${project}`,
+                              )}
                               onChange={(event) =>
                                 handleExportCheck(
                                   `project_${project}`,
@@ -2300,7 +2293,13 @@ const Entity = () => {
                               }
                             >
                               Project:{" "}
-                              {<Linky id={project} type={"projects"} />}
+                              {
+                                <Linky
+                                  id={project}
+                                  type={"projects"}
+                                  size={"sm"}
+                                />
+                              }
                             </Checkbox>
                           );
                         })}
@@ -2322,10 +2321,10 @@ const Entity = () => {
                             <Checkbox
                               size={"sm"}
                               key={origin._id}
-                              isChecked={
-                                exportAll ||
-                                _.includes(exportFields, `origin_${origin._id}`)
-                              }
+                              isChecked={_.includes(
+                                exportFields,
+                                `origin_${origin._id}`,
+                              )}
                               onChange={(event) =>
                                 handleExportCheck(
                                   `origin_${origin._id}`,
@@ -2352,13 +2351,10 @@ const Entity = () => {
                             <Checkbox
                               size={"sm"}
                               key={product._id}
-                              isChecked={
-                                exportAll ||
-                                _.includes(
-                                  exportFields,
-                                  `product_${product._id}`,
-                                )
-                              }
+                              isChecked={_.includes(
+                                exportFields,
+                                `product_${product._id}`,
+                              )}
                               onChange={(event) =>
                                 handleExportCheck(
                                   `product_${product._id}`,
@@ -2388,13 +2384,10 @@ const Entity = () => {
                             <Checkbox
                               size={"sm"}
                               key={attribute._id}
-                              isChecked={
-                                exportAll ||
-                                _.includes(
-                                  exportFields,
-                                  `attribute_${attribute._id}`,
-                                )
-                              }
+                              isChecked={_.includes(
+                                exportFields,
+                                `attribute_${attribute._id}`,
+                              )}
                               onChange={(event) =>
                                 handleExportCheck(
                                   `attribute_${attribute._id}`,
@@ -2463,11 +2456,12 @@ const Entity = () => {
                     </FormControl>
                   </Flex>
                   <IconButton
+                    icon={<Icon name={"download"} />}
                     colorScheme={"blue"}
                     size={"sm"}
                     aria-label={"Download"}
                     onClick={() => handleDownloadClick(exportFormat)}
-                    icon={<Icon name={"download"} />}
+                    isLoading={exportLoading}
                   />
                 </Flex>
               </Flex>
@@ -2578,7 +2572,11 @@ const Entity = () => {
                                       key={`v_c_${entityVersion.timestamp}_${project}`}
                                     >
                                       <TagLabel>
-                                        <Linky type={"projects"} id={project} />
+                                        <Linky
+                                          type={"projects"}
+                                          id={project}
+                                          size={"sm"}
+                                        />
                                       </TagLabel>
                                     </Tag>
                                   );

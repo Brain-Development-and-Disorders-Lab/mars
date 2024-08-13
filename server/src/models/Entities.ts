@@ -975,7 +975,6 @@ export class Entities {
 
       // Iterate through the list of "fields" and create row representation
       for (let field of exportFields) {
-        console.info("Generating information for field:", field);
         if (_.isEqual(field, "created")) {
           headers.push("Created");
           row.push(dayjs(entity.created).format("DD MMM YYYY").toString());
@@ -1011,7 +1010,15 @@ export class Entities {
             if (_.isEqual(attribute._id, attributeId)) {
               for (let value of attribute.values) {
                 headers.push(`${value?.name} (${attribute?.name})`);
-                row.push(value.data);
+
+                // Some values are JSON data stored as strings
+                if (value.type === "entity") {
+                  row.push(JSON.parse(value.data).name);
+                } else if (value.type === "select") {
+                  row.push(JSON.parse(value.data).selected);
+                } else {
+                  row.push(value.data);
+                }
               }
             }
           });
@@ -1021,6 +1028,8 @@ export class Entities {
       // Collate and format data as a CSV string
       const collated = [headers, row];
       const formatted = Papa.unparse(collated);
+
+      return formatted;
 
       // Create a temporary file, passing the filename as a response
       tmp.file((error, path: string, _fd: number) => {
