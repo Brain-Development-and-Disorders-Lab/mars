@@ -1,3 +1,4 @@
+// Custom types
 import {
   AttributeModel,
   EntityModel,
@@ -5,16 +6,20 @@ import {
   IGenericItem,
   ResponseMessage,
 } from "@types";
-import _ from "lodash";
+
+// Models
+import { Activity } from "./Activity";
+import { Projects } from "./Projects";
+
+// Custom functions
 import { getDatabase } from "../connectors/database";
 import { getIdentifier } from "../util";
-import { Projects } from "./Projects";
+
+// External libraries
+import _ from "lodash";
 import consola from "consola";
 import dayjs from "dayjs";
 import Papa from "papaparse";
-import * as tmp from "tmp";
-import * as fs from "fs";
-import { Activity } from "./Activity";
 
 const ENTITIES_COLLECTION = "entities"; // Collection name
 
@@ -975,7 +980,6 @@ export class Entities {
 
       // Iterate through the list of "fields" and create row representation
       for (let field of exportFields) {
-        console.info("Generating information for field:", field);
         if (_.isEqual(field, "created")) {
           headers.push("Created");
           row.push(dayjs(entity.created).format("DD MMM YYYY").toString());
@@ -1011,7 +1015,15 @@ export class Entities {
             if (_.isEqual(attribute._id, attributeId)) {
               for (let value of attribute.values) {
                 headers.push(`${value?.name} (${attribute?.name})`);
-                row.push(value.data);
+
+                // Some values are JSON data stored as strings
+                if (value.type === "entity") {
+                  row.push(JSON.parse(value.data).name);
+                } else if (value.type === "select") {
+                  row.push(JSON.parse(value.data).selected);
+                } else {
+                  row.push(value.data);
+                }
               }
             }
           });
@@ -1022,19 +1034,7 @@ export class Entities {
       const collated = [headers, row];
       const formatted = Papa.unparse(collated);
 
-      // Create a temporary file, passing the filename as a response
-      tmp.file((error, path: string, _fd: number) => {
-        if (error) {
-          throw error;
-        }
-
-        fs.writeFileSync(path, formatted);
-        consola.success("Generated CSV data for  Entity (id):", entity._id);
-
-        consola.info("File path:", path);
-        consola.info("Formatted:", formatted);
-      });
-      return "csv";
+      return formatted;
     } else {
       return "Invalid format";
     }
