@@ -1,3 +1,4 @@
+// Custom types
 import {
   AttributeModel,
   EntityModel,
@@ -5,16 +6,20 @@ import {
   IGenericItem,
   ResponseMessage,
 } from "@types";
-import _ from "lodash";
+
+// Models
+import { Activity } from "./Activity";
+import { Projects } from "./Projects";
+
+// Custom functions
 import { getDatabase } from "../connectors/database";
 import { getIdentifier } from "../util";
-import { Projects } from "./Projects";
+
+// External libraries
+import _ from "lodash";
 import consola from "consola";
 import dayjs from "dayjs";
 import Papa from "papaparse";
-import * as tmp from "tmp";
-import * as fs from "fs";
-import { Activity } from "./Activity";
 
 const ENTITIES_COLLECTION = "entities"; // Collection name
 
@@ -1030,20 +1035,6 @@ export class Entities {
       const formatted = Papa.unparse(collated);
 
       return formatted;
-
-      // Create a temporary file, passing the filename as a response
-      tmp.file((error, path: string, _fd: number) => {
-        if (error) {
-          throw error;
-        }
-
-        fs.writeFileSync(path, formatted);
-        consola.success("Generated CSV data for  Entity (id):", entity._id);
-
-        consola.info("File path:", path);
-        consola.info("Formatted:", formatted);
-      });
-      return "csv";
     } else {
       return "Invalid format";
     }
