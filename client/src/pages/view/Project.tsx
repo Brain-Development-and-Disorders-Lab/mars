@@ -71,7 +71,6 @@ import dayjs from "dayjs";
 import DataTable from "@components/DataTable";
 import FileSaver from "file-saver";
 import slugify from "slugify";
-import consola from "consola";
 
 const Project = () => {
   const { id } = useParams();
@@ -126,7 +125,6 @@ const Project = () => {
   } = useDisclosure();
   const [exportFields, setExportFields] = useState([] as string[]);
   const [exportFormat, setExportFormat] = useState("json");
-  const validExportFormats = ["json", "csv", "txt"];
 
   useEffect(() => {
     if (isLoaded) {
@@ -445,53 +443,42 @@ const Project = () => {
 
   // Handle clicking the "Download" button
   const handleDownloadClick = async (format: string) => {
-    if (_.includes(validExportFormats, format)) {
-      // Send POST data to generate file
-      const response = await exportProject({
-        variables: {
-          _id: id,
-          fields: exportFields,
-          format: format,
-        },
-      });
+    // Send query to generate data
+    const response = await exportProject({
+      variables: {
+        _id: id,
+        fields: exportFields,
+        format: format,
+      },
+    });
 
-      if (response.data.exportProject) {
-        FileSaver.saveAs(
-          new Blob([response.data.exportProject]),
-          slugify(`${project.name.replace(" ", "")}_export.${format}`),
-        );
+    if (response.data.exportProject) {
+      FileSaver.saveAs(
+        new Blob([response.data.exportProject]),
+        slugify(`${project.name.replace(" ", "")}_export.${format}`),
+      );
 
-        // Close the "Export" modal
-        onExportClose();
+      // Close the "Export" modal
+      onExportClose();
 
-        // Reset the export state
-        setExportFields([]);
+      // Reset the export state
+      setExportFields([]);
 
-        toast({
-          title: "Info",
-          description: `Generated ${format.toUpperCase()} file`,
-          status: "info",
-          duration: 2000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-      }
-
-      if (exportError) {
-        toast({
-          title: "Error",
-          description: "An error occurred exporting this Project",
-          status: "error",
-          duration: 2000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-      }
-    } else {
       toast({
-        title: "Warning",
-        description: `Unsupported export format: ${format}`,
-        status: "warning",
+        title: "Info",
+        description: `Generated ${format.toUpperCase()} file`,
+        status: "info",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
+
+    if (exportError) {
+      toast({
+        title: "Error",
+        description: "An error occurred exporting this Project",
+        status: "error",
         duration: 2000,
         position: "bottom-right",
         isClosable: true,
@@ -521,6 +508,30 @@ const Project = () => {
     }
   };
 
+  /**
+   * Remove an Entity from the Project
+   * @param _id Identifier of Entity to remove
+   */
+  const handleRemoveEntity = (_id: string) => {
+    // Filter out the removed Entity
+    const updatedEntities = projectEntities.filter((entity) => {
+      return !_.isEqual(entity, _id);
+    });
+    setProjectEntities(updatedEntities);
+  };
+
+  /**
+   * Remove multiple Entities from a Project
+   * @param entities Identifiers of Entities to remove
+   */
+  const handleRemoveEntities = (entities: string[]) => {
+    // Filter out the removed Entities
+    const updatedEntities = projectEntities.filter((entity) => {
+      return !_.includes(entities, entity);
+    });
+    setProjectEntities(updatedEntities);
+  };
+
   // Define the columns for Entities listing
   const entitiesColumns = [
     {
@@ -540,11 +551,7 @@ const Project = () => {
                 icon={<Icon name={"delete"} />}
                 aria-label={"Remove entity"}
                 colorScheme={"red"}
-                onClick={() => {
-                  consola.warn(
-                    "Removing Entities from a Project has not been implemented!",
-                  );
-                }}
+                onClick={() => handleRemoveEntity(info.row.original)}
                 size={"sm"}
               />
             ) : (
@@ -571,11 +578,9 @@ const Project = () => {
       action(table, rows) {
         const entitiesToRemove: string[] = [];
         for (let rowIndex of Object.keys(rows)) {
-          entitiesToRemove.push(table.getRow(rowIndex).original.id);
+          entitiesToRemove.push(table.getRow(rowIndex).original);
         }
-        consola.warn(
-          "Removing Entities from a Project has not been implemented!",
-        );
+        handleRemoveEntities(entitiesToRemove);
       },
     },
   ];
