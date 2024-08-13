@@ -1526,16 +1526,16 @@ const Entity = () => {
                   {/* "Created" and "Owner" fields */}
                   <Flex gap={"2"} direction={"column"} basis={"40%"}>
                     <Text fontWeight={"bold"}>Created</Text>
-                    <Flex align={"center"} gap={"2"}>
+                    <Flex align={"center"} gap={"1"}>
                       <Icon name={"v_date"} size={"sm"} />
-                      <Text>
+                      <Text fontSize={"sm"}>
                         {dayjs(entityData.created).format("DD MMM YYYY")}
                       </Text>
                     </Flex>
                     <Text fontWeight={"bold"}>Owner</Text>
                     <Flex>
                       <Tag colorScheme={"green"}>
-                        <TagLabel>{entityData.owner}</TagLabel>
+                        <TagLabel fontSize={"sm"}>{entityData.owner}</TagLabel>
                       </Tag>
                     </Flex>
                   </Flex>

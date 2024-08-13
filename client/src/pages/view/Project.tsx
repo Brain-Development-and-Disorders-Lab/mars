@@ -125,7 +125,6 @@ const Project = () => {
     onClose: onExportClose,
   } = useDisclosure();
   const [exportFields, setExportFields] = useState([] as string[]);
-  const [exportAll, setExportAll] = useState(false);
   const [exportFormat, setExportFormat] = useState("json");
   const validExportFormats = ["json", "csv", "txt"];
 
@@ -444,15 +443,6 @@ const Project = () => {
     }
   };
 
-  // A list of all fields that can be exported, generated when the interface is opened
-  const allExportFields = [
-    "name",
-    "created",
-    "owner",
-    "collaborators",
-    "description",
-  ];
-
   // Handle clicking the "Download" button
   const handleDownloadClick = async (format: string) => {
     if (_.includes(validExportFormats, format)) {
@@ -460,7 +450,7 @@ const Project = () => {
       const response = await exportProject({
         variables: {
           _id: id,
-          fields: exportAll ? allExportFields : exportFields,
+          fields: exportFields,
           format: format,
         },
       });
@@ -535,7 +525,9 @@ const Project = () => {
   const entitiesColumns = [
     {
       id: (info: any) => info.row.original,
-      cell: (info: any) => <Linky id={info.row.original} type={"entities"} />,
+      cell: (info: any) => (
+        <Linky id={info.row.original} type={"entities"} size={"sm"} />
+      ),
       header: "Name",
     },
     {
@@ -727,16 +719,16 @@ const Project = () => {
                 <Flex gap={"2"} direction={"row"}>
                   <Flex gap={"2"} direction={"column"} basis={"40%"}>
                     <Text fontWeight={"bold"}>Created</Text>
-                    <Flex align={"center"} gap={"2"}>
+                    <Flex align={"center"} gap={"1"}>
                       <Icon name={"v_date"} size={"sm"} />
-                      <Text>
+                      <Text fontSize={"sm"}>
                         {dayjs(project.created).format("DD MMM YYYY")}
                       </Text>
                     </Flex>
                     <Text fontWeight={"bold"}>Owner</Text>
                     <Flex>
                       <Tag colorScheme={"green"}>
-                        <TagLabel>{project.owner}</TagLabel>
+                        <TagLabel fontSize={"sm"}>{project.owner}</TagLabel>
                       </Tag>
                     </Flex>
                   </Flex>
@@ -744,6 +736,7 @@ const Project = () => {
                   <Flex gap={"2"} direction={"column"} basis={"60%"}>
                     <Text fontWeight={"bold"}>Description</Text>
                     <Textarea
+                      size={"sm"}
                       value={projectDescription}
                       onChange={(event) => {
                         setProjectDescription(event.target.value);
@@ -966,15 +959,10 @@ const Project = () => {
 
             <ModalBody px={"2"}>
               <Flex w={"100%"} direction={"column"} py={"1"} gap={"2"}>
-                <Text>
+                <Text fontSize={"sm"}>
                   Select the Project information to include in the exported
                   file.
                 </Text>
-                <Checkbox
-                  onChange={(event) => setExportAll(event.target.checked)}
-                >
-                  Select All
-                </Checkbox>
               </Flex>
 
               {/* Selection content */}
@@ -983,7 +971,7 @@ const Project = () => {
                 p={"2"}
                 gap={"4"}
                 rounded={"md"}
-                border={"2px"}
+                border={"1px"}
                 borderColor={"gray.200"}
               >
                 <Flex direction={"column"} gap={"2"}>
@@ -992,13 +980,12 @@ const Project = () => {
                     {!loading ? (
                       <CheckboxGroup>
                         <Stack spacing={2} direction={"column"}>
-                          <Checkbox disabled defaultChecked>
+                          <Checkbox disabled defaultChecked size={"sm"}>
                             Name: {project.name}
                           </Checkbox>
                           <Checkbox
-                            isChecked={
-                              exportAll || _.includes(exportFields, "created")
-                            }
+                            size={"sm"}
+                            isChecked={_.includes(exportFields, "created")}
                             onChange={(event) =>
                               handleExportCheck("created", event.target.checked)
                             }
@@ -1007,9 +994,8 @@ const Project = () => {
                             {dayjs(project.created).format("DD MMM YYYY")}
                           </Checkbox>
                           <Checkbox
-                            isChecked={
-                              exportAll || _.includes(exportFields, "owner")
-                            }
+                            size={"sm"}
+                            isChecked={_.includes(exportFields, "owner")}
                             onChange={(event) =>
                               handleExportCheck("owner", event.target.checked)
                             }
@@ -1017,10 +1003,8 @@ const Project = () => {
                             Owner: {project.owner}
                           </Checkbox>
                           <Checkbox
-                            isChecked={
-                              exportAll ||
-                              _.includes(exportFields, "description")
-                            }
+                            size={"sm"}
+                            isChecked={_.includes(exportFields, "description")}
                             onChange={(event) =>
                               handleExportCheck(
                                 "description",
@@ -1039,7 +1023,7 @@ const Project = () => {
                         </Stack>
                       </CheckboxGroup>
                     ) : (
-                      <Text>Loading details...</Text>
+                      <Text fontSize={"sm"}>Loading details...</Text>
                     )}
                   </FormControl>
                 </Flex>
@@ -1050,21 +1034,23 @@ const Project = () => {
               <Flex
                 direction={"row"}
                 w={"70%"}
-                gap={"4"}
+                gap={"2"}
                 align={"center"}
                 justifySelf={"left"}
               >
                 <Icon name={"info"} />
                 {_.isEqual(exportFormat, "json") && (
-                  <Text>JSON files can be re-imported into Storacuity.</Text>
+                  <Text fontSize={"sm"}>
+                    JSON files can be re-imported into Storacuity.
+                  </Text>
                 )}
                 {_.isEqual(exportFormat, "csv") && (
-                  <Text>
+                  <Text fontSize={"sm"}>
                     CSV spreadsheets can be used by other applications.
                   </Text>
                 )}
               </Flex>
-              <Flex direction={"column"} w={"30%"} gap={"2"}>
+              <Flex direction={"column"} w={"30%"} gap={"2"} p={"0"}>
                 {/* "Download" button */}
                 <Flex
                   direction={"row"}
@@ -1076,6 +1062,7 @@ const Project = () => {
                   <Flex>
                     <FormControl>
                       <Select
+                        size={"sm"}
                         value={exportFormat}
                         onChange={(event) =>
                           setExportFormat(event.target.value)
@@ -1091,6 +1078,7 @@ const Project = () => {
                     </FormControl>
                   </Flex>
                   <IconButton
+                    size={"sm"}
                     colorScheme={"blue"}
                     aria-label={"Download"}
                     onClick={() => handleDownloadClick(exportFormat)}

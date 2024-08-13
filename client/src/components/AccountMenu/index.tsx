@@ -20,25 +20,12 @@ import Icon from "@components/Icon";
 import { useNavigate } from "react-router-dom";
 
 // Utility functions and libraries
-import { request } from "@database/functions";
 import { useToken } from "src/authentication/useToken";
-import dayjs from "dayjs";
-import FileSaver from "file-saver";
-import slugify from "slugify";
 
 const AccountMenu = () => {
   const navigate = useNavigate();
 
   const [token, setToken] = useToken();
-
-  const performBackup = async () => {
-    // Retrieve all data stored in the system
-    const response = request("GET", "/data/backup");
-    FileSaver.saveAs(
-      new Blob([JSON.stringify(response, null, "  ")]),
-      slugify(`backup_${dayjs(Date.now()).toJSON()}.json`),
-    );
-  };
 
   const performLogout = () => {
     // Invalidate the token and refresh the page
@@ -103,22 +90,6 @@ const AccountMenu = () => {
                 </Tag>
               </Flex>
             </Flex>
-          </MenuGroup>
-          <MenuDivider />
-
-          <MenuGroup title={"System"}>
-            <MenuItem onClick={() => performBackup()}>
-              <Flex direction={"row"} align={"center"} gap={"2"} ml={"2"}>
-                <Icon name={"download"} />
-                Backup
-              </Flex>
-            </MenuItem>
-            <MenuItem onClick={() => navigate(`/settings`)}>
-              <Flex direction={"row"} align={"center"} gap={"2"} ml={"2"}>
-                <Icon name={"settings"} />
-                Settings
-              </Flex>
-            </MenuItem>
           </MenuGroup>
           <MenuDivider />
 
