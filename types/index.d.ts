@@ -304,6 +304,13 @@ export type DataTableAction = {
   alwaysEnabled?: boolean; // Enable the action at all times, regardless if any rows selected
 };
 
+// PreviewModal props
+export type PreviewModalProps = {
+  src: string;
+  name: string;
+  type: "image" | "document";
+};
+
 // Icon component
 export type IconNames =
   // Default

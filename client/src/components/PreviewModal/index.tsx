@@ -1,14 +1,25 @@
 import React from "react";
 import { useState } from "react";
-
-import { Flex, IconButton, Image, Text } from "@chakra-ui/react";
+import { Flex, IconButton, Image, Spacer, Text } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 
-import { pdfjs, Document, Page } from "react-pdf";
-import _ from "lodash";
+// Custom types
+import { PreviewModalProps } from "@types";
 
+// PDF preview imports
+import { pdfjs, Document, Page } from "react-pdf";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
+
+// Zoom and pan import for image previews
+import {
+  TransformComponent,
+  TransformWrapper,
+  useControls,
+} from "react-zoom-pan-pinch";
+
+// Utility functions
+import _ from "lodash";
 
 // Setup PDF worker
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
@@ -16,7 +27,43 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   import.meta.url,
 ).toString();
 
-const PreviewModal = (props: { src: string; type: "image" | "document" }) => {
+const ImageControls = () => {
+  // Controls for image preview
+  const { zoomIn, zoomOut, resetTransform } = useControls();
+
+  return (
+    <Flex
+      direction={"row"}
+      gap={"2"}
+      pb={"0"}
+      align={"center"}
+      justify={"center"}
+    >
+      <IconButton
+        size={"sm"}
+        icon={<Icon name={"zoom_out"} />}
+        colorScheme={"blue"}
+        aria-label={"Zoom out"}
+        onClick={() => zoomOut()}
+      />
+      <IconButton
+        size={"sm"}
+        icon={<Icon name={"zoom_in"} />}
+        colorScheme={"blue"}
+        aria-label={"Zoom in"}
+        onClick={() => zoomIn()}
+      />
+      <IconButton
+        size={"sm"}
+        icon={<Icon name={"reload"} />}
+        aria-label={"Reset"}
+        onClick={() => resetTransform()}
+      />
+    </Flex>
+  );
+};
+
+const PreviewModal = (props: PreviewModalProps) => {
   // Page view state
   const [previewPages, setPreviewPages] = useState(0);
   const [previewIndex, setPreviewIndex] = useState(1);
@@ -42,83 +89,63 @@ const PreviewModal = (props: { src: string; type: "image" | "document" }) => {
     }
   };
 
-  // Image manipulation state
-  const minZoom = 10;
-  const maxZoom = 200;
-  const zoomDelta = 10;
-  const [zoomLevel, setZoomLevel] = useState(100);
-
-  const rotateDelta = 90;
-  const [rotateLevel, setRotateLevel] = useState(0);
-
-  const increaseZoom = () => {
-    if (zoomLevel + zoomDelta <= maxZoom) {
-      setZoomLevel(zoomLevel + zoomDelta);
-    }
-  };
-
-  const decreaseZoom = () => {
-    if (zoomLevel - zoomDelta >= minZoom) {
-      setZoomLevel(zoomLevel - zoomDelta);
-    }
-  };
-
-  const rotate = () => {
-    if (rotateLevel + rotateDelta >= 360) {
-      setRotateLevel(0);
-    } else {
-      setRotateLevel(rotateLevel + rotateDelta);
-    }
-  };
-
   return (
     <Flex>
       {_.isEqual(props.type, "image") && (
-        <Flex direction={"column"} gap={"4"} maxH={"70vh"}>
-          <Flex overflow={"auto"} h={"100%"}>
-            <Image
-              src={props.src}
-              w={"100%"}
-              objectFit={"contain"}
-              style={{
-                transform: `scale(${zoomLevel / 100})`,
-                rotate: `${rotateLevel}deg`,
-              }}
-            />
-          </Flex>
-
-          <Flex
-            direction={"row"}
-            gap={"4"}
-            align={"center"}
-            justify={"center"}
-            pb={"2"}
-          >
-            <IconButton
-              aria-label={"Zoom out"}
-              onClick={decreaseZoom}
-              icon={<Icon name={"zoom_out"} />}
-              isDisabled={zoomLevel === minZoom}
-            />
-            <Text>{zoomLevel}%</Text>
-            <IconButton
-              aria-label={"Zoom in"}
-              onClick={increaseZoom}
-              icon={<Icon name={"zoom_in"} />}
-              isDisabled={zoomLevel === maxZoom}
-            />
-            <IconButton
-              aria-label={"Rotate"}
-              onClick={rotate}
-              icon={<Icon name={"reload"} />}
-            />
-          </Flex>
+        <Flex direction={"column"} gap={"2"}>
+          <TransformWrapper>
+            <Flex direction={"row"} gap={"1"} align={"center"}>
+              <Text fontSize={"sm"} fontWeight={"semibold"}>
+                Attachment Name:
+              </Text>
+              <Text fontSize={"sm"}>
+                {_.truncate(props.name, { length: 32 })}
+              </Text>
+              <Spacer />
+              <Text fontSize={"sm"} fontWeight={"semibold"}>
+                Attachment Type:
+              </Text>
+              <Text fontSize={"sm"}>{props.type}</Text>
+            </Flex>
+            <Flex
+              rounded={"md"}
+              border={"1px"}
+              borderColor={"gray.200"}
+              mb={"2"}
+            >
+              <TransformComponent>
+                <Image src={props.src} w={"100%"} objectFit={"contain"} />
+              </TransformComponent>
+            </Flex>
+            <ImageControls />
+          </TransformWrapper>
         </Flex>
       )}
 
       {_.isEqual(props.type, "document") && (
-        <Flex direction={"column"} gap={"4"} maxH={"70vh"}>
-          <Flex overflowY={"scroll"}>
+        <Flex direction={"column"} gap={"2"}>
+          <Flex direction={"row"} gap={"1"} align={"center"}>
+            <Text fontSize={"sm"} fontWeight={"semibold"}>
+              Attachment Name:
+            </Text>
+            <Text fontSize={"sm"}>
+              {_.truncate(props.name, { length: 32 })}
+            </Text>
+            <Spacer />
+            <Text fontSize={"sm"} fontWeight={"semibold"}>
+              Attachment Type:
+            </Text>
+            <Text fontSize={"sm"}>{props.type}</Text>
+          </Flex>
+          <Flex
+            overflowY={"scroll"}
+            maxH={"70vh"}
+            justify={"center"}
+            rounded={"md"}
+            border={"1px"}
+            borderColor={"gray.200"}
+            mb={"2"}
+          >
             <Document
               file={props.src}
               onLoadSuccess={onPreviewDocumentLoadSuccess}
@@ -129,22 +156,26 @@ const PreviewModal = (props: { src: string; type: "image" | "document" }) => {
 
           <Flex
             direction={"row"}
-            gap={"4"}
+            gap={"2"}
+            pb={"0"}
             align={"center"}
             justify={"center"}
-            pb={"2"}
           >
             <IconButton
-              aria-label={"Go back"}
+              aria-label={"Previous page"}
+              size={"sm"}
+              colorScheme={"blue"}
               onClick={previousPage}
               icon={<Icon name={"c_left"} />}
               isDisabled={previewIndex === 1}
             />
-            <Text>
+            <Text fontSize={"sm"} fontWeight={"semibold"}>
               Page {previewIndex} of {previewPages}
             </Text>
             <IconButton
-              aria-label={"Go forward"}
+              aria-label={"Next page"}
+              size={"sm"}
+              colorScheme={"blue"}
               onClick={nextPage}
               icon={<Icon name={"c_right"} />}
               isDisabled={previewIndex === previewPages}
