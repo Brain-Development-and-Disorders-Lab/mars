@@ -87,7 +87,15 @@ const startServer = async () => {
   });
   await server.start();
 
-  // Configure Express, enable CORS middleware
+  // Serve static resources, enable CORS middleware
+  app.use(
+    "/static",
+    cors<cors.CorsRequest>(),
+    express.static("./static"),
+    helmet(),
+  );
+
+  // Configure Express, GraphQL, and enable CORS middleware
   const origins =
     process.env.NODE_ENV !== "production"
       ? ["http://localhost:8080"]
@@ -104,14 +112,6 @@ const startServer = async () => {
         };
       },
     }),
-    helmet(),
-  );
-
-  // Serve static resources
-  app.use(
-    "/static",
-    cors<cors.CorsRequest>(),
-    express.static("./static"),
     helmet(),
   );
 
