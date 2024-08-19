@@ -63,7 +63,7 @@ import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 import Uploader from "@components/Uploader";
 import Values from "@components/Values";
-import Preview from "@components/Preview";
+import PreviewModal from "@components/PreviewModal";
 import AttributeViewButton from "@components/AttributeViewButton";
 import SearchSelect from "@components/SearchSelect";
 import { createColumnHelper } from "@tanstack/react-table";
@@ -2508,9 +2508,9 @@ const Entity = () => {
                 {!isPreviewLoaded || fileLoading ? (
                   <Spinner />
                 ) : _.isEqual(previewType, "application/pdf") ? (
-                  <Preview src={previewSource} type={"document"} />
+                  <PreviewModal src={previewSource} type={"document"} />
                 ) : (
-                  <Preview src={previewSource} type={"image"} />
+                  <PreviewModal src={previewSource} type={"image"} />
                 )}
               </Flex>
             </ModalBody>
