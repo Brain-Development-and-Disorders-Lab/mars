@@ -1360,6 +1360,14 @@ const Entity = () => {
     onAddProjectsClose();
   };
 
+  /**
+   * Click handler for "Cancel" button when adding Entities to a Project
+   */
+  const onCancelAddProjectsClick = () => {
+    setSelectedProjects([]);
+    onAddProjectsClose();
+  };
+
   return (
     <Content
       isError={!_.isUndefined(error)}
@@ -1824,170 +1832,161 @@ const Entity = () => {
           isCentered
         >
           <ModalOverlay />
-          <ModalContent p={"2"} gap={"4"}>
+          <ModalContent p={"2"} gap={"2"}>
             <ModalHeader p={"2"}>Add Attribute</ModalHeader>
             <ModalCloseButton />
 
             <ModalBody p={"2"}>
               {/* Attribute creation */}
-              <Flex justify={"center"}>
+              <Flex direction={"column"} gap={"2"} pb={"2"} justify={"center"}>
+                <Text fontSize={"sm"}>
+                  Specify some basic details about this Attribute. The metadata
+                  associated with this Entity should be specified using Values.
+                </Text>
+
+                <Select
+                  size={"sm"}
+                  placeholder={"Use template"}
+                  onChange={(event) => {
+                    if (!_.isEqual(event.target.value.toString(), "")) {
+                      for (let attribute of attributes) {
+                        if (
+                          _.isEqual(
+                            event.target.value.toString(),
+                            attribute._id,
+                          )
+                        ) {
+                          setAttributeName(attribute.name);
+                          setAttributeDescription(attribute.description);
+                          setAttributeValues(() => [...attribute.values]);
+                          break;
+                        }
+                      }
+                    }
+                  }}
+                >
+                  {!loading &&
+                    attributes.map((attribute) => {
+                      return (
+                        <option key={attribute._id} value={attribute._id}>
+                          {attribute.name}
+                        </option>
+                      );
+                    })}
+                  ;
+                </Select>
+                <Text fontSize="sm">
+                  Don't see the attribute you're looking for? You can
+                  <Link
+                    onClick={() => navigate("/create/attribute")}
+                    style={{
+                      color: "#3182ce",
+                      marginLeft: "5px",
+                      marginRight: "5px",
+                      textDecoration: "underline",
+                    }}
+                  >
+                    create
+                  </Link>
+                  a new attribute template here.
+                </Text>
+
                 <Flex
                   direction={"column"}
-                  gap={"6"}
-                  pb={"6"}
+                  gap={"2"}
+                  w={"100%"}
                   justify={"center"}
                 >
-                  <Flex direction={"column"}>
-                    <Heading fontWeight={"semibold"} size={"md"}>
-                      Details
-                    </Heading>
-                    <Text>
-                      Specify some basic details about this Attribute. The
-                      metadata associated with this Entity should be specified
-                      using Values.
-                    </Text>
-                  </Flex>
-
-                  <Stack>
-                    <Select
-                      placeholder={"Use template"}
-                      onChange={(event) => {
-                        if (!_.isEqual(event.target.value.toString(), "")) {
-                          for (let attribute of attributes) {
-                            if (
-                              _.isEqual(
-                                event.target.value.toString(),
-                                attribute._id,
-                              )
-                            ) {
-                              setAttributeName(attribute.name);
-                              setAttributeDescription(attribute.description);
-                              setAttributeValues(() => [...attribute.values]);
-                              break;
-                            }
-                          }
+                  <Flex direction={"row"} gap={"2"} wrap={["wrap", "nowrap"]}>
+                    <FormControl isRequired>
+                      <FormLabel fontSize={"sm"}>Name</FormLabel>
+                      <Input
+                        size={"sm"}
+                        placeholder={"Name"}
+                        id="formName"
+                        value={attributeName}
+                        onChange={(event) =>
+                          setAttributeName(event.target.value)
                         }
-                      }}
-                    >
-                      {!loading &&
-                        attributes.map((attribute) => {
-                          return (
-                            <option key={attribute._id} value={attribute._id}>
-                              {attribute.name}
-                            </option>
-                          );
-                        })}
-                      ;
-                    </Select>
-                    <Text fontSize="sm">
-                      Don't see the attribute you're looking for? You can
-                      <Link
-                        onClick={() => navigate("/create/attribute")}
-                        style={{
-                          color: "#3182ce",
-                          marginLeft: "5px",
-                          marginRight: "5px",
-                          textDecoration: "underline",
-                        }}
-                      >
-                        create a new attribute template
-                      </Link>
-                      here.
-                    </Text>
-                  </Stack>
+                        required
+                      />
+                      {isAttributeNameError && (
+                        <FormErrorMessage>
+                          A name must be specified for the Attribute.
+                        </FormErrorMessage>
+                      )}
+                    </FormControl>
 
-                  <Flex
-                    direction={"column"}
-                    gap={"2"}
-                    w={"100%"}
-                    justify={"center"}
-                  >
-                    <Flex direction={"row"} gap={"4"} wrap={["wrap", "nowrap"]}>
-                      <FormControl isRequired>
-                        <FormLabel>Name</FormLabel>
-                        <Input
-                          placeholder={"Name"}
-                          id="formName"
-                          value={attributeName}
-                          onChange={(event) =>
-                            setAttributeName(event.target.value)
-                          }
-                          required
-                        />
-                        {isAttributeNameError && (
-                          <FormErrorMessage>
-                            A name must be specified for the Attribute.
-                          </FormErrorMessage>
-                        )}
-                      </FormControl>
-
-                      <FormControl isRequired>
-                        <FormLabel>Description</FormLabel>
-                        <Textarea
-                          value={attributeDescription}
-                          placeholder={"Attribute Description"}
-                          id="formDescription"
-                          onChange={(event) =>
-                            setAttributeDescription(event.target.value)
-                          }
-                        />
-                        {isAttributeDescriptionError && (
-                          <FormErrorMessage>
-                            A description should be provided for the Attribute.
-                          </FormErrorMessage>
-                        )}
-                      </FormControl>
-                    </Flex>
-
-                    <Flex>
-                      <FormControl isRequired isInvalid={isAttributeValueError}>
-                        <FormLabel>Values</FormLabel>
-                        <Values
-                          viewOnly={false}
-                          values={attributeValues}
-                          setValues={setAttributeValues}
-                        />
-                      </FormControl>
-                    </Flex>
+                    <FormControl isRequired>
+                      <FormLabel fontSize={"sm"}>Description</FormLabel>
+                      <Textarea
+                        size={"sm"}
+                        value={attributeDescription}
+                        placeholder={"Attribute Description"}
+                        id="formDescription"
+                        onChange={(event) =>
+                          setAttributeDescription(event.target.value)
+                        }
+                      />
+                      {isAttributeDescriptionError && (
+                        <FormErrorMessage>
+                          A description should be provided for the Attribute.
+                        </FormErrorMessage>
+                      )}
+                    </FormControl>
                   </Flex>
 
-                  {/* "Cancel" button */}
-                  <Flex direction={"row"} p={"md"} justify={"center"} gap={"8"}>
-                    <Button
-                      colorScheme={"red"}
-                      size={"sm"}
-                      variant={"outline"}
-                      rightIcon={<Icon name={"cross"} />}
-                      onClick={onAddAttributesClose}
-                    >
-                      Cancel
-                    </Button>
-
-                    <Button
-                      colorScheme={"blue"}
-                      size={"sm"}
-                      variant={"outline"}
-                      rightIcon={<Icon name={"add"} />}
-                      onClick={onSaveAsTemplate}
-                      isDisabled={isAttributeError}
-                      isLoading={loadingAttributeCreate}
-                    >
-                      Save as Template
-                    </Button>
-
-                    <Button
-                      colorScheme={"green"}
-                      size={"sm"}
-                      rightIcon={<Icon name={"check"} />}
-                      isDisabled={isAttributeError}
-                      onClick={() => {
-                        addAttribute();
-                      }}
-                    >
-                      Done
-                    </Button>
+                  <Flex>
+                    <FormControl isRequired isInvalid={isAttributeValueError}>
+                      <FormLabel fontSize={"sm"}>Values</FormLabel>
+                      <Values
+                        viewOnly={false}
+                        values={attributeValues}
+                        setValues={setAttributeValues}
+                      />
+                    </FormControl>
                   </Flex>
                 </Flex>
+              </Flex>
+
+              {/* Modal buttons */}
+              <Flex direction={"row"} justify={"center"} gap={"2"}>
+                {/* "Cancel" button */}
+                <Button
+                  colorScheme={"red"}
+                  size={"sm"}
+                  variant={"outline"}
+                  rightIcon={<Icon name={"cross"} />}
+                  onClick={onAddAttributesClose}
+                >
+                  Cancel
+                </Button>
+
+                <Spacer />
+
+                <Button
+                  colorScheme={"blue"}
+                  size={"sm"}
+                  variant={"outline"}
+                  rightIcon={<Icon name={"add"} />}
+                  onClick={onSaveAsTemplate}
+                  isDisabled={isAttributeError}
+                  isLoading={loadingAttributeCreate}
+                >
+                  Save as Template
+                </Button>
+
+                <Button
+                  colorScheme={"green"}
+                  size={"sm"}
+                  rightIcon={<Icon name={"check"} />}
+                  isDisabled={isAttributeError}
+                  onClick={() => {
+                    addAttribute();
+                  }}
+                >
+                  Done
+                </Button>
               </Flex>
             </ModalBody>
           </ModalContent>
@@ -2000,22 +1999,23 @@ const Entity = () => {
           isCentered
         >
           <ModalOverlay />
-          <ModalContent p={"2"} gap={"4"} w={["lg", "xl", "2xl"]}>
+          <ModalContent p={"2"} gap={"2"} w={["lg", "xl", "2xl"]}>
             {/* Heading and close button */}
-            <ModalHeader p={"2"}>Add to Project</ModalHeader>
+            <ModalHeader p={"2"}>Add Entity to Projects</ModalHeader>
             <ModalCloseButton />
 
             <ModalBody p={"2"}>
               {/* Select component for Projects */}
               <Flex direction={"column"} gap={"2"}>
                 <FormControl>
-                  <FormLabel>Add Entity to Projects</FormLabel>
                   <Select
-                    title="Select Project"
+                    size={"sm"}
+                    title={"Select Project"}
                     placeholder={"Select Project"}
                     onChange={(event) => {
                       const selectedProject = event.target.value.toString();
                       if (selectedProjects.includes(selectedProject)) {
+                        // Check that the selected Project has not already been selected
                         toast({
                           title: "Warning",
                           description: "Project has already been selected.",
@@ -2024,7 +2024,8 @@ const Entity = () => {
                           position: "bottom-right",
                           isClosable: true,
                         });
-                      } else {
+                      } else if (!_.isEqual(selectedProject, "")) {
+                        // Add the selected Project if not the default option
                         setSelectedProjects([
                           ...selectedProjects,
                           selectedProject,
@@ -2033,56 +2034,89 @@ const Entity = () => {
                     }}
                   >
                     {!loading &&
-                      projectData.map((project) => {
-                        return (
-                          <option key={project._id} value={project._id}>
-                            {project.name}
-                          </option>
-                        );
+                      projectData.map((project: IGenericItem) => {
+                        if (
+                          !_.includes(selectedProjects, project._id) &&
+                          !_.includes(entityProjects, project._id)
+                        ) {
+                          // Only include Projects that haven't been selected or the Entity is currently present in
+                          return (
+                            <option key={project._id} value={project._id}>
+                              {project.name}
+                            </option>
+                          );
+                        } else {
+                          return null;
+                        }
                       })}
-                    ;
                   </Select>
                 </FormControl>
 
-                <Flex direction={"row"} p={"2"} gap={"2"}>
-                  {selectedProjects.map((project) => {
-                    if (!_.isEqual(project, "")) {
-                      return (
-                        <Tag key={`tag-${project}`}>
-                          <TagLabel>
-                            <Linky id={project} type={"projects"} size={"sm"} />
-                          </TagLabel>
-                          <TagCloseButton
-                            onClick={() => {
-                              setSelectedProjects(
-                                selectedProjects.filter((selected) => {
-                                  return !_.isEqual(project, selected);
-                                }),
-                              );
-                            }}
-                          />
-                        </Tag>
-                      );
-                    } else {
-                      return null;
-                    }
-                  })}
+                <Flex
+                  direction={"row"}
+                  gap={"2"}
+                  p={"2"}
+                  align={"center"}
+                  justify={"center"}
+                  rounded={"md"}
+                  border={"1px"}
+                  borderColor={"gray.200"}
+                  minH={"100px"}
+                >
+                  {selectedProjects.length > 0 ? (
+                    selectedProjects.map((project) => {
+                      if (!_.isEqual(project, "")) {
+                        return (
+                          <Tag key={`tag-${project}`}>
+                            <TagLabel>
+                              <Linky
+                                id={project}
+                                type={"projects"}
+                                size={"sm"}
+                              />
+                            </TagLabel>
+                            <TagCloseButton
+                              onClick={() => {
+                                setSelectedProjects([
+                                  ...selectedProjects.filter((selected) => {
+                                    return !_.isEqual(project, selected);
+                                  }),
+                                ]);
+                              }}
+                            />
+                          </Tag>
+                        );
+                      } else {
+                        return null;
+                      }
+                    })
+                  ) : (
+                    <Text
+                      fontSize={"sm"}
+                      fontWeight={"semibold"}
+                      color={"gray.400"}
+                    >
+                      No Projects selected
+                    </Text>
+                  )}
                 </Flex>
               </Flex>
             </ModalBody>
 
             <ModalFooter p={"2"}>
               {/* "Cancel" button */}
-              <Flex direction={"row"} gap={"8"} justify={"center"}>
+              <Flex direction={"row"} justify={"center"} w={"100%"}>
                 <Button
                   colorScheme={"red"}
                   size={"sm"}
                   variant={"outline"}
                   rightIcon={<Icon name={"cross"} />}
-                  onClick={onAddProjectsClose}
+                  onClick={onCancelAddProjectsClick}
                 >
                   Cancel
                 </Button>
+
+                <Spacer />
 
                 <Button
                   colorScheme={"green"}
@@ -2091,8 +2125,10 @@ const Entity = () => {
                   onClick={() => {
                     addProjects(selectedProjects);
                   }}
+                  isDisabled={selectedProjects.length === 0}
                 >
-                  Done
+                  Add Entity to {selectedProjects.length} Project
+                  {selectedProjects.length === 1 ? "" : "s"}
                 </Button>
               </Flex>
             </ModalFooter>
