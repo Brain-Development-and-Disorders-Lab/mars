@@ -416,8 +416,11 @@ const Entity = () => {
 
       if (fileResponse.success) {
         setPreviewSource(URL.createObjectURL(fileResponse.data));
+        // Set `previewType` depending on file type
         if (_.endsWith(name, ".pdf")) {
           setPreviewType("application/pdf");
+        } else {
+          setPreviewType("");
         }
       }
 
@@ -535,6 +538,7 @@ const Entity = () => {
 
   const [isPreviewLoaded, setIsPreviewLoaded] = useState(false);
   const [previewSource, setPreviewSource] = useState("");
+  const [previewName, setPreviewName] = useState("");
   const [previewType, setPreviewType] = useState("");
   const {
     isOpen: isPreviewOpen,
@@ -973,10 +977,11 @@ const Entity = () => {
         };
 
         const handlePreview = async () => {
+          setPreviewName(info.row.original.name);
           setIsPreviewLoaded(false);
           onPreviewOpen();
 
-          // Retrieve the attachment file from the serve
+          // Retrieve the attachment file from the server
           await getAttachmentFile(info.getValue(), info.row.original.name);
         };
 
@@ -2491,11 +2496,11 @@ const Entity = () => {
           </ModalContent>
         </Modal>
 
-        {/* Preview attachments */}
+        {/* Attachment preview modal */}
         <Modal isOpen={isPreviewOpen} onClose={onPreviewClose}>
           <ModalOverlay />
           <ModalContent minW={"3xl"}>
-            <ModalHeader>Preview Attachment</ModalHeader>
+            <ModalHeader>Attachment Preview</ModalHeader>
             <ModalCloseButton />
             <ModalBody>
               <Flex
@@ -2508,9 +2513,17 @@ const Entity = () => {
                 {!isPreviewLoaded || fileLoading ? (
                   <Spinner />
                 ) : _.isEqual(previewType, "application/pdf") ? (
-                  <PreviewModal src={previewSource} type={"document"} />
+                  <PreviewModal
+                    src={previewSource}
+                    type={"document"}
+                    name={previewName}
+                  />
                 ) : (
-                  <PreviewModal src={previewSource} type={"image"} />
+                  <PreviewModal
+                    src={previewSource}
+                    type={"image"}
+                    name={previewName}
+                  />
                 )}
               </Flex>
             </ModalBody>
