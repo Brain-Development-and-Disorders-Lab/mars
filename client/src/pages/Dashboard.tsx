@@ -378,7 +378,7 @@ const Dashboard = () => {
           <Flex align={"center"} gap={"2"} my={"2"}>
             <Icon name={"activity"} size={"md"} />
             <Heading size={"md"} color={"gray.700"}>
-              Recent Activity
+              Workspace Activity
             </Heading>
           </Flex>
 

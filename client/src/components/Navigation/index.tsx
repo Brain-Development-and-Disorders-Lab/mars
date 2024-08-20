@@ -18,15 +18,16 @@ import {
   MenuGroup,
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
+import Importer from "@components/Importer";
+import SearchBox from "@components/SearchBox";
+import AccountMenu from "@components/AccountMenu";
+import WorkspaceSwitcher from "@components/WorkspaceSwitcher";
 
 // Routing and navigation
 import { useLocation, useNavigate } from "react-router-dom";
 
 // Utility functions and libraries
 import _ from "lodash";
-import Importer from "@components/Importer";
-import SearchBox from "@components/SearchBox";
-import AccountMenu from "@components/AccountMenu";
 
 const Navigation = () => {
   const navigate = useNavigate();
@@ -62,13 +63,16 @@ const Navigation = () => {
           </Heading>
         </Flex>
 
-        {/* Menu items */}
+        {/* Workspace menu items */}
         <Flex direction={"column"} align={"self-start"} gap={"6"}>
-          <SearchBox />
+          <Flex direction={"column"} gap={"2"} w={"100%"}>
+            <WorkspaceSwitcher />
+            <SearchBox />
+          </Flex>
 
           <Flex direction={"column"} gap={"2"} width={"100%"}>
             <Text fontSize={"xs"} fontWeight={"bold"} color={"gray.600"}>
-              Menu
+              Workspace
             </Text>
             <Button
               key={"dashboard"}

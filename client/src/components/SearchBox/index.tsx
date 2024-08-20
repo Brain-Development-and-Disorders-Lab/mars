@@ -32,9 +32,9 @@ import { EntityModel } from "@types";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
+import { gql, useLazyQuery } from "@apollo/client";
 
 // Utility functions and libraries
-import { request } from "@database/functions";
 import _ from "lodash";
 
 // Limit the number of results shown
@@ -55,39 +55,49 @@ const SearchBox = () => {
   // Store results as a set of IDs
   const [results, setResults] = useState([] as EntityModel[]);
 
-  const runSearch = async () => {
-    // Use the new search route for text-based search
-    setIsSearching(true);
-    setHasSearched(true);
-
-    const response = await request<EntityModel[]>("POST", "/entities/search/", {
-      query: query,
-    });
-    if (response.success) {
-      if (response.data.length > 0) {
-        setResults(response.data);
-      } else {
-        // Handle no results found scenario
-        toast({
-          title: "No results found",
-          status: "info",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
+  // Query to search by text value
+  const SEARCH_TEXT = gql`
+    query Search($query: String, $isBuilder: Boolean, $limit: Int) {
+      search(query: $query, isBuilder: $isBuilder, limit: $limit) {
+        _id
+        name
+        description
       }
-    } else {
-      toast({
-        title: "Search Error",
-        description: "Could not perform search",
-        status: "error",
-        duration: 5000,
-        isClosable: true,
-        position: "bottom-right",
-      });
-      setIsError(true);
     }
-    setIsSearching(false);
+  `;
+  const [searchText, { loading, error }] = useLazyQuery(SEARCH_TEXT);
+
+  const runSearch = async () => {
+    // Initial check if a specific ID search was not found
+    setIsSearching(loading);
+    setHasSearched(true);
+    setResults([]);
+
+    const results = await searchText({
+      variables: {
+        query: query,
+        isBuilder: false,
+        limit: 100,
+      },
+    });
+
+    if (results.data.search) {
+      setResults(results.data.search);
+    }
+
+    if (error) {
+      setIsError(true);
+      toast({
+        title: "Error",
+        status: "error",
+        description: error.message,
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
+
+    setIsSearching(loading);
   };
 
   const onCloseWrapper = () => {
@@ -113,7 +123,7 @@ const SearchBox = () => {
   };
 
   return (
-    <Flex w={"100%"} p={"1"}>
+    <Flex w={"100%"} p={"0"}>
       <Popover
         isOpen={isOpen}
         onClose={onCloseWrapper}
@@ -146,16 +156,23 @@ const SearchBox = () => {
           <PopoverCloseButton />
           <PopoverHeader>
             <Flex align={"center"} gap={"1"}>
+              <Text fontSize={"sm"}>
+                Showing{" "}
+                {results.length > MAX_RESULTS ? MAX_RESULTS : results.length} of
+              </Text>
               {isSearching ? (
                 <Spinner size={"sm"} />
               ) : (
-                <Text fontWeight={"bold"}>{results.length}</Text>
-              )}{" "}
-              results for "{query}"
+                <Text fontWeight={"bold"} fontSize={"sm"}>
+                  {results.length}
+                </Text>
+              )}
+              <Text fontSize={"sm"}>results</Text>
             </Flex>
           </PopoverHeader>
+
           <PopoverBody>
-            <Flex gap={"2"} p={"2"}>
+            <Flex gap={"2"} py={"1"}>
               {isSearching ? (
                 <Stack w={"100%"}>
                   <Skeleton height={"30px"} />
@@ -166,7 +183,7 @@ const SearchBox = () => {
                 hasSearched &&
                 !isError && (
                   <VStack
-                    gap={"4"}
+                    gap={"1"}
                     divider={<StackDivider borderColor={"gray.200"} />}
                     w={"100%"}
                   >
@@ -176,10 +193,12 @@ const SearchBox = () => {
                           <Flex
                             key={result._id}
                             direction={"row"}
-                            gap={"4"}
+                            gap={"2"}
                             w={"100%"}
                           >
-                            <Text as={"b"}>{result.name}</Text>
+                            <Text fontWeight={"semibold"} fontSize={"sm"}>
+                              {result.name}
+                            </Text>
                             <Spacer />
                             <Link onClick={() => handleResultClick(result._id)}>
                               <Flex
@@ -187,7 +206,7 @@ const SearchBox = () => {
                                 direction={"row"}
                                 align={"center"}
                               >
-                                <Text>View</Text>
+                                <Text fontSize={"sm"}>View</Text>
                                 <Icon name={"a_right"} />
                               </Flex>
                             </Link>
@@ -195,16 +214,21 @@ const SearchBox = () => {
                         );
                       })
                     ) : (
-                      <Flex m={"4"}>No results found.</Flex>
+                      <Flex m={"2"}>
+                        <Text fontWeight={"semibold"} fontSize={"sm"}>
+                          No results found.
+                        </Text>
+                      </Flex>
                     )}
                   </VStack>
                 )
               )}
             </Flex>
           </PopoverBody>
+
           <PopoverFooter>
             <Flex width={"100%"} gap={"1"}>
-              View more results using{" "}
+              <Text fontSize={"sm"}>View all results using </Text>
               <Link
                 onClick={() => {
                   // Close the popover and navigate to the `/search` route
@@ -213,7 +237,7 @@ const SearchBox = () => {
                 }}
               >
                 <Flex gap={"1"} direction={"row"} align={"center"}>
-                  <Text>Search</Text>
+                  <Text fontSize={"sm"}>Search</Text>
                   <Icon name={"a_right"} />
                 </Flex>
               </Link>
