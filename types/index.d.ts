@@ -365,6 +365,7 @@ export type IconNames =
   | "settings"
   | "print"
   | "view"
+  | "workspace"
   | "zoom_in"
   | "zoom_out"
 
