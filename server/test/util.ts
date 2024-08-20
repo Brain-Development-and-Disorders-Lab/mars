@@ -5,9 +5,10 @@ import { getDatabase } from "../src/connectors/database";
  * @return {Promise<void>}
  */
 export const clearDatabase = async (): Promise<void> => {
+  await getDatabase().collection("activity").deleteMany({});
   await getDatabase().collection("attributes").deleteMany({});
-  await getDatabase().collection("collections").deleteMany({});
   await getDatabase().collection("entities").deleteMany({});
   await getDatabase().collection("projects").deleteMany({});
-  await getDatabase().collection("activity").deleteMany({});
+  await getDatabase().collection("workspaces").deleteMany({});
+  await getDatabase().collection("users").deleteMany({});
 };

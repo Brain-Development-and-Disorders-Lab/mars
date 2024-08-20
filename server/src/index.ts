@@ -29,6 +29,7 @@ import { ObjectResolver } from "./resolvers/Object";
 import { ProjectsResolvers } from "./resolvers/Projects";
 import { SearchResolvers } from "./resolvers/Search";
 import { UsersResolvers } from "./resolvers/Users";
+import { WorkspacesResolvers } from "./resolvers/Workspaces";
 import { Context } from "@types";
 
 // GraphQL uploads
@@ -44,7 +45,7 @@ const app = express();
 const httpServer = http.createServer(app);
 
 // Start the GraphQL server
-const startServer = async () => {
+const start = async () => {
   consola.info("Server mode:", process.env.NODE_ENV);
   if (process.env.NODE_ENV !== "production") {
     consola.warn("Server not secured!");
@@ -64,7 +65,7 @@ const startServer = async () => {
   }
 
   // Setup the GraphQL server
-  const server = new ApolloServer({
+  const server = new ApolloServer<Context>({
     typeDefs: typedefs,
     resolvers: [
       {
@@ -80,6 +81,7 @@ const startServer = async () => {
       ProjectsResolvers,
       SearchResolvers,
       UsersResolvers,
+      WorkspacesResolvers,
     ],
     introspection: process.env.NODE_ENV !== "production",
     csrfPrevention: true,
@@ -117,7 +119,7 @@ const startServer = async () => {
 
   // Start the server
   httpServer.listen({ port: port });
-  consola.success(`Server running at http://localhost:${port}/`);
+  consola.success(`Server running at: http://localhost:${port}/`);
 };
 
-startServer();
+start();

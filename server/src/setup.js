@@ -12,8 +12,9 @@ db.createUser({
 });
 
 // Step 2: Create collections to manage metadata within the overall "metadata" database
+db.createCollection("activity");
+db.createCollection("attributes");
 db.createCollection("entities");
 db.createCollection("projects");
-db.createCollection("attributes");
-db.createCollection("updates");
 db.createCollection("users");
+db.createCollection("workspaces");

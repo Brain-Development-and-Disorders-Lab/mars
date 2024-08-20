@@ -148,6 +148,22 @@ export type IGenericItem = {
   name: string;
 };
 
+// Workspace types
+export type IWorkspace = {
+  name: string;
+  description: string;
+  owner: string;
+  collaborators: string[];
+  entities: string[];
+  projects: string[];
+  attributes: string[];
+  activity: string[];
+};
+
+export type WorkspaceModel = IWorkspace & {
+  _id: string;
+};
+
 // Entity types
 export type IEntity = {
   name: string;
@@ -404,9 +420,10 @@ export type ResponseMessage = {
 
 // Authentication types
 export type IAuth = {
-  orcid: string;
-  name: string;
-  token: string;
+  name: string; // User name
+  orcid: string; // ORCiD value
+  token: string; // ORCiD token
+  workspace: string; // Identifier for active Workspace
 };
 
 export type Token = IAuth & {
