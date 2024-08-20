@@ -1,5 +1,5 @@
 // React
-import React, { FC, useEffect, useMemo } from "react";
+import React, { FC, useEffect, useMemo, useState } from "react";
 
 // Existing and custom components
 import { Flex, Heading, Button, Image, Text, useToast } from "@chakra-ui/react";
@@ -9,14 +9,14 @@ import { Content } from "@components/Container";
 import { useLocation, useSearchParams } from "react-router-dom";
 
 // Utility functions and libraries
-import { gql, useLazyQuery } from "@apollo/client";
+import { gql, useLazyQuery, useQuery } from "@apollo/client";
 import { useToken } from "src/authentication/useToken";
 import _ from "lodash";
 
 // Existing and custom types
-import { LoginProps } from "@types";
+import { IAuth, LoginProps, WorkspaceModel } from "@types";
 
-const useQuery = () => {
+const useParameters = () => {
   // Get URL query parameters
   const { search } = useLocation();
   return useMemo(() => new URLSearchParams(search), [search]);
@@ -27,11 +27,12 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
 
   // Enable authentication modification
   const [token, setToken] = useToken();
+  const [workspaces, setWorkspaces] = useState([] as Partial<WorkspaceModel>[]);
 
-  const query = useQuery();
+  const parameters = useParameters();
 
   // Extract query parameters
-  const accessCode = query.get("code");
+  const accessCode = parameters.get("code");
 
   // Access parameters to remove code after authentication
   const [searchParams, setSearchParams] = useSearchParams();
@@ -57,6 +58,52 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
 
   const [doLogin, { loading, error }] = useLazyQuery(LOGIN_DATA);
 
+  // Query to retrieve Workspaces
+  const GET_WORKSPACES = gql`
+    query GetWorkspaces {
+      workspaces {
+        _id
+        owner
+        name
+        description
+      }
+    }
+  `;
+  const {
+    loading: workspacesLoading,
+    error: workspacesError,
+    data,
+    refetch,
+  } = useQuery<{
+    workspaces: WorkspaceModel[];
+  }>(GET_WORKSPACES);
+
+  // Manage data once retrieved
+  useEffect(() => {
+    if (data?.workspaces) {
+      // Unpack all the Entity data
+      setWorkspaces(data.workspaces);
+    }
+
+    if (workspacesError) {
+      toast({
+        title: "Error",
+        description: "Unable to retrieve Workspaces",
+        status: "error",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
+  }, [workspacesLoading]);
+
+  // Check to see if data currently exists and refetch if so
+  useEffect(() => {
+    if (data && refetch) {
+      refetch();
+    }
+  }, []);
+
   /**
    * Utility function to perform a Login operation
    * @param code String returned by ORCID API for login
@@ -68,7 +115,15 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
     // Perform login and data retrieval via server, check if user permitted access
     if (response.data?.login) {
       removeCode();
-      setToken(response.data.login);
+
+      // Create a new token instance and splice in the first Workspace the user has access to
+      const token: IAuth = {
+        ...response.data.login,
+        workspace: workspaces.length > 0 ? workspaces[0]._id : "",
+      };
+      setToken(token);
+
+      // Finalise authentication state
       setAuthenticated(true);
     } else if (error) {
       toast({

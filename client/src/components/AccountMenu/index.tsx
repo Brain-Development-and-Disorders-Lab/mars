@@ -35,6 +35,7 @@ const AccountMenu = () => {
       name: token.name,
       orcid: token.orcid,
       token: "",
+      workspace: "",
     });
     navigate(0);
   };
