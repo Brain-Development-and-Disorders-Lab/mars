@@ -21,6 +21,23 @@ export class Workspaces {
   };
 
   /**
+   * Get one Workspace entry from the Workspaces collection where the user
+   * is either the owner or a collaborator
+   * @returns Workspace entry
+   */
+  static getOne = async (
+    _id: string,
+    user: string,
+  ): Promise<WorkspaceModel | null> => {
+    return await getDatabase()
+      .collection<WorkspaceModel>(WORKSPACES_COLLECTION)
+      .findOne({
+        _id: _id,
+        $or: [{ owner: user }, { collaborators: user }],
+      });
+  };
+
+  /**
    * Create a new Workspace entry
    * @param workspace Workspace data
    * @return {ResponseMessage}

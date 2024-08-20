@@ -295,6 +295,7 @@ export const typedefs = `#graphql
     activity(limit: Int): [Activity]
 
     # Workspace queries
+    workspace(_id: String): Workspace
     workspaces: [Workspace]
 
     # Export queries
