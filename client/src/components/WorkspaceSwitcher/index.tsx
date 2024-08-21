@@ -224,8 +224,7 @@ const WorkspaceSwitcher = () => {
     });
 
     if (result.data?.createWorkspace.success) {
-      // Refetch the collection of Workspaces and navigate to the Dashboard
-      await refetch();
+      // Navigate back to the Dashboard
       onCreateClose();
       navigate("/");
     }
