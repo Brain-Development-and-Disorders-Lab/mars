@@ -114,7 +114,6 @@ const WorkspaceSwitcher = () => {
   }, []);
 
   useEffect(() => {
-    console.info("workspaceIdnetifier:", workspaceIdentifier);
     const updateWorkspace = async () => {
       // When the `workspaceIdentifier` value changes, retrieve updated model
       const result = await getWorkspace({
@@ -264,26 +263,56 @@ const WorkspaceSwitcher = () => {
                   new Workspace below.
                 </Text>
               )}
+
               <Flex direction={"row"} gap={"2"}>
-                <Flex gap={"2"}>
-                  <FormControl>
-                    <FormLabel>
-                      <Text fontSize={"sm"}>Name</Text>
-                    </FormLabel>
-                    <Input size={"sm"} rounded={"md"} placeholder={"Name"} />
-                  </FormControl>
+                {/* Workspace name */}
+                <Flex
+                  direction={"column"}
+                  p={"0"}
+                  gap={"2"}
+                  grow={"1"}
+                  basis={"50%"}
+                >
+                  <Flex
+                    direction={"column"}
+                    p={"2"}
+                    gap={"2"}
+                    rounded={"md"}
+                    border={"1px"}
+                    borderColor={"gray.200"}
+                  >
+                    <FormControl isRequired>
+                      <FormLabel fontSize={"sm"}>Name</FormLabel>
+                      <Input size={"sm"} rounded={"md"} placeholder={"Name"} />
+                    </FormControl>
+                  </Flex>
                 </Flex>
-                <Flex gap={"2"}>
-                  <FormControl>
-                    <FormLabel>
-                      <Text fontSize={"sm"}>Description</Text>
-                    </FormLabel>
-                    <Textarea
-                      size={"sm"}
-                      rounded={"md"}
-                      placeholder={"Description"}
-                    />
-                  </FormControl>
+
+                {/* Workspace description */}
+                <Flex
+                  direction={"column"}
+                  p={"0"}
+                  gap={"2"}
+                  grow={"1"}
+                  basis={"50%"}
+                >
+                  <Flex
+                    direction={"column"}
+                    p={"2"}
+                    gap={"2"}
+                    rounded={"md"}
+                    border={"1px"}
+                    borderColor={"gray.200"}
+                  >
+                    <FormControl>
+                      <FormLabel fontSize={"sm"}>Description</FormLabel>
+                      <Textarea
+                        size={"sm"}
+                        rounded={"md"}
+                        placeholder={"Description"}
+                      />
+                    </FormControl>
+                  </Flex>
                 </Flex>
               </Flex>
             </Flex>
