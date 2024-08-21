@@ -1,5 +1,5 @@
 // React
-import React, { FC, useEffect, useMemo, useState } from "react";
+import React, { FC, useEffect, useMemo } from "react";
 
 // Existing and custom components
 import { Flex, Heading, Button, Image, Text, useToast } from "@chakra-ui/react";
@@ -9,12 +9,12 @@ import { Content } from "@components/Container";
 import { useLocation, useSearchParams } from "react-router-dom";
 
 // Utility functions and libraries
-import { gql, useLazyQuery, useQuery } from "@apollo/client";
+import { gql, useLazyQuery } from "@apollo/client";
 import { useToken } from "src/authentication/useToken";
 import _ from "lodash";
 
 // Existing and custom types
-import { IAuth, LoginProps, WorkspaceModel } from "@types";
+import { LoginProps, WorkspaceModel } from "@types";
 
 const useParameters = () => {
   // Get URL query parameters
@@ -27,7 +27,6 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
 
   // Enable authentication modification
   const [token, setToken] = useToken();
-  const [workspaces, setWorkspaces] = useState([] as Partial<WorkspaceModel>[]);
 
   const parameters = useParameters();
 
@@ -69,40 +68,12 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
       }
     }
   `;
-  const {
-    loading: workspacesLoading,
-    error: workspacesError,
-    data,
-    refetch,
-  } = useQuery<{
+  const [
+    getWorkspaces,
+    { loading: _workspacesLoading, error: workspacesError },
+  ] = useLazyQuery<{
     workspaces: WorkspaceModel[];
   }>(GET_WORKSPACES);
-
-  // Manage data once retrieved
-  useEffect(() => {
-    if (data?.workspaces) {
-      // Unpack all the Entity data
-      setWorkspaces(data.workspaces);
-    }
-
-    if (workspacesError) {
-      toast({
-        title: "Error",
-        description: "Unable to retrieve Workspaces",
-        status: "error",
-        duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
-      });
-    }
-  }, [workspacesLoading]);
-
-  // Check to see if data currently exists and refetch if so
-  useEffect(() => {
-    if (data && refetch) {
-      refetch();
-    }
-  }, []);
 
   /**
    * Utility function to perform a Login operation
@@ -116,12 +87,35 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
     if (response.data?.login) {
       removeCode();
 
-      // Create a new token instance and splice in the first Workspace the user has access to
-      const token: IAuth = {
+      // Create a new token instance with an empty Workspace value
+      setToken({
         ...response.data.login,
-        workspace: workspaces.length > 0 ? workspaces[0]._id : "",
-      };
-      setToken(token);
+        workspace: "",
+      });
+
+      // Retrieve all Workspaces and update the token if Workspaces exist
+      const responseWorkspaces = await getWorkspaces();
+      if (
+        responseWorkspaces.data?.workspaces &&
+        responseWorkspaces.data?.workspaces.length > 0
+      ) {
+        // Update the token with an active Workspace if the user is a member of a Workspace
+        setToken({
+          ...response.data.login,
+          workspace: responseWorkspaces.data.workspaces[0]._id,
+        });
+      }
+
+      if (workspacesError) {
+        toast({
+          title: "Warning",
+          status: "warning",
+          description: "Unable to retrieve Workspaces",
+          duration: 4000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+      }
 
       // Finalise authentication state
       setAuthenticated(true);
