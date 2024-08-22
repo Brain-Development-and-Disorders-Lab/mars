@@ -4,3 +4,7 @@ node_modules/
 
 # Files
 .eslintrc.js
+gulpfile.js
+jest.config.js
+webpack.*.js
+*.d.ts
