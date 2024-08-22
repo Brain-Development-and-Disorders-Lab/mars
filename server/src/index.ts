@@ -111,6 +111,7 @@ const start = async () => {
       context: async ({ req }): Promise<Context> => {
         return {
           user: req.headers.user as string,
+          workspace: req.headers.workspace as string,
         };
       },
     }),

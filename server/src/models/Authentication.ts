@@ -35,6 +35,7 @@ export class Authentication {
         orcid: "XXXX-0000-DEMO-1111",
         name: "Test User",
         token: "test_token_value",
+        workspace: "",
       };
     }
 

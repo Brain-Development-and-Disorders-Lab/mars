@@ -438,6 +438,7 @@ export type Token = IAuth & {
 // Context passed through the request headers, includes the ORCID (user) of the user
 export type Context = {
   user: string;
+  workspace: string;
 };
 
 // User types
