@@ -9,15 +9,25 @@ import {
 import { GraphQLError } from "graphql";
 import _ from "lodash";
 import { Entities } from "src/models/Entities";
+import { Workspaces } from "../models/Workspaces";
 
 export const EntitiesResolvers = {
   Query: {
     // Retrieve all Entities
     entities: async (_parent: any, args: { limit: 100 }, context: Context) => {
+      const workspace = await Workspaces.getOne(context.workspace);
+      if (_.isNull(workspace)) {
+        throw new GraphQLError("Workspace does not exist", {
+          extensions: {
+            code: "NON_EXIST",
+          },
+        });
+      }
+
+      // Filter by ownership and Workspace membership
       const entities = await Entities.all();
-      // Filter by ownership
       return entities
-        .filter((e) => e.owner === context.user)
+        .filter((entity) => _.includes(workspace?.entities, entity._id))
         .slice(0, args.limit);
     },
 
@@ -27,6 +37,17 @@ export const EntitiesResolvers = {
       args: { _id: string },
       context: Context,
     ): Promise<EntityModel> => {
+      // Check Workspace exists
+      const workspace = await Workspaces.getOne(context.workspace);
+      if (_.isNull(workspace)) {
+        throw new GraphQLError("Workspace does not exist", {
+          extensions: {
+            code: "NON_EXIST",
+          },
+        });
+      }
+
+      // Check Entity exists
       const entity = await Entities.getOne(args._id);
       if (_.isNull(entity)) {
         throw new GraphQLError("Entity does not exist", {
@@ -36,7 +57,11 @@ export const EntitiesResolvers = {
         });
       }
 
-      if (entity.owner === context.user) {
+      // Check that Entity is owned by the user and exists in the Workspace
+      if (
+        entity.owner === context.user &&
+        _.includes(workspace?.entities, entity._id)
+      ) {
         return entity;
       } else {
         throw new GraphQLError(
@@ -66,6 +91,17 @@ export const EntitiesResolvers = {
       args: { _id: string; format: "json" | "csv"; fields?: string[] },
       context: Context,
     ) => {
+      // Check Workspace exists
+      const workspace = await Workspaces.getOne(context.workspace);
+      if (_.isNull(workspace)) {
+        throw new GraphQLError("Workspace does not exist", {
+          extensions: {
+            code: "NON_EXIST",
+          },
+        });
+      }
+
+      // Check Entity exists
       const entity = await Entities.getOne(args._id);
       if (_.isNull(entity)) {
         throw new GraphQLError("Entity does not exist", {
@@ -75,7 +111,11 @@ export const EntitiesResolvers = {
         });
       }
 
-      if (entity.owner === context.user) {
+      // Check that Entity is owned by the user and exists in the Workspace
+      if (
+        entity.owner === context.user &&
+        _.includes(workspace?.entities, entity._id)
+      ) {
         return await Entities.export(args._id, args.format, args.fields);
       } else {
         throw new GraphQLError(
@@ -98,7 +138,7 @@ export const EntitiesResolvers = {
       const authorizedEntities = [];
 
       // Ensure only Entities the user is authorized to access are exported
-      for (let entity of args.entities) {
+      for (const entity of args.entities) {
         const result = await Entities.getOne(entity);
         if (result && result.owner === context.user) {
           authorizedEntities.push(entity);

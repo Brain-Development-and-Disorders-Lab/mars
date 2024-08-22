@@ -28,6 +28,13 @@ export class Projects {
       .findOne({ _id: _id });
   };
 
+  static getMany = async (projects: string[]) => {
+    return await getDatabase()
+      .collection<ProjectModel>(PROJECTS_COLLECTION)
+      .find({ _id: { $in: projects } })
+      .toArray();
+  };
+
   static exists = async (_id: string): Promise<boolean> => {
     const project = await this.getOne(_id);
     return !_.isNull(project);

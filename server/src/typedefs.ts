@@ -250,6 +250,19 @@ export const typedefs = `#graphql
     activity: [String]
   }
 
+  # "WorkspaceUpdateInput" input  
+  input WorkspaceUpdateInput {
+    _id: String!
+    name: String
+    description: String
+    owner: String
+    collaborators: [String]
+    entities: [String]
+    projects: [String]
+    attributes: [String]
+    activity: [String]
+  }
+
   # "Response" type
   type Response {
     success: Boolean
@@ -297,6 +310,8 @@ export const typedefs = `#graphql
     # Workspace queries
     workspace(_id: String): Workspace
     workspaces: [Workspace]
+    workspaceEntities(_id: String, limit: Int): [Entity]
+    workspaceProjects(_id: String, limit: Int): [Project]
 
     # Export queries
     exportEntity(_id: String, format: String, fields: [String]): String
@@ -347,6 +362,7 @@ export const typedefs = `#graphql
 
     # Workspace mutations
     createWorkspace(workspace: WorkspaceCreateInput): Response
+    updateWorkspace(workspace: WorkspaceUpdateInput): Response
 
     # Attribute mutations
     createAttribute(attribute: AttributeCreateInput): Response
