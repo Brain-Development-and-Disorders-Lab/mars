@@ -95,8 +95,9 @@ const WorkspaceSwitcher = () => {
       }
     }
   `;
-  const [getWorkspace, { loading: _workspaceLoading, error: workspaceError }] =
-    useLazyQuery<{ workspace: WorkspaceModel }>(GET_WORKSPACE);
+  const [getWorkspace, { error: workspaceError }] = useLazyQuery<{
+    workspace: WorkspaceModel;
+  }>(GET_WORKSPACE);
 
   // Query to create a Workspace
   const CREATE_WORKSPACE = gql`
@@ -152,6 +153,11 @@ const WorkspaceSwitcher = () => {
         const updatedToken: IAuth = _.cloneDeep(token);
         updatedToken.workspace = workspaceIdentifier;
         setToken(updatedToken);
+
+        // Only reload on valid and updated Workspace
+        if (workspace._id) {
+          navigate(0);
+        }
       }
 
       if (workspaceError) {
