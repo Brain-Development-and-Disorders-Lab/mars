@@ -55,6 +55,56 @@ export class Workspaces {
   };
 
   /**
+   * Add an Entity to an existing Workspace
+   * @param _id Workspace identifier to receive the Entity
+   * @param entity Entity identifier to be added to the Workspace
+   * @return {Promise<ResponseMessage>}
+   */
+  static addEntity = async (
+    _id: string,
+    entity: string,
+  ): Promise<ResponseMessage> => {
+    const workspace = await Workspaces.getOne(_id);
+    if (_.isNull(workspace)) {
+      return {
+        success: false,
+        message: "Workspace not found",
+      };
+    }
+
+    // Extract the collection of Entities from the Workspace
+    const entities = _.cloneDeep(workspace.entities);
+    if (_.includes(entities, entity)) {
+      // Check if the Workspace already includes the Entity
+      return {
+        success: true,
+        message: "Workspace already contains Entity",
+      };
+    }
+
+    // Push the new Entity
+    entities.push(entity);
+    const update = {
+      $set: {
+        entities: entities,
+      },
+    };
+
+    // Execute the update
+    const response = await getDatabase()
+      .collection<WorkspaceModel>(WORKSPACES_COLLECTION)
+      .updateOne({ _id: _id }, update);
+
+    return {
+      success: response.modifiedCount === 1,
+      message:
+        response.modifiedCount === 1
+          ? "Added Entity to Workspace"
+          : "Unable to add Entity to Workspace",
+    };
+  };
+
+  /**
    * Get all Projects present in a Workspace
    * @param _id Workspace identifier
    * @return {Promise<ProjectModel[]>}
@@ -66,24 +116,6 @@ export class Workspaces {
     } else {
       return [];
     }
-  };
-
-  static addEntity = async (
-    _id: string,
-    entity: string,
-  ): Promise<ResponseMessage> => {
-    const workspace = await Workspaces.getOne(_id);
-
-    // Add the Entity to list of all Entities within a Workspace
-    if (workspace) {
-      const entities = [..._.cloneDeep(workspace.entities)];
-      entities.push(entity);
-    }
-
-    return {
-      success: false,
-      message: "Unable to add Entity to Workspace",
-    };
   };
 
   /**

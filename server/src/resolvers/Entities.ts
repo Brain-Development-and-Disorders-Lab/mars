@@ -182,8 +182,9 @@ export const EntitiesResolvers = {
     createEntity: async (
       _parent: any,
       args: { entity: IEntity },
+      context: Context,
     ): Promise<ResponseMessage> => {
-      return await Entities.create(args.entity);
+      return await Entities.create(args.entity, context.workspace);
     },
 
     // Update an existing Entity from EntityModel data structure

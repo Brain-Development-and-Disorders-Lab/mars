@@ -10,6 +10,7 @@ import {
 // Models
 import { Activity } from "./Activity";
 import { Projects } from "./Projects";
+import { Workspaces } from "./Workspaces";
 
 // Custom functions
 import { getDatabase } from "../connectors/database";
@@ -129,9 +130,13 @@ export class Entities {
   /**
    * Create a new Entity
    * @param {IEntity} entity Entity information
+   * @param {string} workspace Workspace to add the Entity to
    * @returns {ResponseMessage}
    */
-  static create = async (entity: IEntity): Promise<ResponseMessage> => {
+  static create = async (
+    entity: IEntity,
+    workspace: string,
+  ): Promise<ResponseMessage> => {
     // Allocate a new identifier and join with IEntity data
     const joinedEntity: EntityModel = {
       _id: getIdentifier("entity"), // Generate new identifier
@@ -139,8 +144,7 @@ export class Entities {
       ...entity, // Unpack existing IEntity fields
     };
 
-    // To-Do: Add Activity operation
-    for (let origin of entity.associations.origins) {
+    for (const origin of entity.associations.origins) {
       // Add new Entity as a Product
       await Entities.addProduct(origin._id, {
         _id: joinedEntity._id,
@@ -148,7 +152,7 @@ export class Entities {
       });
     }
 
-    for (let product of entity.associations.products) {
+    for (const product of entity.associations.products) {
       // Add new Entity as an Origin
       await Entities.addOrigin(product._id, {
         _id: joinedEntity._id,
@@ -156,7 +160,7 @@ export class Entities {
       });
     }
 
-    for (let project of entity.projects) {
+    for (const project of entity.projects) {
       // Add Entity to Project
       await Projects.addEntity(project, joinedEntity._id);
     }
@@ -167,6 +171,10 @@ export class Entities {
     const successStatus = _.isEqual(response.insertedId, joinedEntity._id);
 
     if (successStatus) {
+      // Add the Entity to the Workspace
+      await Workspaces.addEntity(workspace, response.insertedId);
+
+      // Create a new Activity entry
       await Activity.create({
         timestamp: new Date(),
         type: "create",
@@ -211,12 +219,12 @@ export class Entities {
     // Projects
     if (!_.isUndefined(updated.projects)) {
       const addProjects = _.difference(updated.projects, entity.projects);
-      for (let project of addProjects) {
+      for (const project of addProjects) {
         await this.addProject(updated._id, project);
         await Projects.addEntity(project, updated._id);
       }
       const removeProjects = _.difference(entity.projects, updated.projects);
-      for (let project of removeProjects) {
+      for (const project of removeProjects) {
         await this.removeProject(updated._id, project);
         await Projects.removeEntity(project, updated._id);
       }
@@ -232,7 +240,7 @@ export class Entities {
         updated.associations.origins,
         entity.associations.origins,
       );
-      for (let origin of addOrigins) {
+      for (const origin of addOrigins) {
         await this.addOrigin(updated._id, origin);
         await this.addProduct(origin._id, {
           _id: updated._id,
@@ -243,7 +251,7 @@ export class Entities {
         entity.associations.origins,
         updated.associations.origins,
       );
-      for (let origin of removeOrigins) {
+      for (const origin of removeOrigins) {
         await this.removeOrigin(updated._id, origin);
         await this.removeProduct(origin._id, {
           _id: updated._id,
@@ -323,19 +331,6 @@ export class Entities {
     };
   };
 
-  static upsert = async (upserted: EntityModel): Promise<ResponseMessage> => {
-    const exists = await Entities.exists(upserted._id);
-    if (exists) {
-      await Entities.update(upserted);
-    } else {
-      await Entities.create(upserted);
-    }
-    return {
-      success: true,
-      message: "Upserted Entity",
-    };
-  };
-
   /**
    * Delete an Entity
    * @param _id Entity identifier to delete
@@ -345,7 +340,7 @@ export class Entities {
     const entity = await Entities.getOne(_id);
     if (entity) {
       // Remove Origins
-      for (let origin of entity.associations.origins) {
+      for (const origin of entity.associations.origins) {
         await Entities.removeProduct(origin._id, {
           _id: entity._id,
           name: entity.name,
@@ -353,7 +348,7 @@ export class Entities {
       }
 
       // Remove Products
-      for (let product of entity.associations.products) {
+      for (const product of entity.associations.products) {
         await Entities.removeOrigin(product._id, {
           _id: entity._id,
           name: entity.name,
@@ -361,7 +356,7 @@ export class Entities {
       }
 
       // Remove Projects
-      for (let project of entity.projects) {
+      for (const project of entity.projects) {
         await Projects.removeEntity(project, entity._id);
       }
     }
@@ -932,6 +927,8 @@ export class Entities {
   /**
    * Generate export data for the Entity
    * @param _id Entity identifier
+   * @param format File format of exported data, either JSON or CSV
+   * @param fields Optional argument to specify Entity data fields for export
    * @returns {Promise<string>}
    */
   static export = async (
