@@ -262,25 +262,31 @@ const WorkspaceSwitcher = () => {
         >
           <Flex
             direction={"row"}
-            align={"center"}
             gap={"2"}
+            align={"center"}
             p={"2"}
             ml={"2"}
             mr={"2"}
           >
-            <Text
-              fontSize={"sm"}
-              fontWeight={"semibold"}
-              w={"100%"}
-              align={"center"}
-            >
+            <Text fontSize={"sm"} fontWeight={"semibold"}>
               {_.truncate(workspace.name, { length: 15 })}
             </Text>
+            <Spacer />
             <Icon name={isOpen ? "c_up" : "c_down"} />
           </Flex>
         </MenuButton>
 
         <MenuList bg={"white"}>
+          <MenuGroup>
+            <Flex px={"2"}>
+              <Text fontWeight={"semibold"} size={"sm"}>
+                Select Workspace
+              </Text>
+            </Flex>
+          </MenuGroup>
+
+          <MenuDivider />
+
           <MenuGroup>
             {/* Create a list of all Workspaces the user has access to */}
             {workspaces.map((workspace) => {
@@ -310,11 +316,18 @@ const WorkspaceSwitcher = () => {
             >
               <Button
                 size={"sm"}
+                leftIcon={<Icon size={"sm"} name={"settings"} />}
+                isDisabled
+              >
+                Manage
+              </Button>
+              <Button
+                size={"sm"}
                 colorScheme={"green"}
                 onClick={() => handleCreateClick()}
                 leftIcon={<Icon size={"sm"} name={"add"} />}
               >
-                Create Workspace
+                Create
               </Button>
             </Flex>
           </MenuGroup>
