@@ -1,11 +1,17 @@
+// Models
+import { Activity } from "./Activity";
+import { Entities } from "./Entities";
+import { Workspaces } from "./Workspaces";
+
+// Custom types
 import { EntityModel, IProject, ProjectModel, ResponseMessage } from "@types";
+
+// Utility functions and libraries
 import _ from "lodash";
 import { getDatabase } from "../connectors/database";
 import { getIdentifier } from "../util";
-import { Entities } from "./Entities";
 import dayjs from "dayjs";
 import Papa from "papaparse";
-import { Activity } from "./Activity";
 
 // Collection name
 const PROJECTS_COLLECTION = "projects";
@@ -40,7 +46,10 @@ export class Projects {
     return !_.isNull(project);
   };
 
-  static create = async (project: IProject): Promise<ResponseMessage> => {
+  static create = async (
+    project: IProject,
+    workspace: string,
+  ): Promise<ResponseMessage> => {
     // Create a `ProjectModel` instance by adding an identifier and unpacking given Project data
     const projectModel: ProjectModel = {
       _id: getIdentifier("project"),
@@ -53,6 +62,10 @@ export class Projects {
     const successStatus = _.isEqual(response.insertedId, projectModel._id);
 
     if (successStatus) {
+      // Add the Project to the Workspace
+      await Workspaces.addEntity(workspace, response.insertedId);
+
+      // Create a new Activity entry
       await Activity.create({
         timestamp: new Date(),
         type: "create",

@@ -333,7 +333,7 @@ export const typedefs = `#graphql
   type Mutation {
     # Entity mutations
     setEntityDescription(_id: String, description: String): Response
-    createEntity(entity: EntityCreateInput, workspace: String): Response
+    createEntity(entity: EntityCreateInput): Response
     updateEntity(entity: EntityUpdateInput): Response
     deleteEntity(_id: String): Response
     addEntityProject(_id: String, project_id: String): Response

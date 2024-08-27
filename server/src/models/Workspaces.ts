@@ -119,6 +119,56 @@ export class Workspaces {
   };
 
   /**
+   * Add a Project to an existing Workspace
+   * @param _id Workspace identifier to receive the Project
+   * @param project Project identifier to be added to the Workspace
+   * @return {Promise<ResponseMessage>}
+   */
+  static addProject = async (
+    _id: string,
+    project: string,
+  ): Promise<ResponseMessage> => {
+    const workspace = await Workspaces.getOne(_id);
+    if (_.isNull(workspace)) {
+      return {
+        success: false,
+        message: "Workspace not found",
+      };
+    }
+
+    // Extract the collection of Projects from the Workspace
+    const projects = _.cloneDeep(workspace.projects);
+    if (_.includes(projects, project)) {
+      // Check if the Workspace already includes the Project
+      return {
+        success: true,
+        message: "Workspace already contains Project",
+      };
+    }
+
+    // Push the new Entity
+    projects.push(project);
+    const update = {
+      $set: {
+        projects: projects,
+      },
+    };
+
+    // Execute the update
+    const response = await getDatabase()
+      .collection<WorkspaceModel>(WORKSPACES_COLLECTION)
+      .updateOne({ _id: _id }, update);
+
+    return {
+      success: response.modifiedCount === 1,
+      message:
+        response.modifiedCount === 1
+          ? "Added Project to Workspace"
+          : "Unable to add Project to Workspace",
+    };
+  };
+
+  /**
    * Create a new Workspace entry
    * @param workspace Workspace data
    * @return {ResponseMessage}
