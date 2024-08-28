@@ -1,7 +1,11 @@
 import { AttributeModel, IAttribute, ResponseMessage } from "@types";
+
+// Utility functions and libraries
 import _ from "lodash";
 import { getDatabase } from "../connectors/database";
 import { getIdentifier } from "../util";
+
+// Models
 import { Activity } from "./Activity";
 
 // Collection name
@@ -40,9 +44,13 @@ export class Attributes {
   /**
    * Create a new Attribute
    * @param attribute Attribute data
+   * @param workspace Workspace identifier
    * @return {ResponseMessage}
    */
-  static create = async (attribute: IAttribute): Promise<ResponseMessage> => {
+  static create = async (
+    attribute: IAttribute,
+    workspace: string,
+  ): Promise<ResponseMessage> => {
     // Add an identifier to the Attribute
     const joinedAttribute: AttributeModel = {
       _id: getIdentifier("attribute"),
@@ -54,16 +62,19 @@ export class Attributes {
       .insertOne(joinedAttribute);
     const successStatus = _.isEqual(response.insertedId, joinedAttribute._id);
 
-    await Activity.create({
-      timestamp: new Date(),
-      type: "create",
-      details: "Created new Attribute",
-      target: {
-        _id: joinedAttribute._id,
-        type: "attributes",
-        name: joinedAttribute.name,
+    await Activity.create(
+      {
+        timestamp: new Date(),
+        type: "create",
+        details: "Created new Attribute",
+        target: {
+          _id: joinedAttribute._id,
+          type: "attributes",
+          name: joinedAttribute.name,
+        },
       },
-    });
+      workspace,
+    );
 
     return {
       success: successStatus,
@@ -73,7 +84,10 @@ export class Attributes {
     };
   };
 
-  static update = async (updated: AttributeModel): Promise<ResponseMessage> => {
+  static update = async (
+    updated: AttributeModel,
+    workspace: string,
+  ): Promise<ResponseMessage> => {
     const attribute = await this.getOne(updated._id);
 
     if (_.isNull(attribute)) {
@@ -103,16 +117,19 @@ export class Attributes {
       .collection<AttributeModel>(ATTRIBUTES_COLLECTION)
       .updateOne({ _id: updated._id }, update);
 
-    await Activity.create({
-      timestamp: new Date(),
-      type: "update",
-      details: "Updated existing Attribute",
-      target: {
-        _id: updated._id,
-        type: "attributes",
-        name: updated.name,
+    await Activity.create(
+      {
+        timestamp: new Date(),
+        type: "update",
+        details: "Updated existing Attribute",
+        target: {
+          _id: updated._id,
+          type: "attributes",
+          name: updated.name,
+        },
       },
-    });
+      workspace,
+    );
 
     return {
       success: true,
@@ -126,25 +143,32 @@ export class Attributes {
   /**
    * Delete an Attribute
    * @param _id Attribute identifier to delete
+   * @param workspace Workspace identifier
    * @return {ResponseMessage}
    */
-  static delete = async (_id: string): Promise<ResponseMessage> => {
+  static delete = async (
+    _id: string,
+    workspace: string,
+  ): Promise<ResponseMessage> => {
     const attribute = await Attributes.getOne(_id);
     const response = await getDatabase()
       .collection<AttributeModel>(ATTRIBUTES_COLLECTION)
       .deleteOne({ _id: _id });
 
     if (attribute && response.deletedCount > 0) {
-      await Activity.create({
-        timestamp: new Date(),
-        type: "delete",
-        details: "Deleted Attribute",
-        target: {
-          _id: attribute._id,
-          type: "attributes",
-          name: attribute.name,
+      await Activity.create(
+        {
+          timestamp: new Date(),
+          type: "delete",
+          details: "Deleted Attribute",
+          target: {
+            _id: attribute._id,
+            type: "attributes",
+            name: attribute.name,
+          },
         },
-      });
+        workspace,
+      );
     }
 
     return {
