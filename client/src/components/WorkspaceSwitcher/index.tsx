@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   Button,
   Flex,
@@ -41,6 +41,7 @@ import { useNavigate } from "react-router-dom";
 // Utility functions and libraries
 import { useToken } from "src/authentication/useToken";
 import _ from "lodash";
+import { WorkspaceContext } from "../../Context";
 
 const WorkspaceSwitcher = () => {
   const navigate = useNavigate();
@@ -53,7 +54,7 @@ const WorkspaceSwitcher = () => {
   const [workspaceIdentifier, setWorkspaceIdentifier] = useState(
     token.workspace,
   );
-  const [workspace, setWorkspace] = useState({} as WorkspaceModel);
+  const { workspace, setWorkspace } = useContext(WorkspaceContext);
 
   // State for Workspace details
   const [name, setName] = useState("");
@@ -153,11 +154,6 @@ const WorkspaceSwitcher = () => {
         const updatedToken: IAuth = _.cloneDeep(token);
         updatedToken.workspace = workspaceIdentifier;
         setToken(updatedToken);
-
-        // Only reload on valid and updated Workspace
-        if (workspace._id) {
-          navigate(0);
-        }
       }
 
       if (workspaceError) {

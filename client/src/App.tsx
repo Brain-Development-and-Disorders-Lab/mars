@@ -45,8 +45,12 @@ import Invalid from "@pages/Invalid";
 // Theme extension
 import { theme } from "./styles/theme";
 
+// Workspace context component
+import { WorkspaceContext } from "./Context";
+
 // Authentication
 import { useToken } from "src/authentication/useToken";
+import { WorkspaceModel } from "@types";
 
 /**
  * Base App component containing the page layout and page routing components
@@ -69,50 +73,58 @@ const App = (): ReactElement => {
     }
   }, [token]);
 
+  // Setup Workspace state
+  const [workspace, setWorkspace] = useState({} as WorkspaceModel);
+
   return (
     <BrowserRouter>
       <ChakraProvider theme={theme}>
         {!authenticated ? (
           <Login setAuthenticated={setAuthenticated} />
         ) : (
-          <Page>
-            <Routes>
-              <Route path={"/"} element={<Dashboard />} />
+          <WorkspaceContext.Provider value={{ workspace, setWorkspace }}>
+            <Page>
+              <Routes>
+                <Route path={"/"} element={<Dashboard />} />
 
-              {/* Create routes */}
-              <Route path={"/create/attribute"} element={<CreateAttribute />} />
-              <Route path={"/create/project"} element={<CreateProject />} />
-              <Route path={"/create/entity"} element={<CreateEntity />} />
-              <Route path={"/create"} element={<Create />} />
+                {/* Create routes */}
+                <Route
+                  path={"/create/attribute"}
+                  element={<CreateAttribute />}
+                />
+                <Route path={"/create/project"} element={<CreateProject />} />
+                <Route path={"/create/entity"} element={<CreateEntity />} />
+                <Route path={"/create"} element={<Create />} />
 
-              {/* Entity routes */}
-              <Route path={"/entities"} element={<Entities />} />
-              <Route path={"entities"}>
-                <Route path={":id"} element={<Entity />} />
-              </Route>
+                {/* Entity routes */}
+                <Route path={"/entities"} element={<Entities />} />
+                <Route path={"entities"}>
+                  <Route path={":id"} element={<Entity />} />
+                </Route>
 
-              {/* Projects routes */}
-              <Route path={"/projects"} element={<Projects />} />
-              <Route path={"projects"}>
-                <Route path={":id"} element={<Project />} />
-              </Route>
+                {/* Projects routes */}
+                <Route path={"/projects"} element={<Projects />} />
+                <Route path={"projects"}>
+                  <Route path={":id"} element={<Project />} />
+                </Route>
 
-              {/* Attributes routes */}
-              <Route path={"/attributes"} element={<Attributes />} />
-              <Route path={"attributes"}>
-                <Route path={":id"} element={<Attribute />} />
-              </Route>
+                {/* Attributes routes */}
+                <Route path={"/attributes"} element={<Attributes />} />
+                <Route path={"attributes"}>
+                  <Route path={":id"} element={<Attribute />} />
+                </Route>
 
-              {/* Other routes */}
-              <Route path={"/search"} element={<Search />} />
-              <Route path={"/settings"} element={<Settings />} />
-              <Route path={"/invalid"} element={<Invalid />} />
-              <Route
-                path={"*"}
-                element={<Navigate to={"/invalid"} replace />}
-              />
-            </Routes>
-          </Page>
+                {/* Other routes */}
+                <Route path={"/search"} element={<Search />} />
+                <Route path={"/settings"} element={<Settings />} />
+                <Route path={"/invalid"} element={<Invalid />} />
+                <Route
+                  path={"*"}
+                  element={<Navigate to={"/invalid"} replace />}
+                />
+              </Routes>
+            </Page>
+          </WorkspaceContext.Provider>
         )}
       </ChakraProvider>
     </BrowserRouter>
