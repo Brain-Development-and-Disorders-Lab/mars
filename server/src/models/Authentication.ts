@@ -65,7 +65,6 @@ export class Authentication {
         name: authenticationPayload.name,
         token: authenticationPayload.token,
       });
-      await Users.bootstrap(authenticationPayload.orcid);
     }
 
     return authenticationPayload;

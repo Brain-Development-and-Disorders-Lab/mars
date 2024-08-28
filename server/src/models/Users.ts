@@ -85,55 +85,64 @@ export class Users {
     };
   };
 
-  static bootstrap = async (orcid: string): Promise<ResponseMessage> => {
-    await Projects.create({
-      name: "My First Project",
-      created: dayjs(Date.now()).toISOString(),
-      description:
-        "This is your first Project. Feel free to explore and modify it!",
-      owner: orcid,
-      shared: [],
-      entities: [], // Assuming you can add entities later
-      collaborators: [], // Assuming you might want collaborators
-      history: [],
-    });
-
-    await Entities.create({
-      name: "Example Entity",
-      deleted: false,
-      locked: false,
-      created: dayjs(Date.now()).toISOString(),
-      description: "This is your first Entity. Go ahead and modify it!",
-      owner: orcid,
-      projects: [],
-      associations: {
-        origins: [],
-        products: [],
+  static bootstrap = async (
+    user: string,
+    workspace: string,
+  ): Promise<ResponseMessage> => {
+    await Projects.create(
+      {
+        name: "My First Project",
+        created: dayjs(Date.now()).toISOString(),
+        description:
+          "This is your first Project. Feel free to explore and modify it!",
+        owner: user,
+        shared: [],
+        entities: [], // Assuming you can add entities later
+        collaborators: [], // Assuming you might want collaborators
+        history: [],
       },
-      attachments: [],
-      attributes: [
-        {
-          _id: "a-00-example",
-          name: "Example Attribute",
-          description: "An example Attribute",
-          values: [
-            {
-              _id: "v-00-example",
-              type: "text",
-              name: "Test Value 01",
-              data: "Test Value Data",
-            },
-            {
-              _id: "v-01-example",
-              type: "number",
-              name: "Test Value 01",
-              data: 10,
-            },
-          ],
+      workspace,
+    );
+
+    await Entities.create(
+      {
+        name: "Example Entity",
+        deleted: false,
+        locked: false,
+        created: dayjs(Date.now()).toISOString(),
+        description: "This is your first Entity. Go ahead and modify it!",
+        owner: user,
+        projects: [],
+        associations: {
+          origins: [],
+          products: [],
         },
-      ],
-      history: [],
-    });
+        attachments: [],
+        attributes: [
+          {
+            _id: "a-00-example",
+            name: "Example Attribute",
+            description: "An example Attribute",
+            values: [
+              {
+                _id: "v-00-example",
+                type: "text",
+                name: "Test Value 01",
+                data: "Test Value Data",
+              },
+              {
+                _id: "v-01-example",
+                type: "number",
+                name: "Test Value 01",
+                data: 10,
+              },
+            ],
+          },
+        ],
+        history: [],
+      },
+      workspace,
+    );
 
     return {
       success: true,
