@@ -63,19 +63,22 @@ export class Projects {
 
     if (successStatus) {
       // Add the Project to the Workspace
-      await Workspaces.addEntity(workspace, response.insertedId);
+      await Workspaces.addProject(workspace, response.insertedId);
 
       // Create a new Activity entry
-      await Activity.create({
-        timestamp: new Date(),
-        type: "create",
-        details: "Created new Project",
-        target: {
-          _id: projectModel._id,
-          type: "projects",
-          name: projectModel.name,
+      await Activity.create(
+        {
+          timestamp: new Date(),
+          type: "create",
+          details: "Created new Project",
+          target: {
+            _id: projectModel._id,
+            type: "projects",
+            name: projectModel.name,
+          },
         },
-      });
+        workspace,
+      );
     }
 
     return {
@@ -86,7 +89,10 @@ export class Projects {
     };
   };
 
-  static update = async (updated: ProjectModel): Promise<ResponseMessage> => {
+  static update = async (
+    updated: ProjectModel,
+    workspace: string,
+  ): Promise<ResponseMessage> => {
     const project = await this.getOne(updated._id);
 
     if (_.isNull(project)) {
@@ -109,11 +115,11 @@ export class Projects {
     // Entities to add and remove
     if (!_.isUndefined(updated.entities)) {
       const toAdd = _.difference(updated.entities, project.entities);
-      for (let entity of toAdd) {
+      for (const entity of toAdd) {
         await Entities.addProject(entity, project._id);
       }
       const toRemove = _.difference(project.entities, updated.entities);
-      for (let entity of toRemove) {
+      for (const entity of toRemove) {
         await Entities.removeProject(entity, project._id);
       }
       update.$set.entities = updated.entities;
@@ -125,16 +131,19 @@ export class Projects {
     const successStatus = response.modifiedCount == 1;
 
     if (successStatus) {
-      await Activity.create({
-        timestamp: new Date(),
-        type: "update",
-        details: "Updated existing Project",
-        target: {
-          _id: project._id,
-          type: "projects",
-          name: project.name,
+      await Activity.create(
+        {
+          timestamp: new Date(),
+          type: "update",
+          details: "Updated existing Project",
+          target: {
+            _id: project._id,
+            type: "projects",
+            name: project.name,
+          },
         },
-      });
+        workspace,
+      );
     }
 
     return {
@@ -146,13 +155,17 @@ export class Projects {
   /**
    * Delete a Project
    * @param _id Project identifier to delete
+   * @param workspace Workspace identifier
    * @return {ResponseMessage}
    */
-  static delete = async (_id: string): Promise<ResponseMessage> => {
+  static delete = async (
+    _id: string,
+    workspace: string,
+  ): Promise<ResponseMessage> => {
     const project = await Projects.getOne(_id);
     // Remove Entities from Project
     if (project) {
-      for (let entity of project.entities) {
+      for (const entity of project.entities) {
         await Entities.removeProject(entity, project._id);
       }
     }
@@ -163,16 +176,19 @@ export class Projects {
       .deleteOne({ _id: _id });
 
     if (project && response.deletedCount > 0) {
-      await Activity.create({
-        timestamp: new Date(),
-        type: "delete",
-        details: "Deleted Project",
-        target: {
-          _id: project._id,
-          type: "projects",
-          name: project.name,
+      await Activity.create(
+        {
+          timestamp: new Date(),
+          type: "delete",
+          details: "Deleted Project",
+          target: {
+            _id: project._id,
+            type: "projects",
+            name: project.name,
+          },
         },
-      });
+        workspace,
+      );
     }
 
     return {
@@ -286,6 +302,8 @@ export class Projects {
   /**
    * Generate export data for the Project
    * @param _id Project identifier
+   * @param format File format, either JSON or CSV
+   * @param fields Optionally specify fields to include in export
    * @returns {Promise<string>}
    */
   static export = async (
@@ -316,7 +334,7 @@ export class Projects {
       }
 
       // Iterate through the list of "fields" and create row representation
-      for (let field of exportFields) {
+      for (const field of exportFields) {
         if (_.isEqual(field, "created")) {
           headers.push("Created");
           row.push(dayjs(project.created).format("DD MMM YYYY").toString());
@@ -360,7 +378,7 @@ export class Projects {
     }
 
     const entityData = [];
-    for (let entity of project.entities) {
+    for (const entity of project.entities) {
       const result = await Entities.getOne(entity);
 
       // Remove the history component

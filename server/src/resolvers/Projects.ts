@@ -2,15 +2,22 @@ import { Context, IProject, ProjectModel } from "@types";
 import { GraphQLError } from "graphql";
 import _ from "lodash";
 import { Projects } from "src/models/Projects";
+import { Workspaces } from "../models/Workspaces";
 
 export const ProjectsResolvers = {
   Query: {
     // Retrieve all Projects
     projects: async (_parent: any, args: { limit: 100 }, context: Context) => {
-      const projects = await Projects.all();
-      return projects
-        .filter((p) => p.owner === context.user)
-        .slice(0, args.limit);
+      const workspace = await Workspaces.getOne(context.workspace);
+      if (_.isNull(workspace)) {
+        throw new GraphQLError("Workspace does not exist", {
+          extensions: {
+            code: "NON_EXIST",
+          },
+        });
+      }
+
+      return (await Projects.getMany(workspace.projects)).slice(0, args.limit);
     },
 
     // Retrieve one Project by _id
@@ -96,14 +103,26 @@ export const ProjectsResolvers = {
   },
 
   Mutation: {
-    createProject: async (_parent: any, args: { project: IProject }) => {
-      return await Projects.create(args.project);
+    createProject: async (
+      _parent: any,
+      args: { project: IProject },
+      context: Context,
+    ) => {
+      return await Projects.create(args.project, context.workspace);
     },
-    updateProject: async (_parent: any, args: { project: ProjectModel }) => {
-      return await Projects.update(args.project);
+    updateProject: async (
+      _parent: any,
+      args: { project: ProjectModel },
+      context: Context,
+    ) => {
+      return await Projects.update(args.project, context.workspace);
     },
-    deleteProject: async (_parent: any, args: { _id: string }) => {
-      return await Projects.delete(args._id);
+    deleteProject: async (
+      _parent: any,
+      args: { _id: string },
+      context: Context,
+    ) => {
+      return await Projects.delete(args._id, context.workspace);
     },
     addProjectEntity: async (
       _parent: any,
