@@ -68,10 +68,7 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
       }
     }
   `;
-  const [
-    getWorkspaces,
-    { loading: _workspacesLoading, error: workspacesError },
-  ] = useLazyQuery<{
+  const [getWorkspaces, { error: workspacesError }] = useLazyQuery<{
     workspaces: WorkspaceModel[];
   }>(GET_WORKSPACES);
 
@@ -199,7 +196,7 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
               </Heading>
             </Flex>
             <Text align={"center"}>
-              Log in or create an account with your ORCID iD.
+              Use your ORCiD ID to log in or create an account below.
             </Text>
           </Flex>
 
@@ -215,7 +212,7 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
                 "https://orcid.org/sites/default/files/images/orcid_16x16.png"
               }
             />
-            Connect ORCID
+            Connect ORCiD
           </Button>
         </Flex>
       </Flex>

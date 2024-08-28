@@ -17,10 +17,7 @@ export const ActivityResolvers = {
         });
       }
 
-      const allActivity = (
-        await Activity.getMany(workspace.activity)
-      ).reverse();
-      return allActivity.slice(0, args.limit);
+      return (await Activity.getMany(workspace.activity)).slice(0, args.limit);
     },
   },
 
