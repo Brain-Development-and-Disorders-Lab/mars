@@ -10,7 +10,7 @@ import {
 
 // Utility functions and libraries
 import { getDatabase } from "../connectors/database";
-import { getIdentifier } from "src/util";
+import { getIdentifier } from "../util";
 import _ from "lodash";
 
 // Models
