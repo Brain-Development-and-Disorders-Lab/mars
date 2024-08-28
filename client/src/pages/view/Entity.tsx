@@ -1,5 +1,5 @@
 // React
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 
 // Existing and custom components
 import {
@@ -96,6 +96,9 @@ import { useQuery, gql, useMutation, useLazyQuery } from "@apollo/client";
 import { useParams, useNavigate } from "react-router-dom";
 import Dialog from "@components/Dialog";
 import { Warning } from "@components/Label";
+
+// Workspace context
+import { WorkspaceContext } from "../../Context";
 
 const Entity = () => {
   const { id } = useParams();
@@ -344,7 +347,7 @@ const Entity = () => {
     if (data?.projects) {
       setProjectData(data.projects);
     }
-  }, [loading]);
+  }, [data]);
 
   // Display any GraphQL errors
   useEffect(() => {
@@ -359,12 +362,14 @@ const Entity = () => {
     }
   }, [error]);
 
+  const { workspace } = useContext(WorkspaceContext);
+
   // Check to see if data currently exists and refetch if so
   useEffect(() => {
     if (data && refetch) {
       refetch();
     }
-  }, []);
+  }, [workspace]);
 
   /**
    * Utility function to retrieve a file from the server for download

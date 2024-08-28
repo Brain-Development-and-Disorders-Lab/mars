@@ -1,5 +1,5 @@
 // React
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   Button,
   Flex,
@@ -23,6 +23,9 @@ import _ from "lodash";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
+
+// Workspace context
+import { WorkspaceContext } from "../../Context";
 
 // Apollo client imports
 import { useQuery, gql } from "@apollo/client";
@@ -62,12 +65,23 @@ const Projects = () => {
   // Execute GraphQL query both on page load and navigation
   const { loading, error, data, refetch } = useQuery(GET_PROJECTS);
 
+  const [projects, setProjects] = useState<ProjectModel[]>([]);
+
+  // Manage data once retrieved
+  useEffect(() => {
+    if (data?.projects) {
+      setProjects(data.projects);
+    }
+  }, [data]);
+
+  const { workspace } = useContext(WorkspaceContext);
+
   // Check to see if data currently exists and refetch if so
   useEffect(() => {
     if (data && refetch) {
       refetch();
     }
-  }, []);
+  }, [workspace]);
 
   // Display error messages from GraphQL usage
   useEffect(() => {
@@ -170,7 +184,7 @@ const Projects = () => {
           </Flex>
         </Flex>
         <Flex direction={"column"} gap={"4"} w={"100%"}>
-          {data && data.projects.length > 0 ? (
+          {projects.length > 0 ? (
             <DataTable
               columns={columns}
               data={data.projects}

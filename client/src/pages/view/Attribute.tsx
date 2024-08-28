@@ -1,5 +1,5 @@
 // React
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 
 // Existing and custom components
 import {
@@ -27,6 +27,9 @@ import _ from "lodash";
 // Routing and navigation
 import { useNavigate, useParams } from "react-router-dom";
 import { gql, useMutation, useQuery } from "@apollo/client";
+
+// Workspace context
+import { WorkspaceContext } from "../../Context";
 
 const Attribute = () => {
   const { id } = useParams();
@@ -117,12 +120,14 @@ const Attribute = () => {
     }
   }, [error]);
 
+  const { workspace } = useContext(WorkspaceContext);
+
   // Check to see if data currently exists and refetch if so
   useEffect(() => {
     if (data && refetch) {
       refetch();
     }
-  }, []);
+  }, [workspace]);
 
   // Delete the Attribute when confirmed
   const handleDeleteClick = async () => {

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 
 // Existing and custom components
 import {
@@ -33,6 +33,9 @@ import { useNavigate } from "react-router-dom";
 
 // Apollo client imports
 import { useQuery, gql } from "@apollo/client";
+
+// Workspace context
+import { WorkspaceContext } from "../Context";
 
 // Queries
 const GET_DASHBOARD = gql`
@@ -72,6 +75,9 @@ const Dashboard = () => {
 
   // Toast to show errors
   const toast = useToast();
+
+  // Workspace context
+  const { workspace } = useContext(WorkspaceContext);
 
   // Page data
   const [entityData, setEntityData] = useState(
@@ -115,7 +121,7 @@ const Dashboard = () => {
     if (data && refetch) {
       refetch();
     }
-  }, []);
+  }, [workspace]);
 
   // Display error messages from GraphQL usage
   useEffect(() => {

@@ -1,5 +1,5 @@
 // React
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 
 // Existing and custom components
 import {
@@ -64,6 +64,9 @@ import { useQuery, gql, useMutation, useLazyQuery } from "@apollo/client";
 
 // Routing and navigation
 import { useParams, useNavigate } from "react-router-dom";
+
+// Workspace context
+import { WorkspaceContext } from "../../Context";
 
 // Utility functions and libraries
 import _ from "lodash";
@@ -214,12 +217,14 @@ const Project = () => {
     }
   }, [data]);
 
+  const { workspace } = useContext(WorkspaceContext);
+
   // Check to see if data currently exists and refetch if so
   useEffect(() => {
     if (data && refetch) {
       refetch();
     }
-  }, []);
+  }, [workspace]);
 
   // Display error messages from GraphQL usage
   useEffect(() => {
