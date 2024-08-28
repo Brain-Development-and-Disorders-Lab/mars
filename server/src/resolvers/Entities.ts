@@ -203,7 +203,7 @@ export const EntitiesResolvers = {
       }
 
       if (entity.owner === context.user) {
-        return await Entities.update(args.entity);
+        return await Entities.update(args.entity, context.workspace);
       } else {
         throw new GraphQLError(
           "You do not have permission to modify this Entity",
@@ -217,8 +217,12 @@ export const EntitiesResolvers = {
     },
 
     // Delete an Entity
-    deleteEntity: async (_parent: any, args: { _id: string }) => {
-      return await Entities.delete(args._id);
+    deleteEntity: async (
+      _parent: any,
+      args: { _id: string },
+      context: Context,
+    ) => {
+      return await Entities.delete(args._id, context.workspace);
     },
 
     // Set the Entity "lock" status

@@ -18,7 +18,6 @@ import { getIdentifier } from "../util";
 
 // External libraries
 import _ from "lodash";
-import consola from "consola";
 import dayjs from "dayjs";
 import Papa from "papaparse";
 
@@ -86,47 +85,6 @@ export class Entities {
       .findOne({ name: name, deleted: false });
   };
 
-  static search = async (
-    orcid: string,
-    search: string,
-    limit: number = 5,
-  ): Promise<EntityModel[]> => {
-    let searchRegex;
-    try {
-      searchRegex = new RegExp(search, "i");
-    } catch (error) {
-      consola.error("Invalid regex for search:", error);
-
-      // Fallback to plain text search if regex fails to compile
-      search = search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // Escape special regex characters
-      searchRegex = new RegExp(search, "i"); // Safe regex with escaped characters
-    }
-
-    // Construct search query
-    const query = {
-      $or: [
-        { name: { $regex: searchRegex } },
-        { description: { $regex: searchRegex } },
-        { "attributes.values.data": { $regex: searchRegex } }, // Assuming searchable content within attributes
-      ],
-      $and: [
-        { deleted: false },
-        { $or: [{ owner: orcid }, { collaborators: orcid }] }, // Ensure user is owner or collaborator
-      ],
-    };
-
-    // Limit the fields returned for efficiency
-    const options = {
-      limit: limit,
-      projection: { name: 1, description: 1 },
-    };
-
-    return await getDatabase()
-      .collection<EntityModel>(ENTITIES_COLLECTION)
-      .find(query, options)
-      .toArray();
-  };
-
   /**
    * Create a new Entity
    * @param {IEntity} entity Entity information
@@ -175,16 +133,19 @@ export class Entities {
       await Workspaces.addEntity(workspace, response.insertedId);
 
       // Create a new Activity entry
-      await Activity.create({
-        timestamp: new Date(),
-        type: "create",
-        details: "Created new Entity",
-        target: {
-          _id: joinedEntity._id,
-          type: "entities",
-          name: joinedEntity.name,
+      await Activity.create(
+        {
+          timestamp: new Date(),
+          type: "create",
+          details: "Created new Entity",
+          target: {
+            _id: joinedEntity._id,
+            type: "entities",
+            name: joinedEntity.name,
+          },
         },
-      });
+        workspace,
+      );
     }
 
     return {
@@ -195,7 +156,10 @@ export class Entities {
     };
   };
 
-  static update = async (updated: EntityModel): Promise<ResponseMessage> => {
+  static update = async (
+    updated: EntityModel,
+    workspace: string,
+  ): Promise<ResponseMessage> => {
     const entity = await this.getOne(updated._id);
 
     if (_.isNull(entity)) {
@@ -270,7 +234,7 @@ export class Entities {
         updated.associations.products,
         entity.associations.products,
       );
-      for (let product of addProducts) {
+      for (const product of addProducts) {
         await this.addProduct(updated._id, product);
         await this.addOrigin(product._id, {
           _id: updated._id,
@@ -281,7 +245,7 @@ export class Entities {
         entity.associations.products,
         updated.associations.products,
       );
-      for (let product of removeProducts) {
+      for (const product of removeProducts) {
         await this.removeProduct(updated._id, product);
         await this.removeOrigin(product._id, {
           _id: updated._id,
@@ -294,14 +258,14 @@ export class Entities {
     // Attributes
     if (!_.isUndefined(updated.attributes)) {
       const addAttributes = _.difference(updated.attributes, entity.attributes);
-      for (let attribute of addAttributes) {
+      for (const attribute of addAttributes) {
         await this.addAttribute(updated._id, attribute);
       }
       const removeAttributes = _.difference(
         entity.attributes,
         updated.attributes,
       );
-      for (let attribute of removeAttributes) {
+      for (const attribute of removeAttributes) {
         await this.removeAttribute(updated._id, attribute._id);
       }
       update.$set.attributes = updated.attributes;
@@ -311,16 +275,19 @@ export class Entities {
       .collection<EntityModel>(ENTITIES_COLLECTION)
       .updateOne({ _id: updated._id }, update);
 
-    await Activity.create({
-      timestamp: new Date(),
-      type: "update",
-      details: "Updated existing Entity",
-      target: {
-        _id: updated._id,
-        type: "entities",
-        name: updated.name,
+    await Activity.create(
+      {
+        timestamp: new Date(),
+        type: "update",
+        details: "Updated existing Entity",
+        target: {
+          _id: updated._id,
+          type: "entities",
+          name: updated.name,
+        },
       },
-    });
+      workspace,
+    );
 
     return {
       success: true,
@@ -334,9 +301,13 @@ export class Entities {
   /**
    * Delete an Entity
    * @param _id Entity identifier to delete
+   * @param workspace Workspace identifier
    * @return {ResponseMessage}
    */
-  static delete = async (_id: string): Promise<ResponseMessage> => {
+  static delete = async (
+    _id: string,
+    workspace: string,
+  ): Promise<ResponseMessage> => {
     const entity = await Entities.getOne(_id);
     if (entity) {
       // Remove Origins
@@ -367,16 +338,19 @@ export class Entities {
       .deleteOne({ _id: _id });
 
     if (entity) {
-      await Activity.create({
-        timestamp: new Date(),
-        type: "delete",
-        details: "Deleted Entity",
-        target: {
-          _id: entity._id,
-          type: "entities",
-          name: entity.name,
+      await Activity.create(
+        {
+          timestamp: new Date(),
+          type: "delete",
+          details: "Deleted Entity",
+          target: {
+            _id: entity._id,
+            type: "entities",
+            name: entity.name,
+          },
         },
-      });
+        workspace,
+      );
     }
 
     return {
@@ -961,22 +935,22 @@ export class Entities {
         exportFields = ["created", "owner", "description"];
 
         // Iterate and generate fields for Origins, Products, Projects, and Attributes
-        for (let origin of entity.associations.origins) {
+        for (const origin of entity.associations.origins) {
           exportFields.push(`origin_${origin._id}`);
         }
-        for (let product of entity.associations.products) {
+        for (const product of entity.associations.products) {
           exportFields.push(`product_${product._id}`);
         }
-        for (let project of entity.projects) {
+        for (const project of entity.projects) {
           exportFields.push(`project_${project}`);
         }
-        for (let attribute of entity.attributes) {
+        for (const attribute of entity.attributes) {
           exportFields.push(`attribute_${attribute._id}`);
         }
       }
 
       // Iterate through the list of "fields" and create row representation
-      for (let field of exportFields) {
+      for (const field of exportFields) {
         if (_.isEqual(field, "created")) {
           headers.push("Created");
           row.push(dayjs(entity.created).format("DD MMM YYYY").toString());
@@ -1010,7 +984,7 @@ export class Entities {
           const attributeId = field.slice(ATTRIBUTE_PREFIX_LENGTH);
           entity.attributes.map((attribute) => {
             if (_.isEqual(attribute._id, attributeId)) {
-              for (let value of attribute.values) {
+              for (const value of attribute.values) {
                 headers.push(`${value?.name} (${attribute?.name})`);
 
                 // Some values are JSON data stored as strings
@@ -1044,7 +1018,7 @@ export class Entities {
    */
   static exportMany = async (entities: string[]): Promise<string> => {
     const collection = [];
-    for (let entity of entities) {
+    for (const entity of entities) {
       const result = await Entities.getOne(entity);
       if (result) {
         collection.push(result);
