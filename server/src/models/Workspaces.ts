@@ -1,15 +1,23 @@
+// Custom types
 import {
+  ActivityModel,
   EntityModel,
   IWorkspace,
   ProjectModel,
   ResponseMessage,
   WorkspaceModel,
 } from "@types";
+
+// Utility functions and libraries
 import { getDatabase } from "../connectors/database";
 import { getIdentifier } from "src/util";
+import _ from "lodash";
+
+// Models
+import { Activity } from "./Activity";
 import { Entities } from "./Entities";
 import { Projects } from "./Projects";
-import _ from "lodash";
+import { Users } from "./Users";
 
 // Collection name
 const WORKSPACES_COLLECTION = "workspaces";
@@ -146,7 +154,7 @@ export class Workspaces {
       };
     }
 
-    // Push the new Entity
+    // Push the new Project
     projects.push(project);
     const update = {
       $set: {
@@ -169,6 +177,70 @@ export class Workspaces {
   };
 
   /**
+   * Get all Activities present in the Workspace
+   * @param _id Workspace identifier
+   * @return {Promise<ActivityModel[]>}
+   */
+  static getActivity = async (_id: string): Promise<ActivityModel[]> => {
+    const workspace = await Workspaces.getOne(_id);
+    if (!_.isNull(workspace)) {
+      return await Activity.getMany(workspace.activity);
+    } else {
+      return [];
+    }
+  };
+
+  /**
+   * Add Activity to an existing Workspace
+   * @param _id Workspace identifier to receive the Activity
+   * @param activity Activity identifier to be added to the Workspace
+   * @return {Promise<ResponseMessage>}
+   */
+  static addActivity = async (
+    _id: string,
+    activity: string,
+  ): Promise<ResponseMessage> => {
+    const workspace = await Workspaces.getOne(_id);
+    if (_.isNull(workspace)) {
+      return {
+        success: false,
+        message: "Workspace not found",
+      };
+    }
+
+    // Extract the collection of Activity from the Workspace
+    const activities = _.cloneDeep(workspace.activity);
+    if (_.includes(activities, activity)) {
+      // Check if the Workspace already includes the Activity
+      return {
+        success: true,
+        message: "Workspace already contains this Activity",
+      };
+    }
+
+    // Push the new Activity
+    activities.push(activity);
+    const update = {
+      $set: {
+        activity: activities,
+      },
+    };
+
+    // Execute the update
+    const response = await getDatabase()
+      .collection<WorkspaceModel>(WORKSPACES_COLLECTION)
+      .updateOne({ _id: _id }, update);
+
+    return {
+      success: response.modifiedCount === 1,
+      message:
+        response.modifiedCount === 1
+          ? "Added Activity to Workspace"
+          : "Unable to add Activity to Workspace",
+    };
+  };
+
+  /**
    * Create a new Workspace entry
    * @param workspace Workspace data
    * @return {ResponseMessage}
@@ -181,6 +253,9 @@ export class Workspaces {
     const response = await getDatabase()
       .collection<WorkspaceModel>(WORKSPACES_COLLECTION)
       .insertOne(joinedWorkspace);
+
+    // Bootstrap the Workspace with an example Entity and Project
+    await Users.bootstrap(joinedWorkspace.owner, joinedWorkspace._id);
 
     return {
       success: response.acknowledged,

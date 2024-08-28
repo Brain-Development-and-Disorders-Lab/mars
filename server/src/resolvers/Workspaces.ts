@@ -1,4 +1,5 @@
 import {
+  ActivityModel,
   Context,
   EntityModel,
   IWorkspace,
@@ -103,6 +104,35 @@ export const WorkspacesResolvers = {
       ) {
         // Check if user is a Workspace owner or collaborator
         const result = await Workspaces.getProjects(args._id);
+        return result.slice(0, args.limit);
+      } else {
+        throw new GraphQLError(
+          "You do not have permission to access this Workspace",
+          {
+            extensions: {
+              code: "UNAUTHORIZED",
+            },
+          },
+        );
+      }
+    },
+
+    // Get all Activity within a single Workspace
+    workspaceActivity: async (
+      _parent: any,
+      args: { _id: string; limit: 100 },
+      context: Context,
+    ): Promise<ActivityModel[]> => {
+      const workspace = await Workspaces.getOne(args._id);
+
+      // Access control
+      if (
+        workspace &&
+        (_.includes(workspace.collaborators, context.user) ||
+          _.isEqual(workspace.owner, context.user))
+      ) {
+        // Check if user is a Workspace owner or collaborator
+        const result = await Workspaces.getActivity(args._id);
         return result.slice(0, args.limit);
       } else {
         throw new GraphQLError(

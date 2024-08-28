@@ -312,6 +312,7 @@ export const typedefs = `#graphql
     workspaces: [Workspace]
     workspaceEntities(_id: String, limit: Int): [Entity]
     workspaceProjects(_id: String, limit: Int): [Project]
+    workspaceActivity(_id: String, limit: Int): [Activity]
 
     # Export queries
     exportEntity(_id: String, format: String, fields: [String]): String
