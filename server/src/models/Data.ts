@@ -1,8 +1,4 @@
-import { ObjectId } from "mongodb";
-import { getAttachments } from "../connectors/database";
-import _ from "lodash";
-import * as fs from "fs";
-import { Entities } from "./Entities";
+// Custom types
 import {
   AttributeModel,
   EntityModel,
@@ -10,8 +6,17 @@ import {
   IValue,
   ResponseMessage,
 } from "@types";
+
+// Utility functions and libraries
+import * as fs from "fs";
 import XLSX from "xlsx";
 import dayjs from "dayjs";
+import { ObjectId } from "mongodb";
+import { getAttachments } from "../connectors/database";
+import _ from "lodash";
+
+// Models
+import { Entities } from "./Entities";
 import { Projects } from "./Projects";
 
 export class Data {
@@ -117,11 +122,13 @@ export class Data {
    * Map the set of columns as specified to Entity parameters
    * @param columnMapping Collection of mapped values with their corresponding columns names
    * @param file CSV file
+   * @param workspace Workspace identifier
    * @return {Promise<ResponseMessage>}
    */
   static mapColumns = async (
     columnMapping: { [key: string]: any },
     file: any,
+    workspace: string,
   ): Promise<ResponseMessage> => {
     const { createReadStream } = await file[0];
     const stream = createReadStream();
@@ -192,7 +199,7 @@ export class Data {
         }
 
         // Create the Entity and merge in the generated ID
-        const response = await Entities.create(data);
+        const response = await Entities.create(data, workspace);
         if (response.success) {
           entities.push({
             _id: response.message,
@@ -223,13 +230,17 @@ export class Data {
 
   /**
    * Import a JSON file or set of objects
-   * @param objectsData Set of Objects to import
+   * @param file JSON file for import
+   * @param owner ORCiD ID of owner
+   * @param project Project identifier to add Entities to (if any)
+   * @param workspace Workspace identifier
    * @return {Promise<ResponseMessage>}
    */
   static importObjects = async (
     file: any[],
     owner: string,
     project: string,
+    workspace: string,
   ): Promise<ResponseMessage> => {
     const { createReadStream, mimetype } = await file[0];
     const stream = createReadStream();
@@ -250,7 +261,7 @@ export class Data {
       // Check that the specified Project exists
       const projectExists = await Projects.exists(project);
 
-      for (let entity of parsed.entities as EntityModel[]) {
+      for (const entity of parsed.entities as EntityModel[]) {
         // Splice in the owner and Project information
         entity.owner = owner;
         entity.projects = projectExists ? [project] : [];
@@ -259,8 +270,8 @@ export class Data {
         const exists = await Entities.exists(entity._id);
         if (exists) {
           // Update the Entity if it already exists
-          const result = await Entities.update(entity);
-          if (result.success === false) {
+          const result = await Entities.update(entity, workspace);
+          if (!result.success) {
             return {
               success: false,
               message: `Error updating existing Entity: "${entity.name}"`,
@@ -268,8 +279,8 @@ export class Data {
           }
         } else {
           // Create a new Entity if it does not exist
-          const result = await Entities.create(entity);
-          if (result.success === false) {
+          const result = await Entities.create(entity, workspace);
+          if (!result.success) {
             return {
               success: false,
               message: `Error creating new Entity: "${entity.name}"`,

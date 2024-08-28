@@ -1,6 +1,11 @@
-import { ResponseMessage } from "@types";
+// Custom types
+import { Context, ResponseMessage } from "@types";
+
+// Utility functions and libraries
 import { GraphQLError } from "graphql";
 import _ from "lodash";
+
+// Data model
 import { Data } from "src/models/Data";
 
 export const DataResolvers = {
@@ -41,14 +46,25 @@ export const DataResolvers = {
     mapColumns: async (
       _parent: any,
       args: { columnMapping: { [column: string]: string }; file: any },
+      context: Context,
     ): Promise<ResponseMessage> => {
-      return await Data.mapColumns(args.columnMapping, args.file);
+      return await Data.mapColumns(
+        args.columnMapping,
+        args.file,
+        context.workspace,
+      );
     },
     importObjects: async (
       _parent: any,
       args: { file: any; owner: string; project: string },
+      context: Context,
     ): Promise<ResponseMessage> => {
-      return await Data.importObjects(args.file, args.owner, args.project);
+      return await Data.importObjects(
+        args.file,
+        args.owner,
+        args.project,
+        context.workspace,
+      );
     },
   },
 };
