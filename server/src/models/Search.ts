@@ -1,6 +1,8 @@
 import { EntityModel } from "@types";
 import { getDatabase } from "../connectors/database";
 import _ from "lodash";
+import { Workspaces } from "./Workspaces";
+import { Entities } from "./Entities";
 
 // Collection name
 const ENTITIES_COLLECTION = "entities";
@@ -9,20 +11,22 @@ export class Search {
   /**
    * Get a collection of Search results
    * @param {string} query Search query data
+   * @param {string} workspace Workspace identifier
+   * @param {number} limit Limit the number of results
    * @returns {Promise<EntityModel[]>}
    */
   static getText = async (
     query: string,
-    user: string,
-    limit: number = 5,
+    workspace: string,
+    limit?: number,
   ): Promise<EntityModel[]> => {
     // Sanitize database query
     query = query.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
     const expression = new RegExp(query, "gi");
 
-    // Limit the fields returned for efficiency
+    // Limit the fields returned for efficiency, default limit is 10
     const options = {
-      limit: limit,
+      limit: _.isUndefined(limit) ? 10 : limit,
       projection: { name: 1, description: 1 },
     };
 
@@ -39,22 +43,35 @@ export class Search {
         { "attributes.values.name": { $regex: expression } },
         { "attributes.values.data": { $regex: expression } }, // Assuming searchable content within attributes
       ],
-      $and: [
-        { deleted: false },
-        { $or: [{ owner: user }, { collaborators: user }] }, // Ensure user is owner or collaborator
-      ],
+      $and: [{ deleted: false }],
     };
 
-    return await getDatabase()
+    const results = await getDatabase()
       .collection<EntityModel>(ENTITIES_COLLECTION)
       .find(databaseQuery, options)
       .toArray();
+
+    // Get the current Workspace context and retrieve all Entities
+    const context = await Workspaces.getOne(workspace);
+    if (!context) {
+      return [];
+    }
+    const entities = await Entities.getMany(context.entities);
+
+    // Create an intersection of the search results and all Entities
+    const intersected = _.intersection<string>(
+      results.map((e) => e._id),
+      entities.map((e) => e._id),
+    );
+
+    // Filter the query results to only those matching the current Workspace
+    return _.filter(entities, (entity) => _.includes(intersected, entity._id));
   };
 
   static getQuery = async (
     query: string,
-    user: string,
-    limit: number = 5,
+    workspace: string,
+    limit?: number,
   ): Promise<EntityModel[]> => {
     // Parse the query string into a MongoDB query object
     const parsedQuery = JSON.parse(query);
@@ -70,17 +87,31 @@ export class Search {
       mongoQuery = parsedQuery;
     }
 
-    // Limit the fields returned for efficiency
+    // Limit the fields returned for efficiency, default limit is 10
     const options = {
-      limit: limit,
+      limit: _.isUndefined(limit) ? 10 : limit,
     };
 
-    // To-Do: Ensure we restrict by user
-
-    // Perform the MongoDB query
-    return await getDatabase()
+    // Execute the search query with any specified options
+    const results = await getDatabase()
       .collection<EntityModel>(ENTITIES_COLLECTION)
       .find(mongoQuery, options)
       .toArray();
+
+    // Get the current Workspace context and retrieve all Entities
+    const context = await Workspaces.getOne(workspace);
+    if (!context) {
+      return [];
+    }
+    const entities = await Entities.getMany(context.entities);
+
+    // Create an intersection of the search results and all Entities
+    const intersected = _.intersection<string>(
+      results.map((e) => e._id),
+      entities.map((e) => e._id),
+    );
+
+    // Filter the query results to only those matching the current Workspace
+    return _.filter(entities, (entity) => _.includes(intersected, entity._id));
   };
 }
