@@ -2,10 +2,9 @@
 import "dotenv/config";
 
 // Libraries
-import _ from "lodash";
 import consola, { LogLevels } from "consola";
 import cors from "cors";
-import express from "express";
+import express, { RequestHandler } from "express";
 import helmet from "helmet";
 import http from "http";
 import * as fs from "fs";
@@ -106,7 +105,10 @@ const start = async () => {
     "/",
     cors<cors.CorsRequest>({ origin: origins }),
     express.json({ limit: "50mb" }),
-    graphqlUploadExpress({ maxFileSize: 10000000, maxFiles: 10 }),
+    graphqlUploadExpress({
+      maxFileSize: 10000000,
+      maxFiles: 10,
+    }) as RequestHandler,
     expressMiddleware(server, {
       context: async ({ req }): Promise<Context> => {
         return {
