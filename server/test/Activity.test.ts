@@ -9,15 +9,20 @@ import { Activity } from "../src/models/Activity";
 
 // Database connectivity
 import { connect, disconnect } from "../src/connectors/database";
-import { clearDatabase } from "./util";
+import { clearDatabase, setupWorkspace } from "./util";
 
 describe("Activity model", () => {
+  let workspace = ""; // Workspace identifier used in all tests
+
   beforeEach(async () => {
     // Connect to the database
     await connect();
 
     // Clear the database prior to running tests
     await clearDatabase();
+
+    // Create a new Workspace environment to bypass requirement
+    workspace = await setupWorkspace();
   });
 
   // Teardown after each test
@@ -27,29 +32,33 @@ describe("Activity model", () => {
     await disconnect();
   });
 
-  it("should return 0 Activity with an empty database", async () => {
+  it("should return 2 Activity entries with a new Workspace", async () => {
     const result = await Activity.all();
-    expect(result.length).toBe(0);
+    expect(result.length).toBe(2);
   });
 
   it("should create a new Activity entry", async () => {
-    const create = await Activity.create({
-      timestamp: new Date(),
-      type: "create",
-      actor: {
-        name: "Test",
-        _id: "test",
+    const create = await Activity.create(
+      {
+        timestamp: new Date(),
+        type: "create",
+        actor: {
+          name: "Test",
+          _id: "test",
+        },
+        details: "Test Activity",
+        target: {
+          type: "entities",
+          _id: "test",
+          name: "Test Target",
+        },
       },
-      details: "Test Activity",
-      target: {
-        type: "entities",
-        _id: "test",
-        name: "Test Target",
-      },
-    });
+      workspace,
+    );
     expect(create.success).toBeTruthy();
 
+    // Results should include new Activity entry as well as existing entries
     const result = await Activity.all();
-    expect(result.length).toBe(1);
+    expect(result.length).toBe(3);
   });
 });

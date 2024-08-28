@@ -9,15 +9,20 @@ import { Attributes } from "../src/models/Attributes";
 
 // Database connectivity
 import { connect, disconnect } from "../src/connectors/database";
-import { clearDatabase } from "./util";
+import { clearDatabase, setupWorkspace } from "./util";
 
 describe("Attributes model", () => {
+  let workspace = ""; // Workspace identifier used in all tests
+
   beforeEach(async () => {
     // Connect to the database
     await connect();
 
     // Clear the database prior to running tests
     await clearDatabase();
+
+    // Create a new Workspace environment to bypass requirement
+    workspace = await setupWorkspace();
   });
 
   // Teardown after each test
@@ -33,31 +38,40 @@ describe("Attributes model", () => {
   });
 
   it("should create an Attribute", async () => {
-    await Attributes.create({
-      name: "TestAttribute",
-      description: "Attribute description",
-      values: [],
-    });
+    await Attributes.create(
+      {
+        name: "TestAttribute",
+        description: "Attribute description",
+        values: [],
+      },
+      workspace,
+    );
 
     const attributes = await Attributes.all();
     expect(attributes.length).toBe(1);
   });
 
   it("should update the description", async () => {
-    await Attributes.create({
-      name: "TestAttribute",
-      description: "Attribute description",
-      values: [],
-    });
+    await Attributes.create(
+      {
+        name: "TestAttribute",
+        description: "Attribute description",
+        values: [],
+      },
+      workspace,
+    );
     let attributes = await Attributes.all();
     expect(attributes.length).toBe(1);
 
-    await Attributes.update({
-      _id: attributes[0]._id,
-      name: attributes[0].name,
-      description: "Updated Attribute description",
-      values: attributes[0].values,
-    });
+    await Attributes.update(
+      {
+        _id: attributes[0]._id,
+        name: attributes[0].name,
+        description: "Updated Attribute description",
+        values: attributes[0].values,
+      },
+      workspace,
+    );
     attributes = await Attributes.all();
 
     expect(attributes.length).toBe(1);
@@ -65,27 +79,33 @@ describe("Attributes model", () => {
   });
 
   it("should update the values", async () => {
-    const create = await Attributes.create({
-      name: "TestAttribute",
-      description: "Attribute description",
-      values: [],
-    });
+    const create = await Attributes.create(
+      {
+        name: "TestAttribute",
+        description: "Attribute description",
+        values: [],
+      },
+      workspace,
+    );
     expect(create.success).toBeTruthy();
     let attributes = await Attributes.all();
 
-    const update = await Attributes.update({
-      _id: attributes[0]._id,
-      name: attributes[0].name,
-      description: attributes[0].description,
-      values: [
-        {
-          _id: "v_0",
-          name: "Value0",
-          type: "text",
-          data: "Test",
-        },
-      ],
-    });
+    const update = await Attributes.update(
+      {
+        _id: attributes[0]._id,
+        name: attributes[0].name,
+        description: attributes[0].description,
+        values: [
+          {
+            _id: "v_0",
+            name: "Value0",
+            type: "text",
+            data: "Test",
+          },
+        ],
+      },
+      workspace,
+    );
     expect(update.success).toBeTruthy();
     attributes = await Attributes.all();
 
