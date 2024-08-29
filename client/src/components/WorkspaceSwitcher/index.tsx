@@ -71,7 +71,7 @@ const WorkspaceSwitcher = () => {
     onClose: onCreateClose,
   } = useDisclosure();
 
-  // Query to retrieve Workspaces
+  // Queries (active and lazy) to retrieve all Workspaces
   const GET_WORKSPACES = gql`
     query GetWorkspaces {
       workspaces {
@@ -83,6 +83,9 @@ const WorkspaceSwitcher = () => {
     }
   `;
   const { loading, error, data, refetch } = useQuery<{
+    workspaces: WorkspaceModel[];
+  }>(GET_WORKSPACES, { fetchPolicy: "network-only" });
+  const [getWorkspaces, { error: workspacesError }] = useLazyQuery<{
     workspaces: WorkspaceModel[];
   }>(GET_WORKSPACES, { fetchPolicy: "network-only" });
 
@@ -226,12 +229,22 @@ const WorkspaceSwitcher = () => {
     });
 
     if (result.data?.createWorkspace.success) {
-      // Navigate back to the Dashboard
-      onCreateClose();
-      navigate("/");
+      // Update to use the new Workspace identifier
+      const workspaces = await getWorkspaces();
+      if (
+        workspaces.data?.workspaces &&
+        workspaces.data?.workspaces.length > 0
+      ) {
+        // Update the stored Workspace identifier and collection of Workspaces
+        setWorkspaceIdentifier(workspaces.data.workspaces[0]._id);
+        setWorkspaces(workspaces.data.workspaces);
+
+        // Close the modal
+        onCreateClose();
+      }
     }
 
-    if (createError) {
+    if (createError || workspacesError) {
       toast({
         title: "Error",
         description: "Unable to retrieve Workspaces",
@@ -245,7 +258,7 @@ const WorkspaceSwitcher = () => {
 
   return (
     <Flex>
-      <Menu isOpen={isOpen}>
+      <Menu isOpen={isOpen} autoSelect={false}>
         <MenuButton
           h={"100%"}
           w={"100%"}
@@ -289,6 +302,7 @@ const WorkspaceSwitcher = () => {
               return (
                 <MenuItem
                   key={workspace._id}
+                  isDisabled={workspace._id === workspaceIdentifier}
                   onClick={() => handleWorkspaceClick(workspace._id)}
                 >
                   <Text fontSize={"sm"} fontWeight={"semibold"}>
