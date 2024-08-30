@@ -37,7 +37,6 @@ import CreateProject from "@pages/create/Project";
 
 // Page type - Other
 import Search from "@pages/Search";
-import Settings from "@pages/Settings";
 import Dashboard from "@pages/Dashboard";
 import Login from "@pages/Login";
 import Invalid from "@pages/Invalid";
@@ -75,6 +74,7 @@ const App = (): ReactElement => {
 
   // Setup Workspace state
   const [workspace, setWorkspace] = useState({} as WorkspaceModel);
+  const [workspaceLoading, setWorkspaceLoading] = useState(false);
 
   return (
     <BrowserRouter>
@@ -82,7 +82,14 @@ const App = (): ReactElement => {
         {!authenticated ? (
           <Login setAuthenticated={setAuthenticated} />
         ) : (
-          <WorkspaceContext.Provider value={{ workspace, setWorkspace }}>
+          <WorkspaceContext.Provider
+            value={{
+              workspace,
+              setWorkspace,
+              workspaceLoading,
+              setWorkspaceLoading,
+            }}
+          >
             <Page>
               <Routes>
                 <Route path={"/"} element={<Dashboard />} />
@@ -116,7 +123,6 @@ const App = (): ReactElement => {
 
                 {/* Other routes */}
                 <Route path={"/search"} element={<Search />} />
-                <Route path={"/settings"} element={<Settings />} />
                 <Route path={"/invalid"} element={<Invalid />} />
                 <Route
                   path={"*"}

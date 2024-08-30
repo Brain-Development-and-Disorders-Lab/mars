@@ -79,7 +79,7 @@ const Entities = () => {
     }
   }, [data]);
 
-  const { workspace } = useContext(WorkspaceContext);
+  const { workspace, workspaceLoading } = useContext(WorkspaceContext);
 
   // Check to see if data currently exists and refetch if so
   useEffect(() => {
@@ -191,8 +191,8 @@ const Entities = () => {
 
   return (
     <Content
-      isError={!_.isUndefined(error) && !_.isUndefined(exportError)}
-      isLoaded={!loading && !exportLoading}
+      isError={!_.isUndefined(error) || !_.isUndefined(exportError)}
+      isLoaded={!loading && !exportLoading && !workspaceLoading}
     >
       <Flex
         direction={"row"}

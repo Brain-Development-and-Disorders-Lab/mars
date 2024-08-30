@@ -54,7 +54,8 @@ const WorkspaceSwitcher = () => {
   const [workspaceIdentifier, setWorkspaceIdentifier] = useState(
     token.workspace,
   );
-  const { workspace, setWorkspace } = useContext(WorkspaceContext);
+  const { workspace, setWorkspace, setWorkspaceLoading } =
+    useContext(WorkspaceContext);
 
   // State for Workspace details
   const [name, setName] = useState("");
@@ -101,7 +102,7 @@ const WorkspaceSwitcher = () => {
   `;
   const [getWorkspace, { error: workspaceError }] = useLazyQuery<{
     workspace: WorkspaceModel;
-  }>(GET_WORKSPACE);
+  }>(GET_WORKSPACE, { fetchPolicy: "network-only" });
 
   // Query to create a Workspace
   const CREATE_WORKSPACE = gql`
@@ -143,6 +144,8 @@ const WorkspaceSwitcher = () => {
 
   useEffect(() => {
     const updateWorkspace = async () => {
+      setWorkspaceLoading(true);
+
       // When the `workspaceIdentifier` value changes, retrieve updated model
       const result = await getWorkspace({
         variables: {
@@ -169,6 +172,8 @@ const WorkspaceSwitcher = () => {
           isClosable: true,
         });
       }
+
+      setWorkspaceLoading(false);
     };
 
     if (workspaceIdentifier !== "") {
@@ -238,6 +243,11 @@ const WorkspaceSwitcher = () => {
         // Update the stored Workspace identifier and collection of Workspaces
         setWorkspaceIdentifier(workspaces.data.workspaces[0]._id);
         setWorkspaces(workspaces.data.workspaces);
+
+        // Reset modal state
+        setName("");
+        setDescription("");
+        setCollaborators([]);
 
         // Close the modal
         onCreateClose();

@@ -74,7 +74,7 @@ const Projects = () => {
     }
   }, [data]);
 
-  const { workspace } = useContext(WorkspaceContext);
+  const { workspace, workspaceLoading } = useContext(WorkspaceContext);
 
   // Check to see if data currently exists and refetch if so
   useEffect(() => {
@@ -85,21 +85,11 @@ const Projects = () => {
 
   // Display error messages from GraphQL usage
   useEffect(() => {
-    if (!loading && _.isUndefined(data)) {
-      // Raised if invalid query
-      toast({
-        title: "Error",
-        description: "Could not retrieve Project data.",
-        status: "error",
-        duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
-      });
-    } else if (error) {
+    if ((!loading && _.isUndefined(data)) || error) {
       // Raised GraphQL error
       toast({
         title: "Error",
-        description: error.message,
+        description: "Unable to retrieve Projects",
         status: "error",
         duration: 4000,
         position: "bottom-right",
@@ -151,7 +141,10 @@ const Projects = () => {
   ];
 
   return (
-    <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
+    <Content
+      isError={!_.isUndefined(error)}
+      isLoaded={!loading && !workspaceLoading}
+    >
       <Flex
         direction={"row"}
         p={"4"}

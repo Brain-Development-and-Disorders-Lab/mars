@@ -354,7 +354,7 @@ const Entity = () => {
     if (error) {
       toast({
         title: "Error",
-        description: error.message,
+        description: "Unable to retrieve Entity information",
         status: "error",
         position: "bottom-right",
         isClosable: true,
@@ -362,7 +362,7 @@ const Entity = () => {
     }
   }, [error]);
 
-  const { workspace } = useContext(WorkspaceContext);
+  const { workspace, workspaceLoading } = useContext(WorkspaceContext);
 
   // Check to see if data currently exists and refetch if so
   useEffect(() => {
@@ -1376,7 +1376,7 @@ const Entity = () => {
   return (
     <Content
       isError={!_.isUndefined(error)}
-      isLoaded={!loading && !deleteLoading}
+      isLoaded={!loading && !deleteLoading && !workspaceLoading}
     >
       <Flex direction={"column"}>
         <Flex

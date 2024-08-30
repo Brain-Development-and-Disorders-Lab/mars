@@ -77,7 +77,7 @@ const Dashboard = () => {
   const toast = useToast();
 
   // Workspace context
-  const { workspace } = useContext(WorkspaceContext);
+  const { workspace, workspaceLoading } = useContext(WorkspaceContext);
 
   // Page data
   const [entityData, setEntityData] = useState(
@@ -118,35 +118,25 @@ const Dashboard = () => {
 
   // Check to see if data currently exists and refetch if so
   useEffect(() => {
-    if (data && refetch) {
+    if (refetch) {
       refetch();
     }
   }, [workspace]);
 
   // Display error messages from GraphQL usage
   useEffect(() => {
-    if (!loading && _.isUndefined(data)) {
-      // Raised if invalid query
-      toast({
-        title: "Error",
-        description: "Could not retrieve data.",
-        status: "error",
-        duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
-      });
-    } else if (error) {
+    if (error) {
       // Raised GraphQL error
       toast({
         title: "Error",
-        description: error.message,
+        description: "Could not retrieve data for Dashboard",
         status: "error",
         duration: 4000,
         position: "bottom-right",
         isClosable: true,
       });
     }
-  }, [error, loading]);
+  }, [error]);
 
   // Effect to adjust column visibility
   const breakpoint = useBreakpoint({ ssr: false });
@@ -254,7 +244,10 @@ const Dashboard = () => {
   ];
 
   return (
-    <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
+    <Content
+      isError={!_.isUndefined(error)}
+      isLoaded={!loading && !workspaceLoading}
+    >
       <Flex direction={"row"} wrap={"wrap"} gap={"2"} p={"2"}>
         <Flex direction={"column"} gap={"2"} grow={"1"} basis={"60%"}>
           {/* Projects and Entities */}

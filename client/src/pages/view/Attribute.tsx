@@ -112,7 +112,7 @@ const Attribute = () => {
       toast({
         title: "Error",
         status: "error",
-        description: error.message,
+        description: "Unable to retrieve Attribute information",
         duration: 4000,
         position: "bottom-right",
         isClosable: true,
@@ -120,7 +120,7 @@ const Attribute = () => {
     }
   }, [error]);
 
-  const { workspace } = useContext(WorkspaceContext);
+  const { workspace, workspaceLoading } = useContext(WorkspaceContext);
 
   // Check to see if data currently exists and refetch if so
   useEffect(() => {
@@ -200,7 +200,9 @@ const Attribute = () => {
   return (
     <Content
       isError={!_.isUndefined(error)}
-      isLoaded={!loading && !updateLoading && !deleteLoading}
+      isLoaded={
+        !loading && !updateLoading && !deleteLoading && !workspaceLoading
+      }
     >
       <Flex direction={"column"}>
         <Flex
