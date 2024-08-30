@@ -6,16 +6,15 @@ describe("Interface launches", () => {
     // Navigate the "Login" page
     cy.visit("http://localhost:8080/");
     cy.get("button").click();
+
+    // Create a Workspace
+    cy.get("#modalWorkspaceName").type("Test Workspace");
+    cy.get("#modalWorkspaceDescription").type("Description for Workspace");
+    cy.get("#modalWorkspaceCreateButton").click();
   });
 
-  it("Search and Projects box are visible", () => {
-    cy.get(".css-50hugx > :nth-child(2) > button:nth-child(3)").should(
-      "have.text",
-      "Search",
-    );
-    cy.get(".css-50hugx > :nth-child(2) > button:nth-child(4)").should(
-      "have.text",
-      "Projects",
-    );
+  it("navigation menu items are visible", () => {
+    cy.get("#navSearchButton").should("have.text", "Search");
+    cy.get("#navProjectsButton").should("have.text", "Projects");
   });
 });

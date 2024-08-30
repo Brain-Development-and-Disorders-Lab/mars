@@ -9,10 +9,8 @@ describe("JSON Import Test", () => {
   });
 
   it("should import a JSON file successfully", () => {
-    // Visit the page where you can import CSV files
-    cy.contains("button", "Import").click(); // click to import CSV file
-
-    // cy.get('input[type=file]').first().selectFile(Cypress.Buffer.from('text'));
+    // Open import modal and import JSON file
+    cy.get("#navImportButton").click();
 
     cy.fixture("export_entities.json", "binary").then((fileContent) => {
       // Directly use fileContent if it's already in the correct format
@@ -21,14 +19,15 @@ describe("JSON Import Test", () => {
         mimeType: "application/json",
         contents: fileContent,
       });
+      cy.get("#importContinueButton").scrollIntoView().click();
 
-      cy.wait(100);
-      cy.get(".css-15vhhhd > .css-hipoo1").scrollIntoView().click();
+      // Skip the remaining import screens
       cy.wait(500);
-      cy.get(".css-15vhhhd > .css-hipoo1").click({ force: true }); // Go to import step 2
-      cy.get(".css-15vhhhd > .css-lgnrpw").click({ force: true }); // Finalize import
-      cy.reload();
+      cy.get("#importContinueButton").click({ force: true }); // Go to import step 2
+      cy.get("#importContinueButton").click({ force: true }); // Finalize import
 
+      // Validate the Entity has been imported successfully
+      cy.get("#navEntitiesButton").click();
       cy.contains("FROMJSON").should("exist");
     });
   });
