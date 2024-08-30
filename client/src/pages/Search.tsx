@@ -295,7 +295,11 @@ const Search = () => {
             hasSearched &&
             !isSearching && (
               <Flex direction={"column"} w={"100%"} gap={"4"}>
-                <Heading size={"sm"} fontWeight={"semibold"}>
+                <Heading
+                  id={"resultsHeading"}
+                  size={"sm"}
+                  fontWeight={"semibold"}
+                >
                   {results.length} result
                   {results.length > 1 || results.length === 0 ? "s" : ""}
                 </Heading>

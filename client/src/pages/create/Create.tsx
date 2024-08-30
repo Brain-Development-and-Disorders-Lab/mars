@@ -83,6 +83,7 @@ const Create = () => {
           <CardFooter>
             <Flex w={"100%"} justify={"center"}>
               <Button
+                id={"createProjectButton"}
                 size={"sm"}
                 colorScheme={"green"}
                 rightIcon={<Icon name={"add"} />}
@@ -155,6 +156,7 @@ const Create = () => {
           <CardFooter>
             <Flex w={"100%"} justify={"center"}>
               <Button
+                id={"createEntityButton"}
                 size={"sm"}
                 colorScheme={"green"}
                 rightIcon={<Icon name={"add"} />}
@@ -213,6 +215,7 @@ const Create = () => {
           <CardFooter>
             <Flex w={"100%"} justify={"center"}>
               <Button
+                id={"createTemplateButton"}
                 size={"sm"}
                 colorScheme={"green"}
                 rightIcon={<Icon name={"add"} />}

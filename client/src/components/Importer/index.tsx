@@ -853,6 +853,7 @@ const Importer = (props: {
             <ModalFooter p={"2"}>
               <Flex direction={"row"} w={"100%"} justify={"space-between"}>
                 <Button
+                  id={"importCancelButton"}
                   size={"sm"}
                   colorScheme={"red"}
                   rightIcon={<Icon name="cross" />}
@@ -866,27 +867,8 @@ const Importer = (props: {
                   Cancel
                 </Button>
 
-                {/* Back button will be enable after debugging */}
-                {/* <Button
-                  colorScheme={"blue"}
-                  rightIcon={<Icon name="check" />}
-                  variant={"solid"}
-                  onClick={() => {
-                    if (_.isEqual(interfacePage, "mapping")) {
-                      setInterfacePage("details");
-                    } else {
-                      props.onOpen();
-                      onMappingClose();
-                    }
-                  }}
-                  isDisabled={_.isEqual(nameField, "") || _.isEqual(nameField, "details")}
-                  isLoading={isMapping}
-                  loadingText={"Please wait..."}
-                >
-                  Back
-                </Button> */}
-
                 <Button
+                  id={"importContinueButton"}
                   size={"sm"}
                   colorScheme={
                     _.isEqual(interfacePage, "mapping") ? "green" : "blue"

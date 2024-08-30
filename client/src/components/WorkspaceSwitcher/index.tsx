@@ -434,6 +434,7 @@ const WorkspaceSwitcher = () => {
                         Name
                       </FormLabel>
                       <Input
+                        id={"modalWorkspaceName"}
                         size={"sm"}
                         rounded={"md"}
                         placeholder={"Name"}
@@ -561,6 +562,7 @@ const WorkspaceSwitcher = () => {
                         Description
                       </FormLabel>
                       <Textarea
+                        id={"modalWorkspaceDescription"}
                         size={"sm"}
                         rounded={"md"}
                         placeholder={"Description"}
@@ -591,6 +593,7 @@ const WorkspaceSwitcher = () => {
             )}
             <Spacer />
             <Button
+              id={"modalWorkspaceCreateButton"}
               size={"sm"}
               colorScheme={"green"}
               onClick={() => handleCreateWorkspaceClick()}

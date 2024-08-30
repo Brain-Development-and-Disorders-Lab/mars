@@ -75,6 +75,7 @@ const Navigation = () => {
               Workspace
             </Text>
             <Button
+              id={"navDashboardButton"}
               key={"dashboard"}
               size={"sm"}
               w={"100%"}
@@ -87,6 +88,7 @@ const Navigation = () => {
             </Button>
 
             <Button
+              id={"navSearchButton"}
               key={"search"}
               size={"sm"}
               w={"100%"}
@@ -101,6 +103,7 @@ const Navigation = () => {
             </Button>
 
             <Button
+              id={"navProjectsButton"}
               leftIcon={<Icon name={"project"} />}
               size={"sm"}
               w={"100%"}
@@ -119,6 +122,7 @@ const Navigation = () => {
             </Button>
 
             <Button
+              id={"navEntitiesButton"}
               leftIcon={<Icon name={"entity"} />}
               size={"sm"}
               w={"100%"}
@@ -136,6 +140,7 @@ const Navigation = () => {
               </Flex>
             </Button>
             <Button
+              id={"navTemplatesButton"}
               leftIcon={<Icon name={"attribute"} />}
               size={"sm"}
               w={"100%"}
@@ -157,6 +162,7 @@ const Navigation = () => {
               Tools
             </Text>
             <Button
+              id={"navCreateButton"}
               key={"create"}
               size={"sm"}
               w={"100%"}
@@ -171,6 +177,7 @@ const Navigation = () => {
             </Button>
 
             <Button
+              id={"navImportButton"}
               key={"import"}
               size={"sm"}
               w={"100%"}
