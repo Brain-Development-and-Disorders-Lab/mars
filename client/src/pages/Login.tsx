@@ -116,18 +116,23 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
 
       // Finalise authentication state
       setAuthenticated(true);
-    } else if (error) {
+    }
+  };
+
+  useEffect(() => {
+    // Handle potential errors when using ORCiD
+    if (error) {
       toast({
         title: "Login Error",
         status: "error",
-        description: "Error authenticating with ORCiD",
+        description: "Could not authenticate with ORCiD",
         duration: 4000,
         position: "bottom-right",
         isClosable: true,
       });
       setAuthenticated(false);
     }
-  };
+  }, [error]);
 
   // Check if token exists
   useEffect(() => {
