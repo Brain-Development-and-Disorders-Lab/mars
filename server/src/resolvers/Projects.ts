@@ -1,13 +1,19 @@
+// Custom types
 import { Context, IProject, ProjectModel } from "@types";
+
+// Utility functions and libraries
 import { GraphQLError } from "graphql";
 import _ from "lodash";
-import { Projects } from "src/models/Projects";
+
+// Models
+import { Projects } from "../models/Projects";
 import { Workspaces } from "../models/Workspaces";
 
 export const ProjectsResolvers = {
   Query: {
     // Retrieve all Projects
     projects: async (_parent: any, args: { limit: 100 }, context: Context) => {
+      // Check Workspace exists
       const workspace = await Workspaces.getOne(context.workspace);
       if (_.isNull(workspace)) {
         throw new GraphQLError("Workspace does not exist", {
@@ -17,11 +23,26 @@ export const ProjectsResolvers = {
         });
       }
 
-      return (await Projects.getMany(workspace.projects)).slice(0, args.limit);
+      // Filter by ownership and Workspace membership
+      const projects = await Projects.all();
+      return projects
+        .filter((project) => _.includes(workspace.projects, project._id))
+        .slice(0, args.limit);
     },
 
     // Retrieve one Project by _id
     project: async (_parent: any, args: { _id: string }, context: Context) => {
+      // Check Workspace exists
+      const workspace = await Workspaces.getOne(context.workspace);
+      if (_.isNull(workspace)) {
+        throw new GraphQLError("Workspace does not exist", {
+          extensions: {
+            code: "NON_EXIST",
+          },
+        });
+      }
+
+      // Check that Project exists
       const project = await Projects.getOne(args._id);
       if (_.isNull(project)) {
         throw new GraphQLError("Project does not exist", {
@@ -31,7 +52,10 @@ export const ProjectsResolvers = {
         });
       }
 
-      if (project.owner === context.user) {
+      if (
+        project.owner === context.user &&
+        _.includes(workspace.projects, project._id)
+      ) {
         return project;
       } else {
         throw new GraphQLError(

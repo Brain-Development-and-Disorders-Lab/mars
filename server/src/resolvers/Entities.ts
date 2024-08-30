@@ -27,7 +27,7 @@ export const EntitiesResolvers = {
       // Filter by ownership and Workspace membership
       const entities = await Entities.all();
       return entities
-        .filter((entity) => _.includes(workspace?.entities, entity._id))
+        .filter((entity) => _.includes(workspace.entities, entity._id))
         .slice(0, args.limit);
     },
 
@@ -60,7 +60,7 @@ export const EntitiesResolvers = {
       // Check that Entity is owned by the user and exists in the Workspace
       if (
         entity.owner === context.user &&
-        _.includes(workspace?.entities, entity._id)
+        _.includes(workspace.entities, entity._id)
       ) {
         return entity;
       } else {
@@ -114,7 +114,7 @@ export const EntitiesResolvers = {
       // Check that Entity is owned by the user and exists in the Workspace
       if (
         entity.owner === context.user &&
-        _.includes(workspace?.entities, entity._id)
+        _.includes(workspace.entities, entity._id)
       ) {
         return await Entities.export(args._id, args.format, args.fields);
       } else {
