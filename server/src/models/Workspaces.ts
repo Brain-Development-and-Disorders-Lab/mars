@@ -81,8 +81,7 @@ export class Workspaces {
     }
 
     // Extract the collection of Entities from the Workspace
-    const entities = _.cloneDeep(workspace.entities);
-    if (_.includes(entities, entity)) {
+    if (_.includes(workspace.entities, entity)) {
       // Check if the Workspace already includes the Entity
       return {
         success: true,
@@ -91,10 +90,9 @@ export class Workspaces {
     }
 
     // Push the new Entity
-    entities.push(entity);
     const update = {
       $set: {
-        entities: entities,
+        entities: [...workspace.entities, entity],
       },
     };
 

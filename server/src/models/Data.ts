@@ -143,7 +143,9 @@ export class Data {
 
       // Create generic set of Entities
       const entities = [] as EntityModel[];
-      parsedSheet.map(async (row) => {
+
+      // Asynchronously iterate over all rows, importing Entity data
+      for await (const row of parsedSheet) {
         // Extract Attributes
         const attributes = [] as AttributeModel[];
 
@@ -206,7 +208,7 @@ export class Data {
             ...data,
           });
         }
-      });
+      }
 
       if (!_.isEqual(columnMapping.project, "")) {
         // Add all Entities to Project
@@ -261,7 +263,7 @@ export class Data {
       // Check that the specified Project exists
       const projectExists = await Projects.exists(project);
 
-      for (const entity of parsed.entities as EntityModel[]) {
+      for await (const entity of parsed.entities as EntityModel[]) {
         // Splice in the owner and Project information
         entity.owner = owner;
         entity.projects = projectExists ? [project] : [];

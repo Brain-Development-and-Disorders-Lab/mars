@@ -130,7 +130,7 @@ export class Entities {
 
     if (successStatus) {
       // Add the Entity to the Workspace
-      await Workspaces.addEntity(workspace, response.insertedId);
+      await Workspaces.addEntity(workspace, joinedEntity._id);
 
       // Create a new Activity entry
       await Activity.create(
