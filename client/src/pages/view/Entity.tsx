@@ -1376,7 +1376,9 @@ const Entity = () => {
   return (
     <Content
       isError={!_.isUndefined(error)}
-      isLoaded={!loading && !deleteLoading && !workspaceLoading}
+      isLoaded={
+        !loading && !updateLoading && !deleteLoading && !workspaceLoading
+      }
     >
       <Flex direction={"column"}>
         <Flex

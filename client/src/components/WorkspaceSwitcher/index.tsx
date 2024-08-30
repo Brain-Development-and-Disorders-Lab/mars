@@ -238,11 +238,17 @@ const WorkspaceSwitcher = () => {
       const workspaces = await getWorkspaces();
       if (
         workspaces.data?.workspaces &&
-        workspaces.data?.workspaces.length > 0
+        workspaces.data.workspaces.length > 0
       ) {
+        // Get the latest created Workspace
+        const created =
+          workspaces.data.workspaces[workspaces.data.workspaces.length - 1];
+
         // Update the stored Workspace identifier and collection of Workspaces
-        setWorkspaceIdentifier(workspaces.data.workspaces[0]._id);
         setWorkspaces(workspaces.data.workspaces);
+        if (created) {
+          setWorkspaceIdentifier(created._id);
+        }
 
         // Reset modal state
         setName("");
@@ -251,6 +257,15 @@ const WorkspaceSwitcher = () => {
 
         // Close the modal
         onCreateClose();
+
+        toast({
+          title: "Success",
+          description: "Workspace created successfully",
+          status: "success",
+          duration: 4000,
+          position: "bottom-right",
+          isClosable: true,
+        });
       }
     }
 
@@ -580,6 +595,7 @@ const WorkspaceSwitcher = () => {
               colorScheme={"green"}
               onClick={() => handleCreateWorkspaceClick()}
               isLoading={createLoading}
+              isDisabled={name === ""}
             >
               Create
             </Button>
