@@ -1,6 +1,7 @@
 // Custom types
 import {
   ActivityModel,
+  AttributeModel,
   EntityModel,
   IWorkspace,
   ProjectModel,
@@ -18,6 +19,7 @@ import { Activity } from "./Activity";
 import { Entities } from "./Entities";
 import { Projects } from "./Projects";
 import { Users } from "./Users";
+import { Attributes } from "./Attributes";
 
 // Collection name
 const WORKSPACES_COLLECTION = "workspaces";
@@ -235,6 +237,70 @@ export class Workspaces {
         response.modifiedCount === 1
           ? "Added Activity to Workspace"
           : "Unable to add Activity to Workspace",
+    };
+  };
+
+  /**
+   * Retrieve all Attributes in a Workspace
+   * @param _id Workspace identifier
+   * @return {Promise<AttributeModel[]>}
+   */
+  static getAttributes = async (_id: string): Promise<AttributeModel[]> => {
+    const workspace = await Workspaces.getOne(_id);
+    if (!_.isNull(workspace)) {
+      return await Attributes.getMany(workspace.attributes);
+    } else {
+      return [];
+    }
+  };
+
+  /**
+   * Add an Attribute to an existing Workspace
+   * @param _id Workspace identifier to receive the Attribute
+   * @param attribute Attribute identifier to be added to the Workspace
+   * @return {Promise<ResponseMessage>}
+   */
+  static addAttribute = async (
+    _id: string,
+    attribute: string,
+  ): Promise<ResponseMessage> => {
+    const workspace = await Workspaces.getOne(_id);
+    if (_.isNull(workspace)) {
+      return {
+        success: false,
+        message: "Workspace not found",
+      };
+    }
+
+    // Extract the collection of Attributes from the Workspace
+    const attributes = _.cloneDeep(workspace.attributes);
+    if (_.includes(attributes, attribute)) {
+      // Check if the Workspace already includes the Attribute
+      return {
+        success: true,
+        message: "Workspace already contains Attribute",
+      };
+    }
+
+    // Push the new Attribute
+    attributes.push(attribute);
+    const update = {
+      $set: {
+        attributes: attributes,
+      },
+    };
+
+    // Execute the update
+    const response = await getDatabase()
+      .collection<WorkspaceModel>(WORKSPACES_COLLECTION)
+      .updateOne({ _id: _id }, update);
+
+    return {
+      success: response.modifiedCount === 1,
+      message:
+        response.modifiedCount === 1
+          ? "Added Attribute to Workspace"
+          : "Unable to add Attribute to Workspace",
     };
   };
 

@@ -23,6 +23,7 @@ import {
   Tag,
   Text,
   Textarea,
+  Tooltip,
   useDisclosure,
   useToast,
   VStack,
@@ -173,6 +174,8 @@ const WorkspaceSwitcher = () => {
         });
       }
 
+      // Navigate to the Dashboard for that Workspace
+      navigate("/");
       setWorkspaceLoading(false);
     };
 
@@ -325,15 +328,20 @@ const WorkspaceSwitcher = () => {
             {/* Create a list of all Workspaces the user has access to */}
             {workspaces.map((workspace) => {
               return (
-                <MenuItem
+                <Tooltip
                   key={workspace._id}
-                  isDisabled={workspace._id === workspaceIdentifier}
-                  onClick={() => handleWorkspaceClick(workspace._id)}
+                  isDisabled={workspace._id !== workspaceIdentifier}
+                  label={"Current Workspace"}
                 >
-                  <Text fontSize={"sm"} fontWeight={"semibold"}>
-                    {workspace.name}
-                  </Text>
-                </MenuItem>
+                  <MenuItem
+                    isDisabled={workspace._id === workspaceIdentifier}
+                    onClick={() => handleWorkspaceClick(workspace._id)}
+                  >
+                    <Text fontSize={"sm"} fontWeight={"semibold"}>
+                      {workspace.name}
+                    </Text>
+                  </MenuItem>
+                </Tooltip>
               );
             })}
           </MenuGroup>
