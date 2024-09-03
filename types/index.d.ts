@@ -164,6 +164,17 @@ export type WorkspaceModel = IWorkspace & {
   _id: string;
 };
 
+export type WorkspaceCreateProps = {
+  // Modal state
+  isOpen: boolean;
+  onOpen: () => void;
+  onClose: () => void;
+  // Workspace state
+  workspaceIdentifier: string;
+  setWorkspaceIdentifier: React.Dispatch<React.SetStateAction<string>>;
+  setWorkspaces: React.Dispatch<React.SetStateAction<WorkspaceModel[]>>;
+};
+
 // Entity types
 export type IEntity = {
   name: string;
