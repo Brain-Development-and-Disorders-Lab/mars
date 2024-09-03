@@ -2,39 +2,27 @@ import React, { useContext, useEffect, useState } from "react";
 import {
   Button,
   Flex,
-  FormControl,
-  FormLabel,
-  Heading,
-  IconButton,
-  Input,
   Menu,
   MenuButton,
   MenuDivider,
   MenuGroup,
   MenuItem,
   MenuList,
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
   Spacer,
-  Tag,
   Text,
-  Textarea,
   Tooltip,
   useDisclosure,
   useToast,
-  VStack,
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
+import WorkspaceCreateModal from "@components/WorkspaceCreateModal";
+import WorkspaceUpdateModal from "@components/WorkspaceUpdateModal";
 
 // GraphQL resources
-import { gql, useLazyQuery, useMutation, useQuery } from "@apollo/client";
+import { gql, useLazyQuery, useQuery } from "@apollo/client";
 
 // Custom types
-import { IAuth, ResponseMessage, WorkspaceModel } from "@types";
+import { IAuth, WorkspaceModel } from "@types";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
@@ -42,7 +30,7 @@ import { useNavigate } from "react-router-dom";
 // Utility functions and libraries
 import { useToken } from "src/authentication/useToken";
 import _ from "lodash";
-import { WorkspaceContext } from "../../Context";
+import { WorkspaceContext } from "src/Context";
 
 const WorkspaceSwitcher = () => {
   const navigate = useNavigate();
@@ -58,19 +46,16 @@ const WorkspaceSwitcher = () => {
   const { workspace, setWorkspace, setWorkspaceLoading } =
     useContext(WorkspaceContext);
 
-  // State for Workspace details
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-
-  // State for Workspace collaborators
-  const [collaborator, setCollaborator] = useState("");
-  const [collaborators, setCollaborators] = useState([] as string[]);
-
   const [isOpen, setIsOpen] = useState(false);
   const {
     isOpen: isCreateOpen,
     onOpen: onCreateOpen,
     onClose: onCreateClose,
+  } = useDisclosure();
+  const {
+    isOpen: isUpdateOpen,
+    onOpen: onUpdateOpen,
+    onClose: onUpdateClose,
   } = useDisclosure();
 
   // Queries (active and lazy) to retrieve all Workspaces
@@ -87,16 +72,12 @@ const WorkspaceSwitcher = () => {
   const { loading, error, data, refetch } = useQuery<{
     workspaces: WorkspaceModel[];
   }>(GET_WORKSPACES, { fetchPolicy: "network-only" });
-  const [getWorkspaces, { error: workspacesError }] = useLazyQuery<{
-    workspaces: WorkspaceModel[];
-  }>(GET_WORKSPACES, { fetchPolicy: "network-only" });
 
   // Query to get a Workspace
   const GET_WORKSPACE = gql`
     query GetWorkspace($_id: String) {
       workspace(_id: $_id) {
         _id
-        owner
         name
       }
     }
@@ -104,18 +85,6 @@ const WorkspaceSwitcher = () => {
   const [getWorkspace, { error: workspaceError }] = useLazyQuery<{
     workspace: WorkspaceModel;
   }>(GET_WORKSPACE, { fetchPolicy: "network-only" });
-
-  // Query to create a Workspace
-  const CREATE_WORKSPACE = gql`
-    mutation CreateWorkspace($workspace: WorkspaceCreateInput) {
-      createWorkspace(workspace: $workspace) {
-        success
-        message
-      }
-    }
-  `;
-  const [createWorkspace, { loading: createLoading, error: createError }] =
-    useMutation<{ createWorkspace: ResponseMessage }>(CREATE_WORKSPACE);
 
   // Manage data once retrieved
   useEffect(() => {
@@ -186,23 +155,23 @@ const WorkspaceSwitcher = () => {
     }
   }, [workspaceIdentifier]);
 
-  const performLogout = () => {
-    // Invalidate the token and refresh the page
-    setToken({
-      name: token.name,
-      orcid: token.orcid,
-      token: "",
-      workspace: "",
-    });
-    navigate(0);
-  };
-
   /**
    * Handle selecting a Workspace from the drop-down
    * @param _id Identifier of selected Workspace
    */
   const handleWorkspaceClick = (_id: string) => {
     setWorkspaceIdentifier(_id);
+    setIsOpen(false);
+  };
+
+  /**
+   * Handle click events within the `Update Workspace` button
+   */
+  const handleUpdateClick = () => {
+    // Open the update Workspace modal
+    onUpdateOpen();
+
+    // Ensure `WorkspaceSwitcher` is closed
     setIsOpen(false);
   };
 
@@ -215,73 +184,6 @@ const WorkspaceSwitcher = () => {
 
     // Ensure `WorkspaceSwitcher` is closed
     setIsOpen(false);
-  };
-
-  /**
-   * Create the Workspace using GraphQL query
-   */
-  const handleCreateWorkspaceClick = async () => {
-    const result = await createWorkspace({
-      variables: {
-        workspace: {
-          name: name,
-          description: description,
-          owner: token.orcid,
-          collaborators: collaborators,
-          entities: [],
-          projects: [],
-          attributes: [],
-          activity: [],
-        },
-      },
-    });
-
-    if (result.data?.createWorkspace.success) {
-      // Update to use the new Workspace identifier
-      const workspaces = await getWorkspaces();
-      if (
-        workspaces.data?.workspaces &&
-        workspaces.data.workspaces.length > 0
-      ) {
-        // Get the latest created Workspace
-        const created =
-          workspaces.data.workspaces[workspaces.data.workspaces.length - 1];
-
-        // Update the stored Workspace identifier and collection of Workspaces
-        setWorkspaces(workspaces.data.workspaces);
-        if (created) {
-          setWorkspaceIdentifier(created._id);
-        }
-
-        // Reset modal state
-        setName("");
-        setDescription("");
-        setCollaborators([]);
-
-        // Close the modal
-        onCreateClose();
-
-        toast({
-          title: "Success",
-          description: "Workspace created successfully",
-          status: "success",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-      }
-    }
-
-    if (createError || workspacesError) {
-      toast({
-        title: "Error",
-        description: "Unable to retrieve Workspaces",
-        status: "error",
-        duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
-      });
-    }
   };
 
   return (
@@ -360,9 +262,9 @@ const WorkspaceSwitcher = () => {
               <Button
                 size={"sm"}
                 leftIcon={<Icon size={"sm"} name={"settings"} />}
-                isDisabled
+                onClick={() => handleUpdateClick()}
               >
-                Manage
+                Update
               </Button>
               <Button
                 size={"sm"}
@@ -377,242 +279,23 @@ const WorkspaceSwitcher = () => {
         </MenuList>
       </Menu>
 
-      <Modal
+      {/* Modal to create a Workspace */}
+      <WorkspaceCreateModal
         isOpen={isCreateOpen}
+        onOpen={onCreateOpen}
         onClose={onCreateClose}
-        size={"full"}
-        closeOnEsc={workspaceIdentifier !== ""}
-      >
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader p={"2"}>
-            <Flex align={"center"} gap={"2"} w={"100%"}>
-              <Icon name={"workspace"} size={"md"} />
-              <Heading size={"md"}>Create Workspace</Heading>
-              <Spacer />
-            </Flex>
-          </ModalHeader>
-          <ModalBody p={"2"}>
-            <Flex gap={"2"} direction={"column"}>
-              {workspaceIdentifier === "" ? (
-                <Text
-                  fontSize={"sm"}
-                  fontWeight={"semibold"}
-                  color={"gray.400"}
-                >
-                  Before you can get started using Storacuity, you must be
-                  invited as Collaborator on an existing Workspace or create a
-                  new Workspace below.
-                </Text>
-              ) : (
-                <Text
-                  fontSize={"sm"}
-                  fontWeight={"semibold"}
-                  color={"gray.400"}
-                >
-                  Workspaces can be used to organize Entities and Projects, as
-                  well as inviting collaborators to work together on
-                  experiments.
-                </Text>
-              )}
-              <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.400"}>
-                Use the Workspace switcher in the navigation bar to view all
-                Workspaces and switch the active Workspace.
-              </Text>
+        workspaceIdentifier={workspaceIdentifier}
+        setWorkspaceIdentifier={setWorkspaceIdentifier}
+        setWorkspaces={setWorkspaces}
+      />
 
-              <Flex direction={"row"} gap={"2"}>
-                {/* Workspace name */}
-                <Flex
-                  direction={"column"}
-                  p={"0"}
-                  gap={"2"}
-                  grow={"1"}
-                  basis={"50%"}
-                >
-                  <Flex
-                    direction={"column"}
-                    p={"2"}
-                    gap={"2"}
-                    rounded={"md"}
-                    border={"1px"}
-                    borderColor={"gray.200"}
-                  >
-                    <FormControl isRequired>
-                      <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
-                        Name
-                      </FormLabel>
-                      <Input
-                        id={"modalWorkspaceName"}
-                        size={"sm"}
-                        rounded={"md"}
-                        placeholder={"Name"}
-                        value={name}
-                        onChange={(event) => setName(event.target.value)}
-                      />
-                    </FormControl>
-                  </Flex>
-                  <Flex
-                    direction={"column"}
-                    p={"2"}
-                    gap={"2"}
-                    rounded={"md"}
-                    border={"1px"}
-                    borderColor={"gray.200"}
-                  >
-                    <Text fontSize={"sm"} fontWeight={"semibold"}>
-                      Collaborators
-                    </Text>
-                    <Text
-                      fontSize={"sm"}
-                      fontWeight={"semibold"}
-                      color={"gray.400"}
-                    >
-                      Add Collaborators by their ORCiD, and they will have
-                      access to this Workspace when they next sign into
-                      Storacuity.
-                    </Text>
-                    <Flex direction={"row"} gap={"2"} align={"center"}>
-                      <FormControl>
-                        <Input
-                          placeholder={"ORCiD"}
-                          rounded={"md"}
-                          size={"sm"}
-                          value={collaborator}
-                          onChange={(event) =>
-                            setCollaborator(event.target.value)
-                          }
-                        />
-                      </FormControl>
-                      <Spacer />
-                      <Button
-                        colorScheme={"green"}
-                        rightIcon={<Icon name={"add"} />}
-                        size={"sm"}
-                        isDisabled={collaborator === ""}
-                        onClick={() => {
-                          // Prevent adding empty or duplicate collaborator
-                          if (
-                            collaborator &&
-                            !collaborators.includes(collaborator)
-                          ) {
-                            setCollaborators((collaborators) => [
-                              ...collaborators,
-                              collaborator,
-                            ]);
-                            setCollaborator("");
-                          }
-                        }}
-                      >
-                        Add
-                      </Button>
-                    </Flex>
-                    <Flex
-                      w={"100%"}
-                      justify={collaborators.length === 0 ? "center" : ""}
-                      align={"center"}
-                      minH={collaborators.length > 0 ? "fit-content" : "200px"}
-                    >
-                      {collaborators.length === 0 ? (
-                        <Text color={"gray.400"} fontWeight={"semibold"}>
-                          No Collaborators
-                        </Text>
-                      ) : (
-                        <VStack w={"100%"}>
-                          {collaborators.map((collaborator, index) => (
-                            <Flex
-                              key={index}
-                              align={"center"}
-                              gap={"2"}
-                              py={"2"}
-                              w={"100%"}
-                            >
-                              <Tag colorScheme={"green"}>{collaborator}</Tag>
-                              <Spacer />
-                              <IconButton
-                                size={"sm"}
-                                aria-label={"Remove collaborator"}
-                                icon={<Icon name="delete" />}
-                                colorScheme={"red"}
-                                onClick={() =>
-                                  setCollaborators((collaborators) =>
-                                    collaborators.filter(
-                                      (existing) => existing !== collaborator,
-                                    ),
-                                  )
-                                }
-                              />
-                            </Flex>
-                          ))}
-                        </VStack>
-                      )}
-                    </Flex>
-                  </Flex>
-                </Flex>
-
-                {/* Workspace description */}
-                <Flex
-                  direction={"column"}
-                  p={"0"}
-                  gap={"2"}
-                  grow={"1"}
-                  basis={"50%"}
-                >
-                  <Flex
-                    direction={"column"}
-                    p={"2"}
-                    gap={"2"}
-                    rounded={"md"}
-                    border={"1px"}
-                    borderColor={"gray.200"}
-                  >
-                    <FormControl>
-                      <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
-                        Description
-                      </FormLabel>
-                      <Textarea
-                        id={"modalWorkspaceDescription"}
-                        size={"sm"}
-                        rounded={"md"}
-                        placeholder={"Description"}
-                        value={description}
-                        onChange={(event) => setDescription(event.target.value)}
-                      />
-                    </FormControl>
-                  </Flex>
-                </Flex>
-              </Flex>
-            </Flex>
-          </ModalBody>
-
-          <ModalFooter p={"2"}>
-            {workspaceIdentifier === "" && (
-              <Button size={"sm"} onClick={() => performLogout()}>
-                Logout
-              </Button>
-            )}
-            {workspaceIdentifier !== "" && (
-              <Button
-                size={"sm"}
-                colorScheme={"red"}
-                onClick={() => onCreateClose()}
-              >
-                Cancel
-              </Button>
-            )}
-            <Spacer />
-            <Button
-              id={"modalWorkspaceCreateButton"}
-              size={"sm"}
-              colorScheme={"green"}
-              onClick={() => handleCreateWorkspaceClick()}
-              isLoading={createLoading}
-              isDisabled={name === ""}
-            >
-              Create
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+      {/* Modal to update the current Workspace */}
+      <WorkspaceUpdateModal
+        isOpen={isUpdateOpen}
+        onOpen={onUpdateOpen}
+        onClose={onUpdateClose}
+        workspaceIdentifier={workspaceIdentifier}
+      />
     </Flex>
   );
 };
