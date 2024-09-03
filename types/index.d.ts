@@ -175,6 +175,15 @@ export type WorkspaceCreateProps = {
   setWorkspaces: React.Dispatch<React.SetStateAction<WorkspaceModel[]>>;
 };
 
+export type WorkspaceUpdateProps = {
+  // Modal state
+  isOpen: boolean;
+  onOpen: () => void;
+  onClose: () => void;
+  // Workspace state
+  workspaceIdentifier: string;
+};
+
 // Entity types
 export type IEntity = {
   name: string;
