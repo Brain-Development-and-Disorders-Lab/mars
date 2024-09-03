@@ -2,6 +2,7 @@
 import { AttributeModel, Context, IAttribute } from "@types";
 
 // Models
+import { Activity } from "../models/Activity";
 import { Attributes } from "../models/Attributes";
 import { Workspaces } from "../models/Workspaces";
 
@@ -91,7 +92,30 @@ export const AttributesResolvers = {
       args: { attribute: IAttribute },
       context: Context,
     ) => {
-      return await Attributes.create(args.attribute, context.workspace);
+      const result = await Attributes.create(args.attribute);
+
+      if (result.success) {
+        // Add the Attribute to the Workspace
+        await Workspaces.addAttribute(context.workspace, result.message);
+
+        // If successful, add Activity
+        const activity = await Activity.create({
+          timestamp: new Date(),
+          type: "create",
+          actor: context.user,
+          details: "Created new Attribute",
+          target: {
+            _id: result.message, // New Attribute identifier
+            type: "attributes",
+            name: args.attribute.name,
+          },
+        });
+
+        // Add Activity to Workspace
+        await Workspaces.addActivity(context.workspace, activity.message);
+      }
+
+      return result;
     },
 
     // Update an existing Attribute
@@ -100,7 +124,37 @@ export const AttributesResolvers = {
       args: { attribute: AttributeModel },
       context: Context,
     ) => {
-      return await Attributes.update(args.attribute, context.workspace);
+      const attribute = await Attributes.getOne(args.attribute._id);
+      if (_.isNull(attribute)) {
+        throw new GraphQLError("Attribute does not exist", {
+          extensions: {
+            code: "NON_EXIST",
+          },
+        });
+      }
+
+      // Execute update operation
+      const result = await Attributes.update(args.attribute);
+
+      if (result.success) {
+        // If successful, add Activity
+        const activity = await Activity.create({
+          timestamp: new Date(),
+          type: "update",
+          actor: context.user,
+          details: "Updated existing Attribute",
+          target: {
+            _id: args.attribute._id,
+            type: "attributes",
+            name: args.attribute.name,
+          },
+        });
+
+        // Add Activity to Workspace
+        await Workspaces.addActivity(context.workspace, activity.message);
+      }
+
+      return result;
     },
 
     // Delete an Attribute
@@ -109,7 +163,37 @@ export const AttributesResolvers = {
       args: { _id: string },
       context: Context,
     ) => {
-      return await Attributes.delete(args._id, context.workspace);
+      const attribute = await Attributes.getOne(args._id);
+      if (_.isNull(attribute)) {
+        throw new GraphQLError("Attribute does not exist", {
+          extensions: {
+            code: "NON_EXIST",
+          },
+        });
+      }
+
+      // Execute delete operation
+      const result = await Attributes.delete(args._id);
+
+      // If successful, add Activity
+      if (result.success) {
+        const activity = await Activity.create({
+          timestamp: new Date(),
+          type: "delete",
+          actor: context.user,
+          details: "Deleted Attribute",
+          target: {
+            _id: args._id,
+            type: "attributes",
+            name: attribute.name,
+          },
+        });
+
+        // Add Activity to Workspace
+        await Workspaces.addActivity(context.workspace, activity.message);
+      }
+
+      return result;
     },
   },
 };

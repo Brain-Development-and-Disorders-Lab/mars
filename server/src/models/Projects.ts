@@ -1,7 +1,5 @@
 // Models
-import { Activity } from "./Activity";
 import { Entities } from "./Entities";
-import { Workspaces } from "./Workspaces";
 
 // Custom types
 import { EntityModel, IProject, ProjectModel, ResponseMessage } from "@types";
@@ -46,10 +44,7 @@ export class Projects {
     return !_.isNull(project);
   };
 
-  static create = async (
-    project: IProject,
-    workspace: string,
-  ): Promise<ResponseMessage> => {
+  static create = async (project: IProject): Promise<ResponseMessage> => {
     // Create a `ProjectModel` instance by adding an identifier and unpacking given Project data
     const projectModel: ProjectModel = {
       _id: getIdentifier("project"),
@@ -61,26 +56,6 @@ export class Projects {
       .insertOne(projectModel);
     const successStatus = _.isEqual(response.insertedId, projectModel._id);
 
-    if (successStatus) {
-      // Add the Project to the Workspace
-      await Workspaces.addProject(workspace, response.insertedId);
-
-      // Create a new Activity entry
-      await Activity.create(
-        {
-          timestamp: new Date(),
-          type: "create",
-          details: "Created new Project",
-          target: {
-            _id: projectModel._id,
-            type: "projects",
-            name: projectModel.name,
-          },
-        },
-        workspace,
-      );
-    }
-
     return {
       success: successStatus,
       message: successStatus
@@ -89,10 +64,7 @@ export class Projects {
     };
   };
 
-  static update = async (
-    updated: ProjectModel,
-    workspace: string,
-  ): Promise<ResponseMessage> => {
+  static update = async (updated: ProjectModel): Promise<ResponseMessage> => {
     const project = await this.getOne(updated._id);
 
     if (_.isNull(project)) {
@@ -130,22 +102,6 @@ export class Projects {
       .updateOne({ _id: project._id }, update);
     const successStatus = response.modifiedCount == 1;
 
-    if (successStatus) {
-      await Activity.create(
-        {
-          timestamp: new Date(),
-          type: "update",
-          details: "Updated existing Project",
-          target: {
-            _id: project._id,
-            type: "projects",
-            name: project.name,
-          },
-        },
-        workspace,
-      );
-    }
-
     return {
       success: successStatus,
       message: successStatus ? "Updated Project" : "Could not update Project",
@@ -155,13 +111,9 @@ export class Projects {
   /**
    * Delete a Project
    * @param _id Project identifier to delete
-   * @param workspace Workspace identifier
    * @return {ResponseMessage}
    */
-  static delete = async (
-    _id: string,
-    workspace: string,
-  ): Promise<ResponseMessage> => {
+  static delete = async (_id: string): Promise<ResponseMessage> => {
     const project = await Projects.getOne(_id);
     // Remove Entities from Project
     if (project) {
@@ -174,22 +126,6 @@ export class Projects {
     const response = await getDatabase()
       .collection<ProjectModel>(PROJECTS_COLLECTION)
       .deleteOne({ _id: _id });
-
-    if (project && response.deletedCount > 0) {
-      await Activity.create(
-        {
-          timestamp: new Date(),
-          type: "delete",
-          details: "Deleted Project",
-          target: {
-            _id: project._id,
-            type: "projects",
-            name: project.name,
-          },
-        },
-        workspace,
-      );
-    }
 
     return {
       success: response.deletedCount > 0,

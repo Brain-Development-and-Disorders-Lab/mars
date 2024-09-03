@@ -1,6 +1,10 @@
+// Custom types
 import { Context, IActivity, ResponseMessage } from "@types";
-import { Activity } from "src/models/Activity";
+
+// Models
+import { Activity } from "../models/Activity";
 import { Workspaces } from "../models/Workspaces";
+
 import _ from "lodash";
 import { GraphQLError } from "graphql/index";
 
@@ -28,7 +32,15 @@ export const ActivityResolvers = {
       args: { activity: IActivity },
       context: Context,
     ): Promise<ResponseMessage> => {
-      return await Activity.create(args.activity, context.workspace);
+      // Apply the create operation
+      const result = await Activity.create(args.activity);
+
+      if (result.success) {
+        // Add the Activity to the Workspace
+        await Workspaces.addActivity(context.workspace, result.message);
+      }
+
+      return result;
     },
   },
 };

@@ -1,9 +1,14 @@
+// Custom types
 import { ResponseMessage, UserModel } from "@types";
+
 import _ from "lodash";
 import { getDatabase } from "../connectors/database";
-import { Projects } from "./Projects";
 import dayjs from "dayjs";
+
+// Models
 import { Entities } from "./Entities";
+import { Projects } from "./Projects";
+import { Workspaces } from "./Workspaces";
 
 // Collection name
 const USERS_COLLECTION = "users";
@@ -89,60 +94,56 @@ export class Users {
     user: string,
     workspace: string,
   ): Promise<ResponseMessage> => {
-    await Projects.create(
-      {
-        name: "My First Project",
-        created: dayjs(Date.now()).toISOString(),
-        description:
-          "This is your first Project. Feel free to explore and modify it!",
-        owner: user,
-        shared: [],
-        entities: [], // Assuming you can add entities later
-        collaborators: [], // Assuming you might want collaborators
-        history: [],
-      },
-      workspace,
-    );
+    const project = await Projects.create({
+      name: "My First Project",
+      created: dayjs(Date.now()).toISOString(),
+      description:
+        "This is your first Project. Feel free to explore and modify it!",
+      owner: user,
+      shared: [],
+      entities: [], // Assuming you can add entities later
+      collaborators: [], // Assuming you might want collaborators
+      history: [],
+    });
+    await Workspaces.addProject(workspace, project.message);
 
-    await Entities.create(
-      {
-        name: "Example Entity",
-        deleted: false,
-        locked: false,
-        created: dayjs(Date.now()).toISOString(),
-        description: "This is your first Entity. Go ahead and modify it!",
-        owner: user,
-        projects: [],
-        associations: {
-          origins: [],
-          products: [],
-        },
-        attachments: [],
-        attributes: [
-          {
-            _id: "a-00-example",
-            name: "Example Attribute",
-            description: "An example Attribute",
-            values: [
-              {
-                _id: "v-00-example",
-                type: "text",
-                name: "Test Value 01",
-                data: "Test Value Data",
-              },
-              {
-                _id: "v-01-example",
-                type: "number",
-                name: "Test Value 01",
-                data: 10,
-              },
-            ],
-          },
-        ],
-        history: [],
+    const entity = await Entities.create({
+      name: "Example Entity",
+      deleted: false,
+      locked: false,
+      created: dayjs(Date.now()).toISOString(),
+      description: "This is your first Entity. Go ahead and modify it!",
+      owner: user,
+      projects: [],
+      associations: {
+        origins: [],
+        products: [],
       },
-      workspace,
-    );
+      attachments: [],
+      attributes: [
+        {
+          _id: "a-00-example",
+          name: "Example Attribute",
+          description: "An example Attribute",
+          values: [
+            {
+              _id: "v-00-example",
+              type: "text",
+              name: "Test Value 01",
+              data: "Test Value Data",
+            },
+            {
+              _id: "v-01-example",
+              type: "number",
+              name: "Test Value 01",
+              data: 10,
+            },
+          ],
+        },
+      ],
+      history: [],
+    });
+    await Workspaces.addEntity(workspace, entity.message);
 
     return {
       success: true,

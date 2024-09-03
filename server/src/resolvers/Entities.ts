@@ -8,7 +8,10 @@ import {
 } from "@types";
 import { GraphQLError } from "graphql";
 import _ from "lodash";
-import { Entities } from "src/models/Entities";
+
+// Models
+import { Activity } from "../models/Activity";
+import { Entities } from "../models/Entities";
 import { Workspaces } from "../models/Workspaces";
 
 export const EntitiesResolvers = {
@@ -184,7 +187,31 @@ export const EntitiesResolvers = {
       args: { entity: IEntity },
       context: Context,
     ): Promise<ResponseMessage> => {
-      return await Entities.create(args.entity, context.workspace);
+      // Apply create operation
+      const result = await Entities.create(args.entity);
+
+      if (result.success) {
+        // Add the Entity to the Workspace
+        await Workspaces.addEntity(context.workspace, result.message);
+
+        // Create new Activity if successful
+        const activity = await Activity.create({
+          timestamp: new Date(),
+          type: "create",
+          actor: context.user,
+          details: "Created new Entity",
+          target: {
+            _id: result.message,
+            type: "entities",
+            name: args.entity.name,
+          },
+        });
+
+        // Add Activity to Workspace
+        await Workspaces.addActivity(context.workspace, activity.message);
+      }
+
+      return result;
     },
 
     // Update an existing Entity from EntityModel data structure
@@ -203,7 +230,28 @@ export const EntitiesResolvers = {
       }
 
       if (entity.owner === context.user) {
-        return await Entities.update(args.entity, context.workspace);
+        // Apply update operation
+        const result = await Entities.update(args.entity);
+
+        // Create new Activity if successful
+        if (result.success) {
+          const activity = await Activity.create({
+            timestamp: new Date(),
+            type: "update",
+            actor: context.user,
+            details: "Updated existing Entity",
+            target: {
+              _id: args.entity._id,
+              type: "entities",
+              name: args.entity.name,
+            },
+          });
+
+          // Add Activity to Workspace
+          await Workspaces.addActivity(context.workspace, activity.message);
+        }
+
+        return result;
       } else {
         throw new GraphQLError(
           "You do not have permission to modify this Entity",
@@ -222,7 +270,37 @@ export const EntitiesResolvers = {
       args: { _id: string },
       context: Context,
     ) => {
-      return await Entities.delete(args._id, context.workspace);
+      const entity = await Entities.getOne(args._id);
+      if (_.isNull(entity)) {
+        throw new GraphQLError("Entity does not exist", {
+          extensions: {
+            code: "NON_EXIST",
+          },
+        });
+      }
+
+      // Perform delete operation
+      const result = await Entities.delete(args._id);
+
+      // Create new Activity if successful
+      if (result.success) {
+        const activity = await Activity.create({
+          timestamp: new Date(),
+          type: "delete",
+          actor: context.user,
+          details: "Deleted Entity",
+          target: {
+            _id: entity._id,
+            type: "entities",
+            name: entity.name,
+          },
+        });
+
+        // Add Activity to Workspace
+        await Workspaces.addActivity(context.workspace, activity.message);
+      }
+
+      return result;
     },
 
     // Set the Entity "lock" status

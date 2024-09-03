@@ -8,9 +8,7 @@ import {
 } from "@types";
 
 // Models
-import { Activity } from "./Activity";
 import { Projects } from "./Projects";
-import { Workspaces } from "./Workspaces";
 
 // Custom functions
 import { getDatabase } from "../connectors/database";
@@ -88,13 +86,9 @@ export class Entities {
   /**
    * Create a new Entity
    * @param {IEntity} entity Entity information
-   * @param {string} workspace Workspace to add the Entity to
    * @returns {ResponseMessage}
    */
-  static create = async (
-    entity: IEntity,
-    workspace: string,
-  ): Promise<ResponseMessage> => {
+  static create = async (entity: IEntity): Promise<ResponseMessage> => {
     // Allocate a new identifier and join with IEntity data
     const joinedEntity: EntityModel = {
       _id: getIdentifier("entity"), // Generate new identifier
@@ -128,26 +122,6 @@ export class Entities {
       .insertOne(joinedEntity);
     const successStatus = _.isEqual(response.insertedId, joinedEntity._id);
 
-    if (successStatus) {
-      // Add the Entity to the Workspace
-      await Workspaces.addEntity(workspace, joinedEntity._id);
-
-      // Create a new Activity entry
-      await Activity.create(
-        {
-          timestamp: new Date(),
-          type: "create",
-          details: "Created new Entity",
-          target: {
-            _id: joinedEntity._id,
-            type: "entities",
-            name: joinedEntity.name,
-          },
-        },
-        workspace,
-      );
-    }
-
     return {
       success: successStatus,
       message: successStatus
@@ -156,10 +130,12 @@ export class Entities {
     };
   };
 
-  static update = async (
-    updated: EntityModel,
-    workspace: string,
-  ): Promise<ResponseMessage> => {
+  /**
+   * Apply updates to an existing Entity
+   * @param updated Updated Entity information
+   * @return {Promise<ResponseMessage>}
+   */
+  static update = async (updated: EntityModel): Promise<ResponseMessage> => {
     const entity = await this.getOne(updated._id);
 
     if (_.isNull(entity)) {
@@ -275,20 +251,6 @@ export class Entities {
       .collection<EntityModel>(ENTITIES_COLLECTION)
       .updateOne({ _id: updated._id }, update);
 
-    await Activity.create(
-      {
-        timestamp: new Date(),
-        type: "update",
-        details: "Updated existing Entity",
-        target: {
-          _id: updated._id,
-          type: "entities",
-          name: updated.name,
-        },
-      },
-      workspace,
-    );
-
     return {
       success: true,
       message:
@@ -301,13 +263,9 @@ export class Entities {
   /**
    * Delete an Entity
    * @param _id Entity identifier to delete
-   * @param workspace Workspace identifier
    * @return {ResponseMessage}
    */
-  static delete = async (
-    _id: string,
-    workspace: string,
-  ): Promise<ResponseMessage> => {
+  static delete = async (_id: string): Promise<ResponseMessage> => {
     const entity = await Entities.getOne(_id);
     if (entity) {
       // Remove Origins
@@ -336,22 +294,6 @@ export class Entities {
     const response = await getDatabase()
       .collection<EntityModel>(ENTITIES_COLLECTION)
       .deleteOne({ _id: _id });
-
-    if (entity) {
-      await Activity.create(
-        {
-          timestamp: new Date(),
-          type: "delete",
-          details: "Deleted Entity",
-          target: {
-            _id: entity._id,
-            type: "entities",
-            name: entity.name,
-          },
-        },
-        workspace,
-      );
-    }
 
     return {
       success: response.deletedCount > 0,

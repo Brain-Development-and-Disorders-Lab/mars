@@ -6,9 +6,6 @@ import { getIdentifier } from "../util";
 import { getDatabase } from "../connectors/database";
 import _ from "lodash";
 
-// Models
-import { Workspaces } from "./Workspaces";
-
 // Collection name
 const ACTIVITY_COLLECTION = "activity";
 
@@ -38,26 +35,19 @@ export class Activity {
   /**
    * Create a new Activity entry
    * @param activity Activity data
-   * @param workspace Workspace identifier
    * @return {ResponseMessage}
    */
-  static create = async (
-    activity: IActivity,
-    workspace: string,
-  ): Promise<ResponseMessage> => {
+  static create = async (activity: IActivity): Promise<ResponseMessage> => {
     const activityModel: ActivityModel = {
       _id: getIdentifier("activity"),
       ...activity,
     };
+
     const response = await getDatabase()
       .collection<ActivityModel>(ACTIVITY_COLLECTION)
       .insertOne(activityModel);
 
     const successStatus = _.isEqual(response.insertedId, activityModel._id);
-    if (successStatus) {
-      // Add the Project to the Workspace
-      await Workspaces.addActivity(workspace, response.insertedId);
-    }
 
     return {
       success: successStatus,
