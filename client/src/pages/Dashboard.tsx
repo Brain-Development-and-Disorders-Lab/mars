@@ -55,10 +55,7 @@ const GET_DASHBOARD = gql`
       _id
       timestamp
       type
-      actor {
-        _id
-        name
-      }
+      actor
       details
       target {
         _id
@@ -394,19 +391,8 @@ const Dashboard = () => {
                       key={`activity-${activity._id}`}
                       align={"center"}
                     >
-                      <Tooltip
-                        label={
-                          activity.actor ? activity.actor.name : "Unknown User"
-                        }
-                      >
-                        <Avatar
-                          name={
-                            activity.actor
-                              ? activity.actor.name
-                              : "Unknown User"
-                          }
-                          size={"sm"}
-                        />
+                      <Tooltip label={activity.actor}>
+                        <Avatar name={activity.actor} size={"sm"} />
                       </Tooltip>
                       <Flex direction={"column"}>
                         <Flex direction={"row"} gap={"1"}>

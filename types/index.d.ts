@@ -253,10 +253,7 @@ export type IActivity = {
     _id: string;
     name: string;
   };
-  actor?: {
-    name: string;
-    _id: string;
-  };
+  actor?: string;
 };
 
 export type ActivityModel = IActivity & {

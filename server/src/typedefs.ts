@@ -186,21 +186,11 @@ export const typedefs = `#graphql
     type: String
   }
 
-  type ActivityActor {
-    _id: String!
-    name: String
-  }
-
-  input ActivityActorInput {
-    _id: String!
-    name: String
-  }
-
   # "Activity" type
   type Activity {
     _id: String!
     timestamp: Date
-    actor: ActivityActor
+    actor: String
     type: String
     details: String
     target: ActivityTarget
@@ -209,7 +199,7 @@ export const typedefs = `#graphql
   # "ActivityCreateInput" input
   input ActivityCreateInput {
     timestamp: Date
-    actor: ActivityActorInput
+    actor: String
     type: String
     details: String
     target: ActivityTargetInput
@@ -250,7 +240,7 @@ export const typedefs = `#graphql
     activity: [String]
   }
 
-  # "WorkspaceUpdateInput" input  
+  # "WorkspaceUpdateInput" input
   input WorkspaceUpdateInput {
     _id: String!
     name: String
