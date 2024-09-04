@@ -280,6 +280,7 @@ const Project = () => {
         </Button>
 
         <Button
+          id={"finishCreateProjectButton"}
           size={"sm"}
           colorScheme={"green"}
           rightIcon={<Icon name={"check"} />}

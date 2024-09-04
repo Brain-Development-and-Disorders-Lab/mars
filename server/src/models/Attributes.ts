@@ -1,8 +1,9 @@
 import { AttributeModel, IAttribute, ResponseMessage } from "@types";
+
+// Utility functions and libraries
 import _ from "lodash";
 import { getDatabase } from "../connectors/database";
 import { getIdentifier } from "../util";
-import { Activity } from "./Activity";
 
 // Collection name
 const ATTRIBUTES_COLLECTION = "attributes";
@@ -23,6 +24,13 @@ export class Attributes {
     return await getDatabase()
       .collection<AttributeModel>(ATTRIBUTES_COLLECTION)
       .findOne({ _id: _id });
+  };
+
+  static getMany = async (attributes: string[]): Promise<AttributeModel[]> => {
+    return await getDatabase()
+      .collection<AttributeModel>(ATTRIBUTES_COLLECTION)
+      .find({ _id: { $in: attributes } })
+      .toArray();
   };
 
   /**
@@ -53,17 +61,6 @@ export class Attributes {
       .collection<AttributeModel>(ATTRIBUTES_COLLECTION)
       .insertOne(joinedAttribute);
     const successStatus = _.isEqual(response.insertedId, joinedAttribute._id);
-
-    await Activity.create({
-      timestamp: new Date(),
-      type: "create",
-      details: "Created new Attribute",
-      target: {
-        _id: joinedAttribute._id,
-        type: "attributes",
-        name: joinedAttribute.name,
-      },
-    });
 
     return {
       success: successStatus,
@@ -103,17 +100,6 @@ export class Attributes {
       .collection<AttributeModel>(ATTRIBUTES_COLLECTION)
       .updateOne({ _id: updated._id }, update);
 
-    await Activity.create({
-      timestamp: new Date(),
-      type: "update",
-      details: "Updated existing Attribute",
-      target: {
-        _id: updated._id,
-        type: "attributes",
-        name: updated.name,
-      },
-    });
-
     return {
       success: true,
       message:
@@ -129,23 +115,9 @@ export class Attributes {
    * @return {ResponseMessage}
    */
   static delete = async (_id: string): Promise<ResponseMessage> => {
-    const attribute = await Attributes.getOne(_id);
     const response = await getDatabase()
       .collection<AttributeModel>(ATTRIBUTES_COLLECTION)
       .deleteOne({ _id: _id });
-
-    if (attribute && response.deletedCount > 0) {
-      await Activity.create({
-        timestamp: new Date(),
-        type: "delete",
-        details: "Deleted Attribute",
-        target: {
-          _id: attribute._id,
-          type: "attributes",
-          name: attribute.name,
-        },
-      });
-    }
 
     return {
       success: response.deletedCount > 0,

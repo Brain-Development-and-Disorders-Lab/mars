@@ -9,16 +9,19 @@ describe("search query builder", () => {
   });
 
   it("should go to search page and test query builder", () => {
-    cy.contains("button", "Search").click();
+    cy.get("#navSearchButton").click();
     cy.contains("button", "Query Builder").click();
-    // result array should be empty/not exist
+
+    // Default search result array should be empty
     cy.get(".css-1ofqig9 > .chakra-heading").should("not.exist");
+
+    // Create a test query
     cy.contains("button", "Rule").click();
     cy.get(".rule-operators").select("contains");
     cy.get('[data-testid="value-editor"]').type("box");
-    // press search button
-    cy.get('[aria-label="Run Query"]').click();
-    // result array should exist
-    cy.get(".css-aybym5 > .chakra-heading").should("contain.text", "7 results");
+    cy.get('[aria-label="Run Query"]').click(); // Click the Search button
+
+    // Search result array should contain multiple results
+    cy.get("#resultsHeading").should("contain.text", "7 results");
   });
 });

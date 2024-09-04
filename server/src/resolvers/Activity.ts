@@ -1,12 +1,27 @@
-import { IActivity, ResponseMessage } from "@types";
-import { Activity } from "src/models/Activity";
+// Custom types
+import { Context, IActivity, ResponseMessage } from "@types";
+
+// Models
+import { Activity } from "../models/Activity";
+import { Workspaces } from "../models/Workspaces";
+
+import _ from "lodash";
+import { GraphQLError } from "graphql/index";
 
 export const ActivityResolvers = {
   Query: {
     // Retrieve all Activity
-    activity: async (_parent: any, args: { limit: 100 }) => {
-      const allActivity = (await Activity.all()).reverse();
-      return allActivity.slice(0, args.limit);
+    activity: async (_parent: any, args: { limit: 100 }, context: Context) => {
+      const workspace = await Workspaces.getOne(context.workspace);
+      if (_.isNull(workspace)) {
+        throw new GraphQLError("Workspace does not exist", {
+          extensions: {
+            code: "NON_EXIST",
+          },
+        });
+      }
+
+      return (await Activity.getMany(workspace.activity)).slice(0, args.limit);
     },
   },
 
@@ -15,8 +30,17 @@ export const ActivityResolvers = {
     createActivity: async (
       _parent: any,
       args: { activity: IActivity },
+      context: Context,
     ): Promise<ResponseMessage> => {
-      return await Activity.create(args.activity);
+      // Apply the create operation
+      const result = await Activity.create(args.activity);
+
+      if (result.success) {
+        // Add the Activity to the Workspace
+        await Workspaces.addActivity(context.workspace, result.message);
+      }
+
+      return result;
     },
   },
 };

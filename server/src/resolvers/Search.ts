@@ -10,9 +10,9 @@ export const SearchResolvers = {
     ): Promise<EntityModel[]> => {
       // Use a single search query, but require specifying the type of `query`
       if (args.isBuilder) {
-        return await Search.getQuery(args.query, context.user, args.limit);
+        return await Search.getQuery(args.query, context.workspace, args.limit);
       } else {
-        return await Search.getText(args.query, context.user, args.limit);
+        return await Search.getText(args.query, context.workspace, args.limit);
       }
     },
   },

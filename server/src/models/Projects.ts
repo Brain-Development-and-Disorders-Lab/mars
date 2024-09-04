@@ -1,11 +1,15 @@
+// Models
+import { Entities } from "./Entities";
+
+// Custom types
 import { EntityModel, IProject, ProjectModel, ResponseMessage } from "@types";
+
+// Utility functions and libraries
 import _ from "lodash";
 import { getDatabase } from "../connectors/database";
 import { getIdentifier } from "../util";
-import { Entities } from "./Entities";
 import dayjs from "dayjs";
 import Papa from "papaparse";
-import { Activity } from "./Activity";
 
 // Collection name
 const PROJECTS_COLLECTION = "projects";
@@ -28,6 +32,13 @@ export class Projects {
       .findOne({ _id: _id });
   };
 
+  static getMany = async (projects: string[]) => {
+    return await getDatabase()
+      .collection<ProjectModel>(PROJECTS_COLLECTION)
+      .find({ _id: { $in: projects } })
+      .toArray();
+  };
+
   static exists = async (_id: string): Promise<boolean> => {
     const project = await this.getOne(_id);
     return !_.isNull(project);
@@ -44,19 +55,6 @@ export class Projects {
       .collection<ProjectModel>(PROJECTS_COLLECTION)
       .insertOne(projectModel);
     const successStatus = _.isEqual(response.insertedId, projectModel._id);
-
-    if (successStatus) {
-      await Activity.create({
-        timestamp: new Date(),
-        type: "create",
-        details: "Created new Project",
-        target: {
-          _id: projectModel._id,
-          type: "projects",
-          name: projectModel.name,
-        },
-      });
-    }
 
     return {
       success: successStatus,
@@ -89,11 +87,11 @@ export class Projects {
     // Entities to add and remove
     if (!_.isUndefined(updated.entities)) {
       const toAdd = _.difference(updated.entities, project.entities);
-      for (let entity of toAdd) {
+      for (const entity of toAdd) {
         await Entities.addProject(entity, project._id);
       }
       const toRemove = _.difference(project.entities, updated.entities);
-      for (let entity of toRemove) {
+      for (const entity of toRemove) {
         await Entities.removeProject(entity, project._id);
       }
       update.$set.entities = updated.entities;
@@ -103,19 +101,6 @@ export class Projects {
       .collection<ProjectModel>(PROJECTS_COLLECTION)
       .updateOne({ _id: project._id }, update);
     const successStatus = response.modifiedCount == 1;
-
-    if (successStatus) {
-      await Activity.create({
-        timestamp: new Date(),
-        type: "update",
-        details: "Updated existing Project",
-        target: {
-          _id: project._id,
-          type: "projects",
-          name: project.name,
-        },
-      });
-    }
 
     return {
       success: successStatus,
@@ -132,7 +117,7 @@ export class Projects {
     const project = await Projects.getOne(_id);
     // Remove Entities from Project
     if (project) {
-      for (let entity of project.entities) {
+      for (const entity of project.entities) {
         await Entities.removeProject(entity, project._id);
       }
     }
@@ -141,19 +126,6 @@ export class Projects {
     const response = await getDatabase()
       .collection<ProjectModel>(PROJECTS_COLLECTION)
       .deleteOne({ _id: _id });
-
-    if (project && response.deletedCount > 0) {
-      await Activity.create({
-        timestamp: new Date(),
-        type: "delete",
-        details: "Deleted Project",
-        target: {
-          _id: project._id,
-          type: "projects",
-          name: project.name,
-        },
-      });
-    }
 
     return {
       success: response.deletedCount > 0,
@@ -266,6 +238,8 @@ export class Projects {
   /**
    * Generate export data for the Project
    * @param _id Project identifier
+   * @param format File format, either JSON or CSV
+   * @param fields Optionally specify fields to include in export
    * @returns {Promise<string>}
    */
   static export = async (
@@ -296,7 +270,7 @@ export class Projects {
       }
 
       // Iterate through the list of "fields" and create row representation
-      for (let field of exportFields) {
+      for (const field of exportFields) {
         if (_.isEqual(field, "created")) {
           headers.push("Created");
           row.push(dayjs(project.created).format("DD MMM YYYY").toString());
@@ -340,7 +314,7 @@ export class Projects {
     }
 
     const entityData = [];
-    for (let entity of project.entities) {
+    for (const entity of project.entities) {
       const result = await Entities.getOne(entity);
 
       // Remove the history component

@@ -148,6 +148,42 @@ export type IGenericItem = {
   name: string;
 };
 
+// Workspace types
+export type IWorkspace = {
+  name: string;
+  description: string;
+  owner: string;
+  collaborators: string[];
+  entities: string[];
+  projects: string[];
+  attributes: string[];
+  activity: string[];
+};
+
+export type WorkspaceModel = IWorkspace & {
+  _id: string;
+};
+
+export type WorkspaceCreateProps = {
+  // Modal state
+  isOpen: boolean;
+  onOpen: () => void;
+  onClose: () => void;
+  // Workspace state
+  workspaceIdentifier: string;
+  setWorkspaceIdentifier: React.Dispatch<React.SetStateAction<string>>;
+  setWorkspaces: React.Dispatch<React.SetStateAction<WorkspaceModel[]>>;
+};
+
+export type WorkspaceUpdateProps = {
+  // Modal state
+  isOpen: boolean;
+  onOpen: () => void;
+  onClose: () => void;
+  // Workspace state
+  workspaceIdentifier: string;
+};
+
 // Entity types
 export type IEntity = {
   name: string;
@@ -237,10 +273,7 @@ export type IActivity = {
     _id: string;
     name: string;
   };
-  actor?: {
-    name: string;
-    _id: string;
-  };
+  actor?: string;
 };
 
 export type ActivityModel = IActivity & {
@@ -349,6 +382,7 @@ export type IconNames =
   | "settings"
   | "print"
   | "view"
+  | "workspace"
   | "zoom_in"
   | "zoom_out"
 
@@ -404,9 +438,10 @@ export type ResponseMessage = {
 
 // Authentication types
 export type IAuth = {
-  orcid: string;
-  name: string;
-  token: string;
+  name: string; // User name
+  orcid: string; // ORCiD value
+  token: string; // ORCiD token
+  workspace: string; // Identifier for active Workspace
 };
 
 export type Token = IAuth & {
@@ -420,6 +455,7 @@ export type Token = IAuth & {
 // Context passed through the request headers, includes the ORCID (user) of the user
 export type Context = {
   user: string;
+  workspace: string;
 };
 
 // User types

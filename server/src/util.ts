@@ -38,11 +38,11 @@ export const authenticate = (request: any, response: any, next: () => void) => {
  * Generate safe pseudo-random identifiers for allocation when creating
  * new items for storage in the MongoDB database, in place of default
  * identifier
- * @param type identifier to be assigned an Entity, Attribute, or Project
+ * @param type identifier to be assigned an Entity, Attribute, Project, or Workspace
  * @return {string}
  */
 export const getIdentifier = (
-  type: "entity" | "attribute" | "project",
+  type: "entity" | "attribute" | "activity" | "project" | "workspace",
 ): string => {
   return `${type.slice(0, 1)}${nanoid(7)}`;
 };

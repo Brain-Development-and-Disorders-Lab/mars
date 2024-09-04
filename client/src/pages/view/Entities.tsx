@@ -1,5 +1,5 @@
 // React
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 
 // Existing and custom components
 import {
@@ -22,6 +22,9 @@ import { DataTableAction, EntityModel } from "@types";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
+
+// Workspace context
+import { WorkspaceContext } from "../../Context";
 
 // Utility functions and libraries
 import { gql, useLazyQuery, useQuery } from "@apollo/client";
@@ -74,14 +77,16 @@ const Entities = () => {
       // Unpack all the Entity data
       setEntityData(data.entities);
     }
-  }, [loading]);
+  }, [data]);
+
+  const { workspace, workspaceLoading } = useContext(WorkspaceContext);
 
   // Check to see if data currently exists and refetch if so
   useEffect(() => {
     if (data && refetch) {
       refetch();
     }
-  }, []);
+  }, [workspace]);
 
   // Effect to adjust column visibility
   useEffect(() => {
@@ -186,8 +191,8 @@ const Entities = () => {
 
   return (
     <Content
-      isError={!_.isUndefined(error) && !_.isUndefined(exportError)}
-      isLoaded={!loading && !exportLoading}
+      isError={!_.isUndefined(error) || !_.isUndefined(exportError)}
+      isLoaded={!loading && !exportLoading && !workspaceLoading}
     >
       <Flex
         direction={"row"}

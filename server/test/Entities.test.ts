@@ -682,7 +682,7 @@ describe("Entity model", () => {
     // Act: Retrieve raw data for created entities
     const rawData = await Entities.all();
 
-    // Assert: Raw data should include data for both entities
+    // Assert: Raw data should include data for both Entities
     expect(rawData.length).toBe(2);
     expect(
       rawData[0].name.toString() == "TestProductEntity" ||

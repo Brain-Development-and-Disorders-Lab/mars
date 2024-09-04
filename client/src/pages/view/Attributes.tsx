@@ -1,5 +1,5 @@
 // React
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 
 // Existing and custom components
 import {
@@ -25,6 +25,9 @@ import _ from "lodash";
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
 import { gql, useQuery } from "@apollo/client";
+
+// Workspace context
+import { WorkspaceContext } from "../../Context";
 
 const Attributes = () => {
   const navigate = useNavigate();
@@ -64,7 +67,7 @@ const Attributes = () => {
       toast({
         title: "Error",
         status: "error",
-        description: error.message,
+        description: "Unable to retrieve Attributes",
         duration: 4000,
         position: "bottom-right",
         isClosable: true,
@@ -72,12 +75,14 @@ const Attributes = () => {
     }
   }, [error]);
 
+  const { workspace, workspaceLoading } = useContext(WorkspaceContext);
+
   // Check to see if data currently exists and refetch if so
   useEffect(() => {
     if (data && refetch) {
       refetch();
     }
-  }, []);
+  }, [workspace]);
 
   const breakpoint = useBreakpoint();
   const [visibleColumns, setVisibleColumns] = useState({});
@@ -131,7 +136,10 @@ const Attributes = () => {
   ];
 
   return (
-    <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
+    <Content
+      isError={!_.isUndefined(error)}
+      isLoaded={!loading && !workspaceLoading}
+    >
       <Flex
         direction={"row"}
         p={"4"}

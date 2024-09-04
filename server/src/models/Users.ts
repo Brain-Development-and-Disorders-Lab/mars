@@ -1,9 +1,14 @@
+// Custom types
 import { ResponseMessage, UserModel } from "@types";
+
 import _ from "lodash";
 import { getDatabase } from "../connectors/database";
-import { Projects } from "./Projects";
 import dayjs from "dayjs";
+
+// Models
 import { Entities } from "./Entities";
+import { Projects } from "./Projects";
+import { Workspaces } from "./Workspaces";
 
 // Collection name
 const USERS_COLLECTION = "users";
@@ -85,26 +90,30 @@ export class Users {
     };
   };
 
-  static bootstrap = async (orcid: string): Promise<ResponseMessage> => {
-    await Projects.create({
+  static bootstrap = async (
+    user: string,
+    workspace: string,
+  ): Promise<ResponseMessage> => {
+    const project = await Projects.create({
       name: "My First Project",
       created: dayjs(Date.now()).toISOString(),
       description:
         "This is your first Project. Feel free to explore and modify it!",
-      owner: orcid,
+      owner: user,
       shared: [],
       entities: [], // Assuming you can add entities later
       collaborators: [], // Assuming you might want collaborators
       history: [],
     });
+    await Workspaces.addProject(workspace, project.message);
 
-    await Entities.create({
+    const entity = await Entities.create({
       name: "Example Entity",
       deleted: false,
       locked: false,
       created: dayjs(Date.now()).toISOString(),
       description: "This is your first Entity. Go ahead and modify it!",
-      owner: orcid,
+      owner: user,
       projects: [],
       associations: {
         origins: [],
@@ -134,6 +143,7 @@ export class Users {
       ],
       history: [],
     });
+    await Workspaces.addEntity(workspace, entity.message);
 
     return {
       success: true,

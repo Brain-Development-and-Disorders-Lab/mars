@@ -1,9 +1,6 @@
 /**
  * Specify important application-wide variables
  */
-// Utility functions and libraries
-import _ from "lodash";
-
 // URL of the API server, either local or remote depending on deployment status
 export const API_URL =
   process.env.NODE_ENV !== "production"

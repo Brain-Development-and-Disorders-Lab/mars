@@ -186,21 +186,11 @@ export const typedefs = `#graphql
     type: String
   }
 
-  type ActivityActor {
-    _id: String!
-    name: String
-  }
-
-  input ActivityActorInput {
-    _id: String!
-    name: String
-  }
-
   # "Activity" type
   type Activity {
     _id: String!
     timestamp: Date
-    actor: ActivityActor
+    actor: String
     type: String
     details: String
     target: ActivityTarget
@@ -209,7 +199,7 @@ export const typedefs = `#graphql
   # "ActivityCreateInput" input
   input ActivityCreateInput {
     timestamp: Date
-    actor: ActivityActorInput
+    actor: String
     type: String
     details: String
     target: ActivityTargetInput
@@ -223,6 +213,44 @@ export const typedefs = `#graphql
     owner: String
     project: String
     attributes: [AttributeInput]
+  }
+
+  # "Workspace" type
+  type Workspace {
+    _id: String!
+    name: String
+    description: String
+    owner: String
+    collaborators: [String]
+    entities: [String]
+    projects: [String]
+    attributes: [String]
+    activity: [String]
+  }
+
+  # "WorkspaceCreateInput" input
+  input WorkspaceCreateInput {
+    name: String
+    description: String
+    owner: String
+    collaborators: [String]
+    entities: [String]
+    projects: [String]
+    attributes: [String]
+    activity: [String]
+  }
+
+  # "WorkspaceUpdateInput" input
+  input WorkspaceUpdateInput {
+    _id: String!
+    name: String
+    description: String
+    owner: String
+    collaborators: [String]
+    entities: [String]
+    projects: [String]
+    attributes: [String]
+    activity: [String]
   }
 
   # "Response" type
@@ -268,6 +296,13 @@ export const typedefs = `#graphql
 
     # Activity queries
     activity(limit: Int): [Activity]
+
+    # Workspace queries
+    workspace(_id: String): Workspace
+    workspaces: [Workspace]
+    workspaceEntities(_id: String, limit: Int): [Entity]
+    workspaceProjects(_id: String, limit: Int): [Project]
+    workspaceActivity(_id: String, limit: Int): [Activity]
 
     # Export queries
     exportEntity(_id: String, format: String, fields: [String]): String
@@ -315,6 +350,10 @@ export const typedefs = `#graphql
 
     # Activity mutations
     createActivity(activity: ActivityCreateInput): Response
+
+    # Workspace mutations
+    createWorkspace(workspace: WorkspaceCreateInput): Response
+    updateWorkspace(workspace: WorkspaceUpdateInput): Response
 
     # Attribute mutations
     createAttribute(attribute: AttributeCreateInput): Response

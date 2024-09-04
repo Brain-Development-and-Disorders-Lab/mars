@@ -1,5 +1,5 @@
 // React
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 
 // Existing and custom components
 import {
@@ -64,6 +64,9 @@ import { useQuery, gql, useMutation, useLazyQuery } from "@apollo/client";
 
 // Routing and navigation
 import { useParams, useNavigate } from "react-router-dom";
+
+// Workspace context
+import { WorkspaceContext } from "../../Context";
 
 // Utility functions and libraries
 import _ from "lodash";
@@ -214,30 +217,22 @@ const Project = () => {
     }
   }, [data]);
 
+  const { workspace, workspaceLoading } = useContext(WorkspaceContext);
+
   // Check to see if data currently exists and refetch if so
   useEffect(() => {
     if (data && refetch) {
       refetch();
     }
-  }, []);
+  }, [workspace]);
 
   // Display error messages from GraphQL usage
   useEffect(() => {
-    if (!loading && _.isUndefined(data)) {
-      // Raised if invalid query
-      toast({
-        title: "Error",
-        description: "Could not retrieve data.",
-        status: "error",
-        duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
-      });
-    } else if (error) {
+    if ((!loading && _.isUndefined(data)) || error) {
       // Raised GraphQL error
       toast({
         title: "Error",
-        description: error.message,
+        description: "Unable to retrieve Project information",
         status: "error",
         duration: 4000,
         position: "bottom-right",
@@ -588,7 +583,9 @@ const Project = () => {
   return (
     <Content
       isError={!_.isUndefined(error)}
-      isLoaded={!loading && !deleteLoading && !updateLoading}
+      isLoaded={
+        !loading && !deleteLoading && !updateLoading && !workspaceLoading
+      }
     >
       <Flex direction={"column"}>
         <Flex

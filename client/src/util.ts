@@ -60,5 +60,6 @@ export const getToken = (tokenKey: string): IAuth => {
     name: "",
     orcid: "",
     token: "",
+    workspace: "",
   };
 };

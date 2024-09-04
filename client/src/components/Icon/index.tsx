@@ -22,6 +22,7 @@ import {
   BsClockHistory,
   BsCloudDownloadFill,
   BsCollectionFill,
+  BsDatabaseFill,
   BsDiagram2Fill,
   BsExclamationOctagonFill,
   BsFileCodeFill,
@@ -101,6 +102,7 @@ const SYSTEM_ICONS: { [k: string]: IconType } = {
   settings: BsFillGearFill,
   print: BsPrinter,
   view: BsFillEyeFill,
+  workspace: BsDatabaseFill,
   zoom_in: BsZoomIn,
   zoom_out: BsZoomOut,
 

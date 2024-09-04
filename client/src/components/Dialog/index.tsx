@@ -10,10 +10,10 @@ import {
   Button,
   Spacer,
 } from "@chakra-ui/react";
+import Icon from "@components/Icon";
 
 // Types
 import { DialogProps } from "@types";
-import Icon from "@components/Icon";
 
 const Dialog = (props: DialogProps) => {
   const header = props.header || "Dialog";

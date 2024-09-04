@@ -35,6 +35,7 @@ export class Authentication {
         orcid: "XXXX-0000-DEMO-1111",
         name: "Test User",
         token: "test_token_value",
+        workspace: "",
       };
     }
 
@@ -64,7 +65,6 @@ export class Authentication {
         name: authenticationPayload.name,
         token: authenticationPayload.token,
       });
-      await Users.bootstrap(authenticationPayload.orcid);
     }
 
     return authenticationPayload;

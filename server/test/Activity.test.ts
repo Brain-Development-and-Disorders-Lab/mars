@@ -27,7 +27,7 @@ describe("Activity model", () => {
     await disconnect();
   });
 
-  it("should return 0 Activity with an empty database", async () => {
+  it("should return 0 Activity entries with an empty database", async () => {
     const result = await Activity.all();
     expect(result.length).toBe(0);
   });
@@ -36,10 +36,7 @@ describe("Activity model", () => {
     const create = await Activity.create({
       timestamp: new Date(),
       type: "create",
-      actor: {
-        name: "Test",
-        _id: "test",
-      },
+      actor: "test",
       details: "Test Activity",
       target: {
         type: "entities",
@@ -49,6 +46,7 @@ describe("Activity model", () => {
     });
     expect(create.success).toBeTruthy();
 
+    // Results should include new Activity entry as well as existing entries
     const result = await Activity.all();
     expect(result.length).toBe(1);
   });

@@ -14,9 +14,9 @@ import { useToken } from "src/authentication/useToken";
 import _ from "lodash";
 
 // Existing and custom types
-import { LoginProps } from "@types";
+import { LoginProps, WorkspaceModel } from "@types";
 
-const useQuery = () => {
+const useParameters = () => {
   // Get URL query parameters
   const { search } = useLocation();
   return useMemo(() => new URLSearchParams(search), [search]);
@@ -28,10 +28,10 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
   // Enable authentication modification
   const [token, setToken] = useToken();
 
-  const query = useQuery();
+  const parameters = useParameters();
 
   // Extract query parameters
-  const accessCode = query.get("code");
+  const accessCode = parameters.get("code");
 
   // Access parameters to remove code after authentication
   const [searchParams, setSearchParams] = useSearchParams();
@@ -57,6 +57,21 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
 
   const [doLogin, { loading, error }] = useLazyQuery(LOGIN_DATA);
 
+  // Query to retrieve Workspaces
+  const GET_WORKSPACES = gql`
+    query GetWorkspaces {
+      workspaces {
+        _id
+        owner
+        name
+        description
+      }
+    }
+  `;
+  const [getWorkspaces, { error: workspacesError }] = useLazyQuery<{
+    workspaces: WorkspaceModel[];
+  }>(GET_WORKSPACES);
+
   /**
    * Utility function to perform a Login operation
    * @param code String returned by ORCID API for login
@@ -68,20 +83,56 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
     // Perform login and data retrieval via server, check if user permitted access
     if (response.data?.login) {
       removeCode();
-      setToken(response.data.login);
+
+      // Create a new token instance with an empty Workspace value
+      setToken({
+        ...response.data.login,
+        workspace: "",
+      });
+
+      // Retrieve all Workspaces and update the token if Workspaces exist
+      const responseWorkspaces = await getWorkspaces();
+      if (
+        responseWorkspaces.data?.workspaces &&
+        responseWorkspaces.data?.workspaces.length > 0
+      ) {
+        // Update the token with an active Workspace if the user is a member of a Workspace
+        setToken({
+          ...response.data.login,
+          workspace: responseWorkspaces.data.workspaces[0]._id,
+        });
+      }
+
+      if (workspacesError) {
+        toast({
+          title: "Warning",
+          status: "warning",
+          description: "Unable to retrieve Workspaces",
+          duration: 4000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+      }
+
+      // Finalise authentication state
       setAuthenticated(true);
-    } else if (error) {
+    }
+  };
+
+  useEffect(() => {
+    // Handle potential errors when using ORCiD
+    if (error) {
       toast({
         title: "Login Error",
         status: "error",
-        description: "Error authenticating with ORCiD",
+        description: "Could not authenticate with ORCiD",
         duration: 4000,
         position: "bottom-right",
         isClosable: true,
       });
       setAuthenticated(false);
     }
-  };
+  }, [error]);
 
   // Check if token exists
   useEffect(() => {
@@ -150,7 +201,7 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
               </Heading>
             </Flex>
             <Text align={"center"}>
-              Log in or create an account with your ORCID iD.
+              Use your ORCiD ID to log in or create an account below.
             </Text>
           </Flex>
 
@@ -166,7 +217,7 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
                 "https://orcid.org/sites/default/files/images/orcid_16x16.png"
               }
             />
-            Connect ORCID
+            Connect ORCiD
           </Button>
         </Flex>
       </Flex>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 
 // Existing and custom components
 import {
@@ -34,6 +34,9 @@ import { useNavigate } from "react-router-dom";
 // Apollo client imports
 import { useQuery, gql } from "@apollo/client";
 
+// Workspace context
+import { WorkspaceContext } from "../Context";
+
 // Queries
 const GET_DASHBOARD = gql`
   query GetDashboard($projects: Int, $entities: Int, $activity: Int) {
@@ -52,10 +55,7 @@ const GET_DASHBOARD = gql`
       _id
       timestamp
       type
-      actor {
-        _id
-        name
-      }
+      actor
       details
       target {
         _id
@@ -72,6 +72,9 @@ const Dashboard = () => {
 
   // Toast to show errors
   const toast = useToast();
+
+  // Workspace context
+  const { workspace, workspaceLoading } = useContext(WorkspaceContext);
 
   // Page data
   const [entityData, setEntityData] = useState(
@@ -112,35 +115,25 @@ const Dashboard = () => {
 
   // Check to see if data currently exists and refetch if so
   useEffect(() => {
-    if (data && refetch) {
+    if (refetch) {
       refetch();
     }
-  }, []);
+  }, [workspace]);
 
   // Display error messages from GraphQL usage
   useEffect(() => {
-    if (!loading && _.isUndefined(data)) {
-      // Raised if invalid query
-      toast({
-        title: "Error",
-        description: "Could not retrieve data.",
-        status: "error",
-        duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
-      });
-    } else if (error) {
+    if (error) {
       // Raised GraphQL error
       toast({
         title: "Error",
-        description: error.message,
+        description: "Could not retrieve data for Dashboard",
         status: "error",
         duration: 4000,
         position: "bottom-right",
         isClosable: true,
       });
     }
-  }, [error, loading]);
+  }, [error]);
 
   // Effect to adjust column visibility
   const breakpoint = useBreakpoint({ ssr: false });
@@ -248,7 +241,10 @@ const Dashboard = () => {
   ];
 
   return (
-    <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
+    <Content
+      isError={!_.isUndefined(error)}
+      isLoaded={!loading && !workspaceLoading}
+    >
       <Flex direction={"row"} wrap={"wrap"} gap={"2"} p={"2"}>
         <Flex direction={"column"} gap={"2"} grow={"1"} basis={"60%"}>
           {/* Projects and Entities */}
@@ -378,7 +374,7 @@ const Dashboard = () => {
           <Flex align={"center"} gap={"2"} my={"2"}>
             <Icon name={"activity"} size={"md"} />
             <Heading size={"md"} color={"gray.700"}>
-              Recent Activity
+              Workspace Activity
             </Heading>
           </Flex>
 
@@ -395,19 +391,8 @@ const Dashboard = () => {
                       key={`activity-${activity._id}`}
                       align={"center"}
                     >
-                      <Tooltip
-                        label={
-                          activity.actor ? activity.actor.name : "Unknown User"
-                        }
-                      >
-                        <Avatar
-                          name={
-                            activity.actor
-                              ? activity.actor.name
-                              : "Unknown User"
-                          }
-                          size={"sm"}
-                        />
+                      <Tooltip label={activity.actor}>
+                        <Avatar name={activity.actor} size={"sm"} />
                       </Tooltip>
                       <Flex direction={"column"}>
                         <Flex direction={"row"} gap={"1"}>

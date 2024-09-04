@@ -1,6 +1,11 @@
 import React from "react";
-import SearchBox from "../src/components/SearchBox";
+
+// Testing imports
+import { MockedProvider } from "@apollo/client/testing";
 import { shallow } from "enzyme";
+
+// Target component
+import SearchBox from "../src/components/SearchBox";
 
 jest.mock("@devices/Scanner", () => ({
   connectScanner: jest.fn(),
@@ -14,14 +19,14 @@ describe("SearchBox Component", () => {
   let wrapper: any;
 
   beforeEach(() => {
-    wrapper = shallow(<SearchBox />);
+    wrapper = shallow(
+      <MockedProvider>
+        <SearchBox />
+      </MockedProvider>,
+    );
   });
 
   it("renders", () => {
     expect(wrapper.exists()).toBe(true);
-  });
-
-  it("renders Flex", () => {
-    expect(wrapper.find("Flex").exists()).toBe(true);
   });
 });

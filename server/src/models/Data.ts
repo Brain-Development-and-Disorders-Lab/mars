@@ -1,18 +1,26 @@
-import { ObjectId } from "mongodb";
-import { getAttachments } from "../connectors/database";
-import _ from "lodash";
-import * as fs from "fs";
-import { Entities } from "./Entities";
+// Custom types
 import {
   AttributeModel,
+  Context,
   EntityModel,
   IEntity,
   IValue,
   ResponseMessage,
 } from "@types";
+
+// Utility functions and libraries
+import * as fs from "fs";
 import XLSX from "xlsx";
 import dayjs from "dayjs";
+import { ObjectId } from "mongodb";
+import { getAttachments } from "../connectors/database";
+import _ from "lodash";
+
+// Models
+import { Activity } from "./Activity";
+import { Entities } from "./Entities";
 import { Projects } from "./Projects";
+import { Workspaces } from "./Workspaces";
 
 export class Data {
   static downloadFile = async (_id: string): Promise<string | null> => {
@@ -117,11 +125,13 @@ export class Data {
    * Map the set of columns as specified to Entity parameters
    * @param columnMapping Collection of mapped values with their corresponding columns names
    * @param file CSV file
+   * @param context Request context, containing user and Workspace identifiers
    * @return {Promise<ResponseMessage>}
    */
   static mapColumns = async (
     columnMapping: { [key: string]: any },
     file: any,
+    context: Context,
   ): Promise<ResponseMessage> => {
     const { createReadStream } = await file[0];
     const stream = createReadStream();
@@ -136,7 +146,9 @@ export class Data {
 
       // Create generic set of Entities
       const entities = [] as EntityModel[];
-      parsedSheet.map(async (row) => {
+
+      // Asynchronously iterate over all rows, importing Entity data
+      for await (const row of parsedSheet) {
         // Extract Attributes
         const attributes = [] as AttributeModel[];
 
@@ -170,7 +182,7 @@ export class Data {
         });
 
         // Core Entity data
-        const data: IEntity = {
+        const entity: IEntity = {
           deleted: false,
           locked: false,
           name: row[columnMapping.name],
@@ -188,18 +200,37 @@ export class Data {
         };
 
         if (!_.isEqual(columnMapping.project, "")) {
-          data.projects = [columnMapping.project];
+          entity.projects = [columnMapping.project];
         }
 
         // Create the Entity and merge in the generated ID
-        const response = await Entities.create(data);
+        const response = await Entities.create(entity);
         if (response.success) {
           entities.push({
             _id: response.message,
-            ...data,
+            ...entity,
           });
+
+          // Add Entity to Workspace
+          await Workspaces.addEntity(context.workspace, response.message);
+
+          // Create new Activity if successful
+          const activity = await Activity.create({
+            timestamp: new Date(),
+            type: "create",
+            actor: context.user,
+            details: "Created new Entity",
+            target: {
+              _id: response.message,
+              type: "entities",
+              name: entity.name,
+            },
+          });
+
+          // Add Activity to Workspace
+          await Workspaces.addActivity(context.workspace, activity.message);
         }
-      });
+      }
 
       if (!_.isEqual(columnMapping.project, "")) {
         // Add all Entities to Project
@@ -223,13 +254,17 @@ export class Data {
 
   /**
    * Import a JSON file or set of objects
-   * @param objectsData Set of Objects to import
+   * @param file JSON file for import
+   * @param owner ORCiD ID of owner
+   * @param project Project identifier to add Entities to (if any)
+   * @param context Request context containing user and Workspace identifier
    * @return {Promise<ResponseMessage>}
    */
   static importObjects = async (
     file: any[],
     owner: string,
     project: string,
+    context: Context,
   ): Promise<ResponseMessage> => {
     const { createReadStream, mimetype } = await file[0];
     const stream = createReadStream();
@@ -250,7 +285,7 @@ export class Data {
       // Check that the specified Project exists
       const projectExists = await Projects.exists(project);
 
-      for (let entity of parsed.entities as EntityModel[]) {
+      for await (const entity of parsed.entities as EntityModel[]) {
         // Splice in the owner and Project information
         entity.owner = owner;
         entity.projects = projectExists ? [project] : [];
@@ -260,20 +295,56 @@ export class Data {
         if (exists) {
           // Update the Entity if it already exists
           const result = await Entities.update(entity);
-          if (result.success === false) {
+          if (!result.success) {
             return {
               success: false,
               message: `Error updating existing Entity: "${entity.name}"`,
             };
+          } else {
+            // Add the Entity to the Workspace
+            await Workspaces.addEntity(context.workspace, entity._id);
+
+            const activity = await Activity.create({
+              timestamp: new Date(),
+              type: "update",
+              actor: context.user,
+              details: "Updated existing Entity",
+              target: {
+                _id: entity._id,
+                type: "entities",
+                name: entity.name,
+              },
+            });
+
+            // Add Activity to Workspace
+            await Workspaces.addActivity(context.workspace, activity.message);
           }
         } else {
           // Create a new Entity if it does not exist
           const result = await Entities.create(entity);
-          if (result.success === false) {
+          if (!result.success) {
             return {
               success: false,
               message: `Error creating new Entity: "${entity.name}"`,
             };
+          } else {
+            // Add the Entity to the Workspace
+            await Workspaces.addEntity(context.workspace, result.message);
+
+            const activity = await Activity.create({
+              timestamp: new Date(),
+              type: "update",
+              actor: context.user,
+              details: "Updated existing Entity",
+              target: {
+                _id: result.message,
+                type: "entities",
+                name: entity.name,
+              },
+            });
+
+            // Add Activity to Workspace
+            await Workspaces.addActivity(context.workspace, activity.message);
           }
         }
       }
