@@ -48,11 +48,7 @@ export const DataResolvers = {
       args: { columnMapping: { [column: string]: string }; file: any },
       context: Context,
     ): Promise<ResponseMessage> => {
-      return await Data.mapColumns(
-        args.columnMapping,
-        args.file,
-        context.workspace,
-      );
+      return await Data.mapColumns(args.columnMapping, args.file, context);
     },
     importObjects: async (
       _parent: any,
@@ -63,7 +59,7 @@ export const DataResolvers = {
         args.file,
         args.owner,
         args.project,
-        context.workspace,
+        context,
       );
     },
   },
