@@ -24,17 +24,12 @@ import { gql, useLazyQuery, useQuery } from "@apollo/client";
 // Custom types
 import { IAuth, WorkspaceModel } from "@types";
 
-// Routing and navigation
-import { useNavigate } from "react-router-dom";
-
 // Utility functions and libraries
 import { useToken } from "src/authentication/useToken";
 import _ from "lodash";
 import { WorkspaceContext } from "src/Context";
 
 const WorkspaceSwitcher = () => {
-  const navigate = useNavigate();
-
   const toast = useToast();
   const [workspaces, setWorkspaces] = useState([] as WorkspaceModel[]);
 
@@ -143,8 +138,7 @@ const WorkspaceSwitcher = () => {
         });
       }
 
-      // Navigate to the Dashboard for that Workspace
-      navigate("/");
+      // Update the Workspace loading state
       setWorkspaceLoading(false);
     };
 
