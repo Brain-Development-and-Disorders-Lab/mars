@@ -34,9 +34,6 @@ import { EntityModel } from "@types";
 import { useNavigate } from "react-router-dom";
 import { gql, useLazyQuery } from "@apollo/client";
 
-// Utility functions and libraries
-import _ from "lodash";
-
 // Limit the number of results shown
 const MAX_RESULTS = 5;
 
