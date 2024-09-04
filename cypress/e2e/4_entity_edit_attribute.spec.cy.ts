@@ -16,9 +16,7 @@ describe("In entity page, edit attribute", () => {
     cy.contains("button", "Edit").click();
 
     // Add Attribute
-    cy.get(
-      "#root > div > div.css-17rivg8 > div > div > div.css-4u5rvs > div.css-i2bh61 > div.css-pon32a > div.css-1ialerq > button",
-    ).click();
+    cy.get("#addAttributeModalButton").click();
     cy.get("#formName").type("Attribute Name");
     cy.get("#formDescription").type("Attribute Description");
     cy.get(".add-value-button-form").click();

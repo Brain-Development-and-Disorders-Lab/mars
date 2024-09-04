@@ -798,7 +798,7 @@ const Entity = () => {
       icon: "delete",
       action(table, rows) {
         const originsToRemove: string[] = [];
-        for (let rowIndex of Object.keys(rows)) {
+        for (const rowIndex of Object.keys(rows)) {
           originsToRemove.push(table.getRow(rowIndex).original._id);
         }
         removeOrigins(originsToRemove);
@@ -861,7 +861,7 @@ const Entity = () => {
       icon: "delete",
       action(table, rows) {
         const productsToRemove: string[] = [];
-        for (let rowIndex of Object.keys(rows)) {
+        for (const rowIndex of Object.keys(rows)) {
           productsToRemove.push(table.getRow(rowIndex).original._id);
         }
         removeProducts(productsToRemove);
@@ -898,7 +898,7 @@ const Entity = () => {
     }),
     attributeTableColumnHelper.accessor("values", {
       cell: (info) => {
-        const tooltipLabelValue: string = `${info.row.original.values
+        const tooltipLabelValue = `${info.row.original.values
           .slice(0, 5)
           .map((value) => value.name)
           .join(", ")}${info.row.original.values.length > 5 ? "..." : ""}`;
@@ -965,7 +965,7 @@ const Entity = () => {
     {
       id: (info: any) => `type_${info.row.original.name}`,
       cell: (info: any) => {
-        let fileExtension = _.upperCase(
+        const fileExtension = _.upperCase(
           _.last(info.row.original.name.split(".")),
         );
         const fileColorScheme = _.isEqual(fileExtension, "PDF")
@@ -1031,7 +1031,7 @@ const Entity = () => {
       icon: "delete",
       action(table, rows) {
         const attachmentsToRemove: string[] = [];
-        for (let rowIndex of Object.keys(rows)) {
+        for (const rowIndex of Object.keys(rows)) {
           attachmentsToRemove.push(table.getRow(rowIndex).original._id);
         }
         removeAttachments(attachmentsToRemove);
@@ -1797,6 +1797,7 @@ const Entity = () => {
               >
                 <Heading size={"sm"}>Attributes</Heading>
                 <Button
+                  id={"addAttributeModalButton"}
                   size={"sm"}
                   rightIcon={<Icon name={"add"} />}
                   isDisabled={!editing}
@@ -1856,7 +1857,7 @@ const Entity = () => {
                   placeholder={"Use template"}
                   onChange={(event) => {
                     if (!_.isEqual(event.target.value.toString(), "")) {
-                      for (let attribute of attributes) {
+                      for (const attribute of attributes) {
                         if (
                           _.isEqual(
                             event.target.value.toString(),
