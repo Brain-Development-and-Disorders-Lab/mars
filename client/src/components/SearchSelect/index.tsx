@@ -3,10 +3,11 @@ import {
   Input,
   Button,
   Flex,
-  Text,
   useToast,
   InputGroup,
   InputRightElement,
+  Skeleton,
+  Text,
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 
@@ -31,7 +32,7 @@ const SearchSelect = (props: SearchSelectProps) => {
     entities: EntityModel[];
   }>(GET_ENTITIES, {
     variables: {
-      limit: 5,
+      limit: 20,
     },
   });
 
@@ -87,6 +88,9 @@ const SearchSelect = (props: SearchSelectProps) => {
 
     if (results.data.search) {
       setResults(results.data.search);
+
+      // Once results have been updated, set `hasSearched` state
+      setHasSearched(true);
     } else {
       setResults([]);
     }
@@ -119,7 +123,11 @@ const SearchSelect = (props: SearchSelectProps) => {
    * @param event Input event
    */
   const handleInputChange = (event: any) => {
-    setHasSearched(event.target.value !== "");
+    if (event.target.value === "") {
+      // Case where search input is empty, reset `hasSearched` state
+      setHasSearched(false);
+    }
+
     setInputValue(event.target.value);
     if (inputValue.length > 2) {
       fetchEntities(inputValue);
@@ -179,15 +187,6 @@ const SearchSelect = (props: SearchSelectProps) => {
             onChange={handleInputChange}
             autoFocus
           />
-          {hasSearched ? (
-            <Text fontSize={"sm"} fontWeight={"semibold"}>
-              Results: {results.length}
-            </Text>
-          ) : (
-            <Text fontSize={"sm"} fontWeight={"semibold"}>
-              Recent:
-            </Text>
-          )}
           <Flex
             direction={"column"}
             maxH={"200px"}
@@ -195,39 +194,62 @@ const SearchSelect = (props: SearchSelectProps) => {
             gap={"2"}
             p={"0"}
           >
-            {hasSearched
-              ? results.map((entity: IGenericItem) => (
-                  <Flex key={`e_${entity._id}`}>
-                    <Button
-                      key={entity._id}
-                      variant={"ghost"}
-                      onClick={() => handleSelectEntity(entity)}
-                      width={"full"}
-                      isDisabled={searchLoading}
-                      size={"sm"}
-                    >
-                      <Flex w={"100%"} justify={"left"}>
-                        {entity.name}
-                      </Flex>
-                    </Button>
-                  </Flex>
-                ))
-              : entities.map((entity: IGenericItem) => (
-                  <Flex key={`e_${entity._id}`}>
-                    <Button
-                      key={entity._id}
-                      variant={"ghost"}
-                      onClick={() => handleSelectEntity(entity)}
-                      width={"full"}
-                      isDisabled={loading}
-                      size={"sm"}
-                    >
-                      <Flex w={"100%"} justify={"left"}>
-                        {entity.name}
-                      </Flex>
-                    </Button>
-                  </Flex>
-                ))}
+            {/* Has searched, search operation complete, multiple results */}
+            {hasSearched &&
+              searchLoading === false &&
+              results.length > 0 &&
+              results.map((entity: IGenericItem) => (
+                <Flex key={`e_${entity._id}`} p={"0"}>
+                  <Button
+                    key={entity._id}
+                    variant={"ghost"}
+                    onClick={() => handleSelectEntity(entity)}
+                    width={"full"}
+                    isDisabled={searchLoading}
+                    size={"sm"}
+                  >
+                    <Flex w={"100%"} justify={"left"}>
+                      {entity.name}
+                    </Flex>
+                  </Button>
+                </Flex>
+              ))}
+
+            {/* Has searched, search operation complete, no results */}
+            {hasSearched && searchLoading === false && results.length === 0 && (
+              <Flex p={"2"}>
+                <Text fontSize={"sm"} fontWeight={"semibold"}>
+                  No Results
+                </Text>
+              </Flex>
+            )}
+
+            {/* Has not yet searched, search operation complete */}
+            {!hasSearched &&
+              searchLoading === false &&
+              entities.map((entity: IGenericItem) => (
+                <Flex key={`e_${entity._id}`}>
+                  <Button
+                    key={entity._id}
+                    variant={"ghost"}
+                    onClick={() => handleSelectEntity(entity)}
+                    width={"full"}
+                    isDisabled={loading}
+                    size={"sm"}
+                  >
+                    <Flex w={"100%"} justify={"left"}>
+                      {entity.name}
+                    </Flex>
+                  </Button>
+                </Flex>
+              ))}
+
+            {/* Search operation in-progress */}
+            {searchLoading === true && (
+              <Flex>
+                <Skeleton height={"20px"} />
+              </Flex>
+            )}
           </Flex>
         </Flex>
       )}
