@@ -32,7 +32,7 @@ const Error = () => {
 
         <Flex w={"md"} gap={"4"} direction={"column"}>
           <Text fontWeight={"semibold"} color={"gray.600"}>
-            Storacuity experienced an error while attempting to access the
+            Metadatify experienced an error while attempting to access the
             requested resource. If this issues persists, please contact your
             system administrator.
           </Text>

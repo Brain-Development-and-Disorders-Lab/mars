@@ -5,7 +5,7 @@ module.exports = {
   entry: "./src/index.tsx",
   plugins: [
     new HtmlWebpackPlugin({
-      title: "Storacuity",
+      title: "Metadatify",
       template: "src/index.html",
       favicon: "src/img/Favicon.png",
     }),

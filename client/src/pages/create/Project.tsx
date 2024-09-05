@@ -332,7 +332,7 @@ const Project = () => {
                 set of Entities used in a specific experiment, this date could
                 represent when work on the experiment commenced. Otherwise, this
                 timestamp may simply represent when this Project was created in
-                Storacuity.
+                Metadatify.
               </Text>
 
               <Heading size={"sm"}>Description*</Heading>

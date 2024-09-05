@@ -176,7 +176,7 @@ const WorkspaceCreateModal = (props: WorkspaceCreateProps) => {
           <Flex gap={"2"} direction={"column"}>
             {props.workspaceIdentifier === "" ? (
               <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.400"}>
-                Before you can get started using Storacuity, you must be invited
+                Before you can get started using Metadatify, you must be invited
                 as Collaborator on an existing Workspace or create a new
                 Workspace below.
               </Text>
@@ -239,7 +239,7 @@ const WorkspaceCreateModal = (props: WorkspaceCreateProps) => {
                     color={"gray.400"}
                   >
                     Add Collaborators by their ORCiD, and they will have access
-                    to this Workspace when they next sign into Storacuity.
+                    to this Workspace when they next sign into Metadatify.
                   </Text>
                   <Flex direction={"row"} gap={"2"} align={"center"}>
                     <FormControl>
