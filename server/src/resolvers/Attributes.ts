@@ -61,11 +61,8 @@ export const AttributesResolvers = {
         });
       }
 
-      // Check that Attribute is owned by the user and exists in the Workspace
-      if (
-        attribute.owner === context.user &&
-        _.includes(workspace.attributes, attribute._id)
-      ) {
+      // Check that Attribute exists in the Workspace
+      if (_.includes(workspace.attributes, attribute._id)) {
         return attribute;
       } else {
         throw new GraphQLError(
