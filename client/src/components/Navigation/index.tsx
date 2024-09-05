@@ -59,7 +59,7 @@ const Navigation = () => {
         >
           <Image src="/Favicon.png" boxSize={"36px"} />
           <Heading fontWeight={"semibold"} size={"md"}>
-            Storacuity
+            Metadatify
           </Heading>
         </Flex>
 

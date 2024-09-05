@@ -43,7 +43,7 @@ const Invalid = () => {
 
           <Flex w={"md"} gap={"4"} direction={"column"}>
             <Text fontWeight={"semibold"} color={"gray.600"}>
-              Storacuity could not locate the requested resource.
+              Metadatify could not locate the requested resource.
             </Text>
           </Flex>
 
