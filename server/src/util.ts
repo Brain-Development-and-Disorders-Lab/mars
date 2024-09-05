@@ -44,5 +44,5 @@ export const authenticate = (request: any, response: any, next: () => void) => {
 export const getIdentifier = (
   type: "entity" | "attribute" | "activity" | "project" | "workspace",
 ): string => {
-  return `${type.slice(0, 1)}${nanoid(7)}`;
+  return `${type.slice(0, 1)}${nanoid(9)}`;
 };
