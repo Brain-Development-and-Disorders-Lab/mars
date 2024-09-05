@@ -18,6 +18,7 @@ export class Activity {
     return await getDatabase()
       .collection<ActivityModel>(ACTIVITY_COLLECTION)
       .find()
+      .sort({ timestamp: -1 })
       .toArray();
   };
 
@@ -29,6 +30,7 @@ export class Activity {
     return await getDatabase()
       .collection<ActivityModel>(ACTIVITY_COLLECTION)
       .find({ _id: { $in: activities } })
+      .sort({ timestamp: -1 })
       .toArray();
   };
 
