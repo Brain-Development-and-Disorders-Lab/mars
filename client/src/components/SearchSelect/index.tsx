@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   Input,
   Button,
@@ -14,10 +14,46 @@ import { EntityModel, IGenericItem, SearchSelectProps } from "@types";
 
 // Utility imports
 import { debounce } from "lodash";
-import _ from "lodash";
-import { gql, useLazyQuery } from "@apollo/client";
+import { gql, useLazyQuery, useQuery } from "@apollo/client";
+import { WorkspaceContext } from "src/Context";
 
 const SearchSelect = (props: SearchSelectProps) => {
+  // Query to retrieve Entities
+  const GET_ENTITIES = gql`
+    query GetEntities($limit: Int) {
+      entities(limit: $limit) {
+        _id
+        name
+      }
+    }
+  `;
+  const { loading, data, refetch } = useQuery<{
+    entities: EntityModel[];
+  }>(GET_ENTITIES, {
+    variables: {
+      limit: 5,
+    },
+  });
+
+  const [entities, setEntities] = useState([] as EntityModel[]);
+
+  // Manage data once retrieved
+  useEffect(() => {
+    if (data?.entities) {
+      // Unpack all the Entity data
+      setEntities(data.entities);
+    }
+  }, [data]);
+
+  const { workspace } = useContext(WorkspaceContext);
+
+  // Check to see if data currently exists and refetch if so
+  useEffect(() => {
+    if (data && refetch) {
+      refetch();
+    }
+  }, [workspace]);
+
   // Query to search by text value
   const SEARCH_TEXT = gql`
     query Search($query: String, $isBuilder: Boolean, $limit: Int) {
@@ -28,11 +64,14 @@ const SearchSelect = (props: SearchSelectProps) => {
       }
     }
   `;
-  const [searchText, { loading, error }] = useLazyQuery(SEARCH_TEXT);
+  const [searchText, { loading: searchLoading, error: searchError }] =
+    useLazyQuery(SEARCH_TEXT);
+
+  // State
   const [results, setResults] = useState([] as EntityModel[]);
   const [showResults, setShowResults] = useState(false);
-
   const [inputValue, setInputValue] = useState("");
+  const [hasSearched, setHasSearched] = useState(false);
 
   const toast = useToast();
 
@@ -52,11 +91,11 @@ const SearchSelect = (props: SearchSelectProps) => {
       setResults([]);
     }
 
-    if (error) {
+    if (searchError) {
       toast({
         title: "Error",
         status: "error",
-        description: error.message,
+        description: searchError.message,
         duration: 4000,
         position: "bottom-right",
         isClosable: true,
@@ -80,6 +119,7 @@ const SearchSelect = (props: SearchSelectProps) => {
    * @param event Input event
    */
   const handleInputChange = (event: any) => {
+    setHasSearched(event.target.value !== "");
     setInputValue(event.target.value);
     if (inputValue.length > 2) {
       fetchEntities(inputValue);
@@ -91,9 +131,11 @@ const SearchSelect = (props: SearchSelectProps) => {
    * @param entity Selected Entity
    */
   const handleSelectEntity = (entity: IGenericItem) => {
+    // Reset state
     setInputValue("");
     setResults([]);
     setShowResults(false);
+    setHasSearched(false);
 
     // Invoke the `onChange` callback if specified
     props.onChange?.(entity);
@@ -130,9 +172,6 @@ const SearchSelect = (props: SearchSelectProps) => {
           position={"absolute"}
           zIndex={"2"}
         >
-          <Text fontSize={"sm"} fontWeight={"semibold"}>
-            Results: {results.length}
-          </Text>
           <Input
             size={"sm"}
             placeholder={"Search"}
@@ -140,6 +179,15 @@ const SearchSelect = (props: SearchSelectProps) => {
             onChange={handleInputChange}
             autoFocus
           />
+          {hasSearched ? (
+            <Text fontSize={"sm"} fontWeight={"semibold"}>
+              Results: {results.length}
+            </Text>
+          ) : (
+            <Text fontSize={"sm"} fontWeight={"semibold"}>
+              Recent:
+            </Text>
+          )}
           <Flex
             direction={"column"}
             maxH={"200px"}
@@ -147,22 +195,39 @@ const SearchSelect = (props: SearchSelectProps) => {
             gap={"2"}
             p={"0"}
           >
-            {results.map((entity: IGenericItem) => (
-              <Flex key={`e_${entity._id}`}>
-                <Button
-                  key={entity._id}
-                  variant={"ghost"}
-                  onClick={() => handleSelectEntity(entity)}
-                  width={"full"}
-                  isDisabled={loading}
-                  size={"sm"}
-                >
-                  <Flex w={"100%"} justify={"left"}>
-                    {entity.name}
+            {hasSearched
+              ? results.map((entity: IGenericItem) => (
+                  <Flex key={`e_${entity._id}`}>
+                    <Button
+                      key={entity._id}
+                      variant={"ghost"}
+                      onClick={() => handleSelectEntity(entity)}
+                      width={"full"}
+                      isDisabled={searchLoading}
+                      size={"sm"}
+                    >
+                      <Flex w={"100%"} justify={"left"}>
+                        {entity.name}
+                      </Flex>
+                    </Button>
                   </Flex>
-                </Button>
-              </Flex>
-            ))}
+                ))
+              : entities.map((entity: IGenericItem) => (
+                  <Flex key={`e_${entity._id}`}>
+                    <Button
+                      key={entity._id}
+                      variant={"ghost"}
+                      onClick={() => handleSelectEntity(entity)}
+                      width={"full"}
+                      isDisabled={loading}
+                      size={"sm"}
+                    >
+                      <Flex w={"100%"} justify={"left"}>
+                        {entity.name}
+                      </Flex>
+                    </Button>
+                  </Flex>
+                ))}
           </Flex>
         </Flex>
       )}
