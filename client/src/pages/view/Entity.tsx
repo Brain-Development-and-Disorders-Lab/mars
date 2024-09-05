@@ -169,6 +169,7 @@ const Entity = () => {
   const [attributeName, setAttributeName] = useState("");
   const [attributeDescription, setAttributeDescription] = useState("");
   const [attributeValues, setAttributeValues] = useState([] as IValue<any>[]);
+  const [selectedTemplate, setSelectedTemplate] = useState("");
 
   const isAttributeNameError = attributeName === "";
   const isAttributeDescriptionError = attributeDescription === "";
@@ -338,14 +339,20 @@ const Entity = () => {
       setEntityHistory(data.entity.history || []);
     }
     if (data?.entities) {
+      // Unpack the minimal Entity data
       setMinimalEntities(
         data.entities.filter(
           (entity: EntityModel) => !_.isEqual(entityData._id, entity._id),
         ),
       );
     }
+    // Unpack Project data
     if (data?.projects) {
       setProjectData(data.projects);
+    }
+    // Unpack Attribute data
+    if (data?.attributes) {
+      setAttributes(data.attributes);
     }
   }, [data]);
 
@@ -1847,16 +1854,13 @@ const Entity = () => {
             <ModalBody p={"2"}>
               {/* Attribute creation */}
               <Flex direction={"column"} gap={"2"} pb={"2"} justify={"center"}>
-                <Text fontSize={"sm"}>
-                  Specify some basic details about this Attribute. The metadata
-                  associated with this Entity should be specified using Values.
-                </Text>
-
                 <Select
                   size={"sm"}
-                  placeholder={"Use template"}
+                  placeholder={"Select Template"}
+                  value={selectedTemplate}
                   onChange={(event) => {
                     if (!_.isEqual(event.target.value.toString(), "")) {
+                      setSelectedTemplate(event.target.value);
                       for (const attribute of attributes) {
                         if (
                           _.isEqual(
@@ -1884,7 +1888,7 @@ const Entity = () => {
                   ;
                 </Select>
                 <Text fontSize="sm">
-                  Don't see the attribute you're looking for? You can
+                  Don't see the Template you're looking for? You can
                   <Link
                     onClick={() => navigate("/create/attribute")}
                     style={{
@@ -1896,7 +1900,7 @@ const Entity = () => {
                   >
                     create
                   </Link>
-                  a new attribute template here.
+                  a new Template here.
                 </Text>
 
                 <Flex
@@ -1946,7 +1950,6 @@ const Entity = () => {
 
                   <Flex>
                     <FormControl isRequired isInvalid={isAttributeValueError}>
-                      <FormLabel fontSize={"sm"}>Values</FormLabel>
                       <Values
                         viewOnly={false}
                         values={attributeValues}
