@@ -45,6 +45,7 @@ import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 import AttributeCard from "@components/AttributeCard";
+import SearchSelect from "@components/SearchSelect";
 
 // Existing and custom types
 import {
@@ -87,7 +88,6 @@ const Entity = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [token, _useToken] = useToken();
 
-  const [entities, setEntities] = useState([] as IGenericItem[]);
   const [projects, setProjects] = useState([] as IGenericItem[]);
   const [attributes, setAttributes] = useState([] as AttributeModel[]);
 
@@ -143,10 +143,6 @@ const Entity = () => {
 
   const GET_CREATE_ENTITIES_DATA = gql`
     query GetCreateEntitiesData {
-      entities {
-        _id
-        name
-      }
       projects {
         _id
         name
@@ -180,9 +176,6 @@ const Entity = () => {
 
   // Assign data
   useEffect(() => {
-    if (data?.entities) {
-      setEntities(data.entities);
-    }
     if (data?.projects) {
       setProjects(data.projects);
     }
@@ -239,6 +232,47 @@ const Entity = () => {
     }
     return true;
   };
+
+  // Handle `SearchSelect` updates for selecting Origins and Products
+  const [selectedOrigin, setSelectedOrigin] = useState({} as IGenericItem);
+  useEffect(() => {
+    if (
+      _.find(selectedOrigins, (origin) => {
+        return _.isEqual(origin._id, selectedOrigin._id);
+      })
+    ) {
+      toast({
+        title: "Warning",
+        description: "Origin has already been selected.",
+        status: "warning",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    } else if (selectedOrigin._id && !_.isEqual(selectedOrigin._id, "")) {
+      setSelectedOrigins([...selectedOrigins, selectedOrigin]);
+    }
+  }, [selectedOrigin]);
+
+  const [selectedProduct, setSelectedProduct] = useState({} as IGenericItem);
+  useEffect(() => {
+    if (
+      _.find(selectedProducts, (product) => {
+        return _.isEqual(product._id, selectedProduct._id);
+      })
+    ) {
+      toast({
+        title: "Warning",
+        description: "Product has already been selected.",
+        status: "warning",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    } else if (selectedProduct._id && !_.isEqual(selectedProduct._id, "")) {
+      setSelectedProducts([...selectedProducts, selectedProduct]);
+    }
+  }, [selectedProduct]);
 
   // Handle clicking "Next"
   const onPageNext = async () => {
@@ -470,47 +504,10 @@ const Entity = () => {
               >
                 <FormControl>
                   <FormLabel fontSize={"sm"}>Origins</FormLabel>
-                  <Select
-                    size={"sm"}
-                    title={"Select Entity"}
-                    placeholder={"Select Entity"}
-                    onChange={(event) => {
-                      if (
-                        _.find(selectedOrigins, (product) => {
-                          return _.isEqual(product._id, event.target.value);
-                        })
-                      ) {
-                        toast({
-                          title: "Warning",
-                          description: "Origin has already been selected.",
-                          status: "warning",
-                          duration: 2000,
-                          position: "bottom-right",
-                          isClosable: true,
-                        });
-                      } else if (
-                        !_.isEqual(event.target.value.toString(), "")
-                      ) {
-                        setSelectedOrigins([
-                          ...selectedOrigins,
-                          {
-                            _id: event.target.value.toString(),
-                            name: event.target.options[
-                              event.target.selectedIndex
-                            ].text,
-                          },
-                        ]);
-                      }
-                    }}
-                  >
-                    {entities.map((entity) => {
-                      return (
-                        <option key={entity._id} value={entity._id}>
-                          {entity.name}
-                        </option>
-                      );
-                    })}
-                  </Select>
+                  <SearchSelect
+                    value={selectedOrigin}
+                    onChange={setSelectedOrigin}
+                  />
                   <FormHelperText fontSize={"sm"}>
                     If the sources of this Entity currently exist or did exist
                     in this system, specify those associations here by selecting
@@ -567,47 +564,10 @@ const Entity = () => {
               >
                 <FormControl>
                   <FormLabel fontSize={"sm"}>Products</FormLabel>
-                  <Select
-                    title="Select Entity"
-                    placeholder={"Select Entity"}
-                    size={"sm"}
-                    onChange={(event) => {
-                      if (
-                        _.find(selectedProducts, (product) => {
-                          return _.isEqual(product._id, event.target.value);
-                        })
-                      ) {
-                        toast({
-                          title: "Warning",
-                          description: "Entity has already been selected.",
-                          status: "warning",
-                          duration: 2000,
-                          position: "bottom-right",
-                          isClosable: true,
-                        });
-                      } else if (
-                        !_.isEqual(event.target.value.toString(), "")
-                      ) {
-                        setSelectedProducts([
-                          ...selectedProducts,
-                          {
-                            _id: event.target.value.toString(),
-                            name: event.target.options[
-                              event.target.selectedIndex
-                            ].text,
-                          },
-                        ]);
-                      }
-                    }}
-                  >
-                    {entities.map((entity) => {
-                      return (
-                        <option key={entity._id} value={entity._id}>
-                          {entity.name}
-                        </option>
-                      );
-                    })}
-                  </Select>
+                  <SearchSelect
+                    value={selectedProduct}
+                    onChange={setSelectedProduct}
+                  />
                   <FormHelperText fontSize={"sm"}>
                     If this Entity has any derivatives or Entities that have
                     been created from it, specify those associations here by
