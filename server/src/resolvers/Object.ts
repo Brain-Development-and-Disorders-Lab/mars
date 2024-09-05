@@ -3,46 +3,60 @@ import { Kind } from "graphql";
 
 /**
  * Generic GraphQL scalar type to deal with dynamic types rarely used in codebase
- * Credit: https://stackoverflow.com/a/47880926
+ * Credit: https://stackoverflow.com/a/45598911
  */
+const toObject = (value: any) => {
+  if (typeof value === "object") {
+    return value;
+  }
+
+  if (typeof value === "string" && value.charAt(0) === "{") {
+    return JSON.parse(value);
+  }
+
+  return value.toString();
+};
+
+const parseObject = (ast: any) => {
+  const value = Object.create(null);
+  ast.fields.forEach((field: any) => {
+    value[field.name.value] = parseValue(field.value);
+  });
+
+  return value;
+};
+
+const parseValue = (ast: any) => {
+  switch (ast.kind) {
+    case Kind.STRING:
+    case Kind.BOOLEAN:
+      return ast.value;
+    case Kind.INT:
+    case Kind.FLOAT:
+      return parseFloat(ast.value);
+    case Kind.OBJECT:
+      return parseObject(ast);
+    case Kind.LIST:
+      return ast.values.map(parseValue);
+    default:
+      return null;
+  }
+};
+
 export const ObjectResolver = {
   Object: new GraphQLScalarType({
     name: "Object",
     description: "Arbitrary object",
-    parseValue: (value: any) => {
-      // Value received from the client, typically a string
-      return typeof value === "object"
-        ? JSON.stringify(value)
-        : typeof value === "string"
-          ? value
-          : value;
-    },
-    serialize: (value: any) => {
-      // Value sent to the client, formatted for JSON
-      if (typeof value === "string") {
-        // Attempt to parse as JSON, else continue
-        try {
-          let parsedValue = JSON.parse(value);
-          return parsedValue;
-        } catch (error) {}
-      }
-      return typeof value === "object"
-        ? JSON.parse(value)
-        : typeof value === "string"
-          ? value
-          : value;
-    },
-    parseLiteral: (ast: any) => {
+    parseValue: toObject,
+    serialize: toObject,
+    parseLiteral(ast) {
       switch (ast.kind) {
         case Kind.STRING:
-          return JSON.parse(ast.value);
+          return ast.value.charAt(0) === "{" ? JSON.parse(ast.value) : null;
         case Kind.OBJECT:
-          throw new Error(
-            "Not sure what to do with OBJECT for Object scalar type",
-          );
-        default:
-          return ast.value;
+          return parseObject(ast);
       }
+      return null;
     },
   }),
 };
