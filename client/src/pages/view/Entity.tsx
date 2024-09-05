@@ -427,12 +427,23 @@ const Entity = () => {
       );
 
       if (fileResponse.success) {
+        // Set the preview details
         setPreviewSource(URL.createObjectURL(fileResponse.data));
-        // Set `previewType` depending on file type
-        if (_.endsWith(name, ".pdf")) {
-          setPreviewType("application/pdf");
-        } else {
-          setPreviewType("");
+        setPreviewName(name);
+
+        // Set the preview type
+        const fileType = _.toLower(name.split(".").pop());
+        switch (fileType) {
+          case "pdf":
+            setPreviewType("document");
+            break;
+          case "png":
+          case "jpg":
+          case "jpeg":
+            setPreviewType("image");
+            break;
+          default:
+            setPreviewType("error");
         }
       }
 
@@ -551,7 +562,9 @@ const Entity = () => {
   const [isPreviewLoaded, setIsPreviewLoaded] = useState(false);
   const [previewSource, setPreviewSource] = useState("");
   const [previewName, setPreviewName] = useState("");
-  const [previewType, setPreviewType] = useState("");
+  const [previewType, setPreviewType] = useState(
+    "error" as "error" | "image" | "document",
+  );
   const {
     isOpen: isPreviewOpen,
     onOpen: onPreviewOpen,
@@ -2558,18 +2571,27 @@ const Entity = () => {
                 pb={"2"}
               >
                 {!isPreviewLoaded || fileLoading ? (
-                  <Spinner />
-                ) : _.isEqual(previewType, "application/pdf") ? (
-                  <PreviewModal
-                    src={previewSource}
-                    type={"document"}
-                    name={previewName}
-                  />
+                  <Flex
+                    direction={"column"}
+                    align={"center"}
+                    justify={"center"}
+                    minH={"400px"}
+                    gap={"2"}
+                  >
+                    <Text
+                      fontSize={"sm"}
+                      color={"gray.400"}
+                      fontWeight={"semibold"}
+                    >
+                      Preparing Preview
+                    </Text>
+                    <Spinner />
+                  </Flex>
                 ) : (
                   <PreviewModal
                     src={previewSource}
-                    type={"image"}
                     name={previewName}
+                    type={previewType}
                   />
                 )}
               </Flex>

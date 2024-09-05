@@ -68,7 +68,9 @@ const AccountMenu = () => {
               w={"100%"}
               align={"center"}
             >
-              {token.name.split(" ").pop()}
+              {token.name.split(" ").length > 0
+                ? token.name.split(" ")[0]
+                : "User"}
             </Text>
             <Icon name={isOpen ? "c_down" : "c_up"} />
           </Flex>
