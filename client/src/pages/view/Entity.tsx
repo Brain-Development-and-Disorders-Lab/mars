@@ -97,6 +97,9 @@ import { useParams, useNavigate } from "react-router-dom";
 import Dialog from "@components/Dialog";
 import { Warning } from "@components/Label";
 
+// URL for loading static resources
+import { STATIC_URL } from "src/variables";
+
 // Workspace context
 import { WorkspaceContext } from "../../Context";
 
@@ -419,32 +422,22 @@ const Entity = () => {
     });
 
     if (response.data?.downloadFile) {
-      const fileResponse = await requestStatic<any>(
-        response.data.downloadFile,
-        {
-          responseType: "blob",
-        },
-      );
-
-      if (fileResponse.success) {
-        // Set the preview details
-        setPreviewSource(URL.createObjectURL(fileResponse.data));
-        setPreviewName(name);
-
-        // Set the preview type
-        const fileType = _.toLower(name.split(".").pop());
-        switch (fileType) {
-          case "pdf":
-            setPreviewType("document");
-            break;
-          case "png":
-          case "jpg":
-          case "jpeg":
-            setPreviewType("image");
-            break;
-          default:
-            setPreviewType("error");
-        }
+      // Set the preview details
+      setPreviewSource(`${STATIC_URL}${response.data.downloadFile}`);
+      setPreviewName(name);
+      const fileType = _.toLower(name.split(".").pop());
+      switch (fileType) {
+        case "pdf":
+          setPreviewType("document");
+          break;
+        case "png":
+        case "jpg":
+        case "jpeg":
+          setPreviewType("image");
+          break;
+        default:
+          setPreviewType("error");
+          break;
       }
 
       if (fileError) {
