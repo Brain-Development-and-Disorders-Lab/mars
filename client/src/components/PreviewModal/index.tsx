@@ -93,20 +93,20 @@ const PreviewModal = (props: PreviewModalProps) => {
     <Flex>
       {_.isEqual(props.type, "image") && (
         <Flex direction={"column"} gap={"2"}>
+          <Flex direction={"row"} gap={"1"} align={"center"}>
+            <Text fontSize={"sm"} fontWeight={"semibold"}>
+              Attachment Name:
+            </Text>
+            <Text fontSize={"sm"}>
+              {_.truncate(props.name, { length: 32 })}
+            </Text>
+            <Spacer />
+            <Text fontSize={"sm"} fontWeight={"semibold"}>
+              Attachment Type:
+            </Text>
+            <Text fontSize={"sm"}>{props.type}</Text>
+          </Flex>
           <TransformWrapper>
-            <Flex direction={"row"} gap={"1"} align={"center"}>
-              <Text fontSize={"sm"} fontWeight={"semibold"}>
-                Attachment Name:
-              </Text>
-              <Text fontSize={"sm"}>
-                {_.truncate(props.name, { length: 32 })}
-              </Text>
-              <Spacer />
-              <Text fontSize={"sm"} fontWeight={"semibold"}>
-                Attachment Type:
-              </Text>
-              <Text fontSize={"sm"}>{props.type}</Text>
-            </Flex>
             <Flex
               rounded={"md"}
               border={"1px"}
@@ -180,6 +180,35 @@ const PreviewModal = (props: PreviewModalProps) => {
               icon={<Icon name={"c_right"} />}
               isDisabled={previewIndex === previewPages}
             />
+          </Flex>
+        </Flex>
+      )}
+
+      {_.isEqual(props.type, "error") && (
+        <Flex direction={"column"} gap={"2"}>
+          <Flex direction={"row"} gap={"1"} align={"center"}>
+            <Text fontSize={"sm"} fontWeight={"semibold"}>
+              Attachment Name:
+            </Text>
+            <Text fontSize={"sm"}>Unable to load preview</Text>
+            <Spacer />
+            <Text fontSize={"sm"} fontWeight={"semibold"}>
+              Attachment Type:
+            </Text>
+            <Text fontSize={"sm"}>Unknown</Text>
+          </Flex>
+          <Flex
+            minH={"400px"}
+            rounded={"md"}
+            border={"1px"}
+            borderColor={"gray.200"}
+            align={"center"}
+            justify={"center"}
+            mb={"2"}
+          >
+            <Text color={"gray.400"} fontWeight={"semibold"}>
+              Unable to load preview
+            </Text>
           </Flex>
         </Flex>
       )}

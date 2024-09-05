@@ -341,7 +341,7 @@ export type DataTableAction = {
 export type PreviewModalProps = {
   src: string;
   name: string;
-  type: "image" | "document";
+  type: "error" | "image" | "document";
 };
 
 // Icon component
