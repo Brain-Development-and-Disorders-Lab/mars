@@ -148,7 +148,7 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
     window.location.hostname === "127.0.0.1";
   const redirectURI = isLocalhost
     ? "http://127.0.0.1:8080"
-    : "https://app.storacuity.com";
+    : "https://app.metadatify.com";
   const requestURI = `https://orcid.org/oauth/authorize?client_id=${clientID}&response_type=code&scope=openid&redirect_uri=${redirectURI}`;
 
   /**
@@ -197,7 +197,7 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
             <Flex direction={"row"} gap={"2"} align={"center"}>
               <Image src="/Favicon.png" boxSize={"64px"} />
               <Heading size={"lg"} fontWeight={"semibold"}>
-                Storacuity
+                Metadatify
               </Heading>
             </Flex>
             <Text align={"center"}>

@@ -1043,7 +1043,7 @@ const Project = () => {
                 <Icon name={"info"} />
                 {_.isEqual(exportFormat, "json") && (
                   <Text fontSize={"sm"}>
-                    JSON files can be re-imported into Storacuity.
+                    JSON files can be re-imported into Metadatify.
                   </Text>
                 )}
                 {_.isEqual(exportFormat, "csv") && (

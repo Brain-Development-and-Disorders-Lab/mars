@@ -352,7 +352,7 @@ const WorkspaceUpdateModal = (props: WorkspaceUpdateProps) => {
                     color={"gray.400"}
                   >
                     Add Collaborators by their ORCiD, and they will have access
-                    to this Workspace when they next sign into Storacuity.
+                    to this Workspace when they next sign into Metadatify.
                   </Text>
                   <Flex direction={"row"} gap={"2"} align={"center"}>
                     <FormControl>

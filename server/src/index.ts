@@ -100,7 +100,7 @@ const start = async () => {
   const origins =
     process.env.NODE_ENV !== "production"
       ? ["http://localhost:8080"]
-      : ["https://app.storacuity.com"];
+      : ["https://app.metadatify.com"];
   app.use(
     "/",
     cors<cors.CorsRequest>({ origin: origins }),
