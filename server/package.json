@@ -14,7 +14,7 @@
     "buildDebug": "esbuild src/index.ts --platform=node --outdir=dist --bundle --sourcemap",
     "startDev": "node --inspect dist/index.js",
     "test": "jest --run-in-band",
-    "clean": "rm -rf dist",
+    "clean": "rm -rf dist public",
     "lint": "prettier --write ."
   },
   "dependencies": {

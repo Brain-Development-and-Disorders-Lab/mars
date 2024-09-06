@@ -59,8 +59,8 @@ const start = async () => {
   }
 
   // Create folder for serving static files
-  if (!fs.existsSync("./static")) {
-    fs.mkdirSync("./static");
+  if (!fs.existsSync(__dirname + "/public")) {
+    fs.mkdirSync(__dirname + "/public");
   }
 
   // Setup the GraphQL server
@@ -92,7 +92,7 @@ const start = async () => {
   app.use(
     "/static",
     cors<cors.CorsRequest>(),
-    express.static("./static"),
+    express.static(__dirname + "/public"),
     helmet(),
   );
 

@@ -34,16 +34,16 @@ export class Data {
       return "/";
     }
 
-    // Get the first file object from the results and generate `/static` path
+    // Get the first file object from the results and generate `/public` path
     const staticPath = `${_id}_${result[0].filename}`;
 
-    // Create stream from buffer and write to `/static` path
+    // Create stream from buffer and write to `/public` path
     const stream = bucket
       .openDownloadStream(new ObjectId(_id))
       .on("error", () => {
         return null;
       });
-    stream.pipe(fs.createWriteStream(`./static/${staticPath}`));
+    stream.pipe(fs.createWriteStream(__dirname + `/public/${staticPath}`));
 
     return `/${staticPath}`;
   };
