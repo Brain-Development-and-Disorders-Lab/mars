@@ -38,6 +38,9 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   import.meta.url,
 ).toString();
 
+// Variables
+const IMAGE_TYPES = ["png", "jpg", "jpeg"];
+
 const ImageControls = () => {
   // Controls for image preview
   const { zoomIn, zoomOut, resetTransform } = useControls();
@@ -98,17 +101,15 @@ const PreviewModal = (props: PreviewModalProps) => {
 
   useEffect(() => {
     if (data?.downloadFile) {
+      // Generate the static URL to retrieve the file preview
       setPreviewSource(`${STATIC_URL}${data.downloadFile}`);
+
+      // Set the preview type depending on the file type
       const fileType = _.toLower(props.attachment.name.split(".").pop());
-      switch (fileType) {
-        case "pdf":
-          setPreviewType("document");
-          break;
-        case "png":
-        case "jpg":
-        case "jpeg":
-          setPreviewType("image");
-          break;
+      if (fileType === "pdf") {
+        setPreviewType("document");
+      } else if (_.includes(IMAGE_TYPES, fileType)) {
+        setPreviewType("image");
       }
     }
   }, [data]);

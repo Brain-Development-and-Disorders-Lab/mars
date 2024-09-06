@@ -27,15 +27,25 @@ export class Data {
     // Access bucket and create open stream to write to storage
     const bucket = getAttachments();
 
-    // Create stream from buffer
+    // Check that the file exists
+    const result = await bucket.find({ _id: new ObjectId(_id) }).toArray();
+
+    if (result.length === 0) {
+      return "/";
+    }
+
+    // Get the first file object from the results and generate `/static` path
+    const staticPath = `${_id}_${result[0].filename}`;
+
+    // Create stream from buffer and write to `/static` path
     const stream = bucket
       .openDownloadStream(new ObjectId(_id))
       .on("error", () => {
         return null;
       });
-    stream.pipe(fs.createWriteStream(`./static/${_id}`));
+    stream.pipe(fs.createWriteStream(`./static/${staticPath}`));
 
-    return `/${_id}`;
+    return `/${staticPath}`;
   };
 
   static uploadAttachment = async (
