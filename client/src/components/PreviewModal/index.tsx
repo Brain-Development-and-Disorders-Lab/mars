@@ -219,6 +219,7 @@ const PreviewModal = (props: PreviewModalProps) => {
                 rounded={"md"}
                 border={"1px"}
                 borderColor={"gray.200"}
+                minH={"400px"}
                 mb={"2"}
               >
                 <TransformComponent>

@@ -23,7 +23,39 @@ import { Projects } from "./Projects";
 import { Workspaces } from "./Workspaces";
 
 export class Data {
-  static downloadFile = async (_id: string): Promise<string | null> => {
+  /**
+   * Generate a file to be downloaded from the `/static` endpoint
+   * @param _id File identifier in GridFS storage
+   * @param filename File name, assuming that file exists
+   * @return {Promise<string>}
+   */
+  private static generateFile = (
+    _id: string,
+    filename: string,
+  ): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      // Access bucket and create open stream to write to storage
+      const bucket = getAttachments();
+
+      // Get the first file object from the results and generate `/public` path
+      const staticPath = `${_id}_${filename}`;
+
+      // Create stream from buffer and write to `/public` path
+      const stream = bucket
+        .openDownloadStream(new ObjectId(_id))
+        .on("error", () => {
+          reject("Error while generating static file for download");
+        });
+      stream.pipe(fs.createWriteStream(__dirname + `/public/${staticPath}`));
+
+      stream.on("close", () => {
+        // Resolve with the final static identifier of the file
+        resolve(`/${staticPath}`);
+      });
+    });
+  };
+
+  static downloadFile = async (_id: string): Promise<string> => {
     // Access bucket and create open stream to write to storage
     const bucket = getAttachments();
 
@@ -34,18 +66,7 @@ export class Data {
       return "/";
     }
 
-    // Get the first file object from the results and generate `/public` path
-    const staticPath = `${_id}_${result[0].filename}`;
-
-    // Create stream from buffer and write to `/public` path
-    const stream = bucket
-      .openDownloadStream(new ObjectId(_id))
-      .on("error", () => {
-        return null;
-      });
-    stream.pipe(fs.createWriteStream(__dirname + `/public/${staticPath}`));
-
-    return `/${staticPath}`;
+    return await Data.generateFile(_id, result[0].filename);
   };
 
   static uploadAttachment = async (
