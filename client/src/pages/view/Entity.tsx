@@ -43,7 +43,6 @@ import {
   Spacer,
   Tooltip,
   IconButton,
-  Spinner,
   useBreakpoint,
   ModalFooter,
   Menu,
@@ -96,9 +95,6 @@ import { useQuery, gql, useMutation, useLazyQuery } from "@apollo/client";
 import { useParams, useNavigate } from "react-router-dom";
 import Dialog from "@components/Dialog";
 import { Warning } from "@components/Label";
-
-// URL for loading static resources
-import { STATIC_URL } from "src/variables";
 
 // Workspace context
 import { WorkspaceContext } from "../../Context";
@@ -280,8 +276,7 @@ const Entity = () => {
       downloadFile(_id: $_id)
     }
   `;
-  const [getFile, { loading: fileLoading, error: fileError }] =
-    useLazyQuery(GET_FILE_URL);
+  const [getFile] = useLazyQuery(GET_FILE_URL);
 
   // Query to export an Entity, returning the string contents of a file for download
   const EXPORT_ENTITY = gql`
@@ -414,55 +409,6 @@ const Entity = () => {
     }
   };
 
-  const getAttachmentFile = async (_id: string, name: string) => {
-    const response = await getFile({
-      variables: {
-        _id: _id,
-      },
-    });
-
-    if (response.data?.downloadFile) {
-      // Set the preview details
-      setPreviewSource(`${STATIC_URL}${response.data.downloadFile}`);
-      setPreviewName(name);
-      const fileType = _.toLower(name.split(".").pop());
-      switch (fileType) {
-        case "pdf":
-          setPreviewType("document");
-          break;
-        case "png":
-        case "jpg":
-        case "jpeg":
-          setPreviewType("image");
-          break;
-        default:
-          setPreviewType("error");
-          break;
-      }
-
-      if (fileError) {
-        toast({
-          title: "Error",
-          status: "error",
-          description: fileError.message,
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-      }
-      setIsPreviewLoaded(true);
-    } else {
-      toast({
-        title: "Error",
-        status: "error",
-        description: "Could not retrieve attachment preview",
-        duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
-      });
-    }
-  };
-
   const onSaveAsTemplate = async () => {
     const attributeData: IAttribute = {
       name: attributeName,
@@ -552,11 +498,8 @@ const Entity = () => {
     onClose: onUploadClose,
   } = useDisclosure();
 
-  const [isPreviewLoaded, setIsPreviewLoaded] = useState(false);
-  const [previewSource, setPreviewSource] = useState("");
-  const [previewName, setPreviewName] = useState("");
-  const [previewType, setPreviewType] = useState(
-    "error" as "error" | "image" | "document",
+  const [previewAttachment, setPreviewAttachment] = useState(
+    {} as IGenericItem,
   );
   const {
     isOpen: isPreviewOpen,
@@ -748,7 +691,7 @@ const Entity = () => {
       icon: "delete",
       action(table, rows) {
         const projectsToRemove: string[] = [];
-        for (let rowIndex of Object.keys(rows)) {
+        for (const rowIndex of Object.keys(rows)) {
           projectsToRemove.push(table.getRow(rowIndex).original);
         }
         removeProjects(projectsToRemove);
@@ -995,12 +938,14 @@ const Entity = () => {
         };
 
         const handlePreview = async () => {
-          setPreviewName(info.row.original.name);
-          setIsPreviewLoaded(false);
-          onPreviewOpen();
+          // Update the attachment state
+          setPreviewAttachment({
+            _id: info.getValue(),
+            name: info.row.original.name,
+          });
 
-          // Retrieve the attachment file from the server
-          await getAttachmentFile(info.getValue(), info.row.original.name);
+          // Open the preview modal
+          onPreviewOpen();
         };
 
         return (
@@ -2563,30 +2508,7 @@ const Entity = () => {
                 align={"center"}
                 pb={"2"}
               >
-                {!isPreviewLoaded || fileLoading ? (
-                  <Flex
-                    direction={"column"}
-                    align={"center"}
-                    justify={"center"}
-                    minH={"400px"}
-                    gap={"2"}
-                  >
-                    <Text
-                      fontSize={"sm"}
-                      color={"gray.400"}
-                      fontWeight={"semibold"}
-                    >
-                      Preparing Preview
-                    </Text>
-                    <Spinner />
-                  </Flex>
-                ) : (
-                  <PreviewModal
-                    src={previewSource}
-                    name={previewName}
-                    type={previewType}
-                  />
-                )}
+                <PreviewModal attachment={previewAttachment} />
               </Flex>
             </ModalBody>
           </ModalContent>

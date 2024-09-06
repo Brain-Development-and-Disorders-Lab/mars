@@ -339,9 +339,7 @@ export type DataTableAction = {
 
 // PreviewModal props
 export type PreviewModalProps = {
-  src: string;
-  name: string;
-  type: "error" | "image" | "document";
+  attachment: IGenericItem;
 };
 
 // Icon component

@@ -1,6 +1,13 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useState } from "react";
-import { Flex, IconButton, Image, Spacer, Text } from "@chakra-ui/react";
+import {
+  Flex,
+  IconButton,
+  Image,
+  Spacer,
+  Spinner,
+  Text,
+} from "@chakra-ui/react";
 import Icon from "@components/Icon";
 
 // Custom types
@@ -17,6 +24,10 @@ import {
   TransformWrapper,
   useControls,
 } from "react-zoom-pan-pinch";
+
+// GraphQL
+import { gql, useQuery } from "@apollo/client";
+import { STATIC_URL } from "src/variables";
 
 // Utility functions
 import _ from "lodash";
@@ -68,6 +79,47 @@ const PreviewModal = (props: PreviewModalProps) => {
   const [previewPages, setPreviewPages] = useState(0);
   const [previewIndex, setPreviewIndex] = useState(1);
 
+  // Preview data state
+  const [previewType, setPreviewType] = useState(
+    "image" as "document" | "image",
+  );
+  const [previewSource, setPreviewSource] = useState("");
+
+  const GET_FILE_URL = gql`
+    query GetFileURL($_id: String) {
+      downloadFile(_id: $_id)
+    }
+  `;
+  const { data, loading, error, refetch } = useQuery(GET_FILE_URL, {
+    variables: {
+      _id: props.attachment._id,
+    },
+  });
+
+  useEffect(() => {
+    if (data?.downloadFile) {
+      setPreviewSource(`${STATIC_URL}${data.downloadFile}`);
+      const fileType = _.toLower(props.attachment.name.split(".").pop());
+      switch (fileType) {
+        case "pdf":
+          setPreviewType("document");
+          break;
+        case "png":
+        case "jpg":
+        case "jpeg":
+          setPreviewType("image");
+          break;
+      }
+    }
+  }, [data]);
+
+  // Check to see if data currently exists and refetch if so
+  useEffect(() => {
+    if (data && refetch) {
+      refetch();
+    }
+  }, []);
+
   // Handlers for page view manipulation
   const onPreviewDocumentLoadSuccess = ({
     numPages,
@@ -77,12 +129,14 @@ const PreviewModal = (props: PreviewModalProps) => {
     setPreviewPages(numPages);
   };
 
+  // Show the next page of the PDF if available
   const nextPage = () => {
     if (previewIndex < previewPages) {
       setPreviewIndex(previewIndex + 1);
     }
   };
 
+  // Show the previous page of the PDF if available
   const previousPage = () => {
     if (previewIndex > 1) {
       setPreviewIndex(previewIndex - 1);
@@ -91,100 +145,105 @@ const PreviewModal = (props: PreviewModalProps) => {
 
   return (
     <Flex>
-      {_.isEqual(props.type, "image") && (
+      {!loading ? (
         <Flex direction={"column"} gap={"2"}>
           <Flex direction={"row"} gap={"1"} align={"center"}>
             <Text fontSize={"sm"} fontWeight={"semibold"}>
               Attachment Name:
             </Text>
             <Text fontSize={"sm"}>
-              {_.truncate(props.name, { length: 32 })}
+              {_.truncate(props.attachment.name, { length: 32 })}
             </Text>
             <Spacer />
             <Text fontSize={"sm"} fontWeight={"semibold"}>
               Attachment Type:
             </Text>
-            <Text fontSize={"sm"}>{props.type}</Text>
+            <Text fontSize={"sm"}>{previewType}</Text>
           </Flex>
-          <TransformWrapper>
-            <Flex
-              rounded={"md"}
-              border={"1px"}
-              borderColor={"gray.200"}
-              mb={"2"}
-            >
-              <TransformComponent>
-                <Image src={props.src} w={"100%"} objectFit={"contain"} />
-              </TransformComponent>
+
+          {_.isEqual(previewType, "document") ? (
+            <Flex direction={"column"}>
+              <Flex
+                overflowY={"scroll"}
+                minH={"400px"}
+                maxH={"70vh"}
+                justify={"center"}
+                rounded={"md"}
+                border={"1px"}
+                borderColor={"gray.200"}
+                mb={"2"}
+              >
+                <Document
+                  file={previewSource}
+                  onLoadSuccess={onPreviewDocumentLoadSuccess}
+                >
+                  <Page
+                    key={`page_${previewIndex}`}
+                    pageNumber={previewIndex}
+                  />
+                </Document>
+              </Flex>
+
+              <Flex
+                direction={"row"}
+                gap={"2"}
+                pb={"0"}
+                align={"center"}
+                justify={"center"}
+              >
+                <IconButton
+                  aria-label={"Previous page"}
+                  size={"sm"}
+                  colorScheme={"blue"}
+                  onClick={previousPage}
+                  icon={<Icon name={"c_left"} />}
+                  isDisabled={previewIndex === 1}
+                />
+                <Text fontSize={"sm"} fontWeight={"semibold"}>
+                  Page {previewIndex} of {previewPages}
+                </Text>
+                <IconButton
+                  aria-label={"Next page"}
+                  size={"sm"}
+                  colorScheme={"blue"}
+                  onClick={nextPage}
+                  icon={<Icon name={"c_right"} />}
+                  isDisabled={previewIndex === previewPages}
+                />
+              </Flex>
             </Flex>
-            <ImageControls />
-          </TransformWrapper>
+          ) : (
+            <TransformWrapper>
+              <Flex
+                rounded={"md"}
+                border={"1px"}
+                borderColor={"gray.200"}
+                mb={"2"}
+              >
+                <TransformComponent>
+                  <Image src={previewSource} w={"100%"} objectFit={"contain"} />
+                </TransformComponent>
+              </Flex>
+              <ImageControls />
+            </TransformWrapper>
+          )}
+        </Flex>
+      ) : (
+        <Flex
+          direction={"column"}
+          align={"center"}
+          justify={"center"}
+          minH={"400px"}
+          gap={"2"}
+        >
+          <Text fontSize={"sm"} color={"gray.400"} fontWeight={"semibold"}>
+            Preparing Preview
+          </Text>
+          <Spinner />
         </Flex>
       )}
 
-      {_.isEqual(props.type, "document") && (
-        <Flex direction={"column"} gap={"2"}>
-          <Flex direction={"row"} gap={"1"} align={"center"}>
-            <Text fontSize={"sm"} fontWeight={"semibold"}>
-              Attachment Name:
-            </Text>
-            <Text fontSize={"sm"}>
-              {_.truncate(props.name, { length: 32 })}
-            </Text>
-            <Spacer />
-            <Text fontSize={"sm"} fontWeight={"semibold"}>
-              Attachment Type:
-            </Text>
-            <Text fontSize={"sm"}>{props.type}</Text>
-          </Flex>
-          <Flex
-            overflowY={"scroll"}
-            maxH={"70vh"}
-            justify={"center"}
-            rounded={"md"}
-            border={"1px"}
-            borderColor={"gray.200"}
-            mb={"2"}
-          >
-            <Document
-              file={props.src}
-              onLoadSuccess={onPreviewDocumentLoadSuccess}
-            >
-              <Page key={`page_${previewIndex}`} pageNumber={previewIndex} />
-            </Document>
-          </Flex>
-
-          <Flex
-            direction={"row"}
-            gap={"2"}
-            pb={"0"}
-            align={"center"}
-            justify={"center"}
-          >
-            <IconButton
-              aria-label={"Previous page"}
-              size={"sm"}
-              colorScheme={"blue"}
-              onClick={previousPage}
-              icon={<Icon name={"c_left"} />}
-              isDisabled={previewIndex === 1}
-            />
-            <Text fontSize={"sm"} fontWeight={"semibold"}>
-              Page {previewIndex} of {previewPages}
-            </Text>
-            <IconButton
-              aria-label={"Next page"}
-              size={"sm"}
-              colorScheme={"blue"}
-              onClick={nextPage}
-              icon={<Icon name={"c_right"} />}
-              isDisabled={previewIndex === previewPages}
-            />
-          </Flex>
-        </Flex>
-      )}
-
-      {_.isEqual(props.type, "error") && (
+      {!_.isUndefined(error) && (
         <Flex direction={"column"} gap={"2"}>
           <Flex direction={"row"} gap={"1"} align={"center"}>
             <Text fontSize={"sm"} fontWeight={"semibold"}>
