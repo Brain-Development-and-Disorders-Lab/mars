@@ -32,12 +32,13 @@ import DataTable from "@components/DataTable";
 import {
   DataTableAction,
   IGenericItem,
+  ResponseMessage,
   WorkspaceModel,
   WorkspaceUpdateProps,
 } from "@types";
 
 // GraphQL imports
-import { gql, useLazyQuery } from "@apollo/client";
+import { gql, useLazyQuery, useMutation } from "@apollo/client";
 
 // Utility functions and libraries
 import { createColumnHelper } from "@tanstack/react-table";
@@ -53,6 +54,8 @@ const WorkspaceUpdateModal = (props: WorkspaceUpdateProps) => {
       workspace(_id: $_id) {
         _id
         name
+        owner
+        description
       }
     }
   `;
@@ -83,9 +86,24 @@ const WorkspaceUpdateModal = (props: WorkspaceUpdateProps) => {
     attributes: IGenericItem[];
   }>(GET_WORKSPACE_DATA, { fetchPolicy: "network-only" });
 
+  // Mutation to update Workspace
+  const UPDATE_WORKSPACE = gql`
+    mutation UpdateWorkspace($workspace: WorkspaceUpdateInput) {
+      updateWorkspace(workspace: $workspace) {
+        success
+        message
+      }
+    }
+  `;
+  const [
+    updateWorkspace,
+    { loading: workspaceUpdateLoading, error: workspaceUpdateError },
+  ] = useMutation<ResponseMessage>(UPDATE_WORKSPACE);
+
   // State for Workspace details
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [owner, setOwner] = useState("");
 
   // State for Workspace contents
   const [entities, setEntities] = useState([] as IGenericItem[]);
@@ -106,6 +124,7 @@ const WorkspaceUpdateModal = (props: WorkspaceUpdateProps) => {
       });
       if (workspaceResult.data?.workspace) {
         setName(workspaceResult.data.workspace.name);
+        setOwner(workspaceResult.data.workspace.owner);
         setDescription(workspaceResult.data.workspace.description);
       }
 
@@ -136,6 +155,37 @@ const WorkspaceUpdateModal = (props: WorkspaceUpdateProps) => {
     // Refresh the Workspace information when the identifier changes
     refreshWorkspace();
   }, [props.workspaceIdentifier]);
+
+  const handleUpdateClick = async () => {
+    await updateWorkspace({
+      variables: {
+        workspace: {
+          _id: props.workspaceIdentifier,
+          name: name,
+          description: description,
+          owner: owner,
+          collaborators: collaborators,
+          entities: entities.map((e) => e._id),
+          projects: projects.map((p) => p._id),
+          attributes: attributes.map((a) => a._id),
+        },
+      },
+    });
+
+    if (workspaceUpdateError) {
+      toast({
+        title: "Error",
+        description: "Unable to update Workspace",
+        status: "error",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    } else {
+      // Close the modal if updated
+      props.onClose();
+    }
+  };
 
   const truncateTableText =
     _.isEqual(breakpoint, "sm") ||
@@ -590,6 +640,8 @@ const WorkspaceUpdateModal = (props: WorkspaceUpdateProps) => {
             colorScheme={"green"}
             leftIcon={<Icon name={"check"} />}
             isDisabled={name === ""}
+            isLoading={workspaceUpdateLoading}
+            onClick={() => handleUpdateClick()}
           >
             Done
           </Button>

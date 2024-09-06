@@ -339,10 +339,15 @@ export class Workspaces {
       };
     }
 
-    // Construct object containing updates to Workspace
-    const update = {
+    // Construct object containing updates for Workspace
+    const update: { $set: Partial<IWorkspace> } = {
       $set: {
-        ...workspace,
+        name: updated.name,
+        description: updated.description,
+        collaborators: updated.collaborators,
+        entities: updated.entities,
+        projects: updated.projects,
+        attributes: updated.attributes,
       },
     };
 
@@ -355,8 +360,8 @@ export class Workspaces {
       success: true,
       message:
         response.modifiedCount == 1
-          ? "Updated Entity"
-          : "No changes made to Entity",
+          ? "Updated Workspace"
+          : "No changes made to Workspace",
     };
   };
 }
