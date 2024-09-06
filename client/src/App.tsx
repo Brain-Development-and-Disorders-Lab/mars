@@ -49,7 +49,6 @@ import { WorkspaceContext } from "./Context";
 
 // Authentication
 import { useToken } from "src/authentication/useToken";
-import { WorkspaceModel } from "@types";
 
 /**
  * Base App component containing the page layout and page routing components
@@ -73,7 +72,7 @@ const App = (): ReactElement => {
   }, [token]);
 
   // Setup Workspace state
-  const [workspace, setWorkspace] = useState({} as WorkspaceModel);
+  const [workspace, setWorkspace] = useState("");
   const [workspaceLoading, setWorkspaceLoading] = useState(false);
 
   return (

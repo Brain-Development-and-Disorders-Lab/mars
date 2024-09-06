@@ -31,15 +31,21 @@ import { WorkspaceContext } from "src/Context";
 
 const WorkspaceSwitcher = () => {
   const toast = useToast();
+
+  // Store all Workspaces
   const [workspaces, setWorkspaces] = useState([] as WorkspaceModel[]);
+
+  // Value displayed on the `Select` component
+  const [labelValue, setLabelValue] = useState("");
 
   // Access token to set the active Workspace
   const [token, setToken] = useToken();
   const [workspaceIdentifier, setWorkspaceIdentifier] = useState(
     token.workspace,
   );
-  const { workspace, setWorkspace, setWorkspaceLoading } =
-    useContext(WorkspaceContext);
+
+  // Workspace context value
+  const { setWorkspace, setWorkspaceLoading } = useContext(WorkspaceContext);
 
   const [isOpen, setIsOpen] = useState(false);
   const {
@@ -119,7 +125,8 @@ const WorkspaceSwitcher = () => {
       });
 
       if (result.data?.workspace) {
-        setWorkspace(result.data.workspace);
+        setWorkspace(result.data.workspace._id);
+        setLabelValue(result.data.workspace.name);
 
         // Clone the existing token and update with selected Workspace ID
         const updatedToken: IAuth = _.cloneDeep(token);
@@ -202,7 +209,7 @@ const WorkspaceSwitcher = () => {
             mr={"2"}
           >
             <Text fontSize={"sm"} fontWeight={"semibold"}>
-              {_.truncate(workspace.name, { length: 15 })}
+              {_.truncate(labelValue, { length: 15 })}
             </Text>
             <Spacer />
             <Icon name={isOpen ? "c_up" : "c_down"} />

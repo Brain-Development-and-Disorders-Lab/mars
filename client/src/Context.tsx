@@ -2,10 +2,9 @@
 import React, { createContext } from "react";
 
 // Custom types
-import { WorkspaceModel } from "@types";
 type WorkspaceContextValue = {
-  workspace: WorkspaceModel;
-  setWorkspace: React.Dispatch<React.SetStateAction<WorkspaceModel>>;
+  workspace: string;
+  setWorkspace: React.Dispatch<React.SetStateAction<string>>;
   workspaceLoading: boolean;
   setWorkspaceLoading: React.Dispatch<React.SetStateAction<boolean>>;
 };
