@@ -198,6 +198,49 @@ const WorkspaceUpdateModal = (props: WorkspaceUpdateProps) => {
     _.isEqual(breakpoint, "base") ||
     _.isUndefined(breakpoint);
 
+  // Utility functions for removing Workspace contents
+  const removeEntity = (_id: string) => {
+    const updated = entities.filter((entity) => {
+      return !_.isEqual(entity._id, _id);
+    });
+    setEntities(updated);
+  };
+
+  const removeEntities = (toRemove: string[]) => {
+    const updated = entities.filter((entity) => {
+      return !_.includes(toRemove, entity._id);
+    });
+    setEntities(updated);
+  };
+
+  const removeProject = (_id: string) => {
+    const updated = projects.filter((project) => {
+      return !_.isEqual(project._id, _id);
+    });
+    setProjects(updated);
+  };
+
+  const removeProjects = (toRemove: string[]) => {
+    const updated = projects.filter((project) => {
+      return !_.includes(toRemove, project._id);
+    });
+    setProjects(updated);
+  };
+
+  const removeAttribute = (_id: string) => {
+    const updated = attributes.filter((attribute) => {
+      return !_.isEqual(attribute._id, _id);
+    });
+    setAttributes(updated);
+  };
+
+  const removeAttributes = (toRemove: string[]) => {
+    const updated = attributes.filter((attribute) => {
+      return !_.includes(toRemove, attribute._id);
+    });
+    setAttributes(updated);
+  };
+
   // Setup `DataTable` components
   const entitiesTableColumnHelper = createColumnHelper<IGenericItem>();
   const entitiesTableColumns = [
@@ -225,7 +268,7 @@ const WorkspaceUpdateModal = (props: WorkspaceUpdateProps) => {
               aria-label={"Remove Entity"}
               colorScheme={"red"}
               onClick={() => {
-                console.info("Remove:", info.row.original._id);
+                removeEntity(info.row.original._id);
               }}
             />
           </Flex>
@@ -243,7 +286,7 @@ const WorkspaceUpdateModal = (props: WorkspaceUpdateProps) => {
         for (const rowIndex of Object.keys(rows)) {
           entitiesToRemove.push(table.getRow(rowIndex).original._id);
         }
-        // removeEntities(entitiesToRemove);
+        removeEntities(entitiesToRemove);
       },
     },
   ];
@@ -274,7 +317,7 @@ const WorkspaceUpdateModal = (props: WorkspaceUpdateProps) => {
               aria-label={"Remove Project"}
               colorScheme={"red"}
               onClick={() => {
-                console.info("Remove:", info.row.original._id);
+                removeProject(info.row.original._id);
               }}
             />
           </Flex>
@@ -292,7 +335,7 @@ const WorkspaceUpdateModal = (props: WorkspaceUpdateProps) => {
         for (const rowIndex of Object.keys(rows)) {
           projectsToRemove.push(table.getRow(rowIndex).original._id);
         }
-        // removeProjects(projectsToRemove);
+        removeProjects(projectsToRemove);
       },
     },
   ];
@@ -323,7 +366,7 @@ const WorkspaceUpdateModal = (props: WorkspaceUpdateProps) => {
               aria-label={"Remove Attribute"}
               colorScheme={"red"}
               onClick={() => {
-                console.info("Remove:", info.row.original._id);
+                removeAttribute(info.row.original._id);
               }}
             />
           </Flex>
@@ -341,7 +384,7 @@ const WorkspaceUpdateModal = (props: WorkspaceUpdateProps) => {
         for (const rowIndex of Object.keys(rows)) {
           attributesToRemove.push(table.getRow(rowIndex).original._id);
         }
-        // removeAttributes(attributesToRemove);
+        removeAttributes(attributesToRemove);
       },
     },
   ];
@@ -470,7 +513,7 @@ const WorkspaceUpdateModal = (props: WorkspaceUpdateProps) => {
                             <IconButton
                               size={"sm"}
                               aria-label={"Remove collaborator"}
-                              icon={<Icon name="delete" />}
+                              icon={<Icon name={"delete"} />}
                               colorScheme={"red"}
                               onClick={() =>
                                 setCollaborators((collaborators) =>
