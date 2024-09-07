@@ -182,6 +182,7 @@ export type WorkspaceUpdateProps = {
   onClose: () => void;
   // Workspace state
   workspaceIdentifier: string;
+  onUpdate: () => Promise<void>;
 };
 
 // Entity types

@@ -73,6 +73,9 @@ const WorkspaceSwitcher = () => {
   const { loading, error, data, refetch } = useQuery<{
     workspaces: WorkspaceModel[];
   }>(GET_WORKSPACES, { fetchPolicy: "network-only" });
+  const [getWorkspaces, { error: workspacesError }] = useLazyQuery<{
+    workspaces: WorkspaceModel[];
+  }>(GET_WORKSPACES, { fetchPolicy: "network-only" });
 
   // Query to get a Workspace
   const GET_WORKSPACE = gql`
@@ -86,6 +89,50 @@ const WorkspaceSwitcher = () => {
   const [getWorkspace, { error: workspaceError }] = useLazyQuery<{
     workspace: WorkspaceModel;
   }>(GET_WORKSPACE, { fetchPolicy: "network-only" });
+
+  /**
+   * Utility function to update the current Workspace data
+   */
+  const updateWorkspace = async () => {
+    setWorkspaceLoading(true);
+
+    // When the `workspaceIdentifier` value changes, retrieve updated model
+    const resultWorkspace = await getWorkspace({
+      variables: {
+        _id: workspaceIdentifier,
+      },
+    });
+
+    if (resultWorkspace.data?.workspace) {
+      setWorkspace(resultWorkspace.data.workspace._id);
+      setLabelValue(resultWorkspace.data.workspace.name);
+
+      // Clone the existing token and update with selected Workspace ID
+      const updatedToken: IAuth = _.cloneDeep(token);
+      updatedToken.workspace = workspaceIdentifier;
+      setToken(updatedToken);
+    }
+
+    // Refresh the list of Workspaces
+    const resultWorkspaces = await getWorkspaces();
+    if (resultWorkspaces.data?.workspaces) {
+      setWorkspaces(resultWorkspaces.data.workspaces);
+    }
+
+    if (workspaceError || workspacesError) {
+      toast({
+        title: "Error",
+        description: "Unable to retrieve Workspaces",
+        status: "error",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
+
+    // Update the Workspace loading state
+    setWorkspaceLoading(false);
+  };
 
   // Manage data once retrieved
   useEffect(() => {
@@ -114,41 +161,6 @@ const WorkspaceSwitcher = () => {
   }, []);
 
   useEffect(() => {
-    const updateWorkspace = async () => {
-      setWorkspaceLoading(true);
-
-      // When the `workspaceIdentifier` value changes, retrieve updated model
-      const result = await getWorkspace({
-        variables: {
-          _id: workspaceIdentifier,
-        },
-      });
-
-      if (result.data?.workspace) {
-        setWorkspace(result.data.workspace._id);
-        setLabelValue(result.data.workspace.name);
-
-        // Clone the existing token and update with selected Workspace ID
-        const updatedToken: IAuth = _.cloneDeep(token);
-        updatedToken.workspace = workspaceIdentifier;
-        setToken(updatedToken);
-      }
-
-      if (workspaceError) {
-        toast({
-          title: "Error",
-          description: "Unable to retrieve Workspaces",
-          status: "error",
-          duration: 2000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-      }
-
-      // Update the Workspace loading state
-      setWorkspaceLoading(false);
-    };
-
     if (workspaceIdentifier !== "") {
       updateWorkspace();
     } else {
@@ -296,6 +308,7 @@ const WorkspaceSwitcher = () => {
         onOpen={onUpdateOpen}
         onClose={onUpdateClose}
         workspaceIdentifier={workspaceIdentifier}
+        onUpdate={updateWorkspace}
       />
     </Flex>
   );

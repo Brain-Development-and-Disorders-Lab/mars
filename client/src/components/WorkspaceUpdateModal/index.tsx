@@ -156,6 +156,9 @@ const WorkspaceUpdateModal = (props: WorkspaceUpdateProps) => {
     refreshWorkspace();
   }, [props.workspaceIdentifier]);
 
+  /**
+   * Handler function for modal `Done` button, apply updates to the Workspace
+   */
   const handleUpdateClick = async () => {
     await updateWorkspace({
       variables: {
@@ -182,6 +185,9 @@ const WorkspaceUpdateModal = (props: WorkspaceUpdateProps) => {
         isClosable: true,
       });
     } else {
+      // Run the `onUpdate` function
+      await props.onUpdate();
+
       // Close the modal if updated
       props.onClose();
     }
