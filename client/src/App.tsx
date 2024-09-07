@@ -31,6 +31,7 @@ import Entities from "@pages/view/Entities";
 
 // Page type - Create
 import Create from "@pages/create/Create";
+import CreateWorkspace from "@pages/create/Workspace";
 import CreateAttribute from "@pages/create/Attribute";
 import CreateEntity from "@pages/create/Entity";
 import CreateProject from "@pages/create/Project";
@@ -49,6 +50,7 @@ import { WorkspaceContext } from "./Context";
 
 // Authentication
 import { useToken } from "src/authentication/useToken";
+import Workspace from "@pages/view/Workspace";
 
 /**
  * Base App component containing the page layout and page routing components
@@ -73,6 +75,7 @@ const App = (): ReactElement => {
 
   // Setup Workspace state
   const [workspace, setWorkspace] = useState("");
+  const [label, setLabel] = useState("");
   const [workspaceLoading, setWorkspaceLoading] = useState(false);
 
   return (
@@ -85,6 +88,8 @@ const App = (): ReactElement => {
             value={{
               workspace,
               setWorkspace,
+              label,
+              setLabel,
               workspaceLoading,
               setWorkspaceLoading,
             }}
@@ -95,12 +100,21 @@ const App = (): ReactElement => {
 
                 {/* Create routes */}
                 <Route
+                  path={"/create/workspace"}
+                  element={<CreateWorkspace />}
+                />
+                <Route
                   path={"/create/attribute"}
                   element={<CreateAttribute />}
                 />
                 <Route path={"/create/project"} element={<CreateProject />} />
                 <Route path={"/create/entity"} element={<CreateEntity />} />
                 <Route path={"/create"} element={<Create />} />
+
+                {/* Workspace routes */}
+                <Route path={"workspaces"}>
+                  <Route path={":id"} element={<Workspace />} />
+                </Route>
 
                 {/* Entity routes */}
                 <Route path={"/entities"} element={<Entities />} />

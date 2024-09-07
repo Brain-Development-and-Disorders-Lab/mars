@@ -5,6 +5,8 @@ import React, { createContext } from "react";
 type WorkspaceContextValue = {
   workspace: string;
   setWorkspace: React.Dispatch<React.SetStateAction<string>>;
+  label: string;
+  setLabel: React.Dispatch<React.SetStateAction<string>>;
   workspaceLoading: boolean;
   setWorkspaceLoading: React.Dispatch<React.SetStateAction<boolean>>;
 };
