@@ -44,6 +44,7 @@ const authLink = setContext((_, { headers }) => {
 const client = new ApolloClient({
   link: ApolloLink.from([authLink, httpLink as unknown as ApolloLink]),
   cache: new InMemoryCache({
+    addTypename: false,
     typePolicies: {
       Workspace: {
         keyFields: ["_id"],
