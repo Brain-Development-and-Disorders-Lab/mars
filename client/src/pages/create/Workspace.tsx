@@ -1,5 +1,5 @@
 // React and Chakra UI components
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useState } from "react";
 import {
   Flex,
   Spacer,
@@ -40,7 +40,7 @@ const CreateWorkspace = () => {
   const toast = useToast();
 
   // Workspace context
-  const { workspace, setWorkspace, setLabel } = useContext(WorkspaceContext);
+  const { workspace, setWorkspace } = useContext(WorkspaceContext);
 
   // State for Workspace details
   const [name, setName] = useState("");
@@ -88,13 +88,6 @@ const CreateWorkspace = () => {
     navigate(0);
   };
 
-  // Update `WorkspaceSwitcher` label
-  useEffect(() => {
-    if (workspace === "") {
-      setLabel("No Workspaces");
-    }
-  }, [workspace]);
-
   /**
    * Create the Workspace using GraphQL query
    */
@@ -126,8 +119,8 @@ const CreateWorkspace = () => {
           workspaces.data.workspaces[workspaces.data.workspaces.length - 1];
 
         // Update the stored Workspace identifier and collection of Workspaces
-        setWorkspace(created._id);
         navigate("/");
+        setWorkspace(created._id);
 
         // Reset modal state
         setName("");

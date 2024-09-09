@@ -40,11 +40,14 @@ const WorkspaceSwitcher = () => {
   const [token, setToken] = useToken();
 
   // Workspace context value
-  const { workspace, setWorkspace, setWorkspaceLoading, label, setLabel } =
+  const { workspace, setWorkspace, setWorkspaceLoading } =
     useContext(WorkspaceContext);
 
   // Switcher drop-down visibility state
   const [isOpen, setIsOpen] = useState(false);
+
+  // Switcher label text
+  const [label, setLabel] = useState("Select Workspace");
 
   // Queries (active and lazy) to retrieve all Workspaces
   const GET_WORKSPACES = gql`
@@ -91,19 +94,20 @@ const WorkspaceSwitcher = () => {
     });
 
     if (resultWorkspace.data?.workspace) {
-      setWorkspace(resultWorkspace.data.workspace._id);
-      setLabel(resultWorkspace.data.workspace.name);
-
       // Clone the existing token and update with selected Workspace ID
       const updatedToken: IAuth = _.cloneDeep(token);
-      updatedToken.workspace = workspace;
+      updatedToken.workspace = resultWorkspace.data.workspace._id;
       setToken(updatedToken);
+
+      // Update the UI state to reflect the change in Workspace
+      setLabel(resultWorkspace.data.workspace.name);
+      setWorkspace(resultWorkspace.data.workspace._id);
     }
 
-    if (workspaceError || workspacesError) {
+    if (workspaceError) {
       toast({
         title: "Error",
-        description: "Unable to retrieve Workspaces",
+        description: "Unable to retrieve Workspace",
         status: "error",
         duration: 2000,
         position: "bottom-right",
@@ -123,6 +127,17 @@ const WorkspaceSwitcher = () => {
     const resultWorkspaces = await getWorkspaces();
     if (resultWorkspaces.data?.workspaces) {
       setWorkspaces(resultWorkspaces.data.workspaces);
+    }
+
+    if (workspacesError) {
+      toast({
+        title: "Error",
+        description: "Unable to update list of Workspaces",
+        status: "error",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
     }
   };
 

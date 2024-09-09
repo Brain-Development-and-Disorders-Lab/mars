@@ -117,7 +117,7 @@ const Workspace = () => {
   const [collaborator, setCollaborator] = useState("");
   const [collaborators, setCollaborators] = useState([] as string[]);
 
-  const { workspace, setLabel } = useContext(WorkspaceContext);
+  const { workspace } = useContext(WorkspaceContext);
 
   useEffect(() => {
     const refreshWorkspace = async () => {
@@ -190,7 +190,6 @@ const Workspace = () => {
         isClosable: true,
       });
     } else {
-      setLabel(name);
       navigate("/");
     }
   };
