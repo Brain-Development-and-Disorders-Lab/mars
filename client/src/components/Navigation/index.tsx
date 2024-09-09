@@ -1,5 +1,5 @@
 // React
-import React from "react";
+import React, { useContext } from "react";
 
 // Existing and custom components
 import {
@@ -29,9 +29,15 @@ import { useLocation, useNavigate } from "react-router-dom";
 // Utility functions and libraries
 import _ from "lodash";
 
+// Workspace context
+import { WorkspaceContext } from "src/Context";
+
 const Navigation = () => {
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Workspace context value
+  const { workspace } = useContext(WorkspaceContext);
 
   const {
     isOpen: isImportOpen,
@@ -83,6 +89,7 @@ const Navigation = () => {
               variant={_.isEqual(location.pathname, "/") ? "solid" : "ghost"}
               leftIcon={<Icon name={"dashboard"} />}
               onClick={() => navigate("/")}
+              isDisabled={workspace === ""}
             >
               Dashboard
             </Button>
@@ -98,6 +105,7 @@ const Navigation = () => {
               }
               leftIcon={<Icon name={"search"} />}
               onClick={() => navigate("/search")}
+              isDisabled={workspace === ""}
             >
               Search
             </Button>
@@ -115,6 +123,7 @@ const Navigation = () => {
                   : "ghost"
               }
               onClick={() => navigate("/projects")}
+              isDisabled={workspace === ""}
             >
               <Flex w={"100%"} align={"center"} gap={"2"}>
                 <Text>Projects</Text>
@@ -134,6 +143,7 @@ const Navigation = () => {
                   : "ghost"
               }
               onClick={() => navigate("/entities")}
+              isDisabled={workspace === ""}
             >
               <Flex w={"100%"} align={"center"} gap={"2"}>
                 <Text>Entities</Text>
@@ -152,6 +162,7 @@ const Navigation = () => {
                   : "ghost"
               }
               onClick={() => navigate("/attributes")}
+              isDisabled={workspace === ""}
             >
               Templates
             </Button>
@@ -172,6 +183,7 @@ const Navigation = () => {
               }
               leftIcon={<Icon name={"add"} />}
               onClick={() => navigate("/create")}
+              isDisabled={workspace === ""}
             >
               Create
             </Button>
@@ -185,6 +197,7 @@ const Navigation = () => {
               variant={"ghost"}
               leftIcon={<Icon name={"upload"} />}
               onClick={() => onImportOpen()}
+              isDisabled={workspace === ""}
             >
               Import
             </Button>

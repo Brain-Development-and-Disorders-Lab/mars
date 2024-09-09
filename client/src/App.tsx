@@ -62,38 +62,37 @@ const App = (): ReactElement => {
   }
 
   // Setup token authentication
-  const [token, _setToken] = useToken();
+  const [token] = useToken();
   const [authenticated, setAuthenticated] = useState(false);
+
+  // Setup Workspace state
+  const [workspace, setWorkspace] = useState("");
+  const [workspaceLoading, setWorkspaceLoading] = useState(false);
 
   useEffect(() => {
     if (_.isNull(token) || _.isEqual(token.token, "")) {
       setAuthenticated(false);
     } else {
+      // Manipulate the Workspace value
+      setWorkspace(token.workspace);
       setAuthenticated(true);
     }
   }, [token]);
 
-  // Setup Workspace state
-  const [workspace, setWorkspace] = useState("");
-  const [label, setLabel] = useState("");
-  const [workspaceLoading, setWorkspaceLoading] = useState(false);
-
   return (
     <BrowserRouter>
       <ChakraProvider theme={theme}>
-        {!authenticated ? (
-          <Login setAuthenticated={setAuthenticated} />
-        ) : (
-          <WorkspaceContext.Provider
-            value={{
-              workspace,
-              setWorkspace,
-              label,
-              setLabel,
-              workspaceLoading,
-              setWorkspaceLoading,
-            }}
-          >
+        <WorkspaceContext.Provider
+          value={{
+            workspace,
+            setWorkspace,
+            workspaceLoading,
+            setWorkspaceLoading,
+          }}
+        >
+          {!authenticated ? (
+            <Login setAuthenticated={setAuthenticated} />
+          ) : (
             <Page>
               <Routes>
                 <Route path={"/"} element={<Dashboard />} />
@@ -143,8 +142,8 @@ const App = (): ReactElement => {
                 />
               </Routes>
             </Page>
-          </WorkspaceContext.Provider>
-        )}
+          )}
+        </WorkspaceContext.Provider>
       </ChakraProvider>
     </BrowserRouter>
   );
