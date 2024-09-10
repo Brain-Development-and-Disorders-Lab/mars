@@ -113,7 +113,7 @@ const Dashboard = () => {
     }
   }, [data]);
 
-  // Check to see if data currently exists and refetch if so
+  // If the workspace changes, refetch the data
   useEffect(() => {
     if (refetch) {
       refetch();
@@ -246,7 +246,7 @@ const Dashboard = () => {
       isLoaded={!loading && !workspaceLoading}
     >
       <Flex direction={"row"} wrap={"wrap"} gap={"2"} p={"2"}>
-        <Flex direction={"column"} gap={"2"} grow={"1"} basis={"60%"}>
+        <Flex direction={"column"} gap={"2"} grow={"1"}>
           {/* Projects and Entities */}
           <Flex
             direction={"column"}
@@ -368,7 +368,6 @@ const Dashboard = () => {
           rounded={"md"}
           border={"1px"}
           borderColor={"gray.200"}
-          maxH={"97vh"}
         >
           {/* Activity heading */}
           <Flex align={"center"} gap={"2"} my={"2"}>

@@ -23,8 +23,9 @@ describe("JSON Import Test", () => {
 
       // Skip the remaining import screens
       cy.wait(500);
-      cy.get("#importContinueButton").click({ force: true }); // Go to import step 2
-      cy.get("#importContinueButton").click({ force: true }); // Finalize import
+      cy.get("#importContinueButton").click(); // Go to import step 2
+      cy.get("#importContinueButton").click(); // Finalize import
+      cy.wait(1000); // Wait for GraphQL request to complete
 
       // Validate the Entity has been imported successfully
       cy.get("#navEntitiesButton").click();

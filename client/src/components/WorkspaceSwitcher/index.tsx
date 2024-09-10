@@ -11,15 +11,15 @@ import {
   Spacer,
   Text,
   Tooltip,
-  useDisclosure,
   useToast,
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
-import WorkspaceCreateModal from "@components/WorkspaceCreateModal";
-import WorkspaceUpdateModal from "@components/WorkspaceUpdateModal";
 
 // GraphQL resources
 import { gql, useLazyQuery, useQuery } from "@apollo/client";
+
+// Navigation
+import { useNavigate } from "react-router-dom";
 
 // Custom types
 import { IAuth, WorkspaceModel } from "@types";
@@ -31,27 +31,23 @@ import { WorkspaceContext } from "src/Context";
 
 const WorkspaceSwitcher = () => {
   const toast = useToast();
+  const navigate = useNavigate();
+
+  // Store all Workspaces
   const [workspaces, setWorkspaces] = useState([] as WorkspaceModel[]);
 
   // Access token to set the active Workspace
   const [token, setToken] = useToken();
-  const [workspaceIdentifier, setWorkspaceIdentifier] = useState(
-    token.workspace,
-  );
+
+  // Workspace context value
   const { workspace, setWorkspace, setWorkspaceLoading } =
     useContext(WorkspaceContext);
 
+  // Switcher drop-down visibility state
   const [isOpen, setIsOpen] = useState(false);
-  const {
-    isOpen: isCreateOpen,
-    onOpen: onCreateOpen,
-    onClose: onCreateClose,
-  } = useDisclosure();
-  const {
-    isOpen: isUpdateOpen,
-    onOpen: onUpdateOpen,
-    onClose: onUpdateClose,
-  } = useDisclosure();
+
+  // Switcher label text
+  const [label, setLabel] = useState("Select Workspace");
 
   // Queries (active and lazy) to retrieve all Workspaces
   const GET_WORKSPACES = gql`
@@ -67,6 +63,9 @@ const WorkspaceSwitcher = () => {
   const { loading, error, data, refetch } = useQuery<{
     workspaces: WorkspaceModel[];
   }>(GET_WORKSPACES, { fetchPolicy: "network-only" });
+  const [getWorkspaces, { error: workspacesError }] = useLazyQuery<{
+    workspaces: WorkspaceModel[];
+  }>(GET_WORKSPACES, { fetchPolicy: "network-only" });
 
   // Query to get a Workspace
   const GET_WORKSPACE = gql`
@@ -80,6 +79,67 @@ const WorkspaceSwitcher = () => {
   const [getWorkspace, { error: workspaceError }] = useLazyQuery<{
     workspace: WorkspaceModel;
   }>(GET_WORKSPACE, { fetchPolicy: "network-only" });
+
+  /**
+   * Utility function to update the current Workspace data
+   */
+  const updateWorkspace = async () => {
+    setWorkspaceLoading(true);
+
+    // When the `workspace` value changes, retrieve updated model
+    const resultWorkspace = await getWorkspace({
+      variables: {
+        _id: workspace,
+      },
+    });
+
+    if (resultWorkspace.data?.workspace) {
+      // Clone the existing token and update with selected Workspace ID
+      const updatedToken: IAuth = _.cloneDeep(token);
+      updatedToken.workspace = resultWorkspace.data.workspace._id;
+      setToken(updatedToken);
+
+      // Update the UI state to reflect the change in Workspace
+      setLabel(resultWorkspace.data.workspace.name);
+      setWorkspace(resultWorkspace.data.workspace._id);
+    }
+
+    if (workspaceError) {
+      toast({
+        title: "Error",
+        description: "Unable to retrieve Workspace",
+        status: "error",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
+
+    // Update the Workspace loading state
+    setWorkspaceLoading(false);
+  };
+
+  /**
+   * Utility function to update the list of Workspaces
+   */
+  const updateWorkspaces = async () => {
+    // Refresh the list of Workspaces
+    const resultWorkspaces = await getWorkspaces();
+    if (resultWorkspaces.data?.workspaces) {
+      setWorkspaces(resultWorkspaces.data.workspaces);
+    }
+
+    if (workspacesError) {
+      toast({
+        title: "Error",
+        description: "Unable to update list of Workspaces",
+        status: "error",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
+  };
 
   // Manage data once retrieved
   useEffect(() => {
@@ -108,53 +168,24 @@ const WorkspaceSwitcher = () => {
   }, []);
 
   useEffect(() => {
-    const updateWorkspace = async () => {
-      setWorkspaceLoading(true);
-
-      // When the `workspaceIdentifier` value changes, retrieve updated model
-      const result = await getWorkspace({
-        variables: {
-          _id: workspaceIdentifier,
-        },
-      });
-
-      if (result.data?.workspace) {
-        setWorkspace(result.data.workspace);
-
-        // Clone the existing token and update with selected Workspace ID
-        const updatedToken: IAuth = _.cloneDeep(token);
-        updatedToken.workspace = workspaceIdentifier;
-        setToken(updatedToken);
-      }
-
-      if (workspaceError) {
-        toast({
-          title: "Error",
-          description: "Unable to retrieve Workspaces",
-          status: "error",
-          duration: 2000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-      }
-
-      // Update the Workspace loading state
-      setWorkspaceLoading(false);
-    };
-
-    if (workspaceIdentifier !== "") {
+    if (workspace !== "") {
       updateWorkspace();
     } else {
-      onCreateOpen();
+      navigate("/create/workspace");
     }
-  }, [workspaceIdentifier]);
+  }, [workspace]);
+
+  // When the label is updated, refresh the list of Workspaces
+  useEffect(() => {
+    updateWorkspaces();
+  }, [label]);
 
   /**
    * Handle selecting a Workspace from the drop-down
    * @param _id Identifier of selected Workspace
    */
   const handleWorkspaceClick = (_id: string) => {
-    setWorkspaceIdentifier(_id);
+    setWorkspace(_id);
     setIsOpen(false);
   };
 
@@ -163,7 +194,7 @@ const WorkspaceSwitcher = () => {
    */
   const handleUpdateClick = () => {
     // Open the update Workspace modal
-    onUpdateOpen();
+    navigate(`/workspaces/${workspace}`);
 
     // Ensure `WorkspaceSwitcher` is closed
     setIsOpen(false);
@@ -174,7 +205,7 @@ const WorkspaceSwitcher = () => {
    */
   const handleCreateClick = () => {
     // Open the create Workspace modal
-    onCreateOpen();
+    navigate("/create/workspace");
 
     // Ensure `WorkspaceSwitcher` is closed
     setIsOpen(false);
@@ -189,9 +220,10 @@ const WorkspaceSwitcher = () => {
           rounded={"md"}
           border={"1px"}
           borderColor={"gray.200"}
-          bg={"white"}
-          _hover={{ bg: "gray.300" }}
+          bg={workspaces.length === 0 ? "gray.100" : "white"}
+          _hover={{ bg: workspaces.length === 0 ? "" : "gray.300" }}
           onClick={() => setIsOpen(!isOpen)}
+          disabled={workspaces.length === 0}
         >
           <Flex
             direction={"row"}
@@ -202,7 +234,7 @@ const WorkspaceSwitcher = () => {
             mr={"2"}
           >
             <Text fontSize={"sm"} fontWeight={"semibold"}>
-              {_.truncate(workspace.name, { length: 15 })}
+              {_.truncate(label, { length: 15 })}
             </Text>
             <Spacer />
             <Icon name={isOpen ? "c_up" : "c_down"} />
@@ -212,7 +244,7 @@ const WorkspaceSwitcher = () => {
         <MenuList bg={"white"}>
           <MenuGroup>
             <Flex px={"2"}>
-              <Text fontWeight={"semibold"} size={"sm"}>
+              <Text fontWeight={"semibold"} fontSize={"sm"}>
                 Select Workspace
               </Text>
             </Flex>
@@ -222,19 +254,19 @@ const WorkspaceSwitcher = () => {
 
           <MenuGroup>
             {/* Create a list of all Workspaces the user has access to */}
-            {workspaces.map((workspace) => {
+            {workspaces.map((accessible) => {
               return (
                 <Tooltip
-                  key={workspace._id}
-                  isDisabled={workspace._id !== workspaceIdentifier}
+                  key={accessible._id}
+                  isDisabled={accessible._id !== workspace}
                   label={"Current Workspace"}
                 >
                   <MenuItem
-                    isDisabled={workspace._id === workspaceIdentifier}
-                    onClick={() => handleWorkspaceClick(workspace._id)}
+                    isDisabled={accessible._id === workspace}
+                    onClick={() => handleWorkspaceClick(accessible._id)}
                   >
                     <Text fontSize={"sm"} fontWeight={"semibold"}>
-                      {workspace.name}
+                      {accessible.name}
                     </Text>
                   </MenuItem>
                 </Tooltip>
@@ -272,24 +304,6 @@ const WorkspaceSwitcher = () => {
           </MenuGroup>
         </MenuList>
       </Menu>
-
-      {/* Modal to create a Workspace */}
-      <WorkspaceCreateModal
-        isOpen={isCreateOpen}
-        onOpen={onCreateOpen}
-        onClose={onCreateClose}
-        workspaceIdentifier={workspaceIdentifier}
-        setWorkspaceIdentifier={setWorkspaceIdentifier}
-        setWorkspaces={setWorkspaces}
-      />
-
-      {/* Modal to update the current Workspace */}
-      <WorkspaceUpdateModal
-        isOpen={isUpdateOpen}
-        onOpen={onUpdateOpen}
-        onClose={onUpdateClose}
-        workspaceIdentifier={workspaceIdentifier}
-      />
     </Flex>
   );
 };

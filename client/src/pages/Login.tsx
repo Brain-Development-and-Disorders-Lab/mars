@@ -1,12 +1,12 @@
 // React
-import React, { FC, useEffect, useMemo } from "react";
+import React, { FC, useContext, useEffect, useMemo } from "react";
 
 // Existing and custom components
 import { Flex, Heading, Button, Image, Text, useToast } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 
 // Routing and navigation
-import { useLocation, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 
 // Utility functions and libraries
 import { gql, useLazyQuery } from "@apollo/client";
@@ -15,6 +15,9 @@ import _ from "lodash";
 
 // Existing and custom types
 import { LoginProps, WorkspaceModel } from "@types";
+
+// Workspace context
+import { WorkspaceContext } from "src/Context";
 
 const useParameters = () => {
   // Get URL query parameters
@@ -29,6 +32,9 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
   const [token, setToken] = useToken();
 
   const parameters = useParameters();
+
+  // Navigation
+  const navigate = useNavigate();
 
   // Extract query parameters
   const accessCode = parameters.get("code");
@@ -54,7 +60,6 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
       }
     }
   `;
-
   const [doLogin, { loading, error }] = useLazyQuery(LOGIN_DATA);
 
   // Query to retrieve Workspaces
@@ -72,36 +77,48 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
     workspaces: WorkspaceModel[];
   }>(GET_WORKSPACES);
 
+  // Workspace context
+  const { setWorkspace } = useContext(WorkspaceContext);
+
   /**
    * Utility function to perform a Login operation
    * @param code String returned by ORCID API for login
    */
   const getLogin = async (code: string) => {
     // Query to retrieve Entity data and associated data for editing
-    const response = await doLogin({ variables: { code: code } });
+    const loginResponse = await doLogin({ variables: { code: code } });
 
     // Perform login and data retrieval via server, check if user permitted access
-    if (response.data?.login) {
+    if (loginResponse.data?.login) {
       removeCode();
 
       // Create a new token instance with an empty Workspace value
       setToken({
-        ...response.data.login,
+        ...loginResponse.data.login,
         workspace: "",
       });
 
       // Retrieve all Workspaces and update the token if Workspaces exist
-      const responseWorkspaces = await getWorkspaces();
+      const workspacesResponse = await getWorkspaces();
       if (
-        responseWorkspaces.data?.workspaces &&
-        responseWorkspaces.data?.workspaces.length > 0
+        workspacesResponse.data?.workspaces &&
+        workspacesResponse.data.workspaces.length > 0
       ) {
         // Update the token with an active Workspace if the user is a member of a Workspace
         setToken({
-          ...response.data.login,
-          workspace: responseWorkspaces.data.workspaces[0]._id,
+          ...loginResponse.data.login,
+          workspace: workspacesResponse.data.workspaces[0]._id,
         });
+
+        // Update the Workspace context
+        setWorkspace(workspacesResponse.data.workspaces[0]._id);
+
+        // Navigate to the dashboard
+        navigate("");
       }
+
+      // Finalise authentication state
+      setAuthenticated(true);
 
       if (workspacesError) {
         toast({
@@ -113,9 +130,6 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
           isClosable: true,
         });
       }
-
-      // Finalise authentication state
-      setAuthenticated(true);
     }
   };
 

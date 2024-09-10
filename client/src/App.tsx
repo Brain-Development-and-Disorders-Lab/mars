@@ -31,6 +31,7 @@ import Entities from "@pages/view/Entities";
 
 // Page type - Create
 import Create from "@pages/create/Create";
+import CreateWorkspace from "@pages/create/Workspace";
 import CreateAttribute from "@pages/create/Attribute";
 import CreateEntity from "@pages/create/Entity";
 import CreateProject from "@pages/create/Project";
@@ -49,7 +50,7 @@ import { WorkspaceContext } from "./Context";
 
 // Authentication
 import { useToken } from "src/authentication/useToken";
-import { WorkspaceModel } from "@types";
+import Workspace from "@pages/view/Workspace";
 
 /**
  * Base App component containing the page layout and page routing components
@@ -61,40 +62,46 @@ const App = (): ReactElement => {
   }
 
   // Setup token authentication
-  const [token, _setToken] = useToken();
+  const [token] = useToken();
   const [authenticated, setAuthenticated] = useState(false);
+
+  // Setup Workspace state
+  const [workspace, setWorkspace] = useState("");
+  const [workspaceLoading, setWorkspaceLoading] = useState(false);
 
   useEffect(() => {
     if (_.isNull(token) || _.isEqual(token.token, "")) {
       setAuthenticated(false);
     } else {
+      // Manipulate the Workspace value
+      setWorkspace(token.workspace);
       setAuthenticated(true);
     }
   }, [token]);
 
-  // Setup Workspace state
-  const [workspace, setWorkspace] = useState({} as WorkspaceModel);
-  const [workspaceLoading, setWorkspaceLoading] = useState(false);
-
   return (
     <BrowserRouter>
       <ChakraProvider theme={theme}>
-        {!authenticated ? (
-          <Login setAuthenticated={setAuthenticated} />
-        ) : (
-          <WorkspaceContext.Provider
-            value={{
-              workspace,
-              setWorkspace,
-              workspaceLoading,
-              setWorkspaceLoading,
-            }}
-          >
+        <WorkspaceContext.Provider
+          value={{
+            workspace,
+            setWorkspace,
+            workspaceLoading,
+            setWorkspaceLoading,
+          }}
+        >
+          {!authenticated ? (
+            <Login setAuthenticated={setAuthenticated} />
+          ) : (
             <Page>
               <Routes>
                 <Route path={"/"} element={<Dashboard />} />
 
                 {/* Create routes */}
+                <Route
+                  path={"/create/workspace"}
+                  element={<CreateWorkspace />}
+                />
                 <Route
                   path={"/create/attribute"}
                   element={<CreateAttribute />}
@@ -102,6 +109,11 @@ const App = (): ReactElement => {
                 <Route path={"/create/project"} element={<CreateProject />} />
                 <Route path={"/create/entity"} element={<CreateEntity />} />
                 <Route path={"/create"} element={<Create />} />
+
+                {/* Workspace routes */}
+                <Route path={"workspaces"}>
+                  <Route path={":id"} element={<Workspace />} />
+                </Route>
 
                 {/* Entity routes */}
                 <Route path={"/entities"} element={<Entities />} />
@@ -130,8 +142,8 @@ const App = (): ReactElement => {
                 />
               </Routes>
             </Page>
-          </WorkspaceContext.Provider>
-        )}
+          )}
+        </WorkspaceContext.Provider>
       </ChakraProvider>
     </BrowserRouter>
   );
