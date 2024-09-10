@@ -46,7 +46,7 @@ const Navigation = () => {
   } = useDisclosure();
 
   return (
-    <Flex w={"100%"} p={"2"} bg={"#fafafa"}>
+    <Flex w={"100%"} p={"2"} bg={"#f2f2f2"}>
       {/* Main navigation group */}
       <Flex
         direction={"column"}
@@ -86,7 +86,7 @@ const Navigation = () => {
               size={"sm"}
               w={"100%"}
               justifyContent={"left"}
-              variant={_.isEqual(location.pathname, "/") ? "solid" : "ghost"}
+              bg={_.isEqual(location.pathname, "/") ? "#ffffff" : "#f2f2f2"}
               leftIcon={<Icon name={"dashboard"} />}
               onClick={() => navigate("/")}
               isDisabled={workspace === ""}
@@ -100,8 +100,8 @@ const Navigation = () => {
               size={"sm"}
               w={"100%"}
               justifyContent={"left"}
-              variant={
-                _.includes(location.pathname, "/search") ? "solid" : "ghost"
+              bg={
+                _.includes(location.pathname, "/search") ? "#ffffff" : "#f2f2f2"
               }
               leftIcon={<Icon name={"search"} />}
               onClick={() => navigate("/search")}
@@ -116,11 +116,11 @@ const Navigation = () => {
               size={"sm"}
               w={"100%"}
               justifyContent={"left"}
-              variant={
+              bg={
                 _.includes(location.pathname, "/project") &&
                 !_.includes(location.pathname, "/create")
-                  ? "solid"
-                  : "ghost"
+                  ? "#ffffff"
+                  : "#f2f2f2"
               }
               onClick={() => navigate("/projects")}
               isDisabled={workspace === ""}
@@ -136,11 +136,11 @@ const Navigation = () => {
               size={"sm"}
               w={"100%"}
               justifyContent={"left"}
-              variant={
+              bg={
                 _.includes(location.pathname, "/entit") &&
                 !_.includes(location.pathname, "/create")
-                  ? "solid"
-                  : "ghost"
+                  ? "#ffffff"
+                  : "#f2f2f2"
               }
               onClick={() => navigate("/entities")}
               isDisabled={workspace === ""}
@@ -155,11 +155,11 @@ const Navigation = () => {
               size={"sm"}
               w={"100%"}
               justifyContent={"left"}
-              variant={
+              bg={
                 _.includes(location.pathname, "/attribute") &&
                 !_.includes(location.pathname, "/create")
-                  ? "solid"
-                  : "ghost"
+                  ? "#ffffff"
+                  : "#f2f2f2"
               }
               onClick={() => navigate("/attributes")}
               isDisabled={workspace === ""}
@@ -178,8 +178,8 @@ const Navigation = () => {
               size={"sm"}
               w={"100%"}
               justifyContent={"left"}
-              variant={
-                _.includes(location.pathname, "/create") ? "solid" : "ghost"
+              bg={
+                _.includes(location.pathname, "/create") ? "#ffffff" : "#f2f2f2"
               }
               leftIcon={<Icon name={"add"} />}
               onClick={() => navigate("/create")}
@@ -194,7 +194,7 @@ const Navigation = () => {
               size={"sm"}
               w={"100%"}
               justifyContent={"left"}
-              variant={"ghost"}
+              bg={"#f2f2f2"}
               leftIcon={<Icon name={"upload"} />}
               onClick={() => onImportOpen()}
               isDisabled={workspace === ""}
@@ -216,7 +216,7 @@ const Navigation = () => {
         alignContent={"center"}
         h={"5vh"}
         w={"100%"}
-        bg={"#fafafa"}
+        bg={"#f2f2f2"}
       >
         <Menu>
           <MenuButton
