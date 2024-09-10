@@ -10,7 +10,6 @@ describe("Interface launches", () => {
     // Create a Workspace
     cy.get("#modalWorkspaceName").type("Test Workspace");
     cy.get("#modalWorkspaceDescription").type("Description for Workspace");
-    cy.wait(4200); // Wait for toast to disappear
     cy.get("#modalWorkspaceCreateButton").click();
   });
 

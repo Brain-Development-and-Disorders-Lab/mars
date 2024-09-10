@@ -35,8 +35,9 @@ describe("CSV Import Test", () => {
         .parent()
         .select("My First Project") // Default created Project
         .first();
-      cy.get("#importContinueButton").click({ force: true }); // Go to import step 2
-      cy.get("#importContinueButton").click({ force: true }); // Finalize import
+      cy.get("#importContinueButton").click(); // Go to import step 2
+      cy.get("#importContinueButton").click(); // Finalize import
+      cy.wait(200); // Wait GraphQL request to complete
 
       // Validate that the Project contains an Entity named "mini box 1 CSV"
       cy.get("#navProjectsButton").click();

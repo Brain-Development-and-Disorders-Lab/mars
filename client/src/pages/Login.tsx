@@ -6,7 +6,7 @@ import { Flex, Heading, Button, Image, Text, useToast } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 
 // Routing and navigation
-import { useLocation, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 
 // Utility functions and libraries
 import { gql, useLazyQuery } from "@apollo/client";
@@ -32,6 +32,9 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
   const [token, setToken] = useToken();
 
   const parameters = useParameters();
+
+  // Navigation
+  const navigate = useNavigate();
 
   // Extract query parameters
   const accessCode = parameters.get("code");
@@ -89,6 +92,12 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
     if (loginResponse.data?.login) {
       removeCode();
 
+      // Create a new token instance with an empty Workspace value
+      setToken({
+        ...loginResponse.data.login,
+        workspace: "",
+      });
+
       // Retrieve all Workspaces and update the token if Workspaces exist
       const workspacesResponse = await getWorkspaces();
       if (
@@ -103,12 +112,9 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
 
         // Update the Workspace context
         setWorkspace(workspacesResponse.data.workspaces[0]._id);
-      } else {
-        // Create a new token instance with an empty Workspace value
-        setToken({
-          ...loginResponse.data.login,
-          workspace: "",
-        });
+
+        // Navigate to the dashboard
+        navigate("");
       }
 
       // Finalise authentication state

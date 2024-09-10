@@ -1,5 +1,5 @@
 // React
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 
 // Existing and custom components
 import {
@@ -34,6 +34,9 @@ import { EntityModel } from "@types";
 import { useNavigate } from "react-router-dom";
 import { gql, useLazyQuery } from "@apollo/client";
 
+// Workspace context
+import { WorkspaceContext } from "src/Context";
+
 // Limit the number of results shown
 const MAX_RESULTS = 5;
 
@@ -43,6 +46,9 @@ const SearchBox = () => {
 
   const { isOpen, onToggle, onClose } = useDisclosure();
   const [query, setQuery] = useState("");
+
+  // Workspace context
+  const { workspace } = useContext(WorkspaceContext);
 
   // Search status
   const [hasSearched, setHasSearched] = useState(false);
@@ -137,6 +143,7 @@ const SearchBox = () => {
                 rounded={"md"}
                 placeholder={"Quick Search"}
                 background={"white"}
+                isDisabled={workspace === ""}
                 onChange={(event) => setQuery(event.target.value)}
                 onKeyUp={(event) => {
                   // Listen for "Enter" key when entering a query
