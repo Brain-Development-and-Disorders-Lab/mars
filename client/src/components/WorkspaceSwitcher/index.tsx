@@ -244,7 +244,7 @@ const WorkspaceSwitcher = () => {
         <MenuList bg={"white"}>
           <MenuGroup>
             <Flex px={"2"}>
-              <Text fontWeight={"semibold"} size={"sm"}>
+              <Text fontWeight={"semibold"} fontSize={"sm"}>
                 Select Workspace
               </Text>
             </Flex>
