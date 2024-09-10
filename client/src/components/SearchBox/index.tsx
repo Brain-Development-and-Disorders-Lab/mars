@@ -35,7 +35,7 @@ import { useNavigate } from "react-router-dom";
 import { gql, useLazyQuery } from "@apollo/client";
 
 // Workspace context
-import { WorkspaceContext } from "src/Context";
+import { WorkspaceContext } from "../../Context";
 
 // Limit the number of results shown
 const MAX_RESULTS = 5;
