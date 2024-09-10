@@ -27,6 +27,8 @@ import { IAuth, WorkspaceModel } from "@types";
 // Utility functions and libraries
 import { useToken } from "src/authentication/useToken";
 import _ from "lodash";
+
+// Workspace context
 import { WorkspaceContext } from "src/Context";
 
 const WorkspaceSwitcher = () => {
@@ -220,8 +222,8 @@ const WorkspaceSwitcher = () => {
           rounded={"md"}
           border={"1px"}
           borderColor={"gray.200"}
-          bg={workspaces.length === 0 ? "gray.100" : "white"}
-          _hover={{ bg: workspaces.length === 0 ? "" : "gray.300" }}
+          bg={workspaces.length === 0 ? "#f2f2f2" : "white"}
+          _hover={{ bg: workspaces.length === 0 ? "" : "gray.200" }}
           onClick={() => setIsOpen(!isOpen)}
           disabled={workspaces.length === 0}
         >

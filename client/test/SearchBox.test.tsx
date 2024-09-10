@@ -7,10 +7,6 @@ import { shallow } from "enzyme";
 // Target component
 import SearchBox from "../src/components/SearchBox";
 
-jest.mock("@devices/Scanner", () => ({
-  connectScanner: jest.fn(),
-}));
-
 jest.mock("react-router-dom", () => ({
   useNavigate: jest.fn(),
 }));

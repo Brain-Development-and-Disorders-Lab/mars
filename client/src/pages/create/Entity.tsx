@@ -86,7 +86,7 @@ const Entity = () => {
   const navigate = useNavigate();
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [token, _useToken] = useToken();
+  const [token] = useToken();
 
   const [projects, setProjects] = useState([] as IGenericItem[]);
   const [attributes, setAttributes] = useState([] as AttributeModel[]);
@@ -98,7 +98,7 @@ const Entity = () => {
   const [created, setCreated] = useState(
     dayjs(Date.now()).format("YYYY-MM-DD"),
   );
-  const [owner, _setOwner] = useState(token.orcid);
+  const [owner] = useState(token.orcid);
   const [description, setDescription] = useState("");
   const [selectedProjects, setSelectedProjects] = useState([] as string[]);
   const [selectedOrigins, setSelectedOrigins] = useState([] as IGenericItem[]);
@@ -693,7 +693,7 @@ const Entity = () => {
                     placeholder={"Template Attribute"}
                     onChange={(event) => {
                       if (!_.isEqual(event.target.value.toString(), "")) {
-                        for (let attribute of attributes) {
+                        for (const attribute of attributes) {
                           if (
                             _.isEqual(
                               event.target.value.toString(),

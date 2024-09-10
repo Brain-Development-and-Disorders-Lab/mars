@@ -97,7 +97,7 @@ const Graph = (props: {
       // Add the Origins
       if (entity.associations.origins.length > 0) {
         // Add nodes and edges
-        for (let origin of entity.associations.origins) {
+        for (const origin of entity.associations.origins) {
           // Add node
           initialNodes.push({
             id: origin._id,
@@ -123,7 +123,7 @@ const Graph = (props: {
       // Add products
       if (entity.associations.products.length > 0) {
         // Add nodes and edges
-        for (let product of entity.associations.products) {
+        for (const product of entity.associations.products) {
           // Add node
           initialNodes.push({
             id: product._id,
@@ -199,7 +199,7 @@ const Graph = (props: {
    * @returns {boolean}
    */
   const containsNode = (id: string): boolean => {
-    for (let node of nodes) {
+    for (const node of nodes) {
       if (_.isEqual(node.id, id)) {
         return true;
       }
@@ -213,7 +213,7 @@ const Graph = (props: {
    * @returns {boolean}
    */
   const containsEdge = (id: string): boolean => {
-    for (let edge of edges) {
+    for (const edge of edges) {
       if (_.isEqual(edge.id, id)) {
         return true;
       }
@@ -281,7 +281,7 @@ const Graph = (props: {
       const entity = await getEntityData(node.id);
       // Origins
       if (entity.associations.origins.length > 0) {
-        for (let origin of entity.associations.origins) {
+        for (const origin of entity.associations.origins) {
           if (containsNode(origin._id) === false) {
             // Firstly, update the current node type (if required)
             updatedNodes = [
@@ -334,7 +334,7 @@ const Graph = (props: {
 
       // Products
       if (entity.associations.products.length > 0) {
-        for (let product of entity.associations.products) {
+        for (const product of entity.associations.products) {
           if (containsNode(product._id) === false) {
             // Firstly, update the current node type (if required)
             updatedNodes = [
@@ -425,16 +425,16 @@ const Graph = (props: {
         fitView
       >
         <MiniMap
-          nodeStrokeColor={(n: any) => {
-            if (n.style?.background) return n.style.background;
-            if (n.type === "input") return "#0041d0";
-            if (n.type === "output") return "#ff0072";
-            if (n.type === "default") return "#1a192b";
+          nodeStrokeColor={(node: any) => {
+            if (node.style?.background) return node.style.background;
+            if (node.type === "input") return "#0041d0";
+            if (node.type === "output") return "#ff0072";
+            if (node.type === "default") return "#1a192b";
 
             return "#eee";
           }}
-          nodeColor={(n: any) => {
-            if (n.style?.background) return n.style.background;
+          nodeColor={(node: any) => {
+            if (node.style?.background) return node.style.background;
 
             return "#fff";
           }}

@@ -89,7 +89,7 @@ const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
    * @param {RuleType} rule Rule for processing value
    * @return {String}
    */
-  const ruleProcessor: RuleProcessor = (rule: RuleType): String => {
+  const ruleProcessor: RuleProcessor = (rule: RuleType): string => {
     if (rule.field === "origins") {
       // Handle `origins` field
       if (rule.operator === "doesNotContain") {

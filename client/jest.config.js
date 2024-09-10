@@ -5,7 +5,6 @@ module.exports = {
     "\\.(css|less|scss|sass)$": "identity-obj-proxy",
     "^@components/(.*)$": "<rootDir>/src/components/$1",
     "^@database/(.*)$": "<rootDir>/src/database/$1",
-    "^@devices/(.*)$": "<rootDir>/src/devices/$1",
     "^@pages/(.*)$": "<rootDir>/src/pages/$1",
     "^@types/(.*)$": "../types/$1",
     "src/variables": "<rootDir>/src/variables",

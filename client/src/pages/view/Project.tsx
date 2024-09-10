@@ -419,7 +419,9 @@ const Project = () => {
       FileSaver.saveAs(
         new Blob([response.data.exportProjectEntities]),
         slugify(
-          `export_${project._id}_entities_${dayjs(Date.now()).format("YYYY_MM_DD")}.json`,
+          `export_${project._id}_entities_${dayjs(Date.now()).format(
+            "YYYY_MM_DD",
+          )}.json`,
         ),
       );
     }
@@ -572,7 +574,7 @@ const Project = () => {
       icon: "delete",
       action(table, rows) {
         const entitiesToRemove: string[] = [];
-        for (let rowIndex of Object.keys(rows)) {
+        for (const rowIndex of Object.keys(rows)) {
           entitiesToRemove.push(table.getRow(rowIndex).original);
         }
         handleRemoveEntities(entitiesToRemove);

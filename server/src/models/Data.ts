@@ -160,7 +160,7 @@ export class Data {
    * @return {Promise<ResponseMessage>}
    */
   static mapColumns = async (
-    columnMapping: { [key: string]: any },
+    columnMapping: Record<string, any>,
     file: any,
     context: Context,
   ): Promise<ResponseMessage> => {

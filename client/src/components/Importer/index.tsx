@@ -72,7 +72,7 @@ const Importer = (props: {
 
   const navigate = useNavigate();
   const toast = useToast();
-  const [token, _setToken] = useToken();
+  const [token] = useToken();
 
   // State management to generate and present different pages
   const [interfacePage, setInterfacePage] = useState(
@@ -99,7 +99,7 @@ const Importer = (props: {
   // Fields to be assigned to columns
   const [nameField, setNameField] = useState("");
   const [descriptionField, setDescriptionField] = useState("");
-  const [ownerField, _setOwnerField] = useState(token.orcid);
+  const [ownerField] = useState(token.orcid);
   const [projectField, setProjectField] = useState("");
   const [attributes, setAttributes] = useState([] as AttributeModel[]);
   const [attributesField, setAttributesField] = useState(
@@ -771,7 +771,7 @@ const Importer = (props: {
                           isDisabled={attributes.length === 0}
                           onChange={(event) => {
                             if (!_.isEqual(event.target.value.toString(), "")) {
-                              for (let attribute of attributes) {
+                              for (const attribute of attributes) {
                                 if (
                                   _.isEqual(
                                     event.target.value.toString(),

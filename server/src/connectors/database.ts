@@ -22,14 +22,12 @@ let attachments: GridFSBucket;
  * Connect to the primary database storing metadata
  */
 export const connect = (): Promise<Db> => {
-  return new Promise((resolve, _reject) => {
+  return new Promise((resolve) => {
     client.connect().then((result) => {
       database = result.db("metadata");
       consola.success('Connected to "metadata" database');
 
       storage = result.db("storage");
-      consola.success('Connected to "storage" database');
-
       attachments = new GridFSBucket(storage, { bucketName: "attachments" });
       consola.success('Connected to "attachments" storage bucket');
 
@@ -51,14 +49,6 @@ export const disconnect = (): Promise<void> => {
  */
 export const getDatabase = (): Db => {
   return database;
-};
-
-/**
- * Get the MongoDB database for storage
- * @return {Db}
- */
-export const getStorage = (): Db => {
-  return storage;
 };
 
 /**
