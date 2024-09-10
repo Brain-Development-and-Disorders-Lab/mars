@@ -45,7 +45,7 @@ export const DataResolvers = {
     // Map CSV file columns to Entity fields
     mapColumns: async (
       _parent: any,
-      args: { columnMapping: { [column: string]: string }; file: any },
+      args: { columnMapping: Record<string, string>; file: any },
       context: Context,
     ): Promise<ResponseMessage> => {
       return await Data.mapColumns(args.columnMapping, args.file, context);

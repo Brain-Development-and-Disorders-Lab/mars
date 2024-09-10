@@ -61,7 +61,7 @@ const Linky = (props: LinkyProps) => {
    * Utility function to retrieve data of link target
    */
   const getLinkyData = async () => {
-    let data: IGenericItem = {
+    const data: IGenericItem = {
       _id: props.id,
       name: props.fallback || "Invalid",
     };

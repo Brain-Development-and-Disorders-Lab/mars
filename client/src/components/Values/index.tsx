@@ -487,7 +487,7 @@ const Values = (props: {
       action: (table, rows: any) => {
         // Delete rows that have been selected
         const idToRemove: IValue<any>[] = [];
-        for (let rowIndex of Object.keys(rows)) {
+        for (const rowIndex of Object.keys(rows)) {
           idToRemove.push(table.getRow(rowIndex).original);
         }
 

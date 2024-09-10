@@ -32,7 +32,6 @@ import { IProject } from "@types";
 // Utility functions and libraries
 import { useToken } from "src/authentication/useToken";
 import dayjs from "dayjs";
-import _ from "lodash";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
@@ -42,13 +41,13 @@ const Project = () => {
   const navigate = useNavigate();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
-  const [token, _useToken] = useToken();
+  const [token] = useToken();
 
   const [name, setName] = useState("");
   const [created, setCreated] = useState(
     dayjs(Date.now()).format("YYYY-MM-DDTHH:mm"),
   );
-  const [owner, _setOwner] = useState(token.orcid);
+  const [owner] = useState(token.orcid);
   const [description, setDescription] = useState("");
 
   const [isSubmitting, setIsSubmitting] = useState(false);

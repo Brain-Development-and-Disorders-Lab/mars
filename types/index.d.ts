@@ -1,14 +1,3 @@
-declare global {
-  interface Navigator {
-    usb: {
-      getDevices(): any;
-      requestDevice({}): any;
-      addEventListener(event: string, handler: (event: any) => void): any;
-      onconnect({}): any;
-    };
-  }
-}
-
 // Request types to the server
 declare enum Requests {
   POST,
@@ -98,7 +87,7 @@ export type AttributeViewButtonProps = {
 };
 
 // Values
-export interface IValue<D> {
+export type IValue<D> = {
   _id: string;
   name: string;
   type: "number" | "text" | "url" | "date" | "entity" | "select";
@@ -107,7 +96,7 @@ export interface IValue<D> {
   showRemove?: boolean;
   onRemove?: (id: string) => void;
   onUpdate?: (data: D) => void;
-}
+};
 
 export type LinkyProps = {
   type: "entities" | "attributes" | "projects";
@@ -217,9 +206,6 @@ export type EntityExport = {
   projects: string;
   origins: string;
   products: string;
-
-  // Generic details
-  [key: string]: string;
 };
 
 export type EntityImport = {
@@ -299,7 +285,7 @@ export type DialogProps = {
 // DataTable component
 export type DataTableProps = {
   columns: any[];
-  visibleColumns: VisibilityState;
+  visibleColumns: Record<string, boolean>;
   data: any[];
   setData?: (value: React.SetStateAction<any[]>) => void;
   viewOnly?: boolean;

@@ -113,7 +113,7 @@ const DataTable = (props: DataTableProps) => {
             data.map((row, index) => {
               if (index === rowIndex) {
                 return {
-                  ...data[rowIndex]!,
+                  ...data[rowIndex],
                   [columnId]: value,
                 };
               }

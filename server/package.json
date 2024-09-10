@@ -15,7 +15,8 @@
     "startDev": "node --inspect dist/index.js",
     "test": "jest --run-in-band",
     "clean": "rm -rf dist public",
-    "lint": "prettier --write ."
+    "lint:check": "prettier . --check",
+    "lint:fix": "prettier . --write"
   },
   "dependencies": {
     "@apollo/server": "^4.10.4",

@@ -35,10 +35,8 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
   const [values, setValues] = useState(props.attribute.values);
 
   // State to store original values
-  const [defaultDescription, _setDefaultDescription] = useState(
-    props.attribute.description,
-  );
-  const [defaultValues, _setDefaultValues] = useState(props.attribute.values);
+  const [defaultDescription] = useState(props.attribute.description);
+  const [defaultValues] = useState(props.attribute.values);
 
   return (
     <Flex gap={"2"}>

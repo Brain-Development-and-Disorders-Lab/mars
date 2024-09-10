@@ -164,7 +164,7 @@ const Search = () => {
       action: async (table, rows) => {
         // Export rows that have been selected
         const toExport: string[] = [];
-        for (let rowIndex of Object.keys(rows)) {
+        for (const rowIndex of Object.keys(rows)) {
           toExport.push(table.getRow(rowIndex).original._id);
         }
 
@@ -189,7 +189,7 @@ const Search = () => {
       action: async (table, rows: any) => {
         // Export rows that have been selected
         const toExport: string[] = [];
-        for (let rowIndex of Object.keys(rows)) {
+        for (const rowIndex of Object.keys(rows)) {
           toExport.push(table.getRow(rowIndex).original._id);
         }
 

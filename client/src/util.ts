@@ -12,7 +12,7 @@ export const isValidValues = (
     return false;
   }
 
-  for (let value of values) {
+  for (const value of values) {
     // Check the name of the Value
     if (_.isEqual(value.name, "")) {
       return false;
@@ -31,7 +31,7 @@ export const isValidValues = (
 export const isValidAttributes = (attributes: IAttribute[]) => {
   if (attributes.length === 0) return false;
 
-  for (let attribute of attributes) {
+  for (const attribute of attributes) {
     // Check the name and description
     if (_.isEqual(attribute.name, "") || _.isEqual(attribute.description, "")) {
       return false;

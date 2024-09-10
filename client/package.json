@@ -12,7 +12,8 @@
     "start": "webpack serve --config webpack.dev.js",
     "build": "webpack --config webpack.prod.js",
     "clean": "rm -rf dist",
-    "lint": "prettier --write .",
+    "lint:check": "prettier . --check",
+    "lint:fix": "prettier . --write",
     "test": "jest  --verbose"
   },
   "dependencies": {
