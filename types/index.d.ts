@@ -425,20 +425,11 @@ export type Context = {
 // User types
 export type IUser = {
   name: string;
-  email?: string;
+  email: string;
 };
 
 export type UserModel = IUser & {
   _id: string;
   token: string;
-};
-
-// Device types
-export type IDevice = {
-  name: string;
-  vendor_id: number;
-};
-
-export type DeviceModel = IDevice & {
-  _id: string;
+  workspaces: string[];
 };

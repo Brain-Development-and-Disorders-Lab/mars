@@ -23,7 +23,17 @@ export const typedefs = `#graphql
     _id: String!
     name: String
     email: String
-    id_token: String
+    token: String
+    workspaces: [String]
+  }
+
+  # "UserInput" type
+  input UserInput {
+    _id: String!
+    name: String
+    email: String
+    token: String
+    workspaces: [String]
   }
 
   # "Project" type
@@ -354,6 +364,9 @@ export const typedefs = `#graphql
     # Workspace mutations
     createWorkspace(workspace: WorkspaceCreateInput): Response
     updateWorkspace(workspace: WorkspaceUpdateInput): Response
+
+    # User mutations
+    createUser(user: UserInput): Response
 
     # Attribute mutations
     createAttribute(attribute: AttributeCreateInput): Response

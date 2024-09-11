@@ -39,6 +39,46 @@ export class Users {
     return !_.isNull(result);
   };
 
+  /**
+   * Get the collection of Workspaces the User has access to
+   * @param orcid User ORCiD
+   * @return {Promise<string[]>}
+   */
+  static getWorkspaces = async (orcid: string): Promise<string[]> => {
+    const result = await getDatabase()
+      .collection<UserModel>(USERS_COLLECTION)
+      .findOne({ _id: orcid });
+
+    if (result?.workspaces) {
+      return result.workspaces;
+    }
+    return [];
+  };
+
+  /**
+   * Add a Workspace to the collection a User has access to
+   * @param orcid User ORCiD
+   * @param workspace Workspace to assign the User access to
+   * @return {Promise<ResponseMessage>}
+   */
+  static addWorkspace = async (
+    orcid: string,
+    workspace: string,
+  ): Promise<ResponseMessage> => {
+    const result = await Users.getOne(orcid);
+
+    // Attempt to update the `UserModel` with the Workspace
+    if (result?.workspaces) {
+      result.workspaces.push(workspace);
+      return await Users.update(result);
+    }
+
+    return {
+      success: false,
+      message: "Unable to add Workspace to User",
+    };
+  };
+
   static update = async (updated: UserModel): Promise<ResponseMessage> => {
     const user = await this.getOne(updated._id);
 
@@ -61,6 +101,10 @@ export class Users {
 
     if (updated.email) {
       update.$set.email = updated.email;
+    }
+
+    if (updated.workspaces) {
+      update.$set.workspaces = updated.workspaces;
     }
 
     const response = await getDatabase()
