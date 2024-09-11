@@ -8,8 +8,11 @@ import {
   WorkspaceModel,
 } from "@types";
 import _ from "lodash";
-import { Workspaces } from "src/models/Workspaces";
 import { GraphQLError } from "graphql/index";
+
+// Models
+import { Workspaces } from "src/models/Workspaces";
+import { Users } from "src/models/Users";
 
 export const WorkspacesResolvers = {
   Query: {
@@ -152,8 +155,16 @@ export const WorkspacesResolvers = {
     createWorkspace: async (
       _parent: any,
       args: { workspace: IWorkspace },
+      context: Context,
     ): Promise<ResponseMessage> => {
-      return await Workspaces.create(args.workspace);
+      const result = await Workspaces.create(args.workspace);
+
+      if (result.success) {
+        // If successful, add Workspace to the User
+        await Users.addWorkspace(context.user, result.message);
+      }
+
+      return result;
     },
 
     // Update an existing Workspace
