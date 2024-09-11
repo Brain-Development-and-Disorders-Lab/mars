@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 // Existing and custom components
 import {
@@ -16,18 +16,58 @@ import {
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 
+// Custom types
+import { UserModel } from "@types";
+
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
 
 // Utility functions and libraries
 import { useToken } from "src/authentication/useToken";
 
+// GraphQL
+import { gql, useQuery } from "@apollo/client";
+
 const AccountMenu = () => {
   const navigate = useNavigate();
+
+  // User data
+  const [user, setUser] = useState({} as Partial<UserModel>);
 
   const [isOpen, setIsOpen] = useState(false);
 
   const [token, setToken] = useToken();
+
+  // Query to retrieve User
+  const GET_USER = gql`
+    query GetUser($_id: String) {
+      user(_id: $_id) {
+        _id
+        firstName
+        lastName
+        email
+        affiliation
+      }
+    }
+  `;
+  const { data, refetch } = useQuery(GET_USER, {
+    variables: {
+      _id: token.orcid,
+    },
+  });
+
+  useEffect(() => {
+    if (data?.user) {
+      setUser(data.user);
+    }
+  }, [data]);
+
+  // Check to see if data currently exists and refetch if so
+  useEffect(() => {
+    if (data && refetch) {
+      refetch();
+    }
+  }, []);
 
   const performLogout = () => {
     // Invalidate the token and refresh the page
@@ -61,16 +101,14 @@ const AccountMenu = () => {
             ml={"2"}
             mr={"2"}
           >
-            <Avatar name={token.name} size={"sm"} />
+            <Avatar name={`${user.firstName} ${user.lastName}`} size={"sm"} />
             <Text
               fontSize={"sm"}
               fontWeight={"semibold"}
               w={"100%"}
               align={"center"}
             >
-              {token.name.split(" ").length > 0
-                ? token.name.split(" ")[0]
-                : "User"}
+              {user.firstName}
             </Text>
             <Icon name={isOpen ? "c_down" : "c_up"} />
           </Flex>
@@ -81,20 +119,16 @@ const AccountMenu = () => {
           <MenuGroup>
             <Flex p={"4"} py={"2"} gap={"2"} direction={"column"}>
               <Text fontWeight={"semibold"} fontSize={"sm"}>
-                {token.name}
+                {user.firstName} {user.lastName}
               </Text>
 
               <Flex align={"center"} wrap={"wrap"} gap={"2"}>
-                <Text
-                  fontSize={"sm"}
-                  fontWeight={"semibold"}
-                  color={"gray.600"}
-                >
+                <Text fontSize={"sm"} fontWeight={"semibold"}>
                   ORCiD:
                 </Text>
                 <Tag colorScheme={"green"}>
-                  <Link href={`https://orcid.org/${token.orcid}`} isExternal>
-                    {token.orcid}
+                  <Link href={`https://orcid.org/${user._id}`} isExternal>
+                    {user._id}
                   </Link>
                 </Tag>
               </Flex>
