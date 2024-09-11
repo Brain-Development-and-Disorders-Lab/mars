@@ -95,12 +95,20 @@ export class Users {
       },
     };
 
-    if (updated.name) {
-      update.$set.name = updated.name;
+    if (updated.firstName) {
+      update.$set.firstName = updated.firstName;
+    }
+
+    if (updated.lastName) {
+      update.$set.lastName = updated.lastName;
     }
 
     if (updated.email) {
       update.$set.email = updated.email;
+    }
+
+    if (updated.affiliation) {
+      update.$set.affiliation = updated.affiliation;
     }
 
     if (updated.workspaces) {

@@ -16,5 +16,10 @@ export const UsersResolvers = {
     createUser: async (_parent: any, args: { user: UserModel }) => {
       return await Users.create(args.user);
     },
+
+    // Update a User
+    updateUser: async (_parent: any, args: { user: UserModel }) => {
+      return await Users.update(args.user);
+    },
   },
 };

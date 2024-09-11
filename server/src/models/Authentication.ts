@@ -58,8 +58,11 @@ export class Authentication {
     if (!exists) {
       await Users.create({
         _id: authenticationPayload.orcid,
-        name: authenticationPayload.name,
+        firstName: "",
+        lastName: "",
         email: "",
+        affiliation: "",
+        isSetup: false,
         token: authenticationPayload.token,
         workspaces: [],
       });

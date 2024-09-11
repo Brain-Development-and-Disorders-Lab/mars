@@ -21,18 +21,24 @@ export const typedefs = `#graphql
   # "User" type
   type User {
     _id: String!
-    name: String
-    email: String
     token: String
+    firstName: String
+    lastName: String
+    affiliation: String
+    email: String
+    isSetup: Boolean
     workspaces: [String]
   }
 
   # "UserInput" type
   input UserInput {
     _id: String!
-    name: String
-    email: String
     token: String
+    firstName: String
+    lastName: String
+    affiliation: String
+    email: String
+    isSetup: Boolean
     workspaces: [String]
   }
 
@@ -367,6 +373,7 @@ export const typedefs = `#graphql
 
     # User mutations
     createUser(user: UserInput): Response
+    updateUser(user: UserInput): Response
 
     # Attribute mutations
     createAttribute(attribute: AttributeCreateInput): Response

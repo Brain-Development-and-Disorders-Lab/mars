@@ -424,12 +424,15 @@ export type Context = {
 
 // User types
 export type IUser = {
-  name: string;
+  firstName: string;
+  lastName: string;
+  affiliation: string;
   email: string;
+  isSetup: boolean;
+  workspaces: string[];
 };
 
 export type UserModel = IUser & {
   _id: string;
   token: string;
-  workspaces: string[];
 };
