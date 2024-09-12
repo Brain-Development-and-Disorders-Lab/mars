@@ -419,7 +419,13 @@ const Dashboard = () => {
               </VStack>
             </Flex>
           ) : (
-            <Flex w={"100%"} h={"100%"} justify={"center"} align={"center"}>
+            <Flex
+              w={"100%"}
+              h={"100%"}
+              justify={"center"}
+              align={"center"}
+              minH={"200px"}
+            >
               <Text color={"gray.400"} fontWeight={"semibold"}>
                 No Activity yet.
               </Text>

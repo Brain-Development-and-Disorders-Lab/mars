@@ -62,7 +62,6 @@ export class Authentication {
         lastName: "",
         email: "",
         affiliation: "",
-        isSetup: false,
         token: authenticationPayload.token,
         workspaces: [],
       });
