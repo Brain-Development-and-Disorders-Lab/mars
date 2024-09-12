@@ -333,6 +333,7 @@ export type IconNames =
   | "upload"
   | "cross"
   | "list"
+  | "person"
   | "warning"
   | "exclamation"
   | "reload"
@@ -365,6 +366,7 @@ export type IconNames =
 
   // Arrows
   | "a_right"
+  | "b_right"
 
   // Chevrons
   | "c_left"
@@ -428,7 +430,6 @@ export type IUser = {
   lastName: string;
   affiliation: string;
   email: string;
-  isSetup: boolean;
   workspaces: string[];
 };
 

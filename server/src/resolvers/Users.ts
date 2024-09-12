@@ -1,4 +1,4 @@
-import { UserModel } from "@types";
+import { ResponseMessage, UserModel } from "@types";
 import { Users } from "src/models/Users";
 
 export const UsersResolvers = {
@@ -18,7 +18,10 @@ export const UsersResolvers = {
     },
 
     // Update a User
-    updateUser: async (_parent: any, args: { user: UserModel }) => {
+    updateUser: async (
+      _parent: any,
+      args: { user: UserModel },
+    ): Promise<ResponseMessage> => {
       return await Users.update(args.user);
     },
   },

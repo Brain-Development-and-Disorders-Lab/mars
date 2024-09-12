@@ -26,7 +26,6 @@ export const typedefs = `#graphql
     lastName: String
     affiliation: String
     email: String
-    isSetup: Boolean
     workspaces: [String]
   }
 
@@ -38,7 +37,6 @@ export const typedefs = `#graphql
     lastName: String
     affiliation: String
     email: String
-    isSetup: Boolean
     workspaces: [String]
   }
 

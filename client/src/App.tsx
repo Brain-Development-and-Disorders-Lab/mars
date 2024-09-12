@@ -28,6 +28,7 @@ import Project from "@pages/view/Project";
 import Projects from "@pages/view/Projects";
 import Entity from "@pages/view/Entity";
 import Entities from "@pages/view/Entities";
+import User from "@pages/view/User";
 
 // Page type - Create
 import Create from "@pages/create/Create";
@@ -134,6 +135,7 @@ const App = (): ReactElement => {
                 </Route>
 
                 {/* Other routes */}
+                <Route path={"/profile"} element={<User />} />
                 <Route path={"/search"} element={<Search />} />
                 <Route path={"/invalid"} element={<Invalid />} />
                 <Route
