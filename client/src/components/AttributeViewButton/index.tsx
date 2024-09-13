@@ -179,6 +179,7 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
                       ? props.doneCallback({
                           _id: props.attribute._id,
                           name: props.attribute.name,
+                          archived: false,
                           description: description,
                           values: values,
                         })

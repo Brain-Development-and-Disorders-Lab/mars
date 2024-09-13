@@ -419,6 +419,7 @@ const Importer = (props: {
           return {
             _id: data._id,
             name: data.name,
+            archived: false,
             description: data.description,
             values: data.values,
           };
@@ -783,6 +784,7 @@ const Importer = (props: {
                                     {
                                       _id: `a-${nanoid(6)}`,
                                       name: attribute.name,
+                                      archived: false,
                                       description: attribute.description,
                                       values: attribute.values,
                                     },
@@ -820,6 +822,7 @@ const Importer = (props: {
                           {
                             _id: `a-${nanoid(6)}`,
                             name: "",
+                            archived: false,
                             description: "",
                             values: [],
                           },
@@ -837,6 +840,7 @@ const Importer = (props: {
                         _id={attribute._id}
                         key={attribute._id}
                         name={attribute.name}
+                        archived={attribute.archived}
                         description={attribute.description}
                         values={attribute.values}
                         restrictDataValues={true}

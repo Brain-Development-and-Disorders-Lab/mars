@@ -5,6 +5,7 @@ import React from "react";
 import { Icon as ChakraIcon } from "@chakra-ui/react";
 import {
   BsActivity,
+  BsArchiveFill,
   BsArrowClockwise,
   BsArrowCounterclockwise,
   BsArrowRight,
@@ -79,6 +80,7 @@ const SYSTEM_ICONS: Record<string, IconType> = {
 
   // Signal and action icons
   activity: BsActivity,
+  archive: BsArchiveFill,
   attachment: BsPaperclip,
   check: BsCheckCircleFill,
   info: BsInfoCircleFill,

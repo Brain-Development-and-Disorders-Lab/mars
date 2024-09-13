@@ -84,6 +84,7 @@ const Project = () => {
 
   const projectData: IProject = {
     name: name,
+    archived: false,
     description: description,
     owner: owner,
     shared: [],

@@ -12,6 +12,7 @@ import {
   Tooltip,
   useBreakpoint,
   IconButton,
+  Tag,
 } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
 
@@ -316,33 +317,11 @@ const User = () => {
               borderColor={"gray.200"}
             >
               <Flex direction={"row"} p={"0"} gap={"2"}>
-                <FormControl isRequired>
+                <FormControl>
                   <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
-                    First Name
+                    ORCiD
                   </FormLabel>
-                  <Input
-                    id={"modalUserFirstName"}
-                    size={"sm"}
-                    rounded={"md"}
-                    placeholder={"First Name"}
-                    value={userFirstName}
-                    isDisabled
-                    onChange={(event) => setUserFirstName(event.target.value)}
-                  />
-                </FormControl>
-                <FormControl isRequired>
-                  <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
-                    Last Name
-                  </FormLabel>
-                  <Input
-                    id={"modalUserLastName"}
-                    size={"sm"}
-                    rounded={"md"}
-                    placeholder={"Last Name"}
-                    value={userLastName}
-                    isDisabled
-                    onChange={(event) => setUserLastName(event.target.value)}
-                  />
+                  <Tag colorScheme={"green"}>{userOrcid}</Tag>
                 </FormControl>
               </Flex>
               <Flex direction={"row"} p={"0"} gap={"2"}>
@@ -360,14 +339,6 @@ const User = () => {
                     isDisabled={!editing}
                     onChange={(event) => setUserEmail(event.target.value)}
                   />
-                </FormControl>
-              </Flex>
-              <Flex direction={"row"} p={"0"} gap={"2"}>
-                <FormControl isRequired>
-                  <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
-                    ORCiD
-                  </FormLabel>
-                  <Text>{userOrcid}</Text>
                 </FormControl>
               </Flex>
               <Flex direction={"row"} p={"0"} gap={"2"}>

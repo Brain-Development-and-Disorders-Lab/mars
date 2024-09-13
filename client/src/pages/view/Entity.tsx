@@ -65,6 +65,7 @@ import Values from "@components/Values";
 import PreviewModal from "@components/PreviewModal";
 import AttributeViewButton from "@components/AttributeViewButton";
 import SearchSelect from "@components/SearchSelect";
+import Dialog from "@components/Dialog";
 import { createColumnHelper } from "@tanstack/react-table";
 
 // Existing and custom types
@@ -93,8 +94,6 @@ import { useQuery, gql, useMutation, useLazyQuery } from "@apollo/client";
 
 // Routing and navigation
 import { useParams, useNavigate } from "react-router-dom";
-import Dialog from "@components/Dialog";
-import { Warning } from "@components/Label";
 
 // Workspace context
 import { WorkspaceContext } from "../../Context";
@@ -185,7 +184,7 @@ const Entity = () => {
         _id
         name
         owner
-        deleted
+        archived
         locked
         description
         projects
@@ -216,7 +215,7 @@ const Entity = () => {
         }
         history {
           timestamp
-          deleted
+          archived
           owner
           description
           projects
@@ -412,6 +411,7 @@ const Entity = () => {
   const onSaveAsTemplate = async () => {
     const attributeData: IAttribute = {
       name: attributeName,
+      archived: false,
       description: attributeDescription,
       values: attributeValues,
     };
@@ -473,12 +473,12 @@ const Entity = () => {
     [] as string[],
   );
 
-  // State for dialog confirming if user should delete
-  const deleteDialogRef = useRef();
+  // State for dialog confirming if user should archive
+  const archiveDialogRef = useRef();
   const {
-    isOpen: isDeleteDialogOpen,
-    onOpen: onDeleteDialogOpen,
-    onClose: onDeleteDialogClose,
+    isOpen: isArchiveDialogOpen,
+    onOpen: onArchiveDialogOpen,
+    onClose: onArchiveDialogClose,
   } = useDisclosure();
 
   // Manage the tab index between "Entity Origins" and "Entity Products"
@@ -517,9 +517,9 @@ const Entity = () => {
             entity: {
               _id: entityData._id,
               name: entityData.name,
-              created: entityData.created,
-              deleted: entityData.deleted,
+              archived: entityData.archived,
               locked: entityData.locked,
+              created: entityData.created,
               owner: entityData.owner,
               description: entityDescription,
               projects: entityProjects,
@@ -595,9 +595,9 @@ const Entity = () => {
   };
 
   /**
-   * Restore an Entity from a deleted status
+   * Restore an Entity from an archived status
    */
-  const handleRestoreFromDeleteClick = async () => {
+  const handleRestoreFromArchiveClick = async () => {
     try {
       await updateEntity({
         variables: {
@@ -605,7 +605,7 @@ const Entity = () => {
             _id: entityData._id,
             name: entityData.name,
             created: entityData.created,
-            deleted: false,
+            archived: false,
             locked: false,
             owner: entityData.owner,
             description: entityDescription,
@@ -960,9 +960,9 @@ const Entity = () => {
             />
             {editing ? (
               <IconButton
-                aria-label={"Delete attachment"}
+                aria-label={"Remove attachment"}
                 size={"sm"}
-                key={`delete-file-${info.getValue()}`}
+                key={`remove-file-${info.getValue()}`}
                 colorScheme={"red"}
                 icon={<Icon name={"delete"} />}
                 onClick={() => removeAttachment(info.getValue())}
@@ -1011,7 +1011,7 @@ const Entity = () => {
             _id: entityData._id,
             name: entityData.name,
             created: entityData.created,
-            deleted: entityVersion.deleted,
+            archived: entityVersion.archived,
             locked: entityData.locked,
             owner: entityVersion.owner,
             description: entityVersion.description || "",
@@ -1137,8 +1137,8 @@ const Entity = () => {
     }
   };
 
-  // Delete the Entity when confirmed
-  const handleDeleteClick = async () => {
+  // Archive the Entity when confirmed
+  const handleArchiveClick = async () => {
     const response = await deleteEntity({
       variables: {
         _id: entityData._id,
@@ -1146,7 +1146,7 @@ const Entity = () => {
     });
     if (response.data.deleteEntity.success) {
       toast({
-        title: "Deleted Successfully",
+        title: "Archived Successfully",
         status: "success",
         duration: 2000,
         position: "bottom-right",
@@ -1156,7 +1156,7 @@ const Entity = () => {
     } else {
       toast({
         title: "Error",
-        description: "An error occurred when deleting Entity",
+        description: "An error occurred while archiving Entity",
         status: "error",
         duration: 2000,
         position: "bottom-right",
@@ -1275,6 +1275,7 @@ const Entity = () => {
       {
         _id: `a-${entityData._id}-${nanoid(6)}`,
         name: attributeName,
+        archived: false,
         description: attributeDescription,
         values: attributeValues,
       },
@@ -1359,7 +1360,7 @@ const Entity = () => {
             <Heading fontWeight={"semibold"} size={"md"}>
               {entityData.name}
             </Heading>
-            {entityData.deleted && <Icon name={"delete"} size={"md"} />}
+            {entityData.archived && <Icon name={"archive"} size={"md"} />}
           </Flex>
 
           {/* Buttons */}
@@ -1374,9 +1375,9 @@ const Entity = () => {
                 Cancel
               </Button>
             )}
-            {entityData.deleted ? (
+            {entityData.archived ? (
               <Button
-                onClick={handleRestoreFromDeleteClick}
+                onClick={handleRestoreFromArchiveClick}
                 size={"sm"}
                 colorScheme={"orange"}
                 rightIcon={<Icon name={"rewind"} />}
@@ -1431,7 +1432,7 @@ const Entity = () => {
                 <MenuItem
                   icon={<Icon name={"graph"} />}
                   onClick={onGraphOpen}
-                  isDisabled={editing || entityData.deleted}
+                  isDisabled={editing || entityData.archived}
                 >
                   Visualize
                 </MenuItem>
@@ -1444,38 +1445,37 @@ const Entity = () => {
                 <MenuItem
                   onClick={handleExportClick}
                   icon={<Icon name={"download"} />}
-                  isDisabled={editing || entityData.deleted}
+                  isDisabled={editing || entityData.archived}
                 >
                   Export
                 </MenuItem>
                 <MenuItem
-                  onClick={onDeleteDialogOpen}
-                  icon={<Icon name={"delete"} />}
+                  onClick={onArchiveDialogOpen}
+                  icon={<Icon name={"archive"} />}
                 >
-                  Delete
+                  Archive
                 </MenuItem>
               </MenuList>
             </Menu>
 
-            {/* Delete Dialog */}
+            {/* Archive Dialog */}
             <Dialog
-              dialogRef={deleteDialogRef}
-              header={"Delete Entity"}
-              rightButtonAction={handleDeleteClick}
-              isOpen={isDeleteDialogOpen}
-              onOpen={onDeleteDialogOpen}
-              onClose={onDeleteDialogClose}
+              dialogRef={archiveDialogRef}
+              header={"Archive Entity"}
+              rightButtonAction={handleArchiveClick}
+              isOpen={isArchiveDialogOpen}
+              onOpen={onArchiveDialogOpen}
+              onClose={onArchiveDialogClose}
             >
               <Flex gap={"2"} direction={"column"}>
                 <Text fontWeight={"semibold"}>
-                  Are you sure you want to delete this Entity?
+                  Are you sure you want to archive this Entity?
                 </Text>
                 <Text>
-                  It will be removed from all Projects, all relationships to
-                  Origins and Products will be removed, Attribute data removed,
-                  and all Attachments deleted.
+                  This Entity will be moved to the Workspace archive. All
+                  relationships will be preserved, however it will not be
+                  visible. It can be restored at any time.
                 </Text>
-                <Warning text={"This is a destructive operation"} />
               </Flex>
             </Dialog>
           </Flex>
@@ -2544,7 +2544,7 @@ const Entity = () => {
                               onClick={() => {
                                 handleRestoreFromHistoryClick(entityVersion);
                               }}
-                              isDisabled={entityData.deleted}
+                              isDisabled={entityData.archived}
                             >
                               Restore
                             </Button>

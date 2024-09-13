@@ -61,6 +61,7 @@ const Attribute = () => {
   // Store Attribute data
   const attributeData: IAttribute = {
     name: name,
+    archived: false,
     description: description,
     values: values,
   };

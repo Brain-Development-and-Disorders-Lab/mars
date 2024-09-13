@@ -87,12 +87,12 @@ const Project = () => {
     onClose: onEntitiesClose,
   } = useDisclosure();
 
-  // State for dialog confirming if user should delete
-  const deleteDialogRef = useRef();
+  // State for dialog confirming if user should archive Project
+  const archiveDialogRef = useRef();
   const {
-    isOpen: isDeleteDialogOpen,
-    onOpen: onDeleteDialogOpen,
-    onClose: onDeleteDialogClose,
+    isOpen: isArchiveDialogOpen,
+    onOpen: onArchiveDialogOpen,
+    onClose: onArchiveDialogClose,
   } = useDisclosure();
 
   // History drawer
@@ -142,6 +142,7 @@ const Project = () => {
       project(_id: $_id) {
         _id
         name
+        archived
         description
         owner
         entities
@@ -261,6 +262,7 @@ const Project = () => {
       const updateData: ProjectModel = {
         _id: project._id,
         name: project.name,
+        archived: project.archived,
         description: projectDescription,
         owner: project.owner,
         collaborators: projectCollaborators || [],
@@ -357,6 +359,7 @@ const Project = () => {
     const updateData: ProjectModel = {
       _id: project._id,
       name: project.name,
+      archived: project.archived,
       created: project.created,
       owner: project.owner,
       collaborators: project.collaborators || [],
@@ -637,18 +640,18 @@ const Project = () => {
               {editing ? "Done" : "Edit"}
             </Button>
 
-            {/* Delete Dialog */}
+            {/* Archive Dialog */}
             <Dialog
-              dialogRef={deleteDialogRef}
-              header={"Delete Project"}
+              dialogRef={archiveDialogRef}
+              header={"Archive Project"}
               rightButtonAction={handleDeleteClick}
-              isOpen={isDeleteDialogOpen}
-              onOpen={onDeleteDialogOpen}
-              onClose={onDeleteDialogClose}
+              isOpen={isArchiveDialogOpen}
+              onOpen={onArchiveDialogOpen}
+              onClose={onArchiveDialogClose}
             >
               <Text>
-                Are you sure you want to delete this Project? No Entities will
-                be deleted.
+                Are you sure you want to archive this Project? No Entities will
+                be deleted. This Project will be moved to the Workspace archive.
               </Text>
             </Dialog>
 
@@ -691,10 +694,10 @@ const Project = () => {
                   </MenuItem>
                 </Tooltip>
                 <MenuItem
-                  icon={<Icon name={"delete"} />}
-                  onClick={onDeleteDialogOpen}
+                  icon={<Icon name={"archive"} />}
+                  onClick={onArchiveDialogOpen}
                 >
-                  Delete
+                  Archive
                 </MenuItem>
               </MenuList>
             </Menu>

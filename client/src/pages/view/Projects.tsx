@@ -35,6 +35,7 @@ const GET_PROJECTS = gql`
   query GetProjects {
     projects {
       _id
+      archived
       name
       description
       owner

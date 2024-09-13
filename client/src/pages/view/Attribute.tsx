@@ -42,12 +42,12 @@ const Attribute = () => {
   const [attributeDescription, setAttributeDescription] = useState("");
   const [attributeValues, setAttributeValues] = useState([] as IValue<any>[]);
 
-  // State for dialog confirming if user should delete
-  const deleteDialogRef = useRef();
+  // State for dialog confirming if user should archive
+  const archiveDialogRef = useRef();
   const {
-    isOpen: isDeleteDialogOpen,
-    onOpen: onDeleteDialogOpen,
-    onClose: onDeleteDialogClose,
+    isOpen: isArchiveDialogOpen,
+    onOpen: onArchiveDialogOpen,
+    onClose: onArchiveDialogClose,
   } = useDisclosure();
 
   // GraphQL operations
@@ -129,8 +129,8 @@ const Attribute = () => {
     }
   }, [workspace]);
 
-  // Delete the Attribute when confirmed
-  const handleDeleteClick = async () => {
+  // Archive the Attribute when confirmed
+  const handleArchiveClick = async () => {
     const response = await deleteAttribute({
       variables: {
         _id: attributeData._id,
@@ -138,7 +138,7 @@ const Attribute = () => {
     });
     if (response.data.deleteAttribute.success) {
       toast({
-        title: "Deleted Successfully",
+        title: "Archived Successfully",
         status: "success",
         duration: 2000,
         position: "bottom-right",
@@ -148,7 +148,7 @@ const Attribute = () => {
     } else {
       toast({
         title: "Error",
-        description: "An error occurred when deleting Attribute",
+        description: "An error occurred when archiving Attribute",
         status: "error",
         duration: 2000,
         position: "bottom-right",
@@ -240,18 +240,18 @@ const Attribute = () => {
               {editing ? "Done" : "Edit"}
             </Button>
 
-            {/* Delete Dialog */}
+            {/* Archive Dialog */}
             <Dialog
-              dialogRef={deleteDialogRef}
-              header={"Delete Entity"}
-              rightButtonAction={handleDeleteClick}
-              isOpen={isDeleteDialogOpen}
-              onOpen={onDeleteDialogOpen}
-              onClose={onDeleteDialogClose}
+              dialogRef={archiveDialogRef}
+              header={"Archive Attribute"}
+              rightButtonAction={handleArchiveClick}
+              isOpen={isArchiveDialogOpen}
+              onOpen={onArchiveDialogOpen}
+              onClose={onArchiveDialogClose}
             >
               <Text>
-                Are you sure you want to delete this Attribute? It will not be
-                removed from any existing Entities
+                Are you sure you want to archive this Attribute? It can be
+                restored any time from the Workspace archive
               </Text>
             </Dialog>
           </Flex>
