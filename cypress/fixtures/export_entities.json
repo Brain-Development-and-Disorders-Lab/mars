@@ -2,7 +2,7 @@
   "entities": [
     {
       "_id": "eDDyDMjQ",
-      "deleted": false,
+      "archived": false,
       "locked": false,
       "name": "mini box 1 FROMJSON",
       "owner": "XXXX-1234-ABCD-0000",
@@ -21,6 +21,7 @@
       "attributes": [
         {
           "_id": "a-eDDyDMjQ-SLaiM7",
+          "archived": false,
           "name": "AAAAAAAAAA",
           "description": "BBBBBB",
           "values": [
@@ -37,7 +38,7 @@
     },
     {
       "_id": "noID",
-      "deleted": false,
+      "archived": false,
       "locked": false,
       "name": "mini box 1",
       "owner": "XXXX-1234-ABCD-0000",
@@ -56,6 +57,7 @@
       "attributes": [
         {
           "_id": "a-eDDyDMjQ-SLaiM7",
+          "archived": false,
           "name": "AAAAAAAAAA",
           "description": "BBBBBB",
           "values": [
@@ -72,7 +74,7 @@
     },
     {
       "_id": "eOZ4E6Qw",
-      "deleted": false,
+      "archived": false,
       "locked": false,
       "name": "box2",
       "owner": "XXXX-1234-ABCD-0000",
@@ -86,6 +88,7 @@
       "attributes": [
         {
           "_id": "a-eOZ4E6Qw-0EmAiB",
+          "archived": false,
           "name": "asdvasdvsadv",
           "description": "qwervqewvqew",
           "values": [
@@ -102,7 +105,7 @@
     },
     {
       "_id": "eqRN9NBH",
-      "deleted": false,
+      "archived": false,
       "locked": false,
       "name": "box 1",
       "owner": "XXXX-1234-ABCD-0000",
@@ -123,7 +126,7 @@
     },
     {
       "_id": "eDDyDMjQ",
-      "deleted": false,
+      "archived": false,
       "locked": false,
       "name": "mini box 1 FROMJSON",
       "owner": "XXXX-1234-ABCD-0000",
@@ -143,6 +146,7 @@
         {
           "_id": "a-eDDyDMjQ-SLaiM7",
           "name": "AAAAAAAAAA",
+          "archived": false,
           "description": "BBBBBB",
           "values": [
             {

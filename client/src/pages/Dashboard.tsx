@@ -47,7 +47,7 @@ const GET_DASHBOARD = gql`
     }
     entities(limit: $entities) {
       _id
-      deleted
+      archived
       name
       description
     }
@@ -80,7 +80,7 @@ const Dashboard = () => {
   const [entityData, setEntityData] = useState(
     [] as {
       _id: string;
-      deleted: boolean;
+      archived: boolean;
       name: string;
       description: string;
     }[],
@@ -153,7 +153,7 @@ const Dashboard = () => {
   // Configure Entity table
   const entityTableData: {
     _id: string;
-    deleted: boolean;
+    archived: boolean;
     name: string;
     description: string;
   }[] = entityData;
@@ -323,8 +323,8 @@ const Dashboard = () => {
                 columns={entityTableColumns}
                 data={entityTableData.filter(
                   (entity) =>
-                    _.isEqual(entity.deleted, false) ||
-                    _.isEqual(entity.deleted, null),
+                    _.isEqual(entity.archived, false) ||
+                    _.isEqual(entity.archived, null),
                 )}
                 visibleColumns={visibleColumns}
               />
