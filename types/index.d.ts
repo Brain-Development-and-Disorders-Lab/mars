@@ -99,6 +99,7 @@ export type IValue<D> = {
   onUpdate?: (data: D) => void;
 };
 
+// "Linky" component props
 export type LinkyProps = {
   type: "entities" | "attributes" | "projects";
   id: string;
@@ -107,6 +108,12 @@ export type LinkyProps = {
   justify?: string;
   size?: string;
   truncate?: boolean | number;
+};
+
+// "Actor" component props
+export type ActorProps = {
+  orcid: string;
+  fallback: string;
 };
 
 // Project types
@@ -188,6 +195,7 @@ export type EntityNode = IGenericItem & {
 export type EntityHistory = {
   timestamp: string;
   archived: boolean;
+  name: string;
   owner: string;
   description: string;
   projects: string[];

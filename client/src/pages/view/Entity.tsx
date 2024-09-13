@@ -55,6 +55,7 @@ import {
   TabPanel,
   TabPanels,
 } from "@chakra-ui/react";
+import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
 import DataTable from "@components/DataTable";
 import Graph from "@components/Graph";
@@ -81,7 +82,7 @@ import {
 } from "@types";
 
 // Utility functions and libraries
-import { request, requestStatic } from "src/database/functions";
+import { requestStatic } from "src/database/functions";
 import { isValidValues } from "src/util";
 import _ from "lodash";
 import dayjs from "dayjs";
@@ -331,6 +332,7 @@ const Entity = () => {
     if (data?.entity) {
       // Unpack all the Entity data
       setEntityData(data.entity);
+      setEntityName(data.entity.name);
       setEntityArchived(data.entity.archived);
       setEntityDescription(data.entity.description || "");
       setEntityProjects(data.entity.projects || []);
@@ -463,6 +465,7 @@ const Entity = () => {
 
   // Break up entity data into editable fields
   const [entityData, setEntityData] = useState({} as EntityModel);
+  const [entityName, setEntityName] = useState("");
   const [entityDescription, setEntityDescription] = useState("");
   const [entityProjects, setEntityProjects] = useState([] as string[]);
   const [entityOrigins, setEntityOrigins] = useState([] as IGenericItem[]);
@@ -521,7 +524,7 @@ const Entity = () => {
           variables: {
             entity: {
               _id: entityData._id,
-              name: entityData.name,
+              name: entityName,
               archived: entityArchived,
               locked: entityData.locked,
               created: entityData.created,
@@ -555,25 +558,12 @@ const Entity = () => {
         });
       }
 
-      // Unlock Entity
-      await request<any>("POST", `/entities/lock/${id}`, {
-        entity: {
-          _id: entityData._id,
-          name: entityData.name,
-        },
-        lockState: false,
-      });
+      // Run a refetch operation
+      await refetch();
+
       setEditing(false);
       setIsUpdating(false);
     } else {
-      // Lock Entity
-      await request<any>("POST", `/entities/lock/${id}`, {
-        entity: {
-          _id: entityData._id,
-          name: entityData.name,
-        },
-        lockState: true,
-      });
       setEditing(true);
     }
   };
@@ -587,6 +577,7 @@ const Entity = () => {
 
     // Reset all Entity states
     setEntityData(entityData);
+    setEntityName(entityName);
     setEntityDescription(entityDescription);
     setEntityProjects(entityProjects);
     setEntityOrigins(entityOrigins);
@@ -1001,7 +992,7 @@ const Entity = () => {
         variables: {
           entity: {
             _id: entityData._id,
-            name: entityData.name,
+            name: entityVersion.name,
             created: entityData.created,
             archived: entityVersion.archived,
             locked: entityData.locked,
@@ -1073,7 +1064,7 @@ const Entity = () => {
 
       FileSaver.saveAs(
         new Blob([exportData]),
-        slugify(`${entityData.name.replace(" ", "")}_export.${format}`),
+        slugify(`${entityName.replace(" ", "")}_export.${format}`),
       );
 
       // Close the "Export" modal
@@ -1492,43 +1483,68 @@ const Entity = () => {
             <Flex
               direction={"column"}
               p={"2"}
+              gap={"2"}
               border={"1px"}
               borderColor={"gray.200"}
               rounded={"md"}
             >
-              <Flex gap={"2"} direction={"column"}>
-                <Flex gap={"2"} direction={"row"}>
-                  {/* "Created" and "Owner" fields */}
-                  <Flex gap={"2"} direction={"column"} basis={"40%"}>
-                    <Text fontWeight={"bold"}>Created</Text>
-                    <Flex align={"center"} gap={"1"}>
-                      <Icon name={"v_date"} size={"sm"} />
-                      <Text fontSize={"sm"}>
-                        {dayjs(entityData.created).format("DD MMM YYYY")}
-                      </Text>
-                    </Flex>
-                    <Text fontWeight={"bold"}>Owner</Text>
-                    <Flex>
-                      <Tag colorScheme={"green"}>
-                        <TagLabel fontSize={"sm"}>{entityData.owner}</TagLabel>
-                      </Tag>
-                    </Flex>
+              {/* "Name" and "Created" field */}
+              <Flex gap={"2"} direction={"row"}>
+                <Flex direction={"column"} gap={"1"} basis={"60%"}>
+                  <Text fontWeight={"bold"}>Name</Text>
+                  <Flex>
+                    <Input
+                      size={"sm"}
+                      value={entityName}
+                      onChange={(event) => {
+                        setEntityName(event.target.value || "");
+                      }}
+                      isReadOnly={!editing}
+                      rounded={"md"}
+                      border={"1px"}
+                      borderColor={"gray.200"}
+                      bg={"white"}
+                    />
                   </Flex>
-                  {/* "Description" field */}
-                  <Flex gap={"2"} direction={"column"} basis={"60%"}>
-                    <Text fontWeight={"bold"}>Description</Text>
-                    <Flex>
-                      <Textarea
-                        value={entityDescription}
-                        onChange={(event) => {
-                          setEntityDescription(event.target.value || "");
-                        }}
-                        isReadOnly={!editing}
-                        border={"1px"}
-                        borderColor={"gray.200"}
-                        bg={"white"}
-                      />
-                    </Flex>
+                </Flex>
+
+                <Flex direction={"column"} gap={"1"}>
+                  <Text fontWeight={"bold"}>Created</Text>
+                  <Flex align={"center"} gap={"1"}>
+                    <Icon name={"v_date"} size={"sm"} />
+                    <Text fontSize={"sm"}>
+                      {dayjs(entityData.created).format("DD MMM YYYY")}
+                    </Text>
+                  </Flex>
+                </Flex>
+              </Flex>
+
+              {/* "Created" and "Owner" fields */}
+              <Flex gap={"2"} direction={"row"}>
+                <Flex direction={"column"} gap={"1"} basis={"60%"}>
+                  <Text fontWeight={"bold"}>Description</Text>
+                  <Flex>
+                    <Textarea
+                      size={"sm"}
+                      value={entityDescription}
+                      onChange={(event) => {
+                        setEntityDescription(event.target.value || "");
+                      }}
+                      isReadOnly={!editing}
+                      rounded={"md"}
+                      border={"1px"}
+                      borderColor={"gray.200"}
+                      bg={"white"}
+                    />
+                  </Flex>
+                </Flex>
+                <Flex direction={"column"} gap={"1"}>
+                  <Text fontWeight={"bold"}>Owner</Text>
+                  <Flex>
+                    <ActorTag
+                      orcid={entityData.owner}
+                      fallback={"Unknown User"}
+                    />
                   </Flex>
                 </Flex>
               </Flex>
@@ -2234,7 +2250,7 @@ const Entity = () => {
                       <CheckboxGroup size={"sm"}>
                         <Stack spacing={2} direction={"column"}>
                           <Checkbox disabled defaultChecked>
-                            Name: {entityData.name}
+                            Name: {entityName}
                           </Checkbox>
                           <Checkbox
                             isChecked={_.includes(exportFields, "created")}
@@ -2478,7 +2494,7 @@ const Entity = () => {
         >
           <ModalOverlay />
           <ModalContent>
-            <ModalHeader>Visualize: {entityData.name}</ModalHeader>
+            <ModalHeader>Visualize: {entityName}</ModalHeader>
             <ModalCloseButton />
             <ModalBody>
               <Container h={"90vh"} minW={"90vw"}>
