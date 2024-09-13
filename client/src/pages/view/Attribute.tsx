@@ -6,6 +6,10 @@ import {
   Button,
   Flex,
   Heading,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
   Tag,
   TagLabel,
   Text,
@@ -25,7 +29,7 @@ import { AttributeModel, IValue } from "@types";
 import _ from "lodash";
 
 // Routing and navigation
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { gql, useMutation, useQuery } from "@apollo/client";
 
 // Workspace context
@@ -34,12 +38,12 @@ import { WorkspaceContext } from "../../Context";
 const Attribute = () => {
   const { id } = useParams();
   const toast = useToast();
-  const navigate = useNavigate();
 
   const [editing, setEditing] = useState(false);
 
   const [attributeData, setAttributeData] = useState({} as AttributeModel);
   const [attributeDescription, setAttributeDescription] = useState("");
+  const [attributeArchived, setAttributeArchived] = useState(false);
   const [attributeValues, setAttributeValues] = useState([] as IValue<any>[]);
 
   // State for dialog confirming if user should archive
@@ -56,6 +60,7 @@ const Attribute = () => {
       attribute(_id: $_id) {
         _id
         name
+        archived
         description
         values {
           _id
@@ -102,6 +107,7 @@ const Attribute = () => {
     if (data?.attribute) {
       // Unpack all the Entity data
       setAttributeData(data.attribute);
+      setAttributeArchived(data.attribute.archived);
       setAttributeDescription(data.attribute.description || "");
       setAttributeValues(data.attribute.values);
     }
@@ -137,6 +143,7 @@ const Attribute = () => {
         state: true,
       },
     });
+
     if (response.data.archiveAttribute.success) {
       toast({
         title: "Archived Successfully",
@@ -145,17 +152,52 @@ const Attribute = () => {
         position: "bottom-right",
         isClosable: true,
       });
-      navigate("/attributes");
+      setAttributeArchived(true);
+      onArchiveDialogClose();
     } else {
       toast({
         title: "Error",
-        description: "An error occurred when archiving Attribute",
+        description: "An error occurred while archiving Attribute",
         status: "error",
         duration: 2000,
         position: "bottom-right",
         isClosable: true,
       });
     }
+
+    setEditing(false);
+  };
+
+  // Restore the Attribute
+  const handleRestoreFromArchiveClick = async () => {
+    const response = await archiveAttribute({
+      variables: {
+        _id: attributeData._id,
+        state: false,
+      },
+    });
+
+    if (response.data.archiveAttribute.success) {
+      toast({
+        title: "Restored Attribute successfully",
+        status: "success",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+      setAttributeArchived(false);
+      onArchiveDialogClose();
+    } else {
+      toast({
+        title: "Error",
+        description: "An error occurred while restoring Attribute",
+        status: "error",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
+
     setEditing(false);
   };
 
@@ -230,16 +272,55 @@ const Attribute = () => {
 
           {/* Buttons */}
           <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
-            <Button
-              size={"sm"}
-              colorScheme={editing ? "green" : "blue"}
-              rightIcon={
-                editing ? <Icon name={"check"} /> : <Icon name={"edit"} />
-              }
-              onClick={handleEditClick}
-            >
-              {editing ? "Done" : "Edit"}
-            </Button>
+            {attributeArchived ? (
+              <Button
+                onClick={handleRestoreFromArchiveClick}
+                size={"sm"}
+                colorScheme={"orange"}
+                rightIcon={<Icon name={"rewind"} />}
+              >
+                Restore
+              </Button>
+            ) : (
+              <Button
+                size={"sm"}
+                colorScheme={editing ? "green" : "blue"}
+                rightIcon={
+                  editing ? <Icon name={"check"} /> : <Icon name={"edit"} />
+                }
+                onClick={handleEditClick}
+              >
+                {editing ? "Done" : "Edit"}
+              </Button>
+            )}
+
+            {/* Actions Menu */}
+            <Menu>
+              <MenuButton
+                as={Button}
+                size={"sm"}
+                colorScheme={"blue"}
+                rightIcon={<Icon name={"c_down"} />}
+              >
+                Actions
+              </MenuButton>
+              <MenuList>
+                <MenuItem icon={<Icon name={"clock"} />}>History</MenuItem>
+                <MenuItem
+                  icon={<Icon name={"download"} />}
+                  isDisabled={editing || attributeArchived}
+                >
+                  Export
+                </MenuItem>
+                <MenuItem
+                  onClick={onArchiveDialogOpen}
+                  icon={<Icon name={"archive"} />}
+                  isDisabled={attributeArchived}
+                >
+                  Archive
+                </MenuItem>
+              </MenuList>
+            </Menu>
 
             {/* Archive Dialog */}
             <Dialog

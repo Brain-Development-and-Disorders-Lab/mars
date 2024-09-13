@@ -362,6 +362,7 @@ const Dashboard = () => {
         {/* Activity */}
         <Flex
           direction={"column"}
+          maxW={"sm"}
           p={"2"}
           gap={"2"}
           grow={"1"}
@@ -379,7 +380,7 @@ const Dashboard = () => {
 
           {/* Activity list */}
           {activityData.length > 0 ? (
-            <Flex overflowY={"auto"} p={"0"} w={"100%"} h={"100%"}>
+            <Flex p={"0"} w={"100%"} maxH={"90vh"} overflowY={"auto"}>
               <VStack spacing={"2"} w={"95%"}>
                 {activityData.map((activity) => {
                   return (

@@ -109,6 +109,7 @@ const Project = () => {
 
   // Project state
   const [project, setProject] = useState({} as ProjectModel);
+  const [projectArchived, setProjectArchived] = useState(false);
   const [projectEntities, setProjectEntities] = useState([] as string[]);
   const [projectDescription, setProjectDescription] = useState("");
   const [projectHistory, setProjectHistory] = useState([] as ProjectHistory[]);
@@ -211,10 +212,11 @@ const Project = () => {
   useEffect(() => {
     if (data?.project) {
       setProject(data.project);
-      setProjectDescription(data.project?.description);
-      setProjectEntities(data.project?.entities);
-      setProjectHistory(data.project?.history);
-      setProjectCollaborators(data.project?.collaborators || []);
+      setProjectArchived(data.project.archived);
+      setProjectDescription(data.project.description);
+      setProjectEntities(data.project.entities);
+      setProjectHistory(data.project.history);
+      setProjectCollaborators(data.project.collaborators || []);
     }
   }, [data]);
 
@@ -262,7 +264,7 @@ const Project = () => {
       const updateData: ProjectModel = {
         _id: project._id,
         name: project.name,
-        archived: project.archived,
+        archived: projectArchived,
         description: projectDescription,
         owner: project.owner,
         collaborators: projectCollaborators || [],
@@ -309,6 +311,7 @@ const Project = () => {
     const response = await archiveProject({
       variables: {
         _id: project._id,
+        state: true,
       },
     });
     if (response.data.archiveProject.success) {
@@ -319,11 +322,42 @@ const Project = () => {
         position: "bottom-right",
         isClosable: true,
       });
-      navigate("/projects");
+      setProjectArchived(true);
+      onArchiveDialogClose();
     } else {
       toast({
         title: "Error",
         description: "An error occurred when archiving Project",
+        status: "error",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
+    setEditing(false);
+  };
+
+  // Restore the Project
+  const handleRestoreClick = async () => {
+    const response = await archiveProject({
+      variables: {
+        _id: project._id,
+        state: false,
+      },
+    });
+    if (response.data.archiveProject.success) {
+      toast({
+        title: "Restored Successfully",
+        status: "success",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+      setProjectArchived(false);
+    } else {
+      toast({
+        title: "Error",
+        description: "An error occurred when restoring Project",
         status: "error",
         duration: 2000,
         position: "bottom-right",
@@ -617,28 +651,41 @@ const Project = () => {
 
           {/* Buttons */}
           <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
-            {editing && (
+            {projectArchived ? (
               <Button
-                onClick={handleCancelClick}
+                onClick={handleRestoreClick}
                 size={"sm"}
-                colorScheme={"red"}
-                rightIcon={<Icon name={"cross"} />}
+                colorScheme={"orange"}
+                rightIcon={<Icon name={"rewind"} />}
               >
-                Cancel
+                Restore
               </Button>
+            ) : (
+              <Flex gap={"2"}>
+                {editing && (
+                  <Button
+                    onClick={handleCancelClick}
+                    size={"sm"}
+                    colorScheme={"red"}
+                    rightIcon={<Icon name={"cross"} />}
+                  >
+                    Cancel
+                  </Button>
+                )}
+                <Button
+                  colorScheme={editing ? "green" : "blue"}
+                  rightIcon={
+                    editing ? <Icon name={"check"} /> : <Icon name={"edit"} />
+                  }
+                  onClick={handleEditClick}
+                  loadingText={"Saving..."}
+                  isLoading={isUpdating}
+                  size={"sm"}
+                >
+                  {editing ? "Done" : "Edit"}
+                </Button>
+              </Flex>
             )}
-            <Button
-              colorScheme={editing ? "green" : "blue"}
-              rightIcon={
-                editing ? <Icon name={"check"} /> : <Icon name={"edit"} />
-              }
-              onClick={handleEditClick}
-              loadingText={"Saving..."}
-              isLoading={isUpdating}
-              size={"sm"}
-            >
-              {editing ? "Done" : "Edit"}
-            </Button>
 
             {/* Archive Dialog */}
             <Dialog
@@ -675,19 +722,21 @@ const Project = () => {
                 <MenuItem
                   onClick={handleExportClick}
                   icon={<Icon name={"download"} />}
-                  isDisabled={exportLoading}
+                  isDisabled={exportLoading || projectArchived}
                 >
                   Export Project
                 </MenuItem>
                 <Tooltip
-                  isDisabled={projectEntities?.length > 0}
+                  isDisabled={projectEntities?.length > 0 || projectArchived}
                   label={"This Project does not contain any Entities."}
                 >
                   <MenuItem
                     onClick={handleExportEntitiesClick}
                     icon={<Icon name={"download"} />}
                     isDisabled={
-                      projectEntities?.length === 0 || exportEntitiesLoading
+                      projectEntities?.length === 0 ||
+                      exportEntitiesLoading ||
+                      projectArchived
                     }
                   >
                     Export Entities
@@ -696,6 +745,7 @@ const Project = () => {
                 <MenuItem
                   icon={<Icon name={"archive"} />}
                   onClick={onArchiveDialogOpen}
+                  isDisabled={projectArchived}
                 >
                   Archive
                 </MenuItem>
