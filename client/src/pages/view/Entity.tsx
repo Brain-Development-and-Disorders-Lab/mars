@@ -157,6 +157,9 @@ const Entity = () => {
     onClose: onHistoryClose,
   } = useDisclosure();
 
+  // Archive state
+  const [entityArchived, setEntityArchived] = useState(false);
+
   // Adding Attributes to existing Entity
   const {
     isOpen: isAddAttributesOpen,
@@ -311,22 +314,24 @@ const Entity = () => {
   `;
   const [updateEntity, { loading: updateLoading }] = useMutation(UPDATE_ENTITY);
 
-  // Mutation to delete Entity
-  const DELETE_ENTITY = gql`
-    mutation DeleteEntity($_id: String) {
-      deleteEntity(_id: $_id) {
+  // Mutation to archive Entity
+  const ARCHIVE_ENTITY = gql`
+    mutation ArchiveEntity($_id: String, $state: Boolean) {
+      archiveEntity(_id: $_id, state: $state) {
         success
         message
       }
     }
   `;
-  const [deleteEntity, { loading: deleteLoading }] = useMutation(DELETE_ENTITY);
+  const [archiveEntity, { error: archiveError, loading: archiveLoading }] =
+    useMutation(ARCHIVE_ENTITY);
 
   // Manage data once retrieved
   useEffect(() => {
     if (data?.entity) {
       // Unpack all the Entity data
       setEntityData(data.entity);
+      setEntityArchived(data.entity.archived);
       setEntityDescription(data.entity.description || "");
       setEntityProjects(data.entity.projects || []);
       setEntityOrigins(data.entity.associations.origins || []);
@@ -517,7 +522,7 @@ const Entity = () => {
             entity: {
               _id: entityData._id,
               name: entityData.name,
-              archived: entityData.archived,
+              archived: entityArchived,
               locked: entityData.locked,
               created: entityData.created,
               owner: entityData.owner,
@@ -598,43 +603,30 @@ const Entity = () => {
    * Restore an Entity from an archived status
    */
   const handleRestoreFromArchiveClick = async () => {
-    try {
-      await updateEntity({
-        variables: {
-          entity: {
-            _id: entityData._id,
-            name: entityData.name,
-            created: entityData.created,
-            archived: false,
-            locked: false,
-            owner: entityData.owner,
-            description: entityDescription,
-            projects: entityProjects,
-            associations: {
-              origins: entityOrigins,
-              products: entityProducts,
-            },
-            attributes: entityAttributes,
-            attachments: entityAttachments,
-          },
-        },
-      });
+    await archiveEntity({
+      variables: {
+        _id: entityData._id,
+        state: false,
+      },
+    });
+
+    if (archiveError) {
       toast({
-        title: "Restored Successfully",
-        status: "success",
-        duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: `Entity could not be restored`,
+        title: "Error while restoring Entity",
         status: "error",
         duration: 2000,
         position: "bottom-right",
         isClosable: true,
       });
+    } else {
+      toast({
+        title: "Entity restored successfully",
+        status: "success",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+      setEntityArchived(false);
     }
   };
 
@@ -1139,12 +1131,14 @@ const Entity = () => {
 
   // Archive the Entity when confirmed
   const handleArchiveClick = async () => {
-    const response = await deleteEntity({
+    const response = await archiveEntity({
       variables: {
         _id: entityData._id,
+        state: true,
       },
     });
-    if (response.data.deleteEntity.success) {
+
+    if (response.data.archiveEntity.success) {
       toast({
         title: "Archived Successfully",
         status: "success",
@@ -1152,7 +1146,8 @@ const Entity = () => {
         position: "bottom-right",
         isClosable: true,
       });
-      navigate("/entities");
+      setEntityArchived(true);
+      onArchiveDialogClose();
     } else {
       toast({
         title: "Error",
@@ -1163,6 +1158,7 @@ const Entity = () => {
         isClosable: true,
       });
     }
+
     setEditing(false);
   };
 
@@ -1336,7 +1332,7 @@ const Entity = () => {
     <Content
       isError={!_.isUndefined(error)}
       isLoaded={
-        !loading && !updateLoading && !deleteLoading && !workspaceLoading
+        !loading && !updateLoading && !archiveLoading && !workspaceLoading
       }
     >
       <Flex direction={"column"}>
@@ -1360,7 +1356,7 @@ const Entity = () => {
             <Heading fontWeight={"semibold"} size={"md"}>
               {entityData.name}
             </Heading>
-            {entityData.archived && <Icon name={"archive"} size={"md"} />}
+            {entityArchived && <Icon name={"archive"} size={"md"} />}
           </Flex>
 
           {/* Buttons */}
@@ -1375,7 +1371,7 @@ const Entity = () => {
                 Cancel
               </Button>
             )}
-            {entityData.archived ? (
+            {entityArchived ? (
               <Button
                 onClick={handleRestoreFromArchiveClick}
                 size={"sm"}
@@ -1432,7 +1428,7 @@ const Entity = () => {
                 <MenuItem
                   icon={<Icon name={"graph"} />}
                   onClick={onGraphOpen}
-                  isDisabled={editing || entityData.archived}
+                  isDisabled={editing || entityArchived}
                 >
                   Visualize
                 </MenuItem>
@@ -1445,13 +1441,14 @@ const Entity = () => {
                 <MenuItem
                   onClick={handleExportClick}
                   icon={<Icon name={"download"} />}
-                  isDisabled={editing || entityData.archived}
+                  isDisabled={editing || entityArchived}
                 >
                   Export
                 </MenuItem>
                 <MenuItem
                   onClick={onArchiveDialogOpen}
                   icon={<Icon name={"archive"} />}
+                  isDisabled={entityArchived}
                 >
                   Archive
                 </MenuItem>
@@ -2544,7 +2541,7 @@ const Entity = () => {
                               onClick={() => {
                                 handleRestoreFromHistoryClick(entityVersion);
                               }}
-                              isDisabled={entityData.archived}
+                              isDisabled={entityArchived}
                             >
                               Restore
                             </Button>

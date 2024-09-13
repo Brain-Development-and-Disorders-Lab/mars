@@ -195,17 +195,17 @@ const Project = () => {
   const [updateProject, { loading: updateLoading, error: updateError }] =
     useMutation(UPDATE_PROJECT);
 
-  // Mutation to delete Project
-  const DELETE_PROJECT = gql`
-    mutation DeleteProject($_id: String) {
-      deleteProject(_id: $_id) {
+  // Mutation to archive Project
+  const ARCHIVE_PROJECT = gql`
+    mutation ArchiveProject($_id: String, $state: Boolean) {
+      archiveProject(_id: $_id, state: $state) {
         success
         message
       }
     }
   `;
-  const [deleteProject, { loading: deleteLoading }] =
-    useMutation(DELETE_PROJECT);
+  const [archiveProject, { loading: archiveLoading }] =
+    useMutation(ARCHIVE_PROJECT);
 
   // Manage data once retrieved
   useEffect(() => {
@@ -304,16 +304,16 @@ const Project = () => {
     }
   };
 
-  // Delete the Project when confirmed
-  const handleDeleteClick = async () => {
-    const response = await deleteProject({
+  // Archive the Project when confirmed
+  const handleArchiveClick = async () => {
+    const response = await archiveProject({
       variables: {
         _id: project._id,
       },
     });
-    if (response.data.deleteProject.success) {
+    if (response.data.archiveProject.success) {
       toast({
-        title: "Deleted Successfully",
+        title: "Archived Successfully",
         status: "success",
         duration: 2000,
         position: "bottom-right",
@@ -323,7 +323,7 @@ const Project = () => {
     } else {
       toast({
         title: "Error",
-        description: "An error occurred when deleting Project",
+        description: "An error occurred when archiving Project",
         status: "error",
         duration: 2000,
         position: "bottom-right",
@@ -589,7 +589,7 @@ const Project = () => {
     <Content
       isError={!_.isUndefined(error)}
       isLoaded={
-        !loading && !deleteLoading && !updateLoading && !workspaceLoading
+        !loading && !archiveLoading && !updateLoading && !workspaceLoading
       }
     >
       <Flex direction={"column"}>
@@ -644,7 +644,7 @@ const Project = () => {
             <Dialog
               dialogRef={archiveDialogRef}
               header={"Archive Project"}
-              rightButtonAction={handleDeleteClick}
+              rightButtonAction={handleArchiveClick}
               isOpen={isArchiveDialogOpen}
               onOpen={onArchiveDialogOpen}
               onClose={onArchiveDialogClose}

@@ -85,17 +85,17 @@ const Attribute = () => {
   const [updateAttribute, { loading: updateLoading }] =
     useMutation(UPDATE_ATTRIBUTE);
 
-  // Mutation to delete Attribute
-  const DELETE_ATTRIBUTE = gql`
-    mutation DeleteAttribute($_id: String) {
-      deleteAttribute(_id: $_id) {
+  // Mutation to archive Attribute
+  const ARCHIVE_ATTRIBUTE = gql`
+    mutation ArchiveAttribute($_id: String, $state: Boolean) {
+      archiveAttribute(_id: $_id, state: $state) {
         success
         message
       }
     }
   `;
-  const [deleteAttribute, { loading: deleteLoading }] =
-    useMutation(DELETE_ATTRIBUTE);
+  const [archiveAttribute, { loading: archiveLoading }] =
+    useMutation(ARCHIVE_ATTRIBUTE);
 
   // Manage data once retrieved
   useEffect(() => {
@@ -131,12 +131,13 @@ const Attribute = () => {
 
   // Archive the Attribute when confirmed
   const handleArchiveClick = async () => {
-    const response = await deleteAttribute({
+    const response = await archiveAttribute({
       variables: {
         _id: attributeData._id,
+        state: true,
       },
     });
-    if (response.data.deleteAttribute.success) {
+    if (response.data.archiveAttribute.success) {
       toast({
         title: "Archived Successfully",
         status: "success",
@@ -201,7 +202,7 @@ const Attribute = () => {
     <Content
       isError={!_.isUndefined(error)}
       isLoaded={
-        !loading && !updateLoading && !deleteLoading && !workspaceLoading
+        !loading && !updateLoading && !archiveLoading && !workspaceLoading
       }
     >
       <Flex direction={"column"}>
