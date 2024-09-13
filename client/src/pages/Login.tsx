@@ -354,6 +354,7 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
                   <Flex direction={"column"} w={"100%"}>
                     <FormLabel>First Name</FormLabel>
                     <Input
+                      id={"userFirstNameInput"}
                       size={"sm"}
                       rounded={"md"}
                       value={userFirstName}
@@ -363,6 +364,7 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
                   <Flex direction={"column"} w={"100%"}>
                     <FormLabel>Last Name</FormLabel>
                     <Input
+                      id={"userLastNameInput"}
                       size={"sm"}
                       rounded={"md"}
                       value={userLastName}
@@ -374,6 +376,7 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
                   <Flex direction={"column"}>
                     <FormLabel>Email</FormLabel>
                     <Input
+                      id={"userEmailInput"}
                       size={"sm"}
                       rounded={"md"}
                       type={"email"}
@@ -384,6 +387,7 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
                   <Flex direction={"column"}>
                     <FormLabel>Affiliation</FormLabel>
                     <Input
+                      id={"userAffiliationInput"}
                       size={"sm"}
                       rounded={"md"}
                       value={userAffiliation}
@@ -397,6 +401,7 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
             </FormControl>
             <Flex align={"center"} justify={"right"} w={"100%"}>
               <Button
+                id={"userDoneButton"}
                 leftIcon={<Icon name={"check"} />}
                 colorScheme={"green"}
                 size={"sm"}
