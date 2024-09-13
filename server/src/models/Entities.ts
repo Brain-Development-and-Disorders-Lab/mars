@@ -72,7 +72,7 @@ export class Entities {
   static existByName = async (name: string): Promise<boolean> => {
     const entity = await getDatabase()
       .collection<EntityModel>(ENTITIES_COLLECTION)
-      .findOne({ name: name, deleted: false });
+      .findOne({ name: name, archived: false });
 
     return !_.isNull(entity);
   };
@@ -80,7 +80,7 @@ export class Entities {
   static getByName = async (name: string): Promise<EntityModel | null> => {
     return await getDatabase()
       .collection<EntityModel>(ENTITIES_COLLECTION)
-      .findOne({ name: name, deleted: false });
+      .findOne({ name: name, archived: false });
   };
 
   /**

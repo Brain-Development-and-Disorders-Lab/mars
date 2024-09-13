@@ -39,7 +39,7 @@ describe("Entity model", () => {
     const result = await Entities.create({
       name: "TestEntity",
       created: new Date(Date.now()).toISOString(),
-      deleted: false,
+      archived: false,
       locked: false,
       owner: "henry.burgess@wustl.edu",
       description: "Test",
@@ -63,7 +63,7 @@ describe("Entity model", () => {
     await Entities.create({
       name: "TestOriginEntity",
       created: new Date(Date.now()).toISOString(),
-      deleted: false,
+      archived: false,
       locked: false,
       owner: "henry.burgess@wustl.edu",
       description: "Test Origin",
@@ -86,7 +86,7 @@ describe("Entity model", () => {
     await Entities.create({
       name: "TestProductEntity",
       created: new Date(Date.now()).toISOString(),
-      deleted: false,
+      archived: false,
       locked: false,
       owner: "henry.burgess@wustl.edu",
       description: "Test Product",
@@ -127,7 +127,7 @@ describe("Entity model", () => {
     await Entities.create({
       name: "TestProductEntity",
       created: new Date(Date.now()).toISOString(),
-      deleted: false,
+      archived: false,
       locked: false,
       owner: "henry.burgess@wustl.edu",
       description: "Test Product",
@@ -149,7 +149,7 @@ describe("Entity model", () => {
     await Entities.create({
       name: "TestOriginEntity",
       created: new Date(Date.now()).toISOString(),
-      deleted: false,
+      archived: false,
       locked: false,
       owner: "henry.burgess@wustl.edu",
       description: "Test Origin",
@@ -191,7 +191,7 @@ describe("Entity model", () => {
     await Entities.create({
       name: "TestProductEntity",
       created: new Date(Date.now()).toISOString(),
-      deleted: false,
+      archived: false,
       locked: false,
       owner: "henry.burgess@wustl.edu",
       description: "Test Product",
@@ -213,7 +213,7 @@ describe("Entity model", () => {
     await Entities.create({
       name: "TestOriginEntity",
       created: new Date(Date.now()).toISOString(),
-      deleted: false,
+      archived: false,
       locked: false,
       owner: "henry.burgess@wustl.edu",
       description: "Test Origin",
@@ -255,7 +255,7 @@ describe("Entity model", () => {
     await Entities.create({
       name: "TestEntity",
       created: new Date(Date.now()).toISOString(),
-      deleted: false,
+      archived: false,
       locked: false,
       owner: "henry.burgess@wustl.edu",
       description: "Test",
@@ -288,7 +288,7 @@ describe("Entity model", () => {
     await Entities.create({
       name: "TestEntity",
       created: new Date(Date.now()).toISOString(),
-      deleted: false,
+      archived: false,
       locked: false,
       owner: "henry.burgess@wustl.edu",
       description: "Test",
@@ -318,7 +318,7 @@ describe("Entity model", () => {
     await Entities.create({
       name: "TestEntity",
       created: new Date(Date.now()).toISOString(),
-      deleted: false,
+      archived: false,
       locked: false,
       owner: "henry.burgess@wustl.edu",
       description: "Test",
@@ -379,7 +379,7 @@ describe("Entity model", () => {
     await Entities.create({
       name: "TestEntity",
       created: new Date(Date.now()).toISOString(),
-      deleted: false,
+      archived: false,
       locked: false,
       owner: "henry.burgess@wustl.edu",
       description: "Test",
@@ -400,7 +400,7 @@ describe("Entity model", () => {
     await Entities.create({
       name: "OriginEntity",
       created: new Date(Date.now()).toISOString(),
-      deleted: false,
+      archived: false,
       locked: false,
       owner: "henry.burgess@wustl.edu",
       description: "Test",
@@ -452,7 +452,7 @@ describe("Entity model", () => {
     await Entities.create({
       name: "TestEntity",
       created: new Date(Date.now()).toISOString(),
-      deleted: false,
+      archived: false,
       locked: false,
       owner: "henry.burgess@wustl.edu",
       description: "Test",
@@ -473,7 +473,7 @@ describe("Entity model", () => {
     await Entities.create({
       name: "ProductEntity",
       created: new Date(Date.now()).toISOString(),
-      deleted: false,
+      archived: false,
       locked: false,
       owner: "henry.burgess@wustl.edu",
       description: "Test",
@@ -526,7 +526,7 @@ describe("Entity model", () => {
     await Entities.create({
       name: "TestEntity",
       created: new Date(Date.now()).toISOString(),
-      deleted: false,
+      archived: false,
       locked: false,
       owner: "henry.burgess@wustl.edu",
       description: "Test",
@@ -563,7 +563,7 @@ describe("Entity model", () => {
     await Entities.create({
       name: "TestEntity",
       created: new Date(Date.now()).toISOString(),
-      deleted: false,
+      archived: false,
       locked: false,
       owner: "henry.burgess@wustl.edu",
       description: "Test",
@@ -600,7 +600,7 @@ describe("Entity model", () => {
     await Entities.create({
       name: "TestEntity",
       created: new Date(Date.now()).toISOString(),
-      deleted: false,
+      archived: false,
       locked: false,
       owner: "henry.burgess@wustl.edu",
       description: "Test",
@@ -647,7 +647,7 @@ describe("Entity model", () => {
     await Entities.create({
       name: "TestProductEntity",
       created: new Date(Date.now()).toISOString(),
-      deleted: false,
+      archived: false,
       locked: false,
       owner: "henry.burgess@wustl.edu",
       description: "Test Product",
@@ -665,7 +665,7 @@ describe("Entity model", () => {
     await Entities.create({
       name: "TestOriginEntity",
       created: new Date(Date.now()).toISOString(),
-      deleted: false,
+      archived: false,
       locked: false,
       owner: "henry.burgess@wustl.edu",
       description: "Test Origin",

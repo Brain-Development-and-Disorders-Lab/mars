@@ -44,6 +44,7 @@ export const typedefs = `#graphql
   type Project {
     _id: String!
     name: String
+    archived: Boolean
     description: String
     owner: String
     collaborators: [String]
@@ -55,6 +56,7 @@ export const typedefs = `#graphql
   # "ProjectCreateInput" type
   input ProjectCreateInput {
     name: String!
+    archived: Boolean
     description: String!
     owner: String!
     shared: [String]!
@@ -67,6 +69,7 @@ export const typedefs = `#graphql
   input ProjectUpdateInput {
     _id: String!
     name: String
+    archived: Boolean
     description: String
     owner: String
     collaborators: [String]
@@ -96,6 +99,7 @@ export const typedefs = `#graphql
   type Attribute {
     _id: String!
     name: String
+    archived: Boolean
     description: String
     values: [Value]
   }
@@ -103,6 +107,7 @@ export const typedefs = `#graphql
   # "AttributeCreateInput" input
   input AttributeCreateInput {
     name: String
+    archived: Boolean
     description: String
     values: [ValueInput]
   }
@@ -111,6 +116,7 @@ export const typedefs = `#graphql
   input AttributeInput {
     _id: String!
     name: String
+    archived: Boolean
     description: String
     values: [ValueInput]
   }
@@ -131,10 +137,10 @@ export const typedefs = `#graphql
   type Entity {
     _id: String!
     name: String
+    archived: Boolean
+    locked: Boolean
     created: String
     timestamp: String
-    deleted: Boolean
-    locked: Boolean
     owner: String
     description: String
     projects: [String]
@@ -147,10 +153,10 @@ export const typedefs = `#graphql
   # "EntityCreateInput" input, includes -"Input" types
   input EntityCreateInput {
     name: String!
+    archived: Boolean!
+    locked: Boolean!
     created: String!
     timestamp: String!
-    deleted: Boolean!
-    locked: Boolean!
     owner: String!
     description: String!
     projects: [String]!
@@ -163,10 +169,10 @@ export const typedefs = `#graphql
   input EntityUpdateInput {
     _id: String!
     name: String
+    archived: Boolean
+    locked: Boolean
     created: String
     timestamp: String
-    deleted: Boolean
-    locked: Boolean
     owner: String
     description: String
     projects: [String]
@@ -178,7 +184,7 @@ export const typedefs = `#graphql
   # "EntityHistory" type storing iterations of an Entity
   type EntityHistory {
     timestamp: String
-    deleted: Boolean
+    archived: Boolean
     owner: String
     description: String
     projects: [String]

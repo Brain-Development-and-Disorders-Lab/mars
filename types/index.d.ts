@@ -53,6 +53,7 @@ export type IAttribute = {
   name: string;
   description: string;
   values: IValue<any>[];
+  archived: boolean;
   owner?: string;
 };
 
@@ -111,6 +112,7 @@ export type LinkyProps = {
 // Project types
 export type IProject = {
   name: string;
+  archived: boolean;
   created: string;
   timestamp?: string;
   owner: string;
@@ -156,10 +158,10 @@ export type WorkspaceModel = IWorkspace & {
 // Entity types
 export type IEntity = {
   name: string;
+  archived: boolean;
+  locked: boolean;
   created: string;
   timestamp?: string;
-  deleted: boolean;
-  locked: boolean;
   owner: string;
   description: string;
   projects: string[];
@@ -185,7 +187,7 @@ export type EntityNode = IGenericItem & {
 
 export type EntityHistory = {
   timestamp: string;
-  deleted: boolean;
+  archived: boolean;
   owner: string;
   description: string;
   projects: string[];
@@ -321,6 +323,7 @@ export type IconNames =
 
   // Signal and action icons
   | "activity"
+  | "archive"
   | "attachment"
   | "check"
   | "info"
