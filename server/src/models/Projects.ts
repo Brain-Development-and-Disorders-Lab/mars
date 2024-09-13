@@ -81,6 +81,12 @@ export class Projects {
       },
     };
 
+    // Name
+    if (!_.isUndefined(updated.name)) {
+      update.$set.name = updated.name;
+    }
+
+    // Description
     if (!_.isUndefined(updated.description)) {
       update.$set.description = updated.description;
     }

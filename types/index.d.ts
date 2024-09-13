@@ -136,6 +136,7 @@ export type ProjectModel = IProject & {
 
 export type ProjectHistory = {
   timestamp: string;
+  name: string;
   description: string;
   entities: string[];
 };

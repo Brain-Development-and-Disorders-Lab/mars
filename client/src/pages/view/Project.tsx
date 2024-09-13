@@ -37,7 +37,6 @@ import {
   Spacer,
   Stack,
   Tag,
-  TagLabel,
   Text,
   Textarea,
   Tooltip,
@@ -46,6 +45,7 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
+import ActorTag from "@components/ActorTag";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 import Dialog from "@components/Dialog";
@@ -109,6 +109,7 @@ const Project = () => {
 
   // Project state
   const [project, setProject] = useState({} as ProjectModel);
+  const [projectName, setProjectName] = useState("");
   const [projectArchived, setProjectArchived] = useState(false);
   const [projectEntities, setProjectEntities] = useState([] as string[]);
   const [projectDescription, setProjectDescription] = useState("");
@@ -212,6 +213,7 @@ const Project = () => {
   useEffect(() => {
     if (data?.project) {
       setProject(data.project);
+      setProjectName(data.project.name);
       setProjectArchived(data.project.archived);
       setProjectDescription(data.project.description);
       setProjectEntities(data.project.entities);
@@ -263,7 +265,7 @@ const Project = () => {
       // Collate update data
       const updateData: ProjectModel = {
         _id: project._id,
-        name: project.name,
+        name: projectName,
         archived: projectArchived,
         description: projectDescription,
         owner: project.owner,
@@ -299,6 +301,10 @@ const Project = () => {
           });
         }
       }
+
+      // Refetch Project data
+      await refetch();
+
       setEditing(false);
       setIsUpdating(false);
     } else {
@@ -392,7 +398,7 @@ const Project = () => {
     // Reconstruct a `ProjectModel` instance from the prior version
     const updateData: ProjectModel = {
       _id: project._id,
-      name: project.name,
+      name: projectVersion.name,
       archived: project.archived,
       created: project.created,
       owner: project.owner,
@@ -438,6 +444,10 @@ const Project = () => {
     setProjectEntities(updateData.entities);
     setProjectHistory(updateData?.history || []);
     setProjectCollaborators(updateData?.collaborators || []);
+
+    // Refetch Project data
+    await refetch();
+
     setIsLoaded(true);
   };
 
@@ -489,7 +499,7 @@ const Project = () => {
     if (response.data.exportProject) {
       FileSaver.saveAs(
         new Blob([response.data.exportProject]),
-        slugify(`${project.name.replace(" ", "")}_export.${format}`),
+        slugify(`${projectName.replace(" ", "")}_export.${format}`),
       );
 
       // Close the "Export" modal
@@ -767,42 +777,61 @@ const Project = () => {
             <Flex
               direction={"column"}
               p={"2"}
+              gap={"2"}
               border={"1px"}
               borderColor={"gray.200"}
               rounded={"md"}
             >
               {/* Project Overview */}
-              <Flex gap={"4"} grow={"1"} direction={"column"}>
-                <Flex gap={"2"} direction={"row"}>
-                  <Flex gap={"2"} direction={"column"} basis={"40%"}>
-                    <Text fontWeight={"bold"}>Created</Text>
-                    <Flex align={"center"} gap={"1"}>
-                      <Icon name={"v_date"} size={"sm"} />
-                      <Text fontSize={"sm"}>
-                        {dayjs(project.created).format("DD MMM YYYY")}
-                      </Text>
-                    </Flex>
-                    <Text fontWeight={"bold"}>Owner</Text>
-                    <Flex>
-                      <Tag colorScheme={"green"}>
-                        <TagLabel fontSize={"sm"}>{project.owner}</TagLabel>
-                      </Tag>
-                    </Flex>
-                  </Flex>
+              <Flex gap={"2"} direction={"row"}>
+                <Flex direction={"column"} gap={"2"} basis={"60%"}>
+                  <Text fontWeight={"bold"}>Name</Text>
+                  <Input
+                    size={"sm"}
+                    value={projectName}
+                    onChange={(event) => {
+                      setProjectName(event.target.value);
+                    }}
+                    isReadOnly={!editing}
+                    bg={"white"}
+                    rounded={"md"}
+                    border={"1px"}
+                    borderColor={"gray.200"}
+                  />
+                </Flex>
 
-                  <Flex gap={"2"} direction={"column"} basis={"60%"}>
-                    <Text fontWeight={"bold"}>Description</Text>
-                    <Textarea
-                      size={"sm"}
-                      value={projectDescription}
-                      onChange={(event) => {
-                        setProjectDescription(event.target.value);
-                      }}
-                      isReadOnly={!editing}
-                      bg={"white"}
-                      border={"1px"}
-                      borderColor={"gray.200"}
-                    />
+                <Flex direction={"column"} gap={"2"}>
+                  <Text fontWeight={"bold"}>Created</Text>
+                  <Flex align={"center"} gap={"1"}>
+                    <Icon name={"v_date"} size={"sm"} />
+                    <Text fontSize={"sm"}>
+                      {dayjs(project.created).format("DD MMM YYYY")}
+                    </Text>
+                  </Flex>
+                </Flex>
+              </Flex>
+
+              <Flex gap={"2"} direction={"row"}>
+                <Flex direction={"column"} gap={"2"} basis={"60%"}>
+                  <Text fontWeight={"bold"}>Description</Text>
+                  <Textarea
+                    size={"sm"}
+                    value={projectDescription}
+                    onChange={(event) => {
+                      setProjectDescription(event.target.value);
+                    }}
+                    isReadOnly={!editing}
+                    bg={"white"}
+                    rounded={"md"}
+                    border={"1px"}
+                    borderColor={"gray.200"}
+                  />
+                </Flex>
+
+                <Flex direction={"column"} gap={"2"}>
+                  <Text fontWeight={"bold"}>Owner</Text>
+                  <Flex>
+                    <ActorTag orcid={project.owner} fallback={"Unknown User"} />
                   </Flex>
                 </Flex>
               </Flex>
@@ -1038,7 +1067,7 @@ const Project = () => {
                       <CheckboxGroup>
                         <Stack spacing={2} direction={"column"}>
                           <Checkbox disabled defaultChecked size={"sm"}>
-                            Name: {project.name}
+                            Name: {projectName}
                           </Checkbox>
                           <Checkbox
                             size={"sm"}
