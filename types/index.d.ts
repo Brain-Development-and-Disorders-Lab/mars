@@ -333,6 +333,7 @@ export type IconNames =
   | "upload"
   | "cross"
   | "list"
+  | "person"
   | "warning"
   | "exclamation"
   | "reload"
@@ -365,6 +366,7 @@ export type IconNames =
 
   // Arrows
   | "a_right"
+  | "b_right"
 
   // Chevrons
   | "c_left"
@@ -424,21 +426,14 @@ export type Context = {
 
 // User types
 export type IUser = {
-  name: string;
-  email?: string;
+  firstName: string;
+  lastName: string;
+  affiliation: string;
+  email: string;
+  workspaces: string[];
 };
 
 export type UserModel = IUser & {
   _id: string;
   token: string;
-};
-
-// Device types
-export type IDevice = {
-  name: string;
-  vendor_id: number;
-};
-
-export type DeviceModel = IDevice & {
-  _id: string;
 };

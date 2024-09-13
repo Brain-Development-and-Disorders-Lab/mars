@@ -150,6 +150,13 @@ const CreateWorkspace = () => {
     }
   };
 
+  /**
+   * Handle clicking the "Cancel" button when creating a Workspace
+   */
+  const handleCancelClick = () => {
+    navigate("/");
+  };
+
   return (
     <Content>
       <Flex gap={"2"} direction={"column"}>
@@ -172,7 +179,11 @@ const CreateWorkspace = () => {
               </Button>
             )}
             {workspace !== "" && (
-              <Button size={"sm"} colorScheme={"red"}>
+              <Button
+                size={"sm"}
+                colorScheme={"red"}
+                onClick={() => handleCancelClick()}
+              >
                 Cancel
               </Button>
             )}

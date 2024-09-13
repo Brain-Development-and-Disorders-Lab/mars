@@ -1,20 +1,32 @@
 // React
-import React, { FC, useContext, useEffect, useMemo } from "react";
+import React, { FC, useContext, useEffect, useMemo, useState } from "react";
 
 // Existing and custom components
-import { Flex, Heading, Button, Image, Text, useToast } from "@chakra-ui/react";
+import {
+  Flex,
+  Heading,
+  Button,
+  Image,
+  Text,
+  useToast,
+  FormControl,
+  FormLabel,
+  Input,
+  Tag,
+} from "@chakra-ui/react";
 import { Content } from "@components/Container";
+import Icon from "@components/Icon";
 
 // Routing and navigation
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 
 // Utility functions and libraries
-import { gql, useLazyQuery } from "@apollo/client";
+import { gql, useLazyQuery, useMutation } from "@apollo/client";
 import { useToken } from "src/authentication/useToken";
 import _ from "lodash";
 
 // Existing and custom types
-import { LoginProps, WorkspaceModel } from "@types";
+import { LoginProps, ResponseMessage, UserModel, WorkspaceModel } from "@types";
 
 // Workspace context
 import { WorkspaceContext } from "src/Context";
@@ -33,14 +45,28 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
 
   const parameters = useParameters();
 
-  // Navigation
-  const navigate = useNavigate();
-
   // Extract query parameters
   const accessCode = parameters.get("code");
 
   // Access parameters to remove code after authentication
   const [searchParams, setSearchParams] = useSearchParams();
+
+  // User configured state
+  const [showSetup, setShowSetup] = useState(false);
+  const [isSetup, setIsSetup] = useState(false);
+
+  // User information state
+  const [userOrcid, setUserOrcid] = useState("");
+  const [userFirstName, setUserFirstName] = useState("");
+  const [userLastName, setUserLastName] = useState("");
+  const [userEmail, setUserEmail] = useState("");
+  const [userAffiliation, setUserAffiliation] = useState("");
+  const isUserComplete =
+    userOrcid !== "" &&
+    userFirstName !== "" &&
+    userLastName !== "" &&
+    userEmail !== "" &&
+    userAffiliation !== "";
 
   // Remove the "code" search parameter upon login
   const removeCode = () => {
@@ -77,8 +103,45 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
     workspaces: WorkspaceModel[];
   }>(GET_WORKSPACES);
 
+  // Query to retrieve User
+  const GET_USER = gql`
+    query GetUser($_id: String) {
+      user(_id: $_id) {
+        _id
+        firstName
+        lastName
+        email
+        affiliation
+      }
+    }
+  `;
+  const [getUser, { error: userError }] = useLazyQuery<{ user: UserModel }>(
+    GET_USER,
+  );
+
+  // Query to update User
+  const UPDATE_USER = gql`
+    mutation UpdateUser($user: UserInput) {
+      updateUser(user: $user) {
+        success
+        message
+      }
+    }
+  `;
+  const [updateUser, { error: userUpdateError }] = useMutation<{
+    updateUser: ResponseMessage;
+  }>(UPDATE_USER);
+
   // Workspace context
   const { setWorkspace } = useContext(WorkspaceContext);
+
+  // Respond to `isSetup` state
+  useEffect(() => {
+    if (isSetup === true) {
+      // Set the authentication status
+      setAuthenticated(true);
+    }
+  }, [isSetup]);
 
   /**
    * Utility function to perform a Login operation
@@ -91,6 +154,9 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
     // Perform login and data retrieval via server, check if user permitted access
     if (loginResponse.data?.login) {
       removeCode();
+
+      // Store the User ORCiD
+      setUserOrcid(loginResponse.data.login.orcid);
 
       // Create a new token instance with an empty Workspace value
       setToken({
@@ -112,19 +178,46 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
 
         // Update the Workspace context
         setWorkspace(workspacesResponse.data.workspaces[0]._id);
-
-        // Navigate to the dashboard
-        navigate("");
       }
 
-      // Finalise authentication state
-      setAuthenticated(true);
+      // Retrieve the User information and display the setup form if information missing
+      const userResponse = await getUser({
+        variables: {
+          _id: loginResponse.data.login.orcid,
+        },
+      });
+
+      if (userResponse.data?.user) {
+        // Examine the user data and show setup if incomplete
+        const user: Partial<UserModel> = userResponse.data.user;
+        if (
+          user.firstName === "" ||
+          user.lastName === "" ||
+          user.email === "" ||
+          user.affiliation === ""
+        ) {
+          setShowSetup(true);
+        } else {
+          setAuthenticated(true);
+        }
+      }
 
       if (workspacesError) {
         toast({
           title: "Warning",
           status: "warning",
           description: "Unable to retrieve Workspaces",
+          duration: 4000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+      }
+
+      if (userError) {
+        toast({
+          title: "Warning",
+          status: "warning",
+          description: "Unable to retrieve User data",
           duration: 4000,
           position: "bottom-right",
           isClosable: true,
@@ -177,6 +270,39 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
     }
   };
 
+  /**
+   * Handle the "Done" button being clicked after user information is entered
+   */
+  const handleUserDone = async () => {
+    const result = await updateUser({
+      variables: {
+        user: {
+          _id: userOrcid,
+          firstName: userFirstName,
+          lastName: userLastName,
+          email: userEmail,
+          affiliation: userAffiliation,
+        },
+      },
+    });
+
+    console.info(result.data);
+    if (result.data?.updateUser) {
+      setIsSetup(result.data.updateUser.success);
+    }
+
+    if (userUpdateError) {
+      toast({
+        title: "Error",
+        status: "error",
+        description: "Failed to update User information",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
+  };
+
   return (
     <Content>
       <Flex
@@ -189,24 +315,17 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
         h={"100vh"}
         wrap={"wrap"}
       >
-        <Flex
-          direction={"column"}
-          p={"8"}
-          gap={"12"}
-          maxW={"sm"}
-          h={"md"}
-          bg={"white"}
-          rounded={"lg"}
-          border={"1px"}
-          borderColor={"gray.200"}
-          align={"center"}
-          justify={"center"}
-        >
+        {showSetup ? (
           <Flex
             direction={"column"}
-            justify={"center"}
+            p={"4"}
+            gap={"4"}
+            bg={"white"}
+            rounded={"lg"}
+            border={"1px"}
+            borderColor={"gray.200"}
             align={"center"}
-            gap={"6"}
+            justify={"center"}
           >
             <Flex direction={"row"} gap={"2"} align={"center"}>
               <Image src="/Favicon.png" boxSize={"64px"} />
@@ -214,26 +333,132 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
                 Metadatify
               </Heading>
             </Flex>
-            <Text align={"center"}>
-              Use your ORCiD ID to log in or create an account below.
+            <Heading size={"md"}>User Setup</Heading>
+            <Text fontWeight={"semibold"} color={"gray.400"}>
+              Please provide the following information to complete your user
+              profile.
             </Text>
+            <Flex
+              direction={"row"}
+              gap={"2"}
+              w={"100%"}
+              align={"center"}
+              justify={"left"}
+            >
+              <Text fontWeight={"semibold"}>ORCiD:</Text>
+              <Tag colorScheme={"green"}>{userOrcid}</Tag>
+            </Flex>
+            <FormControl isRequired>
+              <Flex direction={"column"} gap={"2"}>
+                <Flex direction={"row"} gap={"2"}>
+                  <Flex direction={"column"} w={"100%"}>
+                    <FormLabel>First Name</FormLabel>
+                    <Input
+                      id={"userFirstNameInput"}
+                      size={"sm"}
+                      rounded={"md"}
+                      value={userFirstName}
+                      onChange={(event) => setUserFirstName(event.target.value)}
+                    />
+                  </Flex>
+                  <Flex direction={"column"} w={"100%"}>
+                    <FormLabel>Last Name</FormLabel>
+                    <Input
+                      id={"userLastNameInput"}
+                      size={"sm"}
+                      rounded={"md"}
+                      value={userLastName}
+                      onChange={(event) => setUserLastName(event.target.value)}
+                    />
+                  </Flex>
+                </Flex>
+                <Flex direction={"column"} gap={"2"}>
+                  <Flex direction={"column"}>
+                    <FormLabel>Email</FormLabel>
+                    <Input
+                      id={"userEmailInput"}
+                      size={"sm"}
+                      rounded={"md"}
+                      type={"email"}
+                      value={userEmail}
+                      onChange={(event) => setUserEmail(event.target.value)}
+                    />
+                  </Flex>
+                  <Flex direction={"column"}>
+                    <FormLabel>Affiliation</FormLabel>
+                    <Input
+                      id={"userAffiliationInput"}
+                      size={"sm"}
+                      rounded={"md"}
+                      value={userAffiliation}
+                      onChange={(event) =>
+                        setUserAffiliation(event.target.value)
+                      }
+                    />
+                  </Flex>
+                </Flex>
+              </Flex>
+            </FormControl>
+            <Flex align={"center"} justify={"right"} w={"100%"}>
+              <Button
+                id={"userDoneButton"}
+                leftIcon={<Icon name={"check"} />}
+                colorScheme={"green"}
+                size={"sm"}
+                onClick={() => handleUserDone()}
+                isDisabled={!isUserComplete}
+              >
+                Done
+              </Button>
+            </Flex>
           </Flex>
-
-          <Button
-            colorScheme={"gray"}
-            gap={"4"}
-            onClick={onLoginClick}
-            isLoading={loading}
-            loadingText={"Logging in..."}
+        ) : (
+          <Flex
+            direction={"column"}
+            p={"8"}
+            gap={"12"}
+            maxW={"sm"}
+            h={"md"}
+            bg={"white"}
+            rounded={"lg"}
+            border={"1px"}
+            borderColor={"gray.200"}
+            align={"center"}
+            justify={"center"}
           >
-            <Image
-              src={
-                "https://orcid.org/sites/default/files/images/orcid_16x16.png"
-              }
-            />
-            Connect ORCiD
-          </Button>
-        </Flex>
+            <Flex
+              direction={"column"}
+              justify={"center"}
+              align={"center"}
+              gap={"6"}
+            >
+              <Flex direction={"row"} gap={"2"} align={"center"}>
+                <Image src="/Favicon.png" boxSize={"64px"} />
+                <Heading size={"lg"} fontWeight={"semibold"}>
+                  Metadatify
+                </Heading>
+              </Flex>
+              <Text align={"center"}>
+                Use your ORCiD ID to log in or create an account below.
+              </Text>
+            </Flex>
+
+            <Button
+              colorScheme={"gray"}
+              gap={"4"}
+              onClick={onLoginClick}
+              isLoading={loading}
+              loadingText={"Logging in..."}
+            >
+              <Image
+                src={
+                  "https://orcid.org/sites/default/files/images/orcid_16x16.png"
+                }
+              />
+              Connect ORCiD
+            </Button>
+          </Flex>
+        )}
       </Flex>
     </Content>
   );

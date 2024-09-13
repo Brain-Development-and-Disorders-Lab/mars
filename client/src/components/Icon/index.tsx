@@ -10,6 +10,7 @@ import {
   BsArrowRight,
   BsBarChartFill,
   BsBellFill,
+  BsBoxArrowRight,
   BsBoxFill,
   BsCalendarWeekFill,
   BsCheckCircleFill,
@@ -34,6 +35,7 @@ import {
   BsFillEyeFill,
   BsFillFileBinaryFill,
   BsFillGearFill,
+  BsFillPersonFill,
   BsGithub,
   BsGlobe,
   BsInfoCircleFill,
@@ -89,6 +91,7 @@ const SYSTEM_ICONS: Record<string, IconType> = {
   upload: BsFillCloudUploadFill,
   cross: BsXCircleFill,
   list: BsList,
+  person: BsFillPersonFill,
   warning: BsFillExclamationTriangleFill,
   exclamation: BsExclamationOctagonFill,
   reload: BsArrowClockwise,
@@ -121,6 +124,7 @@ const SYSTEM_ICONS: Record<string, IconType> = {
 
   // Arrows
   a_right: BsArrowRight,
+  b_right: BsBoxArrowRight,
 
   // Chevrons
   c_left: BsChevronLeft,
