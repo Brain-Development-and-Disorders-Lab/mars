@@ -234,7 +234,7 @@ export type AttachmentData = {
 // Activity types
 export type IActivity = {
   timestamp: Date;
-  type: "create" | "update" | "delete";
+  type: "create" | "update" | "delete" | "archived";
   details: string;
   target: {
     type: "entities" | "projects" | "attributes";

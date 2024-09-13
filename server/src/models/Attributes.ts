@@ -127,6 +127,55 @@ export class Attributes {
   };
 
   /**
+   * Set the archive state of an Attribute
+   * @param _id Attribute identifier to archive
+   * @param state Attribute archive state
+   * @return {Promise<ResponseMessage>}
+   */
+  static setArchived = async (
+    _id: string,
+    state: boolean,
+  ): Promise<ResponseMessage> => {
+    consola.debug(
+      "Setting archive state of Attribute:",
+      _id,
+      "Archived:",
+      state,
+    );
+    const attribute = await this.getOne(_id);
+    if (_.isNull(attribute)) {
+      consola.error("Unable to retrieve Attribute:", _id);
+      return {
+        success: false,
+        message: "Error retrieving existing Attribute",
+      };
+    }
+
+    // Update the archived state
+    attribute.archived = state;
+    const update: { $set: IAttribute } = {
+      $set: {
+        ...attribute,
+      },
+    };
+
+    const response = await getDatabase()
+      .collection<AttributeModel>(ATTRIBUTES_COLLECTION)
+      .updateOne({ _id: _id }, update);
+    if (response.modifiedCount > 0) {
+      consola.info("Set archive state of Attribute:", _id, "Archived:", state);
+    }
+
+    return {
+      success: true,
+      message:
+        response.modifiedCount === 1
+          ? "Set archive state of Attribute"
+          : "No changes made to Attribute",
+    };
+  };
+
+  /**
    * Delete an Attribute
    * @param _id Attribute identifier to delete
    * @return {ResponseMessage}

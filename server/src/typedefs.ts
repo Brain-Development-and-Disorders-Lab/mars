@@ -346,6 +346,7 @@ export const typedefs = `#graphql
     setEntityDescription(_id: String, description: String): Response
     createEntity(entity: EntityCreateInput): Response
     updateEntity(entity: EntityUpdateInput): Response
+    archiveEntity(_id: String, state: Boolean): Response
     deleteEntity(_id: String): Response
     addEntityProject(_id: String, project_id: String): Response
     removeEntityProject(_id: String, project_id: String): Response
@@ -363,6 +364,7 @@ export const typedefs = `#graphql
     # Project mutations
     createProject(project: ProjectCreateInput): Response
     updateProject(project: ProjectUpdateInput): Response
+    archiveProject(_id: String, state: Boolean): Response
     deleteProject(_id: String): Response
     addProjectEntity(_id: String, entity: String): Response
     addProjectEntities(_id: String, entities: [String]): Response
@@ -382,6 +384,7 @@ export const typedefs = `#graphql
     # Attribute mutations
     createAttribute(attribute: AttributeCreateInput): Response
     updateAttribute(attribute: AttributeInput): Response
+    archiveAttribute(_id: String, state: Boolean): Response
     deleteAttribute(_id: String): Response
 
     # Data mutations

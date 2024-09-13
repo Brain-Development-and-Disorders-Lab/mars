@@ -264,6 +264,45 @@ export const EntitiesResolvers = {
       }
     },
 
+    // Archive an Entity
+    archiveEntity: async (
+      _parent: any,
+      args: { _id: string; state: boolean },
+      context: Context,
+    ) => {
+      const entity = await Entities.getOne(args._id);
+      if (_.isNull(entity)) {
+        throw new GraphQLError("Entity does not exist", {
+          extensions: {
+            code: "NON_EXIST",
+          },
+        });
+      }
+
+      // Perform archive operation
+      const result = await Entities.setArchived(args._id, args.state);
+
+      // Create new Activity if successful
+      if (result.success) {
+        const activity = await Activity.create({
+          timestamp: new Date(),
+          type: "archived",
+          actor: context.user,
+          details: "Archived Entity",
+          target: {
+            _id: entity._id,
+            type: "entities",
+            name: entity.name,
+          },
+        });
+
+        // Add Activity to Workspace
+        await Workspaces.addActivity(context.workspace, activity.message);
+      }
+
+      return result;
+    },
+
     // Delete an Entity
     deleteEntity: async (
       _parent: any,

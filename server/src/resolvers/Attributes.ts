@@ -154,6 +154,45 @@ export const AttributesResolvers = {
       return result;
     },
 
+    // Archive an Attribute
+    archiveAttribute: async (
+      _parent: any,
+      args: { _id: string; state: boolean },
+      context: Context,
+    ) => {
+      const attribute = await Attributes.getOne(args._id);
+      if (_.isNull(attribute)) {
+        throw new GraphQLError("Attribute does not exist", {
+          extensions: {
+            code: "NON_EXIST",
+          },
+        });
+      }
+
+      // Execute archive operation
+      const result = await Attributes.setArchived(args._id, args.state);
+
+      // If successful, add Activity
+      if (result.success) {
+        const activity = await Activity.create({
+          timestamp: new Date(),
+          type: "archived",
+          actor: context.user,
+          details: "Archived Attribute",
+          target: {
+            _id: args._id,
+            type: "attributes",
+            name: attribute.name,
+          },
+        });
+
+        // Add Activity to Workspace
+        await Workspaces.addActivity(context.workspace, activity.message);
+      }
+
+      return result;
+    },
+
     // Delete an Attribute
     deleteAttribute: async (
       _parent: any,

@@ -197,6 +197,42 @@ export const ProjectsResolvers = {
       return result;
     },
 
+    archiveProject: async (
+      _parent: any,
+      args: { _id: string; state: boolean },
+      context: Context,
+    ) => {
+      const project = await Projects.getOne(args._id);
+      if (_.isNull(project)) {
+        throw new GraphQLError("Project does not exist", {
+          extensions: {
+            code: "NON_EXIST",
+          },
+        });
+      }
+
+      const result = await Projects.setArchived(args._id, args.state);
+
+      if (result.success) {
+        const activity = await Activity.create({
+          timestamp: new Date(),
+          type: "archived",
+          actor: context.user,
+          details: "Archived Project",
+          target: {
+            _id: project._id,
+            type: "projects",
+            name: project.name,
+          },
+        });
+
+        // Add Activity to Workspace
+        await Workspaces.addActivity(context.workspace, activity.message);
+      }
+
+      return result;
+    },
+
     deleteProject: async (
       _parent: any,
       args: { _id: string },
