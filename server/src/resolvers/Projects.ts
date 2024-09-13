@@ -218,7 +218,7 @@ export const ProjectsResolvers = {
           timestamp: new Date(),
           type: "archived",
           actor: context.user,
-          details: "Archived Project",
+          details: args.state ? "Archived Project" : "Restored Project",
           target: {
             _id: project._id,
             type: "projects",

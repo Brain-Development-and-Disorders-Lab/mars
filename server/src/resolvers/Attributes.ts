@@ -178,7 +178,7 @@ export const AttributesResolvers = {
           timestamp: new Date(),
           type: "archived",
           actor: context.user,
-          details: "Archived Attribute",
+          details: args.state ? "Archived Attribute" : "Restored Attribute",
           target: {
             _id: args._id,
             type: "attributes",

@@ -288,7 +288,7 @@ export const EntitiesResolvers = {
           timestamp: new Date(),
           type: "archived",
           actor: context.user,
-          details: "Archived Entity",
+          details: args.state ? "Archived Entity" : "Restored Entity",
           target: {
             _id: entity._id,
             type: "entities",
