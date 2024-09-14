@@ -31,7 +31,7 @@ const Invalid = () => {
           justify={"center"}
           align={"center"}
           border={"1px"}
-          borderColor={"gray.200"}
+          borderColor={"gray.300"}
           rounded={"md"}
         >
           <Flex direction={"row"} gap={"2"} align={"center"}>

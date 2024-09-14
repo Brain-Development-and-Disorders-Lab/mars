@@ -8,13 +8,6 @@ import {
   Heading,
   IconButton,
   Input,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalHeader,
-  ModalOverlay,
-  Spacer,
   Tab,
   TabList,
   TabPanel,
@@ -22,7 +15,6 @@ import {
   Tabs,
   Tag,
   Text,
-  useDisclosure,
   useToast,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
@@ -54,8 +46,6 @@ const Search = () => {
   const [hasSearched, setHasSearched] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [isError, setIsError] = useState(false);
-
-  const { isOpen, onOpen, onClose } = useDisclosure();
 
   const navigate = useNavigate();
   const toast = useToast();
@@ -213,7 +203,7 @@ const Search = () => {
 
   return (
     <Content isError={isError}>
-      <Flex direction={"column"}>
+      <Flex direction={"column"} p={"2"}>
         {/* Page header */}
         <Flex
           direction={"row"}
@@ -224,15 +214,6 @@ const Search = () => {
           <Flex align={"center"} gap={"2"} w={"100%"}>
             <Icon name={"search"} size={"md"} />
             <Heading size={"md"}>Search</Heading>
-            <Spacer />
-            <Button
-              size={"sm"}
-              rightIcon={<Icon name={"info"} />}
-              variant={"outline"}
-              onClick={onOpen}
-            >
-              Info
-            </Button>
           </Flex>
         </Flex>
 
@@ -240,39 +221,63 @@ const Search = () => {
         <Tabs
           w={"100%"}
           size={"sm"}
-          colorScheme={"gray"}
+          colorScheme={"blue"}
           variant={"soft-rounded"}
           onChange={onTabChange}
         >
-          <TabList p={"2"} gap={"2"}>
+          <TabList p={"2"} gap={"2"} pb={"0"}>
             <Tab isDisabled={isSearching}>Text</Tab>
             <Tab isDisabled={isSearching}>Query Builder</Tab>
           </TabList>
+
           <TabPanels>
             {/* Text search */}
             <TabPanel p={"2"}>
-              <Flex w={"100%"} direction={"row"} gap={"2"}>
-                <Input
-                  size={"sm"}
-                  value={query}
-                  placeholder={"Search..."}
-                  onChange={(event) => setQuery(event.target.value)}
-                  onKeyUp={(event) => {
-                    // Listen for "Enter" key when entering a query
-                    if (event.key === "Enter" && query !== "") {
-                      runSearch();
-                    }
-                  }}
-                />
+              <Flex direction={"column"} gap={"2"}>
+                <Flex
+                  direction={"row"}
+                  gap={"2"}
+                  p={"2"}
+                  rounded={"md"}
+                  bg={"blue.100"}
+                  align={"center"}
+                  w={"fit-content"}
+                >
+                  <Icon name={"info"} color={"blue.300"} />
+                  <Text
+                    fontWeight={"semibold"}
+                    fontSize={"sm"}
+                    color={"blue.700"}
+                  >
+                    Use text search to search for terms appearing in Entities
+                    within the Workspace. Text search will include terms
+                    appearing in Attributes.
+                  </Text>
+                </Flex>
 
-                <IconButton
-                  aria-label={"Search"}
-                  size={"sm"}
-                  icon={<Icon name={"search"} />}
-                  colorScheme={"green"}
-                  isDisabled={query === ""}
-                  onClick={() => runSearch()}
-                />
+                <Flex w={"100%"} direction={"row"} gap={"2"}>
+                  <Input
+                    size={"sm"}
+                    value={query}
+                    placeholder={"Search..."}
+                    onChange={(event) => setQuery(event.target.value)}
+                    onKeyUp={(event) => {
+                      // Listen for "Enter" key when entering a query
+                      if (event.key === "Enter" && query !== "") {
+                        runSearch();
+                      }
+                    }}
+                  />
+
+                  <IconButton
+                    aria-label={"Search"}
+                    size={"sm"}
+                    icon={<Icon name={"search"} />}
+                    colorScheme={"green"}
+                    isDisabled={query === ""}
+                    onClick={() => runSearch()}
+                  />
+                </Flex>
               </Flex>
             </TabPanel>
 
@@ -315,28 +320,6 @@ const Search = () => {
             )
           )}
         </Flex>
-
-        {/* Information modal */}
-        <Modal isOpen={isOpen} onClose={onClose} isCentered>
-          <ModalOverlay />
-          <ModalContent p={"2"} gap={"2"} w={["lg", "xl", "2xl"]}>
-            <ModalHeader px={"2"}>Search</ModalHeader>
-            <ModalCloseButton />
-            <ModalBody px={"2"}>
-              <Flex direction={"column"} gap={"2"} p={"2"}>
-                <Text fontSize={"sm"}>
-                  Use the <b>Text Search</b> tab to search for text across all
-                  Entity fields.
-                </Text>
-                <Text fontSize={"sm"}>
-                  The <b>Query Builder</b> tab allows search queries to be
-                  constructed to target specific fields and values. Queries can
-                  be built using AND and OR logical components.
-                </Text>
-              </Flex>
-            </ModalBody>
-          </ModalContent>
-        </Modal>
       </Flex>
     </Content>
   );

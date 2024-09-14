@@ -779,7 +779,7 @@ const Project = () => {
               p={"2"}
               gap={"2"}
               border={"1px"}
-              borderColor={"gray.200"}
+              borderColor={"gray.300"}
               rounded={"md"}
             >
               {/* Project Overview */}
@@ -796,7 +796,7 @@ const Project = () => {
                     bg={"white"}
                     rounded={"md"}
                     border={"1px"}
-                    borderColor={"gray.200"}
+                    borderColor={"gray.300"}
                   />
                 </Flex>
 
@@ -824,7 +824,7 @@ const Project = () => {
                     bg={"white"}
                     rounded={"md"}
                     border={"1px"}
-                    borderColor={"gray.200"}
+                    borderColor={"gray.300"}
                   />
                 </Flex>
 
@@ -844,7 +844,7 @@ const Project = () => {
               gap={"2"}
               rounded={"md"}
               border={"1px"}
-              borderColor={"gray.200"}
+              borderColor={"gray.300"}
             >
               <Flex
                 direction={"row"}
@@ -905,7 +905,7 @@ const Project = () => {
               p={"2"}
               rounded={"md"}
               border={"1px"}
-              borderColor={"gray.200"}
+              borderColor={"gray.300"}
             >
               {/* Collaborators display */}
               <Flex direction={"column"}>
@@ -1058,7 +1058,7 @@ const Project = () => {
                 gap={"4"}
                 rounded={"md"}
                 border={"1px"}
-                borderColor={"gray.200"}
+                borderColor={"gray.300"}
               >
                 <Flex direction={"column"} gap={"2"}>
                   <FormControl>

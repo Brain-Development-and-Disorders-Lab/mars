@@ -133,7 +133,7 @@ const Project = () => {
               gap={"2"}
               rounded={"md"}
               border={"1px"}
-              borderColor={"gray.200"}
+              borderColor={"gray.300"}
             >
               <FormControl isRequired isInvalid={isNameError}>
                 <FormLabel htmlFor={"name"} fontSize={"sm"}>
@@ -213,7 +213,7 @@ const Project = () => {
               gap={"2"}
               rounded={"md"}
               border={"1px"}
-              borderColor={"gray.200"}
+              borderColor={"gray.300"}
             >
               {/* Project description */}
               <FormControl isRequired isInvalid={isDescriptionError}>
@@ -246,7 +246,7 @@ const Project = () => {
             minH={"300px"}
             rounded={"md"}
             border={"1px"}
-            borderColor={"gray.200"}
+            borderColor={"gray.300"}
             align={"center"}
             justify={"center"}
           >

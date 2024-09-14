@@ -233,7 +233,7 @@ const CreateWorkspace = () => {
                 gap={"2"}
                 rounded={"md"}
                 border={"1px"}
-                borderColor={"gray.200"}
+                borderColor={"gray.300"}
               >
                 <FormControl isRequired>
                   <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
@@ -255,7 +255,7 @@ const CreateWorkspace = () => {
                 gap={"2"}
                 rounded={"md"}
                 border={"1px"}
-                borderColor={"gray.200"}
+                borderColor={"gray.300"}
               >
                 <Text fontSize={"sm"} fontWeight={"semibold"}>
                   Collaborators
@@ -358,7 +358,7 @@ const CreateWorkspace = () => {
                 gap={"2"}
                 rounded={"md"}
                 border={"1px"}
-                borderColor={"gray.200"}
+                borderColor={"gray.300"}
               >
                 <FormControl>
                   <FormLabel fontSize={"sm"} fontWeight={"semibold"}>

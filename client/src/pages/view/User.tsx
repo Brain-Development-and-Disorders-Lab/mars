@@ -314,7 +314,7 @@ const User = () => {
               gap={"2"}
               rounded={"md"}
               border={"1px"}
-              borderColor={"gray.200"}
+              borderColor={"gray.300"}
             >
               <Flex direction={"row"} p={"0"} gap={"2"}>
                 <FormControl>
@@ -367,7 +367,7 @@ const User = () => {
               gap={"2"}
               rounded={"md"}
               border={"1px"}
-              borderColor={"gray.200"}
+              borderColor={"gray.300"}
             >
               <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
                 Workspaces

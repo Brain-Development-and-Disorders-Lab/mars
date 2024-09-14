@@ -352,7 +352,7 @@ const Attribute = () => {
               direction={"column"}
               p={"2"}
               border={"1px"}
-              borderColor={"gray.200"}
+              borderColor={"gray.300"}
               rounded={"md"}
             >
               {/* Attribute Overview */}
@@ -383,7 +383,7 @@ const Attribute = () => {
                     isReadOnly={!editing}
                     bg={"white"}
                     border={"1px"}
-                    borderColor={"gray.200"}
+                    borderColor={"gray.300"}
                   />
                 )}
               </Flex>
@@ -401,7 +401,7 @@ const Attribute = () => {
               p={"2"}
               rounded={"md"}
               border={"1px"}
-              borderColor={"gray.200"}
+              borderColor={"gray.300"}
             >
               <Values
                 viewOnly={!editing}

@@ -174,7 +174,7 @@ const SearchSelect = (props: SearchSelectProps) => {
           direction={"column"}
           bg={"white"}
           border={"1px"}
-          borderColor={"gray.200"}
+          borderColor={"gray.300"}
           borderRadius={"sm"}
           shadow={"md"}
           position={"absolute"}

@@ -323,7 +323,7 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
             bg={"white"}
             rounded={"lg"}
             border={"1px"}
-            borderColor={"gray.200"}
+            borderColor={"gray.300"}
             align={"center"}
             justify={"center"}
           >
@@ -422,7 +422,7 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
             bg={"white"}
             rounded={"lg"}
             border={"1px"}
-            borderColor={"gray.200"}
+            borderColor={"gray.300"}
             align={"center"}
             justify={"center"}
           >

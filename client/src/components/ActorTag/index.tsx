@@ -63,7 +63,7 @@ const ActorTag = (props: ActorProps) => {
       rounded={"md"}
       bg={"gray.50"}
       border={"1px"}
-      borderColor={"gray.200"}
+      borderColor={"gray.300"}
     >
       <Avatar name={tooltipLabel} size={"sm"} />
       {loading ? (

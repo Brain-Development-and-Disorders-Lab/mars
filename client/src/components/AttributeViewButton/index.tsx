@@ -94,7 +94,7 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
                 rounded={"md"}
                 direction={"row"}
                 border={"1px"}
-                borderColor={"gray.200"}
+                borderColor={"gray.300"}
               >
                 <Flex direction={"column"} gap={"2"} basis={"40%"}>
                   <Text size={"md"} fontWeight={"semibold"}>
@@ -132,7 +132,7 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
                 bg={"white"}
                 rounded={"md"}
                 border={"1px"}
-                borderColor={"gray.200"}
+                borderColor={"gray.300"}
               >
                 <Flex
                   direction={"column"}

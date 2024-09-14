@@ -18,6 +18,7 @@ import {
   BsChevronDoubleLeft,
   BsChevronDoubleRight,
   BsChevronDown,
+  BsChevronExpand,
   BsChevronLeft,
   BsChevronRight,
   BsChevronUp,
@@ -135,6 +136,7 @@ const SYSTEM_ICONS: Record<string, IconType> = {
   c_double_right: BsChevronDoubleRight,
   c_up: BsChevronUp,
   c_down: BsChevronDown,
+  c_expand: BsChevronExpand,
 
   // Sort
   sort: FaSort,

@@ -10,7 +10,6 @@ import {
   useDisclosure,
   Heading,
   Text,
-  Spacer,
   MenuButton,
   Menu,
   MenuList,
@@ -20,7 +19,6 @@ import {
 import Icon from "@components/Icon";
 import Importer from "@components/Importer";
 import SearchBox from "@components/SearchBox";
-import AccountMenu from "@components/AccountMenu";
 import WorkspaceSwitcher from "@components/WorkspaceSwitcher";
 
 // Routing and navigation
@@ -51,7 +49,7 @@ const Navigation = () => {
       <Flex
         direction={"column"}
         display={{ base: "none", lg: "flex" }}
-        gap={"6"}
+        gap={"4"}
         w={"100%"}
       >
         {/* Heading */}
@@ -63,8 +61,8 @@ const Navigation = () => {
           align={"center"}
           justify={"center"}
         >
-          <Image src="/Favicon.png" boxSize={"36px"} />
-          <Heading fontWeight={"semibold"} size={"md"}>
+          <Image src="/Favicon.png" boxSize={"24px"} />
+          <Heading fontWeight={"semibold"} size={"sm"}>
             Metadatify
           </Heading>
         </Flex>
@@ -72,14 +70,15 @@ const Navigation = () => {
         {/* Workspace menu items */}
         <Flex direction={"column"} align={"self-start"} gap={"6"}>
           <Flex direction={"column"} gap={"2"} w={"100%"}>
-            <WorkspaceSwitcher />
             <SearchBox />
+            <WorkspaceSwitcher />
           </Flex>
 
           <Flex direction={"column"} gap={"2"} width={"100%"}>
             <Text fontSize={"xs"} fontWeight={"bold"} color={"gray.600"}>
               Workspace
             </Text>
+
             <Button
               id={"navDashboardButton"}
               key={"dashboard"}
@@ -203,10 +202,6 @@ const Navigation = () => {
             </Button>
           </Flex>
         </Flex>
-
-        <Spacer />
-
-        <AccountMenu />
       </Flex>
 
       {/* Icon to show menu in responsive context */}

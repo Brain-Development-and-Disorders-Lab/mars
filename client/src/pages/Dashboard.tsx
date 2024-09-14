@@ -255,7 +255,7 @@ const Dashboard = () => {
             rounded={"md"}
             gap={"2"}
             border={"1px"}
-            borderColor={"gray.200"}
+            borderColor={"gray.300"}
           >
             {/* Projects heading */}
             <Flex direction={"row"} align={"center"} gap={"2"} my={"2"}>
@@ -308,7 +308,7 @@ const Dashboard = () => {
             rounded={"md"}
             gap={"2"}
             border={"1px"}
-            borderColor={"gray.200"}
+            borderColor={"gray.300"}
           >
             {/* Entities heading */}
             <Flex direction={"row"} align={"center"} gap={"2"} my={"2"}>
@@ -368,7 +368,7 @@ const Dashboard = () => {
           grow={"1"}
           rounded={"md"}
           border={"1px"}
-          borderColor={"gray.200"}
+          borderColor={"gray.300"}
         >
           {/* Activity heading */}
           <Flex align={"center"} gap={"2"} my={"2"}>
@@ -380,7 +380,7 @@ const Dashboard = () => {
 
           {/* Activity list */}
           {activityData.length > 0 ? (
-            <Flex p={"0"} w={"100%"} maxH={"90vh"} overflowY={"auto"}>
+            <Flex p={"0"} w={"100%"} maxH={"85vh"} overflowY={"auto"}>
               <VStack spacing={"2"} w={"95%"}>
                 {activityData.map((activity) => {
                   return (

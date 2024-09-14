@@ -1485,7 +1485,7 @@ const Entity = () => {
               p={"2"}
               gap={"2"}
               border={"1px"}
-              borderColor={"gray.200"}
+              borderColor={"gray.300"}
               rounded={"md"}
             >
               {/* "Name" and "Created" field */}
@@ -1502,7 +1502,7 @@ const Entity = () => {
                       isReadOnly={!editing}
                       rounded={"md"}
                       border={"1px"}
-                      borderColor={"gray.200"}
+                      borderColor={"gray.300"}
                       bg={"white"}
                     />
                   </Flex>
@@ -1533,7 +1533,7 @@ const Entity = () => {
                       isReadOnly={!editing}
                       rounded={"md"}
                       border={"1px"}
-                      borderColor={"gray.200"}
+                      borderColor={"gray.300"}
                       bg={"white"}
                     />
                   </Flex>
@@ -1557,7 +1557,7 @@ const Entity = () => {
               gap={"2"}
               rounded={"md"}
               border={"1px"}
-              borderColor={"gray.200"}
+              borderColor={"gray.300"}
             >
               <Flex
                 direction={"row"}
@@ -1605,7 +1605,7 @@ const Entity = () => {
               gap={"2"}
               rounded={"md"}
               border={"1px"}
-              borderColor={"gray.200"}
+              borderColor={"gray.300"}
             >
               <Flex gap={"2"} direction={"column"}>
                 <Flex
@@ -1692,7 +1692,7 @@ const Entity = () => {
                   borderLeft={"1px"}
                   borderRight={"1px"}
                   borderBottom={"1px"}
-                  borderColor={"gray.200"}
+                  borderColor={"gray.300"}
                   roundedBottom={"md"}
                 >
                   <Flex
@@ -1723,7 +1723,7 @@ const Entity = () => {
                   borderLeft={"1px"}
                   borderRight={"1px"}
                   borderBottom={"1px"}
-                  borderColor={"gray.200"}
+                  borderColor={"gray.300"}
                   roundedBottom={"md"}
                 >
                   <Flex
@@ -1759,7 +1759,7 @@ const Entity = () => {
               gap={"2"}
               rounded={"md"}
               border={"1px"}
-              borderColor={"gray.200"}
+              borderColor={"gray.300"}
             >
               <Flex
                 direction={"row"}
@@ -2035,7 +2035,7 @@ const Entity = () => {
                   justify={"center"}
                   rounded={"md"}
                   border={"1px"}
-                  borderColor={"gray.200"}
+                  borderColor={"gray.300"}
                   minH={"100px"}
                 >
                   {selectedProjects.length > 0 ? (
@@ -2241,7 +2241,7 @@ const Entity = () => {
                 gap={"2"}
                 rounded={"md"}
                 border={"1px"}
-                borderColor={"gray.200"}
+                borderColor={"gray.300"}
               >
                 <Flex direction={"column"} gap={"2"}>
                   <FormControl>

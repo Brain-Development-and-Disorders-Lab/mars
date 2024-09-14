@@ -44,7 +44,7 @@ const Create = () => {
           h={"md"}
           variant={"outline"}
           border={"1px"}
-          borderColor={"gray.200"}
+          borderColor={"gray.300"}
         >
           <CardHeader>
             <Flex gap={"2"} w={"100%"} justify={"center"} align={"center"}>
@@ -101,7 +101,7 @@ const Create = () => {
           h={"md"}
           variant={"outline"}
           border={"1px"}
-          borderColor={"gray.200"}
+          borderColor={"gray.300"}
         >
           <CardHeader>
             <Flex gap={"2"} w={"100%"} justify={"center"} align={"center"}>
@@ -174,7 +174,7 @@ const Create = () => {
           h={"md"}
           variant={"outline"}
           border={"1px"}
-          borderColor={"gray.200"}
+          borderColor={"gray.300"}
         >
           <CardHeader>
             <Flex gap={"4"} w={"100%"} justify={"center"} align={"center"}>

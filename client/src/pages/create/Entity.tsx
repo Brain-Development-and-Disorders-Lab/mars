@@ -405,7 +405,7 @@ const Entity = () => {
                 p={"2"}
                 gap={"2"}
                 border={"1px"}
-                borderColor={"gray.200"}
+                borderColor={"gray.300"}
                 rounded={"md"}
               >
                 <FormControl
@@ -464,7 +464,7 @@ const Entity = () => {
                 gap={"2"}
                 rounded={"md"}
                 border={"1px"}
-                borderColor={"gray.200"}
+                borderColor={"gray.300"}
               >
                 {/* Description */}
                 <FormControl>
@@ -501,7 +501,7 @@ const Entity = () => {
                 gap={"2"}
                 rounded={"md"}
                 border={"1px"}
-                borderColor={"gray.200"}
+                borderColor={"gray.300"}
               >
                 <FormControl>
                   <FormLabel fontSize={"sm"}>Origins</FormLabel>
@@ -561,7 +561,7 @@ const Entity = () => {
                 gap={"2"}
                 rounded={"md"}
                 border={"1px"}
-                borderColor={"gray.200"}
+                borderColor={"gray.300"}
               >
                 <FormControl>
                   <FormLabel fontSize={"sm"}>Products</FormLabel>
@@ -632,7 +632,7 @@ const Entity = () => {
                 gap={"2"}
                 rounded={"md"}
                 border={"1px"}
-                borderColor={"gray.200"}
+                borderColor={"gray.300"}
               >
                 <FormControl>
                   <FormLabel fontSize={"sm"}>Projects</FormLabel>
@@ -684,7 +684,7 @@ const Entity = () => {
                 gap={"2"}
                 rounded={"md"}
                 border={"1px"}
-                borderColor={"gray.200"}
+                borderColor={"gray.300"}
                 justify={"space-between"}
               >
                 {/* Drop-down to select template Attributes */}

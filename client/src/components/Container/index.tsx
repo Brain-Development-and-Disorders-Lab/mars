@@ -52,13 +52,13 @@ const Page: FC<PageProps> = ({ children }) => {
       {/* Navigation component */}
       <Flex
         justify={"center"}
-        w={{ base: "100%", lg: "200px" }}
-        minW={{ lg: "200px" }}
+        w={{ base: "100%", lg: "240px" }}
+        minW={{ lg: "240px" }}
         h={{ base: "8vh", lg: "100%" }}
         position={"fixed"}
         borderRight={"1px"}
         borderBottom={"1px"}
-        borderColor={"gray.200"}
+        borderColor={"gray.300"}
         bg={"white"}
         zIndex={2}
       >
@@ -68,7 +68,7 @@ const Page: FC<PageProps> = ({ children }) => {
       <Flex
         direction={"column"}
         w={"100%"}
-        ml={{ base: "0", lg: "200px" }}
+        ml={{ base: "0", lg: "240px" }}
         mt={{ base: "8vh", lg: "0" }}
       >
         {/* Main content components */}
