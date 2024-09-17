@@ -88,7 +88,7 @@ const Navigation = () => {
               bg={_.isEqual(location.pathname, "/") ? "#ffffff" : "#f2f2f2"}
               leftIcon={<Icon name={"dashboard"} />}
               onClick={() => navigate("/")}
-              isDisabled={workspace === ""}
+              isDisabled={workspace === "" || _.isUndefined(workspace)}
             >
               Dashboard
             </Button>
@@ -104,7 +104,7 @@ const Navigation = () => {
               }
               leftIcon={<Icon name={"search"} />}
               onClick={() => navigate("/search")}
-              isDisabled={workspace === ""}
+              isDisabled={workspace === "" || _.isUndefined(workspace)}
             >
               Search
             </Button>
@@ -122,7 +122,7 @@ const Navigation = () => {
                   : "#f2f2f2"
               }
               onClick={() => navigate("/projects")}
-              isDisabled={workspace === ""}
+              isDisabled={workspace === "" || _.isUndefined(workspace)}
             >
               <Flex w={"100%"} align={"center"} gap={"2"}>
                 <Text>Projects</Text>
@@ -142,7 +142,7 @@ const Navigation = () => {
                   : "#f2f2f2"
               }
               onClick={() => navigate("/entities")}
-              isDisabled={workspace === ""}
+              isDisabled={workspace === "" || _.isUndefined(workspace)}
             >
               <Flex w={"100%"} align={"center"} gap={"2"}>
                 <Text>Entities</Text>
@@ -161,7 +161,7 @@ const Navigation = () => {
                   : "#f2f2f2"
               }
               onClick={() => navigate("/attributes")}
-              isDisabled={workspace === ""}
+              isDisabled={workspace === "" || _.isUndefined(workspace)}
             >
               Templates
             </Button>
@@ -182,7 +182,7 @@ const Navigation = () => {
               }
               leftIcon={<Icon name={"add"} />}
               onClick={() => navigate("/create")}
-              isDisabled={workspace === ""}
+              isDisabled={workspace === "" || _.isUndefined(workspace)}
             >
               Create
             </Button>
@@ -196,7 +196,7 @@ const Navigation = () => {
               bg={"#f2f2f2"}
               leftIcon={<Icon name={"upload"} />}
               onClick={() => onImportOpen()}
-              isDisabled={workspace === ""}
+              isDisabled={workspace === "" || _.isUndefined(workspace)}
             >
               Import
             </Button>

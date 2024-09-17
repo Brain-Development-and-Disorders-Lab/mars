@@ -245,10 +245,9 @@ const WorkspaceSwitcher = () => {
           rounded={"md"}
           border={"1px"}
           borderColor={"gray.300"}
-          bg={workspaces.length === 0 ? "#f2f2f2" : "white"}
-          _hover={{ bg: workspaces.length === 0 ? "" : "gray.300" }}
+          bg={"white"}
+          _hover={{ bg: "gray.300" }}
           onClick={() => setIsOpen(!isOpen)}
-          disabled={workspaces.length === 0}
         >
           <Flex
             direction={"row"}
@@ -269,39 +268,58 @@ const WorkspaceSwitcher = () => {
         <MenuList bg={"white"}>
           <MenuGroup>
             {/* Create a list of all Workspaces the user has access to */}
-            {workspaces.map((accessible) => {
-              return (
-                <Tooltip
-                  key={accessible._id}
-                  isDisabled={accessible._id !== workspace}
-                  label={"Current Workspace"}
-                >
-                  <MenuItem
-                    onClick={() => handleWorkspaceClick(accessible._id)}
+            {workspaces.length > 0 ? (
+              workspaces.map((accessible) => {
+                return (
+                  <Tooltip
+                    key={accessible._id}
+                    isDisabled={accessible._id !== workspace}
+                    label={"Current Workspace"}
                   >
-                    <Flex
-                      direction={"row"}
-                      gap={"2"}
-                      w={"100%"}
-                      align={"center"}
-                      justify={"space-between"}
+                    <MenuItem
+                      onClick={() => handleWorkspaceClick(accessible._id)}
                     >
-                      <Text fontSize={"sm"} fontWeight={"semibold"}>
-                        {accessible.name}
-                      </Text>
-                      {workspace === accessible._id && (
-                        <Icon name={"check"} color={"green.600"} />
-                      )}
-                    </Flex>
-                  </MenuItem>
-                </Tooltip>
-              );
-            })}
+                      <Flex
+                        direction={"row"}
+                        gap={"2"}
+                        w={"100%"}
+                        align={"center"}
+                        justify={"space-between"}
+                      >
+                        <Text fontSize={"sm"} fontWeight={"semibold"}>
+                          {accessible.name}
+                        </Text>
+                        {workspace === accessible._id && (
+                          <Icon name={"check"} color={"green.600"} />
+                        )}
+                      </Flex>
+                    </MenuItem>
+                  </Tooltip>
+                );
+              })
+            ) : (
+              <MenuItem isDisabled>
+                <Flex
+                  direction={"row"}
+                  gap={"2"}
+                  w={"100%"}
+                  align={"center"}
+                  justify={"space-between"}
+                >
+                  <Text fontSize={"sm"} fontWeight={"semibold"}>
+                    No Workspaces
+                  </Text>
+                </Flex>
+              </MenuItem>
+            )}
           </MenuGroup>
 
           <MenuGroup>
             {/* Option to create a new Workspace */}
-            <MenuItem onClick={() => handleUpdateClick()}>
+            <MenuItem
+              onClick={() => handleUpdateClick()}
+              isDisabled={workspaces.length === 0}
+            >
               <Flex direction={"row"} gap={"2"} align={"center"}>
                 <Icon name={"edit"} />
                 <Text fontSize={"sm"}>Edit workspace</Text>
