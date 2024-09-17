@@ -37,6 +37,7 @@ import {
   BsFillEyeFill,
   BsFillFileBinaryFill,
   BsFillGearFill,
+  BsFillLightningChargeFill,
   BsFillPersonFill,
   BsGithub,
   BsGlobe,
@@ -60,6 +61,10 @@ import {
 } from "react-icons/bs";
 import { SiBox } from "react-icons/si";
 import { FaSort, FaSortDown, FaSortUp } from "react-icons/fa";
+import {
+  TbBaselineDensityMedium,
+  TbBaselineDensitySmall,
+} from "react-icons/tb";
 
 // Existing and custom types
 import { IconNames } from "@types";
@@ -97,6 +102,7 @@ const SYSTEM_ICONS: Record<string, IconType> = {
   person: BsFillPersonFill,
   warning: BsFillExclamationTriangleFill,
   exclamation: BsExclamationOctagonFill,
+  lightning: BsFillLightningChargeFill,
   reload: BsArrowClockwise,
   graph: BsDiagram2Fill,
   clock: BsClockHistory,
@@ -137,6 +143,10 @@ const SYSTEM_ICONS: Record<string, IconType> = {
   c_up: BsChevronUp,
   c_down: BsChevronDown,
   c_expand: BsChevronExpand,
+
+  // Density
+  d_low: TbBaselineDensityMedium,
+  d_high: TbBaselineDensitySmall,
 
   // Sort
   sort: FaSort,

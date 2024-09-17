@@ -350,6 +350,7 @@ export type IconNames =
   | "person"
   | "warning"
   | "exclamation"
+  | "lightning"
   | "reload"
   | "graph"
   | "clock"
@@ -390,6 +391,10 @@ export type IconNames =
   | "c_up"
   | "c_down"
   | "c_expand"
+
+  // Density
+  | "d_low"
+  | "d_high"
 
   // Sorting
   | "sort"
