@@ -15,7 +15,6 @@ import {
   Tr,
   Text,
   Checkbox,
-  Spacer,
   Menu,
   MenuButton,
   Button,
@@ -133,6 +132,50 @@ const DataTable = (props: DataTableProps) => {
   useEffect(() => {
     setSelectedRows(props.selectedRows);
   }, [props.selectedRows]);
+
+  // Add a counter for the number of presented paginated items
+  const [itemCountComponent, setItemCountComponent] = useState(<Flex></Flex>);
+  const updateItemCountComponent = () => {
+    const page = table.getState().pagination.pageIndex;
+    const pageSize = table.getState().pagination.pageSize;
+
+    if (props.data.length === 0) {
+      setItemCountComponent(<Flex></Flex>);
+    } else if (page === 0) {
+      setItemCountComponent(
+        <Flex direction={"row"} gap={"1"} align={"center"}>
+          <Text fontSize={"sm"}>Showing:</Text>
+          <Text fontSize={"sm"} fontWeight={"semibold"}>
+            1 - {props.data.length > pageSize ? pageSize : props.data.length}
+          </Text>
+          <Text fontSize={"sm"}>of {props.data.length}</Text>
+        </Flex>,
+      );
+    } else if (page < table.getPageCount() - 1) {
+      setItemCountComponent(
+        <Flex direction={"row"} gap={"1"} align={"center"}>
+          <Text fontSize={"sm"}>Showing:</Text>
+          <Text fontSize={"sm"} fontWeight={"semibold"}>
+            {pageSize * page + 1} - {pageSize * (page + 1)}
+          </Text>
+          <Text fontSize={"sm"}>of {props.data.length}</Text>
+        </Flex>,
+      );
+    } else {
+      setItemCountComponent(
+        <Flex direction={"row"} gap={"1"} align={"center"}>
+          <Text fontSize={"sm"}>Showing:</Text>
+          <Text fontSize={"sm"} fontWeight={"semibold"}>
+            {pageSize * page + 1} - {props.data.length}
+          </Text>
+          <Text fontSize={"sm"}>of {props.data.length}</Text>
+        </Flex>,
+      );
+    }
+  };
+  useEffect(() => {
+    updateItemCountComponent();
+  }, [table.getState().pagination.pageIndex, props.data.length]);
 
   // Exclude columns that are not sortable, i.e. checkboxes and buttons
   const canSortColumn = (header: any) => {
@@ -286,7 +329,8 @@ const DataTable = (props: DataTableProps) => {
           </Flex>
         )}
 
-        <Spacer />
+        {/* Table item counter */}
+        {props.showItemCount && itemCountComponent}
 
         {props.showPagination && (
           <Flex gap={"4"} wrap={"wrap"}>
