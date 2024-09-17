@@ -93,7 +93,7 @@ export class Entities {
     // Allocate a new identifier and join with IEntity data
     const joinedEntity: EntityModel = {
       _id: getIdentifier("entity"), // Generate new identifier
-      timestamp: new Date().toISOString(), // Add created timestamp
+      timestamp: dayjs(Date.now()).toISOString(), // Add created timestamp
       ...entity, // Unpack existing IEntity fields
     };
 

@@ -49,6 +49,7 @@ export class Projects {
     // Create a `ProjectModel` instance by adding an identifier and unpacking given Project data
     const projectModel: ProjectModel = {
       _id: getIdentifier("project"),
+      timestamp: dayjs(Date.now()).toISOString(),
       ...project,
     };
 
@@ -89,6 +90,11 @@ export class Projects {
     // Description
     if (!_.isUndefined(updated.description)) {
       update.$set.description = updated.description;
+    }
+
+    // Collaborators
+    if (!_.isUndefined(updated.collaborators)) {
+      update.$set.collaborators = updated.collaborators;
     }
 
     // Entities to add and remove

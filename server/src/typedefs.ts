@@ -46,6 +46,7 @@ export const typedefs = `#graphql
     name: String
     archived: Boolean
     description: String
+    timestamp: String
     owner: String
     collaborators: [String]
     created: String
@@ -56,12 +57,13 @@ export const typedefs = `#graphql
   # "ProjectCreateInput" type
   input ProjectCreateInput {
     name: String!
-    archived: Boolean
+    archived: Boolean!
     description: String!
     owner: String!
     shared: [String]!
     created: String!
     entities: [String]!
+    collaborators: [String]!
     # To-Do: History
   }
 
@@ -99,6 +101,7 @@ export const typedefs = `#graphql
   type Attribute {
     _id: String!
     name: String
+    timestamp: String
     archived: Boolean
     description: String
     values: [Value]
@@ -107,6 +110,7 @@ export const typedefs = `#graphql
   # "AttributeCreateInput" input
   input AttributeCreateInput {
     name: String
+    owner: String
     archived: Boolean
     description: String
     values: [ValueInput]
@@ -116,6 +120,7 @@ export const typedefs = `#graphql
   input AttributeInput {
     _id: String!
     name: String
+    owner: String
     archived: Boolean
     description: String
     values: [ValueInput]
@@ -139,8 +144,8 @@ export const typedefs = `#graphql
     name: String
     archived: Boolean
     locked: Boolean
-    created: String
     timestamp: String
+    created: String
     owner: String
     description: String
     projects: [String]
@@ -156,7 +161,6 @@ export const typedefs = `#graphql
     archived: Boolean!
     locked: Boolean!
     created: String!
-    timestamp: String!
     owner: String!
     description: String!
     projects: [String]!
@@ -239,6 +243,7 @@ export const typedefs = `#graphql
   type Workspace {
     _id: String!
     name: String
+    timestamp: String
     description: String
     owner: String
     collaborators: [String]

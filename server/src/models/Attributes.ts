@@ -5,6 +5,7 @@ import _ from "lodash";
 import { getDatabase } from "../connectors/database";
 import { getIdentifier } from "../util";
 import consola from "consola";
+import dayjs from "dayjs";
 
 // Collection name
 const ATTRIBUTES_COLLECTION = "attributes";
@@ -60,6 +61,7 @@ export class Attributes {
     // Add an identifier to the Attribute
     const joinedAttribute: AttributeModel = {
       _id: getIdentifier("attribute"),
+      timestamp: dayjs(Date.now()).toISOString(),
       ...attribute,
     };
     consola.debug("Attribute:", joinedAttribute._id, joinedAttribute.name);

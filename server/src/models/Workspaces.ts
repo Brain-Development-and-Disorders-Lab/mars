@@ -12,6 +12,7 @@ import {
 // Utility functions and libraries
 import { getDatabase } from "../connectors/database";
 import { getIdentifier } from "../util";
+import dayjs from "dayjs";
 import _ from "lodash";
 
 // Models
@@ -312,6 +313,7 @@ export class Workspaces {
   static create = async (workspace: IWorkspace): Promise<ResponseMessage> => {
     const joinedWorkspace: WorkspaceModel = {
       _id: getIdentifier("workspace"), // Generate new identifier
+      timestamp: dayjs(Date.now()).toISOString(),
       ...workspace, // Unpack existing IEntity fields
     };
     const response = await getDatabase()

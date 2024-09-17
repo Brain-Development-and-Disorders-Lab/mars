@@ -51,15 +51,16 @@ export namespace State.Project {
 // Generic Attribute interface containing required Values
 export type IAttribute = {
   name: string;
+  owner: string;
   description: string;
   values: IValue<any>[];
   archived: boolean;
-  owner?: string;
 };
 
 // Database model of Attribute, including assigned ID
 export type AttributeModel = IAttribute & {
   _id: string;
+  timestamp: string;
 };
 
 export type AttributeCardActions = {
@@ -119,11 +120,10 @@ export type ActorProps = {
 // Project types
 export type IProject = {
   name: string;
+  owner: string;
   archived: boolean;
   created: string;
-  timestamp?: string;
-  owner: string;
-  collaborators?: string[];
+  collaborators: string[];
   description: string;
   shared: string[];
   entities: string[];
@@ -132,6 +132,7 @@ export type IProject = {
 
 export type ProjectModel = IProject & {
   _id: string;
+  timestamp: string;
 };
 
 export type ProjectHistory = {
@@ -150,8 +151,8 @@ export type IGenericItem = {
 // Workspace types
 export type IWorkspace = {
   name: string;
-  description: string;
   owner: string;
+  description: string;
   collaborators: string[];
   entities: string[];
   projects: string[];
@@ -161,16 +162,16 @@ export type IWorkspace = {
 
 export type WorkspaceModel = IWorkspace & {
   _id: string;
+  timestamp: string;
 };
 
 // Entity types
 export type IEntity = {
   name: string;
+  owner: string;
   archived: boolean;
   locked: boolean;
   created: string;
-  timestamp?: string;
-  owner: string;
   description: string;
   projects: string[];
   associations: {
@@ -184,6 +185,7 @@ export type IEntity = {
 
 export type EntityModel = IEntity & {
   _id: string;
+  timestamp: string;
 };
 
 export type EntityNode = IGenericItem & {
@@ -242,7 +244,7 @@ export type AttachmentData = {
 
 // Activity types
 export type IActivity = {
-  timestamp: Date;
+  timestamp: string;
   type: "create" | "update" | "delete" | "archived";
   details: string;
   target: {

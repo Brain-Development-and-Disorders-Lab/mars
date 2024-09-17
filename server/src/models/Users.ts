@@ -177,6 +177,8 @@ export class Users {
         {
           _id: "a-00-example",
           name: "Example Attribute",
+          owner: user,
+          timestamp: dayjs(Date.now()).toISOString(),
           archived: false,
           description: "An example Attribute",
           values: [

@@ -187,6 +187,8 @@ export class Data {
           attributes.push({
             _id: attribute._id,
             name: attribute.name,
+            owner: attribute.owner,
+            timestamp: attribute.timestamp,
             archived: false,
             description: attribute.description,
             values: attribute.values.map((value: IValue<any>) => {
@@ -240,6 +242,7 @@ export class Data {
         if (response.success) {
           entities.push({
             _id: response.message,
+            timestamp: dayjs(Date.now()).toISOString(),
             ...entity,
           });
 
@@ -248,7 +251,7 @@ export class Data {
 
           // Create new Activity if successful
           const activity = await Activity.create({
-            timestamp: new Date(),
+            timestamp: dayjs(Date.now()).toISOString(),
             type: "create",
             actor: context.user,
             details: "Created new Entity",
@@ -337,7 +340,7 @@ export class Data {
             await Workspaces.addEntity(context.workspace, entity._id);
 
             const activity = await Activity.create({
-              timestamp: new Date(),
+              timestamp: dayjs(Date.now()).toISOString(),
               type: "update",
               actor: context.user,
               details: "Updated existing Entity",
@@ -364,7 +367,7 @@ export class Data {
             await Workspaces.addEntity(context.workspace, result.message);
 
             const activity = await Activity.create({
-              timestamp: new Date(),
+              timestamp: dayjs(Date.now()).toISOString(),
               type: "update",
               actor: context.user,
               details: "Updated existing Entity",
