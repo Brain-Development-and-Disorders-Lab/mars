@@ -159,7 +159,7 @@ const Attributes = () => {
             <Heading size={"md"}>Templates</Heading>
             <Spacer />
             <Button
-              leftIcon={<Icon name={"add"} />}
+              rightIcon={<Icon name={"add"} />}
               colorScheme={"green"}
               onClick={() => navigate("/create/attribute")}
               size={"sm"}
@@ -174,6 +174,7 @@ const Attributes = () => {
               columns={columns}
               data={attributesData}
               visibleColumns={visibleColumns}
+              selectedRows={{}}
               showPagination
               showSelection
             />

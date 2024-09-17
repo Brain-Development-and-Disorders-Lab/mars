@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { TabPanel, Flex, Button, useToast } from "@chakra-ui/react";
+import { TabPanel, Flex, Button, Text, useToast } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 
 // `react-querybuilder` imports
@@ -193,26 +193,51 @@ const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
   return (
     <TabPanel p={"2"}>
       <Flex direction={"column"} gap={"2"}>
-        <QueryBuilderChakra>
-          <QueryBuilder
-            fields={fields}
-            onQueryChange={setQuery}
-            controlElements={{ valueEditor: SearchQueryValue }}
-            showCloneButtons
-            showNotToggle
-          />
-        </QueryBuilderChakra>
-        <Flex>
-          <Button
-            aria-label={"Run Query"}
-            colorScheme={"green"}
-            size={"sm"}
-            rightIcon={<Icon name={"search"} />}
-            onClick={() => onSearchBuiltQuery()}
-            isDisabled={query.rules.length === 0}
-          >
-            Run Query
-          </Button>
+        <Flex
+          direction={"row"}
+          gap={"2"}
+          p={"2"}
+          rounded={"md"}
+          bg={"blue.100"}
+          align={"center"}
+          w={"fit-content"}
+        >
+          <Icon name={"info"} color={"blue.300"} />
+          <Flex direction={"column"} gap={"1"}>
+            <Text fontWeight={"semibold"} fontSize={"sm"} color={"blue.700"}>
+              Use the query builder to construct advanced queries to search for
+              Entities within the Workspace.
+            </Text>
+            <Text fontWeight={"semibold"} fontSize={"sm"} color={"blue.700"}>
+              Query builder can be used to search for specific conditions within
+              Entities and their Attributes, as well as Project membership and
+              relationships to other Entities.
+            </Text>
+          </Flex>
+        </Flex>
+
+        <Flex direction={"column"} gap={"2"}>
+          <QueryBuilderChakra>
+            <QueryBuilder
+              fields={fields}
+              onQueryChange={setQuery}
+              controlElements={{ valueEditor: SearchQueryValue }}
+              showCloneButtons
+              showNotToggle
+            />
+          </QueryBuilderChakra>
+          <Flex>
+            <Button
+              aria-label={"Run Query"}
+              colorScheme={"green"}
+              size={"sm"}
+              rightIcon={<Icon name={"search"} />}
+              onClick={() => onSearchBuiltQuery()}
+              isDisabled={query.rules.length === 0}
+            >
+              Run Query
+            </Button>
+          </Flex>
         </Flex>
       </Flex>
     </TabPanel>

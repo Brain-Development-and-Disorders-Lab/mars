@@ -39,19 +39,24 @@ import { WorkspaceContext } from "../Context";
 
 // Queries
 const GET_DASHBOARD = gql`
-  query GetDashboard($projects: Int, $entities: Int, $activity: Int) {
-    projects(limit: $projects) {
+  query GetDashboard(
+    $projectLimit: Int
+    $entityLimit: Int
+    $entitiesArchived: Boolean
+    $activityLimit: Int
+  ) {
+    projects(limit: $projectLimit) {
       _id
       name
       description
     }
-    entities(limit: $entities) {
+    entities(limit: $entityLimit, archived: $entitiesArchived) {
       _id
-      deleted
+      archived
       name
       description
     }
-    activity(limit: $activity) {
+    activity(limit: $activityLimit) {
       _id
       timestamp
       type
@@ -80,7 +85,7 @@ const Dashboard = () => {
   const [entityData, setEntityData] = useState(
     [] as {
       _id: string;
-      deleted: boolean;
+      archived: boolean;
       name: string;
       description: string;
     }[],
@@ -93,9 +98,10 @@ const Dashboard = () => {
   // Execute GraphQL query both on page load and navigation
   const { loading, error, data, refetch } = useQuery(GET_DASHBOARD, {
     variables: {
-      projects: 5,
-      entities: 5,
-      activity: 20,
+      projectsLimit: 8,
+      entitiesLimit: 8,
+      entitiesArchived: false,
+      activityLimit: 20,
     },
     fetchPolicy: "network-only",
   });
@@ -115,7 +121,7 @@ const Dashboard = () => {
 
   // If the workspace changes, refetch the data
   useEffect(() => {
-    if (refetch) {
+    if (data && refetch) {
       refetch();
     }
   }, [workspace]);
@@ -153,7 +159,7 @@ const Dashboard = () => {
   // Configure Entity table
   const entityTableData: {
     _id: string;
-    deleted: boolean;
+    archived: boolean;
     name: string;
     description: string;
   }[] = entityData;
@@ -255,7 +261,7 @@ const Dashboard = () => {
             rounded={"md"}
             gap={"2"}
             border={"1px"}
-            borderColor={"gray.200"}
+            borderColor={"gray.300"}
           >
             {/* Projects heading */}
             <Flex direction={"row"} align={"center"} gap={"2"} my={"2"}>
@@ -270,6 +276,7 @@ const Dashboard = () => {
                 columns={projectTableColumns}
                 data={projectTableData}
                 visibleColumns={visibleColumns}
+                selectedRows={{}}
               />
             )}
 
@@ -308,7 +315,7 @@ const Dashboard = () => {
             rounded={"md"}
             gap={"2"}
             border={"1px"}
-            borderColor={"gray.200"}
+            borderColor={"gray.300"}
           >
             {/* Entities heading */}
             <Flex direction={"row"} align={"center"} gap={"2"} my={"2"}>
@@ -323,10 +330,11 @@ const Dashboard = () => {
                 columns={entityTableColumns}
                 data={entityTableData.filter(
                   (entity) =>
-                    _.isEqual(entity.deleted, false) ||
-                    _.isEqual(entity.deleted, null),
+                    _.isEqual(entity.archived, false) ||
+                    _.isEqual(entity.archived, null),
                 )}
                 visibleColumns={visibleColumns}
+                selectedRows={{}}
               />
             )}
 
@@ -362,12 +370,13 @@ const Dashboard = () => {
         {/* Activity */}
         <Flex
           direction={"column"}
+          maxW={"sm"}
           p={"2"}
           gap={"2"}
           grow={"1"}
           rounded={"md"}
           border={"1px"}
-          borderColor={"gray.200"}
+          borderColor={"gray.300"}
         >
           {/* Activity heading */}
           <Flex align={"center"} gap={"2"} my={"2"}>
@@ -379,7 +388,7 @@ const Dashboard = () => {
 
           {/* Activity list */}
           {activityData.length > 0 ? (
-            <Flex overflowY={"auto"} p={"0"} w={"100%"} h={"100%"}>
+            <Flex p={"0"} w={"100%"} maxH={"85vh"} overflowY={"auto"}>
               <VStack spacing={"2"} w={"95%"}>
                 {activityData.map((activity) => {
                   return (

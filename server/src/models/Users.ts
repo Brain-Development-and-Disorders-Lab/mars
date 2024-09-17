@@ -148,6 +148,7 @@ export class Users {
   ): Promise<ResponseMessage> => {
     const project = await Projects.create({
       name: "My First Project",
+      archived: false,
       created: dayjs(Date.now()).toISOString(),
       description:
         "This is your first Project. Feel free to explore and modify it!",
@@ -161,7 +162,7 @@ export class Users {
 
     const entity = await Entities.create({
       name: "Example Entity",
-      deleted: false,
+      archived: false,
       locked: false,
       created: dayjs(Date.now()).toISOString(),
       description: "This is your first Entity. Go ahead and modify it!",
@@ -176,6 +177,7 @@ export class Users {
         {
           _id: "a-00-example",
           name: "Example Attribute",
+          archived: false,
           description: "An example Attribute",
           values: [
             {

@@ -44,6 +44,7 @@ export const typedefs = `#graphql
   type Project {
     _id: String!
     name: String
+    archived: Boolean
     description: String
     owner: String
     collaborators: [String]
@@ -55,6 +56,7 @@ export const typedefs = `#graphql
   # "ProjectCreateInput" type
   input ProjectCreateInput {
     name: String!
+    archived: Boolean
     description: String!
     owner: String!
     shared: [String]!
@@ -67,6 +69,7 @@ export const typedefs = `#graphql
   input ProjectUpdateInput {
     _id: String!
     name: String
+    archived: Boolean
     description: String
     owner: String
     collaborators: [String]
@@ -96,6 +99,7 @@ export const typedefs = `#graphql
   type Attribute {
     _id: String!
     name: String
+    archived: Boolean
     description: String
     values: [Value]
   }
@@ -103,6 +107,7 @@ export const typedefs = `#graphql
   # "AttributeCreateInput" input
   input AttributeCreateInput {
     name: String
+    archived: Boolean
     description: String
     values: [ValueInput]
   }
@@ -111,6 +116,7 @@ export const typedefs = `#graphql
   input AttributeInput {
     _id: String!
     name: String
+    archived: Boolean
     description: String
     values: [ValueInput]
   }
@@ -131,10 +137,10 @@ export const typedefs = `#graphql
   type Entity {
     _id: String!
     name: String
+    archived: Boolean
+    locked: Boolean
     created: String
     timestamp: String
-    deleted: Boolean
-    locked: Boolean
     owner: String
     description: String
     projects: [String]
@@ -147,10 +153,10 @@ export const typedefs = `#graphql
   # "EntityCreateInput" input, includes -"Input" types
   input EntityCreateInput {
     name: String!
+    archived: Boolean!
+    locked: Boolean!
     created: String!
     timestamp: String!
-    deleted: Boolean!
-    locked: Boolean!
     owner: String!
     description: String!
     projects: [String]!
@@ -163,10 +169,10 @@ export const typedefs = `#graphql
   input EntityUpdateInput {
     _id: String!
     name: String
+    archived: Boolean
+    locked: Boolean
     created: String
     timestamp: String
-    deleted: Boolean
-    locked: Boolean
     owner: String
     description: String
     projects: [String]
@@ -178,7 +184,7 @@ export const typedefs = `#graphql
   # "EntityHistory" type storing iterations of an Entity
   type EntityHistory {
     timestamp: String
-    deleted: Boolean
+    archived: Boolean
     owner: String
     description: String
     projects: [String]
@@ -298,7 +304,7 @@ export const typedefs = `#graphql
     project(_id: String): Project
 
     # Entity queries
-    entities(limit: Int): [Entity]
+    entities(limit: Int, archived: Boolean): [Entity]
     entity(_id: String): Entity
     entityExists(_id: String): Boolean
     entityNameExists(name: String): Boolean
@@ -340,6 +346,8 @@ export const typedefs = `#graphql
     setEntityDescription(_id: String, description: String): Response
     createEntity(entity: EntityCreateInput): Response
     updateEntity(entity: EntityUpdateInput): Response
+    archiveEntity(_id: String, state: Boolean): Response
+    archiveEntities(toArchive: [String], state: Boolean): Response
     deleteEntity(_id: String): Response
     addEntityProject(_id: String, project_id: String): Response
     removeEntityProject(_id: String, project_id: String): Response
@@ -357,6 +365,8 @@ export const typedefs = `#graphql
     # Project mutations
     createProject(project: ProjectCreateInput): Response
     updateProject(project: ProjectUpdateInput): Response
+    archiveProject(_id: String, state: Boolean): Response
+    archiveProjects(toArchive: [String], state: Boolean): Response
     deleteProject(_id: String): Response
     addProjectEntity(_id: String, entity: String): Response
     addProjectEntities(_id: String, entities: [String]): Response
@@ -376,6 +386,8 @@ export const typedefs = `#graphql
     # Attribute mutations
     createAttribute(attribute: AttributeCreateInput): Response
     updateAttribute(attribute: AttributeInput): Response
+    archiveAttribute(_id: String, state: Boolean): Response
+    archiveAttributes(toArchive: [String], state: Boolean): Response
     deleteAttribute(_id: String): Response
 
     # Data mutations

@@ -112,7 +112,7 @@ const Entity = () => {
   const entityState: IEntity = {
     name: name,
     created: created,
-    deleted: false,
+    archived: false,
     locked: false,
     owner: owner,
     description: description,
@@ -327,6 +327,7 @@ const Entity = () => {
           return {
             _id: data._id,
             name: data.name,
+            archived: false,
             description: data.description,
             values: data.values,
           };
@@ -404,7 +405,7 @@ const Entity = () => {
                 p={"2"}
                 gap={"2"}
                 border={"1px"}
-                borderColor={"gray.200"}
+                borderColor={"gray.300"}
                 rounded={"md"}
               >
                 <FormControl
@@ -463,7 +464,7 @@ const Entity = () => {
                 gap={"2"}
                 rounded={"md"}
                 border={"1px"}
-                borderColor={"gray.200"}
+                borderColor={"gray.300"}
               >
                 {/* Description */}
                 <FormControl>
@@ -500,7 +501,7 @@ const Entity = () => {
                 gap={"2"}
                 rounded={"md"}
                 border={"1px"}
-                borderColor={"gray.200"}
+                borderColor={"gray.300"}
               >
                 <FormControl>
                   <FormLabel fontSize={"sm"}>Origins</FormLabel>
@@ -560,7 +561,7 @@ const Entity = () => {
                 gap={"2"}
                 rounded={"md"}
                 border={"1px"}
-                borderColor={"gray.200"}
+                borderColor={"gray.300"}
               >
                 <FormControl>
                   <FormLabel fontSize={"sm"}>Products</FormLabel>
@@ -631,7 +632,7 @@ const Entity = () => {
                 gap={"2"}
                 rounded={"md"}
                 border={"1px"}
-                borderColor={"gray.200"}
+                borderColor={"gray.300"}
               >
                 <FormControl>
                   <FormLabel fontSize={"sm"}>Projects</FormLabel>
@@ -683,7 +684,7 @@ const Entity = () => {
                 gap={"2"}
                 rounded={"md"}
                 border={"1px"}
-                borderColor={"gray.200"}
+                borderColor={"gray.300"}
                 justify={"space-between"}
               >
                 {/* Drop-down to select template Attributes */}
@@ -705,6 +706,7 @@ const Entity = () => {
                               {
                                 _id: `a-${nanoid(6)}`,
                                 name: attribute.name,
+                                archived: false,
                                 description: attribute.description,
                                 values: attribute.values,
                               },
@@ -727,7 +729,7 @@ const Entity = () => {
 
                 <Button
                   size={"sm"}
-                  leftIcon={<Icon name={"add"} />}
+                  rightIcon={<Icon name={"add"} />}
                   colorScheme={"green"}
                   onClick={() => {
                     // Create an 'empty' Attribute and add the data structure to 'selectedAttributes'
@@ -736,6 +738,7 @@ const Entity = () => {
                       {
                         _id: `a-${nanoid(6)}`,
                         name: "",
+                        archived: false,
                         description: "",
                         values: [],
                       },
@@ -762,6 +765,7 @@ const Entity = () => {
                         _id={attribute._id}
                         key={attribute._id}
                         name={attribute.name}
+                        archived={attribute.archived}
                         description={attribute.description}
                         values={attribute.values}
                         restrictDataValues={false}
@@ -843,7 +847,7 @@ const Entity = () => {
               size={"sm"}
               colorScheme={"orange"}
               variant={"outline"}
-              leftIcon={<Icon name={"c_left"} />}
+              rightIcon={<Icon name={"c_left"} />}
               onClick={onPageBack}
             >
               Back

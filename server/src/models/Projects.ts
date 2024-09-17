@@ -10,6 +10,7 @@ import { getDatabase } from "../connectors/database";
 import { getIdentifier } from "../util";
 import dayjs from "dayjs";
 import Papa from "papaparse";
+import consola from "consola";
 
 // Collection name
 const PROJECTS_COLLECTION = "projects";
@@ -80,6 +81,12 @@ export class Projects {
       },
     };
 
+    // Name
+    if (!_.isUndefined(updated.name)) {
+      update.$set.name = updated.name;
+    }
+
+    // Description
     if (!_.isUndefined(updated.description)) {
       update.$set.description = updated.description;
     }
@@ -105,6 +112,50 @@ export class Projects {
     return {
       success: successStatus,
       message: successStatus ? "Updated Project" : "Could not update Project",
+    };
+  };
+
+  /**
+   * Set the archive state of a Project
+   * @param _id Project identifier to archive
+   * @param state Project archive state
+   * @return {Promise<ResponseMessage>}
+   */
+  static setArchived = async (
+    _id: string,
+    state: boolean,
+  ): Promise<ResponseMessage> => {
+    consola.debug("Setting archive state of Project:", _id, "Archived:", state);
+    const project = await Projects.getOne(_id);
+    if (_.isNull(project)) {
+      consola.error("Unable to retrieve Project:", _id);
+      return {
+        success: false,
+        message: "Error retrieving existing Project",
+      };
+    }
+
+    // Update the archived state
+    project.archived = state;
+    const update: { $set: IProject } = {
+      $set: {
+        ...project,
+      },
+    };
+
+    const response = await getDatabase()
+      .collection<ProjectModel>(PROJECTS_COLLECTION)
+      .updateOne({ _id: _id }, update);
+    if (response.modifiedCount > 0) {
+      consola.info("Set archive state of Project:", _id, "Archived:", state);
+    }
+
+    return {
+      success: true,
+      message:
+        response.modifiedCount === 1
+          ? "Set archive state of Project"
+          : "No changes made to Project",
     };
   };
 

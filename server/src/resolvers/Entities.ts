@@ -17,7 +17,11 @@ import { Workspaces } from "../models/Workspaces";
 export const EntitiesResolvers = {
   Query: {
     // Retrieve all Entities
-    entities: async (_parent: any, args: { limit: 100 }, context: Context) => {
+    entities: async (
+      _parent: any,
+      args: { limit: 100; archived: boolean },
+      context: Context,
+    ) => {
       const workspace = await Workspaces.getOne(context.workspace);
       if (_.isNull(workspace)) {
         throw new GraphQLError("Workspace does not exist", {
@@ -31,6 +35,15 @@ export const EntitiesResolvers = {
       const entities = await Entities.all();
       return entities
         .filter((entity) => _.includes(workspace.entities, entity._id))
+        .filter((entity) => {
+          if (args.archived === true) {
+            // If showing all Entities, including archived
+            return true;
+          } else {
+            // If only showing active Entities, not archived
+            return entity.archived === false;
+          }
+        })
         .slice(0, args.limit);
     },
 
@@ -262,6 +275,105 @@ export const EntitiesResolvers = {
           },
         );
       }
+    },
+
+    // Archive an Entity
+    archiveEntity: async (
+      _parent: any,
+      args: { _id: string; state: boolean },
+      context: Context,
+    ) => {
+      const entity = await Entities.getOne(args._id);
+      if (_.isNull(entity)) {
+        throw new GraphQLError("Entity does not exist", {
+          extensions: {
+            code: "NON_EXIST",
+          },
+        });
+      }
+
+      if (entity.archived === args.state) {
+        return {
+          success: true,
+          message: "Entity archive state unchanged",
+        };
+      } else {
+        // Perform archive operation
+        const result = await Entities.setArchived(args._id, args.state);
+
+        // Create new Activity if successful
+        if (result.success) {
+          const activity = await Activity.create({
+            timestamp: new Date(),
+            type: "archived",
+            actor: context.user,
+            details: args.state ? "Archived Entity" : "Restored Entity",
+            target: {
+              _id: entity._id,
+              type: "entities",
+              name: entity.name,
+            },
+          });
+
+          // Add Activity to Workspace
+          await Workspaces.addActivity(context.workspace, activity.message);
+        }
+
+        return result;
+      }
+    },
+
+    // Archive multiple Entities
+    archiveEntities: async (
+      _parent: any,
+      args: { toArchive: string[]; state: boolean },
+      context: Context,
+    ): Promise<ResponseMessage> => {
+      let archiveCounter = 0;
+      for await (const _id of args.toArchive) {
+        const entity = await Entities.getOne(_id);
+        if (_.isNull(entity)) {
+          throw new GraphQLError("Entity does not exist", {
+            extensions: {
+              code: "NON_EXIST",
+            },
+          });
+        }
+
+        if (entity.archived === args.state) {
+          archiveCounter += 1;
+        } else {
+          // Perform archive operation
+          const result = await Entities.setArchived(_id, args.state);
+
+          // Create new Activity if successful
+          if (result.success) {
+            const activity = await Activity.create({
+              timestamp: new Date(),
+              type: "archived",
+              actor: context.user,
+              details: args.state ? "Archived Entity" : "Restored Entity",
+              target: {
+                _id: entity._id,
+                type: "entities",
+                name: entity.name,
+              },
+            });
+
+            // Add Activity to Workspace
+            await Workspaces.addActivity(context.workspace, activity.message);
+            archiveCounter += 1;
+          }
+        }
+      }
+
+      return {
+        success: args.toArchive.length === archiveCounter,
+        message:
+          args.toArchive.length === archiveCounter
+            ? "Archived Entities successfully"
+            : "Error while archiving multiple Entities",
+      };
     },
 
     // Delete an Entity

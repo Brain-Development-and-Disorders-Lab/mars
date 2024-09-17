@@ -544,7 +544,7 @@ const Values = (props: {
                   color={"white"}
                   borderColor={"orange.300"}
                   _hover={{ bg: "orange.400" }}
-                  leftIcon={<Icon name={"v_date"} />}
+                  rightIcon={<Icon name={"v_date"} />}
                   onClick={() => {
                     props.setValues([
                       ...props.values,
@@ -568,7 +568,7 @@ const Values = (props: {
                   color={"white"}
                   borderColor={"blue.300"}
                   _hover={{ bg: "blue.400" }}
-                  leftIcon={<Icon name={"v_text"} />}
+                  rightIcon={<Icon name={"v_text"} />}
                   onClick={() => {
                     props.setValues([
                       ...props.values,
@@ -591,7 +591,7 @@ const Values = (props: {
                   color={"white"}
                   borderColor={"green.300"}
                   _hover={{ bg: "green.400" }}
-                  leftIcon={<Icon name={"v_number"} />}
+                  rightIcon={<Icon name={"v_number"} />}
                   onClick={() => {
                     props.setValues([
                       ...props.values,
@@ -614,7 +614,7 @@ const Values = (props: {
                   color={"white"}
                   borderColor={"yellow.300"}
                   _hover={{ bg: "yellow.400" }}
-                  leftIcon={<Icon name={"v_url"} />}
+                  rightIcon={<Icon name={"v_url"} />}
                   onClick={() => {
                     props.setValues([
                       ...props.values,
@@ -637,7 +637,7 @@ const Values = (props: {
                   color={"white"}
                   borderColor={"purple.300"}
                   _hover={{ bg: "purple.400" }}
-                  leftIcon={<Icon name={"entity"} />}
+                  rightIcon={<Icon name={"entity"} />}
                   onClick={() => {
                     props.setValues([
                       ...props.values,
@@ -660,7 +660,7 @@ const Values = (props: {
                   color={"white"}
                   borderColor={"teal.300"}
                   _hover={{ bg: "teal.400" }}
-                  leftIcon={<Icon name={"v_select"} />}
+                  rightIcon={<Icon name={"v_select"} />}
                   isDisabled={!_.isUndefined(props.permittedValues)}
                   onClick={() => {
                     onOpen();
@@ -677,6 +677,7 @@ const Values = (props: {
       <DataTable
         columns={columns}
         visibleColumns={{}}
+        selectedRows={{}}
         data={props.values}
         setData={props.setValues}
         viewOnly={props.viewOnly}

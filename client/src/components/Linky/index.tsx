@@ -30,7 +30,7 @@ const Linky = (props: LinkyProps) => {
       entity(_id: $_id) {
         _id
         name
-        deleted
+        archived
       }
     }
   `;

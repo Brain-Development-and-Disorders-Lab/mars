@@ -61,6 +61,7 @@ const Attribute = () => {
   // Store Attribute data
   const attributeData: IAttribute = {
     name: name,
+    archived: false,
     description: description,
     values: values,
   };
@@ -147,7 +148,7 @@ const Attribute = () => {
               direction={"column"}
               p={"2"}
               border={"1px"}
-              borderColor={"gray.200"}
+              borderColor={"gray.300"}
               rounded={"md"}
             >
               <FormControl isRequired>
@@ -187,7 +188,7 @@ const Attribute = () => {
               gap={"2"}
               rounded={"md"}
               border={"1px"}
-              borderColor={"gray.200"}
+              borderColor={"gray.300"}
             >
               <FormControl isRequired>
                 <FormLabel fontSize={"sm"}>Template Description</FormLabel>

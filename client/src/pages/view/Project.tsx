@@ -37,7 +37,6 @@ import {
   Spacer,
   Stack,
   Tag,
-  TagLabel,
   Text,
   Textarea,
   Tooltip,
@@ -46,6 +45,7 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
+import ActorTag from "@components/ActorTag";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 import Dialog from "@components/Dialog";
@@ -87,12 +87,12 @@ const Project = () => {
     onClose: onEntitiesClose,
   } = useDisclosure();
 
-  // State for dialog confirming if user should delete
-  const deleteDialogRef = useRef();
+  // State for dialog confirming if user should archive Project
+  const archiveDialogRef = useRef();
   const {
-    isOpen: isDeleteDialogOpen,
-    onOpen: onDeleteDialogOpen,
-    onClose: onDeleteDialogClose,
+    isOpen: isArchiveDialogOpen,
+    onOpen: onArchiveDialogOpen,
+    onClose: onArchiveDialogClose,
   } = useDisclosure();
 
   // History drawer
@@ -109,6 +109,8 @@ const Project = () => {
 
   // Project state
   const [project, setProject] = useState({} as ProjectModel);
+  const [projectName, setProjectName] = useState("");
+  const [projectArchived, setProjectArchived] = useState(false);
   const [projectEntities, setProjectEntities] = useState([] as string[]);
   const [projectDescription, setProjectDescription] = useState("");
   const [projectHistory, setProjectHistory] = useState([] as ProjectHistory[]);
@@ -142,6 +144,7 @@ const Project = () => {
       project(_id: $_id) {
         _id
         name
+        archived
         description
         owner
         entities
@@ -194,26 +197,28 @@ const Project = () => {
   const [updateProject, { loading: updateLoading, error: updateError }] =
     useMutation(UPDATE_PROJECT);
 
-  // Mutation to delete Project
-  const DELETE_PROJECT = gql`
-    mutation DeleteProject($_id: String) {
-      deleteProject(_id: $_id) {
+  // Mutation to archive Project
+  const ARCHIVE_PROJECT = gql`
+    mutation ArchiveProject($_id: String, $state: Boolean) {
+      archiveProject(_id: $_id, state: $state) {
         success
         message
       }
     }
   `;
-  const [deleteProject, { loading: deleteLoading }] =
-    useMutation(DELETE_PROJECT);
+  const [archiveProject, { loading: archiveLoading }] =
+    useMutation(ARCHIVE_PROJECT);
 
   // Manage data once retrieved
   useEffect(() => {
     if (data?.project) {
       setProject(data.project);
-      setProjectDescription(data.project?.description);
-      setProjectEntities(data.project?.entities);
-      setProjectHistory(data.project?.history);
-      setProjectCollaborators(data.project?.collaborators || []);
+      setProjectName(data.project.name);
+      setProjectArchived(data.project.archived);
+      setProjectDescription(data.project.description);
+      setProjectEntities(data.project.entities);
+      setProjectHistory(data.project.history);
+      setProjectCollaborators(data.project.collaborators || []);
     }
   }, [data]);
 
@@ -260,7 +265,8 @@ const Project = () => {
       // Collate update data
       const updateData: ProjectModel = {
         _id: project._id,
-        name: project.name,
+        name: projectName,
+        archived: projectArchived,
         description: projectDescription,
         owner: project.owner,
         collaborators: projectCollaborators || [],
@@ -295,6 +301,10 @@ const Project = () => {
           });
         }
       }
+
+      // Refetch Project data
+      await refetch();
+
       setEditing(false);
       setIsUpdating(false);
     } else {
@@ -302,26 +312,58 @@ const Project = () => {
     }
   };
 
-  // Delete the Project when confirmed
-  const handleDeleteClick = async () => {
-    const response = await deleteProject({
+  // Archive the Project when confirmed
+  const handleArchiveClick = async () => {
+    const response = await archiveProject({
       variables: {
         _id: project._id,
+        state: true,
       },
     });
-    if (response.data.deleteProject.success) {
+    if (response.data.archiveProject.success) {
       toast({
-        title: "Deleted Successfully",
+        title: "Archived Successfully",
         status: "success",
         duration: 2000,
         position: "bottom-right",
         isClosable: true,
       });
-      navigate("/projects");
+      setProjectArchived(true);
+      onArchiveDialogClose();
     } else {
       toast({
         title: "Error",
-        description: "An error occurred when deleting Project",
+        description: "An error occurred when archiving Project",
+        status: "error",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
+    setEditing(false);
+  };
+
+  // Restore the Project
+  const handleRestoreClick = async () => {
+    const response = await archiveProject({
+      variables: {
+        _id: project._id,
+        state: false,
+      },
+    });
+    if (response.data.archiveProject.success) {
+      toast({
+        title: "Restored Successfully",
+        status: "success",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+      setProjectArchived(false);
+    } else {
+      toast({
+        title: "Error",
+        description: "An error occurred when restoring Project",
         status: "error",
         duration: 2000,
         position: "bottom-right",
@@ -356,7 +398,8 @@ const Project = () => {
     // Reconstruct a `ProjectModel` instance from the prior version
     const updateData: ProjectModel = {
       _id: project._id,
-      name: project.name,
+      name: projectVersion.name,
+      archived: project.archived,
       created: project.created,
       owner: project.owner,
       collaborators: project.collaborators || [],
@@ -401,6 +444,10 @@ const Project = () => {
     setProjectEntities(updateData.entities);
     setProjectHistory(updateData?.history || []);
     setProjectCollaborators(updateData?.collaborators || []);
+
+    // Refetch Project data
+    await refetch();
+
     setIsLoaded(true);
   };
 
@@ -452,7 +499,7 @@ const Project = () => {
     if (response.data.exportProject) {
       FileSaver.saveAs(
         new Blob([response.data.exportProject]),
-        slugify(`${project.name.replace(" ", "")}_export.${format}`),
+        slugify(`${projectName.replace(" ", "")}_export.${format}`),
       );
 
       // Close the "Export" modal
@@ -586,7 +633,7 @@ const Project = () => {
     <Content
       isError={!_.isUndefined(error)}
       isLoaded={
-        !loading && !deleteLoading && !updateLoading && !workspaceLoading
+        !loading && !archiveLoading && !updateLoading && !workspaceLoading
       }
     >
       <Flex direction={"column"}>
@@ -614,41 +661,54 @@ const Project = () => {
 
           {/* Buttons */}
           <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
-            {editing && (
+            {projectArchived ? (
               <Button
-                onClick={handleCancelClick}
+                onClick={handleRestoreClick}
                 size={"sm"}
-                colorScheme={"red"}
-                rightIcon={<Icon name={"cross"} />}
+                colorScheme={"orange"}
+                rightIcon={<Icon name={"rewind"} />}
               >
-                Cancel
+                Restore
               </Button>
+            ) : (
+              <Flex gap={"2"}>
+                {editing && (
+                  <Button
+                    onClick={handleCancelClick}
+                    size={"sm"}
+                    colorScheme={"red"}
+                    rightIcon={<Icon name={"cross"} />}
+                  >
+                    Cancel
+                  </Button>
+                )}
+                <Button
+                  colorScheme={editing ? "green" : "blue"}
+                  rightIcon={
+                    editing ? <Icon name={"check"} /> : <Icon name={"edit"} />
+                  }
+                  onClick={handleEditClick}
+                  loadingText={"Saving..."}
+                  isLoading={isUpdating}
+                  size={"sm"}
+                >
+                  {editing ? "Done" : "Edit"}
+                </Button>
+              </Flex>
             )}
-            <Button
-              colorScheme={editing ? "green" : "blue"}
-              rightIcon={
-                editing ? <Icon name={"check"} /> : <Icon name={"edit"} />
-              }
-              onClick={handleEditClick}
-              loadingText={"Saving..."}
-              isLoading={isUpdating}
-              size={"sm"}
-            >
-              {editing ? "Done" : "Edit"}
-            </Button>
 
-            {/* Delete Dialog */}
+            {/* Archive Dialog */}
             <Dialog
-              dialogRef={deleteDialogRef}
-              header={"Delete Project"}
-              rightButtonAction={handleDeleteClick}
-              isOpen={isDeleteDialogOpen}
-              onOpen={onDeleteDialogOpen}
-              onClose={onDeleteDialogClose}
+              dialogRef={archiveDialogRef}
+              header={"Archive Project"}
+              rightButtonAction={handleArchiveClick}
+              isOpen={isArchiveDialogOpen}
+              onOpen={onArchiveDialogOpen}
+              onClose={onArchiveDialogClose}
             >
               <Text>
-                Are you sure you want to delete this Project? No Entities will
-                be deleted.
+                Are you sure you want to archive this Project? No Entities will
+                be deleted. This Project will be moved to the Workspace archive.
               </Text>
             </Dialog>
 
@@ -672,29 +732,32 @@ const Project = () => {
                 <MenuItem
                   onClick={handleExportClick}
                   icon={<Icon name={"download"} />}
-                  isDisabled={exportLoading}
+                  isDisabled={exportLoading || projectArchived}
                 >
                   Export Project
                 </MenuItem>
                 <Tooltip
-                  isDisabled={projectEntities?.length > 0}
+                  isDisabled={projectEntities?.length > 0 || projectArchived}
                   label={"This Project does not contain any Entities."}
                 >
                   <MenuItem
                     onClick={handleExportEntitiesClick}
                     icon={<Icon name={"download"} />}
                     isDisabled={
-                      projectEntities?.length === 0 || exportEntitiesLoading
+                      projectEntities?.length === 0 ||
+                      exportEntitiesLoading ||
+                      projectArchived
                     }
                   >
                     Export Entities
                   </MenuItem>
                 </Tooltip>
                 <MenuItem
-                  icon={<Icon name={"delete"} />}
-                  onClick={onDeleteDialogOpen}
+                  icon={<Icon name={"archive"} />}
+                  onClick={onArchiveDialogOpen}
+                  isDisabled={projectArchived}
                 >
-                  Delete
+                  Archive
                 </MenuItem>
               </MenuList>
             </Menu>
@@ -714,42 +777,61 @@ const Project = () => {
             <Flex
               direction={"column"}
               p={"2"}
+              gap={"2"}
               border={"1px"}
-              borderColor={"gray.200"}
+              borderColor={"gray.300"}
               rounded={"md"}
             >
               {/* Project Overview */}
-              <Flex gap={"4"} grow={"1"} direction={"column"}>
-                <Flex gap={"2"} direction={"row"}>
-                  <Flex gap={"2"} direction={"column"} basis={"40%"}>
-                    <Text fontWeight={"bold"}>Created</Text>
-                    <Flex align={"center"} gap={"1"}>
-                      <Icon name={"v_date"} size={"sm"} />
-                      <Text fontSize={"sm"}>
-                        {dayjs(project.created).format("DD MMM YYYY")}
-                      </Text>
-                    </Flex>
-                    <Text fontWeight={"bold"}>Owner</Text>
-                    <Flex>
-                      <Tag colorScheme={"green"}>
-                        <TagLabel fontSize={"sm"}>{project.owner}</TagLabel>
-                      </Tag>
-                    </Flex>
-                  </Flex>
+              <Flex gap={"2"} direction={"row"}>
+                <Flex direction={"column"} gap={"2"} basis={"60%"}>
+                  <Text fontWeight={"bold"}>Name</Text>
+                  <Input
+                    size={"sm"}
+                    value={projectName}
+                    onChange={(event) => {
+                      setProjectName(event.target.value);
+                    }}
+                    isReadOnly={!editing}
+                    bg={"white"}
+                    rounded={"md"}
+                    border={"1px"}
+                    borderColor={"gray.300"}
+                  />
+                </Flex>
 
-                  <Flex gap={"2"} direction={"column"} basis={"60%"}>
-                    <Text fontWeight={"bold"}>Description</Text>
-                    <Textarea
-                      size={"sm"}
-                      value={projectDescription}
-                      onChange={(event) => {
-                        setProjectDescription(event.target.value);
-                      }}
-                      isReadOnly={!editing}
-                      bg={"white"}
-                      border={"1px"}
-                      borderColor={"gray.200"}
-                    />
+                <Flex direction={"column"} gap={"2"}>
+                  <Text fontWeight={"bold"}>Created</Text>
+                  <Flex align={"center"} gap={"1"}>
+                    <Icon name={"v_date"} size={"sm"} />
+                    <Text fontSize={"sm"}>
+                      {dayjs(project.created).format("DD MMM YYYY")}
+                    </Text>
+                  </Flex>
+                </Flex>
+              </Flex>
+
+              <Flex gap={"2"} direction={"row"}>
+                <Flex direction={"column"} gap={"2"} basis={"60%"}>
+                  <Text fontWeight={"bold"}>Description</Text>
+                  <Textarea
+                    size={"sm"}
+                    value={projectDescription}
+                    onChange={(event) => {
+                      setProjectDescription(event.target.value);
+                    }}
+                    isReadOnly={!editing}
+                    bg={"white"}
+                    rounded={"md"}
+                    border={"1px"}
+                    borderColor={"gray.300"}
+                  />
+                </Flex>
+
+                <Flex direction={"column"} gap={"2"}>
+                  <Text fontWeight={"bold"}>Owner</Text>
+                  <Flex>
+                    <ActorTag orcid={project.owner} fallback={"Unknown User"} />
                   </Flex>
                 </Flex>
               </Flex>
@@ -762,7 +844,7 @@ const Project = () => {
               gap={"2"}
               rounded={"md"}
               border={"1px"}
-              borderColor={"gray.200"}
+              borderColor={"gray.300"}
             >
               <Flex
                 direction={"row"}
@@ -791,6 +873,7 @@ const Project = () => {
                     data={projectEntities}
                     columns={entitiesColumns}
                     visibleColumns={{}}
+                    selectedRows={{}}
                     viewOnly={!editing}
                     showSelection={true}
                     actions={entitiesTableActions}
@@ -823,7 +906,7 @@ const Project = () => {
               p={"2"}
               rounded={"md"}
               border={"1px"}
-              borderColor={"gray.200"}
+              borderColor={"gray.300"}
             >
               {/* Collaborators display */}
               <Flex direction={"column"}>
@@ -976,7 +1059,7 @@ const Project = () => {
                 gap={"4"}
                 rounded={"md"}
                 border={"1px"}
-                borderColor={"gray.200"}
+                borderColor={"gray.300"}
               >
                 <Flex direction={"column"} gap={"2"}>
                   <FormControl>
@@ -985,7 +1068,7 @@ const Project = () => {
                       <CheckboxGroup>
                         <Stack spacing={2} direction={"column"}>
                           <Checkbox disabled defaultChecked size={"sm"}>
-                            Name: {project.name}
+                            Name: {projectName}
                           </Checkbox>
                           <Checkbox
                             size={"sm"}

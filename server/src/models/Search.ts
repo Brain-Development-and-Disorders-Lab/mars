@@ -43,7 +43,7 @@ export class Search {
         { "attributes.values.name": { $regex: expression } },
         { "attributes.values.data": { $regex: expression } }, // Assuming searchable content within attributes
       ],
-      $and: [{ deleted: false }],
+      $and: [{ archived: false }],
     };
 
     const results = await getDatabase()

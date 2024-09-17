@@ -114,7 +114,7 @@ const AccountMenu = () => {
           w={"100%"}
           rounded={"md"}
           border={"1px"}
-          borderColor={"gray.200"}
+          borderColor={"gray.300"}
           bg={"white"}
           _hover={{ bg: "gray.300" }}
           onClick={() => handleOpenClick()}

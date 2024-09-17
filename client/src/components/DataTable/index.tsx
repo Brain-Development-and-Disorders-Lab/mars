@@ -50,7 +50,7 @@ const DataTable = (props: DataTableProps) => {
   );
 
   // Table row selection state
-  const [selectedRows, setSelectedRows] = useState({});
+  const [selectedRows, setSelectedRows] = useState(props.selectedRows);
 
   // Create ReactTable instance
   const table = useReactTable({
@@ -128,6 +128,11 @@ const DataTable = (props: DataTableProps) => {
   useEffect(() => {
     setColumnVisibility(props.visibleColumns);
   }, [props.visibleColumns]);
+
+  // Effect to update the selected rows
+  useEffect(() => {
+    setSelectedRows(props.selectedRows);
+  }, [props.selectedRows]);
 
   // Exclude columns that are not sortable, i.e. checkboxes and buttons
   const canSortColumn = (header: any) => {

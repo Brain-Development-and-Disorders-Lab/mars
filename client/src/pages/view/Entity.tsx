@@ -55,6 +55,7 @@ import {
   TabPanel,
   TabPanels,
 } from "@chakra-ui/react";
+import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
 import DataTable from "@components/DataTable";
 import Graph from "@components/Graph";
@@ -65,6 +66,7 @@ import Values from "@components/Values";
 import PreviewModal from "@components/PreviewModal";
 import AttributeViewButton from "@components/AttributeViewButton";
 import SearchSelect from "@components/SearchSelect";
+import Dialog from "@components/Dialog";
 import { createColumnHelper } from "@tanstack/react-table";
 
 // Existing and custom types
@@ -80,7 +82,7 @@ import {
 } from "@types";
 
 // Utility functions and libraries
-import { request, requestStatic } from "src/database/functions";
+import { requestStatic } from "src/database/functions";
 import { isValidValues } from "src/util";
 import _ from "lodash";
 import dayjs from "dayjs";
@@ -93,8 +95,6 @@ import { useQuery, gql, useMutation, useLazyQuery } from "@apollo/client";
 
 // Routing and navigation
 import { useParams, useNavigate } from "react-router-dom";
-import Dialog from "@components/Dialog";
-import { Warning } from "@components/Label";
 
 // Workspace context
 import { WorkspaceContext } from "../../Context";
@@ -158,6 +158,9 @@ const Entity = () => {
     onClose: onHistoryClose,
   } = useDisclosure();
 
+  // Archive state
+  const [entityArchived, setEntityArchived] = useState(false);
+
   // Adding Attributes to existing Entity
   const {
     isOpen: isAddAttributesOpen,
@@ -185,7 +188,7 @@ const Entity = () => {
         _id
         name
         owner
-        deleted
+        archived
         locked
         description
         projects
@@ -216,7 +219,7 @@ const Entity = () => {
         }
         history {
           timestamp
-          deleted
+          archived
           owner
           description
           projects
@@ -312,22 +315,25 @@ const Entity = () => {
   `;
   const [updateEntity, { loading: updateLoading }] = useMutation(UPDATE_ENTITY);
 
-  // Mutation to delete Entity
-  const DELETE_ENTITY = gql`
-    mutation DeleteEntity($_id: String) {
-      deleteEntity(_id: $_id) {
+  // Mutation to archive Entity
+  const ARCHIVE_ENTITY = gql`
+    mutation ArchiveEntity($_id: String, $state: Boolean) {
+      archiveEntity(_id: $_id, state: $state) {
         success
         message
       }
     }
   `;
-  const [deleteEntity, { loading: deleteLoading }] = useMutation(DELETE_ENTITY);
+  const [archiveEntity, { error: archiveError, loading: archiveLoading }] =
+    useMutation(ARCHIVE_ENTITY);
 
   // Manage data once retrieved
   useEffect(() => {
     if (data?.entity) {
       // Unpack all the Entity data
       setEntityData(data.entity);
+      setEntityName(data.entity.name);
+      setEntityArchived(data.entity.archived);
       setEntityDescription(data.entity.description || "");
       setEntityProjects(data.entity.projects || []);
       setEntityOrigins(data.entity.associations.origins || []);
@@ -412,6 +418,7 @@ const Entity = () => {
   const onSaveAsTemplate = async () => {
     const attributeData: IAttribute = {
       name: attributeName,
+      archived: false,
       description: attributeDescription,
       values: attributeValues,
     };
@@ -458,6 +465,7 @@ const Entity = () => {
 
   // Break up entity data into editable fields
   const [entityData, setEntityData] = useState({} as EntityModel);
+  const [entityName, setEntityName] = useState("");
   const [entityDescription, setEntityDescription] = useState("");
   const [entityProjects, setEntityProjects] = useState([] as string[]);
   const [entityOrigins, setEntityOrigins] = useState([] as IGenericItem[]);
@@ -473,12 +481,12 @@ const Entity = () => {
     [] as string[],
   );
 
-  // State for dialog confirming if user should delete
-  const deleteDialogRef = useRef();
+  // State for dialog confirming if user should archive
+  const archiveDialogRef = useRef();
   const {
-    isOpen: isDeleteDialogOpen,
-    onOpen: onDeleteDialogOpen,
-    onClose: onDeleteDialogClose,
+    isOpen: isArchiveDialogOpen,
+    onOpen: onArchiveDialogOpen,
+    onClose: onArchiveDialogClose,
   } = useDisclosure();
 
   // Manage the tab index between "Entity Origins" and "Entity Products"
@@ -516,10 +524,10 @@ const Entity = () => {
           variables: {
             entity: {
               _id: entityData._id,
-              name: entityData.name,
-              created: entityData.created,
-              deleted: entityData.deleted,
+              name: entityName,
+              archived: entityArchived,
               locked: entityData.locked,
+              created: entityData.created,
               owner: entityData.owner,
               description: entityDescription,
               projects: entityProjects,
@@ -550,25 +558,12 @@ const Entity = () => {
         });
       }
 
-      // Unlock Entity
-      await request<any>("POST", `/entities/lock/${id}`, {
-        entity: {
-          _id: entityData._id,
-          name: entityData.name,
-        },
-        lockState: false,
-      });
+      // Run a refetch operation
+      await refetch();
+
       setEditing(false);
       setIsUpdating(false);
     } else {
-      // Lock Entity
-      await request<any>("POST", `/entities/lock/${id}`, {
-        entity: {
-          _id: entityData._id,
-          name: entityData.name,
-        },
-        lockState: true,
-      });
       setEditing(true);
     }
   };
@@ -582,6 +577,7 @@ const Entity = () => {
 
     // Reset all Entity states
     setEntityData(entityData);
+    setEntityName(entityName);
     setEntityDescription(entityDescription);
     setEntityProjects(entityProjects);
     setEntityOrigins(entityOrigins);
@@ -595,46 +591,33 @@ const Entity = () => {
   };
 
   /**
-   * Restore an Entity from a deleted status
+   * Restore an Entity from an archived status
    */
-  const handleRestoreFromDeleteClick = async () => {
-    try {
-      await updateEntity({
-        variables: {
-          entity: {
-            _id: entityData._id,
-            name: entityData.name,
-            created: entityData.created,
-            deleted: false,
-            locked: false,
-            owner: entityData.owner,
-            description: entityDescription,
-            projects: entityProjects,
-            associations: {
-              origins: entityOrigins,
-              products: entityProducts,
-            },
-            attributes: entityAttributes,
-            attachments: entityAttachments,
-          },
-        },
-      });
+  const handleRestoreFromArchiveClick = async () => {
+    await archiveEntity({
+      variables: {
+        _id: entityData._id,
+        state: false,
+      },
+    });
+
+    if (archiveError) {
       toast({
-        title: "Restored Successfully",
-        status: "success",
-        duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: `Entity could not be restored`,
+        title: "Error while restoring Entity",
         status: "error",
         duration: 2000,
         position: "bottom-right",
         isClosable: true,
       });
+    } else {
+      toast({
+        title: "Entity restored successfully",
+        status: "success",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+      setEntityArchived(false);
     }
   };
 
@@ -960,9 +943,9 @@ const Entity = () => {
             />
             {editing ? (
               <IconButton
-                aria-label={"Delete attachment"}
+                aria-label={"Remove attachment"}
                 size={"sm"}
-                key={`delete-file-${info.getValue()}`}
+                key={`remove-file-${info.getValue()}`}
                 colorScheme={"red"}
                 icon={<Icon name={"delete"} />}
                 onClick={() => removeAttachment(info.getValue())}
@@ -1009,9 +992,9 @@ const Entity = () => {
         variables: {
           entity: {
             _id: entityData._id,
-            name: entityData.name,
+            name: entityVersion.name,
             created: entityData.created,
-            deleted: entityVersion.deleted,
+            archived: entityVersion.archived,
             locked: entityData.locked,
             owner: entityVersion.owner,
             description: entityVersion.description || "",
@@ -1081,7 +1064,7 @@ const Entity = () => {
 
       FileSaver.saveAs(
         new Blob([exportData]),
-        slugify(`${entityData.name.replace(" ", "")}_export.${format}`),
+        slugify(`${entityName.replace(" ", "")}_export.${format}`),
       );
 
       // Close the "Export" modal
@@ -1137,32 +1120,36 @@ const Entity = () => {
     }
   };
 
-  // Delete the Entity when confirmed
-  const handleDeleteClick = async () => {
-    const response = await deleteEntity({
+  // Archive the Entity when confirmed
+  const handleArchiveClick = async () => {
+    const response = await archiveEntity({
       variables: {
         _id: entityData._id,
+        state: true,
       },
     });
-    if (response.data.deleteEntity.success) {
+
+    if (response.data.archiveEntity.success) {
       toast({
-        title: "Deleted Successfully",
+        title: "Archived Successfully",
         status: "success",
         duration: 2000,
         position: "bottom-right",
         isClosable: true,
       });
-      navigate("/entities");
+      setEntityArchived(true);
+      onArchiveDialogClose();
     } else {
       toast({
         title: "Error",
-        description: "An error occurred when deleting Entity",
+        description: "An error occurred while archiving Entity",
         status: "error",
         duration: 2000,
         position: "bottom-right",
         isClosable: true,
       });
     }
+
     setEditing(false);
   };
 
@@ -1275,6 +1262,7 @@ const Entity = () => {
       {
         _id: `a-${entityData._id}-${nanoid(6)}`,
         name: attributeName,
+        archived: false,
         description: attributeDescription,
         values: attributeValues,
       },
@@ -1335,7 +1323,7 @@ const Entity = () => {
     <Content
       isError={!_.isUndefined(error)}
       isLoaded={
-        !loading && !updateLoading && !deleteLoading && !workspaceLoading
+        !loading && !updateLoading && !archiveLoading && !workspaceLoading
       }
     >
       <Flex direction={"column"}>
@@ -1359,7 +1347,7 @@ const Entity = () => {
             <Heading fontWeight={"semibold"} size={"md"}>
               {entityData.name}
             </Heading>
-            {entityData.deleted && <Icon name={"delete"} size={"md"} />}
+            {entityArchived && <Icon name={"archive"} size={"md"} />}
           </Flex>
 
           {/* Buttons */}
@@ -1374,9 +1362,10 @@ const Entity = () => {
                 Cancel
               </Button>
             )}
-            {entityData.deleted ? (
+            {entityArchived ? (
               <Button
-                onClick={handleRestoreFromDeleteClick}
+                id={"restoreEntityButton"}
+                onClick={handleRestoreFromArchiveClick}
                 size={"sm"}
                 colorScheme={"orange"}
                 rightIcon={<Icon name={"rewind"} />}
@@ -1398,6 +1387,7 @@ const Entity = () => {
                   </Tooltip>
                 ) : (
                   <Button
+                    id={"editEntityButton"}
                     onClick={handleEditClick}
                     size={"sm"}
                     colorScheme={editing ? "green" : "blue"}
@@ -1431,7 +1421,7 @@ const Entity = () => {
                 <MenuItem
                   icon={<Icon name={"graph"} />}
                   onClick={onGraphOpen}
-                  isDisabled={editing || entityData.deleted}
+                  isDisabled={editing || entityArchived}
                 >
                   Visualize
                 </MenuItem>
@@ -1444,38 +1434,38 @@ const Entity = () => {
                 <MenuItem
                   onClick={handleExportClick}
                   icon={<Icon name={"download"} />}
-                  isDisabled={editing || entityData.deleted}
+                  isDisabled={editing || entityArchived}
                 >
                   Export
                 </MenuItem>
                 <MenuItem
-                  onClick={onDeleteDialogOpen}
-                  icon={<Icon name={"delete"} />}
+                  onClick={onArchiveDialogOpen}
+                  icon={<Icon name={"archive"} />}
+                  isDisabled={entityArchived}
                 >
-                  Delete
+                  Archive
                 </MenuItem>
               </MenuList>
             </Menu>
 
-            {/* Delete Dialog */}
+            {/* Archive Dialog */}
             <Dialog
-              dialogRef={deleteDialogRef}
-              header={"Delete Entity"}
-              rightButtonAction={handleDeleteClick}
-              isOpen={isDeleteDialogOpen}
-              onOpen={onDeleteDialogOpen}
-              onClose={onDeleteDialogClose}
+              dialogRef={archiveDialogRef}
+              header={"Archive Entity"}
+              rightButtonAction={handleArchiveClick}
+              isOpen={isArchiveDialogOpen}
+              onOpen={onArchiveDialogOpen}
+              onClose={onArchiveDialogClose}
             >
               <Flex gap={"2"} direction={"column"}>
                 <Text fontWeight={"semibold"}>
-                  Are you sure you want to delete this Entity?
+                  Are you sure you want to archive this Entity?
                 </Text>
                 <Text>
-                  It will be removed from all Projects, all relationships to
-                  Origins and Products will be removed, Attribute data removed,
-                  and all Attachments deleted.
+                  This Entity will be moved to the Workspace archive. All
+                  relationships will be preserved, however it will not be
+                  visible. It can be restored at any time.
                 </Text>
-                <Warning text={"This is a destructive operation"} />
               </Flex>
             </Dialog>
           </Flex>
@@ -1495,43 +1485,68 @@ const Entity = () => {
             <Flex
               direction={"column"}
               p={"2"}
+              gap={"2"}
               border={"1px"}
-              borderColor={"gray.200"}
+              borderColor={"gray.300"}
               rounded={"md"}
             >
-              <Flex gap={"2"} direction={"column"}>
-                <Flex gap={"2"} direction={"row"}>
-                  {/* "Created" and "Owner" fields */}
-                  <Flex gap={"2"} direction={"column"} basis={"40%"}>
-                    <Text fontWeight={"bold"}>Created</Text>
-                    <Flex align={"center"} gap={"1"}>
-                      <Icon name={"v_date"} size={"sm"} />
-                      <Text fontSize={"sm"}>
-                        {dayjs(entityData.created).format("DD MMM YYYY")}
-                      </Text>
-                    </Flex>
-                    <Text fontWeight={"bold"}>Owner</Text>
-                    <Flex>
-                      <Tag colorScheme={"green"}>
-                        <TagLabel fontSize={"sm"}>{entityData.owner}</TagLabel>
-                      </Tag>
-                    </Flex>
+              {/* "Name" and "Created" field */}
+              <Flex gap={"2"} direction={"row"}>
+                <Flex direction={"column"} gap={"1"} basis={"60%"}>
+                  <Text fontWeight={"bold"}>Name</Text>
+                  <Flex>
+                    <Input
+                      size={"sm"}
+                      value={entityName}
+                      onChange={(event) => {
+                        setEntityName(event.target.value || "");
+                      }}
+                      isReadOnly={!editing}
+                      rounded={"md"}
+                      border={"1px"}
+                      borderColor={"gray.300"}
+                      bg={"white"}
+                    />
                   </Flex>
-                  {/* "Description" field */}
-                  <Flex gap={"2"} direction={"column"} basis={"60%"}>
-                    <Text fontWeight={"bold"}>Description</Text>
-                    <Flex>
-                      <Textarea
-                        value={entityDescription}
-                        onChange={(event) => {
-                          setEntityDescription(event.target.value || "");
-                        }}
-                        isReadOnly={!editing}
-                        border={"1px"}
-                        borderColor={"gray.200"}
-                        bg={"white"}
-                      />
-                    </Flex>
+                </Flex>
+
+                <Flex direction={"column"} gap={"1"}>
+                  <Text fontWeight={"bold"}>Created</Text>
+                  <Flex align={"center"} gap={"1"}>
+                    <Icon name={"v_date"} size={"sm"} />
+                    <Text fontSize={"sm"}>
+                      {dayjs(entityData.created).format("DD MMM YYYY")}
+                    </Text>
+                  </Flex>
+                </Flex>
+              </Flex>
+
+              {/* "Created" and "Owner" fields */}
+              <Flex gap={"2"} direction={"row"}>
+                <Flex direction={"column"} gap={"1"} basis={"60%"}>
+                  <Text fontWeight={"bold"}>Description</Text>
+                  <Flex>
+                    <Textarea
+                      size={"sm"}
+                      value={entityDescription}
+                      onChange={(event) => {
+                        setEntityDescription(event.target.value || "");
+                      }}
+                      isReadOnly={!editing}
+                      rounded={"md"}
+                      border={"1px"}
+                      borderColor={"gray.300"}
+                      bg={"white"}
+                    />
+                  </Flex>
+                </Flex>
+                <Flex direction={"column"} gap={"1"}>
+                  <Text fontWeight={"bold"}>Owner</Text>
+                  <Flex>
+                    <ActorTag
+                      orcid={entityData.owner}
+                      fallback={"Unknown User"}
+                    />
                   </Flex>
                 </Flex>
               </Flex>
@@ -1544,7 +1559,7 @@ const Entity = () => {
               gap={"2"}
               rounded={"md"}
               border={"1px"}
-              borderColor={"gray.200"}
+              borderColor={"gray.300"}
             >
               <Flex
                 direction={"row"}
@@ -1576,6 +1591,7 @@ const Entity = () => {
                     data={entityProjects}
                     columns={projectsTableColumns}
                     visibleColumns={{}}
+                    selectedRows={{}}
                     viewOnly={!editing}
                     actions={projectsTableActions}
                     showPagination
@@ -1592,7 +1608,7 @@ const Entity = () => {
               gap={"2"}
               rounded={"md"}
               border={"1px"}
-              borderColor={"gray.200"}
+              borderColor={"gray.300"}
             >
               <Flex gap={"2"} direction={"column"}>
                 <Flex
@@ -1625,6 +1641,7 @@ const Entity = () => {
                       data={entityAttachments}
                       columns={attachmentTableColumns}
                       visibleColumns={{}}
+                      selectedRows={{}}
                       viewOnly={!editing}
                       actions={attachmentTableActions}
                       showPagination
@@ -1679,7 +1696,7 @@ const Entity = () => {
                   borderLeft={"1px"}
                   borderRight={"1px"}
                   borderBottom={"1px"}
-                  borderColor={"gray.200"}
+                  borderColor={"gray.300"}
                   roundedBottom={"md"}
                 >
                   <Flex
@@ -1693,6 +1710,7 @@ const Entity = () => {
                         data={entityOrigins}
                         columns={originTableColumns}
                         visibleColumns={{}}
+                        selectedRows={{}}
                         viewOnly={!editing}
                         actions={originTableActions}
                         showPagination
@@ -1710,7 +1728,7 @@ const Entity = () => {
                   borderLeft={"1px"}
                   borderRight={"1px"}
                   borderBottom={"1px"}
-                  borderColor={"gray.200"}
+                  borderColor={"gray.300"}
                   roundedBottom={"md"}
                 >
                   <Flex
@@ -1724,6 +1742,7 @@ const Entity = () => {
                         data={entityProducts}
                         columns={productTableColumns}
                         visibleColumns={{}}
+                        selectedRows={{}}
                         viewOnly={!editing}
                         actions={productTableActions}
                         showPagination
@@ -1746,7 +1765,7 @@ const Entity = () => {
               gap={"2"}
               rounded={"md"}
               border={"1px"}
-              borderColor={"gray.200"}
+              borderColor={"gray.300"}
             >
               <Flex
                 direction={"row"}
@@ -1780,6 +1799,7 @@ const Entity = () => {
                     data={entityAttributes}
                     columns={attributeTableColumns}
                     visibleColumns={visibleAttributeTableColumns}
+                    selectedRows={{}}
                     viewOnly={!editing}
                     showPagination
                     showSelection
@@ -2022,7 +2042,7 @@ const Entity = () => {
                   justify={"center"}
                   rounded={"md"}
                   border={"1px"}
-                  borderColor={"gray.200"}
+                  borderColor={"gray.300"}
                   minH={"100px"}
                 >
                   {selectedProjects.length > 0 ? (
@@ -2228,7 +2248,7 @@ const Entity = () => {
                 gap={"2"}
                 rounded={"md"}
                 border={"1px"}
-                borderColor={"gray.200"}
+                borderColor={"gray.300"}
               >
                 <Flex direction={"column"} gap={"2"}>
                   <FormControl>
@@ -2237,7 +2257,7 @@ const Entity = () => {
                       <CheckboxGroup size={"sm"}>
                         <Stack spacing={2} direction={"column"}>
                           <Checkbox disabled defaultChecked>
-                            Name: {entityData.name}
+                            Name: {entityName}
                           </Checkbox>
                           <Checkbox
                             isChecked={_.includes(exportFields, "created")}
@@ -2481,7 +2501,7 @@ const Entity = () => {
         >
           <ModalOverlay />
           <ModalContent>
-            <ModalHeader>Visualize: {entityData.name}</ModalHeader>
+            <ModalHeader>Visualize: {entityName}</ModalHeader>
             <ModalCloseButton />
             <ModalBody>
               <Container h={"90vh"} minW={"90vw"}>
@@ -2544,7 +2564,7 @@ const Entity = () => {
                               onClick={() => {
                                 handleRestoreFromHistoryClick(entityVersion);
                               }}
-                              isDisabled={entityData.deleted}
+                              isDisabled={entityArchived}
                             >
                               Restore
                             </Button>

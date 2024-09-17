@@ -18,6 +18,7 @@ import { getIdentifier } from "../util";
 import _ from "lodash";
 import dayjs from "dayjs";
 import Papa from "papaparse";
+import consola from "consola";
 
 const ENTITIES_COLLECTION = "entities"; // Collection name
 
@@ -72,7 +73,7 @@ export class Entities {
   static existByName = async (name: string): Promise<boolean> => {
     const entity = await getDatabase()
       .collection<EntityModel>(ENTITIES_COLLECTION)
-      .findOne({ name: name, deleted: false });
+      .findOne({ name: name, archived: false });
 
     return !_.isNull(entity);
   };
@@ -80,7 +81,7 @@ export class Entities {
   static getByName = async (name: string): Promise<EntityModel | null> => {
     return await getDatabase()
       .collection<EntityModel>(ENTITIES_COLLECTION)
-      .findOne({ name: name, deleted: false });
+      .findOne({ name: name, archived: false });
   };
 
   /**
@@ -150,6 +151,11 @@ export class Entities {
         ...entity,
       },
     };
+
+    // Name
+    if (!_.isUndefined(updated.name)) {
+      update.$set.name = updated.name;
+    }
 
     // Description
     if (!_.isUndefined(updated.description)) {
@@ -256,6 +262,50 @@ export class Entities {
       message:
         response.modifiedCount == 1
           ? "Updated Entity"
+          : "No changes made to Entity",
+    };
+  };
+
+  /**
+   * Set the archive state of an Entity
+   * @param _id Entity identifier to archive
+   * @param state Entity archive state
+   * @return {Promise<ResponseMessage>}
+   */
+  static setArchived = async (
+    _id: string,
+    state: boolean,
+  ): Promise<ResponseMessage> => {
+    consola.debug("Setting archive state of Entity:", _id, "Archived:", state);
+    const entity = await Entities.getOne(_id);
+    if (_.isNull(entity)) {
+      consola.error("Unable to retrieve Entity:", _id);
+      return {
+        success: false,
+        message: "Error retrieving existing Entity",
+      };
+    }
+
+    // Update the archived state
+    entity.archived = state;
+    const update: { $set: IEntity } = {
+      $set: {
+        ...entity,
+      },
+    };
+
+    const response = await getDatabase()
+      .collection<EntityModel>(ENTITIES_COLLECTION)
+      .updateOne({ _id: _id }, update);
+    if (response.modifiedCount > 0) {
+      consola.info("Set archive state of Entity:", _id, "Archived:", state);
+    }
+
+    return {
+      success: true,
+      message:
+        response.modifiedCount === 1
+          ? "Set archive state of Entity"
           : "No changes made to Entity",
     };
   };

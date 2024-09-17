@@ -21,8 +21,8 @@ import { WorkspaceContext } from "src/Context";
 const SearchSelect = (props: SearchSelectProps) => {
   // Query to retrieve Entities
   const GET_ENTITIES = gql`
-    query GetEntities($limit: Int) {
-      entities(limit: $limit) {
+    query GetEntities($limit: Int, $archived: Boolean) {
+      entities(limit: $limit, archived: $archived) {
         _id
         name
       }
@@ -33,6 +33,7 @@ const SearchSelect = (props: SearchSelectProps) => {
   }>(GET_ENTITIES, {
     variables: {
       limit: 20,
+      archived: true,
     },
   });
 
@@ -174,7 +175,7 @@ const SearchSelect = (props: SearchSelectProps) => {
           direction={"column"}
           bg={"white"}
           border={"1px"}
-          borderColor={"gray.200"}
+          borderColor={"gray.300"}
           borderRadius={"sm"}
           shadow={"md"}
           position={"absolute"}

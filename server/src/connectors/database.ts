@@ -22,6 +22,7 @@ let attachments: GridFSBucket;
  * Connect to the primary database storing metadata
  */
 export const connect = (): Promise<Db> => {
+  consola.start("Connecting to databases...");
   return new Promise((resolve) => {
     client.connect().then((result) => {
       database = result.db("metadata");

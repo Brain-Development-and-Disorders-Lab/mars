@@ -188,7 +188,7 @@ const SearchBox = () => {
                 !isError && (
                   <VStack
                     gap={"1"}
-                    divider={<StackDivider borderColor={"gray.200"} />}
+                    divider={<StackDivider borderColor={"gray.300"} />}
                     w={"100%"}
                   >
                     {results.length > 0 ? (

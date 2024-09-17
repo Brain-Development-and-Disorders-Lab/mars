@@ -6,6 +6,10 @@ import {
   Button,
   Flex,
   Heading,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
   Tag,
   TagLabel,
   Text,
@@ -25,7 +29,7 @@ import { AttributeModel, IValue } from "@types";
 import _ from "lodash";
 
 // Routing and navigation
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { gql, useMutation, useQuery } from "@apollo/client";
 
 // Workspace context
@@ -34,20 +38,20 @@ import { WorkspaceContext } from "../../Context";
 const Attribute = () => {
   const { id } = useParams();
   const toast = useToast();
-  const navigate = useNavigate();
 
   const [editing, setEditing] = useState(false);
 
   const [attributeData, setAttributeData] = useState({} as AttributeModel);
   const [attributeDescription, setAttributeDescription] = useState("");
+  const [attributeArchived, setAttributeArchived] = useState(false);
   const [attributeValues, setAttributeValues] = useState([] as IValue<any>[]);
 
-  // State for dialog confirming if user should delete
-  const deleteDialogRef = useRef();
+  // State for dialog confirming if user should archive
+  const archiveDialogRef = useRef();
   const {
-    isOpen: isDeleteDialogOpen,
-    onOpen: onDeleteDialogOpen,
-    onClose: onDeleteDialogClose,
+    isOpen: isArchiveDialogOpen,
+    onOpen: onArchiveDialogOpen,
+    onClose: onArchiveDialogClose,
   } = useDisclosure();
 
   // GraphQL operations
@@ -56,6 +60,7 @@ const Attribute = () => {
       attribute(_id: $_id) {
         _id
         name
+        archived
         description
         values {
           _id
@@ -85,23 +90,24 @@ const Attribute = () => {
   const [updateAttribute, { loading: updateLoading }] =
     useMutation(UPDATE_ATTRIBUTE);
 
-  // Mutation to delete Attribute
-  const DELETE_ATTRIBUTE = gql`
-    mutation DeleteAttribute($_id: String) {
-      deleteAttribute(_id: $_id) {
+  // Mutation to archive Attribute
+  const ARCHIVE_ATTRIBUTE = gql`
+    mutation ArchiveAttribute($_id: String, $state: Boolean) {
+      archiveAttribute(_id: $_id, state: $state) {
         success
         message
       }
     }
   `;
-  const [deleteAttribute, { loading: deleteLoading }] =
-    useMutation(DELETE_ATTRIBUTE);
+  const [archiveAttribute, { loading: archiveLoading }] =
+    useMutation(ARCHIVE_ATTRIBUTE);
 
   // Manage data once retrieved
   useEffect(() => {
     if (data?.attribute) {
       // Unpack all the Entity data
       setAttributeData(data.attribute);
+      setAttributeArchived(data.attribute.archived);
       setAttributeDescription(data.attribute.description || "");
       setAttributeValues(data.attribute.values);
     }
@@ -129,32 +135,69 @@ const Attribute = () => {
     }
   }, [workspace]);
 
-  // Delete the Attribute when confirmed
-  const handleDeleteClick = async () => {
-    const response = await deleteAttribute({
+  // Archive the Attribute when confirmed
+  const handleArchiveClick = async () => {
+    const response = await archiveAttribute({
       variables: {
         _id: attributeData._id,
+        state: true,
       },
     });
-    if (response.data.deleteAttribute.success) {
+
+    if (response.data.archiveAttribute.success) {
       toast({
-        title: "Deleted Successfully",
+        title: "Archived Successfully",
         status: "success",
         duration: 2000,
         position: "bottom-right",
         isClosable: true,
       });
-      navigate("/attributes");
+      setAttributeArchived(true);
+      onArchiveDialogClose();
     } else {
       toast({
         title: "Error",
-        description: "An error occurred when deleting Attribute",
+        description: "An error occurred while archiving Attribute",
         status: "error",
         duration: 2000,
         position: "bottom-right",
         isClosable: true,
       });
     }
+
+    setEditing(false);
+  };
+
+  // Restore the Attribute
+  const handleRestoreFromArchiveClick = async () => {
+    const response = await archiveAttribute({
+      variables: {
+        _id: attributeData._id,
+        state: false,
+      },
+    });
+
+    if (response.data.archiveAttribute.success) {
+      toast({
+        title: "Restored Attribute successfully",
+        status: "success",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+      setAttributeArchived(false);
+      onArchiveDialogClose();
+    } else {
+      toast({
+        title: "Error",
+        description: "An error occurred while restoring Attribute",
+        status: "error",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
+
     setEditing(false);
   };
 
@@ -201,7 +244,7 @@ const Attribute = () => {
     <Content
       isError={!_.isUndefined(error)}
       isLoaded={
-        !loading && !updateLoading && !deleteLoading && !workspaceLoading
+        !loading && !updateLoading && !archiveLoading && !workspaceLoading
       }
     >
       <Flex direction={"column"}>
@@ -229,29 +272,70 @@ const Attribute = () => {
 
           {/* Buttons */}
           <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
-            <Button
-              size={"sm"}
-              colorScheme={editing ? "green" : "blue"}
-              rightIcon={
-                editing ? <Icon name={"check"} /> : <Icon name={"edit"} />
-              }
-              onClick={handleEditClick}
-            >
-              {editing ? "Done" : "Edit"}
-            </Button>
+            {attributeArchived ? (
+              <Button
+                id={"restoreAttributeButton"}
+                onClick={handleRestoreFromArchiveClick}
+                size={"sm"}
+                colorScheme={"orange"}
+                rightIcon={<Icon name={"rewind"} />}
+              >
+                Restore
+              </Button>
+            ) : (
+              <Button
+                id={"editAttributeButton"}
+                size={"sm"}
+                colorScheme={editing ? "green" : "blue"}
+                rightIcon={
+                  editing ? <Icon name={"check"} /> : <Icon name={"edit"} />
+                }
+                onClick={handleEditClick}
+              >
+                {editing ? "Done" : "Edit"}
+              </Button>
+            )}
 
-            {/* Delete Dialog */}
+            {/* Actions Menu */}
+            <Menu>
+              <MenuButton
+                as={Button}
+                size={"sm"}
+                colorScheme={"blue"}
+                rightIcon={<Icon name={"c_down"} />}
+              >
+                Actions
+              </MenuButton>
+              <MenuList>
+                <MenuItem icon={<Icon name={"clock"} />}>History</MenuItem>
+                <MenuItem
+                  icon={<Icon name={"download"} />}
+                  isDisabled={editing || attributeArchived}
+                >
+                  Export
+                </MenuItem>
+                <MenuItem
+                  onClick={onArchiveDialogOpen}
+                  icon={<Icon name={"archive"} />}
+                  isDisabled={attributeArchived}
+                >
+                  Archive
+                </MenuItem>
+              </MenuList>
+            </Menu>
+
+            {/* Archive Dialog */}
             <Dialog
-              dialogRef={deleteDialogRef}
-              header={"Delete Entity"}
-              rightButtonAction={handleDeleteClick}
-              isOpen={isDeleteDialogOpen}
-              onOpen={onDeleteDialogOpen}
-              onClose={onDeleteDialogClose}
+              dialogRef={archiveDialogRef}
+              header={"Archive Attribute"}
+              rightButtonAction={handleArchiveClick}
+              isOpen={isArchiveDialogOpen}
+              onOpen={onArchiveDialogOpen}
+              onClose={onArchiveDialogClose}
             >
               <Text>
-                Are you sure you want to delete this Attribute? It will not be
-                removed from any existing Entities
+                Are you sure you want to archive this Attribute? It can be
+                restored any time from the Workspace archive
               </Text>
             </Dialog>
           </Flex>
@@ -270,7 +354,7 @@ const Attribute = () => {
               direction={"column"}
               p={"2"}
               border={"1px"}
-              borderColor={"gray.200"}
+              borderColor={"gray.300"}
               rounded={"md"}
             >
               {/* Attribute Overview */}
@@ -301,7 +385,7 @@ const Attribute = () => {
                     isReadOnly={!editing}
                     bg={"white"}
                     border={"1px"}
-                    borderColor={"gray.200"}
+                    borderColor={"gray.300"}
                   />
                 )}
               </Flex>
@@ -319,7 +403,7 @@ const Attribute = () => {
               p={"2"}
               rounded={"md"}
               border={"1px"}
-              borderColor={"gray.200"}
+              borderColor={"gray.300"}
             >
               <Values
                 viewOnly={!editing}

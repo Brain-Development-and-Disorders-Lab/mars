@@ -53,6 +53,7 @@ export type IAttribute = {
   name: string;
   description: string;
   values: IValue<any>[];
+  archived: boolean;
   owner?: string;
 };
 
@@ -98,6 +99,7 @@ export type IValue<D> = {
   onUpdate?: (data: D) => void;
 };
 
+// "Linky" component props
 export type LinkyProps = {
   type: "entities" | "attributes" | "projects";
   id: string;
@@ -108,9 +110,16 @@ export type LinkyProps = {
   truncate?: boolean | number;
 };
 
+// "Actor" component props
+export type ActorProps = {
+  orcid: string;
+  fallback: string;
+};
+
 // Project types
 export type IProject = {
   name: string;
+  archived: boolean;
   created: string;
   timestamp?: string;
   owner: string;
@@ -127,6 +136,7 @@ export type ProjectModel = IProject & {
 
 export type ProjectHistory = {
   timestamp: string;
+  name: string;
   description: string;
   entities: string[];
 };
@@ -156,10 +166,10 @@ export type WorkspaceModel = IWorkspace & {
 // Entity types
 export type IEntity = {
   name: string;
+  archived: boolean;
+  locked: boolean;
   created: string;
   timestamp?: string;
-  deleted: boolean;
-  locked: boolean;
   owner: string;
   description: string;
   projects: string[];
@@ -185,7 +195,8 @@ export type EntityNode = IGenericItem & {
 
 export type EntityHistory = {
   timestamp: string;
-  deleted: boolean;
+  archived: boolean;
+  name: string;
   owner: string;
   description: string;
   projects: string[];
@@ -232,7 +243,7 @@ export type AttachmentData = {
 // Activity types
 export type IActivity = {
   timestamp: Date;
-  type: "create" | "update" | "delete";
+  type: "create" | "update" | "delete" | "archived";
   details: string;
   target: {
     type: "entities" | "projects" | "attributes";
@@ -286,6 +297,7 @@ export type DialogProps = {
 export type DataTableProps = {
   columns: any[];
   visibleColumns: Record<string, boolean>;
+  selectedRows: any;
   data: any[];
   setData?: (value: React.SetStateAction<any[]>) => void;
   viewOnly?: boolean;
@@ -321,6 +333,7 @@ export type IconNames =
 
   // Signal and action icons
   | "activity"
+  | "archive"
   | "attachment"
   | "check"
   | "info"
@@ -375,6 +388,7 @@ export type IconNames =
   | "c_double_right"
   | "c_up"
   | "c_down"
+  | "c_expand"
 
   // Sorting
   | "sort"

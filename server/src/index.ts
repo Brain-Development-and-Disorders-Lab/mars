@@ -37,7 +37,7 @@ import graphqlUploadExpress from "graphql-upload/graphqlUploadExpress.mjs";
 
 // Set logging level
 consola.level =
-  process.env.NODE_ENV !== "production" ? LogLevels.trace : LogLevels.info;
+  process.env.NODE_ENV === "development" ? LogLevels.verbose : LogLevels.info;
 
 const port = process.env.PORT || 8000;
 const app = express();
@@ -45,7 +45,7 @@ const httpServer = http.createServer(app);
 
 // Start the GraphQL server
 const start = async () => {
-  consola.info("Server mode:", process.env.NODE_ENV);
+  consola.info("Environment:", process.env.NODE_ENV);
   if (process.env.NODE_ENV !== "production") {
     consola.warn("Server not secured!");
   }
@@ -60,6 +60,7 @@ const start = async () => {
 
   // Create folder for serving static files
   if (!fs.existsSync(__dirname + "/public")) {
+    consola.info("Creating /public directory...");
     fs.mkdirSync(__dirname + "/public");
   }
 
@@ -86,7 +87,9 @@ const start = async () => {
     csrfPrevention: true,
     plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
   });
+  consola.start("Starting GraphQL server...");
   await server.start();
+  consola.success("GraphQL server running!");
 
   // Serve static resources, enable CORS middleware
   app.use(
@@ -121,8 +124,9 @@ const start = async () => {
   );
 
   // Start the server
+  consola.start("Starting Express server...");
   httpServer.listen({ port: port });
-  consola.success(`Server running at: http://localhost:${port}/`);
+  consola.success(`Express server running at: http://localhost:${port}/`);
 };
 
 start();

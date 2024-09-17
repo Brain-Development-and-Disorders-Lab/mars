@@ -46,7 +46,7 @@ const Entities = () => {
     query GetEntities($limit: Int) {
       entities(limit: $limit) {
         _id
-        deleted
+        archived
         owner
         name
         description
@@ -213,7 +213,7 @@ const Entities = () => {
             <Heading size={"md"}>Entities</Heading>
             <Spacer />
             <Button
-              leftIcon={<Icon name={"add"} />}
+              rightIcon={<Icon name={"add"} />}
               colorScheme={"green"}
               onClick={() => navigate("/create/entity")}
               size={"sm"}
@@ -223,14 +223,15 @@ const Entities = () => {
           </Flex>
         </Flex>
         <Flex direction={"column"} gap={"4"} w={"100%"}>
-          {entityData.filter((entity) => _.isEqual(entity.deleted, false))
+          {entityData.filter((entity) => _.isEqual(entity.archived, false))
             .length > 0 ? (
             <DataTable
               columns={columns}
               data={entityData.filter((entity) =>
-                _.isEqual(entity.deleted, false),
+                _.isEqual(entity.archived, false),
               )}
               visibleColumns={visibleColumns}
+              selectedRows={{}}
               actions={actions}
               showSelection
               showPagination

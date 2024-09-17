@@ -132,7 +132,7 @@ const Uploader = (props: {
                         justify={"center"}
                         border={"2px"}
                         borderStyle={"dashed"}
-                        borderColor={"gray.200"}
+                        borderColor={"gray.300"}
                         bg={"gray.50"}
                         rounded={"md"}
                       >

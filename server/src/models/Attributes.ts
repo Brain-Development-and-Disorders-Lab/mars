@@ -4,6 +4,7 @@ import { AttributeModel, IAttribute, ResponseMessage } from "@types";
 import _ from "lodash";
 import { getDatabase } from "../connectors/database";
 import { getIdentifier } from "../util";
+import consola from "consola";
 
 // Collection name
 const ATTRIBUTES_COLLECTION = "attributes";
@@ -14,6 +15,7 @@ export class Attributes {
    * @returns Collection of all Attribute entries
    */
   static all = async (): Promise<AttributeModel[]> => {
+    consola.debug("Retrieving all Attributes...");
     return await getDatabase()
       .collection<AttributeModel>(ATTRIBUTES_COLLECTION)
       .find()
@@ -21,12 +23,14 @@ export class Attributes {
   };
 
   static getOne = async (_id: string): Promise<AttributeModel | null> => {
+    consola.debug("Retrieving Attribute:", _id);
     return await getDatabase()
       .collection<AttributeModel>(ATTRIBUTES_COLLECTION)
       .findOne({ _id: _id });
   };
 
   static getMany = async (attributes: string[]): Promise<AttributeModel[]> => {
+    consola.debug(`Retrieving ${attributes.length} Attributes...`);
     return await getDatabase()
       .collection<AttributeModel>(ATTRIBUTES_COLLECTION)
       .find({ _id: { $in: attributes } })
@@ -39,6 +43,7 @@ export class Attributes {
    * @return {boolean}
    */
   static exists = async (_id: string): Promise<boolean> => {
+    consola.debug("Checking if Attribute exists:", _id);
     const response = await getDatabase()
       .collection<AttributeModel>(ATTRIBUTES_COLLECTION)
       .findOne({ _id: _id });
@@ -51,16 +56,24 @@ export class Attributes {
    * @return {ResponseMessage}
    */
   static create = async (attribute: IAttribute): Promise<ResponseMessage> => {
+    consola.debug(`Creating new Attribute...`);
     // Add an identifier to the Attribute
     const joinedAttribute: AttributeModel = {
       _id: getIdentifier("attribute"),
       ...attribute,
     };
+    consola.debug("Attribute:", joinedAttribute._id, joinedAttribute.name);
 
     const response = await getDatabase()
       .collection<AttributeModel>(ATTRIBUTES_COLLECTION)
       .insertOne(joinedAttribute);
     const successStatus = _.isEqual(response.insertedId, joinedAttribute._id);
+    if (!successStatus) {
+      consola.error(
+        "Unable to create new Attribute entry:",
+        joinedAttribute._id,
+      );
+    }
 
     return {
       success: successStatus,
@@ -71,9 +84,10 @@ export class Attributes {
   };
 
   static update = async (updated: AttributeModel): Promise<ResponseMessage> => {
+    consola.debug("Updating Attribute:", updated._id);
     const attribute = await this.getOne(updated._id);
-
     if (_.isNull(attribute)) {
+      consola.error("Unable to retrieve Attribute:", updated._id);
       return {
         success: false,
         message: "Error retrieving existing Attribute",
@@ -99,12 +113,64 @@ export class Attributes {
     const response = await getDatabase()
       .collection<AttributeModel>(ATTRIBUTES_COLLECTION)
       .updateOne({ _id: updated._id }, update);
+    if (response.modifiedCount > 0) {
+      consola.info("Updated Attribute:", updated._id);
+    }
 
     return {
       success: true,
       message:
-        response.modifiedCount == 1
+        response.modifiedCount === 1
           ? "Updated Attribute"
+          : "No changes made to Attribute",
+    };
+  };
+
+  /**
+   * Set the archive state of an Attribute
+   * @param _id Attribute identifier to archive
+   * @param state Attribute archive state
+   * @return {Promise<ResponseMessage>}
+   */
+  static setArchived = async (
+    _id: string,
+    state: boolean,
+  ): Promise<ResponseMessage> => {
+    consola.debug(
+      "Setting archive state of Attribute:",
+      _id,
+      "Archived:",
+      state,
+    );
+    const attribute = await this.getOne(_id);
+    if (_.isNull(attribute)) {
+      consola.error("Unable to retrieve Attribute:", _id);
+      return {
+        success: false,
+        message: "Error retrieving existing Attribute",
+      };
+    }
+
+    // Update the archived state
+    attribute.archived = state;
+    const update: { $set: IAttribute } = {
+      $set: {
+        ...attribute,
+      },
+    };
+
+    const response = await getDatabase()
+      .collection<AttributeModel>(ATTRIBUTES_COLLECTION)
+      .updateOne({ _id: _id }, update);
+    if (response.modifiedCount > 0) {
+      consola.info("Set archive state of Attribute:", _id, "Archived:", state);
+    }
+
+    return {
+      success: true,
+      message:
+        response.modifiedCount === 1
+          ? "Set archive state of Attribute"
           : "No changes made to Attribute",
     };
   };
@@ -118,6 +184,12 @@ export class Attributes {
     const response = await getDatabase()
       .collection<AttributeModel>(ATTRIBUTES_COLLECTION)
       .deleteOne({ _id: _id });
+
+    if (response.deletedCount > 0) {
+      consola.info("Deleted Attribute:", _id);
+    } else {
+      consola.warn("Unable to delete Attribute:", _id);
+    }
 
     return {
       success: response.deletedCount > 0,

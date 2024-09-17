@@ -35,6 +35,7 @@ const GET_PROJECTS = gql`
   query GetProjects {
     projects {
       _id
+      archived
       name
       description
       owner
@@ -167,7 +168,7 @@ const Projects = () => {
             </Heading>
             <Spacer />
             <Button
-              leftIcon={<Icon name={"add"} />}
+              rightIcon={<Icon name={"add"} />}
               colorScheme={"green"}
               onClick={() => navigate("/create/project")}
               size={"sm"}
@@ -182,6 +183,7 @@ const Projects = () => {
               columns={columns}
               data={data.projects}
               visibleColumns={visibleColumns}
+              selectedRows={{}}
               showPagination
               showSelection
             />

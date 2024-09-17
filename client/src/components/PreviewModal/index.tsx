@@ -171,7 +171,7 @@ const PreviewModal = (props: PreviewModalProps) => {
                 justify={"center"}
                 rounded={"md"}
                 border={"1px"}
-                borderColor={"gray.200"}
+                borderColor={"gray.300"}
                 mb={"2"}
               >
                 <Document
@@ -218,7 +218,7 @@ const PreviewModal = (props: PreviewModalProps) => {
               <Flex
                 rounded={"md"}
                 border={"1px"}
-                borderColor={"gray.200"}
+                borderColor={"gray.300"}
                 minH={"400px"}
                 mb={"2"}
               >
@@ -262,7 +262,7 @@ const PreviewModal = (props: PreviewModalProps) => {
             minH={"400px"}
             rounded={"md"}
             border={"1px"}
-            borderColor={"gray.200"}
+            borderColor={"gray.300"}
             align={"center"}
             justify={"center"}
             mb={"2"}

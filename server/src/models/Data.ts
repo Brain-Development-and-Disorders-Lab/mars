@@ -187,6 +187,7 @@ export class Data {
           attributes.push({
             _id: attribute._id,
             name: attribute.name,
+            archived: false,
             description: attribute.description,
             values: attribute.values.map((value: IValue<any>) => {
               // Clean the data for specific types
@@ -214,7 +215,7 @@ export class Data {
 
         // Core Entity data
         const entity: IEntity = {
-          deleted: false,
+          archived: false,
           locked: false,
           name: row[columnMapping.name],
           owner: columnMapping.owner,

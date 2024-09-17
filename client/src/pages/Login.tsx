@@ -323,7 +323,7 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
             bg={"white"}
             rounded={"lg"}
             border={"1px"}
-            borderColor={"gray.200"}
+            borderColor={"gray.300"}
             align={"center"}
             justify={"center"}
           >
@@ -402,7 +402,7 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
             <Flex align={"center"} justify={"right"} w={"100%"}>
               <Button
                 id={"userDoneButton"}
-                leftIcon={<Icon name={"check"} />}
+                rightIcon={<Icon name={"check"} />}
                 colorScheme={"green"}
                 size={"sm"}
                 onClick={() => handleUserDone()}
@@ -422,7 +422,7 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
             bg={"white"}
             rounded={"lg"}
             border={"1px"}
-            borderColor={"gray.200"}
+            borderColor={"gray.300"}
             align={"center"}
             justify={"center"}
           >

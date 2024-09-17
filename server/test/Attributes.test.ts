@@ -35,6 +35,7 @@ describe("Attributes model", () => {
   it("should create an Attribute", async () => {
     await Attributes.create({
       name: "TestAttribute",
+      archived: false,
       description: "Attribute description",
       values: [],
     });
@@ -46,6 +47,7 @@ describe("Attributes model", () => {
   it("should update the description", async () => {
     await Attributes.create({
       name: "TestAttribute",
+      archived: false,
       description: "Attribute description",
       values: [],
     });
@@ -54,6 +56,7 @@ describe("Attributes model", () => {
 
     await Attributes.update({
       _id: attributes[0]._id,
+      archived: false,
       name: attributes[0].name,
       description: "Updated Attribute description",
       values: attributes[0].values,
@@ -67,6 +70,7 @@ describe("Attributes model", () => {
   it("should update the values", async () => {
     const create = await Attributes.create({
       name: "TestAttribute",
+      archived: false,
       description: "Attribute description",
       values: [],
     });
@@ -75,6 +79,7 @@ describe("Attributes model", () => {
 
     const update = await Attributes.update({
       _id: attributes[0]._id,
+      archived: false,
       name: attributes[0].name,
       description: attributes[0].description,
       values: [

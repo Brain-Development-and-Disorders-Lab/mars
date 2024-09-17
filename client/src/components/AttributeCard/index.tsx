@@ -43,6 +43,7 @@ const AttributeCard = (props: AttributeCardProps) => {
   const attributeCardData: AttributeCardProps = {
     _id: props._id,
     name: name,
+    archived: false,
     description: description,
     values: values,
     restrictDataValues: props.restrictDataValues,
