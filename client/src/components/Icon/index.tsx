@@ -6,7 +6,6 @@ import { Icon as ChakraIcon } from "@chakra-ui/react";
 import {
   BsActivity,
   BsArchiveFill,
-  BsArrowClockwise,
   BsArrowCounterclockwise,
   BsArrowRight,
   BsBarChartFill,
@@ -64,6 +63,7 @@ import { FaSort, FaSortDown, FaSortUp } from "react-icons/fa";
 import {
   TbBaselineDensityMedium,
   TbBaselineDensitySmall,
+  TbRefresh,
 } from "react-icons/tb";
 
 // Existing and custom types
@@ -103,7 +103,7 @@ const SYSTEM_ICONS: Record<string, IconType> = {
   warning: BsFillExclamationTriangleFill,
   exclamation: BsExclamationOctagonFill,
   lightning: BsFillLightningChargeFill,
-  reload: BsArrowClockwise,
+  reload: TbRefresh,
   graph: BsDiagram2Fill,
   clock: BsClockHistory,
   rewind: BsArrowCounterclockwise,

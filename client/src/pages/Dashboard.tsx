@@ -12,6 +12,13 @@ import {
   VStack,
   Avatar,
   Tooltip,
+  StatGroup,
+  Stat,
+  StatLabel,
+  StatNumber,
+  StatHelpText,
+  StatArrow,
+  Spacer,
 } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
 import { Content } from "@components/Container";
@@ -81,6 +88,14 @@ const Dashboard = () => {
   // Workspace context
   const { workspace, workspaceLoading } = useContext(WorkspaceContext);
 
+  // Handle refresh state
+  const [lastRefresh, setLastRefresh] = useState(
+    dayjs(Date.now()).toISOString(),
+  );
+  const [sinceLastRefresh, setSinceLastRefresh] = useState(
+    dayjs(dayjs(Date.now()).toISOString()).fromNow(),
+  );
+
   // Page data
   const [entityData, setEntityData] = useState(
     [] as {
@@ -125,6 +140,15 @@ const Dashboard = () => {
       refetch();
     }
   }, [workspace]);
+
+  // Setup interval and function to refresh the dashboard
+  const refreshDashboard = async () => {
+    setLastRefresh(dayjs(Date.now()).toISOString());
+    await refetch();
+  };
+  setInterval(() => {
+    setSinceLastRefresh(dayjs(lastRefresh).fromNow());
+  }, 5000);
 
   // Display error messages from GraphQL usage
   useEffect(() => {
@@ -251,195 +275,275 @@ const Dashboard = () => {
       isError={!_.isUndefined(error)}
       isLoaded={!loading && !workspaceLoading}
     >
-      <Flex direction={"row"} wrap={"wrap"} gap={"2"} p={"2"}>
-        <Flex direction={"column"} gap={"2"} grow={"1"}>
-          {/* Projects and Entities */}
-          <Flex
-            direction={"column"}
-            p={"2"}
-            background={"white"}
-            rounded={"md"}
-            gap={"2"}
-            border={"1px"}
-            borderColor={"gray.300"}
-          >
-            {/* Projects heading */}
-            <Flex direction={"row"} align={"center"} gap={"2"} my={"2"}>
-              <Icon name={"project"} size={"md"} />
-              <Heading size={"md"}>Projects</Heading>
-            </Flex>
+      <Flex direction={"column"} w={"100%"} p={"2"} gap={"2"}>
+        <Flex direction={"column"} basis={"70%"} gap={"2"}>
+          <Flex direction={"row"} gap={"2"} align={"center"}>
+            <Icon name={"dashboard"} size={"md"} />
+            <Heading size={"lg"}>Workspace Dashboard</Heading>
+            <Spacer />
 
-            {/* Projects table */}
-            {/* Condition: Loaded and content present */}
-            {!loading && projectData.length > 0 && (
-              <DataTable
-                columns={projectTableColumns}
-                data={projectTableData}
-                visibleColumns={visibleColumns}
-                selectedRows={{}}
-              />
-            )}
-
-            {/* Condition: Loaded and no content present */}
-            {!loading && _.isEmpty(projectData) && (
-              <Flex
-                w={"100%"}
-                direction={"row"}
-                p={"4"}
-                justify={"center"}
-                align={"center"}
-              >
-                <Text color={"gray.400"} fontWeight={"semibold"}>
-                  You do not have any Projects.
-                </Text>
-              </Flex>
-            )}
-
-            <Flex justify={"right"}>
+            {/* Refresh component */}
+            <Flex
+              p={"2"}
+              gap={"2"}
+              rounded={"md"}
+              align={"center"}
+              border={"1px"}
+              borderColor={"gray.300"}
+            >
               <Button
-                key={`view-projects-all`}
                 size={"sm"}
-                colorScheme={"blue"}
-                rightIcon={<Icon name={"c_right"} />}
-                onClick={() => navigate(`/projects`)}
+                onClick={() => refreshDashboard()}
+                rightIcon={<Icon name={"reload"} />}
+                isLoading={loading}
               >
-                All Projects
+                Refresh
               </Button>
+              <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.600"}>
+                Last Refreshed: {sinceLastRefresh}
+              </Text>
             </Flex>
           </Flex>
 
           <Flex
-            direction={"column"}
             p={"2"}
-            background={"white"}
-            rounded={"md"}
             gap={"2"}
+            rounded={"md"}
+            basis={"30%"}
+            align={"center"}
             border={"1px"}
             borderColor={"gray.300"}
           >
-            {/* Entities heading */}
-            <Flex direction={"row"} align={"center"} gap={"2"} my={"2"}>
-              <Icon name={"entity"} size={"md"} />
-              <Heading size={"md"}>Entities</Heading>
-            </Flex>
+            <StatGroup w={"100%"}>
+              <Stat>
+                <StatLabel>Total Workspace Entities</StatLabel>
+                <StatNumber>{100}</StatNumber>
+                <StatHelpText>
+                  <StatArrow type={"increase"} />
+                  {23} From last 24 hours
+                </StatHelpText>
+              </Stat>
 
-            {/* Entities table */}
-            {/* Condition: Loaded and content present */}
-            {!loading && entityData.length > 0 && (
-              <DataTable
-                columns={entityTableColumns}
-                data={entityTableData.filter(
-                  (entity) =>
-                    _.isEqual(entity.archived, false) ||
-                    _.isEqual(entity.archived, null),
-                )}
-                visibleColumns={visibleColumns}
-                selectedRows={{}}
-              />
-            )}
+              <Stat>
+                <StatLabel>Total Workspace Projects</StatLabel>
+                <StatNumber>{3}</StatNumber>
+                <StatHelpText>
+                  <StatArrow type={"increase"} />
+                  {1} From last 24 hours
+                </StatHelpText>
+              </Stat>
 
-            {/* Condition: Loaded and no content present */}
-            {!loading && _.isEmpty(entityData) && (
-              <Flex
-                w={"100%"}
-                direction={"row"}
-                p={"4"}
-                justify={"center"}
-                align={"center"}
-              >
-                <Text color={"gray.400"} fontWeight={"semibold"}>
-                  You do not have any Entities.
-                </Text>
-              </Flex>
-            )}
+              <Stat>
+                <StatLabel>Total Workspace Attributes</StatLabel>
+                <StatNumber>{5}</StatNumber>
+                <StatHelpText>
+                  <StatArrow type={"increase"} />
+                  {1} From last 24 hours
+                </StatHelpText>
+              </Stat>
 
-            <Flex justify={"right"}>
-              <Button
-                key={`view-entity-all`}
-                size={"sm"}
-                colorScheme={"blue"}
-                rightIcon={<Icon name={"c_right"} />}
-                onClick={() => navigate(`/entities`)}
-              >
-                All Entities
-              </Button>
-            </Flex>
+              <Stat>
+                <StatLabel>Total Workspace Collaborators</StatLabel>
+                <StatNumber>{3}</StatNumber>
+                <StatHelpText>
+                  <StatArrow type={"increase"} />
+                  {1} From last 24 hours
+                </StatHelpText>
+              </Stat>
+            </StatGroup>
           </Flex>
         </Flex>
 
-        {/* Activity */}
-        <Flex
-          direction={"column"}
-          maxW={"sm"}
-          p={"2"}
-          gap={"2"}
-          grow={"1"}
-          rounded={"md"}
-          border={"1px"}
-          borderColor={"gray.300"}
-        >
-          {/* Activity heading */}
-          <Flex align={"center"} gap={"2"} my={"2"}>
-            <Icon name={"activity"} size={"md"} />
-            <Heading size={"md"} color={"gray.700"}>
-              Workspace Activity
-            </Heading>
+        <Flex direction={"row"} wrap={"wrap"} gap={"2"} p={"0"}>
+          <Flex direction={"column"} gap={"2"} grow={"1"}>
+            {/* Projects and Entities */}
+            <Flex
+              direction={"column"}
+              p={"2"}
+              background={"white"}
+              rounded={"md"}
+              gap={"2"}
+              border={"1px"}
+              borderColor={"gray.300"}
+            >
+              {/* Projects heading */}
+              <Flex direction={"row"} align={"center"} gap={"2"} my={"2"}>
+                <Icon name={"project"} size={"md"} />
+                <Heading size={"md"}>Projects</Heading>
+              </Flex>
+
+              {/* Projects table */}
+              {/* Condition: Loaded and content present */}
+              {!loading && projectData.length > 0 && (
+                <DataTable
+                  columns={projectTableColumns}
+                  data={projectTableData}
+                  visibleColumns={visibleColumns}
+                  selectedRows={{}}
+                />
+              )}
+
+              {/* Condition: Loaded and no content present */}
+              {!loading && _.isEmpty(projectData) && (
+                <Flex
+                  w={"100%"}
+                  direction={"row"}
+                  p={"4"}
+                  justify={"center"}
+                  align={"center"}
+                >
+                  <Text color={"gray.400"} fontWeight={"semibold"}>
+                    You do not have any Projects.
+                  </Text>
+                </Flex>
+              )}
+
+              <Flex justify={"right"}>
+                <Button
+                  key={`view-projects-all`}
+                  size={"sm"}
+                  colorScheme={"blue"}
+                  rightIcon={<Icon name={"c_right"} />}
+                  onClick={() => navigate(`/projects`)}
+                >
+                  All Projects
+                </Button>
+              </Flex>
+            </Flex>
+
+            <Flex
+              direction={"column"}
+              p={"2"}
+              background={"white"}
+              rounded={"md"}
+              gap={"2"}
+              border={"1px"}
+              borderColor={"gray.300"}
+            >
+              {/* Entities heading */}
+              <Flex direction={"row"} align={"center"} gap={"2"} my={"2"}>
+                <Icon name={"entity"} size={"md"} />
+                <Heading size={"md"}>Entities</Heading>
+              </Flex>
+
+              {/* Entities table */}
+              {/* Condition: Loaded and content present */}
+              {!loading && entityData.length > 0 && (
+                <DataTable
+                  columns={entityTableColumns}
+                  data={entityTableData.filter(
+                    (entity) =>
+                      _.isEqual(entity.archived, false) ||
+                      _.isEqual(entity.archived, null),
+                  )}
+                  visibleColumns={visibleColumns}
+                  selectedRows={{}}
+                />
+              )}
+
+              {/* Condition: Loaded and no content present */}
+              {!loading && _.isEmpty(entityData) && (
+                <Flex
+                  w={"100%"}
+                  direction={"row"}
+                  p={"4"}
+                  justify={"center"}
+                  align={"center"}
+                >
+                  <Text color={"gray.400"} fontWeight={"semibold"}>
+                    You do not have any Entities.
+                  </Text>
+                </Flex>
+              )}
+
+              <Flex justify={"right"}>
+                <Button
+                  key={`view-entity-all`}
+                  size={"sm"}
+                  colorScheme={"blue"}
+                  rightIcon={<Icon name={"c_right"} />}
+                  onClick={() => navigate(`/entities`)}
+                >
+                  All Entities
+                </Button>
+              </Flex>
+            </Flex>
           </Flex>
 
-          {/* Activity list */}
-          {activityData.length > 0 ? (
-            <Flex p={"0"} w={"100%"} maxH={"85vh"} overflowY={"auto"}>
-              <VStack spacing={"2"} w={"95%"}>
-                {activityData.map((activity) => {
-                  return (
-                    <Flex
-                      direction={"row"}
-                      width={"100%"}
-                      gap={"2"}
-                      key={`activity-${activity._id}`}
-                      align={"center"}
-                    >
-                      <Tooltip label={activity.actor}>
-                        <Avatar name={activity.actor} size={"sm"} />
-                      </Tooltip>
-                      <Flex direction={"column"}>
-                        <Flex direction={"row"} gap={"1"}>
-                          <Text fontSize={"sm"}>{activity.details}</Text>
-                          <Linky
-                            id={activity.target._id}
-                            type={activity.target.type}
-                            fallback={activity.target.name}
-                            justify={"left"}
-                            size={"sm"}
-                            truncate={20}
-                          />
+          {/* Activity */}
+          <Flex
+            direction={"column"}
+            maxW={"sm"}
+            p={"2"}
+            gap={"2"}
+            grow={"1"}
+            rounded={"md"}
+            border={"1px"}
+            borderColor={"gray.300"}
+          >
+            {/* Activity heading */}
+            <Flex align={"center"} gap={"2"} my={"2"}>
+              <Icon name={"activity"} size={"md"} />
+              <Heading size={"md"} color={"gray.700"}>
+                Workspace Activity
+              </Heading>
+            </Flex>
+
+            {/* Activity list */}
+            {activityData.length > 0 ? (
+              <Flex p={"0"} w={"100%"} maxH={"85vh"} overflowY={"auto"}>
+                <VStack spacing={"2"} w={"95%"}>
+                  {activityData.map((activity) => {
+                    return (
+                      <Flex
+                        direction={"row"}
+                        width={"100%"}
+                        gap={"2"}
+                        key={`activity-${activity._id}`}
+                        align={"center"}
+                      >
+                        <Tooltip label={activity.actor}>
+                          <Avatar name={activity.actor} size={"sm"} />
+                        </Tooltip>
+                        <Flex direction={"column"}>
+                          <Flex direction={"row"} gap={"1"}>
+                            <Text fontSize={"sm"}>{activity.details}</Text>
+                            <Linky
+                              id={activity.target._id}
+                              type={activity.target.type}
+                              fallback={activity.target.name}
+                              justify={"left"}
+                              size={"sm"}
+                              truncate={20}
+                            />
+                          </Flex>
+                          <Text
+                            fontSize={"xs"}
+                            fontWeight={"semibold"}
+                            color={"gray.500"}
+                          >
+                            {dayjs(activity.timestamp).fromNow()}
+                          </Text>
                         </Flex>
-                        <Text
-                          fontSize={"xs"}
-                          fontWeight={"semibold"}
-                          color={"gray.500"}
-                        >
-                          {dayjs(activity.timestamp).fromNow()}
-                        </Text>
                       </Flex>
-                    </Flex>
-                  );
-                })}
-              </VStack>
-            </Flex>
-          ) : (
-            <Flex
-              w={"100%"}
-              h={"100%"}
-              justify={"center"}
-              align={"center"}
-              minH={"200px"}
-            >
-              <Text color={"gray.400"} fontWeight={"semibold"}>
-                No Activity yet.
-              </Text>
-            </Flex>
-          )}
+                    );
+                  })}
+                </VStack>
+              </Flex>
+            ) : (
+              <Flex
+                w={"100%"}
+                h={"100%"}
+                justify={"center"}
+                align={"center"}
+                minH={"200px"}
+              >
+                <Text color={"gray.400"} fontWeight={"semibold"}>
+                  No Activity yet.
+                </Text>
+              </Flex>
+            )}
+          </Flex>
         </Flex>
       </Flex>
     </Content>
