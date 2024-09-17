@@ -21,6 +21,7 @@ import {
 // Custom components
 import Icon from "@components/Icon";
 import DataTable from "@components/DataTable";
+import { Content } from "@components/Container";
 
 // Custom types
 import {
@@ -39,7 +40,8 @@ import { useNavigate } from "react-router-dom";
 // Utility functions and libraries
 import { createColumnHelper } from "@tanstack/react-table";
 import _ from "lodash";
-import { Content } from "@components/Container";
+
+// Workspace Context
 import { WorkspaceContext } from "src/Context";
 
 const Workspace = () => {
@@ -92,6 +94,48 @@ const Workspace = () => {
     attributes: (IGenericItem & { archived: boolean })[];
   }>(GET_WORKSPACE_DATA, { fetchPolicy: "network-only" });
 
+  // Mutation to archive Entities
+  const ARCHIVE_ENTITIES = gql`
+    mutation ArchiveEntities($toArchive: [String], $state: Boolean) {
+      archiveEntities(toArchive: $toArchive, state: $state) {
+        success
+        message
+      }
+    }
+  `;
+  const [
+    archiveEntitiesQuery,
+    { error: archiveEntitiesError, loading: archiveEntitiesLoading },
+  ] = useMutation(ARCHIVE_ENTITIES);
+
+  // Mutation to archive Projects
+  const ARCHIVE_PROJECTS = gql`
+    mutation ArchiveProjects($toArchive: [String], $state: Boolean) {
+      archiveProjects(toArchive: $toArchive, state: $state) {
+        success
+        message
+      }
+    }
+  `;
+  const [
+    archiveProjectsQuery,
+    { error: archiveProjectsError, loading: archiveProjectsLoading },
+  ] = useMutation(ARCHIVE_PROJECTS);
+
+  // Mutation to archive Attributes
+  const ARCHIVE_ATTRIBUTES = gql`
+    mutation ArchiveAttributes($toArchive: [String], $state: Boolean) {
+      archiveAttributes(toArchive: $toArchive, state: $state) {
+        success
+        message
+      }
+    }
+  `;
+  const [
+    archiveAttributesQuery,
+    { error: archiveAttributesError, loading: archiveAttributesLoading },
+  ] = useMutation(ARCHIVE_ATTRIBUTES);
+
   // Mutation to update Workspace
   const UPDATE_WORKSPACE = gql`
     mutation UpdateWorkspace($workspace: WorkspaceUpdateInput) {
@@ -124,12 +168,15 @@ const Workspace = () => {
   const [shownEntities, setShownEntities] = useState(
     [] as (IGenericItem & { archived: boolean })[],
   );
+  const [selectedEntities, setSelectedEntities] = useState({});
   const [shownProjects, setShownProjects] = useState(
     [] as (IGenericItem & { archived: boolean })[],
   );
+  const [selectedProjects, setSelectedProjects] = useState({});
   const [shownAttributes, setShownAttributes] = useState(
     [] as (IGenericItem & { archived: boolean })[],
   );
+  const [selectedAttributes, setSelectedAttributes] = useState({});
 
   // State for Workspace content presentation (show archived or not)
   const [showArchived, setShowArchived] = useState(false);
@@ -159,14 +206,17 @@ const Workspace = () => {
       if (workspaceData.data?.entities) {
         setEntities(workspaceData.data.entities);
         setShownEntities(workspaceData.data.entities);
+        setSelectedEntities({});
       }
       if (workspaceData.data?.projects) {
         setProjects(workspaceData.data.projects);
         setShownProjects(workspaceData.data.projects);
+        setSelectedProjects({});
       }
       if (workspaceData.data?.attributes) {
         setAttributes(workspaceData.data.attributes);
         setShownAttributes(workspaceData.data.attributes);
+        setSelectedAttributes({});
       }
 
       if (workspaceError || workspaceDataError) {
@@ -190,12 +240,15 @@ const Workspace = () => {
     setShownEntities([
       ...entities.filter((entity) => entity.archived === showArchived),
     ]);
+    setSelectedEntities({});
     setShownProjects([
       ...projects.filter((project) => project.archived === showArchived),
     ]);
+    setSelectedProjects({});
     setShownAttributes([
       ...attributes.filter((attribute) => attribute.archived === showArchived),
     ]);
+    setSelectedAttributes({});
   }, [showArchived, entities, projects, attributes]);
 
   /**
@@ -217,12 +270,91 @@ const Workspace = () => {
       },
     });
 
-    // Add GraphQL calls to bulk update the archive state of Workspace contents
+    // Update Entity archive state
+    await archiveEntitiesQuery({
+      variables: {
+        toArchive: entities
+          .filter((entity) => entity.archived === true)
+          .map((entity) => entity._id),
+        state: true,
+      },
+    });
+    await archiveEntitiesQuery({
+      variables: {
+        toArchive: entities
+          .filter((entity) => entity.archived === false)
+          .map((entity) => entity._id),
+        state: false,
+      },
+    });
+
+    // Update Project archive state
+    await archiveProjectsQuery({
+      variables: {
+        toArchive: projects
+          .filter((project) => project.archived === true)
+          .map((project) => project._id),
+        state: true,
+      },
+    });
+    await archiveProjectsQuery({
+      variables: {
+        toArchive: projects
+          .filter((project) => project.archived === false)
+          .map((project) => project._id),
+        state: false,
+      },
+    });
+
+    // Update Attribute archive state
+    await archiveAttributesQuery({
+      variables: {
+        toArchive: attributes
+          .filter((attribute) => attribute.archived === true)
+          .map((attribute) => attribute._id),
+        state: true,
+      },
+    });
+    await archiveAttributesQuery({
+      variables: {
+        toArchive: attributes
+          .filter((attribute) => attribute.archived === false)
+          .map((attribute) => attribute._id),
+        state: false,
+      },
+    });
 
     if (workspaceUpdateError) {
       toast({
         title: "Error",
         description: "Unable to update Workspace",
+        status: "error",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    } else if (archiveEntitiesError) {
+      toast({
+        title: "Error",
+        description: "Unable to apply archive state to Entities",
+        status: "error",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    } else if (archiveProjectsError) {
+      toast({
+        title: "Error",
+        description: "Unable to apply archive state to Projects",
+        status: "error",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    } else if (archiveAttributesError) {
+      toast({
+        title: "Error",
+        description: "Unable to apply archive state to Attributes",
         status: "error",
         duration: 2000,
         position: "bottom-right",
@@ -494,7 +626,12 @@ const Workspace = () => {
             colorScheme={"green"}
             rightIcon={<Icon name={"check"} />}
             isDisabled={name === ""}
-            isLoading={workspaceUpdateLoading}
+            isLoading={
+              workspaceUpdateLoading ||
+              archiveEntitiesLoading ||
+              archiveProjectsLoading ||
+              archiveAttributesLoading
+            }
             onClick={() => handleUpdateClick()}
           >
             Done
@@ -641,6 +778,7 @@ const Workspace = () => {
                       data={shownAttributes}
                       columns={attributesTableColumns}
                       visibleColumns={{}}
+                      selectedRows={selectedAttributes}
                       actions={attributesTableActions}
                       showPagination
                       showSelection
@@ -704,6 +842,7 @@ const Workspace = () => {
                       data={shownEntities}
                       columns={entitiesTableColumns}
                       visibleColumns={{}}
+                      selectedRows={selectedEntities}
                       actions={entitiesTableActions}
                       showPagination
                       showSelection
@@ -741,6 +880,7 @@ const Workspace = () => {
                       data={shownProjects}
                       columns={projectsTableColumns}
                       visibleColumns={{}}
+                      selectedRows={selectedProjects}
                       actions={projectsTableActions}
                       showPagination
                       showSelection
