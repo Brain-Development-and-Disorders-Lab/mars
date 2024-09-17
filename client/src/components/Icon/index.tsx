@@ -6,7 +6,6 @@ import { Icon as ChakraIcon } from "@chakra-ui/react";
 import {
   BsActivity,
   BsArchiveFill,
-  BsArrowClockwise,
   BsArrowCounterclockwise,
   BsArrowRight,
   BsBarChartFill,
@@ -37,6 +36,7 @@ import {
   BsFillEyeFill,
   BsFillFileBinaryFill,
   BsFillGearFill,
+  BsFillLightningChargeFill,
   BsFillPersonFill,
   BsGithub,
   BsGlobe,
@@ -60,6 +60,11 @@ import {
 } from "react-icons/bs";
 import { SiBox } from "react-icons/si";
 import { FaSort, FaSortDown, FaSortUp } from "react-icons/fa";
+import {
+  TbBaselineDensityMedium,
+  TbBaselineDensitySmall,
+  TbRefresh,
+} from "react-icons/tb";
 
 // Existing and custom types
 import { IconNames } from "@types";
@@ -97,7 +102,8 @@ const SYSTEM_ICONS: Record<string, IconType> = {
   person: BsFillPersonFill,
   warning: BsFillExclamationTriangleFill,
   exclamation: BsExclamationOctagonFill,
-  reload: BsArrowClockwise,
+  lightning: BsFillLightningChargeFill,
+  reload: TbRefresh,
   graph: BsDiagram2Fill,
   clock: BsClockHistory,
   rewind: BsArrowCounterclockwise,
@@ -137,6 +143,10 @@ const SYSTEM_ICONS: Record<string, IconType> = {
   c_up: BsChevronUp,
   c_down: BsChevronDown,
   c_expand: BsChevronExpand,
+
+  // Density
+  d_low: TbBaselineDensityMedium,
+  d_high: TbBaselineDensitySmall,
 
   // Sort
   sort: FaSort,

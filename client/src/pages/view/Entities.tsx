@@ -233,6 +233,7 @@ const Entities = () => {
               visibleColumns={visibleColumns}
               selectedRows={{}}
               actions={actions}
+              showColumnSelect
               showSelection
               showPagination
               showItemCount

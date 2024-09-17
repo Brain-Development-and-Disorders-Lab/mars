@@ -20,6 +20,11 @@ import {
   Button,
   MenuList,
   MenuItem,
+  useBreakpoint,
+  Switch,
+  InputGroup,
+  Input,
+  InputRightElement,
 } from "@chakra-ui/react";
 import {
   flexRender,
@@ -43,6 +48,8 @@ declare module "@tanstack/react-table" {
 import _ from "lodash";
 
 const DataTable = (props: DataTableProps) => {
+  const breakpoint = useBreakpoint();
+
   // Table visibility state
   const [columnVisibility, setColumnVisibility] = useState(
     props.visibleColumns,
@@ -50,6 +57,9 @@ const DataTable = (props: DataTableProps) => {
 
   // Table row selection state
   const [selectedRows, setSelectedRows] = useState(props.selectedRows);
+
+  // Table sizing
+  const [displayLargeTable, setDisplayLargeTable] = useState(false);
 
   // Create ReactTable instance
   const table = useReactTable({
@@ -125,8 +135,36 @@ const DataTable = (props: DataTableProps) => {
 
   // Effect to update the column visibility
   useEffect(() => {
-    setColumnVisibility(props.visibleColumns);
+    const updatedVisibility = _.cloneDeep(columnVisibility);
+    Object.keys(props.visibleColumns).map((column) => {
+      updatedVisibility[column] = props.visibleColumns[column];
+    });
+    setColumnVisibility(updatedVisibility);
   }, [props.visibleColumns]);
+
+  // Column selector state
+  const [showColumnList, setShowColumnList] = useState(false);
+  const [columnNames, setColumnNames] = useState([] as string[]);
+
+  useEffect(() => {
+    // Get a list of all column names
+    const columns = table
+      .getAllColumns()
+      .filter((column) => {
+        return !_.includes(["_id", "select", "name", "view"], column.id);
+      })
+      .map((column) => column.id);
+    setColumnNames(columns);
+
+    // Set the column visibilities
+    const updatedVisibility = _.cloneDeep(columnVisibility);
+    columns.map((column) => {
+      if (_.isUndefined(columnVisibility[column])) {
+        updatedVisibility[column] = true;
+      }
+    });
+    setColumnVisibility(updatedVisibility);
+  }, []);
 
   // Effect to update the selected rows
   useEffect(() => {
@@ -194,10 +232,165 @@ const DataTable = (props: DataTableProps) => {
     return header.column.getToggleSortingHandler();
   };
 
+  /**
+   * Handle clicking the `Column` component dropdown
+   */
+  const onColumnsClick = () => {
+    if (props.viewOnly !== true) {
+      setShowColumnList(!showColumnList);
+    }
+  };
+
+  /**
+   * Update the column visibility depending on the column selected
+   * @param column Name of the column
+   */
+  const onColumnViewClick = (column: string) => {
+    const updatedVisibility = _.cloneDeep(columnVisibility);
+    if (
+      _.isUndefined(updatedVisibility[column]) ||
+      updatedVisibility[column] === false
+    ) {
+      updatedVisibility[column] = true;
+    } else {
+      updatedVisibility[column] = false;
+    }
+    setColumnVisibility(updatedVisibility);
+  };
+
   return (
     <Flex w={"100%"} direction={"column"}>
+      <Flex
+        w={"100%"}
+        direction={"row"}
+        gap={"2"}
+        align={"center"}
+        justify={"space-between"}
+      >
+        <Flex pb={"2"} gap={"2"} direction={"row"} align={"center"}>
+          {columnNames.length > 0 && props.showColumnSelect && (
+            <Flex>
+              <Flex pos={"relative"} w={"100%"}>
+                <InputGroup size={"sm"} onClick={onColumnsClick}>
+                  <Input
+                    placeholder={"Columns"}
+                    value={"Columns"}
+                    backgroundColor={"white"}
+                    data-testid={"value-editor"}
+                    cursor={"pointer"}
+                    size={"sm"}
+                    rounded={"md"}
+                    isDisabled={props.viewOnly}
+                    isReadOnly
+                  />
+                  <InputRightElement>
+                    {showColumnList ? (
+                      <Icon name={"c_up"} />
+                    ) : (
+                      <Icon name={"c_down"} />
+                    )}
+                  </InputRightElement>
+                </InputGroup>
+                {showColumnList && (
+                  <Flex
+                    w={"100%"}
+                    p={"2"}
+                    mt={"9"}
+                    gap={"2"}
+                    direction={"column"}
+                    bg={"white"}
+                    border={"1px"}
+                    borderColor={"gray.300"}
+                    borderRadius={"sm"}
+                    shadow={"md"}
+                    position={"absolute"}
+                    zIndex={"2"}
+                  >
+                    {columnNames.map((column) => {
+                      return (
+                        <Button
+                          key={column}
+                          variant={"ghost"}
+                          onClick={() => onColumnViewClick(column)}
+                          width={"full"}
+                          size={"sm"}
+                          justifyContent={"left"}
+                        >
+                          <Flex
+                            direction={"row"}
+                            gap={"2"}
+                            justify={"space-between"}
+                            w={"100%"}
+                          >
+                            <Text fontSize={"sm"}>{_.capitalize(column)}</Text>
+                            {columnVisibility[column] && (
+                              <Icon name={"check"} color={"green"} />
+                            )}
+                          </Flex>
+                        </Button>
+                      );
+                    })}
+                  </Flex>
+                )}
+              </Flex>
+            </Flex>
+          )}
+
+          {props.showSelection && (
+            <Menu size={"sm"}>
+              <MenuButton
+                as={Button}
+                colorScheme={"yellow"}
+                rightIcon={<Icon name={"lightning"} />}
+                size={"sm"}
+                isDisabled={
+                  _.isUndefined(props.actions) || props.actions?.length === 0
+                }
+              >
+                Actions
+              </MenuButton>
+              <MenuList>
+                {props.actions?.map((action) => {
+                  return (
+                    <MenuItem
+                      onClick={() => {
+                        action.action(table, selectedRows);
+                      }}
+                      key={action.label}
+                      isDisabled={
+                        (Object.keys(selectedRows).length === 0 ||
+                          _.isUndefined(props.actions) ||
+                          props.actions?.length === 0) &&
+                        action.alwaysEnabled !== true
+                      }
+                    >
+                      <Flex direction={"row"} gap={"2"} align={"center"}>
+                        <Icon name={action.icon} />
+                        <Text fontSize={"sm"}>{action.label}</Text>
+                      </Flex>
+                    </MenuItem>
+                  );
+                })}
+              </MenuList>
+            </Menu>
+          )}
+        </Flex>
+
+        <Flex pb={"2"} gap={"2"} direction={"row"} align={"center"}>
+          <Icon size={"sm"} name={"d_high"} />
+          <Switch
+            size={"sm"}
+            onChange={() => setDisplayLargeTable(!displayLargeTable)}
+          />
+          <Icon size={"sm"} name={"d_low"} />
+        </Flex>
+      </Flex>
       <TableContainer overflowX={"visible"} overflowY={"visible"}>
-        <Table variant={"simple"} size={"sm"} w={"100%"}>
+        <Table
+          variant={"simple"}
+          size={displayLargeTable ? "md" : "sm"}
+          w={"100%"}
+        >
           {/* Table head */}
           <Thead bg={"gray.50"}>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -268,7 +461,7 @@ const DataTable = (props: DataTableProps) => {
                       key={cell.id}
                       isNumeric={meta?.isNumeric}
                       px={"1"}
-                      py={"2"}
+                      py={displayLargeTable ? "3" : "2"}
                     >
                       {flexRender(
                         cell.column.columnDef.cell,
@@ -291,46 +484,10 @@ const DataTable = (props: DataTableProps) => {
         w={"100%"}
         wrap={"wrap"}
       >
-        {props.showSelection && (
-          <Flex>
-            <Menu size={"sm"}>
-              <MenuButton
-                as={Button}
-                rightIcon={<Icon name={"c_down"} />}
-                size={"sm"}
-                isDisabled={
-                  _.isUndefined(props.actions) || props.actions?.length === 0
-                }
-              >
-                Actions
-              </MenuButton>
-              <MenuList>
-                {props.actions?.map((action) => {
-                  return (
-                    <MenuItem
-                      onClick={() => {
-                        action.action(table, selectedRows);
-                      }}
-                      icon={<Icon name={action.icon} />}
-                      key={action.label}
-                      isDisabled={
-                        (Object.keys(selectedRows).length === 0 ||
-                          _.isUndefined(props.actions) ||
-                          props.actions?.length === 0) &&
-                        action.alwaysEnabled !== true
-                      }
-                    >
-                      {action.label}
-                    </MenuItem>
-                  );
-                })}
-              </MenuList>
-            </Menu>
-          </Flex>
-        )}
-
         {/* Table item counter */}
-        {props.showItemCount && itemCountComponent}
+        {props.showItemCount &&
+          _.includes(["xl", "2xl"], breakpoint) &&
+          itemCountComponent}
 
         {props.showPagination && (
           <Flex gap={"4"} wrap={"wrap"}>

@@ -471,7 +471,13 @@ const Workspace = () => {
     entitiesTableColumnHelper.accessor("_id", {
       cell: (info) => {
         return (
-          <Flex w={"100%"} justify={"end"} p={"0.5"}>
+          <Flex w={"100%"} justify={"end"} p={"0.5"} gap={"2"}>
+            <IconButton
+              icon={<Icon name={"view"} />}
+              size={"sm"}
+              aria-label={"View Entity"}
+              onClick={() => navigate(`/entities/${info.row.original._id}`)}
+            />
             <IconButton
               icon={<Icon name={showArchived ? "rewind" : "archive"} />}
               size={"sm"}
@@ -520,7 +526,13 @@ const Workspace = () => {
     projectsTableColumnHelper.accessor("_id", {
       cell: (info) => {
         return (
-          <Flex w={"100%"} justify={"end"} p={"0.5"}>
+          <Flex w={"100%"} justify={"end"} p={"0.5"} gap={"2"}>
+            <IconButton
+              icon={<Icon name={"view"} />}
+              size={"sm"}
+              aria-label={"View Project"}
+              onClick={() => navigate(`/projects/${info.row.original._id}`)}
+            />
             <IconButton
               icon={<Icon name={showArchived ? "rewind" : "archive"} />}
               size={"sm"}
@@ -569,7 +581,13 @@ const Workspace = () => {
     attributesTableColumnHelper.accessor("_id", {
       cell: (info) => {
         return (
-          <Flex w={"100%"} justify={"end"} p={"0.5"}>
+          <Flex w={"100%"} justify={"end"} p={"0.5"} gap={"2"}>
+            <IconButton
+              icon={<Icon name={"view"} />}
+              size={"sm"}
+              aria-label={"View Attribute"}
+              onClick={() => navigate(`/attributes/${info.row.original._id}`)}
+            />
             <IconButton
               icon={<Icon name={showArchived ? "rewind" : "archive"} />}
               size={"sm"}
