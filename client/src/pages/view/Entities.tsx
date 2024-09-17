@@ -213,7 +213,7 @@ const Entities = () => {
             <Heading size={"md"}>Entities</Heading>
             <Spacer />
             <Button
-              leftIcon={<Icon name={"add"} />}
+              rightIcon={<Icon name={"add"} />}
               colorScheme={"green"}
               onClick={() => navigate("/create/entity")}
               size={"sm"}
@@ -231,6 +231,7 @@ const Entities = () => {
                 _.isEqual(entity.archived, false),
               )}
               visibleColumns={visibleColumns}
+              selectedRows={{}}
               actions={actions}
               showSelection
               showPagination

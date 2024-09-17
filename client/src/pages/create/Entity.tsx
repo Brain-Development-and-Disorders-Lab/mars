@@ -729,7 +729,7 @@ const Entity = () => {
 
                 <Button
                   size={"sm"}
-                  leftIcon={<Icon name={"add"} />}
+                  rightIcon={<Icon name={"add"} />}
                   colorScheme={"green"}
                   onClick={() => {
                     // Create an 'empty' Attribute and add the data structure to 'selectedAttributes'
@@ -847,7 +847,7 @@ const Entity = () => {
               size={"sm"}
               colorScheme={"orange"}
               variant={"outline"}
-              leftIcon={<Icon name={"c_left"} />}
+              rightIcon={<Icon name={"c_left"} />}
               onClick={onPageBack}
             >
               Back

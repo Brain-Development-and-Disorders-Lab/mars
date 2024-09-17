@@ -1591,6 +1591,7 @@ const Entity = () => {
                     data={entityProjects}
                     columns={projectsTableColumns}
                     visibleColumns={{}}
+                    selectedRows={{}}
                     viewOnly={!editing}
                     actions={projectsTableActions}
                     showPagination
@@ -1640,6 +1641,7 @@ const Entity = () => {
                       data={entityAttachments}
                       columns={attachmentTableColumns}
                       visibleColumns={{}}
+                      selectedRows={{}}
                       viewOnly={!editing}
                       actions={attachmentTableActions}
                       showPagination
@@ -1708,6 +1710,7 @@ const Entity = () => {
                         data={entityOrigins}
                         columns={originTableColumns}
                         visibleColumns={{}}
+                        selectedRows={{}}
                         viewOnly={!editing}
                         actions={originTableActions}
                         showPagination
@@ -1739,6 +1742,7 @@ const Entity = () => {
                         data={entityProducts}
                         columns={productTableColumns}
                         visibleColumns={{}}
+                        selectedRows={{}}
                         viewOnly={!editing}
                         actions={productTableActions}
                         showPagination
@@ -1795,6 +1799,7 @@ const Entity = () => {
                     data={entityAttributes}
                     columns={attributeTableColumns}
                     visibleColumns={visibleAttributeTableColumns}
+                    selectedRows={{}}
                     viewOnly={!editing}
                     showPagination
                     showSelection

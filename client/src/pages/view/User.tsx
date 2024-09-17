@@ -383,6 +383,7 @@ const User = () => {
                     data={userWorkspaces}
                     columns={workspacesTableColumns}
                     visibleColumns={{}}
+                    selectedRows={{}}
                     actions={workspacesTableActions}
                     viewOnly={!editing}
                     showPagination

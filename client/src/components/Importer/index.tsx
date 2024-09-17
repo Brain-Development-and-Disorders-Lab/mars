@@ -813,7 +813,7 @@ const Importer = (props: {
 
                     <Button
                       size={"sm"}
-                      leftIcon={<Icon name={"add"} />}
+                      rightIcon={<Icon name={"add"} />}
                       colorScheme={"green"}
                       onClick={() => {
                         // Create an 'empty' Attribute and add the data structure to 'selectedAttributes'

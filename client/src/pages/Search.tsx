@@ -311,6 +311,7 @@ const Search = () => {
                 <DataTable
                   columns={searchResultColumns}
                   visibleColumns={{}}
+                  selectedRows={{}}
                   data={results}
                   showPagination
                   showSelection

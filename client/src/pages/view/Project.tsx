@@ -873,6 +873,7 @@ const Project = () => {
                     data={projectEntities}
                     columns={entitiesColumns}
                     visibleColumns={{}}
+                    selectedRows={{}}
                     viewOnly={!editing}
                     showSelection={true}
                     actions={entitiesTableActions}

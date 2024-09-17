@@ -402,7 +402,7 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
             <Flex align={"center"} justify={"right"} w={"100%"}>
               <Button
                 id={"userDoneButton"}
-                leftIcon={<Icon name={"check"} />}
+                rightIcon={<Icon name={"check"} />}
                 colorScheme={"green"}
                 size={"sm"}
                 onClick={() => handleUserDone()}

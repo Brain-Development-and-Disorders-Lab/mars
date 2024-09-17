@@ -270,6 +270,7 @@ const Dashboard = () => {
                 columns={projectTableColumns}
                 data={projectTableData}
                 visibleColumns={visibleColumns}
+                selectedRows={{}}
               />
             )}
 
@@ -327,6 +328,7 @@ const Dashboard = () => {
                     _.isEqual(entity.archived, null),
                 )}
                 visibleColumns={visibleColumns}
+                selectedRows={{}}
               />
             )}
 
