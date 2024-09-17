@@ -1,5 +1,5 @@
 // Custom types
-import { AttributeModel, Context, IAttribute } from "@types";
+import { AttributeModel, Context, IAttribute, ResponseMessage } from "@types";
 
 // Models
 import { Activity } from "../models/Activity";
@@ -170,27 +170,87 @@ export const AttributesResolvers = {
       }
 
       // Execute archive operation
-      const result = await Attributes.setArchived(args._id, args.state);
+      if (attribute.archived === args.state) {
+        return {
+          success: true,
+          message: "Attribute archive state unchanged",
+        };
+      } else {
+        const result = await Attributes.setArchived(args._id, args.state);
 
-      // If successful, add Activity
-      if (result.success) {
-        const activity = await Activity.create({
-          timestamp: new Date(),
-          type: "archived",
-          actor: context.user,
-          details: args.state ? "Archived Attribute" : "Restored Attribute",
-          target: {
-            _id: args._id,
-            type: "attributes",
-            name: attribute.name,
-          },
-        });
+        // If successful, add Activity
+        if (result.success) {
+          const activity = await Activity.create({
+            timestamp: new Date(),
+            type: "archived",
+            actor: context.user,
+            details: args.state ? "Archived Attribute" : "Restored Attribute",
+            target: {
+              _id: args._id,
+              type: "attributes",
+              name: attribute.name,
+            },
+          });
 
-        // Add Activity to Workspace
-        await Workspaces.addActivity(context.workspace, activity.message);
+          // Add Activity to Workspace
+          await Workspaces.addActivity(context.workspace, activity.message);
+        }
+
+        return result;
+      }
+    },
+
+    // Archive an Attribute
+    archiveAttributes: async (
+      _parent: any,
+      args: { toArchive: string[]; state: boolean },
+      context: Context,
+    ): Promise<ResponseMessage> => {
+      let archiveCounter = 0;
+      for await (const _id of args.toArchive) {
+        const attribute = await Attributes.getOne(_id);
+        if (_.isNull(attribute)) {
+          throw new GraphQLError("Attribute does not exist", {
+            extensions: {
+              code: "NON_EXIST",
+            },
+          });
+        }
+
+        if (attribute.archived === args.state) {
+          archiveCounter += 1;
+        } else {
+          // Execute archive operation
+          const result = await Attributes.setArchived(_id, args.state);
+
+          // If successful, add Activity
+          if (result.success) {
+            const activity = await Activity.create({
+              timestamp: new Date(),
+              type: "archived",
+              actor: context.user,
+              details: args.state ? "Archived Attribute" : "Restored Attribute",
+              target: {
+                _id: _id,
+                type: "attributes",
+                name: attribute.name,
+              },
+            });
+
+            // Add Activity to Workspace
+            await Workspaces.addActivity(context.workspace, activity.message);
+            archiveCounter += 1;
+          }
+        }
       }
 
-      return result;
+      return {
+        success: args.toArchive.length === archiveCounter,
+        message:
+          args.toArchive.length === archiveCounter
+            ? "Archived Attributes successfully"
+            : "Error while archiving multiple Attributes",
+      };
     },
 
     // Delete an Attribute

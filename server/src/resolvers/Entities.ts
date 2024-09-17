@@ -279,28 +279,88 @@ export const EntitiesResolvers = {
         });
       }
 
-      // Perform archive operation
-      const result = await Entities.setArchived(args._id, args.state);
+      if (entity.archived === args.state) {
+        return {
+          success: true,
+          message: "Entity archive state unchanged",
+        };
+      } else {
+        // Perform archive operation
+        const result = await Entities.setArchived(args._id, args.state);
 
-      // Create new Activity if successful
-      if (result.success) {
-        const activity = await Activity.create({
-          timestamp: new Date(),
-          type: "archived",
-          actor: context.user,
-          details: args.state ? "Archived Entity" : "Restored Entity",
-          target: {
-            _id: entity._id,
-            type: "entities",
-            name: entity.name,
-          },
-        });
+        // Create new Activity if successful
+        if (result.success) {
+          const activity = await Activity.create({
+            timestamp: new Date(),
+            type: "archived",
+            actor: context.user,
+            details: args.state ? "Archived Entity" : "Restored Entity",
+            target: {
+              _id: entity._id,
+              type: "entities",
+              name: entity.name,
+            },
+          });
 
-        // Add Activity to Workspace
-        await Workspaces.addActivity(context.workspace, activity.message);
+          // Add Activity to Workspace
+          await Workspaces.addActivity(context.workspace, activity.message);
+        }
+
+        return result;
+      }
+    },
+
+    // Archive multiple Entities
+    archiveEntities: async (
+      _parent: any,
+      args: { toArchive: string[]; state: boolean },
+      context: Context,
+    ): Promise<ResponseMessage> => {
+      let archiveCounter = 0;
+      for await (const _id of args.toArchive) {
+        const entity = await Entities.getOne(_id);
+        if (_.isNull(entity)) {
+          throw new GraphQLError("Entity does not exist", {
+            extensions: {
+              code: "NON_EXIST",
+            },
+          });
+        }
+
+        if (entity.archived === args.state) {
+          archiveCounter += 1;
+        } else {
+          // Perform archive operation
+          const result = await Entities.setArchived(_id, args.state);
+
+          // Create new Activity if successful
+          if (result.success) {
+            const activity = await Activity.create({
+              timestamp: new Date(),
+              type: "archived",
+              actor: context.user,
+              details: args.state ? "Archived Entity" : "Restored Entity",
+              target: {
+                _id: entity._id,
+                type: "entities",
+                name: entity.name,
+              },
+            });
+
+            // Add Activity to Workspace
+            await Workspaces.addActivity(context.workspace, activity.message);
+            archiveCounter += 1;
+          }
+        }
       }
 
-      return result;
+      return {
+        success: args.toArchive.length === archiveCounter,
+        message:
+          args.toArchive.length === archiveCounter
+            ? "Archived Entities successfully"
+            : "Error while archiving multiple Entities",
+      };
     },
 
     // Delete an Entity

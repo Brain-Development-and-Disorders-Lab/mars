@@ -1,9 +1,9 @@
 // Custom types
-import { Context, IProject, ProjectModel } from "@types";
+import { Context, IProject, ProjectModel, ResponseMessage } from "@types";
 
 // Utility functions and libraries
 import { GraphQLError } from "graphql";
-import _ from "lodash";
+import _, { toArray } from "lodash";
 
 // Models
 import { Activity } from "../models/Activity";
@@ -211,26 +211,83 @@ export const ProjectsResolvers = {
         });
       }
 
-      const result = await Projects.setArchived(args._id, args.state);
+      if (project.archived === args.state) {
+        return {
+          success: true,
+          message: "Project archive state unchanged",
+        };
+      } else {
+        const result = await Projects.setArchived(args._id, args.state);
 
-      if (result.success) {
-        const activity = await Activity.create({
-          timestamp: new Date(),
-          type: "archived",
-          actor: context.user,
-          details: args.state ? "Archived Project" : "Restored Project",
-          target: {
-            _id: project._id,
-            type: "projects",
-            name: project.name,
-          },
-        });
+        if (result.success) {
+          const activity = await Activity.create({
+            timestamp: new Date(),
+            type: "archived",
+            actor: context.user,
+            details: args.state ? "Archived Project" : "Restored Project",
+            target: {
+              _id: project._id,
+              type: "projects",
+              name: project.name,
+            },
+          });
 
-        // Add Activity to Workspace
-        await Workspaces.addActivity(context.workspace, activity.message);
+          // Add Activity to Workspace
+          await Workspaces.addActivity(context.workspace, activity.message);
+        }
+
+        return result;
+      }
+    },
+
+    archiveProjects: async (
+      _parent: any,
+      args: { toArchive: string[]; state: boolean },
+      context: Context,
+    ): Promise<ResponseMessage> => {
+      let archiveCounter = 0;
+      for await (const _id of args.toArchive) {
+        const project = await Projects.getOne(_id);
+        if (_.isNull(project)) {
+          throw new GraphQLError("Project does not exist", {
+            extensions: {
+              code: "NON_EXIST",
+            },
+          });
+        }
+
+        if (project.archived === args.state) {
+          archiveCounter += 1;
+        } else {
+          const result = await Projects.setArchived(_id, args.state);
+
+          if (result.success) {
+            const activity = await Activity.create({
+              timestamp: new Date(),
+              type: "archived",
+              actor: context.user,
+              details: args.state ? "Archived Project" : "Restored Project",
+              target: {
+                _id: project._id,
+                type: "projects",
+                name: project.name,
+              },
+            });
+
+            // Add Activity to Workspace
+            await Workspaces.addActivity(context.workspace, activity.message);
+            archiveCounter += 1;
+          }
+        }
       }
 
-      return result;
+      return {
+        success: args.toArchive.length === archiveCounter,
+        message:
+          args.toArchive.length === archiveCounter
+            ? "Archived Projects successfully"
+            : "Error while archiving multiple Projects",
+      };
     },
 
     deleteProject: async (
