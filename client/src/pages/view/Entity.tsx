@@ -1364,6 +1364,7 @@ const Entity = () => {
             )}
             {entityArchived ? (
               <Button
+                id={"restoreEntityButton"}
                 onClick={handleRestoreFromArchiveClick}
                 size={"sm"}
                 colorScheme={"orange"}
@@ -1386,6 +1387,7 @@ const Entity = () => {
                   </Tooltip>
                 ) : (
                   <Button
+                    id={"editEntityButton"}
                     onClick={handleEditClick}
                     size={"sm"}
                     colorScheme={editing ? "green" : "blue"}

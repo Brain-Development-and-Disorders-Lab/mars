@@ -274,6 +274,7 @@ const Attribute = () => {
           <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
             {attributeArchived ? (
               <Button
+                id={"restoreAttributeButton"}
                 onClick={handleRestoreFromArchiveClick}
                 size={"sm"}
                 colorScheme={"orange"}
@@ -283,6 +284,7 @@ const Attribute = () => {
               </Button>
             ) : (
               <Button
+                id={"editAttributeButton"}
                 size={"sm"}
                 colorScheme={editing ? "green" : "blue"}
                 rightIcon={

@@ -267,6 +267,7 @@ describe("Entity model", () => {
       attributes: [
         {
           _id: "TestAttribute",
+          archived: false,
           name: "Attribute_1",
           description: "Test Attribute description",
           values: [],
@@ -338,6 +339,7 @@ describe("Entity model", () => {
     // Create a Project
     await Projects.create({
       name: "TestProject",
+      archived: false,
       created: new Date(Date.now()).toISOString(),
       owner: "henry.burgess@wustl.edu",
       description: "Test Project",
@@ -545,6 +547,7 @@ describe("Entity model", () => {
 
     await Entities.addAttribute(entity._id, {
       _id: "TestAttribute",
+      archived: false,
       name: "Attribute_1",
       description: "Test Attribute description",
       values: [],
@@ -575,6 +578,7 @@ describe("Entity model", () => {
       attributes: [
         {
           _id: "TestAttribute",
+          archived: false,
           name: "Attribute_1",
           description: "Test Attribute description",
           values: [],
@@ -612,6 +616,7 @@ describe("Entity model", () => {
       attributes: [
         {
           _id: "TestAttribute",
+          archived: false,
           name: "Attribute_1",
           description: "Test Attribute description",
           values: [],
@@ -626,6 +631,7 @@ describe("Entity model", () => {
 
     await Entities.updateAttribute(entity._id, {
       _id: "TestAttribute",
+      archived: false,
       name: "Attribute_2",
       description: "Test Attribute updated",
       values: [],
