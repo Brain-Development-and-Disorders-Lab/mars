@@ -297,6 +297,7 @@ export type DialogProps = {
 export type DataTableProps = {
   columns: any[];
   visibleColumns: Record<string, boolean>;
+  selectedRows: any;
   data: any[];
   setData?: (value: React.SetStateAction<any[]>) => void;
   viewOnly?: boolean;
