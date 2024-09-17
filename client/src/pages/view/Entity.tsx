@@ -1595,6 +1595,7 @@ const Entity = () => {
                     viewOnly={!editing}
                     actions={projectsTableActions}
                     showPagination
+                    showItemCount
                     showSelection
                   />
                 )}
@@ -1645,6 +1646,7 @@ const Entity = () => {
                       viewOnly={!editing}
                       actions={attachmentTableActions}
                       showPagination
+                      showItemCount
                       showSelection
                     />
                   )}
@@ -1714,6 +1716,7 @@ const Entity = () => {
                         viewOnly={!editing}
                         actions={originTableActions}
                         showPagination
+                        showItemCount
                         showSelection
                       />
                     ) : (
@@ -1746,6 +1749,7 @@ const Entity = () => {
                         viewOnly={!editing}
                         actions={productTableActions}
                         showPagination
+                        showItemCount
                         showSelection
                       />
                     ) : (
@@ -1802,6 +1806,7 @@ const Entity = () => {
                     selectedRows={{}}
                     viewOnly={!editing}
                     showPagination
+                    showItemCount
                     showSelection
                   />
                 )}

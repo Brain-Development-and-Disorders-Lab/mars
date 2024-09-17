@@ -177,6 +177,7 @@ const Attributes = () => {
               selectedRows={{}}
               showPagination
               showSelection
+              showItemCount
             />
           ) : (
             <Flex

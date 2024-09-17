@@ -186,6 +186,7 @@ const Projects = () => {
               selectedRows={{}}
               showPagination
               showSelection
+              showItemCount
             />
           ) : (
             <Flex
