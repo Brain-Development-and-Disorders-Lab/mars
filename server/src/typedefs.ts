@@ -304,7 +304,7 @@ export const typedefs = `#graphql
     project(_id: String): Project
 
     # Entity queries
-    entities(limit: Int): [Entity]
+    entities(limit: Int, archived: Boolean): [Entity]
     entity(_id: String): Entity
     entityExists(_id: String): Boolean
     entityNameExists(name: String): Boolean

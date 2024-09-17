@@ -67,13 +67,13 @@ const Workspace = () => {
 
   // Queries
   const GET_WORKSPACE_DATA = gql`
-    query GetWorkspaceData {
+    query GetWorkspaceData($archived: Boolean) {
       projects {
         _id
         name
         archived
       }
-      entities {
+      entities(archived: $archived) {
         _id
         name
         archived
@@ -92,7 +92,12 @@ const Workspace = () => {
     entities: (IGenericItem & { archived: boolean })[];
     projects: (IGenericItem & { archived: boolean })[];
     attributes: (IGenericItem & { archived: boolean })[];
-  }>(GET_WORKSPACE_DATA, { fetchPolicy: "network-only" });
+  }>(GET_WORKSPACE_DATA, {
+    fetchPolicy: "network-only",
+    variables: {
+      archived: true,
+    },
+  });
 
   // Mutation to archive Entities
   const ARCHIVE_ENTITIES = gql`
@@ -205,17 +210,29 @@ const Workspace = () => {
       const workspaceData = await getWorkspaceData();
       if (workspaceData.data?.entities) {
         setEntities(workspaceData.data.entities);
-        setShownEntities(workspaceData.data.entities);
+        setShownEntities([
+          ...workspaceData.data.entities.filter(
+            (entity) => entity.archived === showArchived,
+          ),
+        ]);
         setSelectedEntities({});
       }
       if (workspaceData.data?.projects) {
         setProjects(workspaceData.data.projects);
-        setShownProjects(workspaceData.data.projects);
+        setShownProjects([
+          ...workspaceData.data.projects.filter(
+            (project) => project.archived === showArchived,
+          ),
+        ]);
         setSelectedProjects({});
       }
       if (workspaceData.data?.attributes) {
         setAttributes(workspaceData.data.attributes);
-        setShownAttributes(workspaceData.data.attributes);
+        setShownAttributes([
+          ...workspaceData.data.attributes.filter(
+            (attribute) => attribute.archived === showArchived,
+          ),
+        ]);
         setSelectedAttributes({});
       }
 
@@ -249,7 +266,7 @@ const Workspace = () => {
       ...attributes.filter((attribute) => attribute.archived === showArchived),
     ]);
     setSelectedAttributes({});
-  }, [showArchived, entities, projects, attributes]);
+  }, [entities, projects, attributes, showArchived]);
 
   /**
    * Handler function for modal `Done` button, apply updates to the Workspace

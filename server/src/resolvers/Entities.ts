@@ -17,7 +17,11 @@ import { Workspaces } from "../models/Workspaces";
 export const EntitiesResolvers = {
   Query: {
     // Retrieve all Entities
-    entities: async (_parent: any, args: { limit: 100 }, context: Context) => {
+    entities: async (
+      _parent: any,
+      args: { limit: 100; archived: boolean },
+      context: Context,
+    ) => {
       const workspace = await Workspaces.getOne(context.workspace);
       if (_.isNull(workspace)) {
         throw new GraphQLError("Workspace does not exist", {
@@ -31,6 +35,15 @@ export const EntitiesResolvers = {
       const entities = await Entities.all();
       return entities
         .filter((entity) => _.includes(workspace.entities, entity._id))
+        .filter((entity) => {
+          if (args.archived === true) {
+            // If showing all Entities, including archived
+            return true;
+          } else {
+            // If only showing active Entities, not archived
+            return entity.archived === false;
+          }
+        })
         .slice(0, args.limit);
     },
 

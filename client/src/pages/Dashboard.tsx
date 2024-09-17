@@ -39,19 +39,24 @@ import { WorkspaceContext } from "../Context";
 
 // Queries
 const GET_DASHBOARD = gql`
-  query GetDashboard($projects: Int, $entities: Int, $activity: Int) {
-    projects(limit: $projects) {
+  query GetDashboard(
+    $projectLimit: Int
+    $entityLimit: Int
+    $entitiesArchived: Boolean
+    $activityLimit: Int
+  ) {
+    projects(limit: $projectLimit) {
       _id
       name
       description
     }
-    entities(limit: $entities) {
+    entities(limit: $entityLimit, archived: $entitiesArchived) {
       _id
       archived
       name
       description
     }
-    activity(limit: $activity) {
+    activity(limit: $activityLimit) {
       _id
       timestamp
       type
@@ -93,9 +98,10 @@ const Dashboard = () => {
   // Execute GraphQL query both on page load and navigation
   const { loading, error, data, refetch } = useQuery(GET_DASHBOARD, {
     variables: {
-      projects: 5,
-      entities: 5,
-      activity: 20,
+      projectsLimit: 8,
+      entitiesLimit: 8,
+      entitiesArchived: false,
+      activityLimit: 20,
     },
     fetchPolicy: "network-only",
   });
@@ -115,7 +121,7 @@ const Dashboard = () => {
 
   // If the workspace changes, refetch the data
   useEffect(() => {
-    if (refetch) {
+    if (data && refetch) {
       refetch();
     }
   }, [workspace]);
