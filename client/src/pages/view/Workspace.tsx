@@ -69,14 +69,17 @@ const Workspace = () => {
       projects {
         _id
         name
+        archived
       }
       entities {
         _id
         name
+        archived
       }
       attributes {
         _id
         name
+        archived
       }
     }
   `;
@@ -84,9 +87,9 @@ const Workspace = () => {
     getWorkspaceData,
     { loading: workspaceDataLoading, error: workspaceDataError },
   ] = useLazyQuery<{
-    entities: IGenericItem[];
-    projects: IGenericItem[];
-    attributes: IGenericItem[];
+    entities: (IGenericItem & { archived: boolean })[];
+    projects: (IGenericItem & { archived: boolean })[];
+    attributes: (IGenericItem & { archived: boolean })[];
   }>(GET_WORKSPACE_DATA, { fetchPolicy: "network-only" });
 
   // Mutation to update Workspace
@@ -109,9 +112,27 @@ const Workspace = () => {
   const [owner, setOwner] = useState("");
 
   // State for Workspace contents
-  const [entities, setEntities] = useState([] as IGenericItem[]);
-  const [projects, setProjects] = useState([] as IGenericItem[]);
-  const [attributes, setAttributes] = useState([] as IGenericItem[]);
+  const [entities, setEntities] = useState(
+    [] as (IGenericItem & { archived: boolean })[],
+  );
+  const [projects, setProjects] = useState(
+    [] as (IGenericItem & { archived: boolean })[],
+  );
+  const [attributes, setAttributes] = useState(
+    [] as (IGenericItem & { archived: boolean })[],
+  );
+  const [shownEntities, setShownEntities] = useState(
+    [] as (IGenericItem & { archived: boolean })[],
+  );
+  const [shownProjects, setShownProjects] = useState(
+    [] as (IGenericItem & { archived: boolean })[],
+  );
+  const [shownAttributes, setShownAttributes] = useState(
+    [] as (IGenericItem & { archived: boolean })[],
+  );
+
+  // State for Workspace content presentation (show archived or not)
+  const [showArchived, setShowArchived] = useState(false);
 
   // State for Workspace collaborators
   const [collaborator, setCollaborator] = useState("");
@@ -137,12 +158,15 @@ const Workspace = () => {
       const workspaceData = await getWorkspaceData();
       if (workspaceData.data?.entities) {
         setEntities(workspaceData.data.entities);
+        setShownEntities(workspaceData.data.entities);
       }
       if (workspaceData.data?.projects) {
         setProjects(workspaceData.data.projects);
+        setShownProjects(workspaceData.data.projects);
       }
       if (workspaceData.data?.attributes) {
         setAttributes(workspaceData.data.attributes);
+        setShownAttributes(workspaceData.data.attributes);
       }
 
       if (workspaceError || workspaceDataError) {
@@ -160,6 +184,19 @@ const Workspace = () => {
     // Refresh the Workspace information when the identifier changes
     refreshWorkspace();
   }, [workspace]);
+
+  // Effect to manage what contents are shown when `showArchived` is changed or archive state changed
+  useEffect(() => {
+    setShownEntities([
+      ...entities.filter((entity) => entity.archived === showArchived),
+    ]);
+    setShownProjects([
+      ...projects.filter((project) => project.archived === showArchived),
+    ]);
+    setShownAttributes([
+      ...attributes.filter((attribute) => attribute.archived === showArchived),
+    ]);
+  }, [showArchived, entities, projects, attributes]);
 
   /**
    * Handler function for modal `Done` button, apply updates to the Workspace
@@ -180,6 +217,8 @@ const Workspace = () => {
       },
     });
 
+    // Add GraphQL calls to bulk update the archive state of Workspace contents
+
     if (workspaceUpdateError) {
       toast({
         title: "Error",
@@ -199,45 +238,66 @@ const Workspace = () => {
     _.isEqual(breakpoint, "base") ||
     _.isUndefined(breakpoint);
 
-  // Utility functions for removing Workspace contents
-  const removeEntity = (_id: string) => {
-    const updated = entities.filter((entity) => {
-      return !_.isEqual(entity._id, _id);
+  // Utility functions for archiving or restoring Workspace contents
+  const archiveEntity = async (_id: string, state: boolean) => {
+    // Clone and update the local collection of Entities
+    const updated = _.cloneDeep(entities);
+    updated.map((entity) => {
+      if (_.isEqual(entity._id, _id)) {
+        entity.archived = state;
+      }
     });
     setEntities(updated);
   };
 
-  const removeEntities = (toRemove: string[]) => {
-    const updated = entities.filter((entity) => {
-      return !_.includes(toRemove, entity._id);
+  const archiveEntities = (toArchive: string[], state: boolean) => {
+    const updated = _.cloneDeep(entities);
+    updated.map((entity) => {
+      if (_.includes(toArchive, entity._id)) {
+        entity.archived = state;
+      }
     });
     setEntities(updated);
   };
 
-  const removeProject = (_id: string) => {
-    const updated = projects.filter((project) => {
-      return !_.isEqual(project._id, _id);
+  const archiveProject = async (_id: string, state: boolean) => {
+    // Clone and update the local collection of Projects
+    const updated = _.cloneDeep(projects);
+    updated.map((project) => {
+      if (_.isEqual(project._id, _id)) {
+        project.archived = state;
+      }
     });
     setProjects(updated);
   };
 
-  const removeProjects = (toRemove: string[]) => {
-    const updated = projects.filter((project) => {
-      return !_.includes(toRemove, project._id);
+  const archiveProjects = (toArchive: string[], state: boolean) => {
+    const updated = _.cloneDeep(projects);
+    updated.map((project) => {
+      if (_.includes(toArchive, project._id)) {
+        project.archived = state;
+      }
     });
     setProjects(updated);
   };
 
-  const removeAttribute = (_id: string) => {
-    const updated = attributes.filter((attribute) => {
-      return !_.isEqual(attribute._id, _id);
+  const archiveAttribute = async (_id: string, state: boolean) => {
+    // Clone and update the local collection of Attributes
+    const updated = _.cloneDeep(attributes);
+    updated.map((attribute) => {
+      if (_.isEqual(attribute._id, _id)) {
+        attribute.archived = state;
+      }
     });
     setAttributes(updated);
   };
 
-  const removeAttributes = (toRemove: string[]) => {
-    const updated = attributes.filter((attribute) => {
-      return !_.includes(toRemove, attribute._id);
+  const archiveAttributes = (toArchive: string[], state: boolean) => {
+    const updated = _.cloneDeep(attributes);
+    updated.map((attribute) => {
+      if (_.includes(toArchive, attribute._id)) {
+        attribute.archived = state;
+      }
     });
     setAttributes(updated);
   };
@@ -264,13 +324,13 @@ const Workspace = () => {
         return (
           <Flex w={"100%"} justify={"end"} p={"0.5"}>
             <IconButton
-              icon={<Icon name={"delete"} />}
+              icon={<Icon name={showArchived ? "rewind" : "archive"} />}
               size={"sm"}
-              aria-label={"Remove Entity"}
-              colorScheme={"red"}
-              onClick={() => {
-                removeEntity(info.row.original._id);
-              }}
+              aria-label={"Archive Entity"}
+              colorScheme={"orange"}
+              onClick={() =>
+                archiveEntity(info.row.original._id, !showArchived)
+              }
             />
           </Flex>
         );
@@ -280,14 +340,14 @@ const Workspace = () => {
   ];
   const entitiesTableActions: DataTableAction[] = [
     {
-      label: "Remove Entity",
-      icon: "delete",
+      label: showArchived ? "Restore Entities" : "Archive Entities",
+      icon: showArchived ? "rewind" : "archive",
       action(table, rows) {
-        const entitiesToRemove: string[] = [];
+        const entitiesToArchive: string[] = [];
         for (const rowIndex of Object.keys(rows)) {
-          entitiesToRemove.push(table.getRow(rowIndex).original._id);
+          entitiesToArchive.push(table.getRow(rowIndex).original._id);
         }
-        removeEntities(entitiesToRemove);
+        archiveEntities(entitiesToArchive, !showArchived);
       },
     },
   ];
@@ -313,13 +373,13 @@ const Workspace = () => {
         return (
           <Flex w={"100%"} justify={"end"} p={"0.5"}>
             <IconButton
-              icon={<Icon name={"delete"} />}
+              icon={<Icon name={showArchived ? "rewind" : "archive"} />}
               size={"sm"}
-              aria-label={"Remove Project"}
-              colorScheme={"red"}
-              onClick={() => {
-                removeProject(info.row.original._id);
-              }}
+              aria-label={"Archive Project"}
+              colorScheme={"orange"}
+              onClick={() =>
+                archiveProject(info.row.original._id, !showArchived)
+              }
             />
           </Flex>
         );
@@ -329,14 +389,14 @@ const Workspace = () => {
   ];
   const projectsTableActions: DataTableAction[] = [
     {
-      label: "Remove Project",
-      icon: "delete",
+      label: showArchived ? "Restore Projects" : "Archive Projects",
+      icon: showArchived ? "rewind" : "archive",
       action(table, rows) {
-        const projectsToRemove: string[] = [];
+        const projectsToArchive: string[] = [];
         for (const rowIndex of Object.keys(rows)) {
-          projectsToRemove.push(table.getRow(rowIndex).original._id);
+          projectsToArchive.push(table.getRow(rowIndex).original._id);
         }
-        removeProjects(projectsToRemove);
+        archiveProjects(projectsToArchive, !showArchived);
       },
     },
   ];
@@ -362,13 +422,13 @@ const Workspace = () => {
         return (
           <Flex w={"100%"} justify={"end"} p={"0.5"}>
             <IconButton
-              icon={<Icon name={"delete"} />}
+              icon={<Icon name={showArchived ? "rewind" : "archive"} />}
               size={"sm"}
-              aria-label={"Remove Attribute"}
-              colorScheme={"red"}
-              onClick={() => {
-                removeAttribute(info.row.original._id);
-              }}
+              aria-label={"Archive Attribute"}
+              colorScheme={"orange"}
+              onClick={() =>
+                archiveAttribute(info.row.original._id, !showArchived)
+              }
             />
           </Flex>
         );
@@ -378,14 +438,14 @@ const Workspace = () => {
   ];
   const attributesTableActions: DataTableAction[] = [
     {
-      label: "Remove Attribute",
-      icon: "delete",
+      label: showArchived ? "Restore Attributes" : "Archive Attributes",
+      icon: showArchived ? "rewind" : "archive",
       action(table, rows) {
-        const attributesToRemove: string[] = [];
+        const attributesToArchive: string[] = [];
         for (const rowIndex of Object.keys(rows)) {
-          attributesToRemove.push(table.getRow(rowIndex).original._id);
+          attributesToArchive.push(table.getRow(rowIndex).original._id);
         }
-        removeAttributes(attributesToRemove);
+        archiveAttributes(attributesToArchive, !showArchived);
       },
     },
   ];
@@ -413,6 +473,13 @@ const Workspace = () => {
           </Heading>
         </Flex>
         <Flex direction={"row"} align={"center"} gap={"2"}>
+          <Button
+            size={"sm"}
+            rightIcon={<Icon name={"archive"} />}
+            onClick={() => setShowArchived(!showArchived)}
+          >
+            {showArchived ? "Hide" : "Show"} Archive
+          </Button>
           <Button
             size={"sm"}
             colorScheme={"red"}
@@ -561,17 +628,17 @@ const Workspace = () => {
             >
               <FormControl>
                 <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
-                  Attributes
+                  {showArchived ? "Archived " : ""}Attributes
                 </FormLabel>
                 <Flex
                   w={"100%"}
                   justify={"center"}
-                  align={attributes.length > 0 ? "" : "center"}
-                  minH={attributes.length > 0 ? "fit-content" : "200px"}
+                  align={shownAttributes.length > 0 ? "" : "center"}
+                  minH={shownAttributes.length > 0 ? "fit-content" : "200px"}
                 >
-                  {attributes.length > 0 ? (
+                  {shownAttributes.length > 0 ? (
                     <DataTable
-                      data={attributes}
+                      data={shownAttributes}
                       columns={attributesTableColumns}
                       visibleColumns={{}}
                       actions={attributesTableActions}
@@ -580,7 +647,7 @@ const Workspace = () => {
                     />
                   ) : (
                     <Text color={"gray.400"} fontWeight={"semibold"}>
-                      No Attributes
+                      No {showArchived ? "archived " : ""}Attributes
                     </Text>
                   )}
                 </Flex>
@@ -624,17 +691,17 @@ const Workspace = () => {
             >
               <FormControl>
                 <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
-                  Entities
+                  {showArchived ? "Archived " : ""}Entities
                 </FormLabel>
                 <Flex
                   w={"100%"}
                   justify={"center"}
-                  align={entities.length > 0 ? "" : "center"}
-                  minH={entities.length > 0 ? "fit-content" : "200px"}
+                  align={shownEntities.length > 0 ? "" : "center"}
+                  minH={shownEntities.length > 0 ? "fit-content" : "200px"}
                 >
-                  {entities.length > 0 ? (
+                  {shownEntities.length > 0 ? (
                     <DataTable
-                      data={entities}
+                      data={shownEntities}
                       columns={entitiesTableColumns}
                       visibleColumns={{}}
                       actions={entitiesTableActions}
@@ -643,7 +710,7 @@ const Workspace = () => {
                     />
                   ) : (
                     <Text color={"gray.400"} fontWeight={"semibold"}>
-                      No Entities
+                      No {showArchived ? "archived " : ""}Entities
                     </Text>
                   )}
                 </Flex>
@@ -661,17 +728,17 @@ const Workspace = () => {
             >
               <FormControl>
                 <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
-                  Projects
+                  {showArchived ? "Archived " : ""}Projects
                 </FormLabel>
                 <Flex
                   w={"100%"}
                   justify={"center"}
-                  align={projects.length > 0 ? "" : "center"}
-                  minH={projects.length > 0 ? "fit-content" : "200px"}
+                  align={shownProjects.length > 0 ? "" : "center"}
+                  minH={shownProjects.length > 0 ? "fit-content" : "200px"}
                 >
-                  {projects.length > 0 ? (
+                  {shownProjects.length > 0 ? (
                     <DataTable
-                      data={projects}
+                      data={shownProjects}
                       columns={projectsTableColumns}
                       visibleColumns={{}}
                       actions={projectsTableActions}
@@ -680,7 +747,7 @@ const Workspace = () => {
                     />
                   ) : (
                     <Text color={"gray.400"} fontWeight={"semibold"}>
-                      No Projects
+                      No {showArchived ? "archived " : ""}Projects
                     </Text>
                   )}
                 </Flex>
