@@ -84,12 +84,13 @@ const Project = () => {
 
   const projectData: IProject = {
     name: name,
+    owner: token.orcid,
     archived: false,
     description: description,
-    owner: owner,
     shared: [],
     created: created,
     entities: [],
+    collaborators: [],
   };
 
   return (

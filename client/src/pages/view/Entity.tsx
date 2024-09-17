@@ -82,6 +82,7 @@ import {
 } from "@types";
 
 // Utility functions and libraries
+import { useToken } from "src/authentication/useToken";
 import { requestStatic } from "src/database/functions";
 import { isValidValues } from "src/util";
 import _ from "lodash";
@@ -104,6 +105,7 @@ const Entity = () => {
   const breakpoint = useBreakpoint();
   const navigate = useNavigate();
   const toast = useToast();
+  const [token] = useToken();
 
   const {
     isOpen: isGraphOpen,
@@ -419,6 +421,7 @@ const Entity = () => {
     const attributeData: IAttribute = {
       name: attributeName,
       archived: false,
+      owner: token.orcid,
       description: attributeDescription,
       values: attributeValues,
     };
@@ -1262,6 +1265,8 @@ const Entity = () => {
       {
         _id: `a-${entityData._id}-${nanoid(6)}`,
         name: attributeName,
+        owner: entityData.owner,
+        timestamp: dayjs(Date.now()).toISOString(),
         archived: false,
         description: attributeDescription,
         values: attributeValues,

@@ -552,7 +552,7 @@ const Values = (props: {
                         _id: `v_date_${Math.round(performance.now())}`,
                         name: "",
                         type: "date",
-                        data: dayjs(new Date()).toISOString(),
+                        data: dayjs(Date.now()).toISOString(),
                       },
                     ]);
                   }}
