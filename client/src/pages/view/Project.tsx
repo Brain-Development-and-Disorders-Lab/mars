@@ -878,6 +878,7 @@ const Project = () => {
                     showSelection={true}
                     actions={entitiesTableActions}
                     showPagination
+                    showItemCount
                   />
                 ) : (
                   <Flex w={"100%"} justify={"center"} align={"center"}>
