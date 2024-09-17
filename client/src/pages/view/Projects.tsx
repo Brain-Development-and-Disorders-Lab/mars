@@ -184,6 +184,7 @@ const Projects = () => {
               data={data.projects}
               visibleColumns={visibleColumns}
               selectedRows={{}}
+              showColumnSelect
               showPagination
               showSelection
               showItemCount

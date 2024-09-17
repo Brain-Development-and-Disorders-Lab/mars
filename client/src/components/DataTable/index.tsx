@@ -151,7 +151,7 @@ const DataTable = (props: DataTableProps) => {
     const columns = table
       .getAllColumns()
       .filter((column) => {
-        return !_.includes(["_id", "select", "name"], column.id);
+        return !_.includes(["_id", "select", "name", "view"], column.id);
       })
       .map((column) => column.id);
     setColumnNames(columns);
@@ -268,7 +268,7 @@ const DataTable = (props: DataTableProps) => {
         justify={"space-between"}
       >
         <Flex pb={"2"} gap={"2"} direction={"row"} align={"center"}>
-          {columnNames.length > 0 && (
+          {columnNames.length > 0 && props.showColumnSelect && (
             <Flex>
               <Flex pos={"relative"} w={"100%"}>
                 <InputGroup size={"sm"} onClick={onColumnsClick}>

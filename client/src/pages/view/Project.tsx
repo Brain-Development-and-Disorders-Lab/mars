@@ -716,8 +716,8 @@ const Project = () => {
             <Menu>
               <MenuButton
                 as={Button}
-                colorScheme={"blue"}
-                rightIcon={<Icon name={"c_down"} />}
+                colorScheme={"yellow"}
+                rightIcon={<Icon name={"lightning"} />}
                 size={"sm"}
               >
                 Actions

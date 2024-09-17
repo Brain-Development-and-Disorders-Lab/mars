@@ -303,6 +303,7 @@ export type DataTableProps = {
   viewOnly?: boolean;
 
   // Interface visibility
+  showColumnSelect?: boolean;
   showPagination?: boolean;
   showItemCount?: boolean; // Show text at the bottom of the table orienting the user
   showSelection?: boolean;

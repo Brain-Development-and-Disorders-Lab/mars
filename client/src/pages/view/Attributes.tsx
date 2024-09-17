@@ -175,6 +175,7 @@ const Attributes = () => {
               data={attributesData}
               visibleColumns={visibleColumns}
               selectedRows={{}}
+              showColumnSelect
               showPagination
               showSelection
               showItemCount
