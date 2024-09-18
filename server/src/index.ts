@@ -10,6 +10,10 @@ import http from "http";
 import * as fs from "fs";
 import "source-map-support/register";
 
+// Monitoring
+import { collectDefaultMetrics, register } from "prom-client";
+import { Statistics } from "./models/Statistics";
+
 // Get the connection functions
 import { connect } from "./connectors/database";
 
@@ -39,6 +43,9 @@ import graphqlUploadExpress from "graphql-upload/graphqlUploadExpress.mjs";
 consola.level =
   process.env.NODE_ENV === "development" ? LogLevels.verbose : LogLevels.info;
 
+// Prometheus
+collectDefaultMetrics();
+
 const port = process.env.PORT || 8000;
 const app = express();
 const httpServer = http.createServer(app);
@@ -63,6 +70,9 @@ const start = async () => {
     consola.info("Creating /public directory...");
     fs.mkdirSync(__dirname + "/public");
   }
+
+  // Setup server monitoring
+  Statistics.setup();
 
   // Setup the GraphQL server
   const server = new ApolloServer<Context>({
@@ -90,6 +100,16 @@ const start = async () => {
   consola.start("Starting GraphQL server...");
   await server.start();
   consola.success("GraphQL server running!");
+
+  // Serve Prometheus metrics
+  app.get("/metrics", async (_req, res) => {
+    try {
+      res.set("Content-Type", register.contentType);
+      res.end(await register.metrics());
+    } catch (err) {
+      res.status(500).end(err);
+    }
+  });
 
   // Serve static resources, enable CORS middleware
   app.use(

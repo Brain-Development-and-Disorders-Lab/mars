@@ -39,6 +39,7 @@
     "mquery": "^5.0.0",
     "nanoid": "^4.0.2",
     "papaparse": "^5.4.1",
+    "prom-client": "^15.1.3",
     "source-map-support": "^0.5.21",
     "tmp": "^0.2.1",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.0/xlsx-0.20.0.tgz"
