@@ -12,12 +12,14 @@ export class Search {
    * Get a collection of Search results
    * @param {string} query Search query data
    * @param {string} workspace Workspace identifier
+   * @param {boolean} showArchived Include archived Entities
    * @param {number} limit Limit the number of results
    * @returns {Promise<EntityModel[]>}
    */
   static getText = async (
     query: string,
     workspace: string,
+    showArchived: boolean,
     limit?: number,
   ): Promise<EntityModel[]> => {
     // Sanitize database query
@@ -43,8 +45,12 @@ export class Search {
         { "attributes.values.name": { $regex: expression } },
         { "attributes.values.data": { $regex: expression } }, // Assuming searchable content within attributes
       ],
-      $and: [{ archived: false }],
+      $and: [{}],
     };
+
+    if (showArchived === false) {
+      databaseQuery.$and.push({ archived: false });
+    }
 
     const results = await getDatabase()
       .collection<EntityModel>(ENTITIES_COLLECTION)

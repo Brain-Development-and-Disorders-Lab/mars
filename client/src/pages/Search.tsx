@@ -6,8 +6,9 @@ import {
   Button,
   Flex,
   Heading,
-  IconButton,
   Input,
+  Spacer,
+  Switch,
   Tab,
   TabList,
   TabPanel,
@@ -53,13 +54,40 @@ const Search = () => {
   // Store results as a set of IDs
   const [results, setResults] = useState([] as Partial<EntityModel>[]);
 
+  // Include archived Entities
+  const [showArchived, setShowArchived] = useState(false);
+
   // Query to search by text value
   const SEARCH_TEXT = gql`
-    query Search($query: String, $isBuilder: Boolean, $limit: Int) {
-      search(query: $query, isBuilder: $isBuilder, limit: $limit) {
+    query Search(
+      $query: String
+      $isBuilder: Boolean
+      $showArchived: Boolean
+      $limit: Int
+    ) {
+      search(
+        query: $query
+        isBuilder: $isBuilder
+        showArchived: $showArchived
+        limit: $limit
+      ) {
         _id
         name
+        owner
+        archived
         description
+        projects
+        attributes {
+          _id
+          name
+          description
+          values {
+            _id
+            name
+            type
+            data
+          }
+        }
       }
     }
   `;
@@ -75,6 +103,7 @@ const Search = () => {
       variables: {
         query: query,
         isBuilder: false,
+        showArchived: showArchived,
         limit: 100,
       },
     });
@@ -127,6 +156,38 @@ const Search = () => {
       },
       header: "Description",
       enableHiding: true,
+    }),
+    searchResultColumnHelper.accessor("owner", {
+      cell: (info) => {
+        return <Tag colorScheme={"green"}>{info.getValue()}</Tag>;
+      },
+      header: "Owner",
+    }),
+    searchResultColumnHelper.accessor("attributes", {
+      cell: (info) => {
+        return <Tag colorScheme={"purple"}>{info.getValue().length}</Tag>;
+      },
+      header: "Attributes",
+    }),
+    searchResultColumnHelper.accessor("archived", {
+      cell: (info) => {
+        return (
+          <Flex direction={"row"} gap={"2"} align={"center"}>
+            <Icon
+              name={info.getValue() ? "archive" : "check"}
+              color={info.getValue() ? "orange" : "green"}
+            />
+            <Text
+              fontWeight={"semibold"}
+              fontSize={"sm"}
+              color={info.getValue() ? "orange" : "green"}
+            >
+              {info.getValue() ? "Archived" : "Active"}
+            </Text>
+          </Flex>
+        );
+      },
+      header: "Status",
     }),
     searchResultColumnHelper.accessor("_id", {
       cell: (info) => {
@@ -203,7 +264,7 @@ const Search = () => {
 
   return (
     <Content isError={isError}>
-      <Flex direction={"column"} p={"2"}>
+      <Flex direction={"column"} p={"2"} gap={"4"}>
         {/* Page header */}
         <Flex
           direction={"row"}
@@ -255,28 +316,66 @@ const Search = () => {
                   </Text>
                 </Flex>
 
-                <Flex w={"100%"} direction={"row"} gap={"2"}>
-                  <Input
-                    size={"sm"}
-                    value={query}
-                    placeholder={"Search..."}
-                    onChange={(event) => setQuery(event.target.value)}
-                    onKeyUp={(event) => {
-                      // Listen for "Enter" key when entering a query
-                      if (event.key === "Enter" && query !== "") {
-                        runSearch();
-                      }
-                    }}
-                  />
+                <Flex
+                  w={"100%"}
+                  direction={"row"}
+                  gap={"2"}
+                  align={"center"}
+                  p={"2"}
+                  border={"1px"}
+                  borderColor={"gray.300"}
+                  rounded={"md"}
+                >
+                  <Flex w={"60%"} maxW={"xl"}>
+                    <Input
+                      size={"sm"}
+                      rounded={"md"}
+                      value={query}
+                      placeholder={"Search..."}
+                      onChange={(event) => setQuery(event.target.value)}
+                      onKeyUp={(event) => {
+                        // Listen for "Enter" key when entering a query
+                        if (event.key === "Enter" && query !== "") {
+                          runSearch();
+                        }
+                      }}
+                    />
+                  </Flex>
 
-                  <IconButton
+                  <Spacer />
+
+                  <Flex gap={"2"} align={"center"}>
+                    <Text
+                      fontWeight={"semibold"}
+                      fontSize={"sm"}
+                      color={"gray.800"}
+                    >
+                      Options:
+                    </Text>
+                    <Switch
+                      colorScheme={"green"}
+                      checked={showArchived}
+                      onChange={() => setShowArchived(!showArchived)}
+                    />
+                    <Text
+                      fontWeight={"semibold"}
+                      fontSize={"sm"}
+                      color={"gray.600"}
+                    >
+                      Include Archived
+                    </Text>
+                  </Flex>
+
+                  <Button
                     aria-label={"Search"}
                     size={"sm"}
-                    icon={<Icon name={"search"} />}
+                    rightIcon={<Icon name={"search"} />}
                     colorScheme={"green"}
                     isDisabled={query === ""}
                     onClick={() => runSearch()}
-                  />
+                  >
+                    Search
+                  </Button>
                 </Flex>
               </Flex>
             </TabPanel>
@@ -299,7 +398,7 @@ const Search = () => {
           ) : (
             hasSearched &&
             !isSearching && (
-              <Flex direction={"column"} w={"100%"} gap={"4"}>
+              <Flex direction={"column"} w={"100%"} gap={"2"}>
                 <Heading
                   id={"resultsHeading"}
                   size={"sm"}

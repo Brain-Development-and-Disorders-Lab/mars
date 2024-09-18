@@ -343,34 +343,41 @@ const DataTable = (props: DataTableProps) => {
                 colorScheme={"yellow"}
                 rightIcon={<Icon name={"lightning"} />}
                 size={"sm"}
-                isDisabled={
-                  _.isUndefined(props.actions) || props.actions?.length === 0
-                }
               >
                 Actions
               </MenuButton>
               <MenuList>
-                {props.actions?.map((action) => {
-                  return (
-                    <MenuItem
-                      onClick={() => {
-                        action.action(table, selectedRows);
-                      }}
-                      key={action.label}
-                      isDisabled={
-                        (Object.keys(selectedRows).length === 0 ||
-                          _.isUndefined(props.actions) ||
-                          props.actions?.length === 0) &&
-                        action.alwaysEnabled !== true
-                      }
-                    >
-                      <Flex direction={"row"} gap={"2"} align={"center"}>
-                        <Icon name={action.icon} />
-                        <Text fontSize={"sm"}>{action.label}</Text>
-                      </Flex>
-                    </MenuItem>
-                  );
-                })}
+                {props.actions &&
+                  props.actions.length > 0 &&
+                  props.actions?.map((action) => {
+                    return (
+                      <MenuItem
+                        onClick={() => {
+                          action.action(table, selectedRows);
+                        }}
+                        key={action.label}
+                        isDisabled={
+                          (Object.keys(selectedRows).length === 0 ||
+                            _.isUndefined(props.actions) ||
+                            props.actions?.length === 0) &&
+                          action.alwaysEnabled !== true
+                        }
+                      >
+                        <Flex direction={"row"} gap={"2"} align={"center"}>
+                          <Icon name={action.icon} />
+                          <Text fontSize={"sm"}>{action.label}</Text>
+                        </Flex>
+                      </MenuItem>
+                    );
+                  })}
+                {(_.isUndefined(props.actions) ||
+                  props.actions.length === 0) && (
+                  <MenuItem key={"no-actions"} isDisabled>
+                    <Flex direction={"row"} gap={"2"} align={"center"}>
+                      <Text fontSize={"sm"}>No Actions available</Text>
+                    </Flex>
+                  </MenuItem>
+                )}
               </MenuList>
             </Menu>
           )}
