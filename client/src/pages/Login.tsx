@@ -286,7 +286,6 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
       },
     });
 
-    console.info(result.data);
     if (result.data?.updateUser) {
       setIsSetup(result.data.updateUser.success);
     }

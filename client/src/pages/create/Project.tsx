@@ -87,7 +87,6 @@ const Project = () => {
     owner: token.orcid,
     archived: false,
     description: description,
-    shared: [],
     created: created,
     entities: [],
     collaborators: [],
