@@ -18,7 +18,6 @@ import {
   StatNumber,
   StatHelpText,
   StatArrow,
-  Spacer,
 } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
 import { Content } from "@components/Container";
@@ -88,14 +87,6 @@ const Dashboard = () => {
   // Workspace context
   const { workspace, workspaceLoading } = useContext(WorkspaceContext);
 
-  // Handle refresh state
-  const [lastRefresh, setLastRefresh] = useState(
-    dayjs(Date.now()).toISOString(),
-  );
-  const [sinceLastRefresh, setSinceLastRefresh] = useState(
-    dayjs(dayjs(Date.now()).toISOString()).fromNow(),
-  );
-
   // Page data
   const [entityData, setEntityData] = useState(
     [] as {
@@ -140,15 +131,6 @@ const Dashboard = () => {
       refetch();
     }
   }, [workspace]);
-
-  // Setup interval and function to refresh the dashboard
-  const refreshDashboard = async () => {
-    setLastRefresh(dayjs(Date.now()).toISOString());
-    await refetch();
-  };
-  setInterval(() => {
-    setSinceLastRefresh(dayjs(lastRefresh).fromNow());
-  }, 5000);
 
   // Display error messages from GraphQL usage
   useEffect(() => {
@@ -280,29 +262,6 @@ const Dashboard = () => {
           <Flex direction={"row"} gap={"2"} align={"center"}>
             <Icon name={"dashboard"} size={"md"} />
             <Heading size={"lg"}>Workspace Dashboard</Heading>
-            <Spacer />
-
-            {/* Refresh component */}
-            <Flex
-              p={"2"}
-              gap={"2"}
-              rounded={"md"}
-              align={"center"}
-              border={"1px"}
-              borderColor={"gray.300"}
-            >
-              <Button
-                size={"sm"}
-                onClick={() => refreshDashboard()}
-                rightIcon={<Icon name={"reload"} />}
-                isLoading={loading}
-              >
-                Refresh
-              </Button>
-              <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.600"}>
-                Last Refreshed: {sinceLastRefresh}
-              </Text>
-            </Flex>
           </Flex>
 
           <Flex
