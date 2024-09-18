@@ -959,6 +959,11 @@
   resolved "https://registry.npmjs.org/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
+"@bmatei/apollo-prometheus-exporter@^3.0.0":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@bmatei/apollo-prometheus-exporter/-/apollo-prometheus-exporter-3.0.0.tgz#f9db2bd227160ea4380d2c86b9e7fd073de4c61a"
+  integrity sha512-6mhqiIZvt7UWwQ9RF0nLtduOzmdzQ5EA2Deb/fa5/s5ByJZmi+miX328dM8lVVMoHicGLsBeRj2CJ232QWZJKQ==
+
 "@esbuild/android-arm64@0.17.14":
   version "0.17.14"
   resolved "https://registry.yarnpkg.com/@esbuild/android-arm64/-/android-arm64-0.17.14.tgz#4624cea3c8941c91f9e9c1228f550d23f1cef037"

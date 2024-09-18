@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@apollo/server": "^4.10.4",
+    "@bmatei/apollo-prometheus-exporter": "^3.0.0",
     "@types/graphql-upload": "^16.0.7",
     "axios": "^1.6.0",
     "consola": "^3.0.2",

@@ -355,7 +355,7 @@ export class Entities {
 
     // Apply updated statistics
     if (response.deletedCount > 0) {
-      EntityCounterAll.inc(-1);
+      EntityCounterAll.dec();
     }
 
     return {

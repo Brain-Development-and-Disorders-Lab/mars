@@ -13,6 +13,7 @@ import "source-map-support/register";
 // Monitoring
 import { collectDefaultMetrics, register } from "prom-client";
 import { Statistics } from "./models/Statistics";
+import { createPrometheusExporterPlugin } from "@bmatei/apollo-prometheus-exporter";
 
 // Get the connection functions
 import { connect } from "./connectors/database";
@@ -48,6 +49,10 @@ collectDefaultMetrics();
 
 const port = process.env.PORT || 8000;
 const app = express();
+const prometheusExporterPlugin = createPrometheusExporterPlugin({
+  app,
+  defaultMetrics: false,
+});
 const httpServer = http.createServer(app);
 
 // Start the GraphQL server
@@ -95,7 +100,10 @@ const start = async () => {
     ],
     introspection: process.env.NODE_ENV !== "production",
     csrfPrevention: true,
-    plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
+    plugins: [
+      ApolloServerPluginDrainHttpServer({ httpServer }),
+      prometheusExporterPlugin,
+    ],
   });
   consola.start("Starting GraphQL server...");
   await server.start();

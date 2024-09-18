@@ -119,6 +119,7 @@ export const typedefs = `#graphql
     _id: String!
     name: String
     owner: String
+    timestamp: String
     archived: Boolean
     description: String
     values: [ValueInput]
@@ -211,7 +212,7 @@ export const typedefs = `#graphql
   # "Activity" type
   type Activity {
     _id: String!
-    timestamp: Date
+    timestamp: String
     actor: String
     type: String
     details: String
@@ -220,7 +221,7 @@ export const typedefs = `#graphql
 
   # "ActivityCreateInput" input
   input ActivityCreateInput {
-    timestamp: Date
+    timestamp: String
     actor: String
     type: String
     details: String

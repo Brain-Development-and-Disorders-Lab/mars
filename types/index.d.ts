@@ -41,7 +41,7 @@ export namespace State.Project {
   type Start = {
     location: "none" | "start";
     name: string;
-    created: Date;
+    created: string;
     owner: string;
     description: string;
   };
