@@ -146,7 +146,7 @@ const Attributes = () => {
         rounded={"md"}
         bg={"white"}
         wrap={"wrap"}
-        gap={"6"}
+        gap={"4"}
       >
         <Flex
           w={"100%"}

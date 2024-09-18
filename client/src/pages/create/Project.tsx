@@ -171,7 +171,7 @@ const Project = () => {
                   placeholder={"Owner"}
                   borderColor={"gray.300"}
                   focusBorderColor={"black"}
-                  value={"Test User"}
+                  value={owner}
                   isDisabled
                 />
               </FormControl>

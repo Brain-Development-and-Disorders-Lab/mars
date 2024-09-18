@@ -152,7 +152,7 @@ const Projects = () => {
         rounded={"md"}
         bg={"white"}
         wrap={"wrap"}
-        gap={"6"}
+        gap={"4"}
         justify={"center"}
       >
         <Flex

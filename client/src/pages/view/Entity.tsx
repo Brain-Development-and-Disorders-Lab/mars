@@ -1414,8 +1414,8 @@ const Entity = () => {
               <MenuButton
                 as={Button}
                 size={"sm"}
-                colorScheme={"blue"}
-                rightIcon={<Icon name={"c_down"} />}
+                colorScheme={"yellow"}
+                rightIcon={<Icon name={"lightning"} />}
               >
                 Actions
               </MenuButton>
