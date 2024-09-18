@@ -21,7 +21,7 @@ import Papa from "papaparse";
 import consola from "consola";
 
 // Statistics
-import { EntityCounterAll } from "./Statistics";
+import { EntityCounterAll } from "./Metrics";
 
 const ENTITIES_COLLECTION = "entities"; // Collection name
 

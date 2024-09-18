@@ -459,3 +459,19 @@ export type UserModel = IUser & {
   _id: string;
   token: string;
 };
+
+// Metrics
+export type IContentMetrics = {
+  all: number;
+  addedDay: number;
+};
+
+export type EntityMetrics = IContentMetrics;
+
+export type ProjectMetrics = IContentMetrics;
+
+export type AttributeMetrics = IContentMetrics;
+
+export type WorkspaceMetrics = {
+  collaborators: number;
+};

@@ -1,5 +1,11 @@
 // Custom types
-import { Context, IProject, ProjectModel, ResponseMessage } from "@types";
+import {
+  Context,
+  IProject,
+  ProjectMetrics,
+  ProjectModel,
+  ResponseMessage,
+} from "@types";
 
 // Utility functions and libraries
 import { GraphQLError } from "graphql";
@@ -125,6 +131,36 @@ export const ProjectsResolvers = {
           },
         );
       }
+    },
+
+    // Get collection of Project metrics
+    projectMetrics: async (
+      _parent: any,
+      _args: Record<string, unknown>,
+      context: Context,
+    ): Promise<ProjectMetrics> => {
+      const workspace = await Workspaces.getOne(context.workspace);
+      if (_.isNull(workspace)) {
+        throw new GraphQLError("Workspace does not exist", {
+          extensions: {
+            code: "NON_EXIST",
+          },
+        });
+      }
+
+      // Filter by ownership and Workspace membership, then if created in the last 24 hours
+      const projects = await Projects.all();
+      const workspaceProjects = projects.filter((project) =>
+        _.includes(workspace.projects, project._id),
+      );
+      const projectsAddedDay = workspaceProjects.filter((project) =>
+        dayjs(project.timestamp).isAfter(dayjs(Date.now()).subtract(1, "day")),
+      );
+
+      return {
+        all: workspaceProjects.length,
+        addedDay: projectsAddedDay.length,
+      };
     },
   },
 

@@ -12,7 +12,7 @@ import "source-map-support/register";
 
 // Monitoring
 import { collectDefaultMetrics, register } from "prom-client";
-import { Statistics } from "./models/Statistics";
+import { Metrics } from "./models/Metrics";
 import { createPrometheusExporterPlugin } from "@bmatei/apollo-prometheus-exporter";
 
 // Get the connection functions
@@ -76,8 +76,8 @@ const start = async () => {
     fs.mkdirSync(__dirname + "/public");
   }
 
-  // Setup server monitoring
-  Statistics.setup();
+  // Setup server Prometheus
+  Metrics.setupPrometheus();
 
   // Setup the GraphQL server
   const server = new ApolloServer<Context>({

@@ -297,6 +297,29 @@ export const typedefs = `#graphql
     encoding: String!
   }
 
+  # "EntityMetrics" type
+  type EntityMetrics {
+    all: Int
+    addedDay: Int
+  }
+
+  # "ProjectMetrics" type
+  type ProjectMetrics {
+    all: Int
+    addedDay: Int
+  }
+
+  # "AttributeMetrics" type
+  type AttributeMetrics {
+    all: Int
+    addedDay: Int
+  }
+
+  # "WorkspaceMetrics" type
+  type WorkspaceMetrics {
+    collaborators: Int
+  }
+
   # Define query types
   type Query {
     # User queries
@@ -306,17 +329,20 @@ export const typedefs = `#graphql
     # Project queries
     projects(limit: Int): [Project]
     project(_id: String): Project
+    projectMetrics: ProjectMetrics
 
     # Entity queries
     entities(limit: Int, archived: Boolean): [Entity]
     entity(_id: String): Entity
     entityExists(_id: String): Boolean
     entityNameExists(name: String): Boolean
+    entityMetrics: EntityMetrics
 
     # Attribute queries
     attributes(limit: Int): [Attribute]
     attribute(_id: String): Attribute
     attributeExists(_id: String): Boolean
+    attributeMetrics: AttributeMetrics
 
     # Activity queries
     activity(limit: Int): [Activity]
@@ -327,6 +353,7 @@ export const typedefs = `#graphql
     workspaceEntities(_id: String, limit: Int): [Entity]
     workspaceProjects(_id: String, limit: Int): [Project]
     workspaceActivity(_id: String, limit: Int): [Activity]
+    workspaceMetrics: WorkspaceMetrics
 
     # Export queries
     exportEntity(_id: String, format: String, fields: [String]): String
@@ -341,7 +368,7 @@ export const typedefs = `#graphql
     downloadFile(_id: String): String
 
     # Search queries
-    search(query: String, isBuilder: Boolean, limit: Int): [Entity]
+    search(query: String, isBuilder: Boolean, showArchived: Boolean, limit: Int): [Entity]
   }
 
   # Define mutation types

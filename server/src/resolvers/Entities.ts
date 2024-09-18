@@ -1,6 +1,7 @@
 import {
   AttributeModel,
   Context,
+  EntityMetrics,
   EntityModel,
   IEntity,
   IGenericItem,
@@ -163,6 +164,36 @@ export const EntitiesResolvers = {
       }
 
       return await Entities.exportMany(authorizedEntities);
+    },
+
+    // Get collection of Entity metrics
+    entityMetrics: async (
+      _parent: any,
+      _args: Record<string, unknown>,
+      context: Context,
+    ): Promise<EntityMetrics> => {
+      const workspace = await Workspaces.getOne(context.workspace);
+      if (_.isNull(workspace)) {
+        throw new GraphQLError("Workspace does not exist", {
+          extensions: {
+            code: "NON_EXIST",
+          },
+        });
+      }
+
+      // Filter by ownership and Workspace membership, then if created in the last 24 hours
+      const entities = await Entities.all();
+      const workspaceEntities = entities.filter((entity) =>
+        _.includes(workspace.entities, entity._id),
+      );
+      const entitiesAddedDay = workspaceEntities.filter((entity) =>
+        dayjs(entity.timestamp).isAfter(dayjs(Date.now()).subtract(1, "day")),
+      );
+
+      return {
+        all: workspaceEntities.length,
+        addedDay: entitiesAddedDay.length,
+      };
     },
   },
 

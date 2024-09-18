@@ -1,5 +1,11 @@
 // Custom types
-import { AttributeModel, Context, IAttribute, ResponseMessage } from "@types";
+import {
+  AttributeMetrics,
+  AttributeModel,
+  Context,
+  IAttribute,
+  ResponseMessage,
+} from "@types";
 
 // Models
 import { Activity } from "../models/Activity";
@@ -81,6 +87,38 @@ export const AttributesResolvers = {
     // Check if an Attribute exists
     attributeExists: async (_parent: any, args: { _id: string }) => {
       return await Attributes.exists(args._id);
+    },
+
+    // Get collection of Attribute metrics
+    attributeMetrics: async (
+      _parent: any,
+      _args: Record<string, unknown>,
+      context: Context,
+    ): Promise<AttributeMetrics> => {
+      const workspace = await Workspaces.getOne(context.workspace);
+      if (_.isNull(workspace)) {
+        throw new GraphQLError("Workspace does not exist", {
+          extensions: {
+            code: "NON_EXIST",
+          },
+        });
+      }
+
+      // Filter by ownership and Workspace membership, then if created in the last 24 hours
+      const attributes = await Attributes.all();
+      const workspaceAttributes = attributes.filter((attribute) =>
+        _.includes(workspace.attributes, attribute._id),
+      );
+      const attributesAddedDay = workspaceAttributes.filter((attribute) =>
+        dayjs(attribute.timestamp).isAfter(
+          dayjs(Date.now()).subtract(1, "day"),
+        ),
+      );
+
+      return {
+        all: workspaceAttributes.length,
+        addedDay: attributesAddedDay.length,
+      };
     },
   },
 

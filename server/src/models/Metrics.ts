@@ -5,12 +5,11 @@ import { Entities } from "./Entities";
 import { Users } from "./Users";
 import { Workspaces } from "./Workspaces";
 
-export class Statistics {
+export class Metrics {
   /**
-   * Get all User entries from the Users collection
-   * @returns Collection of all User entries
+   * Setup server Prometheus gauges
    */
-  static setup = async (): Promise<void> => {
+  static setupPrometheus = async (): Promise<void> => {
     // Setup total Entity count
     const entities = await Entities.all();
     EntityCounterAll.inc(entities.length);
