@@ -59,17 +59,11 @@ const Search = () => {
 
   // Query to search by text value
   const SEARCH_TEXT = gql`
-    query Search(
-      $query: String
-      $isBuilder: Boolean
-      $showArchived: Boolean
-      $limit: Int
-    ) {
+    query Search($query: String, $isBuilder: Boolean, $showArchived: Boolean) {
       search(
         query: $query
         isBuilder: $isBuilder
         showArchived: $showArchived
-        limit: $limit
       ) {
         _id
         name
@@ -104,7 +98,6 @@ const Search = () => {
         query: query,
         isBuilder: false,
         showArchived: showArchived,
-        limit: 100,
       },
     });
 
@@ -165,7 +158,11 @@ const Search = () => {
     }),
     searchResultColumnHelper.accessor("attributes", {
       cell: (info) => {
-        return <Tag colorScheme={"purple"}>{info.getValue().length}</Tag>;
+        return (
+          <Tag colorScheme={"purple"}>
+            {_.isUndefined(info.getValue()) ? 0 : info.getValue().length}
+          </Tag>
+        );
       },
       header: "Attributes",
     }),

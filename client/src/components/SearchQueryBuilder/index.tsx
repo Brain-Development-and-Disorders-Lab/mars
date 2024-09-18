@@ -140,11 +140,25 @@ const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
 
   // Query to search by text value
   const SEARCH_TEXT = gql`
-    query Search($query: String, $isBuilder: Boolean, $limit: Int) {
-      search(query: $query, isBuilder: $isBuilder, limit: $limit) {
+    query Search($query: String, $isBuilder: Boolean) {
+      search(query: $query, isBuilder: $isBuilder) {
         _id
         name
+        owner
+        archived
         description
+        projects
+        attributes {
+          _id
+          name
+          description
+          values {
+            _id
+            name
+            type
+            data
+          }
+        }
       }
     }
   `;
@@ -167,7 +181,6 @@ const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
           ruleProcessor: ruleProcessor,
         }),
         isBuilder: true,
-        limit: 100,
       },
       fetchPolicy: "network-only",
     });

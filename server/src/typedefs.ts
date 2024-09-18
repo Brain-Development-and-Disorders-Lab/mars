@@ -368,7 +368,7 @@ export const typedefs = `#graphql
     downloadFile(_id: String): String
 
     # Search queries
-    search(query: String, isBuilder: Boolean, showArchived: Boolean, limit: Int): [Entity]
+    search(query: String, isBuilder: Boolean, showArchived: Boolean): [Entity]
   }
 
   # Define mutation types
