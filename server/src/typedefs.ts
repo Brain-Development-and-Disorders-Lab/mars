@@ -60,7 +60,6 @@ export const typedefs = `#graphql
     archived: Boolean!
     description: String!
     owner: String!
-    shared: [String]!
     created: String!
     entities: [String]!
     collaborators: [String]!
@@ -75,7 +74,6 @@ export const typedefs = `#graphql
     description: String
     owner: String
     collaborators: [String]
-    shared: [String]
     created: String
     entities: [String]
     # To-Do: History

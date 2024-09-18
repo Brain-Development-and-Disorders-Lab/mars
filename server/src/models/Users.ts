@@ -153,7 +153,6 @@ export class Users {
       description:
         "This is your first Project. Feel free to explore and modify it!",
       owner: user,
-      shared: [],
       entities: [], // Assuming you can add entities later
       collaborators: [], // Assuming you might want collaborators
       history: [],

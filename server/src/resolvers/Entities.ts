@@ -8,6 +8,7 @@ import {
 } from "@types";
 import { GraphQLError } from "graphql";
 import _ from "lodash";
+import dayjs from "dayjs";
 
 // Models
 import { Activity } from "../models/Activity";
@@ -209,7 +210,7 @@ export const EntitiesResolvers = {
 
         // Create new Activity if successful
         const activity = await Activity.create({
-          timestamp: new Date(),
+          timestamp: dayjs(Date.now()).toISOString(),
           type: "create",
           actor: context.user,
           details: "Created new Entity",
@@ -249,7 +250,7 @@ export const EntitiesResolvers = {
         // Create new Activity if successful
         if (result.success) {
           const activity = await Activity.create({
-            timestamp: new Date(),
+            timestamp: dayjs(Date.now()).toISOString(),
             type: "update",
             actor: context.user,
             details: "Updated existing Entity",
@@ -304,7 +305,7 @@ export const EntitiesResolvers = {
         // Create new Activity if successful
         if (result.success) {
           const activity = await Activity.create({
-            timestamp: new Date(),
+            timestamp: dayjs(Date.now()).toISOString(),
             type: "archived",
             actor: context.user,
             details: args.state ? "Archived Entity" : "Restored Entity",
@@ -349,7 +350,7 @@ export const EntitiesResolvers = {
           // Create new Activity if successful
           if (result.success) {
             const activity = await Activity.create({
-              timestamp: new Date(),
+              timestamp: dayjs(Date.now()).toISOString(),
               type: "archived",
               actor: context.user,
               details: args.state ? "Archived Entity" : "Restored Entity",
@@ -397,7 +398,7 @@ export const EntitiesResolvers = {
       // Create new Activity if successful
       if (result.success) {
         const activity = await Activity.create({
-          timestamp: new Date(),
+          timestamp: dayjs(Date.now()).toISOString(),
           type: "delete",
           actor: context.user,
           details: "Deleted Entity",

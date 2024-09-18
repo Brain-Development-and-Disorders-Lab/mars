@@ -125,7 +125,6 @@ export type IProject = {
   created: string;
   collaborators: string[];
   description: string;
-  shared: string[];
   entities: string[];
   history?: ProjectHistory[];
 };

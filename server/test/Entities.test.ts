@@ -9,6 +9,8 @@ import { EntityModel } from "../../types";
 import { Entities } from "../src/models/Entities";
 import { Projects } from "../src/models/Projects";
 
+import dayjs from "dayjs";
+
 // Database connectivity
 import { connect, disconnect } from "../src/connectors/database";
 import { clearDatabase } from "./util";
@@ -62,7 +64,7 @@ describe("Entity model", () => {
     // Create the first Entity
     await Entities.create({
       name: "TestOriginEntity",
-      created: new Date(Date.now()).toISOString(),
+      created: dayjs(Date.now()).toISOString(),
       archived: false,
       locked: false,
       owner: "henry.burgess@wustl.edu",
@@ -85,7 +87,7 @@ describe("Entity model", () => {
     // Create the second Entity (Product) that has the first Entity (Origin)
     await Entities.create({
       name: "TestProductEntity",
-      created: new Date(Date.now()).toISOString(),
+      created: dayjs(Date.now()).toISOString(),
       archived: false,
       locked: false,
       owner: "henry.burgess@wustl.edu",
@@ -126,7 +128,7 @@ describe("Entity model", () => {
     // Create the first Entity (Product)
     await Entities.create({
       name: "TestProductEntity",
-      created: new Date(Date.now()).toISOString(),
+      created: dayjs(Date.now()).toISOString(),
       archived: false,
       locked: false,
       owner: "henry.burgess@wustl.edu",
@@ -148,7 +150,7 @@ describe("Entity model", () => {
     // Create the second Entity (Origin) that has the first Entity (Product)
     await Entities.create({
       name: "TestOriginEntity",
-      created: new Date(Date.now()).toISOString(),
+      created: dayjs(Date.now()).toISOString(),
       archived: false,
       locked: false,
       owner: "henry.burgess@wustl.edu",
@@ -190,7 +192,7 @@ describe("Entity model", () => {
     // Create the first Entity (Product)
     await Entities.create({
       name: "TestProductEntity",
-      created: new Date(Date.now()).toISOString(),
+      created: dayjs(Date.now()).toISOString(),
       archived: false,
       locked: false,
       owner: "henry.burgess@wustl.edu",
@@ -212,7 +214,7 @@ describe("Entity model", () => {
     // Create the second Entity (Origin) that has the first Entity (Product)
     await Entities.create({
       name: "TestOriginEntity",
-      created: new Date(Date.now()).toISOString(),
+      created: dayjs(Date.now()).toISOString(),
       archived: false,
       locked: false,
       owner: "henry.burgess@wustl.edu",
@@ -254,7 +256,7 @@ describe("Entity model", () => {
     // Start by creating an Entity
     await Entities.create({
       name: "TestEntity",
-      created: new Date(Date.now()).toISOString(),
+      created: dayjs(Date.now()).toISOString(),
       archived: false,
       locked: false,
       owner: "henry.burgess@wustl.edu",
@@ -269,6 +271,8 @@ describe("Entity model", () => {
           _id: "TestAttribute",
           archived: false,
           name: "Attribute_1",
+          timestamp: dayjs(Date.now()).toISOString(),
+          owner: "henry.burgess@wustl.edu",
           description: "Test Attribute description",
           values: [],
         },
@@ -288,7 +292,7 @@ describe("Entity model", () => {
   it("should update the description", async () => {
     await Entities.create({
       name: "TestEntity",
-      created: new Date(Date.now()).toISOString(),
+      created: dayjs(Date.now()).toISOString(),
       archived: false,
       locked: false,
       owner: "henry.burgess@wustl.edu",
@@ -318,7 +322,7 @@ describe("Entity model", () => {
   it("should update Project membership", async () => {
     await Entities.create({
       name: "TestEntity",
-      created: new Date(Date.now()).toISOString(),
+      created: dayjs(Date.now()).toISOString(),
       archived: false,
       locked: false,
       owner: "henry.burgess@wustl.edu",
@@ -340,11 +344,11 @@ describe("Entity model", () => {
     await Projects.create({
       name: "TestProject",
       archived: false,
-      created: new Date(Date.now()).toISOString(),
+      created: dayjs(Date.now()).toISOString(),
       owner: "henry.burgess@wustl.edu",
       description: "Test Project",
       entities: [],
-      shared: [],
+      collaborators: [],
     });
 
     let project = (await Projects.all())[0];
@@ -380,7 +384,7 @@ describe("Entity model", () => {
   it("should update Origin associations", async () => {
     await Entities.create({
       name: "TestEntity",
-      created: new Date(Date.now()).toISOString(),
+      created: dayjs(Date.now()).toISOString(),
       archived: false,
       locked: false,
       owner: "henry.burgess@wustl.edu",
@@ -401,7 +405,7 @@ describe("Entity model", () => {
     // Create an Origin
     await Entities.create({
       name: "OriginEntity",
-      created: new Date(Date.now()).toISOString(),
+      created: dayjs(Date.now()).toISOString(),
       archived: false,
       locked: false,
       owner: "henry.burgess@wustl.edu",
@@ -453,7 +457,7 @@ describe("Entity model", () => {
   it("should update Product associations", async () => {
     await Entities.create({
       name: "TestEntity",
-      created: new Date(Date.now()).toISOString(),
+      created: dayjs(Date.now()).toISOString(),
       archived: false,
       locked: false,
       owner: "henry.burgess@wustl.edu",
@@ -474,7 +478,7 @@ describe("Entity model", () => {
     // Create a Product
     await Entities.create({
       name: "ProductEntity",
-      created: new Date(Date.now()).toISOString(),
+      created: dayjs(Date.now()).toISOString(),
       archived: false,
       locked: false,
       owner: "henry.burgess@wustl.edu",
@@ -527,7 +531,7 @@ describe("Entity model", () => {
     // Start by creating an Entities
     await Entities.create({
       name: "TestEntity",
-      created: new Date(Date.now()).toISOString(),
+      created: dayjs(Date.now()).toISOString(),
       archived: false,
       locked: false,
       owner: "henry.burgess@wustl.edu",
@@ -549,6 +553,8 @@ describe("Entity model", () => {
       _id: "TestAttribute",
       archived: false,
       name: "Attribute_1",
+      timestamp: dayjs(Date.now()).toISOString(),
+      owner: "henry.burgess@wustl.edu",
       description: "Test Attribute description",
       values: [],
     });
@@ -565,7 +571,7 @@ describe("Entity model", () => {
     // Start by creating an Entities
     await Entities.create({
       name: "TestEntity",
-      created: new Date(Date.now()).toISOString(),
+      created: dayjs(Date.now()).toISOString(),
       archived: false,
       locked: false,
       owner: "henry.burgess@wustl.edu",
@@ -580,6 +586,8 @@ describe("Entity model", () => {
           _id: "TestAttribute",
           archived: false,
           name: "Attribute_1",
+          timestamp: dayjs(Date.now()).toISOString(),
+          owner: "henry.burgess@wustl.edu",
           description: "Test Attribute description",
           values: [],
         },
@@ -603,7 +611,7 @@ describe("Entity model", () => {
     // Start by creating an Entities
     await Entities.create({
       name: "TestEntity",
-      created: new Date(Date.now()).toISOString(),
+      created: dayjs(Date.now()).toISOString(),
       archived: false,
       locked: false,
       owner: "henry.burgess@wustl.edu",
@@ -618,6 +626,8 @@ describe("Entity model", () => {
           _id: "TestAttribute",
           archived: false,
           name: "Attribute_1",
+          owner: "henry.burgess@wustl.edu",
+          timestamp: dayjs(Date.now()).toISOString(),
           description: "Test Attribute description",
           values: [],
         },
@@ -633,6 +643,8 @@ describe("Entity model", () => {
       _id: "TestAttribute",
       archived: false,
       name: "Attribute_2",
+      timestamp: dayjs(Date.now()).toISOString(),
+      owner: "henry.burgess@wustl.edu",
       description: "Test Attribute updated",
       values: [],
     });
@@ -652,7 +664,7 @@ describe("Entity model", () => {
     // Arrange: Create multiple entities
     await Entities.create({
       name: "TestProductEntity",
-      created: new Date(Date.now()).toISOString(),
+      created: dayjs(Date.now()).toISOString(),
       archived: false,
       locked: false,
       owner: "henry.burgess@wustl.edu",
@@ -670,7 +682,7 @@ describe("Entity model", () => {
     // Create the second Entity (Origin) that has the first Entity (Product)
     await Entities.create({
       name: "TestOriginEntity",
-      created: new Date(Date.now()).toISOString(),
+      created: dayjs(Date.now()).toISOString(),
       archived: false,
       locked: false,
       owner: "henry.burgess@wustl.edu",

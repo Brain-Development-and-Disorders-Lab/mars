@@ -11,6 +11,8 @@ import { Attributes } from "../src/models/Attributes";
 import { connect, disconnect } from "../src/connectors/database";
 import { clearDatabase } from "./util";
 
+import dayjs from "dayjs";
+
 describe("Attributes model", () => {
   beforeEach(async () => {
     // Connect to the database
@@ -35,6 +37,7 @@ describe("Attributes model", () => {
   it("should create an Attribute", async () => {
     await Attributes.create({
       name: "TestAttribute",
+      owner: "henry.burgess@wustl.edu",
       archived: false,
       description: "Attribute description",
       values: [],
@@ -47,6 +50,7 @@ describe("Attributes model", () => {
   it("should update the description", async () => {
     await Attributes.create({
       name: "TestAttribute",
+      owner: "henry.burgess@wustl.edu",
       archived: false,
       description: "Attribute description",
       values: [],
@@ -57,7 +61,9 @@ describe("Attributes model", () => {
     await Attributes.update({
       _id: attributes[0]._id,
       archived: false,
+      timestamp: dayjs(Date.now()).toISOString(),
       name: attributes[0].name,
+      owner: "henry.burgess@wustl.edu",
       description: "Updated Attribute description",
       values: attributes[0].values,
     });
@@ -70,6 +76,7 @@ describe("Attributes model", () => {
   it("should update the values", async () => {
     const create = await Attributes.create({
       name: "TestAttribute",
+      owner: "henry.burgess@wustl.edu",
       archived: false,
       description: "Attribute description",
       values: [],
@@ -81,6 +88,8 @@ describe("Attributes model", () => {
       _id: attributes[0]._id,
       archived: false,
       name: attributes[0].name,
+      owner: "henry.burgess@wustl.edu",
+      timestamp: dayjs(Date.now()).toISOString(),
       description: attributes[0].description,
       values: [
         {

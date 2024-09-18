@@ -8,6 +8,8 @@ import { Workspaces } from "../models/Workspaces";
 
 // Utility functions and libraries
 import _ from "lodash";
+import dayjs from "dayjs";
+
 import { GraphQLError } from "graphql/index";
 
 export const AttributesResolvers = {
@@ -97,7 +99,7 @@ export const AttributesResolvers = {
 
         // If successful, add Activity
         const activity = await Activity.create({
-          timestamp: new Date(),
+          timestamp: dayjs(Date.now()).toISOString(),
           type: "create",
           actor: context.user,
           details: "Created new Attribute",
@@ -136,7 +138,7 @@ export const AttributesResolvers = {
       if (result.success) {
         // If successful, add Activity
         const activity = await Activity.create({
-          timestamp: new Date(),
+          timestamp: dayjs(Date.now()).toISOString(),
           type: "update",
           actor: context.user,
           details: "Updated existing Attribute",
@@ -181,7 +183,7 @@ export const AttributesResolvers = {
         // If successful, add Activity
         if (result.success) {
           const activity = await Activity.create({
-            timestamp: new Date(),
+            timestamp: dayjs(Date.now()).toISOString(),
             type: "archived",
             actor: context.user,
             details: args.state ? "Archived Attribute" : "Restored Attribute",
@@ -226,7 +228,7 @@ export const AttributesResolvers = {
           // If successful, add Activity
           if (result.success) {
             const activity = await Activity.create({
-              timestamp: new Date(),
+              timestamp: dayjs(Date.now()).toISOString(),
               type: "archived",
               actor: context.user,
               details: args.state ? "Archived Attribute" : "Restored Attribute",
@@ -274,7 +276,7 @@ export const AttributesResolvers = {
       // If successful, add Activity
       if (result.success) {
         const activity = await Activity.create({
-          timestamp: new Date(),
+          timestamp: dayjs(Date.now()).toISOString(),
           type: "delete",
           actor: context.user,
           details: "Deleted Attribute",
