@@ -12,13 +12,13 @@ export class Search {
    * Get a collection of Search results
    * @param {string} query Search query data
    * @param {string} workspace Workspace identifier
-   * @param {number} limit Limit the number of results
+   * @param {boolean} showArchived Include archived Entities
    * @returns {Promise<EntityModel[]>}
    */
   static getText = async (
     query: string,
     workspace: string,
-    limit?: number,
+    showArchived: boolean,
   ): Promise<EntityModel[]> => {
     // Sanitize database query
     query = query.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
@@ -26,7 +26,6 @@ export class Search {
 
     // Limit the fields returned for efficiency, default limit is 10
     const options = {
-      limit: _.isUndefined(limit) ? 10 : limit,
       projection: { name: 1, description: 1 },
     };
 
@@ -43,8 +42,12 @@ export class Search {
         { "attributes.values.name": { $regex: expression } },
         { "attributes.values.data": { $regex: expression } }, // Assuming searchable content within attributes
       ],
-      $and: [{ archived: false }],
+      $and: [{}],
     };
+
+    if (showArchived === false) {
+      databaseQuery.$and.push({ archived: false });
+    }
 
     const results = await getDatabase()
       .collection<EntityModel>(ENTITIES_COLLECTION)
@@ -71,7 +74,6 @@ export class Search {
   static getQuery = async (
     query: string,
     workspace: string,
-    limit?: number,
   ): Promise<EntityModel[]> => {
     // Parse the query string into a MongoDB query object
     const parsedQuery = JSON.parse(query);
@@ -87,15 +89,10 @@ export class Search {
       mongoQuery = parsedQuery;
     }
 
-    // Limit the fields returned for efficiency, default limit is 10
-    const options = {
-      limit: _.isUndefined(limit) ? 10 : limit,
-    };
-
     // Execute the search query with any specified options
     const results = await getDatabase()
       .collection<EntityModel>(ENTITIES_COLLECTION)
-      .find(mongoQuery, options)
+      .find(mongoQuery)
       .toArray();
 
     // Get the current Workspace context and retrieve all Entities

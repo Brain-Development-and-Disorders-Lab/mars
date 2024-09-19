@@ -24,3 +24,22 @@ services:
       ME_CONFIG_MONGODB_ADMINUSERNAME: admin
       ME_CONFIG_MONGODB_ADMINPASSWORD: metadataadmin
       ME_CONFIG_MONGODB_URL: mongodb://admin:metadataadmin@database:27017/
+
+  # Prometheus for metrics and monitoring
+  prometheus:
+    image: prom/prometheus
+    restart: always
+    ports:
+      - 9090:9090
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus.web.yml:/etc/prometheus/prometheus.web.yml
+    environment:
+      - web.config.file=/etc/prometheus/prometheus.web.yml
+
+  # Grafana for dashboard
+  grafana:
+    image: grafana/grafana-oss
+    restart: always
+    ports:
+      - 3000:3000

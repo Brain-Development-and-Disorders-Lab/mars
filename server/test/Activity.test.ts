@@ -7,6 +7,8 @@ import { afterEach, beforeEach, describe, expect, it } from "@jest/globals";
 // Activity model and types
 import { Activity } from "../src/models/Activity";
 
+import dayjs from "dayjs";
+
 // Database connectivity
 import { connect, disconnect } from "../src/connectors/database";
 import { clearDatabase } from "./util";
@@ -34,7 +36,7 @@ describe("Activity model", () => {
 
   it("should create a new Activity entry", async () => {
     const create = await Activity.create({
-      timestamp: new Date(),
+      timestamp: dayjs(Date.now()).toISOString(),
       type: "create",
       actor: "test",
       details: "Test Activity",

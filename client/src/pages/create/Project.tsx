@@ -84,12 +84,12 @@ const Project = () => {
 
   const projectData: IProject = {
     name: name,
+    owner: token.orcid,
     archived: false,
     description: description,
-    owner: owner,
-    shared: [],
     created: created,
     entities: [],
+    collaborators: [],
   };
 
   return (
@@ -171,7 +171,7 @@ const Project = () => {
                   placeholder={"Owner"}
                   borderColor={"gray.300"}
                   focusBorderColor={"black"}
-                  value={"Test User"}
+                  value={owner}
                   isDisabled
                 />
               </FormControl>

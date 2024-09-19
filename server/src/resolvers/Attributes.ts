@@ -1,5 +1,11 @@
 // Custom types
-import { AttributeModel, Context, IAttribute, ResponseMessage } from "@types";
+import {
+  AttributeMetrics,
+  AttributeModel,
+  Context,
+  IAttribute,
+  ResponseMessage,
+} from "@types";
 
 // Models
 import { Activity } from "../models/Activity";
@@ -8,6 +14,8 @@ import { Workspaces } from "../models/Workspaces";
 
 // Utility functions and libraries
 import _ from "lodash";
+import dayjs from "dayjs";
+
 import { GraphQLError } from "graphql/index";
 
 export const AttributesResolvers = {
@@ -80,6 +88,38 @@ export const AttributesResolvers = {
     attributeExists: async (_parent: any, args: { _id: string }) => {
       return await Attributes.exists(args._id);
     },
+
+    // Get collection of Attribute metrics
+    attributeMetrics: async (
+      _parent: any,
+      _args: Record<string, unknown>,
+      context: Context,
+    ): Promise<AttributeMetrics> => {
+      const workspace = await Workspaces.getOne(context.workspace);
+      if (_.isNull(workspace)) {
+        throw new GraphQLError("Workspace does not exist", {
+          extensions: {
+            code: "NON_EXIST",
+          },
+        });
+      }
+
+      // Filter by ownership and Workspace membership, then if created in the last 24 hours
+      const attributes = await Attributes.all();
+      const workspaceAttributes = attributes.filter((attribute) =>
+        _.includes(workspace.attributes, attribute._id),
+      );
+      const attributesAddedDay = workspaceAttributes.filter((attribute) =>
+        dayjs(attribute.timestamp).isAfter(
+          dayjs(Date.now()).subtract(1, "day"),
+        ),
+      );
+
+      return {
+        all: workspaceAttributes.length,
+        addedDay: attributesAddedDay.length,
+      };
+    },
   },
 
   Mutation: {
@@ -97,7 +137,7 @@ export const AttributesResolvers = {
 
         // If successful, add Activity
         const activity = await Activity.create({
-          timestamp: new Date(),
+          timestamp: dayjs(Date.now()).toISOString(),
           type: "create",
           actor: context.user,
           details: "Created new Attribute",
@@ -136,7 +176,7 @@ export const AttributesResolvers = {
       if (result.success) {
         // If successful, add Activity
         const activity = await Activity.create({
-          timestamp: new Date(),
+          timestamp: dayjs(Date.now()).toISOString(),
           type: "update",
           actor: context.user,
           details: "Updated existing Attribute",
@@ -181,7 +221,7 @@ export const AttributesResolvers = {
         // If successful, add Activity
         if (result.success) {
           const activity = await Activity.create({
-            timestamp: new Date(),
+            timestamp: dayjs(Date.now()).toISOString(),
             type: "archived",
             actor: context.user,
             details: args.state ? "Archived Attribute" : "Restored Attribute",
@@ -226,7 +266,7 @@ export const AttributesResolvers = {
           // If successful, add Activity
           if (result.success) {
             const activity = await Activity.create({
-              timestamp: new Date(),
+              timestamp: dayjs(Date.now()).toISOString(),
               type: "archived",
               actor: context.user,
               details: args.state ? "Archived Attribute" : "Restored Attribute",
@@ -274,7 +314,7 @@ export const AttributesResolvers = {
       // If successful, add Activity
       if (result.success) {
         const activity = await Activity.create({
-          timestamp: new Date(),
+          timestamp: dayjs(Date.now()).toISOString(),
           type: "delete",
           actor: context.user,
           details: "Deleted Attribute",

@@ -34,14 +34,19 @@ import { IAttribute, IValue } from "@types";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
-import { isValidValues } from "src/util";
+
+// Utility functions and libraries
 import { gql, useMutation } from "@apollo/client";
+import { isValidValues } from "src/util";
+import { useToken } from "src/authentication/useToken";
 import _ from "lodash";
 
 const Attribute = () => {
   const navigate = useNavigate();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
+
+  const [token] = useToken();
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -61,6 +66,7 @@ const Attribute = () => {
   // Store Attribute data
   const attributeData: IAttribute = {
     name: name,
+    owner: token.orcid,
     archived: false,
     description: description,
     values: values,

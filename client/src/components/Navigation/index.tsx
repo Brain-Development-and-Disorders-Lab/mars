@@ -171,35 +171,33 @@ const Navigation = () => {
             <Text fontSize={"xs"} fontWeight={"bold"} color={"gray.600"}>
               Tools
             </Text>
-            <Button
-              id={"navCreateButton"}
-              key={"create"}
-              size={"sm"}
-              w={"100%"}
-              justifyContent={"left"}
-              bg={
-                _.includes(location.pathname, "/create") ? "#ffffff" : "#f2f2f2"
-              }
-              leftIcon={<Icon name={"add"} />}
-              onClick={() => navigate("/create")}
-              isDisabled={workspace === "" || _.isUndefined(workspace)}
-            >
-              Create
-            </Button>
+            <Flex direction={"row"} gap={"2"}>
+              <Button
+                id={"navCreateButton"}
+                key={"create"}
+                size={"sm"}
+                w={"100%"}
+                colorScheme={"green"}
+                leftIcon={<Icon name={"add"} />}
+                onClick={() => navigate("/create")}
+                isDisabled={workspace === "" || _.isUndefined(workspace)}
+              >
+                Create
+              </Button>
 
-            <Button
-              id={"navImportButton"}
-              key={"import"}
-              size={"sm"}
-              w={"100%"}
-              justifyContent={"left"}
-              bg={"#f2f2f2"}
-              leftIcon={<Icon name={"upload"} />}
-              onClick={() => onImportOpen()}
-              isDisabled={workspace === "" || _.isUndefined(workspace)}
-            >
-              Import
-            </Button>
+              <Button
+                id={"navImportButton"}
+                key={"import"}
+                size={"sm"}
+                w={"100%"}
+                colorScheme={"blue"}
+                leftIcon={<Icon name={"upload"} />}
+                onClick={() => onImportOpen()}
+                isDisabled={workspace === "" || _.isUndefined(workspace)}
+              >
+                Import
+              </Button>
+            </Flex>
           </Flex>
         </Flex>
       </Flex>

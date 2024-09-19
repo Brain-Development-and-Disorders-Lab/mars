@@ -1,0 +1,8 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: nodejs
+    static_configs:
+      - targets: ["localhost:8000"]
+      - targets: ["docker.for.mac.localhost:8000"]

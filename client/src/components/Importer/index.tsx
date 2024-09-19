@@ -419,6 +419,8 @@ const Importer = (props: {
           return {
             _id: data._id,
             name: data.name,
+            timestamp: attribute.timestamp,
+            owner: attribute.owner,
             archived: false,
             description: data.description,
             values: data.values,
@@ -784,6 +786,8 @@ const Importer = (props: {
                                     {
                                       _id: `a-${nanoid(6)}`,
                                       name: attribute.name,
+                                      timestamp: attribute.timestamp,
+                                      owner: attribute.owner,
                                       archived: false,
                                       description: attribute.description,
                                       values: attribute.values,
@@ -822,6 +826,8 @@ const Importer = (props: {
                           {
                             _id: `a-${nanoid(6)}`,
                             name: "",
+                            timestamp: dayjs(Date.now()).toISOString(),
+                            owner: token.orcid,
                             archived: false,
                             description: "",
                             values: [],
@@ -840,6 +846,7 @@ const Importer = (props: {
                         _id={attribute._id}
                         key={attribute._id}
                         name={attribute.name}
+                        owner={attribute.owner}
                         archived={attribute.archived}
                         description={attribute.description}
                         values={attribute.values}

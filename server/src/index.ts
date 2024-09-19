@@ -10,6 +10,11 @@ import http from "http";
 import * as fs from "fs";
 import "source-map-support/register";
 
+// Monitoring
+import { collectDefaultMetrics, register } from "prom-client";
+import { Metrics } from "./models/Metrics";
+import { createPrometheusExporterPlugin } from "@bmatei/apollo-prometheus-exporter";
+
 // Get the connection functions
 import { connect } from "./connectors/database";
 
@@ -39,8 +44,15 @@ import graphqlUploadExpress from "graphql-upload/graphqlUploadExpress.mjs";
 consola.level =
   process.env.NODE_ENV === "development" ? LogLevels.verbose : LogLevels.info;
 
+// Prometheus
+collectDefaultMetrics();
+
 const port = process.env.PORT || 8000;
 const app = express();
+const prometheusExporterPlugin = createPrometheusExporterPlugin({
+  app,
+  defaultMetrics: false,
+});
 const httpServer = http.createServer(app);
 
 // Start the GraphQL server
@@ -64,6 +76,9 @@ const start = async () => {
     fs.mkdirSync(__dirname + "/public");
   }
 
+  // Setup server Prometheus
+  Metrics.setupPrometheus();
+
   // Setup the GraphQL server
   const server = new ApolloServer<Context>({
     typeDefs: typedefs,
@@ -85,11 +100,24 @@ const start = async () => {
     ],
     introspection: process.env.NODE_ENV !== "production",
     csrfPrevention: true,
-    plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
+    plugins: [
+      ApolloServerPluginDrainHttpServer({ httpServer }),
+      prometheusExporterPlugin,
+    ],
   });
   consola.start("Starting GraphQL server...");
   await server.start();
   consola.success("GraphQL server running!");
+
+  // Serve Prometheus metrics
+  app.get("/metrics", async (_req, res) => {
+    try {
+      res.set("Content-Type", register.contentType);
+      res.end(await register.metrics());
+    } catch (err) {
+      res.status(500).end(err);
+    }
+  });
 
   // Serve static resources, enable CORS middleware
   app.use(

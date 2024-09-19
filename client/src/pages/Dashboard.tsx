@@ -27,7 +27,15 @@ import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 
 // Existing and custom types
-import { ProjectModel, EntityModel, ActivityModel } from "@types";
+import {
+  ProjectModel,
+  EntityModel,
+  ActivityModel,
+  EntityMetrics,
+  ProjectMetrics,
+  AttributeMetrics,
+  WorkspaceMetrics,
+} from "@types";
 
 // Utility functions and libraries
 import dayjs from "dayjs";
@@ -57,11 +65,26 @@ const GET_DASHBOARD = gql`
       name
       description
     }
+    projectMetrics {
+      all
+      addedDay
+    }
     entities(limit: $entityLimit, archived: $entitiesArchived) {
       _id
       archived
       name
       description
+    }
+    entityMetrics {
+      all
+      addedDay
+    }
+    attributeMetrics {
+      all
+      addedDay
+    }
+    workspaceMetrics {
+      collaborators
     }
     activity(limit: $activityLimit) {
       _id
@@ -88,14 +111,6 @@ const Dashboard = () => {
   // Workspace context
   const { workspace, workspaceLoading } = useContext(WorkspaceContext);
 
-  // Handle refresh state
-  const [lastRefresh, setLastRefresh] = useState(
-    dayjs(Date.now()).toISOString(),
-  );
-  const [sinceLastRefresh, setSinceLastRefresh] = useState(
-    dayjs(dayjs(Date.now()).toISOString()).fromNow(),
-  );
-
   // Page data
   const [entityData, setEntityData] = useState(
     [] as {
@@ -110,13 +125,26 @@ const Dashboard = () => {
   );
   const [activityData, setActivityData] = useState([] as ActivityModel[]);
 
+  // Metrics
+  const [entityMetrics, setEntityMetrics] = useState({} as EntityMetrics);
+  const [projectMetrics, setProjectMetrics] = useState({} as ProjectMetrics);
+  const [attributeMetrics, setAttributeMetrics] = useState(
+    {} as AttributeMetrics,
+  );
+  const [workspaceMetrics, setWorkspaceMetrics] = useState(
+    {} as WorkspaceMetrics,
+  );
+  const [lastUpdate] = useState(
+    dayjs(Date.now()).format("HH:mm[, ]DD MMMM YYYY"),
+  );
+
   // Execute GraphQL query both on page load and navigation
   const { loading, error, data, refetch } = useQuery(GET_DASHBOARD, {
     variables: {
       projectsLimit: 8,
       entitiesLimit: 8,
       entitiesArchived: false,
-      activityLimit: 20,
+      activityLimit: 12,
     },
     fetchPolicy: "network-only",
   });
@@ -132,6 +160,20 @@ const Dashboard = () => {
     if (data?.activity) {
       setActivityData(data.activity);
     }
+
+    // Metrics
+    if (data?.entityMetrics) {
+      setEntityMetrics(data.entityMetrics);
+    }
+    if (data?.projectMetrics) {
+      setProjectMetrics(data.projectMetrics);
+    }
+    if (data?.attributeMetrics) {
+      setAttributeMetrics(data.attributeMetrics);
+    }
+    if (data?.workspaceMetrics) {
+      setWorkspaceMetrics(data.workspaceMetrics);
+    }
   }, [data]);
 
   // If the workspace changes, refetch the data
@@ -140,15 +182,6 @@ const Dashboard = () => {
       refetch();
     }
   }, [workspace]);
-
-  // Setup interval and function to refresh the dashboard
-  const refreshDashboard = async () => {
-    setLastRefresh(dayjs(Date.now()).toISOString());
-    await refetch();
-  };
-  setInterval(() => {
-    setSinceLastRefresh(dayjs(lastRefresh).fromNow());
-  }, 5000);
 
   // Display error messages from GraphQL usage
   useEffect(() => {
@@ -281,26 +314,19 @@ const Dashboard = () => {
             <Icon name={"dashboard"} size={"md"} />
             <Heading size={"lg"}>Workspace Dashboard</Heading>
             <Spacer />
-
-            {/* Refresh component */}
             <Flex
-              p={"2"}
               gap={"2"}
+              p={"2"}
               rounded={"md"}
-              align={"center"}
               border={"1px"}
               borderColor={"gray.300"}
+              align={"center"}
             >
-              <Button
-                size={"sm"}
-                onClick={() => refreshDashboard()}
-                rightIcon={<Icon name={"reload"} />}
-                isLoading={loading}
-              >
-                Refresh
-              </Button>
-              <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.600"}>
-                Last Refreshed: {sinceLastRefresh}
+              <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.700"}>
+                Last Updated:
+              </Text>
+              <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.500"}>
+                {lastUpdate}
               </Text>
             </Flex>
           </Flex>
@@ -317,38 +343,40 @@ const Dashboard = () => {
             <StatGroup w={"100%"}>
               <Stat>
                 <StatLabel>Total Workspace Entities</StatLabel>
-                <StatNumber>{100}</StatNumber>
+                <StatNumber>{entityMetrics.all}</StatNumber>
                 <StatHelpText>
-                  <StatArrow type={"increase"} />
-                  {23} From last 24 hours
+                  {entityMetrics.addedDay > 0 && (
+                    <StatArrow type={"increase"} />
+                  )}
+                  {entityMetrics.addedDay} in last 24 hours
                 </StatHelpText>
               </Stat>
 
               <Stat>
                 <StatLabel>Total Workspace Projects</StatLabel>
-                <StatNumber>{3}</StatNumber>
+                <StatNumber>{projectMetrics.all}</StatNumber>
                 <StatHelpText>
-                  <StatArrow type={"increase"} />
-                  {1} From last 24 hours
+                  {projectMetrics.addedDay > 0 && (
+                    <StatArrow type={"increase"} />
+                  )}
+                  {projectMetrics.addedDay} in last 24 hours
                 </StatHelpText>
               </Stat>
 
               <Stat>
                 <StatLabel>Total Workspace Attributes</StatLabel>
-                <StatNumber>{5}</StatNumber>
+                <StatNumber>{attributeMetrics.all}</StatNumber>
                 <StatHelpText>
-                  <StatArrow type={"increase"} />
-                  {1} From last 24 hours
+                  {attributeMetrics.addedDay > 0 && (
+                    <StatArrow type={"increase"} />
+                  )}
+                  {attributeMetrics.addedDay} in last 24 hours
                 </StatHelpText>
               </Stat>
 
               <Stat>
                 <StatLabel>Total Workspace Collaborators</StatLabel>
-                <StatNumber>{3}</StatNumber>
-                <StatHelpText>
-                  <StatArrow type={"increase"} />
-                  {1} From last 24 hours
-                </StatHelpText>
+                <StatNumber>{workspaceMetrics.collaborators}</StatNumber>
               </Stat>
             </StatGroup>
           </Flex>
@@ -480,19 +508,20 @@ const Dashboard = () => {
             rounded={"md"}
             border={"1px"}
             borderColor={"gray.300"}
+            h={"fit-content"}
           >
             {/* Activity heading */}
             <Flex align={"center"} gap={"2"} my={"2"}>
               <Icon name={"activity"} size={"md"} />
               <Heading size={"md"} color={"gray.700"}>
-                Workspace Activity
+                Recent Activity
               </Heading>
             </Flex>
 
             {/* Activity list */}
             {activityData.length > 0 ? (
-              <Flex p={"0"} w={"100%"} maxH={"85vh"} overflowY={"auto"}>
-                <VStack spacing={"2"} w={"95%"}>
+              <Flex p={"0"} w={"100%"} overflowY={"auto"}>
+                <VStack spacing={"3"} w={"95%"}>
                   {activityData.map((activity) => {
                     return (
                       <Flex
@@ -505,9 +534,19 @@ const Dashboard = () => {
                         <Tooltip label={activity.actor}>
                           <Avatar name={activity.actor} size={"sm"} />
                         </Tooltip>
-                        <Flex direction={"column"}>
+                        <Flex direction={"column"} w={"100%"}>
                           <Flex direction={"row"} gap={"1"}>
                             <Text fontSize={"sm"}>{activity.details}</Text>
+                            <Spacer />
+                            <Text
+                              fontSize={"xs"}
+                              fontWeight={"semibold"}
+                              color={"gray.500"}
+                            >
+                              {dayjs(activity.timestamp).fromNow()}
+                            </Text>
+                          </Flex>
+                          <Flex>
                             <Linky
                               id={activity.target._id}
                               type={activity.target.type}
@@ -517,13 +556,6 @@ const Dashboard = () => {
                               truncate={20}
                             />
                           </Flex>
-                          <Text
-                            fontSize={"xs"}
-                            fontWeight={"semibold"}
-                            color={"gray.500"}
-                          >
-                            {dayjs(activity.timestamp).fromNow()}
-                          </Text>
                         </Flex>
                       </Flex>
                     );

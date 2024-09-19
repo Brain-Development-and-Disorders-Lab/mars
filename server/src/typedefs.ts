@@ -46,6 +46,7 @@ export const typedefs = `#graphql
     name: String
     archived: Boolean
     description: String
+    timestamp: String
     owner: String
     collaborators: [String]
     created: String
@@ -56,12 +57,12 @@ export const typedefs = `#graphql
   # "ProjectCreateInput" type
   input ProjectCreateInput {
     name: String!
-    archived: Boolean
+    archived: Boolean!
     description: String!
     owner: String!
-    shared: [String]!
     created: String!
     entities: [String]!
+    collaborators: [String]!
     # To-Do: History
   }
 
@@ -73,7 +74,6 @@ export const typedefs = `#graphql
     description: String
     owner: String
     collaborators: [String]
-    shared: [String]
     created: String
     entities: [String]
     # To-Do: History
@@ -99,6 +99,7 @@ export const typedefs = `#graphql
   type Attribute {
     _id: String!
     name: String
+    timestamp: String
     archived: Boolean
     description: String
     values: [Value]
@@ -107,6 +108,7 @@ export const typedefs = `#graphql
   # "AttributeCreateInput" input
   input AttributeCreateInput {
     name: String
+    owner: String
     archived: Boolean
     description: String
     values: [ValueInput]
@@ -116,6 +118,8 @@ export const typedefs = `#graphql
   input AttributeInput {
     _id: String!
     name: String
+    owner: String
+    timestamp: String
     archived: Boolean
     description: String
     values: [ValueInput]
@@ -139,8 +143,8 @@ export const typedefs = `#graphql
     name: String
     archived: Boolean
     locked: Boolean
-    created: String
     timestamp: String
+    created: String
     owner: String
     description: String
     projects: [String]
@@ -156,7 +160,6 @@ export const typedefs = `#graphql
     archived: Boolean!
     locked: Boolean!
     created: String!
-    timestamp: String!
     owner: String!
     description: String!
     projects: [String]!
@@ -209,7 +212,7 @@ export const typedefs = `#graphql
   # "Activity" type
   type Activity {
     _id: String!
-    timestamp: Date
+    timestamp: String
     actor: String
     type: String
     details: String
@@ -218,7 +221,7 @@ export const typedefs = `#graphql
 
   # "ActivityCreateInput" input
   input ActivityCreateInput {
-    timestamp: Date
+    timestamp: String
     actor: String
     type: String
     details: String
@@ -239,6 +242,7 @@ export const typedefs = `#graphql
   type Workspace {
     _id: String!
     name: String
+    timestamp: String
     description: String
     owner: String
     collaborators: [String]
@@ -293,6 +297,29 @@ export const typedefs = `#graphql
     encoding: String!
   }
 
+  # "EntityMetrics" type
+  type EntityMetrics {
+    all: Int
+    addedDay: Int
+  }
+
+  # "ProjectMetrics" type
+  type ProjectMetrics {
+    all: Int
+    addedDay: Int
+  }
+
+  # "AttributeMetrics" type
+  type AttributeMetrics {
+    all: Int
+    addedDay: Int
+  }
+
+  # "WorkspaceMetrics" type
+  type WorkspaceMetrics {
+    collaborators: Int
+  }
+
   # Define query types
   type Query {
     # User queries
@@ -302,17 +329,20 @@ export const typedefs = `#graphql
     # Project queries
     projects(limit: Int): [Project]
     project(_id: String): Project
+    projectMetrics: ProjectMetrics
 
     # Entity queries
     entities(limit: Int, archived: Boolean): [Entity]
     entity(_id: String): Entity
     entityExists(_id: String): Boolean
     entityNameExists(name: String): Boolean
+    entityMetrics: EntityMetrics
 
     # Attribute queries
     attributes(limit: Int): [Attribute]
     attribute(_id: String): Attribute
     attributeExists(_id: String): Boolean
+    attributeMetrics: AttributeMetrics
 
     # Activity queries
     activity(limit: Int): [Activity]
@@ -323,6 +353,7 @@ export const typedefs = `#graphql
     workspaceEntities(_id: String, limit: Int): [Entity]
     workspaceProjects(_id: String, limit: Int): [Project]
     workspaceActivity(_id: String, limit: Int): [Activity]
+    workspaceMetrics: WorkspaceMetrics
 
     # Export queries
     exportEntity(_id: String, format: String, fields: [String]): String
@@ -337,7 +368,7 @@ export const typedefs = `#graphql
     downloadFile(_id: String): String
 
     # Search queries
-    search(query: String, isBuilder: Boolean, limit: Int): [Entity]
+    search(query: String, isBuilder: Boolean, showArchived: Boolean): [Entity]
   }
 
   # Define mutation types

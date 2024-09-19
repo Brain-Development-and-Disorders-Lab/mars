@@ -1,6 +1,7 @@
 import {
   AttributeModel,
   Context,
+  EntityMetrics,
   EntityModel,
   IEntity,
   IGenericItem,
@@ -8,6 +9,7 @@ import {
 } from "@types";
 import { GraphQLError } from "graphql";
 import _ from "lodash";
+import dayjs from "dayjs";
 
 // Models
 import { Activity } from "../models/Activity";
@@ -163,6 +165,36 @@ export const EntitiesResolvers = {
 
       return await Entities.exportMany(authorizedEntities);
     },
+
+    // Get collection of Entity metrics
+    entityMetrics: async (
+      _parent: any,
+      _args: Record<string, unknown>,
+      context: Context,
+    ): Promise<EntityMetrics> => {
+      const workspace = await Workspaces.getOne(context.workspace);
+      if (_.isNull(workspace)) {
+        throw new GraphQLError("Workspace does not exist", {
+          extensions: {
+            code: "NON_EXIST",
+          },
+        });
+      }
+
+      // Filter by ownership and Workspace membership, then if created in the last 24 hours
+      const entities = await Entities.all();
+      const workspaceEntities = entities.filter((entity) =>
+        _.includes(workspace.entities, entity._id),
+      );
+      const entitiesAddedDay = workspaceEntities.filter((entity) =>
+        dayjs(entity.timestamp).isAfter(dayjs(Date.now()).subtract(1, "day")),
+      );
+
+      return {
+        all: workspaceEntities.length,
+        addedDay: entitiesAddedDay.length,
+      };
+    },
   },
 
   Mutation: {
@@ -209,7 +241,7 @@ export const EntitiesResolvers = {
 
         // Create new Activity if successful
         const activity = await Activity.create({
-          timestamp: new Date(),
+          timestamp: dayjs(Date.now()).toISOString(),
           type: "create",
           actor: context.user,
           details: "Created new Entity",
@@ -249,7 +281,7 @@ export const EntitiesResolvers = {
         // Create new Activity if successful
         if (result.success) {
           const activity = await Activity.create({
-            timestamp: new Date(),
+            timestamp: dayjs(Date.now()).toISOString(),
             type: "update",
             actor: context.user,
             details: "Updated existing Entity",
@@ -304,7 +336,7 @@ export const EntitiesResolvers = {
         // Create new Activity if successful
         if (result.success) {
           const activity = await Activity.create({
-            timestamp: new Date(),
+            timestamp: dayjs(Date.now()).toISOString(),
             type: "archived",
             actor: context.user,
             details: args.state ? "Archived Entity" : "Restored Entity",
@@ -349,7 +381,7 @@ export const EntitiesResolvers = {
           // Create new Activity if successful
           if (result.success) {
             const activity = await Activity.create({
-              timestamp: new Date(),
+              timestamp: dayjs(Date.now()).toISOString(),
               type: "archived",
               actor: context.user,
               details: args.state ? "Archived Entity" : "Restored Entity",
@@ -397,7 +429,7 @@ export const EntitiesResolvers = {
       // Create new Activity if successful
       if (result.success) {
         const activity = await Activity.create({
-          timestamp: new Date(),
+          timestamp: dayjs(Date.now()).toISOString(),
           type: "delete",
           actor: context.user,
           details: "Deleted Entity",

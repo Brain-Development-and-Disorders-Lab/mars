@@ -5,6 +5,7 @@ import {
   IWorkspace,
   ProjectModel,
   ResponseMessage,
+  WorkspaceMetrics,
   WorkspaceModel,
 } from "@types";
 import _ from "lodash";
@@ -147,6 +148,26 @@ export const WorkspacesResolvers = {
           },
         );
       }
+    },
+
+    // Get collection of Workspace metrics
+    workspaceMetrics: async (
+      _parent: any,
+      _args: Record<string, unknown>,
+      context: Context,
+    ): Promise<WorkspaceMetrics> => {
+      const workspace = await Workspaces.getOne(context.workspace);
+      if (_.isNull(workspace)) {
+        throw new GraphQLError("Workspace does not exist", {
+          extensions: {
+            code: "NON_EXIST",
+          },
+        });
+      }
+
+      return {
+        collaborators: workspace.collaborators.length,
+      };
     },
   },
 

@@ -1,9 +1,16 @@
 // Custom types
-import { Context, IProject, ProjectModel, ResponseMessage } from "@types";
+import {
+  Context,
+  IProject,
+  ProjectMetrics,
+  ProjectModel,
+  ResponseMessage,
+} from "@types";
 
 // Utility functions and libraries
 import { GraphQLError } from "graphql";
-import _, { toArray } from "lodash";
+import _ from "lodash";
+import dayjs from "dayjs";
 
 // Models
 import { Activity } from "../models/Activity";
@@ -125,6 +132,36 @@ export const ProjectsResolvers = {
         );
       }
     },
+
+    // Get collection of Project metrics
+    projectMetrics: async (
+      _parent: any,
+      _args: Record<string, unknown>,
+      context: Context,
+    ): Promise<ProjectMetrics> => {
+      const workspace = await Workspaces.getOne(context.workspace);
+      if (_.isNull(workspace)) {
+        throw new GraphQLError("Workspace does not exist", {
+          extensions: {
+            code: "NON_EXIST",
+          },
+        });
+      }
+
+      // Filter by ownership and Workspace membership, then if created in the last 24 hours
+      const projects = await Projects.all();
+      const workspaceProjects = projects.filter((project) =>
+        _.includes(workspace.projects, project._id),
+      );
+      const projectsAddedDay = workspaceProjects.filter((project) =>
+        dayjs(project.timestamp).isAfter(dayjs(Date.now()).subtract(1, "day")),
+      );
+
+      return {
+        all: workspaceProjects.length,
+        addedDay: projectsAddedDay.length,
+      };
+    },
   },
 
   Mutation: {
@@ -142,7 +179,7 @@ export const ProjectsResolvers = {
 
         // Create a new Activity entry
         const activity = await Activity.create({
-          timestamp: new Date(),
+          timestamp: dayjs(Date.now()).toISOString(),
           type: "create",
           actor: context.user,
           details: "Created new Project",
@@ -179,7 +216,7 @@ export const ProjectsResolvers = {
 
       if (result.success) {
         const activity = await Activity.create({
-          timestamp: new Date(),
+          timestamp: dayjs(Date.now()).toISOString(),
           type: "update",
           actor: context.user,
           details: "Updated existing Project",
@@ -221,7 +258,7 @@ export const ProjectsResolvers = {
 
         if (result.success) {
           const activity = await Activity.create({
-            timestamp: new Date(),
+            timestamp: dayjs(Date.now()).toISOString(),
             type: "archived",
             actor: context.user,
             details: args.state ? "Archived Project" : "Restored Project",
@@ -263,7 +300,7 @@ export const ProjectsResolvers = {
 
           if (result.success) {
             const activity = await Activity.create({
-              timestamp: new Date(),
+              timestamp: dayjs(Date.now()).toISOString(),
               type: "archived",
               actor: context.user,
               details: args.state ? "Archived Project" : "Restored Project",
@@ -308,7 +345,7 @@ export const ProjectsResolvers = {
 
       if (result.success) {
         const activity = await Activity.create({
-          timestamp: new Date(),
+          timestamp: dayjs(Date.now()).toISOString(),
           type: "delete",
           actor: context.user,
           details: "Deleted Project",

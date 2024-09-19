@@ -20,6 +20,9 @@ import dayjs from "dayjs";
 import Papa from "papaparse";
 import consola from "consola";
 
+// Statistics
+import { EntityCounterAll } from "./Metrics";
+
 const ENTITIES_COLLECTION = "entities"; // Collection name
 
 // Constants for parsing strings
@@ -93,7 +96,7 @@ export class Entities {
     // Allocate a new identifier and join with IEntity data
     const joinedEntity: EntityModel = {
       _id: getIdentifier("entity"), // Generate new identifier
-      timestamp: new Date().toISOString(), // Add created timestamp
+      timestamp: dayjs(Date.now()).toISOString(), // Add created timestamp
       ...entity, // Unpack existing IEntity fields
     };
 
@@ -122,6 +125,11 @@ export class Entities {
       .collection<EntityModel>(ENTITIES_COLLECTION)
       .insertOne(joinedEntity);
     const successStatus = _.isEqual(response.insertedId, joinedEntity._id);
+
+    // Apply updated statistics
+    if (successStatus) {
+      EntityCounterAll.inc();
+    }
 
     return {
       success: successStatus,
@@ -344,6 +352,11 @@ export class Entities {
     const response = await getDatabase()
       .collection<EntityModel>(ENTITIES_COLLECTION)
       .deleteOne({ _id: _id });
+
+    // Apply updated statistics
+    if (response.deletedCount > 0) {
+      EntityCounterAll.dec();
+    }
 
     return {
       success: response.deletedCount > 0,

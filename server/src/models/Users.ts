@@ -153,7 +153,6 @@ export class Users {
       description:
         "This is your first Project. Feel free to explore and modify it!",
       owner: user,
-      shared: [],
       entities: [], // Assuming you can add entities later
       collaborators: [], // Assuming you might want collaborators
       history: [],
@@ -177,6 +176,8 @@ export class Users {
         {
           _id: "a-00-example",
           name: "Example Attribute",
+          owner: user,
+          timestamp: dayjs(Date.now()).toISOString(),
           archived: false,
           description: "An example Attribute",
           values: [

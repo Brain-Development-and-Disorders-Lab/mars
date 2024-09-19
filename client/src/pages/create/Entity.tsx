@@ -111,10 +111,10 @@ const Entity = () => {
 
   const entityState: IEntity = {
     name: name,
+    owner: owner,
     created: created,
     archived: false,
     locked: false,
-    owner: owner,
     description: description,
     associations: {
       origins: selectedOrigins,
@@ -284,7 +284,6 @@ const Entity = () => {
       setActiveStep(2);
     } else if (_.isEqual("attributes", pageState)) {
       setIsSubmitting(true);
-      entityState.timestamp = dayjs(Date.now()).toISOString();
 
       // Execute the GraphQL operation
       const response = await createEntity({
@@ -327,6 +326,8 @@ const Entity = () => {
           return {
             _id: data._id,
             name: data.name,
+            owner: attribute.owner,
+            timestamp: attribute.timestamp,
             archived: false,
             description: data.description,
             values: data.values,
@@ -706,6 +707,8 @@ const Entity = () => {
                               {
                                 _id: `a-${nanoid(6)}`,
                                 name: attribute.name,
+                                timestamp: attribute.timestamp,
+                                owner: attribute.owner,
                                 archived: false,
                                 description: attribute.description,
                                 values: attribute.values,
@@ -738,6 +741,8 @@ const Entity = () => {
                       {
                         _id: `a-${nanoid(6)}`,
                         name: "",
+                        timestamp: dayjs(Date.now()).toISOString(),
+                        owner: owner,
                         archived: false,
                         description: "",
                         values: [],
@@ -765,6 +770,7 @@ const Entity = () => {
                         _id={attribute._id}
                         key={attribute._id}
                         name={attribute.name}
+                        owner={attribute.owner}
                         archived={attribute.archived}
                         description={attribute.description}
                         values={attribute.values}

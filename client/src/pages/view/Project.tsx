@@ -148,6 +148,7 @@ const Project = () => {
         description
         owner
         entities
+        collaborators
       }
       entities {
         _id
@@ -266,11 +267,11 @@ const Project = () => {
       const updateData: ProjectModel = {
         _id: project._id,
         name: projectName,
+        timestamp: project.timestamp,
         archived: projectArchived,
         description: projectDescription,
         owner: project.owner,
         collaborators: projectCollaborators || [],
-        shared: project.shared,
         created: project.created,
         entities: projectEntities,
         history: projectHistory,
@@ -399,11 +400,11 @@ const Project = () => {
     const updateData: ProjectModel = {
       _id: project._id,
       name: projectVersion.name,
+      timestamp: project.timestamp,
       archived: project.archived,
       created: project.created,
       owner: project.owner,
       collaborators: project.collaborators || [],
-      shared: project.shared,
       description: projectVersion.description,
       entities: projectVersion.entities,
       history: project.history,
