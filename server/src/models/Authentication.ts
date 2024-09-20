@@ -3,9 +3,12 @@ import axios, { AxiosResponse } from "axios";
 import { verify } from "jsonwebtoken";
 import { JwksClient } from "jwks-rsa";
 import _ from "lodash";
+
+// Models
 import { Users } from "./Users";
 
 // Variables
+import { DEMO_USER_ORCID } from "src/variables";
 const TOKEN_URL = "https://orcid.org/oauth/token";
 const CLIENT_ID = process.env.CLIENT_ID as string;
 const CLIENT_SECRET = process.env.CLIENT_SECRET as string;
@@ -46,7 +49,7 @@ export class Authentication {
     } else {
       // If non-production, resolve with test user
       authenticationPayload = {
-        orcid: "XXXX-0000-DEMO-1111",
+        orcid: DEMO_USER_ORCID,
         name: "Test User",
         token: "test_token_value",
         workspace: "",
@@ -94,7 +97,7 @@ export class Authentication {
       }
     } else {
       // Return the test user account
-      const user = await Users.getOne("XXXX-0000-DEMO-1111");
+      const user = await Users.getOne(DEMO_USER_ORCID);
       if (user) {
         return user;
       }

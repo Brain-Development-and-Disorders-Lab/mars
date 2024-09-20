@@ -39,6 +39,8 @@ import { Context } from "@types";
 // GraphQL uploads
 import GraphQLUpload from "graphql-upload/GraphQLUpload.mjs";
 import graphqlUploadExpress from "graphql-upload/graphqlUploadExpress.mjs";
+import { Authentication } from "./models/Authentication";
+import { GraphQLError } from "graphql";
 
 // Set logging level
 consola.level =
@@ -142,10 +144,22 @@ const start = async () => {
     }) as RequestHandler,
     expressMiddleware(server, {
       context: async ({ req }): Promise<Context> => {
-        return {
-          user: req.headers.user as string,
-          workspace: req.headers.workspace as string,
-        };
+        const token = (req.headers.token as string) || "";
+
+        try {
+          const user = await Authentication.validate(token);
+          return {
+            user: user._id || "",
+            workspace: (req.headers.workspace as string) || "",
+            token: token,
+          };
+        } catch {
+          throw new GraphQLError("User is not authenticated", {
+            extensions: {
+              code: "UNAUTHENTICATED",
+            },
+          });
+        }
       },
     }),
     helmet(),
