@@ -36,6 +36,7 @@ const authLink = setContext((_, { headers }) => {
     headers: {
       ...headers,
       user: getToken(TOKEN_KEY).orcid,
+      token: getToken(TOKEN_KEY).token,
       workspace: getToken(TOKEN_KEY).workspace,
     },
   };
