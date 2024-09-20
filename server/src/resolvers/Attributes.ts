@@ -26,7 +26,7 @@ export const AttributesResolvers = {
       args: { limit: 100 },
       context: Context,
     ) => {
-      // Check Workspace exists
+      // Retrieve the Workspace to determine which Attributes to return
       const workspace = await Workspaces.getOne(context.workspace);
       if (_.isNull(workspace)) {
         throw new GraphQLError("Workspace does not exist", {
@@ -34,6 +34,19 @@ export const AttributesResolvers = {
             code: "NON_EXIST",
           },
         });
+      } else if (
+        !_.isEqual(workspace.owner, context.user) &&
+        !_.includes(workspace.collaborators, context.user)
+      ) {
+        // Check that the requesting user has access to the Workspace as owner or collaborator
+        throw new GraphQLError(
+          "You do not have permission to access this Workspace",
+          {
+            extensions: {
+              code: "UNAUTHORIZED",
+            },
+          },
+        );
       }
 
       // Filter by ownership and Workspace membership
@@ -49,7 +62,7 @@ export const AttributesResolvers = {
       args: { _id: string },
       context: Context,
     ) => {
-      // Check Workspace exists
+      // Retrieve the Workspace to determine which Attributes to return
       const workspace = await Workspaces.getOne(context.workspace);
       if (_.isNull(workspace)) {
         throw new GraphQLError("Workspace does not exist", {
@@ -57,9 +70,22 @@ export const AttributesResolvers = {
             code: "NON_EXIST",
           },
         });
+      } else if (
+        !_.isEqual(workspace.owner, context.user) &&
+        !_.includes(workspace.collaborators, context.user)
+      ) {
+        // Check that the requesting user has access to the Workspace as owner or collaborator
+        throw new GraphQLError(
+          "You do not have permission to access this Workspace",
+          {
+            extensions: {
+              code: "UNAUTHORIZED",
+            },
+          },
+        );
       }
 
-      // Check Entity exists
+      // Check Attribute exists
       const attribute = await Attributes.getOne(args._id);
       if (_.isNull(attribute)) {
         throw new GraphQLError("Attribute does not exist", {
@@ -84,17 +110,13 @@ export const AttributesResolvers = {
       }
     },
 
-    // Check if an Attribute exists
-    attributeExists: async (_parent: any, args: { _id: string }) => {
-      return await Attributes.exists(args._id);
-    },
-
     // Get collection of Attribute metrics
     attributeMetrics: async (
       _parent: any,
       _args: Record<string, unknown>,
       context: Context,
     ): Promise<AttributeMetrics> => {
+      // Retrieve the Workspace to determine which Attributes to return
       const workspace = await Workspaces.getOne(context.workspace);
       if (_.isNull(workspace)) {
         throw new GraphQLError("Workspace does not exist", {
@@ -102,6 +124,19 @@ export const AttributesResolvers = {
             code: "NON_EXIST",
           },
         });
+      } else if (
+        !_.isEqual(workspace.owner, context.user) &&
+        !_.includes(workspace.collaborators, context.user)
+      ) {
+        // Check that the requesting user has access to the Workspace as owner or collaborator
+        throw new GraphQLError(
+          "You do not have permission to access this Workspace",
+          {
+            extensions: {
+              code: "UNAUTHORIZED",
+            },
+          },
+        );
       }
 
       // Filter by ownership and Workspace membership, then if created in the last 24 hours
@@ -161,6 +196,29 @@ export const AttributesResolvers = {
       args: { attribute: AttributeModel },
       context: Context,
     ) => {
+      // Retrieve the Workspace to determine which Attributes to return
+      const workspace = await Workspaces.getOne(context.workspace);
+      if (_.isNull(workspace)) {
+        throw new GraphQLError("Workspace does not exist", {
+          extensions: {
+            code: "NON_EXIST",
+          },
+        });
+      } else if (
+        !_.isEqual(workspace.owner, context.user) &&
+        !_.includes(workspace.collaborators, context.user)
+      ) {
+        // Check that the requesting user has access to the Workspace as owner or collaborator
+        throw new GraphQLError(
+          "You do not have permission to access this Workspace",
+          {
+            extensions: {
+              code: "UNAUTHORIZED",
+            },
+          },
+        );
+      }
+
       const attribute = await Attributes.getOne(args.attribute._id);
       if (_.isNull(attribute)) {
         throw new GraphQLError("Attribute does not exist", {
@@ -168,6 +226,17 @@ export const AttributesResolvers = {
             code: "NON_EXIST",
           },
         });
+      }
+
+      if (!_.includes(workspace.attributes, args.attribute._id)) {
+        throw new GraphQLError(
+          "You do not have permission to modify this Attribute",
+          {
+            extensions: {
+              code: "UNAUTHORIZED",
+            },
+          },
+        );
       }
 
       // Execute update operation
@@ -200,6 +269,29 @@ export const AttributesResolvers = {
       args: { _id: string; state: boolean },
       context: Context,
     ) => {
+      // Retrieve the Workspace to determine which Attributes to return
+      const workspace = await Workspaces.getOne(context.workspace);
+      if (_.isNull(workspace)) {
+        throw new GraphQLError("Workspace does not exist", {
+          extensions: {
+            code: "NON_EXIST",
+          },
+        });
+      } else if (
+        !_.isEqual(workspace.owner, context.user) &&
+        !_.includes(workspace.collaborators, context.user)
+      ) {
+        // Check that the requesting user has access to the Workspace as owner or collaborator
+        throw new GraphQLError(
+          "You do not have permission to access this Workspace",
+          {
+            extensions: {
+              code: "UNAUTHORIZED",
+            },
+          },
+        );
+      }
+
       const attribute = await Attributes.getOne(args._id);
       if (_.isNull(attribute)) {
         throw new GraphQLError("Attribute does not exist", {
@@ -207,6 +299,17 @@ export const AttributesResolvers = {
             code: "NON_EXIST",
           },
         });
+      }
+
+      if (!_.includes(workspace.attributes, args._id)) {
+        throw new GraphQLError(
+          "You do not have permission to modify the archive state of this Attribute",
+          {
+            extensions: {
+              code: "UNAUTHORIZED",
+            },
+          },
+        );
       }
 
       // Execute archive operation
@@ -240,7 +343,7 @@ export const AttributesResolvers = {
       }
     },
 
-    // Archive an Attribute
+    // Archive multiple Attributes
     archiveAttributes: async (
       _parent: any,
       args: { toArchive: string[]; state: boolean },
@@ -299,6 +402,29 @@ export const AttributesResolvers = {
       args: { _id: string },
       context: Context,
     ) => {
+      // Retrieve the Workspace to determine which Attributes to return
+      const workspace = await Workspaces.getOne(context.workspace);
+      if (_.isNull(workspace)) {
+        throw new GraphQLError("Workspace does not exist", {
+          extensions: {
+            code: "NON_EXIST",
+          },
+        });
+      } else if (
+        !_.isEqual(workspace.owner, context.user) &&
+        !_.includes(workspace.collaborators, context.user)
+      ) {
+        // Check that the requesting user has access to the Workspace as owner or collaborator
+        throw new GraphQLError(
+          "You do not have permission to access this Workspace",
+          {
+            extensions: {
+              code: "UNAUTHORIZED",
+            },
+          },
+        );
+      }
+
       const attribute = await Attributes.getOne(args._id);
       if (_.isNull(attribute)) {
         throw new GraphQLError("Attribute does not exist", {
@@ -306,6 +432,17 @@ export const AttributesResolvers = {
             code: "NON_EXIST",
           },
         });
+      }
+
+      if (!_.includes(workspace.attributes, args._id)) {
+        throw new GraphQLError(
+          "You do not have permission to delete this Attribute",
+          {
+            extensions: {
+              code: "UNAUTHORIZED",
+            },
+          },
+        );
       }
 
       // Execute delete operation

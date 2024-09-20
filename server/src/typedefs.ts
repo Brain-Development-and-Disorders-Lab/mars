@@ -340,7 +340,6 @@ export const typedefs = `#graphql
     # Attribute queries
     attributes(limit: Int): [Attribute]
     attribute(_id: String): Attribute
-    attributeExists(_id: String): Boolean
     attributeMetrics: AttributeMetrics
 
     # Activity queries
@@ -387,9 +386,6 @@ export const typedefs = `#graphql
     archiveProject(_id: String, state: Boolean): Response
     archiveProjects(toArchive: [String], state: Boolean): Response
     deleteProject(_id: String): Response
-    addProjectEntity(_id: String, entity: String): Response
-    addProjectEntities(_id: String, entities: [String]): Response
-    removeProjectEntity(_id: String, entity: String): Response
 
     # Activity mutations
     createActivity(activity: ActivityCreateInput): Response
