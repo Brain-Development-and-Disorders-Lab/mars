@@ -24,6 +24,7 @@ import { useLocation, useSearchParams } from "react-router-dom";
 import { gql, useLazyQuery, useMutation } from "@apollo/client";
 import { useToken } from "src/authentication/useToken";
 import _ from "lodash";
+import consola from "consola";
 
 // Existing and custom types
 import { LoginProps, ResponseMessage, UserModel, WorkspaceModel } from "@types";
@@ -173,6 +174,8 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
         ...loginResponse.data.login,
         workspace: "",
       });
+
+      consola.info("Received login data:", loginResponse);
 
       // Retrieve all Workspaces and update the token if Workspaces exist
       const workspacesResponse = await getWorkspaces();
