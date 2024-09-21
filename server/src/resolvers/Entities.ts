@@ -324,6 +324,9 @@ export const EntitiesResolvers = {
 
         // Create new Activity if successful
         if (result.success) {
+          // Add history to Entity
+          await Entities.addHistory(entity);
+
           const activity = await Activity.create({
             timestamp: dayjs(Date.now()).toISOString(),
             type: "update",

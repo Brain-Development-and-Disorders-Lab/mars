@@ -1,6 +1,7 @@
 // Custom types
 import {
   AttributeModel,
+  EntityHistory,
   EntityModel,
   IEntity,
   IGenericItem,
@@ -13,6 +14,10 @@ import { Projects } from "./Projects";
 // Custom functions
 import { getDatabase } from "../connectors/database";
 import { getIdentifier } from "../util";
+
+// Generate history version IDs
+import { customAlphabet } from "nanoid";
+const nanoid = customAlphabet("1234567890abcdef", 10);
 
 // External libraries
 import _ from "lodash";
@@ -271,6 +276,60 @@ export class Entities {
         response.modifiedCount == 1
           ? "Updated Entity"
           : "No changes made to Entity",
+    };
+  };
+
+  /**
+   * Add a history entry to an Entity based on provided Entity state
+   * @param historyEntity Existing Entity state to add to Entity history
+   * @return {Promise<ResponseMessage>}
+   */
+  static addHistory = async (
+    historyEntity: EntityModel,
+  ): Promise<ResponseMessage> => {
+    const entity = await Entities.getOne(historyEntity._id);
+    if (_.isNull(entity)) {
+      return {
+        success: false,
+        message: "Entity not found",
+      };
+    }
+
+    const historyEntityModel: EntityHistory = {
+      _id: historyEntity._id,
+      timestamp: dayjs(Date.now()).toISOString(), // Timestamp on history creation
+      version: nanoid(),
+      name: historyEntity.name,
+      owner: historyEntity.owner,
+      archived: historyEntity.archived,
+      locked: historyEntity.locked,
+      created: historyEntity.created,
+      description: historyEntity.description,
+      projects: historyEntity.projects,
+      associations: historyEntity.associations,
+      attributes: historyEntity.attributes,
+      attachments: historyEntity.attachments,
+    };
+
+    const update: { $set: Partial<EntityModel> } = {
+      $set: {
+        history: [historyEntityModel, ...entity.history],
+      },
+    };
+
+    const response = await getDatabase()
+      .collection<EntityModel>(ENTITIES_COLLECTION)
+      .updateOne({ _id: historyEntity._id }, update);
+    if (response.modifiedCount > 0) {
+      consola.info("Added history to Entity:", historyEntity._id);
+    }
+
+    return {
+      success: true,
+      message:
+        response.modifiedCount === 1
+          ? "Added history to Entity"
+          : "No history added to Entity",
     };
   };
 

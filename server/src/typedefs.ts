@@ -186,12 +186,18 @@ export const typedefs = `#graphql
 
   # "EntityHistory" type storing iterations of an Entity
   type EntityHistory {
+    _id: String!
     timestamp: String
-    archived: Boolean
+    version: String!
+    name: String
     owner: String
+    archived: Boolean
+    locked: Boolean
+    created: String
     description: String
     projects: [String]
     associations: Associations
+    attachments: [Item]
     attributes: [Attribute]
   }
 

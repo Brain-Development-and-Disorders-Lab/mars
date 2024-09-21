@@ -179,7 +179,7 @@ export type IEntity = {
   };
   attributes: AttributeModel[];
   attachments: IGenericItem[];
-  history?: EntityHistory[];
+  history: EntityHistory[];
 };
 
 export type EntityModel = IEntity & {
@@ -195,10 +195,14 @@ export type EntityNode = IGenericItem & {
 };
 
 export type EntityHistory = {
+  _id: string;
   timestamp: string;
-  archived: boolean;
+  version: string;
   name: string;
   owner: string;
+  archived: boolean;
+  locked: boolean;
+  created: string;
   description: string;
   projects: string[];
   associations: {
