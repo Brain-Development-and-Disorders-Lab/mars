@@ -33,7 +33,6 @@ import {
   DrawerOverlay,
   DrawerContent,
   DrawerCloseButton,
-  DrawerFooter,
   DrawerBody,
   DrawerHeader,
   VStack,
@@ -54,6 +53,7 @@ import {
   Tab,
   TabPanel,
   TabPanels,
+  CardFooter,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
@@ -220,6 +220,11 @@ const Entity = () => {
           name
         }
         history {
+          _id
+          version
+          name
+          locked
+          created
           timestamp
           archived
           owner
@@ -245,6 +250,10 @@ const Entity = () => {
               type
               data
             }
+          }
+          attachments {
+            _id
+            name
           }
         }
       }
@@ -691,7 +700,7 @@ const Entity = () => {
     originTableColumnHelper.accessor("name", {
       cell: (info) => {
         return (
-          <Tooltip label={info.getValue()}>
+          <Tooltip label={info.getValue()} hasArrow>
             <Text>
               {_.truncate(info.getValue(), {
                 length: truncateTableText ? 12 : 24,
@@ -754,7 +763,7 @@ const Entity = () => {
     productTableColumnHelper.accessor("name", {
       cell: (info) => {
         return (
-          <Tooltip label={info.getValue()}>
+          <Tooltip label={info.getValue()} hasArrow>
             <Text>
               {_.truncate(info.getValue(), {
                 length: truncateTableText ? 12 : 24,
@@ -817,7 +826,7 @@ const Entity = () => {
     attributeTableColumnHelper.accessor("name", {
       cell: (info) => {
         return (
-          <Tooltip label={info.getValue()}>
+          <Tooltip label={info.getValue()} hasArrow>
             <Text>
               {_.truncate(info.getValue(), {
                 length: truncateTableText ? 12 : 24,
@@ -831,7 +840,7 @@ const Entity = () => {
     attributeTableColumnHelper.accessor("description", {
       cell: (info) => {
         return (
-          <Tooltip label={info.getValue()}>
+          <Tooltip label={info.getValue()} hasArrow>
             <Text>{_.truncate(info.getValue(), { length: 12 })}</Text>
           </Tooltip>
         );
@@ -845,7 +854,7 @@ const Entity = () => {
           .map((value) => value.name)
           .join(", ")}${info.row.original.values.length > 5 ? "..." : ""}`;
         return (
-          <Tooltip label={tooltipLabelValue}>
+          <Tooltip label={tooltipLabelValue} hasArrow>
             <Tag colorScheme={"purple"}>{info.row.original.values.length}</Tag>
           </Tooltip>
         );
@@ -893,7 +902,7 @@ const Entity = () => {
     attachmentTableColumnHelper.accessor("name", {
       cell: (info) => {
         return (
-          <Tooltip label={info.getValue()}>
+          <Tooltip label={info.getValue()} hasArrow>
             <Text>
               {_.truncate(info.getValue(), {
                 length: truncateTableText ? 12 : 24,
@@ -1380,7 +1389,10 @@ const Entity = () => {
             ) : (
               <Flex gap={"2"}>
                 {entityData.locked ? (
-                  <Tooltip label={"Currently being edited by another user"}>
+                  <Tooltip
+                    label={"Currently being edited by another user"}
+                    hasArrow
+                  >
                     <Button
                       colorScheme={"blue"}
                       size={"sm"}
@@ -1409,6 +1421,16 @@ const Entity = () => {
               </Flex>
             )}
 
+            {/* History button */}
+            <Button
+              size={"sm"}
+              colorScheme={"green"}
+              rightIcon={<Icon name={"clock"} />}
+              onClick={onHistoryOpen}
+            >
+              History
+            </Button>
+
             {/* Actions Menu */}
             <Menu>
               <MenuButton
@@ -1429,12 +1451,6 @@ const Entity = () => {
                   isDisabled={editing || entityArchived}
                 >
                   Visualize
-                </MenuItem>
-                <MenuItem
-                  icon={<Icon name={"clock"} />}
-                  onClick={onHistoryOpen}
-                >
-                  History
                 </MenuItem>
                 <MenuItem
                   onClick={handleExportClick}
@@ -2550,25 +2566,268 @@ const Entity = () => {
         <Drawer
           isOpen={isHistoryOpen}
           placement={"right"}
+          size={"md"}
           onClose={onHistoryClose}
         >
           <DrawerOverlay />
           <DrawerContent>
             <DrawerCloseButton />
-            <DrawerHeader>Version History</DrawerHeader>
-
+            <DrawerHeader>
+              <Flex direction={"row"} w={"100%"} gap={"2"}>
+                <Heading size={"md"} fontWeight={"semibold"}>
+                  Entity History
+                </Heading>
+                <Spacer />
+                <Flex direction={"column"} gap={"1"}>
+                  <Text fontSize={"sm"}>Versions: {entityHistory.length}</Text>
+                  <Text fontSize={"sm"}>
+                    Last modified:{" "}
+                    {entityHistory.length > 0
+                      ? dayjs(entityHistory[0].timestamp).fromNow()
+                      : "never"}
+                  </Text>
+                </Flex>
+              </Flex>
+            </DrawerHeader>
             <DrawerBody>
               <VStack spacing={"4"}>
-                {entityHistory && entityHistory.length > 0 ? (
+                {entityHistory.length > 0 ? (
                   entityHistory.map((entityVersion) => {
                     return (
-                      <Card w={"100%"} key={`v_${entityVersion.timestamp}`}>
-                        <CardHeader>
-                          <Flex align={"center"}>
-                            <Text fontStyle={"italic"}>
-                              {dayjs(entityVersion.timestamp).fromNow()}
+                      <Card
+                        w={"100%"}
+                        key={`v_${entityVersion.timestamp}`}
+                        variant={"simple"}
+                        rounded={"md"}
+                        border={"1px"}
+                        borderColor={"gray.300"}
+                      >
+                        <CardHeader p={"0"}>
+                          <Flex w={"100%"} align={"center"} gap={"2"} p={"2"}>
+                            <Text
+                              fontWeight={"semibold"}
+                              fontSize={"md"}
+                              color={"gray.700"}
+                            >
+                              {entityVersion.name}
                             </Text>
                             <Spacer />
+                            <Flex
+                              direction={"column"}
+                              gap={"1"}
+                              justify={"right"}
+                            >
+                              <Text
+                                fontWeight={"semibold"}
+                                fontSize={"sm"}
+                                color={"gray.700"}
+                              >
+                                {entityVersion.version}
+                              </Text>
+                              <Text
+                                fontWeight={"semibold"}
+                                fontSize={"sm"}
+                                color={"gray.400"}
+                              >
+                                {dayjs(entityVersion.timestamp).fromNow()}
+                              </Text>
+                            </Flex>
+                          </Flex>
+                        </CardHeader>
+                        <CardBody px={"2"} py={"0"}>
+                          <Flex
+                            direction={"column"}
+                            gap={"1"}
+                            p={"2"}
+                            rounded={"md"}
+                            border={"1px"}
+                            borderColor={"gray.300"}
+                          >
+                            <Flex
+                              direction={"row"}
+                              wrap={"wrap"}
+                              gap={"2"}
+                              align={"center"}
+                            >
+                              <Text fontSize={"sm"} fontWeight={"semibold"}>
+                                Description:
+                              </Text>
+                              <Tooltip
+                                label={entityVersion.description}
+                                isDisabled={_.isEqual(
+                                  entityVersion.description,
+                                  "",
+                                )}
+                                hasArrow
+                              >
+                                <Text fontSize={"sm"}>
+                                  {_.isEqual(entityVersion.description, "")
+                                    ? "None"
+                                    : _.truncate(entityVersion.description, {
+                                        length: 56,
+                                      })}
+                                </Text>
+                              </Tooltip>
+                            </Flex>
+                            <Flex
+                              direction={"row"}
+                              wrap={"wrap"}
+                              gap={"2"}
+                              align={"center"}
+                            >
+                              <Text fontSize={"sm"} fontWeight={"semibold"}>
+                                Projects:
+                              </Text>
+                              {entityVersion.projects.length > 0 ? (
+                                <Flex
+                                  direction={"row"}
+                                  gap={"2"}
+                                  align={"center"}
+                                >
+                                  <Tag
+                                    key={`v_c_${entityVersion.timestamp}_${entityVersion.projects[0]}`}
+                                    size={"sm"}
+                                  >
+                                    <TagLabel>
+                                      <Linky
+                                        type={"projects"}
+                                        id={entityVersion.projects[0]}
+                                        size={"sm"}
+                                      />
+                                    </TagLabel>
+                                  </Tag>
+                                  {entityVersion.projects.length > 1 && (
+                                    <Text
+                                      fontWeight={"semibold"}
+                                      fontSize={"sm"}
+                                    >
+                                      and {entityVersion.projects.length - 1}{" "}
+                                      others
+                                    </Text>
+                                  )}
+                                </Flex>
+                              ) : (
+                                <Text fontSize={"sm"}>No Projects</Text>
+                              )}
+                            </Flex>
+                            <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
+                              <Text fontWeight={"semibold"} fontSize={"sm"}>
+                                Origins:
+                              </Text>
+                              <Tag
+                                key={`v_o_${entityVersion.timestamp}`}
+                                size={"sm"}
+                              >
+                                <TagLabel>
+                                  {entityVersion?.associations?.origins?.length}
+                                </TagLabel>
+                              </Tag>
+                            </Flex>
+                            <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
+                              <Text fontWeight={"semibold"} fontSize={"sm"}>
+                                Products:
+                              </Text>
+                              <Tag
+                                key={`v_o_${entityVersion.timestamp}`}
+                                size={"sm"}
+                              >
+                                <TagLabel>
+                                  {
+                                    entityVersion?.associations?.products
+                                      ?.length
+                                  }
+                                </TagLabel>
+                              </Tag>
+                            </Flex>
+                            <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
+                              <Text fontSize={"sm"} fontWeight={"semibold"}>
+                                Attributes:
+                              </Text>
+                              {entityVersion.attributes.length > 0 ? (
+                                <Flex
+                                  direction={"row"}
+                                  gap={"2"}
+                                  align={"center"}
+                                >
+                                  <Tooltip
+                                    label={
+                                      "Values: " +
+                                      entityVersion.attributes[0].values.length
+                                    }
+                                    hasArrow
+                                  >
+                                    <Tag
+                                      key={`v_a_${entityVersion.timestamp}_${entityVersion.attributes[0]._id}`}
+                                      size={"sm"}
+                                    >
+                                      <TagLabel>
+                                        {entityVersion.attributes[0].name}
+                                      </TagLabel>
+                                    </Tag>
+                                  </Tooltip>
+                                  {entityVersion.attributes.length > 1 && (
+                                    <Text fontSize={"sm"}>
+                                      and {entityVersion.attributes.length - 1}{" "}
+                                      other
+                                      {entityVersion.attributes.length > 2
+                                        ? "s"
+                                        : ""}
+                                    </Text>
+                                  )}
+                                </Flex>
+                              ) : (
+                                <Text fontSize={"sm"}>None</Text>
+                              )}
+                            </Flex>
+                            <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
+                              <Text fontSize={"sm"} fontWeight={"semibold"}>
+                                Attachments:
+                              </Text>
+                              {entityVersion.attachments.length > 0 ? (
+                                <Flex
+                                  direction={"row"}
+                                  gap={"2"}
+                                  align={"center"}
+                                >
+                                  <Tooltip
+                                    label={entityVersion.attachments[0].name}
+                                    hasArrow
+                                  >
+                                    <Tag
+                                      key={`v_at_${entityVersion.timestamp}_${entityVersion.attachments[0]._id}`}
+                                      size={"sm"}
+                                    >
+                                      <TagLabel>
+                                        {_.truncate(
+                                          entityVersion.attachments[0].name,
+                                          { length: 24 },
+                                        )}
+                                      </TagLabel>
+                                    </Tag>
+                                  </Tooltip>
+                                  {entityVersion.attachments.length > 1 && (
+                                    <Text fontSize={"sm"}>
+                                      and {entityVersion.attachments.length - 1}{" "}
+                                      other
+                                      {entityVersion.attachments.length > 2
+                                        ? "s"
+                                        : ""}
+                                    </Text>
+                                  )}
+                                </Flex>
+                              ) : (
+                                <Text fontSize={"sm"}>None</Text>
+                              )}
+                            </Flex>
+                          </Flex>
+                        </CardBody>
+                        <CardFooter p={"0"}>
+                          <Flex
+                            w={"100%"}
+                            justify={"right"}
+                            align={"center"}
+                            p={"2"}
+                          >
                             <Button
                               colorScheme={"orange"}
                               size={"sm"}
@@ -2581,76 +2840,7 @@ const Entity = () => {
                               Restore
                             </Button>
                           </Flex>
-                        </CardHeader>
-                        <CardBody>
-                          <VStack gap={"1"} align={"baseline"}>
-                            <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
-                              <Text fontWeight={"bold"}>Description:</Text>
-                              <Text noOfLines={2}>
-                                {_.isEqual(entityVersion.description, "")
-                                  ? "None"
-                                  : entityVersion.description}
-                              </Text>
-                            </Flex>
-                            <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
-                              <Text fontWeight={"bold"}>Projects:</Text>
-                              {entityVersion.projects.length > 0 ? (
-                                entityVersion.projects.map((project) => {
-                                  return (
-                                    <Tag
-                                      key={`v_c_${entityVersion.timestamp}_${project}`}
-                                    >
-                                      <TagLabel>
-                                        <Linky
-                                          type={"projects"}
-                                          id={project}
-                                          size={"sm"}
-                                        />
-                                      </TagLabel>
-                                    </Tag>
-                                  );
-                                })
-                              ) : (
-                                <Text>None</Text>
-                              )}
-                            </Flex>
-                            <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
-                              <Text fontWeight={"bold"}>Attributes:</Text>
-                              {entityVersion.attributes.length > 0 ? (
-                                entityVersion.attributes.map((attribute) => {
-                                  return (
-                                    <Tag
-                                      key={`v_a_${entityVersion.timestamp}_${attribute._id}`}
-                                    >
-                                      <TagLabel>{attribute.name}</TagLabel>
-                                    </Tag>
-                                  );
-                                })
-                              ) : (
-                                <Text>None</Text>
-                              )}
-                            </Flex>
-                            <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
-                              <Text fontWeight={"bold"}>Origins:</Text>
-                              <Tag key={`v_o_${entityVersion.timestamp}`}>
-                                <TagLabel>
-                                  {entityVersion?.associations?.origins?.length}
-                                </TagLabel>
-                              </Tag>
-                            </Flex>
-                            <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
-                              <Text fontWeight={"bold"}>Products:</Text>
-                              <Tag key={`v_o_${entityVersion.timestamp}`}>
-                                <TagLabel>
-                                  {
-                                    entityVersion?.associations?.products
-                                      ?.length
-                                  }
-                                </TagLabel>
-                              </Tag>
-                            </Flex>
-                          </VStack>
-                        </CardBody>
+                        </CardFooter>
                       </Card>
                     );
                   })
@@ -2659,17 +2849,6 @@ const Entity = () => {
                 )}
               </VStack>
             </DrawerBody>
-
-            <DrawerFooter>
-              <Button
-                colorScheme={"red"}
-                size={"sm"}
-                onClick={onHistoryClose}
-                rightIcon={<Icon name={"cross"} />}
-              >
-                Close
-              </Button>
-            </DrawerFooter>
           </DrawerContent>
         </Drawer>
       </Flex>

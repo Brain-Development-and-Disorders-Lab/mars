@@ -51,7 +51,21 @@ export const typedefs = `#graphql
     collaborators: [String]
     created: String
     entities: [String]
-    # To-Do: History
+    history: [ProjectHistory]
+  }
+
+  # "ProjectHistory" type storing iterations of an Entity
+  type ProjectHistory {
+    _id: String!
+    name: String
+    timestamp: String
+    version: String!
+    owner: String
+    collaborators: [String]
+    archived: Boolean
+    created: String
+    description: String
+    entities: [String]
   }
 
   # "ProjectCreateInput" type
@@ -63,7 +77,6 @@ export const typedefs = `#graphql
     created: String!
     entities: [String]!
     collaborators: [String]!
-    # To-Do: History
   }
 
   # "ProjectUpdateInput" type
@@ -76,7 +89,6 @@ export const typedefs = `#graphql
     collaborators: [String]
     created: String
     entities: [String]
-    # To-Do: History
   }
 
   # "Value" type
@@ -186,12 +198,18 @@ export const typedefs = `#graphql
 
   # "EntityHistory" type storing iterations of an Entity
   type EntityHistory {
+    _id: String!
     timestamp: String
-    archived: Boolean
+    version: String!
+    name: String
     owner: String
+    archived: Boolean
+    locked: Boolean
+    created: String
     description: String
     projects: [String]
     associations: Associations
+    attachments: [Item]
     attributes: [Attribute]
   }
 

@@ -204,7 +204,7 @@ const User = () => {
     workspacesTableColumnHelper.accessor("name", {
       cell: (info) => {
         return (
-          <Tooltip label={info.getValue()}>
+          <Tooltip label={info.getValue()} hasArrow>
             <Text>
               {_.truncate(info.getValue(), {
                 length: truncateTableText ? 12 : 24,
@@ -221,6 +221,7 @@ const User = () => {
           <Tooltip
             label={"You cannot leave your only Workspace"}
             isDisabled={userWorkspaces.length > 1}
+            hasArrow
           >
             <Flex w={"100%"} justify={"end"} p={"0.5"}>
               <IconButton

@@ -349,6 +349,7 @@ describe("Entity model", () => {
       description: "Test Project",
       entities: [],
       collaborators: [],
+      history: [],
     });
 
     let project = (await Projects.all())[0];

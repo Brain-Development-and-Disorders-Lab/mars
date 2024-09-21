@@ -332,7 +332,7 @@ const Values = (props: {
                   }
 
                   dataInput = (
-                    <Tooltip label={tooltipText}>
+                    <Tooltip label={tooltipText} hasArrow>
                       <Flex
                         direction={"row"}
                         align={"center"}

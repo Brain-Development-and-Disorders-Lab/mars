@@ -542,7 +542,7 @@ const Dashboard = () => {
                         key={`activity-${activity._id}`}
                         align={"center"}
                       >
-                        <Tooltip label={activity.actor}>
+                        <Tooltip label={activity.actor} hasArrow>
                           <Avatar name={activity.actor} size={"sm"} />
                         </Tooltip>
                         <Flex direction={"column"} w={"100%"}>
