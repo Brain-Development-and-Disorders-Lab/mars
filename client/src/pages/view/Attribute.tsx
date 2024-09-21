@@ -307,7 +307,6 @@ const Attribute = () => {
                 Actions
               </MenuButton>
               <MenuList>
-                <MenuItem icon={<Icon name={"clock"} />}>History</MenuItem>
                 <MenuItem
                   icon={<Icon name={"download"} />}
                   isDisabled={editing || attributeArchived}

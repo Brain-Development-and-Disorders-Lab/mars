@@ -123,6 +123,7 @@ const Entity = () => {
     projects: selectedProjects,
     attributes: selectedAttributes,
     attachments: [],
+    history: [],
   };
 
   // Various validation error states

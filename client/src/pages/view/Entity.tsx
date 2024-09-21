@@ -1279,6 +1279,7 @@ const Entity = () => {
         archived: false,
         description: attributeDescription,
         values: attributeValues,
+        history: [],
       },
     ]);
     onAddAttributesClose();

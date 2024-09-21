@@ -90,6 +90,7 @@ const Project = () => {
     created: created,
     entities: [],
     collaborators: [],
+    history: [],
   };
 
   return (
