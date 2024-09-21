@@ -110,11 +110,11 @@ export class Projects {
     // Entities to add and remove
     if (!_.isUndefined(updated.entities)) {
       const toAdd = _.difference(updated.entities, project.entities);
-      for (const entity of toAdd) {
+      for await (const entity of toAdd) {
         await Entities.addProject(entity, project._id);
       }
       const toRemove = _.difference(project.entities, updated.entities);
-      for (const entity of toRemove) {
+      for await (const entity of toRemove) {
         await Entities.removeProject(entity, project._id);
       }
       update.$set.entities = updated.entities;
@@ -235,7 +235,7 @@ export class Projects {
     const project = await Projects.getOne(_id);
     // Remove Entities from Project
     if (project) {
-      for (const entity of project.entities) {
+      for await (const entity of project.entities) {
         await Entities.removeProject(entity, project._id);
       }
     }
@@ -432,13 +432,25 @@ export class Projects {
     }
 
     const entityData = [];
-    for (const entity of project.entities) {
+    for await (const entity of project.entities) {
       const result = await Entities.getOne(entity);
 
       // Remove the history component
-      delete (result as EntityModel)["history"];
+      const entityHistoryRemoved: Partial<EntityModel> = {
+        _id: result?._id,
+        name: result?.name,
+        timestamp: result?.timestamp,
+        owner: result?.owner,
+        archived: result?.archived,
+        created: result?.created,
+        description: result?.description,
+        projects: result?.projects,
+        associations: result?.associations,
+        attributes: result?.attributes,
+        attachments: result?.attachments,
+      };
 
-      entityData.push(result);
+      entityData.push(entityHistoryRemoved);
     }
 
     return JSON.stringify(entityData, null, "  ");

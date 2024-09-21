@@ -166,7 +166,7 @@ export const EntitiesResolvers = {
       const authorizedEntities = [];
 
       // Ensure only Entities the user is authorized to access are exported
-      for (const entity of args.entities) {
+      for await (const entity of args.entities) {
         const result = await Entities.getOne(entity);
         if (result && _.includes(workspace.entities, entity)) {
           authorizedEntities.push(entity);

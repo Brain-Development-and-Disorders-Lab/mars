@@ -105,7 +105,7 @@ export class Entities {
       ...entity, // Unpack existing IEntity fields
     };
 
-    for (const origin of entity.associations.origins) {
+    for await (const origin of entity.associations.origins) {
       // Add new Entity as a Product
       await Entities.addProduct(origin._id, {
         _id: joinedEntity._id,
@@ -113,7 +113,7 @@ export class Entities {
       });
     }
 
-    for (const product of entity.associations.products) {
+    for await (const product of entity.associations.products) {
       // Add new Entity as an Origin
       await Entities.addOrigin(product._id, {
         _id: joinedEntity._id,
@@ -121,7 +121,7 @@ export class Entities {
       });
     }
 
-    for (const project of entity.projects) {
+    for await (const project of entity.projects) {
       // Add Entity to Project
       await Projects.addEntity(project, joinedEntity._id);
     }
@@ -178,12 +178,12 @@ export class Entities {
     // Projects
     if (!_.isUndefined(updated.projects)) {
       const addProjects = _.difference(updated.projects, entity.projects);
-      for (const project of addProjects) {
+      for await (const project of addProjects) {
         await this.addProject(updated._id, project);
         await Projects.addEntity(project, updated._id);
       }
       const removeProjects = _.difference(entity.projects, updated.projects);
-      for (const project of removeProjects) {
+      for await (const project of removeProjects) {
         await this.removeProject(updated._id, project);
         await Projects.removeEntity(project, updated._id);
       }
@@ -199,7 +199,7 @@ export class Entities {
         updated.associations.origins,
         entity.associations.origins,
       );
-      for (const origin of addOrigins) {
+      for await (const origin of addOrigins) {
         await this.addOrigin(updated._id, origin);
         await this.addProduct(origin._id, {
           _id: updated._id,
@@ -210,7 +210,7 @@ export class Entities {
         entity.associations.origins,
         updated.associations.origins,
       );
-      for (const origin of removeOrigins) {
+      for await (const origin of removeOrigins) {
         await this.removeOrigin(updated._id, origin);
         await this.removeProduct(origin._id, {
           _id: updated._id,
@@ -229,7 +229,7 @@ export class Entities {
         updated.associations.products,
         entity.associations.products,
       );
-      for (const product of addProducts) {
+      for await (const product of addProducts) {
         await this.addProduct(updated._id, product);
         await this.addOrigin(product._id, {
           _id: updated._id,
@@ -240,7 +240,7 @@ export class Entities {
         entity.associations.products,
         updated.associations.products,
       );
-      for (const product of removeProducts) {
+      for await (const product of removeProducts) {
         await this.removeProduct(updated._id, product);
         await this.removeOrigin(product._id, {
           _id: updated._id,
@@ -253,14 +253,14 @@ export class Entities {
     // Attributes
     if (!_.isUndefined(updated.attributes)) {
       const addAttributes = _.difference(updated.attributes, entity.attributes);
-      for (const attribute of addAttributes) {
+      for await (const attribute of addAttributes) {
         await this.addAttribute(updated._id, attribute);
       }
       const removeAttributes = _.difference(
         entity.attributes,
         updated.attributes,
       );
-      for (const attribute of removeAttributes) {
+      for await (const attribute of removeAttributes) {
         await this.removeAttribute(updated._id, attribute._id);
       }
       update.$set.attributes = updated.attributes;
@@ -386,7 +386,7 @@ export class Entities {
     const entity = await Entities.getOne(_id);
     if (entity) {
       // Remove Origins
-      for (const origin of entity.associations.origins) {
+      for await (const origin of entity.associations.origins) {
         await Entities.removeProduct(origin._id, {
           _id: entity._id,
           name: entity.name,
@@ -394,7 +394,7 @@ export class Entities {
       }
 
       // Remove Products
-      for (const product of entity.associations.products) {
+      for await (const product of entity.associations.products) {
         await Entities.removeOrigin(product._id, {
           _id: entity._id,
           name: entity.name,
@@ -402,7 +402,7 @@ export class Entities {
       }
 
       // Remove Projects
-      for (const project of entity.projects) {
+      for await (const project of entity.projects) {
         await Projects.removeEntity(project, entity._id);
       }
     }
@@ -999,22 +999,22 @@ export class Entities {
         exportFields = ["created", "owner", "description"];
 
         // Iterate and generate fields for Origins, Products, Projects, and Attributes
-        for (const origin of entity.associations.origins) {
+        for await (const origin of entity.associations.origins) {
           exportFields.push(`origin_${origin._id}`);
         }
-        for (const product of entity.associations.products) {
+        for await (const product of entity.associations.products) {
           exportFields.push(`product_${product._id}`);
         }
-        for (const project of entity.projects) {
+        for await (const project of entity.projects) {
           exportFields.push(`project_${project}`);
         }
-        for (const attribute of entity.attributes) {
+        for await (const attribute of entity.attributes) {
           exportFields.push(`attribute_${attribute._id}`);
         }
       }
 
       // Iterate through the list of "fields" and create row representation
-      for (const field of exportFields) {
+      for await (const field of exportFields) {
         if (_.isEqual(field, "created")) {
           headers.push("Created");
           row.push(dayjs(entity.created).format("DD MMM YYYY").toString());
@@ -1082,7 +1082,7 @@ export class Entities {
    */
   static exportMany = async (entities: string[]): Promise<string> => {
     const collection = [];
-    for (const entity of entities) {
+    for await (const entity of entities) {
       const result = await Entities.getOne(entity);
       if (result) {
         collection.push(result);
