@@ -1,19 +1,37 @@
-import { ResponseMessage, UserModel } from "@types";
+import { Context, ResponseMessage, UserModel } from "@types";
+
+// Models
+import { Authentication } from "src/models/Authentication";
 import { Users } from "src/models/Users";
 
 export const UsersResolvers = {
   Query: {
     // Retrieve all Users
-    users: async () => await Users.all(),
+    users: async (_parent: any, _args: any, context: Context) => {
+      // Authenticate the provided context
+      await Authentication.authenticate(context);
+
+      return await Users.all();
+    },
 
     // Retrieve one User by _id
-    user: async (_parent: any, args: { _id: string }) => {
+    user: async (_parent: any, args: { _id: string }, context: Context) => {
+      // Authenticate the provided context
+      await Authentication.authenticate(context);
+
       return await Users.getOne(args._id);
     },
   },
   Mutation: {
     // Create a User
-    createUser: async (_parent: any, args: { user: UserModel }) => {
+    createUser: async (
+      _parent: any,
+      args: { user: UserModel },
+      context: Context,
+    ) => {
+      // Authenticate the provided context
+      await Authentication.authenticate(context);
+
       return await Users.create(args.user);
     },
 
@@ -21,7 +39,11 @@ export const UsersResolvers = {
     updateUser: async (
       _parent: any,
       args: { user: UserModel },
+      context: Context,
     ): Promise<ResponseMessage> => {
+      // Authenticate the provided context
+      await Authentication.authenticate(context);
+
       return await Users.update(args.user);
     },
   },

@@ -144,22 +144,12 @@ const start = async () => {
     }) as RequestHandler,
     expressMiddleware(server, {
       context: async ({ req }): Promise<Context> => {
-        const token = (req.headers.token as string) || "";
-
-        try {
-          const user = await Authentication.validate(token);
-          return {
-            user: user._id || "",
-            workspace: (req.headers.workspace as string) || "",
-            token: token,
-          };
-        } catch {
-          throw new GraphQLError("User is not authenticated", {
-            extensions: {
-              code: "UNAUTHENTICATED",
-            },
-          });
-        }
+        // Extract values from headers and create Context value
+        return {
+          user: (req.headers.user as string) || "",
+          workspace: (req.headers.workspace as string) || "",
+          token: (req.headers.token as string) || "",
+        };
       },
     }),
     helmet(),

@@ -4,6 +4,7 @@ import { Context, IActivity, ResponseMessage } from "@types";
 // Models
 import { Activity } from "../models/Activity";
 import { Workspaces } from "../models/Workspaces";
+import { Authentication } from "src/models/Authentication";
 
 import _ from "lodash";
 import { GraphQLError } from "graphql/index";
@@ -12,6 +13,10 @@ export const ActivityResolvers = {
   Query: {
     // Retrieve all Activity
     activity: async (_parent: any, args: { limit: 100 }, context: Context) => {
+      // Authenticate the provided context
+      await Authentication.authenticate(context);
+
+      // Retrieve the Workspace to determine which Entities to return
       const workspace = await Workspaces.getOne(context.workspace);
       if (_.isNull(workspace)) {
         throw new GraphQLError("Workspace does not exist", {
@@ -32,6 +37,9 @@ export const ActivityResolvers = {
       args: { activity: IActivity },
       context: Context,
     ): Promise<ResponseMessage> => {
+      // Authenticate the provided context
+      await Authentication.authenticate(context);
+
       // Apply the create operation
       const result = await Activity.create(args.activity);
 
