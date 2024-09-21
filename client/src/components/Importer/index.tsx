@@ -713,6 +713,7 @@ const Importer = (props: {
                         label={
                           "Initially, only you will have access to imported Entities"
                         }
+                        hasArrow
                       >
                         <Input
                           value={ownerField}
@@ -773,6 +774,7 @@ const Importer = (props: {
                             ? "Select an existing Template Attribute"
                             : "No Template Attributes exist yet"
                         }
+                        hasArrow
                       >
                         <Select
                           size={"sm"}

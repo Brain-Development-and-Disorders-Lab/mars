@@ -461,7 +461,7 @@ const Workspace = () => {
     entitiesTableColumnHelper.accessor("name", {
       cell: (info) => {
         return (
-          <Tooltip label={info.getValue()}>
+          <Tooltip label={info.getValue()} hasArrow>
             <Text>
               {_.truncate(info.getValue(), {
                 length: truncateTableText ? 12 : 24,
@@ -516,7 +516,7 @@ const Workspace = () => {
     projectsTableColumnHelper.accessor("name", {
       cell: (info) => {
         return (
-          <Tooltip label={info.getValue()}>
+          <Tooltip label={info.getValue()} hasArrow>
             <Text>
               {_.truncate(info.getValue(), {
                 length: truncateTableText ? 12 : 24,
@@ -571,7 +571,7 @@ const Workspace = () => {
     attributesTableColumnHelper.accessor("name", {
       cell: (info) => {
         return (
-          <Tooltip label={info.getValue()}>
+          <Tooltip label={info.getValue()} hasArrow>
             <Text>
               {_.truncate(info.getValue(), {
                 length: truncateTableText ? 12 : 24,

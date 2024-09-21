@@ -282,7 +282,7 @@ const WorkspaceSwitcher = () => {
                       align={"center"}
                       justify={"space-between"}
                     >
-                      <Tooltip label={accessible.name}>
+                      <Tooltip label={accessible.name} hasArrow>
                         <Text fontSize={"sm"} fontWeight={"semibold"}>
                           {_.truncate(accessible.name, { length: 24 })}
                         </Text>

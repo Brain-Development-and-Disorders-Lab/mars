@@ -107,7 +107,7 @@ const Entities = () => {
     columnHelper.accessor("name", {
       cell: (info) => {
         return (
-          <Tooltip label={info.getValue()}>
+          <Tooltip label={info.getValue()} hasArrow>
             <Text>{_.truncate(info.getValue(), { length: 20 })}</Text>
           </Tooltip>
         );
@@ -120,7 +120,7 @@ const Entities = () => {
           return <Tag colorScheme={"orange"}>Empty</Tag>;
         }
         return (
-          <Tooltip label={info.getValue()}>
+          <Tooltip label={info.getValue()} hasArrow>
             <Text>{_.truncate(info.getValue(), { length: 20 })}</Text>
           </Tooltip>
         );

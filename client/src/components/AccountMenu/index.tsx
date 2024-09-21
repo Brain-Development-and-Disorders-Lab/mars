@@ -150,7 +150,7 @@ const AccountMenu = () => {
                   {user.firstName} {user.lastName}
                 </Text>
 
-                <Tooltip label={user.affiliation}>
+                <Tooltip label={user.affiliation} hasArrow>
                   <Text
                     fontWeight={"semibold"}
                     fontSize={"sm"}
