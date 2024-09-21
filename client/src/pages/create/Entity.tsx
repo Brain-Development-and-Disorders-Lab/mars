@@ -419,6 +419,7 @@ const Entity = () => {
                     value={name}
                     placeholder={"Name"}
                     size={"sm"}
+                    rounded={"md"}
                     onChange={(event) => {
                       setName(event.target.value);
                       checkEntityName(event.target.value);
@@ -436,6 +437,7 @@ const Entity = () => {
                   <Input
                     placeholder={"Select Date and Time"}
                     size={"sm"}
+                    rounded={"md"}
                     type={"date"}
                     value={created}
                     onChange={(event) => setCreated(event.target.value)}
@@ -475,6 +477,7 @@ const Entity = () => {
                     placeholder={"Description"}
                     w={"100%"}
                     size={"sm"}
+                    rounded={"md"}
                     onChange={(event) => setDescription(event.target.value)}
                   />
                 </FormControl>

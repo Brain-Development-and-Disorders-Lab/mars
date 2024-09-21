@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 
 // Existing and custom components
-import { Avatar, Flex, Skeleton, Text, Tooltip } from "@chakra-ui/react";
+import { Avatar, Flex, Skeleton, Text } from "@chakra-ui/react";
 
 // Existing and custom types
 import { ActorProps, UserModel } from "@types";
@@ -16,7 +16,6 @@ const DEFAULT_ACTOR_LABEL_LENGTH = 20; // Default number of shown characters
 const ActorTag = (props: ActorProps) => {
   // Component state
   const [actorLabel, setActorLabel] = useState(props.fallback);
-  const [tooltipLabel, setTooltipLabel] = useState(props.fallback);
 
   // GraphQL operations
   const GET_USER = gql`
@@ -39,7 +38,6 @@ const ActorTag = (props: ActorProps) => {
 
   useEffect(() => {
     if (data?.user) {
-      setTooltipLabel(`${data.user.firstName} ${data.user.lastName}`);
       setActorLabel(
         _.truncate(`${data.user.firstName} ${data.user.lastName}`, {
           length: DEFAULT_ACTOR_LABEL_LENGTH,
@@ -61,19 +59,21 @@ const ActorTag = (props: ActorProps) => {
       align={"center"}
       p={"2"}
       rounded={"md"}
-      bg={"gray.50"}
       border={"1px"}
       borderColor={"gray.300"}
     >
-      <Avatar name={tooltipLabel} size={"sm"} />
+      <Avatar name={actorLabel} size={"sm"} />
       {loading ? (
         <Skeleton w={"30px"} />
       ) : (
-        <Tooltip hasArrow label={tooltipLabel} bg={"gray.300"} color={"black"}>
+        <Flex direction={"column"} gap={"0"}>
           <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.700"}>
             {actorLabel}
           </Text>
-        </Tooltip>
+          <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.400"}>
+            {props.orcid}
+          </Text>
+        </Flex>
       )}
     </Flex>
   );

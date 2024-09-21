@@ -378,6 +378,8 @@ const Attribute = () => {
                   </Tag>
                 ) : (
                   <Textarea
+                    size={"sm"}
+                    rounded={"md"}
                     value={attributeDescription}
                     onChange={(event) => {
                       setAttributeDescription(event.target.value);

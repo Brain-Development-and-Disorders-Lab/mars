@@ -25,6 +25,7 @@ import { Content } from "@components/Container";
 import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
+import ActorTag from "@components/ActorTag";
 
 // Existing and custom types
 import {
@@ -51,6 +52,7 @@ import { useQuery, gql } from "@apollo/client";
 
 // Workspace context
 import { WorkspaceContext } from "../Context";
+import { useToken } from "src/authentication/useToken";
 
 // Queries
 const GET_DASHBOARD = gql`
@@ -110,6 +112,7 @@ const Dashboard = () => {
 
   // Workspace context
   const { workspace, workspaceLoading } = useContext(WorkspaceContext);
+  const [token] = useToken();
 
   // Page data
   const [entityData, setEntityData] = useState(
@@ -135,7 +138,7 @@ const Dashboard = () => {
     {} as WorkspaceMetrics,
   );
   const [lastUpdate] = useState(
-    dayjs(Date.now()).format("HH:mm[, ]DD MMMM YYYY"),
+    dayjs(Date.now()).format("DD MMMM YYYY[ at ]h:mm a"),
   );
 
   // Execute GraphQL query both on page load and navigation
@@ -311,23 +314,31 @@ const Dashboard = () => {
       <Flex direction={"column"} w={"100%"} p={"2"} gap={"2"}>
         <Flex direction={"column"} basis={"70%"} gap={"2"}>
           <Flex direction={"row"} gap={"2"} align={"center"}>
-            <Icon name={"dashboard"} size={"md"} />
-            <Heading size={"lg"}>Workspace Dashboard</Heading>
+            <Flex direction={"column"}>
+              <Flex direction={"row"} align={"center"} gap={"2"}>
+                <Icon name={"dashboard"} size={"md"} />
+                <Heading size={"lg"}>Workspace Dashboard</Heading>
+              </Flex>
+              <Flex direction={"row"} gap={"1"}>
+                <Text
+                  fontSize={"xs"}
+                  fontWeight={"semibold"}
+                  color={"gray.700"}
+                >
+                  Last Update:
+                </Text>
+                <Text
+                  fontSize={"xs"}
+                  fontWeight={"semibold"}
+                  color={"gray.400"}
+                >
+                  {lastUpdate}
+                </Text>
+              </Flex>
+            </Flex>
             <Spacer />
-            <Flex
-              gap={"2"}
-              p={"2"}
-              rounded={"md"}
-              border={"1px"}
-              borderColor={"gray.300"}
-              align={"center"}
-            >
-              <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.700"}>
-                Last Updated:
-              </Text>
-              <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.500"}>
-                {lastUpdate}
-              </Text>
+            <Flex>
+              <ActorTag orcid={token.orcid} fallback={"Unknown User"} />
             </Flex>
           </Flex>
 

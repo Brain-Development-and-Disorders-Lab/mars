@@ -143,6 +143,7 @@ const Project = () => {
                   id={"name"}
                   name={"name"}
                   size={"sm"}
+                  rounded={"md"}
                   placeholder={"Name"}
                   borderColor={"gray.300"}
                   focusBorderColor={"black"}
@@ -168,6 +169,7 @@ const Project = () => {
                   id={"owner"}
                   name={"owner"}
                   size={"sm"}
+                  rounded={"md"}
                   placeholder={"Owner"}
                   borderColor={"gray.300"}
                   focusBorderColor={"black"}
@@ -182,6 +184,7 @@ const Project = () => {
                 </FormLabel>
                 <Input
                   size={"sm"}
+                  rounded={"md"}
                   type={"datetime-local"}
                   value={created}
                   onChange={(event) =>
@@ -224,6 +227,7 @@ const Project = () => {
                   id={"description"}
                   name={"description"}
                   size={"sm"}
+                  rounded={"md"}
                   value={description}
                   onChange={(event) => setDescription(event.target.value)}
                 />

@@ -62,6 +62,7 @@ const AttributeCard = (props: AttributeCardProps) => {
                 placeholder={"Name"}
                 value={name}
                 isDisabled={finished}
+                rounded={"md"}
                 onChange={(event) => setName(event.target.value)}
               />
             </FormControl>
@@ -70,6 +71,7 @@ const AttributeCard = (props: AttributeCardProps) => {
               <FormLabel>Attribute Description</FormLabel>
               <Textarea
                 size={"sm"}
+                rounded={"md"}
                 value={description}
                 placeholder={"Description"}
                 isDisabled={finished}

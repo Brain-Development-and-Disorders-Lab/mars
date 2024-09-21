@@ -163,6 +163,7 @@ const SearchSelect = (props: SearchSelectProps) => {
           backgroundColor={"white"}
           data-testid={"value-editor"}
           size={"sm"}
+          rounded={"md"}
           isDisabled={props?.isDisabled || false}
           isReadOnly
         />
@@ -187,6 +188,7 @@ const SearchSelect = (props: SearchSelectProps) => {
         >
           <Input
             size={"sm"}
+            rounded={"md"}
             placeholder={"Search"}
             value={inputValue}
             onChange={handleInputChange}

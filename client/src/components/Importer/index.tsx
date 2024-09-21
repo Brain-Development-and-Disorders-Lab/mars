@@ -597,6 +597,7 @@ const Importer = (props: {
                       h={"100%"}
                       w={"100%"}
                       position={"absolute"}
+                      rounded={"md"}
                       top={"0"}
                       left={"0"}
                       opacity={"0"}
@@ -713,7 +714,12 @@ const Importer = (props: {
                           "Initially, only you will have access to imported Entities"
                         }
                       >
-                        <Input value={ownerField} size={"sm"} disabled />
+                        <Input
+                          value={ownerField}
+                          size={"sm"}
+                          rounded={"md"}
+                          disabled
+                        />
                       </Tooltip>
                     </FormControl>
                     <FormControl>
