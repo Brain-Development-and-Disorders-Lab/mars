@@ -255,6 +255,9 @@ export const ProjectsResolvers = {
       const result = await Projects.update(args.project);
 
       if (result.success) {
+        // Add history to Project
+        await Projects.addHistory(project);
+
         const activity = await Activity.create({
           timestamp: dayjs(Date.now()).toISOString(),
           type: "update",

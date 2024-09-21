@@ -126,7 +126,7 @@ export type IProject = {
   collaborators: string[];
   description: string;
   entities: string[];
-  history?: ProjectHistory[];
+  history: ProjectHistory[];
 };
 
 export type ProjectModel = IProject & {
@@ -135,10 +135,16 @@ export type ProjectModel = IProject & {
 };
 
 export type ProjectHistory = {
+  _id: string;
+  version: string;
+  owner: string;
   timestamp: string;
+  created: string;
+  archived: boolean;
   name: string;
   description: string;
   entities: string[];
+  collaborators: string[];
 };
 
 // Utility type used across other types, typically in a list

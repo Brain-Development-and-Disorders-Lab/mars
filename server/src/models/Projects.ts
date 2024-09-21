@@ -2,7 +2,13 @@
 import { Entities } from "./Entities";
 
 // Custom types
-import { EntityModel, IProject, ProjectModel, ResponseMessage } from "@types";
+import {
+  EntityModel,
+  IProject,
+  ProjectHistory,
+  ProjectModel,
+  ResponseMessage,
+} from "@types";
 
 // Utility functions and libraries
 import _ from "lodash";
@@ -11,6 +17,10 @@ import { getIdentifier } from "../util";
 import dayjs from "dayjs";
 import Papa from "papaparse";
 import consola from "consola";
+
+// Generate history version IDs
+import { customAlphabet } from "nanoid";
+const nanoid = customAlphabet("1234567890abcdef", 10);
 
 // Collection name
 const PROJECTS_COLLECTION = "projects";
@@ -118,6 +128,57 @@ export class Projects {
     return {
       success: successStatus,
       message: successStatus ? "Updated Project" : "Could not update Project",
+    };
+  };
+
+  /**
+   * Add a history entry to an Project based on provided Project state
+   * @param historyProject Existing Project state to add to Project history
+   * @return {Promise<ResponseMessage>}
+   */
+  static addHistory = async (
+    historyProject: ProjectModel,
+  ): Promise<ResponseMessage> => {
+    const project = await Projects.getOne(historyProject._id);
+    if (_.isNull(project)) {
+      return {
+        success: false,
+        message: "Project not found",
+      };
+    }
+
+    const historyProjectModel: ProjectHistory = {
+      _id: historyProject._id,
+      timestamp: dayjs(Date.now()).toISOString(), // Timestamp on history creation
+      version: nanoid(),
+      name: historyProject.name,
+      owner: historyProject.owner,
+      collaborators: historyProject.collaborators,
+      archived: historyProject.archived,
+      created: historyProject.created,
+      description: historyProject.description,
+      entities: historyProject.entities,
+    };
+
+    const update: { $set: Partial<ProjectModel> } = {
+      $set: {
+        history: [historyProjectModel, ...project.history],
+      },
+    };
+
+    const response = await getDatabase()
+      .collection<ProjectModel>(PROJECTS_COLLECTION)
+      .updateOne({ _id: project._id }, update);
+    if (response.modifiedCount > 0) {
+      consola.info("Added history to Project:", historyProject._id);
+    }
+
+    return {
+      success: true,
+      message:
+        response.modifiedCount === 1
+          ? "Added history to Project"
+          : "No history added to Project",
     };
   };
 
