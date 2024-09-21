@@ -1,11 +1,21 @@
-import { IAuth, UserModel } from "@types";
-import axios, { AxiosResponse } from "axios";
+// Custom types
+import { Context, IAuth, UserModel } from "@types";
+
+// JWK imports
 import { verify } from "jsonwebtoken";
 import { JwksClient } from "jwks-rsa";
+
+// Utility libraries
+import axios, { AxiosResponse } from "axios";
 import _ from "lodash";
+
+// Models
 import { Users } from "./Users";
 
 // Variables
+import { DEMO_USER_ORCID } from "src/variables";
+import { Workspaces } from "./Workspaces";
+import { GraphQLError } from "graphql";
 const TOKEN_URL = "https://orcid.org/oauth/token";
 const CLIENT_ID = process.env.CLIENT_ID as string;
 const CLIENT_SECRET = process.env.CLIENT_SECRET as string;
@@ -42,11 +52,16 @@ export class Authentication {
       if (response.status !== 200) {
         throw new Error("Invalid");
       }
-      authenticationPayload = response.data;
+      authenticationPayload = {
+        name: response.data.name,
+        orcid: response.data.orcid,
+        token: response.data.id_token,
+        workspace: "",
+      };
     } else {
       // If non-production, resolve with test user
       authenticationPayload = {
-        orcid: "XXXX-0000-DEMO-1111",
+        orcid: DEMO_USER_ORCID,
         name: "Test User",
         token: "test_token_value",
         workspace: "",
@@ -94,12 +109,51 @@ export class Authentication {
       }
     } else {
       // Return the test user account
-      const user = await Users.getOne("XXXX-0000-DEMO-1111");
+      const user = await Users.getOne(DEMO_USER_ORCID);
       if (user) {
         return user;
       }
     }
 
     throw new Error(`Could not validate token`);
+  };
+
+  static authenticate = async (context: Context): Promise<void> => {
+    // Check that a valid token has been provided
+    const user = await Authentication.validate(context.token);
+
+    // Check that the user from the context matches the user from the token
+    if (!_.isEqual(context.user, user._id)) {
+      throw new GraphQLError("Provided user does not match token user", {
+        extensions: {
+          code: "UNAUTHORIZED",
+        },
+      });
+    }
+
+    if (context.workspace !== "") {
+      // Retrieve the Workspace to determine which Entities to return
+      const workspace = await Workspaces.getOne(context.workspace);
+      if (_.isNull(workspace)) {
+        throw new GraphQLError("Workspace does not exist", {
+          extensions: {
+            code: "NON_EXIST",
+          },
+        });
+      } else if (
+        !_.isEqual(workspace.owner, context.user) &&
+        !_.includes(workspace.collaborators, context.user)
+      ) {
+        // Check that the requesting user has access to the Workspace as owner or collaborator
+        throw new GraphQLError(
+          "User does not have permission to access this Workspace",
+          {
+            extensions: {
+              code: "UNAUTHORIZED",
+            },
+          },
+        );
+      }
+    }
   };
 }

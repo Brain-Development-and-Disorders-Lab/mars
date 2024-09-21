@@ -334,14 +334,12 @@ export const typedefs = `#graphql
     # Entity queries
     entities(limit: Int, archived: Boolean): [Entity]
     entity(_id: String): Entity
-    entityExists(_id: String): Boolean
     entityNameExists(name: String): Boolean
     entityMetrics: EntityMetrics
 
     # Attribute queries
     attributes(limit: Int): [Attribute]
     attribute(_id: String): Attribute
-    attributeExists(_id: String): Boolean
     attributeMetrics: AttributeMetrics
 
     # Activity queries
@@ -380,17 +378,6 @@ export const typedefs = `#graphql
     archiveEntity(_id: String, state: Boolean): Response
     archiveEntities(toArchive: [String], state: Boolean): Response
     deleteEntity(_id: String): Response
-    addEntityProject(_id: String, project_id: String): Response
-    removeEntityProject(_id: String, project_id: String): Response
-    addEntityProduct(_id: String, product: ItemInput): Response
-    addEntityProducts(_id: String, products: [ItemInput]): Response
-    removeEntityProduct(_id: String, product: ItemInput): Response
-    addEntityOrigin(_id: String, origin: ItemInput): Response
-    addEntityOrigins(_id: String, origins: [ItemInput]): Response
-    removeEntityOrigin(_id: String, origin: ItemInput): Response
-    addEntityAttribute(_id: String, attribute: AttributeInput): Response
-    removeEntityAttribute(_id: String, attribute: String): Response
-    updateEntityAttribute(_id: String, attribute: AttributeInput): Response
     setEntityLock(_id: String, lock: Boolean): Response
 
     # Project mutations
@@ -399,9 +386,6 @@ export const typedefs = `#graphql
     archiveProject(_id: String, state: Boolean): Response
     archiveProjects(toArchive: [String], state: Boolean): Response
     deleteProject(_id: String): Response
-    addProjectEntity(_id: String, entity: String): Response
-    addProjectEntities(_id: String, entities: [String]): Response
-    removeProjectEntity(_id: String, entity: String): Response
 
     # Activity mutations
     createActivity(activity: ActivityCreateInput): Response

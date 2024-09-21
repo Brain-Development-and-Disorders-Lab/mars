@@ -169,7 +169,7 @@ const Navigation = () => {
 
           <Flex direction={"column"} gap={"2"} width={"100%"}>
             <Text fontSize={"xs"} fontWeight={"bold"} color={"gray.600"}>
-              Tools
+              Metadata Tools
             </Text>
             <Flex direction={"row"} gap={"2"}>
               <Button

@@ -140,8 +140,12 @@ const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
 
   // Query to search by text value
   const SEARCH_TEXT = gql`
-    query Search($query: String, $isBuilder: Boolean) {
-      search(query: $query, isBuilder: $isBuilder) {
+    query Search($query: String, $isBuilder: Boolean, $showArchived: Boolean) {
+      search(
+        query: $query
+        isBuilder: $isBuilder
+        showArchived: $showArchived
+      ) {
         _id
         name
         owner
@@ -181,6 +185,7 @@ const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
           ruleProcessor: ruleProcessor,
         }),
         isBuilder: true,
+        showArchived: false,
       },
       fetchPolicy: "network-only",
     });

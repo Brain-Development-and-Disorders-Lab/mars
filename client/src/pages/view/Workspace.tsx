@@ -8,7 +8,6 @@ import {
   Input,
   Button,
   VStack,
-  Tag,
   IconButton,
   Textarea,
   Text,
@@ -22,6 +21,7 @@ import {
 import Icon from "@components/Icon";
 import DataTable from "@components/DataTable";
 import { Content } from "@components/Container";
+import ActorTag from "@components/ActorTag";
 
 // Custom types
 import {
@@ -43,11 +43,13 @@ import _ from "lodash";
 
 // Workspace Context
 import { WorkspaceContext } from "src/Context";
+import { useToken } from "src/authentication/useToken";
 
 const Workspace = () => {
   const toast = useToast();
   const breakpoint = useBreakpoint();
   const navigate = useNavigate();
+  const [token] = useToken();
 
   // Query to get a Workspace
   const GET_WORKSPACE = gql`
@@ -57,6 +59,7 @@ const Workspace = () => {
         name
         owner
         description
+        collaborators
       }
     }
   `;
@@ -204,6 +207,7 @@ const Workspace = () => {
         setName(workspaceResult.data.workspace.name);
         setOwner(workspaceResult.data.workspace.owner);
         setDescription(workspaceResult.data.workspace.description);
+        setCollaborators(workspaceResult.data.workspace.collaborators);
       }
 
       // Get all Workspace data
@@ -634,7 +638,7 @@ const Workspace = () => {
         wrap={"wrap"}
       >
         <Flex align={"center"} gap={"2"} p={"2"} border={"2px"} rounded={"md"}>
-          <Icon name={"entity"} size={"md"} />
+          <Icon name={"workspace"} size={"md"} />
           <Heading fontWeight={"semibold"} size={"md"}>
             {name}
           </Heading>
@@ -699,6 +703,14 @@ const Workspace = () => {
                   onChange={(event) => setName(event.target.value)}
                 />
               </FormControl>
+              <FormControl>
+                <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
+                  Owner
+                </FormLabel>
+                <Flex>
+                  <ActorTag orcid={owner} fallback={"Unkown User"} />
+                </Flex>
+              </FormControl>
             </Flex>
 
             {/* Workspace collaborators */}
@@ -758,7 +770,7 @@ const Workspace = () => {
                     No Collaborators
                   </Text>
                 ) : (
-                  <VStack w={"100%"}>
+                  <VStack w={"100%"} spacing={"0"}>
                     {collaborators.map((collaborator, index) => (
                       <Flex
                         key={index}
@@ -767,19 +779,37 @@ const Workspace = () => {
                         py={"2"}
                         w={"100%"}
                       >
-                        <Tag colorScheme={"green"}>{collaborator}</Tag>
+                        <Flex>
+                          <ActorTag
+                            orcid={collaborator}
+                            fallback={"Unknown Collaborator"}
+                          />
+                        </Flex>
                         <Spacer />
                         <IconButton
                           size={"sm"}
                           aria-label={"Remove collaborator"}
-                          icon={<Icon name={"delete"} />}
-                          colorScheme={"red"}
+                          icon={
+                            <Icon
+                              name={
+                                token.orcid === collaborator
+                                  ? "b_right"
+                                  : "delete"
+                              }
+                            />
+                          }
+                          colorScheme={
+                            token.orcid === collaborator ? "orange" : "red"
+                          }
                           onClick={() =>
                             setCollaborators((collaborators) =>
                               collaborators.filter(
                                 (existing) => existing !== collaborator,
                               ),
                             )
+                          }
+                          isDisabled={
+                            collaborator === owner && token.orcid !== owner
                           }
                         />
                       </Flex>

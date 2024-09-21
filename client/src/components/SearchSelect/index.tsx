@@ -58,8 +58,12 @@ const SearchSelect = (props: SearchSelectProps) => {
 
   // Query to search by text value
   const SEARCH_TEXT = gql`
-    query Search($query: String, $isBuilder: Boolean, $limit: Int) {
-      search(query: $query, isBuilder: $isBuilder, limit: $limit) {
+    query Search($query: String, $isBuilder: Boolean, $showArchived: Boolean) {
+      search(
+        query: $query
+        isBuilder: $isBuilder
+        showArchived: $showArchived
+      ) {
         _id
         name
         description
@@ -83,7 +87,7 @@ const SearchSelect = (props: SearchSelectProps) => {
       variables: {
         query: query,
         isBuilder: false,
-        limit: 100,
+        showArchived: false,
       },
     });
 
@@ -159,6 +163,7 @@ const SearchSelect = (props: SearchSelectProps) => {
           backgroundColor={"white"}
           data-testid={"value-editor"}
           size={"sm"}
+          rounded={"md"}
           isDisabled={props?.isDisabled || false}
           isReadOnly
         />
@@ -183,6 +188,7 @@ const SearchSelect = (props: SearchSelectProps) => {
         >
           <Input
             size={"sm"}
+            rounded={"md"}
             placeholder={"Search"}
             value={inputValue}
             onChange={handleInputChange}

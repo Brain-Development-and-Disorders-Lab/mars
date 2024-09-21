@@ -444,6 +444,7 @@ export type Token = IAuth & {
 export type Context = {
   user: string;
   workspace: string;
+  token: string;
 };
 
 // User types

@@ -16,12 +16,16 @@ import dayjs from "dayjs";
 import { Activity } from "../models/Activity";
 import { Projects } from "../models/Projects";
 import { Workspaces } from "../models/Workspaces";
+import { Authentication } from "src/models/Authentication";
 
 export const ProjectsResolvers = {
   Query: {
     // Retrieve all Projects
     projects: async (_parent: any, args: { limit: 100 }, context: Context) => {
-      // Check Workspace exists
+      // Authenticate the provided context
+      await Authentication.authenticate(context);
+
+      // Retrieve the Workspace to determine which Entities to return
       const workspace = await Workspaces.getOne(context.workspace);
       if (_.isNull(workspace)) {
         throw new GraphQLError("Workspace does not exist", {
@@ -40,7 +44,10 @@ export const ProjectsResolvers = {
 
     // Retrieve one Project by _id
     project: async (_parent: any, args: { _id: string }, context: Context) => {
-      // Check Workspace exists
+      // Authenticate the provided context
+      await Authentication.authenticate(context);
+
+      // Retrieve the Workspace to determine which Entities to return
       const workspace = await Workspaces.getOne(context.workspace);
       if (_.isNull(workspace)) {
         throw new GraphQLError("Workspace does not exist", {
@@ -60,10 +67,7 @@ export const ProjectsResolvers = {
         });
       }
 
-      if (
-        project.owner === context.user &&
-        _.includes(workspace.projects, project._id)
-      ) {
+      if (_.includes(workspace.projects, project._id)) {
         return project;
       } else {
         throw new GraphQLError(
@@ -82,6 +86,19 @@ export const ProjectsResolvers = {
       args: { _id: string; format: "json" | "csv"; fields?: string[] },
       context: Context,
     ) => {
+      // Authenticate the provided context
+      await Authentication.authenticate(context);
+
+      // Retrieve the Workspace to determine which Entities to return
+      const workspace = await Workspaces.getOne(context.workspace);
+      if (_.isNull(workspace)) {
+        throw new GraphQLError("Workspace does not exist", {
+          extensions: {
+            code: "NON_EXIST",
+          },
+        });
+      }
+
       const project = await Projects.getOne(args._id);
       if (_.isNull(project)) {
         throw new GraphQLError("Project does not exist", {
@@ -91,7 +108,7 @@ export const ProjectsResolvers = {
         });
       }
 
-      if (project.owner === context.user) {
+      if (_.includes(workspace.projects, args._id)) {
         return await Projects.export(args._id, args.format, args.fields);
       } else {
         throw new GraphQLError(
@@ -110,6 +127,19 @@ export const ProjectsResolvers = {
       args: { _id: string; format: "json" },
       context: Context,
     ) => {
+      // Authenticate the provided context
+      await Authentication.authenticate(context);
+
+      // Retrieve the Workspace to determine which Entities to return
+      const workspace = await Workspaces.getOne(context.workspace);
+      if (_.isNull(workspace)) {
+        throw new GraphQLError("Workspace does not exist", {
+          extensions: {
+            code: "NON_EXIST",
+          },
+        });
+      }
+
       const project = await Projects.getOne(args._id);
       if (_.isNull(project)) {
         throw new GraphQLError("Project does not exist", {
@@ -119,7 +149,7 @@ export const ProjectsResolvers = {
         });
       }
 
-      if (project.owner === context.user) {
+      if (_.includes(workspace.projects, args._id)) {
         return await Projects.exportEntities(args._id, args.format);
       } else {
         throw new GraphQLError(
@@ -139,6 +169,10 @@ export const ProjectsResolvers = {
       _args: Record<string, unknown>,
       context: Context,
     ): Promise<ProjectMetrics> => {
+      // Authenticate the provided context
+      await Authentication.authenticate(context);
+
+      // Retrieve the Workspace to determine which Entities to return
       const workspace = await Workspaces.getOne(context.workspace);
       if (_.isNull(workspace)) {
         throw new GraphQLError("Workspace does not exist", {
@@ -170,6 +204,9 @@ export const ProjectsResolvers = {
       args: { project: IProject },
       context: Context,
     ) => {
+      // Authenticate the provided context
+      await Authentication.authenticate(context);
+
       // Apply create operation
       const result = await Projects.create(args.project);
 
@@ -202,6 +239,9 @@ export const ProjectsResolvers = {
       args: { project: ProjectModel },
       context: Context,
     ) => {
+      // Authenticate the provided context
+      await Authentication.authenticate(context);
+
       const project = await Projects.getOne(args.project._id);
       if (_.isNull(project)) {
         throw new GraphQLError("Project does not exist", {
@@ -239,6 +279,19 @@ export const ProjectsResolvers = {
       args: { _id: string; state: boolean },
       context: Context,
     ) => {
+      // Authenticate the provided context
+      await Authentication.authenticate(context);
+
+      // Retrieve the Workspace to determine which Entities to return
+      const workspace = await Workspaces.getOne(context.workspace);
+      if (_.isNull(workspace)) {
+        throw new GraphQLError("Workspace does not exist", {
+          extensions: {
+            code: "NON_EXIST",
+          },
+        });
+      }
+
       const project = await Projects.getOne(args._id);
       if (_.isNull(project)) {
         throw new GraphQLError("Project does not exist", {
@@ -246,6 +299,17 @@ export const ProjectsResolvers = {
             code: "NON_EXIST",
           },
         });
+      }
+
+      if (!_.includes(workspace.projects, args._id)) {
+        throw new GraphQLError(
+          "You do not have permission to modify the archive state of this Project",
+          {
+            extensions: {
+              code: "UNAUTHORIZED",
+            },
+          },
+        );
       }
 
       if (project.archived === args.state) {
@@ -282,6 +346,9 @@ export const ProjectsResolvers = {
       args: { toArchive: string[]; state: boolean },
       context: Context,
     ): Promise<ResponseMessage> => {
+      // Authenticate the provided context
+      await Authentication.authenticate(context);
+
       let archiveCounter = 0;
       for await (const _id of args.toArchive) {
         const project = await Projects.getOne(_id);
@@ -332,6 +399,19 @@ export const ProjectsResolvers = {
       args: { _id: string },
       context: Context,
     ) => {
+      // Authenticate the provided context
+      await Authentication.authenticate(context);
+
+      // Retrieve the Workspace to determine which Entities to return
+      const workspace = await Workspaces.getOne(context.workspace);
+      if (_.isNull(workspace)) {
+        throw new GraphQLError("Workspace does not exist", {
+          extensions: {
+            code: "NON_EXIST",
+          },
+        });
+      }
+
       const project = await Projects.getOne(args._id);
       if (_.isNull(project)) {
         throw new GraphQLError("Project does not exist", {
@@ -339,6 +419,17 @@ export const ProjectsResolvers = {
             code: "NON_EXIST",
           },
         });
+      }
+
+      if (!_.includes(workspace.projects, args._id)) {
+        throw new GraphQLError(
+          "You do not have permission to delete this Project",
+          {
+            extensions: {
+              code: "UNAUTHORIZED",
+            },
+          },
+        );
       }
 
       const result = await Projects.delete(args._id);
@@ -361,25 +452,6 @@ export const ProjectsResolvers = {
       }
 
       return result;
-    },
-
-    addProjectEntity: async (
-      _parent: any,
-      args: { _id: string; entity: string },
-    ) => {
-      return await Projects.addEntity(args._id, args.entity);
-    },
-    addProjectEntities: async (
-      _parent: any,
-      args: { _id: string; entities: string[] },
-    ) => {
-      return await Projects.addEntities(args._id, args.entities);
-    },
-    removeProjectEntity: async (
-      _parent: any,
-      args: { _id: string; entity: string },
-    ) => {
-      return await Projects.removeEntity(args._id, args.entity);
     },
   },
 };

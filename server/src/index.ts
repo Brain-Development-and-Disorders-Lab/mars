@@ -39,6 +39,8 @@ import { Context } from "@types";
 // GraphQL uploads
 import GraphQLUpload from "graphql-upload/GraphQLUpload.mjs";
 import graphqlUploadExpress from "graphql-upload/graphqlUploadExpress.mjs";
+import { Authentication } from "./models/Authentication";
+import { GraphQLError } from "graphql";
 
 // Set logging level
 consola.level =
@@ -142,9 +144,11 @@ const start = async () => {
     }) as RequestHandler,
     expressMiddleware(server, {
       context: async ({ req }): Promise<Context> => {
+        // Extract values from headers and create Context value
         return {
-          user: req.headers.user as string,
-          workspace: req.headers.workspace as string,
+          user: (req.headers.user as string) || "",
+          workspace: (req.headers.workspace as string) || "",
+          token: (req.headers.token as string) || "",
         };
       },
     }),

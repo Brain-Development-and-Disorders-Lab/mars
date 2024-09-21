@@ -1,10 +1,8 @@
 import {
-  AttributeModel,
   Context,
   EntityMetrics,
   EntityModel,
   IEntity,
-  IGenericItem,
   ResponseMessage,
 } from "@types";
 import { GraphQLError } from "graphql";
@@ -15,6 +13,7 @@ import dayjs from "dayjs";
 import { Activity } from "../models/Activity";
 import { Entities } from "../models/Entities";
 import { Workspaces } from "../models/Workspaces";
+import { Authentication } from "src/models/Authentication";
 
 export const EntitiesResolvers = {
   Query: {
@@ -24,6 +23,10 @@ export const EntitiesResolvers = {
       args: { limit: 100; archived: boolean },
       context: Context,
     ) => {
+      // Authenticate the provided context
+      await Authentication.authenticate(context);
+
+      // Retrieve the Workspace to determine which Entities to return
       const workspace = await Workspaces.getOne(context.workspace);
       if (_.isNull(workspace)) {
         throw new GraphQLError("Workspace does not exist", {
@@ -34,9 +37,8 @@ export const EntitiesResolvers = {
       }
 
       // Filter by ownership and Workspace membership
-      const entities = await Entities.all();
+      const entities = await Entities.getMany(workspace.entities);
       return entities
-        .filter((entity) => _.includes(workspace.entities, entity._id))
         .filter((entity) => {
           if (args.archived === true) {
             // If showing all Entities, including archived
@@ -55,7 +57,10 @@ export const EntitiesResolvers = {
       args: { _id: string },
       context: Context,
     ): Promise<EntityModel> => {
-      // Check Workspace exists
+      // Authenticate the provided context
+      await Authentication.authenticate(context);
+
+      // Retrieve the Workspace to determine which Entities to return
       const workspace = await Workspaces.getOne(context.workspace);
       if (_.isNull(workspace)) {
         throw new GraphQLError("Workspace does not exist", {
@@ -76,10 +81,7 @@ export const EntitiesResolvers = {
       }
 
       // Check that Entity is owned by the user and exists in the Workspace
-      if (
-        entity.owner === context.user &&
-        _.includes(workspace.entities, entity._id)
-      ) {
+      if (_.includes(workspace.entities, entity._id)) {
         return entity;
       } else {
         throw new GraphQLError(
@@ -93,11 +95,6 @@ export const EntitiesResolvers = {
       }
     },
 
-    // Check if Entity exists by ID
-    entityExists: async (_parent: any, args: { _id: string }) => {
-      return await Entities.exists(args._id);
-    },
-
     // Check if Entity exists by name
     entityNameExists: async (_parent: any, args: { name: string }) => {
       return await Entities.existByName(args.name);
@@ -109,7 +106,10 @@ export const EntitiesResolvers = {
       args: { _id: string; format: "json" | "csv"; fields?: string[] },
       context: Context,
     ) => {
-      // Check Workspace exists
+      // Authenticate the provided context
+      await Authentication.authenticate(context);
+
+      // Retrieve the Workspace to determine which Entities to return
       const workspace = await Workspaces.getOne(context.workspace);
       if (_.isNull(workspace)) {
         throw new GraphQLError("Workspace does not exist", {
@@ -130,10 +130,7 @@ export const EntitiesResolvers = {
       }
 
       // Check that Entity is owned by the user and exists in the Workspace
-      if (
-        entity.owner === context.user &&
-        _.includes(workspace.entities, entity._id)
-      ) {
+      if (_.includes(workspace.entities, entity._id)) {
         return await Entities.export(args._id, args.format, args.fields);
       } else {
         throw new GraphQLError(
@@ -153,12 +150,25 @@ export const EntitiesResolvers = {
       args: { entities: string[] },
       context: Context,
     ) => {
+      // Authenticate the provided context
+      await Authentication.authenticate(context);
+
+      // Retrieve the Workspace to determine which Entities to return
+      const workspace = await Workspaces.getOne(context.workspace);
+      if (_.isNull(workspace)) {
+        throw new GraphQLError("Workspace does not exist", {
+          extensions: {
+            code: "NON_EXIST",
+          },
+        });
+      }
+
       const authorizedEntities = [];
 
       // Ensure only Entities the user is authorized to access are exported
       for (const entity of args.entities) {
         const result = await Entities.getOne(entity);
-        if (result && result.owner === context.user) {
+        if (result && _.includes(workspace.entities, entity)) {
           authorizedEntities.push(entity);
         }
       }
@@ -172,6 +182,10 @@ export const EntitiesResolvers = {
       _args: Record<string, unknown>,
       context: Context,
     ): Promise<EntityMetrics> => {
+      // Authenticate the provided context
+      await Authentication.authenticate(context);
+
+      // Retrieve the Workspace to determine which Entities to return
       const workspace = await Workspaces.getOne(context.workspace);
       if (_.isNull(workspace)) {
         throw new GraphQLError("Workspace does not exist", {
@@ -203,6 +217,19 @@ export const EntitiesResolvers = {
       args: { _id: string; description: string },
       context: Context,
     ): Promise<ResponseMessage> => {
+      // Authenticate the provided context
+      await Authentication.authenticate(context);
+
+      // Retrieve the Workspace to determine which Entities to return
+      const workspace = await Workspaces.getOne(context.workspace);
+      if (_.isNull(workspace)) {
+        throw new GraphQLError("Workspace does not exist", {
+          extensions: {
+            code: "NON_EXIST",
+          },
+        });
+      }
+
       const entity = await Entities.getOne(args._id);
       if (_.isNull(entity)) {
         throw new GraphQLError("Entity does not exist", {
@@ -212,7 +239,8 @@ export const EntitiesResolvers = {
         });
       }
 
-      if (entity.owner === context.user) {
+      if (_.includes(workspace.entities, args._id)) {
+        // Update description if Entity is in Workspace
         return await Entities.setDescription(args._id, args.description);
       } else {
         throw new GraphQLError(
@@ -232,6 +260,9 @@ export const EntitiesResolvers = {
       args: { entity: IEntity },
       context: Context,
     ): Promise<ResponseMessage> => {
+      // Authenticate the provided context
+      await Authentication.authenticate(context);
+
       // Apply create operation
       const result = await Entities.create(args.entity);
 
@@ -265,6 +296,19 @@ export const EntitiesResolvers = {
       args: { entity: EntityModel },
       context: Context,
     ): Promise<ResponseMessage> => {
+      // Authenticate the provided context
+      await Authentication.authenticate(context);
+
+      // Retrieve the Workspace to determine which Entities to return
+      const workspace = await Workspaces.getOne(context.workspace);
+      if (_.isNull(workspace)) {
+        throw new GraphQLError("Workspace does not exist", {
+          extensions: {
+            code: "NON_EXIST",
+          },
+        });
+      }
+
       const entity = await Entities.getOne(args.entity._id);
       if (_.isNull(entity)) {
         throw new GraphQLError("Entity does not exist", {
@@ -274,7 +318,7 @@ export const EntitiesResolvers = {
         });
       }
 
-      if (entity.owner === context.user) {
+      if (_.includes(workspace.entities, args.entity._id)) {
         // Apply update operation
         const result = await Entities.update(args.entity);
 
@@ -315,6 +359,19 @@ export const EntitiesResolvers = {
       args: { _id: string; state: boolean },
       context: Context,
     ) => {
+      // Authenticate the provided context
+      await Authentication.authenticate(context);
+
+      // Retrieve the Workspace to determine which Entities to return
+      const workspace = await Workspaces.getOne(context.workspace);
+      if (_.isNull(workspace)) {
+        throw new GraphQLError("Workspace does not exist", {
+          extensions: {
+            code: "NON_EXIST",
+          },
+        });
+      }
+
       const entity = await Entities.getOne(args._id);
       if (_.isNull(entity)) {
         throw new GraphQLError("Entity does not exist", {
@@ -322,6 +379,17 @@ export const EntitiesResolvers = {
             code: "NON_EXIST",
           },
         });
+      }
+
+      if (!_.includes(workspace.entities, args._id)) {
+        throw new GraphQLError(
+          "You do not have permission to modify the archive state of this Entity",
+          {
+            extensions: {
+              code: "UNAUTHORIZED",
+            },
+          },
+        );
       }
 
       if (entity.archived === args.state) {
@@ -361,6 +429,9 @@ export const EntitiesResolvers = {
       args: { toArchive: string[]; state: boolean },
       context: Context,
     ): Promise<ResponseMessage> => {
+      // Authenticate the provided context
+      await Authentication.authenticate(context);
+
       let archiveCounter = 0;
       for await (const _id of args.toArchive) {
         const entity = await Entities.getOne(_id);
@@ -414,6 +485,30 @@ export const EntitiesResolvers = {
       args: { _id: string },
       context: Context,
     ) => {
+      // Authenticate the provided context
+      await Authentication.authenticate(context);
+
+      // Retrieve the Workspace to determine which Entities to return
+      const workspace = await Workspaces.getOne(context.workspace);
+      if (_.isNull(workspace)) {
+        throw new GraphQLError("Workspace does not exist", {
+          extensions: {
+            code: "NON_EXIST",
+          },
+        });
+      }
+
+      if (!_.includes(workspace.entities, args._id)) {
+        throw new GraphQLError(
+          "You do not have permission to delete this Entity",
+          {
+            extensions: {
+              code: "UNAUTHORIZED",
+            },
+          },
+        );
+      }
+
       const entity = await Entities.getOne(args._id);
       if (_.isNull(entity)) {
         throw new GraphQLError("Entity does not exist", {
@@ -453,79 +548,6 @@ export const EntitiesResolvers = {
       args: { _id: string; lock: boolean },
     ) => {
       return await Entities.setLock(args._id, args.lock);
-    },
-
-    // Project mutations
-    // Add an Entity to a Project
-    addEntityProject: async (
-      _parent: any,
-      args: { _id: string; project: string },
-    ): Promise<ResponseMessage> => {
-      return await Entities.addProject(args._id, args.project);
-    },
-    // Remove an Entity from a Project
-    removeEntityProject: async (
-      _parent: any,
-      args: { _id: string; project: string },
-    ): Promise<ResponseMessage> => {
-      return await Entities.removeProject(args._id, args.project);
-    },
-    // Associations: Products
-    addEntityProduct: async (
-      _parent: any,
-      args: { _id: string; product: IGenericItem },
-    ): Promise<ResponseMessage> => {
-      return await Entities.addProduct(args._id, args.product);
-    },
-    addEntityProducts: async (
-      _parent: any,
-      args: { _id: string; products: IGenericItem[] },
-    ): Promise<ResponseMessage> => {
-      return await Entities.addProducts(args._id, args.products);
-    },
-    removeEntityProduct: async (
-      _parent: any,
-      args: { _id: string; product: IGenericItem },
-    ): Promise<ResponseMessage> => {
-      return await Entities.removeProduct(args._id, args.product);
-    },
-    // Associations: Origins
-    addEntityOrigin: async (
-      _parent: any,
-      args: { _id: string; origin: IGenericItem },
-    ): Promise<ResponseMessage> => {
-      return await Entities.addOrigin(args._id, args.origin);
-    },
-    addEntityOrigins: async (
-      _parent: any,
-      args: { _id: string; origins: IGenericItem[] },
-    ): Promise<ResponseMessage> => {
-      return await Entities.addOrigins(args._id, args.origins);
-    },
-    removeEntityOrigin: async (
-      _parent: any,
-      args: { _id: string; origin: IGenericItem },
-    ): Promise<ResponseMessage> => {
-      return await Entities.removeOrigin(args._id, args.origin);
-    },
-    // Attributes
-    addEntityAttribute: async (
-      _parent: any,
-      args: { _id: string; attribute: AttributeModel },
-    ): Promise<ResponseMessage> => {
-      return await Entities.addAttribute(args._id, args.attribute);
-    },
-    removeEntityAttribute: async (
-      _parent: any,
-      args: { _id: string; attribute: string },
-    ): Promise<ResponseMessage> => {
-      return await Entities.removeAttribute(args._id, args.attribute);
-    },
-    updateEntityAttribute: async (
-      _parent: any,
-      args: { _id: string; attribute: AttributeModel },
-    ): Promise<ResponseMessage> => {
-      return await Entities.updateAttribute(args._id, args.attribute);
     },
   },
 };

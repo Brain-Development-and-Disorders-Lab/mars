@@ -162,6 +162,7 @@ const Attribute = () => {
                 <Input
                   size={"sm"}
                   placeholder={"Name"}
+                  rounded={"md"}
                   value={name}
                   onChange={(event) => setName(event.target.value)}
                   required
@@ -200,6 +201,7 @@ const Attribute = () => {
                 <FormLabel fontSize={"sm"}>Template Description</FormLabel>
                 <Textarea
                   size={"sm"}
+                  rounded={"md"}
                   value={description}
                   placeholder={"Description"}
                   onChange={(event) => setDescription(event.target.value)}

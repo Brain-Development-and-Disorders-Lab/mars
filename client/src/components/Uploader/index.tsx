@@ -161,6 +161,7 @@ const Uploader = (props: {
                         type={"file"}
                         h={"100%"}
                         w={"100%"}
+                        rounded={"md"}
                         position={"absolute"}
                         top={"0"}
                         left={"0"}

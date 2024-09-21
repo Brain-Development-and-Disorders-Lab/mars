@@ -258,7 +258,7 @@ const WorkspaceSwitcher = () => {
             mr={"2"}
           >
             <Text fontSize={"sm"} fontWeight={"semibold"}>
-              {_.truncate(label, { length: 24 })}
+              {_.truncate(label, { length: 16 })}
             </Text>
             <Spacer />
             <Icon name={"c_expand"} />
@@ -271,30 +271,27 @@ const WorkspaceSwitcher = () => {
             {workspaces.length > 0 ? (
               workspaces.map((accessible) => {
                 return (
-                  <Tooltip
-                    key={accessible._id}
-                    isDisabled={accessible._id !== workspace}
-                    label={"Current Workspace"}
+                  <MenuItem
+                    onClick={() => handleWorkspaceClick(accessible._id)}
+                    key={"w_" + accessible._id}
                   >
-                    <MenuItem
-                      onClick={() => handleWorkspaceClick(accessible._id)}
+                    <Flex
+                      direction={"row"}
+                      gap={"2"}
+                      w={"100%"}
+                      align={"center"}
+                      justify={"space-between"}
                     >
-                      <Flex
-                        direction={"row"}
-                        gap={"2"}
-                        w={"100%"}
-                        align={"center"}
-                        justify={"space-between"}
-                      >
+                      <Tooltip label={accessible.name}>
                         <Text fontSize={"sm"} fontWeight={"semibold"}>
-                          {accessible.name}
+                          {_.truncate(accessible.name, { length: 24 })}
                         </Text>
-                        {workspace === accessible._id && (
-                          <Icon name={"check"} color={"green.600"} />
-                        )}
-                      </Flex>
-                    </MenuItem>
-                  </Tooltip>
+                      </Tooltip>
+                      {workspace === accessible._id && (
+                        <Icon name={"check"} color={"green.600"} />
+                      )}
+                    </Flex>
+                  </MenuItem>
                 );
               })
             ) : (
@@ -344,7 +341,7 @@ const WorkspaceSwitcher = () => {
             </MenuItem>
             <MenuItem onClick={() => performLogout()}>
               <Flex direction={"row"} gap={"2"} align={"center"}>
-                <Icon name={"exit"} />
+                <Icon name={"b_right"} />
                 <Text fontSize={"sm"}>Log out</Text>
               </Flex>
             </MenuItem>

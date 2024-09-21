@@ -35,8 +35,10 @@ const SearchQueryValue = ({
           value={inputValue}
           onChange={handleInputChange}
           minW={"300px"}
+          rounded={"md"}
+          size={"sm"}
           backgroundColor={"white"}
-          data-testid="value-editor"
+          data-testid={"value-editor"}
         />
       )}
     </Flex>

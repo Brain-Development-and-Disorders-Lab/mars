@@ -60,8 +60,12 @@ const SearchBox = () => {
 
   // Query to search by text value
   const SEARCH_TEXT = gql`
-    query Search($query: String, $isBuilder: Boolean, $limit: Int) {
-      search(query: $query, isBuilder: $isBuilder, limit: $limit) {
+    query Search($query: String, $isBuilder: Boolean, $showArchived: Boolean) {
+      search(
+        query: $query
+        isBuilder: $isBuilder
+        showArchived: $showArchived
+      ) {
         _id
         name
         description
@@ -80,7 +84,7 @@ const SearchBox = () => {
       variables: {
         query: query,
         isBuilder: false,
-        limit: 100,
+        showArchived: false,
       },
     });
 
