@@ -218,7 +218,6 @@ export class Data {
         // Core Entity data
         const entity: IEntity = {
           archived: false,
-          locked: false,
           name: row[columnMapping.name],
           owner: columnMapping.owner,
           created: dayjs(Date.now()).toISOString(),

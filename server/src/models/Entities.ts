@@ -302,7 +302,6 @@ export class Entities {
       name: historyEntity.name,
       owner: historyEntity.owner,
       archived: historyEntity.archived,
-      locked: historyEntity.locked,
       created: historyEntity.created,
       description: historyEntity.description,
       projects: historyEntity.projects,
@@ -1123,29 +1122,6 @@ export class Entities {
         response.modifiedCount > 0
           ? "Added attachment successfully"
           : "Error adding attachment",
-    };
-  };
-
-  static setLock = async (
-    _id: string,
-    locked: boolean,
-  ): Promise<ResponseMessage> => {
-    const update = {
-      $set: {
-        locked: locked,
-      },
-    };
-
-    const response = await getDatabase()
-      .collection<EntityModel>(ENTITIES_COLLECTION)
-      .updateOne({ _id: _id }, update);
-
-    return {
-      success: response.modifiedCount > 0,
-      message:
-        response.modifiedCount > 0
-          ? "Set lock status successfully"
-          : "Error setting lock status",
     };
   };
 

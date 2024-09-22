@@ -544,13 +544,5 @@ export const EntitiesResolvers = {
 
       return result;
     },
-
-    // Set the Entity "lock" status
-    setEntityLock: async (
-      _parent: any,
-      args: { _id: string; lock: boolean },
-    ) => {
-      return await Entities.setLock(args._id, args.lock);
-    },
   },
 };

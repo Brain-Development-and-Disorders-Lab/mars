@@ -175,7 +175,6 @@ export type IEntity = {
   name: string;
   owner: string;
   archived: boolean;
-  locked: boolean;
   created: string;
   description: string;
   projects: string[];
@@ -207,7 +206,6 @@ export type EntityHistory = {
   name: string;
   owner: string;
   archived: boolean;
-  locked: boolean;
   created: string;
   description: string;
   projects: string[];
