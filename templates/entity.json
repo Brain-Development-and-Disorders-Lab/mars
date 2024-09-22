@@ -1,7 +1,6 @@
 {
   "_id": "abcd1234",
   "archived": true,
-  "locked": false,
   "name": "Entity Name",
   "created": "2022-05-19T22:34:29.501Z",
   "owner" : "0000-0002-3481-952X",

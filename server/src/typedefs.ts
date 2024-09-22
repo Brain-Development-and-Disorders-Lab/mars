@@ -154,7 +154,6 @@ export const typedefs = `#graphql
     _id: String!
     name: String
     archived: Boolean
-    locked: Boolean
     timestamp: String
     created: String
     owner: String
@@ -170,7 +169,6 @@ export const typedefs = `#graphql
   input EntityCreateInput {
     name: String!
     archived: Boolean!
-    locked: Boolean!
     created: String!
     owner: String!
     description: String!
@@ -185,7 +183,6 @@ export const typedefs = `#graphql
     _id: String!
     name: String
     archived: Boolean
-    locked: Boolean
     created: String
     timestamp: String
     owner: String
@@ -204,7 +201,6 @@ export const typedefs = `#graphql
     name: String
     owner: String
     archived: Boolean
-    locked: Boolean
     created: String
     description: String
     projects: [String]
@@ -396,7 +392,6 @@ export const typedefs = `#graphql
     archiveEntity(_id: String, state: Boolean): Response
     archiveEntities(toArchive: [String], state: Boolean): Response
     deleteEntity(_id: String): Response
-    setEntityLock(_id: String, lock: Boolean): Response
 
     # Project mutations
     createProject(project: ProjectCreateInput): Response

@@ -3,7 +3,6 @@
     {
       "_id": "eDDyDMjQ",
       "archived": false,
-      "locked": false,
       "name": "mini box 1 FROMJSON",
       "owner": "XXXX-1234-ABCD-0000",
       "created": "2023-12-27T20:12:43.686Z",
@@ -39,7 +38,6 @@
     {
       "_id": "noID",
       "archived": false,
-      "locked": false,
       "name": "mini box 1",
       "owner": "XXXX-1234-ABCD-0000",
       "created": "2023-12-27T20:12:43.686Z",
@@ -75,7 +73,6 @@
     {
       "_id": "eOZ4E6Qw",
       "archived": false,
-      "locked": false,
       "name": "box2",
       "owner": "XXXX-1234-ABCD-0000",
       "created": "2023-12-27T20:12:43.686Z",
@@ -106,7 +103,6 @@
     {
       "_id": "eqRN9NBH",
       "archived": false,
-      "locked": false,
       "name": "box 1",
       "owner": "XXXX-1234-ABCD-0000",
       "created": "2023-12-27T20:12:43.686Z",
@@ -127,7 +123,6 @@
     {
       "_id": "eDDyDMjQ",
       "archived": false,
-      "locked": false,
       "name": "mini box 1 FROMJSON",
       "owner": "XXXX-1234-ABCD-0000",
       "created": "2023-12-27T20:12:43.686Z",

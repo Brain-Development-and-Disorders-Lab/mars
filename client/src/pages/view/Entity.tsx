@@ -191,7 +191,6 @@ const Entity = () => {
         name
         owner
         archived
-        locked
         description
         projects
         associations {
@@ -223,7 +222,6 @@ const Entity = () => {
           _id
           version
           name
-          locked
           created
           timestamp
           archived
@@ -538,7 +536,6 @@ const Entity = () => {
               _id: entityData._id,
               name: entityName,
               archived: entityArchived,
-              locked: entityData.locked,
               created: entityData.created,
               owner: entityData.owner,
               description: entityDescription,
@@ -552,6 +549,7 @@ const Entity = () => {
             },
           },
         });
+
         toast({
           title: "Updated Successfully",
           status: "success",
@@ -1007,7 +1005,6 @@ const Entity = () => {
             name: entityVersion.name,
             created: entityData.created,
             archived: entityVersion.archived,
-            locked: entityData.locked,
             owner: entityVersion.owner,
             description: entityVersion.description || "",
             projects: entityVersion.projects || [],
@@ -1388,36 +1385,19 @@ const Entity = () => {
               </Button>
             ) : (
               <Flex gap={"2"}>
-                {entityData.locked ? (
-                  <Tooltip
-                    label={"Currently being edited by another user"}
-                    hasArrow
-                  >
-                    <Button
-                      colorScheme={"blue"}
-                      size={"sm"}
-                      rightIcon={<Icon name={"lock"} />}
-                      isDisabled={entityData.locked}
-                    >
-                      Edit
-                    </Button>
-                  </Tooltip>
-                ) : (
-                  <Button
-                    id={"editEntityButton"}
-                    onClick={handleEditClick}
-                    size={"sm"}
-                    colorScheme={editing ? "green" : "blue"}
-                    rightIcon={
-                      editing ? <Icon name={"check"} /> : <Icon name={"edit"} />
-                    }
-                    isDisabled={entityData.locked}
-                    loadingText={"Saving..."}
-                    isLoading={isUpdating}
-                  >
-                    {editing ? "Done" : "Edit"}
-                  </Button>
-                )}
+                <Button
+                  id={"editEntityButton"}
+                  onClick={handleEditClick}
+                  size={"sm"}
+                  colorScheme={editing ? "green" : "blue"}
+                  rightIcon={
+                    editing ? <Icon name={"check"} /> : <Icon name={"edit"} />
+                  }
+                  loadingText={"Saving..."}
+                  isLoading={isUpdating}
+                >
+                  {editing ? "Done" : "Edit"}
+                </Button>
               </Flex>
             )}
 

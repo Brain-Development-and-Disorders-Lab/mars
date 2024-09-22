@@ -162,7 +162,6 @@ export class Users {
     const entity = await Entities.create({
       name: "Example Entity",
       archived: false,
-      locked: false,
       created: dayjs(Date.now()).toISOString(),
       description: "This is your first Entity. Go ahead and modify it!",
       owner: user,

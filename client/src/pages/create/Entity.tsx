@@ -114,7 +114,6 @@ const Entity = () => {
     owner: owner,
     created: created,
     archived: false,
-    locked: false,
     description: description,
     associations: {
       origins: selectedOrigins,
