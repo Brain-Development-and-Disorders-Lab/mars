@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Input, Flex } from "@chakra-ui/react";
+import { Input, Flex, Select } from "@chakra-ui/react";
 import { ValueEditorProps } from "react-querybuilder";
+
+// Custom components
 import SearchSelect from "@components/SearchSelect";
 
+// Custom types
 import { IGenericItem } from "@types";
 
 // Utility imports
@@ -25,24 +28,49 @@ const SearchQueryValue = ({
     handleOnChange(event.target.value);
   };
 
-  return (
-    <Flex>
-      {field === "origins" || field === "products" ? (
-        <SearchSelect value={selectedEntity} onChange={setSelectedEntity} />
-      ) : (
-        <Input
-          placeholder={_.capitalize(field)}
-          value={inputValue}
-          onChange={handleInputChange}
-          minW={"300px"}
-          rounded={"md"}
-          size={"sm"}
-          backgroundColor={"white"}
-          data-testid={"value-editor"}
-        />
-      )}
-    </Flex>
-  );
+  const getSelectComponent = (field: string) => {
+    switch (field) {
+      case "origins":
+      case "products":
+        return (
+          <SearchSelect value={selectedEntity} onChange={setSelectedEntity} />
+        );
+      case "attributes":
+        return (
+          <Flex gap={"2"}>
+            <Select placeholder={"Type"}>
+              <option>Text</option>
+              <option>Number</option>
+              <option>Date</option>
+              <option>URL</option>
+            </Select>
+            <Select placeholder={"contains"}>
+              <option>contains</option>
+              <option>does not contain</option>
+              <option>between</option>
+              <option>equals</option>
+              <option>&gt;</option>
+              <option>&lt;</option>
+            </Select>
+          </Flex>
+        );
+      default:
+        return (
+          <Input
+            placeholder={_.capitalize(field)}
+            value={inputValue}
+            onChange={handleInputChange}
+            minW={"300px"}
+            rounded={"md"}
+            size={"sm"}
+            backgroundColor={"white"}
+            data-testid={"value-editor"}
+          />
+        );
+    }
+  };
+
+  return <Flex>{getSelectComponent(field)}</Flex>;
 };
 
 export default SearchQueryValue;

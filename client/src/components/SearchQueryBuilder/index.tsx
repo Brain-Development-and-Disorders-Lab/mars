@@ -75,6 +75,15 @@ const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
         ),
       ],
     },
+    {
+      name: "attributes",
+      label: "Attributes",
+      operators: [
+        ...defaultOperators.filter((operator) =>
+          ["contains", "doesNotContain"].includes(operator.name),
+        ),
+      ],
+    },
   ];
 
   // Setup the initial query
