@@ -33,7 +33,19 @@ const SearchQueryValue = ({
       case "origins":
       case "products":
         return (
-          <SearchSelect value={selectedEntity} onChange={setSelectedEntity} />
+          <SearchSelect
+            value={selectedEntity}
+            resultType={"entity"}
+            onChange={setSelectedEntity}
+          />
+        );
+      case "project":
+        return (
+          <SearchSelect
+            value={selectedEntity}
+            resultType={"project"}
+            onChange={setSelectedEntity}
+          />
         );
       case "attributes":
         return (
@@ -70,7 +82,7 @@ const SearchQueryValue = ({
     }
   };
 
-  return <Flex>{getSelectComponent(field)}</Flex>;
+  return <Flex w={"100%"}>{getSelectComponent(field)}</Flex>;
 };
 
 export default SearchQueryValue;

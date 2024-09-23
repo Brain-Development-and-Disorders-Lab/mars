@@ -295,7 +295,15 @@ const Project = () => {
             // Execute the GraphQL mutation
             const response = await createProject({
               variables: {
-                project: projectData,
+                project: {
+                  name: projectData.name,
+                  owner: projectData.owner,
+                  archived: projectData.archived,
+                  description: projectData.description,
+                  created: projectData.created,
+                  entities: projectData.entities,
+                  collaborators: projectData.collaborators,
+                },
               },
             });
 

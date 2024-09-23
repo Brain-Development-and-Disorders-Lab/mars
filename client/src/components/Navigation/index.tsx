@@ -70,7 +70,7 @@ const Navigation = () => {
         {/* Workspace menu items */}
         <Flex direction={"column"} align={"self-start"} gap={"6"}>
           <Flex direction={"column"} gap={"2"} w={"100%"}>
-            <SearchBox />
+            <SearchBox resultType={"entity"} />
             <WorkspaceSwitcher />
           </Flex>
 

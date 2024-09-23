@@ -149,27 +149,36 @@ const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
 
   // Query to search by text value
   const SEARCH_TEXT = gql`
-    query Search($query: String, $isBuilder: Boolean, $showArchived: Boolean) {
+    query Search(
+      $query: String
+      $resultType: String
+      $isBuilder: Boolean
+      $showArchived: Boolean
+    ) {
       search(
         query: $query
+        resultType: $resultType
         isBuilder: $isBuilder
         showArchived: $showArchived
       ) {
-        _id
-        name
-        owner
-        archived
-        description
-        projects
-        attributes {
+        __typename
+        ... on Entity {
           _id
           name
+          owner
+          archived
           description
-          values {
+          projects
+          attributes {
             _id
             name
-            type
-            data
+            description
+            values {
+              _id
+              name
+              type
+              data
+            }
           }
         }
       }
@@ -193,6 +202,7 @@ const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
           format: "mongodb",
           ruleProcessor: ruleProcessor,
         }),
+        resultType: "entity",
         isBuilder: true,
         showArchived: false,
       },

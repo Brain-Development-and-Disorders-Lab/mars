@@ -2139,6 +2139,7 @@ const Entity = () => {
 
             <ModalBody p={"2"}>
               <SearchSelect
+                resultType={"entity"}
                 value={selectedProduct}
                 onChange={setSelectedProduct}
               />
@@ -2184,6 +2185,7 @@ const Entity = () => {
 
             <ModalBody p={"2"}>
               <SearchSelect
+                resultType={"entity"}
                 value={selectedOrigin}
                 onChange={setSelectedOrigin}
               />
