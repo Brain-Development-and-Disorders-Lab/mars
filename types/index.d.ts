@@ -421,9 +421,14 @@ export type SearchQueryBuilderProps = {
 // SearchSelect props
 export type SearchSelectProps = {
   value: IGenericItem;
+  resultType: "entity" | "project";
   placeholder?: string;
   onChange?: (value: any) => void;
   isDisabled?: boolean;
+};
+
+export type SearchBoxProps = {
+  resultType: "entity" | "project";
 };
 
 // Response message types

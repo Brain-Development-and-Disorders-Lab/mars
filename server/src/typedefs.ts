@@ -334,6 +334,8 @@ export const typedefs = `#graphql
     collaborators: Int
   }
 
+  union SearchResult = Entity | Project
+
   # Define query types
   type Query {
     # User queries
@@ -380,7 +382,7 @@ export const typedefs = `#graphql
     downloadFile(_id: String): String
 
     # Search queries
-    search(query: String, isBuilder: Boolean, showArchived: Boolean): [Entity]
+    search(query: String, resultType: String, isBuilder: Boolean, showArchived: Boolean): [SearchResult]
   }
 
   # Define mutation types

@@ -2,7 +2,7 @@ import _ from "lodash";
 import { GraphQLError } from "graphql";
 
 // Custom types
-import { Context, EntityModel } from "@types";
+import { Context, EntityModel, ProjectModel } from "@types";
 
 // Models
 import { Search } from "src/models/Search";
@@ -15,11 +15,12 @@ export const SearchResolvers = {
       _parent: any,
       args: {
         query: string;
+        resultType: string;
         isBuilder: boolean;
         showArchived: boolean;
       },
       context: Context,
-    ): Promise<EntityModel[]> => {
+    ): Promise<EntityModel[] | ProjectModel[]> => {
       // Authenticate the provided context
       await Authentication.authenticate(context);
 
@@ -35,12 +36,17 @@ export const SearchResolvers = {
 
       // Use a single search query, but require specifying the type of `query`
       if (args.isBuilder) {
-        return await Search.getQuery(args.query, context.workspace);
+        return await Search.getQuery(
+          args.query,
+          args.resultType,
+          context.workspace,
+        );
       } else {
         return await Search.getText(
           args.query,
-          context.workspace,
+          args.resultType,
           args.showArchived,
+          context.workspace,
         );
       }
     },
