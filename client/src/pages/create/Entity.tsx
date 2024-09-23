@@ -288,7 +288,17 @@ const Entity = () => {
       // Execute the GraphQL operation
       const response = await createEntity({
         variables: {
-          entity: entityState,
+          entity: {
+            name: entityState.name,
+            created: entityState.created,
+            archived: false,
+            owner: entityState.owner,
+            description: entityState.description,
+            associations: entityState.associations,
+            projects: entityState.projects,
+            attributes: entityState.attributes,
+            attachments: entityState.attachments,
+          },
         },
       });
 

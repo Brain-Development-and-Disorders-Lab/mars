@@ -159,10 +159,8 @@ export class Entities {
       };
     }
 
-    const update: { $set: IEntity } = {
-      $set: {
-        ...entity,
-      },
+    const update: { $set: Record<string, any> } = {
+      $set: {},
     };
 
     // Name
@@ -190,64 +188,63 @@ export class Entities {
       update.$set.projects = updated.projects;
     }
 
-    // Origins
-    if (
-      !_.isUndefined(updated.associations) &&
-      !_.isUndefined(updated.associations.origins)
-    ) {
-      const addOrigins = _.difference(
-        updated.associations.origins,
-        entity.associations.origins,
-      );
-      for await (const origin of addOrigins) {
-        await this.addOrigin(updated._id, origin);
-        await this.addProduct(origin._id, {
-          _id: updated._id,
-          name: updated.name,
-        });
-      }
-      const removeOrigins = _.difference(
-        entity.associations.origins,
-        updated.associations.origins,
-      );
-      for await (const origin of removeOrigins) {
-        await this.removeOrigin(updated._id, origin);
-        await this.removeProduct(origin._id, {
-          _id: updated._id,
-          name: updated.name,
-        });
-      }
-      update.$set.associations.origins = updated.associations.origins;
-    }
+    // Update the Entity associations
+    if (!_.isUndefined(updated.associations)) {
+      update.$set.associations = {};
 
-    // Products
-    if (
-      !_.isUndefined(updated.associations) &&
-      !_.isUndefined(updated.associations.products)
-    ) {
-      const addProducts = _.difference(
-        updated.associations.products,
-        entity.associations.products,
-      );
-      for await (const product of addProducts) {
-        await this.addProduct(updated._id, product);
-        await this.addOrigin(product._id, {
-          _id: updated._id,
-          name: updated.name,
-        });
+      // Origins
+      if (!_.isUndefined(updated.associations.origins)) {
+        const addOrigins = _.difference(
+          updated.associations.origins,
+          entity.associations.origins,
+        );
+        for await (const origin of addOrigins) {
+          await this.addOrigin(updated._id, origin);
+          await this.addProduct(origin._id, {
+            _id: updated._id,
+            name: updated.name,
+          });
+        }
+        const removeOrigins = _.difference(
+          entity.associations.origins,
+          updated.associations.origins,
+        );
+        for await (const origin of removeOrigins) {
+          await this.removeOrigin(updated._id, origin);
+          await this.removeProduct(origin._id, {
+            _id: updated._id,
+            name: updated.name,
+          });
+        }
+        update.$set.associations.origins = updated.associations.origins;
       }
-      const removeProducts = _.difference(
-        entity.associations.products,
-        updated.associations.products,
-      );
-      for await (const product of removeProducts) {
-        await this.removeProduct(updated._id, product);
-        await this.removeOrigin(product._id, {
-          _id: updated._id,
-          name: updated.name,
-        });
+
+      // Products
+      if (!_.isUndefined(updated.associations.products)) {
+        const addProducts = _.difference(
+          updated.associations.products,
+          entity.associations.products,
+        );
+        for await (const product of addProducts) {
+          await this.addProduct(updated._id, product);
+          await this.addOrigin(product._id, {
+            _id: updated._id,
+            name: updated.name,
+          });
+        }
+        const removeProducts = _.difference(
+          entity.associations.products,
+          updated.associations.products,
+        );
+        for await (const product of removeProducts) {
+          await this.removeProduct(updated._id, product);
+          await this.removeOrigin(product._id, {
+            _id: updated._id,
+            name: updated.name,
+          });
+        }
+        update.$set.associations.products = updated.associations.products;
       }
-      update.$set.associations.products = updated.associations.products;
     }
 
     // Attributes
@@ -312,7 +309,7 @@ export class Entities {
 
     const update: { $set: Partial<EntityModel> } = {
       $set: {
-        history: [historyEntityModel, ...entity.history],
+        history: [historyEntityModel, ...(entity.history || [])],
       },
     };
 
