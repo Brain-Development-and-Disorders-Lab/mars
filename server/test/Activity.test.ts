@@ -35,7 +35,7 @@ describe("Activity model", () => {
   });
 
   it("should create a new Activity entry", async () => {
-    const create = await Activity.create({
+    await Activity.create({
       timestamp: dayjs(Date.now()).toISOString(),
       type: "create",
       actor: "test",
@@ -46,10 +46,43 @@ describe("Activity model", () => {
         name: "Test Target",
       },
     });
-    expect(create.success).toBeTruthy();
 
     // Results should include new Activity entry as well as existing entries
     const result = await Activity.all();
     expect(result.length).toBe(1);
+  });
+
+  it("should return multiple requested Activity entries", async () => {
+    // Create a set of Activity entries
+    const NUM_ACTIVITY = 4;
+    for (let i = 0; i < NUM_ACTIVITY; i++) {
+      await Activity.create({
+        timestamp: dayjs(Date.now()).toISOString(),
+        type: "create",
+        actor: "test",
+        details: `Test Activity ${i}`,
+        target: {
+          type: "entities",
+          _id: "test",
+          name: "Test Target",
+        },
+      });
+    }
+
+    // Get all Activity and confirm length
+    const result = await Activity.all();
+    expect(result.length).toBe(NUM_ACTIVITY);
+
+    // Get half of all identifiers and request Activity with those identifiers
+    const identifiers: string[] = result
+      .slice(0, NUM_ACTIVITY / 2)
+      .map((activity) => activity._id);
+    const resultMany = await Activity.getMany(identifiers);
+
+    // Check result length and contents are matching what was requested
+    expect(resultMany.length).toBe(NUM_ACTIVITY / 2);
+    expect(resultMany.map((activity) => activity._id)).toEqual(
+      expect.arrayContaining(identifiers),
+    );
   });
 });
