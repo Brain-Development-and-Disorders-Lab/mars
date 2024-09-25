@@ -61,6 +61,7 @@ export class Projects {
       _id: getIdentifier("project"),
       timestamp: dayjs(Date.now()).toISOString(),
       ...project,
+      history: [],
     };
 
     const response = await getDatabase()

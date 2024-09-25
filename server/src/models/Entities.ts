@@ -103,6 +103,7 @@ export class Entities {
       _id: getIdentifier("entity"), // Generate new identifier
       timestamp: dayjs(Date.now()).toISOString(), // Add created timestamp
       ...entity, // Unpack existing IEntity fields
+      history: [],
     };
 
     for await (const origin of entity.associations.origins) {
