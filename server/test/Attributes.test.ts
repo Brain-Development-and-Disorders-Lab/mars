@@ -6,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, it } from "@jest/globals";
 
 // Attributes model and types
 import { Attributes } from "../src/models/Attributes";
+import { AttributeModel, ResponseMessage } from "../../types";
 
 // Database connectivity
 import { connect, disconnect } from "../src/connectors/database";
@@ -47,65 +48,213 @@ describe("Attributes model", () => {
     expect(attributes.length).toBe(1);
   });
 
-  it("should update the description", async () => {
-    await Attributes.create({
+  it("should get an Attribute", async () => {
+    // Create an Attribute and store the identifier
+    const result: ResponseMessage = await Attributes.create({
       name: "TestAttribute",
       owner: "henry.burgess@wustl.edu",
       archived: false,
       description: "Attribute description",
       values: [],
     });
-    let attributes = await Attributes.all();
-    expect(attributes.length).toBe(1);
+    const identifier = result.message;
 
-    await Attributes.update({
-      _id: attributes[0]._id,
-      archived: false,
-      timestamp: dayjs(Date.now()).toISOString(),
-      name: attributes[0].name,
-      owner: "henry.burgess@wustl.edu",
-      description: "Updated Attribute description",
-      values: attributes[0].values,
-    });
-    attributes = await Attributes.all();
-
-    expect(attributes.length).toBe(1);
-    expect(attributes[0].description).toBe("Updated Attribute description");
+    // Get the Attribute
+    const attribute: AttributeModel | null =
+      await Attributes.getOne(identifier);
+    expect(attribute).not.toBeNull();
   });
 
-  it("should update the values", async () => {
-    const create = await Attributes.create({
+  it("should return multiple requested Attribute entries", async () => {
+    // Create a set of Attribute entries
+    const NUM_ATTRIBUTES = 4;
+    for (let i = 0; i < NUM_ATTRIBUTES; i++) {
+      await Attributes.create({
+        name: "TestAttribute",
+        owner: "henry.burgess@wustl.edu",
+        archived: false,
+        description: `Test Attribute ${i}`,
+        values: [],
+      });
+    }
+
+    // Get all Attributes and confirm length
+    const result = await Attributes.all();
+    expect(result.length).toBe(NUM_ATTRIBUTES);
+
+    // Get half of all identifiers and request Attributes with those identifiers
+    const identifiers: string[] = result
+      .slice(0, NUM_ATTRIBUTES / 2)
+      .map((attribute) => attribute._id);
+    const resultMany = await Attributes.getMany(identifiers);
+
+    // Check result length and contents are matching what was requested
+    expect(resultMany.length).toBe(NUM_ATTRIBUTES / 2);
+    expect(resultMany.map((attribute) => attribute._id)).toEqual(
+      expect.arrayContaining(identifiers),
+    );
+  });
+
+  it("should confirm an Attribute exists", async () => {
+    const result: ResponseMessage = await Attributes.create({
       name: "TestAttribute",
       owner: "henry.burgess@wustl.edu",
       archived: false,
       description: "Attribute description",
       values: [],
     });
-    expect(create.success).toBeTruthy();
-    let attributes = await Attributes.all();
+    const identifier = result.message;
 
-    const update = await Attributes.update({
-      _id: attributes[0]._id,
-      archived: false,
-      name: attributes[0].name,
+    const exists = await Attributes.exists(identifier);
+    expect(exists).toBeTruthy();
+  });
+
+  it("should confirm an Attribute does not exist", async () => {
+    const exists = await Attributes.exists("noID");
+    expect(exists).toBeFalsy();
+  });
+
+  it("should update the Attribute description", async () => {
+    const result: ResponseMessage = await Attributes.create({
+      name: "TestAttribute",
       owner: "henry.burgess@wustl.edu",
-      timestamp: dayjs(Date.now()).toISOString(),
-      description: attributes[0].description,
-      values: [
-        {
-          _id: "v_0",
-          name: "Value0",
-          type: "text",
-          data: "Test",
-        },
-      ],
+      archived: false,
+      description: "Attribute description",
+      values: [],
     });
-    expect(update.success).toBeTruthy();
-    attributes = await Attributes.all();
+    const identifier = result.message;
 
-    expect(attributes[0].values.length).toBe(1);
-    expect(attributes[0].values[0].name).toBe("Value0");
-    expect(attributes[0].values[0].type).toBe("text");
-    expect(attributes[0].values[0].data).toBe("Test");
+    const attribute = await Attributes.getOne(identifier);
+    expect(attribute).not.toBeNull();
+    if (attribute) {
+      await Attributes.update({
+        _id: identifier,
+        archived: false,
+        timestamp: dayjs(Date.now()).toISOString(),
+        name: attribute.name,
+        owner: "henry.burgess@wustl.edu",
+        description: "Updated Attribute description",
+        values: attribute.values,
+      });
+    }
+
+    const updated = await Attributes.getOne(identifier);
+    expect(updated).not.toBeNull();
+    if (updated) {
+      expect(updated.description).toBe("Updated Attribute description");
+    }
+  });
+
+  it("should update the Attribute values", async () => {
+    const result: ResponseMessage = await Attributes.create({
+      name: "TestAttribute",
+      owner: "henry.burgess@wustl.edu",
+      archived: false,
+      description: "Attribute description",
+      values: [],
+    });
+    expect(result.success).toBeTruthy();
+    const identifier = result.message;
+
+    const attribute = await Attributes.getOne(identifier);
+    expect(attribute).not.toBeNull();
+    if (attribute) {
+      const update: ResponseMessage = await Attributes.update({
+        _id: identifier,
+        archived: false,
+        name: attribute.name,
+        owner: "henry.burgess@wustl.edu",
+        timestamp: dayjs(Date.now()).toISOString(),
+        description: attribute.description,
+        values: [
+          {
+            _id: "v_0",
+            name: "Value0",
+            type: "text",
+            data: "Test",
+          },
+        ],
+      });
+      expect(update.success).toBeTruthy();
+    }
+
+    const updated = await Attributes.getOne(identifier);
+    expect(updated).not.toBeNull();
+    if (updated) {
+      expect(updated.values.length).toBe(1);
+      expect(updated.values[0].name).toBe("Value0");
+      expect(updated.values[0].type).toBe("text");
+      expect(updated.values[0].data).toBe("Test");
+    }
+  });
+
+  it("should archive an Attribute", async () => {
+    const result: ResponseMessage = await Attributes.create({
+      name: "TestAttribute",
+      owner: "henry.burgess@wustl.edu",
+      archived: false,
+      description: "Attribute description",
+      values: [],
+    });
+    expect(result.success).toBeTruthy();
+    const identifier = result.message;
+
+    // Archive the Attribute and validate it has been archived
+    await Attributes.setArchived(identifier, true);
+    const attribute: AttributeModel | null =
+      await Attributes.getOne(identifier);
+    expect(attribute).not.toBeNull();
+    if (attribute) {
+      expect(attribute.archived).toBeTruthy();
+    }
+  });
+
+  it("should restore an Attribute", async () => {
+    const result: ResponseMessage = await Attributes.create({
+      name: "TestAttribute",
+      owner: "henry.burgess@wustl.edu",
+      archived: false,
+      description: "Attribute description",
+      values: [],
+    });
+    expect(result.success).toBeTruthy();
+    const identifier = result.message;
+
+    // Archive the Attribute and validate it has been archived
+    await Attributes.setArchived(identifier, true);
+    const attribute: AttributeModel | null =
+      await Attributes.getOne(identifier);
+    expect(attribute).not.toBeNull();
+    if (attribute) {
+      expect(attribute.archived).toBeTruthy();
+    }
+
+    // Restore the Attribute and validate it has been restored
+    await Attributes.setArchived(identifier, false);
+    const restored: AttributeModel | null = await Attributes.getOne(identifier);
+    expect(restored).not.toBeNull();
+    if (restored) {
+      expect(restored.archived).toBeFalsy();
+    }
+  });
+
+  it("should delete an Attribute", async () => {
+    const result: ResponseMessage = await Attributes.create({
+      name: "TestAttribute",
+      owner: "henry.burgess@wustl.edu",
+      archived: false,
+      description: "Attribute description",
+      values: [],
+    });
+    expect(result.success).toBeTruthy();
+    const identifier = result.message;
+
+    // Archive the Attribute and validate it has been archived
+    const deleted: ResponseMessage = await Attributes.delete(identifier);
+    expect(deleted.success).toBeTruthy();
+
+    // Assert that the Attribute does not exist
+    const exists = await Attributes.exists(identifier);
+    expect(exists).toBeFalsy();
   });
 });
