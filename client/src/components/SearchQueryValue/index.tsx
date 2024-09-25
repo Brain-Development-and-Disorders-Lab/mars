@@ -66,6 +66,29 @@ const SearchQueryValue = ({
             </Select>
           </Flex>
         );
+      case "values":
+        return (
+          <Flex gap={"2"}>
+            <Flex w={"100%"}>
+              <Select placeholder={"Type"}>
+                <option>Text</option>
+                <option>Number</option>
+                <option>Date</option>
+                <option>URL</option>
+              </Select>
+            </Flex>
+            <Input
+              placeholder={_.capitalize(field)}
+              value={inputValue}
+              onChange={handleInputChange}
+              minW={"300px"}
+              rounded={"md"}
+              size={"sm"}
+              backgroundColor={"white"}
+              data-testid={"value-editor"}
+            />
+          </Flex>
+        );
       default:
         return (
           <Input
