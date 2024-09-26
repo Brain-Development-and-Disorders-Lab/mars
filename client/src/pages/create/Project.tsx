@@ -34,6 +34,9 @@ import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
 import { gql, useMutation } from "@apollo/client";
 
+// Custom types
+import { ResponseData } from "@types";
+
 const Project = () => {
   const navigate = useNavigate();
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -58,7 +61,9 @@ const Project = () => {
       }
     }
   `;
-  const [createProject, { loading, error }] = useMutation(CREATE_PROJECT);
+  const [createProject, { loading, error }] = useMutation<{
+    createProject: ResponseData<string>;
+  }>(CREATE_PROJECT);
 
   useEffect(() => {
     if (error) {
@@ -293,7 +298,7 @@ const Project = () => {
               },
             });
 
-            if (response.data.createProject.success) {
+            if (response.data?.createProject.success) {
               setIsSubmitting(false);
               navigate("/projects");
             }
