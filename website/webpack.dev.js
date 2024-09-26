@@ -6,7 +6,7 @@ module.exports = merge(common, {
   mode: "development",
   devtool: "inline-source-map",
   devServer: {
-    static: [path.join(__dirname, "dist"), path.join(__dirname, "img")],
+    static: [path.join(__dirname, "dist"), path.join(__dirname, "src", "img")],
     hot: true,
     historyApiFallback: true,
   },
