@@ -17,11 +17,11 @@ const SearchQueryValue = ({
   handleOnChange,
 }: ValueEditorProps) => {
   const [inputValue, setInputValue] = useState(value || "");
-  const [selectedEntity, setSelectedEntity] = useState({} as IGenericItem);
+  const [selected, setSelected] = useState({} as IGenericItem);
 
   useEffect(() => {
-    handleOnChange(selectedEntity._id);
-  }, [selectedEntity]);
+    handleOnChange(selected._id);
+  }, [selected]);
 
   const handleInputChange = (event: any) => {
     setInputValue(event.target.value);
@@ -34,17 +34,17 @@ const SearchQueryValue = ({
       case "products":
         return (
           <SearchSelect
-            value={selectedEntity}
+            value={selected}
             resultType={"entity"}
-            onChange={setSelectedEntity}
+            onChange={setSelected}
           />
         );
-      case "project":
+      case "projects":
         return (
           <SearchSelect
-            value={selectedEntity}
+            value={selected}
             resultType={"project"}
-            onChange={setSelectedEntity}
+            onChange={setSelected}
           />
         );
       case "attributes":

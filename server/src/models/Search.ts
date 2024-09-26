@@ -146,8 +146,6 @@ export class Search {
       mongoQuery = parsedQuery;
     }
 
-    consola.info("resultType:", resultType);
-
     if (resultType === "project") {
       // Execute the search query with any specified options
       const results = await getDatabase()

@@ -49,8 +49,8 @@ const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
       ],
     },
     {
-      name: "project",
-      label: "Project",
+      name: "projects",
+      label: "Projects",
       operators: [
         ...defaultOperators.filter((operator) =>
           ["contains", "doesNotContain"].includes(operator.name),

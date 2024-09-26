@@ -40,8 +40,8 @@ const SearchSelect = (props: SearchSelectProps) => {
 
   // Query to retrieve Entities
   const GET_PROJECTS = gql`
-    query GetProjects($limit: Int, $archived: Boolean) {
-      entities(limit: $limit, archived: $archived) {
+    query GetProjects($limit: Int) {
+      projects(limit: $limit) {
         _id
         name
       }
@@ -52,6 +52,7 @@ const SearchSelect = (props: SearchSelectProps) => {
       projects: IGenericItem[];
     }>(GET_PROJECTS);
 
+  const [placeholder, setPlaceholder] = useState("Select Result");
   const [options, setOptions] = useState([] as IGenericItem[]);
 
   const getSelectOptions = async () => {
@@ -72,7 +73,6 @@ const SearchSelect = (props: SearchSelectProps) => {
       const result = await getProjects({
         variables: {
           limit: 20,
-          archived: true,
         },
       });
 
@@ -96,6 +96,15 @@ const SearchSelect = (props: SearchSelectProps) => {
   // Retrieve the options on component load, depending on the specified target
   useEffect(() => {
     getSelectOptions();
+
+    // Set the placeholder text
+    if (props.placeholder) {
+      setPlaceholder(props.placeholder);
+    } else if (props.resultType === "entity") {
+      setPlaceholder("Select Entity");
+    } else if (props.resultType === "project") {
+      setPlaceholder("Select Project");
+    }
   }, []);
 
   const { workspace } = useContext(WorkspaceContext);
@@ -204,8 +213,8 @@ const SearchSelect = (props: SearchSelectProps) => {
   };
 
   /**
-   * Handle selecting an Entity from the search results
-   * @param entity Selected Entity
+   * Handle selecting an result from the collection of search results
+   * @param {IGenericItem} result Selected result
    */
   const handleSelectResult = (result: IGenericItem) => {
     // Reset state
@@ -222,7 +231,7 @@ const SearchSelect = (props: SearchSelectProps) => {
     <Flex pos={"relative"} w={"100%"}>
       <InputGroup size={"sm"} onClick={onInputClick}>
         <Input
-          placeholder={props?.placeholder || "Select Entity"}
+          placeholder={placeholder}
           value={props.value?.name || ""}
           backgroundColor={"white"}
           data-testid={"value-editor"}
