@@ -3,7 +3,8 @@ import {
   EntityMetrics,
   EntityModel,
   IEntity,
-  ResponseMessage,
+  IResponseMessage,
+  ResponseData,
 } from "@types";
 import { GraphQLError } from "graphql";
 import _ from "lodash";
@@ -216,7 +217,7 @@ export const EntitiesResolvers = {
       _parent: any,
       args: { _id: string; description: string },
       context: Context,
-    ): Promise<ResponseMessage> => {
+    ): Promise<IResponseMessage> => {
       // Authenticate the provided context
       await Authentication.authenticate(context);
 
@@ -259,7 +260,7 @@ export const EntitiesResolvers = {
       _parent: any,
       args: { entity: IEntity },
       context: Context,
-    ): Promise<ResponseMessage> => {
+    ): Promise<ResponseData<string>> => {
       // Authenticate the provided context
       await Authentication.authenticate(context);
 
@@ -268,7 +269,7 @@ export const EntitiesResolvers = {
 
       if (result.success) {
         // Add the Entity to the Workspace
-        await Workspaces.addEntity(context.workspace, result.message);
+        await Workspaces.addEntity(context.workspace, result.data);
 
         // Create new Activity if successful
         const activity = await Activity.create({
@@ -295,7 +296,7 @@ export const EntitiesResolvers = {
       _parent: any,
       args: { entity: EntityModel },
       context: Context,
-    ): Promise<ResponseMessage> => {
+    ): Promise<IResponseMessage> => {
       // Authenticate the provided context
       await Authentication.authenticate(context);
 
@@ -431,7 +432,7 @@ export const EntitiesResolvers = {
       _parent: any,
       args: { toArchive: string[]; state: boolean },
       context: Context,
-    ): Promise<ResponseMessage> => {
+    ): Promise<IResponseMessage> => {
       // Authenticate the provided context
       await Authentication.authenticate(context);
 

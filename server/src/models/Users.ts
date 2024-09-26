@@ -1,5 +1,5 @@
 // Custom types
-import { ResponseMessage, UserModel } from "@types";
+import { IResponseMessage, UserModel } from "@types";
 
 import _ from "lodash";
 import { getDatabase } from "../connectors/database";
@@ -59,12 +59,12 @@ export class Users {
    * Add a Workspace to the collection a User has access to
    * @param orcid User ORCiD
    * @param workspace Workspace to assign the User access to
-   * @return {Promise<ResponseMessage>}
+   * @return {Promise<IResponseMessage>}
    */
   static addWorkspace = async (
     orcid: string,
     workspace: string,
-  ): Promise<ResponseMessage> => {
+  ): Promise<IResponseMessage> => {
     const result = await Users.getOne(orcid);
 
     // Attempt to update the `UserModel` with the Workspace
@@ -79,7 +79,7 @@ export class Users {
     };
   };
 
-  static update = async (updated: UserModel): Promise<ResponseMessage> => {
+  static update = async (updated: UserModel): Promise<IResponseMessage> => {
     const user = await this.getOne(updated._id);
 
     if (_.isNull(user)) {
@@ -128,7 +128,7 @@ export class Users {
     };
   };
 
-  static create = async (user: UserModel): Promise<ResponseMessage> => {
+  static create = async (user: UserModel): Promise<IResponseMessage> => {
     const response = await getDatabase()
       .collection<UserModel>(USERS_COLLECTION)
       .insertOne(user);
@@ -145,7 +145,7 @@ export class Users {
   static bootstrap = async (
     user: string,
     workspace: string,
-  ): Promise<ResponseMessage> => {
+  ): Promise<IResponseMessage> => {
     const project = await Projects.create({
       name: "My First Project",
       archived: false,
@@ -197,7 +197,7 @@ export class Users {
       ],
       history: [],
     });
-    await Workspaces.addEntity(workspace, entity.message);
+    await Workspaces.addEntity(workspace, entity.data);
 
     return {
       success: true,
