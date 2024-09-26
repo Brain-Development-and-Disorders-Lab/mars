@@ -26,7 +26,12 @@ import { useToken } from "src/authentication/useToken";
 import _ from "lodash";
 
 // Existing and custom types
-import { LoginProps, ResponseMessage, UserModel, WorkspaceModel } from "@types";
+import {
+  LoginProps,
+  IResponseMessage,
+  UserModel,
+  WorkspaceModel,
+} from "@types";
 
 // Workspace context
 import { WorkspaceContext } from "src/Context";
@@ -139,7 +144,7 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
     }
   `;
   const [updateUser, { error: userUpdateError }] = useMutation<{
-    updateUser: ResponseMessage;
+    updateUser: IResponseMessage;
   }>(UPDATE_USER);
 
   // Workspace context

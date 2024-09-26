@@ -4,7 +4,7 @@ import {
   AttributeModel,
   Context,
   IAttribute,
-  ResponseMessage,
+  IResponseMessage,
 } from "@types";
 
 // Models
@@ -302,7 +302,7 @@ export const AttributesResolvers = {
       _parent: any,
       args: { toArchive: string[]; state: boolean },
       context: Context,
-    ): Promise<ResponseMessage> => {
+    ): Promise<IResponseMessage> => {
       // Authenticate the provided context
       await Authentication.authenticate(context);
 

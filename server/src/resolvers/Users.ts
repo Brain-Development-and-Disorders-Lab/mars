@@ -1,4 +1,4 @@
-import { Context, ResponseMessage, UserModel } from "@types";
+import { Context, IResponseMessage, UserModel } from "@types";
 
 // Models
 import { Authentication } from "src/models/Authentication";
@@ -40,7 +40,7 @@ export const UsersResolvers = {
       _parent: any,
       args: { user: UserModel },
       context: Context,
-    ): Promise<ResponseMessage> => {
+    ): Promise<IResponseMessage> => {
       // Authenticate the provided context
       await Authentication.authenticate(context);
 

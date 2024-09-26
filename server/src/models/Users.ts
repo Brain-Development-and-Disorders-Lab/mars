@@ -157,7 +157,7 @@ export class Users {
       collaborators: [], // Assuming you might want collaborators
       history: [],
     });
-    await Workspaces.addProject(workspace, project.message);
+    await Workspaces.addProject(workspace, project.data);
 
     const entity = await Entities.create({
       name: "Example Entity",
