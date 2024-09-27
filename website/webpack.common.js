@@ -1,5 +1,6 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const CopyPlugin = require("copy-webpack-plugin");
 
 module.exports = {
   entry: "./src/index.tsx",
@@ -8,6 +9,9 @@ module.exports = {
       title: "Metadatify",
       template: "src/index.html",
       favicon: "src/img/Favicon.png",
+    }),
+    new CopyPlugin({
+      patterns: [{ from: "src/img", to: "" }],
     }),
   ],
   module: {

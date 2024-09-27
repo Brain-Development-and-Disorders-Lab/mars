@@ -11,6 +11,7 @@ import {
   Image,
   Link,
   ListItem,
+  Spacer,
   Text,
   UnorderedList,
 } from "@chakra-ui/react";
@@ -152,6 +153,7 @@ const App = () => {
               justify={"center"}
               wrap={"wrap"}
               gap={["4", "8"]}
+              maxW={["", "60vw"]}
             >
               <Flex
                 direction={"column"}
@@ -321,6 +323,7 @@ const App = () => {
               justify={"space-around"}
               wrap={"wrap"}
               gap={["4", "8"]}
+              maxW={["", "60vw"]}
             >
               <Flex
                 direction={"column"}
@@ -340,6 +343,8 @@ const App = () => {
                   away! While in pre-release, Metadatify will be public and free
                   to use.
                 </Text>
+                <Spacer />
+
                 <Flex direction={"row"} gap={"1"} align={"center"}>
                   <Link
                     color={"blue.500"}
@@ -369,6 +374,7 @@ const App = () => {
                   Follow the documentation on GitHub to download and deploy your
                   own instance of Metadatify.
                 </Text>
+                <Spacer />
                 <Flex direction={"row"} gap={"1"} align={"center"}>
                   <Link
                     color={"blue.500"}
@@ -395,12 +401,6 @@ const App = () => {
               >
                 <Icon name={"l_github"} size={"lg"} />
                 <Text fontWeight={"bold"}>GitHub</Text>
-                <Flex>
-                  <Image
-                    alt="GitHub Repo stars"
-                    src="https://img.shields.io/github/stars/Brain-Development-and-Disorders-Lab/mars"
-                  />
-                </Flex>
                 <Text>
                   Since Metadatify is an open-source project, you can contribute
                   to further development! Get in touch with{" "}
@@ -412,6 +412,7 @@ const App = () => {
                   </Link>{" "}
                   to discuss ways to best make an impact on development.
                 </Text>
+                <Spacer />
                 <Flex direction={"row"} gap={"1"} align={"center"}>
                   <Link
                     color={"blue.500"}
@@ -423,6 +424,11 @@ const App = () => {
                     GitHub Repository
                   </Link>
                   <Icon name={"link"} color={"blue.500"} />
+                  <Spacer />
+                  <Image
+                    alt="GitHub Repo stars"
+                    src="https://img.shields.io/github/stars/Brain-Development-and-Disorders-Lab/mars"
+                  />
                 </Flex>
               </Flex>
             </Flex>
