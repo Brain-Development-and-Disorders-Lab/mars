@@ -40,6 +40,7 @@ import {
   BsFillPersonFill,
   BsGithub,
   BsGlobe,
+  BsGlobeAmericas,
   BsInfoCircleFill,
   BsLink45Deg,
   BsList,
@@ -51,6 +52,7 @@ import {
   BsPrinter,
   BsQuestionOctagonFill,
   BsSearch,
+  BsServer,
   BsTagFill,
   BsTrashFill,
   BsUpcScan,
@@ -124,7 +126,7 @@ const SYSTEM_ICONS: Record<string, IconType> = {
   l_box: SiBox,
   l_labArchives: BsFillBookFill,
   l_globus: BsGlobe,
-  l_gitHub: BsGithub,
+  l_github: BsGithub,
 
   // Values
   v_date: BsCalendarWeekFill,
@@ -149,6 +151,10 @@ const SYSTEM_ICONS: Record<string, IconType> = {
   // Density
   d_low: TbBaselineDensityMedium,
   d_high: TbBaselineDensitySmall,
+
+  // Servers
+  serv_managed_hosted: BsGlobeAmericas,
+  serv_self_hosted: BsServer,
 
   // Sort
   sort: FaSort,

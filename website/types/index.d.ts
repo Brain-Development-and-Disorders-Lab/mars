@@ -70,6 +70,10 @@ export type IconNames =
   | "c_down"
   | "c_expand"
 
+  // Servers
+  | "serv_managed_hosted"
+  | "serv_self_hosted"
+
   // Density
   | "d_low"
   | "d_high"

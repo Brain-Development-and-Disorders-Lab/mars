@@ -3,13 +3,16 @@ import React from "react";
 
 // Chakra provider component
 import {
+  Avatar,
   Button,
   ChakraProvider,
   Flex,
   Heading,
   Image,
   Link,
+  ListItem,
   Text,
+  UnorderedList,
 } from "@chakra-ui/react";
 
 // Custom components
@@ -32,15 +35,9 @@ const App = () => {
         p={"4"}
         m={"0"}
         gap={"0"}
-        opacity={"0.8"}
       >
-        <Flex
-          bg={"#F2F8FF"}
-          rounded={"3xl"}
-          h={"100%"}
-          direction={"column"}
-          p={"4"}
-        >
+        <Flex bg={"#F2F8FF"} rounded={"3xl"} direction={"column"} p={"4"}>
+          {/* Header */}
           <Flex
             direction={"row"}
             gap={"2"}
@@ -55,10 +52,13 @@ const App = () => {
               <Heading size={"md"}>Metadatify</Heading>
             </Flex>
             <Flex align={"center"} gap={"1"}>
-              <Link href={"https://app.metadatify.com"}>Log In</Link>
+              <Link href={"https://app.metadatify.com"} isExternal>
+                Log In
+              </Link>
               <Icon name={"a_right"} />
             </Flex>
           </Flex>
+
           {/* Home */}
           <Flex
             id={"home"}
@@ -69,14 +69,12 @@ const App = () => {
             overflow={"hidden"}
             align={"center"}
           >
-            {/* Page Header */}
             <Flex
               direction={"column"}
               align={"center"}
               justify={"center"}
               gap={"8"}
-              h={"100%"}
-              minH={["40vh", ""]}
+              minH={["60vh", "40vh"]}
             >
               <Flex
                 direction={"column"}
@@ -119,12 +117,23 @@ const App = () => {
               </Flex>
             </Flex>
 
-            <Image
-              src={"Dashboard.png"}
-              maxW={"80vw"}
-              rounded={"xl"}
-              boxShadow={"lg"}
-            />
+            <Flex
+              direction={"column"}
+              h={["30vh", "100%"]}
+              align={"center"}
+              justify={"center"}
+              gap={"2"}
+            >
+              <Image
+                src={"Dashboard.png"}
+                maxW={"80vw"}
+                rounded={"xl"}
+                boxShadow={"lg"}
+              />
+              <Text fontWeight={"semibold"} color={"gray.600"}>
+                Metadatify Dashboard
+              </Text>
+            </Flex>
           </Flex>
 
           {/* Features */}
@@ -289,16 +298,22 @@ const App = () => {
           {/* Get Started */}
           <Flex
             id={"get-started"}
-            h={"100vh"}
             direction={"column"}
             gap={"8"}
             pt={"8"}
             align={"center"}
           >
             <Heading>Get Started</Heading>
-            <Text>
-              There are three great ways to get started managing your metadata
-              with Metadatify:
+            <Text maxW={["", "50vw"]}>
+              To get started with Metadatify, check out any of the three options
+              below, whether you are looking to use Metadatify right away or
+              help with development. If you are unsure where to start or want to
+              know how Metadatify would best suit your needs, please don't
+              hesitate to contact{" "}
+              <Link color={"blue.500"} href={"mailto:henry.burgess@wustl.edu"}>
+                Henry Burgess
+              </Link>
+              !
             </Text>
             <Flex
               w={"100%"}
@@ -318,12 +333,23 @@ const App = () => {
                 bg={"white"}
                 boxShadow={"sm"}
               >
+                <Icon name={"serv_managed_hosted"} size={"lg"} />
                 <Text fontWeight={"bold"}>Managed Hosting</Text>
                 <Text>
                   You can sign up and login Metadatify using your ORCiD right
                   away! While in pre-release, Metadatify will be public and free
                   to use.
                 </Text>
+                <Flex direction={"row"} gap={"1"} align={"center"}>
+                  <Link
+                    color={"blue.500"}
+                    href={"https://app.metadatify.com"}
+                    isExternal
+                  >
+                    Metadatify
+                  </Link>
+                  <Icon name={"link"} color={"blue.500"} />
+                </Flex>
               </Flex>
               <Flex
                 direction={"column"}
@@ -336,12 +362,25 @@ const App = () => {
                 bg={"white"}
                 boxShadow={"sm"}
               >
+                <Icon name={"serv_self_hosted"} size={"lg"} />
                 <Text fontWeight={"bold"}>Self-Hosted</Text>
                 <Text>
                   Metadatify will remain open-source and accessible via GitHub.
                   Follow the documentation on GitHub to download and deploy your
                   own instance of Metadatify.
                 </Text>
+                <Flex direction={"row"} gap={"1"} align={"center"}>
+                  <Link
+                    color={"blue.500"}
+                    href={
+                      "https://github.com/Brain-Development-and-Disorders-Lab/mars"
+                    }
+                    isExternal
+                  >
+                    Documentation
+                  </Link>
+                  <Icon name={"link"} color={"blue.500"} />
+                </Flex>
               </Flex>
               <Flex
                 direction={"column"}
@@ -354,6 +393,7 @@ const App = () => {
                 bg={"white"}
                 boxShadow={"sm"}
               >
+                <Icon name={"l_github"} size={"lg"} />
                 <Text fontWeight={"bold"}>GitHub</Text>
                 <Flex>
                   <Image
@@ -372,6 +412,90 @@ const App = () => {
                   </Link>{" "}
                   to discuss ways to best make an impact on development.
                 </Text>
+                <Flex direction={"row"} gap={"1"} align={"center"}>
+                  <Link
+                    color={"blue.500"}
+                    href={
+                      "https://github.com/Brain-Development-and-Disorders-Lab/mars"
+                    }
+                    isExternal
+                  >
+                    GitHub Repository
+                  </Link>
+                  <Icon name={"link"} color={"blue.500"} />
+                </Flex>
+              </Flex>
+            </Flex>
+            <Flex direction={"column"} gap={"2"}>
+              <Flex justify={"center"} pb={"4"}>
+                <Heading size={"lg"}>Acknowledgements</Heading>
+              </Flex>
+              <Text fontWeight={"semibold"}>Organizations:</Text>
+              <UnorderedList>
+                <ListItem>
+                  <Text>
+                    Department of Neuroscience, Washington University School of
+                    Medicine in St. Louis
+                  </Text>
+                </ListItem>
+                <ListItem>
+                  <Text>
+                    Brain Development and Disorders Lab, Washington University
+                    School of Medicine in St. Louis
+                  </Text>
+                </ListItem>
+                <ListItem>
+                  <Text>
+                    Scientific Software Engineering Center, Georgia Tech
+                  </Text>
+                </ListItem>
+              </UnorderedList>
+
+              <Text fontWeight={"semibold"}>Contributors:</Text>
+              <Flex direction={"row"} gap={"2"}>
+                <Flex
+                  direction={"column"}
+                  gap={"2"}
+                  p={"4"}
+                  rounded={"md"}
+                  border={"1px"}
+                  borderColor={"gray.200"}
+                  bg={"white"}
+                  align={"center"}
+                  justify={"center"}
+                >
+                  <Avatar
+                    name={"Henry Burgess"}
+                    src={"https://avatars.githubusercontent.com/u/60735885"}
+                  />
+                  <Text fontWeight={"semibold"}>Henry Burgess</Text>
+                  <Link
+                    color={"blue.500"}
+                    href={"https://github.com/henryjburg"}
+                  >
+                    GitHub
+                  </Link>
+                </Flex>
+                <Flex
+                  direction={"column"}
+                  gap={"2"}
+                  p={"4"}
+                  rounded={"md"}
+                  border={"1px"}
+                  borderColor={"gray.200"}
+                  bg={"white"}
+                  align={"center"}
+                  justify={"center"}
+                >
+                  <Avatar
+                    name={"Robin Fievet"}
+                    src={"https://avatars.githubusercontent.com/u/11888851"}
+                  />
+                  <Text fontWeight={"semibold"}>Robin Fievet</Text>
+                  <Link color={"blue.500"} href={"https://github.com/rfievet"}>
+                    GitHub
+                  </Link>
+                </Flex>
               </Flex>
             </Flex>
           </Flex>

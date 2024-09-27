@@ -68,7 +68,9 @@ const Carousel = (props: { images: { path: string; caption: string }[] }) => {
         />
         <Flex h={"100%"} direction={"column"} gap={"4"}>
           <Image src={imgPath} rounded={"xl"} maxH={"lg"} boxShadow={"lg"} />
-          <Text fontWeight={"semibold"}>{imgCaption}</Text>
+          <Text fontWeight={"semibold"} color={"gray.600"}>
+            {imgCaption}
+          </Text>
         </Flex>
         <IconButton
           aria-label={"Next image"}
