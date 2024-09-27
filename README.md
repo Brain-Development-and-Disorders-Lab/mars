@@ -1,6 +1,6 @@
 # Metadatify 🧪
 
-> Metadatify (Project Metadata Aggegation for Reproducible Science) is an open-source web-based tool to create, manage, and search scientific metadata.
+> Project Metadata Aggregation for Reproducible Science (MARS) is an open-source web-based tool to create, manage, and search scientific metadata.
 
 ![Dashboard](website/src/img/Dashboard.png)
 
@@ -27,7 +27,7 @@ Everything is recognized as an "Entity", from physical brain slices to antibodie
 
 Entities have the following components that are able to be user-defined:
 
-- `name`: This is the identifying name for the Entity. This is not as powerful as an ID, and is not required to be unique. MARS uses an ID system behind-the-scenes.
+- `name`: This is the identifying name for the Entity. This is not as powerful as an ID and is not required to be unique. MARS uses an ID system behind-the-scenes.
 - `owner`: The creator of the Entity, typically assigned to the ORCiD of the user creating the Entity.
 - `created`: The date that the Entity came into existence or was created.
 - `description`: A text description of the Entity. This should not be used to store concrete metadata. Metadata should be expressed later as Attributes.
@@ -50,7 +50,7 @@ Attributes are the method of organizing Entity metadata. Attributes contain type
 - `number`: A numerical value.
 - `date`: A date or timestamp.
 - `url`: A link to external or internal online resource.
-- `entity`: A "soft" relation to another Entity. This does not have the significance of an Origin or Product Entity in the overall system, but could be used to express a similar concept.
+- `entity`: A "soft" relation to another Entity. This does not have the significance of an Origin or Product Entity in the overall system but could be used to express a similar concept.
 - `select`: A drop-down containing a customizable set of options. The set of options can be customized before and after the value is created.
 
 Template Attributes can be created, to allow metadata structures and values to be reused across Entities.
@@ -138,7 +138,7 @@ To start the client, run `yarn start` in the `/client` directory. Start the serv
 - Brain Development and Disorders Lab, Washington University School of Medicine in St. Louis
 - Scientific Software Engineering Center, Georgia Institute of Technology
 
-**Contributers:**
+**Contributors:**
 
 - Henry Burgess
 - Robin Fievet
