@@ -1,67 +1,120 @@
-# Project MARS 🔬
+# Metadatify 🧪
 
-> Project MARS (Metadata Aggegator for Reproducible Science), aka. Metadatify
+> Metadatify (Project Metadata Aggegation for Reproducible Science) is an open-source web-based tool to create, manage, and search scientific metadata.
 
-An open-source and customizable workflow tool for organizing, tracking, and searching metadata generated from scientific experiments. Named after the underlying philosophy of the FAIR data principles, that data should ultimately be reusable.
+![Dashboard](website/src/img/Dashboard.png)
 
-![screenshot.png](screenshot.png)
+## Features
 
-**⚠️ WARNING: Project MARS is still in early development and should be used with caution.**
+- Rich metadata entry and management, including support for file imports (CSV, JSON files)
+- Export partial or complete metadata into multiple different file types (CSV, JSON files)
+- Text-based search and advanced query system for searching deeply through metadata
+- Manage metadata across projects and share with external users using Workspaces
+- Establish relationships between metadata entries, visualize these relationships
+- Edit history and version restore for metadata entries
+- User accounts handled via [ORCiD](https://orcid.org) sign-in
 
-## Features ✨
+## Concepts
 
-- Rich metadata entry system including spreadsheet imports
-- Text-based search and advanced query system for searching metadata
-- Account system using [ORCiD](https://orcid.org) sign-in
-- Relationships between metadata and graph visualizations of the relationships
-- History and version control system
-- Specific metadata or entire database exports
+### Representing Metadata
 
-## Concepts and Abstractions
+#### Entity
 
-### Entities 📦
+> [!NOTE]
+> "Entity" refers to the object that the metadata is describing.
 
-Everything is recognized as an "entity", from physical brain slices to antibodies. Details within Entities are organized using Attributes (see below), and Attributes contain typed data Values.
+Everything is recognized as an "Entity", from physical brain slices to antibodies. Specific metadata values within Entities are organized using "Attributes" (see below), and Attributes contain typed data "Values".
 
-Entities have the following components:
+Entities have the following components that are able to be user-defined:
 
-- _Name_: This is an ID or general name for an Entity.
-- _Owner_: The creator of the Entity.
-- _Date_: The date that the Entity came into existence or was created.
-- _Description_: An entirely textual description of the Entity. Further metadata should be expressed later as Attributes.
-- _Projects_: Specify any existing Projects that the Entity belongs to.
-- _Origins_: If the Entity was created as a product of another Entity, then the other Entity is an Origin. The Origin Entities must already exist in the database.
-- _Products_: If the Entity being entered into the system generated subsequent Entities that already exist in the system, the generated Entities can be specified. The Product Entities must already exist in the database.
-- _Attributes_: This is a specific metadata component and is explained below (see below).
-- _Attachments_: Attach images or PDF files to an Entity.
+- `name`: This is the identifying name for the Entity. This is not as powerful as an ID, and is not required to be unique. MARS uses an ID system behind-the-scenes.
+- `owner`: The creator of the Entity, typically assigned to the ORCiD of the user creating the Entity.
+- `created`: The date that the Entity came into existence or was created.
+- `description`: A text description of the Entity. This should not be used to store concrete metadata. Metadata should be expressed later as Attributes.
+- `projects`: The collection of Projects that the Entity is a member of.
+- `origins`: The collection of Origin Entities related to this Entity. If this Entity was created from another Entity, the other Entity is the Origin. This is often referred to in other contexts as the "parent".
+- `products`: The collection of Product Entities related to this Entity. If this Entity has created other Entities, the other Entities are the Products. These are often referred to in other contexts as "children".
+- `attributes`: Attributes are used to specify the Entity metadata values. Attributes are discussed further below.
+- `attachments`: Images or PDF files can be attached to Entities.
 
-### Attributes ⚙️
+![Entity](website/src/img/Entity.png)
 
-Attributes are the primary method of organizing metadata associated with Entities. Attributes contain types of metadata known as _Values_. Values can be any of the following:
+#### Attribute
 
-- `string`: A textual description of any length.
+> [!TIP]
+> All metadata should be expressed using Attributes.
+
+Attributes are the method of organizing Entity metadata. Attributes contain types of metadata stored as key-value pairs known as `values`. Values can be of the following types:
+
+- `string`: A text value of any length.
 - `number`: A numerical value.
-- `date`: A date or time.
-- `url`: A link to external or internal item.
+- `date`: A date or timestamp.
+- `url`: A link to external or internal online resource.
 - `entity`: A "soft" relation to another Entity. This does not have the significance of an Origin or Product Entity in the overall system, but could be used to express a similar concept.
-- `select`: A drop-down containing a customizable set of options.
+- `select`: A drop-down containing a customizable set of options. The set of options can be customized before and after the value is created.
 
-### Projects 📚
+Template Attributes can be created, to allow metadata structures and values to be reused across Entities.
 
-Projects are simply groups of Entities. Projects can be of one type of Entities, or a mixture of multiple types.
+![Attribute](website/src/img/Attribute.png)
 
-## Deployment 👉
+### Organizing Metadata
 
-### Configure environment variables
+#### Projects
 
-The server component of reusable.bio is containerized using Docker. Before starting the Docker containers, three environment variables must be configured in an `.env` file that should be placed in the `/server` directory. The variables are `CONNECTION_STRING` and `PORT`: the MongoDB connection string and the port of the server to listen on respectively. Example contents are shown below:
+Projects are collections of Entities. Entities can be added and removed from Projects. Projects can be used to export large numbers of Entities.
+
+#### Workspaces
+
+A Workspace is a collection of Entities, Attributes, and Projects. Access is managed using the user's ORCiD, and users can be added and removed from Workspace access. Activity is tracked across a Workspace, including modifications made to any Entities, Attributes, and Projects.
+
+Currently, access to a Workspace grants the user access to all Entities, Attributes, and Projects within that Workspace.
+
+## Testing
+
+### Client
+
+To run component tests, run `yarn test` in the `/client` directory. To run Cypress tests, run `yarn cypress run` in the root `/` directory of the repository. Ensure the server is running, otherwise the Cypress tests will fail.
+
+### Server
+
+To run unit tests, run `yarn test` in the `/server` directory.
+
+> [!WARNING]
+> This will erase the local MongoDB database!
+
+## Deployment
+
+### Specify environment variables
+
+Before starting the Docker containers, three environment variables must be configured in an `.env` file that should be placed in the `/server` directory.
+
+The `.env` file must have the following variables:
+
+- `CONNECTION_STRING`: The MongoDB connection string, update the username and password.
+- `GRAPHQL_PORT`: The port value for the GraphQL endpoint
+- `NODE_ENV`: Specify the Node environment
+
+The following variables are only required if deploying with ORCiD authentication, see [ORCiD Developer Tools](https://orcid.org/developer-tools):
+
+- `CLIENT_ID`: Client application ID
+- `CLIENT_SECRET`: Client application secret
+
+An example `.env` file is shown below:
 
 ```Text
-CONNECTION_STRING=mongodb://admin:metadataadmin@localhost:27017/
-PORT=8000
+# Database variables
+CONNECTION_STRING=mongodb://<username>:<password>@localhost:27017/
+GRAPHQL_PORT=8000
+
+# Node environment
+NODE_ENV=development
+
+# ORCiD ID API variables
+CLIENT_ID=<ORCiD client ID>
+CLIENT_SECRET=<ORCiD client secret>
 ```
 
-### Starting the database
+### Starting the Docker containers
 
 To start a fresh instance of the MongoDB database, use `docker compose`:
 
@@ -69,14 +122,23 @@ To start a fresh instance of the MongoDB database, use `docker compose`:
 docker compose up --build
 ```
 
-This command will build all required containers before starting the containers required to run the system. The system can then be viewed in the browser at `localhost:8080`, and the MongoDB database can be browsed using the `mongo-express` interface accessible at `localhost:8081`.
+This command will build all required containers before starting the containers required by the server. The MongoDB database can be browsed using the `mongo-express` interface accessible at `localhost:8081`.
 
-**⚠️ Note: Currently, only the MongoDB instance and `mongo-express` interface are started. See the below instructions to start the interface and server.**
+### Starting the MARS client and server
 
-### Starting the interface and server
+Install all client dependencies by running `yarn` in the `/client` directory. Install all server dependencies by running `yarn` in the `/server` directory.
 
-To start the reusable interface, run `yarn start` in the `/client` directory. Start the server by running `yarn build` and `yarn start` in the `/server` directory. Both the client and server should be running alongside the Docker containers before attempting to access the interface at `localhost:8080`.
+To start the client, run `yarn start` in the `/client` directory. Start the server by running `yarn build` and `yarn start` in the `/server` directory. Both the client and server should be running alongside the Docker containers before attempting to access the interface at `localhost:8080`.
 
-### Testing
+## Acknowledgements
 
-To start Cypress test, run `yarn cypress run` in the root (client and server needs to be running)
+**Organizations:**
+
+- Department of Neuroscience, Washington University School of Medicine in St. Louis
+- Brain Development and Disorders Lab, Washington University School of Medicine in St. Louis
+- Scientific Software Engineering Center, Georgia Institute of Technology
+
+**Contributers:**
+
+- Henry Burgess
+- Robin Fievet
