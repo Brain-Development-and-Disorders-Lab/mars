@@ -2,7 +2,7 @@
 import React, { useEffect } from "react";
 
 // Existing and custom components
-import { Flex, Link, Text, useToast } from "@chakra-ui/react";
+import { Flex, IconButton, Text, useToast } from "@chakra-ui/react";
 import ReactFlow, {
   MiniMap,
   Controls,
@@ -14,8 +14,6 @@ import ReactFlow, {
   Edge,
 } from "reactflow";
 import "reactflow/dist/style.css";
-import Loading from "@components/Loading";
-import Error from "@components/Error";
 import Icon from "@components/Icon";
 
 // Existing and custom types
@@ -103,9 +101,13 @@ const Graph = (props: {
             id: origin._id,
             type: "input",
             data: {
-              label: generateLabel({ id: origin._id, name: origin.name }),
+              label: generateLabel(origin._id, origin.name, false),
             },
             position: { x: 250, y: 0 },
+            style: {
+              border: "2px solid #A0AEC0", // gray.400
+              background: "#E2E8F0", // gray.200
+            },
           });
 
           // Create edge
@@ -120,7 +122,7 @@ const Graph = (props: {
         }
       }
 
-      // Add products
+      // Add the Products
       if (entity.associations.products.length > 0) {
         // Add nodes and edges
         for (const product of entity.associations.products) {
@@ -129,9 +131,13 @@ const Graph = (props: {
             id: product._id,
             type: "output",
             data: {
-              label: generateLabel({ id: product._id, name: product.name }),
+              label: generateLabel(product._id, product.name, false),
             },
             position: { x: 100, y: 200 },
+            style: {
+              border: "2px solid #A0AEC0", // gray.400
+              background: "#E2E8F0", // gray.200
+            },
           });
 
           // Create edge
@@ -165,11 +171,11 @@ const Graph = (props: {
         id: entity._id,
         type: currentType,
         data: {
-          label: generateLabel({ id: entity._id, name: entity.name }),
+          label: generateLabel(entity._id, entity.name, true),
         },
         style: {
-          color: "#333",
-          border: "2px solid green",
+          border: "2px solid #48BB78", // green.400
+          background: "#9AE6B4", // green.200
         },
         position: { x: 250, y: 100 },
       });
@@ -209,12 +215,13 @@ const Graph = (props: {
 
   /**
    * Utility function to determine membership of an Edge in the graph
-   * @param {string} id Edge ID
+   * @param {string} source Source node
+   * @param {string} target Target node
    * @returns {boolean}
    */
-  const containsEdge = (id: string): boolean => {
+  const containsEdge = (source: string, target: string): boolean => {
     for (const edge of edges) {
-      if (_.isEqual(edge.id, id)) {
+      if (_.isEqual(edge.source, source) && _.isEqual(edge.target, target)) {
         return true;
       }
     }
@@ -244,11 +251,9 @@ const Graph = (props: {
     const graph = {
       id: "root",
       layoutOptions: {
-        "elk.algorithm": "layered",
-        "elk.direction": "DOWN",
-        "nodePlacement.strategy": "SIMPLE",
-        "spacing.nodeNodeBetweenLayers": "40",
-        "spacing.nodeNode": "40",
+        "elk.algorithm": "mrtree",
+        "nodePlacement.strategy": "INTERACTIVE",
+        "spacing.nodeNode": "80",
       },
       children: nodes,
       edges: edges,
@@ -257,15 +262,32 @@ const Graph = (props: {
     return await elk.layout(graph);
   };
 
-  const generateLabel = (node: { id: string; name: string }) => {
+  /**
+   * Generate the React component for the graph
+   * @param node Information about the graph node
+   * @return
+   */
+  const generateLabel = (id: string, name: string, isPrimary: boolean) => {
     return (
-      <Flex direction={"row"} align={"center"} gap={4}>
-        <Icon name={"entity"} size={"lg"} />
-        <Flex direction={"column"} align={"baseline"}>
-          <Text as={"b"}>Entity</Text>
-          <Link onClick={() => props.entityNavigateHook(node.id)}>
-            {node.name}
-          </Link>
+      <Flex
+        key={`label_${id}`}
+        direction={"row"}
+        align={"center"}
+        gap={"2"}
+        bg={isPrimary ? "green.200" : "gray.200"}
+      >
+        <Icon key={`label_icon_${id}`} name={"entity"} size={"sm"} />
+        <Flex key={`inner_label_${id}`} direction={"column"} align={"baseline"}>
+          <Text key={`inner_label_text_${id}`} fontWeight={"semibold"}>
+            {name}
+          </Text>
+          <IconButton
+            key={`inner_label_view_${id}`}
+            aria-label={"View Entity"}
+            size={"sm"}
+            icon={<Icon name={"view"} />}
+            onClick={() => props.entityNavigateHook(id)}
+          />
         </Flex>
       </Flex>
     );
@@ -275,13 +297,19 @@ const Graph = (props: {
     if (!_.isEqual(node.id.toString(), props.id.toString())) {
       // If the primary Entity hasn't been clicked, obtain Origin and Product nodes
       // for the selected Entity
-      let updatedNodes = nodes;
-      let updatedEdges = edges;
+      let updatedNodes = _.cloneDeep(nodes);
+      let updatedEdges = _.cloneDeep(edges);
+
+      // Update state
+      let refreshLayout = false;
+      let addedOriginCount = 0;
+      let addedProductCount = 0;
 
       const entity = await getEntityData(node.id);
+
       // Origins
       if (entity.associations.origins.length > 0) {
-        for (const origin of entity.associations.origins) {
+        for await (const origin of entity.associations.origins) {
           if (containsNode(origin._id) === false) {
             // Firstly, update the current node type (if required)
             updatedNodes = [
@@ -308,14 +336,21 @@ const Graph = (props: {
                 id: origin._id,
                 type: "input",
                 data: {
-                  label: generateLabel({ id: origin._id, name: origin.name }),
+                  label: generateLabel(origin._id, origin.name, false),
                 },
                 position: { x: 100, y: 200 },
+                style: {
+                  border: "2px solid #A0AEC0", // gray.400
+                  background: "#E2E8F0", // gray.200
+                },
               },
             ];
+
+            refreshLayout = true;
+            addedOriginCount += 1;
           }
 
-          if (containsEdge(`edge_${origin._id}_${node.id}`) === false) {
+          if (containsEdge(origin._id, node.id) === false) {
             // Create edge
             updatedEdges = [
               ...updatedEdges,
@@ -361,17 +396,21 @@ const Graph = (props: {
                 id: product._id,
                 type: "output",
                 data: {
-                  label: generateLabel({
-                    id: product._id,
-                    name: product.name,
-                  }),
+                  label: generateLabel(product._id, product.name, false),
                 },
                 position: { x: 100, y: 200 },
+                style: {
+                  border: "2px solid #A0AEC0", // gray.400
+                  background: "#E2E8F0", // gray.200
+                },
               },
             ];
+
+            refreshLayout = true;
+            addedProductCount += 1;
           }
 
-          if (containsEdge(`edge_${node.id}_${product._id}`) === false) {
+          if (containsEdge(node.id, product._id) === false) {
             // Create edge
             updatedEdges = [
               ...updatedEdges,
@@ -388,17 +427,45 @@ const Graph = (props: {
         }
       }
 
-      const layout = await generateLayout(updatedNodes, updatedEdges);
-      if (layout.children) {
-        layout.children.map((node) => {
-          updatedNodes.forEach((updatedNode) => {
-            if (updatedNode.id === node.id && node.x && node.y) {
-              updatedNode.position.x = node.x;
-              updatedNode.position.y = node.y;
-            }
+      if (refreshLayout === true) {
+        const layout = await generateLayout(updatedNodes, updatedEdges);
+        if (layout.children) {
+          layout.children.map((node) => {
+            updatedNodes.forEach((updatedNode) => {
+              if (updatedNode.id === node.id && node.x && node.y) {
+                updatedNode.position.x = node.x;
+                updatedNode.position.y = node.y;
+              }
+            });
           });
+        }
+
+        // Generate an update message
+        let updateMessage = `Showing ${addedOriginCount} Origin${addedOriginCount > 1 ? "s" : ""} and ${addedProductCount} Product${addedProductCount > 1 && "s"} of Entity "${entity.name}"`;
+        if (addedOriginCount > 0 && addedProductCount === 0) {
+          updateMessage = `Showing ${addedOriginCount} Origin${addedOriginCount > 1 ? "s" : ""} of Entity "${entity.name}"`;
+        } else if (addedProductCount > 0 && addedOriginCount === 0) {
+          updateMessage = `Showing ${addedProductCount} Product${addedProductCount > 1 ? "s" : ""} of Entity "${entity.name}"`;
+        }
+        toast({
+          title: "Retrieved Origins and Products",
+          status: "success",
+          description: updateMessage,
+          duration: 4000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+      } else {
+        toast({
+          title: "No Updates",
+          status: "info",
+          description: `All Entities related to "${entity.name}" are shown`,
+          duration: 2000,
+          position: "bottom-right",
+          isClosable: true,
         });
       }
+
       // Apply updates
       setNodes(updatedNodes);
       setEdges(updatedEdges);
@@ -408,41 +475,56 @@ const Graph = (props: {
   // Get the data and setup the initial nodes and edges
   useEffect(() => {
     setupGraph();
-  }, [loading]);
+  }, []);
 
   return (
-    <Flex h={"full"} align={"center"} justify={"center"}>
-      {error && <Error />}
-      {loading && <Loading />}
-
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        onNodeClick={onNodeClick}
-        attributionPosition={"bottom-right"}
-        fitView
+    <Flex
+      h={"full"}
+      align={"center"}
+      justify={"center"}
+      direction={"column"}
+      w={"100%"}
+      p={"0"}
+      gap={"2"}
+    >
+      <Flex
+        p={"2"}
+        w={"97vw"}
+        h={"85vh"}
+        rounded={"md"}
+        border={"1px"}
+        borderColor={"gray.300"}
+        filter={loading ? "blur(10px);" : ""}
       >
-        <MiniMap
-          nodeStrokeColor={(node: any) => {
-            if (node.style?.background) return node.style.background;
-            if (node.type === "input") return "#0041d0";
-            if (node.type === "output") return "#ff0072";
-            if (node.type === "default") return "#1a192b";
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          onNodeClick={onNodeClick}
+          attributionPosition={"bottom-right"}
+          fitView
+        >
+          <MiniMap
+            nodeStrokeColor={(node: any) => {
+              if (node.style?.background) return node.style.background;
+              if (node.type === "input") return "#0041d0";
+              if (node.type === "output") return "#ff0072";
+              if (node.type === "default") return "#1a192b";
 
-            return "#eee";
-          }}
-          nodeColor={(node: any) => {
-            if (node.style?.background) return node.style.background;
+              return "#EEE";
+            }}
+            nodeColor={(node: any) => {
+              if (node.style?.background) return node.style.background;
 
-            return "#fff";
-          }}
-          nodeBorderRadius={2}
-        />
-        <Controls />
-        <Background color="#aaa" gap={16} />
-      </ReactFlow>
+              return "#fff";
+            }}
+            nodeBorderRadius={2}
+          />
+          <Controls />
+          <Background color="#aaa" gap={16} />
+        </ReactFlow>
+      </Flex>
     </Flex>
   );
 };
