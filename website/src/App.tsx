@@ -20,6 +20,9 @@ import {
 import Carousel from "./components/Carousel";
 import Icon from "./components/Icon";
 
+// Custom styling
+import "./css/styles.css";
+
 // Utility imports
 import _ from "lodash";
 
@@ -30,6 +33,47 @@ const App = () => {
   return (
     <ChakraProvider>
       <Flex
+        position={"absolute"}
+        filter={"blur(10px);"}
+        zIndex={1}
+        bg={"white"}
+        h={"100%"}
+        w={"100%"}
+        maxW={"100vw"}
+        overflow={"hidden"}
+      >
+        <Flex
+          position={"absolute"}
+          rounded={"full"}
+          w={"700px"}
+          h={"450px"}
+          bg={
+            "linear-gradient(45deg, hsl(0deg 0% 100%) 0%, hsl(231deg 80% 89%) 19%, hsl(227deg 79% 78%) 33%, hsl(240deg 80% 81%) 45%, hsl(265deg 86% 85%) 56%, hsl(300deg 64% 83%) 67%, hsl(337deg 88% 82%) 80%, hsl(0deg 77% 79%) 100%)"
+          }
+          opacity={"10%"}
+          top={"5%"}
+          left={"2%"}
+          animation={
+            "animateRight 30s cubic-bezier(0.4, 0.65, 1.0, 0.775) infinite;"
+          }
+        ></Flex>
+        <Flex
+          position={"absolute"}
+          rounded={"full"}
+          w={"200px"}
+          h={"350px"}
+          bg={
+            "linear-gradient(45deg, hsl(0deg 0% 100%) 0%, hsl(231deg 80% 89%) 19%, hsl(227deg 79% 78%) 33%, hsl(240deg 80% 81%) 45%, hsl(265deg 86% 85%) 56%, hsl(300deg 64% 83%) 67%, hsl(337deg 88% 82%) 80%, hsl(0deg 77% 79%) 100%)"
+          }
+          opacity={"10%"}
+          top={"40%"}
+          left={"70%"}
+          animation={
+            "animateLeft 20s cubic-bezier(0.4, 0.65, 1.0, 0.775) infinite;"
+          }
+        ></Flex>
+      </Flex>
+      <Flex
         direction={"column"}
         minH={"100vh"}
         w={"100%"}
@@ -37,7 +81,7 @@ const App = () => {
         m={"0"}
         gap={"0"}
       >
-        <Flex bg={"#F2F8FF"} rounded={"3xl"} direction={"column"} p={"4"}>
+        <Flex rounded={"3xl"} direction={"column"} p={"4"} zIndex={2}>
           {/* Header */}
           <Flex
             direction={"row"}
@@ -48,7 +92,14 @@ const App = () => {
             px={["", "6"]}
             py={["", "2"]}
           >
-            <Flex gap={"2"} align={"center"}>
+            <Flex
+              gap={"2"}
+              align={"center"}
+              rounded={"full"}
+              p={"4"}
+              border={"2px"}
+              borderColor={"black"}
+            >
               <Image src={"Favicon.png"} w={"25px"} h={"25px"} />
               <Heading size={"md"}>Metadatify</Heading>
             </Flex>
@@ -77,6 +128,7 @@ const App = () => {
               gap={"8"}
               minH={["60vh", "40vh"]}
             >
+              {/* Add some colour and gradients to this landing */}
               <Flex
                 direction={"column"}
                 gap={"2"}
@@ -90,8 +142,8 @@ const App = () => {
               </Flex>
 
               <Text fontWeight={"semibold"} fontSize={"lg"}>
-                Metadatify makes reusing, sharing, and collaborating on your
-                scientific metadata easy.
+                Metadatify makes reusing, sharing, and securely collaborating on
+                your scientific metadata easy.
               </Text>
 
               <Flex direction={"row"} gap={"6"} align={"center"}>
@@ -153,7 +205,7 @@ const App = () => {
               justify={"center"}
               wrap={"wrap"}
               gap={["4", "8"]}
-              maxW={["", "60vw"]}
+              maxW={["", "80vw"]}
             >
               <Flex
                 direction={"column"}
@@ -323,7 +375,7 @@ const App = () => {
               justify={"space-around"}
               wrap={"wrap"}
               gap={["4", "8"]}
-              maxW={["", "60vw"]}
+              maxW={["", "80vw"]}
             >
               <Flex
                 direction={"column"}
@@ -339,9 +391,9 @@ const App = () => {
                 <Icon name={"serv_managed_hosted"} size={"lg"} />
                 <Text fontWeight={"bold"}>Managed Hosting</Text>
                 <Text>
-                  You can sign up and login Metadatify using your ORCiD right
-                  away! While in pre-release, Metadatify will be public and free
-                  to use.
+                  Does your team have pre-release access? You can log in right
+                  away with your ORCiD. If you have signed up for our waitlist,
+                  we will notify you when you have access!
                 </Text>
                 <Spacer />
 
@@ -370,7 +422,6 @@ const App = () => {
                 <Icon name={"serv_self_hosted"} size={"lg"} />
                 <Text fontWeight={"bold"}>Self-Hosted</Text>
                 <Text>
-                  Metadatify will remain open-source and accessible via GitHub.
                   Follow the documentation on GitHub to download and deploy your
                   own instance of Metadatify.
                 </Text>
@@ -402,8 +453,8 @@ const App = () => {
                 <Icon name={"l_github"} size={"lg"} />
                 <Text fontWeight={"bold"}>GitHub</Text>
                 <Text>
-                  Since Metadatify is an open-source project, you can contribute
-                  to further development! Get in touch with{" "}
+                  Metadatify is an open-source project, you can contribute to
+                  further development! Get in touch with{" "}
                   <Link
                     color={"blue.500"}
                     href={"mailto:henry.burgess@wustl.edu"}
@@ -457,7 +508,7 @@ const App = () => {
                 </ListItem>
               </UnorderedList>
 
-              <Text fontWeight={"semibold"}>Contributors:</Text>
+              <Text fontWeight={"semibold"}>People:</Text>
               <Flex direction={"row"} gap={"2"}>
                 <Flex
                   direction={"column"}
@@ -469,7 +520,11 @@ const App = () => {
                   bg={"white"}
                   align={"center"}
                   justify={"center"}
+                  w={"160px"}
                 >
+                  <Text fontWeight={"semibold"} color={"gray.400"}>
+                    Lead Developer
+                  </Text>
                   <Avatar
                     name={"Henry Burgess"}
                     src={"https://avatars.githubusercontent.com/u/60735885"}
@@ -492,7 +547,11 @@ const App = () => {
                   bg={"white"}
                   align={"center"}
                   justify={"center"}
+                  w={"160px"}
                 >
+                  <Text fontWeight={"semibold"} color={"gray.400"}>
+                    Collaborator
+                  </Text>
                   <Avatar
                     name={"Robin Fievet"}
                     src={"https://avatars.githubusercontent.com/u/11888851"}

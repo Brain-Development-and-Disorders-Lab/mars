@@ -1,0 +1,29 @@
+@keyframes animateLeft {
+  0% {
+    transform: translateY(0) skewY(0);
+    transform: translateX(0) skewX(0);
+  }
+  50% {
+    transform: translateY(-100px) scale(0.5) skewy(15deg);
+    transform: translateX(-250px) scale(0.8) skewX(-10deg);
+  }
+  100% {
+    transform: translateY(0) skewY(0);
+    transform: translateX(0) skewX(0);
+  }
+}
+
+@keyframes animateRight {
+  0% {
+    transform: translateY(0) skewY(0);
+    transform: translateX(0) skewX(0);
+  }
+  50% {
+    transform: translateY(200px) scale(0.4) skewy(-15deg);
+    transform: translateX(350px) scale(1.2) skewX(20deg);
+  }
+  100% {
+    transform: translateY(0) skewY(0);
+    transform: translateX(0) skewX(0);
+  }
+}
