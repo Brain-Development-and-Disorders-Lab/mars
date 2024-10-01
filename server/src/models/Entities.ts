@@ -103,6 +103,7 @@ export class Entities {
       _id: getIdentifier("entity"), // Generate new identifier
       timestamp: dayjs(Date.now()).toISOString(), // Add created timestamp
       ...entity, // Unpack existing IEntity fields
+      history: [],
     };
 
     for await (const origin of entity.associations.origins) {
@@ -161,7 +162,19 @@ export class Entities {
 
     const update: { $set: IEntity } = {
       $set: {
-        ...entity,
+        name: entity.name,
+        owner: entity.owner,
+        archived: entity.archived,
+        created: entity.created,
+        description: entity.description,
+        projects: entity.projects,
+        associations: {
+          origins: entity.associations.origins,
+          products: entity.associations.products,
+        },
+        attributes: entity.attributes,
+        attachments: entity.attachments,
+        history: entity.history,
       },
     };
 
@@ -177,17 +190,21 @@ export class Entities {
 
     // Projects
     if (!_.isUndefined(updated.projects)) {
+      update.$set.projects = updated.projects;
+
+      // Projects added in updated Entity
       const addProjects = _.difference(updated.projects, entity.projects);
       for await (const project of addProjects) {
         await this.addProject(updated._id, project);
         await Projects.addEntity(project, updated._id);
       }
+
+      // Projects removed in updated Entity
       const removeProjects = _.difference(entity.projects, updated.projects);
       for await (const project of removeProjects) {
         await this.removeProject(updated._id, project);
         await Projects.removeEntity(project, updated._id);
       }
-      update.$set.projects = updated.projects;
     }
 
     // Origins
@@ -195,9 +212,14 @@ export class Entities {
       !_.isUndefined(updated.associations) &&
       !_.isUndefined(updated.associations.origins)
     ) {
-      const addOrigins = _.difference(
-        updated.associations.origins,
-        entity.associations.origins,
+      update.$set.associations.origins = updated.associations.origins;
+      const updatedOrigins = updated.associations.origins.map((o) => o._id);
+      const entityOrigins = entity.associations.origins.map((o) => o._id);
+
+      // Origin Entities added in updated Entity
+      const addOriginIdentifiers = _.difference(updatedOrigins, entityOrigins);
+      const addOrigins = updated.associations.origins.filter((o) =>
+        _.includes(addOriginIdentifiers, o._id),
       );
       for await (const origin of addOrigins) {
         await this.addOrigin(updated._id, origin);
@@ -206,9 +228,14 @@ export class Entities {
           name: updated.name,
         });
       }
-      const removeOrigins = _.difference(
-        entity.associations.origins,
-        updated.associations.origins,
+
+      // Origin Entities removed in updated Entity
+      const removeOriginIdentifiers = _.difference(
+        entity.associations.origins.map((o) => o._id),
+        updated.associations.origins.map((o) => o._id),
+      );
+      const removeOrigins = entity.associations.origins.filter((o) =>
+        _.includes(removeOriginIdentifiers, o._id),
       );
       for await (const origin of removeOrigins) {
         await this.removeOrigin(updated._id, origin);
@@ -217,7 +244,6 @@ export class Entities {
           name: updated.name,
         });
       }
-      update.$set.associations.origins = updated.associations.origins;
     }
 
     // Products
@@ -225,9 +251,17 @@ export class Entities {
       !_.isUndefined(updated.associations) &&
       !_.isUndefined(updated.associations.products)
     ) {
-      const addProducts = _.difference(
-        updated.associations.products,
-        entity.associations.products,
+      update.$set.associations.products = updated.associations.products;
+      const updatedProducts = updated.associations.products.map((p) => p._id);
+      const entityProducts = entity.associations.products.map((p) => p._id);
+
+      // Product Entities added in updated Entity
+      const addProductIdentifiers = _.difference(
+        updatedProducts,
+        entityProducts,
+      );
+      const addProducts = updated.associations.products.filter((p) =>
+        _.includes(addProductIdentifiers, p._id),
       );
       for await (const product of addProducts) {
         await this.addProduct(updated._id, product);
@@ -236,9 +270,14 @@ export class Entities {
           name: updated.name,
         });
       }
-      const removeProducts = _.difference(
-        entity.associations.products,
-        updated.associations.products,
+
+      // Product Entities removed from updated Entity
+      const removeProductIdentifiers = _.difference(
+        entityProducts,
+        updatedProducts,
+      );
+      const removeProducts = updated.associations.products.filter((p) =>
+        _.includes(removeProductIdentifiers, p._id),
       );
       for await (const product of removeProducts) {
         await this.removeProduct(updated._id, product);
@@ -247,23 +286,37 @@ export class Entities {
           name: updated.name,
         });
       }
-      update.$set.associations.products = updated.associations.products;
     }
 
     // Attributes
     if (!_.isUndefined(updated.attributes)) {
-      const addAttributes = _.difference(updated.attributes, entity.attributes);
+      update.$set.attributes = updated.attributes;
+      const updatedAttributes = updated.attributes.map((a) => a._id);
+      const entityAttributes = entity.attributes.map((a) => a._id);
+
+      // Attributes added in updated Entity
+      const addAttributeIdentifiers = _.difference(
+        updatedAttributes,
+        entityAttributes,
+      );
+      const addAttributes = updated.attributes.filter((a) =>
+        _.includes(addAttributeIdentifiers, a._id),
+      );
       for await (const attribute of addAttributes) {
         await this.addAttribute(updated._id, attribute);
       }
-      const removeAttributes = _.difference(
-        entity.attributes,
-        updated.attributes,
+
+      // Attributes removed in updated Entity
+      const removeAttributeIdentifiers = _.difference(
+        entityAttributes,
+        updatedAttributes,
+      );
+      const removeAttributes = entity.attributes.filter((a) =>
+        _.includes(removeAttributeIdentifiers, a._id),
       );
       for await (const attribute of removeAttributes) {
         await this.removeAttribute(updated._id, attribute._id);
       }
-      update.$set.attributes = updated.attributes;
     }
 
     const response = await getDatabase()

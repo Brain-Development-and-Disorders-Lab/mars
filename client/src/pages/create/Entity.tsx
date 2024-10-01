@@ -48,12 +48,7 @@ import AttributeCard from "@components/AttributeCard";
 import SearchSelect from "@components/SearchSelect";
 
 // Existing and custom types
-import {
-  AttributeModel,
-  AttributeCardProps,
-  IEntity,
-  IGenericItem,
-} from "@types";
+import { AttributeModel, AttributeCardProps, IGenericItem } from "@types";
 
 // Utility functions and libraries
 import { useToken } from "src/authentication/useToken";
@@ -108,22 +103,6 @@ const Entity = () => {
   const [selectedAttributes, setSelectedAttributes] = useState(
     [] as AttributeModel[],
   );
-
-  const entityState: IEntity = {
-    name: name,
-    owner: owner,
-    created: created,
-    archived: false,
-    description: description,
-    associations: {
-      origins: selectedOrigins,
-      products: selectedProducts,
-    },
-    projects: selectedProjects,
-    attributes: selectedAttributes,
-    attachments: [],
-    history: [],
-  };
 
   // Various validation error states
   const isNameError = name === "";
@@ -288,7 +267,20 @@ const Entity = () => {
       // Execute the GraphQL operation
       const response = await createEntity({
         variables: {
-          entity: entityState,
+          entity: {
+            name: name,
+            owner: owner,
+            created: created,
+            archived: false,
+            description: description,
+            associations: {
+              origins: selectedOrigins,
+              products: selectedProducts,
+            },
+            projects: selectedProjects,
+            attributes: selectedAttributes,
+            attachments: [],
+          },
         },
       });
 
