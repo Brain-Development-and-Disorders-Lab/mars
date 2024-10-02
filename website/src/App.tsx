@@ -1,5 +1,5 @@
 // React
-import React from "react";
+import React, { useRef } from "react";
 
 // Chakra provider component
 import {
@@ -26,12 +26,13 @@ import "./css/styles.css";
 // Utility imports
 import _ from "lodash";
 
-/**
- * Base App component containing the page layout
- */
 const App = () => {
+  const featuresRef = useRef({} as HTMLDivElement);
+  const getStartedRef = useRef({} as HTMLDivElement);
+
   return (
     <ChakraProvider>
+      {/* Background motion and colour effects */}
       <Flex
         position={"absolute"}
         filter={"blur(10px);"}
@@ -73,6 +74,33 @@ const App = () => {
           }
         ></Flex>
       </Flex>
+
+      {/* Waitlist banner */}
+      <Flex
+        direction={"row"}
+        w={"100%"}
+        bg={"blue.500"}
+        position={"absolute"}
+        zIndex={2}
+        align={"center"}
+        justify={"center"}
+        p={"1"}
+      >
+        <Link
+          href={"https://forms.gle/q4GL4gF1bamem3DA9"}
+          isExternal
+          color={"white"}
+        >
+          <Flex direction={"row"} gap={"1"} align={"center"} justify={"center"}>
+            <Text fontSize={"sm"} fontWeight={"semibold"}>
+              Join the waitlist here
+            </Text>
+            <Icon name={"a_right"} />
+          </Flex>
+        </Link>
+      </Flex>
+
+      {/* Main content */}
       <Flex
         direction={"column"}
         minH={"100vh"}
@@ -81,7 +109,7 @@ const App = () => {
         m={"0"}
         gap={"0"}
       >
-        <Flex rounded={"3xl"} direction={"column"} p={"4"} zIndex={2}>
+        <Flex direction={"column"} p={"4"} zIndex={2}>
           {/* Header */}
           <Flex
             direction={"row"}
@@ -152,8 +180,9 @@ const App = () => {
                   p={"4"}
                   boxShadow={"xs"}
                   colorScheme={"blue"}
-                  as={Link}
-                  href={"#features"}
+                  onClick={() =>
+                    featuresRef.current.scrollIntoView({ behavior: "smooth" })
+                  }
                 >
                   Features
                 </Button>
@@ -163,7 +192,9 @@ const App = () => {
                   boxShadow={"xs"}
                   colorScheme={"blue"}
                   as={Link}
-                  href={"#get-started"}
+                  onClick={() =>
+                    getStartedRef.current.scrollIntoView({ behavior: "smooth" })
+                  }
                 >
                   Get Started
                 </Button>
@@ -191,19 +222,23 @@ const App = () => {
 
           {/* Features */}
           <Flex
-            id={"features"}
             minH={"100vh"}
             direction={"column"}
-            gap={"8"}
+            gap={"4"}
             pt={"8"}
             align={"center"}
+            ref={featuresRef}
           >
             <Heading>Features</Heading>
+            <Text color={"gray.600"}>
+              Powerful features to improve your metadata management workflow.
+            </Text>
             <Flex
               w={"100%"}
               direction={"row"}
               justify={"center"}
               wrap={"wrap"}
+              pb={"8"}
               gap={["4", "8"]}
               maxW={["", "80vw"]}
             >
@@ -223,8 +258,8 @@ const App = () => {
                   Create
                 </Text>
                 <Text>
-                  Create and manage metadata inside <b>Workspaces</b>, and use{" "}
-                  <b>Templates</b> for reusable structures.
+                  Create and manage metadata Entities inside <b>Workspaces</b>,
+                  and use <b>Templates</b> for reusable metadata structures.
                 </Text>
               </Flex>
               <Flex
@@ -243,8 +278,8 @@ const App = () => {
                   Organize
                 </Text>
                 <Text>
-                  Within your Workspace, use <b>Projects</b> to group your
-                  metadata Entities.
+                  Within your Workspace, group and organize metadata Entities
+                  into <b>Projects</b>.
                 </Text>
               </Flex>
               <Flex
@@ -264,8 +299,8 @@ const App = () => {
                 </Text>
                 <Text>
                   Your digital and physical assets are linked, so your metadata
-                  should be too. Visualize relationships between metadata as{" "}
-                  <b>Origins</b> and <b>Products</b>.
+                  should be too. Visualize links between <b>Origin</b> and{" "}
+                  <b>Product</b> metadata Entities.
                 </Text>
               </Flex>
               <Flex
@@ -285,7 +320,8 @@ const App = () => {
                 </Text>
                 <Text>
                   Use a simple <b>text search</b> or use the advanced{" "}
-                  <b>query builder</b> to perform deep searches on metadata.
+                  <b>query builder</b> to perform deep searches on metadata
+                  Entities.
                 </Text>
               </Flex>
               <Flex
@@ -351,19 +387,17 @@ const App = () => {
 
           {/* Get Started */}
           <Flex
-            id={"get-started"}
             direction={"column"}
             gap={"8"}
             pt={"8"}
             align={"center"}
+            ref={getStartedRef}
           >
             <Heading>Get Started</Heading>
             <Text maxW={["", "50vw"]}>
-              To get started with Metadatify, check out any of the three options
-              below, whether you are looking to use Metadatify right away or
-              help with development. If you are unsure where to start or want to
-              know how Metadatify would best suit your needs, please don't
-              hesitate to contact{" "}
+              There are multiple ways to get started with Metadatify. If you are
+              unsure where to start or want to know how Metadatify would best
+              suit your needs, please don't hesitate to contact{" "}
               <Link color={"blue.500"} href={"mailto:henry.burgess@wustl.edu"}>
                 Henry Burgess
               </Link>
@@ -391,21 +425,34 @@ const App = () => {
                 <Icon name={"serv_managed_hosted"} size={"lg"} />
                 <Text fontWeight={"bold"}>Managed Hosting</Text>
                 <Text>
-                  Does your team have pre-release access? You can log in right
-                  away with your ORCiD. If you have signed up for our waitlist,
-                  we will notify you when you have access!
+                  Does your team already have preview access? You can log in
+                  right away with your ORCiD. If you have signed up for our
+                  waitlist, we will notify you when you have access!
                 </Text>
                 <Spacer />
 
-                <Flex direction={"row"} gap={"1"} align={"center"}>
-                  <Link
-                    color={"blue.500"}
-                    href={"https://app.metadatify.com"}
-                    isExternal
-                  >
-                    Metadatify
-                  </Link>
-                  <Icon name={"link"} color={"blue.500"} />
+                <Flex direction={"row"} justify={"space-between"}>
+                  <Flex direction={"row"} gap={"1"} align={"center"}>
+                    <Link
+                      color={"blue.500"}
+                      href={"https://app.metadatify.com"}
+                      isExternal
+                    >
+                      Log In
+                    </Link>
+                    <Icon name={"link"} color={"blue.500"} />
+                  </Flex>
+
+                  <Flex direction={"row"} gap={"1"} align={"center"}>
+                    <Link
+                      color={"blue.500"}
+                      href={"https://forms.gle/q4GL4gF1bamem3DA9"}
+                      isExternal
+                    >
+                      Join Waitlist
+                    </Link>
+                    <Icon name={"link"} color={"blue.500"} />
+                  </Flex>
                 </Flex>
               </Flex>
               <Flex
