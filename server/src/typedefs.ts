@@ -111,6 +111,7 @@ export const typedefs = `#graphql
   type Attribute {
     _id: String!
     name: String
+    owner: String
     timestamp: String
     archived: Boolean
     description: String

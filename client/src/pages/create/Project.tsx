@@ -26,9 +26,6 @@ import {
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 
-// Existing and custom types
-import { IProject } from "@types";
-
 // Utility functions and libraries
 import { useToken } from "src/authentication/useToken";
 import dayjs from "dayjs";
@@ -81,17 +78,6 @@ const Project = () => {
   const isOwnerError = owner === "";
   const isDescriptionError = description === "";
   const isDetailsError = isNameError || isOwnerError || isDescriptionError;
-
-  const projectData: IProject = {
-    name: name,
-    owner: token.orcid,
-    archived: false,
-    description: description,
-    created: created,
-    entities: [],
-    collaborators: [],
-    history: [],
-  };
 
   return (
     <Content isLoaded={!loading}>
@@ -295,7 +281,15 @@ const Project = () => {
             // Execute the GraphQL mutation
             const response = await createProject({
               variables: {
-                project: projectData,
+                project: {
+                  name: name,
+                  owner: token.orcid,
+                  archived: false,
+                  description: description,
+                  created: created,
+                  entities: [],
+                  collaborators: [],
+                },
               },
             });
 
