@@ -161,9 +161,21 @@ export class Entities {
     }
 
     // Construct an update object from the original Entity, and merge in the changes
-    const update: { $set: EntityModel } = {
+    const update: { $set: IEntity } = {
       $set: {
-        ...entity,
+        name: entity.name,
+        owner: entity.owner,
+        created: entity.created,
+        archived: entity.archived,
+        description: entity.description,
+        projects: entity.projects,
+        associations: {
+          origins: entity.associations.origins,
+          products: entity.associations.products,
+        },
+        attributes: entity.attributes,
+        attachments: entity.attachments,
+        history: entity.history,
       },
     };
 
@@ -211,8 +223,8 @@ export class Entities {
         _.includes(addOriginIdentifiers, o._id),
       );
       for await (const origin of addOrigins) {
-        await this.addOrigin(updated._id, origin);
-        await this.addProduct(origin._id, {
+        await Entities.addOrigin(updated._id, origin);
+        await Entities.addProduct(origin._id, {
           _id: updated._id,
           name: updated.name,
         });
@@ -227,8 +239,8 @@ export class Entities {
         _.includes(removeOriginIdentifiers, o._id),
       );
       for await (const origin of removeOrigins) {
-        await this.removeOrigin(updated._id, origin);
-        await this.removeProduct(origin._id, {
+        await Entities.removeOrigin(updated._id, origin);
+        await Entities.removeProduct(origin._id, {
           _id: updated._id,
           name: updated.name,
         });
@@ -253,8 +265,8 @@ export class Entities {
         _.includes(addProductIdentifiers, p._id),
       );
       for await (const product of addProducts) {
-        await this.addProduct(updated._id, product);
-        await this.addOrigin(product._id, {
+        await Entities.addProduct(updated._id, product);
+        await Entities.addOrigin(product._id, {
           _id: updated._id,
           name: updated.name,
         });
@@ -269,8 +281,8 @@ export class Entities {
         _.includes(removeProductIdentifiers, p._id),
       );
       for await (const product of removeProducts) {
-        await this.removeProduct(updated._id, product);
-        await this.removeOrigin(product._id, {
+        await Entities.removeProduct(updated._id, product);
+        await Entities.removeOrigin(product._id, {
           _id: updated._id,
           name: updated.name,
         });
