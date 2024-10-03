@@ -101,7 +101,6 @@ const start = async () => {
       {
         SearchResult: {
           __resolveType(result: any) {
-            consola.info(result);
             // Entity identifiers start with "e"
             if (_.startsWith(result._id, "e")) {
               return "Entity";

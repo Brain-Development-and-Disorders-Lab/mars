@@ -9,7 +9,6 @@ import { JwksClient } from "jwks-rsa";
 import { GraphQLError } from "graphql";
 import axios, { AxiosResponse } from "axios";
 import _ from "lodash";
-import consola from "consola";
 
 // Models
 import { Users } from "./Users";
@@ -73,7 +72,7 @@ export class Authentication {
     // Check if the User exists, and create a new User if not
     const exists = await Users.exists(authenticationPayload.orcid);
     if (!exists && !_.isEqual(authenticationPayload.orcid, DEMO_USER_ORCID)) {
-      // Public use only
+      // Preview use only, User must exist prior to first login
       return {
         success: false,
         message: "User does not have access",
@@ -85,6 +84,7 @@ export class Authentication {
         },
       };
     } else if (!exists) {
+      // If the user is the demo user, create a new User
       await Users.create({
         _id: authenticationPayload.orcid,
         firstName: "",
