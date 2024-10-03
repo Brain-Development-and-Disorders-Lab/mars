@@ -421,15 +421,26 @@ export type SearchQueryBuilderProps = {
 // SearchSelect props
 export type SearchSelectProps = {
   value: IGenericItem;
+  resultType: "entity" | "project";
   placeholder?: string;
   onChange?: (value: any) => void;
   isDisabled?: boolean;
 };
 
-// Response message types
-export type ResponseMessage = {
+// SearchBox props
+export type SearchBoxProps = {
+  resultType: "entity" | "project";
+};
+
+// Generic ResponseMessage type
+export type IResponseMessage = {
   success: boolean;
   message: string;
+};
+
+// ResponseMessage type carrying a data payload
+export type ResponseData<D> = IResponseMessage & {
+  data: D;
 };
 
 // Authentication types

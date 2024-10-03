@@ -1,5 +1,5 @@
 // Custom types
-import { ActivityModel, IActivity, ResponseMessage } from "@types";
+import { ActivityModel, IActivity, ResponseData } from "@types";
 
 // Models
 import { Users } from "./Users";
@@ -43,9 +43,11 @@ export class Activity {
   /**
    * Create a new Activity entry
    * @param activity Activity data
-   * @return {ResponseMessage}
+   * @return {IResponseMessage}
    */
-  static create = async (activity: IActivity): Promise<ResponseMessage> => {
+  static create = async (
+    activity: IActivity,
+  ): Promise<ResponseData<string>> => {
     consola.debug(`Creating new Activity entry...`);
     const activityModel: ActivityModel = {
       _id: getIdentifier("activity"),
@@ -77,9 +79,8 @@ export class Activity {
 
     return {
       success: successStatus,
-      message: successStatus
-        ? response.insertedId.toString()
-        : "Unable to create Activity",
+      message: successStatus ? "Created Activity" : "Unable to create Activity",
+      data: response.insertedId.toString(),
     };
   };
 }

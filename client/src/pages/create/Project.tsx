@@ -26,9 +26,6 @@ import {
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 
-// Existing and custom types
-import { IProject } from "@types";
-
 // Utility functions and libraries
 import { useToken } from "src/authentication/useToken";
 import dayjs from "dayjs";
@@ -36,6 +33,9 @@ import dayjs from "dayjs";
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
 import { gql, useMutation } from "@apollo/client";
+
+// Custom types
+import { ResponseData } from "@types";
 
 const Project = () => {
   const navigate = useNavigate();
@@ -61,7 +61,9 @@ const Project = () => {
       }
     }
   `;
-  const [createProject, { loading, error }] = useMutation(CREATE_PROJECT);
+  const [createProject, { loading, error }] = useMutation<{
+    createProject: ResponseData<string>;
+  }>(CREATE_PROJECT);
 
   useEffect(() => {
     if (error) {
@@ -81,17 +83,6 @@ const Project = () => {
   const isOwnerError = owner === "";
   const isDescriptionError = description === "";
   const isDetailsError = isNameError || isOwnerError || isDescriptionError;
-
-  const projectData: IProject = {
-    name: name,
-    owner: token.orcid,
-    archived: false,
-    description: description,
-    created: created,
-    entities: [],
-    collaborators: [],
-    history: [],
-  };
 
   return (
     <Content isLoaded={!loading}>
@@ -295,11 +286,19 @@ const Project = () => {
             // Execute the GraphQL mutation
             const response = await createProject({
               variables: {
-                project: projectData,
+                project: {
+                  name: name,
+                  owner: token.orcid,
+                  archived: false,
+                  description: description,
+                  created: created,
+                  entities: [],
+                  collaborators: [],
+                },
               },
             });
 
-            if (response.data.createProject.success) {
+            if (response.data?.createProject.success) {
               setIsSubmitting(false);
               navigate("/projects");
             }

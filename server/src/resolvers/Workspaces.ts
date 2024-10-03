@@ -4,7 +4,7 @@ import {
   EntityModel,
   IWorkspace,
   ProjectModel,
-  ResponseMessage,
+  IResponseMessage,
   WorkspaceMetrics,
   WorkspaceModel,
 } from "@types";
@@ -224,7 +224,7 @@ export const WorkspacesResolvers = {
       _parent: any,
       args: { workspace: IWorkspace },
       context: Context,
-    ): Promise<ResponseMessage> => {
+    ): Promise<IResponseMessage> => {
       // Authenticate the provided context
       await Authentication.authenticate(context);
 
@@ -232,7 +232,7 @@ export const WorkspacesResolvers = {
 
       if (result.success) {
         // If successful, add Workspace to the User
-        await Users.addWorkspace(context.user, result.message);
+        await Users.addWorkspace(context.user, result.data);
       }
 
       return result;
@@ -243,7 +243,7 @@ export const WorkspacesResolvers = {
       _parent: any,
       args: { workspace: WorkspaceModel },
       context: Context,
-    ): Promise<ResponseMessage> => {
+    ): Promise<IResponseMessage> => {
       // Authenticate the provided context
       await Authentication.authenticate(context);
 

@@ -15,7 +15,7 @@ import { EntityModel, IGenericItem, SearchSelectProps } from "@types";
 
 // Utility imports
 import { debounce } from "lodash";
-import { gql, useLazyQuery, useQuery } from "@apollo/client";
+import { gql, useLazyQuery } from "@apollo/client";
 import { WorkspaceContext } from "src/Context";
 
 const SearchSelect = (props: SearchSelectProps) => {
@@ -28,45 +28,117 @@ const SearchSelect = (props: SearchSelectProps) => {
       }
     }
   `;
-  const { loading, data, refetch } = useQuery<{
-    entities: EntityModel[];
-  }>(GET_ENTITIES, {
-    variables: {
-      limit: 20,
-      archived: true,
-    },
-  });
+  const [getEntities, { loading: entitiesLoading, error: entitiesError }] =
+    useLazyQuery<{
+      entities: IGenericItem[];
+    }>(GET_ENTITIES, {
+      variables: {
+        limit: 20,
+        archived: true,
+      },
+    });
 
-  const [entities, setEntities] = useState([] as EntityModel[]);
-
-  // Manage data once retrieved
-  useEffect(() => {
-    if (data?.entities) {
-      // Unpack all the Entity data
-      setEntities(data.entities);
+  // Query to retrieve Entities
+  const GET_PROJECTS = gql`
+    query GetProjects($limit: Int) {
+      projects(limit: $limit) {
+        _id
+        name
+      }
     }
-  }, [data]);
+  `;
+  const [getProjects, { loading: projectsLoading, error: projectsError }] =
+    useLazyQuery<{
+      projects: IGenericItem[];
+    }>(GET_PROJECTS);
+
+  const [placeholder, setPlaceholder] = useState("Select Result");
+  const [options, setOptions] = useState([] as IGenericItem[]);
+
+  const getSelectOptions = async () => {
+    if (props.resultType == "entity") {
+      // Get Entities
+      const result = await getEntities({
+        variables: {
+          limit: 20,
+          archived: true,
+        },
+      });
+
+      if (result.data?.entities) {
+        setOptions(result.data.entities);
+      }
+    } else {
+      // Get Projects
+      const result = await getProjects({
+        variables: {
+          limit: 20,
+        },
+      });
+
+      if (result.data?.projects) {
+        setOptions(result.data.projects);
+      }
+    }
+
+    if (entitiesError || projectsError) {
+      toast({
+        title: "Error",
+        status: "error",
+        description: "Error while retrieving options for selection",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
+  };
+
+  // Retrieve the options on component load, depending on the specified target
+  useEffect(() => {
+    getSelectOptions();
+
+    // Set the placeholder text
+    if (props.placeholder) {
+      setPlaceholder(props.placeholder);
+    } else if (props.resultType === "entity") {
+      setPlaceholder("Select Entity");
+    } else if (props.resultType === "project") {
+      setPlaceholder("Select Project");
+    }
+  }, []);
 
   const { workspace } = useContext(WorkspaceContext);
 
   // Check to see if data currently exists and refetch if so
   useEffect(() => {
-    if (data && refetch) {
-      refetch();
-    }
+    getSelectOptions();
   }, [workspace]);
 
   // Query to search by text value
   const SEARCH_TEXT = gql`
-    query Search($query: String, $isBuilder: Boolean, $showArchived: Boolean) {
+    query Search(
+      $query: String
+      $resultType: String
+      $isBuilder: Boolean
+      $showArchived: Boolean
+    ) {
       search(
         query: $query
+        resultType: $resultType
         isBuilder: $isBuilder
         showArchived: $showArchived
       ) {
-        _id
-        name
-        description
+        __typename
+        ... on Entity {
+          _id
+          name
+          description
+        }
+        ... on Project {
+          _id
+          name
+          description
+        }
       }
     }
   `;
@@ -81,11 +153,12 @@ const SearchSelect = (props: SearchSelectProps) => {
 
   const toast = useToast();
 
-  // Function to fetch entities based on the search term
-  const fetchEntities = debounce(async (query) => {
+  // Function to fetch results based on the search term
+  const fetchResults = debounce(async (query) => {
     const results = await searchText({
       variables: {
         query: query,
+        resultType: props.resultType,
         isBuilder: false,
         showArchived: false,
       },
@@ -135,15 +208,15 @@ const SearchSelect = (props: SearchSelectProps) => {
 
     setInputValue(event.target.value);
     if (inputValue.length > 2) {
-      fetchEntities(inputValue);
+      fetchResults(inputValue);
     }
   };
 
   /**
-   * Handle selecting an Entity from the search results
-   * @param entity Selected Entity
+   * Handle selecting an result from the collection of search results
+   * @param {IGenericItem} result Selected result
    */
-  const handleSelectEntity = (entity: IGenericItem) => {
+  const handleSelectResult = (result: IGenericItem) => {
     // Reset state
     setInputValue("");
     setResults([]);
@@ -151,14 +224,14 @@ const SearchSelect = (props: SearchSelectProps) => {
     setHasSearched(false);
 
     // Invoke the `onChange` callback if specified
-    props.onChange?.(entity);
+    props.onChange?.(result);
   };
 
   return (
     <Flex pos={"relative"} w={"100%"}>
       <InputGroup size={"sm"} onClick={onInputClick}>
         <Input
-          placeholder={props?.placeholder || "Select Entity"}
+          placeholder={placeholder}
           value={props.value?.name || ""}
           backgroundColor={"white"}
           data-testid={"value-editor"}
@@ -205,18 +278,18 @@ const SearchSelect = (props: SearchSelectProps) => {
             {hasSearched &&
               searchLoading === false &&
               results.length > 0 &&
-              results.map((entity: IGenericItem) => (
-                <Flex key={`e_${entity._id}`} p={"0"}>
+              results.map((result: IGenericItem) => (
+                <Flex key={`r_${result._id}`} p={"0"}>
                   <Button
-                    key={entity._id}
+                    key={result._id}
                     variant={"ghost"}
-                    onClick={() => handleSelectEntity(entity)}
+                    onClick={() => handleSelectResult(result)}
                     width={"full"}
                     isDisabled={searchLoading}
                     size={"sm"}
                   >
                     <Flex w={"100%"} justify={"left"}>
-                      {entity.name}
+                      {result.name}
                     </Flex>
                   </Button>
                 </Flex>
@@ -234,18 +307,18 @@ const SearchSelect = (props: SearchSelectProps) => {
             {/* Has not yet searched, search operation complete */}
             {!hasSearched &&
               searchLoading === false &&
-              entities.map((entity: IGenericItem) => (
-                <Flex key={`e_${entity._id}`}>
+              options.map((option: IGenericItem) => (
+                <Flex key={`o_${option._id}`}>
                   <Button
-                    key={entity._id}
+                    key={option._id}
                     variant={"ghost"}
-                    onClick={() => handleSelectEntity(entity)}
+                    onClick={() => handleSelectResult(option)}
                     width={"full"}
-                    isDisabled={loading}
+                    isDisabled={entitiesLoading || projectsLoading}
                     size={"sm"}
                   >
                     <Flex w={"100%"} justify={"left"}>
-                      {entity.name}
+                      {option.name}
                     </Flex>
                   </Button>
                 </Flex>

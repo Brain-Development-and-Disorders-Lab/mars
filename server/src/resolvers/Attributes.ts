@@ -4,7 +4,7 @@ import {
   AttributeModel,
   Context,
   IAttribute,
-  ResponseMessage,
+  IResponseMessage,
 } from "@types";
 
 // Models
@@ -142,7 +142,7 @@ export const AttributesResolvers = {
 
       if (result.success) {
         // Add the Attribute to the Workspace
-        await Workspaces.addAttribute(context.workspace, result.message);
+        await Workspaces.addAttribute(context.workspace, result.data);
 
         // If successful, add Activity
         const activity = await Activity.create({
@@ -151,14 +151,14 @@ export const AttributesResolvers = {
           actor: context.user,
           details: "Created new Attribute",
           target: {
-            _id: result.message, // New Attribute identifier
+            _id: result.data, // New Attribute identifier
             type: "attributes",
             name: args.attribute.name,
           },
         });
 
         // Add Activity to Workspace
-        await Workspaces.addActivity(context.workspace, activity.message);
+        await Workspaces.addActivity(context.workspace, activity.data);
       }
 
       return result;
@@ -221,7 +221,7 @@ export const AttributesResolvers = {
         });
 
         // Add Activity to Workspace
-        await Workspaces.addActivity(context.workspace, activity.message);
+        await Workspaces.addActivity(context.workspace, activity.data);
       }
 
       return result;
@@ -290,7 +290,7 @@ export const AttributesResolvers = {
           });
 
           // Add Activity to Workspace
-          await Workspaces.addActivity(context.workspace, activity.message);
+          await Workspaces.addActivity(context.workspace, activity.data);
         }
 
         return result;
@@ -302,7 +302,7 @@ export const AttributesResolvers = {
       _parent: any,
       args: { toArchive: string[]; state: boolean },
       context: Context,
-    ): Promise<ResponseMessage> => {
+    ): Promise<IResponseMessage> => {
       // Authenticate the provided context
       await Authentication.authenticate(context);
 
@@ -338,7 +338,7 @@ export const AttributesResolvers = {
             });
 
             // Add Activity to Workspace
-            await Workspaces.addActivity(context.workspace, activity.message);
+            await Workspaces.addActivity(context.workspace, activity.data);
             archiveCounter += 1;
           }
         }
@@ -410,7 +410,7 @@ export const AttributesResolvers = {
         });
 
         // Add Activity to Workspace
-        await Workspaces.addActivity(context.workspace, activity.message);
+        await Workspaces.addActivity(context.workspace, activity.data);
       }
 
       return result;

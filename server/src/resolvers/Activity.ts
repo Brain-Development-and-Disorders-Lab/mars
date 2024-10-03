@@ -1,5 +1,5 @@
 // Custom types
-import { Context, IActivity, ResponseMessage } from "@types";
+import { Context, IActivity, IResponseMessage } from "@types";
 
 // Models
 import { Activity } from "../models/Activity";
@@ -36,7 +36,7 @@ export const ActivityResolvers = {
       _parent: any,
       args: { activity: IActivity },
       context: Context,
-    ): Promise<ResponseMessage> => {
+    ): Promise<IResponseMessage> => {
       // Authenticate the provided context
       await Authentication.authenticate(context);
 
@@ -45,7 +45,7 @@ export const ActivityResolvers = {
 
       if (result.success) {
         // Add the Activity to the Workspace
-        await Workspaces.addActivity(context.workspace, result.message);
+        await Workspaces.addActivity(context.workspace, result.data);
       }
 
       return result;

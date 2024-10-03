@@ -28,7 +28,7 @@ import {
 import Icon from "@components/Icon";
 
 // Existing and custom types
-import { EntityModel } from "@types";
+import { IGenericItem, SearchBoxProps } from "@types";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
@@ -40,7 +40,7 @@ import { WorkspaceContext } from "../../Context";
 // Limit the number of results shown
 const MAX_RESULTS = 5;
 
-const SearchBox = () => {
+const SearchBox = (props: SearchBoxProps) => {
   const navigate = useNavigate();
   const toast = useToast();
 
@@ -56,19 +56,31 @@ const SearchBox = () => {
   const [isError, setIsError] = useState(false);
 
   // Store results as a set of IDs
-  const [results, setResults] = useState([] as EntityModel[]);
+  const [results, setResults] = useState([] as IGenericItem[]);
 
   // Query to search by text value
   const SEARCH_TEXT = gql`
-    query Search($query: String, $isBuilder: Boolean, $showArchived: Boolean) {
+    query Search(
+      $query: String
+      $resultType: String
+      $isBuilder: Boolean
+      $showArchived: Boolean
+    ) {
       search(
         query: $query
+        resultType: $resultType
         isBuilder: $isBuilder
         showArchived: $showArchived
       ) {
-        _id
-        name
-        description
+        __typename
+        ... on Entity {
+          _id
+          name
+        }
+        ... on Project {
+          _id
+          name
+        }
       }
     }
   `;
@@ -83,6 +95,7 @@ const SearchBox = () => {
     const results = await searchText({
       variables: {
         query: query,
+        resultType: props.resultType,
         isBuilder: false,
         showArchived: false,
       },

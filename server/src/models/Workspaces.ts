@@ -5,8 +5,9 @@ import {
   EntityModel,
   IWorkspace,
   ProjectModel,
-  ResponseMessage,
+  IResponseMessage,
   WorkspaceModel,
+  ResponseData,
 } from "@types";
 
 // Utility functions and libraries
@@ -69,12 +70,12 @@ export class Workspaces {
    * Add an Entity to an existing Workspace
    * @param _id Workspace identifier to receive the Entity
    * @param entity Entity identifier to be added to the Workspace
-   * @return {Promise<ResponseMessage>}
+   * @return {Promise<IResponseMessage>}
    */
   static addEntity = async (
     _id: string,
     entity: string,
-  ): Promise<ResponseMessage> => {
+  ): Promise<IResponseMessage> => {
     const workspace = await Workspaces.getOne(_id);
     if (_.isNull(workspace)) {
       return {
@@ -131,12 +132,12 @@ export class Workspaces {
    * Add a Project to an existing Workspace
    * @param _id Workspace identifier to receive the Project
    * @param project Project identifier to be added to the Workspace
-   * @return {Promise<ResponseMessage>}
+   * @return {Promise<IResponseMessage>}
    */
   static addProject = async (
     _id: string,
     project: string,
-  ): Promise<ResponseMessage> => {
+  ): Promise<IResponseMessage> => {
     const workspace = await Workspaces.getOne(_id);
     if (_.isNull(workspace)) {
       return {
@@ -195,12 +196,12 @@ export class Workspaces {
    * Add Activity to an existing Workspace
    * @param _id Workspace identifier to receive the Activity
    * @param activity Activity identifier to be added to the Workspace
-   * @return {Promise<ResponseMessage>}
+   * @return {Promise<IResponseMessage>}
    */
   static addActivity = async (
     _id: string,
     activity: string,
-  ): Promise<ResponseMessage> => {
+  ): Promise<IResponseMessage> => {
     const workspace = await Workspaces.getOne(_id);
     if (_.isNull(workspace)) {
       return {
@@ -259,17 +260,18 @@ export class Workspaces {
    * Add an Attribute to an existing Workspace
    * @param _id Workspace identifier to receive the Attribute
    * @param attribute Attribute identifier to be added to the Workspace
-   * @return {Promise<ResponseMessage>}
+   * @return {Promise<IResponseMessage>}
    */
   static addAttribute = async (
     _id: string,
     attribute: string,
-  ): Promise<ResponseMessage> => {
+  ): Promise<ResponseData<string>> => {
     const workspace = await Workspaces.getOne(_id);
     if (_.isNull(workspace)) {
       return {
         success: false,
         message: "Workspace not found",
+        data: "",
       };
     }
 
@@ -280,6 +282,7 @@ export class Workspaces {
       return {
         success: true,
         message: "Workspace already contains Attribute",
+        data: "",
       };
     }
 
@@ -302,15 +305,18 @@ export class Workspaces {
         response.modifiedCount === 1
           ? "Added Attribute to Workspace"
           : "Unable to add Attribute to Workspace",
+      data: response.upsertedId.toString(),
     };
   };
 
   /**
    * Create a new Workspace entry
    * @param workspace Workspace data
-   * @return {ResponseMessage}
+   * @return {IResponseMessage}
    */
-  static create = async (workspace: IWorkspace): Promise<ResponseMessage> => {
+  static create = async (
+    workspace: IWorkspace,
+  ): Promise<ResponseData<string>> => {
     const joinedWorkspace: WorkspaceModel = {
       _id: getIdentifier("workspace"), // Generate new identifier
       timestamp: dayjs(Date.now()).toISOString(),
@@ -326,12 +332,15 @@ export class Workspaces {
     return {
       success: response.acknowledged,
       message: response.acknowledged
-        ? response.insertedId.toString()
+        ? "Created new Workspace"
         : "Unable to create Workspace",
+      data: response.insertedId.toString(),
     };
   };
 
-  static update = async (updated: WorkspaceModel): Promise<ResponseMessage> => {
+  static update = async (
+    updated: WorkspaceModel,
+  ): Promise<IResponseMessage> => {
     // Check if the Workspace exists
     const workspace = await Workspaces.getOne(updated._id);
     if (_.isNull(workspace)) {

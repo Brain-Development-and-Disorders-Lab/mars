@@ -1,5 +1,5 @@
 // React
-import React from "react";
+import React, { useRef } from "react";
 
 // Chakra provider component
 import {
@@ -20,15 +20,87 @@ import {
 import Carousel from "./components/Carousel";
 import Icon from "./components/Icon";
 
+// Custom styling
+import "./css/styles.css";
+
 // Utility imports
 import _ from "lodash";
 
-/**
- * Base App component containing the page layout
- */
 const App = () => {
+  const featuresRef = useRef({} as HTMLDivElement);
+  const getStartedRef = useRef({} as HTMLDivElement);
+
   return (
     <ChakraProvider>
+      {/* Background motion and colour effects */}
+      <Flex
+        position={"absolute"}
+        filter={"blur(10px);"}
+        zIndex={1}
+        bg={"white"}
+        h={"100%"}
+        w={"100%"}
+        maxW={"100vw"}
+        overflow={"hidden"}
+      >
+        <Flex
+          position={"absolute"}
+          rounded={"full"}
+          w={"700px"}
+          h={"450px"}
+          bg={
+            "linear-gradient(45deg, hsl(0deg 0% 100%) 0%, hsl(231deg 80% 89%) 19%, hsl(227deg 79% 78%) 33%, hsl(240deg 80% 81%) 45%, hsl(265deg 86% 85%) 56%, hsl(300deg 64% 83%) 67%, hsl(337deg 88% 82%) 80%, hsl(0deg 77% 79%) 100%)"
+          }
+          opacity={"10%"}
+          top={"5%"}
+          left={"2%"}
+          animation={
+            "animateRight 30s cubic-bezier(0.4, 0.65, 1.0, 0.775) infinite;"
+          }
+        ></Flex>
+        <Flex
+          position={"absolute"}
+          rounded={"full"}
+          w={"200px"}
+          h={"350px"}
+          bg={
+            "linear-gradient(45deg, hsl(0deg 0% 100%) 0%, hsl(231deg 80% 89%) 19%, hsl(227deg 79% 78%) 33%, hsl(240deg 80% 81%) 45%, hsl(265deg 86% 85%) 56%, hsl(300deg 64% 83%) 67%, hsl(337deg 88% 82%) 80%, hsl(0deg 77% 79%) 100%)"
+          }
+          opacity={"10%"}
+          top={"40%"}
+          left={"70%"}
+          animation={
+            "animateLeft 20s cubic-bezier(0.4, 0.65, 1.0, 0.775) infinite;"
+          }
+        ></Flex>
+      </Flex>
+
+      {/* Waitlist banner */}
+      <Flex
+        direction={"row"}
+        w={"100%"}
+        bg={"blue.500"}
+        position={"absolute"}
+        zIndex={2}
+        align={"center"}
+        justify={"center"}
+        p={"1"}
+      >
+        <Link
+          href={"https://forms.gle/q4GL4gF1bamem3DA9"}
+          isExternal
+          color={"white"}
+        >
+          <Flex direction={"row"} gap={"1"} align={"center"} justify={"center"}>
+            <Text fontSize={"sm"} fontWeight={"semibold"}>
+              Join the waitlist here
+            </Text>
+            <Icon name={"a_right"} />
+          </Flex>
+        </Link>
+      </Flex>
+
+      {/* Main content */}
       <Flex
         direction={"column"}
         minH={"100vh"}
@@ -37,7 +109,7 @@ const App = () => {
         m={"0"}
         gap={"0"}
       >
-        <Flex bg={"#F2F8FF"} rounded={"3xl"} direction={"column"} p={"4"}>
+        <Flex direction={"column"} p={"4"} zIndex={2}>
           {/* Header */}
           <Flex
             direction={"row"}
@@ -48,7 +120,14 @@ const App = () => {
             px={["", "6"]}
             py={["", "2"]}
           >
-            <Flex gap={"2"} align={"center"}>
+            <Flex
+              gap={"2"}
+              align={"center"}
+              rounded={"full"}
+              p={"4"}
+              border={"2px"}
+              borderColor={"black"}
+            >
               <Image src={"Favicon.png"} w={"25px"} h={"25px"} />
               <Heading size={"md"}>Metadatify</Heading>
             </Flex>
@@ -77,6 +156,7 @@ const App = () => {
               gap={"8"}
               minH={["60vh", "40vh"]}
             >
+              {/* Add some colour and gradients to this landing */}
               <Flex
                 direction={"column"}
                 gap={"2"}
@@ -90,8 +170,8 @@ const App = () => {
               </Flex>
 
               <Text fontWeight={"semibold"} fontSize={"lg"}>
-                Metadatify makes reusing, sharing, and collaborating on your
-                scientific metadata easy.
+                Metadatify makes reusing, sharing, and securely collaborating on
+                your scientific metadata easy.
               </Text>
 
               <Flex direction={"row"} gap={"6"} align={"center"}>
@@ -100,8 +180,9 @@ const App = () => {
                   p={"4"}
                   boxShadow={"xs"}
                   colorScheme={"blue"}
-                  as={Link}
-                  href={"#features"}
+                  onClick={() =>
+                    featuresRef.current.scrollIntoView({ behavior: "smooth" })
+                  }
                 >
                   Features
                 </Button>
@@ -111,7 +192,9 @@ const App = () => {
                   boxShadow={"xs"}
                   colorScheme={"blue"}
                   as={Link}
-                  href={"#get-started"}
+                  onClick={() =>
+                    getStartedRef.current.scrollIntoView({ behavior: "smooth" })
+                  }
                 >
                   Get Started
                 </Button>
@@ -139,21 +222,25 @@ const App = () => {
 
           {/* Features */}
           <Flex
-            id={"features"}
             minH={"100vh"}
             direction={"column"}
-            gap={"8"}
+            gap={"4"}
             pt={"8"}
             align={"center"}
+            ref={featuresRef}
           >
             <Heading>Features</Heading>
+            <Text color={"gray.600"}>
+              Powerful features to improve your metadata management workflow.
+            </Text>
             <Flex
               w={"100%"}
               direction={"row"}
               justify={"center"}
               wrap={"wrap"}
+              pb={"8"}
               gap={["4", "8"]}
-              maxW={["", "60vw"]}
+              maxW={["", "80vw"]}
             >
               <Flex
                 direction={"column"}
@@ -171,8 +258,8 @@ const App = () => {
                   Create
                 </Text>
                 <Text>
-                  Create and manage metadata inside <b>Workspaces</b>, and use{" "}
-                  <b>Templates</b> for reusable structures.
+                  Create and manage metadata Entities inside <b>Workspaces</b>,
+                  and use <b>Templates</b> for reusable metadata structures.
                 </Text>
               </Flex>
               <Flex
@@ -191,8 +278,8 @@ const App = () => {
                   Organize
                 </Text>
                 <Text>
-                  Within your Workspace, use <b>Projects</b> to group your
-                  metadata Entities.
+                  Within your Workspace, group and organize metadata Entities
+                  into <b>Projects</b>.
                 </Text>
               </Flex>
               <Flex
@@ -212,8 +299,8 @@ const App = () => {
                 </Text>
                 <Text>
                   Your digital and physical assets are linked, so your metadata
-                  should be too. Visualize relationships between metadata as{" "}
-                  <b>Origins</b> and <b>Products</b>.
+                  should be too. Visualize links between <b>Origin</b> and{" "}
+                  <b>Product</b> metadata Entities.
                 </Text>
               </Flex>
               <Flex
@@ -233,7 +320,8 @@ const App = () => {
                 </Text>
                 <Text>
                   Use a simple <b>text search</b> or use the advanced{" "}
-                  <b>query builder</b> to perform deep searches on metadata.
+                  <b>query builder</b> to perform deep searches on metadata
+                  Entities.
                 </Text>
               </Flex>
               <Flex
@@ -299,19 +387,17 @@ const App = () => {
 
           {/* Get Started */}
           <Flex
-            id={"get-started"}
             direction={"column"}
             gap={"8"}
             pt={"8"}
             align={"center"}
+            ref={getStartedRef}
           >
             <Heading>Get Started</Heading>
             <Text maxW={["", "50vw"]}>
-              To get started with Metadatify, check out any of the three options
-              below, whether you are looking to use Metadatify right away or
-              help with development. If you are unsure where to start or want to
-              know how Metadatify would best suit your needs, please don't
-              hesitate to contact{" "}
+              There are multiple ways to get started with Metadatify. If you are
+              unsure where to start or want to know how Metadatify would best
+              suit your needs, please don't hesitate to contact{" "}
               <Link color={"blue.500"} href={"mailto:henry.burgess@wustl.edu"}>
                 Henry Burgess
               </Link>
@@ -323,7 +409,7 @@ const App = () => {
               justify={"space-around"}
               wrap={"wrap"}
               gap={["4", "8"]}
-              maxW={["", "60vw"]}
+              maxW={["", "80vw"]}
             >
               <Flex
                 direction={"column"}
@@ -339,21 +425,34 @@ const App = () => {
                 <Icon name={"serv_managed_hosted"} size={"lg"} />
                 <Text fontWeight={"bold"}>Managed Hosting</Text>
                 <Text>
-                  You can sign up and login Metadatify using your ORCiD right
-                  away! While in pre-release, Metadatify will be public and free
-                  to use.
+                  Does your team already have preview access? You can log in
+                  right away with your ORCiD. If you have signed up for our
+                  waitlist, we will notify you when you have access!
                 </Text>
                 <Spacer />
 
-                <Flex direction={"row"} gap={"1"} align={"center"}>
-                  <Link
-                    color={"blue.500"}
-                    href={"https://app.metadatify.com"}
-                    isExternal
-                  >
-                    Metadatify
-                  </Link>
-                  <Icon name={"link"} color={"blue.500"} />
+                <Flex direction={"row"} justify={"space-between"}>
+                  <Flex direction={"row"} gap={"1"} align={"center"}>
+                    <Link
+                      color={"blue.500"}
+                      href={"https://app.metadatify.com"}
+                      isExternal
+                    >
+                      Log In
+                    </Link>
+                    <Icon name={"link"} color={"blue.500"} />
+                  </Flex>
+
+                  <Flex direction={"row"} gap={"1"} align={"center"}>
+                    <Link
+                      color={"blue.500"}
+                      href={"https://forms.gle/q4GL4gF1bamem3DA9"}
+                      isExternal
+                    >
+                      Join Waitlist
+                    </Link>
+                    <Icon name={"link"} color={"blue.500"} />
+                  </Flex>
                 </Flex>
               </Flex>
               <Flex
@@ -370,7 +469,6 @@ const App = () => {
                 <Icon name={"serv_self_hosted"} size={"lg"} />
                 <Text fontWeight={"bold"}>Self-Hosted</Text>
                 <Text>
-                  Metadatify will remain open-source and accessible via GitHub.
                   Follow the documentation on GitHub to download and deploy your
                   own instance of Metadatify.
                 </Text>
@@ -402,8 +500,8 @@ const App = () => {
                 <Icon name={"l_github"} size={"lg"} />
                 <Text fontWeight={"bold"}>GitHub</Text>
                 <Text>
-                  Since Metadatify is an open-source project, you can contribute
-                  to further development! Get in touch with{" "}
+                  Metadatify is an open-source project, you can contribute to
+                  further development! Get in touch with{" "}
                   <Link
                     color={"blue.500"}
                     href={"mailto:henry.burgess@wustl.edu"}
@@ -457,7 +555,7 @@ const App = () => {
                 </ListItem>
               </UnorderedList>
 
-              <Text fontWeight={"semibold"}>Contributors:</Text>
+              <Text fontWeight={"semibold"}>People:</Text>
               <Flex direction={"row"} gap={"2"}>
                 <Flex
                   direction={"column"}
@@ -469,7 +567,11 @@ const App = () => {
                   bg={"white"}
                   align={"center"}
                   justify={"center"}
+                  w={"160px"}
                 >
+                  <Text fontWeight={"semibold"} color={"gray.400"}>
+                    Lead Developer
+                  </Text>
                   <Avatar
                     name={"Henry Burgess"}
                     src={"https://avatars.githubusercontent.com/u/60735885"}
@@ -492,7 +594,11 @@ const App = () => {
                   bg={"white"}
                   align={"center"}
                   justify={"center"}
+                  w={"160px"}
                 >
+                  <Text fontWeight={"semibold"} color={"gray.400"}>
+                    Collaborator
+                  </Text>
                   <Avatar
                     name={"Robin Fievet"}
                     src={"https://avatars.githubusercontent.com/u/11888851"}

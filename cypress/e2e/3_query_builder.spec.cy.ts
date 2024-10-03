@@ -5,7 +5,7 @@ describe("search query builder", () => {
 
     // Navigate the "Login" page
     cy.visit("http://localhost:8080/");
-    cy.get("button").click();
+    cy.get("#orcidLoginButton").click();
   });
 
   it("should go to search page and test query builder", () => {

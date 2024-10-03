@@ -17,7 +17,7 @@ describe("SearchBox Component", () => {
   beforeEach(() => {
     wrapper = shallow(
       <MockedProvider>
-        <SearchBox />
+        <SearchBox resultType={"entity"} />
       </MockedProvider>,
     );
   });

@@ -1,21 +1,22 @@
 // Custom types
-import { Context, IAuth, UserModel } from "@types";
+import { Context, IAuth, ResponseData, UserModel } from "@types";
 
 // JWK imports
 import { verify } from "jsonwebtoken";
 import { JwksClient } from "jwks-rsa";
 
 // Utility libraries
+import { GraphQLError } from "graphql";
 import axios, { AxiosResponse } from "axios";
 import _ from "lodash";
 
 // Models
 import { Users } from "./Users";
+import { Workspaces } from "./Workspaces";
 
 // Variables
 import { DEMO_USER_ORCID } from "src/variables";
-import { Workspaces } from "./Workspaces";
-import { GraphQLError } from "graphql";
+
 const TOKEN_URL = "https://orcid.org/oauth/token";
 const CLIENT_ID = process.env.CLIENT_ID as string;
 const CLIENT_SECRET = process.env.CLIENT_SECRET as string;
@@ -29,7 +30,7 @@ export class Authentication {
    * Perform login operation
    * @returns Authentication information including name, ORCID, and a token
    */
-  static login = async (code: string): Promise<IAuth> => {
+  static login = async (code: string): Promise<ResponseData<IAuth>> => {
     // Format login data for POST request
     const loginData = new URLSearchParams({
       client_id: CLIENT_ID,
@@ -70,7 +71,20 @@ export class Authentication {
 
     // Check if the User exists, and create a new User if not
     const exists = await Users.exists(authenticationPayload.orcid);
-    if (!exists) {
+    if (!exists && !_.isEqual(authenticationPayload.orcid, DEMO_USER_ORCID)) {
+      // Preview use only, User must exist prior to first login
+      return {
+        success: false,
+        message: "User does not have access",
+        data: {
+          name: authenticationPayload.name,
+          orcid: authenticationPayload.orcid,
+          token: "",
+          workspace: "",
+        },
+      };
+    } else if (!exists) {
+      // If the user is the demo user, create a new User
       await Users.create({
         _id: authenticationPayload.orcid,
         firstName: "",
@@ -82,7 +96,11 @@ export class Authentication {
       });
     }
 
-    return authenticationPayload;
+    return {
+      success: true,
+      message: "Logged in successfully",
+      data: authenticationPayload,
+    };
   };
 
   static validate = async (token: string): Promise<UserModel> => {

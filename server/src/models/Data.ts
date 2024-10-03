@@ -5,7 +5,7 @@ import {
   EntityModel,
   IEntity,
   IValue,
-  ResponseMessage,
+  IResponseMessage,
 } from "@types";
 
 // Utility functions and libraries
@@ -72,7 +72,7 @@ export class Data {
   static uploadAttachment = async (
     target: string,
     file: any,
-  ): Promise<ResponseMessage> => {
+  ): Promise<IResponseMessage> => {
     const { createReadStream, filename, mimetype } = await file;
 
     const bucket = getAttachments();
@@ -108,8 +108,8 @@ export class Data {
    * @param stream ReadableStream instance with file contents
    * @return {Promise<Buffer>}
    */
-  static bufferHelper = async (stream: any): Promise<Buffer> =>
-    new Promise((resolve, _reject) => {
+  private static bufferHelper = async (stream: any): Promise<Buffer> =>
+    new Promise((resolve) => {
       const buffers: Uint8Array[] = [];
       stream.on("data", (data: any) => buffers.push(data));
       stream.on("end", () => {
@@ -157,13 +157,13 @@ export class Data {
    * @param columnMapping Collection of mapped values with their corresponding columns names
    * @param file CSV file
    * @param context Request context, containing user and Workspace identifiers
-   * @return {Promise<ResponseMessage>}
+   * @return {Promise<IResponseMessage>}
    */
   static mapColumns = async (
     columnMapping: Record<string, any>,
     file: any,
     context: Context,
-  ): Promise<ResponseMessage> => {
+  ): Promise<IResponseMessage> => {
     const { createReadStream } = await file[0];
     const stream = createReadStream();
 
@@ -240,13 +240,13 @@ export class Data {
         const response = await Entities.create(entity);
         if (response.success) {
           entities.push({
-            _id: response.message,
+            _id: response.data,
             timestamp: dayjs(Date.now()).toISOString(),
             ...entity,
           });
 
           // Add Entity to Workspace
-          await Workspaces.addEntity(context.workspace, response.message);
+          await Workspaces.addEntity(context.workspace, response.data);
 
           // Create new Activity if successful
           const activity = await Activity.create({
@@ -255,14 +255,14 @@ export class Data {
             actor: context.user,
             details: "Created new Entity",
             target: {
-              _id: response.message,
+              _id: response.data,
               type: "entities",
               name: entity.name,
             },
           });
 
           // Add Activity to Workspace
-          await Workspaces.addActivity(context.workspace, activity.message);
+          await Workspaces.addActivity(context.workspace, activity.data);
         }
       }
 
@@ -292,14 +292,14 @@ export class Data {
    * @param owner ORCiD ID of owner
    * @param project Project identifier to add Entities to (if any)
    * @param context Request context containing user and Workspace identifier
-   * @return {Promise<ResponseMessage>}
+   * @return {Promise<IResponseMessage>}
    */
   static importObjects = async (
     file: any[],
     owner: string,
     project: string,
     context: Context,
-  ): Promise<ResponseMessage> => {
+  ): Promise<IResponseMessage> => {
     const { createReadStream, mimetype } = await file[0];
     const stream = createReadStream();
 
@@ -351,7 +351,7 @@ export class Data {
             });
 
             // Add Activity to Workspace
-            await Workspaces.addActivity(context.workspace, activity.message);
+            await Workspaces.addActivity(context.workspace, activity.data);
           }
         } else {
           // Create a new Entity if it does not exist
@@ -363,7 +363,7 @@ export class Data {
             };
           } else {
             // Add the Entity to the Workspace
-            await Workspaces.addEntity(context.workspace, result.message);
+            await Workspaces.addEntity(context.workspace, result.data);
 
             const activity = await Activity.create({
               timestamp: dayjs(Date.now()).toISOString(),
@@ -371,14 +371,14 @@ export class Data {
               actor: context.user,
               details: "Updated existing Entity",
               target: {
-                _id: result.message,
+                _id: result.data,
                 type: "entities",
                 name: entity.name,
               },
             });
 
             // Add Activity to Workspace
-            await Workspaces.addActivity(context.workspace, activity.message);
+            await Workspaces.addActivity(context.workspace, activity.data);
           }
         }
       }

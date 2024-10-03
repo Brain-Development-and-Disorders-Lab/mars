@@ -51,8 +51,8 @@ import SearchSelect from "@components/SearchSelect";
 import {
   AttributeModel,
   AttributeCardProps,
-  IEntity,
   IGenericItem,
+  ResponseData,
 } from "@types";
 
 // Utility functions and libraries
@@ -109,22 +109,6 @@ const Entity = () => {
     [] as AttributeModel[],
   );
 
-  const entityState: IEntity = {
-    name: name,
-    owner: owner,
-    created: created,
-    archived: false,
-    description: description,
-    associations: {
-      origins: selectedOrigins,
-      products: selectedProducts,
-    },
-    projects: selectedProjects,
-    attributes: selectedAttributes,
-    attachments: [],
-    history: [],
-  };
-
   // Various validation error states
   const isNameError = name === "";
   const isDateError = created === "";
@@ -168,11 +152,12 @@ const Entity = () => {
       createEntity(entity: $entity) {
         success
         message
+        data
       }
     }
   `;
   const [createEntity, { loading: createLoading, error: createError }] =
-    useMutation(CREATE_ENTITY);
+    useMutation<{ createEntity: ResponseData<string> }>(CREATE_ENTITY);
 
   // Assign data
   useEffect(() => {
@@ -288,11 +273,24 @@ const Entity = () => {
       // Execute the GraphQL operation
       const response = await createEntity({
         variables: {
-          entity: entityState,
+          entity: {
+            name: name,
+            owner: owner,
+            created: created,
+            archived: false,
+            description: description,
+            associations: {
+              origins: selectedOrigins,
+              products: selectedProducts,
+            },
+            projects: selectedProjects,
+            attributes: selectedAttributes,
+            attachments: [],
+          },
         },
       });
 
-      if (response.data.createEntity.success) {
+      if (response.data?.createEntity.success) {
         setIsSubmitting(false);
         navigate(`/entities`);
       }
@@ -510,6 +508,7 @@ const Entity = () => {
                 <FormControl>
                   <FormLabel fontSize={"sm"}>Origins</FormLabel>
                   <SearchSelect
+                    resultType={"entity"}
                     value={selectedOrigin}
                     onChange={setSelectedOrigin}
                   />
@@ -570,6 +569,7 @@ const Entity = () => {
                 <FormControl>
                   <FormLabel fontSize={"sm"}>Products</FormLabel>
                   <SearchSelect
+                    resultType={"entity"}
                     value={selectedProduct}
                     onChange={setSelectedProduct}
                   />

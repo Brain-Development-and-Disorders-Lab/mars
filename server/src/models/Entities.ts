@@ -5,7 +5,8 @@ import {
   EntityModel,
   IEntity,
   IGenericItem,
-  ResponseMessage,
+  IResponseMessage,
+  ResponseData,
 } from "@types";
 
 // Models
@@ -95,14 +96,15 @@ export class Entities {
   /**
    * Create a new Entity
    * @param {IEntity} entity Entity information
-   * @returns {ResponseMessage}
+   * @returns {Promise<ResponseData<string>>}
    */
-  static create = async (entity: IEntity): Promise<ResponseMessage> => {
+  static create = async (entity: IEntity): Promise<ResponseData<string>> => {
     // Allocate a new identifier and join with IEntity data
     const joinedEntity: EntityModel = {
       _id: getIdentifier("entity"), // Generate new identifier
       timestamp: dayjs(Date.now()).toISOString(), // Add created timestamp
       ...entity, // Unpack existing IEntity fields
+      history: [],
     };
 
     for await (const origin of entity.associations.origins) {
@@ -138,19 +140,18 @@ export class Entities {
 
     return {
       success: successStatus,
-      message: successStatus
-        ? response.insertedId.toString()
-        : "Unable to create Entity",
+      message: successStatus ? "Created new Entity" : "Unable to create Entity",
+      data: response.insertedId.toString(),
     };
   };
 
   /**
    * Apply updates to an existing Entity
    * @param updated Updated Entity information
-   * @return {Promise<ResponseMessage>}
+   * @return {Promise<IResponseMessage>}
    */
-  static update = async (updated: EntityModel): Promise<ResponseMessage> => {
-    const entity = await this.getOne(updated._id);
+  static update = async (updated: EntityModel): Promise<IResponseMessage> => {
+    const entity = await Entities.getOne(updated._id);
 
     if (_.isNull(entity)) {
       return {
@@ -159,9 +160,22 @@ export class Entities {
       };
     }
 
+    // Construct an update object from the original Entity, and merge in the changes
     const update: { $set: IEntity } = {
       $set: {
-        ...entity,
+        name: entity.name,
+        owner: entity.owner,
+        created: entity.created,
+        archived: entity.archived,
+        description: entity.description,
+        projects: entity.projects,
+        associations: {
+          origins: entity.associations.origins,
+          products: entity.associations.products,
+        },
+        attributes: entity.attributes,
+        attachments: entity.attachments,
+        history: entity.history,
       },
     };
 
@@ -177,17 +191,21 @@ export class Entities {
 
     // Projects
     if (!_.isUndefined(updated.projects)) {
+      update.$set.projects = updated.projects;
+
+      // Projects added in updated Entity
       const addProjects = _.difference(updated.projects, entity.projects);
       for await (const project of addProjects) {
-        await this.addProject(updated._id, project);
+        await Entities.addProject(updated._id, project);
         await Projects.addEntity(project, updated._id);
       }
+
+      // Projects removed in updated Entity
       const removeProjects = _.difference(entity.projects, updated.projects);
       for await (const project of removeProjects) {
-        await this.removeProject(updated._id, project);
+        await Entities.removeProject(updated._id, project);
         await Projects.removeEntity(project, updated._id);
       }
-      update.$set.projects = updated.projects;
     }
 
     // Origins
@@ -195,29 +213,38 @@ export class Entities {
       !_.isUndefined(updated.associations) &&
       !_.isUndefined(updated.associations.origins)
     ) {
-      const addOrigins = _.difference(
-        updated.associations.origins,
-        entity.associations.origins,
+      update.$set.associations.origins = updated.associations.origins;
+      const updatedOrigins = updated.associations.origins.map((o) => o._id);
+      const entityOrigins = entity.associations.origins.map((o) => o._id);
+
+      // Origin Entities added in updated Entity
+      const addOriginIdentifiers = _.difference(updatedOrigins, entityOrigins);
+      const addOrigins = updated.associations.origins.filter((o) =>
+        _.includes(addOriginIdentifiers, o._id),
       );
       for await (const origin of addOrigins) {
-        await this.addOrigin(updated._id, origin);
-        await this.addProduct(origin._id, {
+        await Entities.addOrigin(updated._id, origin);
+        await Entities.addProduct(origin._id, {
           _id: updated._id,
           name: updated.name,
         });
       }
-      const removeOrigins = _.difference(
-        entity.associations.origins,
-        updated.associations.origins,
+
+      // Origin Entities removed in updated Entity
+      const removeOriginIdentifiers = _.difference(
+        entity.associations.origins.map((o) => o._id),
+        updated.associations.origins.map((o) => o._id),
+      );
+      const removeOrigins = entity.associations.origins.filter((o) =>
+        _.includes(removeOriginIdentifiers, o._id),
       );
       for await (const origin of removeOrigins) {
-        await this.removeOrigin(updated._id, origin);
-        await this.removeProduct(origin._id, {
+        await Entities.removeOrigin(updated._id, origin);
+        await Entities.removeProduct(origin._id, {
           _id: updated._id,
           name: updated.name,
         });
       }
-      update.$set.associations.origins = updated.associations.origins;
     }
 
     // Products
@@ -225,45 +252,72 @@ export class Entities {
       !_.isUndefined(updated.associations) &&
       !_.isUndefined(updated.associations.products)
     ) {
-      const addProducts = _.difference(
-        updated.associations.products,
-        entity.associations.products,
+      update.$set.associations.products = updated.associations.products;
+      const updatedProducts = updated.associations.products.map((p) => p._id);
+      const entityProducts = entity.associations.products.map((p) => p._id);
+
+      // Product Entities added in updated Entity
+      const addProductIdentifiers = _.difference(
+        updatedProducts,
+        entityProducts,
+      );
+      const addProducts = updated.associations.products.filter((p) =>
+        _.includes(addProductIdentifiers, p._id),
       );
       for await (const product of addProducts) {
-        await this.addProduct(updated._id, product);
-        await this.addOrigin(product._id, {
+        await Entities.addProduct(updated._id, product);
+        await Entities.addOrigin(product._id, {
           _id: updated._id,
           name: updated.name,
         });
       }
-      const removeProducts = _.difference(
-        entity.associations.products,
-        updated.associations.products,
+
+      // Product Entities removed from updated Entity
+      const removeProductIdentifiers = _.difference(
+        entityProducts,
+        updatedProducts,
+      );
+      const removeProducts = updated.associations.products.filter((p) =>
+        _.includes(removeProductIdentifiers, p._id),
       );
       for await (const product of removeProducts) {
-        await this.removeProduct(updated._id, product);
-        await this.removeOrigin(product._id, {
+        await Entities.removeProduct(updated._id, product);
+        await Entities.removeOrigin(product._id, {
           _id: updated._id,
           name: updated.name,
         });
       }
-      update.$set.associations.products = updated.associations.products;
     }
 
     // Attributes
     if (!_.isUndefined(updated.attributes)) {
-      const addAttributes = _.difference(updated.attributes, entity.attributes);
+      update.$set.attributes = updated.attributes;
+      const updatedAttributes = updated.attributes.map((a) => a._id);
+      const entityAttributes = entity.attributes.map((a) => a._id);
+
+      // Attributes added in updated Entity
+      const addAttributeIdentifiers = _.difference(
+        updatedAttributes,
+        entityAttributes,
+      );
+      const addAttributes = updated.attributes.filter((a) =>
+        _.includes(addAttributeIdentifiers, a._id),
+      );
       for await (const attribute of addAttributes) {
         await this.addAttribute(updated._id, attribute);
       }
-      const removeAttributes = _.difference(
-        entity.attributes,
-        updated.attributes,
+
+      // Attributes removed in updated Entity
+      const removeAttributeIdentifiers = _.difference(
+        entityAttributes,
+        updatedAttributes,
+      );
+      const removeAttributes = entity.attributes.filter((a) =>
+        _.includes(removeAttributeIdentifiers, a._id),
       );
       for await (const attribute of removeAttributes) {
         await this.removeAttribute(updated._id, attribute._id);
       }
-      update.$set.attributes = updated.attributes;
     }
 
     const response = await getDatabase()
@@ -282,11 +336,11 @@ export class Entities {
   /**
    * Add a history entry to an Entity based on provided Entity state
    * @param historyEntity Existing Entity state to add to Entity history
-   * @return {Promise<ResponseMessage>}
+   * @return {Promise<IResponseMessage>}
    */
   static addHistory = async (
     historyEntity: EntityModel,
-  ): Promise<ResponseMessage> => {
+  ): Promise<IResponseMessage> => {
     const entity = await Entities.getOne(historyEntity._id);
     if (_.isNull(entity)) {
       return {
@@ -312,7 +366,7 @@ export class Entities {
 
     const update: { $set: Partial<EntityModel> } = {
       $set: {
-        history: [historyEntityModel, ...entity.history],
+        history: [historyEntityModel, ...(entity.history || [])],
       },
     };
 
@@ -336,12 +390,12 @@ export class Entities {
    * Set the archive state of an Entity
    * @param _id Entity identifier to archive
    * @param state Entity archive state
-   * @return {Promise<ResponseMessage>}
+   * @return {Promise<IResponseMessage>}
    */
   static setArchived = async (
     _id: string,
     state: boolean,
-  ): Promise<ResponseMessage> => {
+  ): Promise<IResponseMessage> => {
     consola.debug("Setting archive state of Entity:", _id, "Archived:", state);
     const entity = await Entities.getOne(_id);
     if (_.isNull(entity)) {
@@ -379,9 +433,9 @@ export class Entities {
   /**
    * Delete an Entity
    * @param _id Entity identifier to delete
-   * @return {ResponseMessage}
+   * @return {IResponseMessage}
    */
-  static delete = async (_id: string): Promise<ResponseMessage> => {
+  static delete = async (_id: string): Promise<IResponseMessage> => {
     const entity = await Entities.getOne(_id);
     if (entity) {
       // Remove Origins
@@ -429,12 +483,12 @@ export class Entities {
    * Add a Project to an Entity
    * @param _id Target Entity identifier
    * @param project_id Project identifier to associate with Entity
-   * @returns {Promise<ResponseMessage>}
+   * @returns {Promise<IResponseMessage>}
    */
   static addProject = async (
     _id: string,
     project_id: string,
-  ): Promise<ResponseMessage> => {
+  ): Promise<IResponseMessage> => {
     const entity = await this.getOne(_id);
 
     if (_.isNull(entity)) {
@@ -476,12 +530,12 @@ export class Entities {
    * Remove a Project from an Entity
    * @param _id Target Entity identifier
    * @param project_id Project identifier to remove from Entity
-   * @returns {Promise<ResponseMessage>}
+   * @returns {Promise<IResponseMessage>}
    */
   static removeProject = async (
     _id: string,
     project_id: string,
-  ): Promise<ResponseMessage> => {
+  ): Promise<IResponseMessage> => {
     const entity = await this.getOne(_id);
 
     if (_.isNull(entity)) {
@@ -515,12 +569,12 @@ export class Entities {
    * Update the Entity description
    * @param {string} _id Entity identifier
    * @param {string} description Update Entity description
-   * @returns {ResponseMessage}
+   * @returns {IResponseMessage}
    */
   static setDescription = async (
     _id: string,
     description: string,
-  ): Promise<ResponseMessage> => {
+  ): Promise<IResponseMessage> => {
     const update = {
       $set: {
         description: description,
@@ -544,12 +598,12 @@ export class Entities {
    * Add a Product association to an Entity
    * @param _id Target Entity identifier
    * @param product Generic format for Product to associate with Entity
-   * @returns {Promise<ResponseMessage>}
+   * @returns {Promise<IResponseMessage>}
    */
   static addProduct = async (
     _id: string,
     product: IGenericItem,
-  ): Promise<ResponseMessage> => {
+  ): Promise<IResponseMessage> => {
     const entity = await this.getOne(_id);
 
     if (_.isNull(entity)) {
@@ -596,12 +650,12 @@ export class Entities {
    * Add multiple Product associations to an Entity
    * @param _id Target Entity identifier
    * @param products Set of Products to associate with Entity
-   * @returns {Promise<ResponseMessage>}
+   * @returns {Promise<IResponseMessage>}
    */
   static addProducts = async (
     _id: string,
     products: IGenericItem[],
-  ): Promise<ResponseMessage> => {
+  ): Promise<IResponseMessage> => {
     const entity = await this.getOne(_id);
 
     if (_.isNull(entity)) {
@@ -638,12 +692,12 @@ export class Entities {
    * Remove a Product association from an Entity
    * @param _id Target Entity identifier
    * @param product Generic format for Product to associate with Entity
-   * @returns {Promise<ResponseMessage>}
+   * @returns {Promise<IResponseMessage>}
    */
   static removeProduct = async (
     _id: string,
     product: IGenericItem,
-  ): Promise<ResponseMessage> => {
+  ): Promise<IResponseMessage> => {
     const entity = await this.getOne(_id);
 
     if (_.isNull(entity)) {
@@ -682,12 +736,12 @@ export class Entities {
    * Add a Origin association to an Entity
    * @param _id Target Entity identifier
    * @param origin Generic format for Origin to associate with Entity
-   * @returns {Promise<ResponseMessage>}
+   * @returns {Promise<IResponseMessage>}
    */
   static addOrigin = async (
     _id: string,
     origin: IGenericItem,
-  ): Promise<ResponseMessage> => {
+  ): Promise<IResponseMessage> => {
     const entity = await this.getOne(_id);
 
     if (_.isNull(entity)) {
@@ -734,12 +788,12 @@ export class Entities {
    * Add multiple Origin associations to an Entity
    * @param _id Target Entity identifier
    * @param origins Set of Origins to associate with Entity
-   * @returns {Promise<ResponseMessage>}
+   * @returns {Promise<IResponseMessage>}
    */
   static addOrigins = async (
     _id: string,
     origins: IGenericItem[],
-  ): Promise<ResponseMessage> => {
+  ): Promise<IResponseMessage> => {
     const entity = await this.getOne(_id);
 
     if (_.isNull(entity)) {
@@ -781,12 +835,12 @@ export class Entities {
    * Remove an Origin association from an Entity
    * @param _id Target Entity identifier
    * @param origin Generic format for Origin to associate with Entity
-   * @returns {Promise<ResponseMessage>}
+   * @returns {Promise<IResponseMessage>}
    */
   static removeOrigin = async (
     _id: string,
     origin: IGenericItem,
-  ): Promise<ResponseMessage> => {
+  ): Promise<IResponseMessage> => {
     const entity = await this.getOne(_id);
 
     if (_.isNull(entity)) {
@@ -825,12 +879,12 @@ export class Entities {
    * Add an Attibute to an Entity
    * @param _id Target Entity identifier
    * @param attribute Attribute data
-   * @returns {Promise<ResponseMessage>}
+   * @returns {Promise<IResponseMessage>}
    */
   static addAttribute = async (
     _id: string,
     attribute: AttributeModel,
-  ): Promise<ResponseMessage> => {
+  ): Promise<IResponseMessage> => {
     const entity = await this.getOne(_id);
 
     if (_.isNull(entity)) {
@@ -866,12 +920,12 @@ export class Entities {
    * Remove an Attribute from an Entity by the Attribute identifier
    * @param _id Target Entity identifier
    * @param attribute Attribute identifier to remove
-   * @returns {Promise<ResponseMessage>}
+   * @returns {Promise<IResponseMessage>}
    */
   static removeAttribute = async (
     _id: string,
     attribute: string,
-  ): Promise<ResponseMessage> => {
+  ): Promise<IResponseMessage> => {
     const entity = await this.getOne(_id);
 
     if (_.isNull(entity)) {
@@ -915,12 +969,12 @@ export class Entities {
    * Update an Attribute associated with an Entity
    * @param _id Target Entity identifier
    * @param attribute Updated Attribute
-   * @returns {Promise<ResponseMessage>}
+   * @returns {Promise<IResponseMessage>}
    */
   static updateAttribute = async (
     _id: string,
     attribute: AttributeModel,
-  ): Promise<ResponseMessage> => {
+  ): Promise<IResponseMessage> => {
     const entity = await this.getOne(_id);
 
     if (_.isNull(entity)) {
@@ -1094,7 +1148,7 @@ export class Entities {
   static addAttachment = async (
     _id: string,
     attachment: IGenericItem,
-  ): Promise<ResponseMessage> => {
+  ): Promise<IResponseMessage> => {
     const entity = await Entities.getOne(_id);
     if (_.isNull(entity)) {
       return {

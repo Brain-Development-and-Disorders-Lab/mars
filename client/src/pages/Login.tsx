@@ -13,6 +13,13 @@ import {
   FormLabel,
   Input,
   Tag,
+  Alert,
+  AlertIcon,
+  AlertDescription,
+  Link,
+  Divider,
+  Box,
+  AbsoluteCenter,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
@@ -26,7 +33,14 @@ import { useToken } from "src/authentication/useToken";
 import _ from "lodash";
 
 // Existing and custom types
-import { LoginProps, ResponseMessage, UserModel, WorkspaceModel } from "@types";
+import {
+  LoginProps,
+  IResponseMessage,
+  UserModel,
+  WorkspaceModel,
+  ResponseData,
+  IAuth,
+} from "@types";
 
 // Workspace context
 import { WorkspaceContext } from "src/Context";
@@ -90,13 +104,19 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
   const LOGIN_DATA = gql`
     query PerformLogin($code: String) {
       login(code: $code) {
-        orcid
-        name
-        token
+        success
+        message
+        data {
+          orcid
+          name
+          token
+        }
       }
     }
   `;
-  const [doLogin, { loading, error }] = useLazyQuery(LOGIN_DATA);
+  const [doLogin, { loading, error }] = useLazyQuery<{
+    login: ResponseData<IAuth>;
+  }>(LOGIN_DATA);
 
   // Query to retrieve Workspaces
   const GET_WORKSPACES = gql`
@@ -139,7 +159,7 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
     }
   `;
   const [updateUser, { error: userUpdateError }] = useMutation<{
-    updateUser: ResponseMessage;
+    updateUser: IResponseMessage;
   }>(UPDATE_USER);
 
   // Workspace context
@@ -162,15 +182,18 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
     const loginResponse = await doLogin({ variables: { code: code } });
 
     // Perform login and data retrieval via server, check if user permitted access
-    if (loginResponse.data?.login) {
+    if (
+      loginResponse.data?.login &&
+      loginResponse.data.login.success === true
+    ) {
       removeCode();
 
       // Store the User ORCiD
-      setUserOrcid(loginResponse.data.login.orcid);
+      setUserOrcid(loginResponse.data.login.data.orcid);
 
       // Create a new token instance with an empty Workspace value
       setToken({
-        ...loginResponse.data.login,
+        ...loginResponse.data.login.data,
         workspace: "",
       });
 
@@ -182,7 +205,7 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
       ) {
         // Update the token with an active Workspace if the user is a member of a Workspace
         setToken({
-          ...loginResponse.data.login,
+          ...loginResponse.data.login.data,
           workspace: workspacesResponse.data.workspaces[0]._id,
         });
 
@@ -193,7 +216,7 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
       // Retrieve the User information and display the setup form if information missing
       const userResponse = await getUser({
         variables: {
-          _id: loginResponse.data.login.orcid,
+          _id: loginResponse.data.login.data.orcid,
         },
       });
 
@@ -202,9 +225,13 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
         const user: Partial<UserModel> = userResponse.data.user;
         if (
           user.firstName === "" ||
+          _.isNull(user.firstName) ||
           user.lastName === "" ||
+          _.isNull(user.lastName) ||
           user.email === "" ||
-          user.affiliation === ""
+          _.isNull(user.email) ||
+          user.affiliation === "" ||
+          _.isNull(user.affiliation)
         ) {
           setShowSetup(true);
         } else {
@@ -233,13 +260,36 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
           isClosable: true,
         });
       }
+    } else if (
+      loginResponse.data?.login &&
+      !_.isEqual(loginResponse.data.login.data.orcid, "")
+    ) {
+      if (!toast.isActive("access-toast")) {
+        toast({
+          id: "access-toast",
+          title: "You don't have access yet!",
+          description: (
+            <Link href={"https://forms.gle/q4GL4gF1bamem3DA9"} isExternal>
+              <Flex direction={"row"} gap={"1"} align={"center"}>
+                <Text fontWeight={"semibold"}>Join the waitlist here</Text>
+                <Icon name={"a_right"} />
+              </Flex>
+            </Link>
+          ),
+          status: "info",
+          position: "bottom-right",
+          duration: null,
+          isClosable: false,
+        });
+      }
     }
   };
 
   useEffect(() => {
     // Handle potential errors when using ORCiD
-    if (error) {
+    if (error && !toast.isActive("login-graphql-error-toast")) {
       toast({
+        id: "login-graphql-error-toast",
         title: "Login Error",
         status: "error",
         description: "Could not authenticate with ORCiD",
@@ -304,6 +354,12 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
 
   return (
     <Content>
+      <Flex h={"10vh"} p={"4"}>
+        <Flex gap={"2"} align={"center"} p={"4"}>
+          <Image src={"/Favicon.png"} w={"25px"} h={"25px"} />
+          <Heading size={"md"}>Metadatify</Heading>
+        </Flex>
+      </Flex>
       <Flex
         direction={"column"}
         justify={"center"}
@@ -311,42 +367,41 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
         alignSelf={"center"}
         gap={"8"}
         w={["sm", "md", "lg"]}
-        h={"100vh"}
+        h={"90vh"}
         wrap={"wrap"}
       >
         {showSetup ? (
           <Flex
             direction={"column"}
-            p={"4"}
+            p={"8"}
             gap={"4"}
             bg={"white"}
-            rounded={"lg"}
-            border={"1px"}
-            borderColor={"gray.300"}
             align={"center"}
             justify={"center"}
+            border={"1px"}
+            borderColor={"gray.300"}
+            rounded={"md"}
           >
-            <Flex direction={"row"} gap={"2"} align={"center"}>
-              <Image src="/Favicon.png" boxSize={"64px"} />
-              <Heading size={"lg"} fontWeight={"semibold"}>
-                Metadatify
-              </Heading>
-            </Flex>
-            <Heading size={"md"}>User Setup</Heading>
-            <Text fontWeight={"semibold"} color={"gray.400"}>
-              Please provide the following information to complete your user
-              profile.
+            <Heading size={"xl"} fontWeight={"semibold"}>
+              Create your account
+            </Heading>
+
+            <Text fontWeight={"semibold"} fontSize={"sm"}>
+              Complete your account information before continuing.
             </Text>
+
             <Flex
               direction={"row"}
               gap={"2"}
               w={"100%"}
               align={"center"}
               justify={"left"}
+              pt={"8"}
             >
               <Text fontWeight={"semibold"}>ORCiD:</Text>
               <Tag colorScheme={"green"}>{userOrcid}</Tag>
             </Flex>
+
             <FormControl isRequired>
               <Flex direction={"column"} gap={"2"}>
                 <Flex direction={"row"} gap={"2"}>
@@ -412,50 +467,70 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
             </Flex>
           </Flex>
         ) : (
-          <Flex
-            direction={"column"}
-            p={"8"}
-            gap={"12"}
-            maxW={"sm"}
-            h={"md"}
-            bg={"white"}
-            rounded={"lg"}
-            border={"1px"}
-            borderColor={"gray.300"}
-            align={"center"}
-            justify={"center"}
-          >
+          <Flex direction={"column"} gap={"4"}>
+            <Alert status={"info"}>
+              <AlertIcon />
+              <AlertDescription>
+                Metadatify is in preview and is currently only available to a
+                small group of users.
+                <Link href={"https://forms.gle/q4GL4gF1bamem3DA9"} isExternal>
+                  <Flex direction={"row"} gap={"1"} align={"center"}>
+                    <Text fontWeight={"semibold"}>Join the waitlist here</Text>
+                    <Icon name={"a_right"} />
+                  </Flex>
+                </Link>
+              </AlertDescription>
+            </Alert>
+
             <Flex
               direction={"column"}
-              justify={"center"}
-              align={"center"}
-              gap={"6"}
-            >
-              <Flex direction={"row"} gap={"2"} align={"center"}>
-                <Image src="/Favicon.png" boxSize={"64px"} />
-                <Heading size={"lg"} fontWeight={"semibold"}>
-                  Metadatify
-                </Heading>
-              </Flex>
-              <Text align={"center"}>
-                Use your ORCiD ID to log in or create an account below.
-              </Text>
-            </Flex>
-
-            <Button
-              colorScheme={"gray"}
+              p={"8"}
               gap={"4"}
-              onClick={onLoginClick}
-              isLoading={loading}
-              loadingText={"Logging in..."}
+              h={"md"}
+              bg={"white"}
+              align={"center"}
+              justify={"center"}
+              border={"1px"}
+              borderColor={"gray.300"}
+              rounded={"md"}
             >
-              <Image
-                src={
-                  "https://orcid.org/sites/default/files/images/orcid_16x16.png"
-                }
-              />
-              Connect ORCiD
-            </Button>
+              <Heading size={"xl"} fontWeight={"semibold"}>
+                Sign in
+              </Heading>
+
+              <Text fontWeight={"semibold"} fontSize={"sm"}>
+                Get started with one of the sign in options below.
+              </Text>
+
+              <Flex direction={"column"} gap={"2"} pt={"8"}>
+                <Button
+                  id={"orcidLoginButton"}
+                  colorScheme={"gray"}
+                  gap={"4"}
+                  onClick={onLoginClick}
+                  isLoading={loading}
+                  loadingText={"Logging in..."}
+                >
+                  <Image
+                    src={
+                      "https://orcid.org/sites/default/files/images/orcid_16x16.png"
+                    }
+                  />
+                  Sign in with ORCiD
+                </Button>
+
+                <Box position={"relative"} p={"4"}>
+                  <Divider />
+                  <AbsoluteCenter bg={"white"} color={"gray.500"} px={"4"}>
+                    or
+                  </AbsoluteCenter>
+                </Box>
+
+                <Button colorScheme={"gray"} gap={"4"} isDisabled>
+                  More sign in options coming soon.
+                </Button>
+              </Flex>
+            </Flex>
           </Flex>
         )}
       </Flex>

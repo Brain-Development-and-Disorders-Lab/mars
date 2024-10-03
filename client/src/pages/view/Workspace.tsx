@@ -27,7 +27,7 @@ import ActorTag from "@components/ActorTag";
 import {
   DataTableAction,
   IGenericItem,
-  ResponseMessage,
+  IResponseMessage,
   WorkspaceModel,
 } from "@types";
 
@@ -156,7 +156,7 @@ const Workspace = () => {
   const [
     updateWorkspace,
     { loading: workspaceUpdateLoading, error: workspaceUpdateError },
-  ] = useMutation<ResponseMessage>(UPDATE_WORKSPACE);
+  ] = useMutation<IResponseMessage>(UPDATE_WORKSPACE);
 
   // State for Workspace details
   const [name, setName] = useState("");

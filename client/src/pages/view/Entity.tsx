@@ -18,7 +18,6 @@ import {
   ModalCloseButton,
   ModalBody,
   useDisclosure,
-  Container,
   Tag,
   TagLabel,
   FormControl,
@@ -2139,6 +2138,7 @@ const Entity = () => {
 
             <ModalBody p={"2"}>
               <SearchSelect
+                resultType={"entity"}
                 value={selectedProduct}
                 onChange={setSelectedProduct}
               />
@@ -2184,6 +2184,7 @@ const Entity = () => {
 
             <ModalBody p={"2"}>
               <SearchSelect
+                resultType={"entity"}
                 value={selectedOrigin}
                 onChange={setSelectedOrigin}
               />
@@ -2508,16 +2509,16 @@ const Entity = () => {
           isOpen={isGraphOpen}
         >
           <ModalOverlay />
-          <ModalContent>
-            <ModalHeader>Visualize: {entityName}</ModalHeader>
+          <ModalContent p={"2"}>
+            <ModalHeader p={"2"} gap={"2"}>
+              Visualize: {entityName}
+            </ModalHeader>
             <ModalCloseButton />
-            <ModalBody>
-              <Container h={"90vh"} minW={"90vw"}>
-                <Graph
-                  id={entityData._id}
-                  entityNavigateHook={handleEntityNodeClick}
-                />
-              </Container>
+            <ModalBody p={"2"}>
+              <Graph
+                id={entityData._id}
+                entityNavigateHook={handleEntityNodeClick}
+              />
             </ModalBody>
           </ModalContent>
         </Modal>

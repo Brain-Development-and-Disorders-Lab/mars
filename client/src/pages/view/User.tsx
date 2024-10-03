@@ -25,7 +25,7 @@ import Icon from "@components/Icon";
 import {
   DataTableAction,
   IGenericItem,
-  ResponseMessage,
+  IResponseMessage,
   UserModel,
 } from "@types";
 
@@ -105,7 +105,7 @@ const User = () => {
     }
   `;
   const [updateUser, { loading: userUpdateLoading, error: userUpdateError }] =
-    useMutation<ResponseMessage>(UPDATE_USER);
+    useMutation<IResponseMessage>(UPDATE_USER);
 
   // State for User details
   const [userModel, setUserModel] = useState({} as UserModel);

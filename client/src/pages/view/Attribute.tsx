@@ -6,12 +6,11 @@ import {
   Button,
   Flex,
   Heading,
+  Input,
   Menu,
   MenuButton,
   MenuItem,
   MenuList,
-  Tag,
-  TagLabel,
   Text,
   Textarea,
   useDisclosure,
@@ -21,12 +20,14 @@ import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 import Values from "@components/Values";
 import Dialog from "@components/Dialog";
+import ActorTag from "@components/ActorTag";
 
 // Existing and custom types
 import { AttributeModel, IValue } from "@types";
 
 // Utility functions and libraries
 import _ from "lodash";
+import dayjs from "dayjs";
 
 // Routing and navigation
 import { useParams } from "react-router-dom";
@@ -42,6 +43,7 @@ const Attribute = () => {
   const [editing, setEditing] = useState(false);
 
   const [attributeData, setAttributeData] = useState({} as AttributeModel);
+  const [attributeName, setAttributeName] = useState("");
   const [attributeDescription, setAttributeDescription] = useState("");
   const [attributeArchived, setAttributeArchived] = useState(false);
   const [attributeValues, setAttributeValues] = useState([] as IValue<any>[]);
@@ -60,6 +62,8 @@ const Attribute = () => {
       attribute(_id: $_id) {
         _id
         name
+        timestamp
+        owner
         archived
         description
         values {
@@ -107,6 +111,7 @@ const Attribute = () => {
     if (data?.attribute) {
       // Unpack all the Entity data
       setAttributeData(data.attribute);
+      setAttributeName(data.attribute.name);
       setAttributeArchived(data.attribute.archived);
       setAttributeDescription(data.attribute.description || "");
       setAttributeValues(data.attribute.values);
@@ -210,7 +215,7 @@ const Attribute = () => {
         variables: {
           attribute: {
             _id: attributeData._id,
-            name: attributeData.name,
+            name: attributeName,
             description: attributeDescription,
             values: attributeValues,
           },
@@ -349,46 +354,74 @@ const Attribute = () => {
             grow={"1"}
             rounded={"md"}
           >
+            {/* Attribute Overview */}
             <Flex
               direction={"column"}
               p={"2"}
+              gap={"2"}
               border={"1px"}
               borderColor={"gray.300"}
               rounded={"md"}
             >
-              {/* Attribute Overview */}
-              <Flex gap={"2"} grow={"1"} direction={"column"} minH={"32"}>
-                {/* Details */}
-                <Flex direction={"row"} gap={"2"}>
-                  <Text fontWeight={"semibold"}>Value Count</Text>
-                  <Tag colorScheme={"purple"}>
-                    <TagLabel>{attributeValues.length}</TagLabel>
-                  </Tag>
+              {/* "Name" and "Created" field */}
+              <Flex gap={"2"} direction={"row"}>
+                <Flex direction={"column"} gap={"1"} basis={"60%"}>
+                  <Text fontWeight={"bold"}>Name</Text>
+                  <Flex>
+                    <Input
+                      size={"sm"}
+                      value={attributeName}
+                      onChange={(event) => {
+                        setAttributeName(event.target.value || "");
+                      }}
+                      isReadOnly={!editing}
+                      rounded={"md"}
+                      border={"1px"}
+                      borderColor={"gray.300"}
+                      bg={"white"}
+                    />
+                  </Flex>
                 </Flex>
-                <Text fontWeight={"semibold"}>Description</Text>
-                {_.isEqual(attributeData.description, "") ? (
-                  <Tag
-                    size={"md"}
-                    key={`warn-${attributeData._id}`}
-                    colorScheme={"orange"}
-                  >
-                    <TagLabel>Not Specified</TagLabel>
-                    <Icon name={"warning"} />
-                  </Tag>
-                ) : (
-                  <Textarea
-                    size={"sm"}
-                    rounded={"md"}
-                    value={attributeDescription}
-                    onChange={(event) => {
-                      setAttributeDescription(event.target.value);
-                    }}
-                    isReadOnly={!editing}
-                    bg={"white"}
-                    border={"1px"}
-                    borderColor={"gray.300"}
-                  />
-                )}
+
+                <Flex direction={"column"} gap={"1"}>
+                  <Text fontWeight={"bold"}>Created</Text>
+                  <Flex align={"center"} gap={"1"}>
+                    <Icon name={"v_date"} size={"sm"} />
+                    <Text fontSize={"sm"}>
+                      {dayjs(attributeData.timestamp).format("DD MMM YYYY")}
+                    </Text>
+                  </Flex>
+                </Flex>
+              </Flex>
+
+              {/* "Description" and "Owner" fields */}
+              <Flex gap={"2"} direction={"row"}>
+                <Flex direction={"column"} gap={"1"} basis={"60%"}>
+                  <Text fontWeight={"bold"}>Description</Text>
+                  <Flex>
+                    <Textarea
+                      size={"sm"}
+                      value={attributeDescription}
+                      onChange={(event) => {
+                        setAttributeDescription(event.target.value || "");
+                      }}
+                      isReadOnly={!editing}
+                      rounded={"md"}
+                      border={"1px"}
+                      borderColor={"gray.300"}
+                      bg={"white"}
+                    />
+                  </Flex>
+                </Flex>
+                <Flex direction={"column"} gap={"1"}>
+                  <Text fontWeight={"bold"}>Owner</Text>
+                  <Flex>
+                    <ActorTag
+                      orcid={attributeData.owner}
+                      fallback={"Unknown User"}
+                    />
+                  </Flex>
+                </Flex>
               </Flex>
             </Flex>
           </Flex>

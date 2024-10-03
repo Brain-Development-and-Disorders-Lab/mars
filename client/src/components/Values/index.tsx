@@ -384,6 +384,7 @@ const Values = (props: {
                   dataInput = (
                     <SearchSelect
                       placeholder={"Select"}
+                      resultType={"entity"}
                       value={value}
                       onChange={onSearchSelectChange}
                       isDisabled={props.viewOnly}

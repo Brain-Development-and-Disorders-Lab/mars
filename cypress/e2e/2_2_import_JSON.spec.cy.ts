@@ -5,7 +5,7 @@ describe("JSON Import Test", () => {
 
     // Navigate the "Login" page
     cy.visit("http://localhost:8080/");
-    cy.get("button").click();
+    cy.get("#orcidLoginButton").click();
   });
 
   it("should import a JSON file successfully", () => {
