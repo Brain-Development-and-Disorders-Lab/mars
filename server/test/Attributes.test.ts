@@ -6,7 +6,7 @@ import { afterEach, beforeEach, describe, expect, it } from "@jest/globals";
 
 // Attributes model and types
 import { Attributes } from "../src/models/Attributes";
-import { AttributeModel, IResponseMessage } from "../../types";
+import { AttributeModel, IResponseMessage, ResponseData } from "../../types";
 
 // Database connectivity
 import { connect, disconnect } from "../src/connectors/database";
@@ -52,14 +52,14 @@ describe("Attributes model", () => {
 
   it("should get an Attribute", async () => {
     // Create an Attribute and store the identifier
-    const result: IResponseMessage = await Attributes.create({
+    const result: ResponseData<string> = await Attributes.create({
       name: "TestAttribute",
       owner: "henry.burgess@wustl.edu",
       archived: false,
       description: "Attribute description",
       values: [],
     });
-    const identifier = result.message;
+    const identifier = result.data;
 
     // Get the Attribute
     const attribute: AttributeModel | null =
@@ -98,14 +98,14 @@ describe("Attributes model", () => {
   });
 
   it("should confirm an Attribute exists", async () => {
-    const result: IResponseMessage = await Attributes.create({
+    const result: ResponseData<string> = await Attributes.create({
       name: "TestAttribute",
       owner: "henry.burgess@wustl.edu",
       archived: false,
       description: "Attribute description",
       values: [],
     });
-    const identifier = result.message;
+    const identifier = result.data;
 
     const exists = await Attributes.exists(identifier);
     expect(exists).toBeTruthy();
@@ -117,14 +117,14 @@ describe("Attributes model", () => {
   });
 
   it("should update the Attribute description", async () => {
-    const result: IResponseMessage = await Attributes.create({
+    const result: ResponseData<string> = await Attributes.create({
       name: "TestAttribute",
       owner: "henry.burgess@wustl.edu",
       archived: false,
       description: "Attribute description",
       values: [],
     });
-    const identifier = result.message;
+    const identifier = result.data;
 
     const attribute = await Attributes.getOne(identifier);
     expect(attribute).not.toBeNull();
@@ -146,7 +146,7 @@ describe("Attributes model", () => {
   });
 
   it("should update the Attribute values", async () => {
-    const result: IResponseMessage = await Attributes.create({
+    const result: ResponseData<string> = await Attributes.create({
       name: "TestAttribute",
       owner: "henry.burgess@wustl.edu",
       archived: false,
@@ -154,7 +154,7 @@ describe("Attributes model", () => {
       values: [],
     });
     expect(result.success).toBeTruthy();
-    const identifier = result.message;
+    const identifier = result.data;
 
     const attribute = await Attributes.getOne(identifier);
     if (_.isNull(attribute)) throw new Error("Attribute is null");
@@ -186,7 +186,7 @@ describe("Attributes model", () => {
   });
 
   it("should archive an Attribute", async () => {
-    const result: IResponseMessage = await Attributes.create({
+    const result: ResponseData<string> = await Attributes.create({
       name: "TestAttribute",
       owner: "henry.burgess@wustl.edu",
       archived: false,
@@ -194,7 +194,7 @@ describe("Attributes model", () => {
       values: [],
     });
     expect(result.success).toBeTruthy();
-    const identifier = result.message;
+    const identifier = result.data;
 
     // Archive the Attribute and validate it has been archived
     await Attributes.setArchived(identifier, true);
@@ -206,7 +206,7 @@ describe("Attributes model", () => {
   });
 
   it("should restore an Attribute", async () => {
-    const result: IResponseMessage = await Attributes.create({
+    const result: ResponseData<string> = await Attributes.create({
       name: "TestAttribute",
       owner: "henry.burgess@wustl.edu",
       archived: false,
@@ -214,7 +214,7 @@ describe("Attributes model", () => {
       values: [],
     });
     expect(result.success).toBeTruthy();
-    const identifier = result.message;
+    const identifier = result.data;
 
     // Archive the Attribute and validate it has been archived
     await Attributes.setArchived(identifier, true);
@@ -234,7 +234,7 @@ describe("Attributes model", () => {
   });
 
   it("should delete an Attribute", async () => {
-    const result: IResponseMessage = await Attributes.create({
+    const result: ResponseData<string> = await Attributes.create({
       name: "TestAttribute",
       owner: "henry.burgess@wustl.edu",
       archived: false,
@@ -242,7 +242,7 @@ describe("Attributes model", () => {
       values: [],
     });
     expect(result.success).toBeTruthy();
-    const identifier = result.message;
+    const identifier = result.data;
 
     // Archive the Attribute and validate it has been archived
     const deleted: IResponseMessage = await Attributes.delete(identifier);

@@ -240,7 +240,7 @@ export class Data {
         const response = await Entities.create(entity);
         if (response.success) {
           entities.push({
-            _id: response.message,
+            _id: response.data,
             timestamp: dayjs(Date.now()).toISOString(),
             ...entity,
           });
@@ -255,14 +255,14 @@ export class Data {
             actor: context.user,
             details: "Created new Entity",
             target: {
-              _id: response.message,
+              _id: response.data,
               type: "entities",
               name: entity.name,
             },
           });
 
           // Add Activity to Workspace
-          await Workspaces.addActivity(context.workspace, activity.message);
+          await Workspaces.addActivity(context.workspace, activity.data);
         }
       }
 
@@ -351,7 +351,7 @@ export class Data {
             });
 
             // Add Activity to Workspace
-            await Workspaces.addActivity(context.workspace, activity.message);
+            await Workspaces.addActivity(context.workspace, activity.data);
           }
         } else {
           // Create a new Entity if it does not exist
@@ -371,14 +371,14 @@ export class Data {
               actor: context.user,
               details: "Updated existing Entity",
               target: {
-                _id: result.message,
+                _id: result.data,
                 type: "entities",
                 name: entity.name,
               },
             });
 
             // Add Activity to Workspace
-            await Workspaces.addActivity(context.workspace, activity.message);
+            await Workspaces.addActivity(context.workspace, activity.data);
           }
         }
       }

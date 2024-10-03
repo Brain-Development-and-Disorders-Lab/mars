@@ -228,7 +228,7 @@ export const ProjectsResolvers = {
         });
 
         // Add Activity to Workspace
-        await Workspaces.addActivity(context.workspace, activity.message);
+        await Workspaces.addActivity(context.workspace, activity.data);
       }
 
       return result;
@@ -271,7 +271,7 @@ export const ProjectsResolvers = {
         });
 
         // Add Activity to Workspace
-        await Workspaces.addActivity(context.workspace, activity.message);
+        await Workspaces.addActivity(context.workspace, activity.data);
       }
 
       return result;
@@ -337,7 +337,7 @@ export const ProjectsResolvers = {
           });
 
           // Add Activity to Workspace
-          await Workspaces.addActivity(context.workspace, activity.message);
+          await Workspaces.addActivity(context.workspace, activity.data);
         }
 
         return result;
@@ -382,7 +382,7 @@ export const ProjectsResolvers = {
             });
 
             // Add Activity to Workspace
-            await Workspaces.addActivity(context.workspace, activity.message);
+            await Workspaces.addActivity(context.workspace, activity.data);
             archiveCounter += 1;
           }
         }
@@ -451,7 +451,7 @@ export const ProjectsResolvers = {
         });
 
         // Add Activity to Workspace
-        await Workspaces.addActivity(context.workspace, activity.message);
+        await Workspaces.addActivity(context.workspace, activity.data);
       }
 
       return result;

@@ -45,7 +45,7 @@ export const ActivityResolvers = {
 
       if (result.success) {
         // Add the Activity to the Workspace
-        await Workspaces.addActivity(context.workspace, result.message);
+        await Workspaces.addActivity(context.workspace, result.data);
       }
 
       return result;

@@ -232,7 +232,7 @@ export const WorkspacesResolvers = {
 
       if (result.success) {
         // If successful, add Workspace to the User
-        await Users.addWorkspace(context.user, result.message);
+        await Users.addWorkspace(context.user, result.data);
       }
 
       return result;

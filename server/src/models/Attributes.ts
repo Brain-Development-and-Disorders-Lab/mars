@@ -1,4 +1,9 @@
-import { AttributeModel, IAttribute, IResponseMessage } from "@types";
+import {
+  AttributeModel,
+  IAttribute,
+  IResponseMessage,
+  ResponseData,
+} from "@types";
 
 // Utility functions and libraries
 import _ from "lodash";
@@ -54,9 +59,11 @@ export class Attributes {
   /**
    * Create a new Attribute
    * @param attribute Attribute data
-   * @return {IResponseMessage}
+   * @return {ResponseData<string>}
    */
-  static create = async (attribute: IAttribute): Promise<IResponseMessage> => {
+  static create = async (
+    attribute: IAttribute,
+  ): Promise<ResponseData<string>> => {
     consola.debug(`Creating new Attribute...`);
     // Add an identifier to the Attribute
     const joinedAttribute: AttributeModel = {
@@ -80,8 +87,9 @@ export class Attributes {
     return {
       success: successStatus,
       message: successStatus
-        ? response.insertedId.toString()
+        ? "Created new Attribute"
         : "Unable to create Attribute",
+      data: response.insertedId.toString(),
     };
   };
 

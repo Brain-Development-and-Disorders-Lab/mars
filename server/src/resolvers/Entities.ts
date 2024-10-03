@@ -278,14 +278,14 @@ export const EntitiesResolvers = {
           actor: context.user,
           details: "Created new Entity",
           target: {
-            _id: result.message,
+            _id: result.data,
             type: "entities",
             name: args.entity.name,
           },
         });
 
         // Add Activity to Workspace
-        await Workspaces.addActivity(context.workspace, activity.message);
+        await Workspaces.addActivity(context.workspace, activity.data);
       }
 
       return result;
@@ -341,7 +341,7 @@ export const EntitiesResolvers = {
           });
 
           // Add Activity to Workspace
-          await Workspaces.addActivity(context.workspace, activity.message);
+          await Workspaces.addActivity(context.workspace, activity.data);
         }
 
         return result;
@@ -420,7 +420,7 @@ export const EntitiesResolvers = {
           });
 
           // Add Activity to Workspace
-          await Workspaces.addActivity(context.workspace, activity.message);
+          await Workspaces.addActivity(context.workspace, activity.data);
         }
 
         return result;
@@ -468,7 +468,7 @@ export const EntitiesResolvers = {
             });
 
             // Add Activity to Workspace
-            await Workspaces.addActivity(context.workspace, activity.message);
+            await Workspaces.addActivity(context.workspace, activity.data);
             archiveCounter += 1;
           }
         }
@@ -540,7 +540,7 @@ export const EntitiesResolvers = {
         });
 
         // Add Activity to Workspace
-        await Workspaces.addActivity(context.workspace, activity.message);
+        await Workspaces.addActivity(context.workspace, activity.data);
       }
 
       return result;

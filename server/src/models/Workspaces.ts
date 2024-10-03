@@ -7,6 +7,7 @@ import {
   ProjectModel,
   IResponseMessage,
   WorkspaceModel,
+  ResponseData,
 } from "@types";
 
 // Utility functions and libraries
@@ -264,12 +265,13 @@ export class Workspaces {
   static addAttribute = async (
     _id: string,
     attribute: string,
-  ): Promise<IResponseMessage> => {
+  ): Promise<ResponseData<string>> => {
     const workspace = await Workspaces.getOne(_id);
     if (_.isNull(workspace)) {
       return {
         success: false,
         message: "Workspace not found",
+        data: "",
       };
     }
 
@@ -280,6 +282,7 @@ export class Workspaces {
       return {
         success: true,
         message: "Workspace already contains Attribute",
+        data: "",
       };
     }
 
@@ -302,6 +305,7 @@ export class Workspaces {
         response.modifiedCount === 1
           ? "Added Attribute to Workspace"
           : "Unable to add Attribute to Workspace",
+      data: response.upsertedId.toString(),
     };
   };
 
@@ -310,7 +314,9 @@ export class Workspaces {
    * @param workspace Workspace data
    * @return {IResponseMessage}
    */
-  static create = async (workspace: IWorkspace): Promise<IResponseMessage> => {
+  static create = async (
+    workspace: IWorkspace,
+  ): Promise<ResponseData<string>> => {
     const joinedWorkspace: WorkspaceModel = {
       _id: getIdentifier("workspace"), // Generate new identifier
       timestamp: dayjs(Date.now()).toISOString(),
@@ -326,8 +332,9 @@ export class Workspaces {
     return {
       success: response.acknowledged,
       message: response.acknowledged
-        ? response.insertedId.toString()
+        ? "Created new Workspace"
         : "Unable to create Workspace",
+      data: response.insertedId.toString(),
     };
   };
 
