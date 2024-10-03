@@ -12,7 +12,6 @@ import _ from "lodash";
 
 // Models
 import { Users } from "./Users";
-import { Workspaces } from "./Workspaces";
 
 // Variables
 import { DEMO_USER_ORCID } from "src/variables";
@@ -147,31 +146,6 @@ export class Authentication {
           code: "UNAUTHORIZED",
         },
       });
-    }
-
-    if (context.workspace !== "") {
-      // Retrieve the Workspace to determine which Entities to return
-      const workspace = await Workspaces.getOne(context.workspace);
-      if (_.isNull(workspace)) {
-        throw new GraphQLError("Workspace does not exist", {
-          extensions: {
-            code: "NON_EXIST",
-          },
-        });
-      } else if (
-        !_.isEqual(workspace.owner, context.user) &&
-        !_.includes(workspace.collaborators, context.user)
-      ) {
-        // Check that the requesting user has access to the Workspace as owner or collaborator
-        throw new GraphQLError(
-          "User does not have permission to access this Workspace",
-          {
-            extensions: {
-              code: "UNAUTHORIZED",
-            },
-          },
-        );
-      }
     }
   };
 }

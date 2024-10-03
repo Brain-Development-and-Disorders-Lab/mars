@@ -1,5 +1,5 @@
 // React
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 // Existing and custom components
 import {
@@ -14,7 +14,7 @@ import {
 import { createColumnHelper } from "@tanstack/react-table";
 import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
-import { Content } from "@components/Container";
+import { Content, Page } from "@components/Container";
 
 // Existing and custom types
 import { AttributeModel } from "@types";
@@ -27,7 +27,7 @@ import { useNavigate } from "react-router-dom";
 import { gql, useQuery } from "@apollo/client";
 
 // Workspace context
-import { WorkspaceContext } from "../../Context";
+import { useWorkspace } from "src/hooks/useWorkspace";
 
 const Attributes = () => {
   const navigate = useNavigate();
@@ -75,7 +75,7 @@ const Attributes = () => {
     }
   }, [error]);
 
-  const { workspace, workspaceLoading } = useContext(WorkspaceContext);
+  const { workspace } = useWorkspace();
 
   // Check to see if data currently exists and refetch if so
   useEffect(() => {
@@ -136,66 +136,65 @@ const Attributes = () => {
   ];
 
   return (
-    <Content
-      isError={!_.isUndefined(error)}
-      isLoaded={!loading && !workspaceLoading}
-    >
-      <Flex
-        direction={"row"}
-        p={"4"}
-        rounded={"md"}
-        bg={"white"}
-        wrap={"wrap"}
-        gap={"4"}
-      >
+    <Page>
+      <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
         <Flex
-          w={"100%"}
           direction={"row"}
-          justify={"space-between"}
-          align={"center"}
+          p={"4"}
+          rounded={"md"}
+          bg={"white"}
+          wrap={"wrap"}
+          gap={"4"}
         >
-          <Flex align={"center"} gap={"2"} w={"100%"}>
-            <Icon name={"attribute"} size={"md"} />
-            <Heading size={"md"}>Templates</Heading>
-            <Spacer />
-            <Button
-              rightIcon={<Icon name={"add"} />}
-              colorScheme={"green"}
-              onClick={() => navigate("/create/attribute")}
-              size={"sm"}
-            >
-              Create
-            </Button>
+          <Flex
+            w={"100%"}
+            direction={"row"}
+            justify={"space-between"}
+            align={"center"}
+          >
+            <Flex align={"center"} gap={"2"} w={"100%"}>
+              <Icon name={"attribute"} size={"md"} />
+              <Heading size={"md"}>Templates</Heading>
+              <Spacer />
+              <Button
+                rightIcon={<Icon name={"add"} />}
+                colorScheme={"green"}
+                onClick={() => navigate("/create/attribute")}
+                size={"sm"}
+              >
+                Create
+              </Button>
+            </Flex>
+          </Flex>
+          <Flex direction={"column"} gap={"4"} w={"100%"}>
+            {attributesData.length > 0 ? (
+              <DataTable
+                columns={columns}
+                data={attributesData}
+                visibleColumns={visibleColumns}
+                selectedRows={{}}
+                showColumnSelect
+                showPagination
+                showSelection
+                showItemCount
+              />
+            ) : (
+              <Flex
+                w={"100%"}
+                direction={"row"}
+                p={"4"}
+                justify={"center"}
+                align={"center"}
+              >
+                <Text color={"gray.400"} fontWeight={"semibold"}>
+                  You do not have any Templates.
+                </Text>
+              </Flex>
+            )}
           </Flex>
         </Flex>
-        <Flex direction={"column"} gap={"4"} w={"100%"}>
-          {attributesData.length > 0 ? (
-            <DataTable
-              columns={columns}
-              data={attributesData}
-              visibleColumns={visibleColumns}
-              selectedRows={{}}
-              showColumnSelect
-              showPagination
-              showSelection
-              showItemCount
-            />
-          ) : (
-            <Flex
-              w={"100%"}
-              direction={"row"}
-              p={"4"}
-              justify={"center"}
-              align={"center"}
-            >
-              <Text color={"gray.400"} fontWeight={"semibold"}>
-                You do not have any Templates.
-              </Text>
-            </Flex>
-          )}
-        </Flex>
-      </Flex>
-    </Content>
+      </Content>
+    </Page>
   );
 };
 

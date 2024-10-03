@@ -48,10 +48,12 @@ import { useNavigate } from "react-router-dom";
 import { gql, useLazyQuery, useMutation } from "@apollo/client";
 
 // Utility functions and libraries
-import { useToken } from "src/authentication/useToken";
 import _ from "lodash";
 import dayjs from "dayjs";
 import { nanoid } from "nanoid";
+
+// Authentication context
+import { useAuthentication } from "src/hooks/useAuthentication";
 
 const Importer = (props: {
   isOpen: boolean;
@@ -72,7 +74,7 @@ const Importer = (props: {
 
   const navigate = useNavigate();
   const toast = useToast();
-  const [token] = useToken();
+  const { token } = useAuthentication();
 
   // State management to generate and present different pages
   const [interfacePage, setInterfacePage] = useState(

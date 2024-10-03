@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 // Existing and custom components
 import {
@@ -21,7 +21,7 @@ import {
   Spacer,
 } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
-import { Content } from "@components/Container";
+import { Content, Page } from "@components/Container";
 import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
@@ -50,9 +50,9 @@ import { useNavigate } from "react-router-dom";
 // Apollo client imports
 import { useQuery, gql } from "@apollo/client";
 
-// Workspace context
-import { WorkspaceContext } from "../Context";
-import { useToken } from "src/authentication/useToken";
+// Contexts
+import { useWorkspace } from "src/hooks/useWorkspace";
+import { useAuthentication } from "src/hooks/useAuthentication";
 
 // Queries
 const GET_DASHBOARD = gql`
@@ -111,8 +111,8 @@ const Dashboard = () => {
   const toast = useToast();
 
   // Workspace context
-  const { workspace, workspaceLoading } = useContext(WorkspaceContext);
-  const [token] = useToken();
+  const { workspace } = useWorkspace();
+  const { token } = useAuthentication();
 
   // Page data
   const [entityData, setEntityData] = useState(
@@ -307,289 +307,288 @@ const Dashboard = () => {
   ];
 
   return (
-    <Content
-      isError={!_.isUndefined(error)}
-      isLoaded={!loading && !workspaceLoading}
-    >
-      <Flex direction={"column"} w={"100%"} p={"2"} gap={"2"}>
-        <Flex direction={"column"} basis={"70%"} gap={"2"}>
-          <Flex direction={"row"} gap={"2"} align={"center"}>
-            <Flex direction={"column"}>
-              <Flex direction={"row"} align={"center"} gap={"2"}>
-                <Icon name={"dashboard"} size={"md"} />
-                <Heading size={"lg"}>Workspace Dashboard</Heading>
-              </Flex>
-              <Flex direction={"row"} gap={"1"}>
-                <Text
-                  fontSize={"xs"}
-                  fontWeight={"semibold"}
-                  color={"gray.700"}
-                >
-                  Last Update:
-                </Text>
-                <Text
-                  fontSize={"xs"}
-                  fontWeight={"semibold"}
-                  color={"gray.400"}
-                >
-                  {lastUpdate}
-                </Text>
-              </Flex>
-            </Flex>
-            <Spacer />
-            <Flex>
-              <ActorTag orcid={token.orcid} fallback={"Unknown User"} />
-            </Flex>
-          </Flex>
-
-          <Flex
-            p={"2"}
-            gap={"2"}
-            rounded={"md"}
-            basis={"30%"}
-            align={"center"}
-            border={"1px"}
-            borderColor={"gray.300"}
-          >
-            <StatGroup w={"100%"}>
-              <Stat>
-                <StatLabel>Total Workspace Entities</StatLabel>
-                <StatNumber>{entityMetrics.all}</StatNumber>
-                <StatHelpText>
-                  {entityMetrics.addedDay > 0 && (
-                    <StatArrow type={"increase"} />
-                  )}
-                  {entityMetrics.addedDay} in last 24 hours
-                </StatHelpText>
-              </Stat>
-
-              <Stat>
-                <StatLabel>Total Workspace Projects</StatLabel>
-                <StatNumber>{projectMetrics.all}</StatNumber>
-                <StatHelpText>
-                  {projectMetrics.addedDay > 0 && (
-                    <StatArrow type={"increase"} />
-                  )}
-                  {projectMetrics.addedDay} in last 24 hours
-                </StatHelpText>
-              </Stat>
-
-              <Stat>
-                <StatLabel>Total Workspace Attributes</StatLabel>
-                <StatNumber>{attributeMetrics.all}</StatNumber>
-                <StatHelpText>
-                  {attributeMetrics.addedDay > 0 && (
-                    <StatArrow type={"increase"} />
-                  )}
-                  {attributeMetrics.addedDay} in last 24 hours
-                </StatHelpText>
-              </Stat>
-
-              <Stat>
-                <StatLabel>Total Workspace Collaborators</StatLabel>
-                <StatNumber>{workspaceMetrics.collaborators}</StatNumber>
-              </Stat>
-            </StatGroup>
-          </Flex>
-        </Flex>
-
-        <Flex direction={"row"} wrap={"wrap"} gap={"2"} p={"0"}>
-          <Flex direction={"column"} gap={"2"} grow={"1"}>
-            {/* Projects and Entities */}
-            <Flex
-              direction={"column"}
-              p={"2"}
-              background={"white"}
-              rounded={"md"}
-              gap={"2"}
-              border={"1px"}
-              borderColor={"gray.300"}
-            >
-              {/* Projects heading */}
-              <Flex direction={"row"} align={"center"} gap={"2"} my={"2"}>
-                <Icon name={"project"} size={"md"} />
-                <Heading size={"md"}>Projects</Heading>
-              </Flex>
-
-              {/* Projects table */}
-              {/* Condition: Loaded and content present */}
-              {!loading && projectData.length > 0 && (
-                <DataTable
-                  columns={projectTableColumns}
-                  data={projectTableData}
-                  visibleColumns={visibleColumns}
-                  selectedRows={{}}
-                />
-              )}
-
-              {/* Condition: Loaded and no content present */}
-              {!loading && _.isEmpty(projectData) && (
-                <Flex
-                  w={"100%"}
-                  direction={"row"}
-                  p={"4"}
-                  justify={"center"}
-                  align={"center"}
-                >
-                  <Text color={"gray.400"} fontWeight={"semibold"}>
-                    You do not have any Projects.
+    <Page>
+      <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
+        <Flex direction={"column"} w={"100%"} p={"2"} gap={"2"}>
+          <Flex direction={"column"} basis={"70%"} gap={"2"}>
+            <Flex direction={"row"} gap={"2"} align={"center"}>
+              <Flex direction={"column"}>
+                <Flex direction={"row"} align={"center"} gap={"2"}>
+                  <Icon name={"dashboard"} size={"md"} />
+                  <Heading size={"lg"}>Workspace Dashboard</Heading>
+                </Flex>
+                <Flex direction={"row"} gap={"1"}>
+                  <Text
+                    fontSize={"xs"}
+                    fontWeight={"semibold"}
+                    color={"gray.700"}
+                  >
+                    Last Update:
+                  </Text>
+                  <Text
+                    fontSize={"xs"}
+                    fontWeight={"semibold"}
+                    color={"gray.400"}
+                  >
+                    {lastUpdate}
                   </Text>
                 </Flex>
-              )}
-
-              <Flex justify={"right"}>
-                <Button
-                  key={`view-projects-all`}
-                  size={"sm"}
-                  colorScheme={"blue"}
-                  rightIcon={<Icon name={"c_right"} />}
-                  onClick={() => navigate(`/projects`)}
-                >
-                  All Projects
-                </Button>
+              </Flex>
+              <Spacer />
+              <Flex>
+                <ActorTag orcid={token.orcid} fallback={"Unknown User"} />
               </Flex>
             </Flex>
 
             <Flex
-              direction={"column"}
               p={"2"}
-              background={"white"}
-              rounded={"md"}
               gap={"2"}
+              rounded={"md"}
+              basis={"30%"}
+              align={"center"}
               border={"1px"}
               borderColor={"gray.300"}
             >
-              {/* Entities heading */}
-              <Flex direction={"row"} align={"center"} gap={"2"} my={"2"}>
-                <Icon name={"entity"} size={"md"} />
-                <Heading size={"md"}>Entities</Heading>
-              </Flex>
+              <StatGroup w={"100%"}>
+                <Stat>
+                  <StatLabel>Total Workspace Entities</StatLabel>
+                  <StatNumber>{entityMetrics.all}</StatNumber>
+                  <StatHelpText>
+                    {entityMetrics.addedDay > 0 && (
+                      <StatArrow type={"increase"} />
+                    )}
+                    {entityMetrics.addedDay} in last 24 hours
+                  </StatHelpText>
+                </Stat>
 
-              {/* Entities table */}
-              {/* Condition: Loaded and content present */}
-              {!loading && entityData.length > 0 && (
-                <DataTable
-                  columns={entityTableColumns}
-                  data={entityTableData.filter(
-                    (entity) =>
-                      _.isEqual(entity.archived, false) ||
-                      _.isEqual(entity.archived, null),
-                  )}
-                  visibleColumns={visibleColumns}
-                  selectedRows={{}}
-                />
-              )}
+                <Stat>
+                  <StatLabel>Total Workspace Projects</StatLabel>
+                  <StatNumber>{projectMetrics.all}</StatNumber>
+                  <StatHelpText>
+                    {projectMetrics.addedDay > 0 && (
+                      <StatArrow type={"increase"} />
+                    )}
+                    {projectMetrics.addedDay} in last 24 hours
+                  </StatHelpText>
+                </Stat>
 
-              {/* Condition: Loaded and no content present */}
-              {!loading && _.isEmpty(entityData) && (
-                <Flex
-                  w={"100%"}
-                  direction={"row"}
-                  p={"4"}
-                  justify={"center"}
-                  align={"center"}
-                >
-                  <Text color={"gray.400"} fontWeight={"semibold"}>
-                    You do not have any Entities.
-                  </Text>
-                </Flex>
-              )}
+                <Stat>
+                  <StatLabel>Total Workspace Attributes</StatLabel>
+                  <StatNumber>{attributeMetrics.all}</StatNumber>
+                  <StatHelpText>
+                    {attributeMetrics.addedDay > 0 && (
+                      <StatArrow type={"increase"} />
+                    )}
+                    {attributeMetrics.addedDay} in last 24 hours
+                  </StatHelpText>
+                </Stat>
 
-              <Flex justify={"right"}>
-                <Button
-                  key={`view-entity-all`}
-                  size={"sm"}
-                  colorScheme={"blue"}
-                  rightIcon={<Icon name={"c_right"} />}
-                  onClick={() => navigate(`/entities`)}
-                >
-                  All Entities
-                </Button>
-              </Flex>
+                <Stat>
+                  <StatLabel>Total Workspace Collaborators</StatLabel>
+                  <StatNumber>{workspaceMetrics.collaborators}</StatNumber>
+                </Stat>
+              </StatGroup>
             </Flex>
           </Flex>
 
-          {/* Activity */}
-          <Flex
-            direction={"column"}
-            maxW={"sm"}
-            p={"2"}
-            gap={"2"}
-            grow={"1"}
-            rounded={"md"}
-            border={"1px"}
-            borderColor={"gray.300"}
-            h={"fit-content"}
-          >
-            {/* Activity heading */}
-            <Flex align={"center"} gap={"2"} my={"2"}>
-              <Icon name={"activity"} size={"md"} />
-              <Heading size={"md"} color={"gray.700"}>
-                Recent Activity
-              </Heading>
+          <Flex direction={"row"} wrap={"wrap"} gap={"2"} p={"0"}>
+            <Flex direction={"column"} gap={"2"} grow={"1"}>
+              {/* Projects and Entities */}
+              <Flex
+                direction={"column"}
+                p={"2"}
+                background={"white"}
+                rounded={"md"}
+                gap={"2"}
+                border={"1px"}
+                borderColor={"gray.300"}
+              >
+                {/* Projects heading */}
+                <Flex direction={"row"} align={"center"} gap={"2"} my={"2"}>
+                  <Icon name={"project"} size={"md"} />
+                  <Heading size={"md"}>Projects</Heading>
+                </Flex>
+
+                {/* Projects table */}
+                {/* Condition: Loaded and content present */}
+                {!loading && projectData.length > 0 && (
+                  <DataTable
+                    columns={projectTableColumns}
+                    data={projectTableData}
+                    visibleColumns={visibleColumns}
+                    selectedRows={{}}
+                  />
+                )}
+
+                {/* Condition: Loaded and no content present */}
+                {!loading && _.isEmpty(projectData) && (
+                  <Flex
+                    w={"100%"}
+                    direction={"row"}
+                    p={"4"}
+                    justify={"center"}
+                    align={"center"}
+                  >
+                    <Text color={"gray.400"} fontWeight={"semibold"}>
+                      You do not have any Projects.
+                    </Text>
+                  </Flex>
+                )}
+
+                <Flex justify={"right"}>
+                  <Button
+                    key={`view-projects-all`}
+                    size={"sm"}
+                    colorScheme={"blue"}
+                    rightIcon={<Icon name={"c_right"} />}
+                    onClick={() => navigate(`/projects`)}
+                  >
+                    All Projects
+                  </Button>
+                </Flex>
+              </Flex>
+
+              <Flex
+                direction={"column"}
+                p={"2"}
+                background={"white"}
+                rounded={"md"}
+                gap={"2"}
+                border={"1px"}
+                borderColor={"gray.300"}
+              >
+                {/* Entities heading */}
+                <Flex direction={"row"} align={"center"} gap={"2"} my={"2"}>
+                  <Icon name={"entity"} size={"md"} />
+                  <Heading size={"md"}>Entities</Heading>
+                </Flex>
+
+                {/* Entities table */}
+                {/* Condition: Loaded and content present */}
+                {!loading && entityData.length > 0 && (
+                  <DataTable
+                    columns={entityTableColumns}
+                    data={entityTableData.filter(
+                      (entity) =>
+                        _.isEqual(entity.archived, false) ||
+                        _.isEqual(entity.archived, null),
+                    )}
+                    visibleColumns={visibleColumns}
+                    selectedRows={{}}
+                  />
+                )}
+
+                {/* Condition: Loaded and no content present */}
+                {!loading && _.isEmpty(entityData) && (
+                  <Flex
+                    w={"100%"}
+                    direction={"row"}
+                    p={"4"}
+                    justify={"center"}
+                    align={"center"}
+                  >
+                    <Text color={"gray.400"} fontWeight={"semibold"}>
+                      You do not have any Entities.
+                    </Text>
+                  </Flex>
+                )}
+
+                <Flex justify={"right"}>
+                  <Button
+                    key={`view-entity-all`}
+                    size={"sm"}
+                    colorScheme={"blue"}
+                    rightIcon={<Icon name={"c_right"} />}
+                    onClick={() => navigate(`/entities`)}
+                  >
+                    All Entities
+                  </Button>
+                </Flex>
+              </Flex>
             </Flex>
 
-            {/* Activity list */}
-            {activityData.length > 0 ? (
-              <Flex p={"0"} w={"100%"} overflowY={"auto"}>
-                <VStack spacing={"3"} w={"95%"}>
-                  {activityData.map((activity) => {
-                    return (
-                      <Flex
-                        direction={"row"}
-                        width={"100%"}
-                        gap={"2"}
-                        key={`activity-${activity._id}`}
-                        align={"center"}
-                      >
-                        <Tooltip label={activity.actor} hasArrow>
-                          <Avatar name={activity.actor} size={"sm"} />
-                        </Tooltip>
-                        <Flex direction={"column"} w={"100%"}>
-                          <Flex direction={"row"} gap={"1"}>
-                            <Text fontSize={"sm"}>{activity.details}</Text>
-                            <Spacer />
-                            <Text
-                              fontSize={"xs"}
-                              fontWeight={"semibold"}
-                              color={"gray.500"}
-                            >
-                              {dayjs(activity.timestamp).fromNow()}
-                            </Text>
-                          </Flex>
-                          <Flex>
-                            <Linky
-                              id={activity.target._id}
-                              type={activity.target.type}
-                              fallback={activity.target.name}
-                              justify={"left"}
-                              size={"sm"}
-                              truncate={20}
-                            />
+            {/* Activity */}
+            <Flex
+              direction={"column"}
+              maxW={"sm"}
+              p={"2"}
+              gap={"2"}
+              grow={"1"}
+              rounded={"md"}
+              border={"1px"}
+              borderColor={"gray.300"}
+              h={"fit-content"}
+            >
+              {/* Activity heading */}
+              <Flex align={"center"} gap={"2"} my={"2"}>
+                <Icon name={"activity"} size={"md"} />
+                <Heading size={"md"} color={"gray.700"}>
+                  Recent Activity
+                </Heading>
+              </Flex>
+
+              {/* Activity list */}
+              {activityData.length > 0 ? (
+                <Flex p={"0"} w={"100%"} overflowY={"auto"}>
+                  <VStack spacing={"3"} w={"95%"}>
+                    {activityData.map((activity) => {
+                      return (
+                        <Flex
+                          direction={"row"}
+                          width={"100%"}
+                          gap={"2"}
+                          key={`activity-${activity._id}`}
+                          align={"center"}
+                        >
+                          <Tooltip label={activity.actor} hasArrow>
+                            <Avatar name={activity.actor} size={"sm"} />
+                          </Tooltip>
+                          <Flex direction={"column"} w={"100%"}>
+                            <Flex direction={"row"} gap={"1"}>
+                              <Text fontSize={"sm"}>{activity.details}</Text>
+                              <Spacer />
+                              <Text
+                                fontSize={"xs"}
+                                fontWeight={"semibold"}
+                                color={"gray.500"}
+                              >
+                                {dayjs(activity.timestamp).fromNow()}
+                              </Text>
+                            </Flex>
+                            <Flex>
+                              <Linky
+                                id={activity.target._id}
+                                type={activity.target.type}
+                                fallback={activity.target.name}
+                                justify={"left"}
+                                size={"sm"}
+                                truncate={20}
+                              />
+                            </Flex>
                           </Flex>
                         </Flex>
-                      </Flex>
-                    );
-                  })}
-                </VStack>
-              </Flex>
-            ) : (
-              <Flex
-                w={"100%"}
-                h={"100%"}
-                justify={"center"}
-                align={"center"}
-                minH={"200px"}
-              >
-                <Text color={"gray.400"} fontWeight={"semibold"}>
-                  No Activity yet.
-                </Text>
-              </Flex>
-            )}
+                      );
+                    })}
+                  </VStack>
+                </Flex>
+              ) : (
+                <Flex
+                  w={"100%"}
+                  h={"100%"}
+                  justify={"center"}
+                  align={"center"}
+                  minH={"200px"}
+                >
+                  <Text color={"gray.400"} fontWeight={"semibold"}>
+                    No Activity yet.
+                  </Text>
+                </Flex>
+              )}
+            </Flex>
           </Flex>
         </Flex>
-      </Flex>
-    </Content>
+      </Content>
+    </Page>
   );
 };
 

@@ -13,6 +13,10 @@ import { ContentProps, PageProps } from "@types";
 // Utility functions and libraries
 import _ from "lodash";
 
+// Contexts
+import { useAuthentication } from "src/hooks/useAuthentication";
+import { Navigate } from "react-router-dom";
+
 // Content container
 const Content: FC<ContentProps> = ({ children, isError, isLoaded }) => {
   // Check values and set defaults if required
@@ -41,41 +45,50 @@ const Content: FC<ContentProps> = ({ children, isError, isLoaded }) => {
 
 // Page container
 const Page: FC<PageProps> = ({ children }) => {
-  return (
-    <Flex
-      direction={{ base: "column", lg: "row" }}
-      minH={"100vh"}
-      w={"100%"}
-      p={"0"}
-      m={"0"}
-    >
-      {/* Navigation component */}
-      <Flex
-        justify={"center"}
-        w={{ base: "100%", lg: "240px" }}
-        minW={{ lg: "240px" }}
-        h={{ base: "8vh", lg: "100%" }}
-        position={"fixed"}
-        borderRight={"1px"}
-        borderBottom={"1px"}
-        borderColor={"gray.300"}
-        bg={"white"}
-        zIndex={2}
-      >
-        <Navigation />
-      </Flex>
+  // Observe the authentication state
+  const { isAuthenticated } = useAuthentication();
 
+  if (!isAuthenticated) {
+    // If not authenticated, return the user to the Login page
+    return <Navigate to={"/login"} />;
+  } else {
+    // Display content
+    return (
       <Flex
-        direction={"column"}
+        direction={{ base: "column", lg: "row" }}
+        minH={"100vh"}
         w={"100%"}
-        ml={{ base: "0", lg: "240px" }}
-        mt={{ base: "8vh", lg: "0" }}
+        p={"0"}
+        m={"0"}
       >
-        {/* Main content components */}
-        {children}
+        {/* Navigation component */}
+        <Flex
+          justify={"center"}
+          w={{ base: "100%", lg: "240px" }}
+          minW={{ lg: "240px" }}
+          h={{ base: "8vh", lg: "100%" }}
+          position={"fixed"}
+          borderRight={"1px"}
+          borderBottom={"1px"}
+          borderColor={"gray.300"}
+          bg={"white"}
+          zIndex={2}
+        >
+          <Navigation />
+        </Flex>
+
+        <Flex
+          direction={"column"}
+          w={"100%"}
+          ml={{ base: "0", lg: "240px" }}
+          mt={{ base: "8vh", lg: "0" }}
+        >
+          {/* Main content components */}
+          {children}
+        </Flex>
       </Flex>
-    </Flex>
-  );
+    );
+  }
 };
 
 export { Content, Page };

@@ -1,5 +1,5 @@
 // React
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Button,
   Flex,
@@ -10,7 +10,7 @@ import {
   useBreakpoint,
   useToast,
 } from "@chakra-ui/react";
-import { Content } from "@components/Container";
+import { Content, Page } from "@components/Container";
 import { createColumnHelper } from "@tanstack/react-table";
 import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
@@ -25,7 +25,7 @@ import _ from "lodash";
 import { useNavigate } from "react-router-dom";
 
 // Workspace context
-import { WorkspaceContext } from "../../Context";
+import { useWorkspace } from "src/hooks/useWorkspace";
 
 // Apollo client imports
 import { useQuery, gql } from "@apollo/client";
@@ -75,7 +75,7 @@ const Projects = () => {
     }
   }, [data]);
 
-  const { workspace, workspaceLoading } = useContext(WorkspaceContext);
+  const { workspace } = useWorkspace();
 
   // Check to see if data currently exists and refetch if so
   useEffect(() => {
@@ -142,69 +142,68 @@ const Projects = () => {
   ];
 
   return (
-    <Content
-      isError={!_.isUndefined(error)}
-      isLoaded={!loading && !workspaceLoading}
-    >
-      <Flex
-        direction={"row"}
-        p={"4"}
-        rounded={"md"}
-        bg={"white"}
-        wrap={"wrap"}
-        gap={"4"}
-        justify={"center"}
-      >
+    <Page>
+      <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
         <Flex
-          w={"100%"}
           direction={"row"}
-          justify={"space-between"}
-          align={"center"}
+          p={"4"}
+          rounded={"md"}
+          bg={"white"}
+          wrap={"wrap"}
+          gap={"4"}
+          justify={"center"}
         >
-          <Flex align={"center"} gap={"2"} w={"100%"}>
-            <Icon name={"project"} size={"md"} />
-            <Heading fontWeight={"bold"} size={"md"}>
-              Projects
-            </Heading>
-            <Spacer />
-            <Button
-              rightIcon={<Icon name={"add"} />}
-              colorScheme={"green"}
-              onClick={() => navigate("/create/project")}
-              size={"sm"}
-            >
-              Create
-            </Button>
+          <Flex
+            w={"100%"}
+            direction={"row"}
+            justify={"space-between"}
+            align={"center"}
+          >
+            <Flex align={"center"} gap={"2"} w={"100%"}>
+              <Icon name={"project"} size={"md"} />
+              <Heading fontWeight={"bold"} size={"md"}>
+                Projects
+              </Heading>
+              <Spacer />
+              <Button
+                rightIcon={<Icon name={"add"} />}
+                colorScheme={"green"}
+                onClick={() => navigate("/create/project")}
+                size={"sm"}
+              >
+                Create
+              </Button>
+            </Flex>
+          </Flex>
+          <Flex direction={"column"} gap={"4"} w={"100%"}>
+            {projects.length > 0 ? (
+              <DataTable
+                columns={columns}
+                data={data.projects}
+                visibleColumns={visibleColumns}
+                selectedRows={{}}
+                showColumnSelect
+                showPagination
+                showSelection
+                showItemCount
+              />
+            ) : (
+              <Flex
+                w={"100%"}
+                direction={"row"}
+                p={"4"}
+                justify={"center"}
+                align={"center"}
+              >
+                <Text color={"gray.400"} fontWeight={"semibold"}>
+                  You do not have any Projects.
+                </Text>
+              </Flex>
+            )}
           </Flex>
         </Flex>
-        <Flex direction={"column"} gap={"4"} w={"100%"}>
-          {projects.length > 0 ? (
-            <DataTable
-              columns={columns}
-              data={data.projects}
-              visibleColumns={visibleColumns}
-              selectedRows={{}}
-              showColumnSelect
-              showPagination
-              showSelection
-              showItemCount
-            />
-          ) : (
-            <Flex
-              w={"100%"}
-              direction={"row"}
-              p={"4"}
-              justify={"center"}
-              align={"center"}
-            >
-              <Text color={"gray.400"} fontWeight={"semibold"}>
-                You do not have any Projects.
-              </Text>
-            </Flex>
-          )}
-        </Flex>
-      </Flex>
-    </Content>
+      </Content>
+    </Page>
   );
 };
 

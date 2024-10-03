@@ -278,11 +278,6 @@ export type PageProps = {
   children: React.ReactElement | React.ReactElement[];
 };
 
-// Login component
-export type LoginProps = {
-  setAuthenticated: React.Dispatch<React.SetStateAction<boolean>>;
-};
-
 // Dialog component
 export type DialogProps = {
   // Ref for placement
@@ -448,7 +443,6 @@ export type IAuth = {
   name: string; // User name
   orcid: string; // ORCiD value
   token: string; // ORCiD token
-  workspace: string; // Identifier for active Workspace
 };
 
 export type Token = IAuth & {
@@ -457,6 +451,11 @@ export type Token = IAuth & {
   refesh_token: string;
   expires_in: number;
   scope: string;
+};
+
+// Session type
+export type ISession = {
+  workspace: string; // Active workspace
 };
 
 // Context passed through the request headers, includes the ORCID (user) of the user

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Input,
   Button,
@@ -16,7 +16,9 @@ import { EntityModel, IGenericItem, SearchSelectProps } from "@types";
 // Utility imports
 import { debounce } from "lodash";
 import { gql, useLazyQuery } from "@apollo/client";
-import { WorkspaceContext } from "src/Context";
+
+// Workspace context
+import { useWorkspace } from "src/hooks/useWorkspace";
 
 const SearchSelect = (props: SearchSelectProps) => {
   // Query to retrieve Entities
@@ -107,7 +109,7 @@ const SearchSelect = (props: SearchSelectProps) => {
     }
   }, []);
 
-  const { workspace } = useContext(WorkspaceContext);
+  const { workspace } = useWorkspace();
 
   // Check to see if data currently exists and refetch if so
   useEffect(() => {

@@ -1,5 +1,5 @@
 // React
-import React, { FC, useContext, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 // Existing and custom components
 import {
@@ -25,25 +25,18 @@ import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 
 // Routing and navigation
-import { useLocation, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 // Utility functions and libraries
-import { gql, useLazyQuery, useMutation } from "@apollo/client";
-import { useToken } from "src/authentication/useToken";
+import { gql, useMutation } from "@apollo/client";
 import _ from "lodash";
 
 // Existing and custom types
-import {
-  LoginProps,
-  IResponseMessage,
-  UserModel,
-  WorkspaceModel,
-  ResponseData,
-  IAuth,
-} from "@types";
+import { IResponseMessage } from "@types";
 
-// Workspace context
-import { WorkspaceContext } from "src/Context";
+// Contexts
+import { useAuthentication } from "src/hooks/useAuthentication";
+import { useWorkspace } from "src/hooks/useWorkspace";
 
 // Define login parameters
 const clientID = "APP-BBVHCTCNDUJ4CAXV";
@@ -61,26 +54,22 @@ const useParameters = () => {
   return useMemo(() => new URLSearchParams(search), [search]);
 };
 
-const Login: FC<LoginProps> = ({ setAuthenticated }) => {
+const Login = () => {
   const toast = useToast();
-
-  // Enable authentication modification
-  const [token, setToken] = useToken();
+  const { login } = useAuthentication();
+  const { activateWorkspace } = useWorkspace();
 
   const parameters = useParameters();
+  const navigate = useNavigate();
 
   // Extract query parameters
   const accessCode = parameters.get("code");
 
-  // Access parameters to remove code after authentication
-  const [searchParams, setSearchParams] = useSearchParams();
-
   // User configured state
-  const [showSetup, setShowSetup] = useState(false);
-  const [isSetup, setIsSetup] = useState(false);
+  const [showSetup] = useState(false);
 
   // User information state
-  const [userOrcid, setUserOrcid] = useState("");
+  const [userOrcid] = useState("");
   const [userFirstName, setUserFirstName] = useState("");
   const [userLastName, setUserLastName] = useState("");
   const [userEmail, setUserEmail] = useState("");
@@ -91,63 +80,6 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
     userLastName !== "" &&
     userEmail !== "" &&
     userAffiliation !== "";
-
-  // Remove the "code" search parameter upon login
-  const removeCode = () => {
-    if (searchParams.has("code")) {
-      searchParams.delete("code");
-      setSearchParams(searchParams);
-    }
-  };
-
-  // Queries
-  const LOGIN_DATA = gql`
-    query PerformLogin($code: String) {
-      login(code: $code) {
-        success
-        message
-        data {
-          orcid
-          name
-          token
-        }
-      }
-    }
-  `;
-  const [doLogin, { loading, error }] = useLazyQuery<{
-    login: ResponseData<IAuth>;
-  }>(LOGIN_DATA);
-
-  // Query to retrieve Workspaces
-  const GET_WORKSPACES = gql`
-    query GetWorkspaces {
-      workspaces {
-        _id
-        owner
-        name
-        description
-      }
-    }
-  `;
-  const [getWorkspaces, { error: workspacesError }] = useLazyQuery<{
-    workspaces: WorkspaceModel[];
-  }>(GET_WORKSPACES);
-
-  // Query to retrieve User
-  const GET_USER = gql`
-    query GetUser($_id: String) {
-      user(_id: $_id) {
-        _id
-        firstName
-        lastName
-        email
-        affiliation
-      }
-    }
-  `;
-  const [getUser, { error: userError }] = useLazyQuery<{ user: UserModel }>(
-    GET_USER,
-  );
 
   // Query to update User
   const UPDATE_USER = gql`
@@ -162,149 +94,44 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
     updateUser: IResponseMessage;
   }>(UPDATE_USER);
 
-  // Workspace context
-  const { setWorkspace } = useContext(WorkspaceContext);
+  const runLogin = async (code: string) => {
+    const result = await login(code);
 
-  // Respond to `isSetup` state
-  useEffect(() => {
-    if (isSetup === true) {
-      // Set the authentication status
-      setAuthenticated(true);
-    }
-  }, [isSetup]);
-
-  /**
-   * Utility function to perform a Login operation
-   * @param code String returned by ORCID API for login
-   */
-  const getLogin = async (code: string) => {
-    // Query to retrieve Entity data and associated data for editing
-    const loginResponse = await doLogin({ variables: { code: code } });
-
-    // Perform login and data retrieval via server, check if user permitted access
-    if (
-      loginResponse.data?.login &&
-      loginResponse.data.login.success === true
-    ) {
-      removeCode();
-
-      // Store the User ORCiD
-      setUserOrcid(loginResponse.data.login.data.orcid);
-
-      // Create a new token instance with an empty Workspace value
-      setToken({
-        ...loginResponse.data.login.data,
-        workspace: "",
-      });
-
-      // Retrieve all Workspaces and update the token if Workspaces exist
-      const workspacesResponse = await getWorkspaces();
-      if (
-        workspacesResponse.data?.workspaces &&
-        workspacesResponse.data.workspaces.length > 0
-      ) {
-        // Update the token with an active Workspace if the user is a member of a Workspace
-        setToken({
-          ...loginResponse.data.login.data,
-          workspace: workspacesResponse.data.workspaces[0]._id,
-        });
-
-        // Update the Workspace context
-        setWorkspace(workspacesResponse.data.workspaces[0]._id);
-      }
-
-      // Retrieve the User information and display the setup form if information missing
-      const userResponse = await getUser({
-        variables: {
-          _id: loginResponse.data.login.data.orcid,
-        },
-      });
-
-      if (userResponse.data?.user) {
-        // Examine the user data and show setup if incomplete
-        const user: Partial<UserModel> = userResponse.data.user;
-        if (
-          user.firstName === "" ||
-          _.isNull(user.firstName) ||
-          user.lastName === "" ||
-          _.isNull(user.lastName) ||
-          user.email === "" ||
-          _.isNull(user.email) ||
-          user.affiliation === "" ||
-          _.isNull(user.affiliation)
-        ) {
-          setShowSetup(true);
-        } else {
-          setAuthenticated(true);
-        }
-      }
-
-      if (workspacesError) {
+    if (result.success) {
+      if (!toast.isActive("login-graphql-success-toast")) {
         toast({
-          title: "Warning",
-          status: "warning",
-          description: "Unable to retrieve Workspaces",
+          id: "login-graphql-success-toast",
+          title: "Login Success",
+          status: "success",
+          description: "Successfully logged in...",
           duration: 4000,
           position: "bottom-right",
           isClosable: true,
         });
       }
 
-      if (userError) {
+      // Activate a Workspace and navigate to the Dashboard
+      await activateWorkspace("");
+      navigate("/");
+    } else {
+      if (!toast.isActive("login-graphql-error-toast")) {
         toast({
-          title: "Warning",
-          status: "warning",
-          description: "Unable to retrieve User data",
+          id: "login-graphql-error-toast",
+          title: "Login Error",
+          status: "error",
+          description: "Could not authenticate with ORCiD",
           duration: 4000,
           position: "bottom-right",
           isClosable: true,
-        });
-      }
-    } else if (
-      loginResponse.data?.login &&
-      !_.isEqual(loginResponse.data.login.data.orcid, "")
-    ) {
-      if (!toast.isActive("access-toast")) {
-        toast({
-          id: "access-toast",
-          title: "You don't have access yet!",
-          description: (
-            <Link href={"https://forms.gle/q4GL4gF1bamem3DA9"} isExternal>
-              <Flex direction={"row"} gap={"1"} align={"center"}>
-                <Text fontWeight={"semibold"}>Join the waitlist here</Text>
-                <Icon name={"a_right"} />
-              </Flex>
-            </Link>
-          ),
-          status: "info",
-          position: "bottom-right",
-          duration: null,
-          isClosable: false,
         });
       }
     }
   };
 
+  // On the page load, check if access code has been included in the URL
   useEffect(() => {
-    // Handle potential errors when using ORCiD
-    if (error && !toast.isActive("login-graphql-error-toast")) {
-      toast({
-        id: "login-graphql-error-toast",
-        title: "Login Error",
-        status: "error",
-        description: "Could not authenticate with ORCiD",
-        duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
-      });
-      setAuthenticated(false);
-    }
-  }, [error]);
-
-  // Check if token exists
-  useEffect(() => {
-    if ((_.isUndefined(token) || _.isEqual(token.token, "")) && accessCode) {
-      getLogin(accessCode);
+    if (accessCode) {
+      runLogin(accessCode);
     }
   }, []);
 
@@ -312,10 +139,11 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
    * Wrapper function to handle login flow
    */
   const onLoginClick = async () => {
-    if (process.env.NODE_ENV !== "production") {
+    if (process.env.NODE_ENV === "development") {
       // If in a development environment, bypass the ORCiD login
-      await getLogin("");
+      await runLogin("");
     } else {
+      // In production, navigate to the API login URI
       window.location.href = requestURI;
     }
   };
@@ -337,7 +165,7 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
     });
 
     if (result.data?.updateUser) {
-      setIsSetup(result.data.updateUser.success);
+      // setIsSetup(result.data.updateUser.success);
     }
 
     if (userUpdateError) {
@@ -508,7 +336,6 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
                   colorScheme={"gray"}
                   gap={"4"}
                   onClick={onLoginClick}
-                  isLoading={loading}
                   loadingText={"Logging in..."}
                 >
                   <Image

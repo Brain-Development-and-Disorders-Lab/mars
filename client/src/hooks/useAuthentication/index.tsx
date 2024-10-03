@@ -1,8 +1,17 @@
 import React, { createContext, useContext, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useToken } from "../../authentication/useToken";
+
+// Token and session management
+import { useToken } from "src/hooks/useToken";
+import { useSession } from "src/hooks/useSession";
+
+// Custom types
 import { IAuth, ResponseData, UserModel } from "@types";
+
+// GraphQL
 import { gql, useLazyQuery } from "@apollo/client";
+
+// Utility functions and libraries
 import _ from "lodash";
 
 type AuthenticationContextValue = {
@@ -17,10 +26,13 @@ const AuthenticationContext = createContext({} as AuthenticationContextValue);
 export const AuthenticationProvider = (props: {
   children: React.JSX.Element;
 }) => {
+  const navigate = useNavigate();
   // Setup token authentication
   const [token, setToken] = useToken();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const navigate = useNavigate();
+  const [, setSession] = useSession();
+
+  // Authentication state
+  const [isAuthenticated, setIsAuthenticated] = useState(token.token !== "");
 
   // Access parameters to remove code after authentication
   const [searchParams, setSearchParams] = useSearchParams();
@@ -68,13 +80,22 @@ export const AuthenticationProvider = (props: {
   );
 
   const logout = () => {
-    // Invalidate the token and refresh the page
+    // Reset the authentication state
+    setIsAuthenticated(false);
+
+    // Invalidate the token
     setToken({
       name: token.name,
       orcid: token.orcid,
       token: "",
+    });
+
+    // Invalidate the session
+    setSession({
       workspace: "",
     });
+
+    // Navigate to the login page
     navigate("/login");
   };
 
@@ -96,15 +117,6 @@ export const AuthenticationProvider = (props: {
       };
     }
 
-    // Perform login and data retrieval via server, check if user permitted access
-    removeCode();
-
-    // Create a new token instance with an empty Workspace value
-    setToken({
-      ...loginData.data,
-      workspace: "",
-    });
-
     const userResponse = await getUser({
       variables: {
         _id: loginData.data.orcid,
@@ -119,8 +131,14 @@ export const AuthenticationProvider = (props: {
         data: {} as UserModel,
       };
     }
-
     setIsAuthenticated(true);
+
+    // Perform login and data retrieval via server, check if user permitted access
+    removeCode();
+
+    // Create a new token instance
+    setToken(loginData.data);
+
     return {
       success: true,
       message: "Logged in successfully",
