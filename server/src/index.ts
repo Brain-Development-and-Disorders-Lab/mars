@@ -9,6 +9,7 @@ import helmet from "helmet";
 import http from "http";
 import * as fs from "fs";
 import "source-map-support/register";
+import _ from "lodash";
 
 // Monitoring
 import { collectDefaultMetrics, register } from "prom-client";
@@ -39,8 +40,6 @@ import { Context } from "@types";
 // GraphQL uploads
 import GraphQLUpload from "graphql-upload/GraphQLUpload.mjs";
 import graphqlUploadExpress from "graphql-upload/graphqlUploadExpress.mjs";
-import { Authentication } from "./models/Authentication";
-import { GraphQLError } from "graphql";
 
 // Set logging level
 consola.level =
@@ -99,6 +98,24 @@ const start = async () => {
       SearchResolvers,
       UsersResolvers,
       WorkspacesResolvers,
+      {
+        SearchResult: {
+          __resolveType(result: any) {
+            consola.info(result);
+            // Entity identifiers start with "e"
+            if (_.startsWith(result._id, "e")) {
+              return "Entity";
+            }
+
+            // Project identifiers start with "p"
+            if (_.startsWith(result._id, "p")) {
+              return "Project";
+            }
+
+            return null;
+          },
+        },
+      },
     ],
     introspection: process.env.NODE_ENV !== "production",
     csrfPrevention: true,

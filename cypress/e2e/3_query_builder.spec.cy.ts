@@ -5,7 +5,7 @@ describe("search query builder", () => {
 
     // Navigate the "Login" page
     cy.visit("http://localhost:8080/");
-    cy.get("button").click();
+    cy.get("#orcidLoginButton").click();
   });
 
   it("should go to search page and test query builder", () => {
@@ -22,6 +22,6 @@ describe("search query builder", () => {
     cy.get('[aria-label="Run Query"]').click(); // Click the Search button
 
     // Search result array should contain multiple results
-    cy.get("#resultsHeading").should("contain.text", "7 results");
+    cy.get("#resultsHeading").should("contain.text", "4 results");
   });
 });

@@ -5,7 +5,7 @@ describe("Interface launches", () => {
 
     // Navigate the "Login" page
     cy.visit("http://localhost:8080/");
-    cy.get("button").click();
+    cy.get("#orcidLoginButton").click();
 
     // Complete User information
     cy.get("#userFirstNameInput").type("Test");

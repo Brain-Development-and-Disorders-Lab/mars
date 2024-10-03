@@ -246,7 +246,7 @@ export class Data {
           });
 
           // Add Entity to Workspace
-          await Workspaces.addEntity(context.workspace, response.message);
+          await Workspaces.addEntity(context.workspace, response.data);
 
           // Create new Activity if successful
           const activity = await Activity.create({
@@ -363,7 +363,7 @@ export class Data {
             };
           } else {
             // Add the Entity to the Workspace
-            await Workspaces.addEntity(context.workspace, result.message);
+            await Workspaces.addEntity(context.workspace, result.data);
 
             const activity = await Activity.create({
               timestamp: dayjs(Date.now()).toISOString(),

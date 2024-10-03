@@ -508,6 +508,7 @@ const Entity = () => {
                 <FormControl>
                   <FormLabel fontSize={"sm"}>Origins</FormLabel>
                   <SearchSelect
+                    resultType={"entity"}
                     value={selectedOrigin}
                     onChange={setSelectedOrigin}
                   />
@@ -568,6 +569,7 @@ const Entity = () => {
                 <FormControl>
                   <FormLabel fontSize={"sm"}>Products</FormLabel>
                   <SearchSelect
+                    resultType={"entity"}
                     value={selectedProduct}
                     onChange={setSelectedProduct}
                   />

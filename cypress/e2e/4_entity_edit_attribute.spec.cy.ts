@@ -5,7 +5,7 @@ describe("In entity page, edit attribute", () => {
 
     // Navigate the "Login" page
     cy.visit("http://localhost:8080/");
-    cy.get("button").click();
+    cy.get("#orcidLoginButton").click();
   });
 
   it("should be able to add and edit attribute", () => {

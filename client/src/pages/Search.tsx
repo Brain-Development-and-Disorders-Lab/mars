@@ -59,27 +59,36 @@ const Search = () => {
 
   // Query to search by text value
   const SEARCH_TEXT = gql`
-    query Search($query: String, $isBuilder: Boolean, $showArchived: Boolean) {
+    query Search(
+      $query: String
+      $resultType: String
+      $isBuilder: Boolean
+      $showArchived: Boolean
+    ) {
       search(
         query: $query
+        resultType: $resultType
         isBuilder: $isBuilder
         showArchived: $showArchived
       ) {
-        _id
-        name
-        owner
-        archived
-        description
-        projects
-        attributes {
+        __typename
+        ... on Entity {
           _id
           name
+          owner
+          archived
           description
-          values {
+          projects
+          attributes {
             _id
             name
-            type
-            data
+            description
+            values {
+              _id
+              name
+              type
+              data
+            }
           }
         }
       }
@@ -96,6 +105,7 @@ const Search = () => {
     const results = await searchText({
       variables: {
         query: query,
+        resultType: "entity",
         isBuilder: false,
         showArchived: showArchived,
       },

@@ -225,9 +225,13 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
         const user: Partial<UserModel> = userResponse.data.user;
         if (
           user.firstName === "" ||
+          _.isNull(user.firstName) ||
           user.lastName === "" ||
+          _.isNull(user.lastName) ||
           user.email === "" ||
-          user.affiliation === ""
+          _.isNull(user.email) ||
+          user.affiliation === "" ||
+          _.isNull(user.affiliation)
         ) {
           setShowSetup(true);
         } else {
@@ -500,6 +504,7 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
 
               <Flex direction={"column"} gap={"2"} pt={"8"}>
                 <Button
+                  id={"orcidLoginButton"}
                   colorScheme={"gray"}
                   gap={"4"}
                   onClick={onLoginClick}

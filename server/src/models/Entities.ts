@@ -151,7 +151,7 @@ export class Entities {
    * @return {Promise<IResponseMessage>}
    */
   static update = async (updated: EntityModel): Promise<IResponseMessage> => {
-    const entity = await this.getOne(updated._id);
+    const entity = await Entities.getOne(updated._id);
 
     if (_.isNull(entity)) {
       return {
@@ -160,21 +160,10 @@ export class Entities {
       };
     }
 
-    const update: { $set: IEntity } = {
+    // Construct an update object from the original Entity, and merge in the changes
+    const update: { $set: EntityModel } = {
       $set: {
-        name: entity.name,
-        owner: entity.owner,
-        archived: entity.archived,
-        created: entity.created,
-        description: entity.description,
-        projects: entity.projects,
-        associations: {
-          origins: entity.associations.origins,
-          products: entity.associations.products,
-        },
-        attributes: entity.attributes,
-        attachments: entity.attachments,
-        history: entity.history,
+        ...entity,
       },
     };
 
@@ -195,14 +184,14 @@ export class Entities {
       // Projects added in updated Entity
       const addProjects = _.difference(updated.projects, entity.projects);
       for await (const project of addProjects) {
-        await this.addProject(updated._id, project);
+        await Entities.addProject(updated._id, project);
         await Projects.addEntity(project, updated._id);
       }
 
       // Projects removed in updated Entity
       const removeProjects = _.difference(entity.projects, updated.projects);
       for await (const project of removeProjects) {
-        await this.removeProject(updated._id, project);
+        await Entities.removeProject(updated._id, project);
         await Projects.removeEntity(project, updated._id);
       }
     }
@@ -365,7 +354,7 @@ export class Entities {
 
     const update: { $set: Partial<EntityModel> } = {
       $set: {
-        history: [historyEntityModel, ...entity.history],
+        history: [historyEntityModel, ...(entity.history || [])],
       },
     };
 

@@ -1033,6 +1033,7 @@ const Project = () => {
 
             <ModalBody p={"2"}>
               <SearchSelect
+                resultType={"entity"}
                 value={selectedEntity}
                 onChange={setSelectedEntity}
               />
