@@ -4,7 +4,7 @@ import {
   IProject,
   ProjectMetrics,
   ProjectModel,
-  ResponseMessage,
+  IResponseMessage,
 } from "@types";
 
 // Utility functions and libraries
@@ -212,7 +212,7 @@ export const ProjectsResolvers = {
 
       if (result.success) {
         // Add the Project to the Workspace
-        await Workspaces.addProject(context.workspace, result.message);
+        await Workspaces.addProject(context.workspace, result.data);
 
         // Create a new Activity entry
         const activity = await Activity.create({
@@ -221,7 +221,7 @@ export const ProjectsResolvers = {
           actor: context.user,
           details: "Created new Project",
           target: {
-            _id: result.message,
+            _id: result.data,
             type: "projects",
             name: args.project.name,
           },
@@ -348,7 +348,7 @@ export const ProjectsResolvers = {
       _parent: any,
       args: { toArchive: string[]; state: boolean },
       context: Context,
-    ): Promise<ResponseMessage> => {
+    ): Promise<IResponseMessage> => {
       // Authenticate the provided context
       await Authentication.authenticate(context);
 

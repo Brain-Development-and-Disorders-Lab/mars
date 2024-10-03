@@ -292,10 +292,24 @@ export const typedefs = `#graphql
     activity: [String]
   }
 
-  # "Response" type
-  type Response {
+  # "ResponseMessage" type
+  type ResponseMessage {
     success: Boolean
     message: String
+  }
+
+  # "ResponseData"-type containing data with type "String"
+  type ResponseDataString {
+    success: Boolean
+    message: String
+    data: String
+  }
+
+  # "ResponseData"-type containing data with type "Auth"
+  type ResponseDataAuth {
+    success: Boolean
+    message: String
+    data: Auth
   }
 
   # "Auth" type
@@ -303,6 +317,7 @@ export const typedefs = `#graphql
     orcid: String
     name: String
     token: String
+    workspace: String
   }
 
   # "File" type
@@ -375,7 +390,7 @@ export const typedefs = `#graphql
     exportProjectEntities(_id: String, format: String): String
 
     # Authentication queries
-    login(code: String): Auth
+    login(code: String): ResponseDataAuth
 
     # Data queries
     downloadFile(_id: String): String
@@ -387,42 +402,42 @@ export const typedefs = `#graphql
   # Define mutation types
   type Mutation {
     # Entity mutations
-    setEntityDescription(_id: String, description: String): Response
-    createEntity(entity: EntityCreateInput): Response
-    updateEntity(entity: EntityUpdateInput): Response
-    archiveEntity(_id: String, state: Boolean): Response
-    archiveEntities(toArchive: [String], state: Boolean): Response
-    deleteEntity(_id: String): Response
+    setEntityDescription(_id: String, description: String): ResponseMessage
+    createEntity(entity: EntityCreateInput): ResponseDataString
+    updateEntity(entity: EntityUpdateInput): ResponseMessage
+    archiveEntity(_id: String, state: Boolean): ResponseMessage
+    archiveEntities(toArchive: [String], state: Boolean): ResponseMessage
+    deleteEntity(_id: String): ResponseMessage
 
     # Project mutations
-    createProject(project: ProjectCreateInput): Response
-    updateProject(project: ProjectUpdateInput): Response
-    archiveProject(_id: String, state: Boolean): Response
-    archiveProjects(toArchive: [String], state: Boolean): Response
-    deleteProject(_id: String): Response
+    createProject(project: ProjectCreateInput): ResponseMessage
+    updateProject(project: ProjectUpdateInput): ResponseMessage
+    archiveProject(_id: String, state: Boolean): ResponseMessage
+    archiveProjects(toArchive: [String], state: Boolean): ResponseMessage
+    deleteProject(_id: String): ResponseMessage
 
     # Activity mutations
-    createActivity(activity: ActivityCreateInput): Response
+    createActivity(activity: ActivityCreateInput): ResponseMessage
 
     # Workspace mutations
-    createWorkspace(workspace: WorkspaceCreateInput): Response
-    updateWorkspace(workspace: WorkspaceUpdateInput): Response
+    createWorkspace(workspace: WorkspaceCreateInput): ResponseMessage
+    updateWorkspace(workspace: WorkspaceUpdateInput): ResponseMessage
 
     # User mutations
-    createUser(user: UserInput): Response
-    updateUser(user: UserInput): Response
+    createUser(user: UserInput): ResponseMessage
+    updateUser(user: UserInput): ResponseMessage
 
     # Attribute mutations
-    createAttribute(attribute: AttributeCreateInput): Response
-    updateAttribute(attribute: AttributeInput): Response
-    archiveAttribute(_id: String, state: Boolean): Response
-    archiveAttributes(toArchive: [String], state: Boolean): Response
-    deleteAttribute(_id: String): Response
+    createAttribute(attribute: AttributeCreateInput): ResponseMessage
+    updateAttribute(attribute: AttributeInput): ResponseMessage
+    archiveAttribute(_id: String, state: Boolean): ResponseMessage
+    archiveAttributes(toArchive: [String], state: Boolean): ResponseMessage
+    deleteAttribute(_id: String): ResponseMessage
 
     # Data mutations
-    uploadAttachment(target: String, file: Upload!): Response
+    uploadAttachment(target: String, file: Upload!): ResponseMessage
     prepareColumns(file: [Upload]!): [String]
-    mapColumns(columnMapping: ColumnMappingInput, file: [Upload]!): Response
-    importObjects(file: [Upload]!, owner: String, project: String): Response
+    mapColumns(columnMapping: ColumnMappingInput, file: [Upload]!): ResponseMessage
+    importObjects(file: [Upload]!, owner: String, project: String): ResponseMessage
   }
 `;

@@ -7,7 +7,8 @@ import {
   IProject,
   ProjectHistory,
   ProjectModel,
-  ResponseMessage,
+  IResponseMessage,
+  ResponseData,
 } from "@types";
 
 // Utility functions and libraries
@@ -55,7 +56,7 @@ export class Projects {
     return !_.isNull(project);
   };
 
-  static create = async (project: IProject): Promise<ResponseMessage> => {
+  static create = async (project: IProject): Promise<ResponseData<string>> => {
     // Create a `ProjectModel` instance by adding an identifier and unpacking given Project data
     const projectModel: ProjectModel = {
       _id: getIdentifier("project"),
@@ -72,12 +73,13 @@ export class Projects {
     return {
       success: successStatus,
       message: successStatus
-        ? response.insertedId
+        ? "Created new Project"
         : "Could not create new Project",
+      data: response.insertedId.toString(),
     };
   };
 
-  static update = async (updated: ProjectModel): Promise<ResponseMessage> => {
+  static update = async (updated: ProjectModel): Promise<IResponseMessage> => {
     const project = await this.getOne(updated._id);
 
     if (_.isNull(project)) {
@@ -135,11 +137,11 @@ export class Projects {
   /**
    * Add a history entry to an Project based on provided Project state
    * @param historyProject Existing Project state to add to Project history
-   * @return {Promise<ResponseMessage>}
+   * @return {Promise<IResponseMessage>}
    */
   static addHistory = async (
     historyProject: ProjectModel,
-  ): Promise<ResponseMessage> => {
+  ): Promise<IResponseMessage> => {
     const project = await Projects.getOne(historyProject._id);
     if (_.isNull(project)) {
       return {
@@ -187,12 +189,12 @@ export class Projects {
    * Set the archive state of a Project
    * @param _id Project identifier to archive
    * @param state Project archive state
-   * @return {Promise<ResponseMessage>}
+   * @return {Promise<IResponseMessage>}
    */
   static setArchived = async (
     _id: string,
     state: boolean,
-  ): Promise<ResponseMessage> => {
+  ): Promise<IResponseMessage> => {
     consola.debug("Setting archive state of Project:", _id, "Archived:", state);
     const project = await Projects.getOne(_id);
     if (_.isNull(project)) {
@@ -230,9 +232,9 @@ export class Projects {
   /**
    * Delete a Project
    * @param _id Project identifier to delete
-   * @return {ResponseMessage}
+   * @return {IResponseMessage}
    */
-  static delete = async (_id: string): Promise<ResponseMessage> => {
+  static delete = async (_id: string): Promise<IResponseMessage> => {
     const project = await Projects.getOne(_id);
     // Remove Entities from Project
     if (project) {
@@ -258,7 +260,7 @@ export class Projects {
   static addEntity = async (
     _id: string,
     entity: string,
-  ): Promise<ResponseMessage> => {
+  ): Promise<IResponseMessage> => {
     const project = await this.getOne(_id);
 
     if (_.isNull(project)) {
@@ -293,7 +295,7 @@ export class Projects {
   static addEntities = async (
     _id: string,
     entities: string[],
-  ): Promise<ResponseMessage> => {
+  ): Promise<IResponseMessage> => {
     const project = await this.getOne(_id);
 
     if (_.isNull(project)) {
@@ -325,7 +327,7 @@ export class Projects {
   static removeEntity = async (
     _id: string,
     entity: string,
-  ): Promise<ResponseMessage> => {
+  ): Promise<IResponseMessage> => {
     const project = await this.getOne(_id);
 
     if (_.isNull(project)) {

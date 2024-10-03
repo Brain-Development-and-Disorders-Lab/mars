@@ -33,7 +33,14 @@ import { useToken } from "src/authentication/useToken";
 import _ from "lodash";
 
 // Existing and custom types
-import { LoginProps, ResponseMessage, UserModel, WorkspaceModel } from "@types";
+import {
+  LoginProps,
+  IResponseMessage,
+  UserModel,
+  WorkspaceModel,
+  ResponseData,
+  IAuth,
+} from "@types";
 
 // Workspace context
 import { WorkspaceContext } from "src/Context";
@@ -97,13 +104,19 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
   const LOGIN_DATA = gql`
     query PerformLogin($code: String) {
       login(code: $code) {
-        orcid
-        name
-        token
+        success
+        message
+        data {
+          orcid
+          name
+          token
+        }
       }
     }
   `;
-  const [doLogin, { loading, error }] = useLazyQuery(LOGIN_DATA);
+  const [doLogin, { loading, error }] = useLazyQuery<{
+    login: ResponseData<IAuth>;
+  }>(LOGIN_DATA);
 
   // Query to retrieve Workspaces
   const GET_WORKSPACES = gql`
@@ -146,7 +159,7 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
     }
   `;
   const [updateUser, { error: userUpdateError }] = useMutation<{
-    updateUser: ResponseMessage;
+    updateUser: IResponseMessage;
   }>(UPDATE_USER);
 
   // Workspace context
@@ -169,15 +182,18 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
     const loginResponse = await doLogin({ variables: { code: code } });
 
     // Perform login and data retrieval via server, check if user permitted access
-    if (loginResponse.data?.login) {
+    if (
+      loginResponse.data?.login &&
+      loginResponse.data.login.success === true
+    ) {
       removeCode();
 
       // Store the User ORCiD
-      setUserOrcid(loginResponse.data.login.orcid);
+      setUserOrcid(loginResponse.data.login.data.orcid);
 
       // Create a new token instance with an empty Workspace value
       setToken({
-        ...loginResponse.data.login,
+        ...loginResponse.data.login.data,
         workspace: "",
       });
 
@@ -189,7 +205,7 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
       ) {
         // Update the token with an active Workspace if the user is a member of a Workspace
         setToken({
-          ...loginResponse.data.login,
+          ...loginResponse.data.login.data,
           workspace: workspacesResponse.data.workspaces[0]._id,
         });
 
@@ -200,7 +216,7 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
       // Retrieve the User information and display the setup form if information missing
       const userResponse = await getUser({
         variables: {
-          _id: loginResponse.data.login.orcid,
+          _id: loginResponse.data.login.data.orcid,
         },
       });
 
@@ -240,13 +256,36 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
           isClosable: true,
         });
       }
+    } else if (
+      loginResponse.data?.login &&
+      !_.isEqual(loginResponse.data.login.data.orcid, "")
+    ) {
+      if (!toast.isActive("access-toast")) {
+        toast({
+          id: "access-toast",
+          title: "You don't have access yet!",
+          description: (
+            <Link href={"https://forms.gle/q4GL4gF1bamem3DA9"} isExternal>
+              <Flex direction={"row"} gap={"1"} align={"center"}>
+                <Text fontWeight={"semibold"}>Join the waitlist here</Text>
+                <Icon name={"a_right"} />
+              </Flex>
+            </Link>
+          ),
+          status: "info",
+          position: "bottom-right",
+          duration: null,
+          isClosable: false,
+        });
+      }
     }
   };
 
   useEffect(() => {
     // Handle potential errors when using ORCiD
-    if (error) {
+    if (error && !toast.isActive("login-graphql-error-toast")) {
       toast({
+        id: "login-graphql-error-toast",
         title: "Login Error",
         status: "error",
         description: "Could not authenticate with ORCiD",

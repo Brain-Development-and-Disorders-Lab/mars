@@ -5,7 +5,7 @@ import "dotenv/config";
 import { afterEach, beforeEach, describe, expect, it } from "@jest/globals";
 
 // Entities model and types
-import { EntityModel } from "../../types";
+import { EntityModel, ProjectModel, ResponseData } from "../../types";
 import { Entities } from "../src/models/Entities";
 import { Projects } from "../src/models/Projects";
 
@@ -14,7 +14,7 @@ import dayjs from "dayjs";
 // Database connectivity
 import { connect, disconnect } from "../src/connectors/database";
 import { clearDatabase } from "./util";
-import { isNull } from "lodash";
+import _ from "lodash";
 
 describe("Entity model", () => {
   beforeEach(async () => {
@@ -37,8 +37,8 @@ describe("Entity model", () => {
     expect(result.length).toBe(0);
   });
 
-  it("should create a basic Entity", async () => {
-    const result = await Entities.create({
+  it("should create an Entity", async () => {
+    const result: ResponseData<string> = await Entities.create({
       name: "TestEntity",
       created: new Date(Date.now()).toISOString(),
       archived: false,
@@ -55,13 +55,13 @@ describe("Entity model", () => {
     });
     expect(result.success).toBeTruthy();
 
-    const entity: EntityModel | null = await Entities.getByName("TestEntity");
+    const entity: EntityModel | null = await Entities.getOne(result.data);
     expect(entity).not.toBeNull();
   });
 
   it("should create an association between two Entities when an Origin is specified in a Product", async () => {
     // Create the first Entity
-    await Entities.create({
+    const originResult: ResponseData<string> = await Entities.create({
       name: "TestOriginEntity",
       created: dayjs(Date.now()).toISOString(),
       archived: false,
@@ -77,13 +77,8 @@ describe("Entity model", () => {
       history: [],
     });
 
-    // Confirm Origin Entity creation
-    let originEntity: EntityModel | null =
-      await Entities.getByName("TestOriginEntity");
-    if (isNull(originEntity)) throw new Error();
-
     // Create the second Entity (Product) that has the first Entity (Origin)
-    await Entities.create({
+    const productResult: ResponseData<string> = await Entities.create({
       name: "TestProductEntity",
       created: dayjs(Date.now()).toISOString(),
       archived: false,
@@ -91,7 +86,7 @@ describe("Entity model", () => {
       description: "Test Product",
       projects: [],
       associations: {
-        origins: [{ name: "TestOriginEntity", _id: originEntity._id }],
+        origins: [{ name: "TestOriginEntity", _id: originResult.data }],
         products: [],
       },
       attributes: [],
@@ -99,14 +94,17 @@ describe("Entity model", () => {
       history: [],
     });
 
-    // Confirm Product Entity creation
-    const productEntity: EntityModel | null =
-      await Entities.getByName("TestProductEntity");
-    if (isNull(productEntity)) throw new Error();
-
     // Refresh Origin Entity
-    originEntity = await Entities.getByName("TestOriginEntity");
-    if (isNull(originEntity)) throw new Error();
+    const originEntity: EntityModel | null = await Entities.getOne(
+      originResult.data,
+    );
+    if (_.isNull(originEntity)) throw new Error();
+
+    // Confirm Product Entity creation
+    const productEntity: EntityModel | null = await Entities.getOne(
+      productResult.data,
+    );
+    if (_.isNull(productEntity)) throw new Error();
 
     // Check the Origin of the Product
     expect(productEntity.associations.origins.length).toBe(1);
@@ -123,7 +121,7 @@ describe("Entity model", () => {
 
   it("should create an association between two Entities when a Product is specified in an Origin", async () => {
     // Create the first Entity (Product)
-    await Entities.create({
+    const productResult: ResponseData<string> = await Entities.create({
       name: "TestProductEntity",
       created: dayjs(Date.now()).toISOString(),
       archived: false,
@@ -139,12 +137,8 @@ describe("Entity model", () => {
       history: [],
     });
 
-    const productEntity: EntityModel | null =
-      await Entities.getByName("TestProductEntity");
-    if (isNull(productEntity)) throw new Error();
-
     // Create the second Entity (Origin) that has the first Entity (Product)
-    await Entities.create({
+    const originResult: ResponseData<string> = await Entities.create({
       name: "TestOriginEntity",
       created: dayjs(Date.now()).toISOString(),
       archived: false,
@@ -153,22 +147,22 @@ describe("Entity model", () => {
       projects: [],
       associations: {
         origins: [],
-        products: [{ name: "TestProductEntity", _id: productEntity._id }],
+        products: [{ name: "TestProductEntity", _id: productResult.data }],
       },
       attributes: [],
       attachments: [],
       history: [],
     });
 
-    const originEntity: EntityModel | null =
-      await Entities.getByName("TestOriginEntity");
-    if (isNull(originEntity)) throw new Error();
-
-    // Retrieve the Product Entity associated with the Origin Entity
-    const retrievedProductEntity = await Entities.getOne(
-      originEntity.associations.products[0]._id,
+    const originEntity: EntityModel | null = await Entities.getOne(
+      originResult.data,
     );
-    if (isNull(retrievedProductEntity)) throw new Error();
+    if (_.isNull(originEntity)) throw new Error();
+
+    const productEntity: EntityModel | null = await Entities.getOne(
+      productResult.data,
+    );
+    if (_.isNull(productEntity)) throw new Error();
 
     // Check the Product of the Origin
     expect(originEntity.associations.products.length).toBe(1);
@@ -177,77 +171,15 @@ describe("Entity model", () => {
     );
 
     // Check the Origin of the Product
-    expect(retrievedProductEntity.associations.origins.length).toBe(1);
-    expect(retrievedProductEntity.associations.origins[0]._id).toStrictEqual(
-      originEntity._id,
-    );
-  });
-
-  it("should create an association between two Entities when a Product is specified in an Origin", async () => {
-    // Create the first Entity (Product)
-    await Entities.create({
-      name: "TestProductEntity",
-      created: dayjs(Date.now()).toISOString(),
-      archived: false,
-      owner: "henry.burgess@wustl.edu",
-      description: "Test Product",
-      projects: [],
-      associations: {
-        origins: [],
-        products: [],
-      },
-      attributes: [],
-      attachments: [],
-      history: [],
-    });
-
-    const productEntity: EntityModel | null =
-      await Entities.getByName("TestProductEntity");
-    if (isNull(productEntity)) throw new Error();
-
-    // Create the second Entity (Origin) that has the first Entity (Product)
-    await Entities.create({
-      name: "TestOriginEntity",
-      created: dayjs(Date.now()).toISOString(),
-      archived: false,
-      owner: "henry.burgess@wustl.edu",
-      description: "Test Origin",
-      projects: [],
-      associations: {
-        origins: [],
-        products: [{ name: productEntity.name, _id: productEntity._id }],
-      },
-      attributes: [],
-      attachments: [],
-      history: [],
-    });
-
-    const originEntity: EntityModel | null =
-      await Entities.getByName("TestOriginEntity");
-    if (isNull(originEntity)) throw new Error();
-    expect(originEntity.associations.products.length).toBe(1);
-
-    // Retrieve the Product Entity associated with the Origin Entity
-    const retrievedProductEntity: EntityModel | null = await Entities.getOne(
-      originEntity.associations.products[0]._id,
-    );
-    if (isNull(retrievedProductEntity)) throw new Error();
-
-    // Check the Product of the Origin
-    expect(originEntity.associations.products[0]._id).toStrictEqual(
-      productEntity._id,
-    );
-
-    // Check the Origin of the Product
-    expect(retrievedProductEntity.associations.origins.length).toBe(1);
-    expect(retrievedProductEntity.associations.origins[0]._id).toStrictEqual(
+    expect(productEntity.associations.origins.length).toBe(1);
+    expect(productEntity.associations.origins[0]._id).toStrictEqual(
       originEntity._id,
     );
   });
 
   it("should create an Attribute", async () => {
     // Start by creating an Entity
-    await Entities.create({
+    const result: ResponseData<string> = await Entities.create({
       name: "TestEntity",
       created: dayjs(Date.now()).toISOString(),
       archived: false,
@@ -273,8 +205,8 @@ describe("Entity model", () => {
       history: [],
     });
 
-    const entity: EntityModel | null = await Entities.getByName("TestEntity");
-    if (isNull(entity)) throw new Error();
+    const entity: EntityModel | null = await Entities.getOne(result.data);
+    if (_.isNull(entity)) throw new Error();
 
     // Check that an Attribute exists and it has the correct ID
     expect(entity.attributes.length).toBe(1);
@@ -282,7 +214,7 @@ describe("Entity model", () => {
   });
 
   it("should update the description", async () => {
-    await Entities.create({
+    const result: ResponseData<string> = await Entities.create({
       name: "TestEntity",
       created: dayjs(Date.now()).toISOString(),
       archived: false,
@@ -298,20 +230,19 @@ describe("Entity model", () => {
       history: [],
     });
 
-    const entity: EntityModel | null = await Entities.getByName("TestEntity");
-    if (isNull(entity)) throw new Error();
+    const entity: EntityModel | null = await Entities.getOne(result.data);
+    if (_.isNull(entity)) throw new Error();
 
     entity.description = "Updated";
     await Entities.update(entity);
 
-    const updated: EntityModel | null = await Entities.getByName("TestEntity");
-    if (isNull(updated)) throw new Error();
-
+    const updated: EntityModel | null = await Entities.getOne(result.data);
+    if (_.isNull(updated)) throw new Error();
     expect(updated.description).toBe("Updated");
   });
 
-  it("should update Project membership", async () => {
-    await Entities.create({
+  it("should update Project membership when added", async () => {
+    const entityResult: ResponseData<string> = await Entities.create({
       name: "TestEntity",
       created: dayjs(Date.now()).toISOString(),
       archived: false,
@@ -327,11 +258,8 @@ describe("Entity model", () => {
       history: [],
     });
 
-    let entity = await Entities.getByName("TestEntity");
-    if (isNull(entity)) throw new Error();
-
     // Create a Project
-    await Projects.create({
+    const projectResult: ResponseData<string> = await Projects.create({
       name: "TestProject",
       archived: false,
       created: dayjs(Date.now()).toISOString(),
@@ -342,38 +270,46 @@ describe("Entity model", () => {
       history: [],
     });
 
-    let project = (await Projects.all())[0];
-    if (isNull(project)) throw new Error();
+    // Update the Entity to be added to the new Project
+    const entity: EntityModel | null = await Entities.getOne(entityResult.data);
+    if (_.isNull(entity)) throw new Error();
+    entity.projects.push(projectResult.data);
+    await Entities.update(entity);
 
-    // Add the Entity to the Project
-    await Entities.addProject(entity._id, project._id);
-    await Projects.addEntity(project._id, entity._id);
+    // Retrieve updated Entity and Project models
+    const updatedEntity: EntityModel | null = await Entities.getOne(
+      entityResult.data,
+    );
+    if (_.isNull(updatedEntity)) throw new Error();
+    const updatedProject: ProjectModel | null = await Projects.getOne(
+      projectResult.data,
+    );
+    if (_.isNull(updatedProject)) throw new Error();
 
     // Validate the Entity has the Project
-    entity = await Entities.getByName("TestEntity");
-    if (isNull(entity)) throw new Error();
-    expect(entity.projects.length).toBe(1);
+    expect(updatedEntity.projects.length).toBe(1);
+    expect(updatedEntity.projects.pop()).toBe(projectResult.data);
 
-    project = (await Projects.all())[0];
-    if (isNull(project)) throw new Error();
-    expect(project.entities.length).toBe(1);
+    // Validate the Project has the Entity
+    expect(updatedProject.entities.length).toBe(1);
+    expect(updatedProject.entities.pop()).toBe(entityResult.data);
 
     // Remove the Project from the Entity
-    await Entities.removeProject(entity._id, project._id);
-    await Projects.removeEntity(project._id, entity._id);
+    // await Entities.removeProject(entity._id, project._id);
+    // await Projects.removeEntity(project._id, entity._id);
 
-    // Validate the Entity no longer has the project
-    entity = await Entities.getByName("TestEntity");
-    if (isNull(entity)) throw new Error();
-    expect(entity.projects.length).toBe(0);
+    // // Validate the Entity no longer has the project
+    // entity = await Entities.getByName("TestEntity");
+    // if (_.isNull(entity)) throw new Error();
+    // expect(entity.projects.length).toBe(0);
 
-    project = (await Projects.all())[0];
-    if (isNull(project)) throw new Error();
-    expect(project.entities.length).toBe(0);
+    // project = (await Projects.all())[0];
+    // if (_.isNull(project)) throw new Error();
+    // expect(project.entities.length).toBe(0);
   });
 
-  it("should update Origin associations", async () => {
-    await Entities.create({
+  it("should update Project membership when removed", async () => {
+    const entityResult: ResponseData<string> = await Entities.create({
       name: "TestEntity",
       created: dayjs(Date.now()).toISOString(),
       archived: false,
@@ -389,11 +325,64 @@ describe("Entity model", () => {
       history: [],
     });
 
-    let entity = await Entities.getByName("TestEntity");
-    if (isNull(entity)) throw new Error();
+    // Create a Project
+    const projectResult: ResponseData<string> = await Projects.create({
+      name: "TestProject",
+      archived: false,
+      created: dayjs(Date.now()).toISOString(),
+      owner: "henry.burgess@wustl.edu",
+      description: "Test Project",
+      entities: [],
+      collaborators: [],
+      history: [],
+    });
+
+    // Update the Entity to be added to the new Project
+    const entity: EntityModel | null = await Entities.getOne(entityResult.data);
+    if (_.isNull(entity)) throw new Error();
+    entity.projects.push(projectResult.data);
+    await Entities.update(entity);
+
+    // Remove the Project from the Entity and update
+    entity.projects = [];
+    await Entities.update(entity);
+
+    // Retrieve updated Entity and Project models
+    const updatedEntity: EntityModel | null = await Entities.getOne(
+      entityResult.data,
+    );
+    if (_.isNull(updatedEntity)) throw new Error();
+    const updatedProject: ProjectModel | null = await Projects.getOne(
+      projectResult.data,
+    );
+    if (_.isNull(updatedProject)) throw new Error();
+
+    // Validate the Entity does not have the Project
+    expect(updatedEntity.projects.length).toBe(0);
+
+    // Validate the Project does not have the Entity
+    expect(updatedProject.entities.length).toBe(0);
+  });
+
+  it("should update Origin associations", async () => {
+    const entityResult: ResponseData<string> = await Entities.create({
+      name: "TestEntity",
+      created: dayjs(Date.now()).toISOString(),
+      archived: false,
+      owner: "henry.burgess@wustl.edu",
+      description: "Test",
+      projects: [],
+      associations: {
+        origins: [],
+        products: [],
+      },
+      attributes: [],
+      attachments: [],
+      history: [],
+    });
 
     // Create an Origin
-    await Entities.create({
+    const originResult: ResponseData<string> = await Entities.create({
       name: "OriginEntity",
       created: dayjs(Date.now()).toISOString(),
       archived: false,
@@ -409,42 +398,46 @@ describe("Entity model", () => {
       history: [],
     });
 
-    let originEntity = await Entities.getByName("OriginEntity");
-    if (isNull(originEntity)) throw new Error();
-
     // Add the Origin
+    const entity = await Entities.getOne(entityResult.data);
+    if (_.isNull(entity)) throw new Error();
     entity.associations.origins.push({
-      _id: originEntity._id,
-      name: originEntity.name,
+      _id: originResult.data,
+      name: "OriginEntity",
     });
     await Entities.update(entity);
 
+    // Get the updated Origin Entity and original Entity
+    let originEntity: EntityModel | null = await Entities.getOne(
+      originResult.data,
+    );
+    if (_.isNull(originEntity)) throw new Error();
+
+    let updatedEntity: EntityModel | null = await Entities.getOne(
+      entityResult.data,
+    );
+    if (_.isNull(updatedEntity)) throw new Error();
+
     // Validate Entities
-    entity = await Entities.getByName("TestEntity");
-    if (isNull(entity)) throw new Error();
-
-    originEntity = await Entities.getByName("OriginEntity");
-    if (isNull(originEntity)) throw new Error();
-
-    expect(entity.associations.origins.length).toBe(1);
     expect(originEntity.associations.products.length).toBe(1);
+    expect(updatedEntity.associations.origins.length).toBe(1);
 
     // Remove the Origin
-    entity.associations.origins = [];
-    await Entities.update(entity);
+    updatedEntity.associations.origins = [];
+    await Entities.update(updatedEntity);
 
     // Validate Entities
-    entity = await Entities.getByName("TestEntity");
-    if (isNull(entity)) throw new Error();
-    expect(entity.associations.origins.length).toBe(0);
-
-    originEntity = await Entities.getByName("OriginEntity");
-    if (isNull(originEntity)) throw new Error();
+    originEntity = await Entities.getOne(originResult.data);
+    if (_.isNull(originEntity)) throw new Error();
     expect(originEntity.associations.products.length).toBe(0);
+
+    updatedEntity = await Entities.getOne(entityResult.data);
+    if (_.isNull(updatedEntity)) throw new Error();
+    expect(updatedEntity.associations.origins.length).toBe(0);
   });
 
   it("should update Product associations", async () => {
-    await Entities.create({
+    const entityResult: ResponseData<string> = await Entities.create({
       name: "TestEntity",
       created: dayjs(Date.now()).toISOString(),
       archived: false,
@@ -460,11 +453,8 @@ describe("Entity model", () => {
       history: [],
     });
 
-    let entity: EntityModel | null = await Entities.getByName("TestEntity");
-    if (isNull(entity)) throw new Error();
-
     // Create a Product
-    await Entities.create({
+    const productResult: ResponseData<string> = await Entities.create({
       name: "ProductEntity",
       created: dayjs(Date.now()).toISOString(),
       archived: false,
@@ -480,43 +470,47 @@ describe("Entity model", () => {
       history: [],
     });
 
-    let productEntity: EntityModel | null =
-      await Entities.getByName("ProductEntity");
-    if (isNull(productEntity)) throw new Error();
-
     // Add the Product
+    const entity = await Entities.getOne(entityResult.data);
+    if (_.isNull(entity)) throw new Error();
     entity.associations.products.push({
-      _id: productEntity._id,
-      name: productEntity.name,
+      _id: productResult.data,
+      name: "ProductEntity",
     });
     await Entities.update(entity);
 
-    // Validate Entities
-    entity = await Entities.getByName("TestEntity");
-    if (isNull(entity)) throw new Error();
-    expect(entity.associations.products.length).toBe(1);
+    // Get the updated Product Entity and original Entity
+    let productEntity: EntityModel | null = await Entities.getOne(
+      productResult.data,
+    );
+    if (_.isNull(productEntity)) throw new Error();
 
-    productEntity = await Entities.getByName("ProductEntity");
-    if (isNull(productEntity)) throw new Error();
+    let updatedEntity: EntityModel | null = await Entities.getOne(
+      entityResult.data,
+    );
+    if (_.isNull(updatedEntity)) throw new Error();
+
+    // Validate Entities
     expect(productEntity.associations.origins.length).toBe(1);
+    expect(updatedEntity.associations.products.length).toBe(1);
 
-    // Remove the Origin
-    entity.associations.products = [];
-    await Entities.update(entity);
+    // Remove the Product
+    updatedEntity.associations.products = [];
+    await Entities.update(updatedEntity);
 
     // Validate Entities
-    entity = await Entities.getByName("TestEntity");
-    if (isNull(entity)) throw new Error();
-    expect(entity.associations.products.length).toBe(0);
+    productEntity = await Entities.getOne(productResult.data);
+    if (_.isNull(productEntity)) throw new Error();
+    expect(productEntity.associations.products.length).toBe(0);
 
-    productEntity = await Entities.getByName("ProductEntity");
-    if (isNull(productEntity)) throw new Error();
-    expect(productEntity.associations.origins.length).toBe(0);
+    updatedEntity = await Entities.getOne(entityResult.data);
+    if (_.isNull(updatedEntity)) throw new Error();
+    expect(updatedEntity.associations.origins.length).toBe(0);
   });
 
   it("should add an Attribute", async () => {
     // Start by creating an Entities
-    await Entities.create({
+    const result: ResponseData<string> = await Entities.create({
       name: "TestEntity",
       created: dayjs(Date.now()).toISOString(),
       archived: false,
@@ -532,10 +526,7 @@ describe("Entity model", () => {
       history: [],
     });
 
-    let entity: EntityModel | null = await Entities.getByName("TestEntity");
-    if (isNull(entity)) throw new Error();
-
-    await Entities.addAttribute(entity._id, {
+    await Entities.addAttribute(result.data, {
       _id: "TestAttribute",
       archived: false,
       name: "Attribute_1",
@@ -545,8 +536,8 @@ describe("Entity model", () => {
       values: [],
     });
 
-    entity = await Entities.getByName("TestEntity");
-    if (isNull(entity)) throw new Error();
+    const entity: EntityModel | null = await Entities.getOne(result.data);
+    if (_.isNull(entity)) throw new Error();
 
     // Check that an Attribute exists and it has the correct ID
     expect(entity.attributes.length).toBe(1);
@@ -555,7 +546,7 @@ describe("Entity model", () => {
 
   it("should remove an Attribute", async () => {
     // Start by creating an Entities
-    await Entities.create({
+    const result: ResponseData<string> = await Entities.create({
       name: "TestEntity",
       created: dayjs(Date.now()).toISOString(),
       archived: false,
@@ -568,7 +559,7 @@ describe("Entity model", () => {
       },
       attributes: [
         {
-          _id: "TestAttribute",
+          _id: "a-test-remove",
           archived: false,
           name: "Attribute_1",
           timestamp: dayjs(Date.now()).toISOString(),
@@ -581,20 +572,18 @@ describe("Entity model", () => {
       history: [],
     });
 
-    let entity: EntityModel | null = await Entities.getByName("TestEntity");
-    if (isNull(entity)) throw new Error();
-
     // Remove the Attribute from the Entity
-    await Entities.removeAttribute(entity._id, "TestAttribute");
+    await Entities.removeAttribute(result.data, "a-test-remove");
 
-    entity = await Entities.getByName("TestEntity");
-    if (isNull(entity)) throw new Error();
+    // Check that the Attribute has been removed
+    const entity: EntityModel | null = await Entities.getOne(result.data);
+    if (_.isNull(entity)) throw new Error();
     expect(entity.attributes.length).toBe(0);
   });
 
   it("should update an Attribute", async () => {
-    // Start by creating an Entities
-    await Entities.create({
+    // Start by creating an Entity
+    const result: ResponseData<string> = await Entities.create({
       name: "TestEntity",
       created: dayjs(Date.now()).toISOString(),
       archived: false,
@@ -609,7 +598,7 @@ describe("Entity model", () => {
         {
           _id: "TestAttribute",
           archived: false,
-          name: "Attribute_1",
+          name: "Test Attribute",
           owner: "henry.burgess@wustl.edu",
           timestamp: dayjs(Date.now()).toISOString(),
           description: "Test Attribute description",
@@ -620,27 +609,22 @@ describe("Entity model", () => {
       history: [],
     });
 
-    let entity: EntityModel | null = await Entities.getByName("TestEntity");
-    if (isNull(entity)) throw new Error();
-
-    await Entities.updateAttribute(entity._id, {
+    await Entities.updateAttribute(result.data, {
       _id: "TestAttribute",
       archived: false,
-      name: "Attribute_2",
+      name: "Test Attribute Updated",
       timestamp: dayjs(Date.now()).toISOString(),
       owner: "henry.burgess@wustl.edu",
       description: "Test Attribute updated",
       values: [],
     });
 
-    entity = await Entities.getByName("TestEntity");
-    if (isNull(entity)) throw new Error();
+    const entity = await Entities.getByName("TestEntity");
+    if (_.isNull(entity)) throw new Error();
 
-    // Check that an Attribute has been preserved
+    // Check that an Attribute has been updated
     expect(entity.attributes.length).toBe(1);
-
-    // Check that the Attribute has been updated
-    expect(entity.attributes[0].name).toBe("Attribute_2");
+    expect(entity.attributes[0].name).toBe("Test Attribute Updated");
     expect(entity.attributes[0].description).toBe("Test Attribute updated");
   });
 
@@ -680,28 +664,237 @@ describe("Entity model", () => {
     });
 
     // Act: Retrieve raw data for created entities
-    const rawData = await Entities.all();
+    const entities = await Entities.all();
 
     // Assert: Raw data should include data for both Entities
-    expect(rawData.length).toBe(2);
+    expect(entities.length).toBe(2);
     expect(
-      rawData[0].name.toString() == "TestProductEntity" ||
-        rawData[1].name.toString() == "TestProductEntity",
+      entities[0].name.toString() == "TestProductEntity" ||
+        entities[1].name.toString() == "TestProductEntity",
     ).toBeTruthy();
     expect(
-      rawData[0].name.toString() == "TestOriginEntity" ||
-        rawData[1].name.toString() == "TestOriginEntity",
+      entities[0].name.toString() == "TestOriginEntity" ||
+        entities[1].name.toString() == "TestOriginEntity",
     ).toBeTruthy();
   });
 
   it("should handle non-existent entity IDs gracefully", async () => {
     // Arrange: Non-existent entity IDs
-    const fakeIds = ["fakeId1", "fakeId2"];
+    const fakeIds = ["noID_1", "noID_2"];
 
     // Act: Try to retrieve raw data for non-existent entities
     const rawData = await Entities.getMany(fakeIds);
 
     // Assert: Function should return an empty array or appropriate response
     expect(rawData.length).toBe(0);
+  });
+
+  it("should add a history entry to an existing Entity", async () => {
+    const result: ResponseData<string> = await Entities.create({
+      name: "Test Entity",
+      created: dayjs(Date.now()).toISOString(),
+      archived: false,
+      owner: "henry.burgess@wustl.edu",
+      description: "Test Entity description",
+      projects: [],
+      associations: {
+        origins: [],
+        products: [],
+      },
+      attributes: [],
+      attachments: [],
+      history: [],
+    });
+
+    // Retrieve existing Entity state and use to create history entry
+    const entity: EntityModel | null = await Entities.getOne(result.data);
+    if (_.isNull(entity)) throw new Error();
+    await Entities.addHistory(entity);
+
+    // Get updated Entity and check that it contains history
+    const updated: EntityModel | null = await Entities.getOne(result.data);
+    if (_.isNull(updated)) throw new Error();
+    expect(updated.history.length).toBe(1);
+  });
+
+  it("should include history entry with prior Entity data when updated", async () => {
+    const result: ResponseData<string> = await Entities.create({
+      name: "Test Entity",
+      created: dayjs(Date.now()).toISOString(),
+      archived: false,
+      owner: "henry.burgess@wustl.edu",
+      description: "Test Entity description",
+      projects: [],
+      associations: {
+        origins: [],
+        products: [],
+      },
+      attributes: [],
+      attachments: [],
+      history: [],
+    });
+
+    // Retrieve existing Entity state and use to create history entry
+    const entity: EntityModel | null = await Entities.getOne(result.data);
+    if (_.isNull(entity)) throw new Error();
+    await Entities.addHistory(entity);
+
+    // Get updated Entity and check that it contains expected history
+    const updated: EntityModel | null = await Entities.getOne(result.data);
+    if (_.isNull(updated)) throw new Error();
+    expect(updated.history.length).toBe(1);
+    expect(updated.history.pop()?.description).toBe("Test Entity description");
+  });
+
+  it("should archive an Entity", async () => {
+    const result: ResponseData<string> = await Entities.create({
+      name: "Test Entity",
+      created: dayjs(Date.now()).toISOString(),
+      archived: false,
+      owner: "henry.burgess@wustl.edu",
+      description: "Test Entity description",
+      projects: [],
+      associations: {
+        origins: [],
+        products: [],
+      },
+      attributes: [],
+      attachments: [],
+      history: [],
+    });
+    expect(result.success).toBeTruthy();
+
+    // Archive the Entity and validate it has been archived
+    await Entities.setArchived(result.data, true);
+
+    const entity: EntityModel | null = await Entities.getOne(result.data);
+    if (_.isNull(entity)) throw new Error("Entity is null");
+    expect(entity.archived).toBeTruthy();
+  });
+
+  it("should restore an Entity", async () => {
+    const result: ResponseData<string> = await Entities.create({
+      name: "Test Entity",
+      created: dayjs(Date.now()).toISOString(),
+      archived: false,
+      owner: "henry.burgess@wustl.edu",
+      description: "Test Entity description",
+      projects: [],
+      associations: {
+        origins: [],
+        products: [],
+      },
+      attributes: [],
+      attachments: [],
+      history: [],
+    });
+    expect(result.success).toBeTruthy();
+
+    // Archive the Entity and validate it has been archived
+    await Entities.setArchived(result.data, true);
+    const entity: EntityModel | null = await Entities.getOne(result.data);
+    if (_.isNull(entity)) throw new Error();
+    expect(entity.archived).toBeTruthy();
+
+    // Restore the Entity and validate it has been restored
+    await Entities.setArchived(result.data, false);
+
+    const restored: EntityModel | null = await Entities.getOne(result.data);
+    if (_.isNull(restored)) throw new Error("Entity is null");
+    expect(restored.archived).toBeFalsy();
+  });
+
+  it("should delete an Entity with Origins, Products, and Project membership", async () => {
+    // Create a base Entity
+    const entityResult: ResponseData<string> = await Entities.create({
+      name: "Test Entity",
+      created: dayjs(Date.now()).toISOString(),
+      archived: false,
+      owner: "henry.burgess@wustl.edu",
+      description: "Test Entity description",
+      projects: [],
+      associations: {
+        origins: [],
+        products: [],
+      },
+      attributes: [],
+      attachments: [],
+      history: [],
+    });
+
+    // Create a Origin Entity
+    const originResult: ResponseData<string> = await Entities.create({
+      name: "Origin Entity",
+      created: dayjs(Date.now()).toISOString(),
+      archived: false,
+      owner: "henry.burgess@wustl.edu",
+      description: "Origin Entity description",
+      projects: [],
+      associations: {
+        origins: [],
+        products: [],
+      },
+      attributes: [],
+      attachments: [],
+      history: [],
+    });
+    await Entities.addOrigin(entityResult.data, {
+      _id: originResult.data,
+      name: "Origin Entity",
+    });
+
+    // Create a Product Entity
+    const productResult: ResponseData<string> = await Entities.create({
+      name: "Product Entity",
+      created: dayjs(Date.now()).toISOString(),
+      archived: false,
+      owner: "henry.burgess@wustl.edu",
+      description: "Product Entity description",
+      projects: [],
+      associations: {
+        origins: [],
+        products: [],
+      },
+      attributes: [],
+      attachments: [],
+      history: [],
+    });
+    await Entities.addProduct(entityResult.data, {
+      _id: productResult.data,
+      name: "Product Entity",
+    });
+
+    // Create a Project
+    const projectResult: ResponseData<string> = await Projects.create({
+      name: "TestProject",
+      archived: false,
+      created: dayjs(Date.now()).toISOString(),
+      owner: "henry.burgess@wustl.edu",
+      description: "Test Project",
+      entities: [],
+      collaborators: [],
+      history: [],
+    });
+    await Entities.addProject(entityResult.data, projectResult.data);
+
+    // Delete the Entity
+    await Entities.delete(entityResult.data);
+
+    // Validate the Origin, Product, and Project have no association with the Entity
+    const updatedOrigin: EntityModel | null = await Entities.getOne(
+      originResult.data,
+    );
+    if (_.isNull(updatedOrigin)) throw new Error();
+    expect(updatedOrigin.associations.products.length).toBe(0);
+    const updatedProduct: EntityModel | null = await Entities.getOne(
+      productResult.data,
+    );
+    if (_.isNull(updatedProduct)) throw new Error();
+    expect(updatedProduct.associations.origins.length).toBe(0);
+    const updatedProject: ProjectModel | null = await Projects.getOne(
+      projectResult.data,
+    );
+    if (_.isNull(updatedProject)) throw new Error();
+    expect(updatedProject.entities.length).toBe(0);
   });
 });

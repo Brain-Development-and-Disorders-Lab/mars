@@ -5,7 +5,7 @@ import {
   EntityModel,
   IEntity,
   IValue,
-  ResponseMessage,
+  IResponseMessage,
 } from "@types";
 
 // Utility functions and libraries
@@ -72,7 +72,7 @@ export class Data {
   static uploadAttachment = async (
     target: string,
     file: any,
-  ): Promise<ResponseMessage> => {
+  ): Promise<IResponseMessage> => {
     const { createReadStream, filename, mimetype } = await file;
 
     const bucket = getAttachments();
@@ -108,8 +108,8 @@ export class Data {
    * @param stream ReadableStream instance with file contents
    * @return {Promise<Buffer>}
    */
-  static bufferHelper = async (stream: any): Promise<Buffer> =>
-    new Promise((resolve, _reject) => {
+  private static bufferHelper = async (stream: any): Promise<Buffer> =>
+    new Promise((resolve) => {
       const buffers: Uint8Array[] = [];
       stream.on("data", (data: any) => buffers.push(data));
       stream.on("end", () => {
@@ -157,13 +157,13 @@ export class Data {
    * @param columnMapping Collection of mapped values with their corresponding columns names
    * @param file CSV file
    * @param context Request context, containing user and Workspace identifiers
-   * @return {Promise<ResponseMessage>}
+   * @return {Promise<IResponseMessage>}
    */
   static mapColumns = async (
     columnMapping: Record<string, any>,
     file: any,
     context: Context,
-  ): Promise<ResponseMessage> => {
+  ): Promise<IResponseMessage> => {
     const { createReadStream } = await file[0];
     const stream = createReadStream();
 
@@ -292,14 +292,14 @@ export class Data {
    * @param owner ORCiD ID of owner
    * @param project Project identifier to add Entities to (if any)
    * @param context Request context containing user and Workspace identifier
-   * @return {Promise<ResponseMessage>}
+   * @return {Promise<IResponseMessage>}
    */
   static importObjects = async (
     file: any[],
     owner: string,
     project: string,
     context: Context,
-  ): Promise<ResponseMessage> => {
+  ): Promise<IResponseMessage> => {
     const { createReadStream, mimetype } = await file[0];
     const stream = createReadStream();
 

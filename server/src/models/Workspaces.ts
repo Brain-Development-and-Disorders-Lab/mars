@@ -5,7 +5,7 @@ import {
   EntityModel,
   IWorkspace,
   ProjectModel,
-  ResponseMessage,
+  IResponseMessage,
   WorkspaceModel,
 } from "@types";
 
@@ -69,12 +69,12 @@ export class Workspaces {
    * Add an Entity to an existing Workspace
    * @param _id Workspace identifier to receive the Entity
    * @param entity Entity identifier to be added to the Workspace
-   * @return {Promise<ResponseMessage>}
+   * @return {Promise<IResponseMessage>}
    */
   static addEntity = async (
     _id: string,
     entity: string,
-  ): Promise<ResponseMessage> => {
+  ): Promise<IResponseMessage> => {
     const workspace = await Workspaces.getOne(_id);
     if (_.isNull(workspace)) {
       return {
@@ -131,12 +131,12 @@ export class Workspaces {
    * Add a Project to an existing Workspace
    * @param _id Workspace identifier to receive the Project
    * @param project Project identifier to be added to the Workspace
-   * @return {Promise<ResponseMessage>}
+   * @return {Promise<IResponseMessage>}
    */
   static addProject = async (
     _id: string,
     project: string,
-  ): Promise<ResponseMessage> => {
+  ): Promise<IResponseMessage> => {
     const workspace = await Workspaces.getOne(_id);
     if (_.isNull(workspace)) {
       return {
@@ -195,12 +195,12 @@ export class Workspaces {
    * Add Activity to an existing Workspace
    * @param _id Workspace identifier to receive the Activity
    * @param activity Activity identifier to be added to the Workspace
-   * @return {Promise<ResponseMessage>}
+   * @return {Promise<IResponseMessage>}
    */
   static addActivity = async (
     _id: string,
     activity: string,
-  ): Promise<ResponseMessage> => {
+  ): Promise<IResponseMessage> => {
     const workspace = await Workspaces.getOne(_id);
     if (_.isNull(workspace)) {
       return {
@@ -259,12 +259,12 @@ export class Workspaces {
    * Add an Attribute to an existing Workspace
    * @param _id Workspace identifier to receive the Attribute
    * @param attribute Attribute identifier to be added to the Workspace
-   * @return {Promise<ResponseMessage>}
+   * @return {Promise<IResponseMessage>}
    */
   static addAttribute = async (
     _id: string,
     attribute: string,
-  ): Promise<ResponseMessage> => {
+  ): Promise<IResponseMessage> => {
     const workspace = await Workspaces.getOne(_id);
     if (_.isNull(workspace)) {
       return {
@@ -308,9 +308,9 @@ export class Workspaces {
   /**
    * Create a new Workspace entry
    * @param workspace Workspace data
-   * @return {ResponseMessage}
+   * @return {IResponseMessage}
    */
-  static create = async (workspace: IWorkspace): Promise<ResponseMessage> => {
+  static create = async (workspace: IWorkspace): Promise<IResponseMessage> => {
     const joinedWorkspace: WorkspaceModel = {
       _id: getIdentifier("workspace"), // Generate new identifier
       timestamp: dayjs(Date.now()).toISOString(),
@@ -331,7 +331,9 @@ export class Workspaces {
     };
   };
 
-  static update = async (updated: WorkspaceModel): Promise<ResponseMessage> => {
+  static update = async (
+    updated: WorkspaceModel,
+  ): Promise<IResponseMessage> => {
     // Check if the Workspace exists
     const workspace = await Workspaces.getOne(updated._id);
     if (_.isNull(workspace)) {

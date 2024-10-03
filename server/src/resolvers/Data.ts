@@ -1,5 +1,5 @@
 // Custom types
-import { Context, ResponseMessage } from "@types";
+import { Context, IResponseMessage } from "@types";
 
 // Utility functions and libraries
 import { GraphQLError } from "graphql";
@@ -32,7 +32,7 @@ export const DataResolvers = {
     uploadAttachment: async (
       _parent: any,
       args: { target: string; file: any },
-    ): Promise<ResponseMessage> => {
+    ): Promise<IResponseMessage> => {
       return await Data.uploadAttachment(args.target, args.file);
     },
     // Prepare a CSV file, returning the collection of column names (if present)
@@ -47,14 +47,14 @@ export const DataResolvers = {
       _parent: any,
       args: { columnMapping: Record<string, string>; file: any },
       context: Context,
-    ): Promise<ResponseMessage> => {
+    ): Promise<IResponseMessage> => {
       return await Data.mapColumns(args.columnMapping, args.file, context);
     },
     importObjects: async (
       _parent: any,
       args: { file: any; owner: string; project: string },
       context: Context,
-    ): Promise<ResponseMessage> => {
+    ): Promise<IResponseMessage> => {
       return await Data.importObjects(
         args.file,
         args.owner,

@@ -1,4 +1,4 @@
-import { AttributeModel, IAttribute, ResponseMessage } from "@types";
+import { AttributeModel, IAttribute, IResponseMessage } from "@types";
 
 // Utility functions and libraries
 import _ from "lodash";
@@ -54,9 +54,9 @@ export class Attributes {
   /**
    * Create a new Attribute
    * @param attribute Attribute data
-   * @return {ResponseMessage}
+   * @return {IResponseMessage}
    */
-  static create = async (attribute: IAttribute): Promise<ResponseMessage> => {
+  static create = async (attribute: IAttribute): Promise<IResponseMessage> => {
     consola.debug(`Creating new Attribute...`);
     // Add an identifier to the Attribute
     const joinedAttribute: AttributeModel = {
@@ -85,7 +85,9 @@ export class Attributes {
     };
   };
 
-  static update = async (updated: AttributeModel): Promise<ResponseMessage> => {
+  static update = async (
+    updated: AttributeModel,
+  ): Promise<IResponseMessage> => {
     consola.debug("Updating Attribute:", updated._id);
     const attribute = await this.getOne(updated._id);
     if (_.isNull(attribute)) {
@@ -137,12 +139,12 @@ export class Attributes {
    * Set the archive state of an Attribute
    * @param _id Attribute identifier to archive
    * @param state Attribute archive state
-   * @return {Promise<ResponseMessage>}
+   * @return {Promise<IResponseMessage>}
    */
   static setArchived = async (
     _id: string,
     state: boolean,
-  ): Promise<ResponseMessage> => {
+  ): Promise<IResponseMessage> => {
     consola.debug(
       "Setting archive state of Attribute:",
       _id,
@@ -185,9 +187,9 @@ export class Attributes {
   /**
    * Delete an Attribute
    * @param _id Attribute identifier to delete
-   * @return {ResponseMessage}
+   * @return {IResponseMessage}
    */
-  static delete = async (_id: string): Promise<ResponseMessage> => {
+  static delete = async (_id: string): Promise<IResponseMessage> => {
     const response = await getDatabase()
       .collection<AttributeModel>(ATTRIBUTES_COLLECTION)
       .deleteOne({ _id: _id });

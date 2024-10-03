@@ -48,7 +48,12 @@ import AttributeCard from "@components/AttributeCard";
 import SearchSelect from "@components/SearchSelect";
 
 // Existing and custom types
-import { AttributeModel, AttributeCardProps, IGenericItem } from "@types";
+import {
+  AttributeModel,
+  AttributeCardProps,
+  IGenericItem,
+  ResponseData,
+} from "@types";
 
 // Utility functions and libraries
 import { useToken } from "src/authentication/useToken";
@@ -147,11 +152,12 @@ const Entity = () => {
       createEntity(entity: $entity) {
         success
         message
+        data
       }
     }
   `;
   const [createEntity, { loading: createLoading, error: createError }] =
-    useMutation(CREATE_ENTITY);
+    useMutation<{ createEntity: ResponseData<string> }>(CREATE_ENTITY);
 
   // Assign data
   useEffect(() => {
@@ -284,7 +290,7 @@ const Entity = () => {
         },
       });
 
-      if (response.data.createEntity.success) {
+      if (response.data?.createEntity.success) {
         setIsSubmitting(false);
         navigate(`/entities`);
       }

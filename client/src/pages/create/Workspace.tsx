@@ -20,7 +20,7 @@ import {
 import Icon from "@components/Icon";
 
 // Custom types
-import { ResponseMessage, WorkspaceModel } from "@types";
+import { IResponseMessage, WorkspaceModel } from "@types";
 
 // GraphQL imports
 import { gql, useLazyQuery, useMutation } from "@apollo/client";
@@ -60,7 +60,7 @@ const CreateWorkspace = () => {
     }
   `;
   const [createWorkspace, { loading: createLoading, error: createError }] =
-    useMutation<{ createWorkspace: ResponseMessage }>(CREATE_WORKSPACE);
+    useMutation<{ createWorkspace: IResponseMessage }>(CREATE_WORKSPACE);
 
   // Query to retrieve all Workspaces
   const GET_WORKSPACES = gql`
