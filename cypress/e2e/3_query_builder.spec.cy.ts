@@ -22,6 +22,6 @@ describe("search query builder", () => {
     cy.get('[aria-label="Run Query"]').click(); // Click the Search button
 
     // Search result array should contain multiple results
-    cy.get("#resultsHeading").should("contain.text", "4 results");
+    cy.get("#resultsHeading").should("contain.text", "7 results");
   });
 });
