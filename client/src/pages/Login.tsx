@@ -352,7 +352,7 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
     <Content>
       <Flex h={"10vh"} p={"4"}>
         <Flex gap={"2"} align={"center"} p={"4"}>
-          <Image src={"Favicon.png"} w={"25px"} h={"25px"} />
+          <Image src={"/Favicon.png"} w={"25px"} h={"25px"} />
           <Heading size={"md"}>Metadatify</Heading>
         </Flex>
       </Flex>
@@ -369,36 +369,35 @@ const Login: FC<LoginProps> = ({ setAuthenticated }) => {
         {showSetup ? (
           <Flex
             direction={"column"}
-            p={"4"}
+            p={"8"}
             gap={"4"}
             bg={"white"}
-            rounded={"lg"}
-            border={"1px"}
-            borderColor={"gray.300"}
             align={"center"}
             justify={"center"}
+            border={"1px"}
+            borderColor={"gray.300"}
+            rounded={"md"}
           >
-            <Flex direction={"row"} gap={"2"} align={"center"}>
-              <Image src="/Favicon.png" boxSize={"64px"} />
-              <Heading size={"lg"} fontWeight={"semibold"}>
-                Metadatify
-              </Heading>
-            </Flex>
-            <Heading size={"md"}>Create your account</Heading>
-            <Text fontWeight={"semibold"} color={"gray.400"}>
-              Please provide the following information to complete your user
-              profile.
+            <Heading size={"xl"} fontWeight={"semibold"}>
+              Create your account
+            </Heading>
+
+            <Text fontWeight={"semibold"} fontSize={"sm"}>
+              Complete your account information before continuing.
             </Text>
+
             <Flex
               direction={"row"}
               gap={"2"}
               w={"100%"}
               align={"center"}
               justify={"left"}
+              pt={"8"}
             >
               <Text fontWeight={"semibold"}>ORCiD:</Text>
               <Tag colorScheme={"green"}>{userOrcid}</Tag>
             </Flex>
+
             <FormControl isRequired>
               <Flex direction={"column"} gap={"2"}>
                 <Flex direction={"row"} gap={"2"}>
