@@ -113,12 +113,17 @@ export const AuthenticationProvider = (props: {
       };
     }
 
+    // Create a new token instance
+    setToken(loginData.data);
+
+    // Get the User
     const userResponse = await getUser({
       variables: {
         _id: loginData.data.orcid,
       },
     });
     const userData = userResponse.data?.user;
+    consola.info("userResponse:", userResponse);
     if (!_.isUndefined(userError)) {
       setIsAuthenticated(false);
       return {
@@ -138,9 +143,6 @@ export const AuthenticationProvider = (props: {
 
     // Perform login and data retrieval via server, check if user permitted access
     removeCode();
-
-    // Create a new token instance
-    setToken(loginData.data);
 
     return {
       success: true,
