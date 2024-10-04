@@ -28,7 +28,6 @@ import {
   StepNumber,
   Box,
   StepTitle,
-  StepDescription,
   StepSeparator,
   FormHelperText,
   Tooltip,
@@ -63,6 +62,7 @@ const Importer = (props: {
   // File states
   const [file, setFile] = useState({} as File);
   const [fileType, setFileType] = useState("");
+  const [fileName, setFileName] = useState("");
   const [objectData, setObjectData] = useState(null); // State to store parsed JSON data
 
   // Page states
@@ -78,14 +78,15 @@ const Importer = (props: {
 
   // State management to generate and present different pages
   const [interfacePage, setInterfacePage] = useState(
-    "upload" as "upload" | "details" | "mapping",
+    "upload" as "upload" | "details" | "mapping" | "review",
   );
 
   // Used to generated numerical steps and a progress bar
   const pageSteps = [
-    { title: "Upload", description: "Upload a file" },
-    { title: "Entity", description: "Basic Entity information" },
-    { title: "Templates", description: "Apply a Template" },
+    { title: "Upload File" },
+    { title: "Setup Entities" },
+    { title: "Apply Templates" },
+    { title: "Review" },
   ];
   const { activeStep, setActiveStep } = useSteps({
     index: 0,
@@ -450,6 +451,9 @@ const Importer = (props: {
       setActiveStep(2);
       setInterfacePage("mapping");
     } else if (_.isEqual(interfacePage, "mapping")) {
+      setActiveStep(3);
+      setInterfacePage("review");
+    } else if (_.isEqual(interfacePage, "review")) {
       // Run the final import function depending on file type
       if (_.isEqual(fileType, "application/json")) {
         setContinueLoading(importLoading);
@@ -496,6 +500,7 @@ const Importer = (props: {
     setContinueLoading(false);
     setFile({} as File);
     setFileType("");
+    setFileName("");
     setObjectData(null);
 
     // Reset data state
@@ -538,7 +543,6 @@ const Importer = (props: {
 
                       <Box flexShrink={"0"}>
                         <StepTitle>{step.title}</StepTitle>
-                        <StepDescription>{step.description}</StepDescription>
                       </Box>
 
                       <StepSeparator />
@@ -546,6 +550,13 @@ const Importer = (props: {
                   ))}
                 </Stepper>
               </Flex>
+
+              {!_.isEqual(interfacePage, "upload") && (
+                <Flex w={"100%"} justify={"space-between"} align={"center"}>
+                  <Flex>File Name: {fileName}</Flex>
+                  <Flex>File Type: {fileType}</Flex>
+                </Flex>
+              )}
 
               {/* Step 1: Upload */}
               {_.isEqual(interfacePage, "upload") && (
@@ -555,11 +566,6 @@ const Importer = (props: {
                   align={"center"}
                   justify={"center"}
                 >
-                  <Flex w={"100%"} py={"2"} justify={"left"} gap={"1"}>
-                    <Text>Supported file formats:</Text>
-                    <Tag colorScheme={"green"}>CSV</Tag>
-                    <Tag colorScheme={"green"}>JSON</Tag>
-                  </Flex>
                   <FormControl>
                     <Flex
                       direction={"column"}
@@ -568,10 +574,10 @@ const Importer = (props: {
                       align={"center"}
                       justify={"center"}
                       border={"2px"}
-                      borderStyle={"dashed"}
+                      borderStyle={fileName === "" ? "dashed" : "solid"}
                       borderColor={"gray.300"}
                       rounded={"md"}
-                      background={"gray.50"}
+                      background={fileName === "" ? "gray.50" : "white"}
                     >
                       {_.isEqual(file, {}) ? (
                         <Flex
@@ -616,6 +622,7 @@ const Importer = (props: {
                               event.target.files[0].type,
                             )
                           ) {
+                            setFileName(event.target.files[0].name);
                             setFileType(event.target.files[0].type);
                             setFile(event.target.files[0]);
                           } else {
@@ -632,6 +639,27 @@ const Importer = (props: {
                       }}
                     />
                   </FormControl>
+                  <Flex
+                    w={"100%"}
+                    py={"2"}
+                    justify={"left"}
+                    gap={"1"}
+                    align={"center"}
+                  >
+                    <Text
+                      fontSize={"sm"}
+                      fontWeight={"semibold"}
+                      color={"gray.600"}
+                    >
+                      Supported file formats:
+                    </Text>
+                    <Tag size={"sm"} colorScheme={"green"}>
+                      CSV
+                    </Tag>
+                    <Tag size={"sm"} colorScheme={"green"}>
+                      JSON
+                    </Tag>
+                  </Flex>
                 </Flex>
               )}
 
@@ -708,6 +736,35 @@ const Importer = (props: {
                     </Flex>
                   )}
 
+                  {objectData && (
+                    <Flex direction={"row"} gap={"2"}>
+                      <FormControl>
+                        <FormLabel>Name</FormLabel>
+                        <Select
+                          size={"sm"}
+                          rounded={"md"}
+                          placeholder={"Imported from File"}
+                          isReadOnly
+                        />
+                        <FormHelperText>
+                          Field containing Entity names
+                        </FormHelperText>
+                      </FormControl>
+                      <FormControl>
+                        <FormLabel>Description</FormLabel>
+                        <Select
+                          size={"sm"}
+                          rounded={"md"}
+                          placeholder={"Imported from File"}
+                          isReadOnly
+                        />
+                        <FormHelperText>
+                          Field containing Entity descriptions
+                        </FormHelperText>
+                      </FormControl>
+                    </Flex>
+                  )}
+
                   <Flex direction={"row"} gap={"2"}>
                     <FormControl>
                       <FormLabel>Owner</FormLabel>
@@ -721,7 +778,7 @@ const Importer = (props: {
                           value={ownerField}
                           size={"sm"}
                           rounded={"md"}
-                          disabled
+                          isReadOnly
                         />
                       </Tooltip>
                     </FormControl>
@@ -730,6 +787,7 @@ const Importer = (props: {
                       <Select
                         id={"import_projects"}
                         size={"sm"}
+                        rounded={"md"}
                         placeholder={"Select Project"}
                         value={projectField}
                         onChange={(event) =>
@@ -869,6 +927,13 @@ const Importer = (props: {
                   })}
                 </Flex>
               )}
+
+              {/* Step 4: Review */}
+              {_.isEqual(interfacePage, "review") && (
+                <Flex w={"100%"} direction={"column"} gap={"2"}>
+                  <Text>The following Entities will be created or updated</Text>
+                </Flex>
+              )}
             </ModalBody>
 
             <ModalFooter p={"2"}>
@@ -892,12 +957,13 @@ const Importer = (props: {
                   id={"importContinueButton"}
                   size={"sm"}
                   colorScheme={
-                    _.isEqual(interfacePage, "mapping") ? "green" : "blue"
+                    _.isEqual(interfacePage, "review") ? "green" : "blue"
                   }
                   rightIcon={
-                    _.isEqual(interfacePage, "upload") ? (
-                      <Icon name={"c_right"} />
-                    ) : _.isEqual(interfacePage, "details") ? (
+                    _.includes(
+                      ["upload", "details", "mapping"],
+                      interfacePage,
+                    ) ? (
                       <Icon name={"c_right"} />
                     ) : (
                       <Icon name={"check"} />
@@ -911,7 +977,8 @@ const Importer = (props: {
                 >
                   {_.isEqual(interfacePage, "upload") && "Continue"}
                   {_.isEqual(interfacePage, "details") && "Continue"}
-                  {_.isEqual(interfacePage, "mapping") && "Finish"}
+                  {_.isEqual(interfacePage, "mapping") && "Continue"}
+                  {_.isEqual(interfacePage, "review") && "Finish"}
                 </Button>
               </Flex>
             </ModalFooter>
