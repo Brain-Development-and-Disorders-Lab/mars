@@ -37,8 +37,8 @@ const isLocalhost =
   window.location.hostname === "localhost" ||
   window.location.hostname === "127.0.0.1";
 const redirectURI = isLocalhost
-  ? "http://127.0.0.1:8080"
-  : "https://app.metadatify.com";
+  ? "http://127.0.0.1:8080/login"
+  : "https://app.metadatify.com/login";
 const requestURI = `https://orcid.org/oauth/authorize?client_id=${clientID}&response_type=code&scope=openid&redirect_uri=${redirectURI}`;
 
 const useParameters = () => {
