@@ -210,6 +210,12 @@ export const typedefs = `#graphql
     attributes: [Attribute]
   }
 
+  # "EntityReview" type storing the review state of an Entity to be imported
+  type EntityReview {
+    name: String
+    state: String
+  }
+
   # "ActivityTarget" type
   type ActivityTarget {
     _id: String!
@@ -310,6 +316,13 @@ export const typedefs = `#graphql
     success: Boolean
     message: String
     data: Auth
+  }
+
+  # "ResponseData"-type containing data with type "Review"
+  type ResponseDataEntityReview {
+    success: Boolean
+    message: String
+    data: [EntityReview]
   }
 
   # "Auth" type
@@ -440,9 +453,12 @@ export const typedefs = `#graphql
     # Data mutations
     uploadAttachment(target: String, file: Upload!): ResponseMessage
 
-    # Data import mutations
+    # Data import CSV mutations
     prepareCSV(file: [Upload]!): [String]
+    reviewCSV(columnMapping: ColumnMappingInput, file: [Upload]!): ResponseDataEntityReview
     importCSV(columnMapping: ColumnMappingInput, file: [Upload]!): ResponseMessage
+
+    # Data import JSON mutations
     importJSON(file: [Upload]!, owner: String, project: String): ResponseMessage
   }
 `;

@@ -240,6 +240,12 @@ export type EntityImport = {
   attributes: AttributeModel[];
 };
 
+// Import review summary for Entities being imported
+export type EntityImportReview = {
+  name: string;
+  state: "create" | "update";
+};
+
 // Attachment data
 export type AttachmentData = {
   _id: string;

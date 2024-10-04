@@ -36,7 +36,12 @@ import Icon from "@components/Icon";
 import Attribute from "@components/AttributeCard";
 
 // Custom and existing types
-import { AttributeModel, AttributeCardProps, IGenericItem } from "@types";
+import {
+  AttributeModel,
+  AttributeCardProps,
+  IGenericItem,
+  EntityImportReview,
+} from "@types";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
@@ -107,6 +112,11 @@ const Importer = (props: {
     [] as AttributeModel[],
   );
 
+  // Review state
+  const [reviewEntities, setReviewEntities] = useState(
+    [] as EntityImportReview[],
+  );
+
   // Queries
   const PREPARE_CSV = gql`
     mutation PrepareCSV($file: [Upload]!) {
@@ -139,6 +149,21 @@ const Importer = (props: {
     getMappingData,
     { loading: mappingDataLoading, error: mappingDataError },
   ] = useLazyQuery(GET_MAPPING_DATA);
+
+  const REVIEW_CSV = gql`
+    mutation ReviewCSV($columnMapping: ColumnMappingInput, $file: [Upload]!) {
+      reviewCSV(columnMapping: $columnMapping, file: $file) {
+        success
+        message
+        data {
+          name
+          state
+        }
+      }
+    }
+  `;
+  const [reviewCSV, { loading: reviewCSVLoading, error: reviewCSVError }] =
+    useMutation(REVIEW_CSV);
 
   const IMPORT_CSV = gql`
     mutation ImportCSV($columnMapping: ColumnMappingInput, $file: [Upload]!) {
@@ -329,7 +354,39 @@ const Importer = (props: {
    * to generate a summary of the changes
    */
   const setupReviewCSV = async () => {
-    return;
+    // Collate data to be mapped
+    const mappingData: { columnMapping: any; file: any } = {
+      columnMapping: {
+        name: nameField,
+        description: descriptionField,
+        created: dayjs(Date.now()).toISOString(),
+        owner: token.orcid,
+        project: projectField,
+        attributes: attributesField,
+      },
+      file: file,
+    };
+
+    setContinueLoading(reviewCSVLoading);
+    const response = await reviewCSV({
+      variables: mappingData,
+    });
+    setContinueLoading(reviewCSVLoading);
+
+    if (response.data && response.data.reviewCSV.data) {
+      setReviewEntities(response.data.reviewCSV.data);
+    }
+
+    if (reviewCSVError) {
+      toast({
+        title: "CSV Import Error",
+        status: "error",
+        description: "Error while reviewing CSV file",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
   };
 
   /**

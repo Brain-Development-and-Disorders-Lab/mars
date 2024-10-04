@@ -6,6 +6,8 @@ import {
   IEntity,
   IValue,
   IResponseMessage,
+  ResponseData,
+  EntityImportReview,
 } from "@types";
 
 // Utility functions and libraries
@@ -227,6 +229,52 @@ export class Data {
     }
 
     return entities;
+  };
+
+  /**
+   * Review a CSV file and collate a list of modifications that will be made to the imported Entities
+   * @param columnMapping Collection of key-value pairs defining the mapping between CSV columns and Entity fields
+   * @param file CSV file
+   * @return {Promise<ResponseData<EntityImportReview[]>>}
+   */
+  static reviewCSV = async (
+    columnMapping: Record<string, any>,
+    file: any,
+  ): Promise<ResponseData<EntityImportReview[]>> => {
+    const { createReadStream } = await file[0];
+    const stream = createReadStream();
+
+    const output = await Data.bufferHelper(stream);
+    const workbook = XLSX.read(output, { cellDates: true });
+    if (workbook.SheetNames.length > 0) {
+      const primarySheet = workbook.Sheets[workbook.SheetNames[0]];
+      const parsedSheet = XLSX.utils.sheet_to_json<any>(primarySheet, {
+        defval: "",
+      });
+
+      // Generate collection of Entities to import
+      const entities = await Data.columnMappingHelper(
+        columnMapping,
+        parsedSheet,
+      );
+
+      return {
+        success: true,
+        message: "Collated list of Entities for review",
+        data: entities.map((entity) => {
+          return {
+            name: entity.name,
+            state: "create",
+          };
+        }),
+      };
+    }
+
+    return {
+      success: false,
+      message: "Default sheet is empty",
+      data: [],
+    };
   };
 
   /**
