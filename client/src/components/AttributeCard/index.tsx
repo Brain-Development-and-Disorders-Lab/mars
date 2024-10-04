@@ -56,7 +56,7 @@ const AttributeCard = (props: AttributeCardProps) => {
         <Flex direction={"column"} gap={"2"}>
           <Flex direction={"row"} gap={"2"} wrap={["wrap", "nowrap"]}>
             <FormControl isRequired isInvalid={isNameError}>
-              <FormLabel>Attribute Name</FormLabel>
+              <FormLabel fontSize={"sm"}>Attribute Name</FormLabel>
               <Input
                 size={"sm"}
                 placeholder={"Name"}
@@ -68,7 +68,7 @@ const AttributeCard = (props: AttributeCardProps) => {
             </FormControl>
 
             <FormControl isRequired isInvalid={isDescriptionError}>
-              <FormLabel>Attribute Description</FormLabel>
+              <FormLabel fontSize={"sm"}>Attribute Description</FormLabel>
               <Textarea
                 size={"sm"}
                 rounded={"md"}

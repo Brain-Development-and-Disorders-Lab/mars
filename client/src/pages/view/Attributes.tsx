@@ -7,6 +7,7 @@ import {
   Flex,
   Heading,
   Spacer,
+  Tag,
   Text,
   useBreakpoint,
   useToast,
@@ -21,6 +22,7 @@ import { AttributeModel } from "@types";
 
 // Utility functions and libraries
 import _ from "lodash";
+import dayjs from "dayjs";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
@@ -42,6 +44,8 @@ const Attributes = () => {
       attributes {
         _id
         name
+        owner
+        timestamp
         description
         values {
           _id
@@ -104,8 +108,20 @@ const Attributes = () => {
   const columnHelper = createColumnHelper<AttributeModel>();
   const columns = [
     columnHelper.accessor("name", {
-      cell: (info) => info.getValue(),
+      cell: (info) => <Text fontWeight={"semibold"}>{info.getValue()}</Text>,
       header: "Name",
+    }),
+    columnHelper.accessor("timestamp", {
+      cell: (info) => dayjs(info.getValue()).fromNow(),
+      header: "Created",
+      enableHiding: true,
+    }),
+    columnHelper.accessor("owner", {
+      cell: (info) => {
+        return <Tag size={"sm"}>{info.getValue()}</Tag>;
+      },
+      header: "Owner",
+      enableHiding: true,
     }),
     columnHelper.accessor("description", {
       cell: (info) => info.getValue(),

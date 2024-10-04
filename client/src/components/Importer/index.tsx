@@ -35,7 +35,6 @@ import {
 import Icon from "@components/Icon";
 import Error from "@components/Error";
 import Attribute from "@components/AttributeCard";
-import { Warning } from "@components/Label";
 
 // Custom and existing types
 import { AttributeModel, AttributeCardProps, IGenericItem } from "@types";
@@ -391,6 +390,7 @@ const Importer = (props: {
       <Select
         id={id}
         size={"sm"}
+        rounded={"md"}
         placeholder={"Select Column"}
         value={value}
         onChange={(event) => setValue(event.target.value)}
@@ -527,7 +527,7 @@ const Importer = (props: {
           <ModalContent p={"2"} gap={"0"}>
             <ModalHeader p={"2"}>Import Entities</ModalHeader>
             <ModalCloseButton />
-            <ModalBody px={"2"}>
+            <ModalBody px={"2"} gap={"2"}>
               {/* Stepper progress indicator */}
               <Flex pb={"4"}>
                 <Stepper index={activeStep} w={"100%"}>
@@ -552,9 +552,42 @@ const Importer = (props: {
               </Flex>
 
               {!_.isEqual(interfacePage, "upload") && (
-                <Flex w={"100%"} justify={"space-between"} align={"center"}>
-                  <Flex>File Name: {fileName}</Flex>
-                  <Flex>File Type: {fileType}</Flex>
+                <Flex
+                  w={"100%"}
+                  justify={"left"}
+                  gap={"2"}
+                  align={"baseline"}
+                  pb={"2"}
+                  direction={"column"}
+                >
+                  <Flex direction={"row"} gap={"2"}>
+                    <Text fontSize={"sm"} fontWeight={"semibold"}>
+                      File:
+                    </Text>
+                    <Text fontSize={"sm"} color={"gray.600"}>
+                      {fileName}
+                    </Text>
+                  </Flex>
+                  {_.isNull(objectData) && (
+                    <Flex
+                      w={"100%"}
+                      gap={"2"}
+                      align={"center"}
+                      justify={"left"}
+                      wrap={"wrap"}
+                    >
+                      <Text fontWeight={"semibold"} fontSize={"sm"}>
+                        Columns:
+                      </Text>
+                      {columns.map((column) => {
+                        return (
+                          <Tag size={"sm"} key={column}>
+                            {column}
+                          </Tag>
+                        );
+                      })}
+                    </Flex>
+                  )}
                 </Flex>
               )}
 
@@ -566,6 +599,23 @@ const Importer = (props: {
                   align={"center"}
                   justify={"center"}
                 >
+                  <Flex
+                    w={"100%"}
+                    py={"2"}
+                    justify={"left"}
+                    gap={"1"}
+                    align={"center"}
+                  >
+                    <Text
+                      fontSize={"sm"}
+                      fontWeight={"semibold"}
+                      color={"gray.600"}
+                    >
+                      Supported Formats:
+                    </Text>
+                    <Tag size={"sm"}>CSV</Tag>
+                    <Tag size={"sm"}>JSON</Tag>
+                  </Flex>
                   <FormControl>
                     <Flex
                       direction={"column"}
@@ -586,8 +636,10 @@ const Importer = (props: {
                           justify={"center"}
                           align={"center"}
                         >
-                          <Text fontWeight={"semibold"}>Drag file here</Text>
-                          <Text>or click to upload</Text>
+                          <Text fontSize={"sm"} fontWeight={"semibold"}>
+                            Drag file here
+                          </Text>
+                          <Text fontSize={"sm"}>or click to upload</Text>
                         </Flex>
                       ) : (
                         <Flex
@@ -596,7 +648,9 @@ const Importer = (props: {
                           justify={"center"}
                           align={"center"}
                         >
-                          <Text fontWeight={"semibold"}>{file.name}</Text>
+                          <Text fontSize={"sm"} fontWeight={"semibold"}>
+                            {file.name}
+                          </Text>
                         </Flex>
                       )}
                     </Flex>
@@ -639,69 +693,26 @@ const Importer = (props: {
                       }}
                     />
                   </FormControl>
-                  <Flex
-                    w={"100%"}
-                    py={"2"}
-                    justify={"left"}
-                    gap={"1"}
-                    align={"center"}
-                  >
-                    <Text
-                      fontSize={"sm"}
-                      fontWeight={"semibold"}
-                      color={"gray.600"}
-                    >
-                      Supported file formats:
-                    </Text>
-                    <Tag size={"sm"} colorScheme={"green"}>
-                      CSV
-                    </Tag>
-                    <Tag size={"sm"} colorScheme={"green"}>
-                      JSON
-                    </Tag>
-                  </Flex>
                 </Flex>
               )}
 
               {/* Step 2: Simple mapping, details */}
               {_.isEqual(interfacePage, "details") && (
-                <Flex w={"100%"} direction={"column"} gap={"2"}>
+                <Flex
+                  w={"100%"}
+                  direction={"column"}
+                  gap={"2"}
+                  p={"2"}
+                  border={"1px"}
+                  borderColor={"gray.300"}
+                  rounded={"md"}
+                >
                   {columns.length > 0 && (
                     <Flex direction={"column"} gap={"2"} wrap={"wrap"}>
-                      <Flex w={"100%"} justify={"left"} gap={"2"}>
-                        {fileType === "text/csv" && (
-                          <Warning
-                            text={`Origins and Products cannot be imported from CSV files.`}
-                          />
-                        )}
-                      </Flex>
-                      <Flex
-                        w={"100%"}
-                        gap={"2"}
-                        align={"center"}
-                        justify={"left"}
-                        wrap={"wrap"}
-                      >
-                        <Text
-                          fontWeight={"semibold"}
-                          fontSize={"sm"}
-                          color={"gray.600"}
-                        >
-                          Columns:
-                        </Text>
-                        {columns.map((column) => {
-                          return (
-                            <Tag key={column} colorScheme={"green"}>
-                              {column}
-                            </Tag>
-                          );
-                        })}
-                      </Flex>
-                      <Text>
-                        Each row represents a new Entity that will be created.
-                        From the above columns, use each drop-down to select
-                        which column value to map that specific detail of the
-                        Entities that will be created.
+                      <Text fontSize={"sm"}>
+                        Each row in the CSV file represents a new Entity that
+                        will be created. Assign a column to populate the Entity
+                        fields shown below.
                       </Text>
                     </Flex>
                   )}
@@ -712,7 +723,7 @@ const Importer = (props: {
                         isRequired
                         isInvalid={_.isEqual(nameField, "")}
                       >
-                        <FormLabel>Name</FormLabel>
+                        <FormLabel fontSize={"sm"}>Name</FormLabel>
                         {getSelectComponent(
                           "import_name",
                           nameField,
@@ -723,7 +734,7 @@ const Importer = (props: {
                         </FormHelperText>
                       </FormControl>
                       <FormControl>
-                        <FormLabel>Description</FormLabel>
+                        <FormLabel fontSize={"sm"}>Description</FormLabel>
                         {getSelectComponent(
                           "import_description",
                           descriptionField,
@@ -739,11 +750,11 @@ const Importer = (props: {
                   {objectData && (
                     <Flex direction={"row"} gap={"2"}>
                       <FormControl>
-                        <FormLabel>Name</FormLabel>
+                        <FormLabel fontSize={"sm"}>Name</FormLabel>
                         <Select
                           size={"sm"}
                           rounded={"md"}
-                          placeholder={"Imported from File"}
+                          placeholder={"Defined in JSON"}
                           isReadOnly
                         />
                         <FormHelperText>
@@ -751,11 +762,11 @@ const Importer = (props: {
                         </FormHelperText>
                       </FormControl>
                       <FormControl>
-                        <FormLabel>Description</FormLabel>
+                        <FormLabel fontSize={"sm"}>Description</FormLabel>
                         <Select
                           size={"sm"}
                           rounded={"md"}
-                          placeholder={"Imported from File"}
+                          placeholder={"Defined in JSON"}
                           isReadOnly
                         />
                         <FormHelperText>
@@ -767,7 +778,7 @@ const Importer = (props: {
 
                   <Flex direction={"row"} gap={"2"}>
                     <FormControl>
-                      <FormLabel>Owner</FormLabel>
+                      <FormLabel fontSize={"sm"}>Owner</FormLabel>
                       <Tooltip
                         label={
                           "Initially, only you will have access to imported Entities"
@@ -783,7 +794,7 @@ const Importer = (props: {
                       </Tooltip>
                     </FormControl>
                     <FormControl>
-                      <FormLabel>Project</FormLabel>
+                      <FormLabel fontSize={"sm"}>Project</FormLabel>
                       <Select
                         id={"import_projects"}
                         size={"sm"}
@@ -802,9 +813,7 @@ const Importer = (props: {
                           );
                         })}
                       </Select>
-                      <FormHelperText>
-                        An existing Project to associate each Entity with
-                      </FormHelperText>
+                      <FormHelperText>Add Entities to a Project</FormHelperText>
                     </FormControl>
                   </Flex>
                 </Flex>
@@ -812,13 +821,31 @@ const Importer = (props: {
 
               {/* Step 3: Advanced mapping */}
               {_.isEqual(interfacePage, "mapping") && (
-                <Flex w={"100%"} direction={"column"} gap={"2"}>
-                  <Text>
-                    Columns can be assigned to Values within Attributes. When
-                    adding Values to an Attribute, select the column containing
-                    the data for each Value. Use an existing Template Attribute
-                    from the drop-down or create a new Attribute.
-                  </Text>
+                <Flex
+                  w={"100%"}
+                  direction={"column"}
+                  gap={"2"}
+                  p={"2"}
+                  border={"1px"}
+                  borderColor={"gray.300"}
+                  rounded={"md"}
+                >
+                  {_.isNull(objectData) ? (
+                    <Text fontSize={"sm"}>
+                      Columns can be assigned to Values within Attributes. When
+                      adding Values to an Attribute, select the column
+                      containing the data for each Value. Use an existing
+                      Template Attribute from the drop-down or create a new
+                      Attribute.
+                    </Text>
+                  ) : (
+                    <Text fontSize={"sm"}>
+                      Existing attributes defined in JSON will be preserved. Use
+                      an existing Template Attribute from the drop-down or
+                      create a new Attribute to added to all Entities.
+                    </Text>
+                  )}
+
                   <Flex
                     direction={"row"}
                     gap={"2"}
@@ -907,30 +934,56 @@ const Importer = (props: {
                     </Button>
                   </Flex>
 
-                  {/* Display all Attributes */}
-                  {attributesField.map((attribute) => {
-                    return (
-                      <Attribute
-                        _id={attribute._id}
-                        key={attribute._id}
-                        name={attribute.name}
-                        owner={attribute.owner}
-                        archived={attribute.archived}
-                        description={attribute.description}
-                        values={attribute.values}
-                        restrictDataValues={true}
-                        permittedDataValues={columns}
-                        onRemove={onRemoveAttribute}
-                        onUpdate={onUpdateAttribute}
-                      />
-                    );
-                  })}
+                  {_.isNull(objectData)
+                    ? // If importing from CSV, use column-mapping
+                      attributesField.map((attribute) => {
+                        return (
+                          <Attribute
+                            _id={attribute._id}
+                            key={attribute._id}
+                            name={attribute.name}
+                            owner={attribute.owner}
+                            archived={attribute.archived}
+                            description={attribute.description}
+                            values={attribute.values}
+                            restrictDataValues={true}
+                            permittedDataValues={columns}
+                            onRemove={onRemoveAttribute}
+                            onUpdate={onUpdateAttribute}
+                          />
+                        );
+                      })
+                    : // If importing from JSON, allow new Attributes
+                      attributesField.map((attribute) => {
+                        return (
+                          <Attribute
+                            _id={attribute._id}
+                            key={attribute._id}
+                            name={attribute.name}
+                            owner={attribute.owner}
+                            archived={attribute.archived}
+                            description={attribute.description}
+                            values={attribute.values}
+                            restrictDataValues={true}
+                            onRemove={onRemoveAttribute}
+                            onUpdate={onUpdateAttribute}
+                          />
+                        );
+                      })}
                 </Flex>
               )}
 
               {/* Step 4: Review */}
               {_.isEqual(interfacePage, "review") && (
-                <Flex w={"100%"} direction={"column"} gap={"2"}>
+                <Flex
+                  w={"100%"}
+                  direction={"column"}
+                  gap={"2"}
+                  p={"2"}
+                  border={"1px"}
+                  borderColor={"gray.300"}
+                  rounded={"md"}
+                >
                   <Text>The following Entities will be created or updated</Text>
                 </Flex>
               )}

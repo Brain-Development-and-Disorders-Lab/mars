@@ -108,11 +108,27 @@ const Entities = () => {
       cell: (info) => {
         return (
           <Tooltip label={info.getValue()} hasArrow>
-            <Text>{_.truncate(info.getValue(), { length: 20 })}</Text>
+            <Text fontSize={"sm"} fontWeight={"semibold"}>
+              {_.truncate(info.getValue(), { length: 20 })}
+            </Text>
           </Tooltip>
         );
       },
       header: "Name",
+    }),
+    columnHelper.accessor("created", {
+      cell: (info) => (
+        <Text fontSize={"sm"}>{dayjs(info.getValue()).fromNow()}</Text>
+      ),
+      header: "Created",
+      enableHiding: true,
+    }),
+    columnHelper.accessor("owner", {
+      cell: (info) => {
+        return <Tag size={"sm"}>{info.getValue()}</Tag>;
+      },
+      header: "Owner",
+      enableHiding: true,
     }),
     columnHelper.accessor("description", {
       cell: (info) => {
@@ -121,22 +137,14 @@ const Entities = () => {
         }
         return (
           <Tooltip label={info.getValue()} hasArrow>
-            <Text>{_.truncate(info.getValue(), { length: 20 })}</Text>
+            <Text fontSize={"sm"}>
+              {_.truncate(info.getValue(), { length: 20 })}
+            </Text>
           </Tooltip>
         );
       },
       header: "Description",
       enableHiding: true,
-    }),
-    columnHelper.accessor("owner", {
-      cell: (info) => {
-        return <Tag colorScheme={"green"}>{info.getValue()}</Tag>;
-      },
-      header: "Owner",
-    }),
-    columnHelper.accessor("created", {
-      cell: (info) => dayjs(info.getValue()).fromNow(),
-      header: "Created",
     }),
     columnHelper.accessor("_id", {
       cell: (info) => {

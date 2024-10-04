@@ -273,8 +273,8 @@ const DataTable = (props: DataTableProps) => {
               <Flex pos={"relative"} w={"100%"}>
                 <InputGroup size={"sm"} onClick={onColumnsClick}>
                   <Input
-                    placeholder={"Columns"}
-                    value={"Columns"}
+                    placeholder={"Show Columns"}
+                    value={"Show Columns"}
                     backgroundColor={"white"}
                     data-testid={"value-editor"}
                     cursor={"pointer"}
@@ -399,7 +399,7 @@ const DataTable = (props: DataTableProps) => {
           w={"100%"}
         >
           {/* Table head */}
-          <Thead bg={"gray.50"}>
+          <Thead bg={"gray.50"} p={"0"}>
             {table.getHeaderGroups().map((headerGroup) => (
               <Tr key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
@@ -428,10 +428,9 @@ const DataTable = (props: DataTableProps) => {
                           ? "background-color 0.3s ease-in-out, color 0.3s ease-in-out"
                           : ""
                       }
-                      px={"1"}
-                      py={"1"}
+                      p={"1"}
                     >
-                      <Flex align={"center"} py={"2"}>
+                      <Flex align={"center"} py={"1"}>
                         {flexRender(
                           header.column.columnDef.header,
                           header.getContext(),
@@ -468,7 +467,7 @@ const DataTable = (props: DataTableProps) => {
                       key={cell.id}
                       isNumeric={meta?.isNumeric}
                       px={"1"}
-                      py={displayLargeTable ? "3" : "2"}
+                      py={displayLargeTable ? "2" : "1"}
                     >
                       {flexRender(
                         cell.column.columnDef.cell,

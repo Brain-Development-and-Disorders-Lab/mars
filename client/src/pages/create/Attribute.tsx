@@ -222,10 +222,6 @@ const Attribute = () => {
         </Flex>
 
         <Flex w={"100%"} p={"2"} gap={"2"} direction={"column"}>
-          <Text>
-            Add Values to the Template. Values must be named, but they are not
-            required to have data specified.
-          </Text>
           <Values viewOnly={false} values={values} setValues={setValues} />
         </Flex>
       </Flex>
@@ -233,79 +229,97 @@ const Attribute = () => {
       {/* Information modal */}
       <Modal isOpen={isOpen} onClose={onClose} size={"2xl"} isCentered>
         <ModalOverlay />
-        <ModalContent p={"2"} gap={"4"} w={["lg", "xl", "2xl"]}>
-          <ModalHeader p={"2"}>Creating Template Attributes</ModalHeader>
+        <ModalContent p={"2"} w={["lg", "xl", "2xl"]}>
+          <ModalHeader p={"2"}>Template Attributes</ModalHeader>
           <ModalCloseButton />
           <ModalBody p={"2"}>
-            <Flex direction={"column"} gap={"4"} p={"4"}>
-              <Heading size={"md"}>Overview</Heading>
-              <Text>
-                Create a new template Attribute to be used to specify metadata
-                associated with Entities. Using Values, predefined metadata
-                fields can be associated with Entities. After creating a
-                template Attribute, it can be used during the Entity creation
-                process to pre-populate Attribute information and Entity
-                metadata.
-              </Text>
+            <Flex gap={"4"} direction={"column"}>
+              <Flex direction={"column"} gap={"2"}>
+                <Heading size={"sm"}>Overview</Heading>
+                <Text fontSize={"sm"}>
+                  Create a new template Attribute to be used to specify metadata
+                  associated with Entities. Using Values, predefined metadata
+                  fields can be associated with Entities. After creating a
+                  template Attribute, it can be used during the Entity creation
+                  process to pre-populate Attribute information and Entity
+                  metadata.
+                </Text>
+              </Flex>
 
-              <Heading size={"md"}>Values</Heading>
-              <Text>There are six supported Value types:</Text>
-              <List spacing={2}>
-                <ListItem>
-                  <Flex gap={"2"} align={"center"}>
-                    <Icon name={"v_date"} color={"orange.300"} />
-                    <Text>
-                      <b>Date:</b> Used to specify a point in time.
-                    </Text>
-                  </Flex>
-                </ListItem>
-                <ListItem>
-                  <Flex gap={"2"} align={"center"}>
-                    <Icon name={"v_text"} color={"blue.300"} />
-                    <Text>
-                      <b>Text:</b> Used to specify text of variable length.
-                    </Text>
-                  </Flex>
-                </ListItem>
-                <ListItem>
-                  <Flex gap={"2"} align={"center"}>
-                    <Icon name={"v_number"} color={"green.300"} />
-                    <Text>
-                      <b>Number:</b> Used to specify a numerical value.
-                    </Text>
-                  </Flex>
-                </ListItem>
-                <ListItem>
-                  <Flex gap={"2"} align={"center"}>
-                    <Icon name={"v_url"} color={"yellow.300"} />
-                    <Text>
-                      <b>URL:</b> Used to specify a link.
-                    </Text>
-                  </Flex>
-                </ListItem>
-                <ListItem>
-                  <Flex gap={"2"} align={"center"}>
-                    <Icon name={"entity"} color={"purple.300"} />
-                    <Text>
-                      <b>Entity:</b> Used to specify a relation to another
-                      Entity.
-                    </Text>
-                  </Flex>
-                </ListItem>
-                <ListItem>
-                  <Flex gap={"2"} align={"center"}>
-                    <Icon name={"v_select"} color={"teal.300"} />
-                    <Text>
-                      <b>Select:</b> Used to specify an option from a group of
-                      options.
-                    </Text>
-                  </Flex>
-                </ListItem>
-              </List>
-              <Text>
-                Values can be added to the template Attribute by clicking "Add
-                Value" and selecting the specific type of Value.
-              </Text>
+              <Flex direction={"column"} gap={"2"}>
+                <Heading size={"sm"}>Values</Heading>
+                <Text fontSize={"sm"}>
+                  Values can be added to the template Attribute by clicking "Add
+                  Value" and selecting the specific type of Value. There are six
+                  supported Value types:
+                </Text>
+                <List spacing={"1"}>
+                  <ListItem>
+                    <Flex gap={"1"} align={"center"}>
+                      <Icon name={"v_date"} color={"orange.300"} />
+                      <Text fontWeight={"semibold"} fontSize={"sm"}>
+                        Date:
+                      </Text>
+                      <Text fontSize={"sm"}>
+                        Used to specify a point in time.
+                      </Text>
+                    </Flex>
+                  </ListItem>
+                  <ListItem>
+                    <Flex gap={"1"} align={"center"}>
+                      <Icon name={"v_text"} color={"blue.300"} />
+                      <Text fontWeight={"semibold"} fontSize={"sm"}>
+                        Text:
+                      </Text>
+                      <Text fontSize={"sm"}>
+                        Used to specify text of variable length.
+                      </Text>
+                    </Flex>
+                  </ListItem>
+                  <ListItem>
+                    <Flex gap={"1"} align={"center"}>
+                      <Icon name={"v_number"} color={"green.300"} />
+                      <Text fontWeight={"semibold"} fontSize={"sm"}>
+                        Number:
+                      </Text>
+                      <Text fontSize={"sm"}>
+                        Used to specify a numerical value.
+                      </Text>
+                    </Flex>
+                  </ListItem>
+                  <ListItem>
+                    <Flex gap={"1"} align={"center"}>
+                      <Icon name={"v_url"} color={"yellow.300"} />
+                      <Text fontWeight={"semibold"} fontSize={"sm"}>
+                        URL:
+                      </Text>
+                      <Text fontSize={"sm"}>Used to specify a link.</Text>
+                    </Flex>
+                  </ListItem>
+                  <ListItem>
+                    <Flex gap={"1"} align={"center"}>
+                      <Icon name={"entity"} color={"purple.300"} />
+                      <Text fontWeight={"semibold"} fontSize={"sm"}>
+                        Entity:
+                      </Text>
+                      <Text fontSize={"sm"}>
+                        Used to specify a relation to another Entity.
+                      </Text>
+                    </Flex>
+                  </ListItem>
+                  <ListItem>
+                    <Flex gap={"1"} align={"center"}>
+                      <Icon name={"v_select"} color={"teal.300"} />
+                      <Text fontWeight={"semibold"} fontSize={"sm"}>
+                        Select:
+                      </Text>
+                      <Text fontSize={"sm"}>
+                        Used to specify an option from a group of options.
+                      </Text>
+                    </Flex>
+                  </ListItem>
+                </List>
+              </Flex>
             </Flex>
           </ModalBody>
         </ModalContent>
