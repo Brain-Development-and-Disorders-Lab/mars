@@ -29,7 +29,6 @@ import _ from "lodash";
 // Contexts
 import { useAuthentication } from "@hooks/useAuthentication";
 import { useWorkspace } from "@hooks/useWorkspace";
-import consola from "consola";
 
 // Define login parameters
 const clientID = "APP-BBVHCTCNDUJ4CAXV";
@@ -60,11 +59,9 @@ const Login = () => {
 
   const runLogin = async (code: string) => {
     const result = await login(code);
-    consola.info("Result:", result);
 
     if (result.success) {
       await activateWorkspace("");
-      consola.success("Activated workspace, navigating to Dashboard...");
       navigate("/");
     } else {
       if (
