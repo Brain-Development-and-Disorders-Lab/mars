@@ -56,7 +56,6 @@ export class Authentication {
         name: response.data.name,
         orcid: response.data.orcid,
         token: response.data.id_token,
-        workspace: "",
       };
     } else {
       // If non-production, resolve with test user
@@ -64,7 +63,6 @@ export class Authentication {
         orcid: DEMO_USER_ORCID,
         name: "Test User",
         token: "test_token_value",
-        workspace: "",
       };
     }
 
@@ -79,7 +77,6 @@ export class Authentication {
           name: authenticationPayload.name,
           orcid: authenticationPayload.orcid,
           token: "",
-          workspace: "",
         },
       };
     } else if (!exists) {
@@ -139,13 +136,15 @@ export class Authentication {
     // Check that a valid token has been provided
     const user = await Authentication.validate(context.token);
 
-    // Check that the user from the context matches the user from the token
-    if (!_.isEqual(context.user, user._id)) {
-      throw new GraphQLError("Provided user does not match token user", {
-        extensions: {
-          code: "UNAUTHORIZED",
-        },
-      });
+    if (process.env.NODE_ENV === "production") {
+      // Check that the user from the context matches the user from the token
+      if (!_.isEqual(context.user, user._id)) {
+        throw new GraphQLError("Provided user does not match token user", {
+          extensions: {
+            code: "UNAUTHORIZED",
+          },
+        });
+      }
     }
   };
 }

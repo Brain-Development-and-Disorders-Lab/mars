@@ -107,7 +107,7 @@ const Login = () => {
           id: "login-graphql-error-toast",
           title: "Login Error",
           status: "error",
-          description: "Could not authenticate with ORCiD",
+          description: result.message,
           duration: 4000,
           position: "bottom-right",
           isClosable: true,
