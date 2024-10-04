@@ -88,7 +88,7 @@ const WorkspaceSwitcher = () => {
       },
     });
 
-    if (_.isUndefined(workspaceResult.data) || !_.isUndefined(workspaceError)) {
+    if (_.isUndefined(workspaceResult.data) && !_.isUndefined(workspaceError)) {
       toast({
         title: "Error",
         description: "Unable to get name of current Workspace",
@@ -97,7 +97,7 @@ const WorkspaceSwitcher = () => {
         position: "bottom-right",
         isClosable: true,
       });
-    } else {
+    } else if (!_.isUndefined(workspaceResult.data)) {
       setLabel(workspaceResult.data.workspace.name);
     }
   };
@@ -105,7 +105,7 @@ const WorkspaceSwitcher = () => {
   // Update the label value on first render
   useEffect(() => {
     setInitialLabelValue();
-  }, []);
+  }, [workspace]);
 
   /**
    * Utility function to update the list of Workspaces

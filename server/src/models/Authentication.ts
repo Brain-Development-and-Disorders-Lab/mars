@@ -83,10 +83,10 @@ export class Authentication {
       // If the user is the demo user, create a new User
       await Users.create({
         _id: authenticationPayload.orcid,
-        firstName: "",
-        lastName: "",
-        email: "",
-        affiliation: "",
+        firstName: "Test",
+        lastName: "User",
+        email: "demo@metadatify.com",
+        affiliation: "Metadatify",
         token: authenticationPayload.token,
         workspaces: [],
       });

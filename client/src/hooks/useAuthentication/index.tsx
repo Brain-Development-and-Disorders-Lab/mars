@@ -5,7 +5,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useToken } from "src/hooks/useToken";
 
 // Custom types
-import { IAuth, ResponseData, UserModel } from "@types";
+import { IAuth, IResponseMessage, ResponseData, UserModel } from "@types";
 
 // GraphQL
 import { gql, useLazyQuery } from "@apollo/client";
@@ -17,7 +17,7 @@ type AuthenticationContextValue = {
   token: IAuth;
   setToken: (token: IAuth) => void;
   isAuthenticated: boolean;
-  login: (code: string) => Promise<ResponseData<UserModel>>;
+  login: (code: string) => Promise<IResponseMessage>;
   logout: () => void;
 };
 const AuthenticationContext = createContext({} as AuthenticationContextValue);
@@ -97,7 +97,7 @@ export const AuthenticationProvider = (props: {
    * Utility function to perform a Login operation
    * @param code String returned by ORCID API for login
    */
-  const login = async (code: string): Promise<ResponseData<UserModel>> => {
+  const login = async (code: string): Promise<IResponseMessage> => {
     // Query to retrieve Entity data and associated data for editing
     const loginResponse = await doLogin({ variables: { code: code } });
     const loginData = loginResponse.data?.login;
@@ -107,7 +107,6 @@ export const AuthenticationProvider = (props: {
       return {
         success: false,
         message: "Unable to log in, check network connection",
-        data: {} as UserModel,
       };
     }
 
@@ -122,16 +121,16 @@ export const AuthenticationProvider = (props: {
       return {
         success: false,
         message: "Unable to retrieve User information",
-        data: {} as UserModel,
       };
     } else if (_.isUndefined(userData)) {
       setIsAuthenticated(false);
       return {
         success: false,
         message: "User does not have access",
-        data: {} as UserModel,
       };
     }
+
+    // Update the User and authentication state
     setIsAuthenticated(true);
 
     // Perform login and data retrieval via server, check if user permitted access
@@ -143,17 +142,16 @@ export const AuthenticationProvider = (props: {
     return {
       success: true,
       message: "Logged in successfully",
-      data: userData,
     };
   };
 
   const value = useMemo(
     () => ({
       isAuthenticated: isAuthenticated,
-      token: token,
-      setToken: setToken,
-      login: login,
-      logout: logout,
+      token,
+      setToken,
+      login,
+      logout,
     }),
     [token],
   );

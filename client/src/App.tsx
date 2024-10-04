@@ -10,6 +10,9 @@ import "@fontsource/roboto";
 // Chakra provider component
 import { ChakraProvider } from "@chakra-ui/react";
 
+// Custom components
+import { Page } from "@components/Container";
+
 // Routing and navigation
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
@@ -47,7 +50,6 @@ import { AuthenticationProvider } from "./hooks/useAuthentication";
 
 // Theme extension
 import { theme } from "./styles/theme";
-import { Page } from "@components/Container";
 
 /**
  * Base App component containing the page layout and page routing components

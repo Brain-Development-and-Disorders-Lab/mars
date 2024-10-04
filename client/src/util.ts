@@ -2,7 +2,7 @@
 import _ from "lodash";
 
 // Custom types
-import { IAttribute, IAuth, ISession, IValue } from "@types";
+import { IAttribute, IAuth, ISession, IValue, UserModel } from "@types";
 
 export const isValidValues = (
   values: IValue<any>[],
@@ -43,6 +43,22 @@ export const isValidAttributes = (attributes: IAttribute[]) => {
     }
   }
 
+  return true;
+};
+
+export const isValidUser = (user: UserModel): boolean => {
+  if (
+    _.isUndefined(user.affiliation) ||
+    _.isUndefined(user.email) ||
+    _.isUndefined(user.firstName) ||
+    _.isUndefined(user.lastName) ||
+    user.affiliation === "" ||
+    user.email === "" ||
+    user.firstName === "" ||
+    user.lastName === ""
+  ) {
+    return false;
+  }
   return true;
 };
 
