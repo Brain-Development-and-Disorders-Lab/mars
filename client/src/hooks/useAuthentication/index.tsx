@@ -102,7 +102,7 @@ export const AuthenticationProvider = (props: {
     const loginResponse = await doLogin({ variables: { code: code } });
     const loginData = loginResponse.data?.login;
 
-    if (_.isUndefined(loginData) || loginData.success === false) {
+    if (_.isUndefined(loginData)) {
       setIsAuthenticated(false);
       return {
         success: false,

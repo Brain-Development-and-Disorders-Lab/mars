@@ -174,6 +174,15 @@ const WorkspaceSwitcher = () => {
       await activateWorkspace(selectedWorkspace._id);
       setLabel(selectedWorkspace.name);
       setIsOpen(false);
+
+      toast({
+        title: "Switched Workspace",
+        description: `Currently using Workspace "${selectedWorkspace.name}"`,
+        status: "success",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
     }
   };
 

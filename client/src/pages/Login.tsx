@@ -64,13 +64,38 @@ const Login = () => {
       await activateWorkspace("");
       navigate("/");
     } else {
-      if (!toast.isActive("login-graphql-error-toast")) {
+      if (
+        result.message.includes("Unable") &&
+        !toast.isActive("login-graphql-error-toast")
+      ) {
         toast({
           id: "login-graphql-error-toast",
           title: "Login Error",
           status: "error",
           description: result.message,
           duration: 4000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+      } else if (
+        result.message.includes("access") &&
+        !toast.isActive("login-access-error-toast")
+      ) {
+        toast({
+          id: "login-access-error-toast",
+          title: "Access Unavailable",
+          status: "info",
+          description: (
+            <Flex direction={"column"}>
+              <Link href={"https://forms.gle/q4GL4gF1bamem3DA9"} isExternal>
+                <Flex direction={"row"} gap={"1"} align={"center"}>
+                  <Text fontWeight={"semibold"}>Join the waitlist here</Text>
+                  <Icon name={"a_right"} />
+                </Flex>
+              </Link>
+            </Flex>
+          ),
+          duration: null,
           position: "bottom-right",
           isClosable: true,
         });
