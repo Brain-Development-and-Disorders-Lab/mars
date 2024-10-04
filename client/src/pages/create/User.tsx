@@ -26,8 +26,8 @@ import { gql, useLazyQuery, useMutation } from "@apollo/client";
 import { IResponseMessage, UserModel } from "@types";
 
 // Contexts
-import { useAuthentication } from "src/hooks/useAuthentication";
-import { useWorkspace } from "src/hooks/useWorkspace";
+import { useAuthentication } from "@hooks/useAuthentication";
+import { useWorkspace } from "@hooks/useWorkspace";
 
 const User = () => {
   const toast = useToast();

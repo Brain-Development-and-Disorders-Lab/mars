@@ -2,7 +2,7 @@ import React, { createContext, useContext, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 // Token management
-import { useToken } from "src/hooks/useToken";
+import { useToken } from "@hooks/useToken";
 
 // Custom types
 import { IAuth, IResponseMessage, ResponseData, UserModel } from "@types";

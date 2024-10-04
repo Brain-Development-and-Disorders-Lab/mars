@@ -96,8 +96,8 @@ import { useQuery, gql, useMutation, useLazyQuery } from "@apollo/client";
 import { useParams, useNavigate } from "react-router-dom";
 
 // Contexts
-import { useWorkspace } from "src/hooks/useWorkspace";
-import { useAuthentication } from "src/hooks/useAuthentication";
+import { useWorkspace } from "@hooks/useWorkspace";
+import { useAuthentication } from "@hooks/useAuthentication";
 
 const Entity = () => {
   const { id } = useParams();

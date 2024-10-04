@@ -24,7 +24,7 @@ import { DataTableAction, EntityModel } from "@types";
 import { useNavigate } from "react-router-dom";
 
 // Workspace context
-import { useWorkspace } from "src/hooks/useWorkspace";
+import { useWorkspace } from "@hooks/useWorkspace";
 
 // Utility functions and libraries
 import { gql, useLazyQuery, useQuery } from "@apollo/client";

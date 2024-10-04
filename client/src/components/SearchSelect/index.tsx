@@ -18,7 +18,7 @@ import { debounce } from "lodash";
 import { gql, useLazyQuery } from "@apollo/client";
 
 // Workspace context
-import { useWorkspace } from "src/hooks/useWorkspace";
+import { useWorkspace } from "@hooks/useWorkspace";
 
 const SearchSelect = (props: SearchSelectProps) => {
   // Query to retrieve Entities

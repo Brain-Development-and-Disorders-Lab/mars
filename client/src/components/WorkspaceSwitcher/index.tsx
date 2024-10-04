@@ -27,8 +27,8 @@ import { IGenericItem, WorkspaceModel } from "@types";
 import _ from "lodash";
 
 // Contexts
-import { useWorkspace } from "src/hooks/useWorkspace";
-import { useAuthentication } from "src/hooks/useAuthentication";
+import { useWorkspace } from "@hooks/useWorkspace";
+import { useAuthentication } from "@hooks/useAuthentication";
 
 const WorkspaceSwitcher = () => {
   const toast = useToast();

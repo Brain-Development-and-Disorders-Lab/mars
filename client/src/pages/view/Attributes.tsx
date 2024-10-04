@@ -27,7 +27,7 @@ import { useNavigate } from "react-router-dom";
 import { gql, useQuery } from "@apollo/client";
 
 // Workspace context
-import { useWorkspace } from "src/hooks/useWorkspace";
+import { useWorkspace } from "@hooks/useWorkspace";
 
 const Attributes = () => {
   const navigate = useNavigate();

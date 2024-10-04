@@ -30,7 +30,7 @@ import _ from "lodash";
 import { gql, useLazyQuery, useQuery } from "@apollo/client";
 
 // Contexts
-import { useAuthentication } from "src/hooks/useAuthentication";
+import { useAuthentication } from "@hooks/useAuthentication";
 
 const AccountMenu = () => {
   const navigate = useNavigate();

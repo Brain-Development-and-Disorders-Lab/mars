@@ -25,7 +25,7 @@ import _ from "lodash";
 import { useNavigate } from "react-router-dom";
 
 // Workspace context
-import { useWorkspace } from "src/hooks/useWorkspace";
+import { useWorkspace } from "@hooks/useWorkspace";
 
 // Apollo client imports
 import { useQuery, gql } from "@apollo/client";

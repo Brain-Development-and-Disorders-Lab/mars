@@ -41,7 +41,7 @@ import { isValidValues } from "src/util";
 import _ from "lodash";
 
 // Authentication context
-import { useAuthentication } from "src/hooks/useAuthentication";
+import { useAuthentication } from "@hooks/useAuthentication";
 
 const Attribute = () => {
   const navigate = useNavigate();

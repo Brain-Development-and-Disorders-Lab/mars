@@ -10,6 +10,7 @@
     "paths": {
       "@components/*": ["src/components/*"],
       "@database/*": ["src/database/*"],
+      "@hooks/*": ["src/hooks/*"],
       "@pages/*": ["src/pages/*"],
       "@types": ["../types"]
     },

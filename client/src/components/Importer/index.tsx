@@ -53,7 +53,7 @@ import dayjs from "dayjs";
 import { nanoid } from "nanoid";
 
 // Authentication context
-import { useAuthentication } from "src/hooks/useAuthentication";
+import { useAuthentication } from "@hooks/useAuthentication";
 
 const Importer = (props: {
   isOpen: boolean;

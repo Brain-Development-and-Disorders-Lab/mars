@@ -14,7 +14,7 @@ import { ContentProps } from "@types";
 import _ from "lodash";
 
 // Contexts
-import { useAuthentication } from "src/hooks/useAuthentication";
+import { useAuthentication } from "@hooks/useAuthentication";
 import { Navigate, Outlet } from "react-router-dom";
 
 // Content container

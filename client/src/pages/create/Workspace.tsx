@@ -30,8 +30,8 @@ import { gql, useLazyQuery, useMutation } from "@apollo/client";
 import { useNavigate } from "react-router-dom";
 
 // Contexts
-import { useWorkspace } from "src/hooks/useWorkspace";
-import { useAuthentication } from "src/hooks/useAuthentication";
+import { useWorkspace } from "@hooks/useWorkspace";
+import { useAuthentication } from "@hooks/useAuthentication";
 
 const CreateWorkspace = () => {
   // Access token to set the active Workspace

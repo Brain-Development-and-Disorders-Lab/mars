@@ -37,7 +37,7 @@ import { gql, useMutation } from "@apollo/client";
 import { ResponseData } from "@types";
 
 // Authentication context
-import { useAuthentication } from "src/hooks/useAuthentication";
+import { useAuthentication } from "@hooks/useAuthentication";
 
 const Project = () => {
   const navigate = useNavigate();

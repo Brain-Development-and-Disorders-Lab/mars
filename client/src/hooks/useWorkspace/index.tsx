@@ -16,7 +16,7 @@ import { IResponseMessage, WorkspaceModel } from "@types";
 import _ from "lodash";
 
 // Session
-import { useSession } from "src/hooks/useSession";
+import { useSession } from "@hooks/useSession";
 
 type WorkspaceContextValue = {
   workspace: string;

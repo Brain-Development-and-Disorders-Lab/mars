@@ -67,7 +67,7 @@ import { useNavigate } from "react-router-dom";
 import { gql, useLazyQuery, useMutation, useQuery } from "@apollo/client";
 
 // Authentication context
-import { useAuthentication } from "src/hooks/useAuthentication";
+import { useAuthentication } from "@hooks/useAuthentication";
 
 const Entity = () => {
   // Used to manage what detail inputs are presented

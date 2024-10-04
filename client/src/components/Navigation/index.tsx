@@ -28,7 +28,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import _ from "lodash";
 
 // Workspace context
-import { useWorkspace } from "src/hooks/useWorkspace";
+import { useWorkspace } from "@hooks/useWorkspace";
 
 const Navigation = () => {
   const navigate = useNavigate();

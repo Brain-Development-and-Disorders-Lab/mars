@@ -27,8 +27,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import _ from "lodash";
 
 // Contexts
-import { useAuthentication } from "src/hooks/useAuthentication";
-import { useWorkspace } from "src/hooks/useWorkspace";
+import { useAuthentication } from "@hooks/useAuthentication";
+import { useWorkspace } from "@hooks/useWorkspace";
 
 // Define login parameters
 const clientID = "APP-BBVHCTCNDUJ4CAXV";

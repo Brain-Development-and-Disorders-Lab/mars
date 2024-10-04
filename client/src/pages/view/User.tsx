@@ -33,7 +33,7 @@ import {
 import { gql, useMutation, useQuery } from "@apollo/client";
 
 // Authentication context
-import { useAuthentication } from "src/hooks/useAuthentication";
+import { useAuthentication } from "@hooks/useAuthentication";
 
 // Utility functions and libraries
 import _ from "lodash";
