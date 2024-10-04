@@ -32,8 +32,10 @@ import {
   FormHelperText,
   Tooltip,
 } from "@chakra-ui/react";
+import { createColumnHelper } from "@tanstack/react-table";
 import Icon from "@components/Icon";
 import Attribute from "@components/AttributeCard";
+import DataTable from "@components/DataTable";
 
 // Custom and existing types
 import {
@@ -186,6 +188,41 @@ const Importer = (props: {
   `;
   const [importJSON, { loading: importJSONLoading, error: importJSONError }] =
     useMutation(IMPORT_JSON);
+
+  // Setup columns for review table
+  const reviewTableColumnHelper = createColumnHelper<EntityImportReview>();
+  const reviewTableColumns = [
+    reviewTableColumnHelper.accessor("name", {
+      cell: (info) => {
+        return (
+          <Tooltip label={info.getValue()} hasArrow>
+            <Text fontSize={"sm"} fontWeight={"semibold"}>
+              {_.truncate(info.getValue(), { length: 30 })}
+            </Text>
+          </Tooltip>
+        );
+      },
+      header: "Entity Name",
+    }),
+    reviewTableColumnHelper.accessor("state", {
+      cell: (info) => (
+        <Flex direction={"row"} gap={"2"} align={"center"} p={"1"}>
+          <Icon
+            name={info.getValue() === "update" ? "edit" : "add"}
+            color={info.getValue() === "update" ? "blue" : "green"}
+          />
+          <Text
+            fontWeight={"semibold"}
+            fontSize={"sm"}
+            color={info.getValue() === "update" ? "blue" : "green"}
+          >
+            {_.capitalize(info.getValue())}
+          </Text>
+        </Flex>
+      ),
+      header: "Action",
+    }),
+  ];
 
   // Effect to manipulate 'Continue' button state for 'upload' page
   useEffect(() => {
@@ -1038,9 +1075,15 @@ const Importer = (props: {
               borderColor={"gray.300"}
               rounded={"md"}
             >
-              <Text fontSize={"sm"}>
-                The following Entities will be created or updated
-              </Text>
+              <DataTable
+                columns={reviewTableColumns}
+                data={reviewEntities}
+                visibleColumns={{}}
+                selectedRows={{}}
+                showSelection
+                showPagination
+                showItemCount
+              />
             </Flex>
           )}
         </ModalBody>
