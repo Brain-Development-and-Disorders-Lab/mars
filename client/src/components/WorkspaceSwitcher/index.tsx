@@ -134,6 +134,11 @@ const WorkspaceSwitcher = () => {
     if (data?.workspaces) {
       // Unpack all the Entity data
       setWorkspaces(data.workspaces);
+
+      // If the User has no Workspaces, force them to create one
+      if (data.workspaces.length === 0) {
+        navigate("/create/workspace");
+      }
     }
 
     if (error) {

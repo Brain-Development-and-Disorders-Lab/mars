@@ -106,7 +106,7 @@ export const AuthenticationProvider = (props: {
       setIsAuthenticated(false);
       return {
         success: false,
-        message: "Unable to log in",
+        message: "Unable to log in, check network connection",
         data: {} as UserModel,
       };
     }
@@ -117,11 +117,18 @@ export const AuthenticationProvider = (props: {
       },
     });
     const userData = userResponse.data?.user;
-    if (_.isUndefined(userData) || !_.isUndefined(userError)) {
+    if (!_.isUndefined(userError)) {
       setIsAuthenticated(false);
       return {
         success: false,
         message: "Unable to retrieve User information",
+        data: {} as UserModel,
+      };
+    } else if (_.isUndefined(userData)) {
+      setIsAuthenticated(false);
+      return {
+        success: false,
+        message: "User does not have access",
         data: {} as UserModel,
       };
     }
