@@ -10,7 +10,7 @@ import {
   useBreakpoint,
   useToast,
 } from "@chakra-ui/react";
-import { Content, Page } from "@components/Container";
+import { Content } from "@components/Container";
 import { createColumnHelper } from "@tanstack/react-table";
 import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
@@ -142,68 +142,66 @@ const Projects = () => {
   ];
 
   return (
-    <Page>
-      <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
+    <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
+      <Flex
+        direction={"row"}
+        p={"4"}
+        rounded={"md"}
+        bg={"white"}
+        wrap={"wrap"}
+        gap={"4"}
+        justify={"center"}
+      >
         <Flex
+          w={"100%"}
           direction={"row"}
-          p={"4"}
-          rounded={"md"}
-          bg={"white"}
-          wrap={"wrap"}
-          gap={"4"}
-          justify={"center"}
+          justify={"space-between"}
+          align={"center"}
         >
-          <Flex
-            w={"100%"}
-            direction={"row"}
-            justify={"space-between"}
-            align={"center"}
-          >
-            <Flex align={"center"} gap={"2"} w={"100%"}>
-              <Icon name={"project"} size={"md"} />
-              <Heading fontWeight={"bold"} size={"md"}>
-                Projects
-              </Heading>
-              <Spacer />
-              <Button
-                rightIcon={<Icon name={"add"} />}
-                colorScheme={"green"}
-                onClick={() => navigate("/create/project")}
-                size={"sm"}
-              >
-                Create
-              </Button>
-            </Flex>
-          </Flex>
-          <Flex direction={"column"} gap={"4"} w={"100%"}>
-            {projects.length > 0 ? (
-              <DataTable
-                columns={columns}
-                data={data.projects}
-                visibleColumns={visibleColumns}
-                selectedRows={{}}
-                showColumnSelect
-                showPagination
-                showSelection
-                showItemCount
-              />
-            ) : (
-              <Flex
-                w={"100%"}
-                direction={"row"}
-                p={"4"}
-                justify={"center"}
-                align={"center"}
-              >
-                <Text color={"gray.400"} fontWeight={"semibold"}>
-                  You do not have any Projects.
-                </Text>
-              </Flex>
-            )}
+          <Flex align={"center"} gap={"2"} w={"100%"}>
+            <Icon name={"project"} size={"md"} />
+            <Heading fontWeight={"bold"} size={"md"}>
+              Projects
+            </Heading>
+            <Spacer />
+            <Button
+              rightIcon={<Icon name={"add"} />}
+              colorScheme={"green"}
+              onClick={() => navigate("/create/project")}
+              size={"sm"}
+            >
+              Create
+            </Button>
           </Flex>
         </Flex>
-      </Content>
-    </Page>
+        <Flex direction={"column"} gap={"4"} w={"100%"}>
+          {projects.length > 0 ? (
+            <DataTable
+              columns={columns}
+              data={data.projects}
+              visibleColumns={visibleColumns}
+              selectedRows={{}}
+              showColumnSelect
+              showPagination
+              showSelection
+              showItemCount
+            />
+          ) : (
+            <Flex
+              w={"100%"}
+              direction={"row"}
+              p={"4"}
+              justify={"center"}
+              align={"center"}
+            >
+              <Text color={"gray.400"} fontWeight={"semibold"}>
+                You do not have any Projects.
+              </Text>
+            </Flex>
+          )}
+        </Flex>
+      </Flex>
+    </Content>
   );
 };
 

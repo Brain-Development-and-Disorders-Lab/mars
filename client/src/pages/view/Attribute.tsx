@@ -16,7 +16,7 @@ import {
   useDisclosure,
   useToast,
 } from "@chakra-ui/react";
-import { Content, Page } from "@components/Container";
+import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 import Values from "@components/Values";
 import Dialog from "@components/Dialog";
@@ -246,209 +246,207 @@ const Attribute = () => {
   };
 
   return (
-    <Page>
-      <Content
-        isError={!_.isUndefined(error)}
-        isLoaded={!loading && !updateLoading && !archiveLoading}
-      >
-        <Flex direction={"column"}>
+    <Content
+      isError={!_.isUndefined(error)}
+      isLoaded={!loading && !updateLoading && !archiveLoading}
+    >
+      <Flex direction={"column"}>
+        <Flex
+          gap={"2"}
+          p={"2"}
+          pb={{ base: "2", lg: "0" }}
+          direction={"row"}
+          justify={"space-between"}
+          align={"center"}
+          wrap={"wrap"}
+        >
           <Flex
+            align={"center"}
             gap={"2"}
             p={"2"}
-            pb={{ base: "2", lg: "0" }}
-            direction={"row"}
-            justify={"space-between"}
-            align={"center"}
-            wrap={"wrap"}
+            border={"2px"}
+            rounded={"md"}
           >
+            <Icon name={"attribute"} size={"md"} />
+            <Heading fontWeight={"semibold"} size={"md"}>
+              {attributeData.name}
+            </Heading>
+          </Flex>
+
+          {/* Buttons */}
+          <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
+            {attributeArchived ? (
+              <Button
+                id={"restoreAttributeButton"}
+                onClick={handleRestoreFromArchiveClick}
+                size={"sm"}
+                colorScheme={"orange"}
+                rightIcon={<Icon name={"rewind"} />}
+              >
+                Restore
+              </Button>
+            ) : (
+              <Button
+                id={"editAttributeButton"}
+                size={"sm"}
+                colorScheme={editing ? "green" : "blue"}
+                rightIcon={
+                  editing ? <Icon name={"check"} /> : <Icon name={"edit"} />
+                }
+                onClick={handleEditClick}
+              >
+                {editing ? "Done" : "Edit"}
+              </Button>
+            )}
+
+            {/* Actions Menu */}
+            <Menu>
+              <MenuButton
+                as={Button}
+                size={"sm"}
+                colorScheme={"yellow"}
+                rightIcon={<Icon name={"lightning"} />}
+              >
+                Actions
+              </MenuButton>
+              <MenuList>
+                <MenuItem
+                  icon={<Icon name={"download"} />}
+                  isDisabled={editing || attributeArchived}
+                >
+                  Export
+                </MenuItem>
+                <MenuItem
+                  onClick={onArchiveDialogOpen}
+                  icon={<Icon name={"archive"} />}
+                  isDisabled={attributeArchived}
+                >
+                  Archive
+                </MenuItem>
+              </MenuList>
+            </Menu>
+
+            {/* Archive Dialog */}
+            <Dialog
+              dialogRef={archiveDialogRef}
+              header={"Archive Attribute"}
+              rightButtonAction={handleArchiveClick}
+              isOpen={isArchiveDialogOpen}
+              onOpen={onArchiveDialogOpen}
+              onClose={onArchiveDialogClose}
+            >
+              <Text>
+                Are you sure you want to archive this Attribute? It can be
+                restored any time from the Workspace archive
+              </Text>
+            </Dialog>
+          </Flex>
+        </Flex>
+
+        <Flex direction={"row"} gap={"0"} wrap={"wrap"}>
+          <Flex
+            direction={"column"}
+            p={"2"}
+            pt={{ base: "0", lg: "2" }}
+            gap={"2"}
+            grow={"1"}
+            rounded={"md"}
+          >
+            {/* Attribute Overview */}
             <Flex
-              align={"center"}
-              gap={"2"}
+              direction={"column"}
               p={"2"}
-              border={"2px"}
+              gap={"2"}
+              border={"1px"}
+              borderColor={"gray.300"}
               rounded={"md"}
             >
-              <Icon name={"attribute"} size={"md"} />
-              <Heading fontWeight={"semibold"} size={"md"}>
-                {attributeData.name}
-              </Heading>
-            </Flex>
+              {/* "Name" and "Created" field */}
+              <Flex gap={"2"} direction={"row"}>
+                <Flex direction={"column"} gap={"1"} basis={"60%"}>
+                  <Text fontWeight={"bold"}>Name</Text>
+                  <Flex>
+                    <Input
+                      size={"sm"}
+                      value={attributeName}
+                      onChange={(event) => {
+                        setAttributeName(event.target.value || "");
+                      }}
+                      isReadOnly={!editing}
+                      rounded={"md"}
+                      border={"1px"}
+                      borderColor={"gray.300"}
+                      bg={"white"}
+                    />
+                  </Flex>
+                </Flex>
 
-            {/* Buttons */}
-            <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
-              {attributeArchived ? (
-                <Button
-                  id={"restoreAttributeButton"}
-                  onClick={handleRestoreFromArchiveClick}
-                  size={"sm"}
-                  colorScheme={"orange"}
-                  rightIcon={<Icon name={"rewind"} />}
-                >
-                  Restore
-                </Button>
-              ) : (
-                <Button
-                  id={"editAttributeButton"}
-                  size={"sm"}
-                  colorScheme={editing ? "green" : "blue"}
-                  rightIcon={
-                    editing ? <Icon name={"check"} /> : <Icon name={"edit"} />
-                  }
-                  onClick={handleEditClick}
-                >
-                  {editing ? "Done" : "Edit"}
-                </Button>
-              )}
+                <Flex direction={"column"} gap={"1"}>
+                  <Text fontWeight={"bold"}>Created</Text>
+                  <Flex align={"center"} gap={"1"}>
+                    <Icon name={"v_date"} size={"sm"} />
+                    <Text fontSize={"sm"}>
+                      {dayjs(attributeData.timestamp).format("DD MMM YYYY")}
+                    </Text>
+                  </Flex>
+                </Flex>
+              </Flex>
 
-              {/* Actions Menu */}
-              <Menu>
-                <MenuButton
-                  as={Button}
-                  size={"sm"}
-                  colorScheme={"yellow"}
-                  rightIcon={<Icon name={"lightning"} />}
-                >
-                  Actions
-                </MenuButton>
-                <MenuList>
-                  <MenuItem
-                    icon={<Icon name={"download"} />}
-                    isDisabled={editing || attributeArchived}
-                  >
-                    Export
-                  </MenuItem>
-                  <MenuItem
-                    onClick={onArchiveDialogOpen}
-                    icon={<Icon name={"archive"} />}
-                    isDisabled={attributeArchived}
-                  >
-                    Archive
-                  </MenuItem>
-                </MenuList>
-              </Menu>
-
-              {/* Archive Dialog */}
-              <Dialog
-                dialogRef={archiveDialogRef}
-                header={"Archive Attribute"}
-                rightButtonAction={handleArchiveClick}
-                isOpen={isArchiveDialogOpen}
-                onOpen={onArchiveDialogOpen}
-                onClose={onArchiveDialogClose}
-              >
-                <Text>
-                  Are you sure you want to archive this Attribute? It can be
-                  restored any time from the Workspace archive
-                </Text>
-              </Dialog>
+              {/* "Description" and "Owner" fields */}
+              <Flex gap={"2"} direction={"row"}>
+                <Flex direction={"column"} gap={"1"} basis={"60%"}>
+                  <Text fontWeight={"bold"}>Description</Text>
+                  <Flex>
+                    <Textarea
+                      size={"sm"}
+                      value={attributeDescription}
+                      onChange={(event) => {
+                        setAttributeDescription(event.target.value || "");
+                      }}
+                      isReadOnly={!editing}
+                      rounded={"md"}
+                      border={"1px"}
+                      borderColor={"gray.300"}
+                      bg={"white"}
+                    />
+                  </Flex>
+                </Flex>
+                <Flex direction={"column"} gap={"1"}>
+                  <Text fontWeight={"bold"}>Owner</Text>
+                  <Flex>
+                    <ActorTag
+                      orcid={attributeData.owner}
+                      fallback={"Unknown User"}
+                    />
+                  </Flex>
+                </Flex>
+              </Flex>
             </Flex>
           </Flex>
 
-          <Flex direction={"row"} gap={"0"} wrap={"wrap"}>
+          <Flex
+            direction={"column"}
+            p={"2"}
+            pt={{ base: "0", lg: "2" }}
+            gap={"2"}
+            grow={"1"}
+          >
             <Flex
-              direction={"column"}
               p={"2"}
-              pt={{ base: "0", lg: "2" }}
-              gap={"2"}
-              grow={"1"}
               rounded={"md"}
+              border={"1px"}
+              borderColor={"gray.300"}
             >
-              {/* Attribute Overview */}
-              <Flex
-                direction={"column"}
-                p={"2"}
-                gap={"2"}
-                border={"1px"}
-                borderColor={"gray.300"}
-                rounded={"md"}
-              >
-                {/* "Name" and "Created" field */}
-                <Flex gap={"2"} direction={"row"}>
-                  <Flex direction={"column"} gap={"1"} basis={"60%"}>
-                    <Text fontWeight={"bold"}>Name</Text>
-                    <Flex>
-                      <Input
-                        size={"sm"}
-                        value={attributeName}
-                        onChange={(event) => {
-                          setAttributeName(event.target.value || "");
-                        }}
-                        isReadOnly={!editing}
-                        rounded={"md"}
-                        border={"1px"}
-                        borderColor={"gray.300"}
-                        bg={"white"}
-                      />
-                    </Flex>
-                  </Flex>
-
-                  <Flex direction={"column"} gap={"1"}>
-                    <Text fontWeight={"bold"}>Created</Text>
-                    <Flex align={"center"} gap={"1"}>
-                      <Icon name={"v_date"} size={"sm"} />
-                      <Text fontSize={"sm"}>
-                        {dayjs(attributeData.timestamp).format("DD MMM YYYY")}
-                      </Text>
-                    </Flex>
-                  </Flex>
-                </Flex>
-
-                {/* "Description" and "Owner" fields */}
-                <Flex gap={"2"} direction={"row"}>
-                  <Flex direction={"column"} gap={"1"} basis={"60%"}>
-                    <Text fontWeight={"bold"}>Description</Text>
-                    <Flex>
-                      <Textarea
-                        size={"sm"}
-                        value={attributeDescription}
-                        onChange={(event) => {
-                          setAttributeDescription(event.target.value || "");
-                        }}
-                        isReadOnly={!editing}
-                        rounded={"md"}
-                        border={"1px"}
-                        borderColor={"gray.300"}
-                        bg={"white"}
-                      />
-                    </Flex>
-                  </Flex>
-                  <Flex direction={"column"} gap={"1"}>
-                    <Text fontWeight={"bold"}>Owner</Text>
-                    <Flex>
-                      <ActorTag
-                        orcid={attributeData.owner}
-                        fallback={"Unknown User"}
-                      />
-                    </Flex>
-                  </Flex>
-                </Flex>
-              </Flex>
-            </Flex>
-
-            <Flex
-              direction={"column"}
-              p={"2"}
-              pt={{ base: "0", lg: "2" }}
-              gap={"2"}
-              grow={"1"}
-            >
-              <Flex
-                p={"2"}
-                rounded={"md"}
-                border={"1px"}
-                borderColor={"gray.300"}
-              >
-                <Values
-                  viewOnly={!editing}
-                  values={attributeValues}
-                  setValues={setAttributeValues}
-                />
-              </Flex>
+              <Values
+                viewOnly={!editing}
+                values={attributeValues}
+                setValues={setAttributeValues}
+              />
             </Flex>
           </Flex>
         </Flex>
-      </Content>
-    </Page>
+      </Flex>
+    </Content>
   );
 };
 

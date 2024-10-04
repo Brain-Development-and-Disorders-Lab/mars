@@ -47,6 +47,7 @@ import { AuthenticationProvider } from "./hooks/useAuthentication";
 
 // Theme extension
 import { theme } from "./styles/theme";
+import { Page } from "@components/Container";
 
 /**
  * Base App component containing the page layout and page routing components
@@ -63,46 +64,55 @@ const App = (): ReactElement => {
         <AuthenticationProvider>
           <WorkspaceProvider>
             <Routes>
-              <Route path={"/"} element={<Dashboard />} />
+              <Route element={<Page />}>
+                <Route path={"/"} element={<Dashboard />} />
 
-              {/* Create routes */}
-              <Route path={"/create/workspace"} element={<CreateWorkspace />} />
-              <Route path={"/create/attribute"} element={<CreateAttribute />} />
-              <Route path={"/create/project"} element={<CreateProject />} />
-              <Route path={"/create/entity"} element={<CreateEntity />} />
-              <Route path={"/create"} element={<Create />} />
+                {/* Create routes */}
+                <Route
+                  path={"/create/workspace"}
+                  element={<CreateWorkspace />}
+                />
+                <Route
+                  path={"/create/attribute"}
+                  element={<CreateAttribute />}
+                />
+                <Route path={"/create/project"} element={<CreateProject />} />
+                <Route path={"/create/entity"} element={<CreateEntity />} />
+                <Route path={"/create"} element={<Create />} />
 
-              {/* Workspace routes */}
-              <Route path={"workspaces"}>
-                <Route path={":id"} element={<Workspace />} />
+                {/* Workspace routes */}
+                <Route path={"workspaces"}>
+                  <Route path={":id"} element={<Workspace />} />
+                </Route>
+
+                {/* Entity routes */}
+                <Route path={"/entities"} element={<Entities />} />
+                <Route path={"entities"}>
+                  <Route path={":id"} element={<Entity />} />
+                </Route>
+
+                {/* Projects routes */}
+                <Route path={"/projects"} element={<Projects />} />
+                <Route path={"projects"}>
+                  <Route path={":id"} element={<Project />} />
+                </Route>
+
+                {/* Attributes routes */}
+                <Route path={"/attributes"} element={<Attributes />} />
+                <Route path={"attributes"}>
+                  <Route path={":id"} element={<Attribute />} />
+                </Route>
+
+                {/* Other routes */}
+                <Route path={"/profile"} element={<User />} />
+                <Route path={"/search"} element={<Search />} />
+                <Route path={"/invalid"} element={<Invalid />} />
+                <Route
+                  path={"*"}
+                  element={<Navigate to={"/invalid"} replace />}
+                />
               </Route>
 
-              {/* Entity routes */}
-              <Route path={"/entities"} element={<Entities />} />
-              <Route path={"entities"}>
-                <Route path={":id"} element={<Entity />} />
-              </Route>
-
-              {/* Projects routes */}
-              <Route path={"/projects"} element={<Projects />} />
-              <Route path={"projects"}>
-                <Route path={":id"} element={<Project />} />
-              </Route>
-
-              {/* Attributes routes */}
-              <Route path={"/attributes"} element={<Attributes />} />
-              <Route path={"attributes"}>
-                <Route path={":id"} element={<Attribute />} />
-              </Route>
-
-              {/* Other routes */}
-              <Route path={"/profile"} element={<User />} />
-              <Route path={"/search"} element={<Search />} />
-              <Route path={"/invalid"} element={<Invalid />} />
-              <Route
-                path={"*"}
-                element={<Navigate to={"/invalid"} replace />}
-              />
               <Route path={"/login"} element={<Login />} />
             </Routes>
           </WorkspaceProvider>

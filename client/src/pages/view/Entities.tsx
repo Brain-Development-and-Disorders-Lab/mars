@@ -13,7 +13,7 @@ import {
   Tag,
 } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
-import { Content, Page } from "@components/Container";
+import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 import DataTable from "@components/DataTable";
 
@@ -190,72 +190,70 @@ const Entities = () => {
   ];
 
   return (
-    <Page>
-      <Content
-        isError={!_.isUndefined(error) || !_.isUndefined(exportError)}
-        isLoaded={!loading && !exportLoading}
+    <Content
+      isError={!_.isUndefined(error) || !_.isUndefined(exportError)}
+      isLoaded={!loading && !exportLoading}
+    >
+      <Flex
+        direction={"row"}
+        p={"4"}
+        rounded={"md"}
+        bg={"white"}
+        wrap={"wrap"}
+        gap={"4"}
       >
         <Flex
+          w={"100%"}
           direction={"row"}
-          p={"4"}
-          rounded={"md"}
-          bg={"white"}
-          wrap={"wrap"}
-          gap={"4"}
+          justify={"space-between"}
+          align={"center"}
         >
-          <Flex
-            w={"100%"}
-            direction={"row"}
-            justify={"space-between"}
-            align={"center"}
-          >
-            <Flex align={"center"} gap={"2"} w={"100%"}>
-              <Icon name={"entity"} size={"md"} />
-              <Heading size={"md"}>Entities</Heading>
-              <Spacer />
-              <Button
-                rightIcon={<Icon name={"add"} />}
-                colorScheme={"green"}
-                onClick={() => navigate("/create/entity")}
-                size={"sm"}
-              >
-                Create
-              </Button>
-            </Flex>
-          </Flex>
-          <Flex direction={"column"} gap={"4"} w={"100%"}>
-            {entityData.filter((entity) => _.isEqual(entity.archived, false))
-              .length > 0 ? (
-              <DataTable
-                columns={columns}
-                data={entityData.filter((entity) =>
-                  _.isEqual(entity.archived, false),
-                )}
-                visibleColumns={visibleColumns}
-                selectedRows={{}}
-                actions={actions}
-                showColumnSelect
-                showSelection
-                showPagination
-                showItemCount
-              />
-            ) : (
-              <Flex
-                w={"100%"}
-                direction={"row"}
-                p={"4"}
-                justify={"center"}
-                align={"center"}
-              >
-                <Text color={"gray.400"} fontWeight={"semibold"}>
-                  You do not have any Entities.
-                </Text>
-              </Flex>
-            )}
+          <Flex align={"center"} gap={"2"} w={"100%"}>
+            <Icon name={"entity"} size={"md"} />
+            <Heading size={"md"}>Entities</Heading>
+            <Spacer />
+            <Button
+              rightIcon={<Icon name={"add"} />}
+              colorScheme={"green"}
+              onClick={() => navigate("/create/entity")}
+              size={"sm"}
+            >
+              Create
+            </Button>
           </Flex>
         </Flex>
-      </Content>
-    </Page>
+        <Flex direction={"column"} gap={"4"} w={"100%"}>
+          {entityData.filter((entity) => _.isEqual(entity.archived, false))
+            .length > 0 ? (
+            <DataTable
+              columns={columns}
+              data={entityData.filter((entity) =>
+                _.isEqual(entity.archived, false),
+              )}
+              visibleColumns={visibleColumns}
+              selectedRows={{}}
+              actions={actions}
+              showColumnSelect
+              showSelection
+              showPagination
+              showItemCount
+            />
+          ) : (
+            <Flex
+              w={"100%"}
+              direction={"row"}
+              p={"4"}
+              justify={"center"}
+              align={"center"}
+            >
+              <Text color={"gray.400"} fontWeight={"semibold"}>
+                You do not have any Entities.
+              </Text>
+            </Flex>
+          )}
+        </Flex>
+      </Flex>
+    </Content>
   );
 };
 

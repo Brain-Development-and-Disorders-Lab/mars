@@ -8,14 +8,14 @@ import Error from "@components/Error";
 import Loading from "@components/Loading";
 
 // Existing and custom types
-import { ContentProps, PageProps } from "@types";
+import { ContentProps } from "@types";
 
 // Utility functions and libraries
 import _ from "lodash";
 
 // Contexts
 import { useAuthentication } from "src/hooks/useAuthentication";
-import { Navigate } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
 
 // Content container
 const Content: FC<ContentProps> = ({ children, isError, isLoaded }) => {
@@ -44,7 +44,7 @@ const Content: FC<ContentProps> = ({ children, isError, isLoaded }) => {
 };
 
 // Page container
-const Page: FC<PageProps> = ({ children }) => {
+const Page: FC = () => {
   // Observe the authentication state
   const { isAuthenticated } = useAuthentication();
 
@@ -84,7 +84,7 @@ const Page: FC<PageProps> = ({ children }) => {
           mt={{ base: "8vh", lg: "0" }}
         >
           {/* Main content components */}
-          {children}
+          <Outlet />
         </Flex>
       </Flex>
     );

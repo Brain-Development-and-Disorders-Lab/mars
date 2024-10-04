@@ -18,7 +18,7 @@ import {
   Text,
   useToast,
 } from "@chakra-ui/react";
-import { Content, Page } from "@components/Container";
+import { Content } from "@components/Container";
 import DataTable from "@components/DataTable";
 import Linky from "@components/Linky";
 import Icon from "@components/Icon";
@@ -270,167 +270,165 @@ const Search = () => {
   ];
 
   return (
-    <Page>
-      <Content isError={isError}>
-        <Flex direction={"column"} p={"2"} gap={"4"}>
-          {/* Page header */}
-          <Flex
-            direction={"row"}
-            p={"2"}
-            align={"center"}
-            justify={"space-between"}
-          >
-            <Flex align={"center"} gap={"2"} w={"100%"}>
-              <Icon name={"search"} size={"md"} />
-              <Heading size={"md"}>Search</Heading>
-            </Flex>
+    <Content isError={isError}>
+      <Flex direction={"column"} p={"2"} gap={"4"}>
+        {/* Page header */}
+        <Flex
+          direction={"row"}
+          p={"2"}
+          align={"center"}
+          justify={"space-between"}
+        >
+          <Flex align={"center"} gap={"2"} w={"100%"}>
+            <Icon name={"search"} size={"md"} />
+            <Heading size={"md"}>Search</Heading>
           </Flex>
+        </Flex>
 
-          {/* Search components */}
-          <Tabs
-            w={"100%"}
-            size={"sm"}
-            colorScheme={"blue"}
-            variant={"soft-rounded"}
-            onChange={onTabChange}
-          >
-            <TabList p={"2"} gap={"2"} pb={"0"}>
-              <Tab isDisabled={isSearching}>Text</Tab>
-              <Tab isDisabled={isSearching}>Query Builder</Tab>
-            </TabList>
+        {/* Search components */}
+        <Tabs
+          w={"100%"}
+          size={"sm"}
+          colorScheme={"blue"}
+          variant={"soft-rounded"}
+          onChange={onTabChange}
+        >
+          <TabList p={"2"} gap={"2"} pb={"0"}>
+            <Tab isDisabled={isSearching}>Text</Tab>
+            <Tab isDisabled={isSearching}>Query Builder</Tab>
+          </TabList>
 
-            <TabPanels>
-              {/* Text search */}
-              <TabPanel p={"2"}>
-                <Flex direction={"column"} gap={"2"}>
-                  <Flex
-                    direction={"row"}
-                    gap={"2"}
-                    p={"2"}
-                    rounded={"md"}
-                    bg={"blue.100"}
-                    align={"center"}
-                    w={"fit-content"}
+          <TabPanels>
+            {/* Text search */}
+            <TabPanel p={"2"}>
+              <Flex direction={"column"} gap={"2"}>
+                <Flex
+                  direction={"row"}
+                  gap={"2"}
+                  p={"2"}
+                  rounded={"md"}
+                  bg={"blue.100"}
+                  align={"center"}
+                  w={"fit-content"}
+                >
+                  <Icon name={"info"} color={"blue.300"} />
+                  <Text
+                    fontWeight={"semibold"}
+                    fontSize={"sm"}
+                    color={"blue.700"}
                   >
-                    <Icon name={"info"} color={"blue.300"} />
+                    Use text search to search for terms appearing in Entities
+                    within the Workspace. Text search will include terms
+                    appearing in Attributes.
+                  </Text>
+                </Flex>
+
+                <Flex
+                  w={"100%"}
+                  direction={"row"}
+                  gap={"2"}
+                  align={"center"}
+                  p={"2"}
+                  border={"1px"}
+                  borderColor={"gray.300"}
+                  rounded={"md"}
+                >
+                  <Flex w={"60%"} maxW={"xl"}>
+                    <Input
+                      size={"sm"}
+                      rounded={"md"}
+                      value={query}
+                      placeholder={"Search..."}
+                      onChange={(event) => setQuery(event.target.value)}
+                      onKeyUp={(event) => {
+                        // Listen for "Enter" key when entering a query
+                        if (event.key === "Enter" && query !== "") {
+                          runSearch();
+                        }
+                      }}
+                    />
+                  </Flex>
+
+                  <Spacer />
+
+                  <Flex gap={"2"} align={"center"}>
                     <Text
                       fontWeight={"semibold"}
                       fontSize={"sm"}
-                      color={"blue.700"}
+                      color={"gray.800"}
                     >
-                      Use text search to search for terms appearing in Entities
-                      within the Workspace. Text search will include terms
-                      appearing in Attributes.
+                      Options:
+                    </Text>
+                    <Switch
+                      colorScheme={"green"}
+                      checked={showArchived}
+                      onChange={() => setShowArchived(!showArchived)}
+                    />
+                    <Text
+                      fontWeight={"semibold"}
+                      fontSize={"sm"}
+                      color={"gray.600"}
+                    >
+                      Include Archived
                     </Text>
                   </Flex>
 
-                  <Flex
-                    w={"100%"}
-                    direction={"row"}
-                    gap={"2"}
-                    align={"center"}
-                    p={"2"}
-                    border={"1px"}
-                    borderColor={"gray.300"}
-                    rounded={"md"}
-                  >
-                    <Flex w={"60%"} maxW={"xl"}>
-                      <Input
-                        size={"sm"}
-                        rounded={"md"}
-                        value={query}
-                        placeholder={"Search..."}
-                        onChange={(event) => setQuery(event.target.value)}
-                        onKeyUp={(event) => {
-                          // Listen for "Enter" key when entering a query
-                          if (event.key === "Enter" && query !== "") {
-                            runSearch();
-                          }
-                        }}
-                      />
-                    </Flex>
-
-                    <Spacer />
-
-                    <Flex gap={"2"} align={"center"}>
-                      <Text
-                        fontWeight={"semibold"}
-                        fontSize={"sm"}
-                        color={"gray.800"}
-                      >
-                        Options:
-                      </Text>
-                      <Switch
-                        colorScheme={"green"}
-                        checked={showArchived}
-                        onChange={() => setShowArchived(!showArchived)}
-                      />
-                      <Text
-                        fontWeight={"semibold"}
-                        fontSize={"sm"}
-                        color={"gray.600"}
-                      >
-                        Include Archived
-                      </Text>
-                    </Flex>
-
-                    <Button
-                      aria-label={"Search"}
-                      size={"sm"}
-                      rightIcon={<Icon name={"search"} />}
-                      colorScheme={"green"}
-                      isDisabled={query === ""}
-                      onClick={() => runSearch()}
-                    >
-                      Search
-                    </Button>
-                  </Flex>
-                </Flex>
-              </TabPanel>
-
-              {/* Query builder */}
-              <SearchQueryBuilder
-                setHasSearched={setHasSearched}
-                setResults={setResults}
-                setIsSearching={setIsSearching}
-              />
-            </TabPanels>
-          </Tabs>
-
-          {/* Search Results */}
-          <Flex gap={"2"} p={"2"} w={"100%"}>
-            {isSearching ? (
-              <Flex w={"full"} align={"center"} justify={"center"}>
-                <Loading />
-              </Flex>
-            ) : (
-              hasSearched &&
-              !isSearching && (
-                <Flex direction={"column"} w={"100%"} gap={"2"}>
-                  <Heading
-                    id={"resultsHeading"}
+                  <Button
+                    aria-label={"Search"}
                     size={"sm"}
-                    fontWeight={"semibold"}
+                    rightIcon={<Icon name={"search"} />}
+                    colorScheme={"green"}
+                    isDisabled={query === ""}
+                    onClick={() => runSearch()}
                   >
-                    {results.length} result
-                    {results.length > 1 || results.length === 0 ? "s" : ""}
-                  </Heading>
-                  <DataTable
-                    columns={searchResultColumns}
-                    visibleColumns={{}}
-                    selectedRows={{}}
-                    data={results}
-                    showPagination
-                    showSelection
-                    actions={searchResultActions}
-                  />
+                    Search
+                  </Button>
                 </Flex>
-              )
-            )}
-          </Flex>
+              </Flex>
+            </TabPanel>
+
+            {/* Query builder */}
+            <SearchQueryBuilder
+              setHasSearched={setHasSearched}
+              setResults={setResults}
+              setIsSearching={setIsSearching}
+            />
+          </TabPanels>
+        </Tabs>
+
+        {/* Search Results */}
+        <Flex gap={"2"} p={"2"} w={"100%"}>
+          {isSearching ? (
+            <Flex w={"full"} align={"center"} justify={"center"}>
+              <Loading />
+            </Flex>
+          ) : (
+            hasSearched &&
+            !isSearching && (
+              <Flex direction={"column"} w={"100%"} gap={"2"}>
+                <Heading
+                  id={"resultsHeading"}
+                  size={"sm"}
+                  fontWeight={"semibold"}
+                >
+                  {results.length} result
+                  {results.length > 1 || results.length === 0 ? "s" : ""}
+                </Heading>
+                <DataTable
+                  columns={searchResultColumns}
+                  visibleColumns={{}}
+                  selectedRows={{}}
+                  data={results}
+                  showPagination
+                  showSelection
+                  actions={searchResultActions}
+                />
+              </Flex>
+            )
+          )}
         </Flex>
-      </Content>
-    </Page>
+      </Flex>
+    </Content>
   );
 };
 

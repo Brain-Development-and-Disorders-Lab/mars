@@ -55,7 +55,7 @@ import {
   CardFooter,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
-import { Content, Page } from "@components/Container";
+import { Content } from "@components/Container";
 import DataTable from "@components/DataTable";
 import Graph from "@components/Graph";
 import Icon from "@components/Icon";
@@ -1332,269 +1332,319 @@ const Entity = () => {
   };
 
   return (
-    <Page>
-      <Content
-        isError={!_.isUndefined(error)}
-        isLoaded={!loading && !updateLoading && !archiveLoading}
-      >
-        <Flex direction={"column"}>
+    <Content
+      isError={!_.isUndefined(error)}
+      isLoaded={!loading && !updateLoading && !archiveLoading}
+    >
+      <Flex direction={"column"}>
+        <Flex
+          gap={"2"}
+          p={"2"}
+          pb={{ base: "2", lg: "0" }}
+          direction={"row"}
+          justify={"space-between"}
+          align={"center"}
+          wrap={"wrap"}
+        >
           <Flex
+            align={"center"}
             gap={"2"}
             p={"2"}
-            pb={{ base: "2", lg: "0" }}
-            direction={"row"}
-            justify={"space-between"}
-            align={"center"}
-            wrap={"wrap"}
+            border={"2px"}
+            rounded={"md"}
           >
-            <Flex
-              align={"center"}
-              gap={"2"}
-              p={"2"}
-              border={"2px"}
-              rounded={"md"}
-            >
-              <Icon name={"entity"} size={"md"} />
-              <Heading fontWeight={"semibold"} size={"md"}>
-                {entityData.name}
-              </Heading>
-              {entityArchived && <Icon name={"archive"} size={"md"} />}
-            </Flex>
-
-            {/* Buttons */}
-            <Flex direction={"row"} gap={"2"} wrap={"wrap"} align={"center"}>
-              {editing && (
-                <Button
-                  onClick={handleCancelClick}
-                  size={"sm"}
-                  colorScheme={"red"}
-                  rightIcon={<Icon name={"cross"} />}
-                >
-                  Cancel
-                </Button>
-              )}
-              {entityArchived ? (
-                <Button
-                  id={"restoreEntityButton"}
-                  onClick={handleRestoreFromArchiveClick}
-                  size={"sm"}
-                  colorScheme={"orange"}
-                  rightIcon={<Icon name={"rewind"} />}
-                >
-                  Restore
-                </Button>
-              ) : (
-                <Flex gap={"2"}>
-                  <Button
-                    id={"editEntityButton"}
-                    onClick={handleEditClick}
-                    size={"sm"}
-                    colorScheme={editing ? "green" : "blue"}
-                    rightIcon={
-                      editing ? <Icon name={"check"} /> : <Icon name={"edit"} />
-                    }
-                    loadingText={"Saving..."}
-                    isLoading={isUpdating}
-                  >
-                    {editing ? "Done" : "Edit"}
-                  </Button>
-                </Flex>
-              )}
-
-              {/* History button */}
-              <Button
-                size={"sm"}
-                colorScheme={"green"}
-                rightIcon={<Icon name={"clock"} />}
-                onClick={onHistoryOpen}
-              >
-                History
-              </Button>
-
-              {/* Actions Menu */}
-              <Menu>
-                <MenuButton
-                  as={Button}
-                  size={"sm"}
-                  colorScheme={"yellow"}
-                  rightIcon={<Icon name={"lightning"} />}
-                >
-                  Actions
-                </MenuButton>
-                <MenuList>
-                  <MenuItem icon={<Icon name={"print"} />} isDisabled>
-                    Print
-                  </MenuItem>
-                  <MenuItem
-                    icon={<Icon name={"graph"} />}
-                    onClick={onGraphOpen}
-                    isDisabled={editing || entityArchived}
-                  >
-                    Visualize
-                  </MenuItem>
-                  <MenuItem
-                    onClick={handleExportClick}
-                    icon={<Icon name={"download"} />}
-                    isDisabled={editing || entityArchived}
-                  >
-                    Export
-                  </MenuItem>
-                  <MenuItem
-                    onClick={onArchiveDialogOpen}
-                    icon={<Icon name={"archive"} />}
-                    isDisabled={entityArchived}
-                  >
-                    Archive
-                  </MenuItem>
-                </MenuList>
-              </Menu>
-
-              {/* Archive Dialog */}
-              <Dialog
-                dialogRef={archiveDialogRef}
-                header={"Archive Entity"}
-                rightButtonAction={handleArchiveClick}
-                isOpen={isArchiveDialogOpen}
-                onOpen={onArchiveDialogOpen}
-                onClose={onArchiveDialogClose}
-              >
-                <Flex gap={"2"} direction={"column"}>
-                  <Text fontWeight={"semibold"}>
-                    Are you sure you want to archive this Entity?
-                  </Text>
-                  <Text>
-                    This Entity will be moved to the Workspace archive. All
-                    relationships will be preserved, however it will not be
-                    visible. It can be restored at any time.
-                  </Text>
-                </Flex>
-              </Dialog>
-            </Flex>
+            <Icon name={"entity"} size={"md"} />
+            <Heading fontWeight={"semibold"} size={"md"}>
+              {entityData.name}
+            </Heading>
+            {entityArchived && <Icon name={"archive"} size={"md"} />}
           </Flex>
 
-          <Flex direction={"row"} gap={"0"} wrap={"wrap"}>
+          {/* Buttons */}
+          <Flex direction={"row"} gap={"2"} wrap={"wrap"} align={"center"}>
+            {editing && (
+              <Button
+                onClick={handleCancelClick}
+                size={"sm"}
+                colorScheme={"red"}
+                rightIcon={<Icon name={"cross"} />}
+              >
+                Cancel
+              </Button>
+            )}
+            {entityArchived ? (
+              <Button
+                id={"restoreEntityButton"}
+                onClick={handleRestoreFromArchiveClick}
+                size={"sm"}
+                colorScheme={"orange"}
+                rightIcon={<Icon name={"rewind"} />}
+              >
+                Restore
+              </Button>
+            ) : (
+              <Flex gap={"2"}>
+                <Button
+                  id={"editEntityButton"}
+                  onClick={handleEditClick}
+                  size={"sm"}
+                  colorScheme={editing ? "green" : "blue"}
+                  rightIcon={
+                    editing ? <Icon name={"check"} /> : <Icon name={"edit"} />
+                  }
+                  loadingText={"Saving..."}
+                  isLoading={isUpdating}
+                >
+                  {editing ? "Done" : "Edit"}
+                </Button>
+              </Flex>
+            )}
+
+            {/* History button */}
+            <Button
+              size={"sm"}
+              colorScheme={"green"}
+              rightIcon={<Icon name={"clock"} />}
+              onClick={onHistoryOpen}
+            >
+              History
+            </Button>
+
+            {/* Actions Menu */}
+            <Menu>
+              <MenuButton
+                as={Button}
+                size={"sm"}
+                colorScheme={"yellow"}
+                rightIcon={<Icon name={"lightning"} />}
+              >
+                Actions
+              </MenuButton>
+              <MenuList>
+                <MenuItem icon={<Icon name={"print"} />} isDisabled>
+                  Print
+                </MenuItem>
+                <MenuItem
+                  icon={<Icon name={"graph"} />}
+                  onClick={onGraphOpen}
+                  isDisabled={editing || entityArchived}
+                >
+                  Visualize
+                </MenuItem>
+                <MenuItem
+                  onClick={handleExportClick}
+                  icon={<Icon name={"download"} />}
+                  isDisabled={editing || entityArchived}
+                >
+                  Export
+                </MenuItem>
+                <MenuItem
+                  onClick={onArchiveDialogOpen}
+                  icon={<Icon name={"archive"} />}
+                  isDisabled={entityArchived}
+                >
+                  Archive
+                </MenuItem>
+              </MenuList>
+            </Menu>
+
+            {/* Archive Dialog */}
+            <Dialog
+              dialogRef={archiveDialogRef}
+              header={"Archive Entity"}
+              rightButtonAction={handleArchiveClick}
+              isOpen={isArchiveDialogOpen}
+              onOpen={onArchiveDialogOpen}
+              onClose={onArchiveDialogClose}
+            >
+              <Flex gap={"2"} direction={"column"}>
+                <Text fontWeight={"semibold"}>
+                  Are you sure you want to archive this Entity?
+                </Text>
+                <Text>
+                  This Entity will be moved to the Workspace archive. All
+                  relationships will be preserved, however it will not be
+                  visible. It can be restored at any time.
+                </Text>
+              </Flex>
+            </Dialog>
+          </Flex>
+        </Flex>
+
+        <Flex direction={"row"} gap={"0"} wrap={"wrap"}>
+          <Flex
+            direction={"column"}
+            p={"2"}
+            pt={{ base: "0", lg: "2" }}
+            gap={"2"}
+            grow={"1"}
+            basis={"50%"}
+            rounded={"md"}
+          >
+            {/* Entity Overview */}
             <Flex
               direction={"column"}
               p={"2"}
-              pt={{ base: "0", lg: "2" }}
               gap={"2"}
-              grow={"1"}
-              basis={"50%"}
+              border={"1px"}
+              borderColor={"gray.300"}
               rounded={"md"}
             >
-              {/* Entity Overview */}
-              <Flex
-                direction={"column"}
-                p={"2"}
-                gap={"2"}
-                border={"1px"}
-                borderColor={"gray.300"}
-                rounded={"md"}
-              >
-                {/* "Name" and "Created" field */}
-                <Flex gap={"2"} direction={"row"}>
-                  <Flex direction={"column"} gap={"1"} basis={"60%"}>
-                    <Text fontWeight={"bold"}>Name</Text>
-                    <Flex>
-                      <Input
-                        size={"sm"}
-                        value={entityName}
-                        onChange={(event) => {
-                          setEntityName(event.target.value || "");
-                        }}
-                        isReadOnly={!editing}
-                        rounded={"md"}
-                        border={"1px"}
-                        borderColor={"gray.300"}
-                        bg={"white"}
-                      />
-                    </Flex>
-                  </Flex>
-
-                  <Flex direction={"column"} gap={"1"}>
-                    <Text fontWeight={"bold"}>Created</Text>
-                    <Flex align={"center"} gap={"1"}>
-                      <Icon name={"v_date"} size={"sm"} />
-                      <Text fontSize={"sm"}>
-                        {dayjs(entityData.created).format("DD MMM YYYY")}
-                      </Text>
-                    </Flex>
+              {/* "Name" and "Created" field */}
+              <Flex gap={"2"} direction={"row"}>
+                <Flex direction={"column"} gap={"1"} basis={"60%"}>
+                  <Text fontWeight={"bold"}>Name</Text>
+                  <Flex>
+                    <Input
+                      size={"sm"}
+                      value={entityName}
+                      onChange={(event) => {
+                        setEntityName(event.target.value || "");
+                      }}
+                      isReadOnly={!editing}
+                      rounded={"md"}
+                      border={"1px"}
+                      borderColor={"gray.300"}
+                      bg={"white"}
+                    />
                   </Flex>
                 </Flex>
 
-                {/* "Created" and "Owner" fields */}
-                <Flex gap={"2"} direction={"row"}>
-                  <Flex direction={"column"} gap={"1"} basis={"60%"}>
-                    <Text fontWeight={"bold"}>Description</Text>
-                    <Flex>
-                      <Textarea
-                        size={"sm"}
-                        value={entityDescription}
-                        onChange={(event) => {
-                          setEntityDescription(event.target.value || "");
-                        }}
-                        isReadOnly={!editing}
-                        rounded={"md"}
-                        border={"1px"}
-                        borderColor={"gray.300"}
-                        bg={"white"}
-                      />
-                    </Flex>
-                  </Flex>
-                  <Flex direction={"column"} gap={"1"}>
-                    <Text fontWeight={"bold"}>Owner</Text>
-                    <Flex>
-                      <ActorTag
-                        orcid={entityData.owner}
-                        fallback={"Unknown User"}
-                      />
-                    </Flex>
+                <Flex direction={"column"} gap={"1"}>
+                  <Text fontWeight={"bold"}>Created</Text>
+                  <Flex align={"center"} gap={"1"}>
+                    <Icon name={"v_date"} size={"sm"} />
+                    <Text fontSize={"sm"}>
+                      {dayjs(entityData.created).format("DD MMM YYYY")}
+                    </Text>
                   </Flex>
                 </Flex>
               </Flex>
 
-              {/* Projects */}
+              {/* "Created" and "Owner" fields */}
+              <Flex gap={"2"} direction={"row"}>
+                <Flex direction={"column"} gap={"1"} basis={"60%"}>
+                  <Text fontWeight={"bold"}>Description</Text>
+                  <Flex>
+                    <Textarea
+                      size={"sm"}
+                      value={entityDescription}
+                      onChange={(event) => {
+                        setEntityDescription(event.target.value || "");
+                      }}
+                      isReadOnly={!editing}
+                      rounded={"md"}
+                      border={"1px"}
+                      borderColor={"gray.300"}
+                      bg={"white"}
+                    />
+                  </Flex>
+                </Flex>
+                <Flex direction={"column"} gap={"1"}>
+                  <Text fontWeight={"bold"}>Owner</Text>
+                  <Flex>
+                    <ActorTag
+                      orcid={entityData.owner}
+                      fallback={"Unknown User"}
+                    />
+                  </Flex>
+                </Flex>
+              </Flex>
+            </Flex>
+
+            {/* Projects */}
+            <Flex
+              direction={"column"}
+              p={"2"}
+              gap={"2"}
+              rounded={"md"}
+              border={"1px"}
+              borderColor={"gray.300"}
+            >
               <Flex
-                direction={"column"}
-                p={"2"}
-                gap={"2"}
-                rounded={"md"}
-                border={"1px"}
-                borderColor={"gray.300"}
+                direction={"row"}
+                justify={"space-between"}
+                align={"center"}
               >
+                <Heading size={"sm"}>Projects</Heading>
+                <Button
+                  size={"sm"}
+                  rightIcon={<Icon name={"add"} />}
+                  isDisabled={!editing}
+                  onClick={onAddProjectsOpen}
+                >
+                  Add
+                </Button>
+              </Flex>
+              <Flex
+                w={"100%"}
+                justify={"center"}
+                align={"center"}
+                minH={entityProjects.length > 0 ? "fit-content" : "200px"}
+              >
+                {entityProjects.length === 0 ? (
+                  <Text color={"gray.400"} fontWeight={"semibold"}>
+                    No Projects
+                  </Text>
+                ) : (
+                  <DataTable
+                    data={entityProjects}
+                    columns={projectsTableColumns}
+                    visibleColumns={{}}
+                    selectedRows={{}}
+                    viewOnly={!editing}
+                    actions={projectsTableActions}
+                    showPagination
+                    showItemCount
+                    showSelection
+                  />
+                )}
+              </Flex>
+            </Flex>
+
+            {/* Attachments */}
+            <Flex
+              direction={"column"}
+              p={"2"}
+              gap={"2"}
+              rounded={"md"}
+              border={"1px"}
+              borderColor={"gray.300"}
+            >
+              <Flex gap={"2"} direction={"column"}>
                 <Flex
                   direction={"row"}
                   justify={"space-between"}
                   align={"center"}
                 >
-                  <Heading size={"sm"}>Projects</Heading>
+                  <Heading size={"sm"}>Attachments</Heading>
                   <Button
                     size={"sm"}
-                    rightIcon={<Icon name={"add"} />}
-                    isDisabled={!editing}
-                    onClick={onAddProjectsOpen}
+                    rightIcon={<Icon name={"upload"} />}
+                    onClick={onUploadOpen}
                   >
-                    Add
+                    Upload
                   </Button>
                 </Flex>
+
                 <Flex
                   w={"100%"}
                   justify={"center"}
                   align={"center"}
-                  minH={entityProjects.length > 0 ? "fit-content" : "200px"}
+                  minH={entityAttachments.length > 0 ? "fit-content" : "200px"}
                 >
-                  {entityProjects.length === 0 ? (
+                  {entityAttachments.length === 0 ? (
                     <Text color={"gray.400"} fontWeight={"semibold"}>
-                      No Projects
+                      No Attachments
                     </Text>
                   ) : (
                     <DataTable
-                      data={entityProjects}
-                      columns={projectsTableColumns}
+                      data={entityAttachments}
+                      columns={attachmentTableColumns}
                       visibleColumns={{}}
                       selectedRows={{}}
                       viewOnly={!editing}
-                      actions={projectsTableActions}
+                      actions={attachmentTableActions}
                       showPagination
                       showItemCount
                       showSelection
@@ -1602,1266 +1652,1188 @@ const Entity = () => {
                   )}
                 </Flex>
               </Flex>
+            </Flex>
+          </Flex>
 
-              {/* Attachments */}
-              <Flex
-                direction={"column"}
-                p={"2"}
-                gap={"2"}
-                rounded={"md"}
-                border={"1px"}
-                borderColor={"gray.300"}
-              >
-                <Flex gap={"2"} direction={"column"}>
-                  <Flex
-                    direction={"row"}
-                    justify={"space-between"}
-                    align={"center"}
-                  >
-                    <Heading size={"sm"}>Attachments</Heading>
-                    <Button
-                      size={"sm"}
-                      rightIcon={<Icon name={"upload"} />}
-                      onClick={onUploadOpen}
-                    >
-                      Upload
-                    </Button>
-                  </Flex>
-
+          <Flex
+            direction={"column"}
+            p={"2"}
+            pl={{ base: "2", lg: "0" }}
+            pt={{ base: "0", lg: "2" }}
+            gap={"2"}
+            grow={"1"}
+            basis={"50%"}
+            rounded={"md"}
+          >
+            {/* Origins and Products */}
+            <Tabs
+              variant={"enclosed"}
+              colorScheme={"gray"}
+              onChange={(index) => setRelationsIndex(index)}
+            >
+              <TabList>
+                <Tab>
+                  <Heading size={"sm"}>Origins</Heading>
+                </Tab>
+                <Tab>
+                  <Heading size={"sm"}>Products</Heading>
+                </Tab>
+                <Spacer />
+                <Button
+                  size={"sm"}
+                  rightIcon={<Icon name={"add"} />}
+                  isDisabled={!editing}
+                  onClick={() => {
+                    _.isEqual(relationsIndex, 0)
+                      ? onAddOriginsOpen()
+                      : onAddProductsOpen();
+                  }}
+                >
+                  Add
+                </Button>
+              </TabList>
+              <TabPanels>
+                <TabPanel
+                  p={"2"}
+                  borderLeft={"1px"}
+                  borderRight={"1px"}
+                  borderBottom={"1px"}
+                  borderColor={"gray.300"}
+                  roundedBottom={"md"}
+                >
                   <Flex
                     w={"100%"}
                     justify={"center"}
-                    align={"center"}
-                    minH={
-                      entityAttachments.length > 0 ? "fit-content" : "200px"
-                    }
+                    align={entityOrigins.length > 0 ? "" : "center"}
+                    minH={entityOrigins.length > 0 ? "fit-content" : "200px"}
                   >
-                    {entityAttachments.length === 0 ? (
-                      <Text color={"gray.400"} fontWeight={"semibold"}>
-                        No Attachments
-                      </Text>
-                    ) : (
+                    {entityOrigins.length > 0 ? (
                       <DataTable
-                        data={entityAttachments}
-                        columns={attachmentTableColumns}
+                        data={entityOrigins}
+                        columns={originTableColumns}
                         visibleColumns={{}}
                         selectedRows={{}}
                         viewOnly={!editing}
-                        actions={attachmentTableActions}
+                        actions={originTableActions}
                         showPagination
                         showItemCount
                         showSelection
                       />
+                    ) : (
+                      <Text color={"gray.400"} fontWeight={"semibold"}>
+                        No Origins
+                      </Text>
                     )}
                   </Flex>
-                </Flex>
-              </Flex>
-            </Flex>
+                </TabPanel>
+                <TabPanel
+                  p={"2"}
+                  borderLeft={"1px"}
+                  borderRight={"1px"}
+                  borderBottom={"1px"}
+                  borderColor={"gray.300"}
+                  roundedBottom={"md"}
+                >
+                  <Flex
+                    w={"100%"}
+                    justify={"center"}
+                    align={entityProducts.length > 0 ? "" : "center"}
+                    minH={entityProducts.length > 0 ? "fit-content" : "200px"}
+                  >
+                    {entityProducts.length > 0 ? (
+                      <DataTable
+                        data={entityProducts}
+                        columns={productTableColumns}
+                        visibleColumns={{}}
+                        selectedRows={{}}
+                        viewOnly={!editing}
+                        actions={productTableActions}
+                        showPagination
+                        showItemCount
+                        showSelection
+                      />
+                    ) : (
+                      <Text color={"gray.400"} fontWeight={"semibold"}>
+                        No Products
+                      </Text>
+                    )}
+                  </Flex>
+                </TabPanel>
+              </TabPanels>
+            </Tabs>
 
+            {/* Attributes */}
             <Flex
               direction={"column"}
               p={"2"}
-              pl={{ base: "2", lg: "0" }}
-              pt={{ base: "0", lg: "2" }}
               gap={"2"}
-              grow={"1"}
-              basis={"50%"}
               rounded={"md"}
+              border={"1px"}
+              borderColor={"gray.300"}
             >
-              {/* Origins and Products */}
-              <Tabs
-                variant={"enclosed"}
-                colorScheme={"gray"}
-                onChange={(index) => setRelationsIndex(index)}
+              <Flex
+                direction={"row"}
+                justify={"space-between"}
+                align={"center"}
               >
-                <TabList>
-                  <Tab>
-                    <Heading size={"sm"}>Origins</Heading>
-                  </Tab>
-                  <Tab>
-                    <Heading size={"sm"}>Products</Heading>
-                  </Tab>
-                  <Spacer />
-                  <Button
-                    size={"sm"}
-                    rightIcon={<Icon name={"add"} />}
-                    isDisabled={!editing}
-                    onClick={() => {
-                      _.isEqual(relationsIndex, 0)
-                        ? onAddOriginsOpen()
-                        : onAddProductsOpen();
+                <Heading size={"sm"}>Attributes</Heading>
+                <Button
+                  id={"addAttributeModalButton"}
+                  size={"sm"}
+                  rightIcon={<Icon name={"add"} />}
+                  isDisabled={!editing}
+                  onClick={onAddAttributesOpen}
+                >
+                  Add
+                </Button>
+              </Flex>
+
+              <Flex
+                w={"100%"}
+                justify={"center"}
+                align={"center"}
+                minH={entityAttributes.length > 0 ? "fit-content" : "200px"}
+              >
+                {entityAttributes.length === 0 ? (
+                  <Text color={"gray.400"} fontWeight={"semibold"}>
+                    No Attributes
+                  </Text>
+                ) : (
+                  <DataTable
+                    data={entityAttributes}
+                    columns={attributeTableColumns}
+                    visibleColumns={visibleAttributeTableColumns}
+                    selectedRows={{}}
+                    viewOnly={!editing}
+                    showPagination
+                    showItemCount
+                    showSelection
+                  />
+                )}
+              </Flex>
+            </Flex>
+          </Flex>
+        </Flex>
+
+        {/* Add Attributes modal */}
+        <Modal
+          isOpen={isAddAttributesOpen}
+          onClose={onAddAttributesClose}
+          size={"4xl"}
+          isCentered
+        >
+          <ModalOverlay />
+          <ModalContent p={"2"} gap={"2"}>
+            <ModalHeader p={"2"}>Add Attribute</ModalHeader>
+            <ModalCloseButton />
+
+            <ModalBody p={"2"}>
+              {/* Attribute creation */}
+              <Flex direction={"column"} gap={"2"} pb={"2"} justify={"center"}>
+                <Select
+                  size={"sm"}
+                  placeholder={"Select Template"}
+                  value={selectedTemplate}
+                  onChange={(event) => {
+                    if (!_.isEqual(event.target.value.toString(), "")) {
+                      setSelectedTemplate(event.target.value);
+                      for (const attribute of attributes) {
+                        if (
+                          _.isEqual(
+                            event.target.value.toString(),
+                            attribute._id,
+                          )
+                        ) {
+                          setAttributeName(attribute.name);
+                          setAttributeDescription(attribute.description);
+                          setAttributeValues(() => [...attribute.values]);
+                          break;
+                        }
+                      }
+                    }
+                  }}
+                >
+                  {!loading &&
+                    attributes.map((attribute) => {
+                      return (
+                        <option key={attribute._id} value={attribute._id}>
+                          {attribute.name}
+                        </option>
+                      );
+                    })}
+                  ;
+                </Select>
+                <Text fontSize="sm">
+                  Don't see the Template you're looking for? You can
+                  <Link
+                    onClick={() => navigate("/create/attribute")}
+                    style={{
+                      color: "#3182ce",
+                      marginLeft: "5px",
+                      marginRight: "5px",
+                      textDecoration: "underline",
                     }}
                   >
-                    Add
-                  </Button>
-                </TabList>
-                <TabPanels>
-                  <TabPanel
-                    p={"2"}
-                    borderLeft={"1px"}
-                    borderRight={"1px"}
-                    borderBottom={"1px"}
-                    borderColor={"gray.300"}
-                    roundedBottom={"md"}
-                  >
-                    <Flex
-                      w={"100%"}
-                      justify={"center"}
-                      align={entityOrigins.length > 0 ? "" : "center"}
-                      minH={entityOrigins.length > 0 ? "fit-content" : "200px"}
-                    >
-                      {entityOrigins.length > 0 ? (
-                        <DataTable
-                          data={entityOrigins}
-                          columns={originTableColumns}
-                          visibleColumns={{}}
-                          selectedRows={{}}
-                          viewOnly={!editing}
-                          actions={originTableActions}
-                          showPagination
-                          showItemCount
-                          showSelection
-                        />
-                      ) : (
-                        <Text color={"gray.400"} fontWeight={"semibold"}>
-                          No Origins
-                        </Text>
-                      )}
-                    </Flex>
-                  </TabPanel>
-                  <TabPanel
-                    p={"2"}
-                    borderLeft={"1px"}
-                    borderRight={"1px"}
-                    borderBottom={"1px"}
-                    borderColor={"gray.300"}
-                    roundedBottom={"md"}
-                  >
-                    <Flex
-                      w={"100%"}
-                      justify={"center"}
-                      align={entityProducts.length > 0 ? "" : "center"}
-                      minH={entityProducts.length > 0 ? "fit-content" : "200px"}
-                    >
-                      {entityProducts.length > 0 ? (
-                        <DataTable
-                          data={entityProducts}
-                          columns={productTableColumns}
-                          visibleColumns={{}}
-                          selectedRows={{}}
-                          viewOnly={!editing}
-                          actions={productTableActions}
-                          showPagination
-                          showItemCount
-                          showSelection
-                        />
-                      ) : (
-                        <Text color={"gray.400"} fontWeight={"semibold"}>
-                          No Products
-                        </Text>
-                      )}
-                    </Flex>
-                  </TabPanel>
-                </TabPanels>
-              </Tabs>
+                    create
+                  </Link>
+                  a new Template here.
+                </Text>
 
-              {/* Attributes */}
+                <Flex
+                  direction={"column"}
+                  gap={"2"}
+                  w={"100%"}
+                  justify={"center"}
+                >
+                  <Flex direction={"row"} gap={"2"} wrap={["wrap", "nowrap"]}>
+                    <FormControl isRequired>
+                      <FormLabel fontSize={"sm"}>Name</FormLabel>
+                      <Input
+                        size={"sm"}
+                        placeholder={"Name"}
+                        id="formName"
+                        rounded={"md"}
+                        value={attributeName}
+                        onChange={(event) =>
+                          setAttributeName(event.target.value)
+                        }
+                        required
+                      />
+                      {isAttributeNameError && (
+                        <FormErrorMessage>
+                          A name must be specified for the Attribute.
+                        </FormErrorMessage>
+                      )}
+                    </FormControl>
+
+                    <FormControl isRequired>
+                      <FormLabel fontSize={"sm"}>Description</FormLabel>
+                      <Textarea
+                        size={"sm"}
+                        rounded={"md"}
+                        value={attributeDescription}
+                        placeholder={"Attribute Description"}
+                        id="formDescription"
+                        onChange={(event) =>
+                          setAttributeDescription(event.target.value)
+                        }
+                      />
+                      {isAttributeDescriptionError && (
+                        <FormErrorMessage>
+                          A description should be provided for the Attribute.
+                        </FormErrorMessage>
+                      )}
+                    </FormControl>
+                  </Flex>
+
+                  <Flex>
+                    <FormControl isRequired isInvalid={isAttributeValueError}>
+                      <Values
+                        viewOnly={false}
+                        values={attributeValues}
+                        setValues={setAttributeValues}
+                      />
+                    </FormControl>
+                  </Flex>
+                </Flex>
+              </Flex>
+
+              {/* Modal buttons */}
+              <Flex direction={"row"} justify={"center"} gap={"2"}>
+                {/* "Cancel" button */}
+                <Button
+                  colorScheme={"red"}
+                  size={"sm"}
+                  variant={"outline"}
+                  rightIcon={<Icon name={"cross"} />}
+                  onClick={onAddAttributesClose}
+                >
+                  Cancel
+                </Button>
+
+                <Spacer />
+
+                <Button
+                  colorScheme={"blue"}
+                  size={"sm"}
+                  variant={"outline"}
+                  rightIcon={<Icon name={"add"} />}
+                  onClick={onSaveAsTemplate}
+                  isDisabled={isAttributeError}
+                  isLoading={loadingAttributeCreate}
+                >
+                  Save as Template
+                </Button>
+
+                <Button
+                  colorScheme={"green"}
+                  size={"sm"}
+                  rightIcon={<Icon name={"check"} />}
+                  isDisabled={isAttributeError}
+                  onClick={() => {
+                    addAttribute();
+                  }}
+                >
+                  Done
+                </Button>
+              </Flex>
+            </ModalBody>
+          </ModalContent>
+        </Modal>
+
+        {/* Add Projects modal */}
+        <Modal
+          isOpen={isAddProjectsOpen}
+          onClose={onAddProjectsClose}
+          isCentered
+        >
+          <ModalOverlay />
+          <ModalContent p={"2"} gap={"2"} w={["lg", "xl", "2xl"]}>
+            {/* Heading and close button */}
+            <ModalHeader p={"2"}>Add Entity to Projects</ModalHeader>
+            <ModalCloseButton />
+
+            <ModalBody p={"2"}>
+              {/* Select component for Projects */}
+              <Flex direction={"column"} gap={"2"}>
+                <FormControl>
+                  <Select
+                    size={"sm"}
+                    title={"Select Project"}
+                    placeholder={"Select Project"}
+                    onChange={(event) => {
+                      const selectedProject = event.target.value.toString();
+                      if (selectedProjects.includes(selectedProject)) {
+                        // Check that the selected Project has not already been selected
+                        toast({
+                          title: "Warning",
+                          description: "Project has already been selected.",
+                          status: "warning",
+                          duration: 2000,
+                          position: "bottom-right",
+                          isClosable: true,
+                        });
+                      } else if (!_.isEqual(selectedProject, "")) {
+                        // Add the selected Project if not the default option
+                        setSelectedProjects([
+                          ...selectedProjects,
+                          selectedProject,
+                        ]);
+                      }
+                    }}
+                  >
+                    {!loading &&
+                      projectData.map((project: IGenericItem) => {
+                        if (
+                          !_.includes(selectedProjects, project._id) &&
+                          !_.includes(entityProjects, project._id)
+                        ) {
+                          // Only include Projects that haven't been selected or the Entity is currently present in
+                          return (
+                            <option key={project._id} value={project._id}>
+                              {project.name}
+                            </option>
+                          );
+                        } else {
+                          return null;
+                        }
+                      })}
+                  </Select>
+                </FormControl>
+
+                <Flex
+                  direction={"row"}
+                  gap={"2"}
+                  p={"2"}
+                  align={"center"}
+                  justify={"center"}
+                  rounded={"md"}
+                  border={"1px"}
+                  borderColor={"gray.300"}
+                  minH={"100px"}
+                >
+                  {selectedProjects.length > 0 ? (
+                    selectedProjects.map((project) => {
+                      if (!_.isEqual(project, "")) {
+                        return (
+                          <Tag key={`tag-${project}`}>
+                            <TagLabel>
+                              <Linky
+                                id={project}
+                                type={"projects"}
+                                size={"sm"}
+                              />
+                            </TagLabel>
+                            <TagCloseButton
+                              onClick={() => {
+                                setSelectedProjects([
+                                  ...selectedProjects.filter((selected) => {
+                                    return !_.isEqual(project, selected);
+                                  }),
+                                ]);
+                              }}
+                            />
+                          </Tag>
+                        );
+                      } else {
+                        return null;
+                      }
+                    })
+                  ) : (
+                    <Text
+                      fontSize={"sm"}
+                      fontWeight={"semibold"}
+                      color={"gray.400"}
+                    >
+                      No Projects selected
+                    </Text>
+                  )}
+                </Flex>
+              </Flex>
+            </ModalBody>
+
+            <ModalFooter p={"2"}>
+              {/* "Cancel" button */}
+              <Flex direction={"row"} justify={"center"} w={"100%"}>
+                <Button
+                  colorScheme={"red"}
+                  size={"sm"}
+                  variant={"outline"}
+                  rightIcon={<Icon name={"cross"} />}
+                  onClick={onCancelAddProjectsClick}
+                >
+                  Cancel
+                </Button>
+
+                <Spacer />
+
+                <Button
+                  colorScheme={"green"}
+                  size={"sm"}
+                  rightIcon={<Icon name={"check"} />}
+                  onClick={() => {
+                    addProjects(selectedProjects);
+                  }}
+                  isDisabled={selectedProjects.length === 0}
+                >
+                  Add Entity to {selectedProjects.length} Project
+                  {selectedProjects.length === 1 ? "" : "s"}
+                </Button>
+              </Flex>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+
+        {/* Add Products modal */}
+        <Modal
+          isOpen={isAddProductsOpen}
+          onClose={onAddProductsClose}
+          isCentered
+        >
+          <ModalOverlay />
+          <ModalContent p={"2"} gap={"0"} w={["md", "lg", "xl"]}>
+            {/* Heading and close button */}
+            <ModalHeader p={"2"}>Add Products</ModalHeader>
+            <ModalCloseButton />
+
+            <ModalBody p={"2"}>
+              <SearchSelect
+                resultType={"entity"}
+                value={selectedProduct}
+                onChange={setSelectedProduct}
+              />
+            </ModalBody>
+
+            <ModalFooter p={"2"}>
+              <Button
+                colorScheme={"red"}
+                size={"sm"}
+                variant={"outline"}
+                rightIcon={<Icon name={"cross"} />}
+                onClick={onAddProductsClose}
+              >
+                Cancel
+              </Button>
+
+              <Spacer />
+
+              <Button
+                colorScheme={"green"}
+                size={"sm"}
+                rightIcon={<Icon name={"check"} />}
+                onClick={() => {
+                  if (id) {
+                    // Add the Product to the Entity
+                    addProducts(selectedProducts);
+                  }
+                }}
+              >
+                Done
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+
+        {/* Add Origins modal */}
+        <Modal isOpen={isAddOriginsOpen} onClose={onAddOriginsClose} isCentered>
+          <ModalOverlay />
+          <ModalContent p={"2"} gap={"0"} w={["md", "lg", "xl"]}>
+            {/* Heading and close button */}
+            <ModalHeader p={"2"}>Add Origins</ModalHeader>
+            <ModalCloseButton />
+
+            <ModalBody p={"2"}>
+              <SearchSelect
+                resultType={"entity"}
+                value={selectedOrigin}
+                onChange={setSelectedOrigin}
+              />
+            </ModalBody>
+
+            <ModalFooter p={"2"}>
+              <Button
+                colorScheme={"red"}
+                size={"sm"}
+                variant={"outline"}
+                rightIcon={<Icon name={"cross"} />}
+                onClick={onAddOriginsClose}
+              >
+                Cancel
+              </Button>
+
+              <Spacer />
+
+              <Button
+                colorScheme={"green"}
+                size={"sm"}
+                rightIcon={<Icon name={"check"} />}
+                onClick={() => {
+                  if (id) {
+                    // Add the Origin to the Entity
+                    addOrigins(selectedOrigins);
+                  }
+                }}
+              >
+                Done
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+
+        {/* Upload modal */}
+        <Uploader
+          isOpen={isUploadOpen}
+          onOpen={onUploadOpen}
+          onClose={onUploadClose}
+          uploads={toUploadAttachments}
+          setUploads={setToUploadAttachments}
+          target={entityData._id}
+        />
+
+        {/* Export modal */}
+        <Modal
+          isOpen={isExportOpen}
+          onClose={onExportClose}
+          size={"2xl"}
+          isCentered
+        >
+          <ModalOverlay />
+          <ModalContent p={"2"} w={["lg", "xl", "2xl"]} gap={"0"}>
+            {/* Heading and close button */}
+            <ModalHeader p={"2"}>Export Entity</ModalHeader>
+            <ModalCloseButton />
+
+            <ModalBody px={"2"}>
+              <Flex w={"100%"} direction={"column"} py={"1"} gap={"2"}>
+                <Text fontSize={"sm"}>
+                  Select the Entity information to include in the exported file.
+                </Text>
+              </Flex>
+
+              {/* Selection content */}
               <Flex
-                direction={"column"}
+                direction={"row"}
                 p={"2"}
                 gap={"2"}
                 rounded={"md"}
                 border={"1px"}
                 borderColor={"gray.300"}
               >
-                <Flex
-                  direction={"row"}
-                  justify={"space-between"}
-                  align={"center"}
-                >
-                  <Heading size={"sm"}>Attributes</Heading>
-                  <Button
-                    id={"addAttributeModalButton"}
-                    size={"sm"}
-                    rightIcon={<Icon name={"add"} />}
-                    isDisabled={!editing}
-                    onClick={onAddAttributesOpen}
-                  >
-                    Add
-                  </Button>
-                </Flex>
-
-                <Flex
-                  w={"100%"}
-                  justify={"center"}
-                  align={"center"}
-                  minH={entityAttributes.length > 0 ? "fit-content" : "200px"}
-                >
-                  {entityAttributes.length === 0 ? (
-                    <Text color={"gray.400"} fontWeight={"semibold"}>
-                      No Attributes
-                    </Text>
-                  ) : (
-                    <DataTable
-                      data={entityAttributes}
-                      columns={attributeTableColumns}
-                      visibleColumns={visibleAttributeTableColumns}
-                      selectedRows={{}}
-                      viewOnly={!editing}
-                      showPagination
-                      showItemCount
-                      showSelection
-                    />
-                  )}
-                </Flex>
-              </Flex>
-            </Flex>
-          </Flex>
-
-          {/* Add Attributes modal */}
-          <Modal
-            isOpen={isAddAttributesOpen}
-            onClose={onAddAttributesClose}
-            size={"4xl"}
-            isCentered
-          >
-            <ModalOverlay />
-            <ModalContent p={"2"} gap={"2"}>
-              <ModalHeader p={"2"}>Add Attribute</ModalHeader>
-              <ModalCloseButton />
-
-              <ModalBody p={"2"}>
-                {/* Attribute creation */}
-                <Flex
-                  direction={"column"}
-                  gap={"2"}
-                  pb={"2"}
-                  justify={"center"}
-                >
-                  <Select
-                    size={"sm"}
-                    placeholder={"Select Template"}
-                    value={selectedTemplate}
-                    onChange={(event) => {
-                      if (!_.isEqual(event.target.value.toString(), "")) {
-                        setSelectedTemplate(event.target.value);
-                        for (const attribute of attributes) {
-                          if (
-                            _.isEqual(
-                              event.target.value.toString(),
-                              attribute._id,
-                            )
-                          ) {
-                            setAttributeName(attribute.name);
-                            setAttributeDescription(attribute.description);
-                            setAttributeValues(() => [...attribute.values]);
-                            break;
-                          }
-                        }
-                      }
-                    }}
-                  >
-                    {!loading &&
-                      attributes.map((attribute) => {
-                        return (
-                          <option key={attribute._id} value={attribute._id}>
-                            {attribute.name}
-                          </option>
-                        );
-                      })}
-                    ;
-                  </Select>
-                  <Text fontSize="sm">
-                    Don't see the Template you're looking for? You can
-                    <Link
-                      onClick={() => navigate("/create/attribute")}
-                      style={{
-                        color: "#3182ce",
-                        marginLeft: "5px",
-                        marginRight: "5px",
-                        textDecoration: "underline",
-                      }}
-                    >
-                      create
-                    </Link>
-                    a new Template here.
-                  </Text>
-
-                  <Flex
-                    direction={"column"}
-                    gap={"2"}
-                    w={"100%"}
-                    justify={"center"}
-                  >
-                    <Flex direction={"row"} gap={"2"} wrap={["wrap", "nowrap"]}>
-                      <FormControl isRequired>
-                        <FormLabel fontSize={"sm"}>Name</FormLabel>
-                        <Input
-                          size={"sm"}
-                          placeholder={"Name"}
-                          id="formName"
-                          rounded={"md"}
-                          value={attributeName}
-                          onChange={(event) =>
-                            setAttributeName(event.target.value)
-                          }
-                          required
-                        />
-                        {isAttributeNameError && (
-                          <FormErrorMessage>
-                            A name must be specified for the Attribute.
-                          </FormErrorMessage>
-                        )}
-                      </FormControl>
-
-                      <FormControl isRequired>
-                        <FormLabel fontSize={"sm"}>Description</FormLabel>
-                        <Textarea
-                          size={"sm"}
-                          rounded={"md"}
-                          value={attributeDescription}
-                          placeholder={"Attribute Description"}
-                          id="formDescription"
-                          onChange={(event) =>
-                            setAttributeDescription(event.target.value)
-                          }
-                        />
-                        {isAttributeDescriptionError && (
-                          <FormErrorMessage>
-                            A description should be provided for the Attribute.
-                          </FormErrorMessage>
-                        )}
-                      </FormControl>
-                    </Flex>
-
-                    <Flex>
-                      <FormControl isRequired isInvalid={isAttributeValueError}>
-                        <Values
-                          viewOnly={false}
-                          values={attributeValues}
-                          setValues={setAttributeValues}
-                        />
-                      </FormControl>
-                    </Flex>
-                  </Flex>
-                </Flex>
-
-                {/* Modal buttons */}
-                <Flex direction={"row"} justify={"center"} gap={"2"}>
-                  {/* "Cancel" button */}
-                  <Button
-                    colorScheme={"red"}
-                    size={"sm"}
-                    variant={"outline"}
-                    rightIcon={<Icon name={"cross"} />}
-                    onClick={onAddAttributesClose}
-                  >
-                    Cancel
-                  </Button>
-
-                  <Spacer />
-
-                  <Button
-                    colorScheme={"blue"}
-                    size={"sm"}
-                    variant={"outline"}
-                    rightIcon={<Icon name={"add"} />}
-                    onClick={onSaveAsTemplate}
-                    isDisabled={isAttributeError}
-                    isLoading={loadingAttributeCreate}
-                  >
-                    Save as Template
-                  </Button>
-
-                  <Button
-                    colorScheme={"green"}
-                    size={"sm"}
-                    rightIcon={<Icon name={"check"} />}
-                    isDisabled={isAttributeError}
-                    onClick={() => {
-                      addAttribute();
-                    }}
-                  >
-                    Done
-                  </Button>
-                </Flex>
-              </ModalBody>
-            </ModalContent>
-          </Modal>
-
-          {/* Add Projects modal */}
-          <Modal
-            isOpen={isAddProjectsOpen}
-            onClose={onAddProjectsClose}
-            isCentered
-          >
-            <ModalOverlay />
-            <ModalContent p={"2"} gap={"2"} w={["lg", "xl", "2xl"]}>
-              {/* Heading and close button */}
-              <ModalHeader p={"2"}>Add Entity to Projects</ModalHeader>
-              <ModalCloseButton />
-
-              <ModalBody p={"2"}>
-                {/* Select component for Projects */}
                 <Flex direction={"column"} gap={"2"}>
                   <FormControl>
-                    <Select
-                      size={"sm"}
-                      title={"Select Project"}
-                      placeholder={"Select Project"}
-                      onChange={(event) => {
-                        const selectedProject = event.target.value.toString();
-                        if (selectedProjects.includes(selectedProject)) {
-                          // Check that the selected Project has not already been selected
-                          toast({
-                            title: "Warning",
-                            description: "Project has already been selected.",
-                            status: "warning",
-                            duration: 2000,
-                            position: "bottom-right",
-                            isClosable: true,
-                          });
-                        } else if (!_.isEqual(selectedProject, "")) {
-                          // Add the selected Project if not the default option
-                          setSelectedProjects([
-                            ...selectedProjects,
-                            selectedProject,
-                          ]);
-                        }
-                      }}
-                    >
-                      {!loading &&
-                        projectData.map((project: IGenericItem) => {
-                          if (
-                            !_.includes(selectedProjects, project._id) &&
-                            !_.includes(entityProjects, project._id)
-                          ) {
-                            // Only include Projects that haven't been selected or the Entity is currently present in
-                            return (
-                              <option key={project._id} value={project._id}>
-                                {project.name}
-                              </option>
-                            );
-                          } else {
-                            return null;
-                          }
-                        })}
-                    </Select>
+                    <FormLabel>Details</FormLabel>
+                    {!loading ? (
+                      <CheckboxGroup size={"sm"}>
+                        <Stack spacing={2} direction={"column"}>
+                          <Checkbox disabled defaultChecked>
+                            Name: {entityName}
+                          </Checkbox>
+                          <Checkbox
+                            isChecked={_.includes(exportFields, "created")}
+                            onChange={(event) =>
+                              handleExportCheck("created", event.target.checked)
+                            }
+                          >
+                            Created:{" "}
+                            {dayjs(entityData.created).format("DD MMM YYYY")}
+                          </Checkbox>
+                          <Checkbox isChecked={true} isDisabled>
+                            Owner: {entityData.owner}
+                          </Checkbox>
+                          <Checkbox
+                            isChecked={_.includes(exportFields, "description")}
+                            onChange={(event) =>
+                              handleExportCheck(
+                                "description",
+                                event.target.checked,
+                              )
+                            }
+                            isDisabled={_.isEqual(entityDescription, "")}
+                          >
+                            <Text noOfLines={1}>
+                              Description:{" "}
+                              {_.isEqual(entityDescription, "")
+                                ? "No description"
+                                : entityDescription}
+                            </Text>
+                          </Checkbox>
+                        </Stack>
+                      </CheckboxGroup>
+                    ) : (
+                      <Text>Loading details</Text>
+                    )}
                   </FormControl>
-
-                  <Flex
-                    direction={"row"}
-                    gap={"2"}
-                    p={"2"}
-                    align={"center"}
-                    justify={"center"}
-                    rounded={"md"}
-                    border={"1px"}
-                    borderColor={"gray.300"}
-                    minH={"100px"}
-                  >
-                    {selectedProjects.length > 0 ? (
-                      selectedProjects.map((project) => {
-                        if (!_.isEqual(project, "")) {
+                  <FormControl>
+                    <FormLabel fontSize={"md"}>Projects</FormLabel>
+                    {!loading && entityProjects.length > 0 ? (
+                      <Stack spacing={2} direction={"column"}>
+                        {entityProjects.map((project) => {
+                          allExportFields.push(`project_${project}`);
                           return (
-                            <Tag key={`tag-${project}`}>
-                              <TagLabel>
+                            <Checkbox
+                              size={"sm"}
+                              key={project}
+                              isChecked={_.includes(
+                                exportFields,
+                                `project_${project}`,
+                              )}
+                              onChange={(event) =>
+                                handleExportCheck(
+                                  `project_${project}`,
+                                  event.target.checked,
+                                )
+                              }
+                            >
+                              Project:{" "}
+                              {
                                 <Linky
                                   id={project}
                                   type={"projects"}
                                   size={"sm"}
                                 />
-                              </TagLabel>
-                              <TagCloseButton
-                                onClick={() => {
-                                  setSelectedProjects([
-                                    ...selectedProjects.filter((selected) => {
-                                      return !_.isEqual(project, selected);
-                                    }),
-                                  ]);
-                                }}
-                              />
-                            </Tag>
-                          );
-                        } else {
-                          return null;
-                        }
-                      })
-                    ) : (
-                      <Text
-                        fontSize={"sm"}
-                        fontWeight={"semibold"}
-                        color={"gray.400"}
-                      >
-                        No Projects selected
-                      </Text>
-                    )}
-                  </Flex>
-                </Flex>
-              </ModalBody>
-
-              <ModalFooter p={"2"}>
-                {/* "Cancel" button */}
-                <Flex direction={"row"} justify={"center"} w={"100%"}>
-                  <Button
-                    colorScheme={"red"}
-                    size={"sm"}
-                    variant={"outline"}
-                    rightIcon={<Icon name={"cross"} />}
-                    onClick={onCancelAddProjectsClick}
-                  >
-                    Cancel
-                  </Button>
-
-                  <Spacer />
-
-                  <Button
-                    colorScheme={"green"}
-                    size={"sm"}
-                    rightIcon={<Icon name={"check"} />}
-                    onClick={() => {
-                      addProjects(selectedProjects);
-                    }}
-                    isDisabled={selectedProjects.length === 0}
-                  >
-                    Add Entity to {selectedProjects.length} Project
-                    {selectedProjects.length === 1 ? "" : "s"}
-                  </Button>
-                </Flex>
-              </ModalFooter>
-            </ModalContent>
-          </Modal>
-
-          {/* Add Products modal */}
-          <Modal
-            isOpen={isAddProductsOpen}
-            onClose={onAddProductsClose}
-            isCentered
-          >
-            <ModalOverlay />
-            <ModalContent p={"2"} gap={"0"} w={["md", "lg", "xl"]}>
-              {/* Heading and close button */}
-              <ModalHeader p={"2"}>Add Products</ModalHeader>
-              <ModalCloseButton />
-
-              <ModalBody p={"2"}>
-                <SearchSelect
-                  resultType={"entity"}
-                  value={selectedProduct}
-                  onChange={setSelectedProduct}
-                />
-              </ModalBody>
-
-              <ModalFooter p={"2"}>
-                <Button
-                  colorScheme={"red"}
-                  size={"sm"}
-                  variant={"outline"}
-                  rightIcon={<Icon name={"cross"} />}
-                  onClick={onAddProductsClose}
-                >
-                  Cancel
-                </Button>
-
-                <Spacer />
-
-                <Button
-                  colorScheme={"green"}
-                  size={"sm"}
-                  rightIcon={<Icon name={"check"} />}
-                  onClick={() => {
-                    if (id) {
-                      // Add the Product to the Entity
-                      addProducts(selectedProducts);
-                    }
-                  }}
-                >
-                  Done
-                </Button>
-              </ModalFooter>
-            </ModalContent>
-          </Modal>
-
-          {/* Add Origins modal */}
-          <Modal
-            isOpen={isAddOriginsOpen}
-            onClose={onAddOriginsClose}
-            isCentered
-          >
-            <ModalOverlay />
-            <ModalContent p={"2"} gap={"0"} w={["md", "lg", "xl"]}>
-              {/* Heading and close button */}
-              <ModalHeader p={"2"}>Add Origins</ModalHeader>
-              <ModalCloseButton />
-
-              <ModalBody p={"2"}>
-                <SearchSelect
-                  resultType={"entity"}
-                  value={selectedOrigin}
-                  onChange={setSelectedOrigin}
-                />
-              </ModalBody>
-
-              <ModalFooter p={"2"}>
-                <Button
-                  colorScheme={"red"}
-                  size={"sm"}
-                  variant={"outline"}
-                  rightIcon={<Icon name={"cross"} />}
-                  onClick={onAddOriginsClose}
-                >
-                  Cancel
-                </Button>
-
-                <Spacer />
-
-                <Button
-                  colorScheme={"green"}
-                  size={"sm"}
-                  rightIcon={<Icon name={"check"} />}
-                  onClick={() => {
-                    if (id) {
-                      // Add the Origin to the Entity
-                      addOrigins(selectedOrigins);
-                    }
-                  }}
-                >
-                  Done
-                </Button>
-              </ModalFooter>
-            </ModalContent>
-          </Modal>
-
-          {/* Upload modal */}
-          <Uploader
-            isOpen={isUploadOpen}
-            onOpen={onUploadOpen}
-            onClose={onUploadClose}
-            uploads={toUploadAttachments}
-            setUploads={setToUploadAttachments}
-            target={entityData._id}
-          />
-
-          {/* Export modal */}
-          <Modal
-            isOpen={isExportOpen}
-            onClose={onExportClose}
-            size={"2xl"}
-            isCentered
-          >
-            <ModalOverlay />
-            <ModalContent p={"2"} w={["lg", "xl", "2xl"]} gap={"0"}>
-              {/* Heading and close button */}
-              <ModalHeader p={"2"}>Export Entity</ModalHeader>
-              <ModalCloseButton />
-
-              <ModalBody px={"2"}>
-                <Flex w={"100%"} direction={"column"} py={"1"} gap={"2"}>
-                  <Text fontSize={"sm"}>
-                    Select the Entity information to include in the exported
-                    file.
-                  </Text>
-                </Flex>
-
-                {/* Selection content */}
-                <Flex
-                  direction={"row"}
-                  p={"2"}
-                  gap={"2"}
-                  rounded={"md"}
-                  border={"1px"}
-                  borderColor={"gray.300"}
-                >
-                  <Flex direction={"column"} gap={"2"}>
-                    <FormControl>
-                      <FormLabel>Details</FormLabel>
-                      {!loading ? (
-                        <CheckboxGroup size={"sm"}>
-                          <Stack spacing={2} direction={"column"}>
-                            <Checkbox disabled defaultChecked>
-                              Name: {entityName}
-                            </Checkbox>
-                            <Checkbox
-                              isChecked={_.includes(exportFields, "created")}
-                              onChange={(event) =>
-                                handleExportCheck(
-                                  "created",
-                                  event.target.checked,
-                                )
                               }
-                            >
-                              Created:{" "}
-                              {dayjs(entityData.created).format("DD MMM YYYY")}
                             </Checkbox>
-                            <Checkbox isChecked={true} isDisabled>
-                              Owner: {entityData.owner}
-                            </Checkbox>
+                          );
+                        })}
+                      </Stack>
+                    ) : (
+                      <Text fontSize={"sm"}>No Projects</Text>
+                    )}
+                  </FormControl>
+                </Flex>
+
+                <Flex direction={"column"} gap={"2"}>
+                  <FormControl>
+                    <FormLabel fontSize={"md"}>Origins</FormLabel>
+                    {!loading && entityOrigins?.length > 0 ? (
+                      <Stack spacing={2} direction={"column"}>
+                        {entityOrigins.map((origin) => {
+                          allExportFields.push(`origin_${origin._id}`);
+                          return (
                             <Checkbox
+                              size={"sm"}
+                              key={origin._id}
                               isChecked={_.includes(
                                 exportFields,
-                                "description",
+                                `origin_${origin._id}`,
                               )}
                               onChange={(event) =>
                                 handleExportCheck(
-                                  "description",
+                                  `origin_${origin._id}`,
                                   event.target.checked,
                                 )
                               }
-                              isDisabled={_.isEqual(entityDescription, "")}
                             >
-                              <Text noOfLines={1}>
-                                Description:{" "}
-                                {_.isEqual(entityDescription, "")
-                                  ? "No description"
-                                  : entityDescription}
-                              </Text>
+                              Origin: {origin.name}
                             </Checkbox>
-                          </Stack>
-                        </CheckboxGroup>
-                      ) : (
-                        <Text>Loading details</Text>
-                      )}
-                    </FormControl>
-                    <FormControl>
-                      <FormLabel fontSize={"md"}>Projects</FormLabel>
-                      {!loading && entityProjects.length > 0 ? (
-                        <Stack spacing={2} direction={"column"}>
-                          {entityProjects.map((project) => {
-                            allExportFields.push(`project_${project}`);
-                            return (
-                              <Checkbox
-                                size={"sm"}
-                                key={project}
-                                isChecked={_.includes(
-                                  exportFields,
-                                  `project_${project}`,
-                                )}
-                                onChange={(event) =>
-                                  handleExportCheck(
-                                    `project_${project}`,
-                                    event.target.checked,
-                                  )
-                                }
-                              >
-                                Project:{" "}
-                                {
-                                  <Linky
-                                    id={project}
-                                    type={"projects"}
-                                    size={"sm"}
-                                  />
-                                }
-                              </Checkbox>
-                            );
-                          })}
-                        </Stack>
-                      ) : (
-                        <Text fontSize={"sm"}>No Projects</Text>
-                      )}
-                    </FormControl>
-                  </Flex>
-
-                  <Flex direction={"column"} gap={"2"}>
-                    <FormControl>
-                      <FormLabel fontSize={"md"}>Origins</FormLabel>
-                      {!loading && entityOrigins?.length > 0 ? (
-                        <Stack spacing={2} direction={"column"}>
-                          {entityOrigins.map((origin) => {
-                            allExportFields.push(`origin_${origin._id}`);
-                            return (
-                              <Checkbox
-                                size={"sm"}
-                                key={origin._id}
-                                isChecked={_.includes(
-                                  exportFields,
-                                  `origin_${origin._id}`,
-                                )}
-                                onChange={(event) =>
-                                  handleExportCheck(
-                                    `origin_${origin._id}`,
-                                    event.target.checked,
-                                  )
-                                }
-                              >
-                                Origin: {origin.name}
-                              </Checkbox>
-                            );
-                          })}
-                        </Stack>
-                      ) : (
-                        <Text fontSize={"sm"}>No Origins</Text>
-                      )}
-                    </FormControl>
-                    <FormControl>
-                      <FormLabel fontSize={"md"}>Products</FormLabel>
-                      {!loading && entityProducts?.length > 0 ? (
-                        <Stack spacing={2} direction={"column"}>
-                          {entityProducts.map((product) => {
-                            allExportFields.push(`product_${product._id}`);
-                            return (
-                              <Checkbox
-                                size={"sm"}
-                                key={product._id}
-                                isChecked={_.includes(
-                                  exportFields,
+                          );
+                        })}
+                      </Stack>
+                    ) : (
+                      <Text fontSize={"sm"}>No Origins</Text>
+                    )}
+                  </FormControl>
+                  <FormControl>
+                    <FormLabel fontSize={"md"}>Products</FormLabel>
+                    {!loading && entityProducts?.length > 0 ? (
+                      <Stack spacing={2} direction={"column"}>
+                        {entityProducts.map((product) => {
+                          allExportFields.push(`product_${product._id}`);
+                          return (
+                            <Checkbox
+                              size={"sm"}
+                              key={product._id}
+                              isChecked={_.includes(
+                                exportFields,
+                                `product_${product._id}`,
+                              )}
+                              onChange={(event) =>
+                                handleExportCheck(
                                   `product_${product._id}`,
-                                )}
-                                onChange={(event) =>
-                                  handleExportCheck(
-                                    `product_${product._id}`,
-                                    event.target.checked,
-                                  )
-                                }
-                              >
-                                Product: {product.name}
-                              </Checkbox>
-                            );
-                          })}
-                        </Stack>
-                      ) : (
-                        <Text fontSize={"sm"}>No Products</Text>
-                      )}
-                    </FormControl>
-                  </Flex>
-
-                  <Flex direction={"column"} gap={"2"}>
-                    <FormControl>
-                      <FormLabel fontSize={"md"}>Attributes</FormLabel>
-                      {!loading && entityAttributes.length > 0 ? (
-                        <Stack spacing={2} direction={"column"}>
-                          {entityAttributes.map((attribute) => {
-                            allExportFields.push(`attribute_${attribute._id}`);
-                            return (
-                              <Checkbox
-                                size={"sm"}
-                                key={attribute._id}
-                                isChecked={_.includes(
-                                  exportFields,
-                                  `attribute_${attribute._id}`,
-                                )}
-                                onChange={(event) =>
-                                  handleExportCheck(
-                                    `attribute_${attribute._id}`,
-                                    event.target.checked,
-                                  )
-                                }
-                              >
-                                {attribute.name}
-                              </Checkbox>
-                            );
-                          })}
-                        </Stack>
-                      ) : (
-                        <Text fontSize={"sm"}>No Attributes</Text>
-                      )}
-                    </FormControl>
-                  </Flex>
+                                  event.target.checked,
+                                )
+                              }
+                            >
+                              Product: {product.name}
+                            </Checkbox>
+                          );
+                        })}
+                      </Stack>
+                    ) : (
+                      <Text fontSize={"sm"}>No Products</Text>
+                    )}
+                  </FormControl>
                 </Flex>
-              </ModalBody>
 
-              <ModalFooter p={"2"}>
+                <Flex direction={"column"} gap={"2"}>
+                  <FormControl>
+                    <FormLabel fontSize={"md"}>Attributes</FormLabel>
+                    {!loading && entityAttributes.length > 0 ? (
+                      <Stack spacing={2} direction={"column"}>
+                        {entityAttributes.map((attribute) => {
+                          allExportFields.push(`attribute_${attribute._id}`);
+                          return (
+                            <Checkbox
+                              size={"sm"}
+                              key={attribute._id}
+                              isChecked={_.includes(
+                                exportFields,
+                                `attribute_${attribute._id}`,
+                              )}
+                              onChange={(event) =>
+                                handleExportCheck(
+                                  `attribute_${attribute._id}`,
+                                  event.target.checked,
+                                )
+                              }
+                            >
+                              {attribute.name}
+                            </Checkbox>
+                          );
+                        })}
+                      </Stack>
+                    ) : (
+                      <Text fontSize={"sm"}>No Attributes</Text>
+                    )}
+                  </FormControl>
+                </Flex>
+              </Flex>
+            </ModalBody>
+
+            <ModalFooter p={"2"}>
+              <Flex
+                direction={"row"}
+                w={"70%"}
+                gap={"2"}
+                align={"center"}
+                justifySelf={"left"}
+              >
+                <Icon name={"info"} />
+                {_.isEqual(exportFormat, "json") && (
+                  <Text fontSize={"sm"}>
+                    JSON files can be re-imported into Metadatify.
+                  </Text>
+                )}
+                {_.isEqual(exportFormat, "csv") && (
+                  <Text fontSize={"sm"}>
+                    CSV spreadsheets can be used by other applications.
+                  </Text>
+                )}
+              </Flex>
+              <Flex direction={"column"} w={"30%"} gap={"2"}>
+                {/* "Download" button */}
                 <Flex
                   direction={"row"}
-                  w={"70%"}
-                  gap={"2"}
-                  align={"center"}
-                  justifySelf={"left"}
-                >
-                  <Icon name={"info"} />
-                  {_.isEqual(exportFormat, "json") && (
-                    <Text fontSize={"sm"}>
-                      JSON files can be re-imported into Metadatify.
-                    </Text>
-                  )}
-                  {_.isEqual(exportFormat, "csv") && (
-                    <Text fontSize={"sm"}>
-                      CSV spreadsheets can be used by other applications.
-                    </Text>
-                  )}
-                </Flex>
-                <Flex direction={"column"} w={"30%"} gap={"2"}>
-                  {/* "Download" button */}
-                  <Flex
-                    direction={"row"}
-                    w={"100%"}
-                    gap={"2"}
-                    justify={"right"}
-                    align={"center"}
-                  >
-                    <Flex>
-                      <FormControl>
-                        <Select
-                          size={"sm"}
-                          value={exportFormat}
-                          onChange={(event) =>
-                            setExportFormat(event.target.value)
-                          }
-                        >
-                          <option key={"json"} value={"json"}>
-                            JSON
-                          </option>
-                          <option key={"csv"} value={"csv"}>
-                            CSV
-                          </option>
-                        </Select>
-                      </FormControl>
-                    </Flex>
-                    <IconButton
-                      icon={<Icon name={"download"} />}
-                      colorScheme={"blue"}
-                      size={"sm"}
-                      aria-label={"Download"}
-                      onClick={() => handleDownloadClick(exportFormat)}
-                      isLoading={exportLoading}
-                    />
-                  </Flex>
-                </Flex>
-              </ModalFooter>
-            </ModalContent>
-          </Modal>
-
-          {/* Graph modal */}
-          <Modal
-            size={"full"}
-            onEsc={onGraphClose}
-            onClose={onGraphClose}
-            isOpen={isGraphOpen}
-          >
-            <ModalOverlay />
-            <ModalContent p={"2"}>
-              <ModalHeader p={"2"} gap={"2"}>
-                Visualize: {entityName}
-              </ModalHeader>
-              <ModalCloseButton />
-              <ModalBody p={"2"}>
-                <Graph
-                  id={entityData._id}
-                  entityNavigateHook={handleEntityNodeClick}
-                />
-              </ModalBody>
-            </ModalContent>
-          </Modal>
-
-          {/* Attachment preview modal */}
-          <Modal isOpen={isPreviewOpen} onClose={onPreviewClose}>
-            <ModalOverlay />
-            <ModalContent minW={"3xl"}>
-              <ModalHeader>Attachment Preview</ModalHeader>
-              <ModalCloseButton />
-              <ModalBody>
-                <Flex
                   w={"100%"}
-                  h={"100%"}
-                  justify={"center"}
+                  gap={"2"}
+                  justify={"right"}
                   align={"center"}
-                  pb={"2"}
                 >
-                  <PreviewModal attachment={previewAttachment} />
-                </Flex>
-              </ModalBody>
-            </ModalContent>
-          </Modal>
-
-          {/* Version history */}
-          <Drawer
-            isOpen={isHistoryOpen}
-            placement={"right"}
-            size={"md"}
-            onClose={onHistoryClose}
-          >
-            <DrawerOverlay />
-            <DrawerContent>
-              <DrawerCloseButton />
-              <DrawerHeader>
-                <Flex direction={"row"} w={"100%"} gap={"2"}>
-                  <Heading size={"md"} fontWeight={"semibold"}>
-                    Entity History
-                  </Heading>
-                  <Spacer />
-                  <Flex direction={"column"} gap={"1"}>
-                    <Text fontSize={"sm"}>
-                      Versions: {entityHistory.length}
-                    </Text>
-                    <Text fontSize={"sm"}>
-                      Last modified:{" "}
-                      {entityHistory.length > 0
-                        ? dayjs(entityHistory[0].timestamp).fromNow()
-                        : "never"}
-                    </Text>
+                  <Flex>
+                    <FormControl>
+                      <Select
+                        size={"sm"}
+                        value={exportFormat}
+                        onChange={(event) =>
+                          setExportFormat(event.target.value)
+                        }
+                      >
+                        <option key={"json"} value={"json"}>
+                          JSON
+                        </option>
+                        <option key={"csv"} value={"csv"}>
+                          CSV
+                        </option>
+                      </Select>
+                    </FormControl>
                   </Flex>
+                  <IconButton
+                    icon={<Icon name={"download"} />}
+                    colorScheme={"blue"}
+                    size={"sm"}
+                    aria-label={"Download"}
+                    onClick={() => handleDownloadClick(exportFormat)}
+                    isLoading={exportLoading}
+                  />
                 </Flex>
-              </DrawerHeader>
-              <DrawerBody>
-                <VStack spacing={"4"}>
-                  {entityHistory.length > 0 ? (
-                    entityHistory.map((entityVersion) => {
-                      return (
-                        <Card
-                          w={"100%"}
-                          key={`v_${entityVersion.timestamp}`}
-                          variant={"simple"}
-                          rounded={"md"}
-                          border={"1px"}
-                          borderColor={"gray.300"}
-                        >
-                          <CardHeader p={"0"}>
-                            <Flex w={"100%"} align={"center"} gap={"2"} p={"2"}>
-                              <Text
-                                fontWeight={"semibold"}
-                                fontSize={"md"}
-                                color={"gray.700"}
-                              >
-                                {entityVersion.name}
-                              </Text>
-                              <Spacer />
-                              <Flex
-                                direction={"column"}
-                                gap={"1"}
-                                justify={"right"}
-                              >
-                                <Text
-                                  fontWeight={"semibold"}
-                                  fontSize={"sm"}
-                                  color={"gray.700"}
-                                >
-                                  {entityVersion.version}
-                                </Text>
-                                <Text
-                                  fontWeight={"semibold"}
-                                  fontSize={"sm"}
-                                  color={"gray.400"}
-                                >
-                                  {dayjs(entityVersion.timestamp).fromNow()}
-                                </Text>
-                              </Flex>
-                            </Flex>
-                          </CardHeader>
-                          <CardBody px={"2"} py={"0"}>
+              </Flex>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+
+        {/* Graph modal */}
+        <Modal
+          size={"full"}
+          onEsc={onGraphClose}
+          onClose={onGraphClose}
+          isOpen={isGraphOpen}
+        >
+          <ModalOverlay />
+          <ModalContent p={"2"}>
+            <ModalHeader p={"2"} gap={"2"}>
+              Visualize: {entityName}
+            </ModalHeader>
+            <ModalCloseButton />
+            <ModalBody p={"2"}>
+              <Graph
+                id={entityData._id}
+                entityNavigateHook={handleEntityNodeClick}
+              />
+            </ModalBody>
+          </ModalContent>
+        </Modal>
+
+        {/* Attachment preview modal */}
+        <Modal isOpen={isPreviewOpen} onClose={onPreviewClose}>
+          <ModalOverlay />
+          <ModalContent minW={"3xl"}>
+            <ModalHeader>Attachment Preview</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody>
+              <Flex
+                w={"100%"}
+                h={"100%"}
+                justify={"center"}
+                align={"center"}
+                pb={"2"}
+              >
+                <PreviewModal attachment={previewAttachment} />
+              </Flex>
+            </ModalBody>
+          </ModalContent>
+        </Modal>
+
+        {/* Version history */}
+        <Drawer
+          isOpen={isHistoryOpen}
+          placement={"right"}
+          size={"md"}
+          onClose={onHistoryClose}
+        >
+          <DrawerOverlay />
+          <DrawerContent>
+            <DrawerCloseButton />
+            <DrawerHeader>
+              <Flex direction={"row"} w={"100%"} gap={"2"}>
+                <Heading size={"md"} fontWeight={"semibold"}>
+                  Entity History
+                </Heading>
+                <Spacer />
+                <Flex direction={"column"} gap={"1"}>
+                  <Text fontSize={"sm"}>Versions: {entityHistory.length}</Text>
+                  <Text fontSize={"sm"}>
+                    Last modified:{" "}
+                    {entityHistory.length > 0
+                      ? dayjs(entityHistory[0].timestamp).fromNow()
+                      : "never"}
+                  </Text>
+                </Flex>
+              </Flex>
+            </DrawerHeader>
+            <DrawerBody>
+              <VStack spacing={"4"}>
+                {entityHistory.length > 0 ? (
+                  entityHistory.map((entityVersion) => {
+                    return (
+                      <Card
+                        w={"100%"}
+                        key={`v_${entityVersion.timestamp}`}
+                        variant={"simple"}
+                        rounded={"md"}
+                        border={"1px"}
+                        borderColor={"gray.300"}
+                      >
+                        <CardHeader p={"0"}>
+                          <Flex w={"100%"} align={"center"} gap={"2"} p={"2"}>
+                            <Text
+                              fontWeight={"semibold"}
+                              fontSize={"md"}
+                              color={"gray.700"}
+                            >
+                              {entityVersion.name}
+                            </Text>
+                            <Spacer />
                             <Flex
                               direction={"column"}
                               gap={"1"}
-                              p={"2"}
-                              rounded={"md"}
-                              border={"1px"}
-                              borderColor={"gray.300"}
+                              justify={"right"}
                             >
-                              <Flex
-                                direction={"row"}
-                                wrap={"wrap"}
-                                gap={"2"}
-                                align={"center"}
+                              <Text
+                                fontWeight={"semibold"}
+                                fontSize={"sm"}
+                                color={"gray.700"}
                               >
-                                <Text fontSize={"sm"} fontWeight={"semibold"}>
-                                  Description:
+                                {entityVersion.version}
+                              </Text>
+                              <Text
+                                fontWeight={"semibold"}
+                                fontSize={"sm"}
+                                color={"gray.400"}
+                              >
+                                {dayjs(entityVersion.timestamp).fromNow()}
+                              </Text>
+                            </Flex>
+                          </Flex>
+                        </CardHeader>
+                        <CardBody px={"2"} py={"0"}>
+                          <Flex
+                            direction={"column"}
+                            gap={"1"}
+                            p={"2"}
+                            rounded={"md"}
+                            border={"1px"}
+                            borderColor={"gray.300"}
+                          >
+                            <Flex
+                              direction={"row"}
+                              wrap={"wrap"}
+                              gap={"2"}
+                              align={"center"}
+                            >
+                              <Text fontSize={"sm"} fontWeight={"semibold"}>
+                                Description:
+                              </Text>
+                              <Tooltip
+                                label={entityVersion.description}
+                                isDisabled={_.isEqual(
+                                  entityVersion.description,
+                                  "",
+                                )}
+                                hasArrow
+                              >
+                                <Text fontSize={"sm"}>
+                                  {_.isEqual(entityVersion.description, "")
+                                    ? "None"
+                                    : _.truncate(entityVersion.description, {
+                                        length: 56,
+                                      })}
                                 </Text>
-                                <Tooltip
-                                  label={entityVersion.description}
-                                  isDisabled={_.isEqual(
-                                    entityVersion.description,
-                                    "",
-                                  )}
-                                  hasArrow
+                              </Tooltip>
+                            </Flex>
+                            <Flex
+                              direction={"row"}
+                              wrap={"wrap"}
+                              gap={"2"}
+                              align={"center"}
+                            >
+                              <Text fontSize={"sm"} fontWeight={"semibold"}>
+                                Projects:
+                              </Text>
+                              {entityVersion.projects.length > 0 ? (
+                                <Flex
+                                  direction={"row"}
+                                  gap={"2"}
+                                  align={"center"}
                                 >
-                                  <Text fontSize={"sm"}>
-                                    {_.isEqual(entityVersion.description, "")
-                                      ? "None"
-                                      : _.truncate(entityVersion.description, {
-                                          length: 56,
-                                        })}
-                                  </Text>
-                                </Tooltip>
-                              </Flex>
-                              <Flex
-                                direction={"row"}
-                                wrap={"wrap"}
-                                gap={"2"}
-                                align={"center"}
+                                  <Tag
+                                    key={`v_c_${entityVersion.timestamp}_${entityVersion.projects[0]}`}
+                                    size={"sm"}
+                                  >
+                                    <TagLabel>
+                                      <Linky
+                                        type={"projects"}
+                                        id={entityVersion.projects[0]}
+                                        size={"sm"}
+                                      />
+                                    </TagLabel>
+                                  </Tag>
+                                  {entityVersion.projects.length > 1 && (
+                                    <Text
+                                      fontWeight={"semibold"}
+                                      fontSize={"sm"}
+                                    >
+                                      and {entityVersion.projects.length - 1}{" "}
+                                      others
+                                    </Text>
+                                  )}
+                                </Flex>
+                              ) : (
+                                <Text fontSize={"sm"}>No Projects</Text>
+                              )}
+                            </Flex>
+                            <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
+                              <Text fontWeight={"semibold"} fontSize={"sm"}>
+                                Origins:
+                              </Text>
+                              <Tag
+                                key={`v_o_${entityVersion.timestamp}`}
+                                size={"sm"}
                               >
-                                <Text fontSize={"sm"} fontWeight={"semibold"}>
-                                  Projects:
-                                </Text>
-                                {entityVersion.projects.length > 0 ? (
-                                  <Flex
-                                    direction={"row"}
-                                    gap={"2"}
-                                    align={"center"}
+                                <TagLabel>
+                                  {entityVersion?.associations?.origins?.length}
+                                </TagLabel>
+                              </Tag>
+                            </Flex>
+                            <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
+                              <Text fontWeight={"semibold"} fontSize={"sm"}>
+                                Products:
+                              </Text>
+                              <Tag
+                                key={`v_o_${entityVersion.timestamp}`}
+                                size={"sm"}
+                              >
+                                <TagLabel>
+                                  {
+                                    entityVersion?.associations?.products
+                                      ?.length
+                                  }
+                                </TagLabel>
+                              </Tag>
+                            </Flex>
+                            <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
+                              <Text fontSize={"sm"} fontWeight={"semibold"}>
+                                Attributes:
+                              </Text>
+                              {entityVersion.attributes.length > 0 ? (
+                                <Flex
+                                  direction={"row"}
+                                  gap={"2"}
+                                  align={"center"}
+                                >
+                                  <Tooltip
+                                    label={
+                                      "Values: " +
+                                      entityVersion.attributes[0].values.length
+                                    }
+                                    hasArrow
                                   >
                                     <Tag
-                                      key={`v_c_${entityVersion.timestamp}_${entityVersion.projects[0]}`}
+                                      key={`v_a_${entityVersion.timestamp}_${entityVersion.attributes[0]._id}`}
                                       size={"sm"}
                                     >
                                       <TagLabel>
-                                        <Linky
-                                          type={"projects"}
-                                          id={entityVersion.projects[0]}
-                                          size={"sm"}
-                                        />
+                                        {entityVersion.attributes[0].name}
                                       </TagLabel>
                                     </Tag>
-                                    {entityVersion.projects.length > 1 && (
-                                      <Text
-                                        fontWeight={"semibold"}
-                                        fontSize={"sm"}
-                                      >
-                                        and {entityVersion.projects.length - 1}{" "}
-                                        others
-                                      </Text>
-                                    )}
-                                  </Flex>
-                                ) : (
-                                  <Text fontSize={"sm"}>No Projects</Text>
-                                )}
-                              </Flex>
-                              <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
-                                <Text fontWeight={"semibold"} fontSize={"sm"}>
-                                  Origins:
-                                </Text>
-                                <Tag
-                                  key={`v_o_${entityVersion.timestamp}`}
-                                  size={"sm"}
-                                >
-                                  <TagLabel>
-                                    {
-                                      entityVersion?.associations?.origins
-                                        ?.length
-                                    }
-                                  </TagLabel>
-                                </Tag>
-                              </Flex>
-                              <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
-                                <Text fontWeight={"semibold"} fontSize={"sm"}>
-                                  Products:
-                                </Text>
-                                <Tag
-                                  key={`v_o_${entityVersion.timestamp}`}
-                                  size={"sm"}
-                                >
-                                  <TagLabel>
-                                    {
-                                      entityVersion?.associations?.products
-                                        ?.length
-                                    }
-                                  </TagLabel>
-                                </Tag>
-                              </Flex>
-                              <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
-                                <Text fontSize={"sm"} fontWeight={"semibold"}>
-                                  Attributes:
-                                </Text>
-                                {entityVersion.attributes.length > 0 ? (
-                                  <Flex
-                                    direction={"row"}
-                                    gap={"2"}
-                                    align={"center"}
-                                  >
-                                    <Tooltip
-                                      label={
-                                        "Values: " +
-                                        entityVersion.attributes[0].values
-                                          .length
-                                      }
-                                      hasArrow
-                                    >
-                                      <Tag
-                                        key={`v_a_${entityVersion.timestamp}_${entityVersion.attributes[0]._id}`}
-                                        size={"sm"}
-                                      >
-                                        <TagLabel>
-                                          {entityVersion.attributes[0].name}
-                                        </TagLabel>
-                                      </Tag>
-                                    </Tooltip>
-                                    {entityVersion.attributes.length > 1 && (
-                                      <Text fontSize={"sm"}>
-                                        and{" "}
-                                        {entityVersion.attributes.length - 1}{" "}
-                                        other
-                                        {entityVersion.attributes.length > 2
-                                          ? "s"
-                                          : ""}
-                                      </Text>
-                                    )}
-                                  </Flex>
-                                ) : (
-                                  <Text fontSize={"sm"}>None</Text>
-                                )}
-                              </Flex>
-                              <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
-                                <Text fontSize={"sm"} fontWeight={"semibold"}>
-                                  Attachments:
-                                </Text>
-                                {entityVersion.attachments.length > 0 ? (
-                                  <Flex
-                                    direction={"row"}
-                                    gap={"2"}
-                                    align={"center"}
-                                  >
-                                    <Tooltip
-                                      label={entityVersion.attachments[0].name}
-                                      hasArrow
-                                    >
-                                      <Tag
-                                        key={`v_at_${entityVersion.timestamp}_${entityVersion.attachments[0]._id}`}
-                                        size={"sm"}
-                                      >
-                                        <TagLabel>
-                                          {_.truncate(
-                                            entityVersion.attachments[0].name,
-                                            { length: 24 },
-                                          )}
-                                        </TagLabel>
-                                      </Tag>
-                                    </Tooltip>
-                                    {entityVersion.attachments.length > 1 && (
-                                      <Text fontSize={"sm"}>
-                                        and{" "}
-                                        {entityVersion.attachments.length - 1}{" "}
-                                        other
-                                        {entityVersion.attachments.length > 2
-                                          ? "s"
-                                          : ""}
-                                      </Text>
-                                    )}
-                                  </Flex>
-                                ) : (
-                                  <Text fontSize={"sm"}>None</Text>
-                                )}
-                              </Flex>
+                                  </Tooltip>
+                                  {entityVersion.attributes.length > 1 && (
+                                    <Text fontSize={"sm"}>
+                                      and {entityVersion.attributes.length - 1}{" "}
+                                      other
+                                      {entityVersion.attributes.length > 2
+                                        ? "s"
+                                        : ""}
+                                    </Text>
+                                  )}
+                                </Flex>
+                              ) : (
+                                <Text fontSize={"sm"}>None</Text>
+                              )}
                             </Flex>
-                          </CardBody>
-                          <CardFooter p={"0"}>
-                            <Flex
-                              w={"100%"}
-                              justify={"right"}
-                              align={"center"}
-                              p={"2"}
+                            <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
+                              <Text fontSize={"sm"} fontWeight={"semibold"}>
+                                Attachments:
+                              </Text>
+                              {entityVersion.attachments.length > 0 ? (
+                                <Flex
+                                  direction={"row"}
+                                  gap={"2"}
+                                  align={"center"}
+                                >
+                                  <Tooltip
+                                    label={entityVersion.attachments[0].name}
+                                    hasArrow
+                                  >
+                                    <Tag
+                                      key={`v_at_${entityVersion.timestamp}_${entityVersion.attachments[0]._id}`}
+                                      size={"sm"}
+                                    >
+                                      <TagLabel>
+                                        {_.truncate(
+                                          entityVersion.attachments[0].name,
+                                          { length: 24 },
+                                        )}
+                                      </TagLabel>
+                                    </Tag>
+                                  </Tooltip>
+                                  {entityVersion.attachments.length > 1 && (
+                                    <Text fontSize={"sm"}>
+                                      and {entityVersion.attachments.length - 1}{" "}
+                                      other
+                                      {entityVersion.attachments.length > 2
+                                        ? "s"
+                                        : ""}
+                                    </Text>
+                                  )}
+                                </Flex>
+                              ) : (
+                                <Text fontSize={"sm"}>None</Text>
+                              )}
+                            </Flex>
+                          </Flex>
+                        </CardBody>
+                        <CardFooter p={"0"}>
+                          <Flex
+                            w={"100%"}
+                            justify={"right"}
+                            align={"center"}
+                            p={"2"}
+                          >
+                            <Button
+                              colorScheme={"orange"}
+                              size={"sm"}
+                              rightIcon={<Icon name={"rewind"} />}
+                              onClick={() => {
+                                handleRestoreFromHistoryClick(entityVersion);
+                              }}
+                              isDisabled={entityArchived}
                             >
-                              <Button
-                                colorScheme={"orange"}
-                                size={"sm"}
-                                rightIcon={<Icon name={"rewind"} />}
-                                onClick={() => {
-                                  handleRestoreFromHistoryClick(entityVersion);
-                                }}
-                                isDisabled={entityArchived}
-                              >
-                                Restore
-                              </Button>
-                            </Flex>
-                          </CardFooter>
-                        </Card>
-                      );
-                    })
-                  ) : (
-                    <Text>No previous versions.</Text>
-                  )}
-                </VStack>
-              </DrawerBody>
-            </DrawerContent>
-          </Drawer>
-        </Flex>
-      </Content>
-    </Page>
+                              Restore
+                            </Button>
+                          </Flex>
+                        </CardFooter>
+                      </Card>
+                    );
+                  })
+                ) : (
+                  <Text>No previous versions.</Text>
+                )}
+              </VStack>
+            </DrawerBody>
+          </DrawerContent>
+        </Drawer>
+      </Flex>
+    </Content>
   );
 };
 

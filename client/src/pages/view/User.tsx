@@ -17,7 +17,7 @@ import {
 import { createColumnHelper } from "@tanstack/react-table";
 
 // Custom components
-import { Content, Page } from "@components/Container";
+import { Content } from "@components/Container";
 import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
 
@@ -258,173 +258,151 @@ const User = () => {
   ];
 
   return (
-    <Page>
-      <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
-        <Flex
-          gap={"2"}
-          p={"2"}
-          pb={{ base: "2", lg: "0" }}
-          direction={"row"}
-          justify={"space-between"}
-          align={"center"}
-          wrap={"wrap"}
-        >
-          <Flex
-            align={"center"}
-            gap={"2"}
-            p={"2"}
-            border={"2px"}
-            rounded={"md"}
-          >
-            <Icon name={"person"} size={"md"} />
-            <Heading fontWeight={"semibold"} size={"md"}>
-              {staticName}
-            </Heading>
-          </Flex>
-          {editing ? (
-            <Flex direction={"row"} align={"center"} gap={"2"}>
-              <Button
-                size={"sm"}
-                colorScheme={"red"}
-                rightIcon={<Icon name={"cross"} />}
-                onClick={() => handleCancelClick()}
-              >
-                Cancel
-              </Button>
-              <Button
-                id={"userDoneButton"}
-                size={"sm"}
-                colorScheme={"green"}
-                rightIcon={<Icon name={"check"} />}
-                isLoading={userUpdateLoading}
-                onClick={() => handleUpdateClick()}
-              >
-                Done
-              </Button>
-            </Flex>
-          ) : (
+    <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
+      <Flex
+        gap={"2"}
+        p={"2"}
+        pb={{ base: "2", lg: "0" }}
+        direction={"row"}
+        justify={"space-between"}
+        align={"center"}
+        wrap={"wrap"}
+      >
+        <Flex align={"center"} gap={"2"} p={"2"} border={"2px"} rounded={"md"}>
+          <Icon name={"person"} size={"md"} />
+          <Heading fontWeight={"semibold"} size={"md"}>
+            {staticName}
+          </Heading>
+        </Flex>
+        {editing ? (
+          <Flex direction={"row"} align={"center"} gap={"2"}>
             <Button
               size={"sm"}
-              colorScheme={"blue"}
-              rightIcon={<Icon name={"edit"} />}
-              onClick={() => setEditing(true)}
+              colorScheme={"red"}
+              rightIcon={<Icon name={"cross"} />}
+              onClick={() => handleCancelClick()}
             >
-              Edit
+              Cancel
             </Button>
-          )}
-        </Flex>
+            <Button
+              id={"userDoneButton"}
+              size={"sm"}
+              colorScheme={"green"}
+              rightIcon={<Icon name={"check"} />}
+              isLoading={userUpdateLoading}
+              onClick={() => handleUpdateClick()}
+            >
+              Done
+            </Button>
+          </Flex>
+        ) : (
+          <Button
+            size={"sm"}
+            colorScheme={"blue"}
+            rightIcon={<Icon name={"edit"} />}
+            onClick={() => setEditing(true)}
+          >
+            Edit
+          </Button>
+        )}
+      </Flex>
 
-        <Flex direction={"column"} gap={"2"} p={"2"}>
-          <Flex direction={"row"} gap={"2"}>
+      <Flex direction={"column"} gap={"2"} p={"2"}>
+        <Flex direction={"row"} gap={"2"}>
+          <Flex direction={"column"} p={"0"} gap={"2"} grow={"1"} basis={"50%"}>
+            {/* User details */}
             <Flex
               direction={"column"}
-              p={"0"}
+              p={"2"}
               gap={"2"}
-              grow={"1"}
-              basis={"50%"}
+              rounded={"md"}
+              border={"1px"}
+              borderColor={"gray.300"}
             >
-              {/* User details */}
-              <Flex
-                direction={"column"}
-                p={"2"}
-                gap={"2"}
-                rounded={"md"}
-                border={"1px"}
-                borderColor={"gray.300"}
-              >
-                <Flex direction={"row"} p={"0"} gap={"2"}>
-                  <FormControl>
-                    <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
-                      ORCiD
-                    </FormLabel>
-                    <Tag colorScheme={"green"}>{userOrcid}</Tag>
-                  </FormControl>
-                </Flex>
-                <Flex direction={"row"} p={"0"} gap={"2"}>
-                  <FormControl isRequired>
-                    <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
-                      Email
-                    </FormLabel>
-                    <Input
-                      id={"modalUserEmail"}
-                      size={"sm"}
-                      rounded={"md"}
-                      placeholder={"Email"}
-                      type={"email"}
-                      value={userEmail}
-                      isDisabled={!editing}
-                      onChange={(event) => setUserEmail(event.target.value)}
-                    />
-                  </FormControl>
-                </Flex>
-                <Flex direction={"row"} p={"0"} gap={"2"}>
-                  <FormControl isRequired>
-                    <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
-                      Affiliation
-                    </FormLabel>
-                    <Input
-                      id={"modalUserAffiliation"}
-                      size={"sm"}
-                      rounded={"md"}
-                      placeholder={"Affiliation"}
-                      value={userAffiliation}
-                      isDisabled={!editing}
-                      onChange={(event) =>
-                        setUserAffiliation(event.target.value)
-                      }
-                    />
-                  </FormControl>
-                </Flex>
+              <Flex direction={"row"} p={"0"} gap={"2"}>
+                <FormControl>
+                  <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
+                    ORCiD
+                  </FormLabel>
+                  <Tag colorScheme={"green"}>{userOrcid}</Tag>
+                </FormControl>
+              </Flex>
+              <Flex direction={"row"} p={"0"} gap={"2"}>
+                <FormControl isRequired>
+                  <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
+                    Email
+                  </FormLabel>
+                  <Input
+                    id={"modalUserEmail"}
+                    size={"sm"}
+                    rounded={"md"}
+                    placeholder={"Email"}
+                    type={"email"}
+                    value={userEmail}
+                    isDisabled={!editing}
+                    onChange={(event) => setUserEmail(event.target.value)}
+                  />
+                </FormControl>
+              </Flex>
+              <Flex direction={"row"} p={"0"} gap={"2"}>
+                <FormControl isRequired>
+                  <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
+                    Affiliation
+                  </FormLabel>
+                  <Input
+                    id={"modalUserAffiliation"}
+                    size={"sm"}
+                    rounded={"md"}
+                    placeholder={"Affiliation"}
+                    value={userAffiliation}
+                    isDisabled={!editing}
+                    onChange={(event) => setUserAffiliation(event.target.value)}
+                  />
+                </FormControl>
               </Flex>
             </Flex>
+          </Flex>
 
+          <Flex direction={"column"} p={"0"} gap={"2"} grow={"1"} basis={"50%"}>
             <Flex
               direction={"column"}
-              p={"0"}
+              p={"2"}
               gap={"2"}
-              grow={"1"}
-              basis={"50%"}
+              rounded={"md"}
+              border={"1px"}
+              borderColor={"gray.300"}
             >
+              <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
+                Workspaces
+              </FormLabel>
               <Flex
-                direction={"column"}
-                p={"2"}
-                gap={"2"}
-                rounded={"md"}
-                border={"1px"}
-                borderColor={"gray.300"}
+                w={"100%"}
+                justify={"center"}
+                align={userWorkspaces.length > 0 ? "" : "center"}
+                minH={userWorkspaces.length > 0 ? "fit-content" : "200px"}
               >
-                <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
-                  Workspaces
-                </FormLabel>
-                <Flex
-                  w={"100%"}
-                  justify={"center"}
-                  align={userWorkspaces.length > 0 ? "" : "center"}
-                  minH={userWorkspaces.length > 0 ? "fit-content" : "200px"}
-                >
-                  {userWorkspaces.length > 0 ? (
-                    <DataTable
-                      data={userWorkspaces}
-                      columns={workspacesTableColumns}
-                      visibleColumns={{}}
-                      selectedRows={{}}
-                      actions={workspacesTableActions}
-                      viewOnly={!editing}
-                      showPagination
-                      showSelection
-                    />
-                  ) : (
-                    <Text color={"gray.400"} fontWeight={"semibold"}>
-                      No Workspaces
-                    </Text>
-                  )}
-                </Flex>
+                {userWorkspaces.length > 0 ? (
+                  <DataTable
+                    data={userWorkspaces}
+                    columns={workspacesTableColumns}
+                    visibleColumns={{}}
+                    selectedRows={{}}
+                    actions={workspacesTableActions}
+                    viewOnly={!editing}
+                    showPagination
+                    showSelection
+                  />
+                ) : (
+                  <Text color={"gray.400"} fontWeight={"semibold"}>
+                    No Workspaces
+                  </Text>
+                )}
               </Flex>
             </Flex>
           </Flex>
         </Flex>
-      </Content>
-    </Page>
+      </Flex>
+    </Content>
   );
 };
 
