@@ -98,18 +98,6 @@ const Login = () => {
     const result = await login(code);
 
     if (result.success) {
-      if (!toast.isActive("login-graphql-success-toast")) {
-        toast({
-          id: "login-graphql-success-toast",
-          title: "Login Success",
-          status: "success",
-          description: "Successfully logged in...",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-      }
-
       // Activate a Workspace and navigate to the Dashboard
       await activateWorkspace("");
       navigate("/");
