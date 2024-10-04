@@ -25,6 +25,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 // Utility functions and libraries
 import _ from "lodash";
+import consola from "consola";
 
 // Contexts
 import { useAuthentication } from "@hooks/useAuthentication";
@@ -59,11 +60,13 @@ const Login = () => {
 
   const runLogin = async (code: string) => {
     const result = await login(code);
+    consola.info("Result:", result);
 
     if (result.success) {
       await activateWorkspace("");
       navigate("/");
     } else {
+      consola.info("Did not receive success status...");
       if (
         result.message.includes("Unable") &&
         !toast.isActive("login-graphql-error-toast")
@@ -99,13 +102,17 @@ const Login = () => {
           position: "bottom-right",
           isClosable: true,
         });
+      } else {
+        consola.warn("Uncaught error");
       }
     }
   };
 
   // On the page load, check if access code has been included in the URL
   useEffect(() => {
+    consola.start("Checking for access code...");
     if (accessCode) {
+      consola.info("Access code provided, continuing...");
       runLogin(accessCode);
     }
   }, []);
