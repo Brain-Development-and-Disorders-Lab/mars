@@ -148,13 +148,13 @@ export const AuthenticationProvider = (props: {
 
   const value = useMemo(
     () => ({
-      isAuthenticated: isAuthenticated,
+      isAuthenticated,
       token,
       setToken,
       login,
       logout,
     }),
-    [token],
+    [token, isAuthenticated],
   );
 
   return (
