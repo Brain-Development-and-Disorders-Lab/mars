@@ -459,6 +459,7 @@ export const typedefs = `#graphql
     importCSV(columnMapping: ColumnMappingInput, file: [Upload]!): ResponseMessage
 
     # Data import JSON mutations
-    importJSON(file: [Upload]!, owner: String, project: String): ResponseMessage
+    reviewJSON(file: [Upload]!): ResponseDataEntityReview
+    importJSON(file: [Upload]!, project: String): ResponseMessage
   }
 `;

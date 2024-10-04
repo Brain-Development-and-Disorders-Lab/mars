@@ -78,19 +78,26 @@ export const DataResolvers = {
       return await Data.importCSV(args.columnMapping, args.file, context);
     },
 
-    importJSON: async (
+    // Review a JSON file, return collection of Entity names and their updates
+    reviewJSON: async (
       _parent: any,
-      args: { file: any; owner: string; project: string },
+      args: { file: any },
       context: Context,
     ): Promise<IResponseMessage> => {
       // Authenticate the provided context
       await Authentication.authenticate(context);
-      return await Data.importJSON(
-        args.file,
-        args.owner,
-        args.project,
-        context,
-      );
+      return await Data.reviewJSON(args.file);
+    },
+
+    // Import JSON file
+    importJSON: async (
+      _parent: any,
+      args: { file: any; project: string },
+      context: Context,
+    ): Promise<IResponseMessage> => {
+      // Authenticate the provided context
+      await Authentication.authenticate(context);
+      return await Data.importJSON(args.file, args.project, context);
     },
   },
 };

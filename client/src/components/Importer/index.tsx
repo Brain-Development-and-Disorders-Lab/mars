@@ -178,9 +178,24 @@ const Importer = (props: {
   const [importCSV, { loading: importCSVLoading, error: importCSVError }] =
     useMutation(IMPORT_CSV);
 
+  const REVIEW_JSON = gql`
+    mutation ReviewJSON($file: [Upload]!) {
+      reviewJSON(file: $file) {
+        success
+        message
+        data {
+          name
+          state
+        }
+      }
+    }
+  `;
+  const [reviewJSON, { loading: reviewJSONLoading, error: reviewJSONError }] =
+    useMutation(REVIEW_JSON);
+
   const IMPORT_JSON = gql`
-    mutation ImportJSON($file: [Upload]!, $owner: String, $project: String) {
-      importJSON(file: $file, owner: $owner, project: $project) {
+    mutation ImportJSON($file: [Upload]!, $project: String) {
+      importJSON(file: $file, project: $project) {
         success
         message
       }
@@ -209,12 +224,12 @@ const Importer = (props: {
         <Flex direction={"row"} gap={"2"} align={"center"} p={"1"}>
           <Icon
             name={info.getValue() === "update" ? "edit" : "add"}
-            color={info.getValue() === "update" ? "blue" : "green"}
+            color={info.getValue() === "update" ? "blue.600" : "green"}
           />
           <Text
             fontWeight={"semibold"}
             fontSize={"sm"}
-            color={info.getValue() === "update" ? "blue" : "green"}
+            color={info.getValue() === "update" ? "blue.600" : "green"}
           >
             {_.capitalize(info.getValue())}
           </Text>
@@ -383,7 +398,28 @@ const Importer = (props: {
    * to generate a summary of the changes
    */
   const setupReviewJSON = async () => {
-    return;
+    setContinueLoading(reviewJSONLoading);
+    const response = await reviewJSON({
+      variables: {
+        file: file,
+      },
+    });
+    setContinueLoading(reviewJSONLoading);
+
+    if (response.data && response.data.reviewJSON.data) {
+      setReviewEntities(response.data.reviewJSON.data);
+    }
+
+    if (reviewJSONError) {
+      toast({
+        title: "JSON Import Error",
+        status: "error",
+        description: "Error while reviewing JSON file",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
   };
 
   /**
@@ -434,7 +470,6 @@ const Importer = (props: {
     const response = await importJSON({
       variables: {
         file: file,
-        owner: ownerField,
         project: projectField,
       },
     });

@@ -121,40 +121,6 @@ export class Data {
     });
 
   /**
-   * Prepare a CSV file for import by extracting column names for mapping
-   * @param file File object
-   * @return {Promise<string[]>}
-   */
-  static prepareCSV = async (file: any[]): Promise<string[]> => {
-    const { createReadStream, mimetype } = await file[0];
-    const stream = createReadStream();
-
-    // Validate correct MIME type before continuing
-    if (_.isEqual(mimetype, "text/csv")) {
-      const output = await Data.bufferHelper(stream);
-      const workbook = XLSX.read(output, { cellDates: true });
-      if (workbook.SheetNames.length > 0) {
-        const primarySheet = workbook.Sheets[workbook.SheetNames[0]];
-        const parsedSheet = XLSX.utils.sheet_to_json<any>(primarySheet, {
-          defval: "",
-        });
-
-        // Check if no rows present
-        if (parsedSheet.length === 0) {
-          return [];
-        }
-
-        // Generate the column list from present keys
-        return Object.keys(parsedSheet.pop());
-      } else {
-        return [];
-      }
-    } else {
-      return [];
-    }
-  };
-
-  /**
    * Helper function to generate Entity collection after applying CSV column mapping.
    * @param columnMapping Collection of key-value pairs defining the mapping between CSV columns and Entity fields
    * @param sheet Target sheet of imported CSV file
@@ -232,7 +198,41 @@ export class Data {
   };
 
   /**
-   * Review a CSV file and collate a list of modifications that will be made to the imported Entities
+   * Prepare a CSV file for import by extracting column names for mapping
+   * @param file File object
+   * @return {Promise<string[]>}
+   */
+  static prepareCSV = async (file: any[]): Promise<string[]> => {
+    const { createReadStream, mimetype } = await file[0];
+    const stream = createReadStream();
+
+    // Validate correct MIME type before continuing
+    if (_.isEqual(mimetype, "text/csv")) {
+      const output = await Data.bufferHelper(stream);
+      const workbook = XLSX.read(output, { cellDates: true });
+      if (workbook.SheetNames.length > 0) {
+        const primarySheet = workbook.Sheets[workbook.SheetNames[0]];
+        const parsedSheet = XLSX.utils.sheet_to_json<any>(primarySheet, {
+          defval: "",
+        });
+
+        // Check if no rows present
+        if (parsedSheet.length === 0) {
+          return [];
+        }
+
+        // Generate the column list from present keys
+        return Object.keys(parsedSheet.pop());
+      } else {
+        return [];
+      }
+    } else {
+      return [];
+    }
+  };
+
+  /**
+   * Review a CSV file and collate a list of operations that will be made to the imported Entities
    * @param columnMapping Collection of key-value pairs defining the mapping between CSV columns and Entity fields
    * @param file CSV file
    * @return {Promise<ResponseData<EntityImportReview[]>>}
@@ -260,7 +260,7 @@ export class Data {
 
       return {
         success: true,
-        message: "Collated list of Entities for review",
+        message: "Collated list of Entities from CSV file to review",
         data: entities.map((entity) => {
           return {
             name: entity.name,
@@ -346,16 +346,64 @@ export class Data {
   };
 
   /**
+   * Review a JSON file and collate a list of operations that will be made to the imported Entities
+   * @param file JSON file for import
+   * @return {Promise<ResponseData<EntityImportReview[]>>}
+   */
+  static reviewJSON = async (
+    file: any[],
+  ): Promise<ResponseData<EntityImportReview[]>> => {
+    const { createReadStream, mimetype } = await file[0];
+    const stream = createReadStream();
+
+    // Validate correct MIME type before continuing
+    if (_.isEqual(mimetype, "application/json")) {
+      const output = await Data.bufferHelper(stream);
+      const parsed = JSON.parse(output.toString());
+
+      // Check that JSON file contains required "entities" field
+      if (_.isUndefined(parsed["entities"])) {
+        return {
+          success: false,
+          message: 'JSON file does not contain "entities" field',
+          data: [],
+        };
+      }
+
+      const review: EntityImportReview[] = [];
+      for await (const entity of parsed["entities"]) {
+        // Check if Entity exists and update or create as required
+        const exists = await Entities.exists(entity._id);
+
+        review.push({
+          name: entity.name,
+          state: exists ? "update" : "create",
+        });
+      }
+
+      return {
+        success: true,
+        message: "Collated list of Entities from JSON file to review",
+        data: review,
+      };
+    }
+
+    return {
+      success: false,
+      message: "Invalid JSON file",
+      data: [],
+    };
+  };
+
+  /**
    * Import a JSON file or set of objects
    * @param file JSON file for import
-   * @param owner ORCiD ID of owner
    * @param project Project identifier to add Entities to (if any)
    * @param context Request context containing user and Workspace identifier
    * @return {Promise<IResponseMessage>}
    */
   static importJSON = async (
     file: any[],
-    owner: string,
     project: string,
     context: Context,
   ): Promise<IResponseMessage> => {
@@ -380,7 +428,7 @@ export class Data {
 
       for await (const entity of parsed.entities as EntityModel[]) {
         // Splice in the owner and Project information
-        entity.owner = owner;
+        entity.owner = context.user;
         entity.projects = projectExists ? [project] : [];
 
         // Check if Entity exists and update or create as required
