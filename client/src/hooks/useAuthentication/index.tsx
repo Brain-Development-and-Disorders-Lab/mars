@@ -12,7 +12,6 @@ import { gql, useLazyQuery } from "@apollo/client";
 
 // Utility functions and libraries
 import _ from "lodash";
-import consola from "consola";
 
 type AuthenticationContextValue = {
   token: IAuth;
@@ -102,8 +101,6 @@ export const AuthenticationProvider = (props: {
     // Query to retrieve Entity data and associated data for editing
     const loginResponse = await doLogin({ variables: { code: code } });
     const loginData = loginResponse.data?.login;
-    consola.info("Received loginResponse:", loginResponse);
-    consola.info("loginData:", loginData);
 
     if (_.isUndefined(loginData)) {
       setIsAuthenticated(false);
@@ -123,7 +120,6 @@ export const AuthenticationProvider = (props: {
       },
     });
     const userData = userResponse.data?.user;
-    consola.info("userResponse:", userResponse);
     if (!_.isUndefined(userError)) {
       setIsAuthenticated(false);
       return {

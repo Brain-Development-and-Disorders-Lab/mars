@@ -16,6 +16,7 @@ import _ from "lodash";
 // Contexts
 import { useAuthentication } from "@hooks/useAuthentication";
 import { Navigate, Outlet } from "react-router-dom";
+import consola from "consola";
 
 // Content container
 const Content: FC<ContentProps> = ({ children, isError, isLoaded }) => {
@@ -49,6 +50,7 @@ const Page: FC = () => {
   const { isAuthenticated } = useAuthentication();
 
   if (!isAuthenticated) {
+    consola.warn("Not authenticated!");
     // If not authenticated, return the user to the Login page
     return <Navigate to={"/login"} />;
   } else {

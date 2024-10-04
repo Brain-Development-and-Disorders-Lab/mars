@@ -25,11 +25,11 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 // Utility functions and libraries
 import _ from "lodash";
-import consola from "consola";
 
 // Contexts
 import { useAuthentication } from "@hooks/useAuthentication";
 import { useWorkspace } from "@hooks/useWorkspace";
+import consola from "consola";
 
 // Define login parameters
 const clientID = "APP-BBVHCTCNDUJ4CAXV";
@@ -64,9 +64,9 @@ const Login = () => {
 
     if (result.success) {
       await activateWorkspace("");
+      consola.success("Activated workspace, navigating to Dashboard...");
       navigate("/");
     } else {
-      consola.info("Did not receive success status...");
       if (
         result.message.includes("Unable") &&
         !toast.isActive("login-graphql-error-toast")
@@ -102,17 +102,13 @@ const Login = () => {
           position: "bottom-right",
           isClosable: true,
         });
-      } else {
-        consola.warn("Uncaught error");
       }
     }
   };
 
   // On the page load, check if access code has been included in the URL
   useEffect(() => {
-    consola.start("Checking for access code...");
     if (accessCode) {
-      consola.info("Access code provided, continuing...");
       runLogin(accessCode);
     }
   }, []);
