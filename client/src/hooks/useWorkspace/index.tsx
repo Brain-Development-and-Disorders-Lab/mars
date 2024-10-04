@@ -1,6 +1,3 @@
-import { gql, useLazyQuery } from "@apollo/client";
-import { IResponseMessage, WorkspaceModel } from "@types";
-import _ from "lodash";
 import React, {
   createContext,
   useContext,
@@ -8,6 +5,15 @@ import React, {
   useMemo,
   useState,
 } from "react";
+
+// GraphQL
+import { gql, useLazyQuery } from "@apollo/client";
+
+// Custom types
+import { IResponseMessage, WorkspaceModel } from "@types";
+
+// Utility functions and libraries
+import _ from "lodash";
 
 // Session
 import { useSession } from "src/hooks/useSession";
@@ -22,8 +28,9 @@ export const WorkspaceProvider = (props: { children: React.JSX.Element }) => {
   const [session, setSession] = useSession();
   const [activeWorkspace, setActiveWorkspace] = useState(session.workspace);
 
-  // If the active Workspace is updated, store this update in the session token
+  // If the active Workspace is updated and store the identifier in the session token
   useEffect(() => {
+    // Update the session token
     setSession({
       workspace: activeWorkspace,
     });

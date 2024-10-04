@@ -1,9 +1,8 @@
 import React, { createContext, useContext, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
-// Token and session management
+// Token management
 import { useToken } from "src/hooks/useToken";
-import { useSession } from "src/hooks/useSession";
 
 // Custom types
 import { IAuth, ResponseData, UserModel } from "@types";
@@ -27,9 +26,9 @@ export const AuthenticationProvider = (props: {
   children: React.JSX.Element;
 }) => {
   const navigate = useNavigate();
+
   // Setup token authentication
   const [token, setToken] = useToken();
-  const [, setSession] = useSession();
 
   // Authentication state
   const [isAuthenticated, setIsAuthenticated] = useState(token.token !== "");
@@ -88,11 +87,6 @@ export const AuthenticationProvider = (props: {
       name: token.name,
       orcid: token.orcid,
       token: "",
-    });
-
-    // Invalidate the session
-    setSession({
-      workspace: "",
     });
 
     // Navigate to the login page
