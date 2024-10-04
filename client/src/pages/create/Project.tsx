@@ -27,7 +27,6 @@ import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 
 // Utility functions and libraries
-import { useToken } from "src/authentication/useToken";
 import dayjs from "dayjs";
 
 // Routing and navigation
@@ -37,11 +36,14 @@ import { gql, useMutation } from "@apollo/client";
 // Custom types
 import { ResponseData } from "@types";
 
+// Authentication context
+import { useAuthentication } from "@hooks/useAuthentication";
+
 const Project = () => {
   const navigate = useNavigate();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
-  const [token] = useToken();
+  const { token } = useAuthentication();
 
   const [name, setName] = useState("");
   const [created, setCreated] = useState(

@@ -2,7 +2,7 @@
 import _ from "lodash";
 
 // Custom types
-import { IAttribute, IAuth, IValue } from "@types";
+import { IAttribute, IAuth, ISession, IValue, UserModel } from "@types";
 
 export const isValidValues = (
   values: IValue<any>[],
@@ -46,6 +46,22 @@ export const isValidAttributes = (attributes: IAttribute[]) => {
   return true;
 };
 
+export const isValidUser = (user: UserModel): boolean => {
+  if (
+    _.isUndefined(user.affiliation) ||
+    _.isUndefined(user.email) ||
+    _.isUndefined(user.firstName) ||
+    _.isUndefined(user.lastName) ||
+    user.affiliation === "" ||
+    user.email === "" ||
+    user.firstName === "" ||
+    user.lastName === ""
+  ) {
+    return false;
+  }
+  return true;
+};
+
 /**
  * Retrieve an authentication token from session storage
  * @param {string} tokenKey the key of the token in storage
@@ -60,6 +76,20 @@ export const getToken = (tokenKey: string): IAuth => {
     name: "",
     orcid: "",
     token: "",
+  };
+};
+
+/**
+ * Retrieve a session vaue from session storage
+ * @param {string} sessionKey the key of the token in storage
+ * @returns {any}
+ */
+export const getSession = (sessionKey: string): ISession => {
+  const storedSession = sessionStorage.getItem(sessionKey);
+  if (!_.isNull(storedSession) && !_.isUndefined(storedSession)) {
+    return JSON.parse(storedSession);
+  }
+  return {
     workspace: "",
   };
 };

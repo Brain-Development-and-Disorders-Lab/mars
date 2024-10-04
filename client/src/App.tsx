@@ -1,5 +1,5 @@
 // React
-import React, { ReactElement, useEffect, useState } from "react";
+import React, { ReactElement } from "react";
 
 // Styling to be applied across the application
 import "./styles/styles.css";
@@ -10,15 +10,15 @@ import "@fontsource/roboto";
 // Chakra provider component
 import { ChakraProvider } from "@chakra-ui/react";
 
+// Custom components
+import { Page } from "@components/Container";
+
 // Routing and navigation
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 // Utility imports
 import _ from "lodash";
 import consola from "consola";
-
-// Custom components
-import { Page } from "@components/Container";
 
 // Pages
 // Page type - View
@@ -29,6 +29,7 @@ import Projects from "@pages/view/Projects";
 import Entity from "@pages/view/Entity";
 import Entities from "@pages/view/Entities";
 import User from "@pages/view/User";
+import Workspace from "@pages/view/Workspace";
 
 // Page type - Create
 import Create from "@pages/create/Create";
@@ -40,18 +41,15 @@ import CreateProject from "@pages/create/Project";
 // Page type - Other
 import Search from "@pages/Search";
 import Dashboard from "@pages/Dashboard";
-import Login from "@pages/Login";
 import Invalid from "@pages/Invalid";
+import Login from "@pages/Login";
+
+// Providers
+import { WorkspaceProvider } from "./hooks/useWorkspace";
+import { AuthenticationProvider } from "./hooks/useAuthentication";
 
 // Theme extension
 import { theme } from "./styles/theme";
-
-// Workspace context component
-import { WorkspaceContext } from "./Context";
-
-// Authentication
-import { useToken } from "src/authentication/useToken";
-import Workspace from "@pages/view/Workspace";
 
 /**
  * Base App component containing the page layout and page routing components
@@ -62,40 +60,13 @@ const App = (): ReactElement => {
     consola.debug("Running client in development mode");
   }
 
-  // Setup token authentication
-  const [token] = useToken();
-  const [authenticated, setAuthenticated] = useState(false);
-
-  // Setup Workspace state
-  const [workspace, setWorkspace] = useState("");
-  const [workspaceLoading, setWorkspaceLoading] = useState(false);
-
-  useEffect(() => {
-    if (_.isNull(token) || _.isEqual(token.token, "")) {
-      setAuthenticated(false);
-    } else {
-      // Manipulate the Workspace value
-      setWorkspace(token.workspace);
-      setAuthenticated(true);
-    }
-  }, [token]);
-
   return (
     <BrowserRouter>
       <ChakraProvider theme={theme}>
-        <WorkspaceContext.Provider
-          value={{
-            workspace,
-            setWorkspace,
-            workspaceLoading,
-            setWorkspaceLoading,
-          }}
-        >
-          {!authenticated ? (
-            <Login setAuthenticated={setAuthenticated} />
-          ) : (
-            <Page>
-              <Routes>
+        <AuthenticationProvider>
+          <WorkspaceProvider>
+            <Routes>
+              <Route element={<Page />}>
                 <Route path={"/"} element={<Dashboard />} />
 
                 {/* Create routes */}
@@ -142,10 +113,12 @@ const App = (): ReactElement => {
                   path={"*"}
                   element={<Navigate to={"/invalid"} replace />}
                 />
-              </Routes>
-            </Page>
-          )}
-        </WorkspaceContext.Provider>
+              </Route>
+
+              <Route path={"/login"} element={<Login />} />
+            </Routes>
+          </WorkspaceProvider>
+        </AuthenticationProvider>
       </ChakraProvider>
     </BrowserRouter>
   );

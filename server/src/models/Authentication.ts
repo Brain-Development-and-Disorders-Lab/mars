@@ -12,7 +12,6 @@ import _ from "lodash";
 
 // Models
 import { Users } from "./Users";
-import { Workspaces } from "./Workspaces";
 
 // Variables
 import { DEMO_USER_ORCID } from "src/variables";
@@ -57,7 +56,6 @@ export class Authentication {
         name: response.data.name,
         orcid: response.data.orcid,
         token: response.data.id_token,
-        workspace: "",
       };
     } else {
       // If non-production, resolve with test user
@@ -65,7 +63,6 @@ export class Authentication {
         orcid: DEMO_USER_ORCID,
         name: "Test User",
         token: "test_token_value",
-        workspace: "",
       };
     }
 
@@ -80,17 +77,16 @@ export class Authentication {
           name: authenticationPayload.name,
           orcid: authenticationPayload.orcid,
           token: "",
-          workspace: "",
         },
       };
     } else if (!exists) {
       // If the user is the demo user, create a new User
       await Users.create({
         _id: authenticationPayload.orcid,
-        firstName: "",
-        lastName: "",
-        email: "",
-        affiliation: "",
+        firstName: "Test",
+        lastName: "User",
+        email: "demo@metadatify.com",
+        affiliation: "Metadatify",
         token: authenticationPayload.token,
         workspaces: [],
       });
@@ -140,37 +136,14 @@ export class Authentication {
     // Check that a valid token has been provided
     const user = await Authentication.validate(context.token);
 
-    // Check that the user from the context matches the user from the token
-    if (!_.isEqual(context.user, user._id)) {
-      throw new GraphQLError("Provided user does not match token user", {
-        extensions: {
-          code: "UNAUTHORIZED",
-        },
-      });
-    }
-
-    if (context.workspace !== "") {
-      // Retrieve the Workspace to determine which Entities to return
-      const workspace = await Workspaces.getOne(context.workspace);
-      if (_.isNull(workspace)) {
-        throw new GraphQLError("Workspace does not exist", {
+    if (process.env.NODE_ENV === "production") {
+      // Check that the user from the context matches the user from the token
+      if (!_.isEqual(context.user, user._id)) {
+        throw new GraphQLError("Provided user does not match token user", {
           extensions: {
-            code: "NON_EXIST",
+            code: "UNAUTHORIZED",
           },
         });
-      } else if (
-        !_.isEqual(workspace.owner, context.user) &&
-        !_.includes(workspace.collaborators, context.user)
-      ) {
-        // Check that the requesting user has access to the Workspace as owner or collaborator
-        throw new GraphQLError(
-          "User does not have permission to access this Workspace",
-          {
-            extensions: {
-              code: "UNAUTHORIZED",
-            },
-          },
-        );
       }
     }
   };

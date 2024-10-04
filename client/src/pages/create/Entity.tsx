@@ -56,7 +56,6 @@ import {
 } from "@types";
 
 // Utility functions and libraries
-import { useToken } from "src/authentication/useToken";
 import { isValidAttributes } from "src/util";
 import _ from "lodash";
 import dayjs from "dayjs";
@@ -66,6 +65,9 @@ import consola from "consola";
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
 import { gql, useLazyQuery, useMutation, useQuery } from "@apollo/client";
+
+// Authentication context
+import { useAuthentication } from "@hooks/useAuthentication";
 
 const Entity = () => {
   // Used to manage what detail inputs are presented
@@ -86,7 +88,7 @@ const Entity = () => {
   const navigate = useNavigate();
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [token] = useToken();
+  const { token } = useAuthentication();
 
   const [projects, setProjects] = useState([] as IGenericItem[]);
   const [attributes, setAttributes] = useState([] as AttributeModel[]);

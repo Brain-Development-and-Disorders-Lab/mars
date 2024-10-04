@@ -1,5 +1,5 @@
 // React
-import React, { useContext } from "react";
+import React from "react";
 
 // Existing and custom components
 import {
@@ -28,14 +28,14 @@ import { useLocation, useNavigate } from "react-router-dom";
 import _ from "lodash";
 
 // Workspace context
-import { WorkspaceContext } from "src/Context";
+import { useWorkspace } from "@hooks/useWorkspace";
 
 const Navigation = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
   // Workspace context value
-  const { workspace } = useContext(WorkspaceContext);
+  const { workspace } = useWorkspace();
 
   const {
     isOpen: isImportOpen,

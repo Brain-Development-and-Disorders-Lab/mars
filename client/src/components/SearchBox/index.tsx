@@ -1,5 +1,5 @@
 // React
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 
 // Existing and custom components
 import {
@@ -35,7 +35,7 @@ import { useNavigate } from "react-router-dom";
 import { gql, useLazyQuery } from "@apollo/client";
 
 // Workspace context
-import { WorkspaceContext } from "../../Context";
+import { useWorkspace } from "@hooks/useWorkspace";
 
 // Limit the number of results shown
 const MAX_RESULTS = 5;
@@ -48,7 +48,7 @@ const SearchBox = (props: SearchBoxProps) => {
   const [query, setQuery] = useState("");
 
   // Workspace context
-  const { workspace } = useContext(WorkspaceContext);
+  const { workspace } = useWorkspace();
 
   // Search status
   const [hasSearched, setHasSearched] = useState(false);

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 // Existing and custom components
 import {
@@ -50,9 +50,9 @@ import { useNavigate } from "react-router-dom";
 // Apollo client imports
 import { useQuery, gql } from "@apollo/client";
 
-// Workspace context
-import { WorkspaceContext } from "../Context";
-import { useToken } from "src/authentication/useToken";
+// Contexts
+import { useWorkspace } from "@hooks/useWorkspace";
+import { useAuthentication } from "@hooks/useAuthentication";
 
 // Queries
 const GET_DASHBOARD = gql`
@@ -111,8 +111,8 @@ const Dashboard = () => {
   const toast = useToast();
 
   // Workspace context
-  const { workspace, workspaceLoading } = useContext(WorkspaceContext);
-  const [token] = useToken();
+  const { workspace } = useWorkspace();
+  const { token } = useAuthentication();
 
   // Page data
   const [entityData, setEntityData] = useState(
@@ -307,10 +307,7 @@ const Dashboard = () => {
   ];
 
   return (
-    <Content
-      isError={!_.isUndefined(error)}
-      isLoaded={!loading && !workspaceLoading}
-    >
+    <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
       <Flex direction={"column"} w={"100%"} p={"2"} gap={"2"}>
         <Flex direction={"column"} basis={"70%"} gap={"2"}>
           <Flex direction={"row"} gap={"2"} align={"center"}>

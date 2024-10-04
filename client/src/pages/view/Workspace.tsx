@@ -1,5 +1,5 @@
 // React and Chakra UI components
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Flex,
   Spacer,
@@ -41,15 +41,17 @@ import { useNavigate } from "react-router-dom";
 import { createColumnHelper } from "@tanstack/react-table";
 import _ from "lodash";
 
-// Workspace Context
-import { WorkspaceContext } from "src/Context";
-import { useToken } from "src/authentication/useToken";
+// Contexts
+import { useWorkspace } from "@hooks/useWorkspace";
+import { useAuthentication } from "@hooks/useAuthentication";
 
 const Workspace = () => {
   const toast = useToast();
   const breakpoint = useBreakpoint();
   const navigate = useNavigate();
-  const [token] = useToken();
+
+  // Authentication
+  const { token } = useAuthentication();
 
   // Query to get a Workspace
   const GET_WORKSPACE = gql`
@@ -193,7 +195,7 @@ const Workspace = () => {
   const [collaborator, setCollaborator] = useState("");
   const [collaborators, setCollaborators] = useState([] as string[]);
 
-  const { workspace } = useContext(WorkspaceContext);
+  const { workspace } = useWorkspace();
 
   useEffect(() => {
     const refreshWorkspace = async () => {

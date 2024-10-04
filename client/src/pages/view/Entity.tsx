@@ -1,5 +1,5 @@
 // React
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 // Existing and custom components
 import {
@@ -81,7 +81,6 @@ import {
 } from "@types";
 
 // Utility functions and libraries
-import { useToken } from "src/authentication/useToken";
 import { requestStatic } from "src/database/functions";
 import { isValidValues } from "src/util";
 import _ from "lodash";
@@ -96,15 +95,18 @@ import { useQuery, gql, useMutation, useLazyQuery } from "@apollo/client";
 // Routing and navigation
 import { useParams, useNavigate } from "react-router-dom";
 
-// Workspace context
-import { WorkspaceContext } from "../../Context";
+// Contexts
+import { useWorkspace } from "@hooks/useWorkspace";
+import { useAuthentication } from "@hooks/useAuthentication";
 
 const Entity = () => {
   const { id } = useParams();
   const breakpoint = useBreakpoint();
   const navigate = useNavigate();
   const toast = useToast();
-  const [token] = useToken();
+
+  // Authentication
+  const { token } = useAuthentication();
 
   const {
     isOpen: isGraphOpen,
@@ -381,7 +383,7 @@ const Entity = () => {
     }
   }, [error]);
 
-  const { workspace, workspaceLoading } = useContext(WorkspaceContext);
+  const { workspace } = useWorkspace();
 
   // Check to see if data currently exists and refetch if so
   useEffect(() => {
@@ -1332,9 +1334,7 @@ const Entity = () => {
   return (
     <Content
       isError={!_.isUndefined(error)}
-      isLoaded={
-        !loading && !updateLoading && !archiveLoading && !workspaceLoading
-      }
+      isLoaded={!loading && !updateLoading && !archiveLoading}
     >
       <Flex direction={"column"}>
         <Flex

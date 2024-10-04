@@ -1,5 +1,5 @@
 // React
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 // Existing and custom components
 import {
@@ -34,7 +34,7 @@ import { useParams } from "react-router-dom";
 import { gql, useMutation, useQuery } from "@apollo/client";
 
 // Workspace context
-import { WorkspaceContext } from "../../Context";
+import { useWorkspace } from "@hooks/useWorkspace";
 
 const Attribute = () => {
   const { id } = useParams();
@@ -131,7 +131,7 @@ const Attribute = () => {
     }
   }, [error]);
 
-  const { workspace, workspaceLoading } = useContext(WorkspaceContext);
+  const { workspace } = useWorkspace();
 
   // Check to see if data currently exists and refetch if so
   useEffect(() => {
@@ -248,9 +248,7 @@ const Attribute = () => {
   return (
     <Content
       isError={!_.isUndefined(error)}
-      isLoaded={
-        !loading && !updateLoading && !archiveLoading && !workspaceLoading
-      }
+      isLoaded={!loading && !updateLoading && !archiveLoading}
     >
       <Flex direction={"column"}>
         <Flex

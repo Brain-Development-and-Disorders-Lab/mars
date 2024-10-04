@@ -1,5 +1,5 @@
 // React
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 // Existing and custom components
 import {
@@ -24,7 +24,7 @@ import { DataTableAction, EntityModel } from "@types";
 import { useNavigate } from "react-router-dom";
 
 // Workspace context
-import { WorkspaceContext } from "../../Context";
+import { useWorkspace } from "@hooks/useWorkspace";
 
 // Utility functions and libraries
 import { gql, useLazyQuery, useQuery } from "@apollo/client";
@@ -79,7 +79,7 @@ const Entities = () => {
     }
   }, [data]);
 
-  const { workspace, workspaceLoading } = useContext(WorkspaceContext);
+  const { workspace } = useWorkspace();
 
   // Check to see if data currently exists and refetch if so
   useEffect(() => {
@@ -192,7 +192,7 @@ const Entities = () => {
   return (
     <Content
       isError={!_.isUndefined(error) || !_.isUndefined(exportError)}
-      isLoaded={!loading && !exportLoading && !workspaceLoading}
+      isLoaded={!loading && !exportLoading}
     >
       <Flex
         direction={"row"}

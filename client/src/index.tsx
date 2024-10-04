@@ -16,12 +16,11 @@ import createUploadLink from "apollo-upload-client/createUploadLink.mjs";
 import _ from "lodash";
 
 // Variables
-import { API_URL } from "./variables";
+import { API_URL, SESSION_KEY, TOKEN_KEY } from "./variables";
 
 // Application
 import App from "./App";
-import { getToken } from "./util";
-import { TOKEN_KEY } from "./variables";
+import { getSession, getToken } from "./util";
 
 // Setup Apollo client
 const httpLink = createUploadLink({
@@ -37,7 +36,7 @@ const authLink = setContext((_, { headers }) => {
       ...headers,
       user: getToken(TOKEN_KEY).orcid,
       token: getToken(TOKEN_KEY).token,
-      workspace: getToken(TOKEN_KEY).workspace,
+      workspace: getSession(SESSION_KEY).workspace,
     },
   };
 });

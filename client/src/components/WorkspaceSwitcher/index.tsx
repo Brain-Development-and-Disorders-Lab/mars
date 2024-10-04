@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Flex,
   Menu,
@@ -21,14 +21,14 @@ import { gql, useLazyQuery, useQuery } from "@apollo/client";
 import { useNavigate } from "react-router-dom";
 
 // Custom types
-import { IAuth, WorkspaceModel } from "@types";
+import { IGenericItem, WorkspaceModel } from "@types";
 
 // Utility functions and libraries
-import { useToken } from "src/authentication/useToken";
 import _ from "lodash";
 
-// Workspace context
-import { WorkspaceContext } from "src/Context";
+// Contexts
+import { useWorkspace } from "@hooks/useWorkspace";
+import { useAuthentication } from "@hooks/useAuthentication";
 
 const WorkspaceSwitcher = () => {
   const toast = useToast();
@@ -37,12 +37,9 @@ const WorkspaceSwitcher = () => {
   // Store all Workspaces
   const [workspaces, setWorkspaces] = useState([] as WorkspaceModel[]);
 
-  // Access token to set the active Workspace
-  const [token, setToken] = useToken();
-
-  // Workspace context value
-  const { workspace, setWorkspace, setWorkspaceLoading } =
-    useContext(WorkspaceContext);
+  // Get contexts
+  const { workspace, activateWorkspace } = useWorkspace();
+  const { logout } = useAuthentication();
 
   // Switcher drop-down visibility state
   const [isOpen, setIsOpen] = useState(false);
@@ -82,43 +79,33 @@ const WorkspaceSwitcher = () => {
   }>(GET_WORKSPACE, { fetchPolicy: "network-only" });
 
   /**
-   * Utility function to update the current Workspace data
+   * Async function to retrieve the name of the initially selected Workspace
    */
-  const updateWorkspace = async () => {
-    setWorkspaceLoading(true);
-
-    // When the `workspace` value changes, retrieve updated model
-    const resultWorkspace = await getWorkspace({
+  const setInitialLabelValue = async () => {
+    const workspaceResult = await getWorkspace({
       variables: {
         _id: workspace,
       },
     });
 
-    if (resultWorkspace.data?.workspace) {
-      // Clone the existing token and update with selected Workspace ID
-      const updatedToken: IAuth = _.cloneDeep(token);
-      updatedToken.workspace = resultWorkspace.data.workspace._id;
-      setToken(updatedToken);
-
-      // Update the UI state to reflect the change in Workspace
-      setLabel(resultWorkspace.data.workspace.name);
-      setWorkspace(resultWorkspace.data.workspace._id);
-    }
-
-    if (workspaceError) {
+    if (_.isUndefined(workspaceResult.data) && !_.isUndefined(workspaceError)) {
       toast({
         title: "Error",
-        description: "Unable to retrieve Workspace",
+        description: "Unable to get name of current Workspace",
         status: "error",
         duration: 2000,
         position: "bottom-right",
         isClosable: true,
       });
+    } else if (!_.isUndefined(workspaceResult.data)) {
+      setLabel(workspaceResult.data.workspace.name);
     }
-
-    // Update the Workspace loading state
-    setWorkspaceLoading(false);
   };
+
+  // Update the label value on first render
+  useEffect(() => {
+    setInitialLabelValue();
+  }, [workspace]);
 
   /**
    * Utility function to update the list of Workspaces
@@ -147,6 +134,11 @@ const WorkspaceSwitcher = () => {
     if (data?.workspaces) {
       // Unpack all the Entity data
       setWorkspaces(data.workspaces);
+
+      // If the User has no Workspaces, force them to create one
+      if (data.workspaces.length === 0) {
+        navigate("/create/workspace");
+      }
     }
 
     if (error) {
@@ -168,14 +160,6 @@ const WorkspaceSwitcher = () => {
     }
   }, []);
 
-  useEffect(() => {
-    if (workspace !== "") {
-      updateWorkspace();
-    } else {
-      navigate("/create/workspace");
-    }
-  }, [workspace]);
-
   // When the label is updated, refresh the list of Workspaces
   useEffect(() => {
     updateWorkspaces();
@@ -183,12 +167,22 @@ const WorkspaceSwitcher = () => {
 
   /**
    * Handle selecting a Workspace from the drop-down
-   * @param _id Identifier of selected Workspace
+   * @param selectedWorkspace Identifier and name of selected Workspace
    */
-  const handleWorkspaceClick = (_id: string) => {
-    if (workspace !== _id) {
-      setWorkspace(_id);
+  const handleWorkspaceClick = async (selectedWorkspace: IGenericItem) => {
+    if (workspace !== selectedWorkspace._id) {
+      await activateWorkspace(selectedWorkspace._id);
+      setLabel(selectedWorkspace.name);
       setIsOpen(false);
+
+      toast({
+        title: "Switched Workspace",
+        description: `Currently using Workspace "${selectedWorkspace.name}"`,
+        status: "success",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
     }
   };
 
@@ -222,20 +216,6 @@ const WorkspaceSwitcher = () => {
     setIsOpen(false);
   };
 
-  /**
-   * Handle click events within the `Log out` button
-   */
-  const performLogout = () => {
-    // Invalidate the token and refresh the page
-    setToken({
-      name: token.name,
-      orcid: token.orcid,
-      token: "",
-      workspace: "",
-    });
-    navigate(0);
-  };
-
   return (
     <Flex>
       <Menu isOpen={isOpen} autoSelect={false}>
@@ -257,8 +237,9 @@ const WorkspaceSwitcher = () => {
             ml={"2"}
             mr={"2"}
           >
+            <Icon name={"workspace"} />
             <Text fontSize={"sm"} fontWeight={"semibold"}>
-              {_.truncate(label, { length: 16 })}
+              {_.truncate(label, { length: 14 })}
             </Text>
             <Spacer />
             <Icon name={"c_expand"} />
@@ -272,7 +253,7 @@ const WorkspaceSwitcher = () => {
               workspaces.map((accessible) => {
                 return (
                   <MenuItem
-                    onClick={() => handleWorkspaceClick(accessible._id)}
+                    onClick={() => handleWorkspaceClick(accessible)}
                     key={"w_" + accessible._id}
                   >
                     <Flex
@@ -339,7 +320,7 @@ const WorkspaceSwitcher = () => {
                 <Text fontSize={"sm"}>Account settings</Text>
               </Flex>
             </MenuItem>
-            <MenuItem onClick={() => performLogout()}>
+            <MenuItem onClick={() => logout()}>
               <Flex direction={"row"} gap={"2"} align={"center"}>
                 <Icon name={"b_right"} />
                 <Text fontSize={"sm"}>Log out</Text>

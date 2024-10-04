@@ -1,5 +1,5 @@
 // React and Chakra UI components
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import {
   Flex,
   Spacer,
@@ -18,6 +18,7 @@ import {
 
 // Custom components
 import Icon from "@components/Icon";
+import { Content } from "@components/Container";
 
 // Custom types
 import { IResponseMessage, WorkspaceModel } from "@types";
@@ -28,19 +29,19 @@ import { gql, useLazyQuery, useMutation } from "@apollo/client";
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
 
-// Utility functions and libraries
-import { useToken } from "src/authentication/useToken";
-import { Content } from "@components/Container";
-import { WorkspaceContext } from "src/Context";
+// Contexts
+import { useWorkspace } from "@hooks/useWorkspace";
+import { useAuthentication } from "@hooks/useAuthentication";
 
 const CreateWorkspace = () => {
   // Access token to set the active Workspace
-  const [token, setToken] = useToken();
+  const { token } = useAuthentication();
   const navigate = useNavigate();
   const toast = useToast();
 
-  // Workspace context
-  const { workspace, setWorkspace } = useContext(WorkspaceContext);
+  // Get contexts
+  const { workspace, activateWorkspace } = useWorkspace();
+  const { logout } = useAuthentication();
 
   // State for Workspace details
   const [name, setName] = useState("");
@@ -77,17 +78,6 @@ const CreateWorkspace = () => {
     workspaces: WorkspaceModel[];
   }>(GET_WORKSPACES, { fetchPolicy: "network-only" });
 
-  const performLogout = () => {
-    // Invalidate the token and refresh the page
-    setToken({
-      name: token.name,
-      orcid: token.orcid,
-      token: "",
-      workspace: "",
-    });
-    navigate(0);
-  };
-
   /**
    * Create the Workspace using GraphQL query
    */
@@ -120,7 +110,7 @@ const CreateWorkspace = () => {
 
         // Update the stored Workspace identifier and collection of Workspaces
         navigate("/");
-        setWorkspace(created._id);
+        activateWorkspace(created._id);
 
         // Reset modal state
         setName("");
@@ -174,7 +164,7 @@ const CreateWorkspace = () => {
           <Spacer />
           <Flex gap={"2"} align={"center"}>
             {workspace === "" && (
-              <Button size={"sm"} onClick={() => performLogout()}>
+              <Button size={"sm"} onClick={() => logout()}>
                 Logout
               </Button>
             )}

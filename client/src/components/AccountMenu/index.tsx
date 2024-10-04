@@ -25,20 +25,21 @@ import { useNavigate } from "react-router-dom";
 
 // Utility functions and libraries
 import _ from "lodash";
-import { useToken } from "src/authentication/useToken";
 
 // GraphQL
 import { gql, useLazyQuery, useQuery } from "@apollo/client";
 
+// Contexts
+import { useAuthentication } from "@hooks/useAuthentication";
+
 const AccountMenu = () => {
   const navigate = useNavigate();
 
-  // User data
+  // Authentication and user state data
+  const { token, logout } = useAuthentication();
   const [user, setUser] = useState({} as Partial<UserModel>);
 
   const [isOpen, setIsOpen] = useState(false);
-
-  const [token, setToken] = useToken();
 
   // Query to retrieve User
   const GET_USER = gql`
@@ -77,17 +78,6 @@ const AccountMenu = () => {
       refetch();
     }
   }, []);
-
-  const performLogout = () => {
-    // Invalidate the token and refresh the page
-    setToken({
-      name: token.name,
-      orcid: token.orcid,
-      token: "",
-      workspace: "",
-    });
-    navigate(0);
-  };
 
   const handleProfileClick = () => {
     navigate("/profile");
@@ -182,7 +172,7 @@ const AccountMenu = () => {
                 <Text fontSize={"sm"}>Profile</Text>
               </Flex>
             </MenuItem>
-            <MenuItem onClick={() => performLogout()}>
+            <MenuItem onClick={() => logout()}>
               <Flex direction={"row"} align={"center"} gap={"2"} ml={"2"}>
                 <Icon name={"exit"} />
                 <Text fontSize={"sm"}>Logout</Text>

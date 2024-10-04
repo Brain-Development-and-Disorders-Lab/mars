@@ -38,15 +38,17 @@ import { useNavigate } from "react-router-dom";
 // Utility functions and libraries
 import { gql, useMutation } from "@apollo/client";
 import { isValidValues } from "src/util";
-import { useToken } from "src/authentication/useToken";
 import _ from "lodash";
+
+// Authentication context
+import { useAuthentication } from "@hooks/useAuthentication";
 
 const Attribute = () => {
   const navigate = useNavigate();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
 
-  const [token] = useToken();
+  const { token } = useAuthentication();
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");

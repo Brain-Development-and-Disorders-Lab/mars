@@ -32,8 +32,8 @@ import {
 // GraphQL imports
 import { gql, useMutation, useQuery } from "@apollo/client";
 
-// Token
-import { useToken } from "src/authentication/useToken";
+// Authentication context
+import { useAuthentication } from "@hooks/useAuthentication";
 
 // Utility functions and libraries
 import _ from "lodash";
@@ -41,7 +41,9 @@ import _ from "lodash";
 const User = () => {
   const toast = useToast();
   const breakpoint = useBreakpoint();
-  const [token, setToken] = useToken();
+
+  // Authentication
+  const { token, setToken } = useAuthentication();
 
   // Query to get a User and Workspaces
   const GET_USER = gql`
