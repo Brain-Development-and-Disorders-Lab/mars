@@ -439,8 +439,10 @@ export const typedefs = `#graphql
 
     # Data mutations
     uploadAttachment(target: String, file: Upload!): ResponseMessage
-    prepareColumns(file: [Upload]!): [String]
-    mapColumns(columnMapping: ColumnMappingInput, file: [Upload]!): ResponseMessage
-    importObjects(file: [Upload]!, owner: String, project: String): ResponseMessage
+
+    # Data import mutations
+    prepareCSV(file: [Upload]!): [String]
+    importCSV(columnMapping: ColumnMappingInput, file: [Upload]!): ResponseMessage
+    importJSON(file: [Upload]!, owner: String, project: String): ResponseMessage
   }
 `;

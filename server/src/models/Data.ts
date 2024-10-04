@@ -123,7 +123,7 @@ export class Data {
    * @param file File object
    * @return {Promise<string[]>}
    */
-  static prepareColumns = async (file: any[]): Promise<string[]> => {
+  static prepareCSV = async (file: any[]): Promise<string[]> => {
     const { createReadStream, mimetype } = await file[0];
     const stream = createReadStream();
 
@@ -153,13 +153,90 @@ export class Data {
   };
 
   /**
+   * Helper function to generate Entity collection after applying CSV column mapping.
+   * @param columnMapping Collection of key-value pairs defining the mapping between CSV columns and Entity fields
+   * @param sheet Target sheet of imported CSV file
+   * @return {Promise<IEntity[]>}
+   */
+  private static columnMappingHelper = async (
+    columnMapping: Record<string, any>,
+    sheet: any[],
+  ): Promise<IEntity[]> => {
+    // Create generic set of Entities
+    const entities = [] as IEntity[];
+
+    // Asynchronously iterate over all rows, importing Entity data
+    for await (const row of sheet) {
+      // Extract Attributes
+      const attributes = [] as AttributeModel[];
+
+      columnMapping.attributes.map((attribute: AttributeModel) => {
+        attributes.push({
+          _id: attribute._id,
+          name: attribute.name,
+          owner: attribute.owner,
+          timestamp: attribute.timestamp,
+          archived: false,
+          description: attribute.description,
+          values: attribute.values.map((value: IValue<any>) => {
+            // Clean the data for specific types
+            let valueData = row[value.data];
+            if (_.isEqual(value.type, "date")) {
+              // "date" type
+              valueData = dayjs(row[value.data]).format("YYYY-MM-DD");
+            }
+            if (_.isEqual(value.type, "select")) {
+              // "select" type
+              valueData = {
+                selected: row[value.data],
+                options: [row[value.data]],
+              };
+            }
+            return {
+              _id: value._id,
+              name: value.name,
+              type: value.type,
+              data: valueData,
+            };
+          }),
+        });
+      });
+
+      // Core Entity data
+      const entity: IEntity = {
+        archived: false,
+        name: row[columnMapping.name],
+        owner: columnMapping.owner,
+        created: dayjs(Date.now()).toISOString(),
+        description: row[columnMapping.description],
+        projects: [],
+        associations: {
+          origins: [], // Clear Origins list
+          products: [], // Clear Products list
+        },
+        attributes: attributes,
+        attachments: [],
+        history: [],
+      };
+
+      if (!_.isEqual(columnMapping.project, "")) {
+        entity.projects = [columnMapping.project];
+      }
+
+      entities.push(entity);
+    }
+
+    return entities;
+  };
+
+  /**
    * Map the set of columns as specified to Entity parameters
    * @param columnMapping Collection of mapped values with their corresponding columns names
    * @param file CSV file
    * @param context Request context, containing user and Workspace identifiers
    * @return {Promise<IResponseMessage>}
    */
-  static mapColumns = async (
+  static importCSV = async (
     columnMapping: Record<string, any>,
     file: any,
     context: Context,
@@ -175,76 +252,18 @@ export class Data {
         defval: "",
       });
 
-      // Create generic set of Entities
-      const entities = [] as EntityModel[];
+      // Generate collection of Entities to import
+      const entities = await Data.columnMappingHelper(
+        columnMapping,
+        parsedSheet,
+      );
 
-      // Asynchronously iterate over all rows, importing Entity data
-      for await (const row of parsedSheet) {
-        // Extract Attributes
-        const attributes = [] as AttributeModel[];
-
-        columnMapping.attributes.map((attribute: AttributeModel) => {
-          attributes.push({
-            _id: attribute._id,
-            name: attribute.name,
-            owner: attribute.owner,
-            timestamp: attribute.timestamp,
-            archived: false,
-            description: attribute.description,
-            values: attribute.values.map((value: IValue<any>) => {
-              // Clean the data for specific types
-              let valueData = row[value.data];
-              if (_.isEqual(value.type, "date")) {
-                // "date" type
-                valueData = dayjs(row[value.data]).format("YYYY-MM-DD");
-              }
-              if (_.isEqual(value.type, "select")) {
-                // "select" type
-                valueData = {
-                  selected: row[value.data],
-                  options: [row[value.data]],
-                };
-              }
-              return {
-                _id: value._id,
-                name: value.name,
-                type: value.type,
-                data: valueData,
-              };
-            }),
-          });
-        });
-
-        // Core Entity data
-        const entity: IEntity = {
-          archived: false,
-          name: row[columnMapping.name],
-          owner: columnMapping.owner,
-          created: dayjs(Date.now()).toISOString(),
-          description: row[columnMapping.description],
-          projects: [],
-          associations: {
-            origins: [], // Clear Origins list
-            products: [], // Clear Products list
-          },
-          attributes: attributes,
-          attachments: [],
-          history: [],
-        };
-
-        if (!_.isEqual(columnMapping.project, "")) {
-          entity.projects = [columnMapping.project];
-        }
-
-        // Create the Entity and merge in the generated ID
+      // Iterate over all Entities
+      for await (const entity of entities) {
+        // Create the Entity and add to Workspace
         const response = await Entities.create(entity);
-        if (response.success) {
-          entities.push({
-            _id: response.data,
-            timestamp: dayjs(Date.now()).toISOString(),
-            ...entity,
-          });
 
+        if (response.success) {
           // Add Entity to Workspace
           await Workspaces.addEntity(context.workspace, response.data);
 
@@ -266,17 +285,9 @@ export class Data {
         }
       }
 
-      if (!_.isEqual(columnMapping.project, "")) {
-        // Add all Entities to Project
-        await Projects.addEntities(
-          columnMapping.project,
-          entities.map((entity) => entity._id),
-        );
-      }
-
       return {
         success: true,
-        message: "Mapped fields in spreadsheet",
+        message: "Imported CSV file",
       };
     } else {
       return {
@@ -294,7 +305,7 @@ export class Data {
    * @param context Request context containing user and Workspace identifier
    * @return {Promise<IResponseMessage>}
    */
-  static importObjects = async (
+  static importJSON = async (
     file: any[],
     owner: string,
     project: string,

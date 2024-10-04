@@ -36,26 +36,26 @@ export const DataResolvers = {
       return await Data.uploadAttachment(args.target, args.file);
     },
     // Prepare a CSV file, returning the collection of column names (if present)
-    prepareColumns: async (
+    prepareCSV: async (
       _parent: any,
       args: { file: any },
     ): Promise<string[]> => {
-      return await Data.prepareColumns(args.file);
+      return await Data.prepareCSV(args.file);
     },
     // Map CSV file columns to Entity fields
-    mapColumns: async (
+    importCSV: async (
       _parent: any,
       args: { columnMapping: Record<string, string>; file: any },
       context: Context,
     ): Promise<IResponseMessage> => {
-      return await Data.mapColumns(args.columnMapping, args.file, context);
+      return await Data.importCSV(args.columnMapping, args.file, context);
     },
-    importObjects: async (
+    importJSON: async (
       _parent: any,
       args: { file: any; owner: string; project: string },
       context: Context,
     ): Promise<IResponseMessage> => {
-      return await Data.importObjects(
+      return await Data.importJSON(
         args.file,
         args.owner,
         args.project,
