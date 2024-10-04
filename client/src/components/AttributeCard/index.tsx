@@ -52,7 +52,7 @@ const AttributeCard = (props: AttributeCardProps) => {
 
   return (
     <Card variant={"outline"} w={"100%"}>
-      <CardBody p={"2"}>
+      <CardBody p={"2"} pb={"0"}>
         <Flex direction={"column"} gap={"2"}>
           <Flex direction={"row"} gap={"2"} wrap={["wrap", "nowrap"]}>
             <FormControl isRequired isInvalid={isNameError}>
@@ -101,7 +101,7 @@ const AttributeCard = (props: AttributeCardProps) => {
         </Flex>
       </CardBody>
 
-      <CardFooter p={"2"}>
+      <CardFooter p={"2"} pt={"0"}>
         <Button
           size={"sm"}
           colorScheme={"red"}

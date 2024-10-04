@@ -842,7 +842,7 @@ const Importer = (props: {
                     <Text fontSize={"sm"}>
                       Existing attributes defined in JSON will be preserved. Use
                       an existing Template Attribute from the drop-down or
-                      create a new Attribute to added to all Entities.
+                      create a new Attribute to be added to all Entities.
                     </Text>
                   )}
 
