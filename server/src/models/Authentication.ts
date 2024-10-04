@@ -21,8 +21,8 @@ const CLIENT_ID = process.env.CLIENT_ID as string;
 const CLIENT_SECRET = process.env.CLIENT_SECRET as string;
 const REDIRECT_URI =
   process.env.NODE_ENV !== "production"
-    ? "http://127.0.0.1:8080"
-    : "https://app.metadatify.com";
+    ? "http://127.0.0.1:8080/login"
+    : "https://app.metadatify.com/login";
 
 export class Authentication {
   /**

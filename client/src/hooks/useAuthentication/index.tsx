@@ -110,6 +110,10 @@ export const AuthenticationProvider = (props: {
       };
     }
 
+    // Create a new token instance
+    setToken(loginData.data);
+
+    // Get the User
     const userResponse = await getUser({
       variables: {
         _id: loginData.data.orcid,
@@ -136,9 +140,6 @@ export const AuthenticationProvider = (props: {
     // Perform login and data retrieval via server, check if user permitted access
     removeCode();
 
-    // Create a new token instance
-    setToken(loginData.data);
-
     return {
       success: true,
       message: "Logged in successfully",
@@ -147,13 +148,13 @@ export const AuthenticationProvider = (props: {
 
   const value = useMemo(
     () => ({
-      isAuthenticated: isAuthenticated,
+      isAuthenticated,
       token,
       setToken,
       login,
       logout,
     }),
-    [token],
+    [token, isAuthenticated],
   );
 
   return (
