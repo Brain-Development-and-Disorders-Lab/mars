@@ -4,6 +4,7 @@ import {
   Button,
   Flex,
   Heading,
+  Link,
   Spacer,
   Tag,
   Text,
@@ -131,16 +132,11 @@ const Projects = () => {
     columnHelper.accessor("_id", {
       cell: (info) => {
         return (
-          <Flex w={"100%"} justify={"end"}>
-            <Button
-              key={`view-entity-${info.getValue()}`}
-              colorScheme={"gray"}
-              rightIcon={<Icon name={"c_right"} />}
-              onClick={() => navigate(`/projects/${info.getValue()}`)}
-              size={"sm"}
-            >
-              View
-            </Button>
+          <Flex justifyContent={"right"} p={"2"} align={"center"} gap={"1"}>
+            <Link onClick={() => navigate(`/projects/${info.getValue()}`)}>
+              <Text fontWeight={"semibold"}>View</Text>
+            </Link>
+            <Icon name={"a_right"} />
           </Flex>
         );
       },

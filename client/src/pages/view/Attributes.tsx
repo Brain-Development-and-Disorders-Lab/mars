@@ -6,6 +6,7 @@ import {
   Button,
   Flex,
   Heading,
+  Link,
   Spacer,
   Tag,
   Text,
@@ -135,15 +136,11 @@ const Attributes = () => {
     columnHelper.accessor("_id", {
       cell: (info) => {
         return (
-          <Flex w={"100%"} justify={"end"}>
-            <Button
-              key={`view-entity-${info.getValue()}`}
-              size={"sm"}
-              rightIcon={<Icon name={"c_right"} />}
-              onClick={() => navigate(`/attributes/${info.getValue()}`)}
-            >
-              View
-            </Button>
+          <Flex justifyContent={"right"} p={"2"} align={"center"} gap={"1"}>
+            <Link onClick={() => navigate(`/attributes/${info.getValue()}`)}>
+              <Text fontWeight={"semibold"}>View</Text>
+            </Link>
+            <Icon name={"a_right"} />
           </Flex>
         );
       },

@@ -662,16 +662,14 @@ const Entity = () => {
                 size={"sm"}
               />
             ) : (
-              <Button
-                key={`view-${info.row.original}`}
-                rightIcon={<Icon name={"c_right"} />}
-                colorScheme={"gray"}
-                onClick={() => navigate(`/projects/${info.row.original}`)}
-                isDisabled={_.isUndefined(info.row.original)}
-                size={"sm"}
-              >
-                View
-              </Button>
+              <Flex justifyContent={"right"} p={"2"} align={"center"} gap={"1"}>
+                <Link
+                  onClick={() => navigate(`/projects/${info.row.original}`)}
+                >
+                  <Text fontWeight={"semibold"}>View</Text>
+                </Link>
+                <Icon name={"a_right"} />
+              </Flex>
             )}
           </Flex>
         );
@@ -713,7 +711,7 @@ const Entity = () => {
     originTableColumnHelper.accessor("_id", {
       cell: (info) => {
         return (
-          <Flex w={"100%"} justify={"end"} p={"0.5"}>
+          <Flex w={"100%"} justify={"end"}>
             {editing ? (
               <IconButton
                 icon={<Icon name={"delete"} />}
@@ -725,16 +723,14 @@ const Entity = () => {
                 }}
               />
             ) : (
-              <Button
-                key={`view-${info.row.original._id}`}
-                size={"sm"}
-                rightIcon={<Icon name={"c_right"} />}
-                colorScheme={"gray"}
-                onClick={() => navigate(`/entities/${info.row.original._id}`)}
-                isDisabled={_.isUndefined(info.row.original._id)}
-              >
-                View
-              </Button>
+              <Flex justifyContent={"right"} p={"2"} align={"center"} gap={"1"}>
+                <Link
+                  onClick={() => navigate(`/entities/${info.row.original._id}`)}
+                >
+                  <Text fontWeight={"semibold"}>View</Text>
+                </Link>
+                <Icon name={"a_right"} />
+              </Flex>
             )}
           </Flex>
         );
@@ -788,16 +784,14 @@ const Entity = () => {
                 }}
               />
             ) : (
-              <Button
-                key={`view-${info.row.original._id}`}
-                size={"sm"}
-                rightIcon={<Icon name={"c_right"} />}
-                colorScheme={"gray"}
-                onClick={() => navigate(`/entities/${info.row.original._id}`)}
-                isDisabled={_.isUndefined(info.row.original._id)}
-              >
-                View
-              </Button>
+              <Flex justifyContent={"right"} p={"2"} align={"center"} gap={"1"}>
+                <Link
+                  onClick={() => navigate(`/entities/${info.row.original._id}`)}
+                >
+                  <Text fontWeight={"semibold"}>View</Text>
+                </Link>
+                <Icon name={"a_right"} />
+              </Flex>
             )}
           </Flex>
         );
@@ -854,7 +848,9 @@ const Entity = () => {
           .join(", ")}${info.row.original.values.length > 5 ? "..." : ""}`;
         return (
           <Tooltip label={tooltipLabelValue} hasArrow>
-            <Tag colorScheme={"purple"}>{info.row.original.values.length}</Tag>
+            <Tag colorScheme={"purple"} size={"sm"}>
+              {info.row.original.values.length}
+            </Tag>
           </Tooltip>
         );
       },
@@ -1595,7 +1591,6 @@ const Entity = () => {
                     viewOnly={!editing}
                     actions={projectsTableActions}
                     showPagination
-                    showItemCount
                     showSelection
                   />
                 )}
@@ -1646,7 +1641,6 @@ const Entity = () => {
                       viewOnly={!editing}
                       actions={attachmentTableActions}
                       showPagination
-                      showItemCount
                       showSelection
                     />
                   )}
@@ -1716,7 +1710,6 @@ const Entity = () => {
                         viewOnly={!editing}
                         actions={originTableActions}
                         showPagination
-                        showItemCount
                         showSelection
                       />
                     ) : (
@@ -1749,7 +1742,6 @@ const Entity = () => {
                         viewOnly={!editing}
                         actions={productTableActions}
                         showPagination
-                        showItemCount
                         showSelection
                       />
                     ) : (
@@ -1806,7 +1798,6 @@ const Entity = () => {
                     selectedRows={{}}
                     viewOnly={!editing}
                     showPagination
-                    showItemCount
                     showSelection
                   />
                 )}

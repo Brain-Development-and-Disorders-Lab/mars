@@ -22,6 +22,7 @@ import {
   Heading,
   IconButton,
   Input,
+  Link,
   Menu,
   MenuButton,
   MenuItem,
@@ -630,15 +631,14 @@ const Project = () => {
                 size={"sm"}
               />
             ) : (
-              <Button
-                key={`view-entity-${info.row.original}`}
-                colorScheme={"gray"}
-                rightIcon={<Icon name={"c_right"} />}
-                onClick={() => navigate(`/entities/${info.row.original}`)}
-                size={"sm"}
-              >
-                View
-              </Button>
+              <Flex justifyContent={"right"} p={"2"} align={"center"} gap={"1"}>
+                <Link
+                  onClick={() => navigate(`/entities/${info.row.original}`)}
+                >
+                  <Text fontWeight={"semibold"}>View</Text>
+                </Link>
+                <Icon name={"a_right"} />
+              </Flex>
             )}
           </Flex>
         );
