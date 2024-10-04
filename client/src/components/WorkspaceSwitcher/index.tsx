@@ -65,6 +65,48 @@ const WorkspaceSwitcher = () => {
     workspaces: WorkspaceModel[];
   }>(GET_WORKSPACES, { fetchPolicy: "network-only" });
 
+  // Query to get a Workspace
+  const GET_WORKSPACE = gql`
+    query GetWorkspace($_id: String) {
+      workspace(_id: $_id) {
+        _id
+        name
+      }
+    }
+  `;
+  const [getWorkspace, { error: workspaceError }] = useLazyQuery<{
+    workspace: WorkspaceModel;
+  }>(GET_WORKSPACE, { fetchPolicy: "network-only" });
+
+  /**
+   * Async function to retrieve the name of the initially selected Workspace
+   */
+  const setInitialLabelValue = async () => {
+    const workspaceResult = await getWorkspace({
+      variables: {
+        _id: workspace,
+      },
+    });
+
+    if (_.isUndefined(workspaceResult.data) || !_.isUndefined(workspaceError)) {
+      toast({
+        title: "Error",
+        description: "Unable to get name of current Workspace",
+        status: "error",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    } else {
+      setLabel(workspaceResult.data.workspace.name);
+    }
+  };
+
+  // Update the label value on first render
+  useEffect(() => {
+    setInitialLabelValue();
+  }, []);
+
   /**
    * Utility function to update the list of Workspaces
    */
@@ -181,8 +223,9 @@ const WorkspaceSwitcher = () => {
             ml={"2"}
             mr={"2"}
           >
+            <Icon name={"workspace"} />
             <Text fontSize={"sm"} fontWeight={"semibold"}>
-              {_.truncate(label, { length: 16 })}
+              {_.truncate(label, { length: 14 })}
             </Text>
             <Spacer />
             <Icon name={"c_expand"} />
