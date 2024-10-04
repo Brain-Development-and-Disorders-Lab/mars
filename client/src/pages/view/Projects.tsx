@@ -55,14 +55,30 @@ const Projects = () => {
   const breakpoint = useBreakpoint();
   const [visibleColumns, setVisibleColumns] = useState({});
   useEffect(() => {
-    if (_.includes(["sm", "base"], breakpoint) || _.isUndefined(breakpoint)) {
+    if (
+      _.includes(["md", "sm", "base"], breakpoint) ||
+      _.isUndefined(breakpoint)
+    ) {
       setVisibleColumns({
         description: false,
+        created: false,
         owner: false,
         entities: false,
       });
+    } else if (_.includes(["lg"], breakpoint)) {
+      setVisibleColumns({
+        description: false,
+        created: false,
+        owner: true,
+        entities: true,
+      });
     } else {
-      setVisibleColumns({});
+      setVisibleColumns({
+        description: true,
+        created: true,
+        owner: true,
+        entities: true,
+      });
     }
   }, [breakpoint]);
 
