@@ -53,6 +53,7 @@ import {
   TabPanel,
   TabPanels,
   CardFooter,
+  Divider,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
@@ -1080,9 +1081,9 @@ const Entity = () => {
       setExportFields([]);
 
       toast({
-        title: "Info",
-        description: `Generated ${format.toUpperCase()} file`,
-        status: "info",
+        title: "Success",
+        description: `Successfully generated ${format.toUpperCase()} file`,
+        status: "success",
         duration: 2000,
         position: "bottom-right",
         isClosable: true,
@@ -1115,12 +1116,9 @@ const Entity = () => {
     } else {
       // If unchecked after click, remove the field from exportFields
       if (exportFields.includes(field)) {
-        const updatedFields = exportFields.filter((existingField) => {
-          if (!_.isEqual(existingField, field)) {
-            return existingField;
-          }
-          return;
-        });
+        const updatedFields = exportFields.filter(
+          (existingField) => !_.isEqual(existingField, field),
+        );
         setExportFields(updatedFields);
       }
     }
@@ -2234,29 +2232,82 @@ const Entity = () => {
             <ModalHeader p={"2"}>Export Entity</ModalHeader>
             <ModalCloseButton />
 
-            <ModalBody px={"2"}>
-              <Flex w={"100%"} direction={"column"} py={"1"} gap={"2"}>
+            <ModalBody px={"2"} gap={"2"}>
+              {/* Export information */}
+              <Flex
+                direction={"row"}
+                w={"100%"}
+                gap={"2"}
+                p={"2"}
+                align={"center"}
+                justifySelf={"left"}
+                bg={"blue.200"}
+                rounded={"md"}
+              >
+                <Icon name={"info"} color={"blue.500"} />
+                {_.isEqual(exportFormat, "json") && (
+                  <Text fontSize={"sm"} color={"blue.700"}>
+                    JSON files can be re-imported into Metadatify.
+                  </Text>
+                )}
+                {_.isEqual(exportFormat, "csv") && (
+                  <Text fontSize={"sm"} color={"blue.700"}>
+                    When exporting Origins, Products, or Projects, only the name
+                    will be exported. To export identifiers, use JSON format.
+                  </Text>
+                )}
+              </Flex>
+
+              {/* Select export format */}
+              <Flex
+                w={"100%"}
+                direction={"row"}
+                py={"2"}
+                gap={"2"}
+                justify={"space-between"}
+                align={"center"}
+              >
+                <Flex gap={"1"} align={"center"}>
+                  <Text fontSize={"sm"} fontWeight={"semibold"}>
+                    Format:
+                  </Text>
+                  <FormControl>
+                    <Select
+                      size={"sm"}
+                      rounded={"md"}
+                      value={exportFormat}
+                      onChange={(event) => setExportFormat(event.target.value)}
+                    >
+                      <option key={"json"} value={"json"}>
+                        JSON
+                      </option>
+                      <option key={"csv"} value={"csv"}>
+                        CSV
+                      </option>
+                    </Select>
+                  </FormControl>
+                </Flex>
                 <Text fontSize={"sm"}>
-                  Select the Entity information to include in the exported file.
+                  Select the Entity fields to be exported.
                 </Text>
               </Flex>
 
               {/* Selection content */}
               <Flex
-                direction={"row"}
+                direction={"column"}
                 p={"2"}
                 gap={"2"}
                 rounded={"md"}
                 border={"1px"}
                 borderColor={"gray.300"}
               >
-                <Flex direction={"column"} gap={"2"}>
+                <Flex direction={"row"} gap={"2"}>
                   <FormControl>
-                    <FormLabel>Details</FormLabel>
+                    <FormLabel fontSize={"sm"}>Details</FormLabel>
                     {!loading ? (
                       <CheckboxGroup size={"sm"}>
                         <Stack spacing={2} direction={"column"}>
-                          <Checkbox disabled defaultChecked>
+                          <Checkbox disabled defaultChecked fontSize={"sm"}>
                             Name: {entityName}
                           </Checkbox>
                           <Checkbox
@@ -2264,11 +2315,12 @@ const Entity = () => {
                             onChange={(event) =>
                               handleExportCheck("created", event.target.checked)
                             }
+                            fontSize={"sm"}
                           >
                             Created:{" "}
                             {dayjs(entityData.created).format("DD MMM YYYY")}
                           </Checkbox>
-                          <Checkbox isChecked={true} isDisabled>
+                          <Checkbox isChecked={true} isDisabled fontSize={"sm"}>
                             Owner: {entityData.owner}
                           </Checkbox>
                           <Checkbox
@@ -2281,7 +2333,7 @@ const Entity = () => {
                             }
                             isDisabled={_.isEqual(entityDescription, "")}
                           >
-                            <Text noOfLines={1}>
+                            <Text noOfLines={1} fontSize={"sm"}>
                               Description:{" "}
                               {_.isEqual(entityDescription, "")
                                 ? "No description"
@@ -2291,11 +2343,12 @@ const Entity = () => {
                         </Stack>
                       </CheckboxGroup>
                     ) : (
-                      <Text>Loading details</Text>
+                      <Text fontSize={"sm"}>Loading details</Text>
                     )}
                   </FormControl>
+
                   <FormControl>
-                    <FormLabel fontSize={"md"}>Projects</FormLabel>
+                    <FormLabel fontSize={"sm"}>Projects</FormLabel>
                     {!loading && entityProjects.length > 0 ? (
                       <Stack spacing={2} direction={"column"}>
                         {entityProjects.map((project) => {
@@ -2315,14 +2368,11 @@ const Entity = () => {
                                 )
                               }
                             >
-                              Project:{" "}
-                              {
-                                <Linky
-                                  id={project}
-                                  type={"projects"}
-                                  size={"sm"}
-                                />
-                              }
+                              <Linky
+                                id={project}
+                                type={"projects"}
+                                size={"sm"}
+                              />
                             </Checkbox>
                           );
                         })}
@@ -2333,9 +2383,11 @@ const Entity = () => {
                   </FormControl>
                 </Flex>
 
-                <Flex direction={"column"} gap={"2"}>
+                <Divider />
+
+                <Flex direction={"row"} gap={"2"}>
                   <FormControl>
-                    <FormLabel fontSize={"md"}>Origins</FormLabel>
+                    <FormLabel fontSize={"sm"}>Origins</FormLabel>
                     {!loading && entityOrigins?.length > 0 ? (
                       <Stack spacing={2} direction={"column"}>
                         {entityOrigins.map((origin) => {
@@ -2343,6 +2395,7 @@ const Entity = () => {
                           return (
                             <Checkbox
                               size={"sm"}
+                              fontSize={"sm"}
                               key={origin._id}
                               isChecked={_.includes(
                                 exportFields,
@@ -2355,7 +2408,11 @@ const Entity = () => {
                                 )
                               }
                             >
-                              Origin: {origin.name}
+                              <Linky
+                                id={origin._id}
+                                type={"entities"}
+                                size={"sm"}
+                              />
                             </Checkbox>
                           );
                         })}
@@ -2364,8 +2421,9 @@ const Entity = () => {
                       <Text fontSize={"sm"}>No Origins</Text>
                     )}
                   </FormControl>
+
                   <FormControl>
-                    <FormLabel fontSize={"md"}>Products</FormLabel>
+                    <FormLabel fontSize={"sm"}>Products</FormLabel>
                     {!loading && entityProducts?.length > 0 ? (
                       <Stack spacing={2} direction={"column"}>
                         {entityProducts.map((product) => {
@@ -2373,6 +2431,7 @@ const Entity = () => {
                           return (
                             <Checkbox
                               size={"sm"}
+                              fontSize={"sm"}
                               key={product._id}
                               isChecked={_.includes(
                                 exportFields,
@@ -2385,7 +2444,11 @@ const Entity = () => {
                                 )
                               }
                             >
-                              Product: {product.name}
+                              <Linky
+                                id={product._id}
+                                type={"entities"}
+                                size={"sm"}
+                              />
                             </Checkbox>
                           );
                         })}
@@ -2396,9 +2459,11 @@ const Entity = () => {
                   </FormControl>
                 </Flex>
 
-                <Flex direction={"column"} gap={"2"}>
+                <Divider />
+
+                <Flex direction={"row"} gap={"2"}>
                   <FormControl>
-                    <FormLabel fontSize={"md"}>Attributes</FormLabel>
+                    <FormLabel fontSize={"sm"}>Attributes</FormLabel>
                     {!loading && entityAttributes.length > 0 ? (
                       <Stack spacing={2} direction={"column"}>
                         {entityAttributes.map((attribute) => {
@@ -2406,6 +2471,7 @@ const Entity = () => {
                           return (
                             <Checkbox
                               size={"sm"}
+                              fontSize={"sm"}
                               key={attribute._id}
                               isChecked={_.includes(
                                 exportFields,
@@ -2432,25 +2498,6 @@ const Entity = () => {
             </ModalBody>
 
             <ModalFooter p={"2"}>
-              <Flex
-                direction={"row"}
-                w={"70%"}
-                gap={"2"}
-                align={"center"}
-                justifySelf={"left"}
-              >
-                <Icon name={"info"} />
-                {_.isEqual(exportFormat, "json") && (
-                  <Text fontSize={"sm"}>
-                    JSON files can be re-imported into Metadatify.
-                  </Text>
-                )}
-                {_.isEqual(exportFormat, "csv") && (
-                  <Text fontSize={"sm"}>
-                    CSV spreadsheets can be used by other applications.
-                  </Text>
-                )}
-              </Flex>
               <Flex direction={"column"} w={"30%"} gap={"2"}>
                 {/* "Download" button */}
                 <Flex
@@ -2460,32 +2507,15 @@ const Entity = () => {
                   justify={"right"}
                   align={"center"}
                 >
-                  <Flex>
-                    <FormControl>
-                      <Select
-                        size={"sm"}
-                        value={exportFormat}
-                        onChange={(event) =>
-                          setExportFormat(event.target.value)
-                        }
-                      >
-                        <option key={"json"} value={"json"}>
-                          JSON
-                        </option>
-                        <option key={"csv"} value={"csv"}>
-                          CSV
-                        </option>
-                      </Select>
-                    </FormControl>
-                  </Flex>
-                  <IconButton
-                    icon={<Icon name={"download"} />}
+                  <Button
+                    rightIcon={<Icon name={"download"} />}
                     colorScheme={"blue"}
                     size={"sm"}
-                    aria-label={"Download"}
                     onClick={() => handleDownloadClick(exportFormat)}
                     isLoading={exportLoading}
-                  />
+                  >
+                    Download
+                  </Button>
                 </Flex>
               </Flex>
             </ModalFooter>
