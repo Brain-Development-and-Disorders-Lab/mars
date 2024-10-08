@@ -1210,6 +1210,10 @@ export class Entities {
     for await (const entity of entities) {
       const result = await Entities.getOne(entity);
       if (result) {
+        // Remove `history` field
+        delete (result as any)["history"];
+
+        // Add to collection for export
         collection.push(result);
       }
     }

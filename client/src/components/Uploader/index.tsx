@@ -111,7 +111,7 @@ const Uploader = (props: {
               <ModalBody px={"2"}>
                 <Flex gap={"2"} direction={"column"}>
                   <Flex gap={"1"} direction={"row"} align={"center"}>
-                    <Text>Supported file formats:</Text>
+                    <Text fontSize={"sm"}>Supported file formats:</Text>
                     <Tag colorScheme={"green"} size={"sm"}>
                       PDF
                     </Tag>
@@ -143,8 +143,10 @@ const Uploader = (props: {
                             justify={"center"}
                             align={"center"}
                           >
-                            <Text fontWeight={"semibold"}>Drag file here</Text>
-                            <Text>or click to upload</Text>
+                            <Text fontWeight={"semibold"} fontSize={"sm"}>
+                              Drag file here
+                            </Text>
+                            <Text fontSize={"sm"}>or click to upload</Text>
                           </Flex>
                         ) : (
                           <Flex
@@ -153,7 +155,9 @@ const Uploader = (props: {
                             justify={"center"}
                             align={"center"}
                           >
-                            <Text fontWeight={"semibold"}>{file.name}</Text>
+                            <Text fontWeight={"semibold"} fontSize={"sm"}>
+                              {file.name}
+                            </Text>
                           </Flex>
                         )}
                       </Flex>
@@ -168,7 +172,10 @@ const Uploader = (props: {
                         opacity={"0"}
                         aria-hidden={"true"}
                         onChange={(event: ChangeEvent<HTMLInputElement>) => {
-                          if (event.target.files) {
+                          if (
+                            event.target.files &&
+                            event.target.files.length > 0
+                          ) {
                             // Only accept image or PDF files
                             if (
                               _.includes(

@@ -1415,12 +1415,17 @@ const Entity = () => {
                 Actions
               </MenuButton>
               <MenuList>
-                <MenuItem icon={<Icon name={"print"} />} isDisabled>
+                <MenuItem
+                  icon={<Icon name={"print"} />}
+                  fontSize={"sm"}
+                  isDisabled
+                >
                   Print
                 </MenuItem>
                 <MenuItem
                   icon={<Icon name={"graph"} />}
                   onClick={onGraphOpen}
+                  fontSize={"sm"}
                   isDisabled={editing || entityArchived}
                 >
                   Visualize
@@ -1428,6 +1433,7 @@ const Entity = () => {
                 <MenuItem
                   onClick={handleExportClick}
                   icon={<Icon name={"download"} />}
+                  fontSize={"sm"}
                   isDisabled={editing || entityArchived}
                 >
                   Export
@@ -1435,6 +1441,7 @@ const Entity = () => {
                 <MenuItem
                   onClick={onArchiveDialogOpen}
                   icon={<Icon name={"archive"} />}
+                  fontSize={"sm"}
                   isDisabled={entityArchived}
                 >
                   Archive
@@ -1452,10 +1459,10 @@ const Entity = () => {
               onClose={onArchiveDialogClose}
             >
               <Flex gap={"2"} direction={"column"}>
-                <Text fontWeight={"semibold"}>
+                <Text fontWeight={"semibold"} fontSize={"sm"}>
                   Are you sure you want to archive this Entity?
                 </Text>
-                <Text>
+                <Text fontSize={"sm"}>
                   This Entity will be moved to the Workspace archive. All
                   relationships will be preserved, however it will not be
                   visible. It can be restored at any time.
@@ -2337,7 +2344,7 @@ const Entity = () => {
                               Description:{" "}
                               {_.isEqual(entityDescription, "")
                                 ? "No description"
-                                : entityDescription}
+                                : _.truncate(entityDescription, { length: 32 })}
                             </Text>
                           </Checkbox>
                         </Stack>
