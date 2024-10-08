@@ -89,10 +89,18 @@ export type AttributeViewButtonProps = {
 };
 
 // Values
+export type IValueType =
+  | "number"
+  | "text"
+  | "url"
+  | "date"
+  | "entity"
+  | "select";
+
 export type IValue<D> = {
   _id: string;
   name: string;
-  type: "number" | "text" | "url" | "date" | "entity" | "select";
+  type: IValueType;
   data: D;
   disabled?: boolean;
   showRemove?: boolean;
