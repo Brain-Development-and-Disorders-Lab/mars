@@ -2,7 +2,7 @@
 import React, { useEffect } from "react";
 
 // Existing and custom components
-import { Flex, IconButton, Text, useToast } from "@chakra-ui/react";
+import { Button, Flex, Text, Tooltip, useToast } from "@chakra-ui/react";
 import ReactFlow, {
   MiniMap,
   Controls,
@@ -101,12 +101,14 @@ const Graph = (props: {
             id: origin._id,
             type: "input",
             data: {
-              label: generateLabel(origin._id, origin.name, false),
+              label: createLabel(origin._id, origin.name, false),
             },
             position: { x: 250, y: 0 },
             style: {
-              border: "2px solid #A0AEC0", // gray.400
-              background: "#E2E8F0", // gray.200
+              border: "2px solid",
+              borderColor: "#9F7AEA", // purple.400
+              width: "160px",
+              height: "75px",
             },
           });
 
@@ -131,12 +133,14 @@ const Graph = (props: {
             id: product._id,
             type: "output",
             data: {
-              label: generateLabel(product._id, product.name, false),
+              label: createLabel(product._id, product.name, false),
             },
             position: { x: 100, y: 200 },
             style: {
-              border: "2px solid #A0AEC0", // gray.400
-              background: "#E2E8F0", // gray.200
+              border: "2px solid",
+              borderColor: "#ECC94B", // yellow.400
+              width: "160px",
+              height: "75px",
             },
           });
 
@@ -171,11 +175,13 @@ const Graph = (props: {
         id: entity._id,
         type: currentType,
         data: {
-          label: generateLabel(entity._id, entity.name, true),
+          label: createLabel(entity._id, entity.name, true),
         },
         style: {
-          border: "2px solid #48BB78", // green.400
-          background: "#9AE6B4", // green.200
+          border: "2px solid",
+          borderColor: "#38B2AC", // teal.400
+          width: "160px",
+          height: "75px",
         },
         position: { x: 250, y: 100 },
       });
@@ -228,15 +234,24 @@ const Graph = (props: {
     return false;
   };
 
-  const generateLayout = async (layoutNodes: Node[], layoutEdges: Edge[]) => {
+  /**
+   * Generate graph layout using ELK
+   * @param layoutNodes Nodes to present in a layout
+   * @param layoutEdges Edges to present in a layout
+   * @return {Promise<ElkNode>}
+   */
+  const generateLayout = async (
+    layoutNodes: Node[],
+    layoutEdges: Edge[],
+  ): Promise<ElkNode> => {
     // Set the layout of the graph using ELK
     const elk = new ELK();
 
     const nodes: ElkNode[] = layoutNodes.map((node) => {
       return {
         id: node.id,
-        width: 120,
-        height: 80,
+        width: 150,
+        height: 75,
       };
     });
 
@@ -264,36 +279,71 @@ const Graph = (props: {
 
   /**
    * Generate the React component for the graph
-   * @param node Information about the graph node
-   * @return
+   * @param {string} id Node identifier, typically Entity identifier
+   * @param {string} name Node name, typically Entity name
+   * @param {boolean} isPrimary Flag to indiciate the Node is the central Node.
+   * There should be only one primary Node per graph
+   * @return {React.JSX.Element}
    */
-  const generateLabel = (id: string, name: string, isPrimary: boolean) => {
+  const createLabel = (
+    id: string,
+    name: string,
+    isPrimary: boolean,
+  ): React.JSX.Element => {
     return (
       <Flex
         key={`label_${id}`}
-        direction={"row"}
+        direction={"column"}
         align={"center"}
+        w={"100%"}
         gap={"2"}
-        bg={isPrimary ? "green.200" : "gray.200"}
       >
-        <Icon key={`label_icon_${id}`} name={"entity"} size={"sm"} />
-        <Flex key={`inner_label_${id}`} direction={"column"} align={"baseline"}>
-          <Text key={`inner_label_text_${id}`} fontWeight={"semibold"}>
-            {name}
-          </Text>
-          <IconButton
+        <Flex w={"100%"} gap={"2"} direction={"row"} align={"center"}>
+          <Icon key={`label_icon_${id}`} name={"entity"} size={"sm"} />
+          <Tooltip label={name}>
+            <Text
+              key={`inner_label_text_${id}`}
+              fontWeight={"semibold"}
+              textAlign={"left"}
+            >
+              {_.truncate(name, { length: 16 })}
+            </Text>
+          </Tooltip>
+        </Flex>
+
+        <Flex
+          key={`inner_label_${id}`}
+          direction={"row"}
+          align={"center"}
+          justify={"left"}
+          w={"100%"}
+          py={"1"}
+        >
+          <Button
             key={`inner_label_view_${id}`}
             aria-label={"View Entity"}
-            size={"sm"}
-            icon={<Icon name={"view"} />}
+            size={"xs"}
+            rightIcon={<Icon name={"a_right"} />}
+            isDisabled={isPrimary}
             onClick={() => props.entityNavigateHook(id)}
-          />
+          >
+            View
+          </Button>
         </Flex>
       </Flex>
     );
   };
 
-  const onNodeClick = async (_event: React.MouseEvent, node: Node) => {
+  /**
+   * Handle clicking a Node on the graph. If the Node is not the primary Node, retrieve and add the Origin and Product
+   * Entities of the clicked Node to the graph.
+   * @param _event Click event information
+   * @param node Node that was clicked
+   */
+  const onNodeClick = async (
+    _event: React.MouseEvent,
+    node: Node,
+  ): Promise<void> => {
     if (!_.isEqual(node.id.toString(), props.id.toString())) {
       // If the primary Entity hasn't been clicked, obtain Origin and Product nodes
       // for the selected Entity
@@ -336,12 +386,14 @@ const Graph = (props: {
                 id: origin._id,
                 type: "input",
                 data: {
-                  label: generateLabel(origin._id, origin.name, false),
+                  label: createLabel(origin._id, origin.name, false),
                 },
                 position: { x: 100, y: 200 },
                 style: {
-                  border: "2px solid #A0AEC0", // gray.400
-                  background: "#E2E8F0", // gray.200
+                  border: "2px solid",
+                  borderColor: "#A0AEC0", // gray.400
+                  width: "160px",
+                  height: "75px",
                 },
               },
             ];
@@ -396,12 +448,14 @@ const Graph = (props: {
                 id: product._id,
                 type: "output",
                 data: {
-                  label: generateLabel(product._id, product.name, false),
+                  label: createLabel(product._id, product.name, false),
                 },
                 position: { x: 100, y: 200 },
                 style: {
-                  border: "2px solid #A0AEC0", // gray.400
-                  background: "#E2E8F0", // gray.200
+                  border: "2px solid",
+                  borderColor: "#A0AEC0", // gray.400
+                  width: "160px",
+                  height: "75px",
                 },
               },
             ];
@@ -440,30 +494,36 @@ const Graph = (props: {
           });
         }
 
-        // Generate an update message
-        let updateMessage = `Showing ${addedOriginCount} Origin${addedOriginCount > 1 ? "s" : ""} and ${addedProductCount} Product${addedProductCount > 1 && "s"} of Entity "${entity.name}"`;
-        if (addedOriginCount > 0 && addedProductCount === 0) {
-          updateMessage = `Showing ${addedOriginCount} Origin${addedOriginCount > 1 ? "s" : ""} of Entity "${entity.name}"`;
-        } else if (addedProductCount > 0 && addedOriginCount === 0) {
-          updateMessage = `Showing ${addedProductCount} Product${addedProductCount > 1 ? "s" : ""} of Entity "${entity.name}"`;
+        if (!toast.isActive("toast-retrieved-associations")) {
+          // Generate an update message
+          let updateMessage = `Showing ${addedOriginCount} Origin${addedOriginCount > 1 ? "s" : ""} and ${addedProductCount} Product${addedProductCount > 1 && "s"} of Entity "${entity.name}"`;
+          if (addedOriginCount > 0 && addedProductCount === 0) {
+            updateMessage = `Showing ${addedOriginCount} Origin${addedOriginCount > 1 ? "s" : ""} of Entity "${entity.name}"`;
+          } else if (addedProductCount > 0 && addedOriginCount === 0) {
+            updateMessage = `Showing ${addedProductCount} Product${addedProductCount > 1 ? "s" : ""} of Entity "${entity.name}"`;
+          }
+          toast({
+            id: "toast-retrieved-associations",
+            title: "Retrieved Origins and Products",
+            status: "success",
+            description: updateMessage,
+            duration: 4000,
+            position: "bottom-right",
+            isClosable: true,
+          });
         }
-        toast({
-          title: "Retrieved Origins and Products",
-          status: "success",
-          description: updateMessage,
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
       } else {
-        toast({
-          title: "No Updates",
-          status: "info",
-          description: `All Entities related to "${entity.name}" are shown`,
-          duration: 2000,
-          position: "bottom-right",
-          isClosable: true,
-        });
+        if (!toast.isActive("toast-no-updates")) {
+          toast({
+            id: "toast-no-updates",
+            title: "No Updates",
+            status: "info",
+            description: `All Entities related to "${entity.name}" are shown`,
+            duration: 2000,
+            position: "bottom-right",
+            isClosable: true,
+          });
+        }
       }
 
       // Apply updates
@@ -507,7 +567,11 @@ const Graph = (props: {
         >
           <MiniMap
             nodeStrokeColor={(node: any) => {
+              // Check for defined custom colors
               if (node.style?.background) return node.style.background;
+              if (node.style?.borderColor) return node.style.borderColor;
+
+              // Default colors
               if (node.type === "input") return "#0041d0";
               if (node.type === "output") return "#ff0072";
               if (node.type === "default") return "#1a192b";
@@ -522,7 +586,7 @@ const Graph = (props: {
             nodeBorderRadius={2}
           />
           <Controls />
-          <Background color="#aaa" gap={16} />
+          <Background color={"#aaa"} gap={16} />
         </ReactFlow>
       </Flex>
     </Flex>

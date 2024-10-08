@@ -25,6 +25,7 @@ describe("JSON Import Test", () => {
       cy.wait(500);
       cy.get("#importContinueButton").click(); // Go to Attributes page
       cy.get("#importContinueButton").click(); // Go to Review page
+      cy.wait(1000); // Wait for GraphQL request to complete
       cy.get("#importContinueButton").click(); // Finalize import
       cy.wait(1000); // Wait for GraphQL request to complete
 
