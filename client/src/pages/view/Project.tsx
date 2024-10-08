@@ -522,11 +522,22 @@ const Project = () => {
 
   // Handle clicking the "Download" button
   const handleDownloadClick = async (format: string) => {
+    let fields = exportFields;
+    // Update the exported fields if using JSON format and `Entities` have been selected
+    if (_.isEqual(format, "json") && _.includes(fields, "entities")) {
+      fields = exportFields.filter((field) => !_.isEqual(field, "entities"));
+      if (_.isEqual(exportEntityDetails, "name")) {
+        fields.push("entities_names");
+      } else {
+        fields.push("entities_id");
+      }
+    }
+
     // Send query to generate data
     const response = await exportProject({
       variables: {
         _id: id,
-        fields: exportFields,
+        fields: fields,
         format: format,
       },
     });

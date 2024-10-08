@@ -1040,7 +1040,7 @@ export class Entities {
       // Handle JSON format
       if (_.isUndefined(fields)) {
         // Export the entire Entity
-        return JSON.stringify(entity);
+        return JSON.stringify(entity, null, "  ");
       } else {
         const formatted: Partial<EntityModel> = {
           _id: entity._id,
@@ -1109,7 +1109,7 @@ export class Entities {
           }
         }
 
-        return JSON.stringify(formatted);
+        return JSON.stringify(formatted, null, "  ");
       }
     } else if (_.isEqual(format, "csv")) {
       let exportFields = fields;
