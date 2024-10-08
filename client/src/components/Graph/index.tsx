@@ -234,7 +234,16 @@ const Graph = (props: {
     return false;
   };
 
-  const generateLayout = async (layoutNodes: Node[], layoutEdges: Edge[]) => {
+  /**
+   * Generate graph layout using ELK
+   * @param layoutNodes Nodes to present in a layout
+   * @param layoutEdges Edges to present in a layout
+   * @return {Promise<ElkNode>}
+   */
+  const generateLayout = async (
+    layoutNodes: Node[],
+    layoutEdges: Edge[],
+  ): Promise<ElkNode> => {
     // Set the layout of the graph using ELK
     const elk = new ELK();
 
@@ -270,10 +279,17 @@ const Graph = (props: {
 
   /**
    * Generate the React component for the graph
-   * @param node Information about the graph node
-   * @return
+   * @param {string} id Node identifier, typically Entity identifier
+   * @param {string} name Node name, typically Entity name
+   * @param {boolean} isPrimary Flag to indiciate the Node is the central Node.
+   * There should be only one primary Node per graph
+   * @return {React.JSX.Element}
    */
-  const createLabel = (id: string, name: string, isPrimary: boolean) => {
+  const createLabel = (
+    id: string,
+    name: string,
+    isPrimary: boolean,
+  ): React.JSX.Element => {
     return (
       <Flex
         key={`label_${id}`}
@@ -318,7 +334,16 @@ const Graph = (props: {
     );
   };
 
-  const onNodeClick = async (_event: React.MouseEvent, node: Node) => {
+  /**
+   * Handle clicking a Node on the graph. If the Node is not the primary Node, retrieve and add the Origin and Product
+   * Entities of the clicked Node to the graph.
+   * @param _event Click event information
+   * @param node Node that was clicked
+   */
+  const onNodeClick = async (
+    _event: React.MouseEvent,
+    node: Node,
+  ): Promise<void> => {
     if (!_.isEqual(node.id.toString(), props.id.toString())) {
       // If the primary Entity hasn't been clicked, obtain Origin and Product nodes
       // for the selected Entity
