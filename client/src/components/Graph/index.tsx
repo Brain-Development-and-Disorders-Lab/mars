@@ -2,7 +2,7 @@
 import React, { useEffect } from "react";
 
 // Existing and custom components
-import { Flex, IconButton, Text, useToast } from "@chakra-ui/react";
+import { Button, Flex, Text, Tooltip, useToast } from "@chakra-ui/react";
 import ReactFlow, {
   MiniMap,
   Controls,
@@ -101,12 +101,14 @@ const Graph = (props: {
             id: origin._id,
             type: "input",
             data: {
-              label: generateLabel(origin._id, origin.name, false),
+              label: createLabel(origin._id, origin.name, false),
             },
             position: { x: 250, y: 0 },
             style: {
               border: "2px solid #A0AEC0", // gray.400
               background: "#E2E8F0", // gray.200
+              width: "160px",
+              height: "75px",
             },
           });
 
@@ -131,12 +133,14 @@ const Graph = (props: {
             id: product._id,
             type: "output",
             data: {
-              label: generateLabel(product._id, product.name, false),
+              label: createLabel(product._id, product.name, false),
             },
             position: { x: 100, y: 200 },
             style: {
               border: "2px solid #A0AEC0", // gray.400
               background: "#E2E8F0", // gray.200
+              width: "160px",
+              height: "75px",
             },
           });
 
@@ -171,11 +175,13 @@ const Graph = (props: {
         id: entity._id,
         type: currentType,
         data: {
-          label: generateLabel(entity._id, entity.name, true),
+          label: createLabel(entity._id, entity.name, true),
         },
         style: {
           border: "2px solid #48BB78", // green.400
           background: "#9AE6B4", // green.200
+          width: "160px",
+          height: "75px",
         },
         position: { x: 250, y: 100 },
       });
@@ -235,8 +241,8 @@ const Graph = (props: {
     const nodes: ElkNode[] = layoutNodes.map((node) => {
       return {
         id: node.id,
-        width: 120,
-        height: 80,
+        width: 150,
+        height: 75,
       };
     });
 
@@ -267,27 +273,54 @@ const Graph = (props: {
    * @param node Information about the graph node
    * @return
    */
-  const generateLabel = (id: string, name: string, isPrimary: boolean) => {
+  const createLabel = (id: string, name: string, isPrimary: boolean) => {
     return (
       <Flex
         key={`label_${id}`}
-        direction={"row"}
+        direction={"column"}
         align={"center"}
+        w={"100%"}
         gap={"2"}
         bg={isPrimary ? "green.200" : "gray.200"}
       >
-        <Icon key={`label_icon_${id}`} name={"entity"} size={"sm"} />
-        <Flex key={`inner_label_${id}`} direction={"column"} align={"baseline"}>
-          <Text key={`inner_label_text_${id}`} fontWeight={"semibold"}>
-            {name}
-          </Text>
-          <IconButton
+        <Flex w={"100%"} gap={"2"} direction={"row"} align={"center"}>
+          <Icon key={`label_icon_${id}`} name={"entity"} size={"sm"} />
+          <Tooltip label={name}>
+            <Text
+              key={`inner_label_text_${id}`}
+              fontWeight={"semibold"}
+              textAlign={"left"}
+            >
+              {_.truncate(name, { length: 16 })}
+            </Text>
+          </Tooltip>
+        </Flex>
+        <Flex
+          key={`inner_label_${id}`}
+          direction={"row"}
+          align={"baseline"}
+          gap={"1"}
+          p={"1"}
+        >
+          <Button
             key={`inner_label_view_${id}`}
             aria-label={"View Entity"}
-            size={"sm"}
-            icon={<Icon name={"view"} />}
+            size={"xs"}
+            rightIcon={<Icon name={"view"} />}
+            isDisabled={isPrimary}
             onClick={() => props.entityNavigateHook(id)}
-          />
+          >
+            View
+          </Button>
+          <Button
+            key={`inner_label_extend_${id}`}
+            size={"xs"}
+            rightIcon={<Icon name={"graph"} />}
+            isDisabled={isPrimary}
+            onClick={() => props.entityNavigateHook(id)}
+          >
+            Extend
+          </Button>
         </Flex>
       </Flex>
     );
@@ -336,7 +369,7 @@ const Graph = (props: {
                 id: origin._id,
                 type: "input",
                 data: {
-                  label: generateLabel(origin._id, origin.name, false),
+                  label: createLabel(origin._id, origin.name, false),
                 },
                 position: { x: 100, y: 200 },
                 style: {
@@ -396,7 +429,7 @@ const Graph = (props: {
                 id: product._id,
                 type: "output",
                 data: {
-                  label: generateLabel(product._id, product.name, false),
+                  label: createLabel(product._id, product.name, false),
                 },
                 position: { x: 100, y: 200 },
                 style: {
