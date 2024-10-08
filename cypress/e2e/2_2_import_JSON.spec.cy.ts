@@ -30,7 +30,7 @@ describe("JSON Import Test", () => {
 
       // Validate the Entity has been imported successfully
       cy.get("#navEntitiesButton").click();
-      cy.contains("FROMJSON").should("exist");
+      cy.contains("(JSON)").should("exist");
     });
   });
 });

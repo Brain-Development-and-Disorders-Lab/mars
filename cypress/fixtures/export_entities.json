@@ -3,15 +3,15 @@
     {
       "_id": "eDDyDMjQ",
       "archived": false,
-      "name": "mini box 1 FROMJSON",
+      "name": "Box 1 (JSON)",
       "owner": "XXXX-1234-ABCD-0000",
       "created": "2023-12-27T20:12:43.686Z",
-      "description": "mini box that fit in another box",
+      "description": "Box that fits inside another Box.",
       "projects": ["pBwj_re8"],
       "associations": {
         "origins": [
           {
-            "name": "box 1",
+            "name": "Box 1",
             "_id": "eqRN9NBH"
           }
         ],
@@ -21,14 +21,14 @@
         {
           "_id": "a-eDDyDMjQ-SLaiM7",
           "archived": false,
-          "name": "AAAAAAAAAA",
-          "description": "BBBBBB",
+          "name": "Example Attribute",
+          "description": "Attribute description",
           "values": [
             {
-              "_id": "v_text_18399",
-              "name": "ZZZZZZZZZZZ",
+              "_id": "v_text_18319",
+              "name": "Text Value",
               "type": "text",
-              "data": "XXXXXXXXXXXXX"
+              "data": "Example value"
             }
           ]
         }
@@ -38,15 +38,15 @@
     {
       "_id": "ewoekn2o",
       "archived": false,
-      "name": "mini box 1",
+      "name": "Mini Box 1",
       "owner": "XXXX-1234-ABCD-0000",
       "created": "2023-12-27T20:12:43.686Z",
-      "description": "mini box that fit in another box updated by same name entity",
+      "description": "Box that fits in another Box updated by same name Entity.",
       "projects": ["pBwj_re8"],
       "associations": {
         "origins": [
           {
-            "name": "box 1",
+            "name": "Box 1",
             "_id": "eqRN9NBH"
           }
         ],
@@ -56,14 +56,14 @@
         {
           "_id": "a-eDDyDMjQ-SLaiM7",
           "archived": false,
-          "name": "AAAAAAAAAA",
-          "description": "BBBBBB",
+          "name": "Example Attribute",
+          "description": "Attribute description",
           "values": [
             {
               "_id": "v_text_18399",
-              "name": "ZZZZZZZZZZZ",
+              "name": "Text Value",
               "type": "text",
-              "data": "XXXXXXXXXXXXX"
+              "data": "Example value"
             }
           ]
         }
@@ -73,10 +73,10 @@
     {
       "_id": "eOZ4E6Qw",
       "archived": false,
-      "name": "box2",
+      "name": "Box 2",
       "owner": "XXXX-1234-ABCD-0000",
       "created": "2023-12-27T20:12:43.686Z",
-      "description": "mock box 2 ",
+      "description": "Example Box 2.",
       "projects": ["pBwj_re8"],
       "associations": {
         "origins": [],
@@ -86,14 +86,14 @@
         {
           "_id": "a-eOZ4E6Qw-0EmAiB",
           "archived": false,
-          "name": "asdvasdvsadv",
-          "description": "qwervqewvqew",
+          "name": "Test Attribute",
+          "description": "Another test Attribute",
           "values": [
             {
               "_id": "v_text_11077",
-              "name": "wqefqwef",
+              "name": "Text Value",
               "type": "text",
-              "data": "qwefqwef"
+              "data": "Some text"
             }
           ]
         }
@@ -103,16 +103,16 @@
     {
       "_id": "eqRN9NBH",
       "archived": false,
-      "name": "box 1",
+      "name": "Box 1",
       "owner": "XXXX-1234-ABCD-0000",
       "created": "2023-12-27T20:12:43.686Z",
-      "description": "mock box 1",
+      "description": "Example Box 1.",
       "projects": ["pBwj_re8"],
       "associations": {
         "origins": [],
         "products": [
           {
-            "name": "mini box 1",
+            "name": "Mini Box 1",
             "_id": "eDDyDMjQ"
           }
         ]
@@ -123,15 +123,15 @@
     {
       "_id": "eDDyDMjQ",
       "archived": false,
-      "name": "mini box 1 FROMJSON",
+      "name": "Mini Box 1 (JSON)",
       "owner": "XXXX-1234-ABCD-0000",
       "created": "2023-12-27T20:12:43.686Z",
-      "description": "mini box that fit in another box FROMJSON",
+      "description": "Mini Box that fits in another Box, JSON.",
       "projects": ["pBwj_re8"],
       "associations": {
         "origins": [
           {
-            "name": "box 1",
+            "name": "Box 1",
             "_id": "eqRN9NBH"
           }
         ],
@@ -140,15 +140,15 @@
       "attributes": [
         {
           "_id": "a-eDDyDMjQ-SLaiM7",
-          "name": "AAAAAAAAAA",
+          "name": "Attribute 1",
           "archived": false,
-          "description": "BBBBBB",
+          "description": "Attribute description",
           "values": [
             {
               "_id": "v_text_18399",
-              "name": "ZZZZZZZZZZZ",
+              "name": "Example Value",
               "type": "text",
-              "data": "XXXXXXXXXXXXX"
+              "data": "Value text"
             }
           ]
         }
