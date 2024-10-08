@@ -22,6 +22,7 @@ import {
   Heading,
   IconButton,
   Input,
+  Link,
   Menu,
   MenuButton,
   MenuItem,
@@ -33,6 +34,8 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  Radio,
+  RadioGroup,
   Select,
   Spacer,
   Stack,
@@ -131,6 +134,7 @@ const Project = () => {
   } = useDisclosure();
   const [exportFields, setExportFields] = useState([] as string[]);
   const [exportFormat, setExportFormat] = useState("json");
+  const [exportEntityDetails, setExportEntityDetails] = React.useState("name");
 
   useEffect(() => {
     if (isLoaded) {
@@ -518,11 +522,22 @@ const Project = () => {
 
   // Handle clicking the "Download" button
   const handleDownloadClick = async (format: string) => {
+    let fields = exportFields;
+    // Update the exported fields if using JSON format and `Entities` have been selected
+    if (_.isEqual(format, "json") && _.includes(fields, "entities")) {
+      fields = exportFields.filter((field) => !_.isEqual(field, "entities"));
+      if (_.isEqual(exportEntityDetails, "name")) {
+        fields.push("entities_names");
+      } else {
+        fields.push("entities_id");
+      }
+    }
+
     // Send query to generate data
     const response = await exportProject({
       variables: {
         _id: id,
-        fields: exportFields,
+        fields: fields,
         format: format,
       },
     });
@@ -630,15 +645,14 @@ const Project = () => {
                 size={"sm"}
               />
             ) : (
-              <Button
-                key={`view-entity-${info.row.original}`}
-                colorScheme={"gray"}
-                rightIcon={<Icon name={"c_right"} />}
-                onClick={() => navigate(`/entities/${info.row.original}`)}
-                size={"sm"}
-              >
-                View
-              </Button>
+              <Flex justifyContent={"right"} p={"2"} align={"center"} gap={"1"}>
+                <Link
+                  onClick={() => navigate(`/entities/${info.row.original}`)}
+                >
+                  <Text fontWeight={"semibold"}>View</Text>
+                </Link>
+                <Icon name={"a_right"} />
+              </Flex>
             )}
           </Flex>
         );
@@ -764,6 +778,7 @@ const Project = () => {
                 <MenuItem
                   onClick={handleExportClick}
                   icon={<Icon name={"download"} />}
+                  fontSize={"sm"}
                   isDisabled={exportLoading || projectArchived}
                 >
                   Export Project
@@ -776,6 +791,7 @@ const Project = () => {
                   <MenuItem
                     onClick={handleExportEntitiesClick}
                     icon={<Icon name={"download"} />}
+                    fontSize={"sm"}
                     isDisabled={
                       projectEntities?.length === 0 ||
                       exportEntitiesLoading ||
@@ -788,6 +804,7 @@ const Project = () => {
                 <MenuItem
                   icon={<Icon name={"archive"} />}
                   onClick={onArchiveDialogOpen}
+                  fontSize={"sm"}
                   isDisabled={projectArchived}
                 >
                   Archive
@@ -1074,16 +1091,79 @@ const Project = () => {
           isCentered
         >
           <ModalOverlay />
-          <ModalContent p={"2"} w={["lg", "xl", "2xl"]}>
+          <ModalContent p={"2"} w={["lg", "xl", "2xl"]} gap={"0"}>
             {/* Heading and close button */}
             <ModalHeader p={"2"}>Export Project</ModalHeader>
             <ModalCloseButton />
 
-            <ModalBody px={"2"}>
-              <Flex w={"100%"} direction={"column"} py={"1"} gap={"2"}>
+            <ModalBody px={"2"} gap={"2"}>
+              {/* Export information */}
+              <Flex
+                direction={"row"}
+                w={"100%"}
+                gap={"2"}
+                p={"2"}
+                align={"center"}
+                justifySelf={"left"}
+                bg={"blue.200"}
+                rounded={"md"}
+              >
+                <Icon name={"info"} color={"blue.500"} />
+                {_.isEqual(exportFormat, "json") && (
+                  <Text fontSize={"sm"} color={"blue.700"}>
+                    JSON files can be re-imported into Metadatify.
+                  </Text>
+                )}
+                {_.isEqual(exportFormat, "csv") && (
+                  <Text fontSize={"sm"} color={"blue.700"}>
+                    To export Entities alongside Project details, use JSON
+                    format.
+                  </Text>
+                )}
+              </Flex>
+
+              {/* Select export format */}
+              <Flex
+                w={"100%"}
+                direction={"row"}
+                py={"2"}
+                gap={"2"}
+                justify={"space-between"}
+                align={"center"}
+              >
+                <Flex gap={"1"} align={"center"}>
+                  <Text fontSize={"sm"} fontWeight={"semibold"}>
+                    Format:
+                  </Text>
+                  <FormControl>
+                    <Select
+                      size={"sm"}
+                      rounded={"md"}
+                      value={exportFormat}
+                      onChange={(event) => {
+                        setExportFormat(event.target.value);
+
+                        // Remove `entities` field if currently selected and switching to CSV format
+                        if (event.target.value === "csv") {
+                          setExportFields([
+                            ...exportFields.filter(
+                              (field) => field !== "entities",
+                            ),
+                          ]);
+                        }
+                      }}
+                    >
+                      <option key={"json"} value={"json"}>
+                        JSON
+                      </option>
+                      <option key={"csv"} value={"csv"}>
+                        CSV
+                      </option>
+                    </Select>
+                  </FormControl>
+                </Flex>
                 <Text fontSize={"sm"}>
-                  Select the Project information to include in the exported
-                  file.
+                  Select the Project fields to be exported.
                 </Text>
               </Flex>
 
@@ -1096,116 +1176,132 @@ const Project = () => {
                 border={"1px"}
                 borderColor={"gray.300"}
               >
-                <Flex direction={"column"} gap={"2"}>
-                  <FormControl>
-                    <FormLabel>Details</FormLabel>
-                    {!loading ? (
-                      <CheckboxGroup>
-                        <Stack spacing={2} direction={"column"}>
-                          <Checkbox disabled defaultChecked size={"sm"}>
-                            Name: {projectName}
-                          </Checkbox>
-                          <Checkbox
-                            size={"sm"}
-                            isChecked={_.includes(exportFields, "created")}
-                            onChange={(event) =>
-                              handleExportCheck("created", event.target.checked)
-                            }
-                          >
-                            Created:{" "}
-                            {dayjs(project.created).format("DD MMM YYYY")}
-                          </Checkbox>
-                          <Checkbox
-                            size={"sm"}
-                            isChecked={_.includes(exportFields, "owner")}
-                            onChange={(event) =>
-                              handleExportCheck("owner", event.target.checked)
-                            }
-                          >
-                            Owner: {project.owner}
-                          </Checkbox>
-                          <Checkbox
-                            size={"sm"}
-                            isChecked={_.includes(exportFields, "description")}
-                            onChange={(event) =>
-                              handleExportCheck(
-                                "description",
-                                event.target.checked,
-                              )
-                            }
-                            isDisabled={_.isEqual(projectDescription, "")}
-                          >
-                            <Text noOfLines={1}>
-                              Description:{" "}
-                              {_.isEqual(projectDescription, "")
-                                ? "No description"
-                                : projectDescription}
-                            </Text>
-                          </Checkbox>
-                        </Stack>
-                      </CheckboxGroup>
-                    ) : (
-                      <Text fontSize={"sm"}>Loading details...</Text>
-                    )}
-                  </FormControl>
-                </Flex>
+                <FormControl>
+                  <FormLabel fontSize={"sm"}>Details</FormLabel>
+                  {!loading ? (
+                    <CheckboxGroup>
+                      <Stack spacing={2} direction={"column"}>
+                        <Checkbox
+                          disabled
+                          defaultChecked
+                          size={"sm"}
+                          fontSize={"sm"}
+                        >
+                          Name: {projectName}
+                        </Checkbox>
+                        <Checkbox
+                          size={"sm"}
+                          fontSize={"sm"}
+                          isChecked={_.includes(exportFields, "created")}
+                          onChange={(event) =>
+                            handleExportCheck("created", event.target.checked)
+                          }
+                        >
+                          Created:{" "}
+                          {dayjs(project.created).format("DD MMM YYYY")}
+                        </Checkbox>
+                        <Checkbox
+                          size={"sm"}
+                          isChecked={_.includes(exportFields, "owner")}
+                          onChange={(event) =>
+                            handleExportCheck("owner", event.target.checked)
+                          }
+                        >
+                          Owner: {project.owner}
+                        </Checkbox>
+                        <Checkbox
+                          size={"sm"}
+                          isChecked={_.includes(exportFields, "description")}
+                          onChange={(event) =>
+                            handleExportCheck(
+                              "description",
+                              event.target.checked,
+                            )
+                          }
+                          isDisabled={_.isEqual(projectDescription, "")}
+                        >
+                          <Text noOfLines={1} fontSize={"sm"}>
+                            Description:{" "}
+                            {_.isEqual(projectDescription, "")
+                              ? "No description"
+                              : _.truncate(projectDescription, { length: 32 })}
+                          </Text>
+                        </Checkbox>
+                      </Stack>
+                    </CheckboxGroup>
+                  ) : (
+                    <Text fontSize={"sm"}>Loading details...</Text>
+                  )}
+                </FormControl>
+                <FormControl>
+                  <FormLabel fontSize={"sm"}>Entities</FormLabel>
+                  {!loading ? (
+                    <CheckboxGroup>
+                      <Tooltip
+                        label={
+                          "Entities cannot be included when exporting to CSV"
+                        }
+                        hasArrow
+                        isDisabled={_.isEqual(exportFormat, "json")}
+                      >
+                        <Checkbox
+                          size={"sm"}
+                          isChecked={_.includes(exportFields, "entities")}
+                          onChange={(event) =>
+                            handleExportCheck("entities", event.target.checked)
+                          }
+                          isDisabled={
+                            _.isEqual(projectEntities.length, 0) ||
+                            _.isEqual(exportFormat, "csv")
+                          }
+                        >
+                          <Text noOfLines={1} fontSize={"sm"}>
+                            Export Entities
+                          </Text>
+                        </Checkbox>
+                      </Tooltip>
+                    </CheckboxGroup>
+                  ) : (
+                    <Text fontSize={"sm"}>Loading details...</Text>
+                  )}
+                  {_.includes(exportFields, "entities") && (
+                    <RadioGroup
+                      onChange={setExportEntityDetails}
+                      value={exportEntityDetails}
+                    >
+                      <Stack direction={"row"} gap={"1"}>
+                        <Radio value={"name"} size={"sm"} fontSize={"sm"}>
+                          Names
+                        </Radio>
+                        <Radio value={"_id"} size={"sm"} fontSize={"sm"}>
+                          Identifiers
+                        </Radio>
+                      </Stack>
+                    </RadioGroup>
+                  )}
+                </FormControl>
               </Flex>
             </ModalBody>
 
             <ModalFooter p={"2"}>
-              <Flex
-                direction={"row"}
-                w={"70%"}
-                gap={"2"}
-                align={"center"}
-                justifySelf={"left"}
-              >
-                <Icon name={"info"} />
-                {_.isEqual(exportFormat, "json") && (
-                  <Text fontSize={"sm"}>
-                    JSON files can be re-imported into Metadatify.
-                  </Text>
-                )}
-                {_.isEqual(exportFormat, "csv") && (
-                  <Text fontSize={"sm"}>
-                    CSV spreadsheets can be used by other applications.
-                  </Text>
-                )}
-              </Flex>
-              <Flex direction={"column"} w={"30%"} gap={"2"} p={"0"}>
+              <Flex direction={"column"} w={"30%"} gap={"2"}>
                 {/* "Download" button */}
                 <Flex
                   direction={"row"}
                   w={"100%"}
-                  gap={"4"}
+                  gap={"2"}
                   justify={"right"}
                   align={"center"}
                 >
-                  <Flex>
-                    <FormControl>
-                      <Select
-                        size={"sm"}
-                        value={exportFormat}
-                        onChange={(event) =>
-                          setExportFormat(event.target.value)
-                        }
-                      >
-                        <option key={"json"} value={"json"}>
-                          JSON
-                        </option>
-                        <option key={"csv"} value={"csv"}>
-                          CSV
-                        </option>
-                      </Select>
-                    </FormControl>
-                  </Flex>
-                  <IconButton
-                    size={"sm"}
+                  <Button
+                    rightIcon={<Icon name={"download"} />}
                     colorScheme={"blue"}
-                    aria-label={"Download"}
+                    size={"sm"}
                     onClick={() => handleDownloadClick(exportFormat)}
-                    icon={<Icon name={"download"} />}
-                  />
+                    isLoading={exportLoading}
+                  >
+                    Download
+                  </Button>
                 </Flex>
               </Flex>
             </ModalFooter>

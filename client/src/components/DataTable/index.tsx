@@ -21,7 +21,6 @@ import {
   MenuList,
   MenuItem,
   useBreakpoint,
-  Switch,
   InputGroup,
   Input,
   InputRightElement,
@@ -57,9 +56,6 @@ const DataTable = (props: DataTableProps) => {
 
   // Table row selection state
   const [selectedRows, setSelectedRows] = useState(props.selectedRows);
-
-  // Table sizing
-  const [displayLargeTable, setDisplayLargeTable] = useState(false);
 
   // Create ReactTable instance
   const table = useReactTable({
@@ -260,21 +256,156 @@ const DataTable = (props: DataTableProps) => {
 
   return (
     <Flex w={"100%"} direction={"column"}>
+      <TableContainer overflowX={"visible"} overflowY={"visible"}>
+        <Table variant={"simple"} size={"sm"} w={"100%"}>
+          {/* Table head */}
+          <Thead bg={"gray.50"} p={"0"}>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <Tr key={headerGroup.id}>
+                {headerGroup.headers.map((header) => {
+                  const meta: any = header.column.columnDef.meta;
+
+                  // Customize the column widths depending on data contents
+                  let width = "auto";
+                  if (_.isEqual(header.id, "select")) {
+                    // Dynamically set the width for the checkboxes
+                    width = "30px";
+                  } else if (_.isEqual(header.id, "type")) {
+                    width = "100px";
+                  }
+
+                  return (
+                    <Th
+                      key={header.id}
+                      onClick={getToggleSortingHandler(header)}
+                      isNumeric={meta?.isNumeric}
+                      w={width}
+                      _hover={
+                        canSortColumn(header) ? { cursor: "pointer" } : {}
+                      }
+                      transition={
+                        canSortColumn(header)
+                          ? "background-color 0.3s ease-in-out, color 0.3s ease-in-out"
+                          : ""
+                      }
+                      p={"1"}
+                    >
+                      <Flex align={"center"} py={"1"}>
+                        {flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
+                        {canSortColumn(header) && (
+                          <Icon
+                            name={
+                              header.column.getIsSorted() === "desc"
+                                ? "sort_up"
+                                : header.column.getIsSorted() === "asc"
+                                  ? "sort_down"
+                                  : "sort"
+                            }
+                            style={{ marginLeft: "4px" }}
+                          />
+                        )}
+                      </Flex>
+                    </Th>
+                  );
+                })}
+              </Tr>
+            ))}
+          </Thead>
+
+          {/* Table body */}
+          <Tbody>
+            {table.getRowModel().rows.map((row) => (
+              <Tr id={row.id} key={row.id} w={"auto"}>
+                {row.getVisibleCells().map((cell) => {
+                  const meta: any = cell.column.columnDef.meta;
+                  return (
+                    <Td
+                      id={cell.id}
+                      key={cell.id}
+                      isNumeric={meta?.isNumeric}
+                      px={"1"}
+                      py={"1"}
+                    >
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                    </Td>
+                  );
+                })}
+              </Tr>
+            ))}
+          </Tbody>
+        </Table>
+      </TableContainer>
+
       <Flex
-        w={"100%"}
         direction={"row"}
+        pt={props.showSelection || props.showPagination ? "2" : ""}
         gap={"2"}
-        align={"center"}
         justify={"space-between"}
+        w={"100%"}
+        wrap={"wrap"}
+        align={"center"}
       >
-        <Flex pb={"2"} gap={"2"} direction={"row"} align={"center"}>
+        <Flex gap={"2"} direction={"row"} align={"center"}>
+          {/* Actions button */}
+          {props.showSelection && (
+            <Menu size={"sm"}>
+              <MenuButton
+                as={Button}
+                colorScheme={"yellow"}
+                rightIcon={<Icon name={"lightning"} />}
+                size={"sm"}
+              >
+                Actions
+              </MenuButton>
+              <MenuList>
+                {props.actions &&
+                  props.actions.length > 0 &&
+                  props.actions?.map((action) => {
+                    return (
+                      <MenuItem
+                        onClick={() => {
+                          action.action(table, selectedRows);
+                        }}
+                        key={action.label}
+                        isDisabled={
+                          (Object.keys(selectedRows).length === 0 ||
+                            _.isUndefined(props.actions) ||
+                            props.actions?.length === 0) &&
+                          action.alwaysEnabled !== true
+                        }
+                      >
+                        <Flex direction={"row"} gap={"2"} align={"center"}>
+                          <Icon name={action.icon} />
+                          <Text fontSize={"sm"}>{action.label}</Text>
+                        </Flex>
+                      </MenuItem>
+                    );
+                  })}
+                {(_.isUndefined(props.actions) ||
+                  props.actions.length === 0) && (
+                  <MenuItem key={"no-actions"} isDisabled>
+                    <Flex direction={"row"} gap={"2"} align={"center"}>
+                      <Text fontSize={"sm"}>No Actions available</Text>
+                    </Flex>
+                  </MenuItem>
+                )}
+              </MenuList>
+            </Menu>
+          )}
+
           {columnNames.length > 0 && props.showColumnSelect && (
             <Flex>
               <Flex pos={"relative"} w={"100%"}>
                 <InputGroup size={"sm"} onClick={onColumnsClick}>
                   <Input
-                    placeholder={"Columns"}
-                    value={"Columns"}
+                    placeholder={"Show Columns"}
+                    value={"Show Columns"}
                     backgroundColor={"white"}
                     data-testid={"value-editor"}
                     cursor={"pointer"}
@@ -335,171 +466,17 @@ const DataTable = (props: DataTableProps) => {
               </Flex>
             </Flex>
           )}
-
-          {props.showSelection && (
-            <Menu size={"sm"}>
-              <MenuButton
-                as={Button}
-                colorScheme={"yellow"}
-                rightIcon={<Icon name={"lightning"} />}
-                size={"sm"}
-              >
-                Actions
-              </MenuButton>
-              <MenuList>
-                {props.actions &&
-                  props.actions.length > 0 &&
-                  props.actions?.map((action) => {
-                    return (
-                      <MenuItem
-                        onClick={() => {
-                          action.action(table, selectedRows);
-                        }}
-                        key={action.label}
-                        isDisabled={
-                          (Object.keys(selectedRows).length === 0 ||
-                            _.isUndefined(props.actions) ||
-                            props.actions?.length === 0) &&
-                          action.alwaysEnabled !== true
-                        }
-                      >
-                        <Flex direction={"row"} gap={"2"} align={"center"}>
-                          <Icon name={action.icon} />
-                          <Text fontSize={"sm"}>{action.label}</Text>
-                        </Flex>
-                      </MenuItem>
-                    );
-                  })}
-                {(_.isUndefined(props.actions) ||
-                  props.actions.length === 0) && (
-                  <MenuItem key={"no-actions"} isDisabled>
-                    <Flex direction={"row"} gap={"2"} align={"center"}>
-                      <Text fontSize={"sm"}>No Actions available</Text>
-                    </Flex>
-                  </MenuItem>
-                )}
-              </MenuList>
-            </Menu>
-          )}
         </Flex>
 
-        <Flex pb={"2"} gap={"2"} direction={"row"} align={"center"}>
-          <Icon size={"sm"} name={"d_high"} />
-          <Switch
-            size={"sm"}
-            onChange={() => setDisplayLargeTable(!displayLargeTable)}
-          />
-          <Icon size={"sm"} name={"d_low"} />
-        </Flex>
-      </Flex>
-      <TableContainer overflowX={"visible"} overflowY={"visible"}>
-        <Table
-          variant={"simple"}
-          size={displayLargeTable ? "md" : "sm"}
-          w={"100%"}
-        >
-          {/* Table head */}
-          <Thead bg={"gray.50"}>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <Tr key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  const meta: any = header.column.columnDef.meta;
-
-                  // Customize the column widths depending on data contents
-                  let width = "auto";
-                  if (_.isEqual(header.id, "select")) {
-                    // Dynamically set the width for the checkboxes
-                    width = "30px";
-                  } else if (_.isEqual(header.id, "type")) {
-                    width = "100px";
-                  }
-
-                  return (
-                    <Th
-                      key={header.id}
-                      onClick={getToggleSortingHandler(header)}
-                      isNumeric={meta?.isNumeric}
-                      w={width}
-                      _hover={
-                        canSortColumn(header) ? { cursor: "pointer" } : {}
-                      }
-                      transition={
-                        canSortColumn(header)
-                          ? "background-color 0.3s ease-in-out, color 0.3s ease-in-out"
-                          : ""
-                      }
-                      px={"1"}
-                      py={"1"}
-                    >
-                      <Flex align={"center"} py={"2"}>
-                        {flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
-                        {canSortColumn(header) && (
-                          <Icon
-                            name={
-                              header.column.getIsSorted() === "desc"
-                                ? "sort_up"
-                                : header.column.getIsSorted() === "asc"
-                                  ? "sort_down"
-                                  : "sort"
-                            }
-                            style={{ marginLeft: "4px" }}
-                          />
-                        )}
-                      </Flex>
-                    </Th>
-                  );
-                })}
-              </Tr>
-            ))}
-          </Thead>
-
-          {/* Table body */}
-          <Tbody>
-            {table.getRowModel().rows.map((row) => (
-              <Tr id={row.id} key={row.id} w={"auto"}>
-                {row.getVisibleCells().map((cell) => {
-                  const meta: any = cell.column.columnDef.meta;
-                  return (
-                    <Td
-                      id={cell.id}
-                      key={cell.id}
-                      isNumeric={meta?.isNumeric}
-                      px={"1"}
-                      py={displayLargeTable ? "3" : "2"}
-                    >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </Td>
-                  );
-                })}
-              </Tr>
-            ))}
-          </Tbody>
-        </Table>
-      </TableContainer>
-
-      <Flex
-        direction={"row"}
-        pt={props.showSelection || props.showPagination ? "2" : ""}
-        gap={"4"}
-        justify={"space-between"}
-        w={"100%"}
-        wrap={"wrap"}
-      >
         {/* Table item counter */}
         {props.showItemCount &&
           _.includes(["xl", "2xl"], breakpoint) &&
           itemCountComponent}
 
         {props.showPagination && (
-          <Flex gap={"4"} wrap={"wrap"}>
+          <Flex gap={"2"} wrap={"wrap"}>
             <Flex gap={"2"} align={"center"}>
-              <Text fontSize={"sm"}>Show</Text>
+              <Text fontSize={"sm"}>Show:</Text>
               <Select
                 id={"select-page-size"}
                 size={"sm"}
@@ -520,7 +497,7 @@ const DataTable = (props: DataTableProps) => {
               </Select>
             </Flex>
 
-            <Flex direction={"row"} gap={"4"} align={"center"}>
+            <Flex direction={"row"} gap={"2"} align={"center"}>
               <IconButton
                 variant={"outline"}
                 size={"sm"}
@@ -539,11 +516,13 @@ const DataTable = (props: DataTableProps) => {
               />
               {table.getPageCount() > 0 && (
                 <Flex gap={"1"}>
-                  <Text fontWeight={"semibold"}>
+                  <Text fontSize={"sm"} fontWeight={"semibold"}>
                     {table.getState().pagination.pageIndex + 1}
                   </Text>
-                  <Text> of </Text>
-                  <Text fontWeight={"semibold"}>{table.getPageCount()}</Text>
+                  <Text fontSize={"sm"}> of </Text>
+                  <Text fontSize={"sm"} fontWeight={"semibold"}>
+                    {table.getPageCount()}
+                  </Text>
                 </Flex>
               )}
               <IconButton

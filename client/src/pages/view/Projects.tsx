@@ -4,6 +4,7 @@ import {
   Button,
   Flex,
   Heading,
+  Link,
   Spacer,
   Tag,
   Text,
@@ -20,6 +21,7 @@ import { ProjectModel } from "@types";
 
 // Utility functions and types
 import _ from "lodash";
+import dayjs from "dayjs";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
@@ -37,6 +39,7 @@ const GET_PROJECTS = gql`
       _id
       archived
       name
+      created
       description
       owner
       entities
@@ -52,14 +55,30 @@ const Projects = () => {
   const breakpoint = useBreakpoint();
   const [visibleColumns, setVisibleColumns] = useState({});
   useEffect(() => {
-    if (_.includes(["sm", "base"], breakpoint) || _.isUndefined(breakpoint)) {
+    if (
+      _.includes(["md", "sm", "base"], breakpoint) ||
+      _.isUndefined(breakpoint)
+    ) {
       setVisibleColumns({
         description: false,
+        created: false,
         owner: false,
         entities: false,
       });
+    } else if (_.includes(["lg"], breakpoint)) {
+      setVisibleColumns({
+        description: false,
+        created: false,
+        owner: true,
+        entities: true,
+      });
     } else {
-      setVisibleColumns({});
+      setVisibleColumns({
+        description: true,
+        created: true,
+        owner: true,
+        entities: true,
+      });
     }
   }, [breakpoint]);
 
@@ -103,37 +122,37 @@ const Projects = () => {
   const columnHelper = createColumnHelper<ProjectModel>();
   const columns = [
     columnHelper.accessor("name", {
-      cell: (info) => info.getValue(),
+      cell: (info) => <Text fontWeight={"semibold"}>{info.getValue()}</Text>,
       header: "Name",
+    }),
+    columnHelper.accessor("created", {
+      cell: (info) => dayjs(info.getValue()).fromNow(),
+      header: "Created",
+      enableHiding: true,
+    }),
+    columnHelper.accessor("owner", {
+      cell: (info) => {
+        return <Tag size={"sm"}>{info.getValue()}</Tag>;
+      },
+      header: "Owner",
     }),
     columnHelper.accessor("description", {
       cell: (info) => info.getValue(),
       header: "Description",
       enableHiding: true,
     }),
-    columnHelper.accessor("owner", {
-      cell: (info) => {
-        return <Tag colorScheme={"green"}>{info.getValue()}</Tag>;
-      },
-      header: "Owner",
-    }),
     columnHelper.accessor("entities", {
       cell: (info) => info.getValue().length,
-      header: "Entity Count",
+      header: "Entities",
     }),
     columnHelper.accessor("_id", {
       cell: (info) => {
         return (
-          <Flex w={"100%"} justify={"end"}>
-            <Button
-              key={`view-entity-${info.getValue()}`}
-              colorScheme={"gray"}
-              rightIcon={<Icon name={"c_right"} />}
-              onClick={() => navigate(`/projects/${info.getValue()}`)}
-              size={"sm"}
-            >
-              View
-            </Button>
+          <Flex justifyContent={"right"} p={"2"} align={"center"} gap={"1"}>
+            <Link onClick={() => navigate(`/projects/${info.getValue()}`)}>
+              <Text fontWeight={"semibold"}>View</Text>
+            </Link>
+            <Icon name={"a_right"} />
           </Flex>
         );
       },

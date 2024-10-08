@@ -18,7 +18,7 @@ describe("search query builder", () => {
     // Create a test query
     cy.contains("button", "Rule").click();
     cy.get(".rule-operators").select("contains");
-    cy.get('[data-testid="value-editor"]').type("box");
+    cy.get('[data-testid="value-editor"]').type("Box");
     cy.get('[aria-label="Run Query"]').click(); // Click the Search button
 
     // Search result array should contain multiple results

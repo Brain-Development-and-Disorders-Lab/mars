@@ -1027,7 +1027,7 @@ export class Entities {
     format: "json" | "csv",
     fields?: string[],
   ): Promise<string> => {
-    const entity = await this.getOne(_id);
+    const entity = await Entities.getOne(_id);
 
     if (_.isNull(entity)) {
       return "";
@@ -1038,7 +1038,79 @@ export class Entities {
 
     if (_.isEqual(format, "json")) {
       // Handle JSON format
-      return JSON.stringify(entity);
+      if (_.isUndefined(fields)) {
+        // Export the entire Entity
+        return JSON.stringify(entity, null, "  ");
+      } else {
+        const formatted: Partial<EntityModel> = {
+          _id: entity._id,
+          owner: entity.owner,
+        };
+
+        // Assemble exported object using specified fields
+        for await (const field of fields) {
+          if (_.isEqual(field, "created")) {
+            formatted["created"] = dayjs(entity.created)
+              .format("DD MMM YYYY")
+              .toString();
+          } else if (_.isEqual(field, "description")) {
+            // "description" data field
+            formatted["description"] = entity.description;
+          } else if (_.startsWith(field, "origin_")) {
+            // "origins" data field
+            // Create an empty associations structure
+            if (_.isUndefined(formatted.associations)) {
+              formatted.associations = {
+                origins: [],
+                products: [],
+              };
+            }
+
+            // Get the Origin details and add to the collection of exported Origins
+            const origin = entity.associations.origins.find((origin) => {
+              return _.isEqual(origin._id, field.slice(ORIGIN_PREFIX_LENGTH));
+            });
+            if (origin) {
+              formatted.associations.origins.push(origin);
+            }
+          } else if (_.startsWith(field, "product_")) {
+            // "products" data field
+            // Create an empty associations structure
+            if (_.isUndefined(formatted.associations)) {
+              formatted.associations = {
+                origins: [],
+                products: [],
+              };
+            }
+
+            // Get the Product details and add to the collection of exported Products
+            const product = entity.associations.products.find((product) => {
+              return _.isEqual(product._id, field.slice(PRODUCT_PREFIX_LENGTH));
+            });
+            if (product) {
+              formatted.associations.products.push(product);
+            }
+          } else if (_.startsWith(field, "attribute_")) {
+            // "attributes" data field
+            if (_.isUndefined(formatted.attributes)) {
+              formatted["attributes"] = [];
+            }
+
+            // Get the Attribute details and add to the collection of exported Attributes
+            const attribute = entity.attributes.find((attribute) => {
+              return _.isEqual(
+                attribute._id,
+                field.slice(ATTRIBUTE_PREFIX_LENGTH),
+              );
+            });
+            if (attribute) {
+              formatted.attributes.push(attribute);
+            }
+          }
+        }
+
+        return JSON.stringify(formatted, null, "  ");
+      }
     } else if (_.isEqual(format, "csv")) {
       let exportFields = fields;
 
@@ -1138,6 +1210,10 @@ export class Entities {
     for await (const entity of entities) {
       const result = await Entities.getOne(entity);
       if (result) {
+        // Remove `history` field
+        delete (result as any)["history"];
+
+        // Add to collection for export
         collection.push(result);
       }
     }

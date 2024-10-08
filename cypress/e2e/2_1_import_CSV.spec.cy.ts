@@ -28,21 +28,21 @@ describe("CSV Import Test", () => {
         .first()
         .parent()
         .select("Name");
-      cy.wait(3000); // Wait for toast to disappear
       cy.get("select#import_projects")
         .find("option")
         .first()
         .parent()
         .select("My First Project") // Default created Project
         .first();
-      cy.get("#importContinueButton").click(); // Go to import step 2
+      cy.get("#importContinueButton").click(); // Go to Attributes page
+      cy.get("#importContinueButton").click(); // Go to Review page
       cy.get("#importContinueButton").click(); // Finalize import
       cy.wait(1000); // Wait for GraphQL request to complete
 
-      // Validate that the Project contains an Entity named "mini box 1 CSV"
+      // Validate that the Project contains an Entity named "Mini Box 1 (CSV)"
       cy.get("#navProjectsButton").click();
-      cy.get("#0__id > div > button").first().click(); // Button to view the first Project
-      cy.contains("mini box 1 CSV");
+      cy.get("#0__id > div > a").first().click(); // Button to view the first Project
+      cy.contains("Mini Box 1 (CSV)");
     });
   });
 });

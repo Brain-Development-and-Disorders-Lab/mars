@@ -19,6 +19,7 @@ import {
   StatHelpText,
   StatArrow,
   Spacer,
+  Link,
 } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
 import { Content } from "@components/Container";
@@ -246,16 +247,11 @@ const Dashboard = () => {
     entityTableColumnHelper.accessor("_id", {
       cell: (info) => {
         return (
-          <Flex justifyContent={"right"}>
-            <Button
-              key={`view-entity-${info.getValue()}`}
-              size={"sm"}
-              colorScheme={"gray"}
-              rightIcon={<Icon name={"c_right"} />}
-              onClick={() => navigate(`/entities/${info.getValue()}`)}
-            >
-              View
-            </Button>
+          <Flex justifyContent={"right"} p={"2"} align={"center"} gap={"1"}>
+            <Link onClick={() => navigate(`/entities/${info.getValue()}`)}>
+              <Text fontWeight={"semibold"}>View</Text>
+            </Link>
+            <Icon name={"a_right"} />
           </Flex>
         );
       },
@@ -289,16 +285,11 @@ const Dashboard = () => {
     projectTableColumnHelper.accessor("_id", {
       cell: (info) => {
         return (
-          <Flex justifyContent={"right"}>
-            <Button
-              key={`view-entity-${info.getValue()}`}
-              size={"sm"}
-              colorScheme={"gray"}
-              rightIcon={<Icon name={"c_right"} />}
-              onClick={() => navigate(`/projects/${info.getValue()}`)}
-            >
-              View
-            </Button>
+          <Flex justifyContent={"right"} p={"2"} align={"center"} gap={"1"}>
+            <Link onClick={() => navigate(`/projects/${info.getValue()}`)}>
+              <Text fontWeight={"semibold"}>View</Text>
+            </Link>
+            <Icon name={"a_right"} />
           </Flex>
         );
       },

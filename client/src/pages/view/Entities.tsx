@@ -11,6 +11,7 @@ import {
   Tooltip,
   Spacer,
   Tag,
+  Link,
 } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
 import { Content } from "@components/Container";
@@ -108,11 +109,27 @@ const Entities = () => {
       cell: (info) => {
         return (
           <Tooltip label={info.getValue()} hasArrow>
-            <Text>{_.truncate(info.getValue(), { length: 20 })}</Text>
+            <Text fontSize={"sm"} fontWeight={"semibold"}>
+              {_.truncate(info.getValue(), { length: 20 })}
+            </Text>
           </Tooltip>
         );
       },
       header: "Name",
+    }),
+    columnHelper.accessor("created", {
+      cell: (info) => (
+        <Text fontSize={"sm"}>{dayjs(info.getValue()).fromNow()}</Text>
+      ),
+      header: "Created",
+      enableHiding: true,
+    }),
+    columnHelper.accessor("owner", {
+      cell: (info) => {
+        return <Tag size={"sm"}>{info.getValue()}</Tag>;
+      },
+      header: "Owner",
+      enableHiding: true,
     }),
     columnHelper.accessor("description", {
       cell: (info) => {
@@ -121,36 +138,23 @@ const Entities = () => {
         }
         return (
           <Tooltip label={info.getValue()} hasArrow>
-            <Text>{_.truncate(info.getValue(), { length: 20 })}</Text>
+            <Text fontSize={"sm"}>
+              {_.truncate(info.getValue(), { length: 20 })}
+            </Text>
           </Tooltip>
         );
       },
       header: "Description",
       enableHiding: true,
     }),
-    columnHelper.accessor("owner", {
-      cell: (info) => {
-        return <Tag colorScheme={"green"}>{info.getValue()}</Tag>;
-      },
-      header: "Owner",
-    }),
-    columnHelper.accessor("created", {
-      cell: (info) => dayjs(info.getValue()).fromNow(),
-      header: "Created",
-    }),
     columnHelper.accessor("_id", {
       cell: (info) => {
         return (
-          <Flex w={"100%"} justify={"end"}>
-            <Button
-              key={`view-entity-${info.getValue()}`}
-              colorScheme={"gray"}
-              rightIcon={<Icon name={"c_right"} />}
-              onClick={() => navigate(`/entities/${info.getValue()}`)}
-              size={"sm"}
-            >
-              View
-            </Button>
+          <Flex justifyContent={"right"} p={"2"} align={"center"} gap={"1"}>
+            <Link onClick={() => navigate(`/entities/${info.getValue()}`)}>
+              <Text fontWeight={"semibold"}>View</Text>
+            </Link>
+            <Icon name={"a_right"} />
           </Flex>
         );
       },

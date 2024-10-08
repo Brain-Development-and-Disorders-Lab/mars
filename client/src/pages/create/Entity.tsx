@@ -551,7 +551,7 @@ const Entity = () => {
                     <Text
                       fontSize={"sm"}
                       fontWeight={"semibold"}
-                      color={"gray.200"}
+                      color={"gray.400"}
                     >
                       No Origins
                     </Text>
@@ -612,7 +612,7 @@ const Entity = () => {
                     <Text
                       fontSize={"sm"}
                       fontWeight={"semibold"}
-                      color={"gray.200"}
+                      color={"gray.400"}
                     >
                       No Products
                     </Text>
@@ -659,7 +659,15 @@ const Entity = () => {
                           </Checkbox>
                         );
                       })}
-                      {projects.length === 0 && <Text>No Projects.</Text>}
+                      {projects.length === 0 && (
+                        <Text
+                          fontWeight={"semibold"}
+                          color={"gray.400"}
+                          fontSize={"sm"}
+                        >
+                          No Projects.
+                        </Text>
+                      )}
                     </Stack>
                   </CheckboxGroup>
                   <FormHelperText fontSize={"sm"}>
@@ -697,7 +705,9 @@ const Entity = () => {
                 <FormControl maxW={"sm"}>
                   <Select
                     size={"sm"}
+                    rounded={"md"}
                     placeholder={"Template Attribute"}
+                    isDisabled={attributes.length === 0}
                     onChange={(event) => {
                       if (!_.isEqual(event.target.value.toString(), "")) {
                         for (const attribute of attributes) {
@@ -788,7 +798,11 @@ const Entity = () => {
                 </VStack>
               ) : (
                 <Flex w={"100%"} h={"100%"} align={"center"} justify={"center"}>
-                  <Text fontWeight={"semibold"} color={"gray.200"}>
+                  <Text
+                    fontSize={"sm"}
+                    fontWeight={"semibold"}
+                    color={"gray.400"}
+                  >
                     No Attributes
                   </Text>
                 </Flex>

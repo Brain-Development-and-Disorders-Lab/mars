@@ -7,6 +7,7 @@ import {
   Flex,
   Heading,
   Input,
+  Link,
   Spacer,
   Switch,
   Tab,
@@ -153,7 +154,11 @@ const Search = () => {
     searchResultColumnHelper.accessor("description", {
       cell: (info) => {
         if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
-          return <Tag colorScheme={"orange"}>No Description</Tag>;
+          return (
+            <Tag colorScheme={"orange"} size={"sm"}>
+              No Description
+            </Tag>
+          );
         }
         return <Text noOfLines={1}>{info.getValue()}</Text>;
       },
@@ -162,14 +167,14 @@ const Search = () => {
     }),
     searchResultColumnHelper.accessor("owner", {
       cell: (info) => {
-        return <Tag colorScheme={"green"}>{info.getValue()}</Tag>;
+        return <Tag size={"sm"}>{info.getValue()}</Tag>;
       },
       header: "Owner",
     }),
     searchResultColumnHelper.accessor("attributes", {
       cell: (info) => {
         return (
-          <Tag colorScheme={"purple"}>
+          <Tag size={"sm"}>
             {_.isUndefined(info.getValue()) ? 0 : info.getValue().length}
           </Tag>
         );
@@ -199,16 +204,11 @@ const Search = () => {
     searchResultColumnHelper.accessor("_id", {
       cell: (info) => {
         return (
-          <Flex justifyContent={"right"}>
-            <Button
-              key={`view-entity-${info.getValue()}`}
-              size={"sm"}
-              colorScheme={"gray"}
-              rightIcon={<Icon name={"c_right"} />}
-              onClick={() => navigate(`/entities/${info.getValue()}`)}
-            >
-              View
-            </Button>
+          <Flex justifyContent={"right"} p={"2"} align={"center"} gap={"1"}>
+            <Link onClick={() => navigate(`/entities/${info.getValue()}`)}>
+              <Text fontWeight={"semibold"}>View</Text>
+            </Link>
+            <Icon name={"a_right"} />
           </Flex>
         );
       },

@@ -410,7 +410,41 @@ export class Projects {
       const formatted = Papa.unparse(collated);
       return formatted;
     } else {
-      return JSON.stringify(project, null, "  ");
+      // Handle JSON format
+      if (_.isUndefined(fields)) {
+        // Export the entire Entity
+        return JSON.stringify(project, null, "  ");
+      } else {
+        const formatted: Partial<ProjectModel> = {
+          _id: project._id,
+        };
+
+        // Assemble exported object using specified fields
+        for await (const field of fields) {
+          if (_.isEqual(field, "created")) {
+            formatted["created"] = dayjs(project.created)
+              .format("DD MMM YYYY")
+              .toString();
+          } else if (_.isEqual(field, "owner")) {
+            // "owner" data field
+            formatted["owner"] = project.owner;
+          } else if (_.isEqual(field, "description")) {
+            // "description" data field
+            formatted["description"] = project.description;
+          } else if (_.startsWith(field, "entities_")) {
+            if (_.endsWith(field, "names")) {
+              // Include Entity `name` values
+              const entities = await Entities.getMany(project.entities);
+              formatted["entities"] = entities.map((entity) => entity.name);
+            } else {
+              // Include Entity `_id` values
+              formatted["entities"] = project.entities;
+            }
+          }
+        }
+
+        return JSON.stringify(formatted, null, "  ");
+      }
     }
   };
 

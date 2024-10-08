@@ -1,4 +1,4 @@
 ID,Name,Owner,Created,Description,Projects,Products,Origins
-eQCHWnsl,mini box 1 CSV,XXXX-1234-ABCD-0000,2023-12-02T16:18:14.729Z,mini box that fit in another box,Test Mock,,box 1
-elKTjF8f,box2 CSV,XXXX-1234-ABCD-0000,2023-12-02T16:18:14.729Z,"mock box 2 ",Test Mock,,
-eoDMpnMP,box 1 CSV,XXXX-1234-ABCD-0000,2023-12-02T16:18:14.729Z,mock box 1,Test Mock,mini box 1,
+eQCHWnsl,Mini Box 1 (CSV),XXXX-1234-ABCD-0000,2023-12-02T16:18:14.729Z,Mini Box that fits in another Box,Test Mock Project,,Box 1
+elKTjF8f,Box 2 (CSV),XXXX-1234-ABCD-0000,2023-12-02T16:18:14.729Z,Mock Box 2,Test Mock Project,,
+eoDMpnMP,Box 1 (CSV),XXXX-1234-ABCD-0000,2023-12-02T16:18:14.729Z,Mock Box 1,Test Mock Project,Mini Box 1,

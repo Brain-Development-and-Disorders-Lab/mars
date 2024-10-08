@@ -10,6 +10,7 @@ import React, {
 // Existing and custom components
 import {
   Button,
+  Divider,
   Flex,
   Heading,
   IconButton,
@@ -406,6 +407,7 @@ const Values = (props: {
                     id={`s_${original._id}_data`}
                     value={value.selected}
                     size={"sm"}
+                    rounded={"md"}
                     isDisabled={props.viewOnly}
                     onChange={onSelectChange}
                     onBlur={onBlur}
@@ -434,6 +436,7 @@ const Values = (props: {
                 value={value}
                 placeholder={"Column"}
                 size={"sm"}
+                rounded={"md"}
                 isDisabled={props.viewOnly}
                 onChange={onChange}
                 onBlur={onBlur}
@@ -458,7 +461,7 @@ const Values = (props: {
             </Flex>
           );
         },
-        header: "Data",
+        header: "Value Data",
       }),
     ],
     [props.viewOnly],
@@ -527,7 +530,7 @@ const Values = (props: {
               isDisabled={props.viewOnly}
               size={"sm"}
             >
-              Add
+              Add Value
             </Button>
           </PopoverTrigger>
           <PopoverContent>
@@ -536,15 +539,14 @@ const Values = (props: {
             <PopoverHeader>
               <Flex>
                 <Heading fontWeight={"semibold"} size={"xs"}>
-                  Value Type
+                  Select Type
                 </Heading>
               </Flex>
             </PopoverHeader>
             <PopoverBody>
-              <Flex gap={"4"} wrap={"wrap"}>
+              <Flex gap={"2"} wrap={"wrap"}>
                 {/* Buttons to add Values */}
                 <Button
-                  variant={"outline"}
                   bg={"orange.300"}
                   size={"sm"}
                   color={"white"}
@@ -568,7 +570,6 @@ const Values = (props: {
 
                 <Button
                   id="add-value-button-text"
-                  variant={"outline"}
                   bg={"blue.300"}
                   size={"sm"}
                   color={"white"}
@@ -591,7 +592,6 @@ const Values = (props: {
                 </Button>
 
                 <Button
-                  variant={"outline"}
                   bg={"green.300"}
                   size={"sm"}
                   color={"white"}
@@ -614,7 +614,6 @@ const Values = (props: {
                 </Button>
 
                 <Button
-                  variant={"outline"}
                   bg={"yellow.300"}
                   size={"sm"}
                   color={"white"}
@@ -637,7 +636,6 @@ const Values = (props: {
                 </Button>
 
                 <Button
-                  variant={"outline"}
                   bg={"purple.300"}
                   size={"sm"}
                   color={"white"}
@@ -660,7 +658,6 @@ const Values = (props: {
                 </Button>
 
                 <Button
-                  variant={"outline"}
                   bg={"teal.300"}
                   size={"sm"}
                   color={"white"}
@@ -680,18 +677,34 @@ const Values = (props: {
         </Popover>
       </Flex>
 
-      <DataTable
-        columns={columns}
-        visibleColumns={{}}
-        selectedRows={{}}
-        data={props.values}
-        setData={props.setValues}
-        viewOnly={props.viewOnly}
-        actions={actions}
-        showPagination
-        showItemCount
-        showSelection
-      />
+      {props.values.length > 0 ? (
+        <DataTable
+          columns={columns}
+          visibleColumns={{}}
+          selectedRows={{}}
+          data={props.values}
+          setData={props.setValues}
+          viewOnly={props.viewOnly}
+          actions={actions}
+          showPagination
+          showItemCount
+          showSelection
+        />
+      ) : (
+        <Flex
+          w={"100%"}
+          align={"center"}
+          justify={"center"}
+          minH={"200px"}
+          rounded={"md"}
+          border={"1px"}
+          borderColor={"gray.300"}
+        >
+          <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.400"}>
+            No Values
+          </Text>
+        </Flex>
+      )}
 
       <ScaleFade initialScale={0.9} in={isOpen}>
         <Modal
@@ -703,15 +716,15 @@ const Values = (props: {
         >
           <ModalOverlay />
           <ModalContent>
-            <ModalHeader p={"4"}>Add Options</ModalHeader>
+            <ModalHeader p={"2"}>Add Options</ModalHeader>
             <ModalCloseButton />
-            <ModalBody px={"4"} gap={"4"}>
-              <Flex direction={"column"} gap={"4"}>
-                <Text>
+            <ModalBody p={"2"} gap={"2"} pb={"0"}>
+              <Flex direction={"column"} gap={"2"}>
+                <Text fontSize={"sm"}>
                   For a Select value, set the options to be displayed.
                   Duplicates are not permitted.
                 </Text>
-                <Text>
+                <Text fontSize={"sm"}>
                   Name the option, then click "Add" to add it to the collection
                   of options associated with this Select value. Click "Continue"
                   to add this Select value to the Attribute.
@@ -750,8 +763,8 @@ const Values = (props: {
                 </Flex>
 
                 <Flex direction={"column"} gap={"2"}>
-                  <VStack gap={"2"}>
-                    {options.length > 0 &&
+                  <VStack gap={"1"} divider={<Divider />}>
+                    {options.length > 0 ? (
                       options.map((option, index) => {
                         return (
                           <Flex
@@ -762,8 +775,10 @@ const Values = (props: {
                             key={option}
                           >
                             <Flex gap={"2"}>
-                              <Text fontWeight={"semibold"}>Option:</Text>
-                              <Text>{option}</Text>
+                              <Text fontWeight={"semibold"} fontSize={"sm"}>
+                                Option {index + 1}:
+                              </Text>
+                              <Text fontSize={"sm"}>{option}</Text>
                             </Flex>
                             <IconButton
                               aria-label={`remove_${index}`}
@@ -781,12 +796,31 @@ const Values = (props: {
                             />
                           </Flex>
                         );
-                      })}
+                      })
+                    ) : (
+                      <Flex
+                        w={"100%"}
+                        align={"center"}
+                        justify={"center"}
+                        minH={"100px"}
+                        rounded={"md"}
+                        border={"1px"}
+                        borderColor={"gray.300"}
+                      >
+                        <Text
+                          fontSize={"sm"}
+                          fontWeight={"semibold"}
+                          color={"gray.400"}
+                        >
+                          No Options
+                        </Text>
+                      </Flex>
+                    )}
                   </VStack>
                 </Flex>
               </Flex>
             </ModalBody>
-            <ModalFooter px={"4"}>
+            <ModalFooter p={"2"}>
               <Button
                 size={"sm"}
                 colorScheme={"red"}
