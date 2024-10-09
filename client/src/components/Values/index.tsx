@@ -230,7 +230,9 @@ const Values = (props: {
                     size={"sm"}
                     rounded={"md"}
                     isReadOnly={props.viewOnly}
-                    onChange={(event) => setValue(event.target.value)}
+                    onChange={(event) =>
+                      setValue(parseFloat(event.target.value))
+                    }
                     onBlur={onBlur}
                     isInvalid={
                       _.isEqual(value, "") && _.isEqual(props.requireData, true)
