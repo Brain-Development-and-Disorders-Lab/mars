@@ -176,18 +176,10 @@ const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
             },
           });
         } else {
-          console.info(
-            JSON.stringify({
-              ...processed,
-              "attributes.values.data": {
-                $eq: dayjs(customRule.value).toISOString(),
-              },
-            }),
-          );
           return JSON.stringify({
             ...processed,
             "attributes.values.data": {
-              $eq: dayjs(customRule.value).toDate(),
+              $eq: dayjs(customRule.value).format("YYYY-MM-DD"),
             },
           });
         }
@@ -203,7 +195,7 @@ const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
           return JSON.stringify({
             ...processed,
             "attributes.values.data": {
-              $gt: dayjs(customRule.value).toDate(),
+              $gt: dayjs(customRule.value).format("YYYY-MM-DD"),
             },
           });
         }
@@ -219,7 +211,7 @@ const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
           return JSON.stringify({
             ...processed,
             "attributes.values.data": {
-              $lt: dayjs(customRule.value).toDate(),
+              $lt: dayjs(customRule.value).format("YYYY-MM-DD"),
             },
           });
         }
@@ -329,11 +321,6 @@ const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
             <Text fontWeight={"semibold"} fontSize={"sm"} color={"blue.700"}>
               Use the query builder to construct advanced queries to search for
               Entities within the Workspace.
-            </Text>
-            <Text fontWeight={"semibold"} fontSize={"sm"} color={"blue.700"}>
-              Query builder can be used to search for specific conditions within
-              Entities and their Attributes, as well as Project membership and
-              relationships to other Entities.
             </Text>
           </Flex>
         </Flex>

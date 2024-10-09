@@ -318,8 +318,7 @@ const Search = () => {
                     color={"blue.700"}
                   >
                     Use text search to search for terms appearing in Entities
-                    within the Workspace. Text search will include terms
-                    appearing in Attributes.
+                    within the Workspace.
                   </Text>
                 </Flex>
 
