@@ -21,7 +21,9 @@ import { SearchQueryBuilderProps } from "@types";
 // GraphQL
 import { gql, useLazyQuery } from "@apollo/client";
 
+// Utility functions and libraries
 import _ from "lodash";
+import dayjs from "dayjs";
 
 const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
   setHasSearched,
@@ -141,6 +143,89 @@ const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
           },
         },
       });
+    } else if (rule.field === "attributes") {
+      // Construct the base query components
+      const customRule = JSON.parse(rule.value);
+      const processed = {
+        "attributes.values.type": customRule.type,
+      };
+
+      // Append query components depending on the specified operator
+      if (customRule.operator === "contains") {
+        return JSON.stringify({
+          ...processed,
+          "attributes.values.data": {
+            $regex: customRule.value,
+          },
+        });
+      } else if (customRule.operator === "does not contain") {
+        return JSON.stringify({
+          ...processed,
+          "attributes.values.data": {
+            $not: {
+              $regex: customRule.value,
+            },
+          },
+        });
+      } else if (customRule.operator === "equals") {
+        if (customRule.type === "number") {
+          return JSON.stringify({
+            ...processed,
+            "attributes.values.data": {
+              $eq: parseFloat(customRule.value),
+            },
+          });
+        } else {
+          console.info(
+            JSON.stringify({
+              ...processed,
+              "attributes.values.data": {
+                $eq: dayjs(customRule.value).toISOString(),
+              },
+            }),
+          );
+          return JSON.stringify({
+            ...processed,
+            "attributes.values.data": {
+              $eq: dayjs(customRule.value).toDate(),
+            },
+          });
+        }
+      } else if (customRule.operator === ">") {
+        if (customRule.type === "number") {
+          return JSON.stringify({
+            ...processed,
+            "attributes.values.data": {
+              $gt: parseFloat(customRule.value),
+            },
+          });
+        } else {
+          return JSON.stringify({
+            ...processed,
+            "attributes.values.data": {
+              $gt: dayjs(customRule.value).toDate(),
+            },
+          });
+        }
+      } else if (customRule.operator === "<") {
+        if (customRule.type === "number") {
+          return JSON.stringify({
+            ...processed,
+            "attributes.values.data": {
+              $lt: parseFloat(customRule.value),
+            },
+          });
+        } else {
+          return JSON.stringify({
+            ...processed,
+            "attributes.values.data": {
+              $lt: dayjs(customRule.value).toDate(),
+            },
+          });
+        }
+      }
+
+      return JSON.stringify(processed);
     }
 
     // Default rule applied
