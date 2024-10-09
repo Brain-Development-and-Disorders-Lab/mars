@@ -193,14 +193,6 @@ const Values = (props: {
           }, [initialValue]);
 
           /**
-           * Handle a standard Input change event
-           * @param event change event data
-           */
-          const onChange = (event: any) => {
-            setValue(event.target.value);
-          };
-
-          /**
            * Handle a Select change event
            * @param event change event data
            */
@@ -238,7 +230,9 @@ const Values = (props: {
                     size={"sm"}
                     rounded={"md"}
                     isReadOnly={props.viewOnly}
-                    onChange={onChange}
+                    onChange={(event) =>
+                      setValue(parseFloat(event.target.value))
+                    }
                     onBlur={onBlur}
                     isInvalid={
                       _.isEqual(value, "") && _.isEqual(props.requireData, true)
@@ -255,7 +249,7 @@ const Values = (props: {
                     size={"sm"}
                     rounded={"md"}
                     isReadOnly={props.viewOnly}
-                    onChange={onChange}
+                    onChange={(event) => setValue(event.target.value)}
                     onBlur={onBlur}
                     isInvalid={
                       _.isEqual(value, "") && _.isEqual(props.requireData, true)
@@ -273,7 +267,7 @@ const Values = (props: {
                       size={"sm"}
                       rounded={"md"}
                       isReadOnly={props.viewOnly}
-                      onChange={onChange}
+                      onChange={(event) => setValue(event.target.value)}
                       onBlur={onBlur}
                       isInvalid={
                         _.isEqual(value, "") &&
@@ -371,7 +365,7 @@ const Values = (props: {
                     size={"sm"}
                     rounded={"md"}
                     isReadOnly={props.viewOnly}
-                    onChange={onChange}
+                    onChange={(event) => setValue(event.target.value)}
                     onBlur={onBlur}
                     isInvalid={
                       _.isEqual(value, "") && _.isEqual(props.requireData, true)
@@ -438,7 +432,7 @@ const Values = (props: {
                 size={"sm"}
                 rounded={"md"}
                 isDisabled={props.viewOnly}
-                onChange={onChange}
+                onChange={(event) => setValue(event.target.value)}
                 onBlur={onBlur}
                 isInvalid={
                   _.isEqual(value, "") && _.isEqual(props.requireData, true)

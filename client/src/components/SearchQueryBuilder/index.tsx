@@ -21,7 +21,9 @@ import { SearchQueryBuilderProps } from "@types";
 // GraphQL
 import { gql, useLazyQuery } from "@apollo/client";
 
+// Utility functions and libraries
 import _ from "lodash";
+import dayjs from "dayjs";
 
 const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
   setHasSearched,
@@ -78,15 +80,6 @@ const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
     {
       name: "attributes",
       label: "Attributes",
-      operators: [
-        ...defaultOperators.filter((operator) =>
-          ["contains", "doesNotContain"].includes(operator.name),
-        ),
-      ],
-    },
-    {
-      name: "values",
-      label: "Values",
       operators: [
         ...defaultOperators.filter((operator) =>
           ["contains", "doesNotContain"].includes(operator.name),
@@ -150,6 +143,81 @@ const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
           },
         },
       });
+    } else if (rule.field === "attributes") {
+      // Construct the base query components
+      const customRule = JSON.parse(rule.value);
+      const processed = {
+        "attributes.values.type": customRule.type,
+      };
+
+      // Append query components depending on the specified operator
+      if (customRule.operator === "contains") {
+        return JSON.stringify({
+          ...processed,
+          "attributes.values.data": {
+            $regex: customRule.value,
+          },
+        });
+      } else if (customRule.operator === "does not contain") {
+        return JSON.stringify({
+          ...processed,
+          "attributes.values.data": {
+            $not: {
+              $regex: customRule.value,
+            },
+          },
+        });
+      } else if (customRule.operator === "equals") {
+        if (customRule.type === "number") {
+          return JSON.stringify({
+            ...processed,
+            "attributes.values.data": {
+              $eq: parseFloat(customRule.value),
+            },
+          });
+        } else {
+          return JSON.stringify({
+            ...processed,
+            "attributes.values.data": {
+              $eq: dayjs(customRule.value).format("YYYY-MM-DD"),
+            },
+          });
+        }
+      } else if (customRule.operator === ">") {
+        if (customRule.type === "number") {
+          return JSON.stringify({
+            ...processed,
+            "attributes.values.data": {
+              $gt: parseFloat(customRule.value),
+            },
+          });
+        } else {
+          return JSON.stringify({
+            ...processed,
+            "attributes.values.data": {
+              $gt: dayjs(customRule.value).format("YYYY-MM-DD"),
+            },
+          });
+        }
+      } else if (customRule.operator === "<") {
+        if (customRule.type === "number") {
+          return JSON.stringify({
+            ...processed,
+            "attributes.values.data": {
+              $lt: parseFloat(customRule.value),
+            },
+          });
+        } else {
+          return JSON.stringify({
+            ...processed,
+            "attributes.values.data": {
+              $lt: dayjs(customRule.value).format("YYYY-MM-DD"),
+            },
+          });
+        }
+      }
+
+      return JSON.stringify(processed);
     }
 
     // Default rule applied
@@ -253,11 +321,6 @@ const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
             <Text fontWeight={"semibold"} fontSize={"sm"} color={"blue.700"}>
               Use the query builder to construct advanced queries to search for
               Entities within the Workspace.
-            </Text>
-            <Text fontWeight={"semibold"} fontSize={"sm"} color={"blue.700"}>
-              Query builder can be used to search for specific conditions within
-              Entities and their Attributes, as well as Project membership and
-              relationships to other Entities.
             </Text>
           </Flex>
         </Flex>
