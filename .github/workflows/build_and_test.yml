@@ -33,7 +33,7 @@ jobs:
 
       # Install, build, and test the frontend
       - name: Install, build, and test client
-        working-directory: ./client
+        working-directory: client
         run: |
           yarn install
           yarn build
@@ -54,7 +54,7 @@ jobs:
         working-directory: server
         run: |
           yarn install
-          yarn buildDebug
+          yarn build
 
       # Run the server unit tests
       - name: Test server
@@ -68,14 +68,22 @@ jobs:
         run: yarn start &
 
       - name: Wait for client start
-        run: sleep 10 # seconds
+        run: sleep 10 # 10 seconds
+
+      # Start the server
+      - name: Start server
+        working-directory: server
+        run: yarn start &
+
+      - name: Wait for server start
+        run: sleep 10 # 10 seconds
 
       # Run the Cypress tests
       - name: Run Cypress tests
         uses: cypress-io/github-action@v6
         with:
-          wait-on: "http://localhost:8080"
-          start: yarn startDev
+          wait-on: http://localhost:8080
+          working-directory: server
 
       # Run this step only if the Cypress testing failed
       - name: Upload Cypress screenshots

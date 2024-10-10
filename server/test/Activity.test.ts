@@ -26,6 +26,8 @@ describe("Activity model", () => {
   afterEach(async () => {
     // Clear the database after each test
     await clearDatabase();
+
+    // Disconnect from the database
     await disconnect();
   });
 

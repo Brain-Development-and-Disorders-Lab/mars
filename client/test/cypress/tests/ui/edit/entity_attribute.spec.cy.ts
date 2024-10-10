@@ -1,13 +1,4 @@
 describe("In entity page, edit attribute", () => {
-  beforeEach(() => {
-    // Clear the localstorage
-    cy.clearLocalStorage();
-
-    // Navigate the "Login" page
-    cy.visit("http://localhost:8080/");
-    cy.get("#orcidLoginButton").click();
-  });
-
   it("should be able to add and edit attribute", () => {
     cy.contains("button", "Dashboard").click();
     cy.get("a").contains("View").eq(-1).click();

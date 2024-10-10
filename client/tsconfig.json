@@ -25,6 +25,7 @@
     "jsx": "react",
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "types": ["cypress", "@testing-library/jest-dom", "node"]
   }
 }

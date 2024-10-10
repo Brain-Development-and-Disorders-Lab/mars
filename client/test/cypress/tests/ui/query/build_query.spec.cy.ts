@@ -1,13 +1,4 @@
 describe("search query builder", () => {
-  beforeEach(() => {
-    // Clear the localstorage
-    cy.clearLocalStorage();
-
-    // Navigate the "Login" page
-    cy.visit("http://localhost:8080/");
-    cy.get("#orcidLoginButton").click();
-  });
-
   it("should go to search page and test query builder", () => {
     cy.get("#navSearchButton").click();
     cy.contains("button", "Query Builder").click();
