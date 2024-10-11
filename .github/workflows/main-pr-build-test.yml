@@ -82,6 +82,19 @@ jobs:
         with:
           node-version: 18
 
+      - name: Start Docker containers
+        run: docker compose -f "docker-compose.yml" up -d --build
+
+      - name: Create .env file for server
+        working-directory: server
+        run: |
+          touch .env
+          echo "CONNECTION_STRING=${{ env.CONNECTION_STRING }}" >> .env
+          echo "PORT=8000" >> .env
+          echo "NODE_ENV=development" >> .env
+          echo "CLIENT_ID=${{ secrets.CLIENT_ID }}" >> .env
+          echo "CLIENT_SECRET=${{ secrets.CLIENT_SECRET }}" >> .env
+
       - name: Test server
         working-directory: server
         run: |
@@ -101,19 +114,13 @@ jobs:
         with:
           node-version: 18
 
-      - name: Start Docker containers
-        run: docker compose -f "docker-compose.yml" up -d --build
-
-      - name: Test client components
-        working-directory: client
-        run: |
-          yarn install
-          yarn test:components
-
       - uses: actions/download-artifact@v4
         with:
           name: mars-server
           path: server/dist/
+
+      - name: Start Docker containers
+        run: docker compose -f "docker-compose.yml" up -d --build
 
       - name: Create .env file for server
         working-directory: server
@@ -124,6 +131,12 @@ jobs:
           echo "NODE_ENV=development" >> .env
           echo "CLIENT_ID=${{ secrets.CLIENT_ID }}" >> .env
           echo "CLIENT_SECRET=${{ secrets.CLIENT_SECRET }}" >> .env
+
+      - name: Test client components
+        working-directory: client
+        run: |
+          yarn install
+          yarn test:components
 
       - name: Start server
         working-directory: server
