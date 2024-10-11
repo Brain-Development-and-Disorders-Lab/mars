@@ -9,10 +9,10 @@ describe("search query builder", () => {
     // Create a test query
     cy.contains("button", "Rule").click();
     cy.get(".rule-operators").select("contains");
-    cy.get('[data-testid="value-editor"]').type("Box");
+    cy.get('[data-testid="value-editor"]').type("Entity");
     cy.get('[aria-label="Run Query"]').click(); // Click the Search button
 
     // Search result array should contain multiple results
-    cy.get("#resultsHeading").should("contain.text", "7 results");
+    cy.get("#resultsHeading").should("contain.text", "4 results");
   });
 });

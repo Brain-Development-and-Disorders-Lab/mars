@@ -25,6 +25,7 @@ export default cypress.defineConfig({
         },
       });
     },
+    fixturesFolder: "test/cypress/fixtures",
     specPattern: "test/cypress/tests/**/*.cy.{js,jsx,ts,tsx}",
     supportFile: "test/cypress/support/database.{js,jsx,ts,tsx}",
   },

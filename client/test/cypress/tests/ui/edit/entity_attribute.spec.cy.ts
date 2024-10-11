@@ -1,7 +1,6 @@
 describe("In entity page, edit attribute", () => {
   it("should be able to add and edit attribute", () => {
-    cy.contains("button", "Dashboard").click();
-    cy.get("a").contains("View").eq(-1).click();
+    cy.contains("button", "Entities").click();
     cy.get("a").contains("View").eq(0).click();
     cy.contains("No Attributes").should("exist");
     cy.get("#editEntityButton").click();
