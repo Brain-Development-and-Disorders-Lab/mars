@@ -37,7 +37,9 @@ const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
       operators: [
         { name: "=", label: "is" },
         ...defaultOperators.filter((operator) =>
-          ["contains", "beginsWith", "endsWith"].includes(operator.name),
+          ["contains", "doesNotContain", "beginsWith", "endsWith"].includes(
+            operator.name,
+          ),
         ),
       ],
     },

@@ -138,6 +138,7 @@ const SearchQueryValue = ({
         >
           <Flex direction={"row"} gap={"2"} align={"center"} w={"100%"}>
             <Select
+              className={"rule-value-type"}
               value={attributeValueType}
               onChange={(event) =>
                 updateValueType(event.target.value as IValueType)
@@ -149,6 +150,7 @@ const SearchQueryValue = ({
               <option value={"date"}>Date</option>
             </Select>
             <Select
+              className={"rule-value-operators"}
               value={attributeValueOperator}
               onChange={(event) => handleOperatorChange(event.target.value)}
             >
@@ -161,6 +163,7 @@ const SearchQueryValue = ({
           </Flex>
           <Flex w={"100%"}>
             <Input
+              className={"rule-value-input"}
               type={attributeValueInputType}
               placeholder={"Value"}
               value={attributeValue}
