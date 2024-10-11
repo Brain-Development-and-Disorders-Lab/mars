@@ -31,13 +31,13 @@ jobs:
       - name: Install dependencies
         run: yarn install
 
-      # Install, build, and test the frontend
-      - name: Install, build, and test client
+      # Install, build, and test the client components
+      - name: Install, build, and test client components
         working-directory: client
         run: |
           yarn install
           yarn build
-          yarn test
+          yarn test:components
 
       # Create .env file for server and build server
       - name: Create .env file for server
