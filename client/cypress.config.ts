@@ -1,7 +1,10 @@
+// Required for reading environment variables
+import "dotenv/config";
+
+// Import Cypress
 import cypress from "cypress";
 
 // Database setup and teardown functions
-import "dotenv/config";
 import { setupDatabase, teardownDatabase } from "../server/test/util";
 
 export default cypress.defineConfig({

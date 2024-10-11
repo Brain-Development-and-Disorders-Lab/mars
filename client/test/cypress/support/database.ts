@@ -5,10 +5,10 @@ beforeEach(() => {
   cy.clearLocalStorage();
 
   // Clear the database
-  // cy.task
+  cy.task("database:teardown");
 
   // Seed the database
-  // await seedDatabase();
+  cy.task("database:setup");
 
   // Navigate the "Login" page
   cy.visit("http://localhost:8080/");
@@ -18,5 +18,5 @@ beforeEach(() => {
 
 afterEach(() => {
   // Clear the database
-  // await clearDatabase();
+  cy.task("database:teardown");
 });

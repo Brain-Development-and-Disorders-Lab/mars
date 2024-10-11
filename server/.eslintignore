@@ -8,3 +8,4 @@ gulpfile.js
 jest.config.js
 webpack.*.js
 *.d.ts
+yarn.lock
