@@ -1,5 +1,5 @@
-describe("In entity page, edit attribute", () => {
-  it("should be able to add and edit attribute", () => {
+describe("Entity, edit Attributes", () => {
+  it("should be able to add and edit Attributes", () => {
     cy.contains("button", "Entities").click();
     cy.get("a").contains("View").eq(0).click();
     cy.contains("No Attributes").should("exist");

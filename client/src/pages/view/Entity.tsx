@@ -1353,6 +1353,7 @@ const Entity = () => {
           wrap={"wrap"}
         >
           <Flex
+            id={"entityNameTag"}
             align={"center"}
             gap={"2"}
             p={"2"}
@@ -1516,6 +1517,7 @@ const Entity = () => {
                   <Text fontWeight={"bold"}>Name</Text>
                   <Flex>
                     <Input
+                      id={"entityNameInput"}
                       size={"sm"}
                       value={entityName}
                       onChange={(event) => {
@@ -1547,6 +1549,7 @@ const Entity = () => {
                   <Text fontWeight={"bold"}>Description</Text>
                   <Flex>
                     <Textarea
+                      id={"entityDescriptionInput"}
                       size={"sm"}
                       value={entityDescription}
                       onChange={(event) => {
