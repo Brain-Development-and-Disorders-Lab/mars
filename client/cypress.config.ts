@@ -11,11 +11,13 @@ export default cypress.defineConfig({
   e2e: {
     setupNodeEvents(on, config) {
       on("task", {
+        // Database setup task
         "database:setup": () => {
           return new Promise((resolve) => {
             setupDatabase().then(() => resolve(null));
           });
         },
+        // Database teardown task
         "database:teardown": () => {
           return new Promise((resolve) => {
             teardownDatabase().then(() => resolve(null));

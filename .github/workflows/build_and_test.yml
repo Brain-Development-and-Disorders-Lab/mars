@@ -7,7 +7,7 @@ on:
     branches: ["main"]
   workflow_dispatch:
 
-# Note: Environment variables used for server testing
+# Note: Environment variables used for testing
 env:
   CONNECTION_STRING: mongodb://admin:metadataadmin@localhost:27017/
   PORT: 8000
@@ -40,7 +40,7 @@ jobs:
           yarn test
 
       # Create .env file for server and build server
-      - name: Create .env file
+      - name: Create .env file for server
         working-directory: server
         run: |
           touch .env
@@ -78,12 +78,19 @@ jobs:
       - name: Wait for server start
         run: sleep 10 # 10 seconds
 
+      # Create .env file for client, required for Cypress testing
+      - name: Create .env file for client
+        working-directory: client
+        run: |
+          touch .env
+          echo "CONNECTION_STRING=${{ env.CONNECTION_STRING }}" >> .env
+
       # Run the Cypress tests
       - name: Run Cypress tests
         uses: cypress-io/github-action@v6
         with:
           wait-on: http://localhost:8080
-          working-directory: server
+          working-directory: client
 
       # Run this step only if the Cypress testing failed
       - name: Upload Cypress screenshots

@@ -14,12 +14,18 @@ import { Workspaces } from "../src/models/Workspaces";
 // Variables
 import { DEMO_USER_ORCID } from "../src/variables";
 
+/**
+ * Utility wrapper function to handle database connectivity and seeding the database
+ */
 export const setupDatabase = async (): Promise<void> => {
   await connect();
   await seedDatabase();
   await disconnect();
 };
 
+/**
+ * Utility wrapper function to handle database connectivity and clearing the database
+ */
 export const teardownDatabase = async (): Promise<void> => {
   await connect();
   await clearDatabase();
