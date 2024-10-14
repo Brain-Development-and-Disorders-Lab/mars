@@ -230,7 +230,7 @@ const SearchSelect = (props: SearchSelectProps) => {
   };
 
   return (
-    <Flex pos={"relative"} w={"100%"}>
+    <Flex id={props.id || "searchSelect"} pos={"relative"} w={"100%"}>
       <InputGroup size={"sm"} onClick={onInputClick}>
         <Input
           placeholder={placeholder}
