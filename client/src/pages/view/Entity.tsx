@@ -1459,6 +1459,7 @@ const Entity = () => {
                   Export
                 </MenuItem>
                 <MenuItem
+                  id={"archiveEntityButton"}
                   onClick={onArchiveDialogOpen}
                   icon={<Icon name={"archive"} />}
                   fontSize={"sm"}
