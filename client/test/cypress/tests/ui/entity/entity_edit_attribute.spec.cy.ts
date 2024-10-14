@@ -1,7 +1,10 @@
 describe("Entity, edit Attributes", () => {
   it("should be able to add and edit Attributes", () => {
     cy.contains("button", "Entities").click();
-    cy.get("a").contains("View").eq(0).click();
+    cy.contains("td", "Test Product Entity")
+      .siblings()
+      .contains("a", "View")
+      .click();
     cy.contains("No Attributes").should("exist");
     cy.get("#editEntityButton").click();
 
