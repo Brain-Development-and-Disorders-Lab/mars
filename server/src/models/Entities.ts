@@ -1178,9 +1178,9 @@ export class Entities {
 
                 // Some values are JSON data stored as strings
                 if (value.type === "entity") {
-                  row.push(JSON.parse(value.data).name);
+                  row.push(value.data.name);
                 } else if (value.type === "select") {
-                  row.push(JSON.parse(value.data).selected);
+                  row.push(value.data.selected);
                 } else {
                   row.push(value.data);
                 }
