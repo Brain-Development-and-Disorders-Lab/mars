@@ -1,13 +1,4 @@
 describe("CSV Import Test", () => {
-  beforeEach(() => {
-    // Clear the localstorage
-    cy.clearLocalStorage();
-
-    // Navigate the "Login" page
-    cy.visit("http://localhost:8080/");
-    cy.get("#orcidLoginButton").click();
-  });
-
   it("should import a CSV file successfully", () => {
     // Open import modal and import CSV file
     cy.get("#navImportButton").click();

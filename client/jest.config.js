@@ -10,10 +10,9 @@ module.exports = {
     "^@types/(.*)$": "../types/$1",
     "src/variables": "<rootDir>/src/variables",
     "src/util": "<rootDir>/src/util",
-    // Add other path mappings as needed
   },
   transform: {
     "^.+\\.[t|j]sx?$": "babel-jest",
   },
-  setupFilesAfterEnv: ["./setupTests.js"], // Update the path as needed
+  setupFilesAfterEnv: ["./test/enzyme/setup.js"], // Update the path as needed
 };

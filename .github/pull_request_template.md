@@ -1,11 +1,13 @@
+# Pull Request
+
 ## Description
 
-Please include a summary of the change and the work item associated with it.
+Please include a summary of the changes and the work items associated with them.
 
 ## Ticket
 
-Please include link to Jira/AzureDevops etc
+Please include a link to Jira / Azure DevOps etc.
 
-## Demo 🎥
+## Demonstration
 
-Please provide any images, GIFs, or videos that show the effect of your changes (if applicable). A picture is worth a thousand words.
+Please provide any images, GIFs, or videos that show the effect of your changes (if applicable).

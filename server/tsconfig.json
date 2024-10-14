@@ -4,7 +4,6 @@
     "module": "CommonJS",
     "target": "ES2016",
     "allowJs": true,
-    "importHelpers": true,
     "baseUrl": "./",
     "paths": {
       "@types": ["../types"]

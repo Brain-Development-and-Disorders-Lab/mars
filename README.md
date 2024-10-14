@@ -71,16 +71,31 @@ Currently, access to a Workspace grants the user access to all Entities, Attribu
 
 ## Testing
 
+> [!WARNING]
+> Most testing will erase the local MongoDB database!
+
 ### Client
+
+To run component tests, run `yarn test:components` in the `/client` directory.
+
+[Cypress](https://www.cypress.io/) is used for testing the client UI. Before running client tests, add an `.env` file in the `/client` directory with the following variables:
+
+- `CONNECTION_STRING`: The local MongoDB database connection string, update the username and password.
+
+An example `.env` file is shown below:
+
+```Text
+# Database variables
+CONNECTION_STRING=mongodb://<username>:<password>@localhost:27017/
+```
+
+Once the `.env` file has been configured, run `yarn test:ui` in the `/client` directory to run all Cypress tests in headless mode.
 
 To run component tests, run `yarn test` in the `/client` directory. To run Cypress tests, run `yarn cypress run` in the root `/` directory of the repository. Ensure the server is running, otherwise the Cypress tests will fail.
 
 ### Server
 
 To run unit tests, run `yarn test` in the `/server` directory.
-
-> [!WARNING]
-> This will erase the local MongoDB database!
 
 ## Deployment
 
@@ -90,7 +105,7 @@ Before starting the Docker containers, three environment variables must be confi
 
 The `.env` file must have the following variables:
 
-- `CONNECTION_STRING`: The MongoDB connection string, update the username and password.
+- `CONNECTION_STRING`: The local MongoDB database connection string, update the username and password.
 - `GRAPHQL_PORT`: The port value for the GraphQL endpoint
 - `NODE_ENV`: Specify the Node environment
 

@@ -370,7 +370,9 @@ export type IconNames =
   | "warning"
   | "exclamation"
   | "lightning"
+  | "qr"
   | "reload"
+  | "share"
   | "graph"
   | "clock"
   | "rewind"
@@ -429,6 +431,7 @@ export type SearchQueryBuilderProps = {
 
 // SearchSelect props
 export type SearchSelectProps = {
+  id?: string;
   value: IGenericItem;
   resultType: "entity" | "project";
   placeholder?: string;

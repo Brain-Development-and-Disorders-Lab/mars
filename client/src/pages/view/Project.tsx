@@ -690,6 +690,7 @@ const Project = () => {
           wrap={"wrap"}
         >
           <Flex
+            id={"projectNameTag"}
             align={"center"}
             gap={"2"}
             p={"2"}
@@ -726,6 +727,7 @@ const Project = () => {
                   </Button>
                 )}
                 <Button
+                  id={"editProjectButton"}
                   colorScheme={editing ? "green" : "blue"}
                   rightIcon={
                     editing ? <Icon name={"check"} /> : <Icon name={"edit"} />
@@ -837,6 +839,7 @@ const Project = () => {
                 <Flex direction={"column"} gap={"2"} basis={"60%"}>
                   <Text fontWeight={"bold"}>Name</Text>
                   <Input
+                    id={"projectNameInput"}
                     size={"sm"}
                     value={projectName}
                     onChange={(event) => {
@@ -865,6 +868,7 @@ const Project = () => {
                 <Flex direction={"column"} gap={"2"} basis={"60%"}>
                   <Text fontWeight={"bold"}>Description</Text>
                   <Textarea
+                    id={"projectDescriptionInput"}
                     size={"sm"}
                     value={projectDescription}
                     onChange={(event) => {
@@ -904,6 +908,7 @@ const Project = () => {
                 {/* Entities in the Project */}
                 <Heading size={"sm"}>Entities</Heading>
                 <Button
+                  id={"addEntityButton"}
                   rightIcon={<Icon name={"add"} />}
                   onClick={onEntitiesOpen}
                   size={"sm"}
@@ -1048,6 +1053,7 @@ const Project = () => {
 
             <ModalBody p={"2"}>
               <SearchSelect
+                id={"entitySearchSelect"}
                 resultType={"entity"}
                 value={selectedEntity}
                 onChange={setSelectedEntity}
@@ -1068,6 +1074,7 @@ const Project = () => {
               <Spacer />
 
               <Button
+                id={"addEntityDoneButton"}
                 colorScheme={"green"}
                 size={"sm"}
                 rightIcon={<Icon name={"check"} />}

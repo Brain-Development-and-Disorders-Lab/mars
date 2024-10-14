@@ -1,6 +1,11 @@
 import React from "react";
-import { Warning } from "../src/components/Label";
+
+// Test imports
 import { shallow } from "enzyme";
+import { expect } from "@jest/globals";
+
+// Component
+import { Warning } from "../../../src/components/Label";
 
 describe("Warning Component", () => {
   it("renders with provided text", () => {
@@ -8,7 +13,6 @@ describe("Warning Component", () => {
     const wrapper = shallow(<Warning text={testText} />);
 
     expect(wrapper.text()).toContain(testText);
-    // If you want to check for the Icon component
     expect(wrapper.find("Icon").exists()).toBe(true);
   });
 });

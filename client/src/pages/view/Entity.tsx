@@ -89,6 +89,7 @@ import dayjs from "dayjs";
 import FileSaver from "file-saver";
 import slugify from "slugify";
 import { nanoid } from "nanoid";
+import QRCode from "react-qr-code";
 
 // Apollo client imports
 import { useQuery, gql, useMutation, useLazyQuery } from "@apollo/client";
@@ -113,6 +114,12 @@ const Entity = () => {
     isOpen: isGraphOpen,
     onOpen: onGraphOpen,
     onClose: onGraphClose,
+  } = useDisclosure();
+
+  const {
+    isOpen: isShareOpen,
+    onOpen: onShareOpen,
+    onClose: onShareClose,
   } = useDisclosure();
 
   const {
@@ -1045,6 +1052,11 @@ const Entity = () => {
     }
   };
 
+  // Handle clicking the "Share" button
+  const handleShareClick = () => {
+    onShareOpen();
+  };
+
   // Handle clicking the "Export" button
   const handleExportClick = () => {
     setEntityData(entityData);
@@ -1341,6 +1353,7 @@ const Entity = () => {
           wrap={"wrap"}
         >
           <Flex
+            id={"entityNameTag"}
             align={"center"}
             gap={"2"}
             p={"2"}
@@ -1423,6 +1436,13 @@ const Entity = () => {
                   Print
                 </MenuItem>
                 <MenuItem
+                  icon={<Icon name={"share"} />}
+                  fontSize={"sm"}
+                  onClick={handleShareClick}
+                >
+                  Share
+                </MenuItem>
+                <MenuItem
                   icon={<Icon name={"graph"} />}
                   onClick={onGraphOpen}
                   fontSize={"sm"}
@@ -1439,6 +1459,7 @@ const Entity = () => {
                   Export
                 </MenuItem>
                 <MenuItem
+                  id={"archiveEntityButton"}
                   onClick={onArchiveDialogOpen}
                   icon={<Icon name={"archive"} />}
                   fontSize={"sm"}
@@ -1497,6 +1518,7 @@ const Entity = () => {
                   <Text fontWeight={"bold"}>Name</Text>
                   <Flex>
                     <Input
+                      id={"entityNameInput"}
                       size={"sm"}
                       value={entityName}
                       onChange={(event) => {
@@ -1528,6 +1550,7 @@ const Entity = () => {
                   <Text fontWeight={"bold"}>Description</Text>
                   <Flex>
                     <Textarea
+                      id={"entityDescriptionInput"}
                       size={"sm"}
                       value={entityDescription}
                       onChange={(event) => {
@@ -2568,6 +2591,82 @@ const Entity = () => {
                 <PreviewModal attachment={previewAttachment} />
               </Flex>
             </ModalBody>
+          </ModalContent>
+        </Modal>
+
+        {/* Share modal */}
+        <Modal isOpen={isShareOpen} onClose={onShareClose} isCentered>
+          <ModalOverlay />
+          <ModalContent p={"2"} gap={"0"} w={["md", "lg", "xl"]}>
+            {/* Heading and close button */}
+            <ModalHeader p={"2"}>Share Entity</ModalHeader>
+            <ModalCloseButton />
+
+            <ModalBody p={"2"}>
+              <Flex direction={"column"} gap={"2"}>
+                <Flex direction={"row"} gap={"2"} align={"center"}>
+                  <Flex w={"25%"}>
+                    <Text fontSize={"sm"} fontWeight={"semibold"}>
+                      Sharable URL:
+                    </Text>
+                  </Flex>
+                  <Flex w={"60%"}>
+                    <Input
+                      size={"sm"}
+                      value={`https://app.metadatify.com/entities/${id}`}
+                      rounded={"md"}
+                      onFocus={(event) => event.target.select()}
+                      readOnly
+                    />
+                  </Flex>
+                  <Button
+                    size={"sm"}
+                    onClick={async () => {
+                      await navigator.clipboard.writeText(
+                        `https://app.metadatify.com/entities/${id}`,
+                      );
+                      toast({
+                        title: "Copied to clipboard",
+                        status: "success",
+                        position: "bottom-right",
+                        isClosable: true,
+                        duration: 2000,
+                      });
+                    }}
+                  >
+                    Copy
+                  </Button>
+                </Flex>
+
+                <Flex direction={"row"} gap={"2"}>
+                  <Flex w={"25%"}>
+                    <Text fontSize={"sm"} fontWeight={"semibold"}>
+                      QR Code:
+                    </Text>
+                  </Flex>
+                  <Flex
+                    p={"2"}
+                    border={"1px"}
+                    borderColor={"gray.300"}
+                    rounded={"md"}
+                  >
+                    <QRCode id={`${id}_qr`} value={`${id}`} size={80} />
+                  </Flex>
+                </Flex>
+              </Flex>
+            </ModalBody>
+
+            <ModalFooter p={"2"}>
+              <Spacer />
+              <Button
+                colorScheme={"green"}
+                size={"sm"}
+                rightIcon={<Icon name={"check"} />}
+                onClick={onShareClose}
+              >
+                Done
+              </Button>
+            </ModalFooter>
           </ModalContent>
         </Modal>
 
