@@ -1,5 +1,5 @@
 // React
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 // Existing and custom components
 import {
@@ -54,16 +54,22 @@ const Login = () => {
   const parameters = useParameters();
   const navigate = useNavigate();
 
+  // Login activity state
+  const [isLoading, setIsLoading] = useState(false);
+
   // Extract query parameters
   const accessCode = parameters.get("code");
 
   const runLogin = async (code: string) => {
+    setIsLoading(true);
     const result = await login(code);
 
     if (result.success) {
       await activateWorkspace("");
       navigate("/");
+      setIsLoading(false);
     } else {
+      setIsLoading(false);
       if (
         result.message.includes("Unable") &&
         !toast.isActive("login-graphql-error-toast")
@@ -182,6 +188,7 @@ const Login = () => {
                 colorScheme={"gray"}
                 gap={"4"}
                 onClick={onLoginClick}
+                isLoading={isLoading}
                 loadingText={"Logging in..."}
               >
                 <Image
