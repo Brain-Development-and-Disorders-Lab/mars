@@ -220,6 +220,7 @@ const WorkspaceSwitcher = () => {
     <Flex>
       <Menu isOpen={isOpen} autoSelect={false}>
         <MenuButton
+          id={"workspaceSwitcherButton"}
           h={"100%"}
           w={"100%"}
           rounded={"md"}
@@ -320,7 +321,7 @@ const WorkspaceSwitcher = () => {
                 <Text fontSize={"sm"}>Account settings</Text>
               </Flex>
             </MenuItem>
-            <MenuItem onClick={() => logout()}>
+            <MenuItem id={"logoutButton"} onClick={() => logout()}>
               <Flex direction={"row"} gap={"2"} align={"center"}>
                 <Icon name={"b_right"} />
                 <Text fontSize={"sm"}>Log out</Text>
