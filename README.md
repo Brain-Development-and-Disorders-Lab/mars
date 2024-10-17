@@ -2,6 +2,8 @@
 
 > Project Metadata Aggregation for Reproducible Science (MARS) is an open-source web-based tool to create, manage, and search scientific metadata.
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.13946927.svg)](https://doi.org/10.5281/zenodo.13946927) ![GitHub Repo stars](https://img.shields.io/github/stars/Brain-Development-and-Disorders-Lab/mars?style=flat)
+
 ![Dashboard](website/src/img/Dashboard.png)
 
 ## Features
