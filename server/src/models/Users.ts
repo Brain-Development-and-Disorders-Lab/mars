@@ -1,7 +1,8 @@
 // Custom types
-import { IResponseMessage, UserModel } from "@types";
+import { APIKey, IResponseMessage, UserModel } from "@types";
 
 import _ from "lodash";
+import consola from "consola";
 import { getDatabase } from "../connectors/database";
 import dayjs from "dayjs";
 
@@ -140,6 +141,47 @@ export class Users {
           ? "Successfully created User"
           : "Error creating User",
     };
+  };
+
+  static addKey = async (
+    orcid: string,
+    key: APIKey,
+  ): Promise<IResponseMessage> => {
+    const user = await Users.getOne(orcid);
+
+    if (_.isNull(user)) {
+      return {
+        success: false,
+        message: "User not found",
+      };
+    }
+
+    const apiKeys = _.cloneDeep(user.api_keys);
+    apiKeys.push(key);
+
+    const update: { $set: Partial<UserModel> } = {
+      $set: {
+        api_keys: apiKeys,
+      },
+    };
+
+    const response = await getDatabase()
+      .collection<UserModel>(USERS_COLLECTION)
+      .updateOne({ _id: orcid }, update);
+    const successStatus = response.modifiedCount == 1;
+
+    return {
+      success: successStatus,
+      message: successStatus
+        ? "Added API key to User successfully"
+        : "Unable to add API key to User",
+    };
+  };
+
+  static findByKey = async (api_key: string): Promise<UserModel | null> => {
+    return await getDatabase().collection<UserModel>(USERS_COLLECTION).findOne({
+      "api_keys.value": api_key,
+    });
   };
 
   static bootstrap = async (

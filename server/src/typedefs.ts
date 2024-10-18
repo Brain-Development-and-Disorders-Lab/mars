@@ -18,6 +18,22 @@ export const typedefs = `#graphql
     name: String!
   }
 
+  # "APIKey" type
+  type APIKey {
+    value: String
+    expires: String
+    scope: String
+    workspaces: [String]
+  }
+
+  # "APIKeyInput" type
+  input APIKeyInput {
+    value: String
+    expires: String
+    scope: String
+    workspaces: [String]
+  }
+
   # "User" type
   type User {
     _id: String!
@@ -27,6 +43,7 @@ export const typedefs = `#graphql
     affiliation: String
     email: String
     workspaces: [String]
+    api_keys: [APIKey]
   }
 
   # "UserInput" type
@@ -38,6 +55,7 @@ export const typedefs = `#graphql
     affiliation: String
     email: String
     workspaces: [String]
+    api_keys: [APIKeyInput]
   }
 
   # "Project" type
@@ -325,6 +343,13 @@ export const typedefs = `#graphql
     data: [EntityReview]
   }
 
+  # "ResponseData"-type containing data with type "APIKey"
+  type ResponseDataAPIKey {
+    success: Boolean
+    message: String
+    data: APIKey
+  }
+
   # "Auth" type
   type Auth {
     orcid: String
@@ -407,6 +432,7 @@ export const typedefs = `#graphql
 
     # Authentication queries
     login(code: String): ResponseDataAuth
+    generateKey(scope: String, workspaces: [String]): ResponseDataAPIKey
 
     # Data queries
     downloadFile(_id: String): String

@@ -369,6 +369,7 @@ export type IconNames =
   | "person"
   | "warning"
   | "exclamation"
+  | "key"
   | "lightning"
   | "qr"
   | "reload"

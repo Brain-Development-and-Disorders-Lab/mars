@@ -89,6 +89,7 @@ export class Authentication {
         affiliation: "Metadatify",
         token: authenticationPayload.token,
         workspaces: [],
+        api_keys: [],
       });
     }
 

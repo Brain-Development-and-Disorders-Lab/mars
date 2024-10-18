@@ -24,6 +24,9 @@ import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@apollo/server/express4";
 import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
 import { typedefs } from "./typedefs";
+
+// Resolvers
+import { APIResolvers } from "./resolvers/API";
 import { ActivityResolvers } from "./resolvers/Activity";
 import { AttributesResolvers } from "./resolvers/Attributes";
 import { AuthenticationResolvers } from "./resolvers/Authentication";
@@ -35,11 +38,16 @@ import { ProjectsResolvers } from "./resolvers/Projects";
 import { SearchResolvers } from "./resolvers/Search";
 import { UsersResolvers } from "./resolvers/Users";
 import { WorkspacesResolvers } from "./resolvers/Workspaces";
+
+// Custom types
 import { Context } from "@types";
 
 // GraphQL uploads
 import GraphQLUpload from "graphql-upload/GraphQLUpload.mjs";
 import graphqlUploadExpress from "graphql-upload/graphqlUploadExpress.mjs";
+
+// Public REST API routers
+import APIRouter from "./models/API";
 
 // Set logging level
 consola.level =
@@ -88,6 +96,7 @@ const start = async () => {
         Upload: GraphQLUpload,
       },
       ActivityResolvers,
+      APIResolvers,
       AttributesResolvers,
       AuthenticationResolvers,
       DataResolvers,
@@ -144,6 +153,9 @@ const start = async () => {
     express.static(__dirname + "/public"),
     helmet(),
   );
+
+  // Open the public API endpoint
+  app.use("/v1", APIRouter());
 
   // Configure Express, GraphQL, and enable CORS middleware
   const origins =
