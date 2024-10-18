@@ -482,6 +482,14 @@ export type Context = {
   token: string;
 };
 
+// API key data
+export type APIKey = {
+  value: string;
+  expires: string;
+  scope: "view" | "edit";
+  workspaces: string[];
+};
+
 // User types
 export type IUser = {
   firstName: string;
@@ -489,6 +497,7 @@ export type IUser = {
   affiliation: string;
   email: string;
   workspaces: string[];
+  api_keys: APIKey[];
 };
 
 export type UserModel = IUser & {
