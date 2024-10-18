@@ -217,7 +217,7 @@ const WorkspaceSwitcher = () => {
   };
 
   return (
-    <Flex>
+    <Flex id={"workspaceSwitcher"}>
       <Menu isOpen={isOpen} autoSelect={false}>
         <MenuButton
           h={"100%"}
@@ -315,13 +315,23 @@ const WorkspaceSwitcher = () => {
 
           <MenuGroup>
             <MenuItem onClick={() => handleProfileClick()}>
-              <Flex direction={"row"} gap={"2"} align={"center"}>
+              <Flex
+                id={"accountSettingsItem"}
+                direction={"row"}
+                gap={"2"}
+                align={"center"}
+              >
                 <Icon name={"person"} />
                 <Text fontSize={"sm"}>Account settings</Text>
               </Flex>
             </MenuItem>
             <MenuItem onClick={() => logout()}>
-              <Flex direction={"row"} gap={"2"} align={"center"}>
+              <Flex
+                id={"accountLogoutItem"}
+                direction={"row"}
+                gap={"2"}
+                align={"center"}
+              >
                 <Icon name={"b_right"} />
                 <Text fontSize={"sm"}>Log out</Text>
               </Flex>
