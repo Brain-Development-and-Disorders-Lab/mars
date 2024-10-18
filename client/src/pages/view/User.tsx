@@ -13,6 +13,9 @@ import {
   useBreakpoint,
   IconButton,
   Tag,
+  Spacer,
+  VStack,
+  Divider,
 } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
 
@@ -23,20 +26,23 @@ import Icon from "@components/Icon";
 
 // Custom types
 import {
+  APIKey,
   DataTableAction,
   IGenericItem,
   IResponseMessage,
+  ResponseData,
   UserModel,
 } from "@types";
 
 // GraphQL imports
-import { gql, useMutation, useQuery } from "@apollo/client";
+import { gql, useLazyQuery, useMutation, useQuery } from "@apollo/client";
 
 // Authentication context
 import { useAuthentication } from "@hooks/useAuthentication";
 
 // Utility functions and libraries
 import _ from "lodash";
+import dayjs from "dayjs";
 
 const User = () => {
   const toast = useToast();
@@ -54,6 +60,12 @@ const User = () => {
         lastName
         email
         affiliation
+        api_keys {
+          value
+          expires
+          scope
+          workspaces
+        }
       }
       workspaces {
         _id
@@ -71,21 +83,40 @@ const User = () => {
     },
   });
 
+  // Query to generate a new API key
+  const GENERATE_KEY = gql`
+    query GenerateKey($scope: String, $workspaces: [String]) {
+      generateKey(scope: $scope, workspaces: $workspaces) {
+        success
+        message
+        data {
+          value
+          expires
+          scope
+          workspaces
+        }
+      }
+    }
+  `;
+  const [
+    generateKey,
+    { loading: generateKeyLoading, error: generateKeyError },
+  ] = useLazyQuery<{ generateKey: ResponseData<APIKey> }>(GENERATE_KEY);
+
   useEffect(() => {
     if (data?.user) {
       setUserModel(data.user);
-
       setUserOrcid(data.user._id);
       setUserFirstName(data.user.firstName);
       setUserLastName(data.user.lastName);
       setUserEmail(data.user.email);
       setUserAffiliation(data.user.affiliation);
+      setUserKeys(data.user.api_keys);
       setStaticName(`${data.user.firstName} ${data.user.lastName}`);
     }
 
     if (data?.workspaces) {
       setUserStaticWorkspaces(data.workspaces);
-
       setUserWorkspaces(data.workspaces);
     }
   }, [data]);
@@ -116,6 +147,7 @@ const User = () => {
   const [userLastName, setUserLastName] = useState("");
   const [userEmail, setUserEmail] = useState("");
   const [userAffiliation, setUserAffiliation] = useState("");
+  const [userKeys, setUserKeys] = useState([] as APIKey[]);
 
   // State for User Workspaces
   const [userStaticWorkspaces, setUserStaticWorkspaces] = useState(
@@ -178,6 +210,31 @@ const User = () => {
 
     // Set editing state
     setEditing(false);
+  };
+
+  const handleGenerateKeyClick = async () => {
+    const result = await generateKey({
+      variables: {
+        scope: "edit",
+        workspaces: userWorkspaces.map((w) => w._id),
+      },
+      fetchPolicy: "network-only",
+    });
+
+    if (generateKeyError) {
+      toast({
+        title: "Error",
+        description: "Unable to update User information",
+        status: "error",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
+
+    if (result.data?.generateKey) {
+      setUserKeys([...userKeys, result.data.generateKey.data]);
+    }
   };
 
   const truncateTableText =
@@ -397,6 +454,126 @@ const User = () => {
                     No Workspaces
                   </Text>
                 )}
+              </Flex>
+            </Flex>
+          </Flex>
+        </Flex>
+
+        <Flex direction={"row"} gap={"2"}>
+          <Flex direction={"column"} p={"0"} gap={"2"} grow={"1"} basis={"50%"}>
+            {/* API options */}
+            <Flex
+              direction={"column"}
+              p={"2"}
+              gap={"2"}
+              rounded={"md"}
+              border={"1px"}
+              borderColor={"gray.300"}
+            >
+              <Flex direction={"column"} p={"0"} gap={"2"}>
+                <Flex
+                  direction={"row"}
+                  justify={"space-between"}
+                  align={"center"}
+                >
+                  <Text fontSize={"sm"} fontWeight={"semibold"}>
+                    API Access
+                  </Text>
+                  <Button
+                    size={"sm"}
+                    colorScheme={"green"}
+                    rightIcon={<Icon name={"add"} />}
+                    onClick={() => handleGenerateKeyClick()}
+                    isLoading={generateKeyLoading}
+                  >
+                    Add API Key
+                  </Button>
+                </Flex>
+                <Flex
+                  rounded={"md"}
+                  border={"1px"}
+                  borderColor={"gray.200"}
+                  p={"2"}
+                  minH={userKeys.length > 0 ? "" : "100px"}
+                  align={"center"}
+                  justify={userKeys.length > 0 ? "start" : "center"}
+                >
+                  {userKeys.length > 0 ? (
+                    <VStack
+                      direction={"column"}
+                      w={"100%"}
+                      divider={<Divider />}
+                      spacing={"2"}
+                      justify={"left"}
+                    >
+                      {userKeys.map((key, index) => {
+                        return (
+                          <Flex
+                            key={`api_key_${index}`}
+                            direction={"row"}
+                            gap={"2"}
+                            align={"center"}
+                            w={"100%"}
+                          >
+                            <Flex direction={"row"} gap={"1"} align={"center"}>
+                              <Icon name={"key"} />
+                              <Tag colorScheme={"blue"} size={"sm"}>
+                                {key.scope}
+                              </Tag>
+                            </Flex>
+
+                            <Flex direction={"row"} gap={"1"} align={"center"}>
+                              <Text fontWeight={"semibold"} fontSize={"sm"}>
+                                Expires:
+                              </Text>
+                              <Text fontSize={"sm"}>
+                                {dayjs(key.expires).format("DD MMM YYYY")}
+                              </Text>
+                            </Flex>
+
+                            <Flex maxW={"xl"} gap={"2"} align={"center"}>
+                              <Input
+                                value={key.value}
+                                size={"sm"}
+                                rounded={"md"}
+                                readOnly
+                              />
+                              <Button
+                                size={"sm"}
+                                onClick={async () => {
+                                  await navigator.clipboard.writeText(
+                                    key.value,
+                                  );
+                                }}
+                              >
+                                Copy
+                              </Button>
+                            </Flex>
+
+                            <Spacer />
+
+                            <Button
+                              size={"sm"}
+                              colorScheme={"red"}
+                              isDisabled
+                              rightIcon={<Icon name={"delete"} />}
+                            >
+                              Revoke
+                            </Button>
+                          </Flex>
+                        );
+                      })}
+                    </VStack>
+                  ) : (
+                    <Text
+                      fontWeight={"semibold"}
+                      fontSize={"sm"}
+                      color={"gray.400"}
+                    >
+                      No API keys
+                    </Text>
+                  )}
+                </Flex>
               </Flex>
             </Flex>
           </Flex>
