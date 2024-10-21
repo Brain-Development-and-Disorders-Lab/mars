@@ -64,6 +64,12 @@ const prometheusExporterPlugin = createPrometheusExporterPlugin({
 });
 const httpServer = http.createServer(app);
 
+// Setup CORS origins
+const origins =
+  process.env.NODE_ENV !== "production"
+    ? ["http://localhost:8080"]
+    : ["https://app.metadatify.com"];
+
 // Start the GraphQL server
 const start = async () => {
   consola.info("Environment:", process.env.NODE_ENV);
@@ -146,22 +152,23 @@ const start = async () => {
     }
   });
 
-  // Serve static resources, enable CORS middleware
+  // Serve static resources
   app.use(
     "/static",
-    cors<cors.CorsRequest>(),
+    cors<cors.CorsRequest>({ origin: origins }),
     express.static(__dirname + "/public"),
     helmet(),
   );
 
   // Open the public API endpoint
-  app.use("/v1", APIRouter());
+  app.use(
+    "/v1",
+    cors<cors.CorsRequest>({ origin: "*" }),
+    APIRouter(),
+    helmet(),
+  );
 
-  // Configure Express, GraphQL, and enable CORS middleware
-  const origins =
-    process.env.NODE_ENV !== "production"
-      ? ["http://localhost:8080"]
-      : ["https://app.metadatify.com"];
+  // Configure Express and GraphQL
   app.use(
     "/",
     cors<cors.CorsRequest>({ origin: origins }),

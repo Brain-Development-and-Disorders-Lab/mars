@@ -7,13 +7,18 @@ import dayjs from "dayjs";
 import { hash } from "bcryptjs";
 
 // Custom types
-import { APIKey, ResponseData } from "@types";
+import { APIData, APIKey, EntityModel, ResponseData } from "@types";
 
 // Models
+import { Entities } from "./Entities";
 import { Users } from "./Users";
+import { Workspaces } from "./Workspaces";
 
 // Setup the Express router
 const APIRouter = Router();
+
+// Manage active API versions
+const API_VERSION = "v1";
 
 export class API {
   static generateKey = async (
@@ -35,15 +40,26 @@ export class API {
     };
   };
 
-  static authenticate = async (
+  static validateRequest = async (
     request: Request,
     response: Response,
-    next: NextFunction,
-  ) => {
+  ): Promise<APIKey | null> => {
     // Check if API key provided
     if (_.isUndefined(request.headers["api_key"])) {
-      response.status(401).send("No API key provided").end();
-      return;
+      const responseData: APIData<object> = {
+        path: request.params.path,
+        version: API_VERSION,
+        status: "error",
+        message: "No API key provided",
+        data: {},
+      };
+
+      response
+        .contentType("application/json")
+        .status(401)
+        .send(JSON.stringify(responseData))
+        .end();
+      return null;
     }
 
     // Extract the key from the request headers
@@ -53,7 +69,7 @@ export class API {
     const apiUser = await Users.findByKey(providedKey);
     if (_.isNull(apiUser)) {
       response.status(401).send("Invalid API key").end();
-      return;
+      return null;
     }
 
     // Validate that the API key is current
@@ -62,7 +78,20 @@ export class API {
       .filter((key) => _.isEqual(key.value, providedKey))
       .pop();
     if (_.isUndefined(apiKey)) {
-      response.status(500).send("API key not associated with User").end();
+      response.status(401).send("API key not associated with User").end();
+      return null;
+    }
+
+    return apiKey;
+  };
+
+  static authenticate = async (
+    request: Request,
+    response: Response,
+    next: NextFunction,
+  ) => {
+    const apiKey = await API.validateRequest(request, response);
+    if (_.isNull(apiKey)) {
       return;
     }
 
@@ -72,24 +101,132 @@ export class API {
       return;
     }
 
-    // Validate that the API key scope is respected
-
-    // Validate that the API key ORCiD has access to the requested resource or operation
-
     // If all authentication checks pass, continue to the next middleware
     next();
   };
 
-  static handler = (request: Request, response: Response) => {
-    switch (request.path) {
-      case "/":
-        response.status(200).send("API status: OK").end();
-        return;
+  /**
+   * Generic `status` response, returned if querying the root path of the API
+   * @param request
+   * @param response
+   * @return {Promise<void>}
+   */
+  static status = async (
+    request: Request,
+    response: Response,
+  ): Promise<void> => {
+    const responseData: APIData<object> = {
+      path: "/",
+      version: API_VERSION,
+      status: "success",
+      message: "API status OK",
+      data: {},
+    };
+
+    response
+      .contentType("application/json")
+      .status(200)
+      .send(JSON.stringify(responseData))
+      .end();
+    return;
+  };
+
+  /**
+   * Handler function to process all other non-status API queries
+   * @param request
+   * @param response
+   * @return {Promise<void>}
+   */
+  static handler = async (
+    request: Request,
+    response: Response,
+  ): Promise<void> => {
+    // Validate the API request
+    const apiKey = await API.validateRequest(request, response);
+    if (_.isNull(apiKey)) {
+      return;
     }
+
+    // Get the `UserModel` associated with the API key
+    const user = await Users.findByKey(apiKey.value);
+    if (_.isNull(user)) {
+      return;
+    }
+
+    switch (request.params.path) {
+      case "entities": {
+        const responseData = await API.getEntities(user._id, request);
+        response
+          .contentType("application/json")
+          .status(responseData.status === "success" ? 200 : 400)
+          .send(JSON.stringify(responseData))
+          .end();
+        return;
+      }
+      default: {
+        const responseData: APIData<object> = {
+          path: `/${request.params.path}`,
+          version: API_VERSION,
+          status: "error",
+          message: `Invalid path: /${request.params.path}`,
+          data: {},
+        };
+
+        response
+          .contentType("application/json")
+          .status(400)
+          .send(JSON.stringify(responseData))
+          .end();
+        return;
+      }
+    }
+  };
+
+  static getEntities = async (
+    orcid: string,
+    request: Request,
+  ): Promise<APIData<EntityModel[]>> => {
+    // To-Do: Validate access
+
+    // Extract the query parameters
+    const workspaceIdentifier = request.query.workspace;
+    if (_.isUndefined(workspaceIdentifier)) {
+      return {
+        path: `/${request.params.path}`,
+        version: API_VERSION,
+        status: "error",
+        message: "Query parameter 'workspace' not provided",
+        data: [],
+      };
+    }
+
+    // Retrieve the Workspace to determine which Entities to return
+    const workspace = await Workspaces.getOne(workspaceIdentifier.toString());
+    if (_.isNull(workspace)) {
+      return {
+        path: `/${request.params.path}`,
+        version: API_VERSION,
+        status: "error",
+        message: "Invalid 'workspace' identifier",
+        data: [],
+      };
+    }
+
+    // Filter by ownership and Workspace membership
+    const entities = await Entities.getMany(workspace.entities);
+
+    return {
+      path: `/${request.params.path}`,
+      version: API_VERSION,
+      status: "success",
+      message: "Retrieved all Entities associated with Workspace",
+      data: entities,
+    };
   };
 }
 
 export default () => {
-  APIRouter.get("/", API.authenticate, API.handler);
+  APIRouter.get("/", API.authenticate, API.status);
+  APIRouter.get("/:path", API.authenticate, API.handler);
   return APIRouter;
 };

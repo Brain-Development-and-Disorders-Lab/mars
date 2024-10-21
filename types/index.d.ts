@@ -491,6 +491,15 @@ export type APIKey = {
   workspaces: string[];
 };
 
+// API response
+export type APIData<D> = {
+  path: string;
+  version: string;
+  status: "success" | "warning" | "error";
+  message: string;
+  data: D;
+};
+
 // User types
 export type IUser = {
   firstName: string;
