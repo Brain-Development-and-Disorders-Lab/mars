@@ -178,6 +178,49 @@ export class Users {
     };
   };
 
+  static removeKey = async (
+    orcid: string,
+    key: string,
+  ): Promise<IResponseMessage> => {
+    const user = await Users.getOne(orcid);
+
+    if (_.isNull(user)) {
+      return {
+        success: false,
+        message: "User not found",
+      };
+    }
+
+    const apiKeys = _.cloneDeep(user.api_keys);
+
+    // Iterate through the list of API keys and set the removed key to have expiration 1 year ago
+    apiKeys.map((existingKey) => {
+      if (_.isEqual(existingKey.value, key)) {
+        existingKey.expires = dayjs(Date.now())
+          .subtract(1, "year")
+          .toISOString();
+      }
+    });
+
+    const update: { $set: Partial<UserModel> } = {
+      $set: {
+        api_keys: apiKeys,
+      },
+    };
+
+    const response = await getDatabase()
+      .collection<UserModel>(USERS_COLLECTION)
+      .updateOne({ _id: orcid }, update);
+    const successStatus = response.modifiedCount == 1;
+
+    return {
+      success: successStatus,
+      message: successStatus
+        ? "Revoked API key successfully"
+        : "Unable to revoke API key",
+    };
+  };
+
   static findByKey = async (api_key: string): Promise<UserModel | null> => {
     return await getDatabase().collection<UserModel>(USERS_COLLECTION).findOne({
       "api_keys.value": api_key,

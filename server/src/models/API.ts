@@ -21,7 +21,7 @@ export class API {
     workspaces: string[],
   ): Promise<ResponseData<APIKey>> => {
     const token = crypto.randomUUID();
-    const output = await hash(token, 10);
+    const output = (await hash(token, 10)).slice(7);
 
     return {
       success: true,
@@ -81,7 +81,11 @@ export class API {
   };
 
   static handler = (request: Request, response: Response) => {
-    response.status(200).send("API status: OK").end();
+    switch (request.path) {
+      case "/":
+        response.status(200).send("API status: OK").end();
+        return;
+    }
   };
 }
 

@@ -487,5 +487,8 @@ export const typedefs = `#graphql
     # Data import JSON mutations
     reviewJSON(file: [Upload]!): ResponseDataEntityReview
     importJSON(file: [Upload]!, project: String): ResponseMessage
+
+    # API mutations
+    revokeKey(key: String): ResponseMessage
   }
 `;

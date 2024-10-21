@@ -4,7 +4,7 @@ import { Authentication } from "src/models/Authentication";
 import { Users } from "src/models/Users";
 
 // Custom types
-import { APIKey, Context, ResponseData } from "@types";
+import { APIKey, Context, IResponseMessage, ResponseData } from "@types";
 
 export const APIResolvers = {
   Query: {
@@ -22,6 +22,23 @@ export const APIResolvers = {
       await Users.addKey(context.user, response.data);
 
       // Return the generated API key
+      return response;
+    },
+  },
+
+  Mutation: {
+    // Generate a new API key
+    revokeKey: async (
+      _parent: any,
+      args: { key: string },
+      context: Context,
+    ): Promise<IResponseMessage> => {
+      // Authenticate the provided context
+      await Authentication.authenticate(context);
+
+      // Remove the API key from the User
+      const response = await Users.removeKey(context.user, args.key);
+
       return response;
     },
   },
