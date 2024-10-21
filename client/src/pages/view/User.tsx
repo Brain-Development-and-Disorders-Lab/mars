@@ -44,6 +44,129 @@ import { useAuthentication } from "@hooks/useAuthentication";
 import _ from "lodash";
 import dayjs from "dayjs";
 
+/**
+ * `APIKeyItem` component for presenting a list of API keys registered to a User
+ * @param props Required information for component
+ * @return {React.JSX.Element}
+ */
+const APIKeyItem = (props: { apiKey: APIKey }) => {
+  const toast = useToast();
+  const [isRevoked, setIsRevoked] = useState(
+    dayjs(props.apiKey.expires).diff(Date.now()) < 0,
+  );
+  const [showValue, setShowValue] = useState(false);
+
+  // Mutation to revoke an API key
+  const REVOKE_KEY = gql`
+    mutation RevokeKey($key: String) {
+      revokeKey(key: $key) {
+        success
+        message
+      }
+    }
+  `;
+  const [revokeKey, { loading: revokeKeyLoading, error: revokeKeyError }] =
+    useMutation<{ revokeKey: IResponseMessage }>(REVOKE_KEY);
+
+  const handleRevokeClick = async () => {
+    const result = await revokeKey({
+      variables: {
+        key: props.apiKey.value,
+      },
+    });
+
+    if (result.data?.revokeKey && result.data.revokeKey.success) {
+      setIsRevoked(true);
+      toast({
+        title: "Success",
+        description: "API key revoked successfully",
+        status: "success",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
+
+    if (revokeKeyError) {
+      toast({
+        title: "Error",
+        description: "Unable to revoke API key",
+        status: "error",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
+  };
+
+  return (
+    <Flex direction={"row"} gap={"2"} align={"center"} w={"100%"}>
+      <Flex direction={"row"} gap={"1"} align={"center"}>
+        <Icon name={"key"} />
+        <Tag colorScheme={isRevoked ? "red" : "blue"} size={"sm"}>
+          {isRevoked ? "revoked" : props.apiKey.scope}
+        </Tag>
+      </Flex>
+
+      <Flex maxW={"2xl"} gap={"2"} align={"center"}>
+        <Input
+          type={showValue || isRevoked ? "text" : "password"}
+          value={props.apiKey.value}
+          w={"sm"}
+          size={"sm"}
+          rounded={"md"}
+          isDisabled={isRevoked}
+          readOnly
+        />
+        <Button
+          size={"sm"}
+          onClick={() => setShowValue(!showValue)}
+          isDisabled={isRevoked}
+        >
+          {showValue ? "Hide" : "Show"}
+        </Button>
+        <Button
+          size={"sm"}
+          onClick={async () => {
+            await navigator.clipboard.writeText(props.apiKey.value);
+          }}
+        >
+          Copy
+        </Button>
+      </Flex>
+
+      <Spacer />
+
+      {isRevoked ? (
+        <Text fontWeight={"semibold"} fontSize={"sm"} color={"gray.400"}>
+          Revoked
+        </Text>
+      ) : (
+        <Flex gap={"2"}>
+          <Flex direction={"row"} gap={"1"} align={"center"}>
+            <Text fontWeight={"semibold"} fontSize={"sm"}>
+              Expires:
+            </Text>
+            <Text fontSize={"sm"}>
+              {dayjs(props.apiKey.expires).format("DD MMM YYYY")}
+            </Text>
+          </Flex>
+
+          <Button
+            size={"sm"}
+            colorScheme={"red"}
+            rightIcon={<Icon name={"delete"} />}
+            onClick={() => handleRevokeClick()}
+            isLoading={revokeKeyLoading}
+          >
+            Revoke
+          </Button>
+        </Flex>
+      )}
+    </Flex>
+  );
+};
+
 const User = () => {
   const toast = useToast();
   const breakpoint = useBreakpoint();
@@ -508,59 +631,7 @@ const User = () => {
                     >
                       {userKeys.map((key, index) => {
                         return (
-                          <Flex
-                            key={`api_key_${index}`}
-                            direction={"row"}
-                            gap={"2"}
-                            align={"center"}
-                            w={"100%"}
-                          >
-                            <Flex direction={"row"} gap={"1"} align={"center"}>
-                              <Icon name={"key"} />
-                              <Tag colorScheme={"blue"} size={"sm"}>
-                                {key.scope}
-                              </Tag>
-                            </Flex>
-
-                            <Flex direction={"row"} gap={"1"} align={"center"}>
-                              <Text fontWeight={"semibold"} fontSize={"sm"}>
-                                Expires:
-                              </Text>
-                              <Text fontSize={"sm"}>
-                                {dayjs(key.expires).format("DD MMM YYYY")}
-                              </Text>
-                            </Flex>
-
-                            <Flex maxW={"xl"} gap={"2"} align={"center"}>
-                              <Input
-                                value={key.value}
-                                size={"sm"}
-                                rounded={"md"}
-                                readOnly
-                              />
-                              <Button
-                                size={"sm"}
-                                onClick={async () => {
-                                  await navigator.clipboard.writeText(
-                                    key.value,
-                                  );
-                                }}
-                              >
-                                Copy
-                              </Button>
-                            </Flex>
-
-                            <Spacer />
-
-                            <Button
-                              size={"sm"}
-                              colorScheme={"red"}
-                              isDisabled
-                              rightIcon={<Icon name={"delete"} />}
-                            >
-                              Revoke
-                            </Button>
-                          </Flex>
+                          <APIKeyItem key={`api_key_${index}`} apiKey={key} />
                         );
                       })}
                     </VStack>
