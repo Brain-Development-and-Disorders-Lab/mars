@@ -4,6 +4,7 @@ import { NextFunction, Request, Response, Router } from "express";
 // Utility functions and libraries
 import _ from "lodash";
 import dayjs from "dayjs";
+import crypto from "crypto";
 import { hash } from "bcryptjs";
 
 // Custom types
@@ -13,6 +14,7 @@ import { APIData, APIKey, EntityModel, ResponseData } from "@types";
 import { Entities } from "./Entities";
 import { Users } from "./Users";
 import { Workspaces } from "./Workspaces";
+import { Activity } from "./Activity";
 
 // Setup the Express router
 const APIRouter = Router();
@@ -186,34 +188,79 @@ export class API {
       return;
     }
 
-    switch (request.params.path) {
-      case "entities": {
-        const responseData = await API.getEntities(user._id, request);
-        let status = 200;
-        if (responseData.status === "error") status = 400;
-        if (responseData.status === "unauthorized") status = 401;
-        response
-          .contentType("application/json")
-          .status(status)
-          .send(JSON.stringify(responseData))
-          .end();
-        return;
-      }
-      default: {
-        const responseData: APIData<object> = {
-          path: `/${request.params.path}`,
-          version: API_VERSION,
-          status: "error",
-          message: `Invalid path: /${request.params.path}`,
-          data: {},
-        };
+    if (request.method === "GET") {
+      switch (request.params.path) {
+        case "entities": {
+          const responseData = await API.getEntities(user._id, request);
+          let status = 200;
+          if (responseData.status === "error") status = 400;
+          if (responseData.status === "unauthorized") status = 401;
+          response
+            .contentType("application/json")
+            .status(status)
+            .send(JSON.stringify(responseData))
+            .end();
+          return;
+        }
+        case "entity": {
+          const responseData = await API.getEntity(user._id, request);
+          let status = 200;
+          if (responseData.status === "error") status = 400;
+          if (responseData.status === "unauthorized") status = 401;
+          response
+            .contentType("application/json")
+            .status(status)
+            .send(JSON.stringify(responseData))
+            .end();
+          return;
+        }
+        default: {
+          const responseData: APIData<object> = {
+            path: `/${request.params.path}`,
+            version: API_VERSION,
+            status: "error",
+            message: `Invalid path: /${request.params.path}`,
+            data: {},
+          };
 
-        response
-          .contentType("application/json")
-          .status(400)
-          .send(JSON.stringify(responseData))
-          .end();
-        return;
+          response
+            .contentType("application/json")
+            .status(400)
+            .send(JSON.stringify(responseData))
+            .end();
+          return;
+        }
+      }
+    } else if (request.method === "POST") {
+      switch (request.params.path) {
+        case "entity": {
+          const responseData = await API.updateEntity(user._id, request);
+          let status = 200;
+          if (responseData.status === "error") status = 400;
+          if (responseData.status === "unauthorized") status = 401;
+          response
+            .contentType("application/json")
+            .status(status)
+            .send(JSON.stringify(responseData))
+            .end();
+          return;
+        }
+        default: {
+          const responseData: APIData<object> = {
+            path: `/${request.params.path}`,
+            version: API_VERSION,
+            status: "error",
+            message: `Invalid path: /${request.params.path}`,
+            data: {},
+          };
+
+          response
+            .contentType("application/json")
+            .status(400)
+            .send(JSON.stringify(responseData))
+            .end();
+          return;
+        }
       }
     }
   };
@@ -271,10 +318,211 @@ export class API {
       data: entities,
     };
   };
+
+  static getEntity = async (
+    orcid: string,
+    request: Request,
+  ): Promise<APIData<EntityModel>> => {
+    // Extract query parameters
+    const entityIdentifier = request.query.id;
+    if (_.isUndefined(entityIdentifier)) {
+      return {
+        path: `/${request.params.path}`,
+        version: API_VERSION,
+        status: "error",
+        message: "Query parameter 'id' not provided",
+        data: {} as EntityModel,
+      };
+    }
+
+    // Get all Entities that User has access to
+    const user = await Users.getOne(orcid);
+    if (_.isNull(user)) {
+      return {
+        path: `/${request.params.path}`,
+        version: API_VERSION,
+        status: "error",
+        message: "Unable to get User",
+        data: {} as EntityModel,
+      };
+    }
+
+    const entitiesAccessible = [];
+    for await (const workspaceIdentifier of user.workspaces) {
+      const workspace = await Workspaces.getOne(workspaceIdentifier);
+      if (_.isNull(workspace)) {
+        return {
+          path: `/${request.params.path}`,
+          version: API_VERSION,
+          status: "error",
+          message: "Unable to get Workspace",
+          data: {} as EntityModel,
+        };
+      }
+      entitiesAccessible.push(...workspace.entities);
+    }
+
+    // Check if Entity is included in total set of Entities accessible to User
+    if (_.includes(entitiesAccessible, entityIdentifier.toString())) {
+      const entity = await Entities.getOne(entityIdentifier.toString());
+      if (_.isNull(entity)) {
+        return {
+          path: `/${request.params.path}`,
+          version: API_VERSION,
+          status: "error",
+          message: "Unable to get Entity",
+          data: {} as EntityModel,
+        };
+      }
+      return {
+        path: `/${request.params.path}`,
+        version: API_VERSION,
+        status: "success",
+        message: "Retreived Entity",
+        data: entity,
+      };
+    } else {
+      return {
+        path: `/${request.params.path}`,
+        version: API_VERSION,
+        status: "unauthorized",
+        message: "Unknown Entity or unauthorized to access Entity",
+        data: {} as EntityModel,
+      };
+    }
+  };
+
+  static updateEntity = async (
+    orcid: string,
+    request: Request,
+  ): Promise<APIData<object>> => {
+    // Extract query parameters
+    const entityIdentifier = request.body._id;
+    if (_.isUndefined(entityIdentifier)) {
+      return {
+        path: `/${request.params.path}`,
+        version: API_VERSION,
+        status: "error",
+        message: "Invalid Entity data",
+        data: {},
+      };
+    }
+
+    // Get all Entities that User has access to
+    const user = await Users.getOne(orcid);
+    if (_.isNull(user)) {
+      return {
+        path: `/${request.params.path}`,
+        version: API_VERSION,
+        status: "error",
+        message: "Unable to get User",
+        data: {},
+      };
+    }
+
+    const entitiesAccessible = [];
+    for await (const workspaceIdentifier of user.workspaces) {
+      const workspace = await Workspaces.getOne(workspaceIdentifier);
+      if (_.isNull(workspace)) {
+        return {
+          path: `/${request.params.path}`,
+          version: API_VERSION,
+          status: "error",
+          message: "Unable to get Workspace",
+          data: {},
+        };
+      }
+      entitiesAccessible.push(...workspace.entities);
+    }
+
+    // Check if Entity is included in total set of Entities accessible to User
+    if (_.includes(entitiesAccessible, entityIdentifier)) {
+      const entity = await Entities.getOne(entityIdentifier);
+      if (_.isNull(entity)) {
+        return {
+          path: `/${request.params.path}`,
+          version: API_VERSION,
+          status: "error",
+          message: "Entity does not exist",
+          data: {},
+        };
+      }
+
+      // Apply update operation
+      const result = await Entities.update(request.body);
+      if (result.success === false) {
+        return {
+          path: `/${request.params.path}`,
+          version: API_VERSION,
+          status: "error",
+          message: "Unable to update Entity",
+          data: {},
+        };
+      }
+
+      // Add history to Entity
+      await Entities.addHistory(entity);
+
+      // Attempt to find the Workspace the Entity belongs to
+      let activeWorkspaceIdentifier = "";
+      for await (const workspaceIdentifier of user.workspaces) {
+        const workspace = await Workspaces.getOne(workspaceIdentifier);
+        if (_.isNull(workspace)) {
+          return {
+            path: `/${request.params.path}`,
+            version: API_VERSION,
+            status: "error",
+            message: "Unable to get Workspace",
+            data: {},
+          };
+        }
+
+        if (_.includes(workspace.entities, entityIdentifier)) {
+          activeWorkspaceIdentifier = workspaceIdentifier;
+          break;
+        }
+      }
+
+      // If a Workspace is found, create and add Activity entry
+      if (!_.isEqual(activeWorkspaceIdentifier, "")) {
+        const activity = await Activity.create({
+          timestamp: dayjs(Date.now()).toISOString(),
+          type: "update",
+          actor: orcid,
+          details: "Updated existing Entity",
+          target: {
+            _id: entity._id,
+            type: "entities",
+            name: entity.name,
+          },
+        });
+
+        // Add Activity to Workspace
+        await Workspaces.addActivity(activeWorkspaceIdentifier, activity.data);
+      }
+
+      return {
+        path: `/${request.params.path}`,
+        version: API_VERSION,
+        status: "success",
+        message: "Updated Entity successfully",
+        data: {},
+      };
+    } else {
+      return {
+        path: `/${request.params.path}`,
+        version: API_VERSION,
+        status: "unauthorized",
+        message: "Unknown Entity or unauthorized to access Entity",
+        data: {},
+      };
+    }
+  };
 }
 
 export default () => {
   APIRouter.get("/", API.authenticate, API.status);
   APIRouter.get("/:path", API.authenticate, API.handler);
+  APIRouter.post("/:path", API.authenticate, API.handler);
   return APIRouter;
 };

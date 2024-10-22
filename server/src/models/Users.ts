@@ -111,6 +111,10 @@ export class Users {
       update.$set.affiliation = updated.affiliation;
     }
 
+    if (updated.lastLogin) {
+      update.$set.lastLogin = updated.lastLogin;
+    }
+
     if (updated.workspaces) {
       update.$set.workspaces = updated.workspaces;
     }

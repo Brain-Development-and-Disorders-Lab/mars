@@ -8,6 +8,7 @@ import { JwksClient } from "jwks-rsa";
 // Utility libraries
 import { GraphQLError } from "graphql";
 import axios, { AxiosResponse } from "axios";
+import dayjs from "dayjs";
 import _ from "lodash";
 
 // Models
@@ -67,8 +68,11 @@ export class Authentication {
     }
 
     // Check if the User exists, and create a new User if not
-    const exists = await Users.exists(authenticationPayload.orcid);
-    if (!exists && !_.isEqual(authenticationPayload.orcid, DEMO_USER_ORCID)) {
+    const user = await Users.getOne(authenticationPayload.orcid);
+    if (
+      _.isNull(user) &&
+      !_.isEqual(authenticationPayload.orcid, DEMO_USER_ORCID)
+    ) {
       // Preview use only, User must exist prior to first login
       return {
         success: false,
@@ -79,7 +83,7 @@ export class Authentication {
           token: "",
         },
       };
-    } else if (!exists) {
+    } else if (_.isNull(user)) {
       // If the user is the demo user, create a new User
       await Users.create({
         _id: authenticationPayload.orcid,
@@ -87,10 +91,16 @@ export class Authentication {
         lastName: "User",
         email: "demo@metadatify.com",
         affiliation: "Metadatify",
+        lastLogin: dayjs(Date.now()).toISOString(),
         token: authenticationPayload.token,
         workspaces: [],
         api_keys: [],
       });
+    }
+
+    if (!_.isNull(user)) {
+      user.lastLogin = dayjs(Date.now()).toISOString();
+      await Users.update(user);
     }
 
     return {
