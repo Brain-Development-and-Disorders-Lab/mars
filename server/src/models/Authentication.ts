@@ -100,6 +100,7 @@ export class Authentication {
 
     if (!_.isNull(user)) {
       user.lastLogin = dayjs(Date.now()).toISOString();
+      await Users.update(user);
     }
 
     return {
