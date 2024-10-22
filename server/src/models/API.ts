@@ -49,7 +49,7 @@ export class API {
       const responseData: APIData<object> = {
         path: request.params.path,
         version: API_VERSION,
-        status: "error",
+        status: "unauthorized",
         message: "No API key provided",
         data: {},
       };
@@ -68,7 +68,18 @@ export class API {
     // Validate that the API key exists
     const apiUser = await Users.findByKey(providedKey);
     if (_.isNull(apiUser)) {
-      response.status(401).send("Invalid API key").end();
+      const responseData: APIData<object> = {
+        path: request.params.path,
+        version: API_VERSION,
+        status: "unauthorized",
+        message: "Invalid API key",
+        data: {},
+      };
+      response
+        .contentType("application/json")
+        .status(401)
+        .send(JSON.stringify(responseData))
+        .end();
       return null;
     }
 
@@ -78,7 +89,18 @@ export class API {
       .filter((key) => _.isEqual(key.value, providedKey))
       .pop();
     if (_.isUndefined(apiKey)) {
-      response.status(401).send("API key not associated with User").end();
+      const responseData: APIData<object> = {
+        path: request.params.path,
+        version: API_VERSION,
+        status: "unauthorized",
+        message: "API key not associated with User",
+        data: {},
+      };
+      response
+        .contentType("application/json")
+        .status(401)
+        .send(JSON.stringify(responseData))
+        .end();
       return null;
     }
 
@@ -97,7 +119,18 @@ export class API {
 
     // Compare the expiration date and the current system time
     if (dayjs(apiKey.expires).diff() < 0) {
-      response.status(401).send("API key expired").end();
+      const responseData: APIData<object> = {
+        path: request.params.path,
+        version: API_VERSION,
+        status: "unauthorized",
+        message: "API key expired",
+        data: {},
+      };
+      response
+        .contentType("application/json")
+        .status(401)
+        .send(JSON.stringify(responseData))
+        .end();
       return;
     }
 
@@ -156,9 +189,12 @@ export class API {
     switch (request.params.path) {
       case "entities": {
         const responseData = await API.getEntities(user._id, request);
+        let status = 200;
+        if (responseData.status === "error") status = 400;
+        if (responseData.status === "unauthorized") status = 401;
         response
           .contentType("application/json")
-          .status(responseData.status === "success" ? 200 : 400)
+          .status(status)
           .send(JSON.stringify(responseData))
           .end();
         return;
@@ -186,8 +222,6 @@ export class API {
     orcid: string,
     request: Request,
   ): Promise<APIData<EntityModel[]>> => {
-    // To-Do: Validate access
-
     // Extract the query parameters
     const workspaceIdentifier = request.query.workspace;
     if (_.isUndefined(workspaceIdentifier)) {
@@ -208,6 +242,20 @@ export class API {
         version: API_VERSION,
         status: "error",
         message: "Invalid 'workspace' identifier",
+        data: [],
+      };
+    }
+
+    // Ensure User is the owner or a collaborator
+    if (
+      !_.isEqual(workspace.owner, orcid) &&
+      !_.includes(workspace.collaborators, orcid)
+    ) {
+      return {
+        path: `/${request.params.path}`,
+        version: API_VERSION,
+        status: "unauthorized",
+        message: "Not authorized to access Workspace",
         data: [],
       };
     }

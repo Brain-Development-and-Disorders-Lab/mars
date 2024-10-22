@@ -495,7 +495,7 @@ export type APIKey = {
 export type APIData<D> = {
   path: string;
   version: string;
-  status: "success" | "warning" | "error";
+  status: "success" | "warning" | "error" | "unauthorized";
   message: string;
   data: D;
 };
