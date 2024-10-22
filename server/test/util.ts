@@ -58,6 +58,7 @@ export const seedDatabase = async (): Promise<void> => {
     email: "demo@metadatify.com",
     affiliation: "Demo Affiliation",
     workspaces: [workspaceResult.data],
+    lastLogin: "",
     api_keys: [],
     token: "",
   });

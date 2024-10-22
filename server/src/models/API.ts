@@ -499,14 +499,15 @@ export class API {
 
         // Add Activity to Workspace
         await Workspaces.addActivity(activeWorkspaceIdentifier, activity.data);
-        return {
-          path: `/${request.params.path}`,
-          version: API_VERSION,
-          status: "success",
-          message: "Updated Entity successfully",
-          data: {},
-        };
       }
+
+      return {
+        path: `/${request.params.path}`,
+        version: API_VERSION,
+        status: "success",
+        message: "Updated Entity successfully",
+        data: {},
+      };
     } else {
       return {
         path: `/${request.params.path}`,
