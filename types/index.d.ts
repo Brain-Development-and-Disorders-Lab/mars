@@ -506,6 +506,7 @@ export type IUser = {
   lastName: string;
   affiliation: string;
   email: string;
+  lastLogin: string;
   workspaces: string[];
   api_keys: APIKey[];
 };
