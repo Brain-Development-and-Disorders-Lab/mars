@@ -200,6 +200,18 @@ export class API {
           .end();
         return;
       }
+      case "entity": {
+        const responseData = await API.getEntity(user._id, request);
+        let status = 200;
+        if (responseData.status === "error") status = 400;
+        if (responseData.status === "unauthorized") status = 401;
+        response
+          .contentType("application/json")
+          .status(status)
+          .send(JSON.stringify(responseData))
+          .end();
+        return;
+      }
       default: {
         const responseData: APIData<object> = {
           path: `/${request.params.path}`,
@@ -271,6 +283,79 @@ export class API {
       message: "Retrieved all Entities associated with Workspace",
       data: entities,
     };
+  };
+
+  static getEntity = async (
+    orcid: string,
+    request: Request,
+  ): Promise<APIData<EntityModel>> => {
+    // Extract query parameters
+    const entityIdentifier = request.query.id;
+    if (_.isUndefined(entityIdentifier)) {
+      return {
+        path: `/${request.params.path}`,
+        version: API_VERSION,
+        status: "error",
+        message: "Query parameter 'id' not provided",
+        data: {} as EntityModel,
+      };
+    }
+
+    // Get all Entities that User has access to
+    const user = await Users.getOne(orcid);
+    if (_.isNull(user)) {
+      return {
+        path: `/${request.params.path}`,
+        version: API_VERSION,
+        status: "error",
+        message: "Unable to get User",
+        data: {} as EntityModel,
+      };
+    }
+
+    const entitiesAccessible = [];
+    for await (const workspaceIdentifier of user.workspaces) {
+      const workspace = await Workspaces.getOne(workspaceIdentifier);
+      if (_.isNull(workspace)) {
+        return {
+          path: `/${request.params.path}`,
+          version: API_VERSION,
+          status: "error",
+          message: "Unable to get Workspace",
+          data: {} as EntityModel,
+        };
+      }
+      entitiesAccessible.push(...workspace.entities);
+    }
+
+    // Check if Entity is included in total set of Entities accessible to User
+    if (_.includes(entitiesAccessible, entityIdentifier.toString())) {
+      const entity = await Entities.getOne(entityIdentifier.toString());
+      if (_.isNull(entity)) {
+        return {
+          path: `/${request.params.path}`,
+          version: API_VERSION,
+          status: "error",
+          message: "Unable to get Entity",
+          data: {} as EntityModel,
+        };
+      }
+      return {
+        path: `/${request.params.path}`,
+        version: API_VERSION,
+        status: "success",
+        message: "Retreived Entity",
+        data: entity,
+      };
+    } else {
+      return {
+        path: `/${request.params.path}`,
+        version: API_VERSION,
+        status: "unauthorized",
+        message: "Unknown Entity or unauthorized to access Entity",
+        data: {} as EntityModel,
+      };
+    }
   };
 }
 
