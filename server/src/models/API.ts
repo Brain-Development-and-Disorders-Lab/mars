@@ -4,6 +4,7 @@ import { NextFunction, Request, Response, Router } from "express";
 // Utility functions and libraries
 import _ from "lodash";
 import dayjs from "dayjs";
+import crypto from "crypto";
 import { hash } from "bcryptjs";
 
 // Custom types
