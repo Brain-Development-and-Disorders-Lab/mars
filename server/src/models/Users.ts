@@ -2,7 +2,6 @@
 import { APIKey, IResponseMessage, UserModel } from "@types";
 
 import _ from "lodash";
-import consola from "consola";
 import { getDatabase } from "../connectors/database";
 import dayjs from "dayjs";
 
