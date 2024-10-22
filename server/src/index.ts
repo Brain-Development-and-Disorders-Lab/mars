@@ -24,6 +24,9 @@ import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@apollo/server/express4";
 import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
 import { typedefs } from "./typedefs";
+
+// Resolvers
+import { APIResolvers } from "./resolvers/API";
 import { ActivityResolvers } from "./resolvers/Activity";
 import { AttributesResolvers } from "./resolvers/Attributes";
 import { AuthenticationResolvers } from "./resolvers/Authentication";
@@ -35,11 +38,16 @@ import { ProjectsResolvers } from "./resolvers/Projects";
 import { SearchResolvers } from "./resolvers/Search";
 import { UsersResolvers } from "./resolvers/Users";
 import { WorkspacesResolvers } from "./resolvers/Workspaces";
+
+// Custom types
 import { Context } from "@types";
 
 // GraphQL uploads
 import GraphQLUpload from "graphql-upload/GraphQLUpload.mjs";
 import graphqlUploadExpress from "graphql-upload/graphqlUploadExpress.mjs";
+
+// Public REST API routers
+import APIRouter from "./models/API";
 
 // Set logging level
 consola.level =
@@ -55,6 +63,12 @@ const prometheusExporterPlugin = createPrometheusExporterPlugin({
   defaultMetrics: false,
 });
 const httpServer = http.createServer(app);
+
+// Setup CORS origins
+const origins =
+  process.env.NODE_ENV !== "production"
+    ? ["http://localhost:8080"]
+    : ["https://app.metadatify.com"];
 
 // Start the GraphQL server
 const start = async () => {
@@ -88,6 +102,7 @@ const start = async () => {
         Upload: GraphQLUpload,
       },
       ActivityResolvers,
+      APIResolvers,
       AttributesResolvers,
       AuthenticationResolvers,
       DataResolvers,
@@ -137,19 +152,23 @@ const start = async () => {
     }
   });
 
-  // Serve static resources, enable CORS middleware
+  // Serve static resources
   app.use(
     "/static",
-    cors<cors.CorsRequest>(),
+    cors<cors.CorsRequest>({ origin: origins }),
     express.static(__dirname + "/public"),
     helmet(),
   );
 
-  // Configure Express, GraphQL, and enable CORS middleware
-  const origins =
-    process.env.NODE_ENV !== "production"
-      ? ["http://localhost:8080"]
-      : ["https://app.metadatify.com"];
+  // Open the public API endpoint
+  app.use(
+    "/v1",
+    cors<cors.CorsRequest>({ origin: "*" }),
+    APIRouter(),
+    helmet(),
+  );
+
+  // Configure Express and GraphQL
   app.use(
     "/",
     cors<cors.CorsRequest>({ origin: origins }),

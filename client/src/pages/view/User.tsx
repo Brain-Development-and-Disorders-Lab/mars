@@ -13,6 +13,9 @@ import {
   useBreakpoint,
   IconButton,
   Tag,
+  Spacer,
+  VStack,
+  Divider,
 } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
 
@@ -23,20 +26,146 @@ import Icon from "@components/Icon";
 
 // Custom types
 import {
+  APIKey,
   DataTableAction,
   IGenericItem,
   IResponseMessage,
+  ResponseData,
   UserModel,
 } from "@types";
 
 // GraphQL imports
-import { gql, useMutation, useQuery } from "@apollo/client";
+import { gql, useLazyQuery, useMutation, useQuery } from "@apollo/client";
 
 // Authentication context
 import { useAuthentication } from "@hooks/useAuthentication";
 
 // Utility functions and libraries
 import _ from "lodash";
+import dayjs from "dayjs";
+
+/**
+ * `APIKeyItem` component for presenting a list of API keys registered to a User
+ * @param props Required information for component
+ * @return {React.JSX.Element}
+ */
+const APIKeyItem = (props: { apiKey: APIKey }) => {
+  const toast = useToast();
+  const [isRevoked, setIsRevoked] = useState(
+    dayjs(props.apiKey.expires).diff(Date.now()) < 0,
+  );
+  const [showValue, setShowValue] = useState(false);
+
+  // Mutation to revoke an API key
+  const REVOKE_KEY = gql`
+    mutation RevokeKey($key: String) {
+      revokeKey(key: $key) {
+        success
+        message
+      }
+    }
+  `;
+  const [revokeKey, { loading: revokeKeyLoading, error: revokeKeyError }] =
+    useMutation<{ revokeKey: IResponseMessage }>(REVOKE_KEY);
+
+  const handleRevokeClick = async () => {
+    const result = await revokeKey({
+      variables: {
+        key: props.apiKey.value,
+      },
+    });
+
+    if (result.data?.revokeKey && result.data.revokeKey.success) {
+      setIsRevoked(true);
+      toast({
+        title: "Success",
+        description: "API key revoked successfully",
+        status: "success",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
+
+    if (revokeKeyError) {
+      toast({
+        title: "Error",
+        description: "Unable to revoke API key",
+        status: "error",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
+  };
+
+  return (
+    <Flex direction={"row"} gap={"2"} align={"center"} w={"100%"}>
+      <Flex direction={"row"} gap={"1"} align={"center"}>
+        <Icon name={"key"} />
+        <Tag colorScheme={isRevoked ? "red" : "blue"} size={"sm"}>
+          {isRevoked ? "revoked" : props.apiKey.scope}
+        </Tag>
+      </Flex>
+
+      <Flex maxW={"2xl"} gap={"2"} align={"center"}>
+        <Input
+          type={showValue || isRevoked ? "text" : "password"}
+          value={props.apiKey.value}
+          w={"sm"}
+          size={"sm"}
+          rounded={"md"}
+          isDisabled={isRevoked}
+          readOnly
+        />
+        <Button
+          size={"sm"}
+          onClick={() => setShowValue(!showValue)}
+          isDisabled={isRevoked}
+        >
+          {showValue ? "Hide" : "Show"}
+        </Button>
+        <Button
+          size={"sm"}
+          onClick={async () => {
+            await navigator.clipboard.writeText(props.apiKey.value);
+          }}
+        >
+          Copy
+        </Button>
+      </Flex>
+
+      <Spacer />
+
+      {isRevoked ? (
+        <Text fontWeight={"semibold"} fontSize={"sm"} color={"gray.400"}>
+          Revoked
+        </Text>
+      ) : (
+        <Flex gap={"2"}>
+          <Flex direction={"row"} gap={"1"} align={"center"}>
+            <Text fontWeight={"semibold"} fontSize={"sm"}>
+              Expires:
+            </Text>
+            <Text fontSize={"sm"}>
+              {dayjs(props.apiKey.expires).format("DD MMM YYYY")}
+            </Text>
+          </Flex>
+
+          <Button
+            size={"sm"}
+            colorScheme={"red"}
+            rightIcon={<Icon name={"delete"} />}
+            onClick={() => handleRevokeClick()}
+            isLoading={revokeKeyLoading}
+          >
+            Revoke
+          </Button>
+        </Flex>
+      )}
+    </Flex>
+  );
+};
 
 const User = () => {
   const toast = useToast();
@@ -54,6 +183,12 @@ const User = () => {
         lastName
         email
         affiliation
+        api_keys {
+          value
+          expires
+          scope
+          workspaces
+        }
       }
       workspaces {
         _id
@@ -71,21 +206,40 @@ const User = () => {
     },
   });
 
+  // Query to generate a new API key
+  const GENERATE_KEY = gql`
+    query GenerateKey($scope: String, $workspaces: [String]) {
+      generateKey(scope: $scope, workspaces: $workspaces) {
+        success
+        message
+        data {
+          value
+          expires
+          scope
+          workspaces
+        }
+      }
+    }
+  `;
+  const [
+    generateKey,
+    { loading: generateKeyLoading, error: generateKeyError },
+  ] = useLazyQuery<{ generateKey: ResponseData<APIKey> }>(GENERATE_KEY);
+
   useEffect(() => {
     if (data?.user) {
       setUserModel(data.user);
-
       setUserOrcid(data.user._id);
       setUserFirstName(data.user.firstName);
       setUserLastName(data.user.lastName);
       setUserEmail(data.user.email);
       setUserAffiliation(data.user.affiliation);
+      setUserKeys(data.user.api_keys);
       setStaticName(`${data.user.firstName} ${data.user.lastName}`);
     }
 
     if (data?.workspaces) {
       setUserStaticWorkspaces(data.workspaces);
-
       setUserWorkspaces(data.workspaces);
     }
   }, [data]);
@@ -116,6 +270,7 @@ const User = () => {
   const [userLastName, setUserLastName] = useState("");
   const [userEmail, setUserEmail] = useState("");
   const [userAffiliation, setUserAffiliation] = useState("");
+  const [userKeys, setUserKeys] = useState([] as APIKey[]);
 
   // State for User Workspaces
   const [userStaticWorkspaces, setUserStaticWorkspaces] = useState(
@@ -178,6 +333,31 @@ const User = () => {
 
     // Set editing state
     setEditing(false);
+  };
+
+  const handleGenerateKeyClick = async () => {
+    const result = await generateKey({
+      variables: {
+        scope: "edit",
+        workspaces: userWorkspaces.map((w) => w._id),
+      },
+      fetchPolicy: "network-only",
+    });
+
+    if (generateKeyError) {
+      toast({
+        title: "Error",
+        description: "Unable to update User information",
+        status: "error",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
+
+    if (result.data?.generateKey) {
+      setUserKeys([...userKeys, result.data.generateKey.data]);
+    }
   };
 
   const truncateTableText =
@@ -397,6 +577,74 @@ const User = () => {
                     No Workspaces
                   </Text>
                 )}
+              </Flex>
+            </Flex>
+          </Flex>
+        </Flex>
+
+        <Flex direction={"row"} gap={"2"}>
+          <Flex direction={"column"} p={"0"} gap={"2"} grow={"1"} basis={"50%"}>
+            {/* API options */}
+            <Flex
+              direction={"column"}
+              p={"2"}
+              gap={"2"}
+              rounded={"md"}
+              border={"1px"}
+              borderColor={"gray.300"}
+            >
+              <Flex direction={"column"} p={"0"} gap={"2"}>
+                <Flex
+                  direction={"row"}
+                  justify={"space-between"}
+                  align={"center"}
+                >
+                  <Text fontSize={"sm"} fontWeight={"semibold"}>
+                    API Access
+                  </Text>
+                  <Button
+                    size={"sm"}
+                    colorScheme={"green"}
+                    rightIcon={<Icon name={"add"} />}
+                    onClick={() => handleGenerateKeyClick()}
+                    isLoading={generateKeyLoading}
+                  >
+                    Add API Key
+                  </Button>
+                </Flex>
+                <Flex
+                  rounded={"md"}
+                  border={"1px"}
+                  borderColor={"gray.200"}
+                  p={"2"}
+                  minH={userKeys.length > 0 ? "" : "100px"}
+                  align={"center"}
+                  justify={userKeys.length > 0 ? "start" : "center"}
+                >
+                  {userKeys.length > 0 ? (
+                    <VStack
+                      direction={"column"}
+                      w={"100%"}
+                      divider={<Divider />}
+                      spacing={"2"}
+                      justify={"left"}
+                    >
+                      {userKeys.map((key, index) => {
+                        return (
+                          <APIKeyItem key={`api_key_${index}`} apiKey={key} />
+                        );
+                      })}
+                    </VStack>
+                  ) : (
+                    <Text
+                      fontWeight={"semibold"}
+                      fontSize={"sm"}
+                      color={"gray.400"}
+                    >
+                      No API keys
+                    </Text>
+                  )}
+                </Flex>
               </Flex>
             </Flex>
           </Flex>

@@ -369,6 +369,7 @@ export type IconNames =
   | "person"
   | "warning"
   | "exclamation"
+  | "key"
   | "lightning"
   | "qr"
   | "reload"
@@ -482,6 +483,23 @@ export type Context = {
   token: string;
 };
 
+// API key data
+export type APIKey = {
+  value: string;
+  expires: string;
+  scope: "view" | "edit";
+  workspaces: string[];
+};
+
+// API response
+export type APIData<D> = {
+  path: string;
+  version: string;
+  status: "success" | "warning" | "error" | "unauthorized";
+  message: string;
+  data: D;
+};
+
 // User types
 export type IUser = {
   firstName: string;
@@ -489,6 +507,7 @@ export type IUser = {
   affiliation: string;
   email: string;
   workspaces: string[];
+  api_keys: APIKey[];
 };
 
 export type UserModel = IUser & {

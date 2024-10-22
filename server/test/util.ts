@@ -58,6 +58,7 @@ export const seedDatabase = async (): Promise<void> => {
     email: "demo@metadatify.com",
     affiliation: "Demo Affiliation",
     workspaces: [workspaceResult.data],
+    api_keys: [],
     token: "",
   });
   if (userResult.success === false) throw new Error("Error creating User");
