@@ -164,6 +164,8 @@ const start = async () => {
   app.use(
     "/v1",
     cors<cors.CorsRequest>({ origin: "*" }),
+    express.json(),
+    express.urlencoded({ extended: true }),
     APIRouter(),
     helmet(),
   );
