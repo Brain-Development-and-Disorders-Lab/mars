@@ -42,7 +42,6 @@ import {
   Tag,
   TagLabel,
   Text,
-  Textarea,
   Tooltip,
   VStack,
   useDisclosure,
@@ -54,6 +53,7 @@ import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 import Dialog from "@components/Dialog";
 import SearchSelect from "@components/SearchSelect";
+import MDEditor from "@uiw/react-md-editor";
 
 // Existing and custom types
 import {
@@ -816,41 +816,42 @@ const Project = () => {
           </Flex>
         </Flex>
 
-        <Flex direction={"row"} gap={"0"} wrap={"wrap"}>
-          <Flex
-            direction={"column"}
-            p={"2"}
-            pt={{ base: "0", lg: "2" }}
-            gap={"2"}
-            grow={"1"}
-            basis={"50%"}
-            rounded={"md"}
-          >
+        <Flex direction={"column"} gap={"2"} p={"2"} wrap={"wrap"}>
+          {/* Overview and "Description" field */}
+          <Flex direction={"row"} gap={"2"} p={"0"} wrap={"wrap"}>
+            {/* Overview */}
             <Flex
               direction={"column"}
               p={"2"}
+              h={"fit-content"}
               gap={"2"}
-              border={"1px"}
-              borderColor={"gray.300"}
+              bg={"gray.100"}
               rounded={"md"}
+              grow={"1"}
             >
-              {/* Project Overview */}
+              <Flex direction={"column"} gap={"2"} basis={"60%"}>
+                <Text fontWeight={"bold"}>Name</Text>
+                <Input
+                  id={"projectNameInput"}
+                  size={"sm"}
+                  value={projectName}
+                  onChange={(event) => {
+                    setProjectName(event.target.value);
+                  }}
+                  isReadOnly={!editing}
+                  bg={"white"}
+                  rounded={"md"}
+                  border={"1px"}
+                  borderColor={"gray.300"}
+                />
+              </Flex>
+
               <Flex gap={"2"} direction={"row"}>
-                <Flex direction={"column"} gap={"2"} basis={"60%"}>
-                  <Text fontWeight={"bold"}>Name</Text>
-                  <Input
-                    id={"projectNameInput"}
-                    size={"sm"}
-                    value={projectName}
-                    onChange={(event) => {
-                      setProjectName(event.target.value);
-                    }}
-                    isReadOnly={!editing}
-                    bg={"white"}
-                    rounded={"md"}
-                    border={"1px"}
-                    borderColor={"gray.300"}
-                  />
+                <Flex direction={"column"} gap={"2"}>
+                  <Text fontWeight={"bold"}>Owner</Text>
+                  <Flex>
+                    <ActorTag orcid={project.owner} fallback={"Unknown User"} />
+                  </Flex>
                 </Flex>
 
                 <Flex direction={"column"} gap={"2"}>
@@ -863,35 +864,39 @@ const Project = () => {
                   </Flex>
                 </Flex>
               </Flex>
-
-              <Flex gap={"2"} direction={"row"}>
-                <Flex direction={"column"} gap={"2"} basis={"60%"}>
-                  <Text fontWeight={"bold"}>Description</Text>
-                  <Textarea
-                    id={"projectDescriptionInput"}
-                    size={"sm"}
-                    value={projectDescription}
-                    onChange={(event) => {
-                      setProjectDescription(event.target.value);
-                    }}
-                    isReadOnly={!editing}
-                    bg={"white"}
-                    rounded={"md"}
-                    border={"1px"}
-                    borderColor={"gray.300"}
-                  />
-                </Flex>
-
-                <Flex direction={"column"} gap={"2"}>
-                  <Text fontWeight={"bold"}>Owner</Text>
-                  <Flex>
-                    <ActorTag orcid={project.owner} fallback={"Unknown User"} />
-                  </Flex>
-                </Flex>
-              </Flex>
             </Flex>
 
-            {/* Display Entities */}
+            {/* Description */}
+            <Flex
+              direction={"column"}
+              p={"2"}
+              gap={"2"}
+              border={"1px"}
+              borderColor={"gray.300"}
+              rounded={"md"}
+              basis={"50%"}
+              grow={"1"}
+            >
+              <Flex direction={"column"} gap={"2"} basis={"60%"}>
+                <Text fontWeight={"bold"}>Description</Text>
+                <MDEditor
+                  id={"projectDescriptionInput"}
+                  style={{ width: "100%" }}
+                  value={projectDescription}
+                  preview={editing ? "edit" : "preview"}
+                  contentEditable={editing}
+                  extraCommands={[]}
+                  onChange={(value) => {
+                    setProjectDescription(value || "");
+                  }}
+                />
+              </Flex>
+            </Flex>
+          </Flex>
+
+          {/* "Entities" and "Collaborators" */}
+          <Flex direction={"row"} gap={"2"} p={"0"} wrap={"wrap"}>
+            {/* Entities */}
             <Flex
               direction={"column"}
               p={"2"}
@@ -899,6 +904,8 @@ const Project = () => {
               rounded={"md"}
               border={"1px"}
               borderColor={"gray.300"}
+              grow={"1"}
+              basis={"50%"}
             >
               <Flex
                 direction={"row"}
@@ -944,18 +951,8 @@ const Project = () => {
                 )}
               </Flex>
             </Flex>
-          </Flex>
 
-          <Flex
-            direction={"column"}
-            p={"2"}
-            pl={{ base: "2", lg: "0" }}
-            pt={{ base: "0", lg: "2" }}
-            gap={"2"}
-            grow={"1"}
-            basis={"50%"}
-            rounded={"md"}
-          >
+            {/* Collaborators */}
             <Flex
               direction={"column"}
               gap={"2"}
@@ -963,6 +960,7 @@ const Project = () => {
               rounded={"md"}
               border={"1px"}
               borderColor={"gray.300"}
+              grow={"1"}
             >
               {/* Collaborators display */}
               <Flex direction={"column"}>
