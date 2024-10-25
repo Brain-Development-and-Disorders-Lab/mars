@@ -11,11 +11,13 @@ import {
   FormControl,
   FormLabel,
   Input,
+  Text,
   Spacer,
-  Textarea,
 } from "@chakra-ui/react";
+import ActorTag from "@components/ActorTag";
 import Icon from "@components/Icon";
 import Values from "@components/Values";
+import MDEditor from "@uiw/react-md-editor";
 
 // Existing and custom types
 import { AttributeCardProps } from "@types";
@@ -55,30 +57,42 @@ const AttributeCard = (props: AttributeCardProps) => {
       <CardBody p={"2"} pb={"0"}>
         <Flex direction={"column"} gap={"2"}>
           <Flex direction={"row"} gap={"2"} wrap={["wrap", "nowrap"]}>
-            <FormControl isRequired isInvalid={isNameError}>
-              <FormLabel fontSize={"sm"}>Attribute Name</FormLabel>
-              <Input
-                size={"sm"}
-                placeholder={"Name"}
-                value={name}
-                isDisabled={finished}
-                rounded={"md"}
-                onChange={(event) => setName(event.target.value)}
-              />
-            </FormControl>
+            <Flex direction={"column"} gap={"2"} basis={"50%"}>
+              <FormControl isRequired isInvalid={isNameError}>
+                <FormLabel fontSize={"sm"}>Name</FormLabel>
+                <Input
+                  size={"sm"}
+                  placeholder={"Name"}
+                  value={name}
+                  isDisabled={finished}
+                  rounded={"md"}
+                  onChange={(event) => setName(event.target.value)}
+                />
+              </FormControl>
 
-            <FormControl isRequired isInvalid={isDescriptionError}>
-              <FormLabel fontSize={"sm"}>Attribute Description</FormLabel>
-              <Textarea
-                size={"sm"}
-                rounded={"md"}
-                value={description}
-                placeholder={"Description"}
-                isDisabled={finished}
-                w={"100%"}
-                onChange={(event) => setDescription(event.target.value)}
-              />
-            </FormControl>
+              <Flex direction={"column"} gap={"1"}>
+                <Text fontWeight={"bold"}>Owner</Text>
+                <Flex>
+                  <ActorTag orcid={props.owner} fallback={"Unknown User"} />
+                </Flex>
+              </Flex>
+            </Flex>
+
+            <Flex basis={"50%"}>
+              <FormControl isRequired isInvalid={isDescriptionError} w={"100%"}>
+                <FormLabel fontSize={"sm"}>Description</FormLabel>
+                <MDEditor
+                  style={{ width: "100%" }}
+                  value={description}
+                  preview={finished ? "preview" : "edit"}
+                  contentEditable={!finished}
+                  extraCommands={[]}
+                  onChange={(value) => {
+                    setDescription(value || "");
+                  }}
+                />
+              </FormControl>
+            </Flex>
           </Flex>
 
           {attributeCardData.restrictDataValues ? (
