@@ -21,13 +21,13 @@ import {
   ModalOverlay,
   Spacer,
   Text,
-  Textarea,
   useDisclosure,
   useToast,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
 import Values from "@components/Values";
+import MDEditor from "@uiw/react-md-editor";
 
 // Existing and custom types
 import { IAttribute, IValue } from "@types";
@@ -201,12 +201,14 @@ const Attribute = () => {
             >
               <FormControl isRequired>
                 <FormLabel fontSize={"sm"}>Template Description</FormLabel>
-                <Textarea
-                  size={"sm"}
-                  rounded={"md"}
+                <MDEditor
+                  style={{ width: "100%" }}
                   value={description}
-                  placeholder={"Description"}
-                  onChange={(event) => setDescription(event.target.value)}
+                  preview={"edit"}
+                  extraCommands={[]}
+                  onChange={(value) => {
+                    setDescription(value || "");
+                  }}
                 />
                 {isDescriptionError && (
                   <FormErrorMessage fontSize={"sm"}>
