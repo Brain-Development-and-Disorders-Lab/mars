@@ -17,7 +17,8 @@ import {
   MenuGroup,
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
-import Importer from "@components/Importer";
+import ImportModal from "@components/ImportModal";
+import ScanModal from "@components/ScanModal";
 import SearchBox from "@components/SearchBox";
 import WorkspaceSwitcher from "@components/WorkspaceSwitcher";
 
@@ -41,6 +42,12 @@ const Navigation = () => {
     isOpen: isImportOpen,
     onOpen: onImportOpen,
     onClose: onImportClose,
+  } = useDisclosure();
+
+  const {
+    isOpen: isScanOpen,
+    onOpen: onScanOpen,
+    onClose: onScanClose,
   } = useDisclosure();
 
   return (
@@ -110,24 +117,24 @@ const Navigation = () => {
             </Button>
 
             <Button
-              id={"navProjectsButton"}
-              leftIcon={<Icon name={"project"} />}
+              id={"navCreateButton"}
+              key={"create"}
               size={"sm"}
               w={"100%"}
               justifyContent={"left"}
               bg={
-                _.includes(location.pathname, "/project") &&
-                !_.includes(location.pathname, "/create")
-                  ? "#ffffff"
-                  : "#f2f2f2"
+                _.includes(location.pathname, "/search") ? "#ffffff" : "#f2f2f2"
               }
-              onClick={() => navigate("/projects")}
+              leftIcon={<Icon name={"add"} />}
+              onClick={() => navigate("/create")}
               isDisabled={workspace === "" || _.isUndefined(workspace)}
             >
-              <Flex w={"100%"} align={"center"} gap={"2"}>
-                <Text>Projects</Text>
-              </Flex>
+              Create
             </Button>
+
+            <Text fontSize={"xs"} fontWeight={"bold"} color={"gray.600"}>
+              View
+            </Text>
 
             <Button
               id={"navEntitiesButton"}
@@ -148,6 +155,27 @@ const Navigation = () => {
                 <Text>Entities</Text>
               </Flex>
             </Button>
+
+            <Button
+              id={"navProjectsButton"}
+              leftIcon={<Icon name={"project"} />}
+              size={"sm"}
+              w={"100%"}
+              justifyContent={"left"}
+              bg={
+                _.includes(location.pathname, "/project") &&
+                !_.includes(location.pathname, "/create")
+                  ? "#ffffff"
+                  : "#f2f2f2"
+              }
+              onClick={() => navigate("/projects")}
+              isDisabled={workspace === "" || _.isUndefined(workspace)}
+            >
+              <Flex w={"100%"} align={"center"} gap={"2"}>
+                <Text>Projects</Text>
+              </Flex>
+            </Button>
+
             <Button
               id={"navTemplatesButton"}
               leftIcon={<Icon name={"attribute"} />}
@@ -169,22 +197,9 @@ const Navigation = () => {
 
           <Flex direction={"column"} gap={"2"} width={"100%"}>
             <Text fontSize={"xs"} fontWeight={"bold"} color={"gray.600"}>
-              Metadata Tools
+              Tools
             </Text>
             <Flex direction={"row"} gap={"2"}>
-              <Button
-                id={"navCreateButton"}
-                key={"create"}
-                size={"sm"}
-                w={"100%"}
-                colorScheme={"green"}
-                leftIcon={<Icon name={"add"} />}
-                onClick={() => navigate("/create")}
-                isDisabled={workspace === "" || _.isUndefined(workspace)}
-              >
-                Create
-              </Button>
-
               <Button
                 id={"navImportButton"}
                 key={"import"}
@@ -196,6 +211,19 @@ const Navigation = () => {
                 isDisabled={workspace === "" || _.isUndefined(workspace)}
               >
                 Import
+              </Button>
+
+              <Button
+                id={"navScanButton"}
+                key={"scan"}
+                size={"sm"}
+                w={"100%"}
+                colorScheme={"green"}
+                leftIcon={<Icon name={"scan"} />}
+                onClick={() => onScanOpen()}
+                isDisabled={workspace === "" || _.isUndefined(workspace)}
+              >
+                Scan
               </Button>
             </Flex>
           </Flex>
@@ -265,11 +293,18 @@ const Navigation = () => {
         </Menu>
       </Flex>
 
-      {/* Importer component containing modals */}
-      <Importer
+      {/* `ImportModal` component */}
+      <ImportModal
         isOpen={isImportOpen}
         onOpen={onImportOpen}
         onClose={onImportClose}
+      />
+
+      {/* `ScanModal` component */}
+      <ScanModal
+        isOpen={isScanOpen}
+        onOpen={onScanOpen}
+        onClose={onScanClose}
       />
     </Flex>
   );
