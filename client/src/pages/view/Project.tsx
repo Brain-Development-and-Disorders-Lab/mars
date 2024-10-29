@@ -884,7 +884,6 @@ const Project = () => {
                   style={{ width: "100%" }}
                   value={projectDescription}
                   preview={editing ? "edit" : "preview"}
-                  contentEditable={editing}
                   extraCommands={[]}
                   onChange={(value) => {
                     setProjectDescription(value || "");

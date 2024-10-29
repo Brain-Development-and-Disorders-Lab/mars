@@ -1570,10 +1570,10 @@ const Entity = () => {
                 <Text fontWeight={"bold"}>Description</Text>
                 <Flex>
                   <MDEditor
+                    id={"entityDescriptionInput"}
                     style={{ width: "100%" }}
                     value={entityDescription}
                     preview={editing ? "edit" : "preview"}
-                    contentEditable={editing}
                     extraCommands={[]}
                     onChange={(value) => {
                       setEntityDescription(value || "");
@@ -1945,7 +1945,6 @@ const Entity = () => {
                         style={{ width: "100%" }}
                         value={attributeDescription}
                         preview={editing ? "edit" : "preview"}
-                        contentEditable={editing}
                         id={"formDescription"}
                         extraCommands={[]}
                         onChange={(value) => {

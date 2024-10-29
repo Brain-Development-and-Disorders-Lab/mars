@@ -85,7 +85,6 @@ const AttributeCard = (props: AttributeCardProps) => {
                   style={{ width: "100%" }}
                   value={description}
                   preview={finished ? "preview" : "edit"}
-                  contentEditable={!finished}
                   extraCommands={[]}
                   onChange={(value) => {
                     setDescription(value || "");

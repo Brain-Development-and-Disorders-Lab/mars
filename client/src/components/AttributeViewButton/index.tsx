@@ -117,7 +117,6 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
                     style={{ width: "100%" }}
                     value={description}
                     preview={isEditing ? "edit" : "preview"}
-                    contentEditable={!isEditing}
                     extraCommands={[]}
                     onChange={(value) => {
                       setDescription(value || "");

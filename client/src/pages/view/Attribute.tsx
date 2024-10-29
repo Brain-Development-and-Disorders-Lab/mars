@@ -416,7 +416,6 @@ const Attribute = () => {
                     style={{ width: "100%" }}
                     value={attributeDescription}
                     preview={editing ? "edit" : "preview"}
-                    contentEditable={editing}
                     extraCommands={[]}
                     onChange={(value) => {
                       setAttributeDescription(value || "");
