@@ -335,9 +335,23 @@ export type DataTableAction = {
   alwaysEnabled?: boolean; // Enable the action at all times, regardless if any rows selected
 };
 
-// PreviewModal props
+// `PreviewModal` props
 export type PreviewModalProps = {
   attachment: IGenericItem;
+};
+
+// `ImportModal` props
+export type ImportModalProps = {
+  isOpen: boolean;
+  onOpen: () => void;
+  onClose: () => void;
+};
+
+// `ScanModal` props
+export type ScanModalProps = {
+  isOpen: boolean;
+  onOpen: () => void;
+  onClose: () => void;
 };
 
 // Icon component
