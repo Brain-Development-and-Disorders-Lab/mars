@@ -10,7 +10,6 @@ import {
   VStack,
   Tag,
   IconButton,
-  Textarea,
   Text,
   useToast,
   Heading,
@@ -19,6 +18,7 @@ import {
 // Custom components
 import Icon from "@components/Icon";
 import { Content } from "@components/Container";
+import MDEditor from "@uiw/react-md-editor";
 
 // Custom types
 import { IResponseMessage, WorkspaceModel } from "@types";
@@ -354,13 +354,15 @@ const CreateWorkspace = () => {
                   <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
                     Description
                   </FormLabel>
-                  <Textarea
+                  <MDEditor
                     id={"modalWorkspaceDescription"}
-                    size={"sm"}
-                    rounded={"md"}
-                    placeholder={"Description"}
+                    style={{ width: "100%" }}
                     value={description}
-                    onChange={(event) => setDescription(event.target.value)}
+                    preview={"edit"}
+                    extraCommands={[]}
+                    onChange={(value) => {
+                      setDescription(value || "");
+                    }}
                   />
                 </FormControl>
               </Flex>

@@ -15,11 +15,11 @@ import {
   ModalHeader,
   ModalOverlay,
   Text,
-  Textarea,
   useDisclosure,
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 import Values from "@components/Values";
+import MDEditor from "@uiw/react-md-editor";
 
 // Existing and custom types
 import { AttributeViewButtonProps } from "@types";
@@ -96,7 +96,7 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
                 border={"1px"}
                 borderColor={"gray.300"}
               >
-                <Flex direction={"column"} gap={"2"} basis={"40%"}>
+                <Flex direction={"column"} gap={"2"} basis={"50%"}>
                   <Text size={"md"} fontWeight={"semibold"}>
                     Name
                   </Text>
@@ -109,16 +109,18 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
                   />
                 </Flex>
 
-                <Flex direction={"column"} gap={"2"} basis={"60%"}>
+                <Flex direction={"column"} gap={"2"} basis={"50%"}>
                   <Text size={"md"} fontWeight={"semibold"}>
                     Description
                   </Text>
-                  <Textarea
-                    size={"sm"}
-                    rounded={"md"}
+                  <MDEditor
+                    style={{ width: "100%" }}
                     value={description}
-                    onChange={(event) => setDescription(event.target.value)}
-                    isReadOnly={!isEditing}
+                    preview={isEditing ? "edit" : "preview"}
+                    extraCommands={[]}
+                    onChange={(value) => {
+                      setDescription(value || "");
+                    }}
                   />
                 </Flex>
               </Flex>

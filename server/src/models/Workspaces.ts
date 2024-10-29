@@ -305,7 +305,7 @@ export class Workspaces {
         response.modifiedCount === 1
           ? "Added Attribute to Workspace"
           : "Unable to add Attribute to Workspace",
-      data: response.upsertedId.toString(),
+      data: workspace._id,
     };
   };
 

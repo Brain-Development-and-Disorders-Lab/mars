@@ -9,7 +9,6 @@ import {
   Button,
   VStack,
   IconButton,
-  Textarea,
   Text,
   useToast,
   Tooltip,
@@ -22,6 +21,8 @@ import Icon from "@components/Icon";
 import DataTable from "@components/DataTable";
 import { Content } from "@components/Container";
 import ActorTag from "@components/ActorTag";
+import MDEditor from "@uiw/react-md-editor";
+import { createColumnHelper } from "@tanstack/react-table";
 
 // Custom types
 import {
@@ -38,8 +39,8 @@ import { gql, useLazyQuery, useMutation } from "@apollo/client";
 import { useNavigate } from "react-router-dom";
 
 // Utility functions and libraries
-import { createColumnHelper } from "@tanstack/react-table";
 import _ from "lodash";
+import dayjs from "dayjs";
 
 // Contexts
 import { useWorkspace } from "@hooks/useWorkspace";
@@ -60,6 +61,7 @@ const Workspace = () => {
         _id
         name
         owner
+        timestamp
         description
         collaborators
       }
@@ -164,6 +166,7 @@ const Workspace = () => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [owner, setOwner] = useState("");
+  const [created, setCreated] = useState("");
 
   // State for Workspace contents
   const [entities, setEntities] = useState(
@@ -208,6 +211,7 @@ const Workspace = () => {
       if (workspaceResult.data?.workspace) {
         setName(workspaceResult.data.workspace.name);
         setOwner(workspaceResult.data.workspace.owner);
+        setCreated(workspaceResult.data.workspace.timestamp);
         setDescription(workspaceResult.data.workspace.description);
         setCollaborators(workspaceResult.data.workspace.collaborators);
       }
@@ -689,8 +693,7 @@ const Workspace = () => {
               p={"2"}
               gap={"2"}
               rounded={"md"}
-              border={"1px"}
-              borderColor={"gray.300"}
+              bg={"gray.100"}
             >
               <FormControl isRequired>
                 <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
@@ -698,6 +701,7 @@ const Workspace = () => {
                 </FormLabel>
                 <Input
                   id={"modalWorkspaceName"}
+                  bg={"white"}
                   size={"sm"}
                   rounded={"md"}
                   placeholder={"Name"}
@@ -705,14 +709,24 @@ const Workspace = () => {
                   onChange={(event) => setName(event.target.value)}
                 />
               </FormControl>
-              <FormControl>
-                <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
-                  Owner
-                </FormLabel>
-                <Flex>
-                  <ActorTag orcid={owner} fallback={"Unkown User"} />
+              {/* "Created" and "Owner" fields */}
+              <Flex direction={"row"} gap={"2"}>
+                <Flex direction={"column"} gap={"1"}>
+                  <Text fontWeight={"bold"}>Owner</Text>
+                  <Flex>
+                    <ActorTag orcid={owner} fallback={"Unknown User"} />
+                  </Flex>
                 </Flex>
-              </FormControl>
+                <Flex direction={"column"} gap={"1"}>
+                  <Text fontWeight={"bold"}>Created</Text>
+                  <Flex align={"center"} gap={"1"}>
+                    <Icon name={"v_date"} size={"sm"} />
+                    <Text fontSize={"sm"}>
+                      {dayjs(created).format("DD MMM YYYY")}
+                    </Text>
+                  </Flex>
+                </Flex>
+              </Flex>
             </Flex>
 
             {/* Workspace collaborators */}
@@ -874,13 +888,14 @@ const Workspace = () => {
                 <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
                   Description
                 </FormLabel>
-                <Textarea
-                  id={"modalWorkspaceDescription"}
-                  size={"sm"}
-                  rounded={"md"}
-                  placeholder={"Description"}
+                <MDEditor
+                  style={{ width: "100%" }}
                   value={description}
-                  onChange={(event) => setDescription(event.target.value)}
+                  preview={"edit"}
+                  extraCommands={[]}
+                  onChange={(value) => {
+                    setDescription(value || "");
+                  }}
                 />
               </FormControl>
             </Flex>

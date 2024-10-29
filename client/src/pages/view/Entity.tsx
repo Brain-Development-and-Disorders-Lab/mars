@@ -11,7 +11,6 @@ import {
   Text,
   useToast,
   Modal,
-  Textarea,
   ModalOverlay,
   ModalContent,
   ModalHeader,
@@ -68,6 +67,7 @@ import AttributeViewButton from "@components/AttributeViewButton";
 import SearchSelect from "@components/SearchSelect";
 import Dialog from "@components/Dialog";
 import { createColumnHelper } from "@tanstack/react-table";
+import MDEditor from "@uiw/react-md-editor";
 
 // Existing and custom types
 import {
@@ -1493,28 +1493,22 @@ const Entity = () => {
           </Flex>
         </Flex>
 
-        <Flex direction={"row"} gap={"0"} wrap={"wrap"}>
-          <Flex
-            direction={"column"}
-            p={"2"}
-            pt={{ base: "0", lg: "2" }}
-            gap={"2"}
-            grow={"1"}
-            basis={"50%"}
-            rounded={"md"}
-          >
+        <Flex direction={"column"} gap={"2"} p={"2"}>
+          {/* Overview and "Description" field */}
+          <Flex direction={"row"} gap={"2"} p={"0"} wrap={"wrap"}>
             {/* Entity Overview */}
             <Flex
               direction={"column"}
               p={"2"}
+              h={"fit-content"}
               gap={"2"}
-              border={"1px"}
-              borderColor={"gray.300"}
+              bg={"gray.100"}
               rounded={"md"}
+              grow={"1"}
             >
-              {/* "Name" and "Created" field */}
+              {/* "Name" field */}
               <Flex gap={"2"} direction={"row"}>
-                <Flex direction={"column"} gap={"1"} basis={"60%"}>
+                <Flex direction={"column"} gap={"1"} w={"100%"}>
                   <Text fontWeight={"bold"}>Name</Text>
                   <Flex>
                     <Input
@@ -1532,7 +1526,22 @@ const Entity = () => {
                     />
                   </Flex>
                 </Flex>
+              </Flex>
 
+              {/* "Created" and "Owner" fields */}
+              <Flex gap={"2"} direction={"row"} w={"100%"}>
+                {/* Owner */}
+                <Flex direction={"column"} gap={"1"}>
+                  <Text fontWeight={"bold"}>Owner</Text>
+                  <Flex>
+                    <ActorTag
+                      orcid={entityData.owner}
+                      fallback={"Unknown User"}
+                    />
+                  </Flex>
+                </Flex>
+
+                {/* Created */}
                 <Flex direction={"column"} gap={"1"}>
                   <Text fontWeight={"bold"}>Created</Text>
                   <Flex align={"center"} gap={"1"}>
@@ -1543,47 +1552,51 @@ const Entity = () => {
                   </Flex>
                 </Flex>
               </Flex>
+            </Flex>
 
-              {/* "Created" and "Owner" fields */}
-              <Flex gap={"2"} direction={"row"}>
-                <Flex direction={"column"} gap={"1"} basis={"60%"}>
-                  <Text fontWeight={"bold"}>Description</Text>
-                  <Flex>
-                    <Textarea
-                      id={"entityDescriptionInput"}
-                      size={"sm"}
-                      value={entityDescription}
-                      onChange={(event) => {
-                        setEntityDescription(event.target.value || "");
-                      }}
-                      isReadOnly={!editing}
-                      rounded={"md"}
-                      border={"1px"}
-                      borderColor={"gray.300"}
-                      bg={"white"}
-                    />
-                  </Flex>
-                </Flex>
-                <Flex direction={"column"} gap={"1"}>
-                  <Text fontWeight={"bold"}>Owner</Text>
-                  <Flex>
-                    <ActorTag
-                      orcid={entityData.owner}
-                      fallback={"Unknown User"}
-                    />
-                  </Flex>
+            {/* Description */}
+            <Flex
+              direction={"row"}
+              p={"2"}
+              h={"fit-content"}
+              gap={"2"}
+              border={"1px"}
+              borderColor={"gray.300"}
+              rounded={"md"}
+              basis={"50%"}
+              grow={"1"}
+            >
+              <Flex direction={"column"} gap={"1"} w={"100%"}>
+                <Text fontWeight={"bold"}>Description</Text>
+                <Flex>
+                  <MDEditor
+                    id={"entityDescriptionInput"}
+                    style={{ width: "100%" }}
+                    value={entityDescription}
+                    preview={editing ? "edit" : "preview"}
+                    extraCommands={[]}
+                    onChange={(value) => {
+                      setEntityDescription(value || "");
+                    }}
+                  />
                 </Flex>
               </Flex>
             </Flex>
+          </Flex>
 
+          {/* "Projects" and "Attributes" fields */}
+          <Flex direction={"row"} gap={"2"} p={"0"} wrap={"wrap"}>
             {/* Projects */}
             <Flex
               direction={"column"}
               p={"2"}
+              h={"fit-content"}
               gap={"2"}
               rounded={"md"}
               border={"1px"}
               borderColor={"gray.300"}
+              grow={"1"}
+              basis={"40%"}
             >
               <Flex
                 direction={"row"}
@@ -1625,14 +1638,171 @@ const Entity = () => {
               </Flex>
             </Flex>
 
-            {/* Attachments */}
+            {/* Attributes */}
             <Flex
               direction={"column"}
               p={"2"}
+              h={"fit-content"}
               gap={"2"}
               rounded={"md"}
               border={"1px"}
               borderColor={"gray.300"}
+              grow={"1"}
+              basis={"40%"}
+            >
+              <Flex
+                direction={"row"}
+                justify={"space-between"}
+                align={"center"}
+              >
+                <Heading size={"sm"}>Attributes</Heading>
+                <Button
+                  id={"addAttributeModalButton"}
+                  size={"sm"}
+                  rightIcon={<Icon name={"add"} />}
+                  isDisabled={!editing}
+                  onClick={onAddAttributesOpen}
+                >
+                  Add
+                </Button>
+              </Flex>
+
+              <Flex
+                w={"100%"}
+                justify={"center"}
+                align={"center"}
+                minH={entityAttributes.length > 0 ? "fit-content" : "200px"}
+              >
+                {entityAttributes.length === 0 ? (
+                  <Text color={"gray.400"} fontWeight={"semibold"}>
+                    No Attributes
+                  </Text>
+                ) : (
+                  <DataTable
+                    data={entityAttributes}
+                    columns={attributeTableColumns}
+                    visibleColumns={visibleAttributeTableColumns}
+                    selectedRows={{}}
+                    viewOnly={!editing}
+                    showPagination
+                    showSelection
+                  />
+                )}
+              </Flex>
+            </Flex>
+          </Flex>
+
+          {/* "Origins", "Products" and "Attachments" fields */}
+          <Flex direction={"row"} gap={"2"} p={"0"} wrap={"wrap"}>
+            {/* Origins and Products */}
+            <Flex h={"fit-content"} basis={"40%"} grow={"1"}>
+              <Tabs
+                w={"100%"}
+                variant={"enclosed"}
+                colorScheme={"gray"}
+                onChange={(index) => setRelationsIndex(index)}
+              >
+                <TabList>
+                  <Tab>
+                    <Heading size={"sm"}>Origins</Heading>
+                  </Tab>
+                  <Tab>
+                    <Heading size={"sm"}>Products</Heading>
+                  </Tab>
+                  <Spacer />
+                  <Button
+                    size={"sm"}
+                    rightIcon={<Icon name={"add"} />}
+                    isDisabled={!editing}
+                    onClick={() => {
+                      _.isEqual(relationsIndex, 0)
+                        ? onAddOriginsOpen()
+                        : onAddProductsOpen();
+                    }}
+                  >
+                    Add
+                  </Button>
+                </TabList>
+                <TabPanels>
+                  <TabPanel
+                    p={"2"}
+                    borderLeft={"1px"}
+                    borderRight={"1px"}
+                    borderBottom={"1px"}
+                    borderColor={"gray.300"}
+                    roundedBottom={"md"}
+                  >
+                    <Flex
+                      w={"100%"}
+                      justify={"center"}
+                      align={entityOrigins.length > 0 ? "" : "center"}
+                      minH={entityOrigins.length > 0 ? "fit-content" : "200px"}
+                    >
+                      {entityOrigins.length > 0 ? (
+                        <DataTable
+                          data={entityOrigins}
+                          columns={originTableColumns}
+                          visibleColumns={{}}
+                          selectedRows={{}}
+                          viewOnly={!editing}
+                          actions={originTableActions}
+                          showPagination
+                          showSelection
+                        />
+                      ) : (
+                        <Text color={"gray.400"} fontWeight={"semibold"}>
+                          No Origins
+                        </Text>
+                      )}
+                    </Flex>
+                  </TabPanel>
+                  <TabPanel
+                    p={"2"}
+                    borderLeft={"1px"}
+                    borderRight={"1px"}
+                    borderBottom={"1px"}
+                    borderColor={"gray.300"}
+                    roundedBottom={"md"}
+                  >
+                    <Flex
+                      w={"100%"}
+                      justify={"center"}
+                      align={entityProducts.length > 0 ? "" : "center"}
+                      minH={entityProducts.length > 0 ? "fit-content" : "200px"}
+                    >
+                      {entityProducts.length > 0 ? (
+                        <DataTable
+                          data={entityProducts}
+                          columns={productTableColumns}
+                          visibleColumns={{}}
+                          selectedRows={{}}
+                          viewOnly={!editing}
+                          actions={productTableActions}
+                          showPagination
+                          showSelection
+                        />
+                      ) : (
+                        <Text color={"gray.400"} fontWeight={"semibold"}>
+                          No Products
+                        </Text>
+                      )}
+                    </Flex>
+                  </TabPanel>
+                </TabPanels>
+              </Tabs>
+            </Flex>
+
+            {/* Attachments */}
+            <Flex
+              direction={"column"}
+              p={"2"}
+              h={"fit-content"}
+              gap={"2"}
+              rounded={"md"}
+              border={"1px"}
+              borderColor={"gray.300"}
+              basis={"40%"}
+              grow={"1"}
             >
               <Flex gap={"2"} direction={"column"}>
                 <Flex
@@ -1673,162 +1843,6 @@ const Entity = () => {
                     />
                   )}
                 </Flex>
-              </Flex>
-            </Flex>
-          </Flex>
-
-          <Flex
-            direction={"column"}
-            p={"2"}
-            pl={{ base: "2", lg: "0" }}
-            pt={{ base: "0", lg: "2" }}
-            gap={"2"}
-            grow={"1"}
-            basis={"50%"}
-            rounded={"md"}
-          >
-            {/* Origins and Products */}
-            <Tabs
-              variant={"enclosed"}
-              colorScheme={"gray"}
-              onChange={(index) => setRelationsIndex(index)}
-            >
-              <TabList>
-                <Tab>
-                  <Heading size={"sm"}>Origins</Heading>
-                </Tab>
-                <Tab>
-                  <Heading size={"sm"}>Products</Heading>
-                </Tab>
-                <Spacer />
-                <Button
-                  size={"sm"}
-                  rightIcon={<Icon name={"add"} />}
-                  isDisabled={!editing}
-                  onClick={() => {
-                    _.isEqual(relationsIndex, 0)
-                      ? onAddOriginsOpen()
-                      : onAddProductsOpen();
-                  }}
-                >
-                  Add
-                </Button>
-              </TabList>
-              <TabPanels>
-                <TabPanel
-                  p={"2"}
-                  borderLeft={"1px"}
-                  borderRight={"1px"}
-                  borderBottom={"1px"}
-                  borderColor={"gray.300"}
-                  roundedBottom={"md"}
-                >
-                  <Flex
-                    w={"100%"}
-                    justify={"center"}
-                    align={entityOrigins.length > 0 ? "" : "center"}
-                    minH={entityOrigins.length > 0 ? "fit-content" : "200px"}
-                  >
-                    {entityOrigins.length > 0 ? (
-                      <DataTable
-                        data={entityOrigins}
-                        columns={originTableColumns}
-                        visibleColumns={{}}
-                        selectedRows={{}}
-                        viewOnly={!editing}
-                        actions={originTableActions}
-                        showPagination
-                        showSelection
-                      />
-                    ) : (
-                      <Text color={"gray.400"} fontWeight={"semibold"}>
-                        No Origins
-                      </Text>
-                    )}
-                  </Flex>
-                </TabPanel>
-                <TabPanel
-                  p={"2"}
-                  borderLeft={"1px"}
-                  borderRight={"1px"}
-                  borderBottom={"1px"}
-                  borderColor={"gray.300"}
-                  roundedBottom={"md"}
-                >
-                  <Flex
-                    w={"100%"}
-                    justify={"center"}
-                    align={entityProducts.length > 0 ? "" : "center"}
-                    minH={entityProducts.length > 0 ? "fit-content" : "200px"}
-                  >
-                    {entityProducts.length > 0 ? (
-                      <DataTable
-                        data={entityProducts}
-                        columns={productTableColumns}
-                        visibleColumns={{}}
-                        selectedRows={{}}
-                        viewOnly={!editing}
-                        actions={productTableActions}
-                        showPagination
-                        showSelection
-                      />
-                    ) : (
-                      <Text color={"gray.400"} fontWeight={"semibold"}>
-                        No Products
-                      </Text>
-                    )}
-                  </Flex>
-                </TabPanel>
-              </TabPanels>
-            </Tabs>
-
-            {/* Attributes */}
-            <Flex
-              direction={"column"}
-              p={"2"}
-              gap={"2"}
-              rounded={"md"}
-              border={"1px"}
-              borderColor={"gray.300"}
-            >
-              <Flex
-                direction={"row"}
-                justify={"space-between"}
-                align={"center"}
-              >
-                <Heading size={"sm"}>Attributes</Heading>
-                <Button
-                  id={"addAttributeModalButton"}
-                  size={"sm"}
-                  rightIcon={<Icon name={"add"} />}
-                  isDisabled={!editing}
-                  onClick={onAddAttributesOpen}
-                >
-                  Add
-                </Button>
-              </Flex>
-
-              <Flex
-                w={"100%"}
-                justify={"center"}
-                align={"center"}
-                minH={entityAttributes.length > 0 ? "fit-content" : "200px"}
-              >
-                {entityAttributes.length === 0 ? (
-                  <Text color={"gray.400"} fontWeight={"semibold"}>
-                    No Attributes
-                  </Text>
-                ) : (
-                  <DataTable
-                    data={entityAttributes}
-                    columns={attributeTableColumns}
-                    visibleColumns={visibleAttributeTableColumns}
-                    selectedRows={{}}
-                    viewOnly={!editing}
-                    showPagination
-                    showSelection
-                  />
-                )}
               </Flex>
             </Flex>
           </Flex>
@@ -1927,15 +1941,15 @@ const Entity = () => {
 
                     <FormControl isRequired>
                       <FormLabel fontSize={"sm"}>Description</FormLabel>
-                      <Textarea
-                        size={"sm"}
-                        rounded={"md"}
+                      <MDEditor
+                        style={{ width: "100%" }}
                         value={attributeDescription}
-                        placeholder={"Attribute Description"}
-                        id="formDescription"
-                        onChange={(event) =>
-                          setAttributeDescription(event.target.value)
-                        }
+                        preview={editing ? "edit" : "preview"}
+                        id={"formDescription"}
+                        extraCommands={[]}
+                        onChange={(value) => {
+                          setAttributeDescription(value || "");
+                        }}
                       />
                       {isAttributeDescriptionError && (
                         <FormErrorMessage>

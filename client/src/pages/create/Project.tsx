@@ -19,12 +19,12 @@ import {
   ModalOverlay,
   Spacer,
   Text,
-  Textarea,
   useDisclosure,
   useToast,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
+import MDEditor from "@uiw/react-md-editor";
 
 // Utility functions and libraries
 import dayjs from "dayjs";
@@ -38,6 +38,7 @@ import { ResponseData } from "@types";
 
 // Authentication context
 import { useAuthentication } from "@hooks/useAuthentication";
+import ActorTag from "@components/ActorTag";
 
 const Project = () => {
   const navigate = useNavigate();
@@ -154,26 +155,22 @@ const Project = () => {
               <FormControl isRequired>
                 <FormLabel
                   htmlFor={"owner"}
-                  fontWeight={"normal"}
+                  fontWeight={"semibold"}
                   fontSize={"sm"}
                 >
                   Owner
                 </FormLabel>
-                <Input
-                  id={"owner"}
-                  name={"owner"}
-                  size={"sm"}
-                  rounded={"md"}
-                  placeholder={"Owner"}
-                  borderColor={"gray.300"}
-                  focusBorderColor={"black"}
-                  value={owner}
-                  isDisabled
-                />
+                <Flex>
+                  <ActorTag orcid={owner} fallback={"Unknown User"} />
+                </Flex>
               </FormControl>
 
               <FormControl>
-                <FormLabel htmlFor="date" fontWeight={"normal"} fontSize={"sm"}>
+                <FormLabel
+                  htmlFor="date"
+                  fontWeight={"semibold"}
+                  fontSize={"sm"}
+                >
                   Created
                 </FormLabel>
                 <Input
@@ -217,13 +214,14 @@ const Project = () => {
                 <FormLabel htmlFor="description" fontSize={"sm"}>
                   Description
                 </FormLabel>
-                <Textarea
-                  id={"description"}
-                  name={"description"}
-                  size={"sm"}
-                  rounded={"md"}
+                <MDEditor
+                  style={{ width: "100%" }}
                   value={description}
-                  onChange={(event) => setDescription(event.target.value)}
+                  preview={"edit"}
+                  extraCommands={[]}
+                  onChange={(value) => {
+                    setDescription(value || "");
+                  }}
                 />
                 {isDescriptionError && (
                   <FormErrorMessage>

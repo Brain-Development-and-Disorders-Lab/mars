@@ -35,7 +35,6 @@ import {
   Tag,
   TagCloseButton,
   Text,
-  Textarea,
   VStack,
   useDisclosure,
   useSteps,
@@ -46,6 +45,7 @@ import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 import AttributeCard from "@components/AttributeCard";
 import SearchSelect from "@components/SearchSelect";
+import MDEditor from "@uiw/react-md-editor";
 
 // Existing and custom types
 import {
@@ -472,13 +472,14 @@ const Entity = () => {
                 {/* Description */}
                 <FormControl>
                   <FormLabel fontSize={"sm"}>Description</FormLabel>
-                  <Textarea
+                  <MDEditor
+                    style={{ width: "100%" }}
                     value={description}
-                    placeholder={"Description"}
-                    w={"100%"}
-                    size={"sm"}
-                    rounded={"md"}
-                    onChange={(event) => setDescription(event.target.value)}
+                    preview={"edit"}
+                    extraCommands={[]}
+                    onChange={(value) => {
+                      setDescription(value || "");
+                    }}
                   />
                 </FormControl>
               </Flex>

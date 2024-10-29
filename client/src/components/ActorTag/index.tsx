@@ -61,6 +61,7 @@ const ActorTag = (props: ActorProps) => {
       rounded={"md"}
       border={"1px"}
       borderColor={"gray.300"}
+      bg={"white"}
     >
       <Avatar name={actorLabel} size={"sm"} />
       {loading ? (

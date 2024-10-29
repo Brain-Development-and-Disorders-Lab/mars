@@ -12,7 +12,6 @@ import {
   MenuItem,
   MenuList,
   Text,
-  Textarea,
   useDisclosure,
   useToast,
 } from "@chakra-ui/react";
@@ -21,6 +20,7 @@ import Icon from "@components/Icon";
 import Values from "@components/Values";
 import Dialog from "@components/Dialog";
 import ActorTag from "@components/ActorTag";
+import MDEditor from "@uiw/react-md-editor";
 
 // Existing and custom types
 import { AttributeModel, IValue } from "@types";
@@ -343,27 +343,20 @@ const Attribute = () => {
           </Flex>
         </Flex>
 
-        <Flex direction={"row"} gap={"0"} wrap={"wrap"}>
-          <Flex
-            direction={"column"}
-            p={"2"}
-            pt={{ base: "0", lg: "2" }}
-            gap={"2"}
-            grow={"1"}
-            rounded={"md"}
-          >
-            {/* Attribute Overview */}
+        <Flex direction={"column"} gap={"2"} p={"2"}>
+          <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
             <Flex
-              direction={"column"}
+              direction={"row"}
               p={"2"}
               gap={"2"}
-              border={"1px"}
-              borderColor={"gray.300"}
               rounded={"md"}
+              bg={"gray.100"}
+              grow={"1"}
+              h={"fit-content"}
             >
-              {/* "Name" and "Created" field */}
-              <Flex gap={"2"} direction={"row"}>
-                <Flex direction={"column"} gap={"1"} basis={"60%"}>
+              {/* "Name" field */}
+              <Flex gap={"2"} direction={"column"} w={"100%"}>
+                <Flex direction={"column"} gap={"1"}>
                   <Text fontWeight={"bold"}>Name</Text>
                   <Flex>
                     <Input
@@ -381,68 +374,70 @@ const Attribute = () => {
                   </Flex>
                 </Flex>
 
-                <Flex direction={"column"} gap={"1"}>
-                  <Text fontWeight={"bold"}>Created</Text>
-                  <Flex align={"center"} gap={"1"}>
-                    <Icon name={"v_date"} size={"sm"} />
-                    <Text fontSize={"sm"}>
-                      {dayjs(attributeData.timestamp).format("DD MMM YYYY")}
-                    </Text>
+                {/* "Created" and "Owner" fields */}
+                <Flex direction={"row"} gap={"2"}>
+                  <Flex direction={"column"} gap={"1"}>
+                    <Text fontWeight={"bold"}>Owner</Text>
+                    <Flex>
+                      <ActorTag
+                        orcid={attributeData.owner}
+                        fallback={"Unknown User"}
+                      />
+                    </Flex>
+                  </Flex>
+                  <Flex direction={"column"} gap={"1"}>
+                    <Text fontWeight={"bold"}>Created</Text>
+                    <Flex align={"center"} gap={"1"}>
+                      <Icon name={"v_date"} size={"sm"} />
+                      <Text fontSize={"sm"}>
+                        {dayjs(attributeData.timestamp).format("DD MMM YYYY")}
+                      </Text>
+                    </Flex>
                   </Flex>
                 </Flex>
               </Flex>
+            </Flex>
 
-              {/* "Description" and "Owner" fields */}
-              <Flex gap={"2"} direction={"row"}>
-                <Flex direction={"column"} gap={"1"} basis={"60%"}>
-                  <Text fontWeight={"bold"}>Description</Text>
-                  <Flex>
-                    <Textarea
-                      size={"sm"}
-                      value={attributeDescription}
-                      onChange={(event) => {
-                        setAttributeDescription(event.target.value || "");
-                      }}
-                      isReadOnly={!editing}
-                      rounded={"md"}
-                      border={"1px"}
-                      borderColor={"gray.300"}
-                      bg={"white"}
-                    />
-                  </Flex>
-                </Flex>
-                <Flex direction={"column"} gap={"1"}>
-                  <Text fontWeight={"bold"}>Owner</Text>
-                  <Flex>
-                    <ActorTag
-                      orcid={attributeData.owner}
-                      fallback={"Unknown User"}
-                    />
-                  </Flex>
+            <Flex
+              direction={"row"}
+              p={"2"}
+              gap={"2"}
+              basis={"50%"}
+              grow={"1"}
+              border={"1px"}
+              borderColor={"gray.300"}
+              rounded={"md"}
+            >
+              {/* "Description" field */}
+              <Flex gap={"2"} direction={"column"} w={"100%"}>
+                <Text fontWeight={"bold"}>Description</Text>
+                <Flex>
+                  <MDEditor
+                    style={{ width: "100%" }}
+                    value={attributeDescription}
+                    preview={editing ? "edit" : "preview"}
+                    extraCommands={[]}
+                    onChange={(value) => {
+                      setAttributeDescription(value || "");
+                    }}
+                  />
                 </Flex>
               </Flex>
             </Flex>
           </Flex>
 
           <Flex
-            direction={"column"}
             p={"2"}
-            pt={{ base: "0", lg: "2" }}
-            gap={"2"}
-            grow={"1"}
+            pb={"0"}
+            rounded={"md"}
+            border={"1px"}
+            borderColor={"gray.300"}
           >
-            <Flex
-              p={"2"}
-              rounded={"md"}
-              border={"1px"}
-              borderColor={"gray.300"}
-            >
-              <Values
-                viewOnly={!editing}
-                values={attributeValues}
-                setValues={setAttributeValues}
-              />
-            </Flex>
+            <Values
+              viewOnly={!editing}
+              values={attributeValues}
+              setValues={setAttributeValues}
+            />
           </Flex>
         </Flex>
       </Flex>
