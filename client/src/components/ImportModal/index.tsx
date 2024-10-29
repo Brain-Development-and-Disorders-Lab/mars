@@ -43,6 +43,7 @@ import {
   AttributeCardProps,
   IGenericItem,
   EntityImportReview,
+  ImportModalProps,
 } from "@types";
 
 // Routing and navigation
@@ -59,11 +60,7 @@ import { nanoid } from "nanoid";
 // Authentication context
 import { useAuthentication } from "@hooks/useAuthentication";
 
-const Importer = (props: {
-  isOpen: boolean;
-  onOpen: () => void;
-  onClose: () => void;
-}) => {
+const ImportModal = (props: ImportModalProps) => {
   // File states
   const [file, setFile] = useState({} as File);
   const [fileType, setFileType] = useState("");
@@ -487,7 +484,7 @@ const Importer = (props: {
     }
 
     if (response.data.importJSON.success === true) {
-      // Close the `Importer` UI
+      // Close the `ImportModal` UI
       props.onClose();
       resetState();
       navigate(0);
@@ -1132,7 +1129,7 @@ const Importer = (props: {
               rightIcon={<Icon name="cross" />}
               variant={"outline"}
               onClick={() => {
-                // Close importer modal
+                // Close the `ImportModal`
                 props.onClose();
                 resetState();
               }}
@@ -1171,4 +1168,4 @@ const Importer = (props: {
   );
 };
 
-export default Importer;
+export default ImportModal;
