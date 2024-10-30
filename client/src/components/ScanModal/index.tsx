@@ -11,16 +11,44 @@ import {
   ModalOverlay,
   Spinner,
   Text,
+  useToast,
 } from "@chakra-ui/react";
 
 // Custom types
-import { ScanModalProps } from "@types";
+import { IGenericItem, ScanModalProps } from "@types";
+
+// GraphQL
+import { gql, useLazyQuery } from "@apollo/client";
+
+// Utility functions
+import _ from "lodash";
 
 const ScanModal = (props: ScanModalProps) => {
+  const toast = useToast();
+
   // State to manage identifier input visibility
   const [showInput, setShowInput] = useState(false);
-  const [inputValue, setInputValue] = useState("");
+  const [manualInputValue, setManualInputValue] = useState("");
   const [isListening, setIsListening] = useState(false);
+
+  // Input value from the scanner
+  let scannerInputValue = "";
+
+  // GraphQL query to check if Entity exists
+  const ENTITY_EXISTS = gql`
+    query EntityExists($_id: String) {
+      entity(_id: $_id) {
+        _id
+        name
+      }
+    }
+  `;
+
+  const [entityExists, { loading, error }] = useLazyQuery<{
+    entityExists: IGenericItem;
+  }>(ENTITY_EXISTS, {
+    fetchPolicy: "network-only",
+  });
 
   /**
    * Handle the modal being closed by the user, resetting the state and removing the keypress handler
@@ -28,8 +56,8 @@ const ScanModal = (props: ScanModalProps) => {
   const handleOnClose = () => {
     // Reset state
     setShowInput(false);
-    setInputValue("");
     setIsListening(false);
+    scannerInputValue = "";
 
     // Reset the `onkeyup` listener
     document.onkeyup = () => {
@@ -54,10 +82,71 @@ const ScanModal = (props: ScanModalProps) => {
 
   /**
    * Handle rapid input from the scanner
-   * @param event Keyboard input event containing keypress data
+   * @param {KeyboardEvent} event Keyboard input event containing keypress data
    */
   const handleInput = (event: KeyboardEvent) => {
-    console.info("Pressed:", event.key);
+    scannerInputValue = `${scannerInputValue}${event.key}`;
+
+    if (scannerInputValue.length > 5) {
+      runScannerSearch();
+    }
+  };
+
+  /**
+   * "Debounced" function to run a search based on the provided scanner input
+   */
+  const runScannerSearch = _.debounce(async () => {
+    const results = await entityExists({
+      variables: {
+        _id: scannerInputValue,
+      },
+    });
+
+    if (results.data && results.data.entityExists) {
+      console.info(results.data.entityExists);
+    }
+
+    if (error || _.isUndefined(results.data)) {
+      // Entity does not exist
+      toast({
+        title: "Error",
+        status: "error",
+        description: `Entity with identifier "${scannerInputValue}" not found`,
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
+
+    // Reset the scanner input value
+    scannerInputValue = "";
+  }, 200);
+
+  /**
+   * Generic function to run a manual search to see if the Entity with specified identifier exists or not
+   */
+  const runManualSearch = async () => {
+    const results = await entityExists({
+      variables: {
+        _id: manualInputValue,
+      },
+    });
+
+    if (results.data && results.data.entityExists) {
+      console.info(results.data.entityExists);
+    }
+
+    if (error || _.isUndefined(results.data)) {
+      // Entity does not exist
+      toast({
+        title: "Error",
+        status: "error",
+        description: `Entity with identifier "${manualInputValue}" not found`,
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
   };
 
   useEffect(() => {
@@ -123,11 +212,19 @@ const ScanModal = (props: ScanModalProps) => {
                   <Input
                     size={"sm"}
                     rounded={"md"}
-                    value={inputValue}
-                    onChange={(event) => setInputValue(event.target.value)}
+                    value={manualInputValue}
+                    onChange={(event) =>
+                      setManualInputValue(event.target.value)
+                    }
                     placeholder={"Identifier"}
                   />
-                  <Button size={"sm"}>Find</Button>
+                  <Button
+                    size={"sm"}
+                    isLoading={loading}
+                    onClick={runManualSearch}
+                  >
+                    Find
+                  </Button>
                 </Flex>
               ) : (
                 <Button
