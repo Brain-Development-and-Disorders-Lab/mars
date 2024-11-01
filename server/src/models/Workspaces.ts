@@ -355,6 +355,7 @@ export class Workspaces {
       $set: {
         name: updated.name,
         description: updated.description,
+        public: updated.public,
         collaborators: updated.collaborators,
         entities: updated.entities,
         projects: updated.projects,

@@ -282,6 +282,7 @@ export const typedefs = `#graphql
     _id: String!
     name: String
     timestamp: String
+    public: Boolean
     description: String
     owner: String
     collaborators: [String]
@@ -295,6 +296,7 @@ export const typedefs = `#graphql
   input WorkspaceCreateInput {
     name: String
     description: String
+    public: Boolean
     owner: String
     collaborators: [String]
     entities: [String]
@@ -307,6 +309,7 @@ export const typedefs = `#graphql
   input WorkspaceUpdateInput {
     _id: String!
     name: String
+    public: Boolean
     description: String
     owner: String
     collaborators: [String]
