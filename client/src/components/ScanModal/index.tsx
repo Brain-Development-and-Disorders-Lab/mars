@@ -20,11 +20,15 @@ import { IGenericItem, ScanModalProps } from "@types";
 // GraphQL
 import { gql, useLazyQuery } from "@apollo/client";
 
+// Navigation
+import { useNavigate } from "react-router-dom";
+
 // Utility functions
 import _ from "lodash";
 
 const ScanModal = (props: ScanModalProps) => {
   const toast = useToast();
+  const navigate = useNavigate();
 
   // State to manage identifier input visibility
   const [showInput, setShowInput] = useState(false);
@@ -45,10 +49,8 @@ const ScanModal = (props: ScanModalProps) => {
   `;
 
   const [entityExists, { loading, error }] = useLazyQuery<{
-    entityExists: IGenericItem;
-  }>(ENTITY_EXISTS, {
-    fetchPolicy: "network-only",
-  });
+    entity: IGenericItem;
+  }>(ENTITY_EXISTS);
 
   /**
    * Handle the modal being closed by the user, resetting the state and removing the keypress handler
@@ -57,6 +59,7 @@ const ScanModal = (props: ScanModalProps) => {
     // Reset state
     setShowInput(false);
     setIsListening(false);
+    setManualInputValue("");
     scannerInputValue = "";
 
     // Reset the `onkeyup` listener
@@ -65,6 +68,15 @@ const ScanModal = (props: ScanModalProps) => {
     };
 
     props.onClose();
+  };
+
+  /**
+   * Handle the `View` button action when an Entity does exist
+   * @param {string} identifier Entity identifier
+   */
+  const handleNavigate = (identifier: string) => {
+    handleOnClose();
+    navigate(`/entities/${identifier}`);
   };
 
   /**
@@ -102,8 +114,8 @@ const ScanModal = (props: ScanModalProps) => {
       },
     });
 
-    if (results.data && results.data.entityExists) {
-      console.info(results.data.entityExists);
+    if (results.data && results.data.entity) {
+      handleNavigate(results.data.entity._id);
     }
 
     if (error || _.isUndefined(results.data)) {
@@ -132,20 +144,23 @@ const ScanModal = (props: ScanModalProps) => {
       },
     });
 
-    if (results.data && results.data.entityExists) {
-      console.info(results.data.entityExists);
+    if (results.data && results.data.entity) {
+      handleNavigate(results.data.entity._id);
     }
 
     if (error || _.isUndefined(results.data)) {
       // Entity does not exist
-      toast({
-        title: "Error",
-        status: "error",
-        description: `Entity with identifier "${manualInputValue}" not found`,
-        duration: 4000,
-        position: "bottom-right",
-        isClosable: true,
-      });
+      if (!toast.isActive("entityNotExist")) {
+        toast({
+          id: "entityNotExist",
+          title: "Error",
+          status: "error",
+          description: `Entity with identifier "${manualInputValue}" not found`,
+          duration: 4000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+      }
     }
   };
 
@@ -188,6 +203,7 @@ const ScanModal = (props: ScanModalProps) => {
             rounded={"md"}
             gap={"8"}
           >
+            {/* Show "Waiting" for scanner status */}
             {!showInput && (
               <Flex
                 direction={"column"}
@@ -203,39 +219,37 @@ const ScanModal = (props: ScanModalProps) => {
                   Waiting for scanner input...
                 </Text>
                 <Spinner color={"blue.500"} />
+                <Flex>
+                  <Button
+                    size={"sm"}
+                    colorScheme={"blue"}
+                    onClick={handleManualInputSelect}
+                  >
+                    Enter manually
+                  </Button>
+                </Flex>
               </Flex>
             )}
 
-            <Flex direction={"row"} gap={"2"} align={"center"}>
-              {showInput ? (
-                <Flex direction={"row"} gap={"2"} align={"center"}>
-                  <Input
-                    size={"sm"}
-                    rounded={"md"}
-                    value={manualInputValue}
-                    onChange={(event) =>
-                      setManualInputValue(event.target.value)
-                    }
-                    placeholder={"Identifier"}
-                  />
-                  <Button
-                    size={"sm"}
-                    isLoading={loading}
-                    onClick={runManualSearch}
-                  >
-                    Find
-                  </Button>
-                </Flex>
-              ) : (
+            {/* Show manual entry field */}
+            {showInput && (
+              <Flex direction={"row"} gap={"2"} align={"center"}>
+                <Input
+                  size={"sm"}
+                  rounded={"md"}
+                  value={manualInputValue}
+                  onChange={(event) => setManualInputValue(event.target.value)}
+                  placeholder={"Identifier"}
+                />
                 <Button
                   size={"sm"}
-                  colorScheme={"blue"}
-                  onClick={handleManualInputSelect}
+                  isLoading={loading}
+                  onClick={runManualSearch}
                 >
-                  Enter manually
+                  Find
                 </Button>
-              )}
-            </Flex>
+              </Flex>
+            )}
           </Flex>
         </ModalBody>
       </ModalContent>
