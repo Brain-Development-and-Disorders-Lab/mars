@@ -24,66 +24,61 @@ const VisibilityTag = (props: VisibilityTagProps) => {
   };
 
   return (
-    <Flex direction={"column"} gap={"1"}>
-      <Text fontWeight={"bold"} fontSize={"sm"}>
-        Visibility
-      </Text>
-      <Flex
-        align={"center"}
-        gap={"2"}
-        p={"2"}
-        rounded={"md"}
-        border={"1px"}
-        borderColor={"gray.300"}
-        bg={"white"}
-        minW={"240px"}
-      >
-        <Icon
-          name={props.isPublic ? "l_globus" : "lock"}
-          size={"sm"}
-          color={"green.400"}
-        />
-        <Flex direction={"column"} gap={"0"}>
-          <Text fontSize={"sm"} fontWeight={"semibold"}>
-            {props.isPublic ? "Public" : "Private"}
-          </Text>
-          <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.400"}>
-            {props.isPublic ? "Everyone" : "Workspace Users only"}
-          </Text>
-        </Flex>
-        <Spacer />
-        {props.isInherited ? (
-          <Tooltip
-            hasArrow
-            label={
-              "This visibility state is inherited and cannot be changed directly"
-            }
-          >
-            <IconButton
-              ml={"1"}
-              aria-label={"set-visibility"}
-              size={"sm"}
-              isDisabled
-              icon={<Icon name={props.isPublic ? "lock" : "l_globus"} />}
-            />
-          </Tooltip>
-        ) : (
-          <Tooltip
-            hasArrow
-            label={props.isPublic ? "Make Private" : "Make Public"}
-          >
-            <IconButton
-              ml={"1"}
-              aria-label={"set-visibility"}
-              size={"sm"}
-              colorScheme={"green"}
-              icon={<Icon name={props.isPublic ? "lock" : "l_globus"} />}
-              isDisabled={props.isDisabled}
-              onClick={handleVisibilityClick}
-            />
-          </Tooltip>
-        )}
+    <Flex
+      align={"center"}
+      gap={"2"}
+      p={"2"}
+      rounded={"md"}
+      border={"1px"}
+      borderColor={"gray.300"}
+      bg={"white"}
+      minW={"240px"}
+    >
+      <Icon
+        name={props.isPublic ? "l_globus" : "lock"}
+        size={"sm"}
+        color={"green.400"}
+      />
+      <Flex direction={"column"} gap={"0"}>
+        <Text fontSize={"sm"} fontWeight={"semibold"}>
+          {props.isPublic ? "Public" : "Private"}
+        </Text>
+        <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.400"}>
+          {props.isPublic ? "Everyone" : "Workspace Users only"}
+        </Text>
       </Flex>
+      <Spacer />
+      {props.isInherited ? (
+        <Tooltip
+          hasArrow
+          label={
+            "This visibility state is inherited and cannot be changed directly"
+          }
+        >
+          <IconButton
+            ml={"1"}
+            aria-label={"set-visibility"}
+            size={"sm"}
+            isDisabled
+            icon={<Icon name={props.isPublic ? "lock" : "l_globus"} />}
+          />
+        </Tooltip>
+      ) : (
+        <Tooltip
+          hasArrow
+          label={props.isPublic ? "Make Private" : "Make Public"}
+        >
+          <IconButton
+            ml={"1"}
+            aria-label={"set-visibility"}
+            size={"sm"}
+            colorScheme={"green"}
+            icon={<Icon name={props.isPublic ? "lock" : "l_globus"} />}
+            isDisabled={props.isDisabled}
+            onClick={handleVisibilityClick}
+          />
+        </Tooltip>
+      )}
     </Flex>
   );
 };

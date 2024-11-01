@@ -1536,7 +1536,12 @@ const Entity = () => {
 
               {/* "Created" and "Owner" fields */}
               <Flex gap={"2"} direction={"row"} w={"100%"}>
-                <VisibilityTag isPublic={false} isInherited />
+                <Flex direction={"column"} gap={"1"}>
+                  <Text fontWeight={"bold"} fontSize={"sm"}>
+                    Visibility
+                  </Text>
+                  <VisibilityTag isPublic={false} isInherited />
+                </Flex>
 
                 {/* Owner */}
                 <Flex direction={"column"} gap={"1"}>

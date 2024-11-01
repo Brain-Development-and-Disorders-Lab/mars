@@ -725,7 +725,15 @@ const Workspace = () => {
 
               {/* "Visibility" and "Owner" fields */}
               <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
-                <VisibilityTag isPublic={isPublic} setIsPublic={setIsPublic} />
+                <Flex direction={"column"} gap={"1"}>
+                  <Text fontWeight={"bold"} fontSize={"sm"}>
+                    Visibility
+                  </Text>
+                  <VisibilityTag
+                    isPublic={isPublic}
+                    setIsPublic={setIsPublic}
+                  />
+                </Flex>
 
                 <Flex direction={"column"} gap={"1"}>
                   <Text fontWeight={"bold"} fontSize={"sm"}>

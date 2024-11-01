@@ -52,7 +52,10 @@ import ActorTag from "@components/ActorTag";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 import Dialog from "@components/Dialog";
+import DataTable from "@components/DataTable";
 import SearchSelect from "@components/SearchSelect";
+import TimestampTag from "@components/TimestampTag";
+import VisibilityTag from "@components/VisibilityTag";
 import MDEditor from "@uiw/react-md-editor";
 
 // Existing and custom types
@@ -75,7 +78,6 @@ import { useWorkspace } from "@hooks/useWorkspace";
 // Utility functions and libraries
 import _ from "lodash";
 import dayjs from "dayjs";
-import DataTable from "@components/DataTable";
 import FileSaver from "file-saver";
 import slugify from "slugify";
 
@@ -829,39 +831,45 @@ const Project = () => {
               rounded={"md"}
               grow={"1"}
             >
-              <Flex direction={"column"} gap={"2"} basis={"60%"}>
-                <Text fontWeight={"bold"}>Name</Text>
-                <Input
-                  id={"projectNameInput"}
-                  size={"sm"}
-                  value={projectName}
-                  onChange={(event) => {
-                    setProjectName(event.target.value);
-                  }}
-                  isReadOnly={!editing}
-                  bg={"white"}
-                  rounded={"md"}
-                  border={"1px"}
-                  borderColor={"gray.300"}
+              <Flex direction={"row"} gap={"2"}>
+                <Flex direction={"column"} gap={"1"} grow={"1"}>
+                  <Text fontWeight={"bold"} fontSize={"sm"}>
+                    Name
+                  </Text>
+                  <Input
+                    id={"projectNameInput"}
+                    size={"sm"}
+                    value={projectName}
+                    onChange={(event) => {
+                      setProjectName(event.target.value);
+                    }}
+                    isReadOnly={!editing}
+                    bg={"white"}
+                    rounded={"md"}
+                    border={"1px"}
+                    borderColor={"gray.300"}
+                  />
+                </Flex>
+
+                <TimestampTag
+                  timestamp={project.created}
+                  description={"Created"}
                 />
               </Flex>
 
               <Flex gap={"2"} direction={"row"}>
-                <Flex direction={"column"} gap={"2"}>
-                  <Text fontWeight={"bold"}>Owner</Text>
-                  <Flex>
-                    <ActorTag orcid={project.owner} fallback={"Unknown User"} />
-                  </Flex>
+                <Flex direction={"column"} gap={"1"}>
+                  <Text fontWeight={"bold"} fontSize={"sm"}>
+                    Visibility
+                  </Text>
+                  <VisibilityTag isPublic={false} isInherited />
                 </Flex>
 
-                <Flex direction={"column"} gap={"2"}>
-                  <Text fontWeight={"bold"}>Created</Text>
-                  <Flex align={"center"} gap={"1"}>
-                    <Icon name={"v_date"} size={"sm"} />
-                    <Text fontSize={"sm"}>
-                      {dayjs(project.created).format("DD MMM YYYY")}
-                    </Text>
-                  </Flex>
+                <Flex direction={"column"} gap={"1"}>
+                  <Text fontWeight={"bold"} fontSize={"sm"}>
+                    Owner
+                  </Text>
+                  <ActorTag orcid={project.owner} fallback={"Unknown User"} />
                 </Flex>
               </Flex>
             </Flex>
@@ -874,22 +882,19 @@ const Project = () => {
               border={"1px"}
               borderColor={"gray.300"}
               rounded={"md"}
-              basis={"50%"}
               grow={"1"}
             >
-              <Flex direction={"column"} gap={"2"} basis={"60%"}>
-                <Text fontWeight={"bold"}>Description</Text>
-                <MDEditor
-                  id={"projectDescriptionInput"}
-                  style={{ width: "100%" }}
-                  value={projectDescription}
-                  preview={editing ? "edit" : "preview"}
-                  extraCommands={[]}
-                  onChange={(value) => {
-                    setProjectDescription(value || "");
-                  }}
-                />
-              </Flex>
+              <Text fontWeight={"bold"}>Description</Text>
+              <MDEditor
+                id={"projectDescriptionInput"}
+                style={{ width: "100%" }}
+                value={projectDescription}
+                preview={editing ? "edit" : "preview"}
+                extraCommands={[]}
+                onChange={(value) => {
+                  setProjectDescription(value || "");
+                }}
+              />
             </Flex>
           </Flex>
 
@@ -904,7 +909,6 @@ const Project = () => {
               border={"1px"}
               borderColor={"gray.300"}
               grow={"1"}
-              basis={"50%"}
             >
               <Flex
                 direction={"row"}
@@ -912,7 +916,9 @@ const Project = () => {
                 align={"center"}
               >
                 {/* Entities in the Project */}
-                <Heading size={"sm"}>Entities</Heading>
+                <Text fontSize={"sm"} fontWeight={"bold"}>
+                  Entities
+                </Text>
                 <Button
                   id={"addEntityButton"}
                   rightIcon={<Icon name={"add"} />}
@@ -943,8 +949,12 @@ const Project = () => {
                   />
                 ) : (
                   <Flex w={"100%"} justify={"center"} align={"center"}>
-                    <Text color={"gray.400"} fontWeight={"semibold"}>
-                      This Project does not contain any Entities.
+                    <Text
+                      color={"gray.400"}
+                      fontWeight={"semibold"}
+                      fontSize={"sm"}
+                    >
+                      No Entities
                     </Text>
                   </Flex>
                 )}
@@ -963,9 +973,9 @@ const Project = () => {
             >
               {/* Collaborators display */}
               <Flex direction={"column"}>
-                <Heading size={"sm"} mb={"2"}>
+                <Text fontSize={"sm"} fontWeight={"bold"} mb={"2"}>
                   Collaborators
-                </Heading>
+                </Text>
                 <Flex direction={"row"} gap={"2"} align={"center"}>
                   <FormControl>
                     <Input
@@ -1009,7 +1019,11 @@ const Project = () => {
                   }
                 >
                   {projectCollaborators.length === 0 ? (
-                    <Text color={"gray.400"} fontWeight={"semibold"}>
+                    <Text
+                      color={"gray.400"}
+                      fontWeight={"semibold"}
+                      fontSize={"sm"}
+                    >
                       No Collaborators
                     </Text>
                   ) : (
