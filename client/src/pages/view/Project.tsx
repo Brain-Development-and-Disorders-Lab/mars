@@ -878,13 +878,16 @@ const Project = () => {
             <Flex
               direction={"column"}
               p={"2"}
-              gap={"2"}
+              gap={"1"}
               border={"1px"}
               borderColor={"gray.300"}
               rounded={"md"}
+              basis={"40%"}
               grow={"1"}
             >
-              <Text fontWeight={"bold"}>Description</Text>
+              <Text fontWeight={"bold"} fontSize={"sm"}>
+                Description
+              </Text>
               <MDEditor
                 id={"projectDescriptionInput"}
                 style={{ width: "100%" }}
@@ -1335,26 +1338,36 @@ const Project = () => {
           <DrawerOverlay />
           <DrawerContent>
             <DrawerCloseButton />
-            <DrawerHeader>
-              <Flex direction={"row"} w={"100%"} gap={"2"}>
-                <Heading size={"md"} fontWeight={"semibold"}>
-                  Project History
-                </Heading>
-                <Spacer />
-                <Flex direction={"column"} gap={"1"}>
-                  <Text fontSize={"sm"}>Versions: {projectHistory.length}</Text>
-                  <Text fontSize={"sm"}>
-                    Last modified:{" "}
-                    {projectHistory.length > 0
-                      ? dayjs(projectHistory[0].timestamp).fromNow()
-                      : "never"}
-                  </Text>
+            <DrawerHeader pb={"2"}>
+              <Flex direction={"column"} w={"100%"} gap={"2"}>
+                <Text fontSize={"sm"} fontWeight={"bold"}>
+                  History
+                </Text>
+                <Flex direction={"row"} gap={"1"} justify={"space-between"}>
+                  <Flex direction={"row"} gap={"1"}>
+                    <Text fontSize={"sm"} fontWeight={"semibold"}>
+                      Last modified:
+                    </Text>
+                    <Text fontSize={"sm"} fontWeight={"normal"}>
+                      {projectHistory.length > 0
+                        ? dayjs(projectHistory[0].timestamp).fromNow()
+                        : "never"}
+                    </Text>
+                  </Flex>
+                  <Flex direction={"row"} gap={"1"}>
+                    <Text fontSize={"sm"} fontWeight={"semibold"}>
+                      Previous Versions:
+                    </Text>
+                    <Text fontSize={"sm"} fontWeight={"normal"}>
+                      {projectHistory.length}
+                    </Text>
+                  </Flex>
                 </Flex>
               </Flex>
             </DrawerHeader>
 
             <DrawerBody>
-              <VStack spacing={"4"}>
+              <VStack spacing={"2"}>
                 {projectHistory && projectHistory.length > 0 ? (
                   projectHistory.map((projectVersion) => {
                     return (
@@ -1367,30 +1380,31 @@ const Project = () => {
                         borderColor={"gray.300"}
                       >
                         <CardHeader p={"0"}>
-                          <Flex w={"100%"} align={"center"} gap={"2"} p={"2"}>
+                          <Flex
+                            direction={"column"}
+                            w={"100%"}
+                            gap={"1"}
+                            p={"2"}
+                          >
                             <Text
                               fontWeight={"semibold"}
-                              fontSize={"md"}
+                              fontSize={"sm"}
                               color={"gray.700"}
                             >
                               {projectVersion.name}
                             </Text>
-                            <Spacer />
                             <Flex
-                              direction={"column"}
-                              gap={"1"}
-                              justify={"right"}
+                              direction={"row"}
+                              gap={"2"}
+                              justify={"space-between"}
                             >
-                              <Text
-                                fontWeight={"semibold"}
-                                fontSize={"sm"}
-                                color={"gray.700"}
-                              >
+                              <Tag size={"sm"} colorScheme={"green"}>
                                 {projectVersion.version}
-                              </Text>
+                              </Tag>
+
                               <Text
                                 fontWeight={"semibold"}
-                                fontSize={"sm"}
+                                fontSize={"xs"}
                                 color={"gray.400"}
                               >
                                 {dayjs(projectVersion.timestamp).fromNow()}
@@ -1398,120 +1412,113 @@ const Project = () => {
                             </Flex>
                           </Flex>
                         </CardHeader>
+
                         <CardBody px={"2"} py={"0"}>
-                          <Flex
-                            direction={"column"}
-                            gap={"1"}
-                            p={"2"}
-                            rounded={"md"}
-                            border={"1px"}
-                            borderColor={"gray.300"}
-                          >
-                            <Flex
-                              direction={"row"}
-                              wrap={"wrap"}
-                              gap={"2"}
-                              align={"center"}
-                            >
-                              <Text fontSize={"sm"} fontWeight={"semibold"}>
-                                Description:
+                          <Flex direction={"column"} gap={"2"}>
+                            {/* Description */}
+                            {_.isEqual(projectVersion.description, "") ? (
+                              <Tag size={"sm"} colorScheme={"orange"}>
+                                No Description
+                              </Tag>
+                            ) : (
+                              <Text fontSize={"sm"}>
+                                {_.truncate(projectVersion.description, {
+                                  length: 56,
+                                })}
                               </Text>
-                              <Tooltip
-                                label={projectVersion.description}
-                                isDisabled={_.isEqual(
-                                  projectVersion.description,
-                                  "",
-                                )}
-                                hasArrow
+                            )}
+
+                            <Flex direction={"row"} gap={"2"}>
+                              {/* Entities */}
+                              <Flex
+                                direction={"column"}
+                                gap={"1"}
+                                p={"2"}
+                                rounded={"md"}
+                                border={"1px"}
+                                borderColor={"gray.300"}
+                                grow={"1"}
                               >
-                                <Text fontSize={"sm"}>
-                                  {_.isEqual(projectVersion.description, "")
-                                    ? "None"
-                                    : _.truncate(projectVersion.description, {
-                                        length: 56,
-                                      })}
+                                <Text fontSize={"sm"} fontWeight={"semibold"}>
+                                  Entities
                                 </Text>
-                              </Tooltip>
-                            </Flex>
-                            <Flex
-                              direction={"row"}
-                              wrap={"wrap"}
-                              gap={"2"}
-                              align={"center"}
-                            >
-                              <Text fontSize={"sm"} fontWeight={"semibold"}>
-                                Entities:
-                              </Text>
-                              {projectVersion.entities.length > 0 ? (
-                                <Flex
-                                  direction={"row"}
-                                  gap={"2"}
-                                  align={"center"}
-                                >
-                                  <Tag
-                                    key={`v_c_${projectVersion.timestamp}_${projectVersion.entities[0]}`}
-                                    size={"sm"}
-                                  >
-                                    <TagLabel>
-                                      <Linky
-                                        type={"entities"}
-                                        id={projectVersion.entities[0]}
-                                        size={"sm"}
-                                      />
-                                    </TagLabel>
-                                  </Tag>
-                                  {projectVersion.entities.length > 1 && (
-                                    <Text
-                                      fontWeight={"semibold"}
-                                      fontSize={"sm"}
-                                    >
-                                      and {projectVersion.entities.length - 1}{" "}
-                                      others
-                                    </Text>
-                                  )}
-                                </Flex>
-                              ) : (
-                                <Text fontSize={"sm"}>No Entities</Text>
-                              )}
-                            </Flex>
-                            <Flex direction={"row"} wrap={"wrap"} gap={"2"}>
-                              <Text fontSize={"sm"} fontWeight={"semibold"}>
-                                Collaborators:
-                              </Text>
-                              {projectVersion.collaborators.length > 0 ? (
-                                <Flex
-                                  direction={"row"}
-                                  gap={"2"}
-                                  align={"center"}
-                                >
-                                  <Tooltip
-                                    label={projectVersion.collaborators[0]}
-                                    hasArrow
+                                {projectVersion.entities.length > 0 ? (
+                                  <Flex
+                                    direction={"row"}
+                                    gap={"2"}
+                                    align={"center"}
                                   >
                                     <Tag
-                                      key={`v_at_${projectVersion.timestamp}_${projectVersion.collaborators[0]}`}
+                                      key={`v_c_${projectVersion.timestamp}_${projectVersion.entities[0]}`}
                                       size={"sm"}
-                                      colorScheme={"green"}
+                                    >
+                                      <TagLabel>
+                                        <Linky
+                                          type={"projects"}
+                                          id={projectVersion.entities[0]}
+                                          size={"sm"}
+                                        />
+                                      </TagLabel>
+                                    </Tag>
+                                    {projectVersion.entities.length > 1 && (
+                                      <Text
+                                        fontWeight={"semibold"}
+                                        fontSize={"sm"}
+                                      >
+                                        and {projectVersion.entities.length - 1}{" "}
+                                        others
+                                      </Text>
+                                    )}
+                                  </Flex>
+                                ) : (
+                                  <Text fontSize={"sm"}>No Entities</Text>
+                                )}
+                              </Flex>
+
+                              {/* Collaborators */}
+                              <Flex
+                                direction={"column"}
+                                gap={"1"}
+                                p={"2"}
+                                rounded={"md"}
+                                border={"1px"}
+                                borderColor={"gray.300"}
+                                grow={"1"}
+                              >
+                                <Text fontSize={"sm"} fontWeight={"semibold"}>
+                                  Collaborators
+                                </Text>
+                                {projectVersion.collaborators.length > 0 ? (
+                                  <Flex
+                                    direction={"row"}
+                                    gap={"2"}
+                                    align={"center"}
+                                  >
+                                    <Tag
+                                      key={`v_c_${projectVersion.timestamp}_${projectVersion.collaborators[0]}`}
+                                      size={"sm"}
                                     >
                                       <TagLabel>
                                         {projectVersion.collaborators[0]}
                                       </TagLabel>
                                     </Tag>
-                                  </Tooltip>
-                                  {projectVersion.collaborators.length > 1 && (
-                                    <Text fontSize={"sm"}>
-                                      and{" "}
-                                      {projectVersion.collaborators.length - 1}{" "}
-                                      other
-                                      {projectVersion.collaborators.length > 2
-                                        ? "s"
-                                        : ""}
-                                    </Text>
-                                  )}
-                                </Flex>
-                              ) : (
-                                <Text fontSize={"sm"}>None</Text>
-                              )}
+                                    {projectVersion.collaborators.length >
+                                      1 && (
+                                      <Text
+                                        fontWeight={"semibold"}
+                                        fontSize={"sm"}
+                                      >
+                                        and{" "}
+                                        {projectVersion.collaborators.length -
+                                          1}{" "}
+                                        others
+                                      </Text>
+                                    )}
+                                  </Flex>
+                                ) : (
+                                  <Text fontSize={"sm"}>No Collaborators</Text>
+                                )}
+                              </Flex>
                             </Flex>
                           </Flex>
                         </CardBody>

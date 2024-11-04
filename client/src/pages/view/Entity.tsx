@@ -1565,7 +1565,7 @@ const Entity = () => {
               border={"1px"}
               borderColor={"gray.300"}
               rounded={"md"}
-              basis={"50%"}
+              basis={"40%"}
               grow={"1"}
             >
               <Flex direction={"column"} gap={"1"} w={"100%"}>
@@ -2728,7 +2728,7 @@ const Entity = () => {
           <DrawerOverlay />
           <DrawerContent>
             <DrawerCloseButton />
-            <DrawerHeader pb={"0"}>
+            <DrawerHeader pb={"2"}>
               <Flex direction={"column"} w={"100%"} gap={"2"}>
                 <Text fontSize={"sm"} fontWeight={"bold"}>
                   History
@@ -2755,6 +2755,7 @@ const Entity = () => {
                 </Flex>
               </Flex>
             </DrawerHeader>
+
             <DrawerBody>
               <VStack spacing={"2"}>
                 {entityHistory.length > 0 ? (
