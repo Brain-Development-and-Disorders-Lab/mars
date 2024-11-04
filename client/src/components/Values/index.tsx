@@ -513,7 +513,9 @@ const Values = (props: {
         justify={"space-between"}
         align={"center"}
       >
-        <Heading size={"sm"}>Values</Heading>
+        <Text fontSize={"sm"} fontWeight={"bold"}>
+          Values
+        </Text>
         <Popover>
           <PopoverTrigger>
             <Button

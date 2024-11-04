@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react";
 import { Avatar, Flex, Skeleton, Text } from "@chakra-ui/react";
 
 // Existing and custom types
-import { ActorProps, UserModel } from "@types";
+import { ActorTagProps, UserModel } from "@types";
 
 // Utility functions and libraries
 import _ from "lodash";
@@ -13,7 +13,7 @@ import { gql, useQuery } from "@apollo/client";
 
 const DEFAULT_ACTOR_LABEL_LENGTH = 20; // Default number of shown characters
 
-const ActorTag = (props: ActorProps) => {
+const ActorTag = (props: ActorTagProps) => {
   // Component state
   const [actorLabel, setActorLabel] = useState(props.fallback);
 
@@ -57,11 +57,13 @@ const ActorTag = (props: ActorProps) => {
       direction={"row"}
       gap={"2"}
       align={"center"}
+      justify={"space-around"}
       p={"2"}
       rounded={"md"}
       border={"1px"}
       borderColor={"gray.300"}
       bg={"white"}
+      minW={"210px"}
     >
       <Avatar name={actorLabel} size={"sm"} />
       {loading ? (

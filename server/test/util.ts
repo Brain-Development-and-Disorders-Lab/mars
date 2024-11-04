@@ -40,6 +40,7 @@ export const seedDatabase = async (): Promise<void> => {
   const workspaceResult: ResponseData<string> = await Workspaces.create({
     name: "Test Workspace",
     owner: DEMO_USER_ORCID,
+    public: false,
     collaborators: [],
     description: "This is a test Workspace",
     entities: [],

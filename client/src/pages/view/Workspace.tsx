@@ -17,10 +17,12 @@ import {
 } from "@chakra-ui/react";
 
 // Custom components
+import ActorTag from "@components/ActorTag";
 import Icon from "@components/Icon";
 import DataTable from "@components/DataTable";
 import { Content } from "@components/Container";
-import ActorTag from "@components/ActorTag";
+import TimestampTag from "@components/TimestampTag";
+import VisibilityTag from "@components/VisibilityTag";
 import MDEditor from "@uiw/react-md-editor";
 import { createColumnHelper } from "@tanstack/react-table";
 
@@ -40,7 +42,6 @@ import { useNavigate } from "react-router-dom";
 
 // Utility functions and libraries
 import _ from "lodash";
-import dayjs from "dayjs";
 
 // Contexts
 import { useWorkspace } from "@hooks/useWorkspace";
@@ -61,6 +62,7 @@ const Workspace = () => {
         _id
         name
         owner
+        public
         timestamp
         description
         collaborators
@@ -198,6 +200,9 @@ const Workspace = () => {
   const [collaborator, setCollaborator] = useState("");
   const [collaborators, setCollaborators] = useState([] as string[]);
 
+  // State for Workspace privacy
+  const [isPublic, setIsPublic] = useState(false);
+
   const { workspace } = useWorkspace();
 
   useEffect(() => {
@@ -214,6 +219,7 @@ const Workspace = () => {
         setCreated(workspaceResult.data.workspace.timestamp);
         setDescription(workspaceResult.data.workspace.description);
         setCollaborators(workspaceResult.data.workspace.collaborators);
+        setIsPublic(workspaceResult.data.workspace.public);
       }
 
       // Get all Workspace data
@@ -289,6 +295,7 @@ const Workspace = () => {
           name: name,
           description: description,
           owner: owner,
+          public: isPublic,
           collaborators: collaborators,
           entities: entities.map((e) => e._id),
           projects: projects.map((p) => p._id),
@@ -695,35 +702,45 @@ const Workspace = () => {
               rounded={"md"}
               bg={"gray.100"}
             >
-              <FormControl isRequired>
-                <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
-                  Name
-                </FormLabel>
-                <Input
-                  id={"modalWorkspaceName"}
-                  bg={"white"}
-                  size={"sm"}
-                  rounded={"md"}
-                  placeholder={"Name"}
-                  value={name}
-                  onChange={(event) => setName(event.target.value)}
-                />
-              </FormControl>
-              {/* "Created" and "Owner" fields */}
               <Flex direction={"row"} gap={"2"}>
+                <Flex grow={"1"}>
+                  <FormControl isRequired>
+                    <FormLabel fontSize={"sm"} fontWeight={"semibold"} mb={"1"}>
+                      Name
+                    </FormLabel>
+                    <Input
+                      id={"modalWorkspaceName"}
+                      bg={"white"}
+                      size={"sm"}
+                      rounded={"md"}
+                      placeholder={"Name"}
+                      value={name}
+                      onChange={(event) => setName(event.target.value)}
+                    />
+                  </FormControl>
+                </Flex>
+
+                <TimestampTag timestamp={created} description={"Created"} />
+              </Flex>
+
+              {/* "Visibility" and "Owner" fields */}
+              <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
                 <Flex direction={"column"} gap={"1"}>
-                  <Text fontWeight={"bold"}>Owner</Text>
+                  <Text fontWeight={"bold"} fontSize={"sm"}>
+                    Visibility
+                  </Text>
+                  <VisibilityTag
+                    isPublic={isPublic}
+                    setIsPublic={setIsPublic}
+                  />
+                </Flex>
+
+                <Flex direction={"column"} gap={"1"}>
+                  <Text fontWeight={"bold"} fontSize={"sm"}>
+                    Owner
+                  </Text>
                   <Flex>
                     <ActorTag orcid={owner} fallback={"Unknown User"} />
-                  </Flex>
-                </Flex>
-                <Flex direction={"column"} gap={"1"}>
-                  <Text fontWeight={"bold"}>Created</Text>
-                  <Flex align={"center"} gap={"1"}>
-                    <Icon name={"v_date"} size={"sm"} />
-                    <Text fontSize={"sm"}>
-                      {dayjs(created).format("DD MMM YYYY")}
-                    </Text>
                   </Flex>
                 </Flex>
               </Flex>

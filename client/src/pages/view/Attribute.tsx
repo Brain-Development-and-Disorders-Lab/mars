@@ -20,6 +20,7 @@ import Icon from "@components/Icon";
 import Values from "@components/Values";
 import Dialog from "@components/Dialog";
 import ActorTag from "@components/ActorTag";
+import TimestampTag from "@components/TimestampTag";
 import MDEditor from "@uiw/react-md-editor";
 
 // Existing and custom types
@@ -27,7 +28,6 @@ import { AttributeModel, IValue } from "@types";
 
 // Utility functions and libraries
 import _ from "lodash";
-import dayjs from "dayjs";
 
 // Routing and navigation
 import { useParams } from "react-router-dom";
@@ -35,6 +35,7 @@ import { gql, useMutation, useQuery } from "@apollo/client";
 
 // Workspace context
 import { useWorkspace } from "@hooks/useWorkspace";
+import VisibilityTag from "@components/VisibilityTag";
 
 const Attribute = () => {
   const { id } = useParams();
@@ -42,7 +43,7 @@ const Attribute = () => {
 
   const [editing, setEditing] = useState(false);
 
-  const [attributeData, setAttributeData] = useState({} as AttributeModel);
+  const [attribute, setAttribute] = useState({} as AttributeModel);
   const [attributeName, setAttributeName] = useState("");
   const [attributeDescription, setAttributeDescription] = useState("");
   const [attributeArchived, setAttributeArchived] = useState(false);
@@ -110,7 +111,7 @@ const Attribute = () => {
   useEffect(() => {
     if (data?.attribute) {
       // Unpack all the Entity data
-      setAttributeData(data.attribute);
+      setAttribute(data.attribute);
       setAttributeName(data.attribute.name);
       setAttributeArchived(data.attribute.archived);
       setAttributeDescription(data.attribute.description || "");
@@ -144,7 +145,7 @@ const Attribute = () => {
   const handleArchiveClick = async () => {
     const response = await archiveAttribute({
       variables: {
-        _id: attributeData._id,
+        _id: attribute._id,
         state: true,
       },
     });
@@ -177,7 +178,7 @@ const Attribute = () => {
   const handleRestoreFromArchiveClick = async () => {
     const response = await archiveAttribute({
       variables: {
-        _id: attributeData._id,
+        _id: attribute._id,
         state: false,
       },
     });
@@ -214,7 +215,7 @@ const Attribute = () => {
       const response = await updateAttribute({
         variables: {
           attribute: {
-            _id: attributeData._id,
+            _id: attribute._id,
             name: attributeName,
             description: attributeDescription,
             values: attributeValues,
@@ -269,7 +270,7 @@ const Attribute = () => {
           >
             <Icon name={"attribute"} size={"md"} />
             <Heading fontWeight={"semibold"} size={"md"}>
-              {attributeData.name}
+              {attribute.name}
             </Heading>
           </Flex>
 
@@ -343,86 +344,86 @@ const Attribute = () => {
           </Flex>
         </Flex>
 
-        <Flex direction={"column"} gap={"2"} p={"2"}>
-          <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
+        <Flex direction={"column"} gap={"2"} p={"2"} wrap={"wrap"}>
+          {/* Overview and "Description" field */}
+          <Flex direction={"row"} gap={"2"} p={"0"} wrap={"wrap"}>
+            {/* Overview */}
             <Flex
-              direction={"row"}
+              direction={"column"}
               p={"2"}
-              gap={"2"}
-              rounded={"md"}
-              bg={"gray.100"}
-              grow={"1"}
               h={"fit-content"}
+              gap={"2"}
+              bg={"gray.100"}
+              rounded={"md"}
+              grow={"1"}
             >
-              {/* "Name" field */}
-              <Flex gap={"2"} direction={"column"} w={"100%"}>
-                <Flex direction={"column"} gap={"1"}>
-                  <Text fontWeight={"bold"}>Name</Text>
-                  <Flex>
-                    <Input
-                      size={"sm"}
-                      value={attributeName}
-                      onChange={(event) => {
-                        setAttributeName(event.target.value || "");
-                      }}
-                      isReadOnly={!editing}
-                      rounded={"md"}
-                      border={"1px"}
-                      borderColor={"gray.300"}
-                      bg={"white"}
-                    />
-                  </Flex>
+              <Flex direction={"row"} gap={"2"}>
+                <Flex direction={"column"} gap={"1"} grow={"1"}>
+                  <Text fontWeight={"bold"} fontSize={"sm"}>
+                    Name
+                  </Text>
+                  <Input
+                    id={"attributeNameInput"}
+                    size={"sm"}
+                    value={attributeName}
+                    onChange={(event) => {
+                      setAttributeName(event.target.value);
+                    }}
+                    isReadOnly={!editing}
+                    bg={"white"}
+                    rounded={"md"}
+                    border={"1px"}
+                    borderColor={"gray.300"}
+                  />
                 </Flex>
 
-                {/* "Created" and "Owner" fields */}
-                <Flex direction={"row"} gap={"2"}>
-                  <Flex direction={"column"} gap={"1"}>
-                    <Text fontWeight={"bold"}>Owner</Text>
-                    <Flex>
-                      <ActorTag
-                        orcid={attributeData.owner}
-                        fallback={"Unknown User"}
-                      />
-                    </Flex>
-                  </Flex>
-                  <Flex direction={"column"} gap={"1"}>
-                    <Text fontWeight={"bold"}>Created</Text>
-                    <Flex align={"center"} gap={"1"}>
-                      <Icon name={"v_date"} size={"sm"} />
-                      <Text fontSize={"sm"}>
-                        {dayjs(attributeData.timestamp).format("DD MMM YYYY")}
-                      </Text>
-                    </Flex>
-                  </Flex>
+                <TimestampTag
+                  timestamp={attribute.timestamp}
+                  description={"Created"}
+                />
+              </Flex>
+
+              <Flex gap={"2"} direction={"row"}>
+                <Flex direction={"column"} gap={"1"}>
+                  <Text fontWeight={"bold"} fontSize={"sm"}>
+                    Visibility
+                  </Text>
+                  <VisibilityTag isPublic={false} isInherited />
+                </Flex>
+
+                <Flex direction={"column"} gap={"1"}>
+                  <Text fontWeight={"bold"} fontSize={"sm"}>
+                    Owner
+                  </Text>
+                  <ActorTag orcid={attribute.owner} fallback={"No Owner"} />
                 </Flex>
               </Flex>
             </Flex>
 
+            {/* Description */}
             <Flex
-              direction={"row"}
+              direction={"column"}
               p={"2"}
-              gap={"2"}
-              basis={"50%"}
-              grow={"1"}
+              gap={"1"}
               border={"1px"}
               borderColor={"gray.300"}
               rounded={"md"}
+              basis={"40%"}
+              grow={"1"}
             >
-              {/* "Description" field */}
-              <Flex gap={"2"} direction={"column"} w={"100%"}>
-                <Text fontWeight={"bold"}>Description</Text>
-                <Flex>
-                  <MDEditor
-                    style={{ width: "100%" }}
-                    value={attributeDescription}
-                    preview={editing ? "edit" : "preview"}
-                    extraCommands={[]}
-                    onChange={(value) => {
-                      setAttributeDescription(value || "");
-                    }}
-                  />
-                </Flex>
-              </Flex>
+              <Text fontWeight={"bold"} fontSize={"sm"}>
+                Description
+              </Text>
+              <MDEditor
+                id={"attributeDescriptionInput"}
+                style={{ width: "100%" }}
+                value={attributeDescription}
+                preview={editing ? "edit" : "preview"}
+                extraCommands={[]}
+                onChange={(value) => {
+                  setAttributeDescription(value || "");
+                }}
+              />
             </Flex>
           </Flex>
 

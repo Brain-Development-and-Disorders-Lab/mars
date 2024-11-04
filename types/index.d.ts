@@ -120,9 +120,17 @@ export type LinkyProps = {
 };
 
 // "Actor" component props
-export type ActorProps = {
+export type ActorTagProps = {
   orcid: string;
   fallback: string;
+};
+
+// "VisibilityTagProps" component props
+export type VisibilityTagProps = {
+  isPublic: boolean;
+  setIsPublic?: (value: React.SetStateAction<boolean>) => void;
+  isDisabled?: boolean; // Disable changing the visibility
+  isInherited?: boolean; // Specify if this visibility is inherited
 };
 
 // Project types
@@ -165,6 +173,7 @@ export type IGenericItem = {
 export type IWorkspace = {
   name: string;
   owner: string;
+  public: boolean;
   description: string;
   collaborators: string[];
   entities: string[];

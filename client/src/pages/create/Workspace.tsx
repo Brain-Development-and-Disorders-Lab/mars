@@ -88,6 +88,7 @@ const CreateWorkspace = () => {
           name: name,
           description: description,
           owner: token.orcid,
+          public: false,
           collaborators: collaborators,
           entities: [],
           projects: [],
