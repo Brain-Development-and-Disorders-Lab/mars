@@ -17,7 +17,7 @@ export type ScannerStatus = "disconnected" | "connected" | "error";
 
 export namespace State.Entity {
   type Start = {
-    location: "none" | "start" | "associations" | "attributes";
+    location: "none" | "start" | "relationships" | "attributes";
     name: string;
     created: string;
     owner: string;
@@ -26,10 +26,7 @@ export namespace State.Entity {
 
   type Associations = Start & {
     projects: string[];
-    associations: {
-      origins: IGenericItem[];
-      products: IGenericItem[];
-    };
+    relationships: IRelationship[];
   };
 
   type Attributes = Associations & {
@@ -169,6 +166,16 @@ export type IGenericItem = {
   name: string;
 };
 
+// Utility type to define set of relationship types
+export type RelationshipType = "parent" | "child" | "general";
+
+// Utility type to define relationship between two Entities
+export type IRelationship = {
+  type: RelationshipType;
+  source: IGenericItem;
+  target: IGenericItem;
+};
+
 // Workspace types
 export type IWorkspace = {
   name: string;
@@ -195,10 +202,7 @@ export type IEntity = {
   created: string;
   description: string;
   projects: string[];
-  associations: {
-    origins: IGenericItem[];
-    products: IGenericItem[];
-  };
+  relationships: IRelationship[];
   attributes: AttributeModel[];
   attachments: IGenericItem[];
   history: EntityHistory[];
@@ -210,10 +214,7 @@ export type EntityModel = IEntity & {
 };
 
 export type EntityNode = IGenericItem & {
-  associations: {
-    origins: IGenericItem[];
-    products: IGenericItem[];
-  };
+  relationships: IRelationship[];
 };
 
 export type EntityHistory = {
@@ -226,10 +227,7 @@ export type EntityHistory = {
   created: string;
   description: string;
   projects: string[];
-  associations: {
-    origins: IGenericItem[];
-    products: IGenericItem[];
-  };
+  relationships: IRelationship[];
   attributes: AttributeModel[];
   attachments: IGenericItem[];
 };

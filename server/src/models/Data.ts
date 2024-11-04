@@ -178,10 +178,7 @@ export class Data {
         created: dayjs(Date.now()).toISOString(),
         description: row[columnMapping.description],
         projects: [],
-        associations: {
-          origins: [], // Clear Origins list
-          products: [], // Clear Products list
-        },
+        relationships: [],
         attributes: attributes,
         attachments: [],
         history: [],

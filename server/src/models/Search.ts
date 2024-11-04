@@ -6,7 +6,6 @@ import _ from "lodash";
 import { Workspaces } from "./Workspaces";
 import { Entities } from "./Entities";
 import { Projects } from "./Projects";
-import consola from "consola";
 
 // Collection names
 const ENTITIES_COLLECTION = "entities";
