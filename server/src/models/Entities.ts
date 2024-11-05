@@ -534,14 +534,9 @@ export class Entities {
       };
     }
 
-    // Add the new `IRelationship` to the target Entity
-    const relationships: IRelationship[] = _.cloneDeep(
-      targetEntity.relationships,
-    );
+    // Switch the source and target
     const source = _.cloneDeep(relationship.source);
     const target = _.cloneDeep(relationship.target);
-
-    // Switch the source and target
     targetRelationship.source = target;
     targetRelationship.target = source;
 
@@ -566,6 +561,11 @@ export class Entities {
         message: "Relationship between Entities already exists",
       };
     }
+
+    // Add the new `IRelationship` to the target Entity
+    const relationships: IRelationship[] = _.cloneDeep(
+      targetEntity.relationships,
+    );
     relationships.push(targetRelationship);
 
     const update: { $set: Partial<EntityModel> } = {
@@ -587,20 +587,47 @@ export class Entities {
     };
   };
 
+  /**
+   * Remove a relationship from a target Entity
+   * @param relationship Relationship data containing the source Entity, target Entity, and relationship type
+   * @return {Promise<IResponseMessage>}
+   */
   static removeRelationship = async (
     relationship: IRelationship,
   ): Promise<IResponseMessage> => {
-    const entity = await Entities.getOne(relationship.source._id);
+    // Create a clone of the `IRelationship` instance for the target Entity
+    const targetRelationship = _.cloneDeep(relationship);
+    const targetEntity = await Entities.getOne(targetRelationship.target._id);
 
-    if (_.isNull(entity)) {
+    if (_.isNull(targetEntity)) {
       return {
         success: false,
-        message: "Entity not found",
+        message: "Target Entity not found",
       };
     }
 
-    // Confirm that the relationship does not exist
-    if (!Entities.relationshipExists(relationship, entity.relationships)) {
+    // Switch the source and target
+    const source = _.cloneDeep(relationship.source);
+    const target = _.cloneDeep(relationship.target);
+    targetRelationship.source = target;
+    targetRelationship.target = source;
+
+    // Amend the relationship depending on the relationship type
+    if (relationship.type === "child") {
+      // Flip to "parent" type if "child" being added
+      targetRelationship.type = "parent";
+    } else if (relationship.type === "parent") {
+      // Flip to "child" type if "parent" being added
+      targetRelationship.type = "child";
+    }
+
+    // Confirm that the relationship to remove currently exists on the target Entity
+    if (
+      !Entities.relationshipExists(
+        targetRelationship,
+        targetEntity.relationships,
+      )
+    ) {
       return {
         success: false,
         message: "Relationship between Entities does not exist",
@@ -609,9 +636,9 @@ export class Entities {
 
     // Remove the existing `IRelationship`
     const relationships: IRelationship[] = _.cloneDeep(
-      entity.relationships,
+      targetEntity.relationships,
     ).filter((r) => {
-      return !Entities.relationshipIsEqual(r, relationship);
+      return !Entities.relationshipIsEqual(r, targetRelationship);
     });
 
     const update: { $set: Partial<EntityModel> } = {
@@ -622,7 +649,7 @@ export class Entities {
 
     const response = await getDatabase()
       .collection<EntityModel>(ENTITIES_COLLECTION)
-      .updateOne({ _id: relationship.source._id }, update);
+      .updateOne({ _id: targetRelationship.source._id }, update);
     const successStatus = response.modifiedCount == 1;
 
     return {
