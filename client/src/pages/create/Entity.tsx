@@ -32,8 +32,6 @@ import {
   StepStatus,
   StepTitle,
   Stepper,
-  Tag,
-  TagCloseButton,
   Text,
   VStack,
   useDisclosure,
@@ -42,9 +40,9 @@ import {
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
-import Linky from "@components/Linky";
 import AttributeCard from "@components/AttributeCard";
 import SearchSelect from "@components/SearchSelect";
+import Relationships from "@components/Relationships";
 import MDEditor from "@uiw/react-md-editor";
 
 // Existing and custom types
@@ -53,6 +51,8 @@ import {
   AttributeCardProps,
   IGenericItem,
   ResponseData,
+  IRelationship,
+  RelationshipType,
 } from "@types";
 
 // Utility functions and libraries
@@ -72,12 +72,12 @@ import { useAuthentication } from "@hooks/useAuthentication";
 const Entity = () => {
   // Used to manage what detail inputs are presented
   const [pageState, setPageState] = useState(
-    "start" as "start" | "attributes" | "associations",
+    "start" as "start" | "attributes" | "relationships",
   );
 
   const pageSteps = [
     { title: "Start", description: "Basic information" },
-    { title: "Associations", description: "Relations" },
+    { title: "Relationships", description: "Relationships between Entities" },
     { title: "Attributes", description: "Specify metadata" },
   ];
   const { activeStep, setActiveStep } = useSteps({
@@ -103,10 +103,16 @@ const Entity = () => {
   const [owner] = useState(token.orcid);
   const [description, setDescription] = useState("");
   const [selectedProjects, setSelectedProjects] = useState([] as string[]);
-  const [selectedOrigins, setSelectedOrigins] = useState([] as IGenericItem[]);
-  const [selectedProducts, setSelectedProducts] = useState(
-    [] as IGenericItem[],
+
+  // Manage relationships
+  const [selectedRelationshipTarget, setSelectedRelationshipTarget] = useState(
+    {} as IGenericItem,
   );
+  const [selectedRelationshipType, setSelectedRelationshipType] = useState(
+    "general" as RelationshipType,
+  );
+  const [relationships, setRelationships] = useState([] as IRelationship[]);
+
   const [selectedAttributes, setSelectedAttributes] = useState(
     [] as AttributeModel[],
   );
@@ -220,53 +226,12 @@ const Entity = () => {
     return true;
   };
 
-  // Handle `SearchSelect` updates for selecting Origins and Products
-  const [selectedOrigin, setSelectedOrigin] = useState({} as IGenericItem);
-  useEffect(() => {
-    if (
-      _.find(selectedOrigins, (origin) => {
-        return _.isEqual(origin._id, selectedOrigin._id);
-      })
-    ) {
-      toast({
-        title: "Warning",
-        description: "Origin has already been selected.",
-        status: "warning",
-        duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
-      });
-    } else if (selectedOrigin._id && !_.isEqual(selectedOrigin._id, "")) {
-      setSelectedOrigins([...selectedOrigins, selectedOrigin]);
-    }
-  }, [selectedOrigin]);
-
-  const [selectedProduct, setSelectedProduct] = useState({} as IGenericItem);
-  useEffect(() => {
-    if (
-      _.find(selectedProducts, (product) => {
-        return _.isEqual(product._id, selectedProduct._id);
-      })
-    ) {
-      toast({
-        title: "Warning",
-        description: "Product has already been selected.",
-        status: "warning",
-        duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
-      });
-    } else if (selectedProduct._id && !_.isEqual(selectedProduct._id, "")) {
-      setSelectedProducts([...selectedProducts, selectedProduct]);
-    }
-  }, [selectedProduct]);
-
   // Handle clicking "Next"
   const onPageNext = async () => {
     if (_.isEqual("start", pageState)) {
-      setPageState("associations");
+      setPageState("relationships");
       setActiveStep(1);
-    } else if (_.isEqual("associations", pageState)) {
+    } else if (_.isEqual("relationships", pageState)) {
       setPageState("attributes");
       setActiveStep(2);
     } else if (_.isEqual("attributes", pageState)) {
@@ -281,10 +246,7 @@ const Entity = () => {
             created: created,
             archived: false,
             description: description,
-            associations: {
-              origins: selectedOrigins,
-              products: selectedProducts,
-            },
+            relationships: [],
             projects: selectedProjects,
             attributes: selectedAttributes,
             attachments: [],
@@ -301,13 +263,31 @@ const Entity = () => {
 
   // Handle clicking "Back"
   const onPageBack = () => {
-    if (_.isEqual("associations", pageState)) {
+    if (_.isEqual("relationships", pageState)) {
       setPageState("start");
       setActiveStep(0);
     } else if (_.isEqual("attributes", pageState)) {
-      setPageState("associations");
+      setPageState("relationships");
       setActiveStep(1);
     }
+  };
+
+  const addRelationship = () => {
+    // Create the `IRelationship` data structure
+    const relationship: IRelationship = {
+      source: {
+        _id: "no_id",
+        name: name,
+      },
+      target: selectedRelationshipTarget,
+      type: selectedRelationshipType,
+    };
+
+    setRelationships([...relationships, relationship]);
+
+    // Reset the relationship modal state
+    setSelectedRelationshipType("general");
+    setSelectedRelationshipTarget({} as IGenericItem);
   };
 
   // Removal callback
@@ -487,8 +467,8 @@ const Entity = () => {
           </Flex>
         )}
 
-        {/* "Associations" page */}
-        {_.isEqual("associations", pageState) && (
+        {/* "Relationships" page */}
+        {_.isEqual("relationships", pageState) && (
           <Flex direction={"row"} gap={"0"} wrap={"wrap"}>
             <Flex
               direction={"column"}
@@ -499,7 +479,7 @@ const Entity = () => {
               basis={"50%"}
               rounded={"md"}
             >
-              {/* Origins */}
+              {/* Relationships */}
               <Flex
                 direction={"column"}
                 p={"2"}
@@ -509,116 +489,76 @@ const Entity = () => {
                 borderColor={"gray.300"}
               >
                 <FormControl>
-                  <FormLabel fontSize={"sm"}>Origins</FormLabel>
-                  <SearchSelect
-                    resultType={"entity"}
-                    value={selectedOrigin}
-                    onChange={setSelectedOrigin}
-                  />
+                  <FormLabel fontSize={"sm"}>Relationships</FormLabel>
+                  <Flex direction={"row"} gap={"2"} justify={"space-between"}>
+                    <Flex direction={"row"} gap={"2"} align={"center"}>
+                      <Flex>
+                        <Select size={"sm"} rounded={"md"} isDisabled>
+                          <option>{name}</option>
+                        </Select>
+                      </Flex>
+                      <Flex>
+                        <Select
+                          size={"sm"}
+                          rounded={"md"}
+                          value={selectedRelationshipType}
+                          onChange={(event) =>
+                            setSelectedRelationshipType(
+                              event.target.value as RelationshipType,
+                            )
+                          }
+                        >
+                          <option value={"general"}>General</option>
+                          <option value={"parent"}>Parent</option>
+                          <option value={"child"}>Child</option>
+                        </Select>
+                      </Flex>
+                      <Flex>
+                        <SearchSelect
+                          resultType={"entity"}
+                          value={selectedRelationshipTarget}
+                          onChange={setSelectedRelationshipTarget}
+                        />
+                      </Flex>
+                    </Flex>
+                    <Button
+                      rightIcon={<Icon name={"add"} />}
+                      colorScheme={"green"}
+                      size={"sm"}
+                      isDisabled={_.isUndefined(selectedRelationshipTarget._id)}
+                      onClick={() => addRelationship()}
+                    >
+                      Add
+                    </Button>
+                  </Flex>
                   <FormHelperText fontSize={"sm"}>
-                    If the sources of this Entity currently exist or did exist
-                    in this system, specify those associations here by selecting
-                    the origin Entities.
+                    Create relationships between this Entity and other existing
+                    Entities.
                   </FormHelperText>
                 </FormControl>
 
-                {/* List selected Origins */}
-                <Flex
-                  direction={"row"}
-                  p={"2"}
-                  gap={"2"}
-                  wrap={"wrap"}
-                  minH={selectedOrigins.length > 0 ? "fit-content" : "100px"}
-                  align={"center"}
-                  justify={"center"}
-                >
-                  {selectedOrigins.map((product) => {
-                    return (
-                      <Tag key={`tag-${product._id}`}>
-                        <Linky id={product._id} type={"entities"} size={"sm"} />
-                        <TagCloseButton
-                          onClick={() => {
-                            setSelectedOrigins(
-                              selectedOrigins.filter((selected) => {
-                                return !_.isEqual(product._id, selected._id);
-                              }),
-                            );
-                          }}
-                        />
-                      </Tag>
-                    );
-                  })}
-                  {selectedOrigins.length === 0 && (
-                    <Text
-                      fontSize={"sm"}
-                      fontWeight={"semibold"}
-                      color={"gray.400"}
-                    >
-                      No Origins
-                    </Text>
-                  )}
-                </Flex>
-              </Flex>
-
-              {/* Products */}
-              <Flex
-                direction={"column"}
-                p={"2"}
-                gap={"2"}
-                rounded={"md"}
-                border={"1px"}
-                borderColor={"gray.300"}
-              >
-                <FormControl>
-                  <FormLabel fontSize={"sm"}>Products</FormLabel>
-                  <SearchSelect
-                    resultType={"entity"}
-                    value={selectedProduct}
-                    onChange={setSelectedProduct}
+                {relationships.length > 0 ? (
+                  <Relationships
+                    relationships={relationships}
+                    setRelationships={setRelationships}
+                    viewOnly={false}
                   />
-                  <FormHelperText fontSize={"sm"}>
-                    If this Entity has any derivatives or Entities that have
-                    been created from it, specify those associations here by
-                    selecting the corresponding Entities.
-                  </FormHelperText>
-                </FormControl>
-
-                <Flex
-                  direction={"row"}
-                  p={"2"}
-                  w={"100%"}
-                  gap={"2"}
-                  wrap={"wrap"}
-                  minH={selectedProducts.length > 0 ? "fit-content" : "100px"}
-                  align={"center"}
-                  justify={"center"}
-                >
-                  {selectedProducts.map((product) => {
-                    return (
-                      <Tag key={`tag-${product._id}`}>
-                        <Linky id={product._id} type={"entities"} size={"sm"} />
-                        <TagCloseButton
-                          onClick={() => {
-                            setSelectedProducts(
-                              selectedProducts.filter((selected) => {
-                                return !_.isEqual(product._id, selected._id);
-                              }),
-                            );
-                          }}
-                        />
-                      </Tag>
-                    );
-                  })}
-                  {selectedProducts.length === 0 && (
+                ) : (
+                  <Flex
+                    w={"100%"}
+                    minH={"200px"}
+                    align={"center"}
+                    justify={"center"}
+                  >
                     <Text
-                      fontSize={"sm"}
                       fontWeight={"semibold"}
+                      fontSize={"sm"}
                       color={"gray.400"}
                     >
-                      No Products
+                      No Relationships
                     </Text>
-                  )}
-                </Flex>
+                  </Flex>
+                )}
               </Flex>
             </Flex>
 

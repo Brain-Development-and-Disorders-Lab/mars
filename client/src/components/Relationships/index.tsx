@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Flex, Tooltip, Text, Tag, IconButton, Link } from "@chakra-ui/react";
 import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
@@ -7,15 +7,13 @@ import { createColumnHelper } from "@tanstack/react-table";
 // Custom and existing types
 import { DataTableAction, IRelationship, RelationshipsProps } from "@types";
 
-import _ from "lodash";
+// Navigation
 import { useNavigate } from "react-router-dom";
 
-const Relationships = (props: RelationshipsProps) => {
-  const [relationships, setRelationships] = useState(props.relationships);
-  useEffect(() => {
-    setRelationships(props.relationships);
-  }, [props.relationships]);
+// Utility functions and libraries
+import _ from "lodash";
 
+const Relationships = (props: RelationshipsProps) => {
   const navigate = useNavigate();
 
   /**
@@ -29,7 +27,7 @@ const Relationships = (props: RelationshipsProps) => {
     return (
       _.isEqual(a.source._id, b.source._id) &&
       _.isEqual(a.target._id, b.target._id) &&
-      _.isEqual(a.target, b.type)
+      _.isEqual(a.type, b.type)
     );
   };
 
@@ -54,17 +52,17 @@ const Relationships = (props: RelationshipsProps) => {
 
   // Remove Relationship from the Entity state
   const removeRelationship = (relationship: IRelationship) => {
-    setRelationships(
-      relationships.filter((r) => {
+    props.setRelationships([
+      ...props.relationships.filter((r) => {
         return !relationshipIsEqual(r, relationship);
       }),
-    );
+    ]);
   };
 
   // Remove multiple Relationships from the Entity state
   const removeRelationships = (toRemove: IRelationship[]) => {
-    setRelationships(
-      relationships.filter((r) => {
+    props.setRelationships(
+      props.relationships.filter((r) => {
         return !relationshipExists(r, toRemove);
       }),
     );
@@ -150,7 +148,7 @@ const Relationships = (props: RelationshipsProps) => {
       action(table, rows) {
         const toRemove: IRelationship[] = [];
         for (const rowIndex of Object.keys(rows)) {
-          toRemove.push(table.getRow(rowIndex).original._id);
+          toRemove.push(table.getRow(rowIndex).original);
         }
         removeRelationships(toRemove);
       },
@@ -160,8 +158,8 @@ const Relationships = (props: RelationshipsProps) => {
   return (
     <Flex w={"100%"}>
       <DataTable
-        data={relationships}
-        setData={setRelationships}
+        data={props.relationships}
+        setData={props.setRelationships}
         columns={relationshipTableColumns}
         viewOnly={props.viewOnly}
         actions={relationshipTableActions}
