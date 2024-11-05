@@ -108,29 +108,14 @@ export class Entities {
     };
 
     // Create reciprocal relationships between Entities
-    for await (const relationship of entity.relationships) {
-      if (relationship.type === "child") {
-        // Create "parent" on the target Entity
-        await Entities.addRelationship({
-          target: relationship.target,
-          source: relationship.source,
-          type: "parent",
-        });
-      } else if (relationship.type === "parent") {
-        // Create "child" on the target Entity
-        await Entities.addRelationship({
-          target: relationship.target,
-          source: relationship.source,
-          type: "child",
-        });
-      } else {
-        // Default relationship type
-        await Entities.addRelationship({
-          target: relationship.target,
-          source: relationship.source,
-          type: "general",
-        });
-      }
+    for await (const relationship of joinedEntity.relationships) {
+      // Update the `source` component to include Entity information
+      relationship.source = {
+        _id: joinedEntity._id,
+        name: joinedEntity.name,
+      };
+
+      await Entities.addRelationship(relationship);
     }
 
     for await (const project of entity.projects) {
@@ -507,7 +492,7 @@ export class Entities {
     return (
       _.isEqual(a.source._id, b.source._id) &&
       _.isEqual(a.target._id, b.target._id) &&
-      _.isEqual(a.target, b.type)
+      _.isEqual(a.type, b.type)
     );
   };
 
@@ -530,29 +515,58 @@ export class Entities {
     return false;
   };
 
+  /**
+   * Add a new relationship to a target Entity
+   * @param relationship Relationship data containing the source Entity, target Entity, and relationship type
+   * @return {Promise<IResponseMessage>}
+   */
   static addRelationship = async (
     relationship: IRelationship,
   ): Promise<IResponseMessage> => {
-    const entity = await Entities.getOne(relationship.source._id);
+    // Create a clone of the `IRelationship` instance for the target Entity
+    const targetRelationship = _.cloneDeep(relationship);
+    const targetEntity = await Entities.getOne(targetRelationship.target._id);
 
-    if (_.isNull(entity)) {
+    if (_.isNull(targetEntity)) {
       return {
         success: false,
-        message: "Source Entity not found",
+        message: "Target Entity not found",
       };
     }
 
-    // Confirm that the relationship does not exist
-    if (Entities.relationshipExists(relationship, entity.relationships)) {
+    // Add the new `IRelationship` to the target Entity
+    const relationships: IRelationship[] = _.cloneDeep(
+      targetEntity.relationships,
+    );
+    const source = _.cloneDeep(relationship.source);
+    const target = _.cloneDeep(relationship.target);
+
+    // Switch the source and target
+    targetRelationship.source = target;
+    targetRelationship.target = source;
+
+    // Amend the relationship depending on the relationship type
+    if (relationship.type === "child") {
+      // Flip to "parent" type if "child" being added
+      targetRelationship.type = "parent";
+    } else if (relationship.type === "parent") {
+      // Flip to "child" type if "parent" being added
+      targetRelationship.type = "child";
+    }
+
+    // Confirm that the relationship does not exist on the target Entity
+    if (
+      Entities.relationshipExists(
+        targetRelationship,
+        targetEntity.relationships,
+      )
+    ) {
       return {
         success: false,
         message: "Relationship between Entities already exists",
       };
     }
-
-    // Add the new `IRelationship`
-    const relationships: IRelationship[] = _.cloneDeep(entity.relationships);
-    relationships.push(relationship);
+    relationships.push(targetRelationship);
 
     const update: { $set: Partial<EntityModel> } = {
       $set: {
@@ -562,7 +576,7 @@ export class Entities {
 
     const response = await getDatabase()
       .collection<EntityModel>(ENTITIES_COLLECTION)
-      .updateOne({ _id: relationship.source._id }, update);
+      .updateOne({ _id: targetRelationship.source._id }, update);
     const successStatus = response.modifiedCount == 1;
 
     return {

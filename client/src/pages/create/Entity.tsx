@@ -246,7 +246,7 @@ const Entity = () => {
             created: created,
             archived: false,
             description: description,
-            relationships: [],
+            relationships: relationships,
             projects: selectedProjects,
             attributes: selectedAttributes,
             attachments: [],
