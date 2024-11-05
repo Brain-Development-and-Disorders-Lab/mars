@@ -176,6 +176,12 @@ export type IRelationship = {
   target: IGenericItem;
 };
 
+export type RelationshipsProps = {
+  relationships: IRelationship[];
+  setRelationships: (value: React.SetStateAction<IRelationship[]>) => void;
+  viewOnly?: boolean;
+};
+
 // Workspace types
 export type IWorkspace = {
   name: string;
