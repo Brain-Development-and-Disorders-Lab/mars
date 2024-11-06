@@ -2547,17 +2547,19 @@ const Entity = () => {
                         <CardBody px={"2"} py={"0"}>
                           <Flex direction={"column"} gap={"2"}>
                             {/* Description */}
-                            {_.isEqual(entityVersion.description, "") ? (
-                              <Tag size={"sm"} colorScheme={"orange"}>
-                                No Description
-                              </Tag>
-                            ) : (
-                              <Text fontSize={"sm"}>
-                                {_.truncate(entityVersion.description, {
-                                  length: 56,
-                                })}
-                              </Text>
-                            )}
+                            <Flex w={"100%"}>
+                              {_.isEqual(entityVersion.description, "") ? (
+                                <Tag size={"sm"} colorScheme={"orange"}>
+                                  No Description
+                                </Tag>
+                              ) : (
+                                <Text fontSize={"sm"}>
+                                  {_.truncate(entityVersion.description, {
+                                    length: 56,
+                                  })}
+                                </Text>
+                              )}
+                            </Flex>
 
                             <Flex direction={"row"} gap={"2"}>
                               {/* Projects */}
@@ -2620,13 +2622,7 @@ const Entity = () => {
                                   Relationships
                                 </Text>
                                 <Flex direction={"row"} gap={"2"}>
-                                  <Flex direction={"row"} gap={"1"}>
-                                    <Text
-                                      fontSize={"sm"}
-                                      fontWeight={"semibold"}
-                                    >
-                                      Origins:
-                                    </Text>
+                                  <Flex w={"100%"}>
                                     <Tag
                                       key={`v_o_${entityVersion.timestamp}`}
                                       size={"sm"}

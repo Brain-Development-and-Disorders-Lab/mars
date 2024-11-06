@@ -279,7 +279,10 @@ const Entity = () => {
         _id: "no_id",
         name: name,
       },
-      target: selectedRelationshipTarget,
+      target: {
+        _id: selectedRelationshipTarget._id,
+        name: selectedRelationshipTarget.name,
+      },
       type: selectedRelationshipType,
     };
 
@@ -768,10 +771,10 @@ const Entity = () => {
                   this Entity should be specified using Attributes and
                   corresponding Values.
                 </Text>
-                <Heading size={"md"}>Associations</Heading>
+                <Heading size={"md"}>Relationships</Heading>
                 <Text>
                   Relations between Entities and membership to Projects can be
-                  specified using Associations.
+                  specified using Relationships.
                 </Text>
                 <Heading size={"md"}>Attributes</Heading>
                 <Text>

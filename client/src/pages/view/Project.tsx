@@ -906,6 +906,7 @@ const Project = () => {
             {/* Entities */}
             <Flex
               direction={"column"}
+              h={"fit-content"}
               p={"2"}
               gap={"2"}
               rounded={"md"}
@@ -969,9 +970,11 @@ const Project = () => {
               direction={"column"}
               gap={"2"}
               p={"2"}
+              h={"fit-content"}
               rounded={"md"}
               border={"1px"}
               borderColor={"gray.300"}
+              basis={"50%"}
               grow={"1"}
             >
               {/* Collaborators display */}

@@ -24,12 +24,12 @@ export namespace State.Entity {
     description: string;
   };
 
-  type Associations = Start & {
+  type Relationships = Start & {
     projects: string[];
     relationships: IRelationship[];
   };
 
-  type Attributes = Associations & {
+  type Attributes = Relationships & {
     attributes: IAttribute[];
   };
 }
@@ -238,17 +238,6 @@ export type EntityHistory = {
   attachments: IGenericItem[];
 };
 
-export type EntityExport = {
-  // Specific details
-  name: string;
-  created: string;
-  owner: string;
-  description: string;
-  projects: string;
-  origins: string;
-  products: string;
-};
-
 export type EntityImport = {
   // Specific details
   name: string;
@@ -256,8 +245,7 @@ export type EntityImport = {
   owner: string;
   description: string;
   projects: string;
-  origins: IGenericItem[];
-  products: IGenericItem[];
+  relationships: IRelationship[];
   attributes: AttributeModel[];
 };
 

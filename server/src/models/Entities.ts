@@ -843,7 +843,7 @@ export class Entities {
             formatted["description"] = entity.description;
           } else if (_.startsWith(field, "relationship_")) {
             // "relationship" data field
-            // Create an empty associations structure
+            // Create an empty relationships structure
             if (_.isUndefined(formatted.relationships)) {
               formatted.relationships = [];
             }

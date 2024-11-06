@@ -17,7 +17,7 @@ import "reactflow/dist/style.css";
 import Icon from "@components/Icon";
 
 // Existing and custom types
-import { EntityNode } from "@types";
+import { EntityNode, IRelationship } from "@types";
 
 // Utility functions and libraries
 import { gql, useLazyQuery } from "@apollo/client";
@@ -39,15 +39,16 @@ const Graph = (props: {
       entity(_id: $_id) {
         _id
         name
-        associations {
-          origins {
+        relationships {
+          target {
             _id
             name
           }
-          products {
+          source {
             _id
             name
           }
+          type
         }
       }
     }
@@ -92,21 +93,25 @@ const Graph = (props: {
       const initialNodes = [] as Node[];
       const initialEdges = [] as Edge[];
 
-      // Add the Origins
-      if (entity.associations.origins.length > 0) {
+      // Add the relationships
+      if (entity.relationships.length > 0) {
         // Add nodes and edges
-        for (const origin of entity.associations.origins) {
+        for (const relationship of entity.relationships) {
           // Add node
           initialNodes.push({
-            id: origin._id,
-            type: "input",
+            id: relationship.target._id,
+            type: "default",
             data: {
-              label: createLabel(origin._id, origin.name, false),
+              label: createLabel(
+                relationship.target._id,
+                relationship.target.name,
+                false,
+              ),
             },
             position: { x: 250, y: 0 },
             style: {
               border: "2px solid",
-              borderColor: "#9F7AEA", // purple.400
+              borderColor: "#A0AEC0", // gray.400
               width: "160px",
               height: "75px",
             },
@@ -114,66 +119,23 @@ const Graph = (props: {
 
           // Create edge
           initialEdges.push({
-            id: origin._id,
-            source: origin._id,
-            target: entity._id,
-            markerEnd: {
-              type: MarkerType.ArrowClosed,
-            },
+            id: `${relationship.source._id}_${relationship.target._id}`,
+            source: relationship.source._id,
+            target: relationship.target._id,
+            markerEnd:
+              relationship.type !== "general"
+                ? {
+                    type: MarkerType.ArrowClosed,
+                  }
+                : undefined,
           });
         }
-      }
-
-      // Add the Products
-      if (entity.associations.products.length > 0) {
-        // Add nodes and edges
-        for (const product of entity.associations.products) {
-          // Add node
-          initialNodes.push({
-            id: product._id,
-            type: "output",
-            data: {
-              label: createLabel(product._id, product.name, false),
-            },
-            position: { x: 100, y: 200 },
-            style: {
-              border: "2px solid",
-              borderColor: "#ECC94B", // yellow.400
-              width: "160px",
-              height: "75px",
-            },
-          });
-
-          // Create edge
-          initialEdges.push({
-            id: `edge_${entity._id}_${product._id}`,
-            source: entity._id,
-            target: product._id,
-            markerEnd: {
-              type: MarkerType.ArrowClosed,
-            },
-          });
-        }
-      }
-
-      // Default assuming origin and products
-      let currentType = "default";
-      if (
-        entity.associations.origins.length > 0 &&
-        entity.associations.products.length === 0
-      ) {
-        currentType = "output";
-      } else if (
-        entity.associations.origins.length === 0 &&
-        entity.associations.products.length > 0
-      ) {
-        currentType = "input";
       }
 
       // Add the current Entity to the diagram
       initialNodes.push({
         id: entity._id,
-        type: currentType,
+        type: "default",
         data: {
           label: createLabel(entity._id, entity.name, true),
         },
@@ -221,13 +183,29 @@ const Graph = (props: {
 
   /**
    * Utility function to determine membership of an Edge in the graph
-   * @param {string} source Source node
-   * @param {string} target Target node
+   * @param {IRelationship} relationship Relationship between two Entities
    * @returns {boolean}
    */
-  const containsEdge = (source: string, target: string): boolean => {
+  const containsEdge = (relationship: IRelationship): boolean => {
     for (const edge of edges) {
-      if (_.isEqual(edge.source, source) && _.isEqual(edge.target, target)) {
+      if (
+        _.isEqual(edge.source, relationship.source._id) &&
+        _.isEqual(edge.target, relationship.target._id)
+      ) {
+        // Check for source -> target edge
+        return true;
+      } else if (
+        relationship.type === "general" &&
+        _.isEqual(edge.source, relationship.target._id) &&
+        _.isEqual(edge.target, relationship.source._id)
+      ) {
+        // Check for target -> source edge, general relationship type
+        return true;
+      } else if (
+        _.isEqual(edge.source, relationship.target._id) &&
+        _.isEqual(edge.target, relationship.source._id)
+      ) {
+        // Check for target -> source edge, other relationships
         return true;
       }
     }
@@ -298,9 +276,15 @@ const Graph = (props: {
         w={"100%"}
         gap={"2"}
       >
-        <Flex w={"100%"} gap={"2"} direction={"row"} align={"center"}>
+        <Flex
+          key={`label_inner_container_${id}`}
+          w={"100%"}
+          gap={"2"}
+          direction={"row"}
+          align={"center"}
+        >
           <Icon key={`label_icon_${id}`} name={"entity"} size={"sm"} />
-          <Tooltip label={name}>
+          <Tooltip key={`tooltip_${id}`} label={name}>
             <Text
               key={`inner_label_text_${id}`}
               fontWeight={"semibold"}
@@ -335,7 +319,7 @@ const Graph = (props: {
   };
 
   /**
-   * Handle clicking a Node on the graph. If the Node is not the primary Node, retrieve and add the Origin and Product
+   * Handle clicking a Node on the graph. If the Node is not the primary Node, retrieve and add the related
    * Entities of the clicked Node to the graph.
    * @param _event Click event information
    * @param node Node that was clicked
@@ -345,52 +329,37 @@ const Graph = (props: {
     node: Node,
   ): Promise<void> => {
     if (!_.isEqual(node.id.toString(), props.id.toString())) {
-      // If the primary Entity hasn't been clicked, obtain Origin and Product nodes
+      // If the primary Entity hasn't been clicked, obtain relationships and setup missing nodes and edges
       // for the selected Entity
       let updatedNodes = _.cloneDeep(nodes);
       let updatedEdges = _.cloneDeep(edges);
 
       // Update state
       let refreshLayout = false;
-      let addedOriginCount = 0;
-      let addedProductCount = 0;
+      let addedRelationshipCount = 0;
 
       const entity = await getEntityData(node.id);
 
-      // Origins
-      if (entity.associations.origins.length > 0) {
-        for await (const origin of entity.associations.origins) {
-          if (containsNode(origin._id) === false) {
-            // Firstly, update the current node type (if required)
-            updatedNodes = [
-              ...updatedNodes.map((node) => {
-                if (_.isEqual(node.id, entity._id)) {
-                  if (entity.associations.products.length > 0) {
-                    // If Products are specified as well, we need to set it to
-                    // "default" type
-                    node.type = "default";
-                  } else {
-                    // If no Products are specified, the Entity only has Origin,
-                    // making it "output" type
-                    node.type = "output";
-                  }
-                }
-                return node;
-              }),
-            ];
-
+      if (entity.relationships.length > 0) {
+        for await (const relationship of entity.relationships) {
+          // Update nodes
+          if (containsNode(relationship.target._id) === false) {
             // Add node
             updatedNodes = [
               ...updatedNodes,
               {
-                id: origin._id,
-                type: "input",
+                id: relationship.target._id,
+                type: "default",
                 data: {
-                  label: createLabel(origin._id, origin.name, false),
+                  label: createLabel(
+                    relationship.target._id,
+                    relationship.target.name,
+                    false,
+                  ),
                 },
                 position: { x: 100, y: 200 },
                 style: {
-                  border: "2px solid",
+                  border: "2px dashed", // Add new Entities with dashed borders
                   borderColor: "#A0AEC0", // gray.400
                   width: "160px",
                   height: "75px",
@@ -399,82 +368,24 @@ const Graph = (props: {
             ];
 
             refreshLayout = true;
-            addedOriginCount += 1;
+            addedRelationshipCount += 1;
           }
 
-          if (containsEdge(origin._id, node.id) === false) {
+          // Update edges
+          if (containsEdge(relationship) === false) {
             // Create edge
             updatedEdges = [
               ...updatedEdges,
               {
-                id: `edge_${origin._id}_${node.id}`,
-                source: origin._id,
-                target: node.id,
-                markerEnd: {
-                  type: MarkerType.ArrowClosed,
-                },
-              },
-            ];
-          }
-        }
-      }
-
-      // Products
-      if (entity.associations.products.length > 0) {
-        for (const product of entity.associations.products) {
-          if (containsNode(product._id) === false) {
-            // Firstly, update the current node type (if required)
-            updatedNodes = [
-              ...updatedNodes.map((node) => {
-                if (_.isEqual(node.id, entity._id)) {
-                  if (entity.associations.origins.length > 0) {
-                    // If an Origin is specified as well, we need to set it to
-                    // "default" type
-                    node.type = "default";
-                  } else {
-                    // If no Origin is specified, the Entity only has Products,
-                    // making it "input" type
-                    node.type = "input";
-                  }
-                }
-                return node;
-              }),
-            ];
-
-            // Add node
-            updatedNodes = [
-              ...updatedNodes,
-              {
-                id: product._id,
-                type: "output",
-                data: {
-                  label: createLabel(product._id, product.name, false),
-                },
-                position: { x: 100, y: 200 },
-                style: {
-                  border: "2px solid",
-                  borderColor: "#A0AEC0", // gray.400
-                  width: "160px",
-                  height: "75px",
-                },
-              },
-            ];
-
-            refreshLayout = true;
-            addedProductCount += 1;
-          }
-
-          if (containsEdge(node.id, product._id) === false) {
-            // Create edge
-            updatedEdges = [
-              ...updatedEdges,
-              {
-                id: `edge_${node.id}_${product._id}`,
-                source: node.id,
-                target: product._id,
-                markerEnd: {
-                  type: MarkerType.ArrowClosed,
-                },
+                id: `${relationship.source._id}_${relationship.target._id}`,
+                source: relationship.source._id,
+                target: relationship.target._id,
+                markerEnd:
+                  relationship.type !== "general"
+                    ? {
+                        type: MarkerType.ArrowClosed,
+                      }
+                    : undefined,
               },
             ];
           }
@@ -494,19 +405,13 @@ const Graph = (props: {
           });
         }
 
-        if (!toast.isActive("toast-retrieved-associations")) {
+        if (!toast.isActive("toast-retrieved-relationships")) {
           // Generate an update message
-          let updateMessage = `Showing ${addedOriginCount} Origin${addedOriginCount > 1 ? "s" : ""} and ${addedProductCount} Product${addedProductCount > 1 && "s"} of Entity "${entity.name}"`;
-          if (addedOriginCount > 0 && addedProductCount === 0) {
-            updateMessage = `Showing ${addedOriginCount} Origin${addedOriginCount > 1 ? "s" : ""} of Entity "${entity.name}"`;
-          } else if (addedProductCount > 0 && addedOriginCount === 0) {
-            updateMessage = `Showing ${addedProductCount} Product${addedProductCount > 1 ? "s" : ""} of Entity "${entity.name}"`;
-          }
           toast({
-            id: "toast-retrieved-associations",
-            title: "Retrieved Origins and Products",
+            id: "toast-retrieved-relationships",
+            title: "Retrieved relationships",
             status: "success",
-            description: updateMessage,
+            description: `Showing ${addedRelationshipCount} relationship${addedRelationshipCount > 1 ? "s" : ""} for Entity "${entity.name}"`,
             duration: 4000,
             position: "bottom-right",
             isClosable: true,
