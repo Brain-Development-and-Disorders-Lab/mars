@@ -46,11 +46,6 @@ import {
   MenuButton,
   MenuList,
   MenuItem,
-  Tabs,
-  TabList,
-  Tab,
-  TabPanel,
-  TabPanels,
   CardFooter,
   Divider,
 } from "@chakra-ui/react";
@@ -79,8 +74,10 @@ import {
   EntityModel,
   IAttribute,
   IGenericItem,
+  IRelationship,
   IValue,
   ProjectModel,
+  RelationshipType,
 } from "@types";
 
 // Utility functions and libraries
@@ -102,6 +99,7 @@ import { useParams, useNavigate } from "react-router-dom";
 // Contexts
 import { useWorkspace } from "@hooks/useWorkspace";
 import { useAuthentication } from "@hooks/useAuthentication";
+import Relationships from "@components/Relationships";
 
 const Entity = () => {
   const { id } = useParams();
@@ -132,37 +130,17 @@ const Entity = () => {
   const [projectData, setProjectData] = useState([] as ProjectModel[]);
   const [selectedProjects, setSelectedProjects] = useState([] as string[]);
 
-  const [minimalEntities, setMinimalEntities] = useState([] as IGenericItem[]);
-
   const {
-    isOpen: isAddProductsOpen,
-    onOpen: onAddProductsOpen,
-    onClose: onAddProductsClose,
+    isOpen: isAddRelationshipsOpen,
+    onOpen: onAddRelationshipsOpen,
+    onClose: onAddRelationshipsClose,
   } = useDisclosure();
-  const [selectedProducts, setSelectedProducts] = useState([] as string[]);
-  const [selectedProduct, setSelectedProduct] = useState({} as IGenericItem);
-
-  useEffect(() => {
-    if (selectedProduct && !_.includes(selectedProducts, selectedProduct._id)) {
-      // Append the selected Product
-      setSelectedProducts([...selectedProducts, selectedProduct._id]);
-    }
-  }, [selectedProduct]);
-
-  const {
-    isOpen: isAddOriginsOpen,
-    onOpen: onAddOriginsOpen,
-    onClose: onAddOriginsClose,
-  } = useDisclosure();
-  const [selectedOrigins, setSelectedOrigins] = useState([] as string[]);
-  const [selectedOrigin, setSelectedOrigin] = useState({} as IGenericItem);
-
-  useEffect(() => {
-    if (selectedOrigin && !_.includes(selectedOrigins, selectedOrigin._id)) {
-      // Append the selected Origin
-      setSelectedOrigins([...selectedOrigins, selectedOrigin._id]);
-    }
-  }, [selectedOrigin]);
+  const [selectedRelationshipType, setSelectedRelationshipType] = useState(
+    "general" as RelationshipType,
+  );
+  const [selectedRelationshipTarget, setSelectedRelationshipTarget] = useState(
+    {} as IGenericItem,
+  );
 
   // History drawer
   const {
@@ -204,15 +182,16 @@ const Entity = () => {
         archived
         description
         projects
-        associations {
-          origins {
+        relationships {
+          source {
             _id
             name
           }
-          products {
+          target {
             _id
             name
           }
+          type
         }
         attributes {
           _id
@@ -239,15 +218,16 @@ const Entity = () => {
           owner
           description
           projects
-          associations {
-            origins {
+          relationships {
+            source {
               _id
               name
             }
-            products {
+            target {
               _id
               name
             }
+            type
           }
           attributes {
             _id
@@ -265,10 +245,6 @@ const Entity = () => {
             name
           }
         }
-      }
-      entities {
-        _id
-        name
       }
       projects {
         _id
@@ -356,19 +332,10 @@ const Entity = () => {
       setEntityArchived(data.entity.archived);
       setEntityDescription(data.entity.description || "");
       setEntityProjects(data.entity.projects || []);
-      setEntityOrigins(data.entity.associations.origins || []);
-      setEntityProducts(data.entity.associations.products || []);
+      setEntityRelationships(data.entity.relationships || []);
       setEntityAttributes(data.entity.attributes || []);
       setEntityAttachments(data.entity.attachments);
       setEntityHistory(data.entity.history || []);
-    }
-    if (data?.entities) {
-      // Unpack the minimal Entity data
-      setMinimalEntities(
-        data.entities.filter(
-          (entity: EntityModel) => !_.isEqual(entityData._id, entity._id),
-        ),
-      );
     }
     // Unpack Project data
     if (data?.projects) {
@@ -489,8 +456,9 @@ const Entity = () => {
   const [entityName, setEntityName] = useState("");
   const [entityDescription, setEntityDescription] = useState("");
   const [entityProjects, setEntityProjects] = useState([] as string[]);
-  const [entityOrigins, setEntityOrigins] = useState([] as IGenericItem[]);
-  const [entityProducts, setEntityProducts] = useState([] as IGenericItem[]);
+  const [entityRelationships, setEntityRelationships] = useState(
+    [] as IRelationship[],
+  );
   const [entityAttributes, setEntityAttributes] = useState(
     [] as AttributeModel[],
   );
@@ -509,9 +477,6 @@ const Entity = () => {
     onOpen: onArchiveDialogOpen,
     onClose: onArchiveDialogClose,
   } = useDisclosure();
-
-  // Manage the tab index between "Entity Origins" and "Entity Products"
-  const [relationsIndex, setRelationsIndex] = useState(0);
 
   const {
     isOpen: isExportOpen,
@@ -551,10 +516,7 @@ const Entity = () => {
               owner: entityData.owner,
               description: entityDescription,
               projects: entityProjects,
-              associations: {
-                origins: entityOrigins,
-                products: entityProducts,
-              },
+              relationships: entityRelationships,
               attributes: entityAttributes,
               attachments: entityAttachments,
             },
@@ -601,8 +563,7 @@ const Entity = () => {
     setEntityName(entityName);
     setEntityDescription(entityDescription);
     setEntityProjects(entityProjects);
-    setEntityOrigins(entityOrigins);
-    setEntityProducts(entityProducts);
+    setEntityRelationships(entityRelationships);
     setEntityAttributes(entityAttributes);
     setEntityAttachments(entityAttachments);
     setEntityHistory(entityHistory);
@@ -696,129 +657,8 @@ const Entity = () => {
         for (const rowIndex of Object.keys(rows)) {
           projectsToRemove.push(table.getRow(rowIndex).original);
         }
+
         removeProjects(projectsToRemove);
-      },
-    },
-  ];
-
-  // Configure origins table columns and data
-  const originTableColumnHelper = createColumnHelper<IGenericItem>();
-  const originTableColumns = [
-    originTableColumnHelper.accessor("name", {
-      cell: (info) => {
-        return (
-          <Tooltip label={info.getValue()} hasArrow>
-            <Text>
-              {_.truncate(info.getValue(), {
-                length: truncateTableText ? 12 : 24,
-              })}
-            </Text>
-          </Tooltip>
-        );
-      },
-      header: "Name",
-    }),
-    originTableColumnHelper.accessor("_id", {
-      cell: (info) => {
-        return (
-          <Flex w={"100%"} justify={"end"}>
-            {editing ? (
-              <IconButton
-                icon={<Icon name={"delete"} />}
-                size={"sm"}
-                aria-label={"Remove origin"}
-                colorScheme={"red"}
-                onClick={() => {
-                  removeOrigin(info.row.original._id);
-                }}
-              />
-            ) : (
-              <Flex justifyContent={"right"} p={"2"} align={"center"} gap={"1"}>
-                <Link
-                  onClick={() => navigate(`/entities/${info.row.original._id}`)}
-                >
-                  <Text fontWeight={"semibold"}>View</Text>
-                </Link>
-                <Icon name={"a_right"} />
-              </Flex>
-            )}
-          </Flex>
-        );
-      },
-      header: "",
-    }),
-  ];
-  const originTableActions: DataTableAction[] = [
-    {
-      label: "Remove Origins",
-      icon: "delete",
-      action(table, rows) {
-        const originsToRemove: string[] = [];
-        for (const rowIndex of Object.keys(rows)) {
-          originsToRemove.push(table.getRow(rowIndex).original._id);
-        }
-        removeOrigins(originsToRemove);
-      },
-    },
-  ];
-
-  // Configure products table columns and data
-  const productTableColumnHelper = createColumnHelper<IGenericItem>();
-  const productTableColumns = [
-    productTableColumnHelper.accessor("name", {
-      cell: (info) => {
-        return (
-          <Tooltip label={info.getValue()} hasArrow>
-            <Text>
-              {_.truncate(info.getValue(), {
-                length: truncateTableText ? 12 : 24,
-              })}
-            </Text>
-          </Tooltip>
-        );
-      },
-      header: "Name",
-    }),
-    productTableColumnHelper.accessor("_id", {
-      cell: (info) => {
-        return (
-          <Flex w={"100%"} justify={"end"}>
-            {editing ? (
-              <IconButton
-                icon={<Icon name={"delete"} />}
-                size={"sm"}
-                aria-label={"Remove product"}
-                colorScheme={"red"}
-                onClick={() => {
-                  removeProduct(info.row.original._id);
-                }}
-              />
-            ) : (
-              <Flex justifyContent={"right"} p={"2"} align={"center"} gap={"1"}>
-                <Link
-                  onClick={() => navigate(`/entities/${info.row.original._id}`)}
-                >
-                  <Text fontWeight={"semibold"}>View</Text>
-                </Link>
-                <Icon name={"a_right"} />
-              </Flex>
-            )}
-          </Flex>
-        );
-      },
-      header: "",
-    }),
-  ];
-  const productTableActions: DataTableAction[] = [
-    {
-      label: "Remove Products",
-      icon: "delete",
-      action(table, rows) {
-        const productsToRemove: string[] = [];
-        for (const rowIndex of Object.keys(rows)) {
-          productsToRemove.push(table.getRow(rowIndex).original._id);
-        }
-        removeProducts(productsToRemove);
       },
     },
   ];
@@ -1015,10 +855,7 @@ const Entity = () => {
             owner: entityVersion.owner,
             description: entityVersion.description || "",
             projects: entityVersion.projects || [],
-            associations: {
-              origins: entityVersion.associations.origins || [],
-              products: entityVersion.associations.products || [],
-            },
+            relationships: entityVersion.relationships || [],
             attributes: entityVersion.attributes || [],
             attachments: entityVersion.attachments || [],
           },
@@ -1035,8 +872,7 @@ const Entity = () => {
       // Update the state (safely)
       setEntityDescription(entityVersion.description || "");
       setEntityProjects(entityVersion.projects || []);
-      setEntityOrigins(entityVersion.associations.origins || []);
-      setEntityProducts(entityVersion.associations.products || []);
+      setEntityRelationships(entityVersion.relationships || []);
       setEntityAttributes(entityVersion.attributes || []);
       setEntityAttachments(entityVersion.attachments || []);
 
@@ -1176,58 +1012,28 @@ const Entity = () => {
     navigate(`/entities/${id}`);
   };
 
-  // Add Products to the Entity state
-  const addProducts = (products: string[]): void => {
-    setEntityProducts([
-      ...entityProducts,
-      ...minimalEntities.filter((entity) => products.includes(entity._id)),
-    ]);
-    setSelectedProducts([]);
-    onAddProductsClose();
-  };
+  // Add Relationships to the Entity state
+  const addRelationship = (): void => {
+    // Create the `IRelationship` data structure
+    const relationship: IRelationship = {
+      source: {
+        _id: entityData._id,
+        name: entityName,
+      },
+      target: {
+        _id: selectedRelationshipTarget._id,
+        name: selectedRelationshipTarget.name,
+      },
+      type: selectedRelationshipType,
+    };
 
-  // Remove Products from the Entity state
-  const removeProduct = (_id: string) => {
-    setEntityProducts(
-      entityProducts.filter((product) => {
-        return product._id !== _id;
-      }),
-    );
-  };
+    setEntityRelationships([...entityRelationships, relationship]);
 
-  const removeProducts = (ids: string[]) => {
-    setEntityProducts(
-      entityProducts.filter((product) => {
-        return !_.includes(ids, product._id);
-      }),
-    );
-  };
+    // Reset the relationship modal state
+    setSelectedRelationshipType("general");
+    setSelectedRelationshipTarget({} as IGenericItem);
 
-  // Add Origins to the Entity state
-  const addOrigins = (origins: string[]): void => {
-    setEntityOrigins([
-      ...entityOrigins,
-      ...minimalEntities.filter((entity) => origins.includes(entity._id)),
-    ]);
-    setSelectedOrigins([]);
-    onAddOriginsClose();
-  };
-
-  // Remove Origins from the Entity state
-  const removeOrigin = (id: string) => {
-    setEntityOrigins(
-      entityOrigins.filter((origin) => {
-        return origin._id !== id;
-      }),
-    );
-  };
-
-  const removeOrigins = (ids: string[]) => {
-    setEntityOrigins(
-      entityOrigins.filter((origin) => {
-        return !_.includes(ids, origin._id);
-      }),
-    );
+    onAddRelationshipsClose();
   };
 
   // Remove a Project from the Entity state
@@ -1708,116 +1514,63 @@ const Entity = () => {
             </Flex>
           </Flex>
 
-          {/* "Origins", "Products" and "Attachments" fields */}
+          {/* "Relationships" and "Attachments" fields */}
           <Flex direction={"row"} gap={"2"} p={"0"} wrap={"wrap"}>
-            {/* Origins and Products */}
-            <Flex h={"fit-content"} basis={"40%"} grow={"1"}>
-              <Tabs
-                w={"100%"}
-                variant={"enclosed"}
-                colorScheme={"gray"}
-                onChange={(index) => setRelationsIndex(index)}
-              >
-                <TabList>
-                  <Tab>
-                    <Text fontSize={"sm"} fontWeight={"bold"}>
-                      Origins
-                    </Text>
-                  </Tab>
-                  <Tab>
-                    <Text fontSize={"sm"} fontWeight={"bold"}>
-                      Products
-                    </Text>
-                  </Tab>
-                  <Spacer />
+            {/* Relationships */}
+            <Flex
+              direction={"column"}
+              p={"2"}
+              h={"fit-content"}
+              gap={"2"}
+              rounded={"md"}
+              border={"1px"}
+              borderColor={"gray.300"}
+              basis={"40%"}
+              grow={"1"}
+            >
+              <Flex gap={"2"} direction={"column"}>
+                <Flex
+                  direction={"row"}
+                  justify={"space-between"}
+                  align={"center"}
+                >
+                  <Text fontSize={"sm"} fontWeight={"bold"}>
+                    Relationships
+                  </Text>
                   <Button
                     size={"sm"}
                     rightIcon={<Icon name={"add"} />}
                     isDisabled={!editing}
-                    onClick={() => {
-                      _.isEqual(relationsIndex, 0)
-                        ? onAddOriginsOpen()
-                        : onAddProductsOpen();
-                    }}
+                    onClick={onAddRelationshipsOpen}
                   >
                     Add
                   </Button>
-                </TabList>
-                <TabPanels>
-                  <TabPanel
-                    p={"2"}
-                    borderLeft={"1px"}
-                    borderRight={"1px"}
-                    borderBottom={"1px"}
-                    borderColor={"gray.300"}
-                    roundedBottom={"md"}
-                  >
-                    <Flex
-                      w={"100%"}
-                      justify={"center"}
-                      align={entityOrigins.length > 0 ? "" : "center"}
-                      minH={entityOrigins.length > 0 ? "fit-content" : "200px"}
+                </Flex>
+                <Flex
+                  w={"100%"}
+                  justify={"center"}
+                  align={entityRelationships.length > 0 ? "" : "center"}
+                  minH={
+                    entityRelationships.length > 0 ? "fit-content" : "200px"
+                  }
+                >
+                  {entityRelationships.length > 0 ? (
+                    <Relationships
+                      relationships={entityRelationships}
+                      setRelationships={setEntityRelationships}
+                      viewOnly={!editing}
+                    />
+                  ) : (
+                    <Text
+                      color={"gray.400"}
+                      fontWeight={"semibold"}
+                      fontSize={"sm"}
                     >
-                      {entityOrigins.length > 0 ? (
-                        <DataTable
-                          data={entityOrigins}
-                          columns={originTableColumns}
-                          visibleColumns={{}}
-                          selectedRows={{}}
-                          viewOnly={!editing}
-                          actions={originTableActions}
-                          showPagination
-                          showSelection
-                        />
-                      ) : (
-                        <Text
-                          color={"gray.400"}
-                          fontWeight={"semibold"}
-                          fontSize={"sm"}
-                        >
-                          No Origins
-                        </Text>
-                      )}
-                    </Flex>
-                  </TabPanel>
-                  <TabPanel
-                    p={"2"}
-                    borderLeft={"1px"}
-                    borderRight={"1px"}
-                    borderBottom={"1px"}
-                    borderColor={"gray.300"}
-                    roundedBottom={"md"}
-                  >
-                    <Flex
-                      w={"100%"}
-                      justify={"center"}
-                      align={entityProducts.length > 0 ? "" : "center"}
-                      minH={entityProducts.length > 0 ? "fit-content" : "200px"}
-                    >
-                      {entityProducts.length > 0 ? (
-                        <DataTable
-                          data={entityProducts}
-                          columns={productTableColumns}
-                          visibleColumns={{}}
-                          selectedRows={{}}
-                          viewOnly={!editing}
-                          actions={productTableActions}
-                          showPagination
-                          showSelection
-                        />
-                      ) : (
-                        <Text
-                          color={"gray.400"}
-                          fontWeight={"semibold"}
-                          fontSize={"sm"}
-                        >
-                          No Products
-                        </Text>
-                      )}
-                    </Flex>
-                  </TabPanel>
-                </TabPanels>
-              </Tabs>
+                      No Relationships
+                    </Text>
+                  )}
+                </Flex>
+              </Flex>
             </Flex>
 
             {/* Attachments */}
@@ -2191,24 +1944,100 @@ const Entity = () => {
           </ModalContent>
         </Modal>
 
-        {/* Add Products modal */}
+        {/* Add Relationships modal */}
         <Modal
-          isOpen={isAddProductsOpen}
-          onClose={onAddProductsClose}
+          isOpen={isAddRelationshipsOpen}
+          onClose={onAddRelationshipsClose}
+          size={"lg"}
           isCentered
         >
           <ModalOverlay />
-          <ModalContent p={"2"} gap={"0"} w={["md", "lg", "xl"]}>
+          <ModalContent p={"2"} gap={"0"}>
             {/* Heading and close button */}
-            <ModalHeader p={"2"}>Add Products</ModalHeader>
+            <ModalHeader p={"2"}>
+              <Text fontWeight={"bold"} fontSize={"sm"}>
+                Add Relationship
+              </Text>
+            </ModalHeader>
             <ModalCloseButton />
 
             <ModalBody p={"2"}>
-              <SearchSelect
-                resultType={"entity"}
-                value={selectedProduct}
-                onChange={setSelectedProduct}
-              />
+              <Flex direction={"column"} gap={"2"}>
+                <Flex
+                  direction={"row"}
+                  gap={"2"}
+                  justify={"space-between"}
+                  p={"2"}
+                  rounded={"md"}
+                  border={"1px"}
+                  borderColor={"gray.300"}
+                >
+                  <Flex direction={"column"} gap={"1"}>
+                    <Text fontSize={"sm"} fontWeight={"semibold"}>
+                      Source
+                    </Text>
+                    <Select size={"sm"} rounded={"md"} isDisabled>
+                      <option>{entityName}</option>
+                    </Select>
+                  </Flex>
+                  <Flex direction={"column"} gap={"1"}>
+                    <Text fontSize={"sm"} fontWeight={"semibold"}>
+                      Type
+                    </Text>
+                    <Select
+                      size={"sm"}
+                      rounded={"md"}
+                      value={selectedRelationshipType}
+                      onChange={(event) =>
+                        setSelectedRelationshipType(
+                          event.target.value as RelationshipType,
+                        )
+                      }
+                    >
+                      <option value={"general"}>General</option>
+                      <option value={"parent"}>Parent</option>
+                      <option value={"child"}>Child</option>
+                    </Select>
+                  </Flex>
+                  <Flex direction={"column"} gap={"1"}>
+                    <Text fontSize={"sm"} fontWeight={"semibold"}>
+                      Target
+                    </Text>
+                    <SearchSelect
+                      resultType={"entity"}
+                      value={selectedRelationshipTarget}
+                      onChange={setSelectedRelationshipTarget}
+                    />
+                  </Flex>
+                </Flex>
+                <Flex direction={"row"} gap={"1"} align={"center"}>
+                  <Text fontSize={"sm"} fontWeight={"bold"}>
+                    Description:
+                  </Text>
+                  <Text fontSize={"sm"}>{entityName} is</Text>
+                  <Tag
+                    fontSize={"sm"}
+                    fontWeight={"semibold"}
+                    colorScheme={"yellow"}
+                  >
+                    {selectedRelationshipType === "general" && "related"}
+                    {selectedRelationshipType === "child" && "a child"}
+                    {selectedRelationshipType === "parent" && "a parent"}
+                  </Tag>
+                  <Text fontSize={"sm"}>
+                    {selectedRelationshipType === "general" ? "to" : "of"}
+                  </Text>
+                  <Tag
+                    fontSize={"sm"}
+                    fontWeight={"semibold"}
+                    colorScheme={"blue"}
+                  >
+                    {_.isUndefined(selectedRelationshipTarget.name)
+                      ? "Select Entity"
+                      : selectedRelationshipTarget.name}
+                  </Tag>
+                </Flex>
+              </Flex>
             </ModalBody>
 
             <ModalFooter p={"2"}>
@@ -2217,7 +2046,7 @@ const Entity = () => {
                 size={"sm"}
                 variant={"outline"}
                 rightIcon={<Icon name={"cross"} />}
-                onClick={onAddProductsClose}
+                onClick={onAddRelationshipsClose}
               >
                 Cancel
               </Button>
@@ -2228,58 +2057,8 @@ const Entity = () => {
                 colorScheme={"green"}
                 size={"sm"}
                 rightIcon={<Icon name={"check"} />}
-                onClick={() => {
-                  if (id) {
-                    // Add the Product to the Entity
-                    addProducts(selectedProducts);
-                  }
-                }}
-              >
-                Done
-              </Button>
-            </ModalFooter>
-          </ModalContent>
-        </Modal>
-
-        {/* Add Origins modal */}
-        <Modal isOpen={isAddOriginsOpen} onClose={onAddOriginsClose} isCentered>
-          <ModalOverlay />
-          <ModalContent p={"2"} gap={"0"} w={["md", "lg", "xl"]}>
-            {/* Heading and close button */}
-            <ModalHeader p={"2"}>Add Origins</ModalHeader>
-            <ModalCloseButton />
-
-            <ModalBody p={"2"}>
-              <SearchSelect
-                resultType={"entity"}
-                value={selectedOrigin}
-                onChange={setSelectedOrigin}
-              />
-            </ModalBody>
-
-            <ModalFooter p={"2"}>
-              <Button
-                colorScheme={"red"}
-                size={"sm"}
-                variant={"outline"}
-                rightIcon={<Icon name={"cross"} />}
-                onClick={onAddOriginsClose}
-              >
-                Cancel
-              </Button>
-
-              <Spacer />
-
-              <Button
-                colorScheme={"green"}
-                size={"sm"}
-                rightIcon={<Icon name={"check"} />}
-                onClick={() => {
-                  if (id) {
-                    // Add the Origin to the Entity
-                    addOrigins(selectedOrigins);
-                  }
-                }}
+                isDisabled={_.isUndefined(selectedRelationshipTarget._id)}
+                onClick={() => addRelationship()}
               >
                 Done
               </Button>
@@ -2466,28 +2245,30 @@ const Entity = () => {
                 <Flex direction={"row"} gap={"2"}>
                   <FormControl>
                     <FormLabel fontSize={"sm"}>Origins</FormLabel>
-                    {!loading && entityOrigins?.length > 0 ? (
+                    {!loading && entityRelationships?.length > 0 ? (
                       <Stack spacing={2} direction={"column"}>
-                        {entityOrigins.map((origin) => {
-                          allExportFields.push(`origin_${origin._id}`);
+                        {entityRelationships.map((relationship) => {
+                          allExportFields.push(
+                            `relationship_${relationship.target._id}_${relationship.type}`,
+                          );
                           return (
                             <Checkbox
                               size={"sm"}
                               fontSize={"sm"}
-                              key={origin._id}
+                              key={relationship.target._id}
                               isChecked={_.includes(
                                 exportFields,
-                                `origin_${origin._id}`,
+                                `relationship_${relationship.target._id}_${relationship.type}`,
                               )}
                               onChange={(event) =>
                                 handleExportCheck(
-                                  `origin_${origin._id}`,
+                                  `relationship_${relationship.target._id}_${relationship.type}`,
                                   event.target.checked,
                                 )
                               }
                             >
                               <Linky
-                                id={origin._id}
+                                id={relationship.target._id}
                                 type={"entities"}
                                 size={"sm"}
                               />
@@ -2497,42 +2278,6 @@ const Entity = () => {
                       </Stack>
                     ) : (
                       <Text fontSize={"sm"}>No Origins</Text>
-                    )}
-                  </FormControl>
-
-                  <FormControl>
-                    <FormLabel fontSize={"sm"}>Products</FormLabel>
-                    {!loading && entityProducts?.length > 0 ? (
-                      <Stack spacing={2} direction={"column"}>
-                        {entityProducts.map((product) => {
-                          allExportFields.push(`product_${product._id}`);
-                          return (
-                            <Checkbox
-                              size={"sm"}
-                              fontSize={"sm"}
-                              key={product._id}
-                              isChecked={_.includes(
-                                exportFields,
-                                `product_${product._id}`,
-                              )}
-                              onChange={(event) =>
-                                handleExportCheck(
-                                  `product_${product._id}`,
-                                  event.target.checked,
-                                )
-                              }
-                            >
-                              <Linky
-                                id={product._id}
-                                type={"entities"}
-                                size={"sm"}
-                              />
-                            </Checkbox>
-                          );
-                        })}
-                      </Stack>
-                    ) : (
-                      <Text fontSize={"sm"}>No Products</Text>
                     )}
                   </FormControl>
                 </Flex>
@@ -2805,17 +2550,19 @@ const Entity = () => {
                         <CardBody px={"2"} py={"0"}>
                           <Flex direction={"column"} gap={"2"}>
                             {/* Description */}
-                            {_.isEqual(entityVersion.description, "") ? (
-                              <Tag size={"sm"} colorScheme={"orange"}>
-                                No Description
-                              </Tag>
-                            ) : (
-                              <Text fontSize={"sm"}>
-                                {_.truncate(entityVersion.description, {
-                                  length: 56,
-                                })}
-                              </Text>
-                            )}
+                            <Flex w={"100%"}>
+                              {_.isEqual(entityVersion.description, "") ? (
+                                <Tag size={"sm"} colorScheme={"orange"}>
+                                  No Description
+                                </Tag>
+                              ) : (
+                                <Text fontSize={"sm"}>
+                                  {_.truncate(entityVersion.description, {
+                                    length: 56,
+                                  })}
+                                </Text>
+                              )}
+                            </Flex>
 
                             <Flex direction={"row"} gap={"2"}>
                               {/* Projects */}
@@ -2878,41 +2625,13 @@ const Entity = () => {
                                   Relationships
                                 </Text>
                                 <Flex direction={"row"} gap={"2"}>
-                                  <Flex direction={"row"} gap={"1"}>
-                                    <Text
-                                      fontSize={"sm"}
-                                      fontWeight={"semibold"}
-                                    >
-                                      Origins:
-                                    </Text>
+                                  <Flex w={"100%"}>
                                     <Tag
                                       key={`v_o_${entityVersion.timestamp}`}
                                       size={"sm"}
                                     >
                                       <TagLabel>
-                                        {
-                                          entityVersion?.associations?.origins
-                                            ?.length
-                                        }
-                                      </TagLabel>
-                                    </Tag>
-                                  </Flex>
-                                  <Flex direction={"row"} gap={"1"}>
-                                    <Text
-                                      fontWeight={"semibold"}
-                                      fontSize={"sm"}
-                                    >
-                                      Products:
-                                    </Text>
-                                    <Tag
-                                      key={`v_o_${entityVersion.timestamp}`}
-                                      size={"sm"}
-                                    >
-                                      <TagLabel>
-                                        {
-                                          entityVersion?.associations?.products
-                                            ?.length
-                                        }
+                                        {entityVersion?.relationships?.length}
                                       </TagLabel>
                                     </Tag>
                                   </Flex>

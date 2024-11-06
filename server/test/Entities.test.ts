@@ -45,10 +45,7 @@ describe("Entity model", () => {
       owner: "henry.burgess@wustl.edu",
       description: "Test",
       projects: [],
-      associations: {
-        origins: [],
-        products: [],
-      },
+      relationships: [],
       attributes: [],
       attachments: [],
       history: [],
@@ -59,121 +56,121 @@ describe("Entity model", () => {
     expect(entity).not.toBeNull();
   });
 
-  it("should create an association between two Entities when an Origin is specified in a Product", async () => {
+  it("should create a parent-child relationship between two Entities", async () => {
     // Create the first Entity
-    const originResult: ResponseData<string> = await Entities.create({
-      name: "TestOriginEntity",
+    const parentResult: ResponseData<string> = await Entities.create({
+      name: "TestParentEntity",
       created: dayjs(Date.now()).toISOString(),
       archived: false,
       owner: "henry.burgess@wustl.edu",
-      description: "Test Origin",
+      description: "Test Parent",
       projects: [],
-      associations: {
-        origins: [],
-        products: [],
-      },
+      relationships: [],
       attributes: [],
       attachments: [],
       history: [],
     });
 
-    // Create the second Entity (Product) that has the first Entity (Origin)
-    const productResult: ResponseData<string> = await Entities.create({
-      name: "TestProductEntity",
+    // Create the second Entity (child) that has the first Entity as a parent
+    const childResult: ResponseData<string> = await Entities.create({
+      name: "TestChildEntity",
       created: dayjs(Date.now()).toISOString(),
       archived: false,
       owner: "henry.burgess@wustl.edu",
-      description: "Test Product",
+      description: "Test Child",
       projects: [],
-      associations: {
-        origins: [{ name: "TestOriginEntity", _id: originResult.data }],
-        products: [],
-      },
+      relationships: [
+        {
+          source: { name: "TestChildEntity", _id: "no_id" },
+          target: { name: "TestParentEntity", _id: parentResult.data },
+          type: "child",
+        },
+      ],
       attributes: [],
       attachments: [],
       history: [],
     });
 
-    // Refresh Origin Entity
-    const originEntity: EntityModel | null = await Entities.getOne(
-      originResult.data,
+    // Refresh parent Entity
+    const parentEntity: EntityModel | null = await Entities.getOne(
+      parentResult.data,
     );
-    if (_.isNull(originEntity)) throw new Error();
+    if (_.isNull(parentEntity)) throw new Error();
 
-    // Confirm Product Entity creation
-    const productEntity: EntityModel | null = await Entities.getOne(
-      productResult.data,
+    // Confirm child Entity creation
+    const childEntity: EntityModel | null = await Entities.getOne(
+      childResult.data,
     );
-    if (_.isNull(productEntity)) throw new Error();
+    if (_.isNull(childEntity)) throw new Error();
 
-    // Check the Origin of the Product
-    expect(productEntity.associations.origins.length).toBe(1);
-    expect(productEntity.associations.origins[0]._id).toStrictEqual(
-      originEntity._id,
+    // Check the parent of the child
+    expect(childEntity.relationships.length).toBe(1);
+    expect(childEntity.relationships[0].target._id).toStrictEqual(
+      parentEntity._id,
     );
 
-    // Check the Product of the Origin
-    expect(originEntity.associations.products.length).toBe(1);
-    expect(originEntity.associations.products[0]._id).toStrictEqual(
-      productEntity._id,
+    // Check the child of the parent
+    expect(parentEntity.relationships.length).toBe(1);
+    expect(parentEntity.relationships[0].target._id).toStrictEqual(
+      childEntity._id,
     );
   });
 
-  it("should create an association between two Entities when a Product is specified in an Origin", async () => {
-    // Create the first Entity (Product)
-    const productResult: ResponseData<string> = await Entities.create({
-      name: "TestProductEntity",
+  it("should create a child-parent relationship between two Entities", async () => {
+    // Create the first Entity (child)
+    const childResult: ResponseData<string> = await Entities.create({
+      name: "TestChildEntity",
       created: dayjs(Date.now()).toISOString(),
       archived: false,
       owner: "henry.burgess@wustl.edu",
-      description: "Test Product",
+      description: "Test Child",
       projects: [],
-      associations: {
-        origins: [],
-        products: [],
-      },
+      relationships: [],
       attributes: [],
       attachments: [],
       history: [],
     });
 
-    // Create the second Entity (Origin) that has the first Entity (Product)
-    const originResult: ResponseData<string> = await Entities.create({
-      name: "TestOriginEntity",
+    // Create the second Entity (parent) that has the first Entity as a child
+    const parentResult: ResponseData<string> = await Entities.create({
+      name: "TestParentEntity",
       created: dayjs(Date.now()).toISOString(),
       archived: false,
       owner: "henry.burgess@wustl.edu",
-      description: "Test Origin",
+      description: "Test Parent",
       projects: [],
-      associations: {
-        origins: [],
-        products: [{ name: "TestProductEntity", _id: productResult.data }],
-      },
+      relationships: [
+        {
+          source: { name: "TestParentEntity", _id: "no_id" },
+          target: { name: "TestChildEntity", _id: childResult.data },
+          type: "parent",
+        },
+      ],
       attributes: [],
       attachments: [],
       history: [],
     });
 
-    const originEntity: EntityModel | null = await Entities.getOne(
-      originResult.data,
+    const childEntity: EntityModel | null = await Entities.getOne(
+      childResult.data,
     );
-    if (_.isNull(originEntity)) throw new Error();
+    if (_.isNull(childEntity)) throw new Error();
 
-    const productEntity: EntityModel | null = await Entities.getOne(
-      productResult.data,
+    const parentEntity: EntityModel | null = await Entities.getOne(
+      parentResult.data,
     );
-    if (_.isNull(productEntity)) throw new Error();
+    if (_.isNull(parentEntity)) throw new Error();
 
-    // Check the Product of the Origin
-    expect(originEntity.associations.products.length).toBe(1);
-    expect(originEntity.associations.products[0]._id).toStrictEqual(
-      productEntity._id,
+    // Check the child of the parent
+    expect(parentEntity.relationships.length).toBe(1);
+    expect(parentEntity.relationships[0].target._id).toStrictEqual(
+      childEntity._id,
     );
 
-    // Check the Origin of the Product
-    expect(productEntity.associations.origins.length).toBe(1);
-    expect(productEntity.associations.origins[0]._id).toStrictEqual(
-      originEntity._id,
+    // Check the parent of the child
+    expect(childEntity.relationships.length).toBe(1);
+    expect(childEntity.relationships[0].target._id).toStrictEqual(
+      parentEntity._id,
     );
   });
 
@@ -186,10 +183,7 @@ describe("Entity model", () => {
       owner: "henry.burgess@wustl.edu",
       description: "Test",
       projects: [],
-      associations: {
-        origins: [],
-        products: [],
-      },
+      relationships: [],
       attributes: [
         {
           _id: "TestAttribute",
@@ -221,10 +215,7 @@ describe("Entity model", () => {
       owner: "henry.burgess@wustl.edu",
       description: "Test",
       projects: [],
-      associations: {
-        origins: [],
-        products: [],
-      },
+      relationships: [],
       attributes: [],
       attachments: [],
       history: [],
@@ -249,10 +240,7 @@ describe("Entity model", () => {
       owner: "henry.burgess@wustl.edu",
       description: "Test",
       projects: [],
-      associations: {
-        origins: [],
-        products: [],
-      },
+      relationships: [],
       attributes: [],
       attachments: [],
       history: [],
@@ -293,19 +281,6 @@ describe("Entity model", () => {
     // Validate the Project has the Entity
     expect(updatedProject.entities.length).toBe(1);
     expect(updatedProject.entities.pop()).toBe(entityResult.data);
-
-    // Remove the Project from the Entity
-    // await Entities.removeProject(entity._id, project._id);
-    // await Projects.removeEntity(project._id, entity._id);
-
-    // // Validate the Entity no longer has the project
-    // entity = await Entities.getByName("TestEntity");
-    // if (_.isNull(entity)) throw new Error();
-    // expect(entity.projects.length).toBe(0);
-
-    // project = (await Projects.all())[0];
-    // if (_.isNull(project)) throw new Error();
-    // expect(project.entities.length).toBe(0);
   });
 
   it("should update Project membership when removed", async () => {
@@ -316,10 +291,7 @@ describe("Entity model", () => {
       owner: "henry.burgess@wustl.edu",
       description: "Test",
       projects: [],
-      associations: {
-        origins: [],
-        products: [],
-      },
+      relationships: [],
       attributes: [],
       attachments: [],
       history: [],
@@ -364,7 +336,7 @@ describe("Entity model", () => {
     expect(updatedProject.entities.length).toBe(0);
   });
 
-  it("should update Origin associations", async () => {
+  it("should update Entity relationships from the child", async () => {
     const entityResult: ResponseData<string> = await Entities.create({
       name: "TestEntity",
       created: dayjs(Date.now()).toISOString(),
@@ -372,71 +344,73 @@ describe("Entity model", () => {
       owner: "henry.burgess@wustl.edu",
       description: "Test",
       projects: [],
-      associations: {
-        origins: [],
-        products: [],
-      },
+      relationships: [],
       attributes: [],
       attachments: [],
       history: [],
     });
 
-    // Create an Origin
-    const originResult: ResponseData<string> = await Entities.create({
-      name: "OriginEntity",
+    // Create a parent Entity
+    const parentResult: ResponseData<string> = await Entities.create({
+      name: "ParentEntity",
       created: dayjs(Date.now()).toISOString(),
       archived: false,
       owner: "henry.burgess@wustl.edu",
       description: "Test",
       projects: [],
-      associations: {
-        origins: [],
-        products: [],
-      },
+      relationships: [],
       attributes: [],
       attachments: [],
       history: [],
     });
 
-    // Add the Origin
     const entity = await Entities.getOne(entityResult.data);
     if (_.isNull(entity)) throw new Error();
-    entity.associations.origins.push({
-      _id: originResult.data,
-      name: "OriginEntity",
+
+    // Add the parent
+    entity.relationships.push({
+      target: {
+        _id: parentResult.data,
+        name: "ParentEntity",
+      },
+      source: {
+        _id: entityResult.data,
+        name: "TestEntity",
+      },
+      type: "parent",
     });
     await Entities.update(entity);
 
-    // Get the updated Origin Entity and original Entity
-    let originEntity: EntityModel | null = await Entities.getOne(
-      originResult.data,
+    // Get the updated parent Entity and child Entity
+    let parentEntity: EntityModel | null = await Entities.getOne(
+      parentResult.data,
     );
-    if (_.isNull(originEntity)) throw new Error();
+    if (_.isNull(parentEntity)) throw new Error();
 
-    let updatedEntity: EntityModel | null = await Entities.getOne(
+    let childEntity: EntityModel | null = await Entities.getOne(
       entityResult.data,
     );
-    if (_.isNull(updatedEntity)) throw new Error();
+    if (_.isNull(childEntity)) throw new Error();
 
     // Validate Entities
-    expect(originEntity.associations.products.length).toBe(1);
-    expect(updatedEntity.associations.origins.length).toBe(1);
+    expect(parentEntity.relationships.length).toBe(1);
+    expect(childEntity.relationships.length).toBe(1);
 
-    // Remove the Origin
-    updatedEntity.associations.origins = [];
-    await Entities.update(updatedEntity);
+    // Remove the parent from the child
+    childEntity.relationships = [];
+    await Entities.update(childEntity);
 
     // Validate Entities
-    originEntity = await Entities.getOne(originResult.data);
-    if (_.isNull(originEntity)) throw new Error();
-    expect(originEntity.associations.products.length).toBe(0);
+    parentEntity = await Entities.getOne(parentResult.data);
+    if (_.isNull(parentEntity)) throw new Error();
+    expect(parentEntity.relationships.length).toBe(0);
 
-    updatedEntity = await Entities.getOne(entityResult.data);
-    if (_.isNull(updatedEntity)) throw new Error();
-    expect(updatedEntity.associations.origins.length).toBe(0);
+    childEntity = await Entities.getOne(entityResult.data);
+    if (_.isNull(childEntity)) throw new Error();
+    expect(childEntity.relationships.length).toBe(0);
   });
 
-  it("should update Product associations", async () => {
+  it("should update Entity relationships from the parent", async () => {
     const entityResult: ResponseData<string> = await Entities.create({
       name: "TestEntity",
       created: dayjs(Date.now()).toISOString(),
@@ -444,68 +418,70 @@ describe("Entity model", () => {
       owner: "henry.burgess@wustl.edu",
       description: "Test",
       projects: [],
-      associations: {
-        origins: [],
-        products: [],
-      },
+      relationships: [],
       attributes: [],
       attachments: [],
       history: [],
     });
 
-    // Create a Product
-    const productResult: ResponseData<string> = await Entities.create({
-      name: "ProductEntity",
+    // Create a child Entity
+    const childResult: ResponseData<string> = await Entities.create({
+      name: "ChildEntity",
       created: dayjs(Date.now()).toISOString(),
       archived: false,
       owner: "henry.burgess@wustl.edu",
       description: "Test",
       projects: [],
-      associations: {
-        origins: [],
-        products: [],
-      },
+      relationships: [],
       attributes: [],
       attachments: [],
       history: [],
     });
 
-    // Add the Product
     const entity = await Entities.getOne(entityResult.data);
     if (_.isNull(entity)) throw new Error();
-    entity.associations.products.push({
-      _id: productResult.data,
-      name: "ProductEntity",
+
+    // Add the child
+    entity.relationships.push({
+      target: {
+        _id: childResult.data,
+        name: "ChildEntity",
+      },
+      source: {
+        _id: entityResult.data,
+        name: "TestEntity",
+      },
+      type: "child",
     });
     await Entities.update(entity);
 
-    // Get the updated Product Entity and original Entity
-    let productEntity: EntityModel | null = await Entities.getOne(
-      productResult.data,
-    );
-    if (_.isNull(productEntity)) throw new Error();
-
+    // Get the updated child Entity and original parent Entity
     let updatedEntity: EntityModel | null = await Entities.getOne(
       entityResult.data,
     );
     if (_.isNull(updatedEntity)) throw new Error();
 
+    let childEntity: EntityModel | null = await Entities.getOne(
+      childResult.data,
+    );
+    if (_.isNull(childEntity)) throw new Error();
+
     // Validate Entities
-    expect(productEntity.associations.origins.length).toBe(1);
-    expect(updatedEntity.associations.products.length).toBe(1);
+    expect(updatedEntity.relationships.length).toBe(1);
+    expect(childEntity.relationships.length).toBe(1);
 
     // Remove the Product
-    updatedEntity.associations.products = [];
+    updatedEntity.relationships = [];
     await Entities.update(updatedEntity);
 
     // Validate Entities
-    productEntity = await Entities.getOne(productResult.data);
-    if (_.isNull(productEntity)) throw new Error();
-    expect(productEntity.associations.products.length).toBe(0);
-
     updatedEntity = await Entities.getOne(entityResult.data);
     if (_.isNull(updatedEntity)) throw new Error();
-    expect(updatedEntity.associations.origins.length).toBe(0);
+    expect(updatedEntity.relationships.length).toBe(0);
+
+    childEntity = await Entities.getOne(childResult.data);
+    if (_.isNull(childEntity)) throw new Error();
+    expect(childEntity.relationships.length).toBe(0);
   });
 
   it("should add an Attribute", async () => {
@@ -517,10 +493,7 @@ describe("Entity model", () => {
       owner: "henry.burgess@wustl.edu",
       description: "Test",
       projects: [],
-      associations: {
-        origins: [],
-        products: [],
-      },
+      relationships: [],
       attributes: [],
       attachments: [],
       history: [],
@@ -553,10 +526,7 @@ describe("Entity model", () => {
       owner: "henry.burgess@wustl.edu",
       description: "Test",
       projects: [],
-      associations: {
-        origins: [],
-        products: [],
-      },
+      relationships: [],
       attributes: [
         {
           _id: "a-test-remove",
@@ -590,10 +560,7 @@ describe("Entity model", () => {
       owner: "henry.burgess@wustl.edu",
       description: "Test",
       projects: [],
-      associations: {
-        origins: [],
-        products: [],
-      },
+      relationships: [],
       attributes: [
         {
           _id: "TestAttribute",
@@ -637,10 +604,7 @@ describe("Entity model", () => {
       owner: "henry.burgess@wustl.edu",
       description: "Test Product",
       projects: [],
-      associations: {
-        origins: [],
-        products: [],
-      },
+      relationships: [],
       attributes: [],
       attachments: [],
       history: [],
@@ -654,10 +618,7 @@ describe("Entity model", () => {
       owner: "henry.burgess@wustl.edu",
       description: "Test Origin",
       projects: [],
-      associations: {
-        origins: [],
-        products: [],
-      },
+      relationships: [],
       attributes: [],
       attachments: [],
       history: [],
@@ -697,10 +658,7 @@ describe("Entity model", () => {
       owner: "henry.burgess@wustl.edu",
       description: "Test Entity description",
       projects: [],
-      associations: {
-        origins: [],
-        products: [],
-      },
+      relationships: [],
       attributes: [],
       attachments: [],
       history: [],
@@ -725,10 +683,7 @@ describe("Entity model", () => {
       owner: "henry.burgess@wustl.edu",
       description: "Test Entity description",
       projects: [],
-      associations: {
-        origins: [],
-        products: [],
-      },
+      relationships: [],
       attributes: [],
       attachments: [],
       history: [],
@@ -754,10 +709,7 @@ describe("Entity model", () => {
       owner: "henry.burgess@wustl.edu",
       description: "Test Entity description",
       projects: [],
-      associations: {
-        origins: [],
-        products: [],
-      },
+      relationships: [],
       attributes: [],
       attachments: [],
       history: [],
@@ -780,10 +732,7 @@ describe("Entity model", () => {
       owner: "henry.burgess@wustl.edu",
       description: "Test Entity description",
       projects: [],
-      associations: {
-        origins: [],
-        products: [],
-      },
+      relationships: [],
       attributes: [],
       attachments: [],
       history: [],
@@ -802,99 +751,5 @@ describe("Entity model", () => {
     const restored: EntityModel | null = await Entities.getOne(result.data);
     if (_.isNull(restored)) throw new Error("Entity is null");
     expect(restored.archived).toBeFalsy();
-  });
-
-  it("should delete an Entity with Origins, Products, and Project membership", async () => {
-    // Create a base Entity
-    const entityResult: ResponseData<string> = await Entities.create({
-      name: "Test Entity",
-      created: dayjs(Date.now()).toISOString(),
-      archived: false,
-      owner: "henry.burgess@wustl.edu",
-      description: "Test Entity description",
-      projects: [],
-      associations: {
-        origins: [],
-        products: [],
-      },
-      attributes: [],
-      attachments: [],
-      history: [],
-    });
-
-    // Create a Origin Entity
-    const originResult: ResponseData<string> = await Entities.create({
-      name: "Origin Entity",
-      created: dayjs(Date.now()).toISOString(),
-      archived: false,
-      owner: "henry.burgess@wustl.edu",
-      description: "Origin Entity description",
-      projects: [],
-      associations: {
-        origins: [],
-        products: [],
-      },
-      attributes: [],
-      attachments: [],
-      history: [],
-    });
-    await Entities.addOrigin(entityResult.data, {
-      _id: originResult.data,
-      name: "Origin Entity",
-    });
-
-    // Create a Product Entity
-    const productResult: ResponseData<string> = await Entities.create({
-      name: "Product Entity",
-      created: dayjs(Date.now()).toISOString(),
-      archived: false,
-      owner: "henry.burgess@wustl.edu",
-      description: "Product Entity description",
-      projects: [],
-      associations: {
-        origins: [],
-        products: [],
-      },
-      attributes: [],
-      attachments: [],
-      history: [],
-    });
-    await Entities.addProduct(entityResult.data, {
-      _id: productResult.data,
-      name: "Product Entity",
-    });
-
-    // Create a Project
-    const projectResult: ResponseData<string> = await Projects.create({
-      name: "TestProject",
-      archived: false,
-      created: dayjs(Date.now()).toISOString(),
-      owner: "henry.burgess@wustl.edu",
-      description: "Test Project",
-      entities: [],
-      collaborators: [],
-      history: [],
-    });
-    await Entities.addProject(entityResult.data, projectResult.data);
-
-    // Delete the Entity
-    await Entities.delete(entityResult.data);
-
-    // Validate the Origin, Product, and Project have no association with the Entity
-    const updatedOrigin: EntityModel | null = await Entities.getOne(
-      originResult.data,
-    );
-    if (_.isNull(updatedOrigin)) throw new Error();
-    expect(updatedOrigin.associations.products.length).toBe(0);
-    const updatedProduct: EntityModel | null = await Entities.getOne(
-      productResult.data,
-    );
-    if (_.isNull(updatedProduct)) throw new Error();
-    expect(updatedProduct.associations.origins.length).toBe(0);
-    const updatedProject: ProjectModel | null = await Projects.getOne(
-      projectResult.data,
-    );
-    if (_.isNull(updatedProject)) throw new Error();
-    expect(updatedProject.entities.length).toBe(0);
   });
 });

@@ -80,45 +80,46 @@ export const seedDatabase = async (): Promise<void> => {
     throw new Error("Error creating Project");
   await Workspaces.addProject(workspaceResult.data, projectResult.data);
 
-  // Create Origin and Product Entities
-  const originResult: ResponseData<string> = await Entities.create({
-    name: "Test Origin Entity",
+  // Create parent and child Entities
+  const parentResult: ResponseData<string> = await Entities.create({
+    name: "Test Parent Entity",
     created: dayjs(Date.now()).toISOString(),
     archived: false,
     owner: DEMO_USER_ORCID,
-    description: "Description for test Origin Entity",
+    description: "Description for test Parent Entity",
     projects: [projectResult.data],
-    associations: {
-      origins: [],
-      products: [],
-    },
+    relationships: [],
     attributes: [],
     attachments: [],
     history: [],
   });
-  await Workspaces.addEntity(workspaceResult.data, originResult.data);
+  await Workspaces.addEntity(workspaceResult.data, parentResult.data);
 
-  const productResult: ResponseData<string> = await Entities.create({
-    name: "Test Product Entity",
+  const childResult: ResponseData<string> = await Entities.create({
+    name: "Test Child Entity",
     created: dayjs(Date.now()).toISOString(),
     archived: false,
     owner: DEMO_USER_ORCID,
-    description: "Description for test Product Entity",
+    description: "Description for test Child Entity",
     projects: [projectResult.data],
-    associations: {
-      origins: [
-        {
-          _id: originResult.data,
-          name: "Test Origin Entity",
+    relationships: [
+      {
+        target: {
+          _id: parentResult.data,
+          name: "Test Parent Entity",
         },
-      ],
-      products: [],
-    },
+        source: {
+          _id: "no_id",
+          name: "Test Child Entity",
+        },
+        type: "parent",
+      },
+    ],
     attributes: [],
     attachments: [],
     history: [],
   });
-  await Workspaces.addEntity(workspaceResult.data, productResult.data);
+  await Workspaces.addEntity(workspaceResult.data, childResult.data);
 
   // Create Entity with Attributes
   const entityResult: ResponseData<string> = await Entities.create({
@@ -128,10 +129,7 @@ export const seedDatabase = async (): Promise<void> => {
     owner: DEMO_USER_ORCID,
     description: "Description for test Entity",
     projects: [projectResult.data],
-    associations: {
-      origins: [],
-      products: [],
-    },
+    relationships: [],
     attributes: [
       {
         _id: "a-ndl2n3k",
@@ -170,8 +168,8 @@ export const seedDatabase = async (): Promise<void> => {
             name: "Test Entity Value",
             type: "entity",
             data: {
-              _id: originResult.data,
-              name: "Test Origin Entity",
+              _id: parentResult.data,
+              name: "Test Parent Entity",
             },
           },
           {

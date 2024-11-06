@@ -9,20 +9,19 @@
   "projects": [
     "abcd1234"
   ],
-  "associations": {
-    "origins": [
-      {
-        "name": "Origin name",
-        "id": "abcd1234"
-      }
-    ],
-    "products": [
-      {
-        "name": "Product name",
-        "id": "abcd1234"
-      }
-    ]
-  },
+  "relationships": [
+    {
+      "source": {
+          "name": "Source name",
+          "id": "abcd1234"
+      },
+      "target": {
+          "name": "Target name",
+          "id": "abcd1234"
+      },
+      "type": "general"
+    }
+  ],
   "attributes": [
     {
       "id": "abcd1234",

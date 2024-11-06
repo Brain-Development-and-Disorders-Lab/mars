@@ -156,16 +156,18 @@ export const typedefs = `#graphql
     values: [ValueInput]
   }
 
-  # Representation of Origins and Products
-  type Associations {
-    origins: [Item]
-    products: [Item]
+  # Representation of an Entity relationship
+  type Relationship {
+    source: Item
+    target: Item
+    type: String
   }
 
-  # Input representation of Origins and Products
-  input AssociationsInput {
-    origins: [ItemInput]
-    products: [ItemInput]
+  # Input representation of an Entity relationship
+  input RelationshipInput {
+    source: ItemInput
+    target: ItemInput
+    type: String
   }
 
   # "Entity" type
@@ -178,7 +180,7 @@ export const typedefs = `#graphql
     owner: String
     description: String
     projects: [String]
-    associations: Associations
+    relationships: [Relationship]
     attachments: [Item]
     attributes: [Attribute]
     history: [EntityHistory]
@@ -192,7 +194,7 @@ export const typedefs = `#graphql
     owner: String!
     description: String!
     projects: [String]!
-    associations: AssociationsInput!
+    relationships: [RelationshipInput]!
     attachments: [ItemInput]!
     attributes: [AttributeInput]!
   }
@@ -207,7 +209,7 @@ export const typedefs = `#graphql
     owner: String
     description: String
     projects: [String]
-    associations: AssociationsInput
+    relationships: [RelationshipInput]!
     attachments: [ItemInput]
     attributes: [AttributeInput]
   }
@@ -223,7 +225,7 @@ export const typedefs = `#graphql
     created: String
     description: String
     projects: [String]
-    associations: Associations
+    relationships: [Relationship]
     attachments: [Item]
     attributes: [Attribute]
   }

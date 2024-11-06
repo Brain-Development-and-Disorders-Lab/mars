@@ -14,7 +14,7 @@ import QueryBuilder, {
 } from "react-querybuilder";
 import { QueryBuilderChakra } from "@react-querybuilder/chakra";
 
-// SearchQueryValue component for searching Origins, Products, and Projects
+// SearchQueryValue component for searching Entity fields
 import SearchQueryValue from "@components/SearchQueryValue";
 import { SearchQueryBuilderProps } from "@types";
 
@@ -62,17 +62,8 @@ const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
       ],
     },
     {
-      name: "origins",
-      label: "Origins",
-      operators: [
-        ...defaultOperators.filter((operator) =>
-          ["contains", "doesNotContain"].includes(operator.name),
-        ),
-      ],
-    },
-    {
-      name: "products",
-      label: "Products",
+      name: "relationships",
+      label: "Relationships",
       operators: [
         ...defaultOperators.filter((operator) =>
           ["contains", "doesNotContain"].includes(operator.name),
@@ -103,45 +94,24 @@ const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
    * @return {String}
    */
   const ruleProcessor: RuleProcessor = (rule: RuleType): string => {
-    if (rule.field === "origins") {
-      // Handle `origins` field
+    if (rule.field === "relationships") {
+      // Handle `relationships` field
       if (rule.operator === "doesNotContain") {
         // If `doesNotContain`, include `$not`
         return JSON.stringify({
-          "associations.origins": {
+          relationships: {
             $not: {
               $elemMatch: {
-                _id: rule.value,
+                "target._id": rule.value,
               },
             },
           },
         });
       }
       return JSON.stringify({
-        "associations.origins": {
+        relationships: {
           $elemMatch: {
-            _id: rule.value,
-          },
-        },
-      });
-    } else if (rule.field === "products") {
-      // Handle `products` field
-      if (rule.operator === "doesNotContain") {
-        // If `doesNotContain`, include `$not`
-        return JSON.stringify({
-          "associations.products": {
-            $not: {
-              $elemMatch: {
-                _id: rule.value,
-              },
-            },
-          },
-        });
-      }
-      return JSON.stringify({
-        "associations.products": {
-          $elemMatch: {
-            _id: rule.value,
+            "target._id": rule.value,
           },
         },
       });

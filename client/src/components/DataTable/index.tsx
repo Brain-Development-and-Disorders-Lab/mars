@@ -218,6 +218,7 @@ const DataTable = (props: DataTableProps) => {
       !_.isEqual(header.id, "type") &&
       !_.isEqual(header.id, "view") &&
       !_.isEqual(header.id, "_id") &&
+      !_.endsWith(header.id, "_id") &&
       !_.isEqual(header.id, "id")
     );
   };

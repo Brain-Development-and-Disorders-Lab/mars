@@ -305,7 +305,7 @@ const Dashboard = () => {
             <Flex direction={"column"}>
               <Flex direction={"row"} align={"center"} gap={"2"}>
                 <Icon name={"dashboard"} size={"md"} />
-                <Heading size={"lg"}>Workspace Dashboard</Heading>
+                <Heading size={"lg"}>Dashboard</Heading>
               </Flex>
               <Flex direction={"row"} gap={"1"}>
                 <Text

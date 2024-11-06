@@ -5,7 +5,9 @@ import {
   EntityModel,
   IEntity,
   IGenericItem,
+  IRelationship,
   IResponseMessage,
+  RelationshipType,
   ResponseData,
 } from "@types";
 
@@ -32,8 +34,6 @@ import { EntityCounterAll } from "./Metrics";
 const ENTITIES_COLLECTION = "entities"; // Collection name
 
 // Constants for parsing strings
-const ORIGIN_PREFIX_LENGTH = 7;
-const PRODUCT_PREFIX_LENGTH = 8;
 const ATTRIBUTE_PREFIX_LENGTH = 10;
 
 export class Entities {
@@ -107,20 +107,15 @@ export class Entities {
       history: [],
     };
 
-    for await (const origin of entity.associations.origins) {
-      // Add new Entity as a Product
-      await Entities.addProduct(origin._id, {
+    // Create reciprocal relationships between Entities
+    for await (const relationship of joinedEntity.relationships) {
+      // Update the `source` component to include Entity information
+      relationship.source = {
         _id: joinedEntity._id,
         name: joinedEntity.name,
-      });
-    }
+      };
 
-    for await (const product of entity.associations.products) {
-      // Add new Entity as an Origin
-      await Entities.addOrigin(product._id, {
-        _id: joinedEntity._id,
-        name: joinedEntity.name,
-      });
+      await Entities.addRelationship(relationship);
     }
 
     for await (const project of entity.projects) {
@@ -169,10 +164,7 @@ export class Entities {
         archived: entity.archived,
         description: entity.description,
         projects: entity.projects,
-        associations: {
-          origins: entity.associations.origins,
-          products: entity.associations.products,
-        },
+        relationships: entity.relationships,
         attributes: entity.attributes,
         attachments: entity.attachments,
         history: entity.history,
@@ -208,84 +200,25 @@ export class Entities {
       }
     }
 
-    // Origins
-    if (
-      !_.isUndefined(updated.associations) &&
-      !_.isUndefined(updated.associations.origins)
-    ) {
-      update.$set.associations.origins = updated.associations.origins;
-      const updatedOrigins = updated.associations.origins.map((o) => o._id);
-      const entityOrigins = entity.associations.origins.map((o) => o._id);
+    // Relationships
+    if (!_.isUndefined(updated.relationships)) {
+      update.$set.relationships = updated.relationships;
 
-      // Origin Entities added in updated Entity
-      const addOriginIdentifiers = _.difference(updatedOrigins, entityOrigins);
-      const addOrigins = updated.associations.origins.filter((o) =>
-        _.includes(addOriginIdentifiers, o._id),
-      );
-      for await (const origin of addOrigins) {
-        await Entities.addOrigin(updated._id, origin);
-        await Entities.addProduct(origin._id, {
-          _id: updated._id,
-          name: updated.name,
-        });
+      // Create the collection of relationships added in the updated Entity
+      const addRelationships = updated.relationships.filter((r) => {
+        // Filter by relationships not in the original Entity
+        return !Entities.relationshipExists(r, entity.relationships);
+      });
+      for await (const relationship of addRelationships) {
+        await Entities.addRelationship(relationship);
       }
 
-      // Origin Entities removed in updated Entity
-      const removeOriginIdentifiers = _.difference(
-        entity.associations.origins.map((o) => o._id),
-        updated.associations.origins.map((o) => o._id),
-      );
-      const removeOrigins = entity.associations.origins.filter((o) =>
-        _.includes(removeOriginIdentifiers, o._id),
-      );
-      for await (const origin of removeOrigins) {
-        await Entities.removeOrigin(updated._id, origin);
-        await Entities.removeProduct(origin._id, {
-          _id: updated._id,
-          name: updated.name,
-        });
-      }
-    }
-
-    // Products
-    if (
-      !_.isUndefined(updated.associations) &&
-      !_.isUndefined(updated.associations.products)
-    ) {
-      update.$set.associations.products = updated.associations.products;
-      const updatedProducts = updated.associations.products.map((p) => p._id);
-      const entityProducts = entity.associations.products.map((p) => p._id);
-
-      // Product Entities added in updated Entity
-      const addProductIdentifiers = _.difference(
-        updatedProducts,
-        entityProducts,
-      );
-      const addProducts = updated.associations.products.filter((p) =>
-        _.includes(addProductIdentifiers, p._id),
-      );
-      for await (const product of addProducts) {
-        await Entities.addProduct(updated._id, product);
-        await Entities.addOrigin(product._id, {
-          _id: updated._id,
-          name: updated.name,
-        });
-      }
-
-      // Product Entities removed from updated Entity
-      const removeProductIdentifiers = _.difference(
-        entityProducts,
-        updatedProducts,
-      );
-      const removeProducts = updated.associations.products.filter((p) =>
-        _.includes(removeProductIdentifiers, p._id),
-      );
-      for await (const product of removeProducts) {
-        await Entities.removeProduct(updated._id, product);
-        await Entities.removeOrigin(product._id, {
-          _id: updated._id,
-          name: updated.name,
-        });
+      // Create the collection of relationships to be removed from the Entity
+      const removeRelationships = entity.relationships.filter((r) => {
+        return !Entities.relationshipExists(r, updated.relationships);
+      });
+      for await (const relationship of removeRelationships) {
+        await Entities.removeRelationship(relationship);
       }
     }
 
@@ -359,7 +292,7 @@ export class Entities {
       created: historyEntity.created,
       description: historyEntity.description,
       projects: historyEntity.projects,
-      associations: historyEntity.associations,
+      relationships: historyEntity.relationships,
       attributes: historyEntity.attributes,
       attachments: historyEntity.attachments,
     };
@@ -427,55 +360,6 @@ export class Entities {
         response.modifiedCount === 1
           ? "Set archive state of Entity"
           : "No changes made to Entity",
-    };
-  };
-
-  /**
-   * Delete an Entity
-   * @param _id Entity identifier to delete
-   * @return {IResponseMessage}
-   */
-  static delete = async (_id: string): Promise<IResponseMessage> => {
-    const entity = await Entities.getOne(_id);
-    if (entity) {
-      // Remove Origins
-      for await (const origin of entity.associations.origins) {
-        await Entities.removeProduct(origin._id, {
-          _id: entity._id,
-          name: entity.name,
-        });
-      }
-
-      // Remove Products
-      for await (const product of entity.associations.products) {
-        await Entities.removeOrigin(product._id, {
-          _id: entity._id,
-          name: entity.name,
-        });
-      }
-
-      // Remove Projects
-      for await (const project of entity.projects) {
-        await Projects.removeEntity(project, entity._id);
-      }
-    }
-
-    // Execute delete operation
-    const response = await getDatabase()
-      .collection<EntityModel>(ENTITIES_COLLECTION)
-      .deleteOne({ _id: _id });
-
-    // Apply updated statistics
-    if (response.deletedCount > 0) {
-      EntityCounterAll.dec();
-    }
-
-    return {
-      success: response.deletedCount > 0,
-      message:
-        response.deletedCount > 0
-          ? "Deleted Entity successfully"
-          : "Unable to delete Entity",
     };
   };
 
@@ -595,283 +479,184 @@ export class Entities {
   };
 
   /**
-   * Add a Product association to an Entity
-   * @param _id Target Entity identifier
-   * @param product Generic format for Product to associate with Entity
-   * @returns {Promise<IResponseMessage>}
+   * Compare two `IRelationship` structures and determine if they are describing
+   * the same relationship or not
+   * @param a Relationship
+   * @param b Relationship
+   * @return {boolean}
    */
-  static addProduct = async (
-    _id: string,
-    product: IGenericItem,
-  ): Promise<IResponseMessage> => {
-    const entity = await this.getOne(_id);
-
-    if (_.isNull(entity)) {
-      return {
-        success: false,
-        message: "Entity not found",
-      };
-    }
-
-    const productCollection = _.cloneDeep(entity.associations.products);
-    if (
-      productCollection.filter((p) => _.isEqual(p._id, product._id)).length > 0
-    ) {
-      return {
-        success: false,
-        message: "Entity already associated with Product",
-      };
-    }
-    productCollection.push(product);
-
-    const update = {
-      $set: {
-        associations: {
-          origins: entity.associations.origins,
-          products: productCollection,
-        },
-      },
-    };
-
-    const response = await getDatabase()
-      .collection<EntityModel>(ENTITIES_COLLECTION)
-      .updateOne({ _id: _id }, update);
-    const successStatus = response.modifiedCount == 1;
-
-    return {
-      success: successStatus,
-      message: successStatus
-        ? "Added Product successfully"
-        : "Unable to add Product",
-    };
-  };
-
-  /**
-   * Add multiple Product associations to an Entity
-   * @param _id Target Entity identifier
-   * @param products Set of Products to associate with Entity
-   * @returns {Promise<IResponseMessage>}
-   */
-  static addProducts = async (
-    _id: string,
-    products: IGenericItem[],
-  ): Promise<IResponseMessage> => {
-    const entity = await this.getOne(_id);
-
-    if (_.isNull(entity)) {
-      return {
-        success: false,
-        message: "Entity not found",
-      };
-    }
-
-    // Create a union set from the existing set of products and the set of products to add
-    const update = {
-      $set: {
-        associations: {
-          origins: entity.associations.origins,
-          products: _.union(entity.associations.products, products),
-        },
-      },
-    };
-
-    const response = await getDatabase()
-      .collection<EntityModel>(ENTITIES_COLLECTION)
-      .updateOne({ _id: _id }, update);
-    const successStatus = response.modifiedCount == 1;
-
-    return {
-      success: successStatus,
-      message: successStatus
-        ? "Added Products successfully"
-        : "Unable to add Products",
-    };
-  };
-
-  /**
-   * Remove a Product association from an Entity
-   * @param _id Target Entity identifier
-   * @param product Generic format for Product to associate with Entity
-   * @returns {Promise<IResponseMessage>}
-   */
-  static removeProduct = async (
-    _id: string,
-    product: IGenericItem,
-  ): Promise<IResponseMessage> => {
-    const entity = await this.getOne(_id);
-
-    if (_.isNull(entity)) {
-      return {
-        success: false,
-        message: "Entity not found",
-      };
-    }
-
-    const productCollection = _.cloneDeep(entity.associations.products);
-    const update = {
-      $set: {
-        associations: {
-          origins: entity.associations.origins,
-          products: productCollection.filter(
-            (p) => !_.isEqual(p._id, product._id),
-          ),
-        },
-      },
-    };
-
-    const response = await getDatabase()
-      .collection<EntityModel>(ENTITIES_COLLECTION)
-      .updateOne({ _id: _id }, update);
-    const successStatus = response.modifiedCount == 1;
-
-    return {
-      success: successStatus,
-      message: successStatus
-        ? "Removed Product successfully"
-        : "Unable to remove Product",
-    };
-  };
-
-  /**
-   * Add a Origin association to an Entity
-   * @param _id Target Entity identifier
-   * @param origin Generic format for Origin to associate with Entity
-   * @returns {Promise<IResponseMessage>}
-   */
-  static addOrigin = async (
-    _id: string,
-    origin: IGenericItem,
-  ): Promise<IResponseMessage> => {
-    const entity = await this.getOne(_id);
-
-    if (_.isNull(entity)) {
-      return {
-        success: false,
-        message: "Entity not found",
-      };
-    }
-
-    const originCollection = _.cloneDeep(entity.associations.origins);
-    if (
-      originCollection.filter((o) => _.isEqual(o._id, origin._id)).length > 0
-    ) {
-      return {
-        success: false,
-        message: "Entity already associated with Origin",
-      };
-    }
-    originCollection.push(origin);
-
-    const update = {
-      $set: {
-        associations: {
-          origins: originCollection,
-          products: entity.associations.products,
-        },
-      },
-    };
-
-    const response = await getDatabase()
-      .collection<EntityModel>(ENTITIES_COLLECTION)
-      .updateOne({ _id: _id }, update);
-    const successStatus = response.modifiedCount == 1;
-
-    return {
-      success: successStatus,
-      message: successStatus
-        ? "Added Origin successfully"
-        : "Unable to add Origin",
-    };
-  };
-
-  /**
-   * Add multiple Origin associations to an Entity
-   * @param _id Target Entity identifier
-   * @param origins Set of Origins to associate with Entity
-   * @returns {Promise<IResponseMessage>}
-   */
-  static addOrigins = async (
-    _id: string,
-    origins: IGenericItem[],
-  ): Promise<IResponseMessage> => {
-    const entity = await this.getOne(_id);
-
-    if (_.isNull(entity)) {
-      return {
-        success: false,
-        message: "Entity not found",
-      };
-    }
-
-    // Create a union set from the existing set of Origins and the set of Origins to add
-    const updatedOriginCollection = _.union(
-      entity.associations.origins,
-      origins,
+  private static relationshipIsEqual = (
+    a: IRelationship,
+    b: IRelationship,
+  ): boolean => {
+    return (
+      _.isEqual(a.source._id, b.source._id) &&
+      _.isEqual(a.target._id, b.target._id) &&
+      _.isEqual(a.type, b.type)
     );
+  };
 
-    const update = {
+  /**
+   * Search a collection of existing `IRelationship` structures to find if another
+   * `IRelationship` already exists in the collection or not
+   * @param relationship Relationship structure to search for
+   * @param relationships Collection of existing Relationships
+   * @return {boolean}
+   */
+  private static relationshipExists = (
+    relationship: IRelationship,
+    relationships: IRelationship[],
+  ): boolean => {
+    for (const r of relationships) {
+      if (Entities.relationshipIsEqual(r, relationship)) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  /**
+   * Add a new relationship to a target Entity
+   * @param relationship Relationship data containing the source Entity, target Entity, and relationship type
+   * @return {Promise<IResponseMessage>}
+   */
+  static addRelationship = async (
+    relationship: IRelationship,
+  ): Promise<IResponseMessage> => {
+    // Create a clone of the `IRelationship` instance for the target Entity
+    const targetRelationship = _.cloneDeep(relationship);
+    const targetEntity = await Entities.getOne(targetRelationship.target._id);
+
+    if (_.isNull(targetEntity)) {
+      return {
+        success: false,
+        message: "Target Entity not found",
+      };
+    }
+
+    // Switch the source and target
+    const source = _.cloneDeep(relationship.source);
+    const target = _.cloneDeep(relationship.target);
+    targetRelationship.source = target;
+    targetRelationship.target = source;
+
+    // Amend the relationship depending on the relationship type
+    if (relationship.type === "child") {
+      // Flip to "parent" type if "child" being added
+      targetRelationship.type = "parent";
+    } else if (relationship.type === "parent") {
+      // Flip to "child" type if "parent" being added
+      targetRelationship.type = "child";
+    }
+
+    // Confirm that the relationship does not exist on the target Entity
+    if (
+      Entities.relationshipExists(
+        targetRelationship,
+        targetEntity.relationships,
+      )
+    ) {
+      return {
+        success: false,
+        message: "Relationship between Entities already exists",
+      };
+    }
+
+    // Add the new `IRelationship` to the target Entity
+    const relationships: IRelationship[] = _.cloneDeep(
+      targetEntity.relationships,
+    );
+    relationships.push(targetRelationship);
+
+    const update: { $set: Partial<EntityModel> } = {
       $set: {
-        associations: {
-          origins: updatedOriginCollection,
-          products: entity.associations.products,
-        },
+        relationships: relationships,
       },
     };
 
     const response = await getDatabase()
       .collection<EntityModel>(ENTITIES_COLLECTION)
-      .updateOne({ _id: _id }, update);
+      .updateOne({ _id: targetRelationship.source._id }, update);
     const successStatus = response.modifiedCount == 1;
 
     return {
       success: successStatus,
       message: successStatus
-        ? "Added Origins successfully"
-        : "Unable to add Origins",
+        ? "Added relationship successfully"
+        : "Unable to add relationship",
     };
   };
 
   /**
-   * Remove an Origin association from an Entity
-   * @param _id Target Entity identifier
-   * @param origin Generic format for Origin to associate with Entity
-   * @returns {Promise<IResponseMessage>}
+   * Remove a relationship from a target Entity
+   * @param relationship Relationship data containing the source Entity, target Entity, and relationship type
+   * @return {Promise<IResponseMessage>}
    */
-  static removeOrigin = async (
-    _id: string,
-    origin: IGenericItem,
+  static removeRelationship = async (
+    relationship: IRelationship,
   ): Promise<IResponseMessage> => {
-    const entity = await this.getOne(_id);
+    // Create a clone of the `IRelationship` instance for the target Entity
+    const targetRelationship = _.cloneDeep(relationship);
+    const targetEntity = await Entities.getOne(targetRelationship.target._id);
 
-    if (_.isNull(entity)) {
+    if (_.isNull(targetEntity)) {
       return {
         success: false,
-        message: "Entity not found",
+        message: "Target Entity not found",
       };
     }
 
-    const originCollection = _.cloneDeep(entity.associations.origins);
-    const update = {
+    // Switch the source and target
+    const source = _.cloneDeep(relationship.source);
+    const target = _.cloneDeep(relationship.target);
+    targetRelationship.source = target;
+    targetRelationship.target = source;
+
+    // Amend the relationship depending on the relationship type
+    if (relationship.type === "child") {
+      // Flip to "parent" type if "child" being added
+      targetRelationship.type = "parent";
+    } else if (relationship.type === "parent") {
+      // Flip to "child" type if "parent" being added
+      targetRelationship.type = "child";
+    }
+
+    // Confirm that the relationship to remove currently exists on the target Entity
+    if (
+      !Entities.relationshipExists(
+        targetRelationship,
+        targetEntity.relationships,
+      )
+    ) {
+      return {
+        success: false,
+        message: "Relationship between Entities does not exist",
+      };
+    }
+
+    // Remove the existing `IRelationship`
+    const relationships: IRelationship[] = _.cloneDeep(
+      targetEntity.relationships,
+    ).filter((r) => {
+      return !Entities.relationshipIsEqual(r, targetRelationship);
+    });
+
+    const update: { $set: Partial<EntityModel> } = {
       $set: {
-        associations: {
-          origins: originCollection.filter(
-            (o) => !_.isEqual(o._id, origin._id),
-          ),
-          products: entity.associations.products,
-        },
+        relationships: relationships,
       },
     };
 
     const response = await getDatabase()
       .collection<EntityModel>(ENTITIES_COLLECTION)
-      .updateOne({ _id: _id }, update);
+      .updateOne({ _id: targetRelationship.source._id }, update);
     const successStatus = response.modifiedCount == 1;
 
     return {
       success: successStatus,
       message: successStatus
-        ? "Removed Origin successfully"
-        : "Unable to remove Origin",
+        ? "Removed relationship successfully"
+        : "Unable to remove relationship",
     };
   };
 
@@ -1056,39 +841,32 @@ export class Entities {
           } else if (_.isEqual(field, "description")) {
             // "description" data field
             formatted["description"] = entity.description;
-          } else if (_.startsWith(field, "origin_")) {
-            // "origins" data field
-            // Create an empty associations structure
-            if (_.isUndefined(formatted.associations)) {
-              formatted.associations = {
-                origins: [],
-                products: [],
-              };
+          } else if (_.startsWith(field, "relationship_")) {
+            // "relationship" data field
+            // Create an empty relationships structure
+            if (_.isUndefined(formatted.relationships)) {
+              formatted.relationships = [];
             }
 
-            // Get the Origin details and add to the collection of exported Origins
-            const origin = entity.associations.origins.find((origin) => {
-              return _.isEqual(origin._id, field.slice(ORIGIN_PREFIX_LENGTH));
-            });
-            if (origin) {
-              formatted.associations.origins.push(origin);
-            }
-          } else if (_.startsWith(field, "product_")) {
-            // "products" data field
-            // Create an empty associations structure
-            if (_.isUndefined(formatted.associations)) {
-              formatted.associations = {
-                origins: [],
-                products: [],
-              };
-            }
-
-            // Get the Product details and add to the collection of exported Products
-            const product = entity.associations.products.find((product) => {
-              return _.isEqual(product._id, field.slice(PRODUCT_PREFIX_LENGTH));
-            });
-            if (product) {
-              formatted.associations.products.push(product);
+            const target = await Entities.getOne(field.split("_")[1]);
+            if (!_.isNull(target)) {
+              // Get the relationship details and add to the collection of exported relationships
+              const relationship = entity.relationships.find((relationship) => {
+                return Entities.relationshipIsEqual(relationship, {
+                  source: {
+                    _id: entity._id,
+                    name: entity.name,
+                  },
+                  target: {
+                    _id: target._id,
+                    name: target.name,
+                  },
+                  type: field.split("_")[2] as RelationshipType,
+                });
+              });
+              if (relationship) {
+                formatted.relationships.push(relationship);
+              }
             }
           } else if (_.startsWith(field, "attribute_")) {
             // "attributes" data field
@@ -1124,11 +902,10 @@ export class Entities {
         exportFields = ["created", "owner", "description"];
 
         // Iterate and generate fields for Origins, Products, Projects, and Attributes
-        for await (const origin of entity.associations.origins) {
-          exportFields.push(`origin_${origin._id}`);
-        }
-        for await (const product of entity.associations.products) {
-          exportFields.push(`product_${product._id}`);
+        for await (const relationship of entity.relationships) {
+          exportFields.push(
+            `relationship_${relationship.target._id}_${relationship.type}`,
+          );
         }
         for await (const project of entity.projects) {
           exportFields.push(`project_${project}`);
@@ -1150,23 +927,12 @@ export class Entities {
           // "description" data field
           headers.push("Description");
           row.push(entity.description);
-        } else if (_.startsWith(field, "origin_")) {
-          // "origins" data field
-          const origin = await Entities.getOne(
-            field.slice(ORIGIN_PREFIX_LENGTH),
-          );
-          if (!_.isNull(origin)) {
-            headers.push(`Origin (${origin.name})`);
-            row.push(origin.name);
-          }
-        } else if (_.startsWith(field, "product_")) {
-          // "products" data field
-          const product = await Entities.getOne(
-            field.slice(PRODUCT_PREFIX_LENGTH),
-          );
-          if (!_.isNull(product)) {
-            headers.push(`Product (${product.name})`);
-            row.push(product.name);
+        } else if (_.startsWith(field, "relationship_")) {
+          // "relationship" data field
+          const target = await Entities.getOne(field.split("_")[1]);
+          if (!_.isNull(target)) {
+            headers.push(`Relationship (${field.split("_")[2]})`);
+            row.push(target.name);
           }
         } else if (_.startsWith(field, "attribute_")) {
           // "attributes" data field

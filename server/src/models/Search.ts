@@ -6,7 +6,6 @@ import _ from "lodash";
 import { Workspaces } from "./Workspaces";
 import { Entities } from "./Entities";
 import { Projects } from "./Projects";
-import consola from "consola";
 
 // Collection names
 const ENTITIES_COLLECTION = "entities";
@@ -81,7 +80,7 @@ export class Search {
           { _id: { $regex: expression } },
           { name: { $regex: expression } },
           { description: { $regex: expression } },
-          { "associations.origins.name": { $regex: expression } },
+          { "relationships.target.name": { $regex: expression } },
           { "attributes.description": { $regex: expression } },
           { "attributes.description": { $regex: expression } },
           { "attributes.values": { $regex: expression } },

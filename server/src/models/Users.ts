@@ -254,10 +254,7 @@ export class Users {
       description: "This is your first Entity. Go ahead and modify it!",
       owner: user,
       projects: [],
-      associations: {
-        origins: [],
-        products: [],
-      },
+      relationships: [],
       attachments: [],
       attributes: [
         {

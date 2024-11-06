@@ -482,7 +482,7 @@ export class Projects {
         created: result?.created,
         description: result?.description,
         projects: result?.projects,
-        associations: result?.associations,
+        relationships: result?.relationships,
         attributes: result?.attributes,
         attachments: result?.attachments,
       };
