@@ -22,7 +22,7 @@ ENTITY_FIELDS = [
   "description",
   "owner",
   "projects",
-  "associations",
+  "relationships",
   "attributes",
   "attachments",
   "history"
@@ -38,7 +38,7 @@ ENTITY_HISTORY_FIELDS = [
   "description",
   "owner",
   "projects",
-  "associations",
+  "relationships",
   "attributes",
   "attachments"
 ]
@@ -71,24 +71,14 @@ def validate_entity(entity: dict):
       "message": "Missing {} fields: {}".format(entity["_id"], len(missing_fields), missing_fields)
     })
 
-  if (len(entity["associations"]["origins"]) > 0):
-    # Check that Origins exist
-    for origin in entity["associations"]["origins"]:
-      if origin["_id"] not in ENTITY_IDENTIFIERS:
-        logging.warning("Entity \"{}\" Origin {} does not exist".format(entity["_id"], origin["_id"]))
+  if (len(entity["relationships"]) > 0):
+    # Check that target exists
+    for relationship in entity["relationships"]:
+      if relationship["target"]["_id"] not in ENTITY_IDENTIFIERS:
+        logging.warning("Entity \"{}\" target \"{}\" does not exist".format(entity["_id"], relationship["target"]["_id"]))
         ISSUES.append({
           "_id": entity["_id"],
-          "message": "Origin \"{}\" does not exist".format(origin["_id"])
-        })
-
-  if (len(entity["associations"]["products"]) > 0):
-    # Check that Products exist
-    for product in entity["associations"]["products"]:
-      if product["_id"] not in ENTITY_IDENTIFIERS:
-        logging.warning("Entity \"{}\" Product {} does not exist".format(entity["_id"], product["_id"]))
-        ISSUES.append({
-          "_id": entity["_id"],
-          "message": "Product \"{}\" does not exist".format(product["_id"])
+          "message": "Target \"{}\" does not exist".format(relationship["target"]["_id"])
         })
 
   if entity["description"] is None:
