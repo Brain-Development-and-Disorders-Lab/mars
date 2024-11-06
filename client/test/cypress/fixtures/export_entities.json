@@ -8,15 +8,19 @@
       "created": "2023-12-27T20:12:43.686Z",
       "description": "Box that fits inside another Box.",
       "projects": ["pBwj_re8"],
-      "associations": {
-        "origins": [
-          {
-            "name": "Box 1",
-            "_id": "eqRN9NBH"
-          }
-        ],
-        "products": []
-      },
+      "relationships": [
+        {
+          "target": {
+            "_id": "eqRN9NBH",
+            "name": "Box 1"
+          },
+          "source": {
+            "_id": "eDDyDMjQ",
+            "name": "Box 1 (JSON)"
+          },
+          "type": "child"
+        }
+      ],
       "attributes": [
         {
           "_id": "a-eDDyDMjQ-SLaiM7",
@@ -43,15 +47,19 @@
       "created": "2023-12-27T20:12:43.686Z",
       "description": "Box that fits in another Box updated by same name Entity.",
       "projects": ["pBwj_re8"],
-      "associations": {
-        "origins": [
-          {
-            "name": "Box 1",
-            "_id": "eqRN9NBH"
-          }
-        ],
-        "products": []
-      },
+      "relationships": [
+        {
+          "target": {
+            "_id": "eqRN9NBH",
+            "name": "Box 1"
+          },
+          "source": {
+            "_id": "ewoekn2o",
+            "name": "Mini Box 1"
+          },
+          "type": "child"
+        }
+      ],
       "attributes": [
         {
           "_id": "a-eDDyDMjQ-SLaiM7",
@@ -78,10 +86,7 @@
       "created": "2023-12-27T20:12:43.686Z",
       "description": "Example Box 2.",
       "projects": ["pBwj_re8"],
-      "associations": {
-        "origins": [],
-        "products": []
-      },
+      "relationships": [],
       "attributes": [
         {
           "_id": "a-eOZ4E6Qw-0EmAiB",
@@ -108,15 +113,19 @@
       "created": "2023-12-27T20:12:43.686Z",
       "description": "Example Box 1.",
       "projects": ["pBwj_re8"],
-      "associations": {
-        "origins": [],
-        "products": [
-          {
-            "name": "Mini Box 1",
-            "_id": "eDDyDMjQ"
-          }
-        ]
-      },
+      "relationships": [
+        {
+          "target": {
+            "_id": "eDDyDMjQ",
+            "name": "Mini Box 1"
+          },
+          "source": {
+            "_id": "eqRN9NBH",
+            "name": "Box 1"
+          },
+          "type": "parent"
+        }
+      ],
       "attributes": [],
       "attachments": []
     },
@@ -128,15 +137,19 @@
       "created": "2023-12-27T20:12:43.686Z",
       "description": "Mini Box that fits in another Box, JSON.",
       "projects": ["pBwj_re8"],
-      "associations": {
-        "origins": [
-          {
-            "name": "Box 1",
-            "_id": "eqRN9NBH"
-          }
-        ],
-        "products": []
-      },
+      "relationships": [
+        {
+          "target": {
+            "_id": "eqRN9NBH",
+            "name": "Box 1"
+          },
+          "source": {
+            "_id": "eDDyDMjQ",
+            "name": "Mini Box 1 (JSON)"
+          },
+          "type": "child"
+        }
+      ],
       "attributes": [
         {
           "_id": "a-eDDyDMjQ-SLaiM7",
