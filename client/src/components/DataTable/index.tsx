@@ -57,6 +57,18 @@ const DataTable = (props: DataTableProps) => {
   // Table row selection state
   const [selectedRows, setSelectedRows] = useState(props.selectedRows);
 
+  // `useEffect` for when the rows are selected
+  useEffect(() => {
+    if (props.onSelectedRowsChange) {
+      const rowSet = [];
+      for (const rowIndex of Object.keys(selectedRows)) {
+        // Get the corresponding row based on the current selected index
+        rowSet.push(props.data[parseInt(rowIndex)]);
+      }
+      props.onSelectedRowsChange(rowSet);
+    }
+  }, [selectedRows]);
+
   // Create ReactTable instance
   const table = useReactTable({
     columns: [

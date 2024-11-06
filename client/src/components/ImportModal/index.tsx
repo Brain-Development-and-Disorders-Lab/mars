@@ -1112,7 +1112,6 @@ const ImportModal = (props: ImportModalProps) => {
                 data={reviewEntities}
                 visibleColumns={{}}
                 selectedRows={{}}
-                showSelection
                 showPagination
                 showItemCount
               />
