@@ -1020,7 +1020,10 @@ const Entity = () => {
         _id: entityData._id,
         name: entityName,
       },
-      target: selectedRelationshipTarget,
+      target: {
+        _id: selectedRelationshipTarget._id,
+        name: selectedRelationshipTarget.name,
+      },
       type: selectedRelationshipType,
     };
 

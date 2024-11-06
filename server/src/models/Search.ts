@@ -80,7 +80,7 @@ export class Search {
           { _id: { $regex: expression } },
           { name: { $regex: expression } },
           { description: { $regex: expression } },
-          { "associations.origins.name": { $regex: expression } },
+          { "relationships.target.name": { $regex: expression } },
           { "attributes.description": { $regex: expression } },
           { "attributes.description": { $regex: expression } },
           { "attributes.values": { $regex: expression } },

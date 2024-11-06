@@ -106,8 +106,8 @@ const SearchQueryValue = ({
         />
       )}
 
-      {/* Origins and Products */}
-      {_.includes(["origins", "products"], field) && (
+      {/* Relationships */}
+      {_.isEqual("relationships", field) && (
         <SearchSelect
           value={selected}
           resultType={"entity"}
