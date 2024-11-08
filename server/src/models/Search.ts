@@ -35,6 +35,9 @@ export class Search {
       projection: { name: 1, description: 1 },
     };
 
+    // List of results prior to prioritization
+    let unprioritizedResults = [];
+
     // Execute search operation depending on whether it is searching Entities or Projects
     if (resultType === "project") {
       // Construct search query
@@ -70,7 +73,7 @@ export class Search {
       );
 
       // Filter the query results to only those matching the current Workspace
-      return _.filter(projects, (project) =>
+      unprioritizedResults = _.filter(projects, (project) =>
         _.includes(intersected, project._id),
       );
     } else {
@@ -113,9 +116,66 @@ export class Search {
       );
 
       // Filter the query results to only those matching the current Workspace
-      return _.filter(entities, (entity) =>
+      unprioritizedResults = _.filter(entities, (entity) =>
         _.includes(intersected, entity._id),
       );
+    }
+
+    // Re-sort the results to place the results into prioritized categories:
+    // 1. Starts with: Name starts with search query
+    // 2. Name includes: Name does not start with but includes search query
+    // 3. Description includes: Search query appears in description only
+    // 4. Other: Search query appears elsewhere in the Entity
+    const comparator = _.lowerCase(query);
+
+    // Partial collections for results
+    let resultNameStartsWith = [];
+    let resultNameIncludes = [];
+    let resultDescriptionIncludes = [];
+    let resultOther = [];
+
+    // Iterate through collection of intersected and filtered results
+    while (unprioritizedResults.length > 0) {
+      // Get the last result
+      const entity = unprioritizedResults.pop();
+      if (_.isUndefined(entity)) break;
+
+      // Extract parameters and set uniform case
+      const name = _.lowerCase(entity.name);
+      const description = _.lowerCase(entity.description);
+
+      if (_.startsWith(name, comparator)) {
+        resultNameStartsWith.push(entity);
+      } else if (_.includes(name, comparator)) {
+        resultNameIncludes.push(entity);
+      } else if (_.includes(description, query)) {
+        resultDescriptionIncludes.push(entity);
+      } else {
+        resultOther.push(entity);
+      }
+    }
+
+    // Sort the collections by name
+    resultNameStartsWith = _.sortBy(resultNameStartsWith, "name");
+    resultNameIncludes = _.sortBy(resultNameIncludes, "name");
+    resultDescriptionIncludes = _.sortBy(resultDescriptionIncludes, "name");
+    resultOther = _.sortBy(resultOther, "name");
+
+    // Return the prioritized results
+    if (resultType === "project") {
+      return [
+        ...resultNameStartsWith,
+        ...resultNameIncludes,
+        ...resultDescriptionIncludes,
+        ...resultOther,
+      ] as ProjectModel[];
+    } else {
+      return [
+        ...resultNameStartsWith,
+        ...resultNameIncludes,
+        ...resultDescriptionIncludes,
+        ...resultOther,
+      ] as EntityModel[];
     }
   };
 
