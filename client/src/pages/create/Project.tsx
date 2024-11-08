@@ -10,11 +10,13 @@ import {
   FormHelperText,
   FormLabel,
   Heading,
+  IconButton,
   Input,
   Modal,
   ModalBody,
   ModalCloseButton,
   ModalContent,
+  ModalFooter,
   ModalHeader,
   ModalOverlay,
   Spacer,
@@ -24,9 +26,14 @@ import {
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
+import ActorTag from "@components/ActorTag";
+import DataTable from "@components/DataTable";
+import Linky from "@components/Linky";
+import SearchSelect from "@components/SearchSelect";
 import MDEditor from "@uiw/react-md-editor";
 
 // Utility functions and libraries
+import _ from "lodash";
 import dayjs from "dayjs";
 
 // Routing and navigation
@@ -34,11 +41,10 @@ import { useNavigate } from "react-router-dom";
 import { gql, useMutation } from "@apollo/client";
 
 // Custom types
-import { ResponseData } from "@types";
+import { IGenericItem, ResponseData } from "@types";
 
 // Authentication context
 import { useAuthentication } from "@hooks/useAuthentication";
-import ActorTag from "@components/ActorTag";
 
 const Project = () => {
   const navigate = useNavigate();
@@ -52,6 +58,14 @@ const Project = () => {
   );
   const [owner] = useState(token.orcid);
   const [description, setDescription] = useState("");
+
+  const {
+    isOpen: isEntitiesOpen,
+    onOpen: onEntitiesOpen,
+    onClose: onEntitiesClose,
+  } = useDisclosure();
+  const [selectedEntity, setSelectedEntity] = useState({} as IGenericItem);
+  const [entities, setEntities] = useState([] as string[]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -86,6 +100,55 @@ const Project = () => {
   const isOwnerError = owner === "";
   const isDescriptionError = description === "";
   const isDetailsError = isNameError || isOwnerError || isDescriptionError;
+
+  // Define the columns for Entities listing
+  const entitiesColumns = [
+    {
+      id: (info: any) => info.row.original,
+      cell: (info: any) => (
+        <Linky id={info.row.original} type={"entities"} size={"sm"} />
+      ),
+      header: "Name",
+    },
+    {
+      id: "view",
+      cell: (info: any) => {
+        return (
+          <Flex w={"100%"} justify={"end"}>
+            <IconButton
+              icon={<Icon name={"delete"} />}
+              aria-label={"Remove entity"}
+              colorScheme={"red"}
+              onClick={() => removeEntity(info.row.original)}
+              size={"sm"}
+            />
+          </Flex>
+        );
+      },
+      header: "",
+    },
+  ];
+
+  /**
+   * Callback function to add Entities to a Project
+   * @param {IGenericItem} entity Entity to add
+   */
+  const addEntities = (entity: IGenericItem): void => {
+    if (!_.includes(entities, entity._id)) {
+      setEntities([...entities, entity._id]);
+    }
+    onEntitiesClose();
+  };
+
+  /**
+   * Callback function to remove Entity from Project
+   * @param {string} entity Entity identifier to remove
+   */
+  const removeEntity = (entity: string): void => {
+    if (_.includes(entities, entity)) {
+      setEntities([...entities.filter((e) => !_.isEqual(e, entity))]);
+    }
+  };
 
   return (
     <Content isLoaded={!loading}>
@@ -233,22 +296,60 @@ const Project = () => {
           </Flex>
         </Flex>
 
-        <Flex direction={"row"} px={"2"} gap={"2"} wrap={"wrap"}>
+        <Flex direction={"column"} px={"2"} gap={"2"} wrap={"wrap"}>
+          <Flex justify={"space-between"} align={"center"}>
+            <Text fontWeight={"bold"} fontSize={"sm"}>
+              Entities
+            </Text>
+            <Button
+              size={"sm"}
+              colorScheme={"green"}
+              rightIcon={<Icon name={"add"} />}
+              onClick={() => onEntitiesOpen()}
+            >
+              Add Entity
+            </Button>
+          </Flex>
           <Flex
             direction={"column"}
             p={"2"}
             gap={"2"}
             w={"100%"}
-            minH={"300px"}
             rounded={"md"}
             border={"1px"}
             borderColor={"gray.300"}
             align={"center"}
             justify={"center"}
           >
-            <Text fontWeight={"semibold"} color={"gray.400"}>
-              Select Entities
-            </Text>
+            <Flex
+              w={"100%"}
+              justify={"center"}
+              align={"center"}
+              minH={entities.length > 0 ? "fit-content" : "200px"}
+            >
+              {entities && entities.length > 0 ? (
+                <DataTable
+                  data={entities}
+                  columns={entitiesColumns}
+                  visibleColumns={{}}
+                  selectedRows={{}}
+                  viewOnly={false}
+                  showSelection={true}
+                  showPagination
+                  showItemCount
+                />
+              ) : (
+                <Flex w={"100%"} justify={"center"} align={"center"}>
+                  <Text
+                    color={"gray.400"}
+                    fontWeight={"semibold"}
+                    fontSize={"sm"}
+                  >
+                    No Entities
+                  </Text>
+                </Flex>
+              )}
+            </Flex>
           </Flex>
         </Flex>
       </Flex>
@@ -310,28 +411,76 @@ const Project = () => {
         </Button>
       </Flex>
 
+      {/* Modal to add Entities */}
+      <Modal isOpen={isEntitiesOpen} onClose={onEntitiesClose} isCentered>
+        <ModalOverlay />
+        <ModalContent p={"2"} gap={"0"} w={["md", "lg", "xl"]}>
+          {/* Heading and close button */}
+          <ModalHeader p={"2"}>Add Entity</ModalHeader>
+          <ModalCloseButton />
+
+          <ModalBody p={"2"}>
+            <SearchSelect
+              id={"entitySearchSelect"}
+              resultType={"entity"}
+              value={selectedEntity}
+              onChange={setSelectedEntity}
+            />
+          </ModalBody>
+
+          <ModalFooter p={"2"}>
+            <Button
+              colorScheme={"red"}
+              size={"sm"}
+              variant={"outline"}
+              rightIcon={<Icon name={"cross"} />}
+              onClick={onEntitiesClose}
+            >
+              Cancel
+            </Button>
+
+            <Spacer />
+
+            <Button
+              id={"addEntityDoneButton"}
+              colorScheme={"green"}
+              size={"sm"}
+              rightIcon={<Icon name={"check"} />}
+              onClick={() => {
+                // Add the Origin to the Entity
+                addEntities(selectedEntity);
+              }}
+            >
+              Done
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
       {/* Information modal */}
       <Modal isOpen={isOpen} onClose={onClose} isCentered>
         <ModalOverlay />
-        <ModalContent p={"2"} gap={"4"} w={["lg", "xl", "2xl"]}>
+        <ModalContent px={"2"} gap={"0"} w={["xl", "2xl"]}>
           <ModalHeader p={"2"}>Projects</ModalHeader>
           <ModalCloseButton />
-          <ModalBody p={"2"}>
-            <Flex direction={"column"} gap={"4"} p={"2"}>
-              <Text>Projects can be used to organize and share Entities.</Text>
-              <Text>
+          <ModalBody p={"0"}>
+            <Flex direction={"column"} gap={"2"} p={"2"}>
+              <Text fontSize={"sm"}>
+                Projects can be used to organize and share Entities.
+              </Text>
+              <Text fontSize={"sm"}>
                 Any type of Entity can be included in a Project. Entities can be
                 added and removed from a Project after it has been created.
               </Text>
 
-              <Heading size={"sm"}>Name*</Heading>
-              <Text>
+              <Heading size={"sm"}>Name</Heading>
+              <Text fontSize={"sm"}>
                 Specify the name of a Project. This should be unique and will
                 act as a searchable identifier.
               </Text>
 
               <Heading size={"sm"}>Date Created or Started</Heading>
-              <Text>
+              <Text fontSize={"sm"}>
                 A timestamp assigned to the Project. For example, if this is a
                 set of Entities used in a specific experiment, this date could
                 represent when work on the experiment commenced. Otherwise, this
@@ -339,11 +488,9 @@ const Project = () => {
                 Metadatify.
               </Text>
 
-              <Heading size={"sm"}>Description*</Heading>
-              <Text>A brief description of the Project contents.</Text>
-
-              <Text>
-                <i>* Required field</i>
+              <Heading size={"sm"}>Description</Heading>
+              <Text fontSize={"sm"}>
+                A brief description of the Project contents.
               </Text>
             </Flex>
           </ModalBody>
