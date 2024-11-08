@@ -393,7 +393,7 @@ const Project = () => {
                   archived: false,
                   description: description,
                   created: created,
-                  entities: [],
+                  entities: entities,
                   collaborators: [],
                 },
               },
