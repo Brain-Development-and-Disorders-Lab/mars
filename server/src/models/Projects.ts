@@ -65,6 +65,11 @@ export class Projects {
       history: [],
     };
 
+    // Add the Project to any Entities
+    for await (const entity of projectModel.entities) {
+      await Entities.addProject(entity, projectModel._id);
+    }
+
     const response = await getDatabase()
       .collection<ProjectModel>(PROJECTS_COLLECTION)
       .insertOne(projectModel);
