@@ -6,8 +6,8 @@ import {
   useToast,
   InputGroup,
   InputRightElement,
-  Skeleton,
   Text,
+  Spinner,
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 
@@ -150,7 +150,6 @@ const SearchSelect = (props: SearchSelectProps) => {
   // State
   const [results, setResults] = useState([] as EntityModel[]);
   const [showResults, setShowResults] = useState(false);
-  const [inputValue, setInputValue] = useState("");
   const [hasSearched, setHasSearched] = useState(false);
 
   const toast = useToast();
@@ -202,15 +201,14 @@ const SearchSelect = (props: SearchSelectProps) => {
    * Handle search text input
    * @param event Input event
    */
-  const handleInputChange = (event: any) => {
+  const handleInputChange = async (event: any) => {
     if (event.target.value === "") {
       // Case where search input is empty, reset `hasSearched` state
       setHasSearched(false);
     }
 
-    setInputValue(event.target.value);
-    if (inputValue.length > 2) {
-      fetchResults(inputValue);
+    if (event.target.value.length > 0) {
+      await fetchResults(event.target.value);
     }
   };
 
@@ -220,7 +218,6 @@ const SearchSelect = (props: SearchSelectProps) => {
    */
   const handleSelectResult = (result: IGenericItem) => {
     // Reset state
-    setInputValue("");
     setResults([]);
     setShowResults(false);
     setHasSearched(false);
@@ -265,7 +262,6 @@ const SearchSelect = (props: SearchSelectProps) => {
             size={"sm"}
             rounded={"md"}
             placeholder={"Search"}
-            value={inputValue}
             onChange={handleInputChange}
             autoFocus
           />
@@ -299,7 +295,12 @@ const SearchSelect = (props: SearchSelectProps) => {
 
             {/* Has searched, search operation complete, no results */}
             {hasSearched && searchLoading === false && results.length === 0 && (
-              <Flex p={"2"}>
+              <Flex
+                w={"100%"}
+                minH={"100px"}
+                align={"center"}
+                justify={"center"}
+              >
                 <Text fontSize={"sm"} fontWeight={"semibold"}>
                   No Results
                 </Text>
@@ -328,8 +329,13 @@ const SearchSelect = (props: SearchSelectProps) => {
 
             {/* Search operation in-progress */}
             {searchLoading === true && (
-              <Flex>
-                <Skeleton height={"20px"} />
+              <Flex
+                w={"100%"}
+                minH={"100px"}
+                align={"center"}
+                justify={"center"}
+              >
+                <Spinner />
               </Flex>
             )}
           </Flex>
