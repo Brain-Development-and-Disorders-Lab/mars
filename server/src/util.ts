@@ -8,7 +8,7 @@ import { nanoid } from "nanoid";
  * @return {string}
  */
 export const getIdentifier = (
-  type: "entity" | "attribute" | "activity" | "project" | "workspace",
+  type: "entity" | "template" | "activity" | "project" | "workspace",
 ): string => {
   return `${type.slice(0, 1)}${nanoid(9)}`;
 };

@@ -28,7 +28,6 @@ import { typedefs } from "./typedefs";
 // Resolvers
 import { APIResolvers } from "./resolvers/API";
 import { ActivityResolvers } from "./resolvers/Activity";
-import { AttributesResolvers } from "./resolvers/Attributes";
 import { AuthenticationResolvers } from "./resolvers/Authentication";
 import { DataResolvers } from "./resolvers/Data";
 import { DateResolver } from "./resolvers/Date";
@@ -36,6 +35,7 @@ import { EntitiesResolvers } from "./resolvers/Entities";
 import { ObjectResolver } from "./resolvers/Object";
 import { ProjectsResolvers } from "./resolvers/Projects";
 import { SearchResolvers } from "./resolvers/Search";
+import { TemplatesResolvers } from "./resolvers/Templates";
 import { UsersResolvers } from "./resolvers/Users";
 import { WorkspacesResolvers } from "./resolvers/Workspaces";
 
@@ -103,7 +103,6 @@ const start = async () => {
       },
       ActivityResolvers,
       APIResolvers,
-      AttributesResolvers,
       AuthenticationResolvers,
       DataResolvers,
       DateResolver,
@@ -111,6 +110,7 @@ const start = async () => {
       ObjectResolver,
       ProjectsResolvers,
       SearchResolvers,
+      TemplatesResolvers,
       UsersResolvers,
       WorkspacesResolvers,
       {
