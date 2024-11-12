@@ -24,7 +24,7 @@ import TimestampTag from "@components/TimestampTag";
 import MDEditor from "@uiw/react-md-editor";
 
 // Existing and custom types
-import { AttributeModel, IValue } from "@types";
+import { AttributeModel, GenericValueType, IValue } from "@types";
 
 // Utility functions and libraries
 import _ from "lodash";
@@ -37,17 +37,19 @@ import { gql, useMutation, useQuery } from "@apollo/client";
 import { useWorkspace } from "@hooks/useWorkspace";
 import VisibilityTag from "@components/VisibilityTag";
 
-const Attribute = () => {
+const Template = () => {
   const { id } = useParams();
   const toast = useToast();
 
   const [editing, setEditing] = useState(false);
 
-  const [attribute, setAttribute] = useState({} as AttributeModel);
-  const [attributeName, setAttributeName] = useState("");
-  const [attributeDescription, setAttributeDescription] = useState("");
-  const [attributeArchived, setAttributeArchived] = useState(false);
-  const [attributeValues, setAttributeValues] = useState([] as IValue<any>[]);
+  const [template, setTemplate] = useState({} as AttributeModel);
+  const [templateName, setTemplateName] = useState("");
+  const [templateDescription, setTemplateDescription] = useState("");
+  const [templateArchived, setTemplateArchived] = useState(false);
+  const [templateValues, setTemplateValues] = useState(
+    [] as IValue<GenericValueType>[],
+  );
 
   // State for dialog confirming if user should archive
   const archiveDialogRef = useRef();
@@ -58,9 +60,9 @@ const Attribute = () => {
   } = useDisclosure();
 
   // GraphQL operations
-  const GET_ATTRIBUTE = gql`
-    query GetAttribute($_id: String) {
-      attribute(_id: $_id) {
+  const GET_TEMPLATE = gql`
+    query GetTemplate($_id: String) {
+      template(_id: $_id) {
         _id
         name
         timestamp
@@ -76,46 +78,46 @@ const Attribute = () => {
       }
     }
   `;
-  const { loading, error, data, refetch } = useQuery(GET_ATTRIBUTE, {
+  const { loading, error, data, refetch } = useQuery(GET_TEMPLATE, {
     variables: {
       _id: id,
     },
     fetchPolicy: "network-only",
   });
 
-  // Mutation to update Attribute
-  const UPDATE_ATTRIBUTE = gql`
-    mutation UpdateAttribute($attribute: AttributeInput) {
-      updateAttribute(attribute: $attribute) {
+  // Mutation to update Template
+  const UPDATE_TEMPLATE = gql`
+    mutation UpdateTemplate($template: AttributeInput) {
+      updateTemplate(template: $template) {
         success
         message
       }
     }
   `;
-  const [updateAttribute, { loading: updateLoading }] =
-    useMutation(UPDATE_ATTRIBUTE);
+  const [updateTemplate, { loading: updateLoading }] =
+    useMutation(UPDATE_TEMPLATE);
 
-  // Mutation to archive Attribute
-  const ARCHIVE_ATTRIBUTE = gql`
-    mutation ArchiveAttribute($_id: String, $state: Boolean) {
-      archiveAttribute(_id: $_id, state: $state) {
+  // Mutation to archive Template
+  const ARCHIVE_TEMPLATE = gql`
+    mutation ArchiveTemplate($_id: String, $state: Boolean) {
+      archiveTemplate(_id: $_id, state: $state) {
         success
         message
       }
     }
   `;
-  const [archiveAttribute, { loading: archiveLoading }] =
-    useMutation(ARCHIVE_ATTRIBUTE);
+  const [archiveTemplate, { loading: archiveLoading }] =
+    useMutation(ARCHIVE_TEMPLATE);
 
   // Manage data once retrieved
   useEffect(() => {
-    if (data?.attribute) {
+    if (data?.template) {
       // Unpack all the Entity data
-      setAttribute(data.attribute);
-      setAttributeName(data.attribute.name);
-      setAttributeArchived(data.attribute.archived);
-      setAttributeDescription(data.attribute.description || "");
-      setAttributeValues(data.attribute.values);
+      setTemplate(data.template);
+      setTemplateName(data.template.name);
+      setTemplateArchived(data.template.archived);
+      setTemplateDescription(data.template.description || "");
+      setTemplateValues(data.template.values);
     }
   }, [loading]);
 
@@ -124,7 +126,7 @@ const Attribute = () => {
       toast({
         title: "Error",
         status: "error",
-        description: "Unable to retrieve Attribute information",
+        description: "Unable to retrieve Template information",
         duration: 4000,
         position: "bottom-right",
         isClosable: true,
@@ -141,16 +143,16 @@ const Attribute = () => {
     }
   }, [workspace]);
 
-  // Archive the Attribute when confirmed
+  // Archive the Template when confirmed
   const handleArchiveClick = async () => {
-    const response = await archiveAttribute({
+    const response = await archiveTemplate({
       variables: {
-        _id: attribute._id,
+        _id: template._id,
         state: true,
       },
     });
 
-    if (response.data.archiveAttribute.success) {
+    if (response.data.archiveTemplate.success) {
       toast({
         title: "Archived Successfully",
         status: "success",
@@ -158,12 +160,12 @@ const Attribute = () => {
         position: "bottom-right",
         isClosable: true,
       });
-      setAttributeArchived(true);
+      setTemplateArchived(true);
       onArchiveDialogClose();
     } else {
       toast({
         title: "Error",
-        description: "An error occurred while archiving Attribute",
+        description: "An error occurred while archiving Template",
         status: "error",
         duration: 2000,
         position: "bottom-right",
@@ -174,29 +176,29 @@ const Attribute = () => {
     setEditing(false);
   };
 
-  // Restore the Attribute
+  // Restore the Template
   const handleRestoreFromArchiveClick = async () => {
-    const response = await archiveAttribute({
+    const response = await archiveTemplate({
       variables: {
-        _id: attribute._id,
+        _id: template._id,
         state: false,
       },
     });
 
-    if (response.data.archiveAttribute.success) {
+    if (response.data.archiveTemplate.success) {
       toast({
-        title: "Restored Attribute successfully",
+        title: "Restored Template successfully",
         status: "success",
         duration: 2000,
         position: "bottom-right",
         isClosable: true,
       });
-      setAttributeArchived(false);
+      setTemplateArchived(false);
       onArchiveDialogClose();
     } else {
       toast({
         title: "Error",
-        description: "An error occurred while restoring Attribute",
+        description: "An error occurred while restoring Template",
         status: "error",
         duration: 2000,
         position: "bottom-right",
@@ -212,17 +214,17 @@ const Attribute = () => {
    */
   const handleEditClick = async () => {
     if (editing) {
-      const response = await updateAttribute({
+      const response = await updateTemplate({
         variables: {
-          attribute: {
-            _id: attribute._id,
-            name: attributeName,
-            description: attributeDescription,
-            values: attributeValues,
+          template: {
+            _id: template._id,
+            name: templateName,
+            description: templateDescription,
+            values: templateValues,
           },
         },
       });
-      if (response.data.updateAttribute.success) {
+      if (response.data.updateTemplate.success) {
         toast({
           title: "Updated Successfully",
           status: "success",
@@ -268,17 +270,17 @@ const Attribute = () => {
             border={"2px"}
             rounded={"md"}
           >
-            <Icon name={"attribute"} size={"md"} />
+            <Icon name={"template"} size={"md"} />
             <Heading fontWeight={"semibold"} size={"md"}>
-              {attribute.name}
+              {template.name}
             </Heading>
           </Flex>
 
           {/* Buttons */}
           <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
-            {attributeArchived ? (
+            {templateArchived ? (
               <Button
-                id={"restoreAttributeButton"}
+                id={"restoreTemplateButton"}
                 onClick={handleRestoreFromArchiveClick}
                 size={"sm"}
                 colorScheme={"orange"}
@@ -288,7 +290,7 @@ const Attribute = () => {
               </Button>
             ) : (
               <Button
-                id={"editAttributeButton"}
+                id={"editTemplateButton"}
                 size={"sm"}
                 colorScheme={editing ? "green" : "blue"}
                 rightIcon={
@@ -313,14 +315,14 @@ const Attribute = () => {
               <MenuList>
                 <MenuItem
                   icon={<Icon name={"download"} />}
-                  isDisabled={editing || attributeArchived}
+                  isDisabled={editing || templateArchived}
                 >
                   Export
                 </MenuItem>
                 <MenuItem
                   onClick={onArchiveDialogOpen}
                   icon={<Icon name={"archive"} />}
-                  isDisabled={attributeArchived}
+                  isDisabled={templateArchived}
                 >
                   Archive
                 </MenuItem>
@@ -330,15 +332,15 @@ const Attribute = () => {
             {/* Archive Dialog */}
             <Dialog
               dialogRef={archiveDialogRef}
-              header={"Archive Attribute"}
+              header={"Archive Template"}
               rightButtonAction={handleArchiveClick}
               isOpen={isArchiveDialogOpen}
               onOpen={onArchiveDialogOpen}
               onClose={onArchiveDialogClose}
             >
               <Text>
-                Are you sure you want to archive this Attribute? It can be
-                restored any time from the Workspace archive
+                Are you sure you want to archive this Template? It can be
+                restored any time from the Workspace archives.
               </Text>
             </Dialog>
           </Flex>
@@ -365,9 +367,9 @@ const Attribute = () => {
                   <Input
                     id={"attributeNameInput"}
                     size={"sm"}
-                    value={attributeName}
+                    value={templateName}
                     onChange={(event) => {
-                      setAttributeName(event.target.value);
+                      setTemplateName(event.target.value);
                     }}
                     isReadOnly={!editing}
                     bg={"white"}
@@ -378,7 +380,7 @@ const Attribute = () => {
                 </Flex>
 
                 <TimestampTag
-                  timestamp={attribute.timestamp}
+                  timestamp={template.timestamp}
                   description={"Created"}
                 />
               </Flex>
@@ -395,7 +397,7 @@ const Attribute = () => {
                   <Text fontWeight={"bold"} fontSize={"sm"}>
                     Owner
                   </Text>
-                  <ActorTag orcid={attribute.owner} fallback={"No Owner"} />
+                  <ActorTag orcid={template.owner} fallback={"No Owner"} />
                 </Flex>
               </Flex>
             </Flex>
@@ -417,11 +419,11 @@ const Attribute = () => {
               <MDEditor
                 id={"attributeDescriptionInput"}
                 style={{ width: "100%" }}
-                value={attributeDescription}
+                value={templateDescription}
                 preview={editing ? "edit" : "preview"}
                 extraCommands={[]}
                 onChange={(value) => {
-                  setAttributeDescription(value || "");
+                  setTemplateDescription(value || "");
                 }}
               />
             </Flex>
@@ -436,8 +438,8 @@ const Attribute = () => {
           >
             <Values
               viewOnly={!editing}
-              values={attributeValues}
-              setValues={setAttributeValues}
+              values={templateValues}
+              setValues={setTemplateValues}
             />
           </Flex>
         </Flex>
@@ -446,4 +448,4 @@ const Attribute = () => {
   );
 };
 
-export default Attribute;
+export default Template;

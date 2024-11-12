@@ -32,17 +32,17 @@ import { gql, useQuery } from "@apollo/client";
 // Workspace context
 import { useWorkspace } from "@hooks/useWorkspace";
 
-const Attributes = () => {
+const Templates = () => {
   const navigate = useNavigate();
   const toast = useToast();
 
   // Page state
-  const [attributesData, setAttributesData] = useState([] as AttributeModel[]);
+  const [templates, setTemplates] = useState([] as AttributeModel[]);
 
   // GraphQL operations
-  const GET_ATTRIBUTES = gql`
-    query GetAttribute {
-      attributes {
+  const GET_TEMPLATES = gql`
+    query GetTemplates {
+      templates {
         _id
         name
         owner
@@ -57,13 +57,13 @@ const Attributes = () => {
       }
     }
   `;
-  const { loading, error, data, refetch } = useQuery(GET_ATTRIBUTES);
+  const { loading, error, data, refetch } = useQuery(GET_TEMPLATES);
 
   // Manage data once retrieved
   useEffect(() => {
-    if (data?.attributes) {
-      // Unpack all the Entity data
-      setAttributesData(data.attributes);
+    if (data?.templates) {
+      // Unpack all the Template data
+      setTemplates(data.templates);
     }
   }, [loading]);
 
@@ -72,7 +72,7 @@ const Attributes = () => {
       toast({
         title: "Error",
         status: "error",
-        description: "Unable to retrieve Attributes",
+        description: "Unable to retrieve Templates",
         duration: 4000,
         position: "bottom-right",
         isClosable: true,
@@ -137,7 +137,7 @@ const Attributes = () => {
       cell: (info) => {
         return (
           <Flex justifyContent={"right"} p={"2"} align={"center"} gap={"1"}>
-            <Link onClick={() => navigate(`/attributes/${info.getValue()}`)}>
+            <Link onClick={() => navigate(`/templates/${info.getValue()}`)}>
               <Text fontWeight={"semibold"}>View</Text>
             </Link>
             <Icon name={"a_right"} />
@@ -165,13 +165,13 @@ const Attributes = () => {
           align={"center"}
         >
           <Flex align={"center"} gap={"2"} w={"100%"}>
-            <Icon name={"attribute"} size={"md"} />
+            <Icon name={"template"} size={"md"} />
             <Heading size={"md"}>Templates</Heading>
             <Spacer />
             <Button
               rightIcon={<Icon name={"add"} />}
               colorScheme={"green"}
-              onClick={() => navigate("/create/attribute")}
+              onClick={() => navigate("/create/template")}
               size={"sm"}
             >
               Create
@@ -179,10 +179,10 @@ const Attributes = () => {
           </Flex>
         </Flex>
         <Flex direction={"column"} gap={"4"} w={"100%"}>
-          {attributesData.length > 0 ? (
+          {templates.length > 0 ? (
             <DataTable
               columns={columns}
-              data={attributesData}
+              data={templates}
               visibleColumns={visibleColumns}
               selectedRows={{}}
               showColumnSelect
@@ -209,4 +209,4 @@ const Attributes = () => {
   );
 };
 
-export default Attributes;
+export default Templates;

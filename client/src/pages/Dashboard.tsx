@@ -35,7 +35,7 @@ import {
   ActivityModel,
   EntityMetrics,
   ProjectMetrics,
-  AttributeMetrics,
+  TemplateMetrics,
   WorkspaceMetrics,
 } from "@types";
 
@@ -82,7 +82,7 @@ const GET_DASHBOARD = gql`
       all
       addedDay
     }
-    attributeMetrics {
+    templateMetrics {
       all
       addedDay
     }
@@ -132,9 +132,7 @@ const Dashboard = () => {
   // Metrics
   const [entityMetrics, setEntityMetrics] = useState({} as EntityMetrics);
   const [projectMetrics, setProjectMetrics] = useState({} as ProjectMetrics);
-  const [attributeMetrics, setAttributeMetrics] = useState(
-    {} as AttributeMetrics,
-  );
+  const [templateMetrics, setTemplateMetrics] = useState({} as TemplateMetrics);
   const [workspaceMetrics, setWorkspaceMetrics] = useState(
     {} as WorkspaceMetrics,
   );
@@ -172,8 +170,8 @@ const Dashboard = () => {
     if (data?.projectMetrics) {
       setProjectMetrics(data.projectMetrics);
     }
-    if (data?.attributeMetrics) {
-      setAttributeMetrics(data.attributeMetrics);
+    if (data?.templateMetrics) {
+      setTemplateMetrics(data.templateMetrics);
     }
     if (data?.workspaceMetrics) {
       setWorkspaceMetrics(data.workspaceMetrics);
@@ -363,13 +361,13 @@ const Dashboard = () => {
               </Stat>
 
               <Stat>
-                <StatLabel>Total Workspace Attributes</StatLabel>
-                <StatNumber>{attributeMetrics.all}</StatNumber>
+                <StatLabel>Total Workspace Templates</StatLabel>
+                <StatNumber>{templateMetrics.all}</StatNumber>
                 <StatHelpText>
-                  {attributeMetrics.addedDay > 0 && (
+                  {templateMetrics.addedDay > 0 && (
                     <StatArrow type={"increase"} />
                   )}
-                  {attributeMetrics.addedDay} in last 24 hours
+                  {templateMetrics.addedDay} in last 24 hours
                 </StatHelpText>
               </Stat>
 

@@ -367,6 +367,7 @@ export type IconNames =
   | "dashboard"
   | "entity"
   | "template"
+  | "attribute"
   | "project"
 
   // Signal and action icons

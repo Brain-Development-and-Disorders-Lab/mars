@@ -106,7 +106,7 @@ const ImportModal = (props: ImportModalProps) => {
   const [descriptionField, setDescriptionField] = useState("");
   const [ownerField] = useState(token.orcid);
   const [projectField, setProjectField] = useState("");
-  const [attributes, setAttributes] = useState([] as AttributeModel[]);
+  const [templates, setTemplates] = useState([] as AttributeModel[]);
   const [attributesField, setAttributesField] = useState(
     [] as AttributeModel[],
   );
@@ -131,7 +131,7 @@ const ImportModal = (props: ImportModalProps) => {
         _id
         name
       }
-      attributes {
+      templates {
         _id
         name
         description
@@ -369,8 +369,8 @@ const ImportModal = (props: ImportModalProps) => {
     setIsLoaded(!mappingDataLoading);
     const response = await getMappingData();
 
-    if (response.data?.attributes) {
-      setAttributes(response.data.attributes);
+    if (response.data?.templates) {
+      setTemplates(response.data.templates);
     }
     if (response.data?.projects) {
       setProjects(response.data.projects);
@@ -651,7 +651,7 @@ const ImportModal = (props: ImportModalProps) => {
     setNameField("");
     setDescriptionField("");
     setProjectField("");
-    setAttributes([]);
+    setTemplates([]);
     setAttributesField([]);
   };
 
@@ -979,39 +979,39 @@ const ImportModal = (props: ImportModalProps) => {
                 justify={"space-between"}
                 wrap={["wrap", "nowrap"]}
               >
-                {/* Drop-down to select template Attributes */}
+                {/* Drop-down to select a Template */}
                 <FormControl maxW={"sm"}>
                   <Tooltip
                     label={
-                      attributes.length > 0
-                        ? "Select an existing Template Attribute"
-                        : "No Template Attributes exist yet"
+                      templates.length > 0
+                        ? "Select an existing Template"
+                        : "No Templates exist yet"
                     }
                     hasArrow
                   >
                     <Select
                       size={"sm"}
                       placeholder={"Select Template Attribute"}
-                      isDisabled={attributes.length === 0}
+                      isDisabled={templates.length === 0}
                       onChange={(event) => {
                         if (!_.isEqual(event.target.value.toString(), "")) {
-                          for (const attribute of attributes) {
+                          for (const template of templates) {
                             if (
                               _.isEqual(
                                 event.target.value.toString(),
-                                attribute._id,
+                                template._id,
                               )
                             ) {
                               setAttributesField([
                                 ...attributesField,
                                 {
                                   _id: `a-${nanoid(6)}`,
-                                  name: attribute.name,
-                                  timestamp: attribute.timestamp,
-                                  owner: attribute.owner,
+                                  name: template.name,
+                                  timestamp: template.timestamp,
+                                  owner: template.owner,
                                   archived: false,
-                                  description: attribute.description,
-                                  values: attribute.values,
+                                  description: template.description,
+                                  values: template.values,
                                 },
                               ]);
                               break;
@@ -1021,10 +1021,10 @@ const ImportModal = (props: ImportModalProps) => {
                       }}
                     >
                       {isLoaded &&
-                        attributes.map((attribute) => {
+                        templates.map((template) => {
                           return (
-                            <option key={attribute._id} value={attribute._id}>
-                              {attribute.name}
+                            <option key={template._id} value={template._id}>
+                              {template.name}
                             </option>
                           );
                         })}

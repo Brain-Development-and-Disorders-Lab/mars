@@ -21,8 +21,8 @@ describe("Security, check endpoint access", () => {
     cy.location("pathname").should("eq", "/login");
   });
 
-  it("should not be able to access /attributes", () => {
-    cy.visit("http://localhost:8080/attributes");
+  it("should not be able to access /templates", () => {
+    cy.visit("http://localhost:8080/templates");
     cy.location("pathname").should("eq", "/login");
   });
 
@@ -46,8 +46,8 @@ describe("Security, check endpoint access", () => {
     cy.location("pathname").should("eq", "/login");
   });
 
-  it("should not be able to access /create/attribute", () => {
-    cy.visit("http://localhost:8080/create/attribute");
+  it("should not be able to access /create/template", () => {
+    cy.visit("http://localhost:8080/create/template");
     cy.location("pathname").should("eq", "/login");
   });
 

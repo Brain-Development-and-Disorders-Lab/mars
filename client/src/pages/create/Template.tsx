@@ -30,7 +30,7 @@ import Values from "@components/Values";
 import MDEditor from "@uiw/react-md-editor";
 
 // Existing and custom types
-import { IAttribute, IValue } from "@types";
+import { GenericValueType, IAttribute, IValue } from "@types";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
@@ -38,12 +38,11 @@ import { useNavigate } from "react-router-dom";
 // Utility functions and libraries
 import { gql, useMutation } from "@apollo/client";
 import { isValidValues } from "src/util";
-import _ from "lodash";
 
 // Authentication context
 import { useAuthentication } from "@hooks/useAuthentication";
 
-const Attribute = () => {
+const Template = () => {
   const navigate = useNavigate();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
@@ -52,7 +51,7 @@ const Attribute = () => {
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [values, setValues] = useState([] as IValue<any>[]);
+  const [values, setValues] = useState([] as IValue<GenericValueType>[]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -65,8 +64,8 @@ const Attribute = () => {
     setIsValueError(!isValidValues(values, true));
   }, [values]);
 
-  // Store Attribute data
-  const attributeData: IAttribute = {
+  // Store Template data
+  const templateData: IAttribute = {
     name: name,
     owner: token.orcid,
     archived: false,
@@ -75,15 +74,15 @@ const Attribute = () => {
   };
 
   // GraphQL operations
-  const CREATE_ATTRIBUTE = gql`
-    mutation CreateAttribute($attribute: AttributeCreateInput) {
-      createAttribute(attribute: $attribute) {
+  const CREATE_TEMPLATE = gql`
+    mutation CreateTemplate($template: AttributeCreateInput) {
+      createTemplate(template: $template) {
         success
         message
       }
     }
   `;
-  const [createAttribute, { loading, error }] = useMutation(CREATE_ATTRIBUTE);
+  const [createTemplate, { loading, error }] = useMutation(CREATE_TEMPLATE);
 
   /**
    * Handle creation of a new Attribute
@@ -92,15 +91,15 @@ const Attribute = () => {
     setIsSubmitting(true);
 
     // Execute the GraphQL mutation
-    const response = await createAttribute({
+    const response = await createTemplate({
       variables: {
-        attribute: attributeData,
+        template: templateData,
       },
     });
 
-    if (response.data.createAttribute.success) {
+    if (response.data.createTemplate.success) {
       setIsSubmitting(false);
-      navigate("/attributes");
+      navigate("/templates");
     }
   };
 
@@ -128,7 +127,7 @@ const Attribute = () => {
           justify={"space-between"}
         >
           <Flex align={"center"} gap={"2"} w={"100%"}>
-            <Icon name={"attribute"} size={"md"} />
+            <Icon name={"template"} size={"md"} />
             <Heading size={"md"}>Create Template</Heading>
             <Spacer />
             <Button
@@ -337,7 +336,7 @@ const Attribute = () => {
           colorScheme={"red"}
           variant={"outline"}
           rightIcon={<Icon name={"cross"} />}
-          onClick={() => navigate("/attributes")}
+          onClick={() => navigate("/templates")}
         >
           Cancel
         </Button>
@@ -356,4 +355,4 @@ const Attribute = () => {
   );
 };
 
-export default Attribute;
+export default Template;

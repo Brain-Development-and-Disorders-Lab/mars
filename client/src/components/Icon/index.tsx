@@ -86,6 +86,7 @@ const SYSTEM_ICONS: Record<string, IconType> = {
   entity: BsBoxFill,
   project: BsFillBookmarkFill,
   attribute: BsTagFill,
+  template: BsTagFill,
 
   // Signal and action icons
   activity: BsActivity,

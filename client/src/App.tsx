@@ -22,8 +22,8 @@ import consola from "consola";
 
 // Pages
 // Page type - View
-import Attribute from "@pages/view/Attribute";
-import Attributes from "@pages/view/Attributes";
+import Template from "@pages/view/Template";
+import Templates from "@pages/view/Templates";
 import Project from "@pages/view/Project";
 import Projects from "@pages/view/Projects";
 import Entity from "@pages/view/Entity";
@@ -34,7 +34,7 @@ import Workspace from "@pages/view/Workspace";
 // Page type - Create
 import Create from "@pages/create/Create";
 import CreateWorkspace from "@pages/create/Workspace";
-import CreateAttribute from "@pages/create/Attribute";
+import CreateTemplate from "@pages/create/Template";
 import CreateEntity from "@pages/create/Entity";
 import CreateProject from "@pages/create/Project";
 
@@ -74,10 +74,7 @@ const App = (): ReactElement => {
                   path={"/create/workspace"}
                   element={<CreateWorkspace />}
                 />
-                <Route
-                  path={"/create/attribute"}
-                  element={<CreateAttribute />}
-                />
+                <Route path={"/create/template"} element={<CreateTemplate />} />
                 <Route path={"/create/project"} element={<CreateProject />} />
                 <Route path={"/create/entity"} element={<CreateEntity />} />
                 <Route path={"/create"} element={<Create />} />
@@ -99,10 +96,10 @@ const App = (): ReactElement => {
                   <Route path={":id"} element={<Project />} />
                 </Route>
 
-                {/* Attributes routes */}
-                <Route path={"/attributes"} element={<Attributes />} />
-                <Route path={"attributes"}>
-                  <Route path={":id"} element={<Attribute />} />
+                {/* Templates routes */}
+                <Route path={"/templates"} element={<Templates />} />
+                <Route path={"templates"}>
+                  <Route path={":id"} element={<Template />} />
                 </Route>
 
                 {/* Other routes */}

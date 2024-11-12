@@ -46,16 +46,16 @@ const Linky = (props: LinkyProps) => {
   `;
   const [getProject, { loading: loadingProject }] = useLazyQuery(GET_PROJECT);
 
-  const GET_ATTRIBUTE = gql`
-    query GetAttribute($_id: String) {
-      attribute(_id: $_id) {
+  const GET_TEMPLATE = gql`
+    query GetTemplate($_id: String) {
+      template(_id: $_id) {
         _id
         name
       }
     }
   `;
-  const [getAttribute, { loading: loadingAttribute }] =
-    useLazyQuery(GET_ATTRIBUTE);
+  const [getTemplate, { loading: loadingTemplate }] =
+    useLazyQuery(GET_TEMPLATE);
 
   /**
    * Utility function to retrieve data of link target
@@ -66,13 +66,13 @@ const Linky = (props: LinkyProps) => {
       name: props.fallback || "Invalid",
     };
 
-    if (props.type === "attributes") {
-      const response = await getAttribute({ variables: { _id: props.id } });
+    if (props.type === "templates") {
+      const response = await getTemplate({ variables: { _id: props.id } });
       if (response.error || _.isUndefined(response.data)) {
         setShowDeleted(true);
         setTooltipLabel("Deleted or Private");
       } else {
-        data.name = response.data.attribute.name;
+        data.name = response.data.template.name;
         setTooltipLabel(data.name);
       }
     } else if (props.type === "entities") {
@@ -111,12 +111,7 @@ const Linky = (props: LinkyProps) => {
   };
 
   const onClickHandler = () => {
-    if (
-      !showDeleted &&
-      !loadingAttribute &&
-      !loadingEntity &&
-      !loadingProject
-    ) {
+    if (!showDeleted && !loadingEntity && !loadingProject && !loadingTemplate) {
       navigate(`/${props.type}/${props.id}`);
     }
   };
@@ -135,7 +130,7 @@ const Linky = (props: LinkyProps) => {
         onClick={onClickHandler}
       >
         <Skeleton
-          isLoaded={!loadingAttribute && !loadingEntity && !loadingProject}
+          isLoaded={!loadingTemplate && !loadingEntity && !loadingProject}
         >
           <Text
             color={showDeleted ? "gray.400" : "black"}
