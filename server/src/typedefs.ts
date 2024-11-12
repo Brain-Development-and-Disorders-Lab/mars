@@ -290,7 +290,7 @@ export const typedefs = `#graphql
     collaborators: [String]
     entities: [String]
     projects: [String]
-    attributes: [String]
+    templates: [String]
     activity: [String]
   }
 
@@ -303,7 +303,7 @@ export const typedefs = `#graphql
     collaborators: [String]
     entities: [String]
     projects: [String]
-    attributes: [String]
+    templates: [String]
     activity: [String]
   }
 
@@ -317,7 +317,7 @@ export const typedefs = `#graphql
     collaborators: [String]
     entities: [String]
     projects: [String]
-    attributes: [String]
+    templates: [String]
     activity: [String]
   }
 

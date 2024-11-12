@@ -262,7 +262,7 @@ export class Workspaces {
    * @param template Template identifier to be added to the Workspace
    * @return {Promise<IResponseMessage>}
    */
-  static addAttribute = async (
+  static addTemplate = async (
     _id: string,
     template: string,
   ): Promise<ResponseData<string>> => {
