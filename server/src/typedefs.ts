@@ -434,6 +434,7 @@ export const typedefs = `#graphql
     exportEntities(entities: [String]): String
     exportProject(_id: String, format: String, fields: [String]): String
     exportProjectEntities(_id: String, format: String): String
+    exportTemplate(_id: String): String
 
     # Authentication queries
     login(code: String): ResponseDataAuth

@@ -118,6 +118,48 @@ export const TemplatesResolvers = {
         addedDay: templatesAddedDay.length,
       };
     },
+
+    // Export a Template
+    exportTemplate: async (
+      _parent: any,
+      args: { _id: string },
+      context: Context,
+    ): Promise<string> => {
+      // Authenticate the provided context
+      await Authentication.authenticate(context);
+
+      // Retrieve the Workspace to determine which Entities to return
+      const workspace = await Workspaces.getOne(context.workspace);
+      if (_.isNull(workspace)) {
+        throw new GraphQLError("Workspace does not exist", {
+          extensions: {
+            code: "NON_EXIST",
+          },
+        });
+      }
+
+      const template = await Templates.getOne(args._id);
+      if (_.isNull(template)) {
+        throw new GraphQLError("Template does not exist", {
+          extensions: {
+            code: "NON_EXIST",
+          },
+        });
+      }
+
+      if (_.includes(workspace.templates, args._id)) {
+        return await Templates.export(args._id);
+      } else {
+        throw new GraphQLError(
+          "You do not have permission to access this Template",
+          {
+            extensions: {
+              code: "UNAUTHORIZED",
+            },
+          },
+        );
+      }
+    },
   },
 
   Mutation: {
