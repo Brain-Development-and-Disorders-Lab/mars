@@ -21,6 +21,7 @@ import Values from "@components/Values";
 import Dialog from "@components/Dialog";
 import ActorTag from "@components/ActorTag";
 import TimestampTag from "@components/TimestampTag";
+import VisibilityTag from "@components/VisibilityTag";
 import MDEditor from "@uiw/react-md-editor";
 
 // Existing and custom types
@@ -28,14 +29,15 @@ import { AttributeModel, GenericValueType, IValue } from "@types";
 
 // Utility functions and libraries
 import _ from "lodash";
+import slugify from "slugify";
+import FileSaver from "file-saver";
 
 // Routing and navigation
 import { useParams } from "react-router-dom";
-import { gql, useMutation, useQuery } from "@apollo/client";
+import { gql, useLazyQuery, useMutation, useQuery } from "@apollo/client";
 
 // Workspace context
 import { useWorkspace } from "@hooks/useWorkspace";
-import VisibilityTag from "@components/VisibilityTag";
 
 const Template = () => {
   const { id } = useParams();
@@ -84,6 +86,15 @@ const Template = () => {
     },
     fetchPolicy: "network-only",
   });
+
+  // Query to get Template export contents
+  const GET_TEMPLATE_EXPORT = gql`
+    query GetTemplateExport($_id: String) {
+      exportTemplate(_id: $_id)
+    }
+  `;
+  const [exportTemplate, { error: exportError }] =
+    useLazyQuery(GET_TEMPLATE_EXPORT);
 
   // Mutation to update Template
   const UPDATE_TEMPLATE = gql`
@@ -248,6 +259,45 @@ const Template = () => {
     }
   };
 
+  /**
+   * Handle the export button being clicked
+   */
+  const handleDownloadClick = async () => {
+    // Send query to generate data
+    const response = await exportTemplate({
+      variables: {
+        _id: id,
+      },
+    });
+
+    if (response.data.exportTemplate) {
+      FileSaver.saveAs(
+        new Blob([response.data.exportTemplate]),
+        slugify(`${templateName.replace(" ", "")}_export.json`),
+      );
+
+      toast({
+        title: "Info",
+        description: `Generated JSON file`,
+        status: "info",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
+
+    if (exportError) {
+      toast({
+        title: "Error",
+        description: "An error occurred exporting this Project",
+        status: "error",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
+  };
+
   return (
     <Content
       isError={!_.isUndefined(error)}
@@ -315,6 +365,7 @@ const Template = () => {
               <MenuList>
                 <MenuItem
                   icon={<Icon name={"download"} />}
+                  onClick={handleDownloadClick}
                   isDisabled={editing || templateArchived}
                 >
                   Export

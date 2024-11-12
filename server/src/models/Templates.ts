@@ -141,6 +141,21 @@ export class Templates {
   };
 
   /**
+   * Generate export data for the Template
+   * @param _id Template identifier
+   * @returns {Promise<string>}
+   */
+  static export = async (_id: string): Promise<string> => {
+    const template = await Templates.getOne(_id);
+
+    if (_.isNull(template)) {
+      return "";
+    }
+
+    return JSON.stringify(template, null, "  ");
+  };
+
+  /**
    * Set the archive state of an Template
    * @param _id Template identifier to archive
    * @param state Template archive state
