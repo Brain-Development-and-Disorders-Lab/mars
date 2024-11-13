@@ -2769,7 +2769,9 @@ const Entity = () => {
                     );
                   })
                 ) : (
-                  <Text>No previous versions.</Text>
+                  <Text fontSize={"sm"} fontWeight={"semibold"}>
+                    No previous versions.
+                  </Text>
                 )}
               </VStack>
             </DrawerBody>

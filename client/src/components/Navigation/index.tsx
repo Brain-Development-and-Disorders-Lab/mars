@@ -123,7 +123,7 @@ const Navigation = () => {
               w={"100%"}
               justifyContent={"left"}
               bg={
-                _.includes(location.pathname, "/search") ? "#ffffff" : "#f2f2f2"
+                _.includes(location.pathname, "/create") ? "#ffffff" : "#f2f2f2"
               }
               leftIcon={<Icon name={"add"} />}
               onClick={() => navigate("/create")}
