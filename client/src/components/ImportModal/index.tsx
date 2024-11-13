@@ -137,13 +137,15 @@ const ImportModal = (props: ImportModalProps) => {
   );
 
   // Queries
-  const PREPARE_CSV = gql`
-    mutation PrepareCSV($file: [Upload]!) {
-      prepareCSV(file: $file)
+  const PREPARE_ENTITY_CSV = gql`
+    mutation PrepareEntityCSV($file: [Upload]!) {
+      prepareEntityCSV(file: $file)
     }
   `;
-  const [prepareCSV, { loading: prepareCSVLoading, error: prepareCSVError }] =
-    useMutation(PREPARE_CSV);
+  const [
+    prepareEntityCSV,
+    { loading: prepareEntityCSVLoading, error: prepareEntityCSVError },
+  ] = useMutation(PREPARE_ENTITY_CSV);
 
   const GET_MAPPING_DATA = gql`
     query GetMappingData {
@@ -169,9 +171,12 @@ const ImportModal = (props: ImportModalProps) => {
     { loading: mappingDataLoading, error: mappingDataError },
   ] = useLazyQuery(GET_MAPPING_DATA);
 
-  const REVIEW_CSV = gql`
-    mutation ReviewCSV($columnMapping: ColumnMappingInput, $file: [Upload]!) {
-      reviewCSV(columnMapping: $columnMapping, file: $file) {
+  const REVIEW_ENTITY_CSV = gql`
+    mutation ReviewEntityCSV(
+      $columnMapping: ColumnMappingInput
+      $file: [Upload]!
+    ) {
+      reviewEntityCSV(columnMapping: $columnMapping, file: $file) {
         success
         message
         data {
@@ -181,23 +186,30 @@ const ImportModal = (props: ImportModalProps) => {
       }
     }
   `;
-  const [reviewCSV, { loading: reviewCSVLoading, error: reviewCSVError }] =
-    useMutation(REVIEW_CSV);
+  const [
+    reviewEntityCSV,
+    { loading: reviewEntityCSVLoading, error: reviewEntityCSVError },
+  ] = useMutation(REVIEW_ENTITY_CSV);
 
-  const IMPORT_CSV = gql`
-    mutation ImportCSV($columnMapping: ColumnMappingInput, $file: [Upload]!) {
-      importCSV(columnMapping: $columnMapping, file: $file) {
+  const IMPORT_ENTITY_CSV = gql`
+    mutation ImportEntityCSV(
+      $columnMapping: ColumnMappingInput
+      $file: [Upload]!
+    ) {
+      importEntityCSV(columnMapping: $columnMapping, file: $file) {
         success
         message
       }
     }
   `;
-  const [importCSV, { loading: importCSVLoading, error: importCSVError }] =
-    useMutation(IMPORT_CSV);
+  const [
+    importEntityCSV,
+    { loading: importEntityCSVLoading, error: importEntityCSVError },
+  ] = useMutation(IMPORT_ENTITY_CSV);
 
-  const REVIEW_JSON = gql`
-    mutation ReviewJSON($file: [Upload]!) {
-      reviewJSON(file: $file) {
+  const REVIEW_ENTITY_JSON = gql`
+    mutation ReviewEntityJSON($file: [Upload]!) {
+      reviewEntityJSON(file: $file) {
         success
         message
         data {
@@ -207,19 +219,36 @@ const ImportModal = (props: ImportModalProps) => {
       }
     }
   `;
-  const [reviewJSON, { loading: reviewJSONLoading, error: reviewJSONError }] =
-    useMutation(REVIEW_JSON);
+  const [
+    reviewEntityJSON,
+    { loading: reviewEntityJSONLoading, error: reviewEntityJSONError },
+  ] = useMutation(REVIEW_ENTITY_JSON);
 
-  const IMPORT_JSON = gql`
-    mutation ImportJSON($file: [Upload]!, $project: String) {
-      importJSON(file: $file, project: $project) {
+  const IMPORT_ENTITY_JSON = gql`
+    mutation ImportEntityJSON($file: [Upload]!, $project: String) {
+      importEntityJSON(file: $file, project: $project) {
         success
         message
       }
     }
   `;
-  const [importJSON, { loading: importJSONLoading, error: importJSONError }] =
-    useMutation(IMPORT_JSON);
+  const [
+    importEntityJSON,
+    { loading: importEntityJSONLoading, error: importEntityJSONError },
+  ] = useMutation(IMPORT_ENTITY_JSON);
+
+  const IMPORT_TEMPLATE_JSON = gql`
+    mutation ImportTemplateJSON($file: [Upload]!) {
+      importTemplateJSON(file: $file) {
+        success
+        message
+      }
+    }
+  `;
+  const [
+    importTemplateJSON,
+    { loading: importTemplateJSONLoading, error: importTemplateJSONError },
+  ] = useMutation(IMPORT_TEMPLATE_JSON);
 
   // Setup columns for review table
   const reviewTableColumnHelper = createColumnHelper<EntityImportReview>();
@@ -327,7 +356,7 @@ const ImportModal = (props: ImportModalProps) => {
 
   /**
    * Utility function to perform the initial import operations. For CSV files, execute
-   * `prepareCSV` query to defer the data extraction to the server.
+   * `prepareEntityCSV` query to defer the data extraction to the server.
    * For JSON files, trigger the `validJSONFile` method to handle the file
    * locally instead.
    */
@@ -347,15 +376,15 @@ const ImportModal = (props: ImportModalProps) => {
       await validJSONFile(file);
     } else if (_.isEqual(fileType, "text/csv")) {
       // Mutation query with CSV file
-      setContinueLoading(prepareCSVLoading);
-      const response = await prepareCSV({
+      setContinueLoading(prepareEntityCSVLoading);
+      const response = await prepareEntityCSV({
         variables: {
           file: file,
         },
       });
-      setContinueLoading(prepareCSVLoading);
+      setContinueLoading(prepareEntityCSVLoading);
 
-      if (prepareCSVError || _.isUndefined(response.data)) {
+      if (prepareEntityCSVError || _.isUndefined(response.data)) {
         toast({
           title: "CSV Import Error",
           status: "error",
@@ -366,9 +395,9 @@ const ImportModal = (props: ImportModalProps) => {
         });
       }
 
-      if (response.data && response.data.prepareCSV.length > 0) {
+      if (response.data && response.data.prepareEntityCSV.length > 0) {
         // Filter columns to exclude columns with no header ("__EMPTY...")
-        const filteredColumnSet = response.data.prepareCSV.filter(
+        const filteredColumnSet = response.data.prepareEntityCSV.filter(
           (column: string) => {
             return !_.startsWith(column, "__EMPTY");
           },
@@ -414,20 +443,20 @@ const ImportModal = (props: ImportModalProps) => {
    * Submit the pre-imported JSON structure and changes to the server
    * to generate a summary of the changes
    */
-  const setupReviewJSON = async () => {
-    setContinueLoading(reviewJSONLoading);
-    const response = await reviewJSON({
+  const setupReviewEntityJSON = async () => {
+    setContinueLoading(reviewEntityJSONLoading);
+    const response = await reviewEntityJSON({
       variables: {
         file: file,
       },
     });
-    setContinueLoading(reviewJSONLoading);
+    setContinueLoading(reviewEntityJSONLoading);
 
-    if (response.data && response.data.reviewJSON.data) {
-      setReviewEntities(response.data.reviewJSON.data);
+    if (response.data && response.data.reviewEntityJSON.data) {
+      setReviewEntities(response.data.reviewEntityJSON.data);
     }
 
-    if (reviewJSONError) {
+    if (reviewEntityJSONError) {
       toast({
         title: "JSON Import Error",
         status: "error",
@@ -443,7 +472,7 @@ const ImportModal = (props: ImportModalProps) => {
    * Submit the pre-imported CSV structure and changes to the server
    * to generate a summary of the changes
    */
-  const setupReviewCSV = async () => {
+  const setupReviewEntityCSV = async () => {
     // Collate data to be mapped
     const mappingData: { columnMapping: any; file: any } = {
       columnMapping: {
@@ -457,17 +486,17 @@ const ImportModal = (props: ImportModalProps) => {
       file: file,
     };
 
-    setContinueLoading(reviewCSVLoading);
-    const response = await reviewCSV({
+    setContinueLoading(reviewEntityCSVLoading);
+    const response = await reviewEntityCSV({
       variables: mappingData,
     });
-    setContinueLoading(reviewCSVLoading);
+    setContinueLoading(reviewEntityCSVLoading);
 
-    if (response.data && response.data.reviewCSV.data) {
-      setReviewEntities(response.data.reviewCSV.data);
+    if (response.data && response.data.reviewEntityCSV.data) {
+      setReviewEntities(response.data.reviewEntityCSV.data);
     }
 
-    if (reviewCSVError) {
+    if (reviewEntityCSVError) {
       toast({
         title: "CSV Import Error",
         status: "error",
@@ -482,17 +511,17 @@ const ImportModal = (props: ImportModalProps) => {
   /**
    * Finish importing a JSON file
    */
-  const finishImportJSON = async () => {
-    setContinueLoading(importJSONLoading);
-    const response = await importJSON({
+  const finishImportEntityJSON = async () => {
+    setContinueLoading(importEntityJSONLoading);
+    const response = await importEntityJSON({
       variables: {
         file: file,
         project: projectField,
       },
     });
-    setContinueLoading(importJSONLoading);
+    setContinueLoading(importEntityJSONLoading);
 
-    if (importJSONError) {
+    if (importEntityJSONError) {
       toast({
         title: "JSON Import Error",
         status: "error",
@@ -503,7 +532,7 @@ const ImportModal = (props: ImportModalProps) => {
       });
     }
 
-    if (response.data.importJSON.success === true) {
+    if (response.data.importEntityJSON.success === true) {
       // Close the `ImportModal` UI
       props.onClose();
       resetState();
@@ -514,9 +543,9 @@ const ImportModal = (props: ImportModalProps) => {
   /**
    * Finish importing a CSV file
    */
-  const finishImportCSV = async () => {
+  const finishImportEntityCSV = async () => {
     // Set the mapping status
-    setContinueLoading(importCSVLoading);
+    setContinueLoading(importEntityCSVLoading);
 
     // Collate data to be mapped
     const mappingData: { columnMapping: any; file: any } = {
@@ -530,19 +559,45 @@ const ImportModal = (props: ImportModalProps) => {
       },
       file: file,
     };
-    await importCSV({
+    await importEntityCSV({
       variables: {
         columnMapping: mappingData.columnMapping,
         file: mappingData.file,
       },
     });
-    setContinueLoading(importCSVLoading);
+    setContinueLoading(importEntityCSVLoading);
 
-    if (importCSVError) {
+    if (importEntityCSVError) {
       toast({
         title: "CSV Import Error",
         status: "error",
         description: "Error while importing CSV file",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    } else {
+      props.onClose();
+      resetState();
+      navigate(0);
+    }
+
+    setContinueLoading(false);
+  };
+
+  const finishImportTemplateJSON = async () => {
+    await importTemplateJSON({
+      variables: {
+        file: file,
+      },
+    });
+    setContinueLoading(importTemplateJSONLoading);
+
+    if (importTemplateJSONError) {
+      toast({
+        title: "JSON Import Error",
+        status: "error",
+        description: "Error while importing JSON file",
         duration: 4000,
         position: "bottom-right",
         isClosable: true,
@@ -638,9 +693,9 @@ const ImportModal = (props: ImportModalProps) => {
       } else if (_.isEqual(entityInterfacePage, "mapping")) {
         // Run the review setup function depending on file type
         if (_.isEqual(fileType, "application/json")) {
-          await setupReviewJSON();
+          await setupReviewEntityJSON();
         } else if (_.isEqual(fileType, "text/csv")) {
-          await setupReviewCSV();
+          await setupReviewEntityCSV();
         }
 
         // Proceed to the next page
@@ -649,9 +704,9 @@ const ImportModal = (props: ImportModalProps) => {
       } else if (_.isEqual(entityInterfacePage, "review")) {
         // Run the final import function depending on file type
         if (_.isEqual(fileType, "application/json")) {
-          await finishImportJSON();
+          await finishImportEntityJSON();
         } else if (_.isEqual(fileType, "text/csv")) {
-          await finishImportCSV();
+          await finishImportEntityCSV();
         }
       }
     } else if (_.isEqual(importType, "template")) {
@@ -659,6 +714,9 @@ const ImportModal = (props: ImportModalProps) => {
         // Proceed to the next page
         setActiveTemplateStep(1);
         setTemplateInterfacePage("review");
+      } else if (_.isEqual(templateInterfacePage, "review")) {
+        // Run the final import function for Template JSON files
+        await finishImportTemplateJSON();
       }
     }
   };
@@ -1327,9 +1385,13 @@ const ImportModal = (props: ImportModalProps) => {
             _.isEqual(templateInterfacePage, "review") && (
               <Flex
                 w={"100%"}
+                p={"2"}
                 direction={"column"}
                 align={"center"}
                 justify={"center"}
+                border={"1px"}
+                borderColor={"gray.300"}
+                rounded={"md"}
               >
                 <Text fontSize={"sm"} fontWeight={"semibold"}>
                   Review Template
