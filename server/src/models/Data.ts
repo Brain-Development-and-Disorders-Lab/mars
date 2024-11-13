@@ -22,6 +22,7 @@ import _ from "lodash";
 import { Activity } from "./Activity";
 import { Entities } from "./Entities";
 import { Projects } from "./Projects";
+import { Templates } from "./Templates";
 import { Workspaces } from "./Workspaces";
 
 export class Data {
@@ -195,11 +196,11 @@ export class Data {
   };
 
   /**
-   * Prepare a CSV file for import by extracting column names for mapping
+   * Prepare an Entity CSV file for import by extracting column names for mapping
    * @param file File object
    * @return {Promise<string[]>}
    */
-  static prepareCSV = async (file: any[]): Promise<string[]> => {
+  static prepareEntityCSV = async (file: any[]): Promise<string[]> => {
     const { createReadStream, mimetype } = await file[0];
     const stream = createReadStream();
 
@@ -229,12 +230,12 @@ export class Data {
   };
 
   /**
-   * Review a CSV file and collate a list of operations that will be made to the imported Entities
+   * Review an Entity CSV file and collate a list of operations that will be made to the imported Entities
    * @param columnMapping Collection of key-value pairs defining the mapping between CSV columns and Entity fields
    * @param file CSV file
    * @return {Promise<ResponseData<EntityImportReview[]>>}
    */
-  static reviewCSV = async (
+  static reviewEntityCSV = async (
     columnMapping: Record<string, any>,
     file: any,
   ): Promise<ResponseData<EntityImportReview[]>> => {
@@ -281,7 +282,7 @@ export class Data {
    * @param context Request context, containing user and Workspace identifiers
    * @return {Promise<IResponseMessage>}
    */
-  static importCSV = async (
+  static importEntityCSV = async (
     columnMapping: Record<string, any>,
     file: any,
     context: Context,
@@ -343,11 +344,11 @@ export class Data {
   };
 
   /**
-   * Review a JSON file and collate a list of operations that will be made to the imported Entities
+   * Review an Entity JSON file and collate a list of operations that will be made to the imported Entities
    * @param file JSON file for import
    * @return {Promise<ResponseData<EntityImportReview[]>>}
    */
-  static reviewJSON = async (
+  static reviewEntityJSON = async (
     file: any[],
   ): Promise<ResponseData<EntityImportReview[]>> => {
     const { createReadStream, mimetype } = await file[0];
@@ -393,13 +394,13 @@ export class Data {
   };
 
   /**
-   * Import a JSON file or set of objects
+   * Import an Entity JSON file or set of objects
    * @param file JSON file for import
    * @param project Project identifier to add Entities to (if any)
    * @param context Request context containing user and Workspace identifier
    * @return {Promise<IResponseMessage>}
    */
-  static importJSON = async (
+  static importEntityJSON = async (
     file: any[],
     project: string,
     context: Context,
@@ -485,6 +486,100 @@ export class Data {
             await Workspaces.addActivity(context.workspace, activity.data);
           }
         }
+      }
+    }
+
+    return {
+      success: true,
+      message: "Successfully imported set of objects",
+    };
+  };
+
+  /**
+   * Import a Template JSON file
+   * @param file JSON file for import
+   * @param context Request context containing user and Workspace identifier
+   * @return {Promise<IResponseMessage>}
+   */
+  static importTemplateJSON = async (
+    file: any[],
+    context: Context,
+  ): Promise<IResponseMessage> => {
+    const { createReadStream, mimetype } = await file[0];
+    const stream = createReadStream();
+
+    // Validate correct MIME type before continuing
+    if (_.isEqual(mimetype, "application/json")) {
+      const output = await Data.bufferHelper(stream);
+      const parsed = JSON.parse(output.toString());
+
+      // Check that JSON file contains required fields
+      if (
+        _.isUndefined(parsed["name"]) ||
+        _.isUndefined(parsed["description"]) ||
+        _.isUndefined(parsed["archived"]) ||
+        _.isUndefined(parsed["values"])
+      ) {
+        return {
+          success: false,
+          message: "Template JSON file is missing required fields",
+        };
+      }
+
+      if (
+        !_.isUndefined(parsed["_id"]) &&
+        (await Templates.exists(parsed._id))
+      ) {
+        // Update an existing Template if it exists
+        const result = await Templates.update(parsed);
+        if (!result.success) {
+          return {
+            success: false,
+            message: `Error updating Template: "${parsed.name}"`,
+          };
+        }
+
+        const activity = await Activity.create({
+          timestamp: dayjs(Date.now()).toISOString(),
+          type: "update",
+          actor: context.user,
+          details: "Updated existing Template",
+          target: {
+            _id: parsed._id,
+            type: "templates",
+            name: parsed.name,
+          },
+        });
+
+        // Add Activity to Workspace
+        await Workspaces.addActivity(context.workspace, activity.data);
+      } else {
+        // Create a new Template if it does not exist
+        const result = await Templates.create(parsed);
+        if (!result.success) {
+          return {
+            success: false,
+            message: `Error creating new Template: "${parsed.name}"`,
+          };
+        }
+
+        // Add the Entity to the Workspace
+        await Workspaces.addTemplate(context.workspace, result.data);
+
+        const activity = await Activity.create({
+          timestamp: dayjs(Date.now()).toISOString(),
+          type: "create",
+          actor: context.user,
+          details: "Created new Template",
+          target: {
+            _id: result.data,
+            type: "templates",
+            name: parsed.name,
+          },
+        });
+
+        // Add Activity to Workspace
+        await Workspaces.addActivity(context.workspace, activity.data);
       }
     }
 
