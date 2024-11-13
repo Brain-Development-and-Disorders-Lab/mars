@@ -83,6 +83,7 @@ const ImportModal = (props: ImportModalProps) => {
   const [importType, setImportType] = useState(
     "entities" as "entities" | "template",
   );
+  const [isTypeSelectDisabled, setIsTypeSelectDisabled] = useState(false);
 
   // State management to generate and present different pages
   const [entityInterfacePage, setEntityInterfacePage] = useState(
@@ -618,6 +619,9 @@ const ImportModal = (props: ImportModalProps) => {
    * Callback function to handle any click events on the Continue button
    */
   const onContinueClick = async () => {
+    // Disable changing the type of import unless import canceled
+    setIsTypeSelectDisabled(true);
+
     if (_.isEqual(importType, "entities")) {
       if (_.isEqual(entityInterfacePage, "upload")) {
         // Run setup for import and mapping
@@ -673,6 +677,7 @@ const ImportModal = (props: ImportModalProps) => {
 
     setContinueDisabled(true);
     setContinueLoading(false);
+    setIsTypeSelectDisabled(false);
 
     setFile({} as File);
     setFileType("");
@@ -738,6 +743,7 @@ const ImportModal = (props: ImportModalProps) => {
                 }
                 size={"sm"}
                 rounded={"md"}
+                isDisabled={isTypeSelectDisabled}
               >
                 <option value={"entities"}>Entities</option>
                 <option value={"template"}>Template</option>
@@ -1315,6 +1321,21 @@ const ImportModal = (props: ImportModalProps) => {
                 </FormControl>
               </Flex>
             )}
+
+          {/* Template Step 2: Review */}
+          {_.isEqual(importType, "template") &&
+            _.isEqual(templateInterfacePage, "review") && (
+              <Flex
+                w={"100%"}
+                direction={"column"}
+                align={"center"}
+                justify={"center"}
+              >
+                <Text fontSize={"sm"} fontWeight={"semibold"}>
+                  Review Template
+                </Text>
+              </Flex>
+            )}
         </ModalBody>
 
         <ModalFooter p={"2"}>
@@ -1338,7 +1359,10 @@ const ImportModal = (props: ImportModalProps) => {
               id={"importContinueButton"}
               size={"sm"}
               colorScheme={
-                _.isEqual(entityInterfacePage, "review") ? "green" : "blue"
+                _.isEqual(templateInterfacePage, "review") ||
+                _.isEqual(entityInterfacePage, "review")
+                  ? "green"
+                  : "blue"
               }
               rightIcon={
                 _.includes(
@@ -1356,10 +1380,27 @@ const ImportModal = (props: ImportModalProps) => {
               isLoading={continueLoading}
               loadingText={"Processing"}
             >
-              {_.isEqual(entityInterfacePage, "upload") && "Continue"}
-              {_.isEqual(entityInterfacePage, "details") && "Continue"}
-              {_.isEqual(entityInterfacePage, "mapping") && "Continue"}
-              {_.isEqual(entityInterfacePage, "review") && "Finish"}
+              {/* Entities import type */}
+              {_.isEqual(importType, "entities") &&
+                _.isEqual(entityInterfacePage, "upload") &&
+                "Continue"}
+              {_.isEqual(importType, "entities") &&
+                _.isEqual(entityInterfacePage, "details") &&
+                "Continue"}
+              {_.isEqual(importType, "entities") &&
+                _.isEqual(entityInterfacePage, "mapping") &&
+                "Continue"}
+              {_.isEqual(importType, "entities") &&
+                _.isEqual(entityInterfacePage, "review") &&
+                "Finish"}
+
+              {/* Template import type */}
+              {_.isEqual(importType, "template") &&
+                _.isEqual(entityInterfacePage, "upload") &&
+                "Continue"}
+              {_.isEqual(importType, "template") &&
+                _.isEqual(entityInterfacePage, "review") &&
+                "Finish"}
             </Button>
           </Flex>
         </ModalFooter>
