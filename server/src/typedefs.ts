@@ -485,13 +485,14 @@ export const typedefs = `#graphql
     uploadAttachment(target: String, file: Upload!): ResponseMessage
 
     # Data import CSV mutations
-    prepareCSV(file: [Upload]!): [String]
-    reviewCSV(columnMapping: ColumnMappingInput, file: [Upload]!): ResponseDataEntityReview
-    importCSV(columnMapping: ColumnMappingInput, file: [Upload]!): ResponseMessage
+    prepareEntityCSV(file: [Upload]!): [String]
+    reviewEntityCSV(columnMapping: ColumnMappingInput, file: [Upload]!): ResponseDataEntityReview
+    importEntityCSV(columnMapping: ColumnMappingInput, file: [Upload]!): ResponseMessage
 
     # Data import JSON mutations
-    reviewJSON(file: [Upload]!): ResponseDataEntityReview
-    importJSON(file: [Upload]!, project: String): ResponseMessage
+    reviewEntityJSON(file: [Upload]!): ResponseDataEntityReview
+    importEntityJSON(file: [Upload]!, project: String): ResponseMessage
+    importTemplateJSON(file: [Upload]!): ResponseMessage
 
     # API mutations
     revokeKey(key: String): ResponseMessage
