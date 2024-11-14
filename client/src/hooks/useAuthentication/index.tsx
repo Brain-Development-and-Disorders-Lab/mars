@@ -13,6 +13,9 @@ import { gql, useLazyQuery } from "@apollo/client";
 // Utility functions and libraries
 import _ from "lodash";
 
+// Posthog
+import { usePostHog } from "posthog-js/react";
+
 type AuthenticationContextValue = {
   token: IAuth;
   setToken: (token: IAuth) => void;
@@ -25,6 +28,7 @@ const AuthenticationContext = createContext({} as AuthenticationContextValue);
 export const AuthenticationProvider = (props: {
   children: React.JSX.Element;
 }) => {
+  const posthog = usePostHog();
   const navigate = useNavigate();
 
   // Setup token authentication
@@ -89,6 +93,9 @@ export const AuthenticationProvider = (props: {
       token: "",
     });
 
+    // Reset Posthog
+    posthog.reset();
+
     // Navigate to the login page
     navigate("/login");
   };
@@ -139,6 +146,11 @@ export const AuthenticationProvider = (props: {
 
     // Perform login and data retrieval via server, check if user permitted access
     removeCode();
+
+    // Update session identifier for Posthog
+    posthog.identify(loginData.data.orcid, {
+      name: loginData.data.name,
+    });
 
     return {
       success: true,

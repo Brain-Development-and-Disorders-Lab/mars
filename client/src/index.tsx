@@ -12,15 +12,23 @@ import {
 import { setContext } from "@apollo/client/link/context";
 import createUploadLink from "apollo-upload-client/createUploadLink.mjs";
 
-// Utility imports
-import _ from "lodash";
+// Posthog
+import posthog from "posthog-js";
+import { PostHogProvider } from "posthog-js/react";
+
+posthog.init(process.env.REACT_APP_PUBLIC_POSTHOG_KEY as string, {
+  api_host: process.env.REACT_APP_PUBLIC_POSTHOG_HOST,
+  person_profiles: "always",
+});
 
 // Variables
 import { API_URL, SESSION_KEY, TOKEN_KEY } from "./variables";
 
+// Utilities
+import { getSession, getToken } from "./util";
+
 // Application
 import App from "./App";
-import { getSession, getToken } from "./util";
 
 // Setup Apollo client
 const httpLink = createUploadLink({
@@ -70,6 +78,8 @@ const container = document.getElementById("root");
 const root = createRoot(container!);
 root.render(
   <ApolloProvider client={client}>
-    <App />
+    <PostHogProvider client={posthog}>
+      <App />
+    </PostHogProvider>
   </ApolloProvider>,
 );
