@@ -199,10 +199,12 @@ export const TemplatesResolvers = {
       }
 
       // Capture event
-      PostHogClient.capture({
-        distinctId: context.user,
-        event: "server_create_template",
-      });
+      if (process.env.DISABLE_CAPTURE !== "true") {
+        PostHogClient?.capture({
+          distinctId: context.user,
+          event: "server_create_template",
+        });
+      }
 
       return result;
     },
@@ -268,10 +270,12 @@ export const TemplatesResolvers = {
       }
 
       // Capture event
-      PostHogClient.capture({
-        distinctId: context.user,
-        event: "server_update_template",
-      });
+      if (process.env.DISABLE_CAPTURE !== "true") {
+        PostHogClient?.capture({
+          distinctId: context.user,
+          event: "server_update_template",
+        });
+      }
 
       return result;
     },
@@ -316,10 +320,12 @@ export const TemplatesResolvers = {
       }
 
       // Capture event
-      PostHogClient.capture({
-        distinctId: context.user,
-        event: "server_archive_template",
-      });
+      if (process.env.DISABLE_CAPTURE !== "true") {
+        PostHogClient?.capture({
+          distinctId: context.user,
+          event: "server_archive_template",
+        });
+      }
 
       // Execute archive operation
       if (template.archived === args.state) {

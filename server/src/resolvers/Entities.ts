@@ -292,10 +292,12 @@ export const EntitiesResolvers = {
       }
 
       // Capture event
-      PostHogClient.capture({
-        distinctId: context.user,
-        event: "server_create_entity",
-      });
+      if (process.env.DISABLE_CAPTURE !== "true") {
+        PostHogClient?.capture({
+          distinctId: context.user,
+          event: "server_create_entity",
+        });
+      }
 
       return result;
     },
@@ -354,10 +356,12 @@ export const EntitiesResolvers = {
         }
 
         // Capture event
-        PostHogClient.capture({
-          distinctId: context.user,
-          event: "server_update_entity",
-        });
+        if (process.env.DISABLE_CAPTURE !== "true") {
+          PostHogClient?.capture({
+            distinctId: context.user,
+            event: "server_update_entity",
+          });
+        }
 
         return result;
       } else {
@@ -490,10 +494,12 @@ export const EntitiesResolvers = {
       }
 
       // Capture event
-      PostHogClient.capture({
-        distinctId: context.user,
-        event: "server_archive_entity",
-      });
+      if (process.env.DISABLE_CAPTURE !== "true") {
+        PostHogClient?.capture({
+          distinctId: context.user,
+          event: "server_archive_entity",
+        });
+      }
 
       return {
         success: args.toArchive.length === archiveCounter,

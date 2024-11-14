@@ -10,6 +10,7 @@ on:
 env:
   CONNECTION_STRING: mongodb://admin:metadataadmin@localhost:27017/
   PORT: 8000
+  DISABLE_CAPTURE: true
 
 jobs:
   build-server:
@@ -29,10 +30,11 @@ jobs:
         run: |
           touch .env
           echo "CONNECTION_STRING=${{ env.CONNECTION_STRING }}" >> .env
-          echo "PORT=8000" >> .env
+          echo "PORT=${{ env.PORT }}" >> .env
           echo "NODE_ENV=development" >> .env
           echo "CLIENT_ID=${{ secrets.CLIENT_ID }}" >> .env
           echo "CLIENT_SECRET=${{ secrets.CLIENT_SECRET }}" >> .env
+          echo "DISABLE_CAPTURE=${{ env.DISABLE_CAPTURE }}" >> .env
 
       - name: Build server
         working-directory: server
@@ -90,10 +92,11 @@ jobs:
         run: |
           touch .env
           echo "CONNECTION_STRING=${{ env.CONNECTION_STRING }}" >> .env
-          echo "PORT=8000" >> .env
+          echo "PORT=${{ env.PORT }}" >> .env
           echo "NODE_ENV=development" >> .env
           echo "CLIENT_ID=${{ secrets.CLIENT_ID }}" >> .env
           echo "CLIENT_SECRET=${{ secrets.CLIENT_SECRET }}" >> .env
+          echo "DISABLE_CAPTURE=${{ env.DISABLE_CAPTURE }}" >> .env
 
       - name: Test server
         working-directory: server
@@ -138,10 +141,11 @@ jobs:
         run: |
           touch .env
           echo "CONNECTION_STRING=${{ env.CONNECTION_STRING }}" >> .env
-          echo "PORT=8000" >> .env
+          echo "PORT=${{ env.PORT }}" >> .env
           echo "NODE_ENV=development" >> .env
           echo "CLIENT_ID=${{ secrets.CLIENT_ID }}" >> .env
           echo "CLIENT_SECRET=${{ secrets.CLIENT_SECRET }}" >> .env
+          echo "DISABLE_CAPTURE=${{ env.DISABLE_CAPTURE }}" >> .env
 
       - name: Start server
         working-directory: server
@@ -164,6 +168,7 @@ jobs:
           echo "CONNECTION_STRING=${{ env.CONNECTION_STRING }}" >> .env
           echo "REACT_APP_PUBLIC_POSTHOG_KEY=${{ secrets.REACT_APP_PUBLIC_POSTHOG_KEY }}" >> .env
           echo "REACT_APP_PUBLIC_POSTHOG_HOST=${{ secrets.REACT_APP_PUBLIC_POSTHOG_HOST }}" >> .env
+          echo "DISABLE_CAPTURE=${{ env.DISABLE_CAPTURE }}" >> .env
 
       - name: Run Cypress tests
         uses: cypress-io/github-action@v6

@@ -235,10 +235,12 @@ export const ProjectsResolvers = {
       }
 
       // Capture event
-      PostHogClient.capture({
-        distinctId: context.user,
-        event: "server_create_project",
-      });
+      if (process.env.DISABLE_CAPTURE !== "true") {
+        PostHogClient?.capture({
+          distinctId: context.user,
+          event: "server_create_project",
+        });
+      }
 
       return result;
     },
@@ -284,10 +286,12 @@ export const ProjectsResolvers = {
       }
 
       // Capture event
-      PostHogClient.capture({
-        distinctId: context.user,
-        event: "server_update_project",
-      });
+      if (process.env.DISABLE_CAPTURE !== "true") {
+        PostHogClient?.capture({
+          distinctId: context.user,
+          event: "server_update_project",
+        });
+      }
 
       return result;
     },
@@ -331,10 +335,12 @@ export const ProjectsResolvers = {
       }
 
       // Capture event
-      PostHogClient.capture({
-        distinctId: context.user,
-        event: "server_archive_project",
-      });
+      if (process.env.DISABLE_CAPTURE !== "true") {
+        PostHogClient?.capture({
+          distinctId: context.user,
+          event: "server_archive_project",
+        });
+      }
 
       if (project.archived === args.state) {
         return {

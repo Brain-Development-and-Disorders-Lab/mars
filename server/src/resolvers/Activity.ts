@@ -52,10 +52,12 @@ export const ActivityResolvers = {
       }
 
       // Capture event
-      PostHogClient.capture({
-        distinctId: context.user,
-        event: "server_create_activity",
-      });
+      if (process.env.DISABLE_CAPTURE !== "true") {
+        PostHogClient?.capture({
+          distinctId: context.user,
+          event: "server_create_activity",
+        });
+      }
 
       return result;
     },

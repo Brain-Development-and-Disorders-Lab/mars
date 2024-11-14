@@ -239,10 +239,12 @@ export const WorkspacesResolvers = {
       }
 
       // Capture event
-      PostHogClient.capture({
-        distinctId: context.user,
-        event: "server_create_workspace",
-      });
+      if (process.env.DISABLE_CAPTURE !== "true") {
+        PostHogClient?.capture({
+          distinctId: context.user,
+          event: "server_create_workspace",
+        });
+      }
 
       return result;
     },
@@ -268,10 +270,12 @@ export const WorkspacesResolvers = {
         const result = await Workspaces.update(args.workspace);
 
         // Capture event
-        PostHogClient.capture({
-          distinctId: context.user,
-          event: "server_update_workspace",
-        });
+        if (process.env.DISABLE_CAPTURE !== "true") {
+          PostHogClient?.capture({
+            distinctId: context.user,
+            event: "server_update_workspace",
+          });
+        }
 
         return result;
       } else {

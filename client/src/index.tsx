@@ -19,6 +19,16 @@ import { PostHogProvider } from "posthog-js/react";
 posthog.init(process.env.REACT_APP_PUBLIC_POSTHOG_KEY as string, {
   api_host: process.env.REACT_APP_PUBLIC_POSTHOG_HOST,
   person_profiles: "always",
+  loaded: (ph) => {
+    if (process.env.DISABLE_CAPTURE === "true") {
+      // Disable capture when in "development" mode
+      ph.opt_out_capturing();
+      ph.set_config({ disable_session_recording: true });
+
+      // Display warning
+      consola.warn("Logging and session capture is disabled");
+    }
+  },
 });
 
 // Variables
@@ -26,6 +36,7 @@ import { API_URL, SESSION_KEY, TOKEN_KEY } from "./variables";
 
 // Utilities
 import { getSession, getToken } from "./util";
+import consola from "consola";
 
 // Application
 import App from "./App";
