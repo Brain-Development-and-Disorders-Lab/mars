@@ -61,7 +61,13 @@ import { nanoid } from "nanoid";
 // Authentication context
 import { useAuthentication } from "@hooks/useAuthentication";
 
+// Events
+import { usePostHog } from "posthog-js/react";
+
 const ImportModal = (props: ImportModalProps) => {
+  // Posthog
+  const posthog = usePostHog();
+
   // File states
   const [file, setFile] = useState({} as File);
   const [fileType, setFileType] = useState("");
@@ -679,6 +685,13 @@ const ImportModal = (props: ImportModalProps) => {
 
     if (_.isEqual(importType, "entities")) {
       if (_.isEqual(entityInterfacePage, "upload")) {
+        // Capture event
+        posthog.capture("import_continue", {
+          importType: "entities",
+          fromPage: "upload",
+          toPage: "details",
+        });
+
         // Run setup for import and mapping
         await setupImport();
         await setupMapping();
@@ -687,10 +700,24 @@ const ImportModal = (props: ImportModalProps) => {
         setActiveEntityStep(1);
         setEntityInterfacePage("details");
       } else if (_.isEqual(entityInterfacePage, "details")) {
+        // Capture event
+        posthog.capture("import_continue", {
+          importType: "entities",
+          fromPage: "details",
+          toPage: "mapping",
+        });
+
         // Proceed to the next page
         setActiveEntityStep(2);
         setEntityInterfacePage("mapping");
       } else if (_.isEqual(entityInterfacePage, "mapping")) {
+        // Capture event
+        posthog.capture("import_continue", {
+          importType: "entities",
+          fromPage: "mapping",
+          toPage: "review",
+        });
+
         // Run the review setup function depending on file type
         if (_.isEqual(fileType, "application/json")) {
           await setupReviewEntityJSON();
@@ -702,6 +729,11 @@ const ImportModal = (props: ImportModalProps) => {
         setActiveEntityStep(3);
         setEntityInterfacePage("review");
       } else if (_.isEqual(entityInterfacePage, "review")) {
+        // Capture event
+        posthog.capture("import_finish", {
+          importType: "entities",
+        });
+
         // Run the final import function depending on file type
         if (_.isEqual(fileType, "application/json")) {
           await finishImportEntityJSON();
@@ -711,10 +743,22 @@ const ImportModal = (props: ImportModalProps) => {
       }
     } else if (_.isEqual(importType, "template")) {
       if (_.isEqual(templateInterfacePage, "upload")) {
+        // Capture event
+        posthog.capture("import_continue", {
+          importType: "template",
+          fromPage: "upload",
+          toPage: "review",
+        });
+
         // Proceed to the next page
         setActiveTemplateStep(1);
         setTemplateInterfacePage("review");
       } else if (_.isEqual(templateInterfacePage, "review")) {
+        // Capture event
+        posthog.capture("import_finish", {
+          importType: "template",
+        });
+
         // Run the final import function for Template JSON files
         await finishImportTemplateJSON();
       }
@@ -978,6 +1022,12 @@ const ImportModal = (props: ImportModalProps) => {
                             event.target.files[0].type,
                           )
                         ) {
+                          // Capture event
+                          posthog.capture("import_upload_file", {
+                            importType: importType,
+                            fileName: event.target.files[0].name,
+                          });
+
                           setFileName(event.target.files[0].name);
                           setFileType(event.target.files[0].type);
                           setFile(event.target.files[0]);
@@ -1360,6 +1410,12 @@ const ImportModal = (props: ImportModalProps) => {
                             event.target.files[0].type,
                           )
                         ) {
+                          // Capture event
+                          posthog.capture("import_upload_file", {
+                            importType: importType,
+                            fileName: event.target.files[0].name,
+                          });
+
                           setFileName(event.target.files[0].name);
                           setFileType(event.target.files[0].type);
                           setFile(event.target.files[0]);
@@ -1409,6 +1465,11 @@ const ImportModal = (props: ImportModalProps) => {
               rightIcon={<Icon name="cross" />}
               variant={"outline"}
               onClick={() => {
+                // Capture event
+                posthog.capture("import_cancelled", {
+                  importType: importType,
+                });
+
                 // Close the `ImportModal`
                 props.onClose();
                 resetState();

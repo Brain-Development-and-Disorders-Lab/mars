@@ -23,9 +23,6 @@ import Icon from "@components/Icon";
 // Routing and navigation
 import { useLocation, useNavigate } from "react-router-dom";
 
-// Utility functions and libraries
-import _ from "lodash";
-
 // Contexts
 import { useAuthentication } from "@hooks/useAuthentication";
 import { useWorkspace } from "@hooks/useWorkspace";
