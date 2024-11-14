@@ -16,6 +16,9 @@ import { Entities } from "../models/Entities";
 import { Workspaces } from "../models/Workspaces";
 import { Authentication } from "src/models/Authentication";
 
+// Posthog
+import { PostHogClient } from "src";
+
 export const EntitiesResolvers = {
   Query: {
     // Retrieve all Entities
@@ -288,6 +291,12 @@ export const EntitiesResolvers = {
         await Workspaces.addActivity(context.workspace, activity.data);
       }
 
+      // Capture event
+      PostHogClient.capture({
+        distinctId: context.user,
+        event: "server_create_entity",
+      });
+
       return result;
     },
 
@@ -343,6 +352,12 @@ export const EntitiesResolvers = {
           // Add Activity to Workspace
           await Workspaces.addActivity(context.workspace, activity.data);
         }
+
+        // Capture event
+        PostHogClient.capture({
+          distinctId: context.user,
+          event: "server_update_entity",
+        });
 
         return result;
       } else {
@@ -473,6 +488,12 @@ export const EntitiesResolvers = {
           }
         }
       }
+
+      // Capture event
+      PostHogClient.capture({
+        distinctId: context.user,
+        event: "server_archive_entity",
+      });
 
       return {
         success: args.toArchive.length === archiveCounter,

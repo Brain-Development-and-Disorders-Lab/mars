@@ -16,6 +16,9 @@ import { Authentication } from "src/models/Authentication";
 import { Workspaces } from "src/models/Workspaces";
 import { Users } from "src/models/Users";
 
+// Posthog
+import { PostHogClient } from "src";
+
 export const WorkspacesResolvers = {
   Query: {
     // Retrieve all Workspaces
@@ -235,6 +238,12 @@ export const WorkspacesResolvers = {
         await Users.addWorkspace(context.user, result.data);
       }
 
+      // Capture event
+      PostHogClient.capture({
+        distinctId: context.user,
+        event: "server_create_workspace",
+      });
+
       return result;
     },
 
@@ -256,7 +265,15 @@ export const WorkspacesResolvers = {
           _.isEqual(workspace.owner, context.user))
       ) {
         // Check if user is a Workspace owner or collaborator
-        return await Workspaces.update(args.workspace);
+        const result = await Workspaces.update(args.workspace);
+
+        // Capture event
+        PostHogClient.capture({
+          distinctId: context.user,
+          event: "server_update_workspace",
+        });
+
+        return result;
       } else {
         throw new GraphQLError(
           "You do not have permission to access this Workspace",
