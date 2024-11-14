@@ -23,10 +23,14 @@ import { gql, useLazyQuery } from "@apollo/client";
 // Navigation
 import { useNavigate } from "react-router-dom";
 
+// Events
+import { usePostHog } from "posthog-js/react";
+
 // Utility functions
 import _ from "lodash";
 
 const ScanModal = (props: ScanModalProps) => {
+  const posthog = usePostHog();
   const toast = useToast();
   const navigate = useNavigate();
 
@@ -75,6 +79,11 @@ const ScanModal = (props: ScanModalProps) => {
    * @param {string} identifier Entity identifier
    */
   const handleNavigate = (identifier: string) => {
+    // Capture event
+    posthog.capture("scan_success", {
+      target: identifier,
+    });
+
     handleOnClose();
     navigate(`/entities/${identifier}`);
   };
@@ -115,6 +124,7 @@ const ScanModal = (props: ScanModalProps) => {
     });
 
     if (results.data && results.data.entity) {
+      posthog.capture("scan_scanner_input_success");
       handleNavigate(results.data.entity._id);
     }
 
@@ -145,6 +155,7 @@ const ScanModal = (props: ScanModalProps) => {
     });
 
     if (results.data && results.data.entity) {
+      posthog.capture("scan_manual_input_success");
       handleNavigate(results.data.entity._id);
     }
 

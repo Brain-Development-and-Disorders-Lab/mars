@@ -21,7 +21,11 @@ import Icon from "@components/Icon";
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
 
+// Posthog
+import { usePostHog } from "posthog-js/react";
+
 const Create = () => {
+  const posthog = usePostHog();
   const navigate = useNavigate();
 
   return (
@@ -84,7 +88,10 @@ const Create = () => {
                 size={"sm"}
                 colorScheme={"green"}
                 rightIcon={<Icon name={"add"} />}
-                onClick={() => navigate("/create/project")}
+                onClick={() => {
+                  posthog.capture("create_project_click");
+                  navigate("/create/project");
+                }}
               >
                 Create
               </Button>
@@ -157,7 +164,10 @@ const Create = () => {
                 size={"sm"}
                 colorScheme={"green"}
                 rightIcon={<Icon name={"add"} />}
-                onClick={() => navigate("/create/entity")}
+                onClick={() => {
+                  posthog.capture("create_entity_click");
+                  navigate("/create/entity");
+                }}
               >
                 Create
               </Button>
@@ -165,7 +175,7 @@ const Create = () => {
           </CardFooter>
         </Card>
 
-        {/* Attribute card */}
+        {/* Template card */}
         <Card
           maxW={"sm"}
           h={"md"}
@@ -186,7 +196,7 @@ const Create = () => {
                   Description
                 </Heading>
                 <Text fontSize={"sm"}>
-                  Create template Attributes to reuse metadata structures across
+                  Create a Template to reuse metadata structures across
                   Entities.
                 </Text>
               </Flex>
@@ -216,7 +226,10 @@ const Create = () => {
                 size={"sm"}
                 colorScheme={"green"}
                 rightIcon={<Icon name={"add"} />}
-                onClick={() => navigate("/create/template")}
+                onClick={() => {
+                  posthog.capture("create_template_click");
+                  navigate("/create/template");
+                }}
               >
                 Create
               </Button>

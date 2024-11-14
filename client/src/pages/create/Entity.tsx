@@ -69,7 +69,12 @@ import { gql, useLazyQuery, useMutation, useQuery } from "@apollo/client";
 // Authentication context
 import { useAuthentication } from "@hooks/useAuthentication";
 
+// Posthog
+import { usePostHog } from "posthog-js/react";
+
 const Entity = () => {
+  const posthog = usePostHog();
+
   // Used to manage what detail inputs are presented
   const [pageState, setPageState] = useState(
     "start" as "start" | "attributes" | "relationships",
@@ -197,6 +202,11 @@ const Entity = () => {
     }
   }, []);
 
+  // Capture event
+  useEffect(() => {
+    posthog?.capture("create_entity_start");
+  }, [posthog]);
+
   useEffect(() => {
     if (error) {
       toast({
@@ -229,12 +239,21 @@ const Entity = () => {
   // Handle clicking "Next"
   const onPageNext = async () => {
     if (_.isEqual("start", pageState)) {
+      // Capture event
+      posthog.capture("create_entity_relationships");
+
       setPageState("relationships");
       setActiveStep(1);
     } else if (_.isEqual("relationships", pageState)) {
+      // Capture event
+      posthog.capture("create_entity_attributes");
+
       setPageState("attributes");
       setActiveStep(2);
     } else if (_.isEqual("attributes", pageState)) {
+      // Capture event
+      posthog.capture("create_entity_finished");
+
       setIsSubmitting(true);
 
       // Execute the GraphQL operation
@@ -264,9 +283,15 @@ const Entity = () => {
   // Handle clicking "Back"
   const onPageBack = () => {
     if (_.isEqual("relationships", pageState)) {
+      // Capture event
+      posthog.capture("create_entity_start");
+
       setPageState("start");
       setActiveStep(0);
     } else if (_.isEqual("attributes", pageState)) {
+      // Capture event
+      posthog.capture("create_entity_relationships");
+
       setPageState("relationships");
       setActiveStep(1);
     }

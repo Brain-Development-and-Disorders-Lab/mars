@@ -1,5 +1,5 @@
 // React
-import React from "react";
+import React, { useEffect } from "react";
 
 // Existing and custom components
 import { Button, Flex, Heading, Text } from "@chakra-ui/react";
@@ -9,8 +9,16 @@ import Icon from "@components/Icon";
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
 
+// Posthog
+import { usePostHog } from "posthog-js/react";
+
 const Invalid = () => {
+  const posthog = usePostHog();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    posthog.capture("invalid_shown");
+  }, []);
 
   return (
     <Content>

@@ -42,7 +42,11 @@ import { isValidValues } from "src/util";
 // Authentication context
 import { useAuthentication } from "@hooks/useAuthentication";
 
+// Posthog
+import { usePostHog } from "posthog-js/react";
+
 const Template = () => {
+  const posthog = usePostHog();
   const navigate = useNavigate();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
@@ -63,6 +67,11 @@ const Template = () => {
   useEffect(() => {
     setIsValueError(!isValidValues(values, true));
   }, [values]);
+
+  // Capture event
+  useEffect(() => {
+    posthog?.capture("create_template_start");
+  }, [posthog]);
 
   // Store Template data
   const templateData: IAttribute = {
@@ -88,6 +97,9 @@ const Template = () => {
    * Handle creation of a new Attribute
    */
   const onSubmit = async () => {
+    // Capture event
+    posthog?.capture("create_template_finish");
+
     setIsSubmitting(true);
 
     // Execute the GraphQL mutation
