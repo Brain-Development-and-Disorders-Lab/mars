@@ -13,7 +13,7 @@ env:
   DISABLE_CAPTURE: true
 
 jobs:
-  build-server:
+  build_server:
     name: Build server
     runs-on: ubuntu-latest
 
@@ -49,7 +49,7 @@ jobs:
           name: mars-server
           path: server/dist/
 
-  build-client:
+  build_client:
     name: Build client
     runs-on: ubuntu-latest
 
@@ -67,10 +67,10 @@ jobs:
           yarn install
           yarn build
 
-  test-server:
+  test_server:
     name: Test server
     runs-on: ubuntu-latest
-    needs: build-server
+    needs: build_server
 
     steps:
       - uses: actions/checkout@v4
@@ -106,10 +106,10 @@ jobs:
           yarn install
           yarn test
 
-  test-client:
+  test_client:
     name: Test client
     runs-on: ubuntu-latest
-    needs: [build-server, test-server, build-client]
+    needs: [build_server, test_server, build_client]
 
     steps:
       - uses: actions/checkout@v4
