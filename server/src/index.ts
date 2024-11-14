@@ -56,6 +56,15 @@ consola.level =
 // Prometheus
 collectDefaultMetrics();
 
+// Posthog
+import { PostHog } from "posthog-node";
+export const PostHogClient =
+  process.env.DISABLE_CAPTURE !== "true"
+    ? new PostHog(process.env.POSTHOG_KEY as string, {
+        host: "https://us.i.posthog.com",
+      })
+    : undefined;
+
 const port = process.env.PORT || 8000;
 const app = express();
 const prometheusExporterPlugin = createPrometheusExporterPlugin({

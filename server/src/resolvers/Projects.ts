@@ -18,6 +18,9 @@ import { Projects } from "../models/Projects";
 import { Workspaces } from "../models/Workspaces";
 import { Authentication } from "src/models/Authentication";
 
+// Posthog
+import { PostHogClient } from "src";
+
 export const ProjectsResolvers = {
   Query: {
     // Retrieve all Projects
@@ -231,6 +234,14 @@ export const ProjectsResolvers = {
         await Workspaces.addActivity(context.workspace, activity.data);
       }
 
+      // Capture event
+      if (process.env.DISABLE_CAPTURE !== "true") {
+        PostHogClient?.capture({
+          distinctId: context.user,
+          event: "server_create_project",
+        });
+      }
+
       return result;
     },
 
@@ -274,6 +285,14 @@ export const ProjectsResolvers = {
         await Workspaces.addActivity(context.workspace, activity.data);
       }
 
+      // Capture event
+      if (process.env.DISABLE_CAPTURE !== "true") {
+        PostHogClient?.capture({
+          distinctId: context.user,
+          event: "server_update_project",
+        });
+      }
+
       return result;
     },
 
@@ -313,6 +332,14 @@ export const ProjectsResolvers = {
             },
           },
         );
+      }
+
+      // Capture event
+      if (process.env.DISABLE_CAPTURE !== "true") {
+        PostHogClient?.capture({
+          distinctId: context.user,
+          event: "server_archive_project",
+        });
       }
 
       if (project.archived === args.state) {

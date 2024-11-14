@@ -1,5 +1,9 @@
 const path = require("path");
+const webpack = require("webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+
+// Environment variables
+require("dotenv").config({ path: "./.env" });
 
 module.exports = {
   entry: "./src/index.tsx",
@@ -8,6 +12,9 @@ module.exports = {
       title: "Metadatify",
       template: "src/index.html",
       favicon: "src/img/Favicon.png",
+    }),
+    new webpack.DefinePlugin({
+      "process.env": JSON.stringify(process.env),
     }),
   ],
   module: {

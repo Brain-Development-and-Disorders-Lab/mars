@@ -19,6 +19,9 @@ import dayjs from "dayjs";
 
 import { GraphQLError } from "graphql/index";
 
+// Posthog
+import { PostHogClient } from "src";
+
 export const TemplatesResolvers = {
   Query: {
     // Retrieve all Templates
@@ -195,6 +198,14 @@ export const TemplatesResolvers = {
         await Workspaces.addActivity(context.workspace, activity.data);
       }
 
+      // Capture event
+      if (process.env.DISABLE_CAPTURE !== "true") {
+        PostHogClient?.capture({
+          distinctId: context.user,
+          event: "server_create_template",
+        });
+      }
+
       return result;
     },
 
@@ -258,6 +269,14 @@ export const TemplatesResolvers = {
         await Workspaces.addActivity(context.workspace, activity.data);
       }
 
+      // Capture event
+      if (process.env.DISABLE_CAPTURE !== "true") {
+        PostHogClient?.capture({
+          distinctId: context.user,
+          event: "server_update_template",
+        });
+      }
+
       return result;
     },
 
@@ -298,6 +317,14 @@ export const TemplatesResolvers = {
             },
           },
         );
+      }
+
+      // Capture event
+      if (process.env.DISABLE_CAPTURE !== "true") {
+        PostHogClient?.capture({
+          distinctId: context.user,
+          event: "server_archive_template",
+        });
       }
 
       // Execute archive operation

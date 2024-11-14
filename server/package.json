@@ -39,6 +39,7 @@
     "mquery": "^5.0.0",
     "nanoid": "3.3.7",
     "papaparse": "^5.4.1",
+    "posthog-node": "^4.2.1",
     "prom-client": "^14.0.0",
     "source-map-support": "^0.5.21",
     "tmp": "^0.2.1",

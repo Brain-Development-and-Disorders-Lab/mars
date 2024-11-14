@@ -9,6 +9,9 @@ import { Authentication } from "src/models/Authentication";
 import _ from "lodash";
 import { GraphQLError } from "graphql/index";
 
+// Posthog
+import { PostHogClient } from "src";
+
 export const ActivityResolvers = {
   Query: {
     // Retrieve all Activity
@@ -46,6 +49,14 @@ export const ActivityResolvers = {
       if (result.success) {
         // Add the Activity to the Workspace
         await Workspaces.addActivity(context.workspace, result.data);
+      }
+
+      // Capture event
+      if (process.env.DISABLE_CAPTURE !== "true") {
+        PostHogClient?.capture({
+          distinctId: context.user,
+          event: "server_create_activity",
+        });
       }
 
       return result;

@@ -42,6 +42,7 @@
     "lodash": "^4.17.21",
     "nanoid": "^4.0.2",
     "pdfjs-dist": "^3.9.179",
+    "posthog-js": "^1.184.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-icons": "^4.9.0",

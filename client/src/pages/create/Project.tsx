@@ -46,7 +46,11 @@ import { IGenericItem, ResponseData } from "@types";
 // Authentication context
 import { useAuthentication } from "@hooks/useAuthentication";
 
+// Posthog
+import { usePostHog } from "posthog-js/react";
+
 const Project = () => {
+  const posthog = usePostHog();
   const navigate = useNavigate();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
@@ -94,6 +98,11 @@ const Project = () => {
       });
     }
   }, [error]);
+
+  // Capture event
+  useEffect(() => {
+    posthog?.capture("create_project_start");
+  }, [posthog]);
 
   // Form validation
   const isNameError = name === "";
@@ -382,8 +391,12 @@ const Project = () => {
           colorScheme={"green"}
           rightIcon={<Icon name={"check"} />}
           onClick={async () => {
+            // Capture event
+            posthog.capture("create_project_finish");
+
             // Push the data
             setIsSubmitting(true);
+
             // Execute the GraphQL mutation
             const response = await createProject({
               variables: {

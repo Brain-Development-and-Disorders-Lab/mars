@@ -1,5 +1,5 @@
 // React and Chakra UI components
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Flex,
   Spacer,
@@ -33,7 +33,12 @@ import { useNavigate } from "react-router-dom";
 import { useWorkspace } from "@hooks/useWorkspace";
 import { useAuthentication } from "@hooks/useAuthentication";
 
+// Posthog
+import { usePostHog } from "posthog-js/react";
+
 const CreateWorkspace = () => {
+  const posthog = usePostHog();
+
   // Access token to set the active Workspace
   const { token } = useAuthentication();
   const navigate = useNavigate();
@@ -78,10 +83,18 @@ const CreateWorkspace = () => {
     workspaces: WorkspaceModel[];
   }>(GET_WORKSPACES, { fetchPolicy: "network-only" });
 
+  // Capture event
+  useEffect(() => {
+    posthog?.capture("create_workspace_start");
+  }, [posthog]);
+
   /**
    * Create the Workspace using GraphQL query
    */
   const handleCreateWorkspaceClick = async () => {
+    // Capture event
+    posthog?.capture("create_workspace_finish");
+
     const result = await createWorkspace({
       variables: {
         workspace: {
@@ -145,6 +158,9 @@ const CreateWorkspace = () => {
    * Handle clicking the "Cancel" button when creating a Workspace
    */
   const handleCancelClick = () => {
+    // Capture event
+    posthog?.capture("create_workspace_cancel");
+
     navigate("/");
   };
 

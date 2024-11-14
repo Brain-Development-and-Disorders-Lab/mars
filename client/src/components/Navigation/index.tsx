@@ -28,10 +28,14 @@ import { useLocation, useNavigate } from "react-router-dom";
 // Utility functions and libraries
 import _ from "lodash";
 
+// Events
+import { usePostHog } from "posthog-js/react";
+
 // Workspace context
 import { useWorkspace } from "@hooks/useWorkspace";
 
 const Navigation = () => {
+  const posthog = usePostHog();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -207,7 +211,12 @@ const Navigation = () => {
                 w={"100%"}
                 colorScheme={"blue"}
                 leftIcon={<Icon name={"upload"} />}
-                onClick={() => onImportOpen()}
+                onClick={() => {
+                  // Capture event
+                  posthog.capture("import_modal_open");
+
+                  onImportOpen();
+                }}
                 isDisabled={workspace === "" || _.isUndefined(workspace)}
               >
                 Import
@@ -220,7 +229,12 @@ const Navigation = () => {
                 w={"100%"}
                 colorScheme={"green"}
                 leftIcon={<Icon name={"scan"} />}
-                onClick={() => onScanOpen()}
+                onClick={() => {
+                  // Capture event
+                  posthog.capture("scan_modal_open");
+
+                  onScanOpen();
+                }}
                 isDisabled={workspace === "" || _.isUndefined(workspace)}
               >
                 Scan
