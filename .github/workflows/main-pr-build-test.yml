@@ -162,6 +162,8 @@ jobs:
         run: |
           touch .env
           echo "CONNECTION_STRING=${{ env.CONNECTION_STRING }}" >> .env
+          echo "REACT_APP_PUBLIC_POSTHOG_KEY=${{ secrets.REACT_APP_PUBLIC_POSTHOG_KEY }}" >> .env
+          echo "REACT_APP_PUBLIC_POSTHOG_HOST=${{ secrets.REACT_APP_PUBLIC_POSTHOG_HOST }}" >> .env
 
       - name: Run Cypress tests
         uses: cypress-io/github-action@v6
