@@ -34,6 +34,7 @@ jobs:
           echo "NODE_ENV=development" >> .env
           echo "CLIENT_ID=${{ secrets.CLIENT_ID }}" >> .env
           echo "CLIENT_SECRET=${{ secrets.CLIENT_SECRET }}" >> .env
+          echo "POSTHOG_KEY=${{ secrets.REACT_APP_PUBLIC_POSTHOG_KEY }}" >> .env
           echo "DISABLE_CAPTURE=${{ env.DISABLE_CAPTURE }}" >> .env
 
       - name: Build server
@@ -96,6 +97,7 @@ jobs:
           echo "NODE_ENV=development" >> .env
           echo "CLIENT_ID=${{ secrets.CLIENT_ID }}" >> .env
           echo "CLIENT_SECRET=${{ secrets.CLIENT_SECRET }}" >> .env
+          echo "POSTHOG_KEY=${{ secrets.REACT_APP_PUBLIC_POSTHOG_KEY }}" >> .env
           echo "DISABLE_CAPTURE=${{ env.DISABLE_CAPTURE }}" >> .env
 
       - name: Test server
@@ -145,6 +147,7 @@ jobs:
           echo "NODE_ENV=development" >> .env
           echo "CLIENT_ID=${{ secrets.CLIENT_ID }}" >> .env
           echo "CLIENT_SECRET=${{ secrets.CLIENT_SECRET }}" >> .env
+          echo "POSTHOG_KEY=${{ secrets.REACT_APP_PUBLIC_POSTHOG_KEY }}" >> .env
           echo "DISABLE_CAPTURE=${{ env.DISABLE_CAPTURE }}" >> .env
 
       - name: Start server
