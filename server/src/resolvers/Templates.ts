@@ -1,15 +1,15 @@
 // Custom types
 import {
-  AttributeMetrics,
   AttributeModel,
   Context,
   IAttribute,
   IResponseMessage,
+  TemplateMetrics,
 } from "@types";
 
 // Models
 import { Activity } from "../models/Activity";
-import { Attributes } from "../models/Attributes";
+import { Templates } from "../models/Templates";
 import { Workspaces } from "../models/Workspaces";
 import { Authentication } from "src/models/Authentication";
 
@@ -19,14 +19,10 @@ import dayjs from "dayjs";
 
 import { GraphQLError } from "graphql/index";
 
-export const AttributesResolvers = {
+export const TemplatesResolvers = {
   Query: {
-    // Retrieve all Attributes
-    attributes: async (
-      _parent: any,
-      args: { limit: 100 },
-      context: Context,
-    ) => {
+    // Retrieve all Templates
+    templates: async (_parent: any, args: { limit: 100 }, context: Context) => {
       // Authenticate the provided context
       await Authentication.authenticate(context);
 
@@ -41,18 +37,16 @@ export const AttributesResolvers = {
       }
 
       // Filter by ownership and Workspace membership
-      const attributes = await Attributes.all();
-      return attributes
-        .filter((attribute) => _.includes(workspace.attributes, attribute._id))
+      const templates = await Templates.all();
+      return templates
+        .filter((template: AttributeModel) =>
+          _.includes(workspace.templates, template._id),
+        )
         .slice(0, args.limit);
     },
 
-    // Retrieve one Attribute by _id
-    attribute: async (
-      _parent: any,
-      args: { _id: string },
-      context: Context,
-    ) => {
+    // Retrieve one Template by _id
+    template: async (_parent: any, args: { _id: string }, context: Context) => {
       // Authenticate the provided context
       await Authentication.authenticate(context);
 
@@ -66,22 +60,22 @@ export const AttributesResolvers = {
         });
       }
 
-      // Check Attribute exists
-      const attribute = await Attributes.getOne(args._id);
-      if (_.isNull(attribute)) {
-        throw new GraphQLError("Attribute does not exist", {
+      // Check Template exists
+      const template = await Templates.getOne(args._id);
+      if (_.isNull(template)) {
+        throw new GraphQLError("Template does not exist", {
           extensions: {
             code: "NON_EXIST",
           },
         });
       }
 
-      // Check that Attribute exists in the Workspace
-      if (_.includes(workspace.attributes, attribute._id)) {
-        return attribute;
+      // Check that Template exists in the Workspace
+      if (_.includes(workspace.templates, template._id)) {
+        return template;
       } else {
         throw new GraphQLError(
-          "You do not have permission to access this Attribute",
+          "You do not have permission to access this Template",
           {
             extensions: {
               code: "UNAUTHORIZED",
@@ -91,12 +85,12 @@ export const AttributesResolvers = {
       }
     },
 
-    // Get collection of Attribute metrics
-    attributeMetrics: async (
+    // Get collection of Template metrics
+    templateMetrics: async (
       _parent: any,
       _args: Record<string, unknown>,
       context: Context,
-    ): Promise<AttributeMetrics> => {
+    ): Promise<TemplateMetrics> => {
       // Authenticate the provided context
       await Authentication.authenticate(context);
 
@@ -111,49 +105,89 @@ export const AttributesResolvers = {
       }
 
       // Filter by ownership and Workspace membership, then if created in the last 24 hours
-      const attributes = await Attributes.all();
-      const workspaceAttributes = attributes.filter((attribute) =>
-        _.includes(workspace.attributes, attribute._id),
+      const templates = await Templates.all();
+      const workspaceTemplates = templates.filter((template) =>
+        _.includes(workspace.templates, template._id),
       );
-      const attributesAddedDay = workspaceAttributes.filter((attribute) =>
-        dayjs(attribute.timestamp).isAfter(
-          dayjs(Date.now()).subtract(1, "day"),
-        ),
+      const templatesAddedDay = workspaceTemplates.filter((template) =>
+        dayjs(template.timestamp).isAfter(dayjs(Date.now()).subtract(1, "day")),
       );
 
       return {
-        all: workspaceAttributes.length,
-        addedDay: attributesAddedDay.length,
+        all: workspaceTemplates.length,
+        addedDay: templatesAddedDay.length,
       };
+    },
+
+    // Export a Template
+    exportTemplate: async (
+      _parent: any,
+      args: { _id: string },
+      context: Context,
+    ): Promise<string> => {
+      // Authenticate the provided context
+      await Authentication.authenticate(context);
+
+      // Retrieve the Workspace to determine which Entities to return
+      const workspace = await Workspaces.getOne(context.workspace);
+      if (_.isNull(workspace)) {
+        throw new GraphQLError("Workspace does not exist", {
+          extensions: {
+            code: "NON_EXIST",
+          },
+        });
+      }
+
+      const template = await Templates.getOne(args._id);
+      if (_.isNull(template)) {
+        throw new GraphQLError("Template does not exist", {
+          extensions: {
+            code: "NON_EXIST",
+          },
+        });
+      }
+
+      if (_.includes(workspace.templates, args._id)) {
+        return await Templates.export(args._id);
+      } else {
+        throw new GraphQLError(
+          "You do not have permission to access this Template",
+          {
+            extensions: {
+              code: "UNAUTHORIZED",
+            },
+          },
+        );
+      }
     },
   },
 
   Mutation: {
-    // Create a new Attribute
-    createAttribute: async (
+    // Create a new Template
+    createTemplate: async (
       _parent: any,
-      args: { attribute: IAttribute },
+      args: { template: IAttribute },
       context: Context,
     ) => {
       // Authenticate the provided context
       await Authentication.authenticate(context);
 
-      const result = await Attributes.create(args.attribute);
+      const result = await Templates.create(args.template);
 
       if (result.success) {
-        // Add the Attribute to the Workspace
-        await Workspaces.addAttribute(context.workspace, result.data);
+        // Add the Template to the Workspace
+        await Workspaces.addTemplate(context.workspace, result.data);
 
         // If successful, add Activity
         const activity = await Activity.create({
           timestamp: dayjs(Date.now()).toISOString(),
           type: "create",
           actor: context.user,
-          details: "Created new Attribute",
+          details: "Created new Template",
           target: {
-            _id: result.data, // New Attribute identifier
-            type: "attributes",
-            name: args.attribute.name,
+            _id: result.data, // New Template identifier
+            type: "templates",
+            name: args.template.name,
           },
         });
 
@@ -164,10 +198,10 @@ export const AttributesResolvers = {
       return result;
     },
 
-    // Update an existing Attribute
-    updateAttribute: async (
+    // Update an existing Template
+    updateTemplate: async (
       _parent: any,
-      args: { attribute: AttributeModel },
+      args: { template: AttributeModel },
       context: Context,
     ) => {
       // Authenticate the provided context
@@ -183,18 +217,18 @@ export const AttributesResolvers = {
         });
       }
 
-      const attribute = await Attributes.getOne(args.attribute._id);
-      if (_.isNull(attribute)) {
-        throw new GraphQLError("Attribute does not exist", {
+      const template = await Templates.getOne(args.template._id);
+      if (_.isNull(template)) {
+        throw new GraphQLError("Template does not exist", {
           extensions: {
             code: "NON_EXIST",
           },
         });
       }
 
-      if (!_.includes(workspace.attributes, args.attribute._id)) {
+      if (!_.includes(workspace.templates, args.template._id)) {
         throw new GraphQLError(
-          "You do not have permission to modify this Attribute",
+          "You do not have permission to modify this Template",
           {
             extensions: {
               code: "UNAUTHORIZED",
@@ -204,7 +238,7 @@ export const AttributesResolvers = {
       }
 
       // Execute update operation
-      const result = await Attributes.update(args.attribute);
+      const result = await Templates.update(args.template);
 
       if (result.success) {
         // If successful, add Activity
@@ -212,11 +246,11 @@ export const AttributesResolvers = {
           timestamp: dayjs(Date.now()).toISOString(),
           type: "update",
           actor: context.user,
-          details: "Updated existing Attribute",
+          details: "Updated existing Template",
           target: {
-            _id: args.attribute._id,
-            type: "attributes",
-            name: args.attribute.name,
+            _id: args.template._id,
+            type: "templates",
+            name: args.template.name,
           },
         });
 
@@ -227,8 +261,8 @@ export const AttributesResolvers = {
       return result;
     },
 
-    // Archive an Attribute
-    archiveAttribute: async (
+    // Archive a Template
+    archiveTemplate: async (
       _parent: any,
       args: { _id: string; state: boolean },
       context: Context,
@@ -246,18 +280,18 @@ export const AttributesResolvers = {
         });
       }
 
-      const attribute = await Attributes.getOne(args._id);
-      if (_.isNull(attribute)) {
-        throw new GraphQLError("Attribute does not exist", {
+      const template = await Templates.getOne(args._id);
+      if (_.isNull(template)) {
+        throw new GraphQLError("Template does not exist", {
           extensions: {
             code: "NON_EXIST",
           },
         });
       }
 
-      if (!_.includes(workspace.attributes, args._id)) {
+      if (!_.includes(workspace.templates, args._id)) {
         throw new GraphQLError(
-          "You do not have permission to modify the archive state of this Attribute",
+          "You do not have permission to modify the archive state of this Template",
           {
             extensions: {
               code: "UNAUTHORIZED",
@@ -267,13 +301,13 @@ export const AttributesResolvers = {
       }
 
       // Execute archive operation
-      if (attribute.archived === args.state) {
+      if (template.archived === args.state) {
         return {
           success: true,
-          message: "Attribute archive state unchanged",
+          message: "Template archive state unchanged",
         };
       } else {
-        const result = await Attributes.setArchived(args._id, args.state);
+        const result = await Templates.setArchived(args._id, args.state);
 
         // If successful, add Activity
         if (result.success) {
@@ -281,11 +315,11 @@ export const AttributesResolvers = {
             timestamp: dayjs(Date.now()).toISOString(),
             type: "archived",
             actor: context.user,
-            details: args.state ? "Archived Attribute" : "Restored Attribute",
+            details: args.state ? "Archived Template" : "Restored Template",
             target: {
               _id: args._id,
-              type: "attributes",
-              name: attribute.name,
+              type: "templates",
+              name: template.name,
             },
           });
 
@@ -297,8 +331,8 @@ export const AttributesResolvers = {
       }
     },
 
-    // Archive multiple Attributes
-    archiveAttributes: async (
+    // Archive multiple Templates
+    archiveTemplates: async (
       _parent: any,
       args: { toArchive: string[]; state: boolean },
       context: Context,
@@ -308,20 +342,20 @@ export const AttributesResolvers = {
 
       let archiveCounter = 0;
       for await (const _id of args.toArchive) {
-        const attribute = await Attributes.getOne(_id);
-        if (_.isNull(attribute)) {
-          throw new GraphQLError("Attribute does not exist", {
+        const template = await Templates.getOne(_id);
+        if (_.isNull(template)) {
+          throw new GraphQLError("Template does not exist", {
             extensions: {
               code: "NON_EXIST",
             },
           });
         }
 
-        if (attribute.archived === args.state) {
+        if (template.archived === args.state) {
           archiveCounter += 1;
         } else {
           // Execute archive operation
-          const result = await Attributes.setArchived(_id, args.state);
+          const result = await Templates.setArchived(_id, args.state);
 
           // If successful, add Activity
           if (result.success) {
@@ -329,11 +363,11 @@ export const AttributesResolvers = {
               timestamp: dayjs(Date.now()).toISOString(),
               type: "archived",
               actor: context.user,
-              details: args.state ? "Archived Attribute" : "Restored Attribute",
+              details: args.state ? "Archived Template" : "Restored Template",
               target: {
                 _id: _id,
-                type: "attributes",
-                name: attribute.name,
+                type: "templates",
+                name: template.name,
               },
             });
 
@@ -348,72 +382,9 @@ export const AttributesResolvers = {
         success: args.toArchive.length === archiveCounter,
         message:
           args.toArchive.length === archiveCounter
-            ? "Archived Attributes successfully"
-            : "Error while archiving multiple Attributes",
+            ? "Archived Templates successfully"
+            : "Error while archiving multiple Templates",
       };
-    },
-
-    // Delete an Attribute
-    deleteAttribute: async (
-      _parent: any,
-      args: { _id: string },
-      context: Context,
-    ) => {
-      // Authenticate the provided context
-      await Authentication.authenticate(context);
-
-      // Retrieve the Workspace to determine which Entities to return
-      const workspace = await Workspaces.getOne(context.workspace);
-      if (_.isNull(workspace)) {
-        throw new GraphQLError("Workspace does not exist", {
-          extensions: {
-            code: "NON_EXIST",
-          },
-        });
-      }
-
-      const attribute = await Attributes.getOne(args._id);
-      if (_.isNull(attribute)) {
-        throw new GraphQLError("Attribute does not exist", {
-          extensions: {
-            code: "NON_EXIST",
-          },
-        });
-      }
-
-      if (!_.includes(workspace.attributes, args._id)) {
-        throw new GraphQLError(
-          "You do not have permission to delete this Attribute",
-          {
-            extensions: {
-              code: "UNAUTHORIZED",
-            },
-          },
-        );
-      }
-
-      // Execute delete operation
-      const result = await Attributes.delete(args._id);
-
-      // If successful, add Activity
-      if (result.success) {
-        const activity = await Activity.create({
-          timestamp: dayjs(Date.now()).toISOString(),
-          type: "delete",
-          actor: context.user,
-          details: "Deleted Attribute",
-          target: {
-            _id: args._id,
-            type: "attributes",
-            name: attribute.name,
-          },
-        });
-
-        // Add Activity to Workspace
-        await Workspaces.addActivity(context.workspace, activity.data);
-      }
-
-      return result;
     },
   },
 };

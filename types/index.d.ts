@@ -94,6 +94,8 @@ export type IValueType =
   | "entity"
   | "select";
 
+export type GenericValueType = any;
+
 export type IValue<D> = {
   _id: string;
   name: string;
@@ -107,7 +109,7 @@ export type IValue<D> = {
 
 // "Linky" component props
 export type LinkyProps = {
-  type: "entities" | "attributes" | "projects";
+  type: "entities" | "templates" | "projects";
   id: string;
   fallback?: string;
   color?: string;
@@ -191,7 +193,7 @@ export type IWorkspace = {
   collaborators: string[];
   entities: string[];
   projects: string[];
-  attributes: string[];
+  templates: string[];
   activity: string[];
 };
 
@@ -270,7 +272,7 @@ export type IActivity = {
   type: "create" | "update" | "delete" | "archived";
   details: string;
   target: {
-    type: "entities" | "projects" | "attributes";
+    type: "entities" | "projects" | "templates";
     _id: string;
     name: string;
   };
@@ -364,6 +366,7 @@ export type IconNames =
   // Locations
   | "dashboard"
   | "entity"
+  | "template"
   | "attribute"
   | "project"
 
@@ -542,7 +545,7 @@ export type EntityMetrics = IContentMetrics;
 
 export type ProjectMetrics = IContentMetrics;
 
-export type AttributeMetrics = IContentMetrics;
+export type TemplateMetrics = IContentMetrics;
 
 export type WorkspaceMetrics = {
   collaborators: number;

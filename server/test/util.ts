@@ -45,7 +45,7 @@ export const seedDatabase = async (): Promise<void> => {
     description: "This is a test Workspace",
     entities: [],
     projects: [],
-    attributes: [],
+    templates: [],
     activity: [],
   });
   if (workspaceResult.success === false)
@@ -196,9 +196,9 @@ export const seedDatabase = async (): Promise<void> => {
  */
 export const clearDatabase = async (): Promise<void> => {
   await getDatabase().collection("activity").deleteMany({});
-  await getDatabase().collection("attributes").deleteMany({});
   await getDatabase().collection("entities").deleteMany({});
   await getDatabase().collection("projects").deleteMany({});
-  await getDatabase().collection("workspaces").deleteMany({});
+  await getDatabase().collection("templates").deleteMany({});
   await getDatabase().collection("users").deleteMany({});
+  await getDatabase().collection("workspaces").deleteMany({});
 };

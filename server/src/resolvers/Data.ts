@@ -46,58 +46,69 @@ export const DataResolvers = {
     },
 
     // Prepare a CSV file, returning the collection of column names (if present)
-    prepareCSV: async (
+    prepareEntityCSV: async (
       _parent: any,
       args: { file: any },
       context: Context,
     ): Promise<string[]> => {
       // Authenticate the provided context
       await Authentication.authenticate(context);
-      return await Data.prepareCSV(args.file);
+      return await Data.prepareEntityCSV(args.file);
     },
 
     // Review a CSV file, return collection of Entity names and their updates
-    reviewCSV: async (
+    reviewEntityCSV: async (
       _parent: any,
       args: { columnMapping: Record<string, string>; file: any },
       context: Context,
     ): Promise<ResponseData<EntityImportReview[]>> => {
       // Authenticate the provided context
       await Authentication.authenticate(context);
-      return await Data.reviewCSV(args.columnMapping, args.file);
+      return await Data.reviewEntityCSV(args.columnMapping, args.file);
     },
 
     // Map CSV file columns to Entity fields
-    importCSV: async (
+    importEntityCSV: async (
       _parent: any,
       args: { columnMapping: Record<string, string>; file: any },
       context: Context,
     ): Promise<IResponseMessage> => {
       // Authenticate the provided context
       await Authentication.authenticate(context);
-      return await Data.importCSV(args.columnMapping, args.file, context);
+      return await Data.importEntityCSV(args.columnMapping, args.file, context);
     },
 
     // Review a JSON file, return collection of Entity names and their updates
-    reviewJSON: async (
+    reviewEntityJSON: async (
       _parent: any,
       args: { file: any },
       context: Context,
     ): Promise<IResponseMessage> => {
       // Authenticate the provided context
       await Authentication.authenticate(context);
-      return await Data.reviewJSON(args.file);
+      return await Data.reviewEntityJSON(args.file);
     },
 
     // Import JSON file
-    importJSON: async (
+    importEntityJSON: async (
       _parent: any,
       args: { file: any; project: string },
       context: Context,
     ): Promise<IResponseMessage> => {
       // Authenticate the provided context
       await Authentication.authenticate(context);
-      return await Data.importJSON(args.file, args.project, context);
+      return await Data.importEntityJSON(args.file, args.project, context);
+    },
+
+    // Import Template JSON file
+    importTemplateJSON: async (
+      _parent: any,
+      args: { file: any },
+      context: Context,
+    ): Promise<IResponseMessage> => {
+      // Authenticate the provided context
+      await Authentication.authenticate(context);
+      return await Data.importTemplateJSON(args.file, context);
     },
   },
 };

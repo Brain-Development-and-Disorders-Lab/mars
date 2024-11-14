@@ -72,6 +72,7 @@ import {
   DataTableAction,
   EntityHistory,
   EntityModel,
+  GenericValueType,
   IAttribute,
   IGenericItem,
   IRelationship,
@@ -152,16 +153,18 @@ const Entity = () => {
   // Archive state
   const [entityArchived, setEntityArchived] = useState(false);
 
-  // Adding Attributes to existing Entity
+  // Adding Templates to existing Entity
   const {
     isOpen: isAddAttributesOpen,
     onOpen: onAddAttributesOpen,
     onClose: onAddAttributesClose,
   } = useDisclosure();
-  const [attributes, setAttributes] = useState([] as AttributeModel[]);
+  const [templates, setTemplates] = useState([] as AttributeModel[]);
   const [attributeName, setAttributeName] = useState("");
   const [attributeDescription, setAttributeDescription] = useState("");
-  const [attributeValues, setAttributeValues] = useState([] as IValue<any>[]);
+  const [attributeValues, setAttributeValues] = useState(
+    [] as IValue<GenericValueType>[],
+  );
   const [selectedTemplate, setSelectedTemplate] = useState("");
 
   const isAttributeNameError = attributeName === "";
@@ -250,7 +253,7 @@ const Entity = () => {
         _id
         name
       }
-      attributes {
+      templates {
         _id
         name
         description
@@ -286,19 +289,19 @@ const Entity = () => {
   const [exportEntity, { loading: exportLoading, error: exportError }] =
     useLazyQuery(EXPORT_ENTITY);
 
-  // Query to create a template Attribute
-  const CREATE_ATTRIBUTE = gql`
-    mutation CreateAttribute($attribute: AttributeCreateInput) {
-      createAttribute(attribute: $attribute) {
+  // Query to create a template Template
+  const CREATE_TEMPLATE = gql`
+    mutation CreateTemplate($template: AttributeCreateInput) {
+      createTemplate(template: $template) {
         success
         message
       }
     }
   `;
   const [
-    createAttribute,
-    { loading: loadingAttributeCreate, error: errorAttributeCreate },
-  ] = useMutation(CREATE_ATTRIBUTE);
+    createTemplate,
+    { loading: loadingTemplateCreate, error: errorTemplateCreate },
+  ] = useMutation(CREATE_TEMPLATE);
 
   // Mutation to update Entity
   const UPDATE_ENTITY = gql`
@@ -341,9 +344,9 @@ const Entity = () => {
     if (data?.projects) {
       setProjectData(data.projects);
     }
-    // Unpack Attribute data
-    if (data?.attributes) {
-      setAttributes(data.attributes);
+    // Unpack Template data
+    if (data?.templates) {
+      setTemplates(data.templates);
     }
   }, [data]);
 
@@ -412,13 +415,13 @@ const Entity = () => {
     };
 
     // Execute the GraphQL mutation
-    const response = await createAttribute({
+    const response = await createTemplate({
       variables: {
-        attribute: attributeData,
+        template: attributeData,
       },
     });
 
-    if (response.data.createAttribute.success) {
+    if (response.data.createTemplate.success) {
       toast({
         title: "Saved!",
         status: "success",
@@ -426,13 +429,13 @@ const Entity = () => {
         position: "bottom-right",
         isClosable: true,
       });
-      setAttributes(() => [...attributes, attributeData as AttributeModel]);
+      setTemplates(() => [...templates, attributeData as AttributeModel]);
     }
 
-    if (errorAttributeCreate) {
+    if (errorTemplateCreate) {
       toast({
         title: "Error",
-        description: errorAttributeCreate.message,
+        description: errorTemplateCreate.message,
         status: "error",
         duration: 2000,
         position: "bottom-right",
@@ -1657,16 +1660,13 @@ const Entity = () => {
                   onChange={(event) => {
                     if (!_.isEqual(event.target.value.toString(), "")) {
                       setSelectedTemplate(event.target.value);
-                      for (const attribute of attributes) {
+                      for (const template of templates) {
                         if (
-                          _.isEqual(
-                            event.target.value.toString(),
-                            attribute._id,
-                          )
+                          _.isEqual(event.target.value.toString(), template._id)
                         ) {
-                          setAttributeName(attribute.name);
-                          setAttributeDescription(attribute.description);
-                          setAttributeValues(() => [...attribute.values]);
+                          setAttributeName(template.name);
+                          setAttributeDescription(template.description);
+                          setAttributeValues(() => [...template.values]);
                           break;
                         }
                       }
@@ -1674,10 +1674,10 @@ const Entity = () => {
                   }}
                 >
                   {!loading &&
-                    attributes.map((attribute) => {
+                    templates.map((template) => {
                       return (
-                        <option key={attribute._id} value={attribute._id}>
-                          {attribute.name}
+                        <option key={template._id} value={template._id}>
+                          {template.name}
                         </option>
                       );
                     })}
@@ -1686,7 +1686,7 @@ const Entity = () => {
                 <Text fontSize="sm">
                   Don't see the Template you're looking for? You can
                   <Link
-                    onClick={() => navigate("/create/attribute")}
+                    onClick={() => navigate("/create/template")}
                     style={{
                       color: "#3182ce",
                       marginLeft: "5px",
@@ -1780,7 +1780,7 @@ const Entity = () => {
                   rightIcon={<Icon name={"add"} />}
                   onClick={onSaveAsTemplate}
                   isDisabled={isAttributeError}
-                  isLoading={loadingAttributeCreate}
+                  isLoading={loadingTemplateCreate}
                 >
                   Save as Template
                 </Button>
@@ -2769,7 +2769,9 @@ const Entity = () => {
                     );
                   })
                 ) : (
-                  <Text>No previous versions.</Text>
+                  <Text fontSize={"sm"} fontWeight={"semibold"}>
+                    No previous versions.
+                  </Text>
                 )}
               </VStack>
             </DrawerBody>

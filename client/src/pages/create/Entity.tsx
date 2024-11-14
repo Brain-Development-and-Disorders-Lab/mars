@@ -91,7 +91,7 @@ const Entity = () => {
   const { token } = useAuthentication();
 
   const [projects, setProjects] = useState([] as IGenericItem[]);
-  const [attributes, setAttributes] = useState([] as AttributeModel[]);
+  const [templates, setTemplates] = useState([] as AttributeModel[]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -140,7 +140,7 @@ const Entity = () => {
         name
         description
       }
-      attributes {
+      templates {
         _id
         name
         description
@@ -172,8 +172,8 @@ const Entity = () => {
     if (data?.projects) {
       setProjects(data.projects);
     }
-    if (data?.attributes) {
-      setAttributes(data.attributes);
+    if (data?.templates) {
+      setTemplates(data.templates);
     }
   }, [data]);
 
@@ -645,32 +645,32 @@ const Entity = () => {
                 borderColor={"gray.300"}
                 justify={"space-between"}
               >
-                {/* Drop-down to select template Attributes */}
+                {/* Drop-down to select Templates */}
                 <FormControl maxW={"sm"}>
                   <Select
                     size={"sm"}
                     rounded={"md"}
-                    placeholder={"Template Attribute"}
-                    isDisabled={attributes.length === 0}
+                    placeholder={"Template"}
+                    isDisabled={templates.length === 0}
                     onChange={(event) => {
                       if (!_.isEqual(event.target.value.toString(), "")) {
-                        for (const attribute of attributes) {
+                        for (const template of templates) {
                           if (
                             _.isEqual(
                               event.target.value.toString(),
-                              attribute._id,
+                              template._id,
                             )
                           ) {
                             setSelectedAttributes([
                               ...selectedAttributes,
                               {
                                 _id: `a-${nanoid(6)}`,
-                                name: attribute.name,
-                                timestamp: attribute.timestamp,
-                                owner: attribute.owner,
+                                name: template.name,
+                                timestamp: template.timestamp,
+                                owner: template.owner,
                                 archived: false,
-                                description: attribute.description,
-                                values: attribute.values,
+                                description: template.description,
+                                values: template.values,
                               },
                             ]);
                             break;
@@ -679,10 +679,10 @@ const Entity = () => {
                       }
                     }}
                   >
-                    {attributes.map((attribute) => {
+                    {templates.map((template) => {
                       return (
-                        <option key={attribute._id} value={attribute._id}>
-                          {attribute.name}
+                        <option key={template._id} value={template._id}>
+                          {template.name}
                         </option>
                       );
                     })}

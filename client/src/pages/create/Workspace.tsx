@@ -92,7 +92,7 @@ const CreateWorkspace = () => {
           collaborators: collaborators,
           entities: [],
           projects: [],
-          attributes: [],
+          templates: [],
           activity: [],
         },
       },

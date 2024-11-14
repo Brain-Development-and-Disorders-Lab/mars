@@ -21,7 +21,7 @@ import { Activity } from "./Activity";
 import { Entities } from "./Entities";
 import { Projects } from "./Projects";
 import { Users } from "./Users";
-import { Attributes } from "./Attributes";
+import { Templates } from "./Templates";
 
 // Collection name
 const WORKSPACES_COLLECTION = "workspaces";
@@ -243,28 +243,28 @@ export class Workspaces {
   };
 
   /**
-   * Retrieve all Attributes in a Workspace
+   * Retrieve all Templates in a Workspace
    * @param _id Workspace identifier
    * @return {Promise<AttributeModel[]>}
    */
-  static getAttributes = async (_id: string): Promise<AttributeModel[]> => {
+  static getTemplates = async (_id: string): Promise<AttributeModel[]> => {
     const workspace = await Workspaces.getOne(_id);
     if (!_.isNull(workspace)) {
-      return await Attributes.getMany(workspace.attributes);
+      return await Templates.getMany(workspace.templates);
     } else {
       return [];
     }
   };
 
   /**
-   * Add an Attribute to an existing Workspace
-   * @param _id Workspace identifier to receive the Attribute
-   * @param attribute Attribute identifier to be added to the Workspace
+   * Add a Template to an existing Workspace
+   * @param _id Workspace identifier to receive the Template
+   * @param template Template identifier to be added to the Workspace
    * @return {Promise<IResponseMessage>}
    */
-  static addAttribute = async (
+  static addTemplate = async (
     _id: string,
-    attribute: string,
+    template: string,
   ): Promise<ResponseData<string>> => {
     const workspace = await Workspaces.getOne(_id);
     if (_.isNull(workspace)) {
@@ -275,22 +275,22 @@ export class Workspaces {
       };
     }
 
-    // Extract the collection of Attributes from the Workspace
-    const attributes = _.cloneDeep(workspace.attributes);
-    if (_.includes(attributes, attribute)) {
-      // Check if the Workspace already includes the Attribute
+    // Extract the collection of Templates from the Workspace
+    const templates = _.cloneDeep(workspace.templates);
+    if (_.includes(templates, template)) {
+      // Check if the Workspace already includes the Template
       return {
         success: true,
-        message: "Workspace already contains Attribute",
+        message: "Workspace already contains Template",
         data: "",
       };
     }
 
-    // Push the new Attribute
-    attributes.push(attribute);
+    // Push the new Template
+    templates.push(template);
     const update = {
       $set: {
-        attributes: attributes,
+        templates: templates,
       },
     };
 
@@ -303,8 +303,8 @@ export class Workspaces {
       success: response.modifiedCount === 1,
       message:
         response.modifiedCount === 1
-          ? "Added Attribute to Workspace"
-          : "Unable to add Attribute to Workspace",
+          ? "Added Template to Workspace"
+          : "Unable to add Template to Workspace",
       data: workspace._id,
     };
   };
@@ -359,7 +359,7 @@ export class Workspaces {
         collaborators: updated.collaborators,
         entities: updated.entities,
         projects: updated.projects,
-        attributes: updated.attributes,
+        templates: updated.templates,
       },
     };
 

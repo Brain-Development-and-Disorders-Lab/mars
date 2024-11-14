@@ -290,7 +290,7 @@ export const typedefs = `#graphql
     collaborators: [String]
     entities: [String]
     projects: [String]
-    attributes: [String]
+    templates: [String]
     activity: [String]
   }
 
@@ -303,7 +303,7 @@ export const typedefs = `#graphql
     collaborators: [String]
     entities: [String]
     projects: [String]
-    attributes: [String]
+    templates: [String]
     activity: [String]
   }
 
@@ -317,7 +317,7 @@ export const typedefs = `#graphql
     collaborators: [String]
     entities: [String]
     projects: [String]
-    attributes: [String]
+    templates: [String]
     activity: [String]
   }
 
@@ -382,8 +382,8 @@ export const typedefs = `#graphql
     addedDay: Int
   }
 
-  # "AttributeMetrics" type
-  type AttributeMetrics {
+  # "TemplateMetrics" type
+  type TemplateMetrics {
     all: Int
     addedDay: Int
   }
@@ -413,10 +413,10 @@ export const typedefs = `#graphql
     entityNameExists(name: String): Boolean
     entityMetrics: EntityMetrics
 
-    # Attribute queries
-    attributes(limit: Int): [Attribute]
-    attribute(_id: String): Attribute
-    attributeMetrics: AttributeMetrics
+    # Template queries
+    templates(limit: Int): [Attribute]
+    template(_id: String): Attribute
+    templateMetrics: TemplateMetrics
 
     # Activity queries
     activity(limit: Int): [Activity]
@@ -434,6 +434,7 @@ export const typedefs = `#graphql
     exportEntities(entities: [String]): String
     exportProject(_id: String, format: String, fields: [String]): String
     exportProjectEntities(_id: String, format: String): String
+    exportTemplate(_id: String): String
 
     # Authentication queries
     login(code: String): ResponseDataAuth
@@ -474,24 +475,24 @@ export const typedefs = `#graphql
     createUser(user: UserInput): ResponseMessage
     updateUser(user: UserInput): ResponseMessage
 
-    # Attribute mutations
-    createAttribute(attribute: AttributeCreateInput): ResponseMessage
-    updateAttribute(attribute: AttributeInput): ResponseMessage
-    archiveAttribute(_id: String, state: Boolean): ResponseMessage
-    archiveAttributes(toArchive: [String], state: Boolean): ResponseMessage
-    deleteAttribute(_id: String): ResponseMessage
+    # Template mutations
+    createTemplate(template: AttributeCreateInput): ResponseMessage
+    updateTemplate(template: AttributeInput): ResponseMessage
+    archiveTemplate(_id: String, state: Boolean): ResponseMessage
+    archiveTemplates(toArchive: [String], state: Boolean): ResponseMessage
 
     # Data mutations
     uploadAttachment(target: String, file: Upload!): ResponseMessage
 
     # Data import CSV mutations
-    prepareCSV(file: [Upload]!): [String]
-    reviewCSV(columnMapping: ColumnMappingInput, file: [Upload]!): ResponseDataEntityReview
-    importCSV(columnMapping: ColumnMappingInput, file: [Upload]!): ResponseMessage
+    prepareEntityCSV(file: [Upload]!): [String]
+    reviewEntityCSV(columnMapping: ColumnMappingInput, file: [Upload]!): ResponseDataEntityReview
+    importEntityCSV(columnMapping: ColumnMappingInput, file: [Upload]!): ResponseMessage
 
     # Data import JSON mutations
-    reviewJSON(file: [Upload]!): ResponseDataEntityReview
-    importJSON(file: [Upload]!, project: String): ResponseMessage
+    reviewEntityJSON(file: [Upload]!): ResponseDataEntityReview
+    importEntityJSON(file: [Upload]!, project: String): ResponseMessage
+    importTemplateJSON(file: [Upload]!): ResponseMessage
 
     # API mutations
     revokeKey(key: String): ResponseMessage

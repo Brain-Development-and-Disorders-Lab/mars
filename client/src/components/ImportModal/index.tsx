@@ -31,6 +31,7 @@ import {
   StepSeparator,
   FormHelperText,
   Tooltip,
+  Spacer,
 } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
 import Icon from "@components/Icon";
@@ -78,21 +79,40 @@ const ImportModal = (props: ImportModalProps) => {
   const toast = useToast();
   const { token } = useAuthentication();
 
+  // State to differentiate which type of file is being imported
+  const [importType, setImportType] = useState(
+    "entities" as "entities" | "template",
+  );
+  const [isTypeSelectDisabled, setIsTypeSelectDisabled] = useState(false);
+
   // State management to generate and present different pages
-  const [interfacePage, setInterfacePage] = useState(
+  const [entityInterfacePage, setEntityInterfacePage] = useState(
     "upload" as "upload" | "details" | "mapping" | "review",
+  );
+  const [templateInterfacePage, setTemplateInterfacePage] = useState(
+    "upload" as "upload" | "review",
   );
 
   // Used to generated numerical steps and a progress bar
-  const pageSteps = [
+  const entitySteps = [
     { title: "Upload File" },
     { title: "Setup Entities" },
     { title: "Apply Templates" },
     { title: "Review" },
   ];
-  const { activeStep, setActiveStep } = useSteps({
+  const { activeStep: activeEntityStep, setActiveStep: setActiveEntityStep } =
+    useSteps({
+      index: 0,
+      count: entitySteps.length,
+    });
+
+  const templateSteps = [{ title: "Upload File" }, { title: "Review" }];
+  const {
+    activeStep: activeTemplateStep,
+    setActiveStep: setActiveTemplateStep,
+  } = useSteps({
     index: 0,
-    count: pageSteps.length,
+    count: templateSteps.length,
   });
 
   // Spreadsheet column state
@@ -106,7 +126,7 @@ const ImportModal = (props: ImportModalProps) => {
   const [descriptionField, setDescriptionField] = useState("");
   const [ownerField] = useState(token.orcid);
   const [projectField, setProjectField] = useState("");
-  const [attributes, setAttributes] = useState([] as AttributeModel[]);
+  const [templates, setTemplates] = useState([] as AttributeModel[]);
   const [attributesField, setAttributesField] = useState(
     [] as AttributeModel[],
   );
@@ -117,13 +137,15 @@ const ImportModal = (props: ImportModalProps) => {
   );
 
   // Queries
-  const PREPARE_CSV = gql`
-    mutation PrepareCSV($file: [Upload]!) {
-      prepareCSV(file: $file)
+  const PREPARE_ENTITY_CSV = gql`
+    mutation PrepareEntityCSV($file: [Upload]!) {
+      prepareEntityCSV(file: $file)
     }
   `;
-  const [prepareCSV, { loading: prepareCSVLoading, error: prepareCSVError }] =
-    useMutation(PREPARE_CSV);
+  const [
+    prepareEntityCSV,
+    { loading: prepareEntityCSVLoading, error: prepareEntityCSVError },
+  ] = useMutation(PREPARE_ENTITY_CSV);
 
   const GET_MAPPING_DATA = gql`
     query GetMappingData {
@@ -131,7 +153,7 @@ const ImportModal = (props: ImportModalProps) => {
         _id
         name
       }
-      attributes {
+      templates {
         _id
         name
         description
@@ -149,9 +171,12 @@ const ImportModal = (props: ImportModalProps) => {
     { loading: mappingDataLoading, error: mappingDataError },
   ] = useLazyQuery(GET_MAPPING_DATA);
 
-  const REVIEW_CSV = gql`
-    mutation ReviewCSV($columnMapping: ColumnMappingInput, $file: [Upload]!) {
-      reviewCSV(columnMapping: $columnMapping, file: $file) {
+  const REVIEW_ENTITY_CSV = gql`
+    mutation ReviewEntityCSV(
+      $columnMapping: ColumnMappingInput
+      $file: [Upload]!
+    ) {
+      reviewEntityCSV(columnMapping: $columnMapping, file: $file) {
         success
         message
         data {
@@ -161,23 +186,30 @@ const ImportModal = (props: ImportModalProps) => {
       }
     }
   `;
-  const [reviewCSV, { loading: reviewCSVLoading, error: reviewCSVError }] =
-    useMutation(REVIEW_CSV);
+  const [
+    reviewEntityCSV,
+    { loading: reviewEntityCSVLoading, error: reviewEntityCSVError },
+  ] = useMutation(REVIEW_ENTITY_CSV);
 
-  const IMPORT_CSV = gql`
-    mutation ImportCSV($columnMapping: ColumnMappingInput, $file: [Upload]!) {
-      importCSV(columnMapping: $columnMapping, file: $file) {
+  const IMPORT_ENTITY_CSV = gql`
+    mutation ImportEntityCSV(
+      $columnMapping: ColumnMappingInput
+      $file: [Upload]!
+    ) {
+      importEntityCSV(columnMapping: $columnMapping, file: $file) {
         success
         message
       }
     }
   `;
-  const [importCSV, { loading: importCSVLoading, error: importCSVError }] =
-    useMutation(IMPORT_CSV);
+  const [
+    importEntityCSV,
+    { loading: importEntityCSVLoading, error: importEntityCSVError },
+  ] = useMutation(IMPORT_ENTITY_CSV);
 
-  const REVIEW_JSON = gql`
-    mutation ReviewJSON($file: [Upload]!) {
-      reviewJSON(file: $file) {
+  const REVIEW_ENTITY_JSON = gql`
+    mutation ReviewEntityJSON($file: [Upload]!) {
+      reviewEntityJSON(file: $file) {
         success
         message
         data {
@@ -187,19 +219,36 @@ const ImportModal = (props: ImportModalProps) => {
       }
     }
   `;
-  const [reviewJSON, { loading: reviewJSONLoading, error: reviewJSONError }] =
-    useMutation(REVIEW_JSON);
+  const [
+    reviewEntityJSON,
+    { loading: reviewEntityJSONLoading, error: reviewEntityJSONError },
+  ] = useMutation(REVIEW_ENTITY_JSON);
 
-  const IMPORT_JSON = gql`
-    mutation ImportJSON($file: [Upload]!, $project: String) {
-      importJSON(file: $file, project: $project) {
+  const IMPORT_ENTITY_JSON = gql`
+    mutation ImportEntityJSON($file: [Upload]!, $project: String) {
+      importEntityJSON(file: $file, project: $project) {
         success
         message
       }
     }
   `;
-  const [importJSON, { loading: importJSONLoading, error: importJSONError }] =
-    useMutation(IMPORT_JSON);
+  const [
+    importEntityJSON,
+    { loading: importEntityJSONLoading, error: importEntityJSONError },
+  ] = useMutation(IMPORT_ENTITY_JSON);
+
+  const IMPORT_TEMPLATE_JSON = gql`
+    mutation ImportTemplateJSON($file: [Upload]!) {
+      importTemplateJSON(file: $file) {
+        success
+        message
+      }
+    }
+  `;
+  const [
+    importTemplateJSON,
+    { loading: importTemplateJSONLoading, error: importTemplateJSONError },
+  ] = useMutation(IMPORT_TEMPLATE_JSON);
 
   // Setup columns for review table
   const reviewTableColumnHelper = createColumnHelper<EntityImportReview>();
@@ -238,7 +287,7 @@ const ImportModal = (props: ImportModalProps) => {
 
   // Effect to manipulate 'Continue' button state for 'upload' page
   useEffect(() => {
-    if (_.isEqual(interfacePage, "upload") && fileType !== "") {
+    if (_.isEqual(entityInterfacePage, "upload") && fileType !== "") {
       setContinueLoading(false);
       setContinueDisabled(false);
     }
@@ -247,7 +296,7 @@ const ImportModal = (props: ImportModalProps) => {
   // Effect to manipulate 'Continue' button state when mapping fields from CSV file
   useEffect(() => {
     if (
-      _.isEqual(interfacePage, "details") &&
+      _.isEqual(entityInterfacePage, "details") &&
       nameField !== "" &&
       fileType === "text/csv"
     ) {
@@ -259,13 +308,13 @@ const ImportModal = (props: ImportModalProps) => {
   // Effect to manipulate 'Continue' button state when importing JSON file
   useEffect(() => {
     if (
-      _.isEqual(interfacePage, "details") &&
+      _.isEqual(entityInterfacePage, "details") &&
       fileType === "application/json"
     ) {
       setContinueLoading(false);
       setContinueDisabled(false);
     }
-  }, [interfacePage]);
+  }, [entityInterfacePage]);
 
   /**
    * Read a JSON file and update `Importer` state, raising errors if invalid
@@ -307,7 +356,7 @@ const ImportModal = (props: ImportModalProps) => {
 
   /**
    * Utility function to perform the initial import operations. For CSV files, execute
-   * `prepareCSV` query to defer the data extraction to the server.
+   * `prepareEntityCSV` query to defer the data extraction to the server.
    * For JSON files, trigger the `validJSONFile` method to handle the file
    * locally instead.
    */
@@ -327,15 +376,15 @@ const ImportModal = (props: ImportModalProps) => {
       await validJSONFile(file);
     } else if (_.isEqual(fileType, "text/csv")) {
       // Mutation query with CSV file
-      setContinueLoading(prepareCSVLoading);
-      const response = await prepareCSV({
+      setContinueLoading(prepareEntityCSVLoading);
+      const response = await prepareEntityCSV({
         variables: {
           file: file,
         },
       });
-      setContinueLoading(prepareCSVLoading);
+      setContinueLoading(prepareEntityCSVLoading);
 
-      if (prepareCSVError || _.isUndefined(response.data)) {
+      if (prepareEntityCSVError || _.isUndefined(response.data)) {
         toast({
           title: "CSV Import Error",
           status: "error",
@@ -346,9 +395,9 @@ const ImportModal = (props: ImportModalProps) => {
         });
       }
 
-      if (response.data && response.data.prepareCSV.length > 0) {
+      if (response.data && response.data.prepareEntityCSV.length > 0) {
         // Filter columns to exclude columns with no header ("__EMPTY...")
-        const filteredColumnSet = response.data.prepareCSV.filter(
+        const filteredColumnSet = response.data.prepareEntityCSV.filter(
           (column: string) => {
             return !_.startsWith(column, "__EMPTY");
           },
@@ -369,8 +418,8 @@ const ImportModal = (props: ImportModalProps) => {
     setIsLoaded(!mappingDataLoading);
     const response = await getMappingData();
 
-    if (response.data?.attributes) {
-      setAttributes(response.data.attributes);
+    if (response.data?.templates) {
+      setTemplates(response.data.templates);
     }
     if (response.data?.projects) {
       setProjects(response.data.projects);
@@ -394,20 +443,20 @@ const ImportModal = (props: ImportModalProps) => {
    * Submit the pre-imported JSON structure and changes to the server
    * to generate a summary of the changes
    */
-  const setupReviewJSON = async () => {
-    setContinueLoading(reviewJSONLoading);
-    const response = await reviewJSON({
+  const setupReviewEntityJSON = async () => {
+    setContinueLoading(reviewEntityJSONLoading);
+    const response = await reviewEntityJSON({
       variables: {
         file: file,
       },
     });
-    setContinueLoading(reviewJSONLoading);
+    setContinueLoading(reviewEntityJSONLoading);
 
-    if (response.data && response.data.reviewJSON.data) {
-      setReviewEntities(response.data.reviewJSON.data);
+    if (response.data && response.data.reviewEntityJSON.data) {
+      setReviewEntities(response.data.reviewEntityJSON.data);
     }
 
-    if (reviewJSONError) {
+    if (reviewEntityJSONError) {
       toast({
         title: "JSON Import Error",
         status: "error",
@@ -423,7 +472,7 @@ const ImportModal = (props: ImportModalProps) => {
    * Submit the pre-imported CSV structure and changes to the server
    * to generate a summary of the changes
    */
-  const setupReviewCSV = async () => {
+  const setupReviewEntityCSV = async () => {
     // Collate data to be mapped
     const mappingData: { columnMapping: any; file: any } = {
       columnMapping: {
@@ -437,17 +486,17 @@ const ImportModal = (props: ImportModalProps) => {
       file: file,
     };
 
-    setContinueLoading(reviewCSVLoading);
-    const response = await reviewCSV({
+    setContinueLoading(reviewEntityCSVLoading);
+    const response = await reviewEntityCSV({
       variables: mappingData,
     });
-    setContinueLoading(reviewCSVLoading);
+    setContinueLoading(reviewEntityCSVLoading);
 
-    if (response.data && response.data.reviewCSV.data) {
-      setReviewEntities(response.data.reviewCSV.data);
+    if (response.data && response.data.reviewEntityCSV.data) {
+      setReviewEntities(response.data.reviewEntityCSV.data);
     }
 
-    if (reviewCSVError) {
+    if (reviewEntityCSVError) {
       toast({
         title: "CSV Import Error",
         status: "error",
@@ -462,17 +511,17 @@ const ImportModal = (props: ImportModalProps) => {
   /**
    * Finish importing a JSON file
    */
-  const finishImportJSON = async () => {
-    setContinueLoading(importJSONLoading);
-    const response = await importJSON({
+  const finishImportEntityJSON = async () => {
+    setContinueLoading(importEntityJSONLoading);
+    const response = await importEntityJSON({
       variables: {
         file: file,
         project: projectField,
       },
     });
-    setContinueLoading(importJSONLoading);
+    setContinueLoading(importEntityJSONLoading);
 
-    if (importJSONError) {
+    if (importEntityJSONError) {
       toast({
         title: "JSON Import Error",
         status: "error",
@@ -483,7 +532,7 @@ const ImportModal = (props: ImportModalProps) => {
       });
     }
 
-    if (response.data.importJSON.success === true) {
+    if (response.data.importEntityJSON.success === true) {
       // Close the `ImportModal` UI
       props.onClose();
       resetState();
@@ -494,9 +543,9 @@ const ImportModal = (props: ImportModalProps) => {
   /**
    * Finish importing a CSV file
    */
-  const finishImportCSV = async () => {
+  const finishImportEntityCSV = async () => {
     // Set the mapping status
-    setContinueLoading(importCSVLoading);
+    setContinueLoading(importEntityCSVLoading);
 
     // Collate data to be mapped
     const mappingData: { columnMapping: any; file: any } = {
@@ -510,19 +559,45 @@ const ImportModal = (props: ImportModalProps) => {
       },
       file: file,
     };
-    await importCSV({
+    await importEntityCSV({
       variables: {
         columnMapping: mappingData.columnMapping,
         file: mappingData.file,
       },
     });
-    setContinueLoading(importCSVLoading);
+    setContinueLoading(importEntityCSVLoading);
 
-    if (importCSVError) {
+    if (importEntityCSVError) {
       toast({
         title: "CSV Import Error",
         status: "error",
         description: "Error while importing CSV file",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    } else {
+      props.onClose();
+      resetState();
+      navigate(0);
+    }
+
+    setContinueLoading(false);
+  };
+
+  const finishImportTemplateJSON = async () => {
+    await importTemplateJSON({
+      variables: {
+        file: file,
+      },
+    });
+    setContinueLoading(importTemplateJSONLoading);
+
+    if (importTemplateJSONError) {
+      toast({
+        title: "JSON Import Error",
+        status: "error",
+        description: "Error while importing JSON file",
         duration: 4000,
         position: "bottom-right",
         isClosable: true,
@@ -599,35 +674,49 @@ const ImportModal = (props: ImportModalProps) => {
    * Callback function to handle any click events on the Continue button
    */
   const onContinueClick = async () => {
-    if (_.isEqual(interfacePage, "upload")) {
-      // Run setup for import and mapping
-      await setupImport();
-      await setupMapping();
+    // Disable changing the type of import unless import canceled
+    setIsTypeSelectDisabled(true);
 
-      // Proceed to the next page
-      setActiveStep(1);
-      setInterfacePage("details");
-    } else if (_.isEqual(interfacePage, "details")) {
-      // Proceed to the next page
-      setActiveStep(2);
-      setInterfacePage("mapping");
-    } else if (_.isEqual(interfacePage, "mapping")) {
-      // Run the review setup function depending on file type
-      if (_.isEqual(fileType, "application/json")) {
-        await setupReviewJSON();
-      } else if (_.isEqual(fileType, "text/csv")) {
-        await setupReviewCSV();
+    if (_.isEqual(importType, "entities")) {
+      if (_.isEqual(entityInterfacePage, "upload")) {
+        // Run setup for import and mapping
+        await setupImport();
+        await setupMapping();
+
+        // Proceed to the next page
+        setActiveEntityStep(1);
+        setEntityInterfacePage("details");
+      } else if (_.isEqual(entityInterfacePage, "details")) {
+        // Proceed to the next page
+        setActiveEntityStep(2);
+        setEntityInterfacePage("mapping");
+      } else if (_.isEqual(entityInterfacePage, "mapping")) {
+        // Run the review setup function depending on file type
+        if (_.isEqual(fileType, "application/json")) {
+          await setupReviewEntityJSON();
+        } else if (_.isEqual(fileType, "text/csv")) {
+          await setupReviewEntityCSV();
+        }
+
+        // Proceed to the next page
+        setActiveEntityStep(3);
+        setEntityInterfacePage("review");
+      } else if (_.isEqual(entityInterfacePage, "review")) {
+        // Run the final import function depending on file type
+        if (_.isEqual(fileType, "application/json")) {
+          await finishImportEntityJSON();
+        } else if (_.isEqual(fileType, "text/csv")) {
+          await finishImportEntityCSV();
+        }
       }
-
-      // Proceed to the next page
-      setActiveStep(3);
-      setInterfacePage("review");
-    } else if (_.isEqual(interfacePage, "review")) {
-      // Run the final import function depending on file type
-      if (_.isEqual(fileType, "application/json")) {
-        await finishImportJSON();
-      } else if (_.isEqual(fileType, "text/csv")) {
-        await finishImportCSV();
+    } else if (_.isEqual(importType, "template")) {
+      if (_.isEqual(templateInterfacePage, "upload")) {
+        // Proceed to the next page
+        setActiveTemplateStep(1);
+        setTemplateInterfacePage("review");
+      } else if (_.isEqual(templateInterfacePage, "review")) {
+        // Run the final import function for Template JSON files
+        await finishImportTemplateJSON();
       }
     }
   };
@@ -637,10 +726,17 @@ const ImportModal = (props: ImportModalProps) => {
    */
   const resetState = () => {
     // Reset UI state
-    setActiveStep(0);
-    setInterfacePage("upload");
+    setImportType("entities");
+
+    setActiveEntityStep(0);
+    setEntityInterfacePage("upload");
+    setActiveTemplateStep(0);
+    setTemplateInterfacePage("upload");
+
     setContinueDisabled(true);
     setContinueLoading(false);
+    setIsTypeSelectDisabled(false);
+
     setFile({} as File);
     setFileType("");
     setFileName("");
@@ -651,7 +747,7 @@ const ImportModal = (props: ImportModalProps) => {
     setNameField("");
     setDescriptionField("");
     setProjectField("");
-    setAttributes([]);
+    setTemplates([]);
     setAttributesField([]);
   };
 
@@ -664,459 +760,644 @@ const ImportModal = (props: ImportModalProps) => {
     >
       <ModalOverlay />
       <ModalContent p={"2"} gap={"0"}>
-        <ModalHeader p={"2"}>Import Entities</ModalHeader>
+        <ModalHeader p={"2"}>Import File</ModalHeader>
         <ModalCloseButton />
         <ModalBody px={"2"} gap={"2"}>
-          {/* Stepper progress indicator */}
-          <Flex pb={"4"}>
-            <Stepper index={activeStep} w={"100%"}>
-              {pageSteps.map((step, index) => (
-                <Step key={index}>
-                  <StepIndicator>
-                    <StepStatus
-                      complete={<StepIcon />}
-                      incomplete={<StepNumber />}
-                      active={<StepNumber />}
-                    />
-                  </StepIndicator>
-
-                  <Box flexShrink={"0"}>
-                    <StepTitle>{step.title}</StepTitle>
-                  </Box>
-
-                  <StepSeparator />
-                </Step>
-              ))}
-            </Stepper>
+          <Flex
+            direction={"row"}
+            gap={"2"}
+            align={"center"}
+            justify={"left"}
+            p={"2"}
+            rounded={"md"}
+            border={"1px"}
+            borderColor={"gray.300"}
+          >
+            <Text fontWeight={"semibold"} fontSize={"sm"} color={"gray.600"}>
+              Files can be imported into Metadatify and used to create Entities
+              or update existing Entities. Templates can also be imported.
+              Select the file type being imported, then upload the file to
+              continue.
+            </Text>
           </Flex>
 
-          {!_.isEqual(interfacePage, "upload") && (
-            <Flex
-              w={"100%"}
-              justify={"left"}
-              gap={"2"}
-              align={"baseline"}
-              pb={"2"}
-              direction={"column"}
-            >
-              <Flex direction={"row"} gap={"2"}>
-                <Text fontSize={"sm"} fontWeight={"semibold"}>
-                  File:
-                </Text>
-                <Text fontSize={"sm"} color={"gray.600"}>
-                  {fileName}
-                </Text>
-              </Flex>
-              {_.isNull(objectData) && (
-                <Flex
-                  w={"100%"}
-                  gap={"2"}
-                  align={"center"}
-                  justify={"left"}
-                  wrap={"wrap"}
-                >
-                  <Text fontWeight={"semibold"} fontSize={"sm"}>
-                    Columns:
-                  </Text>
-                  {columns.map((column) => {
-                    return (
-                      <Tag size={"sm"} key={column}>
-                        {column}
-                      </Tag>
-                    );
-                  })}
-                </Flex>
-              )}
+          {/* Select file type of import */}
+          <Flex
+            direction={"row"}
+            gap={"2"}
+            align={"center"}
+            justify={"left"}
+            w={"100%"}
+            py={"2"}
+          >
+            <Text fontWeight={"semibold"} fontSize={"sm"} color={"gray.600"}>
+              File contents:
+            </Text>
+            <Flex>
+              <Select
+                value={importType}
+                onChange={(event) =>
+                  setImportType(event.target.value as "entities" | "template")
+                }
+                size={"sm"}
+                rounded={"md"}
+                isDisabled={isTypeSelectDisabled}
+              >
+                <option value={"entities"}>Entities</option>
+                <option value={"template"}>Template</option>
+              </Select>
+            </Flex>
+            <Spacer />
+            <Flex py={"2"} gap={"1"} align={"center"}>
+              <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.600"}>
+                Supported formats:
+              </Text>
+              {_.isEqual(importType, "entities") && <Tag size={"sm"}>CSV</Tag>}
+              <Tag size={"sm"}>JSON</Tag>
+            </Flex>
+          </Flex>
+
+          {/* Stepper progress indicators */}
+          {_.isEqual(importType, "entities") && (
+            <Flex pb={"2"}>
+              <Stepper index={activeEntityStep} w={"100%"}>
+                {entitySteps.map((step, index) => (
+                  <Step key={index}>
+                    <StepIndicator>
+                      <StepStatus
+                        complete={<StepIcon />}
+                        incomplete={<StepNumber />}
+                        active={<StepNumber />}
+                      />
+                    </StepIndicator>
+
+                    <Box flexShrink={"0"}>
+                      <StepTitle>
+                        <Text fontSize={"sm"}>{step.title}</Text>
+                      </StepTitle>
+                    </Box>
+
+                    <StepSeparator />
+                  </Step>
+                ))}
+              </Stepper>
             </Flex>
           )}
 
-          {/* Step 1: Upload */}
-          {_.isEqual(interfacePage, "upload") && (
-            <Flex
-              w={"100%"}
-              direction={"column"}
-              align={"center"}
-              justify={"center"}
-            >
+          {_.isEqual(importType, "template") && (
+            <Flex pb={"2"}>
+              <Stepper index={activeTemplateStep} w={"100%"}>
+                {templateSteps.map((step, index) => (
+                  <Step key={index}>
+                    <StepIndicator>
+                      <StepStatus
+                        complete={<StepIcon />}
+                        incomplete={<StepNumber />}
+                        active={<StepNumber />}
+                      />
+                    </StepIndicator>
+
+                    <Box flexShrink={"0"}>
+                      <StepTitle>
+                        <Text fontSize={"sm"}>{step.title}</Text>
+                      </StepTitle>
+                    </Box>
+
+                    <StepSeparator />
+                  </Step>
+                ))}
+              </Stepper>
+            </Flex>
+          )}
+
+          {/* Display filename and list of columns if a CSV file after upload */}
+          {_.isEqual(importType, "entities") &&
+            !_.isEqual(entityInterfacePage, "upload") && (
               <Flex
                 w={"100%"}
-                py={"2"}
                 justify={"left"}
-                gap={"1"}
-                align={"center"}
+                gap={"2"}
+                align={"baseline"}
+                pb={"2"}
+                direction={"column"}
               >
-                <Text
-                  fontSize={"sm"}
-                  fontWeight={"semibold"}
-                  color={"gray.600"}
-                >
-                  Supported Formats:
-                </Text>
-                <Tag size={"sm"}>CSV</Tag>
-                <Tag size={"sm"}>JSON</Tag>
-              </Flex>
-              <FormControl>
-                <Flex
-                  direction={"column"}
-                  minH={"50vh"}
-                  w={"100%"}
-                  align={"center"}
-                  justify={"center"}
-                  border={"2px"}
-                  borderStyle={fileName === "" ? "dashed" : "solid"}
-                  borderColor={"gray.300"}
-                  rounded={"md"}
-                  background={fileName === "" ? "gray.50" : "white"}
-                >
-                  {_.isEqual(file, {}) ? (
-                    <Flex
-                      direction={"column"}
-                      w={"100%"}
-                      justify={"center"}
-                      align={"center"}
-                    >
-                      <Text fontSize={"sm"} fontWeight={"semibold"}>
-                        Drag file here
-                      </Text>
-                      <Text fontSize={"sm"}>or click to upload</Text>
-                    </Flex>
-                  ) : (
-                    <Flex
-                      direction={"column"}
-                      w={"100%"}
-                      justify={"center"}
-                      align={"center"}
-                    >
-                      <Text fontSize={"sm"} fontWeight={"semibold"}>
-                        {file.name}
-                      </Text>
-                    </Flex>
-                  )}
-                </Flex>
-                <Input
-                  type={"file"}
-                  h={"100%"}
-                  w={"100%"}
-                  position={"absolute"}
-                  rounded={"md"}
-                  top={"0"}
-                  left={"0"}
-                  opacity={"0"}
-                  aria-hidden={"true"}
-                  onChange={(event: ChangeEvent<HTMLInputElement>) => {
-                    if (event.target.files && event.target.files.length > 0) {
-                      // Only accept defined file types
-                      if (
-                        _.includes(
-                          ["text/csv", "application/json"],
-                          event.target.files[0].type,
-                        )
-                      ) {
-                        setFileName(event.target.files[0].name);
-                        setFileType(event.target.files[0].type);
-                        setFile(event.target.files[0]);
-                      } else {
-                        toast({
-                          title: "Warning",
-                          status: "warning",
-                          description: "Please upload a JSON or CSV file",
-                          duration: 2000,
-                          position: "bottom-right",
-                          isClosable: true,
-                        });
-                      }
-                    }
-                  }}
-                />
-              </FormControl>
-            </Flex>
-          )}
-
-          {/* Step 2: Simple mapping, details */}
-          {_.isEqual(interfacePage, "details") && (
-            <Flex
-              w={"100%"}
-              direction={"column"}
-              gap={"2"}
-              p={"2"}
-              border={"1px"}
-              borderColor={"gray.300"}
-              rounded={"md"}
-            >
-              {columns.length > 0 && (
-                <Flex direction={"column"} gap={"2"} wrap={"wrap"}>
-                  <Text fontSize={"sm"}>
-                    Each row in the CSV file represents a new Entity that will
-                    be created. Assign a column to populate the Entity fields
-                    shown below.
+                <Flex direction={"row"} gap={"2"}>
+                  <Text fontSize={"sm"} fontWeight={"semibold"}>
+                    File:
+                  </Text>
+                  <Text fontSize={"sm"} color={"gray.600"}>
+                    {fileName}
                   </Text>
                 </Flex>
-              )}
-
-              {!objectData && (
-                <Flex direction={"row"} gap={"2"}>
-                  <FormControl isRequired isInvalid={_.isEqual(nameField, "")}>
-                    <FormLabel fontSize={"sm"}>Name</FormLabel>
-                    {getSelectComponent("import_name", nameField, setNameField)}
-                    <FormHelperText>
-                      Column containing Entity names
-                    </FormHelperText>
-                  </FormControl>
-                  <FormControl>
-                    <FormLabel fontSize={"sm"}>Description</FormLabel>
-                    {getSelectComponent(
-                      "import_description",
-                      descriptionField,
-                      setDescriptionField,
-                    )}
-                    <FormHelperText>
-                      Column containing Entity descriptions
-                    </FormHelperText>
-                  </FormControl>
-                </Flex>
-              )}
-
-              {objectData && (
-                <Flex direction={"row"} gap={"2"}>
-                  <FormControl>
-                    <FormLabel fontSize={"sm"}>Name</FormLabel>
-                    <Select
-                      size={"sm"}
-                      rounded={"md"}
-                      placeholder={"Defined in JSON"}
-                      isReadOnly
-                    />
-                    <FormHelperText>
-                      Field containing Entity names
-                    </FormHelperText>
-                  </FormControl>
-                  <FormControl>
-                    <FormLabel fontSize={"sm"}>Description</FormLabel>
-                    <Select
-                      size={"sm"}
-                      rounded={"md"}
-                      placeholder={"Defined in JSON"}
-                      isReadOnly
-                    />
-                    <FormHelperText>
-                      Field containing Entity descriptions
-                    </FormHelperText>
-                  </FormControl>
-                </Flex>
-              )}
-
-              <Flex direction={"row"} gap={"2"}>
-                <FormControl>
-                  <FormLabel fontSize={"sm"}>Owner</FormLabel>
-                  <Tooltip
-                    label={
-                      "Initially, only you will have access to imported Entities"
-                    }
-                    hasArrow
+                {_.isNull(objectData) && (
+                  <Flex
+                    w={"100%"}
+                    gap={"2"}
+                    align={"center"}
+                    justify={"left"}
+                    wrap={"wrap"}
                   >
-                    <Input
-                      value={ownerField}
-                      size={"sm"}
-                      rounded={"md"}
-                      isReadOnly
-                    />
-                  </Tooltip>
-                </FormControl>
-                <FormControl>
-                  <FormLabel fontSize={"sm"}>Project</FormLabel>
-                  <Select
-                    id={"import_projects"}
-                    size={"sm"}
-                    rounded={"md"}
-                    placeholder={"Select Project"}
-                    value={projectField}
-                    onChange={(event) => setProjectField(event.target.value)}
-                  >
-                    {projects.map((project) => {
+                    <Text fontWeight={"semibold"} fontSize={"sm"}>
+                      Columns:
+                    </Text>
+                    {columns.map((column) => {
                       return (
-                        <option key={project._id} value={project._id}>
-                          {project.name}
-                        </option>
+                        <Tag size={"sm"} key={column}>
+                          {column}
+                        </Tag>
                       );
                     })}
-                  </Select>
-                  <FormHelperText>Add Entities to a Project</FormHelperText>
+                  </Flex>
+                )}
+              </Flex>
+            )}
+
+          {/* Entity Step 1: Upload */}
+          {_.isEqual(importType, "entities") &&
+            _.isEqual(entityInterfacePage, "upload") && (
+              <Flex
+                w={"100%"}
+                direction={"column"}
+                align={"center"}
+                justify={"center"}
+              >
+                <FormControl>
+                  <Flex
+                    direction={"column"}
+                    minH={"50vh"}
+                    w={"100%"}
+                    align={"center"}
+                    justify={"center"}
+                    border={"2px"}
+                    borderStyle={fileName === "" ? "dashed" : "solid"}
+                    borderColor={"gray.300"}
+                    rounded={"md"}
+                    background={fileName === "" ? "gray.50" : "white"}
+                  >
+                    {_.isEqual(file, {}) ? (
+                      <Flex
+                        direction={"column"}
+                        w={"100%"}
+                        justify={"center"}
+                        align={"center"}
+                      >
+                        <Text fontSize={"sm"} fontWeight={"semibold"}>
+                          Drag file here
+                        </Text>
+                        <Text fontSize={"sm"}>or click to upload</Text>
+                      </Flex>
+                    ) : (
+                      <Flex
+                        direction={"column"}
+                        w={"100%"}
+                        justify={"center"}
+                        align={"center"}
+                      >
+                        <Text fontSize={"sm"} fontWeight={"semibold"}>
+                          {file.name}
+                        </Text>
+                      </Flex>
+                    )}
+                  </Flex>
+                  <Input
+                    type={"file"}
+                    h={"100%"}
+                    w={"100%"}
+                    position={"absolute"}
+                    rounded={"md"}
+                    top={"0"}
+                    left={"0"}
+                    opacity={"0"}
+                    aria-hidden={"true"}
+                    onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                      if (event.target.files && event.target.files.length > 0) {
+                        // Only accept defined file types
+                        if (
+                          _.includes(
+                            ["text/csv", "application/json"],
+                            event.target.files[0].type,
+                          )
+                        ) {
+                          setFileName(event.target.files[0].name);
+                          setFileType(event.target.files[0].type);
+                          setFile(event.target.files[0]);
+                        } else {
+                          toast({
+                            title: "Warning",
+                            status: "warning",
+                            description: "Please upload a JSON or CSV file",
+                            duration: 2000,
+                            position: "bottom-right",
+                            isClosable: true,
+                          });
+                        }
+                      }
+                    }}
+                  />
                 </FormControl>
               </Flex>
-            </Flex>
-          )}
+            )}
 
-          {/* Step 3: Advanced mapping */}
-          {_.isEqual(interfacePage, "mapping") && (
-            <Flex
-              w={"100%"}
-              direction={"column"}
-              gap={"2"}
-              p={"2"}
-              border={"1px"}
-              borderColor={"gray.300"}
-              rounded={"md"}
-            >
-              {_.isNull(objectData) ? (
-                <Text fontSize={"sm"}>
-                  Columns can be assigned to Values within Attributes. When
-                  adding Values to an Attribute, select the column containing
-                  the data for each Value. Use an existing Template Attribute
-                  from the drop-down or create a new Attribute.
-                </Text>
-              ) : (
-                <Text fontSize={"sm"}>
-                  Existing attributes defined in JSON will be preserved. Use an
-                  existing Template Attribute from the drop-down or create a new
-                  Attribute to be added to all Entities.
-                </Text>
-              )}
-
+          {/* Entity Step 2: Simple mapping, details */}
+          {_.isEqual(importType, "entities") &&
+            _.isEqual(entityInterfacePage, "details") && (
               <Flex
-                direction={"row"}
+                w={"100%"}
+                direction={"column"}
                 gap={"2"}
-                align={"center"}
-                justify={"space-between"}
-                wrap={["wrap", "nowrap"]}
+                p={"2"}
+                border={"1px"}
+                borderColor={"gray.300"}
+                rounded={"md"}
               >
-                {/* Drop-down to select template Attributes */}
-                <FormControl maxW={"sm"}>
-                  <Tooltip
-                    label={
-                      attributes.length > 0
-                        ? "Select an existing Template Attribute"
-                        : "No Template Attributes exist yet"
-                    }
-                    hasArrow
-                  >
+                {columns.length > 0 && (
+                  <Flex direction={"column"} gap={"2"} wrap={"wrap"}>
+                    <Text fontSize={"sm"}>
+                      Each row in the CSV file represents a new Entity that will
+                      be created. Assign a column to populate the Entity fields
+                      shown below.
+                    </Text>
+                  </Flex>
+                )}
+
+                {!objectData && (
+                  <Flex direction={"row"} gap={"2"}>
+                    <FormControl
+                      isRequired
+                      isInvalid={_.isEqual(nameField, "")}
+                    >
+                      <FormLabel fontSize={"sm"}>Name</FormLabel>
+                      {getSelectComponent(
+                        "import_name",
+                        nameField,
+                        setNameField,
+                      )}
+                      <FormHelperText>
+                        Column containing Entity names
+                      </FormHelperText>
+                    </FormControl>
+                    <FormControl>
+                      <FormLabel fontSize={"sm"}>Description</FormLabel>
+                      {getSelectComponent(
+                        "import_description",
+                        descriptionField,
+                        setDescriptionField,
+                      )}
+                      <FormHelperText>
+                        Column containing Entity descriptions
+                      </FormHelperText>
+                    </FormControl>
+                  </Flex>
+                )}
+
+                {objectData && (
+                  <Flex direction={"row"} gap={"2"}>
+                    <FormControl>
+                      <FormLabel fontSize={"sm"}>Name</FormLabel>
+                      <Select
+                        size={"sm"}
+                        rounded={"md"}
+                        placeholder={"Defined in JSON"}
+                        isReadOnly
+                      />
+                      <FormHelperText>
+                        Field containing Entity names
+                      </FormHelperText>
+                    </FormControl>
+                    <FormControl>
+                      <FormLabel fontSize={"sm"}>Description</FormLabel>
+                      <Select
+                        size={"sm"}
+                        rounded={"md"}
+                        placeholder={"Defined in JSON"}
+                        isReadOnly
+                      />
+                      <FormHelperText>
+                        Field containing Entity descriptions
+                      </FormHelperText>
+                    </FormControl>
+                  </Flex>
+                )}
+
+                <Flex direction={"row"} gap={"2"}>
+                  <FormControl>
+                    <FormLabel fontSize={"sm"}>Owner</FormLabel>
+                    <Tooltip
+                      label={
+                        "Initially, only you will have access to imported Entities"
+                      }
+                      hasArrow
+                    >
+                      <Input
+                        value={ownerField}
+                        size={"sm"}
+                        rounded={"md"}
+                        isReadOnly
+                      />
+                    </Tooltip>
+                  </FormControl>
+                  <FormControl>
+                    <FormLabel fontSize={"sm"}>Project</FormLabel>
                     <Select
+                      id={"import_projects"}
                       size={"sm"}
-                      placeholder={"Select Template Attribute"}
-                      isDisabled={attributes.length === 0}
-                      onChange={(event) => {
-                        if (!_.isEqual(event.target.value.toString(), "")) {
-                          for (const attribute of attributes) {
-                            if (
-                              _.isEqual(
-                                event.target.value.toString(),
-                                attribute._id,
-                              )
-                            ) {
-                              setAttributesField([
-                                ...attributesField,
-                                {
-                                  _id: `a-${nanoid(6)}`,
-                                  name: attribute.name,
-                                  timestamp: attribute.timestamp,
-                                  owner: attribute.owner,
-                                  archived: false,
-                                  description: attribute.description,
-                                  values: attribute.values,
-                                },
-                              ]);
-                              break;
+                      rounded={"md"}
+                      placeholder={"Select Project"}
+                      value={projectField}
+                      onChange={(event) => setProjectField(event.target.value)}
+                    >
+                      {projects.map((project) => {
+                        return (
+                          <option key={project._id} value={project._id}>
+                            {project.name}
+                          </option>
+                        );
+                      })}
+                    </Select>
+                    <FormHelperText>Add Entities to a Project</FormHelperText>
+                  </FormControl>
+                </Flex>
+              </Flex>
+            )}
+
+          {/* Entity Step 3: Advanced mapping */}
+          {_.isEqual(importType, "entities") &&
+            _.isEqual(entityInterfacePage, "mapping") && (
+              <Flex
+                w={"100%"}
+                direction={"column"}
+                gap={"2"}
+                p={"2"}
+                border={"1px"}
+                borderColor={"gray.300"}
+                rounded={"md"}
+              >
+                {_.isNull(objectData) ? (
+                  <Text fontSize={"sm"}>
+                    Columns can be assigned to Values within Attributes. When
+                    adding Values to an Attribute, select the column containing
+                    the data for each Value. Use an existing Template Attribute
+                    from the drop-down or create a new Attribute.
+                  </Text>
+                ) : (
+                  <Text fontSize={"sm"}>
+                    Existing attributes defined in JSON will be preserved. Use
+                    an existing Template Attribute from the drop-down or create
+                    a new Attribute to be added to all Entities.
+                  </Text>
+                )}
+
+                <Flex
+                  direction={"row"}
+                  gap={"2"}
+                  align={"center"}
+                  justify={"space-between"}
+                  wrap={["wrap", "nowrap"]}
+                >
+                  {/* Drop-down to select a Template */}
+                  <FormControl maxW={"sm"}>
+                    <Tooltip
+                      label={
+                        templates.length > 0
+                          ? "Select an existing Template"
+                          : "No Templates exist yet"
+                      }
+                      hasArrow
+                    >
+                      <Select
+                        size={"sm"}
+                        placeholder={"Select Template Attribute"}
+                        isDisabled={templates.length === 0}
+                        onChange={(event) => {
+                          if (!_.isEqual(event.target.value.toString(), "")) {
+                            for (const template of templates) {
+                              if (
+                                _.isEqual(
+                                  event.target.value.toString(),
+                                  template._id,
+                                )
+                              ) {
+                                setAttributesField([
+                                  ...attributesField,
+                                  {
+                                    _id: `a-${nanoid(6)}`,
+                                    name: template.name,
+                                    timestamp: template.timestamp,
+                                    owner: template.owner,
+                                    archived: false,
+                                    description: template.description,
+                                    values: template.values,
+                                  },
+                                ]);
+                                break;
+                              }
                             }
                           }
-                        }
-                      }}
-                    >
-                      {isLoaded &&
-                        attributes.map((attribute) => {
-                          return (
-                            <option key={attribute._id} value={attribute._id}>
-                              {attribute.name}
-                            </option>
-                          );
-                        })}
-                      ;
-                    </Select>
-                  </Tooltip>
-                </FormControl>
+                        }}
+                      >
+                        {isLoaded &&
+                          templates.map((template) => {
+                            return (
+                              <option key={template._id} value={template._id}>
+                                {template.name}
+                              </option>
+                            );
+                          })}
+                        ;
+                      </Select>
+                    </Tooltip>
+                  </FormControl>
 
-                <Button
-                  size={"sm"}
-                  rightIcon={<Icon name={"add"} />}
-                  colorScheme={"green"}
-                  onClick={() => {
-                    // Create an 'empty' Attribute and add the data structure to 'selectedAttributes'
-                    setAttributesField([
-                      ...attributesField,
-                      {
-                        _id: `a-${nanoid(6)}`,
-                        name: "",
-                        timestamp: dayjs(Date.now()).toISOString(),
-                        owner: token.orcid,
-                        archived: false,
-                        description: "",
-                        values: [],
-                      },
-                    ]);
-                  }}
-                >
-                  Create
-                </Button>
+                  <Button
+                    size={"sm"}
+                    rightIcon={<Icon name={"add"} />}
+                    colorScheme={"green"}
+                    onClick={() => {
+                      // Create an 'empty' Attribute and add the data structure to 'selectedAttributes'
+                      setAttributesField([
+                        ...attributesField,
+                        {
+                          _id: `a-${nanoid(6)}`,
+                          name: "",
+                          timestamp: dayjs(Date.now()).toISOString(),
+                          owner: token.orcid,
+                          archived: false,
+                          description: "",
+                          values: [],
+                        },
+                      ]);
+                    }}
+                  >
+                    Create
+                  </Button>
+                </Flex>
+
+                {_.isNull(objectData)
+                  ? // If importing from CSV, use column-mapping
+                    attributesField.map((attribute) => {
+                      return (
+                        <Attribute
+                          _id={attribute._id}
+                          key={attribute._id}
+                          name={attribute.name}
+                          owner={attribute.owner}
+                          archived={attribute.archived}
+                          description={attribute.description}
+                          values={attribute.values}
+                          restrictDataValues={true}
+                          permittedDataValues={columns}
+                          onRemove={onRemoveAttribute}
+                          onUpdate={onUpdateAttribute}
+                        />
+                      );
+                    })
+                  : // If importing from JSON, allow new Attributes
+                    attributesField.map((attribute) => {
+                      return (
+                        <Attribute
+                          _id={attribute._id}
+                          key={attribute._id}
+                          name={attribute.name}
+                          owner={attribute.owner}
+                          archived={attribute.archived}
+                          description={attribute.description}
+                          values={attribute.values}
+                          restrictDataValues={true}
+                          onRemove={onRemoveAttribute}
+                          onUpdate={onUpdateAttribute}
+                        />
+                      );
+                    })}
               </Flex>
+            )}
 
-              {_.isNull(objectData)
-                ? // If importing from CSV, use column-mapping
-                  attributesField.map((attribute) => {
-                    return (
-                      <Attribute
-                        _id={attribute._id}
-                        key={attribute._id}
-                        name={attribute.name}
-                        owner={attribute.owner}
-                        archived={attribute.archived}
-                        description={attribute.description}
-                        values={attribute.values}
-                        restrictDataValues={true}
-                        permittedDataValues={columns}
-                        onRemove={onRemoveAttribute}
-                        onUpdate={onUpdateAttribute}
-                      />
-                    );
-                  })
-                : // If importing from JSON, allow new Attributes
-                  attributesField.map((attribute) => {
-                    return (
-                      <Attribute
-                        _id={attribute._id}
-                        key={attribute._id}
-                        name={attribute.name}
-                        owner={attribute.owner}
-                        archived={attribute.archived}
-                        description={attribute.description}
-                        values={attribute.values}
-                        restrictDataValues={true}
-                        onRemove={onRemoveAttribute}
-                        onUpdate={onUpdateAttribute}
-                      />
-                    );
-                  })}
-            </Flex>
-          )}
+          {/* Entity Step 4: Review */}
+          {_.isEqual(importType, "entities") &&
+            _.isEqual(entityInterfacePage, "review") && (
+              <Flex
+                w={"100%"}
+                direction={"column"}
+                gap={"2"}
+                p={"2"}
+                border={"1px"}
+                borderColor={"gray.300"}
+                rounded={"md"}
+              >
+                <DataTable
+                  columns={reviewTableColumns}
+                  data={reviewEntities}
+                  visibleColumns={{}}
+                  selectedRows={{}}
+                  showPagination
+                  showItemCount
+                />
+              </Flex>
+            )}
 
-          {/* Step 4: Review */}
-          {_.isEqual(interfacePage, "review") && (
-            <Flex
-              w={"100%"}
-              direction={"column"}
-              gap={"2"}
-              p={"2"}
-              border={"1px"}
-              borderColor={"gray.300"}
-              rounded={"md"}
-            >
-              <DataTable
-                columns={reviewTableColumns}
-                data={reviewEntities}
-                visibleColumns={{}}
-                selectedRows={{}}
-                showPagination
-                showItemCount
-              />
-            </Flex>
-          )}
+          {/* Template Step 1: Upload */}
+          {_.isEqual(importType, "template") &&
+            _.isEqual(templateInterfacePage, "upload") && (
+              <Flex
+                w={"100%"}
+                direction={"column"}
+                align={"center"}
+                justify={"center"}
+              >
+                <FormControl>
+                  <Flex
+                    direction={"column"}
+                    minH={"50vh"}
+                    w={"100%"}
+                    align={"center"}
+                    justify={"center"}
+                    border={"2px"}
+                    borderStyle={fileName === "" ? "dashed" : "solid"}
+                    borderColor={"gray.300"}
+                    rounded={"md"}
+                    background={fileName === "" ? "gray.50" : "white"}
+                  >
+                    {_.isEqual(file, {}) ? (
+                      <Flex
+                        direction={"column"}
+                        w={"100%"}
+                        justify={"center"}
+                        align={"center"}
+                      >
+                        <Text fontSize={"sm"} fontWeight={"semibold"}>
+                          Drag file here
+                        </Text>
+                        <Text fontSize={"sm"}>or click to upload</Text>
+                      </Flex>
+                    ) : (
+                      <Flex
+                        direction={"column"}
+                        w={"100%"}
+                        justify={"center"}
+                        align={"center"}
+                      >
+                        <Text fontSize={"sm"} fontWeight={"semibold"}>
+                          {file.name}
+                        </Text>
+                      </Flex>
+                    )}
+                  </Flex>
+                  <Input
+                    type={"file"}
+                    h={"100%"}
+                    w={"100%"}
+                    position={"absolute"}
+                    rounded={"md"}
+                    top={"0"}
+                    left={"0"}
+                    opacity={"0"}
+                    aria-hidden={"true"}
+                    onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                      if (event.target.files && event.target.files.length > 0) {
+                        // Only accept defined file types
+                        if (
+                          _.isEqual(
+                            "application/json",
+                            event.target.files[0].type,
+                          )
+                        ) {
+                          setFileName(event.target.files[0].name);
+                          setFileType(event.target.files[0].type);
+                          setFile(event.target.files[0]);
+                        } else {
+                          toast({
+                            title: "Warning",
+                            status: "warning",
+                            description: "Please upload a JSON file",
+                            duration: 2000,
+                            position: "bottom-right",
+                            isClosable: true,
+                          });
+                        }
+                      }
+                    }}
+                  />
+                </FormControl>
+              </Flex>
+            )}
+
+          {/* Template Step 2: Review */}
+          {_.isEqual(importType, "template") &&
+            _.isEqual(templateInterfacePage, "review") && (
+              <Flex
+                w={"100%"}
+                p={"2"}
+                direction={"column"}
+                align={"center"}
+                justify={"center"}
+                border={"1px"}
+                borderColor={"gray.300"}
+                rounded={"md"}
+              >
+                <Text fontSize={"sm"} fontWeight={"semibold"}>
+                  Review Template
+                </Text>
+              </Flex>
+            )}
         </ModalBody>
 
         <ModalFooter p={"2"}>
@@ -1140,10 +1421,16 @@ const ImportModal = (props: ImportModalProps) => {
               id={"importContinueButton"}
               size={"sm"}
               colorScheme={
-                _.isEqual(interfacePage, "review") ? "green" : "blue"
+                _.isEqual(templateInterfacePage, "review") ||
+                _.isEqual(entityInterfacePage, "review")
+                  ? "green"
+                  : "blue"
               }
               rightIcon={
-                _.includes(["upload", "details", "mapping"], interfacePage) ? (
+                _.includes(
+                  ["upload", "details", "mapping"],
+                  entityInterfacePage,
+                ) ? (
                   <Icon name={"c_right"} />
                 ) : (
                   <Icon name={"check"} />
@@ -1155,10 +1442,27 @@ const ImportModal = (props: ImportModalProps) => {
               isLoading={continueLoading}
               loadingText={"Processing"}
             >
-              {_.isEqual(interfacePage, "upload") && "Continue"}
-              {_.isEqual(interfacePage, "details") && "Continue"}
-              {_.isEqual(interfacePage, "mapping") && "Continue"}
-              {_.isEqual(interfacePage, "review") && "Finish"}
+              {/* Entities import type */}
+              {_.isEqual(importType, "entities") &&
+                _.isEqual(entityInterfacePage, "upload") &&
+                "Continue"}
+              {_.isEqual(importType, "entities") &&
+                _.isEqual(entityInterfacePage, "details") &&
+                "Continue"}
+              {_.isEqual(importType, "entities") &&
+                _.isEqual(entityInterfacePage, "mapping") &&
+                "Continue"}
+              {_.isEqual(importType, "entities") &&
+                _.isEqual(entityInterfacePage, "review") &&
+                "Finish"}
+
+              {/* Template import type */}
+              {_.isEqual(importType, "template") &&
+                _.isEqual(entityInterfacePage, "upload") &&
+                "Continue"}
+              {_.isEqual(importType, "template") &&
+                _.isEqual(entityInterfacePage, "review") &&
+                "Finish"}
             </Button>
           </Flex>
         </ModalFooter>

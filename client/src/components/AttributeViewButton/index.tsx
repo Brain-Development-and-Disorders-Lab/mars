@@ -79,7 +79,7 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
                 border={"2px"}
                 rounded={"md"}
               >
-                <Icon name={"attribute"} size={"md"} />
+                <Icon name={"template"} size={"md"} />
                 <Heading size={"sm"}>{props.attribute.name}</Heading>
               </Flex>
             </Flex>

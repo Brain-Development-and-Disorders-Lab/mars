@@ -123,7 +123,7 @@ const Navigation = () => {
               w={"100%"}
               justifyContent={"left"}
               bg={
-                _.includes(location.pathname, "/search") ? "#ffffff" : "#f2f2f2"
+                _.includes(location.pathname, "/create") ? "#ffffff" : "#f2f2f2"
               }
               leftIcon={<Icon name={"add"} />}
               onClick={() => navigate("/create")}
@@ -178,17 +178,17 @@ const Navigation = () => {
 
             <Button
               id={"navTemplatesButton"}
-              leftIcon={<Icon name={"attribute"} />}
+              leftIcon={<Icon name={"template"} />}
               size={"sm"}
               w={"100%"}
               justifyContent={"left"}
               bg={
-                _.includes(location.pathname, "/attribute") &&
+                _.includes(location.pathname, "/template") &&
                 !_.includes(location.pathname, "/create")
                   ? "#ffffff"
                   : "#f2f2f2"
               }
-              onClick={() => navigate("/attributes")}
+              onClick={() => navigate("/templates")}
               isDisabled={workspace === "" || _.isUndefined(workspace)}
             >
               Templates
@@ -275,10 +275,10 @@ const Navigation = () => {
                 Entities
               </MenuItem>
               <MenuItem
-                icon={<Icon name={"attribute"} />}
-                onClick={() => navigate("/attributes")}
+                icon={<Icon name={"template"} />}
+                onClick={() => navigate("/templates")}
               >
-                Attributes
+                Templates
               </MenuItem>
             </MenuGroup>
             <MenuGroup title={"Tools"}>

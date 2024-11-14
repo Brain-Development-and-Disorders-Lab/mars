@@ -21,9 +21,6 @@ import Icon from "@components/Icon";
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
 
-// Utility functions and libraries
-import _ from "lodash";
-
 const Create = () => {
   const navigate = useNavigate();
 
@@ -178,7 +175,7 @@ const Create = () => {
         >
           <CardHeader>
             <Flex gap={"4"} w={"100%"} justify={"center"} align={"center"}>
-              <Icon name={"attribute"} size={"md"} />
+              <Icon name={"template"} size={"md"} />
               <Heading size={"md"}>Template</Heading>
             </Flex>
           </CardHeader>
@@ -219,7 +216,7 @@ const Create = () => {
                 size={"sm"}
                 colorScheme={"green"}
                 rightIcon={<Icon name={"add"} />}
-                onClick={() => navigate("/create/attribute")}
+                onClick={() => navigate("/create/template")}
               >
                 Create
               </Button>
