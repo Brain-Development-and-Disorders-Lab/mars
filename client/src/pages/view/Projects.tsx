@@ -137,7 +137,16 @@ const Projects = () => {
       header: "Owner",
     }),
     columnHelper.accessor("description", {
-      cell: (info) => info.getValue(),
+      cell: (info) => {
+        if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
+          return <Tag colorScheme={"orange"}>Empty</Tag>;
+        }
+        return (
+          <Text fontSize={"sm"}>
+            {_.truncate(info.getValue(), { length: 20 })}
+          </Text>
+        );
+      },
       header: "Description",
       enableHiding: true,
     }),

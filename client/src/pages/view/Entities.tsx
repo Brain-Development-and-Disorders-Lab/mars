@@ -137,11 +137,9 @@ const Entities = () => {
           return <Tag colorScheme={"orange"}>Empty</Tag>;
         }
         return (
-          <Tooltip label={info.getValue()} hasArrow>
-            <Text fontSize={"sm"}>
-              {_.truncate(info.getValue(), { length: 20 })}
-            </Text>
-          </Tooltip>
+          <Text fontSize={"sm"}>
+            {_.truncate(info.getValue(), { length: 20 })}
+          </Text>
         );
       },
       header: "Description",
