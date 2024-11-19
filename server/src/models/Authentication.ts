@@ -69,36 +69,20 @@ export class Authentication {
 
     // Check if the User exists, and create a new User if not
     const user = await Users.getOne(authenticationPayload.orcid);
-    if (
-      _.isNull(user) &&
-      !_.isEqual(authenticationPayload.orcid, DEMO_USER_ORCID)
-    ) {
-      // Preview use only, User must exist prior to first login
-      return {
-        success: false,
-        message: "User does not have access",
-        data: {
-          name: authenticationPayload.name,
-          orcid: authenticationPayload.orcid,
-          token: "",
-        },
-      };
-    } else if (_.isNull(user)) {
-      // If the user is the demo user, create a new User
+    if (_.isNull(user)) {
       await Users.create({
         _id: authenticationPayload.orcid,
-        firstName: "Test",
-        lastName: "User",
-        email: "demo@metadatify.com",
-        affiliation: "Metadatify",
+        firstName: "",
+        lastName: "",
+        email: "",
+        affiliation: "",
         lastLogin: dayjs(Date.now()).toISOString(),
         token: authenticationPayload.token,
         workspaces: [],
         api_keys: [],
       });
-    }
-
-    if (!_.isNull(user)) {
+    } else {
+      // If the User does exist, update the `lastLogin` timestamp
       user.lastLogin = dayjs(Date.now()).toISOString();
       await Users.update(user);
     }
