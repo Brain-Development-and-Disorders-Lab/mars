@@ -45,13 +45,14 @@ const useParameters = () => {
 
 const Login = () => {
   const toast = useToast();
-  const { login } = useAuthentication();
+
+  const { token, login } = useAuthentication();
   const { activateWorkspace } = useWorkspace();
 
   const parameters = useParameters();
   const navigate = useNavigate();
 
-  // Login activity state
+  // Login state
   const [isLoading, setIsLoading] = useState(false);
 
   // Extract query parameters
@@ -62,9 +63,15 @@ const Login = () => {
     const result = await login(code);
 
     if (result.success) {
-      await activateWorkspace("");
-      navigate("/");
+      // If successful login, check if is the user is setup
       setIsLoading(false);
+
+      if (token.setup === true) {
+        await activateWorkspace("");
+        navigate("/");
+      } else {
+        navigate("/setup");
+      }
     } else {
       setIsLoading(false);
       if (
@@ -106,13 +113,6 @@ const Login = () => {
     }
   };
 
-  // On the page load, check if access code has been included in the URL
-  useEffect(() => {
-    if (accessCode) {
-      runLogin(accessCode);
-    }
-  }, []);
-
   /**
    * Wrapper function to handle login flow
    */
@@ -125,6 +125,24 @@ const Login = () => {
       window.location.href = requestURI;
     }
   };
+
+  const checkLoginState = async () => {
+    if (accessCode && token.token === "") {
+      // Not yet authenticated
+      runLogin(accessCode);
+    } else if (token.token !== "" && token.setup === false) {
+      // Authenticated, but not setup
+      navigate("/setup");
+    } else if (token.token !== "" && token.setup === true) {
+      await activateWorkspace("");
+      navigate("/");
+    }
+  };
+
+  // On the page load, check if access code has been included in the URL
+  useEffect(() => {
+    checkLoginState();
+  }, []);
 
   return (
     <Content>

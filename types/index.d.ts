@@ -477,9 +477,9 @@ export type ResponseData<D> = IResponseMessage & {
 
 // Authentication types
 export type IAuth = {
-  name: string; // User name
   orcid: string; // ORCiD value
   token: string; // ORCiD token
+  setup: boolean; // Flag if application setup is complete
 };
 
 export type Token = IAuth & {

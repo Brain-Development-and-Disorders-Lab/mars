@@ -43,6 +43,7 @@ import Search from "@pages/Search";
 import Dashboard from "@pages/Dashboard";
 import Invalid from "@pages/Invalid";
 import Login from "@pages/Login";
+import Setup from "@pages/Setup";
 
 // Providers
 import { WorkspaceProvider } from "./hooks/useWorkspace";
@@ -113,6 +114,7 @@ const App = (): ReactElement => {
               </Route>
 
               <Route path={"/login"} element={<Login />} />
+              <Route path={"/setup"} element={<Setup />} />
             </Routes>
           </WorkspaceProvider>
         </AuthenticationProvider>
