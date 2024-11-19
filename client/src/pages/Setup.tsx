@@ -29,8 +29,8 @@ const Setup = () => {
 
   const navigate = useNavigate();
 
-  // Login state
-  const [isLoading, setIsLoading] = useState(false);
+  // Loading state
+  const [isLoading, setIsLoading] = useState(true);
 
   // User information state
   const [userFirstName, setUserFirstName] = useState("");
@@ -66,11 +66,15 @@ const Setup = () => {
     }
   };
 
+  /**
+   * Utility function to examine the setup state, as a composition of state components
+   */
   const checkSetupState = async () => {
     if (token.setup === true) {
       await activateWorkspace("");
       navigate("/");
     }
+    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -78,7 +82,7 @@ const Setup = () => {
   }, []);
 
   return (
-    <Content>
+    <Content isLoaded={!isLoading}>
       <Flex h={"10vh"} p={"4"}>
         <Flex gap={"2"} align={"center"} p={"4"}>
           <Image src={"/Favicon.png"} w={"25px"} h={"25px"} />

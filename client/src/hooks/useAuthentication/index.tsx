@@ -109,6 +109,10 @@ export const AuthenticationProvider = (props: {
     }
   };
 
+  /**
+   * Function to log out the current user, resets the token to default values and navigates
+   * to the `/login` path
+   */
   const logout = () => {
     // Invalidate the token
     setToken({
@@ -125,8 +129,8 @@ export const AuthenticationProvider = (props: {
   };
 
   /**
-   * Utility function to perform a Login operation
-   * @param code String returned by ORCID API for login
+   * Utility function that logs in the current user and updates the token with received values
+   * @param code returned by ORCID API for login
    */
   const login = async (code: string): Promise<IResponseMessage> => {
     // Query to retrieve Entity data and associated data for editing
@@ -177,6 +181,11 @@ export const AuthenticationProvider = (props: {
     };
   };
 
+  /**
+   * Setup operation to create a new `UserModel` instance and update the token data
+   * @param user Data provided by the user to create a `UserModel` instance
+   * @return {Promise<IResponseMessage>}
+   */
   const setup = async (user: Partial<UserModel>): Promise<IResponseMessage> => {
     const result = await updateUser({
       variables: {
@@ -223,6 +232,7 @@ export const AuthenticationProvider = (props: {
     [token],
   );
 
+  // Return the `React.Context` component
   return (
     <AuthenticationContext.Provider value={value}>
       {props.children}

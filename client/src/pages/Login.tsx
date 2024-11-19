@@ -58,22 +58,31 @@ const Login = () => {
   // Extract query parameters
   const accessCode = parameters.get("code");
 
+  /**
+   * Run the login operation, receiving a login code from the ORCiD API, then attempting to execute
+   * the login operation on the backend
+   * @param code Code provided as parameter of redirect URI
+   */
   const runLogin = async (code: string) => {
     setIsLoading(true);
     const result = await login(code);
 
     if (result.success) {
-      // If successful login, check if is the user is setup
+      // If successful login, check if setup is completed
       setIsLoading(false);
 
       if (token.setup === true) {
+        // Navigate to the dashboard after activating a Workspace
         await activateWorkspace("");
         navigate("/");
       } else {
+        // Navigate to the Setup interface
         navigate("/setup");
       }
     } else {
       setIsLoading(false);
+
+      // Provide error information
       if (
         result.message.includes("Unable") &&
         !toast.isActive("login-graphql-error-toast")
@@ -126,20 +135,25 @@ const Login = () => {
     }
   };
 
+  /**
+   * Utility function to examine the login state, as a composition of other states,
+   * and navigate the user accordingly
+   */
   const checkLoginState = async () => {
     if (accessCode && token.token === "") {
-      // Not yet authenticated
+      // Not authenticated, no interest in setup yet
       runLogin(accessCode);
     } else if (token.token !== "" && token.setup === false) {
-      // Authenticated, but not setup
+      // Authenticated but not setup
       navigate("/setup");
     } else if (token.token !== "" && token.setup === true) {
+      // Authenticated and setup
       await activateWorkspace("");
       navigate("/");
     }
   };
 
-  // On the page load, check if access code has been included in the URL
+  // On the page load, evaluate the login state components
   useEffect(() => {
     checkLoginState();
   }, []);
