@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useMemo, useState } from "react";
+import React, { createContext, useContext, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 // Token management
@@ -8,7 +8,7 @@ import { useToken } from "@hooks/useToken";
 import { IAuth, IResponseMessage, ResponseData, UserModel } from "@types";
 
 // GraphQL
-import { gql, useLazyQuery } from "@apollo/client";
+import { gql, useLazyQuery, useMutation } from "@apollo/client";
 
 // Utility functions and libraries
 import _ from "lodash";
@@ -18,10 +18,9 @@ import { usePostHog } from "posthog-js/react";
 
 type AuthenticationContextValue = {
   token: IAuth;
-  setToken: (token: IAuth) => void;
-  isAuthenticated: boolean;
   login: (code: string) => Promise<IResponseMessage>;
   logout: () => void;
+  setup: (user: Partial<UserModel>) => Promise<IResponseMessage>;
 };
 const AuthenticationContext = createContext({} as AuthenticationContextValue);
 
@@ -31,22 +30,11 @@ export const AuthenticationProvider = (props: {
   const posthog = usePostHog();
   const navigate = useNavigate();
 
-  // Setup token authentication
+  // Setup AuthenticationContext state components
   const [token, setToken] = useToken();
-
-  // Authentication state
-  const [isAuthenticated, setIsAuthenticated] = useState(token.token !== "");
 
   // Access parameters to remove code after authentication
   const [searchParams, setSearchParams] = useSearchParams();
-
-  // Remove the "code" search parameter upon login
-  const removeCode = () => {
-    if (searchParams.has("code")) {
-      searchParams.delete("code");
-      setSearchParams(searchParams);
-    }
-  };
 
   // Queries
   const LOGIN_DATA = gql`
@@ -78,19 +66,59 @@ export const AuthenticationProvider = (props: {
       }
     }
   `;
-  const [getUser, { error: userError }] = useLazyQuery<{ user: UserModel }>(
+  const [getUser, { error: getUserError }] = useLazyQuery<{ user: UserModel }>(
     GET_USER,
   );
 
-  const logout = () => {
-    // Reset the authentication state
-    setIsAuthenticated(false);
+  // Query to update User
+  const UPDATE_USER = gql`
+    mutation UpdateUser($user: UserInput) {
+      updateUser(user: $user) {
+        success
+        message
+      }
+    }
+  `;
+  const [updateUser, { error: updateUserError }] = useMutation<{
+    updateUser: IResponseMessage;
+  }>(UPDATE_USER);
 
+  // Check the "setup" state of a User
+  const isValidUser = (user: Partial<UserModel>): boolean => {
+    console.info("Checking validity:", user);
+
+    // Return `false` if the following required fields are undefined or in the default state
+    if (_.isUndefined(user) || _.isNull(user)) return false;
+    if (_.isUndefined(user.firstName) || _.isEqual(user.firstName, ""))
+      return false;
+    if (_.isUndefined(user.lastName) || _.isEqual(user.lastName, ""))
+      return false;
+    if (_.isUndefined(user.email) || _.isEqual(user.email, "")) return false;
+    if (_.isUndefined(user.affiliation) || _.isEqual(user.affiliation, ""))
+      return false;
+
+    // Return `true` if all information is complete
+    return true;
+  };
+
+  // Remove the "code" search parameter upon login
+  const removeCode = () => {
+    if (searchParams.has("code")) {
+      searchParams.delete("code");
+      setSearchParams(searchParams);
+    }
+  };
+
+  /**
+   * Function to log out the current user, resets the token to default values and navigates
+   * to the `/login` path
+   */
+  const logout = () => {
     // Invalidate the token
     setToken({
-      name: token.name,
       orcid: token.orcid,
       token: "",
+      setup: false,
     });
 
     // Reset Posthog
@@ -101,8 +129,8 @@ export const AuthenticationProvider = (props: {
   };
 
   /**
-   * Utility function to perform a Login operation
-   * @param code String returned by ORCID API for login
+   * Utility function that logs in the current user and updates the token with received values
+   * @param code returned by ORCID API for login
    */
   const login = async (code: string): Promise<IResponseMessage> => {
     // Query to retrieve Entity data and associated data for editing
@@ -110,7 +138,6 @@ export const AuthenticationProvider = (props: {
     const loginData = loginResponse.data?.login;
 
     if (_.isUndefined(loginData)) {
-      setIsAuthenticated(false);
       return {
         success: false,
         message: "Unable to log in, check network connection",
@@ -122,34 +149,30 @@ export const AuthenticationProvider = (props: {
 
     // Get the User
     const userResponse = await getUser({
-      variables: {
-        _id: loginData.data.orcid,
-      },
+      variables: { _id: loginData.data.orcid },
     });
     const userData = userResponse.data?.user;
-    if (!_.isUndefined(userError)) {
-      setIsAuthenticated(false);
+
+    if (!_.isUndefined(getUserError) || _.isUndefined(userData)) {
       return {
         success: false,
         message: "Unable to retrieve User information",
       };
-    } else if (_.isUndefined(userData)) {
-      setIsAuthenticated(false);
-      return {
-        success: false,
-        message: "User does not have access",
-      };
     }
 
     // Update the User and authentication state
-    setIsAuthenticated(true);
+    setToken({
+      orcid: loginData.data.orcid,
+      token: loginData.data.token,
+      setup: isValidUser(userData),
+    });
 
-    // Perform login and data retrieval via server, check if user permitted access
+    // Remove the login code from the current URL
     removeCode();
 
     // Update session identifier for Posthog
     posthog.identify(loginData.data.orcid, {
-      name: loginData.data.name,
+      name: `${userData.firstName} ${userData.lastName}`,
     });
 
     return {
@@ -158,17 +181,58 @@ export const AuthenticationProvider = (props: {
     };
   };
 
+  /**
+   * Setup operation to create a new `UserModel` instance and update the token data
+   * @param user Data provided by the user to create a `UserModel` instance
+   * @return {Promise<IResponseMessage>}
+   */
+  const setup = async (user: Partial<UserModel>): Promise<IResponseMessage> => {
+    const result = await updateUser({
+      variables: {
+        user: {
+          _id: token.orcid,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          affiliation: user.affiliation,
+        },
+      },
+    });
+
+    if (
+      updateUserError ||
+      _.isUndefined(result) ||
+      (result.data && result.data.updateUser.success === false)
+    ) {
+      return {
+        success: false,
+        message: "Could not run User setup",
+      };
+    }
+
+    setToken({
+      orcid: token.orcid,
+      token: token.token,
+      setup: isValidUser(user),
+    });
+
+    return {
+      success: true,
+      message: "User setup successful",
+    };
+  };
+
   const value = useMemo(
     () => ({
-      isAuthenticated,
       token,
-      setToken,
       login,
       logout,
+      setup,
     }),
-    [token, isAuthenticated],
+    [token],
   );
 
+  // Return the `React.Context` component
   return (
     <AuthenticationContext.Provider value={value}>
       {props.children}

@@ -13,6 +13,7 @@ const Loading = () => {
       gap={"3"}
       p={"8"}
       m={"8"}
+      minH={"90vh"}
       h={"100%"}
     >
       <Spinner size="xl" />

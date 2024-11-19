@@ -45,28 +45,44 @@ const useParameters = () => {
 
 const Login = () => {
   const toast = useToast();
-  const { login } = useAuthentication();
+
+  const { token, login } = useAuthentication();
   const { activateWorkspace } = useWorkspace();
 
   const parameters = useParameters();
   const navigate = useNavigate();
 
-  // Login activity state
+  // Login state
   const [isLoading, setIsLoading] = useState(false);
 
   // Extract query parameters
   const accessCode = parameters.get("code");
 
+  /**
+   * Run the login operation, receiving a login code from the ORCiD API, then attempting to execute
+   * the login operation on the backend
+   * @param code Code provided as parameter of redirect URI
+   */
   const runLogin = async (code: string) => {
     setIsLoading(true);
     const result = await login(code);
 
     if (result.success) {
-      await activateWorkspace("");
-      navigate("/");
+      // If successful login, check if setup is completed
       setIsLoading(false);
+
+      if (token.setup === true) {
+        // Navigate to the dashboard after activating a Workspace
+        await activateWorkspace("");
+        navigate("/");
+      } else {
+        // Navigate to the Setup interface
+        navigate("/setup");
+      }
     } else {
       setIsLoading(false);
+
+      // Provide error information
       if (
         result.message.includes("Unable") &&
         !toast.isActive("login-graphql-error-toast")
@@ -106,13 +122,6 @@ const Login = () => {
     }
   };
 
-  // On the page load, check if access code has been included in the URL
-  useEffect(() => {
-    if (accessCode) {
-      runLogin(accessCode);
-    }
-  }, []);
-
   /**
    * Wrapper function to handle login flow
    */
@@ -125,6 +134,29 @@ const Login = () => {
       window.location.href = requestURI;
     }
   };
+
+  /**
+   * Utility function to examine the login state, as a composition of other states,
+   * and navigate the user accordingly
+   */
+  const checkLoginState = async () => {
+    if (accessCode && token.token === "") {
+      // Not authenticated, no interest in setup yet
+      runLogin(accessCode);
+    } else if (token.token !== "" && token.setup === false) {
+      // Authenticated but not setup
+      navigate("/setup");
+    } else if (token.token !== "" && token.setup === true) {
+      // Authenticated and setup
+      await activateWorkspace("");
+      navigate("/");
+    }
+  };
+
+  // On the page load, evaluate the login state components
+  useEffect(() => {
+    checkLoginState();
+  }, []);
 
   return (
     <Content>
