@@ -46,11 +46,13 @@ const Content: FC<ContentProps> = ({ children, isError, isLoaded }) => {
 // Page container
 const Page: FC = () => {
   // Observe the authentication state
-  const { isAuthenticated } = useAuthentication();
+  const { token } = useAuthentication();
 
-  if (!isAuthenticated) {
+  if (token.token === "") {
     // If not authenticated, return the user to the Login page
     return <Navigate to={"/login"} />;
+  } else if (token.setup === false) {
+    return <Navigate to={"/setup"} />;
   } else {
     // Display content
     return (

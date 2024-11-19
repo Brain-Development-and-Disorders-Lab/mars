@@ -172,7 +172,7 @@ const User = () => {
   const breakpoint = useBreakpoint();
 
   // Authentication
-  const { token, setToken } = useAuthentication();
+  const { token } = useAuthentication();
 
   // Query to get a User and Workspaces
   const GET_USER = gql`
@@ -311,11 +311,6 @@ const User = () => {
     } else {
       // Update the displayed name
       setStaticName(`${userFirstName} ${userLastName}`);
-
-      // Update the token data
-      const updatedToken = _.cloneDeep(token);
-      updatedToken.name = `${userFirstName} ${userLastName}`;
-      setToken(updatedToken);
     }
 
     setEditing(false);

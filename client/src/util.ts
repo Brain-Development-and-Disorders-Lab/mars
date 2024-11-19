@@ -73,9 +73,9 @@ export const getToken = (tokenKey: string): IAuth => {
     return JSON.parse(storedToken);
   }
   return {
-    name: "",
     orcid: "",
     token: "",
+    setup: false,
   };
 };
 
