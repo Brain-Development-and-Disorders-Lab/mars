@@ -1,3 +1,6 @@
+// Import types
+import { ReadStream } from "fs";
+
 // Request types to the server
 declare enum Requests {
   POST,
@@ -494,6 +497,14 @@ export type Token = IAuth & {
 export type ISession = {
   workspace: string; // Active workspace
 };
+
+// File type
+export type IFile = Promise<{
+  filename: string;
+  mimetype: string;
+  encoding: string;
+  createReadStream: () => fs.ReadStream;
+}>[];
 
 // Context passed through the request headers, includes the ORCID (user) of the user
 export type Context = {
