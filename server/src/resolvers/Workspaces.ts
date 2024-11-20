@@ -7,6 +7,7 @@ import {
   IResponseMessage,
   WorkspaceMetrics,
   WorkspaceModel,
+  IResolverParent,
 } from "@types";
 import _ from "lodash";
 import { GraphQLError } from "graphql/index";
@@ -22,7 +23,11 @@ import { PostHogClient } from "src";
 export const WorkspacesResolvers = {
   Query: {
     // Retrieve all Workspaces
-    workspaces: async (_parent: any, _args: any, context: Context) => {
+    workspaces: async (
+      _parent: IResolverParent,
+      _args: Record<string, unknown>,
+      context: Context,
+    ) => {
       // Authenticate the provided context
       await Authentication.authenticate(context);
 
@@ -44,7 +49,7 @@ export const WorkspacesResolvers = {
 
     // Get one Workspace
     workspace: async (
-      _parent: any,
+      _parent: IResolverParent,
       args: { _id: string },
       context: Context,
     ): Promise<WorkspaceModel | null> => {
@@ -82,7 +87,7 @@ export const WorkspacesResolvers = {
 
     // Get all Entities within a single Workspace
     workspaceEntities: async (
-      _parent: any,
+      _parent: IResolverParent,
       args: { _id: string; limit: 100 },
       context: Context,
     ): Promise<EntityModel[]> => {
@@ -121,7 +126,7 @@ export const WorkspacesResolvers = {
 
     // Get all Projects within a single Workspace
     workspaceProjects: async (
-      _parent: any,
+      _parent: IResolverParent,
       args: { _id: string; limit: 100 },
       context: Context,
     ): Promise<ProjectModel[]> => {
@@ -160,7 +165,7 @@ export const WorkspacesResolvers = {
 
     // Get all Activity within a single Workspace
     workspaceActivity: async (
-      _parent: any,
+      _parent: IResolverParent,
       args: { _id: string; limit: 100 },
       context: Context,
     ): Promise<ActivityModel[]> => {
@@ -199,7 +204,7 @@ export const WorkspacesResolvers = {
 
     // Get collection of Workspace metrics
     workspaceMetrics: async (
-      _parent: any,
+      _parent: IResolverParent,
       _args: Record<string, unknown>,
       context: Context,
     ): Promise<WorkspaceMetrics> => {
@@ -224,7 +229,7 @@ export const WorkspacesResolvers = {
   Mutation: {
     // Create a new Workspace
     createWorkspace: async (
-      _parent: any,
+      _parent: IResolverParent,
       args: { workspace: IWorkspace },
       context: Context,
     ): Promise<IResponseMessage> => {
@@ -251,7 +256,7 @@ export const WorkspacesResolvers = {
 
     // Update an existing Workspace
     updateWorkspace: async (
-      _parent: any,
+      _parent: IResolverParent,
       args: { workspace: WorkspaceModel },
       context: Context,
     ): Promise<IResponseMessage> => {

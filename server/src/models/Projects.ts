@@ -380,7 +380,7 @@ export class Projects {
     }
 
     // Remove `history` field
-    delete (project as any)["history"];
+    delete (project as never)["history"];
 
     if (_.isEqual(format, "csv")) {
       let exportFields = fields;

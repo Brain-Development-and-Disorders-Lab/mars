@@ -5,6 +5,7 @@ import {
   ProjectMetrics,
   ProjectModel,
   IResponseMessage,
+  IResolverParent,
 } from "@types";
 
 // Utility functions and libraries
@@ -24,7 +25,11 @@ import { PostHogClient } from "src";
 export const ProjectsResolvers = {
   Query: {
     // Retrieve all Projects
-    projects: async (_parent: any, args: { limit: 100 }, context: Context) => {
+    projects: async (
+      _parent: IResolverParent,
+      args: { limit: 100 },
+      context: Context,
+    ) => {
       // Authenticate the provided context
       await Authentication.authenticate(context);
 
@@ -46,7 +51,11 @@ export const ProjectsResolvers = {
     },
 
     // Retrieve one Project by _id
-    project: async (_parent: any, args: { _id: string }, context: Context) => {
+    project: async (
+      _parent: IResolverParent,
+      args: { _id: string },
+      context: Context,
+    ) => {
       // Authenticate the provided context
       await Authentication.authenticate(context);
 
@@ -85,7 +94,7 @@ export const ProjectsResolvers = {
     },
 
     exportProject: async (
-      _parent: any,
+      _parent: IResolverParent,
       args: { _id: string; format: "json" | "csv"; fields?: string[] },
       context: Context,
     ) => {
@@ -126,7 +135,7 @@ export const ProjectsResolvers = {
     },
 
     exportProjectEntities: async (
-      _parent: any,
+      _parent: IResolverParent,
       args: { _id: string; format: "json" },
       context: Context,
     ) => {
@@ -168,7 +177,7 @@ export const ProjectsResolvers = {
 
     // Get collection of Project metrics
     projectMetrics: async (
-      _parent: any,
+      _parent: IResolverParent,
       _args: Record<string, unknown>,
       context: Context,
     ): Promise<ProjectMetrics> => {
@@ -203,7 +212,7 @@ export const ProjectsResolvers = {
 
   Mutation: {
     createProject: async (
-      _parent: any,
+      _parent: IResolverParent,
       args: { project: IProject },
       context: Context,
     ) => {
@@ -246,7 +255,7 @@ export const ProjectsResolvers = {
     },
 
     updateProject: async (
-      _parent: any,
+      _parent: IResolverParent,
       args: { project: ProjectModel },
       context: Context,
     ) => {
@@ -297,7 +306,7 @@ export const ProjectsResolvers = {
     },
 
     archiveProject: async (
-      _parent: any,
+      _parent: IResolverParent,
       args: { _id: string; state: boolean },
       context: Context,
     ) => {
@@ -372,7 +381,7 @@ export const ProjectsResolvers = {
     },
 
     archiveProjects: async (
-      _parent: any,
+      _parent: IResolverParent,
       args: { toArchive: string[]; state: boolean },
       context: Context,
     ): Promise<IResponseMessage> => {
@@ -425,7 +434,7 @@ export const ProjectsResolvers = {
     },
 
     deleteProject: async (
-      _parent: any,
+      _parent: IResolverParent,
       args: { _id: string },
       context: Context,
     ) => {
