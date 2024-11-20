@@ -2,6 +2,9 @@
 import {
   Context,
   EntityImportReview,
+  IColumnMapping,
+  IFile,
+  IResolverParent,
   IResponseMessage,
   ResponseData,
 } from "@types";
@@ -17,10 +20,7 @@ import { Data } from "src/models/Data";
 export const DataResolvers = {
   Query: {
     // Retrieve the URL for a file to be downloaded by client
-    downloadFile: async (
-      _parent: any,
-      args: { _id: string },
-    ): Promise<string> => {
+    downloadFile: async (args: { _id: string }): Promise<string> => {
       const response = await Data.downloadFile(args._id);
       if (_.isNull(response)) {
         throw new GraphQLError("Unable to retrieve file for download", {
@@ -36,8 +36,8 @@ export const DataResolvers = {
   Mutation: {
     // Upload a file to be attached to Entity with ID `target`
     uploadAttachment: async (
-      _parent: any,
-      args: { target: string; file: any },
+      _parent: IResolverParent,
+      args: { target: string; file: IFile },
       context: Context,
     ): Promise<IResponseMessage> => {
       // Authenticate the provided context
@@ -47,8 +47,8 @@ export const DataResolvers = {
 
     // Prepare a CSV file, returning the collection of column names (if present)
     prepareEntityCSV: async (
-      _parent: any,
-      args: { file: any },
+      _parent: IResolverParent,
+      args: { file: IFile[] },
       context: Context,
     ): Promise<string[]> => {
       // Authenticate the provided context
@@ -58,8 +58,8 @@ export const DataResolvers = {
 
     // Review a CSV file, return collection of Entity names and their updates
     reviewEntityCSV: async (
-      _parent: any,
-      args: { columnMapping: Record<string, string>; file: any },
+      _parent: IResolverParent,
+      args: { columnMapping: Record<string, string>; file: IFile[] },
       context: Context,
     ): Promise<ResponseData<EntityImportReview[]>> => {
       // Authenticate the provided context
@@ -69,8 +69,8 @@ export const DataResolvers = {
 
     // Map CSV file columns to Entity fields
     importEntityCSV: async (
-      _parent: any,
-      args: { columnMapping: Record<string, string>; file: any },
+      _parent: IResolverParent,
+      args: { columnMapping: IColumnMapping; file: IFile[] },
       context: Context,
     ): Promise<IResponseMessage> => {
       // Authenticate the provided context
@@ -80,8 +80,8 @@ export const DataResolvers = {
 
     // Review a JSON file, return collection of Entity names and their updates
     reviewEntityJSON: async (
-      _parent: any,
-      args: { file: any },
+      _parent: IResolverParent,
+      args: { file: IFile[] },
       context: Context,
     ): Promise<IResponseMessage> => {
       // Authenticate the provided context
@@ -91,8 +91,8 @@ export const DataResolvers = {
 
     // Import JSON file
     importEntityJSON: async (
-      _parent: any,
-      args: { file: any; project: string },
+      _parent: IResolverParent,
+      args: { file: IFile[]; project: string },
       context: Context,
     ): Promise<IResponseMessage> => {
       // Authenticate the provided context
@@ -102,8 +102,8 @@ export const DataResolvers = {
 
     // Import Template JSON file
     importTemplateJSON: async (
-      _parent: any,
-      args: { file: any },
+      _parent: IResolverParent,
+      args: { file: IFile[] },
       context: Context,
     ): Promise<IResponseMessage> => {
       // Authenticate the provided context

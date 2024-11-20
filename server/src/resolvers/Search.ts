@@ -2,7 +2,7 @@ import _ from "lodash";
 import { GraphQLError } from "graphql";
 
 // Custom types
-import { Context, EntityModel, ProjectModel } from "@types";
+import { Context, EntityModel, IResolverParent, ProjectModel } from "@types";
 
 // Models
 import { Search } from "src/models/Search";
@@ -12,7 +12,7 @@ import { Workspaces } from "src/models/Workspaces";
 export const SearchResolvers = {
   Query: {
     search: async (
-      _parent: any,
+      _parent: IResolverParent,
       args: {
         query: string;
         resultType: string;

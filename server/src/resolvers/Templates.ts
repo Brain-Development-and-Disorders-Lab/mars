@@ -3,6 +3,7 @@ import {
   AttributeModel,
   Context,
   IAttribute,
+  IResolverParent,
   IResponseMessage,
   TemplateMetrics,
 } from "@types";
@@ -25,7 +26,11 @@ import { PostHogClient } from "src";
 export const TemplatesResolvers = {
   Query: {
     // Retrieve all Templates
-    templates: async (_parent: any, args: { limit: 100 }, context: Context) => {
+    templates: async (
+      _parent: IResolverParent,
+      args: { limit: 100 },
+      context: Context,
+    ) => {
       // Authenticate the provided context
       await Authentication.authenticate(context);
 
@@ -49,7 +54,11 @@ export const TemplatesResolvers = {
     },
 
     // Retrieve one Template by _id
-    template: async (_parent: any, args: { _id: string }, context: Context) => {
+    template: async (
+      _parent: IResolverParent,
+      args: { _id: string },
+      context: Context,
+    ) => {
       // Authenticate the provided context
       await Authentication.authenticate(context);
 
@@ -90,7 +99,7 @@ export const TemplatesResolvers = {
 
     // Get collection of Template metrics
     templateMetrics: async (
-      _parent: any,
+      _parent: IResolverParent,
       _args: Record<string, unknown>,
       context: Context,
     ): Promise<TemplateMetrics> => {
@@ -124,7 +133,7 @@ export const TemplatesResolvers = {
 
     // Export a Template
     exportTemplate: async (
-      _parent: any,
+      _parent: IResolverParent,
       args: { _id: string },
       context: Context,
     ): Promise<string> => {
@@ -168,7 +177,7 @@ export const TemplatesResolvers = {
   Mutation: {
     // Create a new Template
     createTemplate: async (
-      _parent: any,
+      _parent: IResolverParent,
       args: { template: IAttribute },
       context: Context,
     ) => {
@@ -211,7 +220,7 @@ export const TemplatesResolvers = {
 
     // Update an existing Template
     updateTemplate: async (
-      _parent: any,
+      _parent: IResolverParent,
       args: { template: AttributeModel },
       context: Context,
     ) => {
@@ -282,7 +291,7 @@ export const TemplatesResolvers = {
 
     // Archive a Template
     archiveTemplate: async (
-      _parent: any,
+      _parent: IResolverParent,
       args: { _id: string; state: boolean },
       context: Context,
     ) => {
@@ -360,7 +369,7 @@ export const TemplatesResolvers = {
 
     // Archive multiple Templates
     archiveTemplates: async (
-      _parent: any,
+      _parent: IResolverParent,
       args: { toArchive: string[]; state: boolean },
       context: Context,
     ): Promise<IResponseMessage> => {

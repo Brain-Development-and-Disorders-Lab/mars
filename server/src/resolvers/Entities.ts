@@ -3,6 +3,7 @@ import {
   EntityMetrics,
   EntityModel,
   IEntity,
+  IResolverParent,
   IResponseMessage,
   ResponseData,
 } from "@types";
@@ -23,7 +24,7 @@ export const EntitiesResolvers = {
   Query: {
     // Retrieve all Entities
     entities: async (
-      _parent: any,
+      _parent: IResolverParent,
       args: { limit: 100; archived: boolean },
       context: Context,
     ) => {
@@ -57,7 +58,7 @@ export const EntitiesResolvers = {
 
     // Retrieve one Entity by _id
     entity: async (
-      _parent: any,
+      _parent: IResolverParent,
       args: { _id: string },
       context: Context,
     ): Promise<EntityModel> => {
@@ -100,13 +101,16 @@ export const EntitiesResolvers = {
     },
 
     // Check if Entity exists by name
-    entityNameExists: async (_parent: any, args: { name: string }) => {
+    entityNameExists: async (
+      _parent: IResolverParent,
+      args: { name: string },
+    ) => {
       return await Entities.existByName(args.name);
     },
 
     // Export one Entity by _id
     exportEntity: async (
-      _parent: any,
+      _parent: IResolverParent,
       args: { _id: string; format: "json" | "csv"; fields?: string[] },
       context: Context,
     ) => {
@@ -150,7 +154,7 @@ export const EntitiesResolvers = {
 
     // Export multiple Entities by _id
     exportEntities: async (
-      _parent: any,
+      _parent: IResolverParent,
       args: { entities: string[] },
       context: Context,
     ) => {
@@ -182,7 +186,7 @@ export const EntitiesResolvers = {
 
     // Get collection of Entity metrics
     entityMetrics: async (
-      _parent: any,
+      _parent: IResolverParent,
       _args: Record<string, unknown>,
       context: Context,
     ): Promise<EntityMetrics> => {
@@ -217,7 +221,7 @@ export const EntitiesResolvers = {
 
   Mutation: {
     setEntityDescription: async (
-      _parent: any,
+      _parent: IResolverParent,
       args: { _id: string; description: string },
       context: Context,
     ): Promise<IResponseMessage> => {
@@ -260,7 +264,7 @@ export const EntitiesResolvers = {
 
     // Create a new Entity from IEntity data structure
     createEntity: async (
-      _parent: any,
+      _parent: IResolverParent,
       args: { entity: IEntity },
       context: Context,
     ): Promise<ResponseData<string>> => {
@@ -304,7 +308,7 @@ export const EntitiesResolvers = {
 
     // Update an existing Entity from EntityModel data structure
     updateEntity: async (
-      _parent: any,
+      _parent: IResolverParent,
       args: { entity: EntityModel },
       context: Context,
     ): Promise<IResponseMessage> => {
@@ -378,7 +382,7 @@ export const EntitiesResolvers = {
 
     // Archive an Entity
     archiveEntity: async (
-      _parent: any,
+      _parent: IResolverParent,
       args: { _id: string; state: boolean },
       context: Context,
     ) => {
@@ -448,7 +452,7 @@ export const EntitiesResolvers = {
 
     // Archive multiple Entities
     archiveEntities: async (
-      _parent: any,
+      _parent: IResolverParent,
       args: { toArchive: string[]; state: boolean },
       context: Context,
     ): Promise<IResponseMessage> => {

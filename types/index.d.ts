@@ -1,3 +1,6 @@
+// Import types
+import { ReadStream } from "fs";
+
 // Request types to the server
 declare enum Requests {
   POST,
@@ -257,6 +260,10 @@ export type EntityImportReview = {
   state: "create" | "update";
 };
 
+// Column mappings for Entity imports
+export type IRow = Record<string, any>;
+export type IColumnMapping = Record<string, any>;
+
 // Attachment data
 export type AttachmentData = {
   _id: string;
@@ -494,6 +501,17 @@ export type Token = IAuth & {
 export type ISession = {
   workspace: string; // Active workspace
 };
+
+// File type
+export type IFile = Promise<{
+  filename: string;
+  mimetype: string;
+  encoding: string;
+  createReadStream: () => fs.ReadStream;
+}>;
+
+// Generic GraphQL resolver parent type (for unused parents)
+export type IResolverParent = Record<string, any>;
 
 // Context passed through the request headers, includes the ORCID (user) of the user
 export type Context = {

@@ -45,6 +45,8 @@ import {
   IGenericItem,
   EntityImportReview,
   ImportModalProps,
+  IColumnMapping,
+  EntityModel,
 } from "@types";
 
 // Routing and navigation
@@ -61,6 +63,10 @@ import { nanoid } from "nanoid";
 // Authentication context
 import { useAuthentication } from "@hooks/useAuthentication";
 
+// Variables
+const JSON_MIME_TYPE = "application/json";
+const CSV_MIME_TYPE = "text/csv";
+
 // Events
 import { usePostHog } from "posthog-js/react";
 
@@ -70,9 +76,8 @@ const ImportModal = (props: ImportModalProps) => {
 
   // File states
   const [file, setFile] = useState({} as File);
-  const [fileType, setFileType] = useState("");
+  const [fileType, setFileType] = useState(CSV_MIME_TYPE);
   const [fileName, setFileName] = useState("");
-  const [objectData, setObjectData] = useState(null); // State to store parsed JSON data
 
   // Page states
   const [isLoaded, setIsLoaded] = useState(false);
@@ -304,7 +309,7 @@ const ImportModal = (props: ImportModalProps) => {
     if (
       _.isEqual(entityInterfacePage, "details") &&
       nameField !== "" &&
-      fileType === "text/csv"
+      fileType === CSV_MIME_TYPE
     ) {
       setContinueLoading(false);
       setContinueDisabled(false);
@@ -315,7 +320,7 @@ const ImportModal = (props: ImportModalProps) => {
   useEffect(() => {
     if (
       _.isEqual(entityInterfacePage, "details") &&
-      fileType === "application/json"
+      fileType === JSON_MIME_TYPE
     ) {
       setContinueLoading(false);
       setContinueDisabled(false);
@@ -326,38 +331,61 @@ const ImportModal = (props: ImportModalProps) => {
    * Read a JSON file and update `Importer` state, raising errors if invalid
    * @param {File} file JSON file instance
    */
-  const validJSONFile = async (file: File) => {
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      if (_.isNull(event.target)) {
-        toast({
-          title: "Error",
-          status: "error",
-          description: "Invalid JSON file",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-        return;
-      }
+  const parseJSONFile = async (
+    file: File,
+  ): Promise<{ entities: EntityModel[] }> => {
+    // Attempt to parse the JSON file
+    const data = await file.text();
 
-      try {
-        // Attempt to parse the JSON file
-        const data = JSON.parse(event.target.result as string);
-        setObjectData(data); // Set your JSON data to state
-      } catch (error) {
-        toast({
-          title: "Error",
-          status: "error",
-          description: "Error while parsing JSON file",
-          duration: 4000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-      }
-    };
+    try {
+      const parsed = JSON.parse(data as string);
+      return parsed;
+    } catch {
+      toast({
+        title: "JSON Import Error",
+        status: "error",
+        description: "Could not parse file contents",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+      return {} as { entities: EntityModel[] };
+    }
+  };
 
-    reader.readAsText(file);
+  /**
+   * Read a parsed JSON file and determine if it has valid file contents or not
+   * @param parsed The parsed JSON file contents, received from `parseJSONFile`
+   */
+  const validJSONFile = (parsed: { entities: EntityModel[] }): boolean => {
+    // Check that "entities" field exists
+    if (_.isUndefined(parsed["entities"])) {
+      toast({
+        title: "JSON Import Error",
+        status: "error",
+        description: 'File does not contain top-level "entities" key',
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+      return false;
+    }
+
+    // Check that it contains `EntityModel` instances
+    if (parsed.entities.length === 0) {
+      toast({
+        title: "JSON Import Error",
+        status: "error",
+        description: "File does not contain any Entity data",
+        duration: 4000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+      return false;
+    }
+
+    // File contents are valid
+    return true;
   };
 
   /**
@@ -365,8 +393,9 @@ const ImportModal = (props: ImportModalProps) => {
    * `prepareEntityCSV` query to defer the data extraction to the server.
    * For JSON files, trigger the `validJSONFile` method to handle the file
    * locally instead.
+   * @return {Promise<boolean>}
    */
-  const setupImport = async () => {
+  const setupImport = async (): Promise<boolean> => {
     // Update state of continue button
     setContinueLoading(true);
     setContinueDisabled(true);
@@ -377,10 +406,13 @@ const ImportModal = (props: ImportModalProps) => {
     formData.append("file", file);
     formData.append("type", fileType);
 
-    if (_.isEqual(fileType, "application/json")) {
+    if (fileType === JSON_MIME_TYPE) {
       // Handle JSON data separately
-      await validJSONFile(file);
-    } else if (_.isEqual(fileType, "text/csv")) {
+      const data = await parseJSONFile(file);
+
+      // Validate the JSON data
+      return validJSONFile(data);
+    } else if (fileType === CSV_MIME_TYPE) {
       // Mutation query with CSV file
       setContinueLoading(prepareEntityCSVLoading);
       const response = await prepareEntityCSV({
@@ -394,11 +426,12 @@ const ImportModal = (props: ImportModalProps) => {
         toast({
           title: "CSV Import Error",
           status: "error",
-          description: "Error while preparing CSV file",
+          description: "Error while preparing file",
           duration: 4000,
           position: "bottom-right",
           isClosable: true,
         });
+        return false;
       }
 
       if (response.data && response.data.prepareEntityCSV.length > 0) {
@@ -409,18 +442,32 @@ const ImportModal = (props: ImportModalProps) => {
           },
         );
         setColumns(filteredColumnSet);
-      }
 
-      // Setup the next stage of CSV import
-      await setupMapping();
+        // Setup the next stage of CSV import
+        return await setupMapping();
+      } else if (response.data.prepareEntityCSV.length === 0) {
+        // If the CSV file is empty, display an error message
+        toast({
+          title: "CSV Import Error",
+          status: "error",
+          description: "File is empty",
+          duration: 4000,
+          position: "bottom-right",
+          isClosable: true,
+        });
+        return false;
+      }
     }
+
+    // No issues with file import
+    return true;
   };
 
   /**
    * Utility function to populate fields required for the mapping stage of importing data. Loads all Entities, Projects,
    * and Attributes.
    */
-  const setupMapping = async () => {
+  const setupMapping = async (): Promise<boolean> => {
     setIsLoaded(!mappingDataLoading);
     const response = await getMappingData();
 
@@ -433,16 +480,18 @@ const ImportModal = (props: ImportModalProps) => {
 
     if (mappingDataError) {
       toast({
-        title: "Error",
+        title: "Import Error",
         status: "error",
-        description: "Could not retrieve data for mapping",
+        description: "Could not retrieve data for mapping columns",
         duration: 4000,
         position: "bottom-right",
         isClosable: true,
       });
+      return false;
     }
 
     setIsLoaded(!mappingDataLoading);
+    return true;
   };
 
   /**
@@ -554,7 +603,7 @@ const ImportModal = (props: ImportModalProps) => {
     setContinueLoading(importEntityCSVLoading);
 
     // Collate data to be mapped
-    const mappingData: { columnMapping: any; file: any } = {
+    const mappingData: { columnMapping: IColumnMapping; file: any } = {
       columnMapping: {
         name: nameField,
         description: descriptionField,
@@ -693,12 +742,18 @@ const ImportModal = (props: ImportModalProps) => {
         });
 
         // Run setup for import and mapping
-        await setupImport();
-        await setupMapping();
+        const importResult = await setupImport();
+        const mappingResult = await setupMapping();
 
-        // Proceed to the next page
-        setActiveEntityStep(1);
-        setEntityInterfacePage("details");
+        if (importResult && mappingResult) {
+          // Proceed to the next page if both setup steps completed successfully
+          setActiveEntityStep(1);
+          setEntityInterfacePage("details");
+        } else {
+          // Reset state as required
+          setContinueLoading(false);
+          setContinueDisabled(false);
+        }
       } else if (_.isEqual(entityInterfacePage, "details")) {
         // Capture event
         posthog.capture("import_continue", {
@@ -719,9 +774,9 @@ const ImportModal = (props: ImportModalProps) => {
         });
 
         // Run the review setup function depending on file type
-        if (_.isEqual(fileType, "application/json")) {
+        if (fileType === JSON_MIME_TYPE) {
           await setupReviewEntityJSON();
-        } else if (_.isEqual(fileType, "text/csv")) {
+        } else if (fileType === CSV_MIME_TYPE) {
           await setupReviewEntityCSV();
         }
 
@@ -735,9 +790,9 @@ const ImportModal = (props: ImportModalProps) => {
         });
 
         // Run the final import function depending on file type
-        if (_.isEqual(fileType, "application/json")) {
+        if (fileType === JSON_MIME_TYPE) {
           await finishImportEntityJSON();
-        } else if (_.isEqual(fileType, "text/csv")) {
+        } else if (fileType === CSV_MIME_TYPE) {
           await finishImportEntityCSV();
         }
       }
@@ -784,9 +839,8 @@ const ImportModal = (props: ImportModalProps) => {
     setFile({} as File);
     setFileType("");
     setFileName("");
-    setObjectData(null);
 
-    // Reset data state
+    // Reset import and mapping state
     setColumns([]);
     setNameField("");
     setDescriptionField("");
@@ -933,7 +987,8 @@ const ImportModal = (props: ImportModalProps) => {
                     {fileName}
                   </Text>
                 </Flex>
-                {_.isNull(objectData) && (
+
+                {fileType === CSV_MIME_TYPE && (
                   <Flex
                     w={"100%"}
                     gap={"2"}
@@ -1003,6 +1058,7 @@ const ImportModal = (props: ImportModalProps) => {
                       </Flex>
                     )}
                   </Flex>
+
                   <Input
                     type={"file"}
                     h={"100%"}
@@ -1018,7 +1074,7 @@ const ImportModal = (props: ImportModalProps) => {
                         // Only accept defined file types
                         if (
                           _.includes(
-                            ["text/csv", "application/json"],
+                            [CSV_MIME_TYPE, JSON_MIME_TYPE],
                             event.target.files[0].type,
                           )
                         ) {
@@ -1070,7 +1126,7 @@ const ImportModal = (props: ImportModalProps) => {
                   </Flex>
                 )}
 
-                {!objectData && (
+                {fileType === CSV_MIME_TYPE && (
                   <Flex direction={"row"} gap={"2"}>
                     <FormControl
                       isRequired
@@ -1100,7 +1156,7 @@ const ImportModal = (props: ImportModalProps) => {
                   </Flex>
                 )}
 
-                {objectData && (
+                {fileType === JSON_MIME_TYPE && (
                   <Flex direction={"row"} gap={"2"}>
                     <FormControl>
                       <FormLabel fontSize={"sm"}>Name</FormLabel>
@@ -1182,7 +1238,7 @@ const ImportModal = (props: ImportModalProps) => {
                 borderColor={"gray.300"}
                 rounded={"md"}
               >
-                {_.isNull(objectData) ? (
+                {_.isEqual(fileType, CSV_MIME_TYPE) ? (
                   <Text fontSize={"sm"}>
                     Columns can be assigned to Values within Attributes. When
                     adding Values to an Attribute, select the column containing
@@ -1282,7 +1338,7 @@ const ImportModal = (props: ImportModalProps) => {
                   </Button>
                 </Flex>
 
-                {_.isNull(objectData)
+                {fileType === CSV_MIME_TYPE
                   ? // If importing from CSV, use column-mapping
                     attributesField.map((attribute) => {
                       return (
@@ -1391,6 +1447,7 @@ const ImportModal = (props: ImportModalProps) => {
                       </Flex>
                     )}
                   </Flex>
+
                   <Input
                     type={"file"}
                     h={"100%"}
@@ -1405,10 +1462,7 @@ const ImportModal = (props: ImportModalProps) => {
                       if (event.target.files && event.target.files.length > 0) {
                         // Only accept defined file types
                         if (
-                          _.isEqual(
-                            "application/json",
-                            event.target.files[0].type,
-                          )
+                          _.isEqual(JSON_MIME_TYPE, event.target.files[0].type)
                         ) {
                           // Capture event
                           posthog.capture("import_upload_file", {

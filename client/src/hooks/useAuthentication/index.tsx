@@ -85,8 +85,6 @@ export const AuthenticationProvider = (props: {
 
   // Check the "setup" state of a User
   const isValidUser = (user: Partial<UserModel>): boolean => {
-    console.info("Checking validity:", user);
-
     // Return `false` if the following required fields are undefined or in the default state
     if (_.isUndefined(user) || _.isNull(user)) return false;
     if (_.isUndefined(user.firstName) || _.isEqual(user.firstName, ""))

@@ -54,16 +54,16 @@ export class Authentication {
         throw new Error("Invalid");
       }
       authenticationPayload = {
-        name: response.data.name,
         orcid: response.data.orcid,
         token: response.data.id_token,
+        setup: false,
       };
     } else {
       // If non-production, resolve with test user
       authenticationPayload = {
         orcid: DEMO_USER_ORCID,
-        name: "Test User",
         token: "test_token_value",
+        setup: false,
       };
     }
 

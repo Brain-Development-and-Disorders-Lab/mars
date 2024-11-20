@@ -819,7 +819,7 @@ export class Entities {
     }
 
     // Remove `history` field
-    delete (entity as any)["history"];
+    delete (entity as never)["history"];
 
     if (_.isEqual(format, "json")) {
       // Handle JSON format
@@ -977,7 +977,7 @@ export class Entities {
       const result = await Entities.getOne(entity);
       if (result) {
         // Remove `history` field
-        delete (result as any)["history"];
+        delete (result as never)["history"];
 
         // Add to collection for export
         collection.push(result);
