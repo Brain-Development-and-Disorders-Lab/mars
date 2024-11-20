@@ -508,7 +508,7 @@ export type IFile = Promise<{
   mimetype: string;
   encoding: string;
   createReadStream: () => fs.ReadStream;
-}>[];
+}>;
 
 // Generic GraphQL parent resolver type (for unused parents)
 export type IGenericParent = Record<string, any>;

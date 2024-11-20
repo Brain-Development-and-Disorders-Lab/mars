@@ -4,10 +4,14 @@ import {
   Context,
   EntityModel,
   IEntity,
+  IFile,
   IValue,
   IResponseMessage,
   ResponseData,
   EntityImportReview,
+  IColumnMapping,
+  IRow,
+  GenericValueType,
 } from "@types";
 
 // Utility functions and libraries
@@ -74,7 +78,7 @@ export class Data {
 
   static uploadAttachment = async (
     target: string,
-    file: any,
+    file: IFile,
   ): Promise<IResponseMessage> => {
     const { createReadStream, filename, mimetype } = await file;
 
@@ -111,10 +115,12 @@ export class Data {
    * @param stream ReadableStream instance with file contents
    * @return {Promise<Buffer>}
    */
-  private static bufferHelper = async (stream: any): Promise<Buffer> =>
+  private static bufferHelper = async (
+    stream: fs.ReadStream,
+  ): Promise<Buffer> =>
     new Promise((resolve) => {
       const buffers: Uint8Array[] = [];
-      stream.on("data", (data: any) => buffers.push(data));
+      stream.on("data", (data: Uint8Array) => buffers.push(data));
       stream.on("end", () => {
         const buffer = Buffer.concat(buffers);
         resolve(buffer);
@@ -123,13 +129,13 @@ export class Data {
 
   /**
    * Helper function to generate Entity collection after applying CSV column mapping.
-   * @param columnMapping Collection of key-value pairs defining the mapping between CSV columns and Entity fields
+   * @param {IColumnMapping} columnMapping Collection of key-value pairs defining the mapping between CSV columns and Entity fields
    * @param sheet Target sheet of imported CSV file
    * @return {Promise<IEntity[]>}
    */
   private static columnMappingHelper = async (
-    columnMapping: Record<string, any>,
-    sheet: any[],
+    columnMapping: IColumnMapping,
+    sheet: IRow[],
   ): Promise<IEntity[]> => {
     // Create generic set of Entities
     const entities = [] as IEntity[];
@@ -147,7 +153,7 @@ export class Data {
           timestamp: attribute.timestamp,
           archived: false,
           description: attribute.description,
-          values: attribute.values.map((value: IValue<any>) => {
+          values: attribute.values.map((value: IValue<GenericValueType>) => {
             // Clean the data for specific types
             let valueData = row[value.data];
             if (_.isEqual(value.type, "date")) {
@@ -197,10 +203,10 @@ export class Data {
 
   /**
    * Prepare an Entity CSV file for import by extracting column names for mapping
-   * @param file File object
-   * @return {Promise<string[]>}
+   * @param {IFile[]} file File object
+   * @return {Promise<string[]>} List of column names
    */
-  static prepareEntityCSV = async (file: any[]): Promise<string[]> => {
+  static prepareEntityCSV = async (file: IFile[]): Promise<string[]> => {
     const { createReadStream, mimetype } = await file[0];
     const stream = createReadStream();
 
@@ -208,9 +214,12 @@ export class Data {
     if (_.isEqual(mimetype, "text/csv")) {
       const output = await Data.bufferHelper(stream);
       const workbook = XLSX.read(output, { cellDates: true });
+
+      // File must contain at least 1 sheet
       if (workbook.SheetNames.length > 0) {
+        // Get the first sheet and parse to JSON format
         const primarySheet = workbook.Sheets[workbook.SheetNames[0]];
-        const parsedSheet = XLSX.utils.sheet_to_json<any>(primarySheet, {
+        const parsedSheet: IRow[] = XLSX.utils.sheet_to_json(primarySheet, {
           defval: "",
         });
 
@@ -220,7 +229,7 @@ export class Data {
         }
 
         // Generate the column list from present keys
-        return Object.keys(parsedSheet.pop());
+        return Object.keys(parsedSheet[0]);
       } else {
         return [];
       }
@@ -231,22 +240,24 @@ export class Data {
 
   /**
    * Review an Entity CSV file and collate a list of operations that will be made to the imported Entities
-   * @param columnMapping Collection of key-value pairs defining the mapping between CSV columns and Entity fields
-   * @param file CSV file
+   * @param {IColumnMapping} columnMapping Collection of key-value pairs defining the mapping between CSV columns and Entity fields
+   * @param {IFile[]} file CSV file
    * @return {Promise<ResponseData<EntityImportReview[]>>}
    */
   static reviewEntityCSV = async (
-    columnMapping: Record<string, any>,
-    file: any,
+    columnMapping: IColumnMapping,
+    file: IFile[],
   ): Promise<ResponseData<EntityImportReview[]>> => {
     const { createReadStream } = await file[0];
     const stream = createReadStream();
 
     const output = await Data.bufferHelper(stream);
     const workbook = XLSX.read(output, { cellDates: true });
+
+    // File must contain at least 1 sheet
     if (workbook.SheetNames.length > 0) {
       const primarySheet = workbook.Sheets[workbook.SheetNames[0]];
-      const parsedSheet = XLSX.utils.sheet_to_json<any>(primarySheet, {
+      const parsedSheet: IRow[] = XLSX.utils.sheet_to_json(primarySheet, {
         defval: "",
       });
 
@@ -277,14 +288,14 @@ export class Data {
 
   /**
    * Map the set of columns as specified to Entity parameters
-   * @param columnMapping Collection of mapped values with their corresponding columns names
-   * @param file CSV file
-   * @param context Request context, containing user and Workspace identifiers
+   * @param {IColumnMapping} columnMapping Collection of mapped values with their corresponding columns names
+   * @param {IFile[]} file CSV file
+   * @param {Context} context Request context, containing user and Workspace identifiers
    * @return {Promise<IResponseMessage>}
    */
   static importEntityCSV = async (
-    columnMapping: Record<string, any>,
-    file: any,
+    columnMapping: IColumnMapping,
+    file: IFile[],
     context: Context,
   ): Promise<IResponseMessage> => {
     const { createReadStream } = await file[0];
@@ -294,7 +305,7 @@ export class Data {
     const workbook = XLSX.read(output, { cellDates: true });
     if (workbook.SheetNames.length > 0) {
       const primarySheet = workbook.Sheets[workbook.SheetNames[0]];
-      const parsedSheet = XLSX.utils.sheet_to_json<any>(primarySheet, {
+      const parsedSheet: IRow[] = XLSX.utils.sheet_to_json(primarySheet, {
         defval: "",
       });
 
@@ -345,11 +356,11 @@ export class Data {
 
   /**
    * Review an Entity JSON file and collate a list of operations that will be made to the imported Entities
-   * @param file JSON file for import
+   * @param {IFile[]} file JSON file for import
    * @return {Promise<ResponseData<EntityImportReview[]>>}
    */
   static reviewEntityJSON = async (
-    file: any[],
+    file: IFile[],
   ): Promise<ResponseData<EntityImportReview[]>> => {
     const { createReadStream, mimetype } = await file[0];
     const stream = createReadStream();
@@ -395,13 +406,13 @@ export class Data {
 
   /**
    * Import an Entity JSON file or set of objects
-   * @param file JSON file for import
+   * @param {IFile[]} file JSON file for import
    * @param project Project identifier to add Entities to (if any)
    * @param context Request context containing user and Workspace identifier
    * @return {Promise<IResponseMessage>}
    */
   static importEntityJSON = async (
-    file: any[],
+    file: IFile[],
     project: string,
     context: Context,
   ): Promise<IResponseMessage> => {
@@ -497,12 +508,12 @@ export class Data {
 
   /**
    * Import a Template JSON file
-   * @param file JSON file for import
+   * @param {IFile[]} file JSON file for import
    * @param context Request context containing user and Workspace identifier
    * @return {Promise<IResponseMessage>}
    */
   static importTemplateJSON = async (
-    file: any[],
+    file: IFile[],
     context: Context,
   ): Promise<IResponseMessage> => {
     const { createReadStream, mimetype } = await file[0];
