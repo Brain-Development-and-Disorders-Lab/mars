@@ -260,6 +260,10 @@ export type EntityImportReview = {
   state: "create" | "update";
 };
 
+// Column mappings for Entity imports
+export type IRow = Record<string, any>;
+export type IColumnMapping = Record<string, any>;
+
 // Attachment data
 export type AttachmentData = {
   _id: string;
@@ -505,6 +509,9 @@ export type IFile = Promise<{
   encoding: string;
   createReadStream: () => fs.ReadStream;
 }>[];
+
+// Generic GraphQL parent resolver type (for unused parents)
+export type IGenericParent = Record<string, any>;
 
 // Context passed through the request headers, includes the ORCID (user) of the user
 export type Context = {
