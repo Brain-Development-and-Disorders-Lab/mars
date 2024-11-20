@@ -1,5 +1,5 @@
 // Custom types
-import { Context, IActivity, IResponseMessage } from "@types";
+import { Context, IActivity, IResolverParent, IResponseMessage } from "@types";
 
 // Models
 import { Activity } from "../models/Activity";
@@ -15,7 +15,11 @@ import { PostHogClient } from "src";
 export const ActivityResolvers = {
   Query: {
     // Retrieve all Activity
-    activity: async (_parent: any, args: { limit: 100 }, context: Context) => {
+    activity: async (
+      _parent: IResolverParent,
+      args: { limit: 100 },
+      context: Context,
+    ) => {
       // Authenticate the provided context
       await Authentication.authenticate(context);
 
@@ -36,7 +40,7 @@ export const ActivityResolvers = {
   Mutation: {
     // Create a new Activity
     createActivity: async (
-      _parent: any,
+      _parent: IResolverParent,
       args: { activity: IActivity },
       context: Context,
     ): Promise<IResponseMessage> => {

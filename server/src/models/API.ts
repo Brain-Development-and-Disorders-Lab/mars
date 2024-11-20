@@ -147,7 +147,7 @@ export class API {
    * @return {Promise<void>}
    */
   static status = async (
-    request: Request,
+    _request: Request,
     response: Response,
   ): Promise<void> => {
     const responseData: APIData<object> = {

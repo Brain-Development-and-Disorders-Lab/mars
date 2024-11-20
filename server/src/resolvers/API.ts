@@ -4,13 +4,19 @@ import { Authentication } from "src/models/Authentication";
 import { Users } from "src/models/Users";
 
 // Custom types
-import { APIKey, Context, IResponseMessage, ResponseData } from "@types";
+import {
+  APIKey,
+  Context,
+  IResolverParent,
+  IResponseMessage,
+  ResponseData,
+} from "@types";
 
 export const APIResolvers = {
   Query: {
     // Generate a new API key
     generateKey: async (
-      _parent: any,
+      _parent: IResolverParent,
       args: { scope: "edit" | "view"; workspaces: string[] },
       context: Context,
     ): Promise<ResponseData<APIKey>> => {
@@ -29,7 +35,7 @@ export const APIResolvers = {
   Mutation: {
     // Generate a new API key
     revokeKey: async (
-      _parent: any,
+      _parent: IResolverParent,
       args: { key: string },
       context: Context,
     ): Promise<IResponseMessage> => {

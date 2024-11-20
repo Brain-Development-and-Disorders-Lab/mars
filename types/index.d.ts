@@ -510,8 +510,8 @@ export type IFile = Promise<{
   createReadStream: () => fs.ReadStream;
 }>;
 
-// Generic GraphQL parent resolver type (for unused parents)
-export type IGenericParent = Record<string, any>;
+// Generic GraphQL resolver parent type (for unused parents)
+export type IResolverParent = Record<string, any>;
 
 // Context passed through the request headers, includes the ORCID (user) of the user
 export type Context = {
