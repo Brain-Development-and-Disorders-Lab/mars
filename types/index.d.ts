@@ -153,10 +153,13 @@ export type ProjectModel = IProject & {
 };
 
 export type ProjectHistory = {
+  author: string; // Change author identifier
+  message: string; // Change message
+  timestamp: string; // Timestamp of change
+  version: string; // Project version
+
   _id: string;
-  version: string;
   owner: string;
-  timestamp: string;
   created: string;
   archived: boolean;
   name: string;
@@ -229,9 +232,12 @@ export type EntityNode = IGenericItem & {
 };
 
 export type EntityHistory = {
+  author: string; // Change author identifier
+  message: string; // Change message
+  timestamp: string; // Timestamp of change
+  version: string; // Entity version
+
   _id: string;
-  timestamp: string;
-  version: string;
   name: string;
   owner: string;
   archived: boolean;
@@ -392,6 +398,7 @@ export type IconNames =
   | "upload"
   | "cross"
   | "list"
+  | "save"
   | "person"
   | "warning"
   | "exclamation"

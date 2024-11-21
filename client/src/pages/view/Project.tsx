@@ -3,6 +3,12 @@ import React, { useEffect, useRef, useState } from "react";
 
 // Existing and custom components
 import {
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogOverlay,
   Button,
   Card,
   CardBody,
@@ -70,7 +76,7 @@ import {
 import { useQuery, gql, useMutation, useLazyQuery } from "@apollo/client";
 
 // Routing and navigation
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useBlocker } from "react-router-dom";
 
 // Workspace context
 import { useWorkspace } from "@hooks/useWorkspace";
@@ -83,8 +89,16 @@ import slugify from "slugify";
 
 const Project = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
   const toast = useToast();
+
+  // Navigation and routing
+  const navigate = useNavigate();
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      editing && currentLocation.pathname !== nextLocation.pathname,
+  );
+  const { onClose: onBlockerClose } = useDisclosure();
+  const cancelBlockerRef = useRef(null);
 
   // Add Entities
   const {
@@ -125,6 +139,14 @@ const Project = () => {
   );
   const [newCollaborator, setNewCollaborator] = useState("");
 
+  // Save message modal
+  const {
+    isOpen: isSaveMessageOpen,
+    onOpen: onSaveMessageOpen,
+    onClose: onSaveMessageClose,
+  } = useDisclosure();
+  const [saveMessage, setSaveMessage] = useState("");
+
   // Entities that can be added
   const [selectedEntity, setSelectedEntity] = useState({} as IGenericItem);
 
@@ -157,6 +179,8 @@ const Project = () => {
         entities
         collaborators
         history {
+          message
+          author
           name
           timestamp
           version
@@ -204,8 +228,8 @@ const Project = () => {
 
   // Mutation to update Project
   const UPDATE_PROJECT = gql`
-    mutation UpdateProject($project: ProjectUpdateInput) {
-      updateProject(project: $project) {
+    mutation UpdateProject($project: ProjectUpdateInput, $message: String) {
+      updateProject(project: $project, message: $message) {
         success
         message
       }
@@ -275,68 +299,81 @@ const Project = () => {
   /**
    * Handle the edit button being clicked
    */
-  const handleEditClick = async () => {
+  const handleEditClick = () => {
     if (editing) {
-      setIsUpdating(true);
+      // Open the save message modal
+      onSaveMessageOpen();
+    } else {
+      setEditing(true);
+    }
+  };
 
-      // Collate update data
-      const updateData: ProjectModel = {
-        _id: project._id,
-        name: projectName,
-        timestamp: project.timestamp,
-        archived: projectArchived,
-        description: projectDescription,
-        owner: project.owner,
-        collaborators: projectCollaborators || [],
-        created: project.created,
-        entities: projectEntities,
-        history: projectHistory,
-      };
+  /**
+   * Helper function to handle clicking the "Done" button within
+   * the save message modal
+   */
+  const handleSaveMessageDoneClick = async () => {
+    setIsUpdating(true);
 
-      try {
-        await updateProject({
-          variables: {
-            project: {
-              _id: updateData._id,
-              name: updateData.name,
-              timestamp: updateData.timestamp,
-              archived: updateData.archived,
-              created: updateData.created,
-              owner: updateData.owner,
-              collaborators: updateData.collaborators,
-              description: updateData.description,
-              entities: updateData.entities,
-            },
+    // Collate update data
+    const updateData: ProjectModel = {
+      _id: project._id,
+      name: projectName,
+      timestamp: project.timestamp,
+      archived: projectArchived,
+      description: projectDescription,
+      owner: project.owner,
+      collaborators: projectCollaborators || [],
+      created: project.created,
+      entities: projectEntities,
+      history: projectHistory,
+    };
+
+    try {
+      await updateProject({
+        variables: {
+          project: {
+            _id: updateData._id,
+            name: updateData.name,
+            timestamp: updateData.timestamp,
+            archived: updateData.archived,
+            created: updateData.created,
+            owner: updateData.owner,
+            collaborators: updateData.collaborators,
+            description: updateData.description,
+            entities: updateData.entities,
           },
-        });
+          message: saveMessage,
+        },
+      });
+      toast({
+        title: "Updated Successfully",
+        status: "success",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    } catch {
+      if (updateError) {
         toast({
-          title: "Updated Successfully",
-          status: "success",
+          title: "Error",
+          description: updateError.message,
+          status: "error",
           duration: 2000,
           position: "bottom-right",
           isClosable: true,
         });
-      } catch {
-        if (updateError) {
-          toast({
-            title: "Error",
-            description: updateError.message,
-            status: "error",
-            duration: 2000,
-            position: "bottom-right",
-            isClosable: true,
-          });
-        }
       }
-
-      // Refetch Project data
-      await refetch();
-
-      setEditing(false);
-      setIsUpdating(false);
-    } else {
-      setEditing(true);
     }
+
+    // Refetch Project data
+    await refetch();
+
+    setEditing(false);
+    setIsUpdating(false);
+
+    // Close the save message modal
+    onSaveMessageClose();
   };
 
   // Archive the Project when confirmed
@@ -451,11 +488,12 @@ const Project = () => {
             description: updateData.description,
             entities: updateData.entities,
           },
+          message: `Restored Project version ${projectVersion.version}`,
         },
       });
       toast({
         title: "Success",
-        description: "Restored Project successfully",
+        description: `Restored Project version ${projectVersion.version}`,
         status: "success",
         duration: 2000,
         position: "bottom-right",
@@ -732,14 +770,14 @@ const Project = () => {
                   id={"editProjectButton"}
                   colorScheme={editing ? "green" : "blue"}
                   rightIcon={
-                    editing ? <Icon name={"check"} /> : <Icon name={"edit"} />
+                    editing ? <Icon name={"save"} /> : <Icon name={"edit"} />
                   }
                   onClick={handleEditClick}
                   loadingText={"Saving..."}
                   isLoading={isUpdating}
                   size={"sm"}
                 >
-                  {editing ? "Done" : "Edit"}
+                  {editing ? "Save" : "Edit"}
                 </Button>
               </Flex>
             )}
@@ -1333,6 +1371,117 @@ const Project = () => {
           </ModalContent>
         </Modal>
 
+        {/* Save message modal */}
+        <Modal
+          onEsc={onSaveMessageOpen}
+          onClose={onSaveMessageClose}
+          isOpen={isSaveMessageOpen}
+          isCentered
+        >
+          <ModalOverlay />
+          <ModalContent p={"2"}>
+            <ModalHeader p={"2"}>
+              <Flex w={"100%"} direction={"row"} gap={"2"} align={"center"}>
+                <Icon name={"save"} />
+                <Text fontWeight={"semibold"}>Saving Changes</Text>
+              </Flex>
+            </ModalHeader>
+            <ModalCloseButton />
+            <ModalBody p={"2"}>
+              <Flex direction={"column"} gap={"2"}>
+                <Text fontSize={"sm"} color={"gray.600"}>
+                  Specify a description of the changes made to the Project.
+                </Text>
+                <MDEditor
+                  id={"saveMessageInput"}
+                  style={{ width: "100%" }}
+                  value={saveMessage}
+                  preview={"edit"}
+                  extraCommands={[]}
+                  onChange={(value) => {
+                    setSaveMessage(value || "");
+                  }}
+                />
+              </Flex>
+            </ModalBody>
+            <ModalFooter p={"2"}>
+              <Flex direction={"row"} w={"100%"} justify={"space-between"}>
+                <Button
+                  size={"sm"}
+                  colorScheme={"red"}
+                  rightIcon={<Icon name={"cross"} />}
+                  onClick={() => onSaveMessageClose()}
+                >
+                  Cancel
+                </Button>
+
+                <Button
+                  id={"saveMessageDoneButton"}
+                  size={"sm"}
+                  colorScheme={"green"}
+                  rightIcon={<Icon name={"check"} />}
+                  onClick={() => handleSaveMessageDoneClick()}
+                >
+                  Done
+                </Button>
+              </Flex>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+
+        {/* Blocker warning message */}
+        <AlertDialog
+          isOpen={blocker.state === "blocked"}
+          leastDestructiveRef={cancelBlockerRef}
+          onClose={onBlockerClose}
+          isCentered
+        >
+          <AlertDialogOverlay>
+            <AlertDialogContent p={"2"}>
+              <AlertDialogHeader p={"2"}>
+                <Flex w={"100%"} direction={"row"} gap={"2"} align={"center"}>
+                  <Icon name={"warning"} />
+                  <Text fontWeight={"semibold"}>Unsaved Changes</Text>
+                </Flex>
+              </AlertDialogHeader>
+
+              <AlertDialogBody p={"2"}>
+                <Text fontSize={"sm"}>
+                  Are you sure you want to leave this page? You will lose any
+                  unsaved changes.
+                </Text>
+              </AlertDialogBody>
+
+              <AlertDialogFooter p={"2"}>
+                <Flex w={"100%"} justify={"space-between"}>
+                  <Button
+                    size={"sm"}
+                    colorScheme={"red"}
+                    rightIcon={<Icon name={"cross"} />}
+                    ref={cancelBlockerRef}
+                    onClick={() => {
+                      blocker.reset?.();
+                      onBlockerClose();
+                    }}
+                  >
+                    Cancel
+                  </Button>
+
+                  <Button
+                    size={"sm"}
+                    rightIcon={<Icon name={"check"} />}
+                    colorScheme={"green"}
+                    onClick={() => blocker.proceed?.()}
+                    ml={3}
+                  >
+                    Continue
+                  </Button>
+                </Flex>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialogOverlay>
+        </AlertDialog>
+
         <Drawer
           isOpen={isHistoryOpen}
           placement={"right"}
@@ -1397,23 +1546,6 @@ const Project = () => {
                             >
                               {projectVersion.name}
                             </Text>
-                            <Flex
-                              direction={"row"}
-                              gap={"2"}
-                              justify={"space-between"}
-                            >
-                              <Tag size={"sm"} colorScheme={"green"}>
-                                {projectVersion.version}
-                              </Tag>
-
-                              <Text
-                                fontWeight={"semibold"}
-                                fontSize={"xs"}
-                                color={"gray.400"}
-                              >
-                                {dayjs(projectVersion.timestamp).fromNow()}
-                              </Text>
-                            </Flex>
                           </Flex>
                         </CardHeader>
 
@@ -1526,24 +1658,100 @@ const Project = () => {
                             </Flex>
                           </Flex>
                         </CardBody>
-                        <CardFooter p={"0"}>
-                          <Flex
-                            w={"100%"}
-                            justify={"right"}
-                            align={"center"}
-                            p={"2"}
-                          >
-                            <Button
-                              colorScheme={"orange"}
-                              size={"sm"}
-                              rightIcon={<Icon name={"rewind"} />}
-                              onClick={() => {
-                                handleRestoreFromHistoryClick(projectVersion);
-                              }}
-                              isDisabled={projectArchived}
+
+                        <CardFooter p={"2"}>
+                          {/* Version information */}
+                          <Flex direction={"column"} gap={"2"} w={"100%"}>
+                            <Flex
+                              direction={"row"}
+                              gap={"2"}
+                              bg={"gray.100"}
+                              justify={"center"}
+                              rounded={"md"}
                             >
-                              Restore
-                            </Button>
+                              <Flex
+                                direction={"column"}
+                                w={"100%"}
+                                gap={"1"}
+                                p={"2"}
+                              >
+                                <Text fontSize={"sm"} fontWeight={"semibold"}>
+                                  Version
+                                </Text>
+                                <Flex
+                                  direction={"row"}
+                                  gap={"2"}
+                                  align={"center"}
+                                >
+                                  <Tag size={"sm"} colorScheme={"green"}>
+                                    {projectVersion.version}
+                                  </Tag>
+                                </Flex>
+                                <Text
+                                  fontWeight={"semibold"}
+                                  fontSize={"xs"}
+                                  color={"gray.400"}
+                                >
+                                  {dayjs(projectVersion.timestamp).fromNow()}
+                                </Text>
+                                <Text fontSize={"sm"} fontWeight={"semibold"}>
+                                  Message
+                                </Text>
+                                {_.isEqual(projectVersion.message, "") ||
+                                _.isNull(projectVersion.message) ? (
+                                  <Flex>
+                                    <Tag size={"sm"} colorScheme={"orange"}>
+                                      No Message
+                                    </Tag>
+                                  </Flex>
+                                ) : (
+                                  <Tooltip
+                                    label={projectVersion.message}
+                                    isDisabled={
+                                      projectVersion.message.length < 32
+                                    }
+                                    hasArrow
+                                  >
+                                    <Text fontSize={"sm"}>
+                                      {_.truncate(projectVersion.message, {
+                                        length: 32,
+                                      })}
+                                    </Text>
+                                  </Tooltip>
+                                )}
+                              </Flex>
+
+                              <Flex
+                                direction={"column"}
+                                w={"100%"}
+                                gap={"1"}
+                                p={"2"}
+                              >
+                                <Text fontSize={"sm"} fontWeight={"semibold"}>
+                                  Author
+                                </Text>
+                                <Flex>
+                                  <ActorTag
+                                    orcid={projectVersion.author}
+                                    fallback={"Unknown User"}
+                                  />
+                                </Flex>
+                              </Flex>
+                            </Flex>
+
+                            <Flex w={"100%"} justify={"right"}>
+                              <Button
+                                colorScheme={"orange"}
+                                size={"sm"}
+                                rightIcon={<Icon name={"rewind"} />}
+                                onClick={() => {
+                                  handleRestoreFromHistoryClick(projectVersion);
+                                }}
+                                isDisabled={projectArchived}
+                              >
+                                Restore
+                              </Button>
+                            </Flex>
                           </Flex>
                         </CardFooter>
                       </Card>

@@ -461,7 +461,7 @@ export class API {
       }
 
       // Add history to Entity
-      await Entities.addHistory(entity);
+      await Entities.addHistory(entity, orcid);
 
       // Attempt to find the Workspace the Entity belongs to
       let activeWorkspaceIdentifier = "";

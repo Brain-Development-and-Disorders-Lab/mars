@@ -6,7 +6,8 @@ describe("Entity, edit details", () => {
 
     // Update the Entity name
     cy.get("#entityNameInput").clear().type("Test Entity (Updated)");
-    cy.get("#editEntityButton").click();
+    cy.contains("button", "Save").click();
+    cy.contains("button", "Done").click();
 
     // Check that name has been updated
     cy.get("#entityNameTag").contains("Test Entity (Updated)");
@@ -23,7 +24,8 @@ describe("Entity, edit details", () => {
     cy.get("#entityDescriptionInput")
       .clear()
       .type("Updated Entity description");
-    cy.get("#editEntityButton").click();
+    cy.contains("button", "Save").click();
+    cy.contains("button", "Done").click();
 
     // Check that name has been updated
     cy.get("#entityDescriptionInput").contains("Updated Entity description");

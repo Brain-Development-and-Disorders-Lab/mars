@@ -9,7 +9,8 @@ describe("Project, edit Entities", () => {
     cy.get("#entitySearchSelect").click();
     cy.get("#entitySearchSelect").contains("button", "Test Entity").click();
     cy.get("#addEntityDoneButton").click();
-    cy.get("#editProjectButton").click();
+    cy.contains("button", "Save").click();
+    cy.contains("button", "Done").click();
 
     // Validate the Entity was added
     cy.get("table").eq(0).contains("Test Entity");
@@ -27,13 +28,15 @@ describe("Project, edit Entities", () => {
     cy.get("#entitySearchSelect").click();
     cy.get("#entitySearchSelect").contains("button", "Test Entity").click();
     cy.get("#addEntityDoneButton").click();
-    cy.get("#editProjectButton").click();
+    cy.contains("button", "Save").click();
+    cy.contains("button", "Done").click();
     cy.reload();
 
     // Remove the Entity
     cy.get("#editProjectButton").click();
     cy.get("tr > td > div > button").click();
-    cy.get("#editProjectButton").click();
+    cy.contains("button", "Save").click();
+    cy.contains("button", "Done").click();
 
     // Validate the Entity was removed
     cy.contains("table").should("not.exist");
@@ -51,14 +54,16 @@ describe("Project, edit Entities", () => {
     cy.get("#entitySearchSelect").click();
     cy.get("#entitySearchSelect").contains("button", "Test Entity").click();
     cy.get("#addEntityDoneButton").click();
-    cy.get("#editProjectButton").click();
+    cy.contains("button", "Save").click();
+    cy.contains("button", "Done").click();
     cy.reload();
 
     // Remove the the Entity
     cy.get("tr > td > div > div > a").click();
     cy.get("#editEntityButton").click();
     cy.get("tr > td > div > button").eq(0).click();
-    cy.get("#editEntityButton").click();
+    cy.contains("button", "Save").click();
+    cy.contains("button", "Done").click();
 
     // Navigate to the Project
     cy.contains("button", "Projects").click();
