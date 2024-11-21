@@ -74,10 +74,13 @@ export const typedefs = `#graphql
 
   # "ProjectHistory" type storing iterations of an Entity
   type ProjectHistory {
-    _id: String!
-    name: String
+    author: String
+    message: String
     timestamp: String
     version: String!
+
+    _id: String!
+    name: String
     owner: String
     collaborators: [String]
     archived: Boolean
@@ -216,9 +219,12 @@ export const typedefs = `#graphql
 
   # "EntityHistory" type storing iterations of an Entity
   type EntityHistory {
-    _id: String!
+    author: String
+    message: String
     timestamp: String
     version: String!
+
+    _id: String!
     name: String
     owner: String
     archived: Boolean
@@ -452,14 +458,14 @@ export const typedefs = `#graphql
     # Entity mutations
     setEntityDescription(_id: String, description: String): ResponseMessage
     createEntity(entity: EntityCreateInput): ResponseDataString
-    updateEntity(entity: EntityUpdateInput): ResponseMessage
+    updateEntity(entity: EntityUpdateInput, message: String): ResponseMessage
     archiveEntity(_id: String, state: Boolean): ResponseMessage
     archiveEntities(toArchive: [String], state: Boolean): ResponseMessage
     deleteEntity(_id: String): ResponseMessage
 
     # Project mutations
     createProject(project: ProjectCreateInput): ResponseMessage
-    updateProject(project: ProjectUpdateInput): ResponseMessage
+    updateProject(project: ProjectUpdateInput, message: String): ResponseMessage
     archiveProject(_id: String, state: Boolean): ResponseMessage
     archiveProjects(toArchive: [String], state: Boolean): ResponseMessage
     deleteProject(_id: String): ResponseMessage

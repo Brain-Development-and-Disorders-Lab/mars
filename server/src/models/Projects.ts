@@ -142,10 +142,14 @@ export class Projects {
   /**
    * Add a history entry to an Project based on provided Project state
    * @param historyProject Existing Project state to add to Project history
+   * @param author Identifier of User who authored changes
+   * @param message Changelog message associated with changes
    * @return {Promise<IResponseMessage>}
    */
   static addHistory = async (
     historyProject: ProjectModel,
+    author?: string,
+    message?: string,
   ): Promise<IResponseMessage> => {
     const project = await Projects.getOne(historyProject._id);
     if (_.isNull(project)) {
@@ -156,9 +160,12 @@ export class Projects {
     }
 
     const historyProjectModel: ProjectHistory = {
-      _id: historyProject._id,
-      timestamp: dayjs(Date.now()).toISOString(), // Timestamp on history creation
+      author: author || "",
+      message: message || "",
       version: nanoid(),
+      timestamp: dayjs(Date.now()).toISOString(), // Timestamp on history creation
+
+      _id: historyProject._id,
       name: historyProject.name,
       owner: historyProject.owner,
       collaborators: historyProject.collaborators,

@@ -269,10 +269,14 @@ export class Entities {
   /**
    * Add a history entry to an Entity based on provided Entity state
    * @param historyEntity Existing Entity state to add to Entity history
+   * @param author Identifier of User who authored changes
+   * @param message Changelog message associated with changes
    * @return {Promise<IResponseMessage>}
    */
   static addHistory = async (
     historyEntity: EntityModel,
+    author?: string,
+    message?: string,
   ): Promise<IResponseMessage> => {
     const entity = await Entities.getOne(historyEntity._id);
     if (_.isNull(entity)) {
@@ -283,9 +287,12 @@ export class Entities {
     }
 
     const historyEntityModel: EntityHistory = {
-      _id: historyEntity._id,
-      timestamp: dayjs(Date.now()).toISOString(), // Timestamp on history creation
+      author: author || "",
+      message: message || "",
       version: nanoid(),
+      timestamp: dayjs(Date.now()).toISOString(), // Timestamp on history creation
+
+      _id: historyEntity._id,
       name: historyEntity.name,
       owner: historyEntity.owner,
       archived: historyEntity.archived,

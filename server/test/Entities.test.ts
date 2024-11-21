@@ -9,12 +9,16 @@ import { EntityModel, ProjectModel, ResponseData } from "../../types";
 import { Entities } from "../src/models/Entities";
 import { Projects } from "../src/models/Projects";
 
+// Utility functions and libraries
 import dayjs from "dayjs";
+import _ from "lodash";
+
+// Variables
+import { DEMO_USER_ORCID } from "../src/variables";
 
 // Database connectivity
 import { connect, disconnect } from "../src/connectors/database";
 import { clearDatabase } from "./util";
-import _ from "lodash";
 
 describe("Entity model", () => {
   beforeEach(async () => {
@@ -667,7 +671,7 @@ describe("Entity model", () => {
     // Retrieve existing Entity state and use to create history entry
     const entity: EntityModel | null = await Entities.getOne(result.data);
     if (_.isNull(entity)) throw new Error();
-    await Entities.addHistory(entity);
+    await Entities.addHistory(entity, DEMO_USER_ORCID);
 
     // Get updated Entity and check that it contains history
     const updated: EntityModel | null = await Entities.getOne(result.data);
@@ -692,7 +696,7 @@ describe("Entity model", () => {
     // Retrieve existing Entity state and use to create history entry
     const entity: EntityModel | null = await Entities.getOne(result.data);
     if (_.isNull(entity)) throw new Error();
-    await Entities.addHistory(entity);
+    await Entities.addHistory(entity, DEMO_USER_ORCID);
 
     // Get updated Entity and check that it contains expected history
     const updated: EntityModel | null = await Entities.getOne(result.data);

@@ -256,7 +256,7 @@ export const ProjectsResolvers = {
 
     updateProject: async (
       _parent: IResolverParent,
-      args: { project: ProjectModel },
+      args: { project: ProjectModel; message: string },
       context: Context,
     ) => {
       // Authenticate the provided context
@@ -276,7 +276,7 @@ export const ProjectsResolvers = {
 
       if (result.success) {
         // Add history to Project
-        await Projects.addHistory(project);
+        await Projects.addHistory(project, context.user, args.message);
 
         const activity = await Activity.create({
           timestamp: dayjs(Date.now()).toISOString(),

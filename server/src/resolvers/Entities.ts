@@ -309,7 +309,7 @@ export const EntitiesResolvers = {
     // Update an existing Entity from EntityModel data structure
     updateEntity: async (
       _parent: IResolverParent,
-      args: { entity: EntityModel },
+      args: { entity: EntityModel; message: string },
       context: Context,
     ): Promise<IResponseMessage> => {
       // Authenticate the provided context
@@ -341,7 +341,7 @@ export const EntitiesResolvers = {
         // Create new Activity if successful
         if (result.success) {
           // Add history to Entity
-          await Entities.addHistory(entity);
+          await Entities.addHistory(entity, context.user, args.message);
 
           const activity = await Activity.create({
             timestamp: dayjs(Date.now()).toISOString(),
