@@ -22,7 +22,6 @@ import { SearchQueryBuilderProps } from "@types";
 import { gql, useLazyQuery } from "@apollo/client";
 
 // Utility functions and libraries
-import _ from "lodash";
 import dayjs from "dayjs";
 
 const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
@@ -233,7 +232,7 @@ const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
       }
     }
   `;
-  const [searchText, { loading, error }] = useLazyQuery(SEARCH_TEXT);
+  const [searchText, { error }] = useLazyQuery(SEARCH_TEXT);
 
   // State to hold the query
   const [query, setQuery] = useState(initialQuery);
@@ -241,7 +240,7 @@ const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
   const toast = useToast();
 
   const onSearchBuiltQuery = async () => {
-    setIsSearching(loading);
+    setIsSearching(true);
     setHasSearched(true);
 
     // Format the query in `mongodb` format before sending
@@ -273,7 +272,7 @@ const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
       });
     }
 
-    setIsSearching(loading);
+    setIsSearching(false);
   };
 
   return (

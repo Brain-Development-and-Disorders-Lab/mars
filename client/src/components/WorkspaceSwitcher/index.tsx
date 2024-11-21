@@ -7,9 +7,14 @@ import {
   MenuGroup,
   MenuItem,
   MenuList,
+  Modal,
+  ModalContent,
+  ModalOverlay,
   Spacer,
+  Spinner,
   Text,
   Tooltip,
+  useDisclosure,
   useToast,
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
@@ -34,6 +39,13 @@ const WorkspaceSwitcher = () => {
   const toast = useToast();
   const navigate = useNavigate();
 
+  // Modal state for transition overlay
+  const {
+    isOpen: isTransitionOpen,
+    onOpen: onTransitionOpen,
+    onClose: onTransitionClose,
+  } = useDisclosure();
+
   // Store all Workspaces
   const [workspaces, setWorkspaces] = useState([] as WorkspaceModel[]);
 
@@ -43,6 +55,9 @@ const WorkspaceSwitcher = () => {
 
   // Switcher drop-down visibility state
   const [isOpen, setIsOpen] = useState(false);
+
+  // Switcher loading state
+  const [isLoading, setIsLoading] = useState(false);
 
   // Switcher label text
   const [label, setLabel] = useState("Select Workspace");
@@ -107,15 +122,30 @@ const WorkspaceSwitcher = () => {
     setInitialLabelValue();
   }, [workspace]);
 
+  // Present the transition overlay when loading
+  useEffect(() => {
+    if (isLoading) {
+      onTransitionOpen();
+    } else {
+      onTransitionClose();
+    }
+  }, [isLoading]);
+
   /**
    * Utility function to update the list of Workspaces
    */
   const updateWorkspaces = async () => {
+    // Presenting the transition overlay
+    setIsLoading(true);
+
     // Refresh the list of Workspaces
     const resultWorkspaces = await getWorkspaces();
     if (resultWorkspaces.data?.workspaces) {
       setWorkspaces(resultWorkspaces.data.workspaces);
     }
+
+    // Close the transition overlay
+    setIsLoading(false);
 
     if (workspacesError) {
       toast({
@@ -171,18 +201,14 @@ const WorkspaceSwitcher = () => {
    */
   const handleWorkspaceClick = async (selectedWorkspace: IGenericItem) => {
     if (workspace !== selectedWorkspace._id) {
+      // Present the transition overlay and activate the selected Workspace
+      setIsLoading(true);
       await activateWorkspace(selectedWorkspace._id);
+
+      // Update the switcher visual state and close the transition overlay
       setLabel(selectedWorkspace.name);
       setIsOpen(false);
-
-      toast({
-        title: "Switched Workspace",
-        description: `Currently using Workspace "${selectedWorkspace.name}"`,
-        status: "success",
-        duration: 2000,
-        position: "bottom-right",
-        isClosable: true,
-      });
+      setIsLoading(false);
     }
   };
 
@@ -339,6 +365,35 @@ const WorkspaceSwitcher = () => {
           </MenuGroup>
         </MenuList>
       </Menu>
+
+      <Modal
+        isOpen={isTransitionOpen}
+        onClose={onTransitionClose}
+        size={"full"}
+        motionPreset={"none"}
+      >
+        <ModalOverlay />
+        <ModalContent
+          w={"100%"}
+          h={"100%"}
+          backdropFilter={"blur(2px)"}
+          background={"rgba(255, 255, 255, 0.85)"}
+        >
+          <Flex
+            direction={"column"}
+            gap={"4"}
+            w={"100%"}
+            h={"100%"}
+            align={"center"}
+            justify={"center"}
+          >
+            <Text fontWeight={"semibold"} color={"gray.600"}>
+              Loading Workspace...
+            </Text>
+            <Spinner size={"lg"} color={"gray.600"} />
+          </Flex>
+        </ModalContent>
+      </Modal>
     </Flex>
   );
 };
