@@ -47,6 +47,12 @@ import {
   MenuItem,
   CardFooter,
   Divider,
+  AlertDialog,
+  AlertDialogOverlay,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogBody,
+  AlertDialogHeader,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
@@ -94,7 +100,7 @@ import QRCode from "react-qr-code";
 import { useQuery, gql, useMutation, useLazyQuery } from "@apollo/client";
 
 // Routing and navigation
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useBlocker } from "react-router-dom";
 
 // Contexts
 import { useWorkspace } from "@hooks/useWorkspace";
@@ -104,8 +110,16 @@ import Relationships from "@components/Relationships";
 const Entity = () => {
   const { id } = useParams();
   const breakpoint = useBreakpoint();
-  const navigate = useNavigate();
   const toast = useToast();
+
+  // Navigation and routing
+  const navigate = useNavigate();
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      editing && currentLocation.pathname !== nextLocation.pathname,
+  );
+  const { onClose: onBlockerClose } = useDisclosure();
+  const cancelBlockerRef = useRef(null);
 
   // Authentication
   const { token } = useAuthentication();
@@ -314,8 +328,8 @@ const Entity = () => {
 
   // Mutation to update Entity
   const UPDATE_ENTITY = gql`
-    mutation UpdateEntity($entity: EntityUpdateInput) {
-      updateEntity(entity: $entity) {
+    mutation UpdateEntity($entity: EntityUpdateInput, $message: String) {
+      updateEntity(entity: $entity, message: $message) {
         success
         message
       }
@@ -523,7 +537,11 @@ const Entity = () => {
     }
   };
 
-  const handleSaveClick = async () => {
+  /**
+   * Helper function to handle clicking the "Done" button within
+   * the save message modal
+   */
+  const handleSaveMessageDoneClick = async () => {
     setIsUpdating(updateLoading);
     try {
       await updateEntity({
@@ -540,6 +558,7 @@ const Entity = () => {
             attributes: entityAttributes,
             attachments: entityAttachments,
           },
+          message: saveMessage,
         },
       });
 
@@ -605,7 +624,7 @@ const Entity = () => {
 
     if (archiveError) {
       toast({
-        title: "Error while restoring Entity",
+        title: "Error while unarchiving Entity",
         status: "error",
         duration: 2000,
         position: "bottom-right",
@@ -613,7 +632,7 @@ const Entity = () => {
       });
     } else {
       toast({
-        title: "Entity restored successfully",
+        title: "Entity successfully unarchived",
         status: "success",
         duration: 2000,
         position: "bottom-right",
@@ -879,10 +898,12 @@ const Entity = () => {
             attributes: entityVersion.attributes || [],
             attachments: entityVersion.attachments || [],
           },
+          message: saveMessage,
         },
       });
       toast({
-        title: "Restored Successfully",
+        title: "Success",
+        description: `Restored Entity version ${entityVersion.version}`,
         status: "success",
         duration: 2000,
         position: "bottom-right",
@@ -2489,7 +2510,12 @@ const Entity = () => {
         >
           <ModalOverlay />
           <ModalContent p={"2"}>
-            <ModalHeader p={"2"}>Saving Changes</ModalHeader>
+            <ModalHeader p={"2"}>
+              <Flex w={"100%"} direction={"row"} gap={"2"} align={"center"}>
+                <Icon name={"save"} />
+                <Text fontWeight={"semibold"}>Saving Changes</Text>
+              </Flex>
+            </ModalHeader>
             <ModalCloseButton />
             <ModalBody p={"2"}>
               <Flex direction={"column"} gap={"2"}>
@@ -2523,7 +2549,7 @@ const Entity = () => {
                   size={"sm"}
                   colorScheme={"green"}
                   rightIcon={<Icon name={"check"} />}
-                  onClick={() => handleSaveClick()}
+                  onClick={() => handleSaveMessageDoneClick()}
                 >
                   Done
                 </Button>
@@ -2531,6 +2557,59 @@ const Entity = () => {
             </ModalFooter>
           </ModalContent>
         </Modal>
+
+        {/* Blocker warning message */}
+        <AlertDialog
+          isOpen={blocker.state === "blocked"}
+          leastDestructiveRef={cancelBlockerRef}
+          onClose={onBlockerClose}
+          isCentered
+        >
+          <AlertDialogOverlay>
+            <AlertDialogContent p={"2"}>
+              <AlertDialogHeader p={"2"}>
+                <Flex w={"100%"} direction={"row"} gap={"2"} align={"center"}>
+                  <Icon name={"warning"} />
+                  <Text fontWeight={"semibold"}>Unsaved Changes</Text>
+                </Flex>
+              </AlertDialogHeader>
+
+              <AlertDialogBody p={"2"}>
+                <Text fontSize={"sm"}>
+                  Are you sure you want to leave this page? You will lose any
+                  unsaved changes.
+                </Text>
+              </AlertDialogBody>
+
+              <AlertDialogFooter p={"2"}>
+                <Flex w={"100%"} justify={"space-between"}>
+                  <Button
+                    size={"sm"}
+                    colorScheme={"red"}
+                    rightIcon={<Icon name={"cross"} />}
+                    ref={cancelBlockerRef}
+                    onClick={() => {
+                      blocker.reset?.();
+                      onBlockerClose();
+                    }}
+                  >
+                    Cancel
+                  </Button>
+
+                  <Button
+                    size={"sm"}
+                    rightIcon={<Icon name={"check"} />}
+                    colorScheme={"green"}
+                    onClick={() => blocker.proceed?.()}
+                    ml={3}
+                  >
+                    Continue
+                  </Button>
+                </Flex>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialogOverlay>
+        </AlertDialog>
 
         {/* Version history */}
         <Drawer
@@ -2818,15 +2897,17 @@ const Entity = () => {
                                   <Tag size={"sm"} colorScheme={"green"}>
                                     {entityVersion.version}
                                   </Tag>
-
-                                  <Text
-                                    fontWeight={"semibold"}
-                                    fontSize={"xs"}
-                                    color={"gray.400"}
-                                  >
-                                    {dayjs(entityVersion.timestamp).fromNow()}
-                                  </Text>
                                 </Flex>
+                                <Text
+                                  fontWeight={"semibold"}
+                                  fontSize={"xs"}
+                                  color={"gray.400"}
+                                >
+                                  {dayjs(entityVersion.timestamp).fromNow()}
+                                </Text>
+                                <Text fontSize={"sm"} fontWeight={"semibold"}>
+                                  Message
+                                </Text>
                                 {_.isEqual(entityVersion.message, "") ||
                                 _.isNull(entityVersion.message) ? (
                                   <Flex>
@@ -2835,9 +2916,19 @@ const Entity = () => {
                                     </Tag>
                                   </Flex>
                                 ) : (
-                                  <Text fontSize={"sm"}>
-                                    {entityVersion.message}
-                                  </Text>
+                                  <Tooltip
+                                    label={entityVersion.message}
+                                    isDisabled={
+                                      entityVersion.message.length < 32
+                                    }
+                                    hasArrow
+                                  >
+                                    <Text fontSize={"sm"}>
+                                      {_.truncate(entityVersion.message, {
+                                        length: 32,
+                                      })}
+                                    </Text>
+                                  </Tooltip>
                                 )}
                               </Flex>
 
