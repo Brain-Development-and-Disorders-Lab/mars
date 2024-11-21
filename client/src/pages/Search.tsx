@@ -9,6 +9,7 @@ import {
   Input,
   Link,
   Spacer,
+  Spinner,
   Switch,
   Tab,
   TabList,
@@ -23,7 +24,6 @@ import { Content } from "@components/Container";
 import DataTable from "@components/DataTable";
 import Linky from "@components/Linky";
 import Icon from "@components/Icon";
-import Loading from "@components/Loading";
 import SearchQueryBuilder from "@components/SearchQueryBuilder";
 
 // Existing and custom types
@@ -95,11 +95,11 @@ const Search = () => {
       }
     }
   `;
-  const [searchText, { loading, error }] = useLazyQuery(SEARCH_TEXT);
+  const [searchText, { error }] = useLazyQuery(SEARCH_TEXT);
 
   const runSearch = async () => {
     // Initial check if a specific ID search was not found
-    setIsSearching(loading);
+    setIsSearching(true);
     setHasSearched(true);
     setResults([]);
 
@@ -128,7 +128,7 @@ const Search = () => {
       });
     }
 
-    setIsSearching(loading);
+    setIsSearching(false);
   };
 
   const onTabChange = () => {
@@ -397,33 +397,32 @@ const Search = () => {
 
         {/* Search Results */}
         <Flex gap={"2"} p={"2"} w={"100%"}>
-          {isSearching ? (
-            <Flex w={"full"} align={"center"} justify={"center"}>
-              <Loading />
+          {isSearching && (
+            <Flex w={"full"} minH={"200px"} align={"center"} justify={"center"}>
+              <Spinner size={"lg"} color={"gray.600"} />
             </Flex>
-          ) : (
-            hasSearched &&
-            !isSearching && (
-              <Flex direction={"column"} w={"100%"} gap={"2"}>
-                <Heading
-                  id={"resultsHeading"}
-                  size={"sm"}
-                  fontWeight={"semibold"}
-                >
-                  {results.length} result
-                  {results.length > 1 || results.length === 0 ? "s" : ""}
-                </Heading>
-                <DataTable
-                  columns={searchResultColumns}
-                  visibleColumns={{}}
-                  selectedRows={{}}
-                  data={results}
-                  showPagination
-                  showSelection
-                  actions={searchResultActions}
-                />
-              </Flex>
-            )
+          )}
+
+          {hasSearched && !isSearching && (
+            <Flex direction={"column"} w={"100%"} gap={"2"}>
+              <Heading
+                id={"resultsHeading"}
+                size={"sm"}
+                fontWeight={"semibold"}
+              >
+                {results.length} result
+                {results.length > 1 || results.length === 0 ? "s" : ""}
+              </Heading>
+              <DataTable
+                columns={searchResultColumns}
+                visibleColumns={{}}
+                selectedRows={{}}
+                data={results}
+                showPagination
+                showSelection
+                actions={searchResultActions}
+              />
+            </Flex>
           )}
         </Flex>
       </Flex>
