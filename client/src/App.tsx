@@ -14,7 +14,14 @@ import { ChakraProvider } from "@chakra-ui/react";
 import { Page } from "@components/Container";
 
 // Routing and navigation
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import {
+  Route,
+  Navigate,
+  createBrowserRouter,
+  createRoutesFromElements,
+  RouterProvider,
+  Outlet,
+} from "react-router-dom";
 
 // Utility imports
 import _ from "lodash";
@@ -53,74 +60,83 @@ import { AuthenticationProvider } from "./hooks/useAuthentication";
 import { theme } from "./styles/theme";
 
 /**
+ * Generate and return React component of all `Provider`-type components used
+ * in the application
+ * @return {React.JSX.Element}
+ */
+const Providers = (): React.JSX.Element => {
+  return (
+    <ChakraProvider theme={theme}>
+      <AuthenticationProvider>
+        <WorkspaceProvider>
+          <Outlet />
+        </WorkspaceProvider>
+      </AuthenticationProvider>
+    </ChakraProvider>
+  );
+};
+
+/**
  * Base App component containing the page layout and page routing components
- * @returns {ReactElement}
+ * @return {ReactElement}
  */
 const App = (): ReactElement => {
   if (_.isEqual(process.env.NODE_ENV, "development")) {
     consola.debug("Running client in development mode");
   }
 
-  return (
-    <BrowserRouter>
-      <ChakraProvider theme={theme}>
-        <AuthenticationProvider>
-          <WorkspaceProvider>
-            <Routes>
-              <Route element={<Page />}>
-                <Route path={"/"} element={<Dashboard />} />
+  const router = createBrowserRouter(
+    createRoutesFromElements(
+      <Route path="" element={<Providers />}>
+        {/* Authentication not required */}
+        <Route path={"/setup"} element={<Setup />} />
+        <Route path={"/login"} element={<Login />} />
 
-                {/* Create routes */}
-                <Route
-                  path={"/create/workspace"}
-                  element={<CreateWorkspace />}
-                />
-                <Route path={"/create/template"} element={<CreateTemplate />} />
-                <Route path={"/create/project"} element={<CreateProject />} />
-                <Route path={"/create/entity"} element={<CreateEntity />} />
-                <Route path={"/create"} element={<Create />} />
+        {/* Authentication required */}
+        <Route element={<Page />}>
+          <Route path={"/"} element={<Dashboard />} />
 
-                {/* Workspace routes */}
-                <Route path={"workspaces"}>
-                  <Route path={":id"} element={<Workspace />} />
-                </Route>
+          {/* Create routes */}
+          <Route path={"/create/workspace"} element={<CreateWorkspace />} />
+          <Route path={"/create/template"} element={<CreateTemplate />} />
+          <Route path={"/create/project"} element={<CreateProject />} />
+          <Route path={"/create/entity"} element={<CreateEntity />} />
+          <Route path={"/create"} element={<Create />} />
 
-                {/* Entity routes */}
-                <Route path={"/entities"} element={<Entities />} />
-                <Route path={"entities"}>
-                  <Route path={":id"} element={<Entity />} />
-                </Route>
+          {/* Workspace routes */}
+          <Route path={"workspaces"}>
+            <Route path={":id"} element={<Workspace />} />
+          </Route>
 
-                {/* Projects routes */}
-                <Route path={"/projects"} element={<Projects />} />
-                <Route path={"projects"}>
-                  <Route path={":id"} element={<Project />} />
-                </Route>
+          {/* Entity routes */}
+          <Route path={"/entities"} element={<Entities />} />
+          <Route path={"entities"}>
+            <Route path={":id"} element={<Entity />} />
+          </Route>
 
-                {/* Templates routes */}
-                <Route path={"/templates"} element={<Templates />} />
-                <Route path={"templates"}>
-                  <Route path={":id"} element={<Template />} />
-                </Route>
+          {/* Projects routes */}
+          <Route path={"/projects"} element={<Projects />} />
+          <Route path={"projects"}>
+            <Route path={":id"} element={<Project />} />
+          </Route>
 
-                {/* Other routes */}
-                <Route path={"/profile"} element={<User />} />
-                <Route path={"/search"} element={<Search />} />
-                <Route path={"/invalid"} element={<Invalid />} />
-                <Route
-                  path={"*"}
-                  element={<Navigate to={"/invalid"} replace />}
-                />
-              </Route>
+          {/* Templates routes */}
+          <Route path={"/templates"} element={<Templates />} />
+          <Route path={"templates"}>
+            <Route path={":id"} element={<Template />} />
+          </Route>
 
-              <Route path={"/login"} element={<Login />} />
-              <Route path={"/setup"} element={<Setup />} />
-            </Routes>
-          </WorkspaceProvider>
-        </AuthenticationProvider>
-      </ChakraProvider>
-    </BrowserRouter>
+          {/* Other routes */}
+          <Route path={"/profile"} element={<User />} />
+          <Route path={"/search"} element={<Search />} />
+          <Route path={"/invalid"} element={<Invalid />} />
+          <Route path={"*"} element={<Navigate to={"/invalid"} replace />} />
+        </Route>
+      </Route>,
+    ),
   );
+
+  return <RouterProvider router={router} />;
 };
 
 export default App;
