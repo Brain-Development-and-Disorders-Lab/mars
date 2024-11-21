@@ -1,8 +1,14 @@
 // React
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 // Existing and custom components
 import {
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogOverlay,
   Button,
   Flex,
   FormControl,
@@ -33,7 +39,7 @@ import MDEditor from "@uiw/react-md-editor";
 import { GenericValueType, IAttribute, IValue } from "@types";
 
 // Routing and navigation
-import { useNavigate } from "react-router-dom";
+import { useBlocker, useNavigate } from "react-router-dom";
 
 // Utility functions and libraries
 import { gql, useMutation } from "@apollo/client";
@@ -47,7 +53,6 @@ import { usePostHog } from "posthog-js/react";
 
 const Template = () => {
   const posthog = usePostHog();
-  const navigate = useNavigate();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
 
@@ -92,6 +97,23 @@ const Template = () => {
     }
   `;
   const [createTemplate, { loading, error }] = useMutation(CREATE_TEMPLATE);
+
+  // Navigation and routing
+  const navigate = useNavigate();
+  const blocker = useBlocker(({ currentLocation, nextLocation }) => {
+    // Check if this is during the `create` mutation
+    if (isSubmitting) {
+      return false;
+    }
+
+    // Default blocker condition
+    return (
+      (name !== "" || description !== "" || values.length > 0) &&
+      currentLocation.pathname !== nextLocation.pathname
+    );
+  });
+  const { onClose: onBlockerClose } = useDisclosure();
+  const cancelBlockerRef = useRef(null);
 
   /**
    * Handle creation of a new Attribute
@@ -363,6 +385,59 @@ const Template = () => {
           Finish
         </Button>
       </Flex>
+
+      {/* Blocker warning message */}
+      <AlertDialog
+        isOpen={blocker.state === "blocked"}
+        leastDestructiveRef={cancelBlockerRef}
+        onClose={onBlockerClose}
+        isCentered
+      >
+        <AlertDialogOverlay>
+          <AlertDialogContent p={"2"}>
+            <AlertDialogHeader p={"2"}>
+              <Flex w={"100%"} direction={"row"} gap={"2"} align={"center"}>
+                <Icon name={"warning"} />
+                <Text fontWeight={"semibold"}>Unsaved Changes</Text>
+              </Flex>
+            </AlertDialogHeader>
+
+            <AlertDialogBody p={"2"}>
+              <Text fontSize={"sm"}>
+                Are you sure you want to leave this page? You will lose any
+                unsaved changes.
+              </Text>
+            </AlertDialogBody>
+
+            <AlertDialogFooter p={"2"}>
+              <Flex w={"100%"} justify={"space-between"}>
+                <Button
+                  size={"sm"}
+                  colorScheme={"red"}
+                  rightIcon={<Icon name={"cross"} />}
+                  ref={cancelBlockerRef}
+                  onClick={() => {
+                    blocker.reset?.();
+                    onBlockerClose();
+                  }}
+                >
+                  Cancel
+                </Button>
+
+                <Button
+                  size={"sm"}
+                  rightIcon={<Icon name={"check"} />}
+                  colorScheme={"green"}
+                  onClick={() => blocker.proceed?.()}
+                  ml={3}
+                >
+                  Continue
+                </Button>
+              </Flex>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogOverlay>
+      </AlertDialog>
     </Content>
   );
 };

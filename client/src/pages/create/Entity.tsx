@@ -1,8 +1,14 @@
 // React
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 // Existing and custom components
 import {
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogOverlay,
   Box,
   Button,
   Checkbox,
@@ -63,7 +69,7 @@ import { nanoid } from "nanoid";
 import consola from "consola";
 
 // Routing and navigation
-import { useNavigate } from "react-router-dom";
+import { useBlocker, useNavigate } from "react-router-dom";
 import { gql, useLazyQuery, useMutation, useQuery } from "@apollo/client";
 
 // Authentication context
@@ -90,10 +96,23 @@ const Entity = () => {
     count: pageSteps.length,
   });
 
-  const navigate = useNavigate();
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { token } = useAuthentication();
+
+  // Navigation and routing
+  const navigate = useNavigate();
+  const blocker = useBlocker(({ currentLocation, nextLocation }) => {
+    // Check if this is during the `create` mutation
+    if (isSubmitting) {
+      return false;
+    }
+
+    // Default blocker condition
+    return name !== "" && currentLocation.pathname !== nextLocation.pathname;
+  });
+  const { onClose: onBlockerClose } = useDisclosure();
+  const cancelBlockerRef = useRef(null);
 
   const [projects, setProjects] = useState([] as IGenericItem[]);
   const [templates, setTemplates] = useState([] as AttributeModel[]);
@@ -866,6 +885,59 @@ const Entity = () => {
           {_.isEqual("attributes", pageState) ? "Finish" : "Continue"}
         </Button>
       </Flex>
+
+      {/* Blocker warning message */}
+      <AlertDialog
+        isOpen={blocker.state === "blocked"}
+        leastDestructiveRef={cancelBlockerRef}
+        onClose={onBlockerClose}
+        isCentered
+      >
+        <AlertDialogOverlay>
+          <AlertDialogContent p={"2"}>
+            <AlertDialogHeader p={"2"}>
+              <Flex w={"100%"} direction={"row"} gap={"2"} align={"center"}>
+                <Icon name={"warning"} />
+                <Text fontWeight={"semibold"}>Unsaved Changes</Text>
+              </Flex>
+            </AlertDialogHeader>
+
+            <AlertDialogBody p={"2"}>
+              <Text fontSize={"sm"}>
+                Are you sure you want to leave this page? You will lose any
+                unsaved changes.
+              </Text>
+            </AlertDialogBody>
+
+            <AlertDialogFooter p={"2"}>
+              <Flex w={"100%"} justify={"space-between"}>
+                <Button
+                  size={"sm"}
+                  colorScheme={"red"}
+                  rightIcon={<Icon name={"cross"} />}
+                  ref={cancelBlockerRef}
+                  onClick={() => {
+                    blocker.reset?.();
+                    onBlockerClose();
+                  }}
+                >
+                  Cancel
+                </Button>
+
+                <Button
+                  size={"sm"}
+                  rightIcon={<Icon name={"check"} />}
+                  colorScheme={"green"}
+                  onClick={() => blocker.proceed?.()}
+                  ml={3}
+                >
+                  Continue
+                </Button>
+              </Flex>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogOverlay>
+      </AlertDialog>
     </Content>
   );
 };
