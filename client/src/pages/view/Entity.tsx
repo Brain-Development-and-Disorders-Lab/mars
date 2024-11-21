@@ -35,7 +35,6 @@ import {
   DrawerHeader,
   VStack,
   Card,
-  CardHeader,
   CardBody,
   Spacer,
   Tooltip,
@@ -143,6 +142,14 @@ const Entity = () => {
     {} as IGenericItem,
   );
 
+  // Save message modal
+  const {
+    isOpen: isSaveMessageOpen,
+    onOpen: onSaveMessageOpen,
+    onClose: onSaveMessageClose,
+  } = useDisclosure();
+  const [saveMessage, setSaveMessage] = useState("");
+
   // History drawer
   const {
     isOpen: isHistoryOpen,
@@ -212,11 +219,13 @@ const Entity = () => {
           name
         }
         history {
-          _id
+          author
+          message
+          timestamp
           version
+          _id
           name
           created
-          timestamp
           archived
           owner
           description
@@ -505,53 +514,61 @@ const Entity = () => {
   } = useDisclosure();
 
   // Toggle editing status
-  const handleEditClick = async () => {
+  const handleEditClick = () => {
     if (editing) {
-      setIsUpdating(updateLoading);
-      try {
-        await updateEntity({
-          variables: {
-            entity: {
-              _id: entityData._id,
-              name: entityName,
-              archived: entityArchived,
-              created: entityData.created,
-              owner: entityData.owner,
-              description: entityDescription,
-              projects: entityProjects,
-              relationships: entityRelationships,
-              attributes: entityAttributes,
-              attachments: entityAttachments,
-            },
-          },
-        });
-
-        toast({
-          title: "Updated Successfully",
-          status: "success",
-          duration: 2000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-      } catch (error: any) {
-        toast({
-          title: "Error",
-          description: `Entity could not be updated`,
-          status: "error",
-          duration: 2000,
-          position: "bottom-right",
-          isClosable: true,
-        });
-      }
-
-      // Run a refetch operation
-      await refetch();
-
-      setEditing(false);
-      setIsUpdating(false);
+      // Open the save message modal
+      onSaveMessageOpen();
     } else {
       setEditing(true);
     }
+  };
+
+  const handleSaveClick = async () => {
+    setIsUpdating(updateLoading);
+    try {
+      await updateEntity({
+        variables: {
+          entity: {
+            _id: entityData._id,
+            name: entityName,
+            archived: entityArchived,
+            created: entityData.created,
+            owner: entityData.owner,
+            description: entityDescription,
+            projects: entityProjects,
+            relationships: entityRelationships,
+            attributes: entityAttributes,
+            attachments: entityAttachments,
+          },
+        },
+      });
+
+      toast({
+        title: "Updated Successfully",
+        status: "success",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: `Entity could not be updated`,
+        status: "error",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
+
+    // Run a refetch operation
+    await refetch();
+
+    setEditing(false);
+    setIsUpdating(false);
+
+    // Close the save message modal
+    onSaveMessageClose();
   };
 
   /**
@@ -1208,12 +1225,12 @@ const Entity = () => {
                   size={"sm"}
                   colorScheme={editing ? "green" : "blue"}
                   rightIcon={
-                    editing ? <Icon name={"check"} /> : <Icon name={"edit"} />
+                    editing ? <Icon name={"save"} /> : <Icon name={"edit"} />
                   }
                   loadingText={"Saving..."}
                   isLoading={isUpdating}
                 >
-                  {editing ? "Done" : "Edit"}
+                  {editing ? "Save" : "Edit"}
                 </Button>
               </Flex>
             )}
@@ -2463,6 +2480,58 @@ const Entity = () => {
           </ModalContent>
         </Modal>
 
+        {/* Save message modal */}
+        <Modal
+          onEsc={onSaveMessageOpen}
+          onClose={onSaveMessageClose}
+          isOpen={isSaveMessageOpen}
+          isCentered
+        >
+          <ModalOverlay />
+          <ModalContent p={"2"}>
+            <ModalHeader p={"2"}>Saving Changes</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody p={"2"}>
+              <Flex direction={"column"} gap={"2"}>
+                <Text fontSize={"sm"} color={"gray.600"}>
+                  Specify a description of the changes made to the Entity.
+                </Text>
+                <MDEditor
+                  id={"saveMessageInput"}
+                  style={{ width: "100%" }}
+                  value={saveMessage}
+                  preview={"edit"}
+                  extraCommands={[]}
+                  onChange={(value) => {
+                    setSaveMessage(value || "");
+                  }}
+                />
+              </Flex>
+            </ModalBody>
+            <ModalFooter p={"2"}>
+              <Flex direction={"row"} w={"100%"} justify={"space-between"}>
+                <Button
+                  size={"sm"}
+                  colorScheme={"red"}
+                  rightIcon={<Icon name={"cross"} />}
+                  onClick={() => onSaveMessageClose()}
+                >
+                  Cancel
+                </Button>
+
+                <Button
+                  size={"sm"}
+                  colorScheme={"green"}
+                  rightIcon={<Icon name={"check"} />}
+                  onClick={() => handleSaveClick()}
+                >
+                  Done
+                </Button>
+              </Flex>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+
         {/* Version history */}
         <Drawer
           isOpen={isHistoryOpen}
@@ -2491,7 +2560,7 @@ const Entity = () => {
                   </Flex>
                   <Flex direction={"row"} gap={"1"}>
                     <Text fontSize={"sm"} fontWeight={"semibold"}>
-                      Previous Versions:
+                      Versions:
                     </Text>
                     <Text fontSize={"sm"} fontWeight={"normal"}>
                       {entityHistory.length}
@@ -2514,13 +2583,9 @@ const Entity = () => {
                         border={"1px"}
                         borderColor={"gray.300"}
                       >
-                        <CardHeader p={"0"}>
-                          <Flex
-                            direction={"column"}
-                            w={"100%"}
-                            gap={"1"}
-                            p={"2"}
-                          >
+                        <CardBody p={"2"} pb={"0"}>
+                          <Flex direction={"column"} gap={"2"}>
+                            {/* Name */}
                             <Text
                               fontWeight={"semibold"}
                               fontSize={"sm"}
@@ -2528,27 +2593,7 @@ const Entity = () => {
                             >
                               {entityVersion.name}
                             </Text>
-                            <Flex
-                              direction={"row"}
-                              gap={"2"}
-                              justify={"space-between"}
-                            >
-                              <Tag size={"sm"} colorScheme={"green"}>
-                                {entityVersion.version}
-                              </Tag>
 
-                              <Text
-                                fontWeight={"semibold"}
-                                fontSize={"xs"}
-                                color={"gray.400"}
-                              >
-                                {dayjs(entityVersion.timestamp).fromNow()}
-                              </Text>
-                            </Flex>
-                          </Flex>
-                        </CardHeader>
-                        <CardBody px={"2"} py={"0"}>
-                          <Flex direction={"column"} gap={"2"}>
                             {/* Description */}
                             <Flex w={"100%"}>
                               {_.isEqual(entityVersion.description, "") ? (
@@ -2745,24 +2790,88 @@ const Entity = () => {
                             </Flex>
                           </Flex>
                         </CardBody>
-                        <CardFooter p={"0"}>
-                          <Flex
-                            w={"100%"}
-                            justify={"right"}
-                            align={"center"}
-                            p={"2"}
-                          >
-                            <Button
-                              colorScheme={"orange"}
-                              size={"sm"}
-                              rightIcon={<Icon name={"rewind"} />}
-                              onClick={() => {
-                                handleRestoreFromHistoryClick(entityVersion);
-                              }}
-                              isDisabled={entityArchived}
+
+                        <CardFooter p={"2"}>
+                          {/* Version information */}
+                          <Flex direction={"column"} gap={"2"} w={"100%"}>
+                            <Flex
+                              direction={"row"}
+                              gap={"2"}
+                              bg={"gray.100"}
+                              justify={"center"}
+                              rounded={"md"}
                             >
-                              Restore
-                            </Button>
+                              <Flex
+                                direction={"column"}
+                                w={"100%"}
+                                gap={"1"}
+                                p={"2"}
+                              >
+                                <Text fontSize={"sm"} fontWeight={"semibold"}>
+                                  Version
+                                </Text>
+                                <Flex
+                                  direction={"row"}
+                                  gap={"2"}
+                                  align={"center"}
+                                >
+                                  <Tag size={"sm"} colorScheme={"green"}>
+                                    {entityVersion.version}
+                                  </Tag>
+
+                                  <Text
+                                    fontWeight={"semibold"}
+                                    fontSize={"xs"}
+                                    color={"gray.400"}
+                                  >
+                                    {dayjs(entityVersion.timestamp).fromNow()}
+                                  </Text>
+                                </Flex>
+                                {_.isEqual(entityVersion.message, "") ||
+                                _.isNull(entityVersion.message) ? (
+                                  <Flex>
+                                    <Tag size={"sm"} colorScheme={"orange"}>
+                                      No Message
+                                    </Tag>
+                                  </Flex>
+                                ) : (
+                                  <Text fontSize={"sm"}>
+                                    {entityVersion.message}
+                                  </Text>
+                                )}
+                              </Flex>
+
+                              <Flex
+                                direction={"column"}
+                                w={"100%"}
+                                gap={"1"}
+                                p={"2"}
+                              >
+                                <Text fontSize={"sm"} fontWeight={"semibold"}>
+                                  Author
+                                </Text>
+                                <Flex>
+                                  <ActorTag
+                                    orcid={entityVersion.author}
+                                    fallback={"Unknown User"}
+                                  />
+                                </Flex>
+                              </Flex>
+                            </Flex>
+
+                            <Flex w={"100%"} justify={"right"}>
+                              <Button
+                                colorScheme={"orange"}
+                                size={"sm"}
+                                rightIcon={<Icon name={"rewind"} />}
+                                onClick={() => {
+                                  handleRestoreFromHistoryClick(entityVersion);
+                                }}
+                                isDisabled={entityArchived}
+                              >
+                                Restore
+                              </Button>
+                            </Flex>
                           </Flex>
                         </CardFooter>
                       </Card>
@@ -2770,7 +2879,7 @@ const Entity = () => {
                   })
                 ) : (
                   <Text fontSize={"sm"} fontWeight={"semibold"}>
-                    No previous versions.
+                    No History.
                   </Text>
                 )}
               </VStack>
