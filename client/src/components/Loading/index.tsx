@@ -16,7 +16,7 @@ const Loading = () => {
       minH={"90vh"}
       h={"100%"}
     >
-      <Spinner size="xl" />
+      <Spinner size={"lg"} color={"gray.600"} />
     </Flex>
   );
 };
