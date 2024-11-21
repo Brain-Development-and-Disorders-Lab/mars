@@ -1416,6 +1416,7 @@ const Project = () => {
                 </Button>
 
                 <Button
+                  id={"saveMessageDoneButton"}
                   size={"sm"}
                   colorScheme={"green"}
                   rightIcon={<Icon name={"check"} />}

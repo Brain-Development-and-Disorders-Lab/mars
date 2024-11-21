@@ -6,7 +6,8 @@ describe("Project, edit details", () => {
 
     // Update the Project name
     cy.get("#projectNameInput").clear().type("Test Project (Updated)");
-    cy.get("#editProjectButton").click();
+    cy.contains("button", "Save").click();
+    cy.contains("button", "Done").click();
 
     // Check that name has been updated
     cy.get("#projectNameTag").contains("Test Project (Updated)");
@@ -23,7 +24,8 @@ describe("Project, edit details", () => {
     cy.get("#projectDescriptionInput")
       .clear()
       .type("Updated Project description");
-    cy.get("#editProjectButton").click();
+    cy.contains("button", "Save").click();
+    cy.contains("button", "Done").click();
 
     // Check that name has been updated
     cy.get("#projectDescriptionInput").contains("Updated Project description");

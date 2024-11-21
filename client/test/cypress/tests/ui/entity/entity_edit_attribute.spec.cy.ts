@@ -22,6 +22,7 @@ describe("Entity, edit Attributes", () => {
 
     cy.get(".chakra-modal__body").get("button").eq(-1).click();
 
+    cy.contains("button", "Save").click();
     cy.contains("button", "Done").click();
 
     cy.contains("No Attributes").should("not.exist");
@@ -35,6 +36,7 @@ describe("Entity, edit Attributes", () => {
 
     // Delete the Attribute
     cy.get('button[aria-label="Delete attribute"]').click();
+    cy.contains("button", "Save").click();
     cy.contains("button", "Done").click();
 
     // Check that Attribute is deleted
