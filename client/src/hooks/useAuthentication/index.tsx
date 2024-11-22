@@ -18,6 +18,7 @@ import { usePostHog } from "posthog-js/react";
 
 type AuthenticationContextValue = {
   token: IAuth;
+  setToken: (token: IAuth) => void;
   login: (code: string) => Promise<IResponseMessage>;
   logout: () => void;
   setup: (user: Partial<UserModel>) => Promise<IResponseMessage>;
@@ -117,6 +118,7 @@ export const AuthenticationProvider = (props: {
       orcid: token.orcid,
       token: "",
       setup: false,
+      firstLogin: false,
     });
 
     // Reset Posthog
@@ -163,6 +165,7 @@ export const AuthenticationProvider = (props: {
       orcid: loginData.data.orcid,
       token: loginData.data.token,
       setup: isValidUser(userData),
+      firstLogin: false,
     });
 
     // Remove the login code from the current URL
@@ -212,6 +215,7 @@ export const AuthenticationProvider = (props: {
       orcid: token.orcid,
       token: token.token,
       setup: isValidUser(user),
+      firstLogin: true,
     });
 
     return {
@@ -223,6 +227,7 @@ export const AuthenticationProvider = (props: {
   const value = useMemo(
     () => ({
       token,
+      setToken,
       login,
       logout,
       setup,
