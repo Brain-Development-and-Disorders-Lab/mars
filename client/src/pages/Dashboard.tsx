@@ -27,6 +27,9 @@ import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 import ActorTag from "@components/ActorTag";
+import WalkthroughBeacon from "@components/WalkthroughBeacon";
+import WalkthroughTooltip from "@components/WalkthroughTooltip";
+import Joyride from "react-joyride";
 
 // Existing and custom types
 import {
@@ -295,8 +298,75 @@ const Dashboard = () => {
     }),
   ];
 
+  const walkthroughSteps = [
+    {
+      target: "#navDashboardButton",
+      content:
+        "This the Workspace Dashboard, showing an overview of all Entities, Projects, and Activity within the Workspace.",
+      title: "Dashboard",
+    },
+    {
+      target: "#recentActivityHeader",
+      content: "You can see all recent activity in the Workspace here.",
+      title: "Recent Activity",
+    },
+    {
+      target: "#navEntitiesButton",
+      content: "Here you can view all Entities in the current Workspace.",
+      title: "Entities",
+    },
+    {
+      target: "#navProjectsButton",
+      content: "Here you can view all Projects in the current Workspace.",
+      title: "Projects",
+    },
+    {
+      target: "#navTemplatesButton",
+      content:
+        "Here you can view all Template Attributes in the current Workspace.",
+      title: "Templates",
+    },
+    {
+      target: "#workspaceSwitcher",
+      content:
+        "This shows all Workspaces you have access to and allows you to edit Workspace and account information.",
+      title: "Workspace Switcher",
+    },
+    {
+      target: "#navSearchButton",
+      content:
+        "The Search page allows you to run text-based searches or construct advanced search queries on all stored metadata.",
+      title: "Search",
+    },
+    {
+      target: "#navCreateButton",
+      content:
+        "The Create portal allows you to manually create Entities, Projects, and Template Attributes.",
+      title: "Create",
+    },
+    {
+      target: "#navImportButton",
+      content:
+        "Upload and import CSV or JSON files to create or modify Entities and Templates.",
+      title: "Import",
+    },
+    {
+      target: "#navScanButton",
+      content:
+        "Opens an interface to accept input from a scanner. Alternatively, an Entity identifier can be specified manually.",
+      title: "Scan",
+    },
+  ];
+
   return (
     <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
+      <Joyride
+        continuous
+        showProgress
+        steps={walkthroughSteps}
+        beaconComponent={WalkthroughBeacon}
+        tooltipComponent={WalkthroughTooltip}
+      />
       <Flex direction={"column"} w={"100%"} p={"2"} gap={"2"}>
         <Flex direction={"column"} basis={"70%"} gap={"2"}>
           <Flex direction={"row"} gap={"2"} align={"center"}>
@@ -508,7 +578,12 @@ const Dashboard = () => {
             h={"fit-content"}
           >
             {/* Activity heading */}
-            <Flex align={"center"} gap={"2"} my={"2"}>
+            <Flex
+              id={"recentActivityHeader"}
+              align={"center"}
+              gap={"2"}
+              my={"2"}
+            >
               <Icon name={"activity"} size={"md"} />
               <Heading size={"md"} color={"gray.700"}>
                 Recent Activity
