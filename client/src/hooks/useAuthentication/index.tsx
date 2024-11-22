@@ -117,6 +117,7 @@ export const AuthenticationProvider = (props: {
       orcid: token.orcid,
       token: "",
       setup: false,
+      firstLogin: false,
     });
 
     // Reset Posthog
@@ -163,6 +164,7 @@ export const AuthenticationProvider = (props: {
       orcid: loginData.data.orcid,
       token: loginData.data.token,
       setup: isValidUser(userData),
+      firstLogin: false,
     });
 
     // Remove the login code from the current URL
@@ -212,6 +214,7 @@ export const AuthenticationProvider = (props: {
       orcid: token.orcid,
       token: token.token,
       setup: isValidUser(user),
+      firstLogin: true,
     });
 
     return {

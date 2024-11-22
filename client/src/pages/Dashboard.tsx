@@ -360,14 +360,16 @@ const Dashboard = () => {
 
   return (
     <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
-      <Joyride
-        continuous
-        showProgress
-        steps={walkthroughSteps}
-        beaconComponent={WalkthroughBeacon}
-        tooltipComponent={WalkthroughTooltip}
-      />
       <Flex direction={"column"} w={"100%"} p={"2"} gap={"2"}>
+        {token.firstLogin === true && (
+          <Joyride
+            continuous
+            showProgress
+            steps={walkthroughSteps}
+            beaconComponent={WalkthroughBeacon}
+            tooltipComponent={WalkthroughTooltip}
+          />
+        )}
         <Flex direction={"column"} basis={"70%"} gap={"2"}>
           <Flex direction={"row"} gap={"2"} align={"center"}>
             <Flex direction={"column"}>

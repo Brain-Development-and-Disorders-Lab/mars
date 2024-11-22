@@ -494,6 +494,7 @@ export type IAuth = {
   orcid: string; // ORCiD value
   token: string; // ORCiD token
   setup: boolean; // Flag if application setup is complete
+  firstLogin?: boolean; // (Optional) Flag if this is the first login
 };
 
 export type Token = IAuth & {
