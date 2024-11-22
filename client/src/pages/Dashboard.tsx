@@ -29,7 +29,7 @@ import Linky from "@components/Linky";
 import ActorTag from "@components/ActorTag";
 import WalkthroughBeacon from "@components/WalkthroughBeacon";
 import WalkthroughTooltip from "@components/WalkthroughTooltip";
-import Joyride from "react-joyride";
+import Joyride, { ACTIONS, CallBackProps, EVENTS } from "react-joyride";
 
 // Existing and custom types
 import {
@@ -116,7 +116,7 @@ const Dashboard = () => {
 
   // Workspace context
   const { workspace } = useWorkspace();
-  const { token } = useAuthentication();
+  const { token, setToken } = useAuthentication();
 
   // Page data
   const [entityData, setEntityData] = useState(
@@ -358,6 +358,23 @@ const Dashboard = () => {
     },
   ];
 
+  /**
+   * Handle events during the Joyride walkthrough
+   * @param {CallBackProps} data Joyride callback function data
+   */
+  const handleJoyrideCallback = (data: CallBackProps) => {
+    const { action, type } = data;
+    if (action === ACTIONS.SKIP || type === EVENTS.TOUR_END) {
+      // Update the token and set the `firstLogin` flag to `false`
+      setToken({
+        orcid: token.orcid,
+        token: token.token,
+        setup: token.setup,
+        firstLogin: false,
+      });
+    }
+  };
+
   return (
     <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
       <Flex direction={"column"} w={"100%"} p={"2"} gap={"2"}>
@@ -366,6 +383,7 @@ const Dashboard = () => {
             continuous
             showProgress
             steps={walkthroughSteps}
+            callback={handleJoyrideCallback}
             beaconComponent={WalkthroughBeacon}
             tooltipComponent={WalkthroughTooltip}
           />

@@ -18,6 +18,7 @@ import { usePostHog } from "posthog-js/react";
 
 type AuthenticationContextValue = {
   token: IAuth;
+  setToken: (token: IAuth) => void;
   login: (code: string) => Promise<IResponseMessage>;
   logout: () => void;
   setup: (user: Partial<UserModel>) => Promise<IResponseMessage>;
@@ -226,6 +227,7 @@ export const AuthenticationProvider = (props: {
   const value = useMemo(
     () => ({
       token,
+      setToken,
       login,
       logout,
       setup,
