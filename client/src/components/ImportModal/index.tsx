@@ -1173,6 +1173,7 @@ const ImportModal = (props: ImportModalProps) => {
                         size={"sm"}
                         rounded={"md"}
                         placeholder={"Defined in JSON"}
+                        isDisabled
                         isReadOnly
                       />
                       <FormHelperText>
@@ -1185,6 +1186,7 @@ const ImportModal = (props: ImportModalProps) => {
                         size={"sm"}
                         rounded={"md"}
                         placeholder={"Defined in JSON"}
+                        isDisabled
                         isReadOnly
                       />
                       <FormHelperText>
