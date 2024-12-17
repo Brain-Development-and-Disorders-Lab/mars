@@ -408,12 +408,14 @@ export class Data {
    * Import an Entity JSON file or set of objects
    * @param {IFile[]} file JSON file for import
    * @param project Project identifier to add Entities to (if any)
+   * @param {AttributeModel[]} attributes Collection of Attributes to add to each Entity (if specified)
    * @param context Request context containing user and Workspace identifier
    * @return {Promise<IResponseMessage>}
    */
   static importEntityJSON = async (
     file: IFile[],
     project: string,
+    attributes: AttributeModel[],
     context: Context,
   ): Promise<IResponseMessage> => {
     const { createReadStream, mimetype } = await file[0];
@@ -436,9 +438,10 @@ export class Data {
       const projectExists = await Projects.exists(project);
 
       for await (const entity of parsed.entities as EntityModel[]) {
-        // Splice in the owner and Project information
+        // Splice in the owner, Project, and Attributes
         entity.owner = context.user;
         entity.projects = projectExists ? [project] : [];
+        entity.attributes = [..._.cloneDeep(entity.attributes), ...attributes];
 
         // Check if Entity exists and update or create as required
         const exists = await Entities.exists(entity._id);

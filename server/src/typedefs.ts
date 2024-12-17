@@ -497,7 +497,7 @@ export const typedefs = `#graphql
 
     # Data import JSON mutations
     reviewEntityJSON(file: [Upload]!): ResponseDataEntityReview
-    importEntityJSON(file: [Upload]!, project: String): ResponseMessage
+    importEntityJSON(file: [Upload]!, project: String, attributes: [AttributeInput]): ResponseMessage
     importTemplateJSON(file: [Upload]!): ResponseMessage
 
     # API mutations
