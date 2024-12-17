@@ -236,8 +236,16 @@ const ImportModal = (props: ImportModalProps) => {
   ] = useMutation(REVIEW_ENTITY_JSON);
 
   const IMPORT_ENTITY_JSON = gql`
-    mutation ImportEntityJSON($file: [Upload]!, $project: String) {
-      importEntityJSON(file: $file, project: $project) {
+    mutation ImportEntityJSON(
+      $file: [Upload]!
+      $project: String
+      $attributes: [AttributeInput]
+    ) {
+      importEntityJSON(
+        file: $file
+        project: $project
+        attributes: $attributes
+      ) {
         success
         message
       }
@@ -572,6 +580,7 @@ const ImportModal = (props: ImportModalProps) => {
       variables: {
         file: file,
         project: projectField,
+        attributes: attributesField,
       },
     });
     setContinueLoading(importEntityJSONLoading);
@@ -1164,6 +1173,7 @@ const ImportModal = (props: ImportModalProps) => {
                         size={"sm"}
                         rounded={"md"}
                         placeholder={"Defined in JSON"}
+                        isDisabled
                         isReadOnly
                       />
                       <FormHelperText>
@@ -1176,6 +1186,7 @@ const ImportModal = (props: ImportModalProps) => {
                         size={"sm"}
                         rounded={"md"}
                         placeholder={"Defined in JSON"}
+                        isDisabled
                         isReadOnly
                       />
                       <FormHelperText>

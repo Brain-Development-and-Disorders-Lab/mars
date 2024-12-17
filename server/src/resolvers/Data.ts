@@ -1,5 +1,6 @@
 // Custom types
 import {
+  AttributeModel,
   Context,
   EntityImportReview,
   IColumnMapping,
@@ -92,12 +93,17 @@ export const DataResolvers = {
     // Import JSON file
     importEntityJSON: async (
       _parent: IResolverParent,
-      args: { file: IFile[]; project: string },
+      args: { file: IFile[]; project: string; attributes: AttributeModel[] },
       context: Context,
     ): Promise<IResponseMessage> => {
       // Authenticate the provided context
       await Authentication.authenticate(context);
-      return await Data.importEntityJSON(args.file, args.project, context);
+      return await Data.importEntityJSON(
+        args.file,
+        args.project,
+        args.attributes,
+        context,
+      );
     },
 
     // Import Template JSON file
