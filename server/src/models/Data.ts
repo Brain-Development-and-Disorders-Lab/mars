@@ -438,14 +438,25 @@ export class Data {
       const projectExists = await Projects.exists(project);
 
       for await (const entity of parsed.entities as EntityModel[]) {
-        // Splice in the owner, Project, and Attributes
-        entity.owner = context.user;
-        entity.projects = projectExists ? [project] : [];
-        entity.attributes = [..._.cloneDeep(entity.attributes), ...attributes];
+        // Apply various Entity data modifications depending on provided import details
+        if (!_.isEqual(entity.owner, context.user)) {
+          // Set the owner to be the user importing the Entity
+          entity.owner = context.user;
+        }
+
+        if (projectExists && !_.includes(entity.projects, project)) {
+          // If the Project exists, add it to the collection of Projects
+          entity.projects.push(project);
+        }
+
+        if (attributes.length > 0) {
+          // Add the new Attributes
+          entity.attributes.push(...attributes);
+        }
 
         // Check if Entity exists and update or create as required
-        const exists = await Entities.exists(entity._id);
-        if (exists) {
+        const entityExists = await Entities.exists(entity._id);
+        if (entityExists) {
           // Update the Entity if it already exists
           const result = await Entities.update(entity);
           if (!result.success) {
