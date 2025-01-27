@@ -40,6 +40,7 @@ import {
   Stepper,
   Text,
   VStack,
+  useBreakpoint,
   useDisclosure,
   useSteps,
   useToast,
@@ -102,6 +103,7 @@ const Entity = () => {
 
   // Navigation and routing
   const navigate = useNavigate();
+  const breakpoint = useBreakpoint();
   const blocker = useBlocker(({ currentLocation, nextLocation }) => {
     // Check if this is during the `create` mutation
     if (isSubmitting) {
@@ -408,7 +410,9 @@ const Entity = () => {
 
               <Box flexShrink={"0"}>
                 <StepTitle>{step.title}</StepTitle>
-                <StepDescription>{step.description}</StepDescription>
+                {breakpoint !== "base" && (
+                  <StepDescription>{step.description}</StepDescription>
+                )}
               </Box>
 
               <StepSeparator />
@@ -421,11 +425,11 @@ const Entity = () => {
           <Flex direction={"row"} gap={"0"} wrap={"wrap"}>
             <Flex
               direction={"column"}
+              w={{ base: "100%", md: "50%" }}
               p={"2"}
               pt={{ base: "0", lg: "2" }}
               gap={"2"}
               grow={"1"}
-              basis={"50%"}
               rounded={"md"}
             >
               <Flex

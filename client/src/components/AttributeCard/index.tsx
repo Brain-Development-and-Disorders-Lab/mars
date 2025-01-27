@@ -57,7 +57,11 @@ const AttributeCard = (props: AttributeCardProps) => {
       <CardBody p={"2"} pb={"0"}>
         <Flex direction={"column"} gap={"2"}>
           <Flex direction={"row"} gap={"2"} wrap={["wrap", "nowrap"]}>
-            <Flex direction={"column"} gap={"2"} basis={"50%"}>
+            <Flex
+              direction={"column"}
+              gap={"2"}
+              w={{ base: "100%", md: "50%" }}
+            >
               <FormControl isRequired isInvalid={isNameError}>
                 <FormLabel fontSize={"sm"}>Name</FormLabel>
                 <Input
@@ -71,14 +75,14 @@ const AttributeCard = (props: AttributeCardProps) => {
               </FormControl>
 
               <Flex direction={"column"} gap={"1"}>
-                <Text fontWeight={"bold"}>Owner</Text>
+                <Text fontSize={"sm"}>Owner</Text>
                 <Flex>
                   <ActorTag orcid={props.owner} fallback={"Unknown User"} />
                 </Flex>
               </Flex>
             </Flex>
 
-            <Flex basis={"50%"}>
+            <Flex w={{ base: "100%", md: "50%" }}>
               <FormControl isRequired isInvalid={isDescriptionError} w={"100%"}>
                 <FormLabel fontSize={"sm"}>Description</FormLabel>
                 <MDEditor
