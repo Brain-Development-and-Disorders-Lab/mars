@@ -483,8 +483,13 @@ const User = () => {
       </Flex>
 
       <Flex direction={"column"} gap={"2"} p={"2"}>
-        <Flex direction={"row"} gap={"2"}>
-          <Flex direction={"column"} p={"0"} gap={"2"} grow={"1"} basis={"50%"}>
+        <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
+          <Flex
+            direction={"column"}
+            p={"0"}
+            gap={"2"}
+            w={{ base: "100%", md: "40%" }}
+          >
             {/* User details */}
             <Flex
               direction={"column"}
@@ -538,7 +543,13 @@ const User = () => {
             </Flex>
           </Flex>
 
-          <Flex direction={"column"} p={"0"} gap={"2"} grow={"1"} basis={"50%"}>
+          <Flex
+            direction={"column"}
+            p={"0"}
+            gap={"2"}
+            grow={"1"}
+            w={{ base: "100%", md: "50%" }}
+          >
             <Flex
               direction={"column"}
               p={"2"}
