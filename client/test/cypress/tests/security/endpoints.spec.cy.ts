@@ -1,7 +1,7 @@
 describe("Security, check endpoint access", () => {
   beforeEach(() => {
     // Before each test, log out and clear localStorage
-    cy.get("#workspaceSwitcher > button").click();
+    cy.get("#workspaceSwitcherDesktop > button").click();
     cy.get("#accountLogoutItem").parent().click();
     cy.clearLocalStorage();
   });

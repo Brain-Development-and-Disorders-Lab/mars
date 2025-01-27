@@ -327,7 +327,7 @@ const Dashboard = () => {
       title: "Templates",
     },
     {
-      target: "#workspaceSwitcher",
+      target: "#workspaceSwitcherDesktop",
       content:
         "This shows all Workspaces you have access to and allows you to edit Workspace and account information.",
       title: "Workspace Switcher",

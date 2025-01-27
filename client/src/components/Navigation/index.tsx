@@ -81,7 +81,7 @@ const Navigation = () => {
         {/* Workspace menu items */}
         <Flex direction={"column"} align={"self-start"} gap={"6"}>
           <Flex direction={"column"} gap={"2"} w={"100%"}>
-            <WorkspaceSwitcher />
+            <WorkspaceSwitcher id={"workspaceSwitcherDesktop"} />
             <SearchBox resultType={"entity"} />
           </Flex>
 
@@ -322,7 +322,7 @@ const Navigation = () => {
         </Menu>
 
         {/* Workspace switcher */}
-        <WorkspaceSwitcher />
+        <WorkspaceSwitcher id={"workspaceSwitcherMobile"} />
       </Flex>
 
       {/* `ImportModal` component */}
