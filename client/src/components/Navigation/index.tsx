@@ -249,7 +249,7 @@ const Navigation = () => {
         display={{ lg: "none" }}
         justify={"left"}
         alignContent={"center"}
-        h={"5vh"}
+        h={"100%"}
         w={"100%"}
         bg={"#f2f2f2"}
       >
@@ -258,7 +258,8 @@ const Navigation = () => {
             as={IconButton}
             aria-label={"Open Menu"}
             display={{ base: "flex", lg: "none" }}
-            size={"sm"}
+            size={"md"}
+            bg={"white"}
             justifyContent={"center"}
             icon={<Icon name={"list"} />}
           />
@@ -301,6 +302,18 @@ const Navigation = () => {
                 onClick={() => navigate("/create")}
               >
                 Create
+              </MenuItem>
+              <MenuItem
+                icon={<Icon name={"scan"} />}
+                onClick={() => {
+                  // Capture event
+                  posthog.capture("scan_modal_open");
+
+                  onScanOpen();
+                }}
+                isDisabled={workspace === "" || _.isUndefined(workspace)}
+              >
+                Scan
               </MenuItem>
             </MenuGroup>
           </MenuList>
