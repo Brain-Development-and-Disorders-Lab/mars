@@ -166,7 +166,7 @@ const CreateWorkspace = () => {
 
   return (
     <Content>
-      <Flex gap={"2"} direction={"column"}>
+      <Flex direction={"column"}>
         {/* Page header */}
         <Flex
           direction={"row"}
@@ -207,7 +207,7 @@ const CreateWorkspace = () => {
           </Flex>
         </Flex>
 
-        <Flex direction={"column"} p={"2"} gap={"2"}>
+        <Flex direction={"column"} p={"2"} gap={"2"} grow={"1"}>
           {workspace === "" ? (
             <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.400"}>
               Before you can get started using Metadatify, you must be invited
@@ -224,164 +224,161 @@ const CreateWorkspace = () => {
             Use the Workspace switcher in the navigation bar to view all
             Workspaces and switch the active Workspace.
           </Text>
+        </Flex>
 
-          <Flex direction={"row"} gap={"2"}>
+        <Flex direction={"row"} p={"2"} gap={"2"} wrap={"wrap"}>
+          <Flex
+            direction={"column"}
+            p={"0"}
+            gap={"2"}
+            w={{ base: "100%", md: "50%" }}
+          >
             {/* Workspace name */}
             <Flex
               direction={"column"}
-              p={"0"}
+              h={"fit-content"}
+              p={"2"}
               gap={"2"}
-              grow={"1"}
-              basis={"50%"}
+              rounded={"md"}
+              border={"1px"}
+              borderColor={"gray.300"}
             >
-              <Flex
-                direction={"column"}
-                p={"2"}
-                gap={"2"}
-                rounded={"md"}
-                border={"1px"}
-                borderColor={"gray.300"}
-              >
-                <FormControl isRequired>
-                  <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
-                    Name
-                  </FormLabel>
-                  <Input
-                    id={"modalWorkspaceName"}
-                    size={"sm"}
-                    rounded={"md"}
-                    placeholder={"Name"}
-                    value={name}
-                    onChange={(event) => setName(event.target.value)}
-                  />
-                </FormControl>
-              </Flex>
-              <Flex
-                direction={"column"}
-                p={"2"}
-                gap={"2"}
-                rounded={"md"}
-                border={"1px"}
-                borderColor={"gray.300"}
-              >
-                <Text fontSize={"sm"} fontWeight={"semibold"}>
-                  Collaborators
-                </Text>
-                <Text
-                  fontSize={"sm"}
-                  fontWeight={"semibold"}
-                  color={"gray.400"}
-                >
-                  Add Collaborators by their ORCiD, and they will have access to
-                  this Workspace when they next sign into Metadatify.
-                </Text>
-                <Flex direction={"row"} gap={"2"} align={"center"}>
-                  <FormControl>
-                    <Input
-                      placeholder={"ORCiD"}
-                      rounded={"md"}
-                      size={"sm"}
-                      value={collaborator}
-                      onChange={(event) => setCollaborator(event.target.value)}
-                    />
-                  </FormControl>
-                  <Spacer />
-                  <Button
-                    colorScheme={"green"}
-                    rightIcon={<Icon name={"add"} />}
-                    size={"sm"}
-                    isDisabled={collaborator === ""}
-                    onClick={() => {
-                      // Prevent adding empty or duplicate collaborator
-                      if (
-                        collaborator &&
-                        !collaborators.includes(collaborator)
-                      ) {
-                        setCollaborators((collaborators) => [
-                          ...collaborators,
-                          collaborator,
-                        ]);
-                        setCollaborator("");
-                      }
-                    }}
-                  >
-                    Add
-                  </Button>
-                </Flex>
-                <Flex
-                  w={"100%"}
-                  justify={collaborators.length === 0 ? "center" : ""}
-                  align={"center"}
-                  minH={collaborators.length > 0 ? "fit-content" : "200px"}
-                >
-                  {collaborators.length === 0 ? (
-                    <Text color={"gray.400"} fontWeight={"semibold"}>
-                      No Collaborators
-                    </Text>
-                  ) : (
-                    <VStack w={"100%"}>
-                      {collaborators.map((collaborator, index) => (
-                        <Flex
-                          key={index}
-                          align={"center"}
-                          gap={"2"}
-                          py={"2"}
-                          w={"100%"}
-                        >
-                          <Tag colorScheme={"green"}>{collaborator}</Tag>
-                          <Spacer />
-                          <IconButton
-                            size={"sm"}
-                            aria-label={"Remove collaborator"}
-                            icon={<Icon name="delete" />}
-                            colorScheme={"red"}
-                            onClick={() =>
-                              setCollaborators((collaborators) =>
-                                collaborators.filter(
-                                  (existing) => existing !== collaborator,
-                                ),
-                              )
-                            }
-                          />
-                        </Flex>
-                      ))}
-                    </VStack>
-                  )}
-                </Flex>
-              </Flex>
+              <FormControl isRequired>
+                <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
+                  Name
+                </FormLabel>
+                <Input
+                  id={"modalWorkspaceName"}
+                  size={"sm"}
+                  rounded={"md"}
+                  placeholder={"Name"}
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                />
+              </FormControl>
             </Flex>
 
             {/* Workspace description */}
             <Flex
               direction={"column"}
-              p={"0"}
+              h={"fit-content"}
+              p={"2"}
               gap={"2"}
-              grow={"1"}
-              basis={"50%"}
+              rounded={"md"}
+              border={"1px"}
+              borderColor={"gray.300"}
             >
-              <Flex
-                direction={"column"}
-                p={"2"}
-                gap={"2"}
-                rounded={"md"}
-                border={"1px"}
-                borderColor={"gray.300"}
-              >
+              <FormControl>
+                <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
+                  Description
+                </FormLabel>
+                <MDEditor
+                  id={"modalWorkspaceDescription"}
+                  style={{ width: "100%" }}
+                  value={description}
+                  preview={"edit"}
+                  extraCommands={[]}
+                  onChange={(value) => {
+                    setDescription(value || "");
+                  }}
+                />
+              </FormControl>
+            </Flex>
+          </Flex>
+
+          <Flex
+            direction={"column"}
+            p={"0"}
+            gap={"2"}
+            wrap={"wrap"}
+            w={{ base: "100%", md: "40%" }}
+          >
+            {/* Workspace collaborators */}
+            <Flex
+              direction={"column"}
+              h={"fit-content"}
+              p={"2"}
+              gap={"2"}
+              rounded={"md"}
+              border={"1px"}
+              borderColor={"gray.300"}
+            >
+              <Text fontSize={"sm"} fontWeight={"semibold"}>
+                Collaborators
+              </Text>
+              <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.400"}>
+                Add Collaborators by their ORCiD, and they will have access to
+                this Workspace when they next sign into Metadatify.
+              </Text>
+              <Flex direction={"row"} gap={"2"} align={"center"}>
                 <FormControl>
-                  <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
-                    Description
-                  </FormLabel>
-                  <MDEditor
-                    id={"modalWorkspaceDescription"}
-                    style={{ width: "100%" }}
-                    value={description}
-                    preview={"edit"}
-                    extraCommands={[]}
-                    onChange={(value) => {
-                      setDescription(value || "");
-                    }}
+                  <Input
+                    placeholder={"ORCiD"}
+                    rounded={"md"}
+                    size={"sm"}
+                    value={collaborator}
+                    onChange={(event) => setCollaborator(event.target.value)}
                   />
                 </FormControl>
+                <Spacer />
+                <Button
+                  colorScheme={"green"}
+                  rightIcon={<Icon name={"add"} />}
+                  size={"sm"}
+                  isDisabled={collaborator === ""}
+                  onClick={() => {
+                    // Prevent adding empty or duplicate collaborator
+                    if (collaborator && !collaborators.includes(collaborator)) {
+                      setCollaborators((collaborators) => [
+                        ...collaborators,
+                        collaborator,
+                      ]);
+                      setCollaborator("");
+                    }
+                  }}
+                >
+                  Add
+                </Button>
+              </Flex>
+              <Flex
+                w={"100%"}
+                justify={collaborators.length === 0 ? "center" : ""}
+                align={"center"}
+                minH={collaborators.length > 0 ? "fit-content" : "200px"}
+              >
+                {collaborators.length === 0 ? (
+                  <Text color={"gray.400"} fontWeight={"semibold"}>
+                    No Collaborators
+                  </Text>
+                ) : (
+                  <VStack w={"100%"}>
+                    {collaborators.map((collaborator, index) => (
+                      <Flex
+                        key={index}
+                        align={"center"}
+                        gap={"2"}
+                        py={"2"}
+                        w={"100%"}
+                      >
+                        <Tag colorScheme={"green"}>{collaborator}</Tag>
+                        <Spacer />
+                        <IconButton
+                          size={"sm"}
+                          aria-label={"Remove collaborator"}
+                          icon={<Icon name="delete" />}
+                          colorScheme={"red"}
+                          onClick={() =>
+                            setCollaborators((collaborators) =>
+                              collaborators.filter(
+                                (existing) => existing !== collaborator,
+                              ),
+                            )
+                          }
+                        />
+                      </Flex>
+                    ))}
+                  </VStack>
+                )}
               </Flex>
             </Flex>
           </Flex>
