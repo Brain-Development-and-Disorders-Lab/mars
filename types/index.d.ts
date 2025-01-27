@@ -371,6 +371,11 @@ export type ScanModalProps = {
   onClose: () => void;
 };
 
+// `Scanner` props
+export type ScannerProps = Html5QrcodeCameraScanConfig & {
+  verbose: boolean;
+};
+
 // Icon component
 export type IconNames =
   // Default
@@ -576,3 +581,10 @@ export type TemplateMetrics = IContentMetrics;
 export type WorkspaceMetrics = {
   collaborators: number;
 };
+
+export interface Html5QrcodeScannerConfig {
+  fps?: number;
+  qrbox?: number;
+  aspectRatio?: number;
+  disableFlip?: boolean;
+}
