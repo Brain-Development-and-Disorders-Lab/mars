@@ -588,7 +588,7 @@ const Dashboard = () => {
           {/* Activity */}
           <Flex
             direction={"column"}
-            maxW={"sm"}
+            maxW={{ lg: "md" }}
             p={"2"}
             gap={"2"}
             grow={"1"}
