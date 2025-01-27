@@ -16,94 +16,21 @@
 - Edit history and version restore for metadata entries
 - User accounts handled via [ORCiD](https://orcid.org) sign-in
 
-## Concepts
+## Documentation
 
-### Representing Metadata
+The [wiki](https://github.com/Brain-Development-and-Disorders-Lab/mars/wiki) is actively maintained that covers the concepts introduced by Metadatify and how to use the platform. Documentation for API usage and self-hosting is coming soon.
 
-#### Entity
+## Development
 
-> [!NOTE]
-> "Entity" refers to the object that the metadata is describing.
+### Install dependencies
 
-Everything is recognized as an "Entity", from physical brain slices to antibodies. Specific metadata values within Entities are organized using "Attributes" (see below), and Attributes contain typed data "Values".
+1. Install dependencies for the overall project by running `yarn` in the root directory of the repository. These dependencies are required to run `husky` and setup the pre-commit hooks that run `prettier` prior to any git commits.
+2. Install dependencies for the client by running `yarn` in the `/client` directory of the repository.
+3. Install dependencies for the server by running `yarn` in the `/server` directory of the repository.
 
-Entities have the following components that are able to be user-defined:
+### Setup environment variables
 
-- `name`: This is the identifying name for the Entity. This is not as powerful as an ID and is not required to be unique. MARS uses an ID system behind-the-scenes.
-- `owner`: The creator of the Entity, typically assigned to the ORCiD of the user creating the Entity.
-- `created`: The date that the Entity came into existence or was created.
-- `description`: A text description of the Entity. This should not be used to store concrete metadata. Metadata should be expressed later as Attributes.
-- `projects`: The collection of Projects that the Entity is a member of.
-- `origins`: The collection of Origin Entities related to this Entity. If this Entity was created from another Entity, the other Entity is the Origin. This is often referred to in other contexts as the "parent".
-- `products`: The collection of Product Entities related to this Entity. If this Entity has created other Entities, the other Entities are the Products. These are often referred to in other contexts as "children".
-- `attributes`: Attributes are used to specify the Entity metadata values. Attributes are discussed further below.
-- `attachments`: Images or PDF files can be attached to Entities.
-
-![Entity](website/src/img/Entity.png)
-
-#### Attribute
-
-> [!TIP]
-> All metadata should be expressed using Attributes.
-
-Attributes are the method of organizing Entity metadata. Attributes contain types of metadata stored as key-value pairs known as `values`. Values can be of the following types:
-
-- `string`: A text value of any length.
-- `number`: A numerical value.
-- `date`: A date or timestamp.
-- `url`: A link to external or internal online resource.
-- `entity`: A "soft" relation to another Entity. This does not have the significance of an Origin or Product Entity in the overall system but could be used to express a similar concept.
-- `select`: A drop-down containing a customizable set of options. The set of options can be customized before and after the value is created.
-
-Template Attributes can be created, to allow metadata structures and values to be reused across Entities.
-
-![Attribute](website/src/img/Attribute.png)
-
-### Organizing Metadata
-
-#### Projects
-
-Projects are collections of Entities. Entities can be added and removed from Projects. Projects can be used to export large numbers of Entities.
-
-#### Workspaces
-
-A Workspace is a collection of Entities, Attributes, and Projects. Access is managed using the user's ORCiD, and users can be added and removed from Workspace access. Activity is tracked across a Workspace, including modifications made to any Entities, Attributes, and Projects.
-
-Currently, access to a Workspace grants the user access to all Entities, Attributes, and Projects within that Workspace.
-
-## Testing
-
-> [!WARNING]
-> Most testing will erase the local MongoDB database!
-
-### Client
-
-To run component tests, run `yarn test:components` in the `/client` directory.
-
-[Cypress](https://www.cypress.io/) is used for testing the client UI. Before running client tests, add an `.env` file in the `/client` directory with the following variables:
-
-- `CONNECTION_STRING`: The local MongoDB database connection string, update the username and password.
-
-An example `.env` file is shown below:
-
-```Text
-# Database variables
-CONNECTION_STRING=mongodb://<username>:<password>@localhost:27017/
-```
-
-Once the `.env` file has been configured, run `yarn test:ui` in the `/client` directory to run all Cypress tests in headless mode.
-
-To run component tests, run `yarn test` in the `/client` directory. To run Cypress tests, run `yarn cypress run` in the root `/` directory of the repository. Ensure the server is running, otherwise the Cypress tests will fail.
-
-### Server
-
-To run unit tests, run `yarn test` in the `/server` directory.
-
-## Deployment
-
-### Specify environment variables
-
-Before starting the Docker containers, three environment variables must be configured in an `.env` file that should be placed in the `/server` directory.
+Metadatify uses Docker to containerize the server components. Before starting the Docker containers, three environment variables must be configured in an `.env` file that should be placed in the `/server` directory.
 
 The `.env` file must have the following variables:
 
@@ -131,7 +58,7 @@ CLIENT_ID=<ORCiD client ID>
 CLIENT_SECRET=<ORCiD client secret>
 ```
 
-### Starting the Docker containers
+### Starting Docker containers
 
 To start a fresh instance of the MongoDB database, use `docker compose`:
 
@@ -141,11 +68,39 @@ docker compose up --build
 
 This command will build all required containers before starting the containers required by the server. The MongoDB database can be browsed using the `mongo-express` interface accessible at `localhost:8081`.
 
-### Starting the MARS client and server
+### Running Metadatify client and server
 
-Install all client dependencies by running `yarn` in the `/client` directory. Install all server dependencies by running `yarn` in the `/server` directory.
+To start the client, run `yarn start` in the `/client` directory. Start the server by running `yarn build` and then `yarn start` in the `/server` directory. Both the client and server should be running alongside the Docker containers before attempting to access the interface at `localhost:8080`.
 
-To start the client, run `yarn start` in the `/client` directory. Start the server by running `yarn build` and `yarn start` in the `/server` directory. Both the client and server should be running alongside the Docker containers before attempting to access the interface at `localhost:8080`.
+## Testing
+
+Metadatify includes Cypress tests and component tests for the client, and the server includes unit tests using Jest.
+
+### Testing - Client
+
+To run component tests, run `yarn test:components` in the `/client` directory.
+
+[Cypress](https://www.cypress.io/) is used for testing the client UI. Before running client tests, add an `.env` file in the `/client` directory with the following variables:
+
+- `CONNECTION_STRING`: The local MongoDB database connection string, update the username and password.
+
+An example `.env` file is shown below:
+
+```Text
+# Database variables
+CONNECTION_STRING=mongodb://<username>:<password>@localhost:27017/
+```
+
+Once the `.env` file has been configured, run `yarn test:ui` in the `/client` directory to run all Cypress tests in headless mode.
+
+To run component tests, run `yarn test` in the `/client` directory. To run Cypress tests, run `yarn cypress run` in the root `/` directory of the repository. Ensure the server is running, otherwise the Cypress tests will fail.
+
+### Testing - Server
+
+> [!WARNING]
+> Testing the server will erase the local MongoDB database!
+
+To run unit tests, run `yarn test` in the `/server` directory.
 
 ## Acknowledgements
 
