@@ -56,7 +56,7 @@ const Navigation = () => {
 
   return (
     <Flex w={"100%"} p={"2"} bg={"#f2f2f2"}>
-      {/* Main navigation group */}
+      {/* Desktop navigation group */}
       <Flex
         direction={"column"}
         display={{ base: "none", lg: "flex" }}
@@ -244,15 +244,18 @@ const Navigation = () => {
         </Flex>
       </Flex>
 
-      {/* Icon to show menu in responsive context */}
+      {/* Mobile navigation group */}
       <Flex
-        display={{ lg: "none" }}
-        justify={"left"}
-        alignContent={"center"}
+        display={{ base: "flex", lg: "none" }}
+        direction={"row"}
+        align={"center"}
         h={"100%"}
         w={"100%"}
         bg={"#f2f2f2"}
+        justify={"space-between"}
+        gap={"2"}
       >
+        {/* Navigation items */}
         <Menu>
           <MenuButton
             as={IconButton}
@@ -260,7 +263,6 @@ const Navigation = () => {
             display={{ base: "flex", lg: "none" }}
             size={"md"}
             bg={"white"}
-            justifyContent={"center"}
             icon={<Icon name={"list"} />}
           />
           <MenuList>
@@ -318,6 +320,9 @@ const Navigation = () => {
             </MenuGroup>
           </MenuList>
         </Menu>
+
+        {/* Workspace switcher */}
+        <WorkspaceSwitcher />
       </Flex>
 
       {/* `ImportModal` component */}

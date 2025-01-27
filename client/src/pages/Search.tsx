@@ -1,5 +1,5 @@
 // React
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 // Existing and custom components
 import {
@@ -18,6 +18,7 @@ import {
   Tabs,
   Tag,
   Text,
+  useBreakpoint,
   useToast,
 } from "@chakra-ui/react";
 import { Content } from "@components/Container";
@@ -50,10 +51,12 @@ const Search = () => {
   const [isError, setIsError] = useState(false);
 
   const navigate = useNavigate();
+  const breakpoint = useBreakpoint();
   const toast = useToast();
 
   // Store results as a set of IDs
   const [results, setResults] = useState([] as Partial<EntityModel>[]);
+  const [visibleColumns, setVisibleColumns] = useState({});
 
   // Include archived Entities
   const [showArchived, setShowArchived] = useState(false);
@@ -137,6 +140,19 @@ const Search = () => {
     setHasSearched(false);
     setResults([]);
   };
+
+  // Effect to adjust column visibility
+  useEffect(() => {
+    if (
+      _.isEqual(breakpoint, "sm") ||
+      _.isEqual(breakpoint, "base") ||
+      _.isUndefined(breakpoint)
+    ) {
+      setVisibleColumns({ description: false, owner: false, created: false });
+    } else {
+      setVisibleColumns({});
+    }
+  }, [breakpoint]);
 
   const searchResultColumnHelper = createColumnHelper<EntityModel>();
   const searchResultColumns = [
@@ -350,27 +366,29 @@ const Search = () => {
 
                   <Spacer />
 
-                  <Flex gap={"2"} align={"center"}>
-                    <Text
-                      fontWeight={"semibold"}
-                      fontSize={"sm"}
-                      color={"gray.800"}
-                    >
-                      Options:
-                    </Text>
-                    <Switch
-                      colorScheme={"green"}
-                      checked={showArchived}
-                      onChange={() => setShowArchived(!showArchived)}
-                    />
-                    <Text
-                      fontWeight={"semibold"}
-                      fontSize={"sm"}
-                      color={"gray.600"}
-                    >
-                      Include Archived
-                    </Text>
-                  </Flex>
+                  {breakpoint !== "base" && (
+                    <Flex gap={"2"} align={"center"}>
+                      <Text
+                        fontWeight={"semibold"}
+                        fontSize={"sm"}
+                        color={"gray.800"}
+                      >
+                        Options:
+                      </Text>
+                      <Switch
+                        colorScheme={"green"}
+                        checked={showArchived}
+                        onChange={() => setShowArchived(!showArchived)}
+                      />
+                      <Text
+                        fontWeight={"semibold"}
+                        fontSize={"sm"}
+                        color={"gray.600"}
+                      >
+                        Include Archived
+                      </Text>
+                    </Flex>
+                  )}
 
                   <Button
                     aria-label={"Search"}
@@ -415,7 +433,7 @@ const Search = () => {
               </Heading>
               <DataTable
                 columns={searchResultColumns}
-                visibleColumns={{}}
+                visibleColumns={visibleColumns}
                 selectedRows={{}}
                 data={results}
                 showPagination
