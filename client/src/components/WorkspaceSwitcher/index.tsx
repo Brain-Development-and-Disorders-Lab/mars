@@ -35,7 +35,7 @@ import _ from "lodash";
 import { useWorkspace } from "@hooks/useWorkspace";
 import { useAuthentication } from "@hooks/useAuthentication";
 
-const WorkspaceSwitcher = () => {
+const WorkspaceSwitcher = (props: { id?: string }) => {
   const toast = useToast();
   const navigate = useNavigate();
 
@@ -243,7 +243,7 @@ const WorkspaceSwitcher = () => {
   };
 
   return (
-    <Flex id={"workspaceSwitcher"}>
+    <Flex id={props.id ? props.id : "workspaceSwitcher"}>
       <Menu isOpen={isOpen} autoSelect={false}>
         <MenuButton
           h={"100%"}

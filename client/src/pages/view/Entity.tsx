@@ -1356,7 +1356,7 @@ const Entity = () => {
               grow={"1"}
             >
               {/* "Name" field */}
-              <Flex gap={"2"} direction={"row"}>
+              <Flex gap={"2"} direction={"row"} wrap={"wrap"}>
                 <Flex direction={"column"} gap={"1"} grow={"1"}>
                   <Text fontWeight={"bold"} fontSize={"sm"}>
                     Name
@@ -1382,7 +1382,7 @@ const Entity = () => {
               </Flex>
 
               {/* "Created" and "Owner" fields */}
-              <Flex gap={"2"} direction={"row"} w={"100%"}>
+              <Flex gap={"2"} direction={"row"} w={"100%"} wrap={"wrap"}>
                 <Flex direction={"column"} gap={"1"}>
                   <Text fontWeight={"bold"} fontSize={"sm"}>
                     Visibility

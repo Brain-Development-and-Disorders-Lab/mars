@@ -209,11 +209,11 @@ const Project = () => {
         <Flex direction={"row"} gap={"0"} wrap={"wrap"}>
           <Flex
             direction={"column"}
+            w={{ base: "100%", md: "50%" }}
             p={"2"}
             pt={{ base: "0", lg: "2" }}
             gap={"2"}
             grow={"1"}
-            basis={"50%"}
             rounded={"md"}
           >
             <Flex

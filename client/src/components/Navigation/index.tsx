@@ -56,7 +56,7 @@ const Navigation = () => {
 
   return (
     <Flex w={"100%"} p={"2"} bg={"#f2f2f2"}>
-      {/* Main navigation group */}
+      {/* Desktop navigation group */}
       <Flex
         direction={"column"}
         display={{ base: "none", lg: "flex" }}
@@ -81,7 +81,7 @@ const Navigation = () => {
         {/* Workspace menu items */}
         <Flex direction={"column"} align={"self-start"} gap={"6"}>
           <Flex direction={"column"} gap={"2"} w={"100%"}>
-            <WorkspaceSwitcher />
+            <WorkspaceSwitcher id={"workspaceSwitcherDesktop"} />
             <SearchBox resultType={"entity"} />
           </Flex>
 
@@ -244,22 +244,25 @@ const Navigation = () => {
         </Flex>
       </Flex>
 
-      {/* Icon to show menu in responsive context */}
+      {/* Mobile navigation group */}
       <Flex
-        display={{ lg: "none" }}
-        justify={"left"}
-        alignContent={"center"}
-        h={"5vh"}
+        display={{ base: "flex", lg: "none" }}
+        direction={"row"}
+        align={"center"}
+        h={"100%"}
         w={"100%"}
         bg={"#f2f2f2"}
+        justify={"space-between"}
+        gap={"2"}
       >
+        {/* Navigation items */}
         <Menu>
           <MenuButton
             as={IconButton}
             aria-label={"Open Menu"}
             display={{ base: "flex", lg: "none" }}
-            size={"sm"}
-            justifyContent={"center"}
+            size={"md"}
+            bg={"white"}
             icon={<Icon name={"list"} />}
           />
           <MenuList>
@@ -302,9 +305,24 @@ const Navigation = () => {
               >
                 Create
               </MenuItem>
+              <MenuItem
+                icon={<Icon name={"scan"} />}
+                onClick={() => {
+                  // Capture event
+                  posthog.capture("scan_modal_open");
+
+                  onScanOpen();
+                }}
+                isDisabled={workspace === "" || _.isUndefined(workspace)}
+              >
+                Scan
+              </MenuItem>
             </MenuGroup>
           </MenuList>
         </Menu>
+
+        {/* Workspace switcher */}
+        <WorkspaceSwitcher id={"workspaceSwitcherMobile"} />
       </Flex>
 
       {/* `ImportModal` component */}

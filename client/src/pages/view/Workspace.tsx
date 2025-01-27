@@ -692,306 +692,313 @@ const Workspace = () => {
       </Flex>
 
       <Flex direction={"column"} gap={"2"} p={"2"}>
-        <Flex direction={"row"} gap={"2"}>
-          <Flex direction={"column"} p={"0"} gap={"2"} grow={"1"} basis={"50%"}>
-            {/* Workspace name */}
-            <Flex
-              direction={"column"}
-              p={"2"}
-              gap={"2"}
-              rounded={"md"}
-              bg={"gray.100"}
-            >
-              <Flex direction={"row"} gap={"2"}>
-                <Flex grow={"1"}>
-                  <FormControl isRequired>
-                    <FormLabel fontSize={"sm"} fontWeight={"semibold"} mb={"1"}>
-                      Name
-                    </FormLabel>
-                    <Input
-                      id={"modalWorkspaceName"}
-                      bg={"white"}
-                      size={"sm"}
-                      rounded={"md"}
-                      placeholder={"Name"}
-                      value={name}
-                      onChange={(event) => setName(event.target.value)}
-                    />
-                  </FormControl>
-                </Flex>
-
-                <TimestampTag timestamp={created} description={"Created"} />
-              </Flex>
-
-              {/* "Visibility" and "Owner" fields */}
-              <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
-                <Flex direction={"column"} gap={"1"}>
-                  <Text fontWeight={"bold"} fontSize={"sm"}>
-                    Visibility
-                  </Text>
-                  <VisibilityTag
-                    isPublic={isPublic}
-                    setIsPublic={setIsPublic}
-                  />
-                </Flex>
-
-                <Flex direction={"column"} gap={"1"}>
-                  <Text fontWeight={"bold"} fontSize={"sm"}>
-                    Owner
-                  </Text>
-                  <Flex>
-                    <ActorTag orcid={owner} fallback={"Unknown User"} />
-                  </Flex>
-                </Flex>
-              </Flex>
-            </Flex>
-
-            {/* Workspace collaborators */}
-            <Flex
-              direction={"column"}
-              p={"2"}
-              gap={"2"}
-              rounded={"md"}
-              border={"1px"}
-              borderColor={"gray.300"}
-            >
-              <Text fontSize={"sm"} fontWeight={"semibold"}>
-                Collaborators
-              </Text>
-              <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.400"}>
-                Add Collaborators by their ORCiD, and they will have access to
-                this Workspace when they next sign into Metadatify.
-              </Text>
-              <Flex direction={"row"} gap={"2"} align={"center"}>
-                <FormControl>
+        <Flex direction={"row"} p={"0"} gap={"2"} grow={"1"} wrap={"wrap"}>
+          {/* Workspace name */}
+          <Flex
+            direction={"column"}
+            w={{ base: "100%", md: "50%" }}
+            h={"fit-content"}
+            p={"2"}
+            gap={"2"}
+            rounded={"md"}
+            bg={"gray.100"}
+          >
+            <Flex direction={"row"} gap={"2"}>
+              <Flex grow={"1"}>
+                <FormControl isRequired>
+                  <FormLabel fontSize={"sm"} fontWeight={"semibold"} mb={"1"}>
+                    Name
+                  </FormLabel>
                   <Input
-                    placeholder={"ORCiD"}
-                    rounded={"md"}
+                    id={"modalWorkspaceName"}
+                    bg={"white"}
                     size={"sm"}
-                    value={collaborator}
-                    onChange={(event) => setCollaborator(event.target.value)}
+                    rounded={"md"}
+                    placeholder={"Name"}
+                    value={name}
+                    onChange={(event) => setName(event.target.value)}
                   />
                 </FormControl>
-                <Spacer />
-                <Button
-                  colorScheme={"green"}
-                  rightIcon={<Icon name={"add"} />}
-                  size={"sm"}
-                  isDisabled={collaborator === ""}
-                  onClick={() => {
-                    // Prevent adding empty or duplicate collaborator
-                    if (collaborator && !collaborators.includes(collaborator)) {
-                      setCollaborators((collaborators) => [
-                        ...collaborators,
-                        collaborator,
-                      ]);
-                      setCollaborator("");
-                    }
-                  }}
-                >
-                  Add
-                </Button>
               </Flex>
-              <Flex
-                w={"100%"}
-                justify={collaborators.length === 0 ? "center" : ""}
-                align={"center"}
-                minH={collaborators.length > 0 ? "fit-content" : "200px"}
-              >
-                {collaborators.length === 0 ? (
-                  <Text color={"gray.400"} fontWeight={"semibold"}>
-                    No Collaborators
-                  </Text>
-                ) : (
-                  <VStack w={"100%"} spacing={"0"}>
-                    {collaborators.map((collaborator, index) => (
-                      <Flex
-                        key={index}
-                        align={"center"}
-                        gap={"2"}
-                        py={"2"}
-                        w={"100%"}
-                      >
-                        <Flex>
-                          <ActorTag
-                            orcid={collaborator}
-                            fallback={"Unknown Collaborator"}
-                          />
-                        </Flex>
-                        <Spacer />
-                        <IconButton
-                          size={"sm"}
-                          aria-label={"Remove collaborator"}
-                          icon={
-                            <Icon
-                              name={
-                                token.orcid === collaborator
-                                  ? "b_right"
-                                  : "delete"
-                              }
-                            />
-                          }
-                          colorScheme={
-                            token.orcid === collaborator ? "orange" : "red"
-                          }
-                          onClick={() =>
-                            setCollaborators((collaborators) =>
-                              collaborators.filter(
-                                (existing) => existing !== collaborator,
-                              ),
-                            )
-                          }
-                          isDisabled={
-                            collaborator === owner && token.orcid !== owner
-                          }
-                        />
-                      </Flex>
-                    ))}
-                  </VStack>
-                )}
-              </Flex>
+
+              <TimestampTag timestamp={created} description={"Created"} />
             </Flex>
 
-            {/* Workspace Templates */}
-            <Flex
-              direction={"column"}
-              p={"2"}
-              gap={"2"}
-              rounded={"md"}
-              border={"1px"}
-              borderColor={"gray.300"}
-            >
-              <FormControl>
-                <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
-                  {showArchived ? "Archived " : ""}Templates
-                </FormLabel>
-                <Flex
-                  w={"100%"}
-                  justify={"center"}
-                  align={shownTemplates.length > 0 ? "" : "center"}
-                  minH={shownTemplates.length > 0 ? "fit-content" : "200px"}
-                >
-                  {shownTemplates.length > 0 ? (
-                    <DataTable
-                      data={shownTemplates}
-                      columns={templatesTableColumns}
-                      visibleColumns={{}}
-                      selectedRows={selectedTemplates}
-                      actions={templatesTableActions}
-                      showPagination
-                      showSelection
-                    />
-                  ) : (
-                    <Text color={"gray.400"} fontWeight={"semibold"}>
-                      No {showArchived ? "archived " : ""}Templates
-                    </Text>
-                  )}
+            {/* "Visibility" and "Owner" fields */}
+            <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
+              <Flex direction={"column"} gap={"1"}>
+                <Text fontWeight={"bold"} fontSize={"sm"}>
+                  Visibility
+                </Text>
+                <VisibilityTag isPublic={isPublic} setIsPublic={setIsPublic} />
+              </Flex>
+
+              <Flex direction={"column"} gap={"1"}>
+                <Text fontWeight={"bold"} fontSize={"sm"}>
+                  Owner
+                </Text>
+                <Flex>
+                  <ActorTag orcid={owner} fallback={"Unknown User"} />
                 </Flex>
-              </FormControl>
+              </Flex>
             </Flex>
           </Flex>
 
-          <Flex direction={"column"} p={"0"} gap={"2"} grow={"1"} basis={"50%"}>
-            {/* Workspace description */}
-            <Flex
-              direction={"column"}
-              p={"2"}
-              gap={"2"}
-              rounded={"md"}
-              border={"1px"}
-              borderColor={"gray.300"}
-            >
+          {/* Workspace description */}
+          <Flex
+            direction={"column"}
+            w={{ base: "100%", md: "50%" }}
+            p={"2"}
+            gap={"2"}
+            rounded={"md"}
+            border={"1px"}
+            borderColor={"gray.300"}
+          >
+            <FormControl>
+              <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
+                Description
+              </FormLabel>
+              <MDEditor
+                style={{ width: "100%" }}
+                value={description}
+                preview={"edit"}
+                extraCommands={[]}
+                onChange={(value) => {
+                  setDescription(value || "");
+                }}
+              />
+            </FormControl>
+          </Flex>
+        </Flex>
+
+        <Flex direction={"row"} p={"0"} gap={"2"} grow={"1"} wrap={"wrap"}>
+          {/* Workspace collaborators */}
+          <Flex
+            direction={"column"}
+            w={{ base: "100%", md: "50%" }}
+            p={"2"}
+            gap={"2"}
+            rounded={"md"}
+            border={"1px"}
+            borderColor={"gray.300"}
+          >
+            <Text fontSize={"sm"} fontWeight={"semibold"}>
+              Collaborators
+            </Text>
+            <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.400"}>
+              Add Collaborators by their ORCiD, and they will have access to
+              this Workspace when they next sign into Metadatify.
+            </Text>
+            <Flex direction={"row"} gap={"2"} align={"center"}>
               <FormControl>
-                <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
-                  Description
-                </FormLabel>
-                <MDEditor
-                  style={{ width: "100%" }}
-                  value={description}
-                  preview={"edit"}
-                  extraCommands={[]}
-                  onChange={(value) => {
-                    setDescription(value || "");
-                  }}
+                <Input
+                  placeholder={"ORCiD"}
+                  rounded={"md"}
+                  size={"sm"}
+                  value={collaborator}
+                  onChange={(event) => setCollaborator(event.target.value)}
                 />
               </FormControl>
+              <Spacer />
+              <Button
+                colorScheme={"green"}
+                rightIcon={<Icon name={"add"} />}
+                size={"sm"}
+                isDisabled={collaborator === ""}
+                onClick={() => {
+                  // Prevent adding empty or duplicate collaborator
+                  if (collaborator && !collaborators.includes(collaborator)) {
+                    setCollaborators((collaborators) => [
+                      ...collaborators,
+                      collaborator,
+                    ]);
+                    setCollaborator("");
+                  }
+                }}
+              >
+                Add
+              </Button>
             </Flex>
-
-            {/* Workspace Entities */}
             <Flex
-              direction={"column"}
-              p={"2"}
-              gap={"2"}
-              rounded={"md"}
-              border={"1px"}
-              borderColor={"gray.300"}
+              w={"100%"}
+              justify={collaborators.length === 0 ? "center" : ""}
+              align={"center"}
+              minH={collaborators.length > 0 ? "fit-content" : "200px"}
             >
-              <FormControl>
-                <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
-                  {showArchived ? "Archived " : ""}Entities
-                </FormLabel>
-                <Flex
-                  w={"100%"}
-                  justify={"center"}
-                  align={shownEntities.length > 0 ? "" : "center"}
-                  minH={shownEntities.length > 0 ? "fit-content" : "200px"}
-                >
-                  {shownEntities.length > 0 ? (
-                    <DataTable
-                      data={shownEntities}
-                      columns={entitiesTableColumns}
-                      visibleColumns={{}}
-                      selectedRows={selectedEntities}
-                      actions={entitiesTableActions}
-                      showPagination
-                      showSelection
-                    />
-                  ) : (
-                    <Text color={"gray.400"} fontWeight={"semibold"}>
-                      No {showArchived ? "archived " : ""}Entities
-                    </Text>
-                  )}
-                </Flex>
-              </FormControl>
+              {collaborators.length === 0 ? (
+                <Text color={"gray.400"} fontWeight={"semibold"}>
+                  No Collaborators
+                </Text>
+              ) : (
+                <VStack w={"100%"} spacing={"0"}>
+                  {collaborators.map((collaborator, index) => (
+                    <Flex
+                      key={index}
+                      align={"center"}
+                      gap={"2"}
+                      py={"2"}
+                      w={"100%"}
+                    >
+                      <Flex>
+                        <ActorTag
+                          orcid={collaborator}
+                          fallback={"Unknown Collaborator"}
+                        />
+                      </Flex>
+                      <Spacer />
+                      <IconButton
+                        size={"sm"}
+                        aria-label={"Remove collaborator"}
+                        icon={
+                          <Icon
+                            name={
+                              token.orcid === collaborator
+                                ? "b_right"
+                                : "delete"
+                            }
+                          />
+                        }
+                        colorScheme={
+                          token.orcid === collaborator ? "orange" : "red"
+                        }
+                        onClick={() =>
+                          setCollaborators((collaborators) =>
+                            collaborators.filter(
+                              (existing) => existing !== collaborator,
+                            ),
+                          )
+                        }
+                        isDisabled={
+                          collaborator === owner && token.orcid !== owner
+                        }
+                      />
+                    </Flex>
+                  ))}
+                </VStack>
+              )}
             </Flex>
+          </Flex>
 
-            {/* Workspace Projects */}
-            <Flex
-              direction={"column"}
-              p={"2"}
-              gap={"2"}
-              rounded={"md"}
-              border={"1px"}
-              borderColor={"gray.300"}
-            >
-              <FormControl>
-                <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
-                  {showArchived ? "Archived " : ""}Projects
-                </FormLabel>
-                <Flex
-                  w={"100%"}
-                  justify={"center"}
-                  align={shownProjects.length > 0 ? "" : "center"}
-                  minH={shownProjects.length > 0 ? "fit-content" : "200px"}
-                >
-                  {shownProjects.length > 0 ? (
-                    <DataTable
-                      data={shownProjects}
-                      columns={projectsTableColumns}
-                      visibleColumns={{}}
-                      selectedRows={selectedProjects}
-                      actions={projectsTableActions}
-                      showPagination
-                      showSelection
-                    />
-                  ) : (
-                    <Text color={"gray.400"} fontWeight={"semibold"}>
-                      No {showArchived ? "archived " : ""}Projects
-                    </Text>
-                  )}
-                </Flex>
-              </FormControl>
-            </Flex>
+          {/* Workspace Entities */}
+          <Flex
+            direction={"column"}
+            w={{ base: "100%", md: "50%" }}
+            h={"fit-content"}
+            p={"2"}
+            gap={"2"}
+            rounded={"md"}
+            border={"1px"}
+            borderColor={"gray.300"}
+          >
+            <FormControl>
+              <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
+                {showArchived ? "Archived " : ""}Entities
+              </FormLabel>
+              <Flex
+                w={"100%"}
+                justify={"center"}
+                align={shownEntities.length > 0 ? "" : "center"}
+                minH={shownEntities.length > 0 ? "fit-content" : "200px"}
+              >
+                {shownEntities.length > 0 ? (
+                  <DataTable
+                    data={shownEntities}
+                    columns={entitiesTableColumns}
+                    visibleColumns={{}}
+                    selectedRows={selectedEntities}
+                    actions={entitiesTableActions}
+                    showPagination
+                    showSelection
+                  />
+                ) : (
+                  <Text color={"gray.400"} fontWeight={"semibold"}>
+                    No {showArchived ? "archived " : ""}Entities
+                  </Text>
+                )}
+              </Flex>
+            </FormControl>
+          </Flex>
+        </Flex>
+
+        <Flex direction={"row"} p={"0"} gap={"2"} grow={"1"} wrap={"wrap"}>
+          {/* Workspace Projects */}
+          <Flex
+            direction={"column"}
+            w={{ base: "100%", md: "50%" }}
+            h={"fit-content"}
+            p={"2"}
+            gap={"2"}
+            rounded={"md"}
+            border={"1px"}
+            borderColor={"gray.300"}
+          >
+            <FormControl>
+              <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
+                {showArchived ? "Archived " : ""}Projects
+              </FormLabel>
+              <Flex
+                w={"100%"}
+                justify={"center"}
+                align={shownProjects.length > 0 ? "" : "center"}
+                minH={shownProjects.length > 0 ? "fit-content" : "200px"}
+              >
+                {shownProjects.length > 0 ? (
+                  <DataTable
+                    data={shownProjects}
+                    columns={projectsTableColumns}
+                    visibleColumns={{}}
+                    selectedRows={selectedProjects}
+                    actions={projectsTableActions}
+                    showPagination
+                    showSelection
+                  />
+                ) : (
+                  <Text color={"gray.400"} fontWeight={"semibold"}>
+                    No {showArchived ? "archived " : ""}Projects
+                  </Text>
+                )}
+              </Flex>
+            </FormControl>
+          </Flex>
+
+          {/* Workspace Templates */}
+          <Flex
+            direction={"column"}
+            w={{ base: "100%", md: "50%" }}
+            h={"fit-content"}
+            p={"2"}
+            gap={"2"}
+            rounded={"md"}
+            border={"1px"}
+            borderColor={"gray.300"}
+          >
+            <FormControl>
+              <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
+                {showArchived ? "Archived " : ""}Templates
+              </FormLabel>
+              <Flex
+                w={"100%"}
+                justify={"center"}
+                align={shownTemplates.length > 0 ? "" : "center"}
+                minH={shownTemplates.length > 0 ? "fit-content" : "200px"}
+              >
+                {shownTemplates.length > 0 ? (
+                  <DataTable
+                    data={shownTemplates}
+                    columns={templatesTableColumns}
+                    visibleColumns={{}}
+                    selectedRows={selectedTemplates}
+                    actions={templatesTableActions}
+                    showPagination
+                    showSelection
+                  />
+                ) : (
+                  <Text color={"gray.400"} fontWeight={"semibold"}>
+                    No {showArchived ? "archived " : ""}Templates
+                  </Text>
+                )}
+              </Flex>
+            </FormControl>
           </Flex>
         </Flex>
       </Flex>

@@ -869,7 +869,7 @@ const Project = () => {
               rounded={"md"}
               grow={"1"}
             >
-              <Flex direction={"row"} gap={"2"}>
+              <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
                 <Flex direction={"column"} gap={"1"} grow={"1"}>
                   <Text fontWeight={"bold"} fontSize={"sm"}>
                     Name
@@ -895,7 +895,7 @@ const Project = () => {
                 />
               </Flex>
 
-              <Flex gap={"2"} direction={"row"}>
+              <Flex gap={"2"} direction={"row"} wrap={"wrap"}>
                 <Flex direction={"column"} gap={"1"}>
                   <Text fontWeight={"bold"} fontSize={"sm"}>
                     Visibility
