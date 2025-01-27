@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   Button,
   Flex,
@@ -9,8 +9,6 @@ import {
   ModalContent,
   ModalHeader,
   ModalOverlay,
-  Spinner,
-  Text,
   useToast,
 } from "@chakra-ui/react";
 
@@ -28,6 +26,9 @@ import { usePostHog } from "posthog-js/react";
 
 // Utility functions
 import _ from "lodash";
+import Scanner from "@components/Scanner";
+import Icon from "@components/Icon";
+import { Warning } from "@components/Label";
 
 const ScanModal = (props: ScanModalProps) => {
   const posthog = usePostHog();
@@ -37,10 +38,6 @@ const ScanModal = (props: ScanModalProps) => {
   // State to manage identifier input visibility
   const [showInput, setShowInput] = useState(false);
   const [manualInputValue, setManualInputValue] = useState("");
-  const [isListening, setIsListening] = useState(false);
-
-  // Input value from the scanner
-  let scannerInputValue = "";
 
   // GraphQL query to check if Entity exists
   const ENTITY_EXISTS = gql`
@@ -62,9 +59,7 @@ const ScanModal = (props: ScanModalProps) => {
   const handleOnClose = () => {
     // Reset state
     setShowInput(false);
-    setIsListening(false);
     setManualInputValue("");
-    scannerInputValue = "";
 
     // Reset the `onkeyup` listener
     document.onkeyup = () => {
@@ -102,24 +97,12 @@ const ScanModal = (props: ScanModalProps) => {
   };
 
   /**
-   * Handle rapid input from the scanner
-   * @param {KeyboardEvent} event Keyboard input event containing keypress data
-   */
-  const handleInput = (event: KeyboardEvent) => {
-    scannerInputValue = `${scannerInputValue}${event.key}`;
-
-    if (scannerInputValue.length > 5) {
-      runScannerSearch();
-    }
-  };
-
-  /**
    * "Debounced" function to run a search based on the provided scanner input
    */
-  const runScannerSearch = _.debounce(async () => {
+  const runScannerSearch = _.debounce(async (input: string) => {
     const results = await entityExists({
       variables: {
-        _id: scannerInputValue,
+        _id: input,
       },
     });
 
@@ -133,15 +116,12 @@ const ScanModal = (props: ScanModalProps) => {
       toast({
         title: "Error",
         status: "error",
-        description: `Entity with identifier "${scannerInputValue}" not found`,
+        description: `Entity with identifier "${input}" not found`,
         duration: 4000,
         position: "bottom-right",
         isClosable: true,
       });
     }
-
-    // Reset the scanner input value
-    scannerInputValue = "";
   }, 200);
 
   /**
@@ -175,33 +155,27 @@ const ScanModal = (props: ScanModalProps) => {
     }
   };
 
-  useEffect(() => {
-    if (props.isOpen === true && isListening === false) {
-      // If the modal has been opened and the application currently is not listening to input
-      setIsListening(true);
-      document.onkeyup = handleInput;
-    }
-  }, [props.isOpen]);
+  /**
+   * Handle the scanner result
+   * @param {string} input Scanner input
+   */
+  const onScannerResult = (input: string) => {
+    runScannerSearch(input);
+  };
 
   return (
-    <Modal
-      isOpen={props.isOpen}
-      onClose={handleOnClose}
-      isCentered
-      size={"4xl"}
-    >
+    <Modal isOpen={props.isOpen} onClose={handleOnClose} isCentered size={"xl"}>
       <ModalOverlay />
       <ModalContent p={"2"} gap={"0"}>
         <ModalHeader p={"2"}>Scan Identifier</ModalHeader>
         <ModalCloseButton />
-        <ModalBody px={"2"} gap={"2"}>
-          <Flex py={"2"}>
-            <Text fontSize={"sm"}>
-              You can use an external scanner device to read a QR code, or enter
-              an existing Entity identifier below.
-            </Text>
+        <ModalBody px={"2"} gap={"2"} w={"100%"}>
+          {/* Warning label */}
+          <Flex mb={"4"}>
+            <Warning text={"Scanning is an experimental feature"} />
           </Flex>
 
+          {/* Scanner */}
           <Flex
             w={"100%"}
             h={"100%"}
@@ -209,55 +183,63 @@ const ScanModal = (props: ScanModalProps) => {
             justify={"center"}
             align={"center"}
             direction={"column"}
-            border={"2px dashed"}
-            borderColor={"gray.400"}
-            rounded={"md"}
             gap={"8"}
           >
-            {/* Show "Waiting" for scanner status */}
+            <Scanner
+              fps={10}
+              qrbox={250}
+              disableFlip={false}
+              verbose={false}
+              rememberLastUsedCamera={true}
+              qrCodeSuccessCallback={onScannerResult}
+            />
+          </Flex>
+
+          {/* Manual entry field */}
+          <Flex mt={"4"} w={"100%"} justify={"center"} gap={"2"}>
             {!showInput && (
-              <Flex
-                direction={"column"}
-                gap={"4"}
-                align={"center"}
-                justify={"center"}
-              >
-                <Text
-                  fontWeight={"semibold"}
-                  fontSize={"sm"}
-                  color={"gray.600"}
+              <Flex>
+                <Button
+                  size={"sm"}
+                  colorScheme={"blue"}
+                  onClick={handleManualInputSelect}
                 >
-                  Waiting for scanner input...
-                </Text>
-                <Spinner color={"blue.500"} />
-                <Flex>
-                  <Button
-                    size={"sm"}
-                    colorScheme={"blue"}
-                    onClick={handleManualInputSelect}
-                  >
-                    Enter manually
-                  </Button>
-                </Flex>
+                  Enter manually
+                </Button>
               </Flex>
             )}
 
-            {/* Show manual entry field */}
             {showInput && (
-              <Flex direction={"row"} gap={"2"} align={"center"}>
-                <Input
-                  size={"sm"}
-                  rounded={"md"}
-                  value={manualInputValue}
-                  onChange={(event) => setManualInputValue(event.target.value)}
-                  placeholder={"Identifier"}
-                />
+              <Flex direction={"row"} gap={"2"} align={"center"} w={"100%"}>
+                <Flex w={"auto"}>
+                  <Input
+                    size={"sm"}
+                    rounded={"md"}
+                    value={manualInputValue}
+                    onChange={(event) =>
+                      setManualInputValue(event.target.value)
+                    }
+                    placeholder={"Identifier"}
+                  />
+                </Flex>
+
                 <Button
                   size={"sm"}
                   isLoading={loading}
+                  rightIcon={<Icon name={"search"} />}
                   onClick={runManualSearch}
                 >
                   Find
+                </Button>
+
+                <Button
+                  size={"sm"}
+                  isLoading={loading}
+                  colorScheme={"red"}
+                  rightIcon={<Icon name={"cross"} />}
+                  onClick={() => setShowInput(false)}
+                >
+                  Cancel
                 </Button>
               </Flex>
             )}

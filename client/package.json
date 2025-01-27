@@ -40,6 +40,7 @@
     "file-saver": "^2.0.5",
     "framer-motion": "^10.16.4",
     "graphql": "^16.8.1",
+    "html5-qrcode": "^2.3.8",
     "lodash": "^4.17.21",
     "nanoid": "^4.0.2",
     "pdfjs-dist": "^3.9.179",
