@@ -229,9 +229,11 @@ const Dashboard = () => {
   const entityTableColumns = [
     entityTableColumnHelper.accessor("name", {
       cell: (info) => (
-        <Text noOfLines={1} fontWeight={"semibold"}>
-          {info.getValue()}
-        </Text>
+        <Tooltip label={info.getValue()} placement={"top"}>
+          <Text noOfLines={1} fontWeight={"semibold"}>
+            {_.truncate(info.getValue(), { length: 30 })}
+          </Text>
+        </Tooltip>
       ),
       header: "Name",
     }),
@@ -397,22 +399,25 @@ const Dashboard = () => {
                 <Icon name={"dashboard"} size={"md"} />
                 <Heading size={"lg"}>Dashboard</Heading>
               </Flex>
-              <Flex direction={"row"} gap={"1"}>
-                <Text
-                  fontSize={"xs"}
-                  fontWeight={"semibold"}
-                  color={"gray.700"}
-                >
-                  Last Update:
-                </Text>
-                <Text
-                  fontSize={"xs"}
-                  fontWeight={"semibold"}
-                  color={"gray.400"}
-                >
-                  {lastUpdate}
-                </Text>
-              </Flex>
+              {/* Display last update when on desktop */}
+              {breakpoint !== "base" && (
+                <Flex direction={"row"} gap={"1"}>
+                  <Text
+                    fontSize={"xs"}
+                    fontWeight={"semibold"}
+                    color={"gray.700"}
+                  >
+                    Last Update:
+                  </Text>
+                  <Text
+                    fontSize={"xs"}
+                    fontWeight={"semibold"}
+                    color={"gray.400"}
+                  >
+                    {lastUpdate}
+                  </Text>
+                </Flex>
+              )}
             </Flex>
             <Spacer />
             <Flex>

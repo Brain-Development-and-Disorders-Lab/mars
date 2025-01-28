@@ -1210,9 +1210,11 @@ const Entity = () => {
             rounded={"md"}
           >
             <Icon name={"entity"} size={"md"} />
-            <Heading fontWeight={"semibold"} size={"md"}>
-              {entityData.name}
-            </Heading>
+            <Tooltip label={entityData.name} placement={"top"}>
+              <Heading fontWeight={"semibold"} size={"md"}>
+                {_.truncate(entityData.name, { length: 30 })}
+              </Heading>
+            </Tooltip>
             {entityArchived && <Icon name={"archive"} size={"md"} />}
           </Flex>
 
