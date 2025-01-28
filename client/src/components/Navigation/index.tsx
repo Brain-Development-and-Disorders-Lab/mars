@@ -91,7 +91,7 @@ const Navigation = () => {
             </Text>
 
             <Button
-              id={"navDashboardButton"}
+              id={"navDashboardButtonDesktop"}
               key={"dashboard"}
               size={"sm"}
               w={"100%"}
@@ -105,7 +105,7 @@ const Navigation = () => {
             </Button>
 
             <Button
-              id={"navSearchButton"}
+              id={"navSearchButtonDesktop"}
               key={"search"}
               size={"sm"}
               w={"100%"}
@@ -121,7 +121,7 @@ const Navigation = () => {
             </Button>
 
             <Button
-              id={"navCreateButton"}
+              id={"navCreateButtonDesktop"}
               key={"create"}
               size={"sm"}
               w={"100%"}
@@ -141,7 +141,7 @@ const Navigation = () => {
             </Text>
 
             <Button
-              id={"navEntitiesButton"}
+              id={"navEntitiesButtonDesktop"}
               leftIcon={<Icon name={"entity"} />}
               size={"sm"}
               w={"100%"}
@@ -161,7 +161,7 @@ const Navigation = () => {
             </Button>
 
             <Button
-              id={"navProjectsButton"}
+              id={"navProjectsButtonDesktop"}
               leftIcon={<Icon name={"project"} />}
               size={"sm"}
               w={"100%"}
@@ -181,7 +181,7 @@ const Navigation = () => {
             </Button>
 
             <Button
-              id={"navTemplatesButton"}
+              id={"navTemplatesButtonDesktop"}
               leftIcon={<Icon name={"template"} />}
               size={"sm"}
               w={"100%"}
@@ -205,7 +205,7 @@ const Navigation = () => {
             </Text>
             <Flex direction={"row"} gap={"2"}>
               <Button
-                id={"navImportButton"}
+                id={"navImportButtonDesktop"}
                 key={"import"}
                 size={"sm"}
                 w={"100%"}
@@ -223,7 +223,7 @@ const Navigation = () => {
               </Button>
 
               <Button
-                id={"navScanButton"}
+                id={"navScanButtonDesktop"}
                 key={"scan"}
                 size={"sm"}
                 w={"100%"}
@@ -268,30 +268,35 @@ const Navigation = () => {
           <MenuList>
             <MenuGroup title={"Menu"}>
               <MenuItem
+                id={"navDashboardButtonMobile"}
                 icon={<Icon name={"dashboard"} />}
                 onClick={() => navigate("/")}
               >
                 Dashboard
               </MenuItem>
               <MenuItem
+                id={"navSearchButtonMobile"}
                 icon={<Icon name={"search"} />}
                 onClick={() => navigate("/search")}
               >
                 Search
               </MenuItem>
               <MenuItem
+                id={"navProjectButtonMobile"}
                 icon={<Icon name={"project"} />}
                 onClick={() => navigate("/projects")}
               >
                 Projects
               </MenuItem>
               <MenuItem
+                id={"navEntitiesButtonMobile"}
                 icon={<Icon name={"entity"} />}
                 onClick={() => navigate("/entities")}
               >
                 Entities
               </MenuItem>
               <MenuItem
+                id={"navTemplatesButtonMobile"}
                 icon={<Icon name={"template"} />}
                 onClick={() => navigate("/templates")}
               >
@@ -300,12 +305,14 @@ const Navigation = () => {
             </MenuGroup>
             <MenuGroup title={"Tools"}>
               <MenuItem
+                id={"navCreateButtonMobile"}
                 icon={<Icon name={"add"} />}
                 onClick={() => navigate("/create")}
               >
                 Create
               </MenuItem>
               <MenuItem
+                id={"navScanButtonMobile"}
                 icon={<Icon name={"scan"} />}
                 onClick={() => {
                   // Capture event

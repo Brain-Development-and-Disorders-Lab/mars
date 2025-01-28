@@ -300,7 +300,7 @@ const Dashboard = () => {
 
   const walkthroughSteps = [
     {
-      target: "#navDashboardButton",
+      target: "#navDashboardButtonDesktop",
       content:
         "This the Workspace Dashboard, showing an overview of all Entities, Projects, and Activity within the Workspace.",
       title: "Dashboard",
@@ -311,17 +311,17 @@ const Dashboard = () => {
       title: "Recent Activity",
     },
     {
-      target: "#navEntitiesButton",
+      target: "#navEntitiesButtonDesktop",
       content: "Here you can view all Entities in the current Workspace.",
       title: "Entities",
     },
     {
-      target: "#navProjectsButton",
+      target: "#navProjectsButtonDesktop",
       content: "Here you can view all Projects in the current Workspace.",
       title: "Projects",
     },
     {
-      target: "#navTemplatesButton",
+      target: "#navTemplatesButtonDesktop",
       content:
         "Here you can view all Template Attributes in the current Workspace.",
       title: "Templates",
@@ -333,25 +333,27 @@ const Dashboard = () => {
       title: "Workspace Switcher",
     },
     {
-      target: "#navSearchButton",
+      target: "#navSearchButtonDesktop",
       content:
         "The Search page allows you to run text-based searches or construct advanced search queries on all stored metadata.",
       title: "Search",
     },
     {
-      target: "#navCreateButton",
+      target: "#navCreateButtonDesktop",
       content:
         "The Create portal allows you to manually create Entities, Projects, and Template Attributes.",
       title: "Create",
     },
     {
-      target: "#navImportButton",
+      target: "#navImportButtonDesktop",
       content:
-        "Upload and import CSV or JSON files to create or modify Entities and Templates.",
+        breakpoint === "base"
+          ? "On desktop, upload and import CSV or JSON files to create or modify Entities and Templates."
+          : "Upload and import CSV or JSON files to create or modify Entities and Templates.",
       title: "Import",
     },
     {
-      target: "#navScanButton",
+      target: "#navScanButtonDesktop",
       content:
         "Opens an interface to accept input from a scanner. Alternatively, an Entity identifier can be specified manually.",
       title: "Scan",
@@ -378,7 +380,7 @@ const Dashboard = () => {
   return (
     <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
       <Flex direction={"column"} w={"100%"} p={"2"} gap={"2"}>
-        {token.firstLogin === true && (
+        {token.firstLogin === true && breakpoint !== "base" && (
           <Joyride
             continuous
             showProgress
