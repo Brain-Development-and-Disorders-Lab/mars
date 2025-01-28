@@ -1,7 +1,17 @@
 describe("CSV Import Test", () => {
+  beforeEach(() => {
+    // Reset the database
+    cy.task("database:teardown");
+    cy.task("database:setup");
+
+    // Navigate the "Login" page
+    cy.visit("http://localhost:8080/");
+    cy.get("#orcidLoginButton").click();
+  });
+
   it("should import a CSV file successfully", () => {
     // Open import modal and import CSV file
-    cy.get("#navImportButton").click();
+    cy.get("#navImportButtonDesktop").click();
     cy.get("input[type=file]").first().selectFile(Cypress.Buffer.from("text"));
     cy.fixture("export_entities.csv").then((fileContent) => {
       cy.get("input[type=file]")
@@ -32,7 +42,7 @@ describe("CSV Import Test", () => {
       cy.wait(1000); // Wait for GraphQL request to complete
 
       // Validate that the Project contains an Entity named "Mini Box 1 (CSV)"
-      cy.get("#navProjectsButton").click();
+      cy.get("#navProjectsButtonDesktop").click();
       cy.get("#0__id > div > a").first().click(); // Button to view the first Project
       cy.contains("Mini Box 1 (CSV)");
     });

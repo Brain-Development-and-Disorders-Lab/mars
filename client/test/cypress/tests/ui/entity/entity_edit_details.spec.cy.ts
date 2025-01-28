@@ -1,4 +1,14 @@
 describe("Entity, edit details", () => {
+  beforeEach(() => {
+    // Reset the database
+    cy.task("database:teardown");
+    cy.task("database:setup");
+
+    // Navigate the "Login" page
+    cy.visit("http://localhost:8080/");
+    cy.get("#orcidLoginButton").click();
+  });
+
   it("should be able to rename the Entity", () => {
     cy.contains("button", "Entities").click();
     cy.get("a").contains("View").eq(0).click();

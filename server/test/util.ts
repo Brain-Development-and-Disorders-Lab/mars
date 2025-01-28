@@ -15,7 +15,7 @@ import { Workspaces } from "../src/models/Workspaces";
 import { DEMO_USER_ORCID } from "../src/variables";
 
 /**
- * Utility wrapper function to handle database connectivity and seeding the database
+ * Utility wrapper function to seed complete database
  */
 export const setupDatabase = async (): Promise<void> => {
   await connect();
@@ -50,20 +50,6 @@ export const seedDatabase = async (): Promise<void> => {
   });
   if (workspaceResult.success === false)
     throw new Error("Error creating Workspace");
-
-  // Create a User
-  const userResult: IResponseMessage = await Users.create({
-    _id: DEMO_USER_ORCID,
-    firstName: "Demo",
-    lastName: "User",
-    email: "demo@metadatify.com",
-    affiliation: "Demo Affiliation",
-    workspaces: [workspaceResult.data],
-    lastLogin: "",
-    api_keys: [],
-    token: "",
-  });
-  if (userResult.success === false) throw new Error("Error creating User");
 
   // Create a Project
   const projectResult: ResponseData<string> = await Projects.create({
@@ -188,6 +174,30 @@ export const seedDatabase = async (): Promise<void> => {
     history: [],
   });
   await Workspaces.addEntity(workspaceResult.data, entityResult.data);
+
+  // Create a User
+  const userResult: IResponseMessage = await Users.create({
+    _id: DEMO_USER_ORCID,
+    firstName: "Demo",
+    lastName: "User",
+    email: "demo@metadatify.com",
+    affiliation: "Demo Affiliation",
+    workspaces: [workspaceResult.data],
+    lastLogin: "",
+    api_keys: [],
+    token: "",
+  });
+  if (userResult.success === false) throw new Error("Error creating User");
+};
+
+/**
+ * Utility to clear the users from the database during testing
+ * @return {Promise<void>}
+ */
+export const clearUsers = async (): Promise<void> => {
+  await connect();
+  await getDatabase().collection("users").deleteMany({});
+  await disconnect();
 };
 
 /**

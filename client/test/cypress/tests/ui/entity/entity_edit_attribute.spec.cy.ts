@@ -1,4 +1,14 @@
 describe("Entity, edit Attributes", () => {
+  beforeEach(() => {
+    // Reset the database
+    cy.task("database:teardown");
+    cy.task("database:setup");
+
+    // Navigate the "Login" page
+    cy.visit("http://localhost:8080/");
+    cy.get("#orcidLoginButton").click();
+  });
+
   it("should be able to add and edit Attributes", () => {
     cy.contains("button", "Entities").click();
     cy.contains("td", "Test Child Entity")
