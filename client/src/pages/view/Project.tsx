@@ -950,8 +950,7 @@ const Project = () => {
               rounded={"md"}
               border={"1px"}
               borderColor={"gray.300"}
-              grow={"1"}
-              basis={"40%"}
+              w={{ base: "100%", md: "50%" }}
             >
               <Flex
                 direction={"row"}
@@ -1014,7 +1013,6 @@ const Project = () => {
               border={"1px"}
               borderColor={"gray.300"}
               grow={"1"}
-              basis={"40%"}
             >
               {/* Collaborators display */}
               <Flex direction={"column"}>
