@@ -150,14 +150,14 @@ const PreviewModal = (props: PreviewModalProps) => {
         <Flex direction={"column"} gap={"2"}>
           <Flex direction={"row"} gap={"1"} align={"center"}>
             <Text fontSize={"sm"} fontWeight={"semibold"}>
-              Attachment Name:
+              Name:
             </Text>
             <Text fontSize={"sm"}>
-              {_.truncate(props.attachment.name, { length: 32 })}
+              {_.truncate(props.attachment.name, { length: 24 })}
             </Text>
             <Spacer />
             <Text fontSize={"sm"} fontWeight={"semibold"}>
-              Attachment Type:
+              Type:
             </Text>
             <Text fontSize={"sm"}>{previewType}</Text>
           </Flex>
@@ -168,6 +168,7 @@ const PreviewModal = (props: PreviewModalProps) => {
                 overflowY={"scroll"}
                 minH={"400px"}
                 maxH={"70vh"}
+                maxW={"85vw"}
                 justify={"center"}
                 rounded={"md"}
                 border={"1px"}
@@ -249,12 +250,12 @@ const PreviewModal = (props: PreviewModalProps) => {
         <Flex direction={"column"} gap={"2"}>
           <Flex direction={"row"} gap={"1"} align={"center"}>
             <Text fontSize={"sm"} fontWeight={"semibold"}>
-              Attachment Name:
+              Name:
             </Text>
             <Text fontSize={"sm"}>Unable to load preview</Text>
             <Spacer />
             <Text fontSize={"sm"} fontWeight={"semibold"}>
-              Attachment Type:
+              Type:
             </Text>
             <Text fontSize={"sm"}>Unknown</Text>
           </Flex>

@@ -2410,17 +2410,11 @@ const Entity = () => {
         {/* Attachment preview modal */}
         <Modal isOpen={isPreviewOpen} onClose={onPreviewClose}>
           <ModalOverlay />
-          <ModalContent minW={"3xl"}>
+          <ModalContent maxW={"100vw"} w={"fit-content"}>
             <ModalHeader>Attachment Preview</ModalHeader>
             <ModalCloseButton />
             <ModalBody>
-              <Flex
-                w={"100%"}
-                h={"100%"}
-                justify={"center"}
-                align={"center"}
-                pb={"2"}
-              >
+              <Flex justify={"center"} align={"center"} pb={"2"}>
                 <PreviewModal attachment={previewAttachment} />
               </Flex>
             </ModalBody>
