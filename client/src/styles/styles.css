@@ -14,7 +14,6 @@ a:hover {
 
 .queryBuilder {
   display: flex;
-  min-width: 420px;
   padding: var(--chakra-space-2);
   border-radius: var(--chakra-radii-md);
   border: var(--chakra-borders-1px);
@@ -51,6 +50,11 @@ a:hover {
   align-items: center;
   width: 100%;
   gap: var(--chakra-space-2);
+  flex-wrap: wrap;
+  border: 1px solid var(--chakra-colors-gray-200);
+  border-radius: var(--chakra-radii-md);
+  padding: var(--chakra-space-2);
+  background: var(--chakra-colors-gray-50);
 
   .ruleGroup-notToggle {
     gap: var(--chakra-space-2);
@@ -67,6 +71,20 @@ a:hover {
   .ruleGroup-addRule:hover,
   .ruleGroup-addGroup:hover {
     background: var(--chakra-colors-blue-600);
+  }
+
+  .ruleGroup-remove {
+    background: var(--chakra-colors-red-500);
+    svg {
+      color: var(--chakra-colors-white);
+    }
+  }
+  .ruleGroup-remove:hover {
+    background: var(--chakra-colors-red-600);
+  }
+
+  .chakra-select__wrapper {
+    width: fit-content;
   }
 }
 
@@ -90,12 +108,20 @@ a:hover {
     display: flex;
     gap: var(--chakra-space-2);
     margin-left: var(--chakra-space-4);
+    flex-wrap: wrap;
 
-    .rule-cloneRule {
-      background: var(--chakra-colors-gray-400);
+    .rule-remove {
+      background: var(--chakra-colors-red-500);
+      svg {
+        color: var(--chakra-colors-white);
+      }
     }
-    .rule-cloneRule:hover {
-      background: var(--chakra-colors-gray-500);
+    .rule-remove:hover {
+      background: var(--chakra-colors-red-600);
+    }
+
+    .chakra-select__wrapper {
+      width: fit-content;
     }
   }
 }
