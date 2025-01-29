@@ -100,7 +100,7 @@ const APIKeyItem = (props: { apiKey: APIKey }) => {
   };
 
   return (
-    <Flex direction={"row"} gap={"2"} align={"center"} w={"100%"}>
+    <Flex direction={"row"} gap={"2"} align={"center"} w={"100%"} wrap={"wrap"}>
       <Flex direction={"row"} gap={"1"} align={"center"}>
         <Icon name={"key"} />
         <Tag colorScheme={isRevoked ? "red" : "blue"} size={"sm"}>
@@ -108,11 +108,11 @@ const APIKeyItem = (props: { apiKey: APIKey }) => {
         </Tag>
       </Flex>
 
-      <Flex maxW={"2xl"} gap={"2"} align={"center"}>
+      <Flex gap={"2"} align={"center"}>
         <Input
           type={showValue || isRevoked ? "text" : "password"}
           value={props.apiKey.value}
-          w={"sm"}
+          maxW={"200px"}
           size={"sm"}
           rounded={"md"}
           isDisabled={isRevoked}
