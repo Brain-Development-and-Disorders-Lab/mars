@@ -95,8 +95,13 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
                 direction={"row"}
                 border={"1px"}
                 borderColor={"gray.300"}
+                wrap={"wrap"}
               >
-                <Flex direction={"column"} gap={"2"} basis={"50%"}>
+                <Flex
+                  direction={"column"}
+                  gap={"2"}
+                  w={{ base: "100%", md: "50%" }}
+                >
                   <Text size={"md"} fontWeight={"semibold"}>
                     Name
                   </Text>
@@ -109,7 +114,7 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
                   />
                 </Flex>
 
-                <Flex direction={"column"} gap={"2"} basis={"50%"}>
+                <Flex direction={"column"} gap={"2"} grow={"1"}>
                   <Text size={"md"} fontWeight={"semibold"}>
                     Description
                   </Text>

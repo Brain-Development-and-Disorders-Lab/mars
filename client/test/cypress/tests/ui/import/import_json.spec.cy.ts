@@ -1,7 +1,17 @@
 describe("JSON Import Test", () => {
+  beforeEach(() => {
+    // Reset the database
+    cy.task("database:teardown");
+    cy.task("database:setup");
+
+    // Navigate the "Login" page
+    cy.visit("http://localhost:8080/");
+    cy.get("#orcidLoginButton").click();
+  });
+
   it("should import a JSON file successfully", () => {
     // Open import modal and import JSON file
-    cy.get("#navImportButton").click();
+    cy.get("#navImportButtonDesktop").click();
 
     cy.fixture("export_entities.json", "binary").then((fileContent) => {
       // Directly use fileContent if it's already in the correct format
@@ -21,7 +31,7 @@ describe("JSON Import Test", () => {
       cy.wait(1000); // Wait for GraphQL request to complete
 
       // Validate the Entity has been imported successfully
-      cy.get("#navEntitiesButton").click();
+      cy.get("#navEntitiesButtonDesktop").click();
       cy.contains("(JSON)").should("exist");
     });
   });

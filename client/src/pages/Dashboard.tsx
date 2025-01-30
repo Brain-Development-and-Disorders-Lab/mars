@@ -229,9 +229,11 @@ const Dashboard = () => {
   const entityTableColumns = [
     entityTableColumnHelper.accessor("name", {
       cell: (info) => (
-        <Text noOfLines={1} fontWeight={"semibold"}>
-          {info.getValue()}
-        </Text>
+        <Tooltip label={info.getValue()} placement={"top"}>
+          <Text noOfLines={1} fontWeight={"semibold"}>
+            {_.truncate(info.getValue(), { length: 30 })}
+          </Text>
+        </Tooltip>
       ),
       header: "Name",
     }),
@@ -300,7 +302,7 @@ const Dashboard = () => {
 
   const walkthroughSteps = [
     {
-      target: "#navDashboardButton",
+      target: "#navDashboardButtonDesktop",
       content:
         "This the Workspace Dashboard, showing an overview of all Entities, Projects, and Activity within the Workspace.",
       title: "Dashboard",
@@ -311,17 +313,17 @@ const Dashboard = () => {
       title: "Recent Activity",
     },
     {
-      target: "#navEntitiesButton",
+      target: "#navEntitiesButtonDesktop",
       content: "Here you can view all Entities in the current Workspace.",
       title: "Entities",
     },
     {
-      target: "#navProjectsButton",
+      target: "#navProjectsButtonDesktop",
       content: "Here you can view all Projects in the current Workspace.",
       title: "Projects",
     },
     {
-      target: "#navTemplatesButton",
+      target: "#navTemplatesButtonDesktop",
       content:
         "Here you can view all Template Attributes in the current Workspace.",
       title: "Templates",
@@ -333,25 +335,27 @@ const Dashboard = () => {
       title: "Workspace Switcher",
     },
     {
-      target: "#navSearchButton",
+      target: "#navSearchButtonDesktop",
       content:
         "The Search page allows you to run text-based searches or construct advanced search queries on all stored metadata.",
       title: "Search",
     },
     {
-      target: "#navCreateButton",
+      target: "#navCreateButtonDesktop",
       content:
         "The Create portal allows you to manually create Entities, Projects, and Template Attributes.",
       title: "Create",
     },
     {
-      target: "#navImportButton",
+      target: "#navImportButtonDesktop",
       content:
-        "Upload and import CSV or JSON files to create or modify Entities and Templates.",
+        breakpoint === "base"
+          ? "On desktop, upload and import CSV or JSON files to create or modify Entities and Templates."
+          : "Upload and import CSV or JSON files to create or modify Entities and Templates.",
       title: "Import",
     },
     {
-      target: "#navScanButton",
+      target: "#navScanButtonDesktop",
       content:
         "Opens an interface to accept input from a scanner. Alternatively, an Entity identifier can be specified manually.",
       title: "Scan",
@@ -378,7 +382,7 @@ const Dashboard = () => {
   return (
     <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
       <Flex direction={"column"} w={"100%"} p={"2"} gap={"2"}>
-        {token.firstLogin === true && (
+        {token.firstLogin === true && breakpoint !== "base" && (
           <Joyride
             continuous
             showProgress
@@ -395,22 +399,25 @@ const Dashboard = () => {
                 <Icon name={"dashboard"} size={"md"} />
                 <Heading size={"lg"}>Dashboard</Heading>
               </Flex>
-              <Flex direction={"row"} gap={"1"}>
-                <Text
-                  fontSize={"xs"}
-                  fontWeight={"semibold"}
-                  color={"gray.700"}
-                >
-                  Last Update:
-                </Text>
-                <Text
-                  fontSize={"xs"}
-                  fontWeight={"semibold"}
-                  color={"gray.400"}
-                >
-                  {lastUpdate}
-                </Text>
-              </Flex>
+              {/* Display last update when on desktop */}
+              {breakpoint !== "base" && (
+                <Flex direction={"row"} gap={"1"}>
+                  <Text
+                    fontSize={"xs"}
+                    fontWeight={"semibold"}
+                    color={"gray.700"}
+                  >
+                    Last Update:
+                  </Text>
+                  <Text
+                    fontSize={"xs"}
+                    fontWeight={"semibold"}
+                    color={"gray.400"}
+                  >
+                    {lastUpdate}
+                  </Text>
+                </Flex>
+              )}
             </Flex>
             <Spacer />
             <Flex>

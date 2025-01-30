@@ -99,7 +99,7 @@ const Templates = () => {
       _.isEqual(breakpoint, "base") ||
       _.isUndefined(breakpoint)
     ) {
-      setVisibleColumns({ description: false });
+      setVisibleColumns({ description: false, timestamp: false, owner: false });
     } else {
       setVisibleColumns({});
     }

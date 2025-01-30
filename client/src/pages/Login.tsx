@@ -9,9 +9,6 @@ import {
   Image,
   Text,
   useToast,
-  Alert,
-  AlertIcon,
-  AlertDescription,
   Link,
   Divider,
   Box,
@@ -177,20 +174,6 @@ const Login = () => {
         wrap={"wrap"}
       >
         <Flex direction={"column"} gap={"4"}>
-          <Alert status={"info"}>
-            <AlertIcon />
-            <AlertDescription>
-              Metadatify is in preview and is currently only available to a
-              small group of users.
-              <Link href={"https://forms.gle/q4GL4gF1bamem3DA9"} isExternal>
-                <Flex direction={"row"} gap={"1"} align={"center"}>
-                  <Text fontWeight={"semibold"}>Join the waitlist here</Text>
-                  <Icon name={"a_right"} />
-                </Flex>
-              </Link>
-            </AlertDescription>
-          </Alert>
-
           <Flex
             direction={"column"}
             p={"8"}

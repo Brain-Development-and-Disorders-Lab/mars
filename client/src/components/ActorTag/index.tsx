@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 
 // Existing and custom components
-import { Avatar, Flex, Skeleton, Text } from "@chakra-ui/react";
+import { Avatar, Flex, Skeleton, Text, useBreakpoint } from "@chakra-ui/react";
 
 // Existing and custom types
 import { ActorTagProps, UserModel } from "@types";
@@ -16,6 +16,9 @@ const DEFAULT_ACTOR_LABEL_LENGTH = 20; // Default number of shown characters
 const ActorTag = (props: ActorTagProps) => {
   // Component state
   const [actorLabel, setActorLabel] = useState(props.fallback);
+
+  // Breakpoint state
+  const breakpoint = useBreakpoint();
 
   // GraphQL operations
   const GET_USER = gql`
@@ -63,7 +66,7 @@ const ActorTag = (props: ActorTagProps) => {
       border={"1px"}
       borderColor={"gray.300"}
       bg={"white"}
-      minW={"210px"}
+      minW={"120px"}
     >
       <Avatar name={actorLabel} size={"sm"} />
       {loading ? (
@@ -73,9 +76,11 @@ const ActorTag = (props: ActorTagProps) => {
           <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.700"}>
             {actorLabel}
           </Text>
-          <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.400"}>
-            {props.orcid}
-          </Text>
+          {breakpoint !== "base" && (
+            <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.400"}>
+              {props.orcid}
+            </Text>
+          )}
         </Flex>
       )}
     </Flex>

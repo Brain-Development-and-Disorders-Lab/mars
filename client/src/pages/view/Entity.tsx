@@ -1210,9 +1210,11 @@ const Entity = () => {
             rounded={"md"}
           >
             <Icon name={"entity"} size={"md"} />
-            <Heading fontWeight={"semibold"} size={"md"}>
-              {entityData.name}
-            </Heading>
+            <Tooltip label={entityData.name} placement={"top"}>
+              <Heading fontWeight={"semibold"} size={"md"}>
+                {_.truncate(entityData.name, { length: 30 })}
+              </Heading>
+            </Tooltip>
             {entityArchived && <Icon name={"archive"} size={"md"} />}
           </Flex>
 
@@ -2408,17 +2410,11 @@ const Entity = () => {
         {/* Attachment preview modal */}
         <Modal isOpen={isPreviewOpen} onClose={onPreviewClose}>
           <ModalOverlay />
-          <ModalContent minW={"3xl"}>
+          <ModalContent maxW={"100vw"} w={"fit-content"}>
             <ModalHeader>Attachment Preview</ModalHeader>
             <ModalCloseButton />
             <ModalBody>
-              <Flex
-                w={"100%"}
-                h={"100%"}
-                justify={"center"}
-                align={"center"}
-                pb={"2"}
-              >
+              <Flex justify={"center"} align={"center"} pb={"2"}>
                 <PreviewModal attachment={previewAttachment} />
               </Flex>
             </ModalBody>

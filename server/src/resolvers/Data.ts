@@ -21,7 +21,10 @@ import { Data } from "src/models/Data";
 export const DataResolvers = {
   Query: {
     // Retrieve the URL for a file to be downloaded by client
-    downloadFile: async (args: { _id: string }): Promise<string> => {
+    downloadFile: async (
+      _parent: IResolverParent,
+      args: { _id: string },
+    ): Promise<string> => {
       const response = await Data.downloadFile(args._id);
       if (_.isNull(response)) {
         throw new GraphQLError("Unable to retrieve file for download", {

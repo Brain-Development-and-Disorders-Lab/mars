@@ -1,6 +1,16 @@
 describe("Search Query Builder", () => {
+  beforeEach(() => {
+    // Reset the database
+    cy.task("database:teardown");
+    cy.task("database:setup");
+
+    // Navigate the "Login" page
+    cy.visit("http://localhost:8080/");
+    cy.get("#orcidLoginButton").click();
+  });
+
   it("should build a query with 1 Name inclusion rule", () => {
-    cy.get("#navSearchButton").click();
+    cy.get("#navSearchButtonDesktop").click();
     cy.contains("button", "Query Builder").click();
 
     // Default search result array should be empty
@@ -17,7 +27,7 @@ describe("Search Query Builder", () => {
   });
 
   it("should build a query with 1 Name exclusion rule", () => {
-    cy.get("#navSearchButton").click();
+    cy.get("#navSearchButtonDesktop").click();
     cy.contains("button", "Query Builder").click();
 
     // Default search result array should be empty
@@ -34,7 +44,7 @@ describe("Search Query Builder", () => {
   });
 
   it("should build a query with 1 Name inclusion rule and 1 Attribute Value (Text) inclusion rule", () => {
-    cy.get("#navSearchButton").click();
+    cy.get("#navSearchButtonDesktop").click();
     cy.contains("button", "Query Builder").click();
 
     // Default search result array should be empty
@@ -59,7 +69,7 @@ describe("Search Query Builder", () => {
   });
 
   it("should build a query with 1 Name inclusion rule and 1 Attribute Value (Number) inclusion rule", () => {
-    cy.get("#navSearchButton").click();
+    cy.get("#navSearchButtonDesktop").click();
     cy.contains("button", "Query Builder").click();
 
     // Default search result array should be empty

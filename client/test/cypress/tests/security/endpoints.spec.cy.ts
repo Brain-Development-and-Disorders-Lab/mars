@@ -1,9 +1,16 @@
 describe("Security, check endpoint access", () => {
   beforeEach(() => {
-    // Before each test, log out and clear localStorage
-    cy.get("#workspaceSwitcherDesktop > button").click();
-    cy.get("#accountLogoutItem").parent().click();
-    cy.clearLocalStorage();
+    // Reset the database
+    cy.task("database:teardown");
+    cy.task("database:setup");
+  });
+
+  it("should not be able to access /setup", () => {
+    // Clear the users from the database
+    cy.task("database:delete:users");
+
+    cy.visit("http://localhost:8080/setup");
+    cy.location("pathname").should("eq", "/login");
   });
 
   it("should not be able to access /", () => {

@@ -5,13 +5,17 @@ import "dotenv/config";
 import cypress from "cypress";
 
 // Database setup and teardown functions
-import { setupDatabase, teardownDatabase } from "../server/test/util";
+import {
+  clearUsers,
+  setupDatabase,
+  teardownDatabase,
+} from "../server/test/util";
 
 export default cypress.defineConfig({
   e2e: {
     setupNodeEvents(on, config) {
       on("task", {
-        // Database setup task
+        // Database setup tasks
         "database:setup": () => {
           return new Promise((resolve) => {
             setupDatabase().then(() => resolve(null));
@@ -21,6 +25,12 @@ export default cypress.defineConfig({
         "database:teardown": () => {
           return new Promise((resolve) => {
             teardownDatabase().then(() => resolve(null));
+          });
+        },
+        // Database clear users task
+        "database:delete:users": () => {
+          return new Promise((resolve) => {
+            clearUsers().then(() => resolve(null));
           });
         },
       });

@@ -71,8 +71,16 @@ const Setup = () => {
    */
   const checkSetupState = async () => {
     if (token.setup === true) {
+      // Activate a Workspace and navigate to the dashboard
       await activateWorkspace("");
       navigate("/");
+    } else if (
+      token.orcid === "" &&
+      token.setup === false &&
+      token.token === ""
+    ) {
+      // Attempting to access setup without ORCiD, navigate to login page
+      navigate("/login");
     }
     setIsLoading(false);
   };

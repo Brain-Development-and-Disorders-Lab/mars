@@ -1,6 +1,13 @@
 // React
 import React from "react";
-import { Flex, IconButton, Spacer, Tooltip, Text } from "@chakra-ui/react";
+import {
+  Flex,
+  IconButton,
+  Spacer,
+  Tooltip,
+  Text,
+  useBreakpoint,
+} from "@chakra-ui/react";
 
 // Custom components
 import Icon from "@components/Icon";
@@ -12,6 +19,9 @@ import { VisibilityTagProps } from "@types";
 import consola from "consola";
 
 const VisibilityTag = (props: VisibilityTagProps) => {
+  // Breakpoint state
+  const breakpoint = useBreakpoint();
+
   /**
    * Handler function for visibility toggle button
    */
@@ -32,7 +42,7 @@ const VisibilityTag = (props: VisibilityTagProps) => {
       border={"1px"}
       borderColor={"gray.300"}
       bg={"white"}
-      minW={"240px"}
+      minW={"120px"}
     >
       <Icon
         name={props.isPublic ? "l_globus" : "lock"}
@@ -43,9 +53,11 @@ const VisibilityTag = (props: VisibilityTagProps) => {
         <Text fontSize={"sm"} fontWeight={"semibold"}>
           {props.isPublic ? "Public" : "Private"}
         </Text>
-        <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.400"}>
-          {props.isPublic ? "Everyone" : "Workspace Users only"}
-        </Text>
+        {breakpoint !== "base" && (
+          <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.400"}>
+            {props.isPublic ? "Everyone" : "Workspace Users only"}
+          </Text>
+        )}
       </Flex>
       <Spacer />
       {props.isInherited ? (
