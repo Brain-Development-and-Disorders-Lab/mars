@@ -15,6 +15,7 @@ import {
   MenuList,
   MenuItem,
   MenuGroup,
+  Spacer,
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 import ImportModal from "@components/ImportModal";
@@ -242,6 +243,15 @@ const Navigation = () => {
             </Flex>
           </Flex>
         </Flex>
+
+        <Spacer />
+
+        {/* Version number */}
+        <Flex direction={"row"} gap={"2"} align={"center"} justify={"center"}>
+          <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.400"}>
+            v{process.env.VERSION}
+          </Text>
+        </Flex>
       </Flex>
 
       {/* Mobile navigation group */}
@@ -325,6 +335,18 @@ const Navigation = () => {
                 Scan
               </MenuItem>
             </MenuGroup>
+
+            {/* Version number */}
+            <Flex
+              direction={"row"}
+              gap={"2"}
+              align={"center"}
+              justify={"center"}
+            >
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.400"}>
+                v{process.env.VERSION}
+              </Text>
+            </Flex>
           </MenuList>
         </Menu>
 

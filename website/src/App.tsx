@@ -75,31 +75,6 @@ const App = () => {
         ></Flex>
       </Flex>
 
-      {/* Waitlist banner */}
-      <Flex
-        direction={"row"}
-        w={"100%"}
-        bg={"blue.500"}
-        position={"absolute"}
-        zIndex={2}
-        align={"center"}
-        justify={"center"}
-        p={"1"}
-      >
-        <Link
-          href={"https://forms.gle/q4GL4gF1bamem3DA9"}
-          isExternal
-          color={"white"}
-        >
-          <Flex direction={"row"} gap={"1"} align={"center"} justify={"center"}>
-            <Text fontSize={"sm"} fontWeight={"semibold"}>
-              Join the waitlist here
-            </Text>
-            <Icon name={"a_right"} />
-          </Flex>
-        </Link>
-      </Flex>
-
       {/* Main content */}
       <Flex
         direction={"column"}
@@ -425,9 +400,8 @@ const App = () => {
                 <Icon name={"serv_managed_hosted"} size={"lg"} />
                 <Text fontWeight={"bold"}>Managed Hosting</Text>
                 <Text>
-                  Does your team already have preview access? You can log in
-                  right away with your ORCiD. If you have signed up for our
-                  waitlist, we will notify you when you have access!
+                  Does your team already have access? You can log in right away
+                  with your ORCiD.
                 </Text>
                 <Spacer />
 
@@ -439,17 +413,6 @@ const App = () => {
                       isExternal
                     >
                       Log In
-                    </Link>
-                    <Icon name={"link"} color={"blue.500"} />
-                  </Flex>
-
-                  <Flex direction={"row"} gap={"1"} align={"center"}>
-                    <Link
-                      color={"blue.500"}
-                      href={"https://forms.gle/q4GL4gF1bamem3DA9"}
-                      isExternal
-                    >
-                      Join Waitlist
                     </Link>
                     <Icon name={"link"} color={"blue.500"} />
                   </Flex>
@@ -469,19 +432,19 @@ const App = () => {
                 <Icon name={"serv_self_hosted"} size={"lg"} />
                 <Text fontWeight={"bold"}>Self-Hosted</Text>
                 <Text>
-                  Follow the documentation on GitHub to download and deploy your
-                  own instance of Metadatify.
+                  Documentation on how to deploy your own instance of Metadatify
+                  will be available soon.
                 </Text>
                 <Spacer />
                 <Flex direction={"row"} gap={"1"} align={"center"}>
                   <Link
                     color={"blue.500"}
                     href={
-                      "https://github.com/Brain-Development-and-Disorders-Lab/mars"
+                      "https://github.com/Brain-Development-and-Disorders-Lab/mars/wiki"
                     }
                     isExternal
                   >
-                    Documentation
+                    Documentation (coming soon)
                   </Link>
                   <Icon name={"link"} color={"blue.500"} />
                 </Flex>
@@ -527,6 +490,37 @@ const App = () => {
                     alt="GitHub Repo stars"
                     src="https://img.shields.io/github/stars/Brain-Development-and-Disorders-Lab/mars"
                   />
+                </Flex>
+              </Flex>
+              <Flex
+                direction={"column"}
+                rounded={"md"}
+                border={"1px"}
+                borderColor={"gray.200"}
+                p={"4"}
+                gap={"4"}
+                maxW={"sm"}
+                bg={"white"}
+                boxShadow={"sm"}
+              >
+                <Icon name={"info"} size={"lg"} />
+                <Text fontWeight={"bold"}>Documentation</Text>
+                <Text>
+                  Further documentation on usage and development with Metadatify
+                  can be found in the wiki on GitHub.
+                </Text>
+                <Spacer />
+                <Flex direction={"row"} gap={"1"} align={"center"}>
+                  <Link
+                    color={"blue.500"}
+                    href={
+                      "https://github.com/Brain-Development-and-Disorders-Lab/mars/wiki"
+                    }
+                    isExternal
+                  >
+                    GitHub Wiki
+                  </Link>
+                  <Icon name={"link"} color={"blue.500"} />
                 </Flex>
               </Flex>
             </Flex>
