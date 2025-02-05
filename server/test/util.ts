@@ -8,6 +8,7 @@ import { IResponseMessage, ResponseData } from "../../types";
 // Models
 import { Entities } from "../src/models/Entities";
 import { Projects } from "../src/models/Projects";
+import { Templates } from "../src/models/Templates";
 import { Users } from "../src/models/Users";
 import { Workspaces } from "../src/models/Workspaces";
 
@@ -174,6 +175,23 @@ export const seedDatabase = async (): Promise<void> => {
     history: [],
   });
   await Workspaces.addEntity(workspaceResult.data, entityResult.data);
+
+  // Create a Template
+  const templateResult: ResponseData<string> = await Templates.create({
+    name: "Test Template",
+    archived: false,
+    owner: DEMO_USER_ORCID,
+    description: "Description for test Template",
+    values: [
+      {
+        _id: "v-00",
+        name: "Test Value",
+        type: "text",
+        data: "Test",
+      },
+    ],
+  });
+  await Workspaces.addTemplate(workspaceResult.data, templateResult.data);
 
   // Create a User
   const userResult: IResponseMessage = await Users.create({
