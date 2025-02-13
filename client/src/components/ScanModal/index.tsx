@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   Button,
   Flex,
-  IconButton,
   Input,
   Modal,
   ModalBody,
@@ -10,11 +9,6 @@ import {
   ModalContent,
   ModalHeader,
   ModalOverlay,
-  Slider,
-  SliderFilledTrack,
-  SliderThumb,
-  SliderTrack,
-  Text,
   useToast,
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
@@ -40,7 +34,6 @@ import { usePostHog } from "posthog-js/react";
 
 // Utility functions
 import _ from "lodash";
-import consola from "consola";
 
 // Constants
 const REGION_ID = "scanner-region";
@@ -57,8 +50,6 @@ const ScanModal = (props: ScanModalProps) => {
   // Camera state
   let codeScanner: Html5Qrcode | null = null;
   const cameraRef = useRef<HTMLDivElement>(null);
-  const [zoomLevel, setZoomLevel] = useState(1.0);
-  const [zoomSupported, setZoomSupported] = useState(false);
 
   // GraphQL query to check if Entity exists
   const ENTITY_EXISTS = gql`
@@ -82,7 +73,7 @@ const ScanModal = (props: ScanModalProps) => {
   const createConfig = (props: ScannerProps) => {
     const config: Html5QrcodeCameraScanConfig = {
       fps: _.isUndefined(props.fps) ? 10 : props.fps,
-      qrbox: _.isUndefined(props.qrbox) ? 250 : props.qrbox,
+      qrbox: _.isUndefined(props.qrbox) ? 200 : props.qrbox,
       aspectRatio: _.isUndefined(props.aspectRatio) ? 1 : props.aspectRatio,
       disableFlip: _.isUndefined(props.disableFlip) ? false : props.disableFlip,
     };
@@ -94,6 +85,7 @@ const ScanModal = (props: ScanModalProps) => {
    * Handle the modal being closed by the user, resetting the state and removing the keypress handler
    */
   const handleOnClose = async () => {
+    console.info("handleOnClose");
     await onScannerCleanup();
 
     // Reset state
@@ -133,38 +125,6 @@ const ScanModal = (props: ScanModalProps) => {
     document.onkeyup = () => {
       return;
     };
-  };
-
-  /**
-   * Change the zoom level of the camera
-   * @param {number} zoom Zoom level
-   */
-  const changeZoom = (zoom: number) => {
-    // Invalid zoom level
-    if (zoom < 1.0 || zoom > 2.0) {
-      return;
-    }
-
-    // Get the stream
-    const stream = document.querySelector("video")?.srcObject as MediaStream;
-    if (!stream) {
-      consola.error("No stream found");
-      return;
-    }
-
-    const [track] = stream.getVideoTracks() as MediaStreamTrack[];
-    if (Object.keys(track.getCapabilities()).includes("zoom")) {
-      track.applyConstraints({
-        advanced: [
-          {
-            zoom: zoom,
-          },
-        ],
-      } as MediaTrackConstraintSet);
-      setZoomLevel(zoom);
-    } else {
-      consola.warn("Zoom is not supported");
-    }
   };
 
   /**
@@ -296,15 +256,6 @@ const ScanModal = (props: ScanModalProps) => {
       },
     );
 
-    // Determine if zoom is supported by the camera
-    const stream = document.querySelector("video")?.srcObject as MediaStream;
-    if (stream) {
-      const [track] = stream.getVideoTracks() as MediaStreamTrack[];
-      if (Object.keys(track.getCapabilities()).includes("zoom")) {
-        setZoomSupported(true);
-      }
-    }
-
     // Cleanup function when component will unmount
     return () => {
       onScannerCleanup();
@@ -329,82 +280,31 @@ const ScanModal = (props: ScanModalProps) => {
       <ModalContent p={"2"} gap={"0"}>
         <ModalHeader p={"2"}>Scan Identifier</ModalHeader>
         <ModalCloseButton />
-        <ModalBody px={"2"} gap={"2"} w={"100%"}>
-          {/* Scanner */}
-          <Flex
-            w={"100%"}
-            h={"100%"}
-            minH={"400px"}
-            justify={"center"}
-            align={"center"}
-            direction={"column"}
-            gap={"8"}
-          >
+        <ModalBody px={"2"} gap={"2"} w={"100%"} alignContent={"center"}>
+          {/* Camera view */}
+          <Flex justify={"center"} align={"center"}>
             <Flex
+              id={REGION_ID}
+              ref={cameraRef}
               direction={"column"}
-              gap={2}
-              w={"100%"}
-              h={"100%"}
-              align={"center"}
+              w={"300px"}
+              h={"300px"}
               justify={"center"}
-            >
-              {/* Camera view */}
-              <Flex
-                id={REGION_ID}
-                ref={cameraRef}
-                direction={"column"}
-                w={"300px"}
-                h={"300px"}
-                justify={"center"}
-                align={"center"}
-                border={"2px"}
-                borderColor={"gray.400"}
-                rounded={"md"}
-              ></Flex>
-
-              {/* Zoom button */}
-              <Flex align={"center"} gap={4} w={"100%"}>
-                <Text
-                  fontWeight={"semibold"}
-                  fontSize={"small"}
-                  color={"gray.500"}
-                >
-                  Zoom:
-                </Text>
-                <IconButton
-                  aria-label={"Zoom out"}
-                  icon={<Icon name={"zoom_out"} />}
-                  size={"sm"}
-                  onClick={() => changeZoom(zoomLevel - 0.1)}
-                  isDisabled={zoomLevel === 1.0 || !zoomSupported}
-                />
-                <Slider
-                  aria-label={"zoom-slider"}
-                  value={zoomLevel}
-                  min={1.0}
-                  max={2.0}
-                  step={0.1}
-                  onChange={(value) => setZoomLevel(value)}
-                  isDisabled={!zoomSupported}
-                >
-                  <SliderTrack>
-                    <SliderFilledTrack />
-                  </SliderTrack>
-                  <SliderThumb />
-                </Slider>
-                <IconButton
-                  aria-label={"Zoom in"}
-                  icon={<Icon name={"zoom_in"} />}
-                  size={"sm"}
-                  onClick={() => changeZoom(zoomLevel + 0.1)}
-                  isDisabled={zoomLevel === 2.0 || !zoomSupported}
-                />
-              </Flex>
-            </Flex>
+              align={"center"}
+              border={"2px"}
+              borderColor={"gray.400"}
+              rounded={"md"}
+            ></Flex>
           </Flex>
 
           {/* Manual entry field */}
-          <Flex mt={"4"} w={"100%"} justify={"center"} gap={"2"}>
+          <Flex
+            align={"center"}
+            mt={"4"}
+            w={"100%"}
+            justify={"center"}
+            gap={"2"}
+          >
             {!showInput && (
               <Flex>
                 <Button
@@ -419,7 +319,7 @@ const ScanModal = (props: ScanModalProps) => {
 
             {showInput && (
               <Flex direction={"row"} gap={"2"} align={"center"} w={"100%"}>
-                <Flex w={"auto"}>
+                <Flex grow={1}>
                   <Input
                     size={"sm"}
                     rounded={"md"}
