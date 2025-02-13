@@ -9,6 +9,8 @@ import {
   ModalContent,
   ModalHeader,
   ModalOverlay,
+  Spinner,
+  Text,
   useToast,
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
@@ -46,6 +48,7 @@ const ScanModal = (props: ScanModalProps) => {
   // State to manage identifier input visibility
   const [showInput, setShowInput] = useState(false);
   const [manualInputValue, setManualInputValue] = useState("");
+  const [showCamera, setShowCamera] = useState(false);
 
   // Camera state
   let codeScanner: Html5Qrcode | null = null;
@@ -73,7 +76,7 @@ const ScanModal = (props: ScanModalProps) => {
   const createConfig = (props: ScannerProps) => {
     const config: Html5QrcodeCameraScanConfig = {
       fps: _.isUndefined(props.fps) ? 10 : props.fps,
-      qrbox: _.isUndefined(props.qrbox) ? 200 : props.qrbox,
+      qrbox: _.isUndefined(props.qrbox) ? 180 : props.qrbox,
       aspectRatio: _.isUndefined(props.aspectRatio) ? 1 : props.aspectRatio,
       disableFlip: _.isUndefined(props.disableFlip) ? false : props.disableFlip,
     };
@@ -85,7 +88,6 @@ const ScanModal = (props: ScanModalProps) => {
    * Handle the modal being closed by the user, resetting the state and removing the keypress handler
    */
   const handleOnClose = async () => {
-    console.info("handleOnClose");
     await onScannerCleanup();
 
     // Reset state
@@ -245,7 +247,7 @@ const ScanModal = (props: ScanModalProps) => {
       verbose: false,
     });
 
-    codeScanner.start(
+    await codeScanner.start(
       { facingMode: "environment" },
       createConfig(props),
       (decodedText) => {
@@ -255,6 +257,7 @@ const ScanModal = (props: ScanModalProps) => {
         return;
       },
     );
+    setShowCamera(true);
 
     // Cleanup function when component will unmount
     return () => {
@@ -287,15 +290,31 @@ const ScanModal = (props: ScanModalProps) => {
               id={REGION_ID}
               ref={cameraRef}
               direction={"column"}
-              w={"300px"}
-              h={"300px"}
+              w={"100%"}
+              h={"100%"}
               justify={"center"}
               align={"center"}
-              border={"2px"}
-              borderColor={"gray.400"}
+              border={showCamera ? "2px" : "none"}
+              borderColor={showCamera ? "gray.400" : "transparent"}
               rounded={"md"}
             ></Flex>
           </Flex>
+
+          {!showCamera && (
+            <Flex
+              w={"100%"}
+              h={"100%"}
+              justify={"center"}
+              align={"center"}
+              p={"2"}
+              gap={"2"}
+            >
+              <Spinner />
+              <Text fontWeight={"semibold"} fontSize={"sm"}>
+                Initializing camera...
+              </Text>
+            </Flex>
+          )}
 
           {/* Manual entry field */}
           <Flex
