@@ -423,23 +423,42 @@ const Search = () => {
 
           {hasSearched && !isSearching && (
             <Flex direction={"column"} w={"100%"} gap={"2"}>
-              <Heading
-                id={"resultsHeading"}
-                size={"sm"}
-                fontWeight={"semibold"}
-              >
-                {results.length} result
-                {results.length > 1 || results.length === 0 ? "s" : ""}
-              </Heading>
-              <DataTable
-                columns={searchResultColumns}
-                visibleColumns={visibleColumns}
-                selectedRows={{}}
-                data={results}
-                showPagination
-                showSelection
-                actions={searchResultActions}
-              />
+              {results.length > 0 ? (
+                <>
+                  <Heading
+                    id={"resultsHeading"}
+                    size={"sm"}
+                    fontWeight={"semibold"}
+                  >
+                    {results.length} result
+                    {results.length > 1 ? "s" : ""}
+                  </Heading>
+                  <DataTable
+                    columns={searchResultColumns}
+                    visibleColumns={visibleColumns}
+                    selectedRows={{}}
+                    data={results}
+                    showPagination
+                    showSelection
+                    actions={searchResultActions}
+                  />
+                </>
+              ) : (
+                <Flex
+                  w={"100%"}
+                  minH={"200px"}
+                  align={"center"}
+                  justify={"center"}
+                >
+                  <Text
+                    fontSize={"sm"}
+                    fontWeight={"semibold"}
+                    color={"gray.600"}
+                  >
+                    No results found
+                  </Text>
+                </Flex>
+              )}
             </Flex>
           )}
         </Flex>

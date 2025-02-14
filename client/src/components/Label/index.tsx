@@ -2,15 +2,25 @@
 import React from "react";
 
 // Existing and custom components
-import { Tag, TagLabel } from "@chakra-ui/react";
+import { Flex, Tag, TagLabel, Text } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 
 const Information = (props: { text: string }) => {
   return (
-    <Tag size={"md"} colorScheme={"teal"} gap={"2"} w={"fit-content"}>
-      <Icon name={"info"} />
-      <TagLabel>{props.text}</TagLabel>
-    </Tag>
+    <Flex
+      direction={"row"}
+      gap={"2"}
+      p={"2"}
+      rounded={"md"}
+      bg={"blue.100"}
+      align={"center"}
+      w={"fit-content"}
+    >
+      <Icon name={"info"} color={"blue.300"} />
+      <Text fontWeight={"semibold"} fontSize={"sm"} color={"blue.700"}>
+        {props.text}
+      </Text>
+    </Flex>
   );
 };
 

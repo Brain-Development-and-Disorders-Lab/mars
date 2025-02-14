@@ -38,6 +38,7 @@ import Icon from "@components/Icon";
 import Attribute from "@components/AttributeCard";
 import DataTable from "@components/DataTable";
 import ActorTag from "@components/ActorTag";
+import { Information } from "@components/Label";
 
 // Custom and existing types
 import {
@@ -888,23 +889,11 @@ const ImportModal = (props: ImportModalProps) => {
         <ModalHeader p={"2"}>Import File</ModalHeader>
         <ModalCloseButton />
         <ModalBody px={"2"} gap={"2"}>
-          <Flex
-            direction={"row"}
-            gap={"2"}
-            align={"center"}
-            justify={"left"}
-            p={"2"}
-            rounded={"md"}
-            border={"1px"}
-            borderColor={"gray.300"}
-          >
-            <Text fontWeight={"semibold"} fontSize={"sm"} color={"gray.600"}>
-              Files can be imported into Metadatify and used to create Entities
-              or update existing Entities. Templates can also be imported.
-              Select the file type being imported, then upload the file to
-              continue.
-            </Text>
-          </Flex>
+          <Information
+            text={
+              "Files can be imported into Metadatify and used to create Entities or update existing Entities. Templates can also be imported. Select the file type being imported, then upload the file to continue."
+            }
+          />
 
           {/* Select file type of import */}
           <Flex
