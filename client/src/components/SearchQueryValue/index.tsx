@@ -91,7 +91,7 @@ const SearchQueryValue = ({
   }, [selected]);
 
   return (
-    <Flex w={"100%"}>
+    <Flex>
       {/* Name and Description */}
       {_.includes(["name", "description"], field) && (
         <Input
