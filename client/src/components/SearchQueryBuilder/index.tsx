@@ -126,7 +126,7 @@ const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
         return JSON.stringify({
           ...processed,
           "attributes.values.data": {
-            $regex: customRule.value,
+            $regex: new RegExp(customRule.value, "gi").toString(),
           },
         });
       } else if (customRule.operator === "does not contain") {
@@ -134,7 +134,7 @@ const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
           ...processed,
           "attributes.values.data": {
             $not: {
-              $regex: customRule.value,
+              $regex: new RegExp(customRule.value, "gi").toString(),
             },
           },
         });
