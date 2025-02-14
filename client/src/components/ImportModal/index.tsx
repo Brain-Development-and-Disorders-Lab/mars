@@ -265,11 +265,17 @@ const ImportModal = (props: ImportModalProps) => {
     reviewTableColumnHelper.accessor("name", {
       cell: (info) => {
         return (
-          <Tooltip label={info.getValue()} hasArrow>
-            <Text fontSize={"sm"} fontWeight={"semibold"}>
-              {_.truncate(info.getValue(), { length: 30 })}
-            </Text>
-          </Tooltip>
+          <Flex>
+            <Tooltip
+              label={info.getValue()}
+              hasArrow
+              isDisabled={info.getValue().length < 30}
+            >
+              <Text fontSize={"sm"} fontWeight={"semibold"}>
+                {_.truncate(info.getValue(), { length: 30 })}
+              </Text>
+            </Tooltip>
+          </Flex>
         );
       },
       header: "Entity Name",
@@ -383,6 +389,23 @@ const ImportModal = (props: ImportModalProps) => {
 
     // File contents are valid
     return true;
+  };
+
+  /**
+   * Utility function to determine if a column is selected for mapping
+   * @param {string} column The column to check
+   * @returns {boolean} True if the column is selected for mapping, false otherwise
+   */
+  const columnSelected = (column: string) => {
+    if (_.includes([nameField, descriptionField], column)) return true;
+
+    for (const attribute of attributesField) {
+      for (const value of attribute.values) {
+        if (_.includes(value.data, column)) return true;
+      }
+    }
+
+    return false;
   };
 
   /**
@@ -535,6 +558,7 @@ const ImportModal = (props: ImportModalProps) => {
     // Collate data to be mapped
     const mappingData: { columnMapping: any; file: any } = {
       columnMapping: {
+        namePrefix: namePrefixField,
         name: nameField,
         description: descriptionField,
         created: dayjs(Date.now()).toISOString(),
@@ -607,6 +631,7 @@ const ImportModal = (props: ImportModalProps) => {
     // Collate data to be mapped
     const mappingData: { columnMapping: IColumnMapping; file: any } = {
       columnMapping: {
+        namePrefix: namePrefixField,
         name: nameField,
         description: descriptionField,
         created: dayjs(Date.now()).toISOString(),
@@ -1003,7 +1028,13 @@ const ImportModal = (props: ImportModalProps) => {
                     </Text>
                     {columns.map((column) => {
                       return (
-                        <Tag size={"sm"} key={column}>
+                        <Tag
+                          size={"sm"}
+                          key={column}
+                          colorScheme={
+                            columnSelected(column) ? "green" : "gray"
+                          }
+                        >
                           {column}
                         </Tag>
                       );

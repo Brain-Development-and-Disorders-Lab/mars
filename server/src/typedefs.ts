@@ -277,6 +277,7 @@ export const typedefs = `#graphql
 
   # "ColumnMappingInput" input
   input ColumnMappingInput {
+    namePrefix: String
     name: String
     description: String
     created: String
