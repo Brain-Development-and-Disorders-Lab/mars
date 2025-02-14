@@ -414,7 +414,7 @@ export const typedefs = `#graphql
     projectMetrics: ProjectMetrics
 
     # Entity queries
-    entities(limit: Int, archived: Boolean): [Entity]
+    entities(limit: Int, archived: Boolean, reverse: Boolean): [Entity]
     entity(_id: String): Entity
     entityNameExists(name: String): Boolean
     entityMetrics: EntityMetrics

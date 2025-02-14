@@ -25,7 +25,7 @@ export const EntitiesResolvers = {
     // Retrieve all Entities
     entities: async (
       _parent: IResolverParent,
-      args: { limit: 100; archived: boolean },
+      args: { limit: number | undefined; archived: boolean; reverse: boolean },
       context: Context,
     ) => {
       // Authenticate the provided context
@@ -43,6 +43,12 @@ export const EntitiesResolvers = {
 
       // Filter by ownership and Workspace membership
       const entities = await Entities.getMany(workspace.entities);
+
+      // Reverse the order of the Entities if requested
+      if (args.reverse) {
+        entities.reverse();
+      }
+
       return entities
         .filter((entity) => {
           if (args.archived === true) {
@@ -53,7 +59,7 @@ export const EntitiesResolvers = {
             return entity.archived === false;
           }
         })
-        .slice(0, args.limit);
+        .slice(0, _.isUndefined(args.limit) ? entities.length : args.limit);
     },
 
     // Retrieve one Entity by _id

@@ -45,6 +45,7 @@ export class Entities {
     return await getDatabase()
       .collection<EntityModel>(ENTITIES_COLLECTION)
       .find()
+      .sort({ timestamp: 1 })
       .toArray();
   };
 
@@ -68,6 +69,7 @@ export class Entities {
     return await getDatabase()
       .collection<EntityModel>(ENTITIES_COLLECTION)
       .find({ _id: { $in: entities } })
+      .sort({ timestamp: 1 })
       .toArray();
   };
 
