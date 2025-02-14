@@ -37,6 +37,7 @@ import { createColumnHelper } from "@tanstack/react-table";
 import Icon from "@components/Icon";
 import Attribute from "@components/AttributeCard";
 import DataTable from "@components/DataTable";
+import ActorTag from "@components/ActorTag";
 
 // Custom and existing types
 import {
@@ -82,9 +83,9 @@ const ImportModal = (props: ImportModalProps) => {
   // Page states
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Button states
+  // Operation and button states
+  const [importLoading, setImportLoading] = useState(false);
   const [continueDisabled, setContinueDisabled] = useState(true);
-  const [continueLoading, setContinueLoading] = useState(false);
 
   const navigate = useNavigate();
   const toast = useToast();
@@ -133,6 +134,7 @@ const ImportModal = (props: ImportModalProps) => {
   const [projects, setProjects] = useState([] as IGenericItem[]);
 
   // Fields to be assigned to columns
+  const [namePrefixField, setNamePrefixField] = useState("");
   const [nameField, setNameField] = useState("");
   const [descriptionField, setDescriptionField] = useState("");
   const [ownerField] = useState(token.orcid);
@@ -153,10 +155,8 @@ const ImportModal = (props: ImportModalProps) => {
       prepareEntityCSV(file: $file)
     }
   `;
-  const [
-    prepareEntityCSV,
-    { loading: prepareEntityCSVLoading, error: prepareEntityCSVError },
-  ] = useMutation(PREPARE_ENTITY_CSV);
+  const [prepareEntityCSV, { error: prepareEntityCSVError }] =
+    useMutation(PREPARE_ENTITY_CSV);
 
   const GET_MAPPING_DATA = gql`
     query GetMappingData {
@@ -197,10 +197,8 @@ const ImportModal = (props: ImportModalProps) => {
       }
     }
   `;
-  const [
-    reviewEntityCSV,
-    { loading: reviewEntityCSVLoading, error: reviewEntityCSVError },
-  ] = useMutation(REVIEW_ENTITY_CSV);
+  const [reviewEntityCSV, { error: reviewEntityCSVError }] =
+    useMutation(REVIEW_ENTITY_CSV);
 
   const IMPORT_ENTITY_CSV = gql`
     mutation ImportEntityCSV(
@@ -213,10 +211,8 @@ const ImportModal = (props: ImportModalProps) => {
       }
     }
   `;
-  const [
-    importEntityCSV,
-    { loading: importEntityCSVLoading, error: importEntityCSVError },
-  ] = useMutation(IMPORT_ENTITY_CSV);
+  const [importEntityCSV, { error: importEntityCSVError }] =
+    useMutation(IMPORT_ENTITY_CSV);
 
   const REVIEW_ENTITY_JSON = gql`
     mutation ReviewEntityJSON($file: [Upload]!) {
@@ -230,10 +226,8 @@ const ImportModal = (props: ImportModalProps) => {
       }
     }
   `;
-  const [
-    reviewEntityJSON,
-    { loading: reviewEntityJSONLoading, error: reviewEntityJSONError },
-  ] = useMutation(REVIEW_ENTITY_JSON);
+  const [reviewEntityJSON, { error: reviewEntityJSONError }] =
+    useMutation(REVIEW_ENTITY_JSON);
 
   const IMPORT_ENTITY_JSON = gql`
     mutation ImportEntityJSON(
@@ -251,10 +245,8 @@ const ImportModal = (props: ImportModalProps) => {
       }
     }
   `;
-  const [
-    importEntityJSON,
-    { loading: importEntityJSONLoading, error: importEntityJSONError },
-  ] = useMutation(IMPORT_ENTITY_JSON);
+  const [importEntityJSON, { error: importEntityJSONError }] =
+    useMutation(IMPORT_ENTITY_JSON);
 
   const IMPORT_TEMPLATE_JSON = gql`
     mutation ImportTemplateJSON($file: [Upload]!) {
@@ -264,10 +256,8 @@ const ImportModal = (props: ImportModalProps) => {
       }
     }
   `;
-  const [
-    importTemplateJSON,
-    { loading: importTemplateJSONLoading, error: importTemplateJSONError },
-  ] = useMutation(IMPORT_TEMPLATE_JSON);
+  const [importTemplateJSON, { error: importTemplateJSONError }] =
+    useMutation(IMPORT_TEMPLATE_JSON);
 
   // Setup columns for review table
   const reviewTableColumnHelper = createColumnHelper<EntityImportReview>();
@@ -306,11 +296,10 @@ const ImportModal = (props: ImportModalProps) => {
 
   // Effect to manipulate 'Continue' button state for 'upload' page
   useEffect(() => {
-    if (_.isEqual(entityInterfacePage, "upload") && fileType !== "") {
-      setContinueLoading(false);
+    if (_.isEqual(entityInterfacePage, "upload") && fileName !== "") {
       setContinueDisabled(false);
     }
-  }, [fileType]);
+  }, [fileName]);
 
   // Effect to manipulate 'Continue' button state when mapping fields from CSV file
   useEffect(() => {
@@ -319,7 +308,6 @@ const ImportModal = (props: ImportModalProps) => {
       nameField !== "" &&
       fileType === CSV_MIME_TYPE
     ) {
-      setContinueLoading(false);
       setContinueDisabled(false);
     }
   }, [nameField]);
@@ -330,7 +318,6 @@ const ImportModal = (props: ImportModalProps) => {
       _.isEqual(entityInterfacePage, "details") &&
       fileType === JSON_MIME_TYPE
     ) {
-      setContinueLoading(false);
       setContinueDisabled(false);
     }
   }, [entityInterfacePage]);
@@ -343,7 +330,9 @@ const ImportModal = (props: ImportModalProps) => {
     file: File,
   ): Promise<{ entities: EntityModel[] }> => {
     // Attempt to parse the JSON file
+    setImportLoading(true);
     const data = await file.text();
+    setImportLoading(false);
 
     try {
       const parsed = JSON.parse(data as string);
@@ -405,7 +394,6 @@ const ImportModal = (props: ImportModalProps) => {
    */
   const setupImport = async (): Promise<boolean> => {
     // Update state of continue button
-    setContinueLoading(true);
     setContinueDisabled(true);
 
     // Extract data from the form
@@ -416,19 +404,21 @@ const ImportModal = (props: ImportModalProps) => {
 
     if (fileType === JSON_MIME_TYPE) {
       // Handle JSON data separately
+      setImportLoading(true);
       const data = await parseJSONFile(file);
+      setImportLoading(false);
 
       // Validate the JSON data
       return validJSONFile(data);
     } else if (fileType === CSV_MIME_TYPE) {
       // Mutation query with CSV file
-      setContinueLoading(prepareEntityCSVLoading);
+      setImportLoading(true);
       const response = await prepareEntityCSV({
         variables: {
           file: file,
         },
       });
-      setContinueLoading(prepareEntityCSVLoading);
+      setImportLoading(false);
 
       if (prepareEntityCSVError || _.isUndefined(response.data)) {
         toast({
@@ -451,8 +441,12 @@ const ImportModal = (props: ImportModalProps) => {
         );
         setColumns(filteredColumnSet);
 
+        setImportLoading(true);
+        const mappingResult = await setupMapping();
+        setImportLoading(false);
+
         // Setup the next stage of CSV import
-        return await setupMapping();
+        return mappingResult;
       } else if (response.data.prepareEntityCSV.length === 0) {
         // If the CSV file is empty, display an error message
         toast({
@@ -477,7 +471,9 @@ const ImportModal = (props: ImportModalProps) => {
    */
   const setupMapping = async (): Promise<boolean> => {
     setIsLoaded(!mappingDataLoading);
+    setImportLoading(true);
     const response = await getMappingData();
+    setImportLoading(false);
 
     if (response.data?.templates) {
       setTemplates(response.data.templates);
@@ -507,13 +503,13 @@ const ImportModal = (props: ImportModalProps) => {
    * to generate a summary of the changes
    */
   const setupReviewEntityJSON = async () => {
-    setContinueLoading(reviewEntityJSONLoading);
+    setImportLoading(true);
     const response = await reviewEntityJSON({
       variables: {
         file: file,
       },
     });
-    setContinueLoading(reviewEntityJSONLoading);
+    setImportLoading(false);
 
     if (response.data && response.data.reviewEntityJSON.data) {
       setReviewEntities(response.data.reviewEntityJSON.data);
@@ -549,11 +545,11 @@ const ImportModal = (props: ImportModalProps) => {
       file: file,
     };
 
-    setContinueLoading(reviewEntityCSVLoading);
+    setImportLoading(true);
     const response = await reviewEntityCSV({
       variables: mappingData,
     });
-    setContinueLoading(reviewEntityCSVLoading);
+    setImportLoading(false);
 
     if (response.data && response.data.reviewEntityCSV.data) {
       setReviewEntities(response.data.reviewEntityCSV.data);
@@ -575,7 +571,7 @@ const ImportModal = (props: ImportModalProps) => {
    * Finish importing a JSON file
    */
   const finishImportEntityJSON = async () => {
-    setContinueLoading(importEntityJSONLoading);
+    setImportLoading(true);
     const response = await importEntityJSON({
       variables: {
         file: file,
@@ -583,7 +579,7 @@ const ImportModal = (props: ImportModalProps) => {
         attributes: attributesField,
       },
     });
-    setContinueLoading(importEntityJSONLoading);
+    setImportLoading(false);
 
     if (importEntityJSONError) {
       toast({
@@ -608,9 +604,6 @@ const ImportModal = (props: ImportModalProps) => {
    * Finish importing a CSV file
    */
   const finishImportEntityCSV = async () => {
-    // Set the mapping status
-    setContinueLoading(importEntityCSVLoading);
-
     // Collate data to be mapped
     const mappingData: { columnMapping: IColumnMapping; file: any } = {
       columnMapping: {
@@ -623,13 +616,14 @@ const ImportModal = (props: ImportModalProps) => {
       },
       file: file,
     };
+    setImportLoading(true);
     await importEntityCSV({
       variables: {
         columnMapping: mappingData.columnMapping,
         file: mappingData.file,
       },
     });
-    setContinueLoading(importEntityCSVLoading);
+    setImportLoading(false);
 
     if (importEntityCSVError) {
       toast({
@@ -645,17 +639,16 @@ const ImportModal = (props: ImportModalProps) => {
       resetState();
       navigate(0);
     }
-
-    setContinueLoading(false);
   };
 
   const finishImportTemplateJSON = async () => {
+    setImportLoading(true);
     await importTemplateJSON({
       variables: {
         file: file,
       },
     });
-    setContinueLoading(importTemplateJSONLoading);
+    setImportLoading(false);
 
     if (importTemplateJSONError) {
       toast({
@@ -671,8 +664,6 @@ const ImportModal = (props: ImportModalProps) => {
       resetState();
       navigate(0);
     }
-
-    setContinueLoading(false);
   };
 
   /**
@@ -751,17 +742,15 @@ const ImportModal = (props: ImportModalProps) => {
         });
 
         // Run setup for import and mapping
+        setImportLoading(true);
         const importResult = await setupImport();
         const mappingResult = await setupMapping();
+        setImportLoading(false);
 
         if (importResult && mappingResult) {
           // Proceed to the next page if both setup steps completed successfully
           setActiveEntityStep(1);
           setEntityInterfacePage("details");
-        } else {
-          // Reset state as required
-          setContinueLoading(false);
-          setContinueDisabled(false);
         }
       } else if (_.isEqual(entityInterfacePage, "details")) {
         // Capture event
@@ -799,11 +788,13 @@ const ImportModal = (props: ImportModalProps) => {
         });
 
         // Run the final import function depending on file type
+        setImportLoading(true);
         if (fileType === JSON_MIME_TYPE) {
           await finishImportEntityJSON();
         } else if (fileType === CSV_MIME_TYPE) {
           await finishImportEntityCSV();
         }
+        setImportLoading(false);
       }
     } else if (_.isEqual(importType, "template")) {
       if (_.isEqual(templateInterfacePage, "upload")) {
@@ -824,7 +815,9 @@ const ImportModal = (props: ImportModalProps) => {
         });
 
         // Run the final import function for Template JSON files
+        setImportLoading(true);
         await finishImportTemplateJSON();
+        setImportLoading(false);
       }
     }
   };
@@ -842,7 +835,7 @@ const ImportModal = (props: ImportModalProps) => {
     setTemplateInterfacePage("upload");
 
     setContinueDisabled(true);
-    setContinueLoading(false);
+    setImportLoading(false);
     setIsTypeSelectDisabled(false);
 
     setFile({} as File);
@@ -1137,6 +1130,21 @@ const ImportModal = (props: ImportModalProps) => {
 
                 {fileType === CSV_MIME_TYPE && (
                   <Flex direction={"row"} gap={"2"}>
+                    <FormControl>
+                      <FormLabel fontSize={"sm"}>Name Prefix</FormLabel>
+                      <Input
+                        value={namePrefixField}
+                        placeholder={"Name Prefix"}
+                        size={"sm"}
+                        rounded={"md"}
+                        onChange={(event) =>
+                          setNamePrefixField(event.target.value)
+                        }
+                      />
+                      <FormHelperText>
+                        Add a prefix to each Entity name
+                      </FormHelperText>
+                    </FormControl>
                     <FormControl
                       isRequired
                       isInvalid={_.isEqual(nameField, "")}
@@ -1151,22 +1159,26 @@ const ImportModal = (props: ImportModalProps) => {
                         Column containing Entity names
                       </FormHelperText>
                     </FormControl>
-                    <FormControl>
-                      <FormLabel fontSize={"sm"}>Description</FormLabel>
-                      {getSelectComponent(
-                        "import_description",
-                        descriptionField,
-                        setDescriptionField,
-                      )}
-                      <FormHelperText>
-                        Column containing Entity descriptions
-                      </FormHelperText>
-                    </FormControl>
                   </Flex>
                 )}
 
                 {fileType === JSON_MIME_TYPE && (
                   <Flex direction={"row"} gap={"2"}>
+                    <FormControl>
+                      <FormLabel fontSize={"sm"}>Name Prefix</FormLabel>
+                      <Input
+                        value={namePrefixField}
+                        placeholder={"Name Prefix"}
+                        size={"sm"}
+                        rounded={"md"}
+                        onChange={(event) =>
+                          setNamePrefixField(event.target.value)
+                        }
+                      />
+                      <FormHelperText>
+                        Add a prefix to each Entity name
+                      </FormHelperText>
+                    </FormControl>
                     <FormControl>
                       <FormLabel fontSize={"sm"}>Name</FormLabel>
                       <Select
@@ -1180,39 +1192,24 @@ const ImportModal = (props: ImportModalProps) => {
                         Field containing Entity names
                       </FormHelperText>
                     </FormControl>
-                    <FormControl>
-                      <FormLabel fontSize={"sm"}>Description</FormLabel>
-                      <Select
-                        size={"sm"}
-                        rounded={"md"}
-                        placeholder={"Defined in JSON"}
-                        isDisabled
-                        isReadOnly
-                      />
-                      <FormHelperText>
-                        Field containing Entity descriptions
-                      </FormHelperText>
-                    </FormControl>
                   </Flex>
                 )}
 
                 <Flex direction={"row"} gap={"2"}>
+                  {/* Description */}
                   <FormControl>
-                    <FormLabel fontSize={"sm"}>Owner</FormLabel>
-                    <Tooltip
-                      label={
-                        "Initially, only you will have access to imported Entities"
-                      }
-                      hasArrow
-                    >
-                      <Input
-                        value={ownerField}
-                        size={"sm"}
-                        rounded={"md"}
-                        isReadOnly
-                      />
-                    </Tooltip>
+                    <FormLabel fontSize={"sm"}>Description</FormLabel>
+                    {getSelectComponent(
+                      "import_description",
+                      descriptionField,
+                      setDescriptionField,
+                    )}
+                    <FormHelperText>
+                      Column containing Entity descriptions
+                    </FormHelperText>
                   </FormControl>
+
+                  {/* Project */}
                   <FormControl>
                     <FormLabel fontSize={"sm"}>Project</FormLabel>
                     <Select
@@ -1232,6 +1229,17 @@ const ImportModal = (props: ImportModalProps) => {
                       })}
                     </Select>
                     <FormHelperText>Add Entities to a Project</FormHelperText>
+                  </FormControl>
+                </Flex>
+
+                <Flex direction={"row"} gap={"2"} w={"50%"}>
+                  {/* Owner */}
+                  <FormControl>
+                    <FormLabel fontSize={"sm"}>Owner</FormLabel>
+                    <Flex>
+                      <ActorTag orcid={ownerField} fallback={"Unknown"} />
+                    </Flex>
+                    <FormHelperText>Owner of imported Entities</FormHelperText>
                   </FormControl>
                 </Flex>
               </Flex>
@@ -1543,53 +1551,56 @@ const ImportModal = (props: ImportModalProps) => {
               Cancel
             </Button>
 
-            <Button
-              id={"importContinueButton"}
-              size={"sm"}
-              colorScheme={
-                _.isEqual(templateInterfacePage, "review") ||
-                _.isEqual(entityInterfacePage, "review")
-                  ? "green"
-                  : "blue"
-              }
-              rightIcon={
-                _.includes(
-                  ["upload", "details", "mapping"],
-                  entityInterfacePage,
-                ) ? (
-                  <Icon name={"c_right"} />
-                ) : (
-                  <Icon name={"check"} />
-                )
-              }
-              variant={"solid"}
-              onClick={onContinueClick}
-              isDisabled={continueDisabled}
-              isLoading={continueLoading}
-              loadingText={"Processing"}
-            >
-              {/* Entities import type */}
-              {_.isEqual(importType, "entities") &&
-                _.isEqual(entityInterfacePage, "upload") &&
-                "Continue"}
-              {_.isEqual(importType, "entities") &&
-                _.isEqual(entityInterfacePage, "details") &&
-                "Continue"}
-              {_.isEqual(importType, "entities") &&
-                _.isEqual(entityInterfacePage, "mapping") &&
-                "Continue"}
-              {_.isEqual(importType, "entities") &&
-                _.isEqual(entityInterfacePage, "review") &&
-                "Finish"}
+            <Flex align={"center"} justify={"center"} gap={"2"}>
+              {/* {importLoading && <Spinner size={"sm"} />} */}
+              <Button
+                id={"importContinueButton"}
+                size={"sm"}
+                colorScheme={
+                  _.isEqual(templateInterfacePage, "review") ||
+                  _.isEqual(entityInterfacePage, "review")
+                    ? "green"
+                    : "blue"
+                }
+                rightIcon={
+                  _.includes(
+                    ["upload", "details", "mapping"],
+                    entityInterfacePage,
+                  ) ? (
+                    <Icon name={"c_right"} />
+                  ) : (
+                    <Icon name={"check"} />
+                  )
+                }
+                variant={"solid"}
+                onClick={onContinueClick}
+                isDisabled={continueDisabled || importLoading}
+                isLoading={importLoading}
+                loadingText={"Processing"}
+              >
+                {/* Entities import type */}
+                {_.isEqual(importType, "entities") &&
+                  _.isEqual(entityInterfacePage, "upload") &&
+                  "Continue"}
+                {_.isEqual(importType, "entities") &&
+                  _.isEqual(entityInterfacePage, "details") &&
+                  "Continue"}
+                {_.isEqual(importType, "entities") &&
+                  _.isEqual(entityInterfacePage, "mapping") &&
+                  "Continue"}
+                {_.isEqual(importType, "entities") &&
+                  _.isEqual(entityInterfacePage, "review") &&
+                  "Finish"}
 
-              {/* Template import type */}
-              {_.isEqual(importType, "template") &&
-                _.isEqual(entityInterfacePage, "upload") &&
-                "Continue"}
-              {_.isEqual(importType, "template") &&
-                _.isEqual(entityInterfacePage, "review") &&
-                "Finish"}
-            </Button>
+                {/* Template import type */}
+                {_.isEqual(importType, "template") &&
+                  _.isEqual(entityInterfacePage, "upload") &&
+                  "Continue"}
+                {_.isEqual(importType, "template") &&
+                  _.isEqual(entityInterfacePage, "review") &&
+                  "Finish"}
+              </Button>
+            </Flex>
           </Flex>
         </ModalFooter>
       </ModalContent>
