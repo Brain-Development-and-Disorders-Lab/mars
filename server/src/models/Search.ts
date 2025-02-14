@@ -1,8 +1,9 @@
-import { EntityModel, ProjectModel } from "@types";
+// Utility libraries and functions
 import { getDatabase } from "../connectors/database";
 import _ from "lodash";
 
 // Models
+import { EntityModel, ProjectModel } from "@types";
 import { Workspaces } from "./Workspaces";
 import { Entities } from "./Entities";
 import { Projects } from "./Projects";

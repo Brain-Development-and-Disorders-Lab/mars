@@ -101,6 +101,10 @@ export class Entities {
    * @returns {Promise<ResponseData<string>>}
    */
   static create = async (entity: IEntity): Promise<ResponseData<string>> => {
+    // Clean the Entity input data
+    entity.name = entity.name.toString().trim();
+    entity.description = entity.description.toString().trim();
+
     // Allocate a new identifier and join with IEntity data
     const joinedEntity: EntityModel = {
       _id: getIdentifier("entity"), // Generate new identifier
