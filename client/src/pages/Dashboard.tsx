@@ -81,6 +81,7 @@ const GET_DASHBOARD = gql`
       archived
       name
       description
+      timestamp
       attributes {
         _id
       }
@@ -261,12 +262,14 @@ const Dashboard = () => {
       header: "Attributes",
       enableHiding: true,
     }),
-    entityTableColumnHelper.accessor("created", {
-      cell: (info) => (
-        <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.600"}>
-          {dayjs(info.getValue()).fromNow()}
-        </Text>
-      ),
+    entityTableColumnHelper.accessor("timestamp", {
+      cell: (info) => {
+        return (
+          <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.600"}>
+            {dayjs(info.getValue()).fromNow()}
+          </Text>
+        );
+      },
       header: "Created",
       enableHiding: true,
     }),
