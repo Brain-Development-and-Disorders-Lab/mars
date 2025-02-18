@@ -112,18 +112,6 @@ const Templates = () => {
       cell: (info) => <Text fontWeight={"semibold"}>{info.getValue()}</Text>,
       header: "Name",
     }),
-    columnHelper.accessor("timestamp", {
-      cell: (info) => dayjs(info.getValue()).fromNow(),
-      header: "Created",
-      enableHiding: true,
-    }),
-    columnHelper.accessor("owner", {
-      cell: (info) => {
-        return <Tag size={"sm"}>{info.getValue()}</Tag>;
-      },
-      header: "Owner",
-      enableHiding: true,
-    }),
     columnHelper.accessor("description", {
       cell: (info) => {
         if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
@@ -136,6 +124,18 @@ const Templates = () => {
         );
       },
       header: "Description",
+      enableHiding: true,
+    }),
+    columnHelper.accessor("owner", {
+      cell: (info) => {
+        return <Tag size={"sm"}>{info.getValue()}</Tag>;
+      },
+      header: "Owner",
+      enableHiding: true,
+    }),
+    columnHelper.accessor("timestamp", {
+      cell: (info) => dayjs(info.getValue()).fromNow(),
+      header: "Created",
       enableHiding: true,
     }),
     columnHelper.accessor("values", {
