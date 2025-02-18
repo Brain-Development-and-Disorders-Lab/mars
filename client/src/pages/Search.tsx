@@ -422,7 +422,12 @@ const Search = () => {
           )}
 
           {hasSearched && !isSearching && (
-            <Flex direction={"column"} w={"100%"} gap={"2"}>
+            <Flex
+              id={"resultsContainer"}
+              direction={"column"}
+              w={"100%"}
+              gap={"2"}
+            >
               {results.length > 0 ? (
                 <>
                   <Heading

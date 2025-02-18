@@ -88,16 +88,33 @@ const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
 
   /**
    * Custom function for processing specific fields within a search query,
-   * specifically `origins` and `products`
+   * specifically `relationships`
    * @param {RuleType} rule Rule for processing value
-   * @return {String}
+   * @return {any}
    */
-  const ruleProcessor: RuleProcessor = (rule: RuleType): string => {
-    if (rule.field === "relationships") {
+  const ruleProcessor: RuleProcessor = (rule: RuleType): any => {
+    console.log(rule);
+    if (rule.field === "name") {
+      if (rule.operator === "doesNotContain") {
+        return {
+          name: {
+            $not: { $regex: new RegExp(rule.value, "gi").toString() },
+          },
+        };
+      } else if (rule.operator === "contains") {
+        return {
+          name: {
+            $regex: new RegExp(rule.value, "gi").toString(),
+          },
+        };
+      } else {
+        return defaultRuleProcessorMongoDB(rule);
+      }
+    } else if (rule.field === "relationships") {
       // Handle `relationships` field
       if (rule.operator === "doesNotContain") {
         // If `doesNotContain`, include `$not`
-        return JSON.stringify({
+        return {
           relationships: {
             $not: {
               $elemMatch: {
@@ -105,15 +122,16 @@ const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
               },
             },
           },
-        });
-      }
-      return JSON.stringify({
-        relationships: {
-          $elemMatch: {
-            "target._id": rule.value,
+        };
+      } else {
+        return {
+          relationships: {
+            $elemMatch: {
+              "target._id": rule.value,
+            },
           },
-        },
-      });
+        };
+      }
     } else if (rule.field === "attributes") {
       // Construct the base query components
       const customRule = JSON.parse(rule.value);
@@ -123,72 +141,72 @@ const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
 
       // Append query components depending on the specified operator
       if (customRule.operator === "contains") {
-        return JSON.stringify({
+        return {
           ...processed,
           "attributes.values.data": {
             $regex: new RegExp(customRule.value, "gi").toString(),
           },
-        });
+        };
       } else if (customRule.operator === "does not contain") {
-        return JSON.stringify({
+        return {
           ...processed,
           "attributes.values.data": {
             $not: {
               $regex: new RegExp(customRule.value, "gi").toString(),
             },
           },
-        });
+        };
       } else if (customRule.operator === "equals") {
         if (customRule.type === "number") {
-          return JSON.stringify({
+          return {
             ...processed,
             "attributes.values.data": {
               $eq: parseFloat(customRule.value),
             },
-          });
+          };
         } else {
-          return JSON.stringify({
+          return {
             ...processed,
             "attributes.values.data": {
               $eq: dayjs(customRule.value).format("YYYY-MM-DD"),
             },
-          });
+          };
         }
       } else if (customRule.operator === ">") {
         if (customRule.type === "number") {
-          return JSON.stringify({
+          return {
             ...processed,
             "attributes.values.data": {
               $gt: parseFloat(customRule.value),
             },
-          });
+          };
         } else {
-          return JSON.stringify({
+          return {
             ...processed,
             "attributes.values.data": {
               $gt: dayjs(customRule.value).format("YYYY-MM-DD"),
             },
-          });
+          };
         }
       } else if (customRule.operator === "<") {
         if (customRule.type === "number") {
-          return JSON.stringify({
+          return {
             ...processed,
             "attributes.values.data": {
               $lt: parseFloat(customRule.value),
             },
-          });
+          };
         } else {
-          return JSON.stringify({
+          return {
             ...processed,
             "attributes.values.data": {
               $lt: dayjs(customRule.value).format("YYYY-MM-DD"),
             },
-          });
+          };
         }
       }
 
-      return JSON.stringify(processed);
+      return processed;
     }
 
     // Default rule applied
@@ -246,10 +264,12 @@ const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
     // Format the query in `mongodb` format before sending
     const results = await searchText({
       variables: {
-        query: formatQuery(query, {
-          format: "mongodb",
-          ruleProcessor: ruleProcessor,
-        }),
+        query: JSON.stringify(
+          formatQuery(query, {
+            format: "mongodb_query",
+            ruleProcessor: ruleProcessor,
+          }),
+        ),
         resultType: "entity",
         isBuilder: true,
         showArchived: false,
