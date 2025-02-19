@@ -883,6 +883,7 @@ const ImportModal = (props: ImportModalProps) => {
       onClose={props.onClose}
       isCentered
       size={"4xl"}
+      scrollBehavior={"inside"}
     >
       <ModalOverlay />
       <ModalContent p={"2"} gap={"0"}>

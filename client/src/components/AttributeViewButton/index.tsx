@@ -61,6 +61,7 @@ const AttributeViewButton = (props: AttributeViewButtonProps) => {
         isOpen={isOpen}
         size={"4xl"}
         isCentered
+        scrollBehavior={"inside"}
       >
         <ModalOverlay />
 
