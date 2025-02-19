@@ -1,8 +1,10 @@
-import { EntityModel, ProjectModel } from "@types";
+// Utility libraries and functions
 import { getDatabase } from "../connectors/database";
 import _ from "lodash";
+import { JSONPath } from "jsonpath-plus";
 
 // Models
+import { EntityModel, ProjectModel } from "@types";
 import { Workspaces } from "./Workspaces";
 import { Entities } from "./Entities";
 import { Projects } from "./Projects";
@@ -195,7 +197,7 @@ export class Search {
     const parsedQuery = JSON.parse(query);
 
     // Construct MongoDB query
-    let mongoQuery = {};
+    let mongoQuery: Record<string, any> = {};
 
     if (_.isArray(parsedQuery)) {
       // If the query is an array, assume it's an array of query conditions
@@ -203,6 +205,39 @@ export class Search {
     } else {
       // If it's not an array, use the query object directly
       mongoQuery = parsedQuery;
+    }
+
+    // MongoDB queries do not serialize regex statements well, so we need to convert them to RegExp objects
+    // Extract all regex statements from the query
+    const regexStatements = JSONPath({
+      path: "$..$regex",
+      json: mongoQuery,
+      resultType: "path",
+    });
+    for (const statement of regexStatements) {
+      // Break the path down into an array of keys
+      const path: string[] = [];
+      for (let key of statement.slice(2, -1).split("][")) {
+        // Remove the quotes from the key
+        key = key.replace(/'/g, "");
+        path.push(key);
+      }
+
+      // Iterate down the path until the regex statement is found
+      let currentLevel = mongoQuery;
+      for (const key of path) {
+        if (key in currentLevel) {
+          // If the key is a regex statement, convert it to a RegExp object
+          if (key === "$regex") {
+            // Remove the leading and trailing slashes
+            const [pattern, flags] = currentLevel[key].slice(1).split("/");
+            currentLevel[key] = new RegExp(pattern, flags);
+          } else {
+            // Otherwise, continue down the path
+            currentLevel = currentLevel[key];
+          }
+        }
+      }
     }
 
     if (resultType === "project") {

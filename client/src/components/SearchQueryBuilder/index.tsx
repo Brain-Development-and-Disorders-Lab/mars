@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { TabPanel, Flex, Button, Text, useToast } from "@chakra-ui/react";
+import { TabPanel, Flex, Button, useToast } from "@chakra-ui/react";
 import Icon from "@components/Icon";
+import { Information } from "@components/Label";
 
 // `react-querybuilder` imports
 import QueryBuilder, {
@@ -88,16 +89,32 @@ const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
 
   /**
    * Custom function for processing specific fields within a search query,
-   * specifically `origins` and `products`
+   * specifically `relationships`
    * @param {RuleType} rule Rule for processing value
-   * @return {String}
+   * @return {any}
    */
-  const ruleProcessor: RuleProcessor = (rule: RuleType): string => {
-    if (rule.field === "relationships") {
+  const ruleProcessor: RuleProcessor = (rule: RuleType): any => {
+    if (rule.field === "name") {
+      if (rule.operator === "doesNotContain") {
+        return {
+          name: {
+            $not: { $regex: new RegExp(rule.value, "gi").toString() },
+          },
+        };
+      } else if (rule.operator === "contains") {
+        return {
+          name: {
+            $regex: new RegExp(rule.value, "gi").toString(),
+          },
+        };
+      } else {
+        return defaultRuleProcessorMongoDB(rule);
+      }
+    } else if (rule.field === "relationships") {
       // Handle `relationships` field
       if (rule.operator === "doesNotContain") {
         // If `doesNotContain`, include `$not`
-        return JSON.stringify({
+        return {
           relationships: {
             $not: {
               $elemMatch: {
@@ -105,15 +122,16 @@ const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
               },
             },
           },
-        });
-      }
-      return JSON.stringify({
-        relationships: {
-          $elemMatch: {
-            "target._id": rule.value,
+        };
+      } else {
+        return {
+          relationships: {
+            $elemMatch: {
+              "target._id": rule.value,
+            },
           },
-        },
-      });
+        };
+      }
     } else if (rule.field === "attributes") {
       // Construct the base query components
       const customRule = JSON.parse(rule.value);
@@ -123,72 +141,72 @@ const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
 
       // Append query components depending on the specified operator
       if (customRule.operator === "contains") {
-        return JSON.stringify({
+        return {
           ...processed,
           "attributes.values.data": {
-            $regex: customRule.value,
+            $regex: new RegExp(customRule.value, "gi").toString(),
           },
-        });
+        };
       } else if (customRule.operator === "does not contain") {
-        return JSON.stringify({
+        return {
           ...processed,
           "attributes.values.data": {
             $not: {
-              $regex: customRule.value,
+              $regex: new RegExp(customRule.value, "gi").toString(),
             },
           },
-        });
+        };
       } else if (customRule.operator === "equals") {
         if (customRule.type === "number") {
-          return JSON.stringify({
+          return {
             ...processed,
             "attributes.values.data": {
               $eq: parseFloat(customRule.value),
             },
-          });
+          };
         } else {
-          return JSON.stringify({
+          return {
             ...processed,
             "attributes.values.data": {
               $eq: dayjs(customRule.value).format("YYYY-MM-DD"),
             },
-          });
+          };
         }
       } else if (customRule.operator === ">") {
         if (customRule.type === "number") {
-          return JSON.stringify({
+          return {
             ...processed,
             "attributes.values.data": {
               $gt: parseFloat(customRule.value),
             },
-          });
+          };
         } else {
-          return JSON.stringify({
+          return {
             ...processed,
             "attributes.values.data": {
               $gt: dayjs(customRule.value).format("YYYY-MM-DD"),
             },
-          });
+          };
         }
       } else if (customRule.operator === "<") {
         if (customRule.type === "number") {
-          return JSON.stringify({
+          return {
             ...processed,
             "attributes.values.data": {
               $lt: parseFloat(customRule.value),
             },
-          });
+          };
         } else {
-          return JSON.stringify({
+          return {
             ...processed,
             "attributes.values.data": {
               $lt: dayjs(customRule.value).format("YYYY-MM-DD"),
             },
-          });
+          };
         }
       }
 
-      return JSON.stringify(processed);
+      return processed;
     }
 
     // Default rule applied
@@ -246,10 +264,12 @@ const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
     // Format the query in `mongodb` format before sending
     const results = await searchText({
       variables: {
-        query: formatQuery(query, {
-          format: "mongodb",
-          ruleProcessor: ruleProcessor,
-        }),
+        query: JSON.stringify(
+          formatQuery(query, {
+            format: "mongodb_query",
+            ruleProcessor: ruleProcessor,
+          }),
+        ),
         resultType: "entity",
         isBuilder: true,
         showArchived: false,
@@ -278,23 +298,11 @@ const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
   return (
     <TabPanel p={"2"}>
       <Flex direction={"column"} gap={"2"}>
-        <Flex
-          direction={"row"}
-          gap={"2"}
-          p={"2"}
-          rounded={"md"}
-          bg={"blue.100"}
-          align={"center"}
-          w={"fit-content"}
-        >
-          <Icon name={"info"} color={"blue.300"} />
-          <Flex direction={"column"} gap={"1"}>
-            <Text fontWeight={"semibold"} fontSize={"sm"} color={"blue.700"}>
-              Use the query builder to construct advanced queries to search for
-              Entities within the Workspace.
-            </Text>
-          </Flex>
-        </Flex>
+        <Information
+          text={
+            "Use the query builder to construct advanced queries to search for Entities within the Workspace."
+          }
+        />
 
         <Flex direction={"column"} gap={"2"}>
           <QueryBuilderChakra>

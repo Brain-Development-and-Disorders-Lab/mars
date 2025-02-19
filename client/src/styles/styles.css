@@ -36,13 +36,15 @@ a:hover {
     align-items: center;
     justify-content: center;
   }
-}
 
-.ruleGroup {
-  display: flex;
-  width: 100%;
-  gap: var(--chakra-space-2);
-  flex-direction: column;
+  .ruleGroup {
+    display: flex;
+    width: 100%;
+    gap: var(--chakra-space-2);
+    flex-direction: column;
+    background: white;
+    border-style: none;
+  }
 }
 
 .ruleGroup-header {
@@ -60,8 +62,14 @@ a:hover {
     gap: var(--chakra-space-2);
   }
 
+  .ruleGroup-combinators {
+    border-radius: var(--chakra-radii-md);
+    font-weight: bold;
+  }
+
   .ruleGroup-addRule,
   .ruleGroup-addGroup {
+    padding: var(--chakra-space-2);
     background: var(--chakra-colors-blue-500);
     color: var(--chakra-colors-white);
     svg {
@@ -74,6 +82,7 @@ a:hover {
   }
 
   .ruleGroup-remove {
+    padding: var(--chakra-space-2);
     background: var(--chakra-colors-red-500);
     svg {
       color: var(--chakra-colors-white);
@@ -81,6 +90,10 @@ a:hover {
   }
   .ruleGroup-remove:hover {
     background: var(--chakra-colors-red-600);
+  }
+
+  .ruleGroup-cloneGroup {
+    padding: var(--chakra-space-2);
   }
 
   .chakra-select__wrapper {
@@ -118,6 +131,16 @@ a:hover {
     }
     .rule-remove:hover {
       background: var(--chakra-colors-red-600);
+    }
+
+    .rule-fields,
+    .rule-operators {
+      border-radius: var(--chakra-radii-md);
+    }
+
+    .rule-cloneRule,
+    .rule-remove {
+      padding: 0;
     }
 
     .chakra-select__wrapper {

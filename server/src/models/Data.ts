@@ -180,10 +180,10 @@ export class Data {
       // Core Entity data
       const entity: IEntity = {
         archived: false,
-        name: row[columnMapping.name],
+        name: `${columnMapping.namePrefix}${row[columnMapping.name]}`,
         owner: columnMapping.owner,
         created: dayjs(Date.now()).toISOString(),
-        description: row[columnMapping.description],
+        description: row[columnMapping.description] || "",
         projects: [],
         relationships: [],
         attributes: attributes,

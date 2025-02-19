@@ -26,6 +26,7 @@ import DataTable from "@components/DataTable";
 import Linky from "@components/Linky";
 import Icon from "@components/Icon";
 import SearchQueryBuilder from "@components/SearchQueryBuilder";
+import { Information } from "@components/Label";
 
 // Existing and custom types
 import { EntityModel, DataTableAction } from "@types";
@@ -318,25 +319,11 @@ const Search = () => {
             {/* Text search */}
             <TabPanel p={"2"}>
               <Flex direction={"column"} gap={"2"}>
-                <Flex
-                  direction={"row"}
-                  gap={"2"}
-                  p={"2"}
-                  rounded={"md"}
-                  bg={"blue.100"}
-                  align={"center"}
-                  w={"fit-content"}
-                >
-                  <Icon name={"info"} color={"blue.300"} />
-                  <Text
-                    fontWeight={"semibold"}
-                    fontSize={"sm"}
-                    color={"blue.700"}
-                  >
-                    Use text search to search for terms appearing in Entities
-                    within the Workspace.
-                  </Text>
-                </Flex>
+                <Information
+                  text={
+                    "Use text search to search for terms appearing in Entities within the Workspace."
+                  }
+                />
 
                 <Flex
                   w={"100%"}
@@ -422,24 +409,48 @@ const Search = () => {
           )}
 
           {hasSearched && !isSearching && (
-            <Flex direction={"column"} w={"100%"} gap={"2"}>
-              <Heading
-                id={"resultsHeading"}
-                size={"sm"}
-                fontWeight={"semibold"}
-              >
-                {results.length} result
-                {results.length > 1 || results.length === 0 ? "s" : ""}
-              </Heading>
-              <DataTable
-                columns={searchResultColumns}
-                visibleColumns={visibleColumns}
-                selectedRows={{}}
-                data={results}
-                showPagination
-                showSelection
-                actions={searchResultActions}
-              />
+            <Flex
+              id={"resultsContainer"}
+              direction={"column"}
+              w={"100%"}
+              gap={"2"}
+            >
+              {results.length > 0 ? (
+                <>
+                  <Heading
+                    id={"resultsHeading"}
+                    size={"sm"}
+                    fontWeight={"semibold"}
+                  >
+                    {results.length} result
+                    {results.length > 1 ? "s" : ""}
+                  </Heading>
+                  <DataTable
+                    columns={searchResultColumns}
+                    visibleColumns={visibleColumns}
+                    selectedRows={{}}
+                    data={results}
+                    showPagination
+                    showSelection
+                    actions={searchResultActions}
+                  />
+                </>
+              ) : (
+                <Flex
+                  w={"100%"}
+                  minH={"200px"}
+                  align={"center"}
+                  justify={"center"}
+                >
+                  <Text
+                    fontSize={"sm"}
+                    fontWeight={"semibold"}
+                    color={"gray.600"}
+                  >
+                    No results found
+                  </Text>
+                </Flex>
+              )}
             </Flex>
           )}
         </Flex>

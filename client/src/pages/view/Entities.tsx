@@ -44,8 +44,8 @@ const Entities = () => {
 
   // Query to retrieve Entities
   const GET_ENTITIES = gql`
-    query GetEntities($limit: Int) {
-      entities(limit: $limit) {
+    query GetEntities {
+      entities {
         _id
         archived
         owner
@@ -58,9 +58,7 @@ const Entities = () => {
   const { loading, error, data, refetch } = useQuery<{
     entities: EntityModel[];
   }>(GET_ENTITIES, {
-    variables: {
-      limit: 100,
-    },
+    variables: {},
   });
 
   // Query to generate exported data
@@ -108,20 +106,41 @@ const Entities = () => {
     columnHelper.accessor("name", {
       cell: (info) => {
         return (
-          <Tooltip label={info.getValue()} hasArrow>
-            <Text fontSize={"sm"} fontWeight={"semibold"}>
-              {_.truncate(info.getValue(), { length: 20 })}
-            </Text>
-          </Tooltip>
+          <Flex>
+            <Tooltip
+              label={info.getValue()}
+              hasArrow
+              isDisabled={info.getValue().length < 20}
+            >
+              <Text fontSize={"sm"} fontWeight={"semibold"}>
+                {_.truncate(info.getValue(), { length: 20 })}
+              </Text>
+            </Tooltip>
+          </Flex>
         );
       },
       header: "Name",
     }),
-    columnHelper.accessor("created", {
-      cell: (info) => (
-        <Text fontSize={"sm"}>{dayjs(info.getValue()).fromNow()}</Text>
-      ),
-      header: "Created",
+    columnHelper.accessor("description", {
+      cell: (info) => {
+        if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
+          return <Tag colorScheme={"orange"}>Empty</Tag>;
+        }
+        return (
+          <Flex>
+            <Tooltip
+              label={info.getValue()}
+              hasArrow
+              isDisabled={info.getValue().length < 24}
+            >
+              <Text fontSize={"sm"}>
+                {_.truncate(info.getValue(), { length: 24 })}
+              </Text>
+            </Tooltip>
+          </Flex>
+        );
+      },
+      header: "Description",
       enableHiding: true,
     }),
     columnHelper.accessor("owner", {
@@ -131,18 +150,13 @@ const Entities = () => {
       header: "Owner",
       enableHiding: true,
     }),
-    columnHelper.accessor("description", {
-      cell: (info) => {
-        if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
-          return <Tag colorScheme={"orange"}>Empty</Tag>;
-        }
-        return (
-          <Text fontSize={"sm"}>
-            {_.truncate(info.getValue(), { length: 20 })}
-          </Text>
-        );
-      },
-      header: "Description",
+    columnHelper.accessor("created", {
+      cell: (info) => (
+        <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.600"}>
+          {dayjs(info.getValue()).fromNow()}
+        </Text>
+      ),
+      header: "Created",
       enableHiding: true,
     }),
     columnHelper.accessor("_id", {
