@@ -13,6 +13,7 @@ import {
   Input,
   Text,
   Spacer,
+  CardHeader,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import Icon from "@components/Icon";
@@ -54,6 +55,21 @@ const AttributeCard = (props: AttributeCardProps) => {
 
   return (
     <Card variant={"outline"} w={"100%"}>
+      <CardHeader p={"2"}>
+        <Flex
+          align={"center"}
+          gap={"2"}
+          p={"2"}
+          border={"2px"}
+          rounded={"md"}
+          w={"fit-content"}
+        >
+          <Icon name={"template"} size={"sm"} />
+          <Text fontSize={"sm"} fontWeight={"semibold"}>
+            Attribute
+          </Text>
+        </Flex>
+      </CardHeader>
       <CardBody p={"2"} pb={"0"}>
         <Flex direction={"column"} gap={"2"}>
           <Flex direction={"row"} gap={"2"} wrap={["wrap", "nowrap"]}>
@@ -86,6 +102,9 @@ const AttributeCard = (props: AttributeCardProps) => {
               <FormControl isRequired isInvalid={isDescriptionError} w={"100%"}>
                 <FormLabel fontSize={"sm"}>Description</FormLabel>
                 <MDEditor
+                  height={150}
+                  minHeight={100}
+                  maxHeight={400}
                   style={{ width: "100%" }}
                   value={description}
                   preview={finished ? "preview" : "edit"}
