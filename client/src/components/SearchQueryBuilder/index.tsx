@@ -13,7 +13,7 @@ import QueryBuilder, {
   RuleProcessor,
   RuleType,
 } from "react-querybuilder";
-import { QueryBuilderChakra } from "@react-querybuilder/chakra";
+import { QueryBuilderChakra } from "@react-querybuilder/chakra2";
 
 // SearchQueryValue component for searching Entity fields
 import SearchQueryValue from "@components/SearchQueryValue";
@@ -307,10 +307,10 @@ const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
         <Flex direction={"column"} gap={"2"}>
           <QueryBuilderChakra>
             <QueryBuilder
+              controlClassnames={{ queryBuilder: "queryBuilder-branches" }}
               fields={fields}
               onQueryChange={setQuery}
               controlElements={{ valueEditor: SearchQueryValue }}
-              showCloneButtons
               showNotToggle
             />
           </QueryBuilderChakra>

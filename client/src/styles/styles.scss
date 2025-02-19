@@ -1,3 +1,5 @@
+@use "react-querybuilder/dist/query-builder.scss";
+
 a {
   color: white;
   text-decoration: none;
@@ -13,19 +15,12 @@ a:hover {
 }
 
 .queryBuilder {
-  display: flex;
-  padding: var(--chakra-space-2);
-  border-radius: var(--chakra-radii-md);
-  border: var(--chakra-borders-1px);
-  border-color: var(--chakra-colors-gray-200);
-}
-
-.queryBuilder {
   select,
   input {
     height: var(--input-height);
+    width: fit-content;
     --input-font-size: var(--chakra-fontSizes-sm);
-    --input-border-radius: var(--chakra-radii-sm);
+    --input-border-radius: var(--chakra-radii-md);
     --input-height: var(--chakra-sizes-8);
     background: var(--chakra-colors-white);
   }
@@ -43,7 +38,35 @@ a:hover {
     gap: var(--chakra-space-2);
     flex-direction: column;
     background: white;
-    border-style: none;
+    border-radius: var(--chakra-radii-md);
+    border-color: var(--chakra-colors-gray-200);
+  }
+}
+
+.queryBuilder-branches {
+  .ruleGroup {
+    background-color: var(--chakra-colors-gray-50);
+  }
+  .ruleGroup-body {
+    .rule::before {
+      border-color: var(--chakra-colors-gray-500);
+      border-width: 0px 0px 2px 2px;
+    }
+    .rule::after {
+      border-color: var(--chakra-colors-gray-500);
+      border-width: 0px 0px 0px 2px;
+    }
+    .ruleGroup {
+      background-color: var(--chakra-colors-gray-200);
+    }
+    .ruleGroup::before {
+      border-color: var(--chakra-colors-gray-500);
+      border-width: 0px 0px 2px 2px;
+    }
+    .ruleGroup::after {
+      border-color: var(--chakra-colors-gray-500);
+      border-width: 0px 0px 0px 2px;
+    }
   }
 }
 
@@ -53,10 +76,6 @@ a:hover {
   width: 100%;
   gap: var(--chakra-space-2);
   flex-wrap: wrap;
-  border: 1px solid var(--chakra-colors-gray-200);
-  border-radius: var(--chakra-radii-md);
-  padding: var(--chakra-space-2);
-  background: var(--chakra-colors-gray-50);
 
   .ruleGroup-notToggle {
     gap: var(--chakra-space-2);
@@ -94,6 +113,10 @@ a:hover {
 
   .ruleGroup-cloneGroup {
     padding: var(--chakra-space-2);
+    background: var(--chakra-colors-yellow-400);
+  }
+  .ruleGroup-cloneGroup:hover {
+    background: var(--chakra-colors-yellow-500);
   }
 
   .chakra-select__wrapper {
@@ -104,8 +127,6 @@ a:hover {
 .ruleGroup-body {
   display: flex;
   flex-direction: column;
-  width: 100%;
-  gap: var(--chakra-space-2);
 
   .rule-remove {
     background: var(--chakra-colors-red-500);
@@ -117,10 +138,17 @@ a:hover {
     background: var(--chakra-colors-red-600);
   }
 
+  .rule-cloneRule {
+    padding: var(--chakra-space-2);
+    background: var(--chakra-colors-yellow-400);
+  }
+  .rule-cloneRule:hover {
+    background: var(--chakra-colors-yellow-500);
+  }
+
   .rule {
     display: flex;
     gap: var(--chakra-space-2);
-    margin-left: var(--chakra-space-4);
     flex-wrap: wrap;
 
     .rule-remove {
@@ -137,19 +165,14 @@ a:hover {
     .rule-operators {
       border-radius: var(--chakra-radii-md);
     }
+  }
 
-    .rule-cloneRule,
-    .rule-remove {
-      padding: 0;
-    }
-
-    .chakra-select__wrapper {
-      width: fit-content;
-    }
+  .chakra-select__wrapper {
+    width: fit-content;
   }
 }
 
-.validateQuery .queryBuilder .ruleGroup.queryBuilder-invalid {
+/* .validateQuery .queryBuilder .ruleGroup.queryBuilder-invalid {
   background-color: rgba(102, 51, 153, 0.4);
 }
 .validateQuery
@@ -173,17 +196,17 @@ a:hover {
   .rule.queryBuilder-invalid
   .rule-value::placeholder {
   color: #47246b;
-}
+} */
 
-html[data-theme="dark"]
+/* html[data-theme="dark"]
   .validateQuery
   .queryBuilder
   .rule.queryBuilder-invalid
   .rule-value::placeholder {
   color: #945ec9;
-}
+} */
 
-.justifiedLayout
+/* .justifiedLayout
   .queryBuilder
   .ruleGroup-addGroup
   + button.ruleGroup-cloneGroup,
@@ -204,4 +227,4 @@ html[data-theme="dark"]
 .justifiedLayout .queryBuilder .chakra-select__wrapper + button.rule-lock,
 .justifiedLayout .queryBuilder .chakra-select__wrapper + button.rule-remove {
   margin-left: auto !important;
-}
+} */
