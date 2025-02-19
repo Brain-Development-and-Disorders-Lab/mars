@@ -68,6 +68,8 @@ import SearchSelect from "@components/SearchSelect";
 import Dialog from "@components/Dialog";
 import TimestampTag from "@components/TimestampTag";
 import VisibilityTag from "@components/VisibilityTag";
+import Relationships from "@components/Relationships";
+import { Information } from "@components/Label";
 import { createColumnHelper } from "@tanstack/react-table";
 import MDEditor from "@uiw/react-md-editor";
 
@@ -105,7 +107,6 @@ import { useParams, useNavigate, useBlocker } from "react-router-dom";
 // Contexts
 import { useWorkspace } from "@hooks/useWorkspace";
 import { useAuthentication } from "@hooks/useAuthentication";
-import Relationships from "@components/Relationships";
 
 const Entity = () => {
   const { id } = useParams();
@@ -2131,29 +2132,18 @@ const Entity = () => {
 
             <ModalBody px={"2"} gap={"2"}>
               {/* Export information */}
-              <Flex
-                direction={"row"}
-                w={"100%"}
-                gap={"2"}
-                p={"2"}
-                align={"center"}
-                justifySelf={"left"}
-                bg={"blue.200"}
-                rounded={"md"}
-              >
-                <Icon name={"info"} color={"blue.500"} />
-                {_.isEqual(exportFormat, "json") && (
-                  <Text fontSize={"sm"} color={"blue.700"}>
-                    JSON files can be re-imported into Metadatify.
-                  </Text>
-                )}
-                {_.isEqual(exportFormat, "csv") && (
-                  <Text fontSize={"sm"} color={"blue.700"}>
-                    When exporting Origins, Products, or Projects, only the name
-                    will be exported. To export identifiers, use JSON format.
-                  </Text>
-                )}
-              </Flex>
+              {_.isEqual(exportFormat, "json") && (
+                <Information
+                  text={"JSON files can be re-imported into Metadatify."}
+                />
+              )}
+              {_.isEqual(exportFormat, "csv") && (
+                <Information
+                  text={
+                    "When exporting Origins, Products, or Projects, only the name will be exported. To export identifiers, use JSON format."
+                  }
+                />
+              )}
 
               {/* Select export format */}
               <Flex

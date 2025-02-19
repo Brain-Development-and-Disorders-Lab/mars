@@ -45,6 +45,7 @@ export class Entities {
     return await getDatabase()
       .collection<EntityModel>(ENTITIES_COLLECTION)
       .find()
+      .sort({ timestamp: 1 })
       .toArray();
   };
 
@@ -68,6 +69,7 @@ export class Entities {
     return await getDatabase()
       .collection<EntityModel>(ENTITIES_COLLECTION)
       .find({ _id: { $in: entities } })
+      .sort({ timestamp: 1 })
       .toArray();
   };
 
@@ -99,6 +101,10 @@ export class Entities {
    * @returns {Promise<ResponseData<string>>}
    */
   static create = async (entity: IEntity): Promise<ResponseData<string>> => {
+    // Clean the Entity input data
+    entity.name = entity.name.toString().trim();
+    entity.description = entity.description.toString().trim();
+
     // Allocate a new identifier and join with IEntity data
     const joinedEntity: EntityModel = {
       _id: getIdentifier("entity"), // Generate new identifier

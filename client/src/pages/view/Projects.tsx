@@ -125,17 +125,6 @@ const Projects = () => {
       cell: (info) => <Text fontWeight={"semibold"}>{info.getValue()}</Text>,
       header: "Name",
     }),
-    columnHelper.accessor("created", {
-      cell: (info) => dayjs(info.getValue()).fromNow(),
-      header: "Created",
-      enableHiding: true,
-    }),
-    columnHelper.accessor("owner", {
-      cell: (info) => {
-        return <Tag size={"sm"}>{info.getValue()}</Tag>;
-      },
-      header: "Owner",
-    }),
     columnHelper.accessor("description", {
       cell: (info) => {
         if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
@@ -148,6 +137,17 @@ const Projects = () => {
         );
       },
       header: "Description",
+      enableHiding: true,
+    }),
+    columnHelper.accessor("owner", {
+      cell: (info) => {
+        return <Tag size={"sm"}>{info.getValue()}</Tag>;
+      },
+      header: "Owner",
+    }),
+    columnHelper.accessor("created", {
+      cell: (info) => dayjs(info.getValue()).fromNow(),
+      header: "Created",
       enableHiding: true,
     }),
     columnHelper.accessor("entities", {

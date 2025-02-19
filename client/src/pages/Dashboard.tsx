@@ -70,16 +70,21 @@ const GET_DASHBOARD = gql`
       _id
       name
       description
+      entities
     }
     projectMetrics {
       all
       addedDay
     }
-    entities(limit: $entityLimit, archived: $entitiesArchived) {
+    entities(limit: $entityLimit, archived: $entitiesArchived, reverse: true) {
       _id
       archived
       name
       description
+      timestamp
+      attributes {
+        _id
+      }
     }
     entityMetrics {
       all
@@ -146,8 +151,8 @@ const Dashboard = () => {
   // Execute GraphQL query both on page load and navigation
   const { loading, error, data, refetch } = useQuery(GET_DASHBOARD, {
     variables: {
-      projectsLimit: 8,
-      entitiesLimit: 8,
+      projectLimit: 8,
+      entityLimit: 8,
       entitiesArchived: false,
       activityLimit: 12,
     },
@@ -247,6 +252,27 @@ const Dashboard = () => {
       header: "Description",
       enableHiding: true,
     }),
+    entityTableColumnHelper.accessor("attributes", {
+      cell: (info) => {
+        if (_.isEqual(info.getValue().length, 0)) {
+          return <Tag colorScheme={"orange"}>None</Tag>;
+        }
+        return <Tag colorScheme={"green"}>{info.getValue().length}</Tag>;
+      },
+      header: "Attributes",
+      enableHiding: true,
+    }),
+    entityTableColumnHelper.accessor("timestamp", {
+      cell: (info) => {
+        return (
+          <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.600"}>
+            {dayjs(info.getValue()).fromNow()}
+          </Text>
+        );
+      },
+      header: "Created",
+      enableHiding: true,
+    }),
     entityTableColumnHelper.accessor("_id", {
       cell: (info) => {
         return (
@@ -268,11 +294,16 @@ const Dashboard = () => {
   const projectTableColumnHelper = createColumnHelper<ProjectModel>();
   const projectTableColumns = [
     projectTableColumnHelper.accessor("name", {
-      cell: (info) => (
-        <Text noOfLines={1} fontWeight={"semibold"}>
-          {info.getValue()}
-        </Text>
-      ),
+      cell: (info) => {
+        if (_.isEqual(info.getValue().length, 0)) {
+          return <Tag colorScheme={"orange"}>None</Tag>;
+        }
+        return (
+          <Text noOfLines={1} fontWeight={"semibold"}>
+            {info.getValue()}
+          </Text>
+        );
+      },
       header: "Name",
     }),
     projectTableColumnHelper.accessor("description", {
@@ -283,6 +314,16 @@ const Dashboard = () => {
         return <Text noOfLines={1}>{info.getValue()}</Text>;
       },
       header: "Description",
+      enableHiding: true,
+    }),
+    projectTableColumnHelper.accessor("entities", {
+      cell: (info) => {
+        if (_.isEqual(info.getValue().length, 0)) {
+          return <Tag colorScheme={"orange"}>None</Tag>;
+        }
+        return <Tag colorScheme={"green"}>{info.getValue().length}</Tag>;
+      },
+      header: "Entities",
       enableHiding: true,
     }),
     projectTableColumnHelper.accessor("_id", {
@@ -491,7 +532,7 @@ const Dashboard = () => {
               {/* Projects heading */}
               <Flex direction={"row"} align={"center"} gap={"2"} my={"2"}>
                 <Icon name={"project"} size={"md"} />
-                <Heading size={"md"}>Projects</Heading>
+                <Heading size={"md"}>Recent Projects</Heading>
               </Flex>
 
               {/* Projects table */}
@@ -545,7 +586,7 @@ const Dashboard = () => {
               {/* Entities heading */}
               <Flex direction={"row"} align={"center"} gap={"2"} my={"2"}>
                 <Icon name={"entity"} size={"md"} />
-                <Heading size={"md"}>Entities</Heading>
+                <Heading size={"md"}>Recent Entities</Heading>
               </Flex>
 
               {/* Entities table */}
