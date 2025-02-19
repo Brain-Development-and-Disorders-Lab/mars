@@ -183,7 +183,7 @@ export class Data {
         name: `${columnMapping.namePrefix}${row[columnMapping.name]}`,
         owner: columnMapping.owner,
         created: dayjs(Date.now()).toISOString(),
-        description: row[columnMapping.description],
+        description: row[columnMapping.description] || "",
         projects: [],
         relationships: [],
         attributes: attributes,

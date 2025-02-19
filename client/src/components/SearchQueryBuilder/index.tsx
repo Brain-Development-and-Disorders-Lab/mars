@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { TabPanel, Flex, Button, Text, useToast } from "@chakra-ui/react";
+import { TabPanel, Flex, Button, useToast } from "@chakra-ui/react";
 import Icon from "@components/Icon";
+import { Information } from "@components/Label";
 
 // `react-querybuilder` imports
 import QueryBuilder, {
@@ -93,7 +94,6 @@ const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
    * @return {any}
    */
   const ruleProcessor: RuleProcessor = (rule: RuleType): any => {
-    console.log(rule);
     if (rule.field === "name") {
       if (rule.operator === "doesNotContain") {
         return {
@@ -298,23 +298,11 @@ const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
   return (
     <TabPanel p={"2"}>
       <Flex direction={"column"} gap={"2"}>
-        <Flex
-          direction={"row"}
-          gap={"2"}
-          p={"2"}
-          rounded={"md"}
-          bg={"blue.100"}
-          align={"center"}
-          w={"fit-content"}
-        >
-          <Icon name={"info"} color={"blue.300"} />
-          <Flex direction={"column"} gap={"1"}>
-            <Text fontWeight={"semibold"} fontSize={"sm"} color={"blue.700"}>
-              Use the query builder to construct advanced queries to search for
-              Entities within the Workspace.
-            </Text>
-          </Flex>
-        </Flex>
+        <Information
+          text={
+            "Use the query builder to construct advanced queries to search for Entities within the Workspace."
+          }
+        />
 
         <Flex direction={"column"} gap={"2"}>
           <QueryBuilderChakra>

@@ -26,6 +26,7 @@ import DataTable from "@components/DataTable";
 import Linky from "@components/Linky";
 import Icon from "@components/Icon";
 import SearchQueryBuilder from "@components/SearchQueryBuilder";
+import { Information } from "@components/Label";
 
 // Existing and custom types
 import { EntityModel, DataTableAction } from "@types";
@@ -318,25 +319,11 @@ const Search = () => {
             {/* Text search */}
             <TabPanel p={"2"}>
               <Flex direction={"column"} gap={"2"}>
-                <Flex
-                  direction={"row"}
-                  gap={"2"}
-                  p={"2"}
-                  rounded={"md"}
-                  bg={"blue.100"}
-                  align={"center"}
-                  w={"fit-content"}
-                >
-                  <Icon name={"info"} color={"blue.300"} />
-                  <Text
-                    fontWeight={"semibold"}
-                    fontSize={"sm"}
-                    color={"blue.700"}
-                  >
-                    Use text search to search for terms appearing in Entities
-                    within the Workspace.
-                  </Text>
-                </Flex>
+                <Information
+                  text={
+                    "Use text search to search for terms appearing in Entities within the Workspace."
+                  }
+                />
 
                 <Flex
                   w={"100%"}
