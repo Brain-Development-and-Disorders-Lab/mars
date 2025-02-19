@@ -51,7 +51,7 @@ const ScanModal = (props: ScanModalProps) => {
   const [showCamera, setShowCamera] = useState(false);
 
   // Camera state
-  let codeScanner: Html5Qrcode | null = null;
+  const [codeScanner, setCodeScanner] = useState<Html5Qrcode | null>(null);
   const cameraRef = useRef<HTMLDivElement>(null);
 
   // GraphQL query to check if Entity exists
@@ -93,6 +93,8 @@ const ScanModal = (props: ScanModalProps) => {
     // Reset state
     setShowInput(false);
     setManualInputValue("");
+    setShowCamera(false);
+    setCodeScanner(null);
 
     // Reset the `onkeyup` listener
     document.onkeyup = () => {
@@ -237,17 +239,24 @@ const ScanModal = (props: ScanModalProps) => {
     });
 
   /**
-   * Start the scanner
+   * Setup the scanner
    */
-  const startScanner = async () => {
+  const setupScanner = async () => {
     await getElementByIdAsync(REGION_ID);
     if (!document.getElementById(REGION_ID)) return;
 
-    codeScanner = new Html5Qrcode(REGION_ID, {
-      verbose: false,
-    });
+    setCodeScanner(
+      new Html5Qrcode(REGION_ID, {
+        verbose: false,
+      }),
+    );
+  };
 
-    await codeScanner.start(
+  /**
+   * Start the scanner
+   */
+  const startScanner = async () => {
+    await codeScanner?.start(
       { facingMode: "environment" },
       createConfig(props),
       (decodedText) => {
@@ -265,12 +274,22 @@ const ScanModal = (props: ScanModalProps) => {
     };
   };
 
-  // Start the scanner when the modal is opened
+  // Setup the scanner when the modal is opened
   useEffect(() => {
     if (props.isOpen) {
-      startScanner();
+      setupScanner();
     }
   }, [props.isOpen]);
+
+  // Start the scanner when the scanner is ready
+  useEffect(() => {
+    if (
+      codeScanner &&
+      codeScanner.getState() === Html5QrcodeScannerState.NOT_STARTED
+    ) {
+      startScanner();
+    }
+  }, [codeScanner]);
 
   return (
     <Modal
