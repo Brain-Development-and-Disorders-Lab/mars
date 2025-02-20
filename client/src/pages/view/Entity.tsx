@@ -47,12 +47,6 @@ import {
   MenuItem,
   CardFooter,
   Divider,
-  AlertDialog,
-  AlertDialogOverlay,
-  AlertDialogContent,
-  AlertDialogFooter,
-  AlertDialogBody,
-  AlertDialogHeader,
 } from "@chakra-ui/react";
 import ActorTag from "@components/ActorTag";
 import { Content } from "@components/Container";
@@ -70,6 +64,7 @@ import TimestampTag from "@components/TimestampTag";
 import VisibilityTag from "@components/VisibilityTag";
 import Relationships from "@components/Relationships";
 import { Information } from "@components/Label";
+import { UnsavedChangesModal } from "@components/WarningModal";
 import { createColumnHelper } from "@tanstack/react-table";
 import MDEditor from "@uiw/react-md-editor";
 
@@ -1424,6 +1419,9 @@ const Entity = () => {
                 </Text>
                 <Flex>
                   <MDEditor
+                    height={150}
+                    minHeight={100}
+                    maxHeight={400}
                     id={"entityDescriptionInput"}
                     style={{ width: "100%" }}
                     value={entityDescription}
@@ -1770,6 +1768,9 @@ const Entity = () => {
                     <FormControl isRequired>
                       <FormLabel fontSize={"sm"}>Description</FormLabel>
                       <MDEditor
+                        height={150}
+                        minHeight={100}
+                        maxHeight={400}
                         style={{ width: "100%" }}
                         value={attributeDescription}
                         preview={editing ? "edit" : "preview"}
@@ -2509,6 +2510,9 @@ const Entity = () => {
                   Specify a description of the changes made to the Entity.
                 </Text>
                 <MDEditor
+                  height={150}
+                  minHeight={100}
+                  maxHeight={400}
                   id={"saveMessageInput"}
                   style={{ width: "100%" }}
                   value={saveMessage}
@@ -2545,57 +2549,12 @@ const Entity = () => {
         </Modal>
 
         {/* Blocker warning message */}
-        <AlertDialog
-          isOpen={blocker.state === "blocked"}
-          leastDestructiveRef={cancelBlockerRef}
+        <UnsavedChangesModal
+          blocker={blocker}
+          cancelBlockerRef={cancelBlockerRef}
           onClose={onBlockerClose}
-          isCentered
-        >
-          <AlertDialogOverlay>
-            <AlertDialogContent p={"2"}>
-              <AlertDialogHeader p={"2"}>
-                <Flex w={"100%"} direction={"row"} gap={"2"} align={"center"}>
-                  <Icon name={"warning"} />
-                  <Text fontWeight={"semibold"}>Unsaved Changes</Text>
-                </Flex>
-              </AlertDialogHeader>
-
-              <AlertDialogBody p={"2"}>
-                <Text fontSize={"sm"}>
-                  Are you sure you want to leave this page? You will lose any
-                  unsaved changes.
-                </Text>
-              </AlertDialogBody>
-
-              <AlertDialogFooter p={"2"}>
-                <Flex w={"100%"} justify={"space-between"}>
-                  <Button
-                    size={"sm"}
-                    colorScheme={"red"}
-                    rightIcon={<Icon name={"cross"} />}
-                    ref={cancelBlockerRef}
-                    onClick={() => {
-                      blocker.reset?.();
-                      onBlockerClose();
-                    }}
-                  >
-                    Cancel
-                  </Button>
-
-                  <Button
-                    size={"sm"}
-                    rightIcon={<Icon name={"check"} />}
-                    colorScheme={"green"}
-                    onClick={() => blocker.proceed?.()}
-                    ml={3}
-                  >
-                    Continue
-                  </Button>
-                </Flex>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialogOverlay>
-        </AlertDialog>
+          callback={onBlockerClose}
+        />
 
         {/* Version history */}
         <Drawer

@@ -759,6 +759,9 @@ const Workspace = () => {
                 Description
               </FormLabel>
               <MDEditor
+                height={150}
+                minHeight={100}
+                maxHeight={400}
                 style={{ width: "100%" }}
                 value={description}
                 preview={"edit"}

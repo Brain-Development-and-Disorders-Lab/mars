@@ -247,7 +247,17 @@ const Dashboard = () => {
         if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
           return <Tag colorScheme={"orange"}>No Description</Tag>;
         }
-        return <Text noOfLines={1}>{info.getValue()}</Text>;
+        return (
+          <Tooltip
+            label={info.getValue()}
+            placement={"top"}
+            isDisabled={info.getValue().length < 30}
+          >
+            <Text noOfLines={1}>
+              {_.truncate(info.getValue(), { length: 30 })}
+            </Text>
+          </Tooltip>
+        );
       },
       header: "Description",
       enableHiding: true,
@@ -311,7 +321,17 @@ const Dashboard = () => {
         if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
           return <Tag colorScheme={"orange"}>No Description</Tag>;
         }
-        return <Text noOfLines={1}>{info.getValue()}</Text>;
+        return (
+          <Tooltip
+            label={info.getValue()}
+            placement={"top"}
+            isDisabled={info.getValue().length < 30}
+          >
+            <Text noOfLines={1}>
+              {_.truncate(info.getValue(), { length: 30 })}
+            </Text>
+          </Tooltip>
+        );
       },
       header: "Description",
       enableHiding: true,

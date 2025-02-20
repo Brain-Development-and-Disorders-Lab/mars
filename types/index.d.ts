@@ -371,6 +371,14 @@ export type ScanModalProps = {
   onClose: () => void;
 };
 
+// `UnsavedChangesModal` props
+export type UnsavedChangesModalProps = {
+  blocker: Blocker;
+  cancelBlockerRef: React.MutableRefObject<null>;
+  onClose: () => void;
+  callback: () => void;
+};
+
 // `Scanner` props
 export type ScannerProps = Html5QrcodeCameraScanConfig & {
   verbose: boolean;

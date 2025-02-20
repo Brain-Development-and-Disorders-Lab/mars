@@ -1,0 +1,173 @@
+@use "react-querybuilder/dist/query-builder.scss";
+
+a {
+  color: white;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* CSS for React Query Builder */
+.svg-font-color svg > path {
+  fill: var(--ifm-font-color-base);
+}
+
+.queryBuilder {
+  select,
+  input {
+    height: var(--input-height);
+    width: fit-content;
+    --input-font-size: var(--chakra-fontSizes-sm);
+    --input-border-radius: var(--chakra-radii-md);
+    --input-height: var(--chakra-sizes-8);
+    background: var(--chakra-colors-white);
+  }
+  button {
+    display: inline-flex;
+    font-size: var(--chakra-fontSizes-sm);
+    height: var(--chakra-sizes-8);
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ruleGroup {
+    display: flex;
+    width: 100%;
+    gap: var(--chakra-space-2);
+    flex-direction: column;
+    background: white;
+    border-radius: var(--chakra-radii-md);
+    border-color: var(--chakra-colors-gray-200);
+  }
+}
+
+.queryBuilder-branches {
+  .ruleGroup {
+    background-color: var(--chakra-colors-gray-50);
+  }
+  .ruleGroup-body {
+    .rule::before {
+      border-color: var(--chakra-colors-gray-500);
+      border-width: 0px 0px 2px 2px;
+    }
+    .rule::after {
+      border-color: var(--chakra-colors-gray-500);
+      border-width: 0px 0px 0px 2px;
+    }
+    .ruleGroup {
+      background-color: var(--chakra-colors-gray-200);
+    }
+    .ruleGroup::before {
+      border-color: var(--chakra-colors-gray-500);
+      border-width: 0px 0px 2px 2px;
+    }
+    .ruleGroup::after {
+      border-color: var(--chakra-colors-gray-500);
+      border-width: 0px 0px 0px 2px;
+    }
+  }
+}
+
+.ruleGroup-header {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: var(--chakra-space-2);
+  flex-wrap: wrap;
+
+  .ruleGroup-notToggle {
+    gap: var(--chakra-space-2);
+  }
+
+  .ruleGroup-combinators {
+    border-radius: var(--chakra-radii-md);
+    font-weight: bold;
+  }
+
+  .ruleGroup-addRule,
+  .ruleGroup-addGroup {
+    padding: var(--chakra-space-2);
+    background: var(--chakra-colors-blue-500);
+    color: var(--chakra-colors-white);
+    svg {
+      color: var(--chakra-colors-white);
+    }
+  }
+  .ruleGroup-addRule:hover,
+  .ruleGroup-addGroup:hover {
+    background: var(--chakra-colors-blue-600);
+  }
+
+  .ruleGroup-remove {
+    padding: var(--chakra-space-2);
+    background: var(--chakra-colors-red-500);
+    svg {
+      color: var(--chakra-colors-white);
+    }
+  }
+  .ruleGroup-remove:hover {
+    background: var(--chakra-colors-red-600);
+  }
+
+  .ruleGroup-cloneGroup {
+    padding: var(--chakra-space-2);
+    background: var(--chakra-colors-yellow-400);
+  }
+  .ruleGroup-cloneGroup:hover {
+    background: var(--chakra-colors-yellow-500);
+  }
+
+  .chakra-select__wrapper {
+    width: fit-content;
+  }
+}
+
+.ruleGroup-body {
+  display: flex;
+  flex-direction: column;
+
+  .rule-remove {
+    background: var(--chakra-colors-red-500);
+    svg {
+      color: var(--chakra-colors-white);
+    }
+  }
+  .rule-remove:hover {
+    background: var(--chakra-colors-red-600);
+  }
+
+  .rule-cloneRule {
+    padding: var(--chakra-space-2);
+    background: var(--chakra-colors-yellow-400);
+  }
+  .rule-cloneRule:hover {
+    background: var(--chakra-colors-yellow-500);
+  }
+
+  .rule {
+    display: flex;
+    gap: var(--chakra-space-2);
+    flex-wrap: wrap;
+
+    .rule-remove {
+      background: var(--chakra-colors-red-500);
+      svg {
+        color: var(--chakra-colors-white);
+      }
+    }
+    .rule-remove:hover {
+      background: var(--chakra-colors-red-600);
+    }
+
+    .rule-fields,
+    .rule-operators {
+      border-radius: var(--chakra-radii-md);
+    }
+  }
+
+  .chakra-select__wrapper {
+    width: fit-content;
+  }
+}

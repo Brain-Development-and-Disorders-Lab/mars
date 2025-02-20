@@ -468,6 +468,9 @@ const Template = () => {
                 Description
               </Text>
               <MDEditor
+                height={150}
+                minHeight={100}
+                maxHeight={400}
                 id={"attributeDescriptionInput"}
                 style={{ width: "100%" }}
                 value={templateDescription}
