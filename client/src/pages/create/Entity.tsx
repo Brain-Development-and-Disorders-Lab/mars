@@ -3,12 +3,6 @@ import React, { useEffect, useRef, useState } from "react";
 
 // Existing and custom components
 import {
-  AlertDialog,
-  AlertDialogBody,
-  AlertDialogContent,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogOverlay,
   Box,
   Button,
   Checkbox,
@@ -50,6 +44,8 @@ import Icon from "@components/Icon";
 import AttributeCard from "@components/AttributeCard";
 import SearchSelect from "@components/SearchSelect";
 import Relationships from "@components/Relationships";
+import { Information } from "@components/Label";
+import { UnsavedChangesModal } from "@components/WarningModal";
 import MDEditor from "@uiw/react-md-editor";
 
 // Existing and custom types
@@ -170,6 +166,7 @@ const Entity = () => {
         _id
         name
         description
+        owner
         values {
           _id
           name
@@ -504,6 +501,9 @@ const Entity = () => {
                 <FormControl>
                   <FormLabel fontSize={"sm"}>Description</FormLabel>
                   <MDEditor
+                    height={150}
+                    minHeight={100}
+                    maxHeight={400}
                     style={{ width: "100%" }}
                     value={description}
                     preview={"edit"}
@@ -684,6 +684,11 @@ const Entity = () => {
               gap={"2"}
               rounded={"md"}
             >
+              <Information
+                text={
+                  "Add Attributes containing metadata about this Entity. Attributes can be created from an existing Template or created manually."
+                }
+              />
               <Flex
                 direction={"row"}
                 p={"2"}
@@ -691,51 +696,55 @@ const Entity = () => {
                 rounded={"md"}
                 border={"1px"}
                 borderColor={"gray.300"}
-                justify={"space-between"}
               >
-                {/* Drop-down to select Templates */}
-                <FormControl maxW={"sm"}>
-                  <Select
-                    size={"sm"}
-                    rounded={"md"}
-                    placeholder={"Template"}
-                    isDisabled={templates.length === 0}
-                    onChange={(event) => {
-                      if (!_.isEqual(event.target.value.toString(), "")) {
-                        for (const template of templates) {
-                          if (
-                            _.isEqual(
-                              event.target.value.toString(),
-                              template._id,
-                            )
-                          ) {
-                            setSelectedAttributes([
-                              ...selectedAttributes,
-                              {
-                                _id: `a-${nanoid(6)}`,
-                                name: template.name,
-                                timestamp: template.timestamp,
-                                owner: template.owner,
-                                archived: false,
-                                description: template.description,
-                                values: template.values,
-                              },
-                            ]);
-                            break;
+                <Flex direction={"row"} gap={"2"} align={"center"} w={"100%"}>
+                  <Text fontSize={"sm"} fontWeight={"semibold"}>
+                    Select Template:
+                  </Text>
+                  {/* Drop-down to select Templates */}
+                  <FormControl maxW={"sm"}>
+                    <Select
+                      size={"sm"}
+                      rounded={"md"}
+                      placeholder={"Template"}
+                      isDisabled={templates.length === 0}
+                      onChange={(event) => {
+                        if (!_.isEqual(event.target.value.toString(), "")) {
+                          for (const template of templates) {
+                            if (
+                              _.isEqual(
+                                event.target.value.toString(),
+                                template._id,
+                              )
+                            ) {
+                              setSelectedAttributes([
+                                ...selectedAttributes,
+                                {
+                                  _id: `a-${nanoid(6)}`,
+                                  name: template.name,
+                                  timestamp: template.timestamp,
+                                  owner: template.owner,
+                                  archived: false,
+                                  description: template.description,
+                                  values: template.values,
+                                },
+                              ]);
+                              break;
+                            }
                           }
                         }
-                      }
-                    }}
-                  >
-                    {templates.map((template) => {
-                      return (
-                        <option key={template._id} value={template._id}>
-                          {template.name}
-                        </option>
-                      );
-                    })}
-                  </Select>
-                </FormControl>
+                      }}
+                    >
+                      {templates.map((template) => {
+                        return (
+                          <option key={template._id} value={template._id}>
+                            {template.name}
+                          </option>
+                        );
+                      })}
+                    </Select>
+                  </FormControl>
+                </Flex>
 
                 <Button
                   size={"sm"}
@@ -891,57 +900,12 @@ const Entity = () => {
       </Flex>
 
       {/* Blocker warning message */}
-      <AlertDialog
-        isOpen={blocker.state === "blocked"}
-        leastDestructiveRef={cancelBlockerRef}
+      <UnsavedChangesModal
+        blocker={blocker}
+        cancelBlockerRef={cancelBlockerRef}
         onClose={onBlockerClose}
-        isCentered
-      >
-        <AlertDialogOverlay>
-          <AlertDialogContent p={"2"}>
-            <AlertDialogHeader p={"2"}>
-              <Flex w={"100%"} direction={"row"} gap={"2"} align={"center"}>
-                <Icon name={"warning"} />
-                <Text fontWeight={"semibold"}>Unsaved Changes</Text>
-              </Flex>
-            </AlertDialogHeader>
-
-            <AlertDialogBody p={"2"}>
-              <Text fontSize={"sm"}>
-                Are you sure you want to leave this page? You will lose any
-                unsaved changes.
-              </Text>
-            </AlertDialogBody>
-
-            <AlertDialogFooter p={"2"}>
-              <Flex w={"100%"} justify={"space-between"}>
-                <Button
-                  size={"sm"}
-                  colorScheme={"red"}
-                  rightIcon={<Icon name={"cross"} />}
-                  ref={cancelBlockerRef}
-                  onClick={() => {
-                    blocker.reset?.();
-                    onBlockerClose();
-                  }}
-                >
-                  Cancel
-                </Button>
-
-                <Button
-                  size={"sm"}
-                  rightIcon={<Icon name={"check"} />}
-                  colorScheme={"green"}
-                  onClick={() => blocker.proceed?.()}
-                  ml={3}
-                >
-                  Continue
-                </Button>
-              </Flex>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialogOverlay>
-      </AlertDialog>
+        callback={onBlockerClose}
+      />
     </Content>
   );
 };
