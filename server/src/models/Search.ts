@@ -2,6 +2,7 @@
 import { getDatabase } from "../connectors/database";
 import _ from "lodash";
 import { JSONPath } from "jsonpath-plus";
+import { traverseQueryObject } from "src/util";
 
 // Models
 import { EntityModel, ProjectModel } from "@types";
@@ -182,19 +183,65 @@ export class Search {
   };
 
   /**
-   * Create and execute a structured MongoDB query
-   * @param {string} query JSON representation of query serialized to string
-   * @param {string} resultType Search result type of either "entity" or "project"
-   * @param {string} workspace Target Workspace identifier
-   * @return {Promise<EntityModel[] | ProjectModel[]>}
+   * Helper function to traverse an object and call a callback function for each key
+   * @param object Object to traverse
+   * @param callback Callback function to call for each key
    */
-  static getQuery = async (
-    query: string,
-    resultType: string,
-    workspace: string,
-  ): Promise<EntityModel[] | ProjectModel[]> => {
-    // Parse the query string into a MongoDB query object
-    const parsedQuery = JSON.parse(query);
+  private static traverseQueryObject = (
+    object: any,
+    callback: (key: any, value: any) => void,
+  ) => {
+    const stack = [object];
+
+    while (stack.length > 0) {
+      let current = stack.pop();
+
+      if (typeof current === "object" && current !== null) {
+        if (Array.isArray(current)) {
+          // Handle array case
+          current.forEach((item, index) => {
+            // Modify the value in-place
+            current[index] = callback(index, item);
+            stack.push(current[index]);
+          });
+        } else {
+          // Handle object case
+          for (const key in current) {
+            if (Object.prototype.hasOwnProperty.call(current, key)) {
+              // Modify the value in-place
+              current[key] = callback(key, current[key]);
+              stack.push(current[key]);
+            }
+          }
+        }
+      } else {
+        // Apply the callback to non-object values
+        current = callback(current, current);
+      }
+    }
+  };
+
+  /**
+   * Helper function to parse a JSON-serialized query into a MongoDB query
+   * @param {string} query JSON-serialized query
+   * @return {Record<string, any>} MongoDB query
+   */
+  private static parseQuery = (query: string): Record<string, any> => {
+    const parsedQuery = JSON.parse(query); // Raw query from JSON
+    Search.traverseQueryObject(parsedQuery, (key: any, value: any) => {
+      // Handle case where value is a JSON string
+      if (_.isString(value) && value.startsWith("{") && value.endsWith("}")) {
+        value = JSON.parse(value);
+      }
+
+      // Handle case where key is `$regex`
+      if (_.isString(key) && key === "$regex" && key !== value) {
+        const [pattern, flags] = value.slice(1).split("/");
+        value = new RegExp(pattern, flags);
+      }
+
+      return value;
+    });
 
     // Construct MongoDB query
     let mongoQuery: Record<string, any> = {};
@@ -207,44 +254,29 @@ export class Search {
       mongoQuery = parsedQuery;
     }
 
-    // MongoDB queries do not serialize regex statements well, so we need to convert them to RegExp objects
-    // Extract all regex statements from the query
-    const regexStatements = JSONPath({
-      path: "$..$regex",
-      json: mongoQuery,
-      resultType: "path",
-    });
-    for (const statement of regexStatements) {
-      // Break the path down into an array of keys
-      const path: string[] = [];
-      for (let key of statement.slice(2, -1).split("][")) {
-        // Remove the quotes from the key
-        key = key.replace(/'/g, "");
-        path.push(key);
-      }
+    return mongoQuery;
+  };
 
-      // Iterate down the path until the regex statement is found
-      let currentLevel = mongoQuery;
-      for (const key of path) {
-        if (key in currentLevel) {
-          // If the key is a regex statement, convert it to a RegExp object
-          if (key === "$regex") {
-            // Remove the leading and trailing slashes
-            const [pattern, flags] = currentLevel[key].slice(1).split("/");
-            currentLevel[key] = new RegExp(pattern, flags);
-          } else {
-            // Otherwise, continue down the path
-            currentLevel = currentLevel[key];
-          }
-        }
-      }
-    }
+  /**
+   * Create and execute a structured MongoDB query
+   * @param {string} query JSON representation of query serialized to string
+   * @param {string} resultType Search result type of either "entity" or "project"
+   * @param {string} workspace Target Workspace identifier
+   * @return {Promise<EntityModel[] | ProjectModel[]>}
+   */
+  static getQuery = async (
+    query: string,
+    resultType: string,
+    workspace: string,
+  ): Promise<EntityModel[] | ProjectModel[]> => {
+    // Parse the query string into a MongoDB query object
+    const parsedQuery: Record<string, any> = Search.parseQuery(query);
 
     if (resultType === "project") {
       // Execute the search query with any specified options
       const results = await getDatabase()
         .collection<ProjectModel>(PROJECTS_COLLECTION)
-        .find(mongoQuery)
+        .find(parsedQuery)
         .toArray();
 
       // Get the current Workspace context and retrieve all Entities
@@ -268,7 +300,7 @@ export class Search {
       // Execute the search query with any specified options
       const results = await getDatabase()
         .collection<EntityModel>(ENTITIES_COLLECTION)
-        .find(mongoQuery)
+        .find(parsedQuery)
         .toArray();
 
       // Get the current Workspace context and retrieve all Entities
