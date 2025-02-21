@@ -105,6 +105,15 @@ export class Entities {
     entity.name = entity.name.toString().trim();
     entity.description = entity.description.toString().trim();
 
+    // Iterate over all Attributes, casting `number` values to floats
+    entity.attributes.forEach((attribute) => {
+      attribute.values.forEach((value) => {
+        if (value.type === "number") {
+          value.data = parseFloat(value.data);
+        }
+      });
+    });
+
     // Allocate a new identifier and join with IEntity data
     const joinedEntity: EntityModel = {
       _id: getIdentifier("entity"), // Generate new identifier
@@ -233,6 +242,15 @@ export class Entities {
       update.$set.attributes = updated.attributes;
       const updatedAttributes = updated.attributes.map((a) => a._id);
       const entityAttributes = entity.attributes.map((a) => a._id);
+
+      // Iterate over all Attributes, casting `number` values to floats
+      update.$set.attributes.forEach((attribute) => {
+        attribute.values.forEach((value) => {
+          if (value.type === "number") {
+            value.data = parseFloat(value.data);
+          }
+        });
+      });
 
       // Attributes added in updated Entity
       const addAttributeIdentifiers = _.difference(
