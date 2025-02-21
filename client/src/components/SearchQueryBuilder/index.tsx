@@ -264,6 +264,7 @@ const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
   const onSearchBuiltQuery = async () => {
     setIsSearching(true);
     setHasSearched(true);
+
     // Format the query in `mongodb` format before sending
     const results = await searchText({
       variables: {

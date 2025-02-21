@@ -18,6 +18,7 @@ import {
   Tabs,
   Tag,
   Text,
+  Tooltip,
   useBreakpoint,
   useToast,
 } from "@chakra-ui/react";
@@ -171,13 +172,19 @@ const Search = () => {
     searchResultColumnHelper.accessor("description", {
       cell: (info) => {
         if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
-          return (
-            <Tag colorScheme={"orange"} size={"sm"}>
-              No Description
-            </Tag>
-          );
+          return <Tag colorScheme={"orange"}>No Description</Tag>;
         }
-        return <Text noOfLines={1}>{info.getValue()}</Text>;
+        return (
+          <Tooltip
+            label={info.getValue()}
+            placement={"top"}
+            isDisabled={info.getValue().length < 30}
+          >
+            <Text noOfLines={1}>
+              {_.truncate(info.getValue(), { length: 30 })}
+            </Text>
+          </Tooltip>
+        );
       },
       header: "Description",
       enableHiding: true,
