@@ -1,8 +1,6 @@
 // Utility libraries and functions
 import { getDatabase } from "../connectors/database";
 import _ from "lodash";
-import { JSONPath } from "jsonpath-plus";
-import { traverseQueryObject } from "src/util";
 
 // Models
 import { EntityModel, ProjectModel } from "@types";
@@ -226,8 +224,11 @@ export class Search {
    * @param {string} query JSON-serialized query
    * @return {Record<string, any>} MongoDB query
    */
-  private static parseQuery = (query: string): Record<string, any> => {
-    const parsedQuery = JSON.parse(query); // Raw query from JSON
+  private static generateMongoQuery = (query: any): Record<string, any> => {
+    // Parse the query if it is a string, typically the case if only one rule is provided
+    const parsedQuery = _.isObject(query) ? query : JSON.parse(query);
+
+    // Traverse the query object and modify the values as necessary
     Search.traverseQueryObject(parsedQuery, (key: any, value: any) => {
       // Handle case where value is a JSON string
       if (_.isString(value) && value.startsWith("{") && value.endsWith("}")) {
@@ -236,25 +237,23 @@ export class Search {
 
       // Handle case where key is `$regex`
       if (_.isString(key) && key === "$regex" && key !== value) {
-        const [pattern, flags] = value.slice(1).split("/");
+        const [pattern, flags] = value
+          .slice(value.startsWith("/") ? 1 : 0)
+          .split("/");
         value = new RegExp(pattern, flags);
       }
 
       return value;
     });
 
-    // Construct MongoDB query
-    let mongoQuery: Record<string, any> = {};
-
+    // Construct and return the MongoDB query
     if (_.isArray(parsedQuery)) {
       // If the query is an array, assume it's an array of query conditions
-      mongoQuery = { $and: parsedQuery };
+      return { $and: parsedQuery };
     } else {
       // If it's not an array, use the query object directly
-      mongoQuery = parsedQuery;
+      return parsedQuery;
     }
-
-    return mongoQuery;
   };
 
   /**
@@ -270,13 +269,15 @@ export class Search {
     workspace: string,
   ): Promise<EntityModel[] | ProjectModel[]> => {
     // Parse the query string into a MongoDB query object
-    const parsedQuery: Record<string, any> = Search.parseQuery(query);
+    const parsedQuery = JSON.parse(query);
+    const mongoQuery: Record<string, any> =
+      Search.generateMongoQuery(parsedQuery);
 
     if (resultType === "project") {
       // Execute the search query with any specified options
       const results = await getDatabase()
         .collection<ProjectModel>(PROJECTS_COLLECTION)
-        .find(parsedQuery)
+        .find(mongoQuery)
         .toArray();
 
       // Get the current Workspace context and retrieve all Entities
@@ -300,7 +301,7 @@ export class Search {
       // Execute the search query with any specified options
       const results = await getDatabase()
         .collection<EntityModel>(ENTITIES_COLLECTION)
-        .find(parsedQuery)
+        .find(mongoQuery)
         .toArray();
 
       // Get the current Workspace context and retrieve all Entities
