@@ -7,7 +7,6 @@ import {
   FormLabel,
   Input,
   Button,
-  VStack,
   IconButton,
   Text,
   useToast,
@@ -692,16 +691,16 @@ const Workspace = () => {
       </Flex>
 
       <Flex direction={"column"} gap={"2"} p={"2"}>
-        <Flex direction={"row"} p={"0"} gap={"2"} grow={"1"} wrap={"wrap"}>
+        <Flex direction={"row"} gap={"2"} p={"0"} wrap={"wrap"}>
           {/* Workspace name */}
           <Flex
             direction={"column"}
-            w={{ base: "100%", md: "50%" }}
-            h={"fit-content"}
             p={"2"}
+            h={"fit-content"}
             gap={"2"}
-            rounded={"md"}
             bg={"gray.100"}
+            rounded={"md"}
+            basis={"50%"}
           >
             <Flex direction={"row"} gap={"2"}>
               <Flex grow={"1"}>
@@ -746,13 +745,14 @@ const Workspace = () => {
 
           {/* Workspace description */}
           <Flex
-            direction={"column"}
-            w={{ base: "100%", md: "50%" }}
+            direction={"row"}
             p={"2"}
+            h={"fit-content"}
             gap={"2"}
-            rounded={"md"}
             border={"1px"}
             borderColor={"gray.300"}
+            rounded={"md"}
+            grow={"1"}
           >
             <FormControl>
               <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
@@ -774,35 +774,38 @@ const Workspace = () => {
           </Flex>
         </Flex>
 
-        <Flex direction={"row"} p={"0"} gap={"2"} grow={"1"} wrap={"wrap"}>
+        <Flex direction={"row"} gap={"2"} p={"0"} wrap={"wrap"}>
           {/* Workspace collaborators */}
           <Flex
             direction={"column"}
-            w={{ base: "100%", md: "50%" }}
             p={"2"}
             gap={"2"}
-            rounded={"md"}
+            h={"fit-content"}
             border={"1px"}
             borderColor={"gray.300"}
+            rounded={"md"}
+            basis={"50%"}
           >
             <Text fontSize={"sm"} fontWeight={"semibold"}>
               Collaborators
             </Text>
-            <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.400"}>
-              Add Collaborators by their ORCiD, and they will have access to
-              this Workspace when they next sign into Metadatify.
-            </Text>
+            <Flex>
+              <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.400"}>
+                Add Collaborators by their ORCiD.
+              </Text>
+            </Flex>
             <Flex direction={"row"} gap={"2"} align={"center"}>
               <FormControl>
                 <Input
                   placeholder={"ORCiD"}
                   rounded={"md"}
                   size={"sm"}
+                  w={"100%"}
                   value={collaborator}
                   onChange={(event) => setCollaborator(event.target.value)}
                 />
               </FormControl>
-              <Spacer />
+              {/* <Spacer /> */}
               <Button
                 colorScheme={"green"}
                 rightIcon={<Icon name={"add"} />}
@@ -833,7 +836,7 @@ const Workspace = () => {
                   No Collaborators
                 </Text>
               ) : (
-                <VStack w={"100%"} spacing={"0"}>
+                <Flex w={"100%"} direction={"column"} gap={"2"}>
                   {collaborators.map((collaborator, index) => (
                     <Flex
                       key={index}
@@ -877,21 +880,21 @@ const Workspace = () => {
                       />
                     </Flex>
                   ))}
-                </VStack>
+                </Flex>
               )}
             </Flex>
           </Flex>
 
           {/* Workspace Entities */}
           <Flex
-            direction={"column"}
-            w={{ base: "100%", md: "50%" }}
-            h={"fit-content"}
+            direction={"row"}
             p={"2"}
+            h={"fit-content"}
             gap={"2"}
-            rounded={"md"}
             border={"1px"}
             borderColor={"gray.300"}
+            rounded={"md"}
+            grow={"1"}
           >
             <FormControl>
               <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
@@ -923,17 +926,17 @@ const Workspace = () => {
           </Flex>
         </Flex>
 
-        <Flex direction={"row"} p={"0"} gap={"2"} grow={"1"} wrap={"wrap"}>
+        <Flex direction={"row"} p={"0"} gap={"2"} wrap={"wrap"}>
           {/* Workspace Projects */}
           <Flex
             direction={"column"}
-            w={{ base: "100%", md: "50%" }}
-            h={"fit-content"}
             p={"2"}
             gap={"2"}
-            rounded={"md"}
+            h={"fit-content"}
             border={"1px"}
             borderColor={"gray.300"}
+            rounded={"md"}
+            basis={"50%"}
           >
             <FormControl>
               <FormLabel fontSize={"sm"} fontWeight={"semibold"}>
@@ -966,14 +969,14 @@ const Workspace = () => {
 
           {/* Workspace Templates */}
           <Flex
-            direction={"column"}
-            w={{ base: "100%", md: "50%" }}
-            h={"fit-content"}
+            direction={"row"}
             p={"2"}
+            h={"fit-content"}
             gap={"2"}
-            rounded={"md"}
             border={"1px"}
             borderColor={"gray.300"}
+            rounded={"md"}
+            grow={"1"}
           >
             <FormControl>
               <FormLabel fontSize={"sm"} fontWeight={"semibold"}>

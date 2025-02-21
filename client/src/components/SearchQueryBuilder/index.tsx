@@ -100,17 +100,16 @@ const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
    */
   const ruleProcessor: RuleProcessor = (rule: RuleType): any => {
     if (rule.field === "name") {
+      const value = { $regex: new RegExp(rule.value, "gi").toString() };
       if (rule.operator === "doesNotContain") {
         return {
           name: {
-            $not: { $regex: new RegExp(rule.value, "gi").toString() },
+            $not: value,
           },
         };
       } else if (rule.operator === "contains") {
         return {
-          name: {
-            $regex: new RegExp(rule.value, "gi").toString(),
-          },
+          name: value,
         };
       } else {
         return defaultRuleProcessorMongoDB(rule);
@@ -138,80 +137,79 @@ const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
         };
       }
     } else if (rule.field === "attributes") {
-      // Construct the base query components
+      // Parse the custom rule
       const customRule = JSON.parse(rule.value);
-      const processed = {
-        "attributes.values.type": customRule.type,
-      };
+
+      // Create a base custom rule structure
+      const processedCustomRules: Record<string, any>[] = [
+        { "attributes.values.type": customRule.type },
+      ];
 
       // Append query components depending on the specified operator
       if (customRule.operator === "contains") {
-        return {
-          ...processed,
+        processedCustomRules.push({
           "attributes.values.data": {
             $regex: new RegExp(customRule.value, "gi").toString(),
           },
-        };
+        });
       } else if (customRule.operator === "does not contain") {
-        return {
-          ...processed,
+        processedCustomRules.push({
           "attributes.values.data": {
             $not: {
               $regex: new RegExp(customRule.value, "gi").toString(),
             },
           },
-        };
+        });
       } else if (customRule.operator === "equals") {
         if (customRule.type === "number") {
-          return {
-            ...processed,
+          processedCustomRules.push({
             "attributes.values.data": {
               $eq: parseFloat(customRule.value),
             },
-          };
+          });
         } else {
-          return {
-            ...processed,
+          processedCustomRules.push({
             "attributes.values.data": {
               $eq: dayjs(customRule.value).format("YYYY-MM-DD"),
             },
-          };
+          });
         }
       } else if (customRule.operator === ">") {
         if (customRule.type === "number") {
-          return {
-            ...processed,
+          processedCustomRules.push({
             "attributes.values.data": {
               $gt: parseFloat(customRule.value),
             },
-          };
+          });
         } else {
-          return {
-            ...processed,
+          processedCustomRules.push({
             "attributes.values.data": {
               $gt: dayjs(customRule.value).format("YYYY-MM-DD"),
             },
-          };
+          });
         }
       } else if (customRule.operator === "<") {
         if (customRule.type === "number") {
-          return {
-            ...processed,
+          processedCustomRules.push({
             "attributes.values.data": {
               $lt: parseFloat(customRule.value),
             },
-          };
+          });
         } else {
-          return {
-            ...processed,
+          processedCustomRules.push({
             "attributes.values.data": {
               $lt: dayjs(customRule.value).format("YYYY-MM-DD"),
             },
-          };
+          });
         }
       }
 
-      return processed;
+      // Handle the operator
+      if (rule.operator === "doesNotContain") {
+        return { $nor: processedCustomRules };
+      } else {
+        return { $and: processedCustomRules };
+      }
     }
 
     // Default rule applied
@@ -371,7 +369,6 @@ const SearchQueryBuilder: React.FC<SearchQueryBuilderProps> = ({
                 fields={fields}
                 onQueryChange={setQuery}
                 controlElements={{ valueEditor: SearchQueryValue }}
-                showNotToggle
                 enableDragAndDrop
               />
             </QueryBuilderDnD>
