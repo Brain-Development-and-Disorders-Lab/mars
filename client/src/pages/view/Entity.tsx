@@ -160,6 +160,14 @@ const Entity = () => {
   } = useDisclosure();
   const [saveMessage, setSaveMessage] = useState("");
 
+  // Clone modal
+  const {
+    isOpen: isCloneOpen,
+    onOpen: onCloneOpen,
+    onClose: onCloneClose,
+  } = useDisclosure();
+  const [clonedEntityName, setClonedEntityName] = useState("");
+
   // History drawer
   const {
     isOpen: isHistoryOpen,
@@ -308,6 +316,21 @@ const Entity = () => {
   const [exportEntity, { loading: exportLoading, error: exportError }] =
     useLazyQuery(EXPORT_ENTITY);
 
+  // Query to create a new Entity
+  const CREATE_ENTITY = gql`
+    mutation CreateEntity($entity: EntityCreateInput) {
+      createEntity(entity: $entity) {
+        success
+        message
+        data
+      }
+    }
+  `;
+  const [
+    createEntity,
+    { error: createEntityError, loading: createEntityLoading },
+  ] = useMutation(CREATE_ENTITY);
+
   // Query to create a template Template
   const CREATE_TEMPLATE = gql`
     mutation CreateTemplate($template: AttributeCreateInput) {
@@ -358,6 +381,9 @@ const Entity = () => {
       setEntityAttributes(data.entity.attributes || []);
       setEntityAttachments(data.entity.attachments);
       setEntityHistory(data.entity.history || []);
+
+      // Set the cloned Entity name
+      setClonedEntityName(`${data.entity.name} (cloned)`);
     }
     // Unpack Project data
     if (data?.projects) {
@@ -1011,6 +1037,52 @@ const Entity = () => {
     }
   };
 
+  // Handle clicking the "Clone" button
+  const handleCloneClick = async () => {
+    // Create a new Entity, with `(cloned)` appended to the name
+    const response = await createEntity({
+      variables: {
+        entity: {
+          name: clonedEntityName,
+          owner: entityData.owner,
+          created: dayjs(Date.now()).toISOString(),
+          archived: false,
+          description: entityData.description,
+          projects: entityData.projects,
+          relationships: entityData.relationships,
+          attributes: entityData.attributes,
+          attachments: entityData.attachments,
+        },
+      },
+    });
+
+    if (response.data.createEntity.success) {
+      onCloneClose();
+
+      toast({
+        title: "Cloned Successfully",
+        description: "Entity has been cloned successfully",
+        status: "success",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+      // Navigate to the new Entity
+      navigate(`/entities/${response.data.createEntity.data}`);
+    }
+
+    if (createEntityError) {
+      toast({
+        title: "Error",
+        description: "An error occurred while cloning the Entity",
+        status: "error",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
+  };
+
   // Archive the Entity when confirmed
   const handleArchiveClick = async () => {
     const response = await archiveEntity({
@@ -1296,6 +1368,14 @@ const Entity = () => {
                   isDisabled={editing || entityArchived}
                 >
                   Visualize
+                </MenuItem>
+                <MenuItem
+                  icon={<Icon name={"copy"} />}
+                  onClick={() => onCloneOpen()}
+                  fontSize={"sm"}
+                  isDisabled={entityArchived}
+                >
+                  Clone
                 </MenuItem>
                 <MenuItem
                   onClick={handleExportClick}
@@ -2483,6 +2563,61 @@ const Entity = () => {
                 onClick={onShareClose}
               >
                 Done
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+
+        {/* Clone modal */}
+        <Modal isOpen={isCloneOpen} onClose={onCloneClose} isCentered>
+          <ModalOverlay />
+          <ModalContent p={"2"}>
+            <ModalHeader p={"2"}>Clone Entity</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody p={"2"}>
+              <Flex direction={"column"} gap={"2"}>
+                <Text fontSize={"sm"} color={"gray.600"}>
+                  By default, the cloned Entity will be created with the same
+                  name, but with "(cloned)" appended to the end. You can modify
+                  the name below.
+                </Text>
+
+                <FormControl>
+                  <FormLabel fontSize={"xs"} fontWeight={"semibold"}>
+                    Cloned Entity Name:
+                  </FormLabel>
+                  <Input
+                    size={"sm"}
+                    rounded={"md"}
+                    value={clonedEntityName}
+                    onChange={(event) =>
+                      setClonedEntityName(event.target.value)
+                    }
+                  />
+                </FormControl>
+              </Flex>
+            </ModalBody>
+
+            <ModalFooter p={"2"} justifyContent={"space-between"}>
+              <Button
+                onClick={onCloneClose}
+                size={"sm"}
+                colorScheme={"red"}
+                variant={"outline"}
+                rightIcon={<Icon name={"cross"} />}
+              >
+                Cancel
+              </Button>
+              <Button
+                rightIcon={<Icon name={"copy"} />}
+                colorScheme={"green"}
+                onClick={handleCloneClick}
+                ml={3}
+                size={"sm"}
+                isLoading={createEntityLoading}
+                isDisabled={clonedEntityName === ""}
+              >
+                Clone
               </Button>
             </ModalFooter>
           </ModalContent>
