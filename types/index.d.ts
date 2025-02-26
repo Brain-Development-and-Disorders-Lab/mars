@@ -405,6 +405,7 @@ export type IconNames =
   | "search"
   | "bell"
   | "add"
+  | "copy"
   | "edit"
   | "delete"
   | "download"
