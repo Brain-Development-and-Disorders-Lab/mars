@@ -308,6 +308,19 @@ const Entity = () => {
   const [exportEntity, { loading: exportLoading, error: exportError }] =
     useLazyQuery(EXPORT_ENTITY);
 
+  // Query to create a new Entity
+  const CREATE_ENTITY = gql`
+    mutation CreateEntity($entity: EntityCreateInput) {
+      createEntity(entity: $entity) {
+        success
+        message
+        data
+      }
+    }
+  `;
+  const [createEntity, { error: createEntityError }] =
+    useMutation(CREATE_ENTITY);
+
   // Query to create a template Template
   const CREATE_TEMPLATE = gql`
     mutation CreateTemplate($template: AttributeCreateInput) {
@@ -1011,6 +1024,50 @@ const Entity = () => {
     }
   };
 
+  // Handle clicking the "Clone" button
+  const handleCloneClick = async () => {
+    // Create a new Entity, with `(cloned)` appended to the name
+    const response = await createEntity({
+      variables: {
+        entity: {
+          name: `${entityName} (cloned)`,
+          owner: entityData.owner,
+          created: dayjs(Date.now()).toISOString(),
+          archived: false,
+          description: entityData.description,
+          projects: entityData.projects,
+          relationships: entityData.relationships,
+          attributes: entityData.attributes,
+          attachments: entityData.attachments,
+        },
+      },
+    });
+
+    if (response.data.createEntity.success) {
+      toast({
+        title: "Cloned Successfully",
+        description: "Entity has been cloned successfully",
+        status: "success",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+      // Navigate to the new Entity
+      navigate(`/entities/${response.data.createEntity.data}`);
+    }
+
+    if (createEntityError) {
+      toast({
+        title: "Error",
+        description: "An error occurred while cloning the Entity",
+        status: "error",
+        duration: 2000,
+        position: "bottom-right",
+        isClosable: true,
+      });
+    }
+  };
+
   // Archive the Entity when confirmed
   const handleArchiveClick = async () => {
     const response = await archiveEntity({
@@ -1296,6 +1353,14 @@ const Entity = () => {
                   isDisabled={editing || entityArchived}
                 >
                   Visualize
+                </MenuItem>
+                <MenuItem
+                  icon={<Icon name={"copy"} />}
+                  onClick={handleCloneClick}
+                  fontSize={"sm"}
+                  isDisabled={entityArchived}
+                >
+                  Clone
                 </MenuItem>
                 <MenuItem
                   onClick={handleExportClick}
