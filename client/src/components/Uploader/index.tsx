@@ -1,5 +1,5 @@
 // React
-import React, { ChangeEvent, useState } from "react";
+import React, { ChangeEvent, useEffect, useState } from "react";
 
 // Existing and custom components
 import {
@@ -33,9 +33,14 @@ const Uploader = (props: {
   uploads: string[];
   setUploads: React.Dispatch<React.SetStateAction<string[]>>;
 }) => {
+  // File to be uploaded
   const [file, setFile] = useState({} as File);
   const [isError, setIsError] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+
+  // Display name and type of the file
+  const [displayName, setDisplayName] = useState("");
+  const [displayType, setDisplayType] = useState("");
 
   const toast = useToast();
 
@@ -92,6 +97,20 @@ const Uploader = (props: {
     }
   };
 
+  // Set the display name and type of the file when uploaded
+  useEffect(() => {
+    if (file.type === "application/pdf") {
+      setDisplayName(file.name);
+      setDisplayType("PDF file");
+    } else if (file.type === "image/jpeg" || file.type === "image/png") {
+      setDisplayName(file.name);
+      setDisplayType("Image file");
+    } else if (_.endsWith(file.name, ".dna")) {
+      setDisplayName(file.name);
+      setDisplayType("Sequence file");
+    }
+  }, [file]);
+
   return (
     <>
       {isLoaded && isError ? (
@@ -120,6 +139,9 @@ const Uploader = (props: {
                     </Tag>
                     <Tag colorScheme={"green"} size={"sm"}>
                       PNG
+                    </Tag>
+                    <Tag colorScheme={"green"} size={"sm"}>
+                      DNA
                     </Tag>
                   </Flex>
                   <Flex w={"100%"} align={"center"} justify={"center"}>
@@ -156,7 +178,14 @@ const Uploader = (props: {
                             align={"center"}
                           >
                             <Text fontWeight={"semibold"} fontSize={"sm"}>
-                              {file.name}
+                              {displayName}
+                            </Text>
+                            <Text
+                              fontWeight={"semibold"}
+                              fontSize={"xs"}
+                              textColor={"gray.600"}
+                            >
+                              {displayType}
                             </Text>
                           </Flex>
                         )}
@@ -181,7 +210,8 @@ const Uploader = (props: {
                               _.includes(
                                 ["image/jpeg", "image/png", "application/pdf"],
                                 event.target.files[0].type,
-                              )
+                              ) ||
+                              _.endsWith(event.target.files[0].name, ".dna")
                             ) {
                               setFile(event.target.files[0]);
                             } else {
@@ -189,7 +219,7 @@ const Uploader = (props: {
                                 title: "Warning",
                                 status: "warning",
                                 description:
-                                  "Please upload an image (JPEG, PNG) or PDF file",
+                                  "Please upload an image (JPEG, PNG), PDF file, or sequence file (DNA)",
                                 duration: 4000,
                                 position: "bottom-right",
                                 isClosable: true,
