@@ -825,9 +825,18 @@ const Entity = () => {
         const fileExtension = _.upperCase(
           _.last(info.row.original.name.split(".")),
         );
-        const fileColorScheme = _.isEqual(fileExtension, "PDF")
-          ? "red"
-          : "yellow";
+        let fileColorScheme = "yellow";
+        if (_.isEqual(fileExtension, "PDF")) {
+          fileColorScheme = "red";
+        } else if (_.isEqual(fileExtension, "DNA")) {
+          fileColorScheme = "green";
+        } else if (
+          _.isEqual(fileExtension, "PNG") ||
+          _.isEqual(fileExtension, "JPEG")
+        ) {
+          fileColorScheme = "blue";
+        }
+
         return <Tag colorScheme={fileColorScheme}>{fileExtension}</Tag>;
       },
       header: "Type",
@@ -2479,7 +2488,7 @@ const Entity = () => {
         </Modal>
 
         {/* Attachment preview modal */}
-        <Modal isOpen={isPreviewOpen} onClose={onPreviewClose}>
+        <Modal isOpen={isPreviewOpen} onClose={onPreviewClose} isCentered>
           <ModalOverlay />
           <ModalContent maxW={"100vw"} w={"fit-content"}>
             <ModalHeader>Attachment Preview</ModalHeader>
