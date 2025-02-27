@@ -357,6 +357,13 @@ export type PreviewModalProps = {
   attachment: IGenericItem;
 };
 
+// `PreviewModal` support type
+export type PreviewSupport = {
+  document: boolean;
+  image: boolean;
+  sequence: boolean;
+};
+
 // `ImportModal` props
 export type ImportModalProps = {
   isOpen: boolean;
