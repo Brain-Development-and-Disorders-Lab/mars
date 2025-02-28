@@ -20,6 +20,8 @@ import {
   StatArrow,
   Spacer,
   Link,
+  useDisclosure,
+  Collapse,
 } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
 import { Content } from "@components/Container";
@@ -147,6 +149,7 @@ const Dashboard = () => {
   const [lastUpdate] = useState(
     dayjs(Date.now()).format("DD MMMM YYYY[ at ]h:mm a"),
   );
+  const { isOpen, onToggle } = useDisclosure();
 
   // Execute GraphQL query both on page load and navigation
   const { loading, error, data, refetch } = useQuery(GET_DASHBOARD, {
@@ -217,7 +220,7 @@ const Dashboard = () => {
       _.isEqual(breakpoint, "base") ||
       _.isUndefined(breakpoint)
     ) {
-      setVisibleColumns({ description: false });
+      setVisibleColumns({ description: false, attributes: false });
     } else {
       setVisibleColumns({});
     }
@@ -236,7 +239,7 @@ const Dashboard = () => {
       cell: (info) => (
         <Tooltip label={info.getValue()} placement={"top"}>
           <Text noOfLines={1} fontWeight={"semibold"}>
-            {_.truncate(info.getValue(), { length: 30 })}
+            {_.truncate(info.getValue(), { length: 24 })}
           </Text>
         </Tooltip>
       ),
@@ -460,25 +463,40 @@ const Dashboard = () => {
                 <Icon name={"dashboard"} size={"md"} />
                 <Heading size={"lg"}>Dashboard</Heading>
               </Flex>
-              {/* Display last update when on desktop */}
-              {breakpoint !== "base" && (
-                <Flex direction={"row"} gap={"1"}>
-                  <Text
-                    fontSize={"xs"}
-                    fontWeight={"semibold"}
-                    color={"gray.700"}
-                  >
-                    Last Update:
-                  </Text>
-                  <Text
-                    fontSize={"xs"}
-                    fontWeight={"semibold"}
-                    color={"gray.400"}
-                  >
-                    {lastUpdate}
-                  </Text>
+              <Flex direction={"column"} gap={"1"}>
+                {/* Display last update when on desktop */}
+                {breakpoint !== "base" && (
+                  <Flex direction={"row"} gap={"1"}>
+                    <Text
+                      fontSize={"xs"}
+                      fontWeight={"semibold"}
+                      color={"gray.700"}
+                    >
+                      Last Update:
+                    </Text>
+                    <Text
+                      fontSize={"xs"}
+                      fontWeight={"semibold"}
+                      color={"gray.400"}
+                    >
+                      {lastUpdate}
+                    </Text>
+                  </Flex>
+                )}
+                {/* Display toggle for stats */}
+                <Flex direction={"row"} gap={"1"} align={"center"}>
+                  <Link onClick={onToggle}>
+                    <Text
+                      fontSize={"xs"}
+                      fontWeight={"semibold"}
+                      color={"gray.700"}
+                    >
+                      {isOpen ? "Hide" : "Show"} stats{" "}
+                    </Text>
+                  </Link>
+                  <Icon name={isOpen ? "c_up" : "c_down"} size={"xs"} />
                 </Flex>
-              )}
+              </Flex>
             </Flex>
             <Spacer />
             <Flex>
@@ -486,55 +504,57 @@ const Dashboard = () => {
             </Flex>
           </Flex>
 
-          <Flex
-            p={"2"}
-            gap={"2"}
-            rounded={"md"}
-            basis={"30%"}
-            align={"center"}
-            border={"1px"}
-            borderColor={"gray.300"}
-          >
-            <StatGroup w={"100%"}>
-              <Stat>
-                <StatLabel>Total Workspace Entities</StatLabel>
-                <StatNumber>{entityMetrics.all}</StatNumber>
-                <StatHelpText>
-                  {entityMetrics.addedDay > 0 && (
-                    <StatArrow type={"increase"} />
-                  )}
-                  {entityMetrics.addedDay} in last 24 hours
-                </StatHelpText>
-              </Stat>
+          <Collapse in={isOpen} animateOpacity>
+            <Flex
+              p={"2"}
+              gap={"2"}
+              rounded={"md"}
+              basis={"30%"}
+              align={"center"}
+              border={"1px"}
+              borderColor={"gray.300"}
+            >
+              <StatGroup w={"100%"}>
+                <Stat>
+                  <StatLabel>Total Workspace Entities</StatLabel>
+                  <StatNumber>{entityMetrics.all}</StatNumber>
+                  <StatHelpText>
+                    {entityMetrics.addedDay > 0 && (
+                      <StatArrow type={"increase"} />
+                    )}
+                    {entityMetrics.addedDay} in last 24 hours
+                  </StatHelpText>
+                </Stat>
 
-              <Stat>
-                <StatLabel>Total Workspace Projects</StatLabel>
-                <StatNumber>{projectMetrics.all}</StatNumber>
-                <StatHelpText>
-                  {projectMetrics.addedDay > 0 && (
-                    <StatArrow type={"increase"} />
-                  )}
-                  {projectMetrics.addedDay} in last 24 hours
-                </StatHelpText>
-              </Stat>
+                <Stat>
+                  <StatLabel>Total Workspace Projects</StatLabel>
+                  <StatNumber>{projectMetrics.all}</StatNumber>
+                  <StatHelpText>
+                    {projectMetrics.addedDay > 0 && (
+                      <StatArrow type={"increase"} />
+                    )}
+                    {projectMetrics.addedDay} in last 24 hours
+                  </StatHelpText>
+                </Stat>
 
-              <Stat>
-                <StatLabel>Total Workspace Templates</StatLabel>
-                <StatNumber>{templateMetrics.all}</StatNumber>
-                <StatHelpText>
-                  {templateMetrics.addedDay > 0 && (
-                    <StatArrow type={"increase"} />
-                  )}
-                  {templateMetrics.addedDay} in last 24 hours
-                </StatHelpText>
-              </Stat>
+                <Stat>
+                  <StatLabel>Total Workspace Templates</StatLabel>
+                  <StatNumber>{templateMetrics.all}</StatNumber>
+                  <StatHelpText>
+                    {templateMetrics.addedDay > 0 && (
+                      <StatArrow type={"increase"} />
+                    )}
+                    {templateMetrics.addedDay} in last 24 hours
+                  </StatHelpText>
+                </Stat>
 
-              <Stat>
-                <StatLabel>Total Workspace Collaborators</StatLabel>
-                <StatNumber>{workspaceMetrics.collaborators}</StatNumber>
-              </Stat>
-            </StatGroup>
-          </Flex>
+                <Stat>
+                  <StatLabel>Total Workspace Collaborators</StatLabel>
+                  <StatNumber>{workspaceMetrics.collaborators}</StatNumber>
+                </Stat>
+              </StatGroup>
+            </Flex>
+          </Collapse>
         </Flex>
 
         <Flex direction={"row"} wrap={"wrap"} gap={"2"} p={"0"}>
