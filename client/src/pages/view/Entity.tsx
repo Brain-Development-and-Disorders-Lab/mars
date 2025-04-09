@@ -2545,6 +2545,38 @@ const Entity = () => {
                   </Button>
                 </Flex>
 
+                <Flex direction={"row"} gap={"2"} align={"center"}>
+                  <Flex w={"25%"}>
+                    <Text fontSize={"sm"} fontWeight={"semibold"}>
+                      Unique ID:
+                    </Text>
+                  </Flex>
+                  <Flex w={"60%"}>
+                    <Input
+                      size={"sm"}
+                      value={id}
+                      rounded={"md"}
+                      onFocus={(event) => event.target.select()}
+                      readOnly
+                    />
+                  </Flex>
+                  <Button
+                    size={"sm"}
+                    onClick={async () => {
+                      await navigator.clipboard.writeText(`${id}`);
+                      toast({
+                        title: "Copied to clipboard",
+                        status: "success",
+                        position: "bottom-right",
+                        isClosable: true,
+                        duration: 2000,
+                      });
+                    }}
+                  >
+                    Copy
+                  </Button>
+                </Flex>
+
                 <Flex direction={"row"} gap={"2"}>
                   <Flex w={"25%"}>
                     <Text fontSize={"sm"} fontWeight={"semibold"}>
