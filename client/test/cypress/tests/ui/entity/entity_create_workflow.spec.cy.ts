@@ -50,67 +50,70 @@ describe("Create Entities", () => {
     cy.get("select").get("option").contains("Template");
   });
 
-  // it("should allow adding Relationships", () => {
-  //   // Fill in the initial details
-  //   cy.get("input[name=\"name\"]").type("Test Entity");
-  //   cy.get("input[type=\"date\"]").type("2023-10-01");
-  //   cy.get("textarea").type("This is a test entity.");
+  it("should allow adding Relationships", () => {
+    // Fill in the initial details
+    cy.get('input[name="name"]').type("Test Entity");
+    cy.get('input[type="date"]').type("2023-10-01");
+    cy.get("textarea").type("This is a test entity.");
 
-  //   // Click on the "Continue" button to go to the Relationships step
-  //   cy.get("button").contains("Continue").click();
+    // Click on the "Continue" button to go to the Relationships step
+    cy.get("button").contains("Continue").click();
 
-  //   // Add a relationship
-  //   cy.get("#relationshipTargetSelect").click();
-  //   cy.get("button").contains("Test Entity").click();
-  //   cy.get("button").contains("Add").click();
+    // Add a relationship
+    cy.get("#relationshipTargetSelect").click();
+    cy.get("button").contains("Test Entity").click();
+    cy.get("button").contains("Add").click();
 
-  //   // Check if the relationship is displayed in a table
-  //   cy.get(".chakra-table").should("exist");
-  //   cy.get("#0_target").should("exist");
-  //   cy.get("#0_target").contains("Test Entity");
-  // });
+    // Check if the relationship is displayed in a table
+    cy.get(".chakra-table").should("exist");
+    cy.get("#0_target").should("exist");
+    cy.get("#0_target").contains("Test Entity");
+  });
 
-  // it("should allow adding Attributes", () => {
-  //   // Fill in the initial details
-  //   cy.get("input[name=\"name\"]").type("Test Entity");
-  //   cy.get("input[type=\"date\"]").type("2023-10-01");
-  //   cy.get("textarea").type("This is a test entity.");
+  it("should allow adding Template Attributes", () => {
+    // Fill in the initial details
+    cy.get('input[name="name"]').type("Test Entity");
+    cy.get('input[type="date"]').type("2023-10-01");
+    cy.get("textarea").type("This is a test entity.");
 
-  //   // Click on the "Continue" button to go to the relationships step
-  //   cy.get("button").contains("Continue").click();
+    // Click on the "Continue" button to go to the relationships step
+    cy.get("button").contains("Continue").click();
 
-  //   // Click on "Continue" to go to the attributes step
-  //   cy.get("button").contains("Continue").click();
+    // Click on "Continue" to go to the Attributes step
+    cy.get("button").contains("Continue").click();
 
-  //   // Add an attribute
-  //   cy.get("select").select("Template 1"); // Select a template
-  //   cy.get("button").contains("Create").click(); // Click to create an attribute
+    // Add an Attribute
+    cy.get("select").select("Test Template"); // Select a Template
 
-  //   // Check if the attribute is displayed
-  //   cy.get(".attribute-card").should("exist"); // Adjust selector based on actual attribute display
-  // });
+    // Check if the Attribute is displayed
+    cy.get(".chakra-card").should("exist"); // Adjust selector based on actual Attribute display
 
-  // it("should submit the entity creation form", () => {
-  //   // Fill in the initial details
-  //   cy.get("input[name=\"name\"]").type("Test Entity");
-  //   cy.get("input[type=\"date\"]").type("2023-10-01");
-  //   cy.get("textarea").type("This is a test entity.");
+    // Save the Attribute and finish creating the Entity
+    cy.get("button").contains("Save").click();
+    cy.get("button").contains("Finish").click();
 
-  //   // Click on the "Continue" button to go to the relationships step
-  //   cy.get("button").contains("Continue").click();
+    // Check redirection
+    cy.url().should("include", "/entities"); // Check if redirected to Entities page
+  });
 
-  //   // Click on "Continue" to go to the attributes step
-  //   cy.get("button").contains("Continue").click();
+  it("should complete Entity creation", () => {
+    // Fill in the initial details
+    cy.get('input[name="name"]').type("Test Entity");
+    cy.get('input[type="date"]').type("2023-10-01");
+    cy.get("textarea").type("This is a test entity.");
 
-  //   // Add an attribute
-  //   cy.get("select").select("Template 1"); // Select a template
-  //   cy.get("button").contains("Create").click(); // Click to create an attribute
+    // Click on the "Continue" button to go to the Relationships step
+    cy.get("button").contains("Continue").click();
+    cy.get("label").contains("Relationships");
 
-  //   // Submit the form
-  //   cy.get("button").contains("Finish").click(); // Click to finish creating the entity
+    // Click on the "Continue" button to go to the Attributes step
+    cy.get("button").contains("Continue").click();
+    cy.get("select").get("option").contains("Template");
 
-  //   // Check for success message or redirection
-  //   cy.url().should("include", "/entities"); // Check if redirected to entities page
-  //   cy.get(".toast").contains("Entity created successfully"); // Adjust selector based on success notification
-  // });
+    // Click the button to finish creating the Entity
+    cy.get("button").contains("Finish").click();
+
+    // Check redirection
+    cy.url().should("include", "/entities"); // Check if redirected to Entities page
+  });
 });
